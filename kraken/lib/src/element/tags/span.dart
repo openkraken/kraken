@@ -11,6 +11,6 @@ const String SPAN = 'SPAN';
 const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE};
 
 class SpanElement extends Element {
-  SpanElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, tagName: SPAN, defaultStyle: _defaultStyle);
+  SpanElement(int targetId, int nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr, elementManager, tagName: SPAN, defaultStyle: _defaultStyle);
 }

@@ -47,12 +47,18 @@ class NativeEvent extends Struct {
   int defaultPrevented;
 
   @Int64()
-  int targetId;
+  int target;
 
   @Int64()
   int currentTarget;
+}
 
-  Pointer<Utf8> detail;
+typedef Native_DispatchEvent = Void Function(Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
+typedef Dart_DispatchEvent = void Function(Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
+
+class NativeEventTarget extends Struct {
+  Pointer<Void> instance;
+  Pointer<NativeFunction<Native_DispatchEvent>> dispatchEvent;
 }
 
 class KrakenInfo {
@@ -120,8 +126,10 @@ void invokeEventListener(int contextId, int type, String data) {
 const UI_EVENT = 0;
 const MODULE_EVENT = 1;
 
-void emitUIEvent(int contextId, String data) {
-  invokeEventListener(contextId, UI_EVENT, data);
+void emitUIEvent(int contextId, int nativePtr, Pointer<NativeEvent> nativeEvent) {
+  Pointer<NativeEventTarget> nativeEventTarget = Pointer.fromAddress(nativePtr);
+  Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
+  dispatchEvent(nativeEventTarget, nativeEvent);;
 }
 
 void emitModuleEvent(int contextId, String data) {
@@ -129,8 +137,10 @@ void emitModuleEvent(int contextId, String data) {
 }
 
 void invokeOnPlatformBrightnessChangedCallback(int contextId) {
-  String json = jsonEncode([WINDOW_ID, Event(EventType.colorschemechange)]);
-  emitUIEvent(contextId, json);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  EventTarget window = controller.view.getEventTargetById(WINDOW_ID);
+  ColorSchemeChangeEvent event = ColorSchemeChangeEvent();
+  emitUIEvent(contextId, window.nativePtr, event.toNativeEvent());
 }
 
 // Register createScreen
@@ -221,7 +231,7 @@ void bridgeFrameCallback() {
   _frameCallback();
 }
 
-enum UICommandType { createElement, disposeEventTarget, addEvent }
+enum UICommandType { initWindow, createElement, disposeEventTarget, addEvent, }
 
 class UICommandItem extends Struct {
   @Int8()
@@ -234,6 +244,9 @@ class UICommandItem extends Struct {
 
   @Int32()
   int length;
+
+  @Int64()
+  int nativePtr;
 }
 
 typedef Native_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(Int32 contextId);
@@ -275,14 +288,18 @@ void flushUICommand() {
       int id = nativeCommand.ref.id;
       print(commandType);
       switch (commandType) {
+        case UICommandType.initWindow:
+          controller.view.initWindow(nativeCommand.ref.nativePtr);
+          break;
         case UICommandType.createElement:
-          controller.view.createElement(id, nativeStringToString(nativeCommand.ref.args[0]));
+          controller.view.createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
           break;
         case UICommandType.disposeEventTarget:
           ElementManager.disposeEventTarget(controller.view.contextId, id);
           break;
         case UICommandType.addEvent:
           String eventType = nativeStringToString(nativeCommand.ref.args[0]);
+          print(nativeCommand.ref.nativePtr);
           controller.view.addEvent(id, int.parse(eventType));
           break;
         default:

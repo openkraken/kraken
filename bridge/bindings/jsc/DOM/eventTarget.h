@@ -13,8 +13,8 @@
 #include "foundation/ui_command_queue.h"
 #include "foundation/ui_task_queue.h"
 #include "include/kraken_bridge.h"
-#include <atomic>
 #include <array>
+#include <atomic>
 #include <condition_variable>
 
 namespace kraken::binding::jsc {
@@ -44,8 +44,8 @@ public:
                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                    const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     EventTargetInstance() = delete;
     explicit EventTargetInstance(JSEventTarget *eventTarget);
     explicit EventTargetInstance(JSEventTarget *eventTarget, int64_t targetId);
@@ -56,12 +56,27 @@ public:
     std::map<std::string, std::deque<JSObjectRef>> _eventHandlers;
 
   private:
-    std::array<JSStringRef, 3> propertyNames {
-        JSStringCreateWithUTF8CString("addEventListener"),
-        JSStringCreateWithUTF8CString("removeEventListener"),
-        JSStringCreateWithUTF8CString("dispatchEvent"),
+    std::array<JSStringRef, 3> propertyNames{
+      JSStringCreateWithUTF8CString("addEventListener"),
+      JSStringCreateWithUTF8CString("removeEventListener"),
+      JSStringCreateWithUTF8CString("dispatchEvent"),
     };
   };
+};
+
+struct NativeEvent;
+struct NativeEventTarget;
+using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);
+
+struct NativeEventTarget {
+  NativeEventTarget() = delete;
+  NativeEventTarget(JSEventTarget::EventTargetInstance *_instance, NativeDispatchEvent dispatchEvent)
+    : instance(_instance), dispatchEvent(dispatchEvent){};
+
+  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);
+
+  JSEventTarget::EventTargetInstance *instance;
+  NativeDispatchEvent dispatchEvent;
 };
 
 } // namespace kraken::binding::jsc

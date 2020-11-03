@@ -6,11 +6,15 @@
 #include "window.h"
 #include "bindings/jsc/macros.h"
 #include "dart_methods.h"
+#include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
 
-JSWindow::WindowInstance::WindowInstance(JSWindow *window): EventTargetInstance(window, WINDOW_TARGET_ID) {
+JSWindow::WindowInstance::WindowInstance(JSWindow *window) : EventTargetInstance(window, WINDOW_TARGET_ID) {
   location_ = new JSLocation(_hostClass->context);
+
+  foundation::UICommandTaskMessageQueue::instance(window->context->getContextId())
+    ->registerCommand(WINDOW_TARGET_ID, UICommandType::initWindow, nullptr, 0, reinterpret_cast<int64_t>(this));
 }
 
 JSWindow::WindowInstance::~WindowInstance() {
@@ -36,8 +40,8 @@ JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef
     return JSValueMakeNumber(_hostClass->context->context(), devicePixelRatio);
   } else if (name == "colorScheme") {
     if (getDartMethod()->platformBrightness == nullptr) {
-      JSC_THROW_ERROR(_hostClass->context->context(), "Failed to read colorScheme: dart method (platformBrightness) not register.",
-                      exception);
+      JSC_THROW_ERROR(_hostClass->context->context(),
+                      "Failed to read colorScheme: dart method (platformBrightness) not register.", exception);
       return nullptr;
     }
     const NativeString *code = getDartMethod()->platformBrightness(_hostClass->context->getContextId());
@@ -50,8 +54,7 @@ JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef
   return nullptr;
 }
 
-JSWindow::~JSWindow() {
-}
+JSWindow::~JSWindow() {}
 
 JSObjectRef JSWindow::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                         const JSValueRef *arguments, JSValueRef *exception) {

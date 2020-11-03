@@ -18,9 +18,10 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class VideoElement extends Element {
-  VideoElement(int targetId, ElementManager elementManager)
+  VideoElement(int targetId, int nativePtr, ElementManager elementManager)
       : super(
           targetId,
+          nativePtr,
           elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,

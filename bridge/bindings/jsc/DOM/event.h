@@ -1,0 +1,177 @@
+/*
+ * Copyright (C) 2020 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
+#ifndef KRAKENBRIDGE_EVENT_H
+#define KRAKENBRIDGE_EVENT_H
+
+#include "bindings/jsc/host_class.h"
+#include "bindings/jsc/js_context.h"
+#include <array>
+#include <map>
+
+namespace kraken::binding::jsc {
+
+void bindEvent(std::unique_ptr<JSContext> &context);
+
+enum EventType {
+  none,
+  input,
+  appear,
+  disappear,
+  error,
+  message,
+  close,
+  open,
+  intersectionchange,
+  touchstart,
+  touchend,
+  touchmove,
+  touchcancel,
+  click,
+  colorschemechange,
+  load,
+  finish,
+  cancel,
+  transitionrun,
+  transitionstart,
+  transitionend,
+  transitioncancel,
+  focus,
+  unload,
+  change,
+  canplay,
+  canplaythrough,
+  ended,
+  play,
+  pause,
+  seeked,
+  seeking,
+  volumechange
+};
+
+struct NativeEvent {
+  NativeEvent() = delete;
+  explicit NativeEvent(EventType eventType) : type(eventType){};
+  int8_t type;
+  int8_t bubbles{0};
+  int8_t cancelable{0};
+  int64_t timeStamp{0};
+  int8_t defaultPrevented{0};
+  int64_t targetId{0};
+  int64_t currentTarget{0};
+};
+
+namespace {
+const char *EventTypeKeys[]{
+  "none",
+  "input",
+  "appear",
+  "disappear",
+  "error",
+  "message",
+  "close",
+  "open",
+  "intersectionchange",
+  "touchstart",
+  "touchend",
+  "touchmove",
+  "touchcancel",
+  "click",
+  "colorschemechange",
+  "load",
+  "finish",
+  "cancel",
+  "transitionrun",
+  "transitionstart",
+  "transitionend",
+  "transitioncancel",
+  "focus",
+  "unload",
+  "change",
+  "canplay",
+  "canplaythrough",
+  "ended",
+  "play",
+  "pause",
+  "seeked",
+  "seeking",
+  "volumechange",
+};
+
+std::map<std::string, EventType> EventTypeValues{
+  {"none", EventType::none},
+  {"input,", EventType::input},
+  {"appear,", EventType::appear},
+  {"disappear,", EventType::disappear},
+  {"error,", EventType::error},
+  {"message,", EventType::message},
+  {"close,", EventType::close},
+  {"open,", EventType::open},
+  {"intersectionchange,", EventType::intersectionchange},
+  {"touchstart,", EventType::touchstart},
+  {"touchend,", EventType::touchend},
+  {"touchmove,", EventType::touchmove},
+  {"touchcancel,", EventType::touchcancel},
+  {"click,", EventType::click},
+  {"colorschemechange,", EventType::colorschemechange},
+  {"load,", EventType::load},
+  {"finish,", EventType::finish},
+  {"cancel,", EventType::cancel},
+  {"transitionrun,", EventType::transitionrun},
+  {"transitionstart,", EventType::transitionstart},
+  {"transitionend,", EventType::transitionend},
+  {"transitioncancel,", EventType::transitioncancel},
+  {"focus,", EventType::focus},
+  {"unload,", EventType::unload},
+  {"change,", EventType::change},
+  {"canplay,", EventType::canplay},
+  {"canplaythrough,", EventType::canplaythrough},
+  {"ended,", EventType::ended},
+  {"play,", EventType::play},
+  {"pause,", EventType::pause},
+  {"seeked,", EventType::seeked},
+  {"seeking,", EventType::seeking},
+  {"volumechange,", EventType::volumechange},
+};
+} // namespace
+
+class JSEvent : public HostClass {
+public:
+  static JSEvent *instance(JSContext *context);
+
+  JSEvent() = delete;
+  explicit JSEvent(JSContext *context, const char *name);
+  explicit JSEvent(JSContext *context);
+
+  JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                const JSValueRef *arguments, JSValueRef *exception) override;
+
+  class EventInstance : public Instance {
+  public:
+    EventInstance() = delete;
+    explicit EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent);
+    explicit EventInstance(JSEvent *jsEvent, EventType eventType);
+    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+    ~EventInstance() override {
+      delete nativeEvent;
+    };
+    NativeEvent *nativeEvent;
+
+  private:
+    std::array<JSStringRef, 7> propertyNames{
+      JSStringCreateWithUTF8CString("type"),
+      JSStringCreateWithUTF8CString("bubbles"),
+      JSStringCreateWithUTF8CString("cancelable"),
+      JSStringCreateWithUTF8CString("timeStamp"),
+      JSStringCreateWithUTF8CString("defaultPrevented"),
+      JSStringCreateWithUTF8CString("targetId"),
+      JSStringCreateWithUTF8CString("currentTarget"),
+    };
+  };
+};
+
+} // namespace kraken::binding::jsc
+
+#endif // KRAKENBRIDGE_EVENT_H

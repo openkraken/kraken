@@ -58,7 +58,6 @@ mixin EventHandlerMixin on Node {
 
   void handlePointCancel(PointerCancelEvent pointEvent) {
     Event event = Event(EventType.touchcancel, EventInit());
-    event.detail = {};
     dispatchEvent(event);
   }
 
@@ -84,7 +83,6 @@ mixin EventHandlerMixin on Node {
     event.changedTouches.items.add(touch);
     event.targetTouches.items.add(touch);
     event.touches.items.add(touch);
-    event.detail = {};
     return event;
   }
 

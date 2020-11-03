@@ -16,8 +16,8 @@ class AnchorElement extends Element {
   String _href;
   String _target;
 
-  AnchorElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, tagName: ANCHOR, defaultStyle: _defaultStyle) {
+  AnchorElement(int targetId, int nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr, elementManager, tagName: ANCHOR, defaultStyle: _defaultStyle) {
     addEvent(EventType.click);
   }
 

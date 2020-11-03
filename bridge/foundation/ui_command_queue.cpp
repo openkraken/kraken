@@ -7,8 +7,8 @@
 
 namespace foundation {
 
-void UICommandTaskMessageQueue::registerCommand(int64_t id, int8_t type, NativeString **args, size_t length) {
-  auto item = new UICommandItem(id, type, args, length);
+void UICommandTaskMessageQueue::registerCommand(int64_t id, int8_t type, NativeString **args, size_t length, int64_t nativePtr) {
+  auto item = new UICommandItem(id, type, args, length, nativePtr);
   queue.emplace_back(item);
 }
 

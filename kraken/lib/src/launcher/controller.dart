@@ -148,9 +148,13 @@ class KrakenViewController {
     return completer.future;
   }
 
-  Element createElement(int id, String tagName) {
+  void initWindow(int nativePtr) {
+    _elementManager.initWindow(nativePtr);
+  }
+
+  Element createElement(int id, int nativeAddress, String tagName) {
     print('create element id: $id, tagName: $tagName');
-    return _elementManager.createElement(id, tagName.toUpperCase(), null, null);
+    return _elementManager.createElement(id, nativeAddress, tagName.toUpperCase(), null, null);
   }
 
   void addEvent(int targetId, int eventTypeIndex) {
@@ -426,8 +430,9 @@ class KrakenController {
       await _bundle.run(_view.contextId);
       // trigger window load event
       module.requestAnimationFrame((_) {
-        String json = jsonEncode([WINDOW_ID, Event(EventType.load)]);
-        emitUIEvent(_view.contextId, json);
+        Event loadEvent = Event(EventType.load);
+        EventTarget window = view.getEventTargetById(WINDOW_ID);
+        emitUIEvent(_view.contextId, window.nativePtr, loadEvent.toNativeEvent());
       });
     }
   }

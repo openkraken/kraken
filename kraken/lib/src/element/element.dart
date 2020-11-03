@@ -3,9 +3,9 @@
  * Author: Kraken Team.
  */
 
-import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:ffi';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -131,6 +131,7 @@ class Element extends Node
 
   Element(
     int targetId,
+    int nativePtr,
     ElementManager elementManager, {
     this.tagName,
     this.defaultStyle = const {},
@@ -141,7 +142,7 @@ class Element extends Node
     this.repaintSelf = false
   }) : assert(targetId != null),
         assert(tagName != null),
-        super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
+        super(NodeType.ELEMENT_NODE, targetId, nativePtr, elementManager, tagName) {
     if (properties == null) properties = {};
     if (events == null) events = [];
 
@@ -1140,8 +1141,8 @@ class Element extends Node
   }
 
   void _eventResponder(Event event) {
-    String json = jsonEncode([targetId, event]);
-    emitUIEvent(elementManager.controller.view.contextId, json);
+    Pointer<NativeEvent> nativeEvent = event.toNativeEvent();
+    emitUIEvent(elementManager.controller.view.contextId, nativePtr, nativeEvent);
   }
 
   void click() {

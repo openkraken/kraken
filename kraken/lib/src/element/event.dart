@@ -54,7 +54,6 @@ class Event {
   EventTarget target;
   num timeStamp;
   bool defaultPrevented = false;
-  dynamic detail;
 
   bool _immediateBubble = true;
 
@@ -85,8 +84,16 @@ class Event {
     bubbles = false;
   }
 
-  NativeEvent toNativeEvent() {
+  Pointer<NativeEvent> toNativeEvent() {
     Pointer<NativeEvent> event = allocate<NativeEvent>();
+    event.ref.type = type.index;
+    event.ref.bubbles = bubbles ? 1 : 0;
+    event.ref.cancelable = cancelable ? 1 : 0;
+    event.ref.timeStamp = timeStamp;
+    event.ref.defaultPrevented = defaultPrevented ? 1 : 0;
+    event.ref.target = target?.nativePtr;
+    event.ref.currentTarget = currentTarget?.nativePtr;
+    return event;
   }
 
   Map toJson() {
@@ -98,7 +105,6 @@ class Event {
       'defaultPrevented': defaultPrevented,
       'target': target?.targetId,
       'currentTarget': currentTarget?.targetId,
-      'detail': detail,
     };
   }
 
@@ -137,6 +143,11 @@ class AppearEvent extends Event {
 
 class DisappearEvent extends Event {
   DisappearEvent() : super(EventType.disappear);
+}
+
+class ColorSchemeChangeEvent extends Event {
+  ColorSchemeChangeEvent() : super(EventType.colorschemechange);
+  String platformBrightness;
 }
 
 class MediaErrorCode {

@@ -7,5 +7,5 @@ import 'package:kraken/element.dart';
 const String PARAGRAPH = 'P';
 
 class ParagraphElement extends Element {
-  ParagraphElement(int targetId, ElementManager elementManager) : super(targetId, elementManager, tagName: PARAGRAPH);
+  ParagraphElement(int targetId, int nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager, tagName: PARAGRAPH);
 }

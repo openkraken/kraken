@@ -25,8 +25,8 @@ class ObjectElement extends Element implements ObjectElementHost {
   ObjectElementClientFactory _objectElementClientFactory;
   ObjectElementClient _objectElementClient;
 
-  ObjectElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  ObjectElement(int targetId, int nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();
     initDetachCallback(elementManager);

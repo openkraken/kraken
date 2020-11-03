@@ -17,9 +17,10 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class CanvasElement extends Element {
-  CanvasElement(int targetId, ElementManager elementManager)
+  CanvasElement(int targetId, int nativePtr, ElementManager elementManager)
       : super(
           targetId,
+          nativePtr,
           elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,

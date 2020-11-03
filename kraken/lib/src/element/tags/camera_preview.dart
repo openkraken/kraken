@@ -44,8 +44,8 @@ Future<CameraDescription> detectCamera(String lens) async {
 }
 
 class CameraPreviewElement extends Element {
-  CameraPreviewElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  CameraPreviewElement(int targetId, int nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr, elementManager, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     sizedBox = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.loose(Size(
         CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),

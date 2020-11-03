@@ -15,56 +15,60 @@ import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 
 Element _createElement(
-    int id, String type, Map<String, dynamic> props, List<EventType> events, ElementManager elementManager) {
+    int id, int nativePtr, String type, Map<String, dynamic> props, List<EventType> events, ElementManager elementManager) {
   Element element;
   switch (type) {
+    case BODY:
+      element = BodyElement(elementManager.viewportWidth, elementManager.viewportHeight, id, nativePtr, elementManager);
+      elementManager._setRootElement(element);
+      break;
     case DIV:
-      element = DivElement(id, elementManager);
+      element = DivElement(id, nativePtr, elementManager);
       break;
     case SPAN:
-      element = SpanElement(id, elementManager);
+      element = SpanElement(id, nativePtr, elementManager);
       break;
     case ANCHOR:
-      element = AnchorElement(id, elementManager);
+      element = AnchorElement(id, nativePtr, elementManager);
       break;
     case STRONG:
-      element = StrongElement(id, elementManager);
+      element = StrongElement(id, nativePtr, elementManager);
       break;
     case IMAGE:
-      element = ImageElement(id, elementManager);
+      element = ImageElement(id, nativePtr, elementManager);
       break;
     case PARAGRAPH:
-      element = ParagraphElement(id, elementManager);
+      element = ParagraphElement(id, nativePtr, elementManager);
       break;
     case INPUT:
-      element = InputElement(id, elementManager);
+      element = InputElement(id, nativePtr, elementManager);
       break;
     case PRE:
-      element = PreElement(id, elementManager);
+      element = PreElement(id, nativePtr, elementManager);
       break;
     case CANVAS:
-      element = CanvasElement(id, elementManager);
+      element = CanvasElement(id, nativePtr, elementManager);
       break;
     case ANIMATION_PLAYER:
-      element = AnimationPlayerElement(id, elementManager);
+      element = AnimationPlayerElement(id, nativePtr, elementManager);
       break;
     case VIDEO:
-      element = VideoElement(id, elementManager);
+      element = VideoElement(id, nativePtr, elementManager);
       break;
     case CAMERA_PREVIEW:
-      element = CameraPreviewElement(id, elementManager);
+      element = CameraPreviewElement(id, nativePtr, elementManager);
       break;
     case IFRAME:
-      element = IFrameElement(id, elementManager);
+      element = IFrameElement(id, nativePtr, elementManager);
       break;
     case AUDIO:
-      element = AudioElement(id, elementManager);
+      element = AudioElement(id, nativePtr, elementManager);
       break;
     case OBJECT:
-      element = ObjectElement(id, elementManager);
+      element = ObjectElement(id, nativePtr, elementManager);
       break;
     default:
-      element = DivElement(id, elementManager);
+      element = DivElement(id, nativePtr, elementManager);
       print('ERROR: unexpected element type "$type"');
   }
 
@@ -104,14 +108,7 @@ class ElementManager {
   final List<VoidCallback> _detachCallbacks = [];
 
   ElementManager(this.viewportWidth, this.viewportHeight,
-      {this.controller, this.showPerformanceOverlayOverride}) {
-    _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this);
-    RenderBoxModel root = _rootElement.renderBoxModel;
-    root.controller = controller;
-    _root = root;
-    setEventTarget(_rootElement);
-    setEventTarget(Window(this));
-  }
+      {this.controller, this.showPerformanceOverlayOverride});
 
   T getEventTargetByTargetId<T>(int targetId) {
     assert(targetId != null);
@@ -146,7 +143,20 @@ class ElementManager {
     _eventTargets = <int, EventTarget>{};
   }
 
-  Element createElement(int id, String type, Map<String, dynamic> props, List<EventType> events) {
+  void initWindow(int nativePtr) {
+    Window window = Window(WINDOW_ID, nativePtr, this);
+    setEventTarget(window);
+  }
+
+  void _setRootElement(Element element) {
+    RenderBoxModel root = element.renderBoxModel;
+    _rootElement = element;
+    root.controller = controller;
+    _root = root;
+    setEventTarget(element);
+  }
+
+  Element createElement(int id, int nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<EventType> eventList;
@@ -157,18 +167,18 @@ class ElementManager {
       }
     }
 
-    Element element = _createElement(id, type, props, eventList, this);
+    Element element = _createElement(id, nativePtr, type, props, eventList, this);
     setEventTarget(element);
     return element;
   }
 
-  void createTextNode(int id, String data) {
-    TextNode textNode = TextNode(id, data, this);
+  void createTextNode(int id, int nativePtr, String data) {
+    TextNode textNode = TextNode(id, nativePtr, data, this);
     setEventTarget(textNode);
   }
 
-  void createComment(int id, String data) {
-    EventTarget comment = Comment(targetId: id, data: data, elementManager: this);
+  void createComment(int id, int nativePtr, String data) {
+    EventTarget comment = Comment(targetId: id, nativePtr: nativePtr, data: data, elementManager: this);
     setEventTarget(comment);
   }
 
@@ -394,52 +404,52 @@ class ElementManager {
 
   dynamic applyAction(String action, List payload) {
     dynamic returnValue;
-
-    switch (action) {
-      case 'createElement':
-        var props, events;
-        if (payload.length > 2) {
-          props = payload[2];
-          if (payload.length > 3) events = payload[3];
-        }
-        createElement(payload[0], payload[1], props, events);
-        break;
-      case 'createTextNode':
-        createTextNode(payload[0], payload[1]);
-        break;
-      case 'createComment':
-        createComment(payload[0], payload[1]);
-        break;
-      case 'insertAdjacentNode':
-        insertAdjacentNode(payload[0], payload[1], payload[2]);
-        break;
-      case 'removeNode':
-        removeNode(payload[0]);
-        break;
-      case 'setStyle':
-        setStyle(payload[0], payload[1], payload[2]);
-        break;
-      case 'setProperty':
-        setProperty(payload[0], payload[1], payload[2]);
-        break;
-      case 'getProperty':
-        returnValue = getProperty(payload[0], payload[1]);
-        break;
-      case 'removeProperty':
-        removeProperty(payload[0], payload[1]);
-        break;
-      case 'addEvent':
-        print(payload);
-        addEvent(payload[0], payload[1]);
-        break;
-      case 'removeEvent':
-        removeEvent(payload[0], payload[1]);
-        break;
-      case 'method':
-        returnValue = method(payload[0], payload[1], payload[2]);
-        break;
-    }
-
-    return returnValue;
+//
+//    switch (action) {
+//      case 'createElement':
+//        var props, events;
+//        if (payload.length > 2) {
+//          props = payload[2];
+//          if (payload.length > 3) events = payload[3];
+//        }
+//        createElement(payload[0], payload[1], props, events);
+//        break;
+//      case 'createTextNode':
+//        createTextNode(payload[0], payload[1]);
+//        break;
+//      case 'createComment':
+//        createComment(payload[0], payload[1]);
+//        break;
+//      case 'insertAdjacentNode':
+//        insertAdjacentNode(payload[0], payload[1], payload[2]);
+//        break;
+//      case 'removeNode':
+//        removeNode(payload[0]);
+//        break;
+//      case 'setStyle':
+//        setStyle(payload[0], payload[1], payload[2]);
+//        break;
+//      case 'setProperty':
+//        setProperty(payload[0], payload[1], payload[2]);
+//        break;
+//      case 'getProperty':
+//        returnValue = getProperty(payload[0], payload[1]);
+//        break;
+//      case 'removeProperty':
+//        removeProperty(payload[0], payload[1]);
+//        break;
+//      case 'addEvent':
+//        print(payload);
+//        addEvent(payload[0], payload[1]);
+//        break;
+//      case 'removeEvent':
+//        removeEvent(payload[0], payload[1]);
+//        break;
+//      case 'method':
+//        returnValue = method(payload[0], payload[1], payload[2]);
+//        break;
+//    }
+//
+//    return returnValue;
   }
 }

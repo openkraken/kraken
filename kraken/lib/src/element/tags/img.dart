@@ -28,9 +28,10 @@ class ImageElement extends Element {
   double _propertyWidth;
   double _propertyHeight;
 
-  ImageElement(int targetId, ElementManager elementManager)
+  ImageElement(int targetId, int nativePtr, ElementManager elementManager)
       : super(
         targetId,
+        nativePtr,
         elementManager,
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,

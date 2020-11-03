@@ -6,6 +6,7 @@
 #include "eventTarget.h"
 #include "dart_methods.h"
 #include "document.h"
+#include "event.h"
 #include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
@@ -51,7 +52,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   foundation::Task disposeTask = [](void *data) {
     auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
     foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
-      ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0);
+      ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0, 0x00);
     delete disposeCallbackData;
   };
   foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
@@ -109,7 +110,7 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
     NativeString **args = new NativeString *[1];
     args[0] = eventNameArgs.clone();
     foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetInstance->eventTargetId,
-                                                                                UICommandType::addEvent, args, 1);
+                                                                                UICommandType::addEvent, args, 1, 0x00);
   }
 
   std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventName];
@@ -199,6 +200,24 @@ void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumula
   for (auto &propertyName : propertyNames) {
     JSPropertyNameAccumulatorAddName(accumulator, propertyName);
   }
+}
+
+// This function will be called back by dart side when trigger events.
+void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent) {
+  JSEventTarget::EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
+  JSContext *context = eventTargetInstance->_hostClass->context;
+  JSContextRef ctx = eventTargetInstance->_hostClass->ctx;
+
+  JSValueRef exception = nullptr;
+  auto eventInstance = new JSEvent::EventInstance(JSEvent::instance(context), nativeEvent);
+  JSStringRef dispatchStringRef = JSStringCreateWithUTF8CString("dispatchEvent");
+  JSValueRef dispatchFunctionValueRef =
+    JSObjectGetProperty(ctx, eventTargetInstance->object, dispatchStringRef, &exception);
+  JSObjectRef dispatchObjectRef = JSValueToObject(ctx, dispatchFunctionValueRef, &exception);
+
+  const JSValueRef dispatchArguments[] = {eventInstance->object};
+  JSObjectCallAsFunction(ctx, dispatchObjectRef, dispatchObjectRef, 1, dispatchArguments, &exception);
+  context->handleException(exception);
 }
 
 } // namespace kraken::binding::jsc

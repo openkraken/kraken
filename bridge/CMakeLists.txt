@@ -113,6 +113,8 @@ else()
       bindings/jsc/DOM/document.cc
       bindings/jsc/DOM/element.cc
       bindings/jsc/DOM/element.h
+      bindings/jsc/DOM/event.h
+      bindings/jsc/DOM/event.cc
       bindings/jsc/DOM/eventTarget.cc
       bindings/jsc/DOM/eventTarget.h
       bindings/jsc/DOM/node.cc

@@ -11,22 +11,20 @@ import 'package:kraken/element.dart';
 const String WINDOW = 'WINDOW';
 
 class Window extends EventTarget {
-  Window(ElementManager elementManager) : super(WINDOW_ID, elementManager) {
+  Window(int targetId, int nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager) {
     window.onPlatformBrightnessChanged = () {
-      Event event = Event(EventType.colorschemechange);
-      event.detail = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
+      ColorSchemeChangeEvent event = ColorSchemeChangeEvent();
+      event.platformBrightness = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
       dispatchEvent(event);
     };
   }
 
   void _handleColorSchemeChange(Event event) {
-    String json = jsonEncode([targetId, event]);
-    emitUIEvent(elementManager.controller.view.contextId, json);
+    emitUIEvent(elementManager.controller.view.contextId, nativePtr, event.toNativeEvent());
   }
 
   void _handleLoad(Event event) {
-    String json = jsonEncode([targetId, event]);
-    emitUIEvent(elementManager.controller.view.contextId, json);
+    emitUIEvent(elementManager.controller.view.contextId, nativePtr, event.toNativeEvent());
   }
 
   @override
