@@ -33,6 +33,7 @@ struct DartMethodPointer {
   RefreshPaint refreshPaint{nullptr};
   MatchImageSnapshot matchImageSnapshot{nullptr};
   Environment environment{nullptr};
+  SimulatePointer simulatePointer{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -55,6 +56,7 @@ void registerJSError(OnJSError onJsError);
 void registerRefreshPaint(RefreshPaint refreshPaint);
 void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot);
 void registerEnvironment(Environment environment);
+void registerSimulatePointer(SimulatePointer simulatePointer);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

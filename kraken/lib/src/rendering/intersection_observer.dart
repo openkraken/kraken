@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'dart:math' show max;
 import 'dart:ui' as ui;
-import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -71,6 +71,12 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     _listeners.add(callback);
   }
 
+  void clearIntersectionChangeListeners() {
+    _listeners?.clear();
+    _listeners = null;
+    _onIntersectionChange = null;
+  }
+
   void removeIntersectionChangeListener(IntersectionChangeCallback callback) {
     for (int i = 0; i < _listeners.length; i += 1) {
       if (_listeners[i] == callback) {
@@ -85,14 +91,17 @@ mixin RenderIntersectionObserverMixin on RenderBox {
   }
 
   void _dispatchChange(IntersectionObserverEntry info) {
-    _listeners.forEach((IntersectionChangeCallback callback) {
+    // Not use for-in, and not cache length, due to callback call stack may
+    // clear [_listeners], which case concurrent exception.
+    for (int i = 0; i < (_listeners == null ? 0 : _listeners.length); i ++) {
+      IntersectionChangeCallback callback = _listeners[i];
       callback(info);
-    });
+    }
   }
 
-  void paintIntersectionObserver(PaintingContext context, Offset offset, PaintingContextCallback superPaint) {
+  void paintIntersectionObserver(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_onIntersectionChange == null) {
-      superPaint(context, offset);
+      callback(context, offset);
       return;
     }
 
@@ -104,7 +113,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       _intersectionObserverLayer.paintOffset = offset;
     }
 
-    context.pushLayer(_intersectionObserverLayer, superPaint, offset);
+    context.pushLayer(_intersectionObserverLayer, callback, offset);
   }
 }
 
@@ -168,7 +177,7 @@ class IntersectionObserverLayer extends ContainerLayer {
   }
 
   bool _isScheduled = false;
-  _scheduleIntersectionObservationUpdate() {
+  void _scheduleIntersectionObservationUpdate() {
     if (!_isScheduled) {
       _isScheduled = true;
       scheduleMicrotask(() {

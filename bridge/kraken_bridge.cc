@@ -127,22 +127,22 @@ bool checkContext(int32_t contextId, void *context) {
   return bridge->getContext() == context;
 }
 
-void evaluateScripts(int32_t contextId, const char *code, const char *bundleFilename, int startLine) {
+void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine) {
   assert(checkContext(contextId) && "evaluateScripts: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
-  context->evaluateScript(std::string(code), std::string(bundleFilename), startLine);
+  context->evaluateScript(code, bundleFilename, startLine);
 }
 
 void reloadJsContext(int32_t contextId) {
   assert(checkContext(contextId) && "reloadJSContext: contextId is not valid");
   auto bridgePtr = getJSContext(contextId);
   auto context = static_cast<kraken::JSBridge *>(bridgePtr);
+  auto newContext = new kraken::JSBridge(contextId, printError);
   delete context;
-  context = new kraken::JSBridge(contextId, printError);
-  contextPool[contextId] = context;
+  contextPool[contextId] = newContext;
 }
 
-void invokeEventListener(int32_t contextId, int32_t type, const char *data) {
+void invokeEventListener(int32_t contextId, int32_t type, NativeString *data) {
   assert(checkContext(contextId) && "invokeEventListener: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->invokeEventListener(type, data);

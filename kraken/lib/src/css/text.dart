@@ -274,12 +274,12 @@ class CSSText {
     return TextBaseline.alphabetic; // @TODO: impl vertical-align
   }
 
-  static String BUILTIN_FONT_PACKAGE = null;
+  static String BUILTIN_FONT_PACKAGE;
   static String getFontPackage(CSSStyleDeclaration style) {
     return BUILTIN_FONT_PACKAGE;
   }
 
-  static List<String> DEFAULT_FONT_FAMILY_FALLBACK = null;
+  static List<String> DEFAULT_FONT_FAMILY_FALLBACK;
   static List<String> getFontFamilyFallback(CSSStyleDeclaration style) {
     String fontFamily = style[FONT_FAMILY];
     if (fontFamily.isNotEmpty) {
@@ -386,7 +386,7 @@ class CSSText {
     if (style.contains(TEXT_SHADOW)) {
       var shadows = CSSStyleProperty.getShadowValues(style[TEXT_SHADOW]);
       if (shadows != null) {
-        shadows.forEach((shadowDefinitions) {
+        for (var shadowDefinitions in shadows) {
           // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
           Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style.getCurrentColor());
           double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
@@ -400,7 +400,7 @@ class CSSText {
               color: color,
             ));
           }
-        });
+        }
       }
     }
     return textShadows;

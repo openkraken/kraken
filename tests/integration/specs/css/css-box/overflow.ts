@@ -280,4 +280,89 @@ describe('Overflow', () => {
       });
     });
   });
+
+  it('flex container\'s maxScrollableSize should care about flex-direction', async (doneFn) => {
+    let container = createViewElement({
+      overflow: 'scroll',
+    }, [
+      createElement('div', {
+        style: {
+          background: 'green',
+          height: '100px'
+        }
+      }, [createText('1234')]),
+      createElement('div', {
+        style: {
+          background: 'blue',
+          height: '200px'
+        }
+      }, [createText('4567')]),
+      createElement('div', {
+        style: {
+          background: 'red',
+          height: '800px'
+        }
+      })
+    ]);
+
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      document.body.scrollLeft = 50;
+      document.body.scrollTop = 300;
+      await matchViewportSnapshot();
+      doneFn();
+    });
+  });
+
+  it('hitTest with scroll offset', async () => {
+    let box;
+    let clickCount = 0;
+    let container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        overflow: 'scroll'
+      }
+    }, [
+      createElement('div', {
+        style: {
+          width: '50px',
+          height: '50px'
+        }
+      }, []),
+      box = createElement('div', {
+        style: {
+          width: '50px',
+          height: '50px'
+        }
+      }, []),
+      createElement('div', {
+        style: {
+          width: '50px',
+          height: '50px'
+        }
+      }, []),
+      createElement('div', {
+        style: {
+          width: '50px',
+          height: '50px'
+        }
+      }, []),
+    ]);
+
+    BODY.appendChild(container);
+
+    box.addEventListener('click', () => clickCount++);
+
+    await simulateClick(20, 60);
+
+    await simulateSwipe(20, 60, 20, 0, 0.1);
+
+    await simulateClick(20, 0);
+
+    expect(clickCount).toBe(2);
+  });
 });

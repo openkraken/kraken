@@ -12,8 +12,7 @@ import 'package:kraken/rendering.dart';
 import 'ticker_provider.dart';
 
 typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
-
-class RenderSingleViewPortParentData extends ContainerBoxParentData<RenderBox> {}
+typedef PointListener = void Function(PointerEvent event);
 
 class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollContext {
   AxisDirection _axisDirection;
@@ -182,6 +181,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
 
 mixin RenderOverflowMixin on RenderBox {
   ScrollListener scrollListener;
+  PointListener pointerListener;
 
   bool _clipX = false;
   bool get clipX => _clipX;
@@ -264,12 +264,12 @@ mixin RenderOverflowMixin on RenderBox {
 
   void _setUpScrollX() {
     _scrollOffsetX.applyViewportDimension(_viewportSize.width);
-    _scrollOffsetX.applyContentDimensions(0.0, _scrollableSize.width - _viewportSize.width);
+    _scrollOffsetX.applyContentDimensions(0.0, math.max(0.0, _scrollableSize.width - _viewportSize.width));
   }
 
   void _setUpScrollY() {
     _scrollOffsetY.applyViewportDimension(_viewportSize.height);
-    _scrollOffsetY.applyContentDimensions(0.0, _scrollableSize.height - _viewportSize.height);
+    _scrollOffsetY.applyContentDimensions(0.0, math.max(0.0, _scrollableSize.height - _viewportSize.height));
   }
 
   void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {
@@ -319,7 +319,8 @@ mixin RenderOverflowMixin on RenderBox {
       size.height - borderEdge.bottom - borderEdge.top,
     );
     if (_shouldClipAtPaintOffset(paintOffset, size)) {
-      PaintingContextCallback fn = (PaintingContext context, Offset offset) {
+      // ignore: prefer_function_declarations_over_variables
+      PaintingContextCallback painter = (PaintingContext context, Offset offset) {
         callback(context, offset + paintOffset);
       };
       if (decoration != null && decoration.borderRadius != null) {
@@ -330,9 +331,9 @@ mixin RenderOverflowMixin on RenderBox {
             bottomLeft: radius.bottomLeft,
             bottomRight: radius.bottomRight
         );
-        context.pushClipRRect(needsCompositing, offset, clipRect, clipRRect, fn);
+        context.pushClipRRect(needsCompositing, offset, clipRect, clipRRect, painter);
       } else {
-        context.pushClipRect(needsCompositing, offset, clipRect, fn);
+        context.pushClipRect(needsCompositing, offset, clipRect, painter);
       }
     } else {
       callback(context, offset);
@@ -342,7 +343,7 @@ mixin RenderOverflowMixin on RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     double result;
-    final RenderSingleViewPortParentData childParentData = parentData;
+    final BoxParentData childParentData = parentData;
     double candidate = getDistanceToActualBaseline(baseline);
     if (candidate != null) {
       candidate += childParentData.offset.dy;

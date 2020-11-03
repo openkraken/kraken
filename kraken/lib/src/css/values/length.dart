@@ -36,9 +36,9 @@ class CSSLength {
     } else if (value is int) {
       return value.toDouble();
     } else if (value is String) {
-      return double.tryParse(value) ?? 0.0;
+      return double.tryParse(value);
     } else {
-      return 0.0;
+      return null;
     }
   }
 
@@ -54,7 +54,7 @@ class CSSLength {
     }
   }
 
-  static bool isAuto(value) {
+  static bool isAuto(String value) {
     return value == AUTO;
   }
 

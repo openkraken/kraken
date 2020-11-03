@@ -3,9 +3,7 @@ import 'dart:core';
 
 import 'package:flutter/animation.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
-import 'package:kraken/src/css/values/keywords.dart';
-import 'package:kraken/src/element/event.dart';
+import 'package:kraken/dom.dart';
 import 'package:flutter/scheduler.dart';
 
 // https://drafts.csswg.org/web-animations/#enumdef-animationplaystate
@@ -100,14 +98,14 @@ class AnimationTimeline {
 
   List<Animation> _getActiveAnimations() {
     List<Animation> activeAnimations = [];
-    _animations.forEach((Animation animation) {
+    for (Animation animation in _animations) {
       AnimationPlayState playState = animation.playState;
       if (playState != AnimationPlayState.finished && playState != AnimationPlayState.idle) {
         activeAnimations.add(animation);
       } else {
         animation._tick(_currentTime);
       }
-    });
+    }
     return activeAnimations;
   }
 
@@ -303,7 +301,7 @@ class Animation {
     _effect._calculateTiming(null);
 
     if (oncancel != null) {
-      var event = new AnimationPlaybackEvent('cancel');
+      var event = AnimationPlaybackEvent('cancel');
       event.timelineTime = _timeline.currentTime;
       oncancel(event);
     }
@@ -388,7 +386,7 @@ class Animation {
   void _fireEvents(double timelineTime) {
     if (_isFinished) {
       if (!_finishedFlag) {
-        AnimationPlaybackEvent event = new AnimationPlaybackEvent('finish');
+        AnimationPlaybackEvent event = AnimationPlaybackEvent('finish');
         event.currentTime = currentTime;
         event.timelineTime = timelineTime;
         if (onfinish != null) onfinish(event);
@@ -555,7 +553,7 @@ class KeyframeEffect extends AnimationEffect {
     if (_progress == null) {
       // If fill is backwards that will be null when animation finished
       _propertySpecificKeyframeGroups.forEach((String propertyName, value) {
-        style.removeAimationProperty(propertyName);
+        style.removeAnimationProperty(propertyName);
         String value = style.getStylePropertyValue(propertyName);
         style.setProperty(propertyName, value);
       });
@@ -846,7 +844,7 @@ class AnimationEffect {
   EffectTiming timing;
 
   Map getComputedTiming() {
-    throw new UnsupportedError('Not supported');
+    throw UnsupportedError('Not supported');
   }
 
   EffectTiming getTiming() {

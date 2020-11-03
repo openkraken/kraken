@@ -5,7 +5,7 @@
 
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
 class RenderIntrinsic extends RenderBoxModel
@@ -26,37 +26,12 @@ class RenderIntrinsic extends RenderBoxModel
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
       if (child is RenderBoxModel) {
-        child.parentData = getPositionParentDataFromStyle(child.style);
+        RenderLayoutParentData parentData = RenderLayoutParentData();
+        child.parentData = CSSPositionedLayout.getPositionParentData(child.style, parentData);;
       } else {
         child.parentData = RenderLayoutParentData();
       }
     }
-  }
-
-  RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
-    RenderLayoutParentData parentData = RenderLayoutParentData();
-    CSSPositionType positionType = resolvePositionFromStyle(style);
-    parentData.position = positionType;
-
-    if (style.contains('top')) {
-      parentData.top = CSSLength.toDisplayPortValue(style['top']);
-    }
-    if (style.contains('left')) {
-      parentData.left = CSSLength.toDisplayPortValue(style['left']);
-    }
-    if (style.contains('bottom')) {
-      parentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
-    }
-    if (style.contains('right')) {
-      parentData.right = CSSLength.toDisplayPortValue(style['right']);
-    }
-    parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
-    parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
-    parentData.zIndex = CSSLength.toInt(style['zIndex']) ?? 0;
-
-    parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
-
-    return parentData;
   }
 
   @override
@@ -119,19 +94,27 @@ class RenderIntrinsic extends RenderBoxModel
     }
   }
 
+  /// This class mixin [RenderProxyBoxMixin], which has its' own paint method,
+  /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
-    basePaint(context, offset, (PaintingContext context, Offset offset) {
-      if (padding != null) {
-        offset += Offset(paddingLeft, paddingTop);
-      }
+    if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+    paintBoxModel(context, offset);
+  }
 
-      if (borderEdge != null) {
-        offset += Offset(borderLeft, borderTop);
-      }
+  @override
+  void performPaint(PaintingContext context, Offset offset) {
+    if (padding != null) {
+      offset += Offset(paddingLeft, paddingTop);
+    }
 
-      if (child != null) context.paintChild(child, offset);
-    });
+    if (borderEdge != null) {
+      offset += Offset(borderLeft, borderTop);
+    }
+
+    if (child != null) {
+      context.paintChild(child, offset);
+    }
   }
 
   RenderSelfRepaintIntrinsic toSelfRepaint() {
@@ -156,7 +139,7 @@ class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
         super(targetId, style, elementManager);
 
   @override
-  get isRepaintBoundary => true;
+  bool get isRepaintBoundary => true;
 
   RenderIntrinsic toParentRepaint() {
     RenderObject childRenderObject = child;

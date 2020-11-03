@@ -47,12 +47,13 @@ class CSSBackground {
   }
 
   static bool isValidBackgroundImageValue(String value) {
-    return value.startsWith('url(') ||
+    return (value.indexOf(')') == value.length - 1) &&
+        (value.startsWith('url(') ||
         value.startsWith('linear-gradient(') ||
         value.startsWith('repeating-linear-gradient(') ||
         value.startsWith('radial-gradient(') ||
         value.startsWith('repeating-radial-gradient(') ||
-        value.startsWith('conic-gradient(');
+        value.startsWith('conic-gradient('));
   }
 
   static bool isValidBackgroundPositionValue(String value) {
@@ -310,10 +311,10 @@ class CSSBackground {
       double grow = 1.0 / (args.length - start - 1);
       for (int i = start; i < args.length; i++) {
         List<CSSColorStop> colorGradients = _parseColorAndStop(args[i].trim(), (i - start) * grow);
-        colorGradients.forEach((element) {
-          colors.add(element.color);
-          stops.add(element.stop);
-        });
+        for (var colorStop in colorGradients) {
+          colors.add(colorStop.color);
+          stops.add(colorStop.stop);
+        }
       }
     }
   }

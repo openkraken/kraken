@@ -5,7 +5,7 @@
  * - setElementProps: Apply attrs object to a specfic DOM.
  * - sleep: wait for several seconds.
  * - create: create element.
- * - matchScreenshot: match snapshot of body's image.
+ * - matchViewportSnapshot: match snapshot of body's image.
  */
 
 let BODY = document.body;
@@ -96,6 +96,87 @@ function createText(content: string) {
   return document.createTextNode(content);
 }
 
+class Cubic {
+  /// The x coordinate of the first control point.
+  ///
+  /// The line through the point (0, 0) and the first control point is tangent
+  /// to the curve at the point (0, 0).
+  private readonly a: number;
+  /// The y coordinate of the first control point.
+  ///
+  /// The line through the point (0, 0) and the first control point is tangent
+  /// to the curve at the point (0, 0).
+  private readonly b: number;
+  /// The x coordinate of the second control point.
+  ///
+  /// The line through the point (1, 1) and the second control point is tangent
+  /// to the curve at the point (1, 1).
+  private readonly c: number;
+  /// The y coordinate of the second control point.
+  ///
+  /// The line through the point (1, 1) and the second control point is tangent
+  /// to the curve at the point (1, 1).
+  private readonly d: number;
+
+  constructor(a, b, c, d) {
+    this.a = a;
+    this.b = b;
+    this.c = c;
+    this.d = d;
+  }
+
+  _evaluateCubic(a, b, m) {
+    return 3 * a * (1 - m) * (1 - m) * m +
+      3 * b * (1 - m) *           m * m +
+      m * m * m;
+  }
+
+  transformInternal(t) {
+    let start = 0.0;
+    let end = 1.0;
+    while (true) {
+      let midpoint = (start + end) / 2;
+      let estimate = this._evaluateCubic(this.a, this.c, midpoint);
+      if (Math.abs((t - estimate)) < 0.001)
+        return this._evaluateCubic(this.b, this.d, midpoint);
+      if (estimate < t)
+        start = midpoint;
+      else
+        end = midpoint;
+    }
+  }
+}
+
+const ease = new Cubic(0.25, 0.1, 0.25, 1.0);
+
+// Simulate an mouse click action
+async function simulateClick(x: number, y: number) {
+  await simulatePointer([
+    [x, y, PointerChange.down],
+    [x, y, PointerChange.up]
+  ]);
+}
+
+// Simulate an mouse swipe action.
+async function simulateSwipe(startX: number, startY: number, endX: number, endY: number, duration: number) {
+  let params: [number, number, number][] = [[startX, startY, PointerChange.down]];
+  let pointerMoveDelay = 0.001;
+  let totalCount = duration / pointerMoveDelay;
+  let diffXPerSecond = (endX - startX) / duration;
+  let diffYPerSecond = (endY - startY) / duration;
+
+  for (let i = 0; i < totalCount; i ++) {
+    let progress = i / totalCount;
+    let diffX = diffXPerSecond * ease.transformInternal(progress);
+    let diffY = diffYPerSecond * ease.transformInternal(progress);
+    await sleep(pointerMoveDelay);
+    params.push([startX + diffX, startY + diffY, PointerChange.move])
+  }
+
+  params.push([endX, endY, PointerChange.up]);
+  await simulatePointer(params);
+}
+
 function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
@@ -104,7 +185,6 @@ async function matchViewportSnapshot(wait: number = 0.0) {
   await sleep(wait);
   return await matchElementImageSnapshot(document.body);
 }
-
 
 async function matchElementImageSnapshot(element: HTMLElement) {
   return await expectAsync(element.toBlob(1.0)).toMatchImageSnapshot();

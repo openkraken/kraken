@@ -3,7 +3,7 @@ import 'package:kraken/css.dart';
 
 mixin RenderVisibilityMixin on RenderBox {
   Visibility _visibility;
-  get visibility => _visibility;
+  Visibility get visibility => _visibility;
   set visibility(Visibility value) {
     if (value == null) return;
     if (value == _visibility) return;
@@ -15,10 +15,7 @@ mixin RenderVisibilityMixin on RenderBox {
     return _visibility != Visibility.hidden;
   }
 
-  void paintVisibility(PaintingContext context, Offset offset, PaintingContextCallback callback) {
-    if (_visibility == Visibility.hidden) {
-      return;
-    }
-    callback(context, offset);
+  bool get isCSSVisibilityHidden {
+    return _visibility != null && _visibility == Visibility.hidden;
   }
 }

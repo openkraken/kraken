@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/src/css/animation.dart';
 
 typedef StyleChangeListener = void Function(
@@ -101,7 +101,7 @@ const Map<String, bool> CSSShorthandProperty = {
 class CSSStyleDeclaration {
   Element target;
 
-  CSSStyleDeclaration(Element this.target);
+  CSSStyleDeclaration(this.target);
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
   List<StyleChangeListener> _styleChangeListeners = [];
@@ -116,7 +116,7 @@ class CSSStyleDeclaration {
     return currentColor ?? CSSColor.INITIAL_COLOR;
   }
 
-  set transitions (Map<String, List> value) {
+  set transitions(Map<String, List> value) {
     _transitions = value;
   }
 
@@ -160,7 +160,10 @@ class CSSStyleDeclaration {
       Animation animation = _propertyRunningTransition[propertyName];
       animation.cancel();
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.cancel);
-      begin = _animationProperties[propertyName];
+      // Maybe set transition twice in a same frame. should check animationProperties has contains propertyName.
+      if (_animationProperties.containsKey(propertyName)) {
+        begin = _animationProperties[propertyName];
+      }
     }
 
     if (begin == null) {
@@ -242,7 +245,7 @@ class CSSStyleDeclaration {
     return _properties[propertyName] ?? EMPTY_STRING;
   }
 
-  String removeAimationProperty(String propertyName) {
+  String removeAnimationProperty(String propertyName) {
     String prevValue = EMPTY_STRING;
 
     if (_animationProperties.containsKey(propertyName)) {
@@ -258,28 +261,28 @@ class CSSStyleDeclaration {
 
     switch (propertyName) {
       case PADDING:
-        CSSStyleProperty.removeShorthandPadding(_properties);
+        CSSStyleProperty.removeShorthandPadding(this);
         break;
       case MARGIN:
-        CSSStyleProperty.removeShorthandMargin(_properties);
+        CSSStyleProperty.removeShorthandMargin(this);
         break;
       case BACKGROUND:
-        CSSStyleProperty.removeShorthandBackground(_properties);
+        CSSStyleProperty.removeShorthandBackground(this);
         break;
       case BORDER_RADIUS:
-        CSSStyleProperty.removeShorthandBorderRadius(_properties);
+        CSSStyleProperty.removeShorthandBorderRadius(this);
         break;
       case OVERFLOW:
-        CSSStyleProperty.removeShorthandOverflow(_properties);
+        CSSStyleProperty.removeShorthandOverflow(this);
         break;
       case FONT:
-        CSSStyleProperty.removeShorthandFont(_properties);
+        CSSStyleProperty.removeShorthandFont(this);
         break;
       case FLEX:
-        CSSStyleProperty.removeShorthandFlex(_properties);
+        CSSStyleProperty.removeShorthandFlex(this);
         break;
       case FLEX_FLOW:
-        CSSStyleProperty.removeShorthandFlexFlow(_properties);
+        CSSStyleProperty.removeShorthandFlexFlow(this);
         break;
       case BORDER:
       case BORDER_TOP:
@@ -289,13 +292,13 @@ class CSSStyleDeclaration {
       case BORDER_COLOR:
       case BORDER_STYLE:
       case BORDER_WIDTH:
-        CSSStyleProperty.removeShorthandBorder(_properties, propertyName);
+        CSSStyleProperty.removeShorthandBorder(this, propertyName);
         break;
       case TRANSITION:
-        CSSStyleProperty.removeShorthandTransition(_properties);
+        CSSStyleProperty.removeShorthandTransition(this);
         break;
       case TEXT_DECORATION:
-        CSSStyleProperty.removeShorthandTextDecoration(_properties);
+        CSSStyleProperty.removeShorthandTextDecoration(this);
         break;
     }
 
@@ -361,6 +364,36 @@ class CSSStyleDeclaration {
     }
   }
 
+  String _replacePattern(String string, String lowerCase, String startString, String endString, [int start = 0]) {
+    int startIndex = lowerCase.indexOf(startString, start);
+    if (startIndex >= 0) {
+      int endIndex;
+      int startStringLength = startString.length;
+      startIndex  = startIndex + startStringLength;
+      for (int i = startIndex; i < string.length; i++) {
+        if (string[i] == endString) endIndex = i;
+      }
+      if (endIndex != null) {
+        var replacement = string.substring(startIndex, endIndex);
+        lowerCase = lowerCase.replaceRange(startIndex, endIndex, replacement);
+        if (endIndex < string.length - 1) {
+          lowerCase = _replacePattern(string, lowerCase, startString, endString, endIndex);
+        }
+      }
+    }
+    return lowerCase;
+  }
+
+  String _toLowerCase(String string, [int start = 0]) {
+    // Like url("http://path") declared with quotation marks and
+    // custom property names are case sensitive.
+    String lowerCase = string.toLowerCase();
+    lowerCase = _replacePattern(string, lowerCase, 'url(', ')');
+     // var(--my-color) will be treated as a separate custom property to var(--My-color).
+    lowerCase = _replacePattern(string, lowerCase, 'var(', ')');
+    return lowerCase;
+  }
+
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
   void setProperty(String propertyName, value, [bool fromAnimation = false]) {
@@ -370,7 +403,7 @@ class CSSStyleDeclaration {
       return;
     }
 
-    String normalizedValue = value.toString().trim().toLowerCase();
+    String normalizedValue = _toLowerCase(value.toString().trim());
 
     // Illegal value like '   ' after trim is '' shoud do nothing.
     if (normalizedValue.isEmpty) return;
@@ -394,9 +427,7 @@ class CSSStyleDeclaration {
       case MARGIN_RIGHT:
       case MARGIN_BOTTOM:
         // Validation length type
-        if (!CSSLength.isLength(normalizedValue) && !CSSLength.isAuto(normalizedValue)) {
-          return;
-        }
+        if (!CSSLength.isLength(normalizedValue) && !CSSLength.isAuto(normalizedValue)) return;
         break;
       case MIN_WIDTH:
       case MIN_HEIGHT:
@@ -410,9 +441,7 @@ class CSSStyleDeclaration {
       case PADDING_LEFT:
       case PADDING_BOTTOM:
       case PADDING_RIGHT:
-        if (!CSSLength.isLength(normalizedValue)) {
-          return;
-        }
+        if (!CSSLength.isLength(normalizedValue)) return;
         break;
       case COLOR:
       case BACKGROUND_COLOR:
@@ -422,15 +451,30 @@ class CSSStyleDeclaration {
       case BORDER_RIGHT_COLOR:
       case TEXT_DECORATION_COLOR:
         // Validation color type
-        if (!CSSColor.isColor(normalizedValue)) {
-          return;
-        }
+        if (!CSSColor.isColor(normalizedValue)) return;
+        break;
+      case BACKGROUND_IMAGE:
+        if (!CSSBackground.isValidBackgroundImageValue(normalizedValue)) return;
+        break;
+      case BACKGROUND_REPEAT:
+        if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
       case TRANSFORM:
         if (CSSTransform.parseTransform(normalizedValue) == null) {
           return;
         }
         break;
+    }
+
+    // https://github.com/WebKit/webkit/blob/master/Source/WebCore/animation/AnimationTimeline.cpp#L257
+    // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
+    // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
+    // Therefore we should cancel all running transition to get thing works.
+    if (propertyName == TRANSITION_PROPERTY && _propertyRunningTransition.length > 0) {
+      for (String property in _propertyRunningTransition.keys) {
+        _propertyRunningTransition[property].finish();
+      }
+      _propertyRunningTransition.clear();
     }
 
     if (!fromAnimation && _shouldTransition(propertyName, prevValue, normalizedValue)) {
@@ -472,13 +516,20 @@ class CSSStyleDeclaration {
   void _invokePropertyChangedListener(String property, String original, String present, [bool inAnimation]) {
     assert(property != null);
 
-    _styleChangeListeners.forEach((StyleChangeListener listener) {
+    for (int i = 0; i < _styleChangeListeners.length; i++) {
+      StyleChangeListener listener = _styleChangeListeners[i];
       listener(property, original, present, inAnimation);
+    }
+  }
+
+  void applyTargetProperties() {
+    _properties.forEach((key, value) {
+      _invokePropertyChangedListener(key, null, value);
     });
   }
 
-  double getLengthByPropertyName(properyName) {
-    return CSSLength.toDisplayPortValue(getPropertyValue(properyName));
+  double getLengthByPropertyName(propertyName) {
+    return CSSLength.toDisplayPortValue(getPropertyValue(propertyName));
   }
 
   static bool isNullOrEmptyValue(value) {

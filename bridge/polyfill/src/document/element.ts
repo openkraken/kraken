@@ -125,6 +125,10 @@ export class Element extends Node {
     setProperty(this.targetId, name, value);
   }
 
+  public get children() {
+    return this.childNodes.filter((node: Node) => node.nodeType === NodeType.ELEMENT_NODE);
+  }
+
   protected _notifyNodeRemoved(insertionNode: Node): void {
     if (insertionNode.isConnected) {
       traverseNode(this, (node: Node) => {

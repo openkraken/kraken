@@ -94,6 +94,7 @@ const builtInCSSProperties = [
   'align-items',
   'align-self',
   'align-content',
+  'sliver-direction',
   'transform',
   'transform-origin',
   'transition',
@@ -103,6 +104,7 @@ const builtInCSSProperties = [
   'transition-delay',
   'object-fit',
   'object-position',
+  'filter'
 ];
 
 interface ICamelize {

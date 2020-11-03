@@ -104,6 +104,8 @@ const String ALIGN_ITEMS = 'alignItems';
 const String ALIGN_SELF = 'alignSelf';
 const String ALIGN_CONTENT = 'alignContent';
 
+const String SLIVER_DIRECTION = 'sliverDirection';
+
 const String TRANSFORM = 'transform';
 const String TRANSFORM_ORIGIN = 'transformOrigin';
 
@@ -115,3 +117,5 @@ const String TRANSITION_DELAY = 'transitionDelay';
 
 const String OBJECT_FIT = 'objectFit';
 const String OBJECT_POSITION = 'objectPosition';
+
+const String FILTER = 'filter';

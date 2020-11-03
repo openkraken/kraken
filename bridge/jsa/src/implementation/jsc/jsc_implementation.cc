@@ -47,9 +47,9 @@ namespace jsc {
 namespace {
 std::string JSStringToSTLString(JSStringRef str) {
   size_t maxBytes = JSStringGetMaximumUTF8CStringSize(str);
-  std::vector<char> buffer(maxBytes);
-  JSStringGetUTF8CString(str, buffer.data(), maxBytes);
-  return std::string(buffer.data());
+  char buffer[maxBytes];
+  JSStringGetUTF8CString(str, buffer, maxBytes);
+  return std::string(buffer);
 }
 
 JSStringRef getLengthString() {
@@ -120,11 +120,30 @@ JSCContext::~JSCContext() {
 #endif
 }
 
-jsa::Value JSCContext::evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) {
+jsa::Value JSCContext::evaluateJavaScript(const uint16_t *code, size_t length, const char *sourceURL, int startLine) {
+  JSStringRef sourceRef = JSStringCreateWithCharacters(code, length);
+  JSStringRef sourceURLRef = nullptr;
+  if (sourceURL != nullptr) {
+    sourceURLRef = JSStringCreateWithUTF8CString(sourceURL);
+  }
+
+  JSValueRef exc = nullptr; // exception
+  JSValueRef res = JSEvaluateScript(ctx_, sourceRef, nullptr /*null means global*/, sourceURLRef, startLine, &exc);
+
+  JSStringRelease(sourceRef);
+  if (sourceURLRef) {
+    JSStringRelease(sourceURLRef);
+  }
+
+  if (hasException(res, exc)) return jsa::Value::null();
+  return createValue(res);
+}
+
+jsa::Value JSCContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
   JSStringRef sourceRef = JSStringCreateWithUTF8CString(code);
   JSStringRef sourceURLRef = nullptr;
-  if (!sourceURL.empty()) {
-    sourceURLRef = JSStringCreateWithUTF8CString(sourceURL.c_str());
+  if (sourceURL != nullptr) {
+    sourceURLRef = JSStringCreateWithUTF8CString(sourceURL);
   }
 
   JSValueRef exc = nullptr; // exception
@@ -143,8 +162,10 @@ void JSCContext::setUnhandledPromiseRejectionHandler(jsa::Object &handler) {
 #if ENABLE_UNHANDLED_PROMISE_REJECTION
   JSValueRef exception = nullptr;
 // dynamic check current os is higher than macOS 10.15 and iOS 13.4
-#if __APPLE__ && __OSX_AVAILABLE_STARTING(101504, 130400)
+#if defined(__APPLE__)
+#if __OSX_AVAILABLE_STARTING(101504, 130400)
   JSGlobalContextSetUnhandledRejectionCallback(ctx_, objectRef(handler), &exception);
+#endif
 #endif
   hasException(exception);
 #endif
@@ -349,6 +370,14 @@ std::string JSCContext::utf8(const jsa::PropNameID &sym) {
   return JSStringToSTLString(stringRef(sym));
 }
 
+const JSChar *JSCContext::getUnicodePtr(const jsa::String &str) {
+  return JSStringGetCharactersPtr(stringRef(str));
+}
+
+size_t JSCContext::unicodeSize(const jsa::String &str) {
+  return JSStringGetLength(stringRef(str));
+}
+
 bool JSCContext::compare(const jsa::PropNameID &a, const jsa::PropNameID &b) {
   return JSStringIsEqual(stringRef(a), stringRef(b));
 }
@@ -363,10 +392,19 @@ jsa::String JSCContext::createStringFromAscii(const char *str, size_t length) {
   return this->createStringFromUtf8(reinterpret_cast<const uint8_t *>(str), length);
 }
 
-jsa::String JSCContext::createStringFromUtf8(const uint8_t *str, size_t length) {
-  std::string tmp(reinterpret_cast<const char *>(str), length);
+jsa::String JSCContext::createStringFromUtf8(const uint8_t *bytes, size_t length) {
+  std::string tmp(reinterpret_cast<const char *>(bytes), length);
   JSStringRef stringRef = JSStringCreateWithUTF8CString(tmp.c_str());
-  return createString(stringRef);
+  jsa::String str = createString(stringRef);
+  JSStringRelease(stringRef);
+  return str;
+}
+
+jsa::String JSCContext::createStringFromUInt16(const JSChar *utf16, size_t length) {
+  JSStringRef stringRef = JSStringCreateWithCharacters(utf16, length);
+  jsa::String str = createString(stringRef);
+  JSStringRelease(stringRef);
+  return str;
 }
 
 std::string JSCContext::utf8(const jsa::String &str) {
@@ -1132,27 +1170,34 @@ jsa::Object JSCContext::createObject(JSObjectRef obj) const {
 }
 
 jsa::Value JSCContext::createValue(JSValueRef value) const {
-  if (JSValueIsNumber(ctx_, value)) {
-    return jsa::Value(JSValueToNumber(ctx_, value, nullptr));
-  } else if (JSValueIsBoolean(ctx_, value)) {
-    return jsa::Value(JSValueToBoolean(ctx_, value));
-  } else if (JSValueIsNull(ctx_, value)) {
-    return jsa::Value(nullptr);
-  } else if (JSValueIsUndefined(ctx_, value)) {
-    return jsa::Value();
-  } else if (JSValueIsString(ctx_, value)) {
-    JSStringRef str = JSValueToStringCopy(ctx_, value, nullptr);
-    auto result = jsa::Value(createString(str));
-    JSStringRelease(str);
-    return result;
-  } else if (JSValueIsObject(ctx_, value)) {
-    JSObjectRef objRef = JSValueToObject(ctx_, value, nullptr);
-    return jsa::Value(createObject(objRef));
-  } else if (smellsLikeES6Symbol(ctx_, value)) {
-    return jsa::Value(createSymbol(value));
-  } else {
-    // WHAT ARE YOU
-    abort();
+  JSType type = JSValueGetType(ctx_, value);
+  switch (type) {
+    case kJSTypeUndefined:
+      return jsa::Value();
+    case kJSTypeBoolean:
+      return jsa::Value(JSValueToBoolean(ctx_, value));
+    case kJSTypeNull:
+      return jsa::Value(nullptr);
+    case kJSTypeNumber:
+      return jsa::Value(JSValueToNumber(ctx_, value, nullptr));
+    case kJSTypeString: {
+      JSStringRef str = JSValueToStringCopy(ctx_, value, nullptr);
+      auto result = jsa::Value(createString(str));
+      JSStringRelease(str);
+      return result;
+    }
+    case kJSTypeObject: {
+      JSObjectRef objRef = JSValueToObject(ctx_, value, nullptr);
+      return jsa::Value(createObject(objRef));
+    }
+#if defined(__APPLE__)
+#if __OSX_AVAILABLE_STARTING(101504, 130400)
+    // TODO: support symbol value in JSA.
+    case kJSTypeSymbol:
+#endif
+#endif
+    default:
+      abort();
   }
 }
 

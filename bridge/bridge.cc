@@ -40,10 +40,13 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   }
 
   auto &&message = args[0];
-  const std::string messageStr = message.getString(context).utf8(context);
+  String &&messageStr = message.getString(context);
+
+  const uint16_t *unicodeString = messageStr.getUnicodePtr(context);
+  size_t unicodeLength = messageStr.unicodeLength(context);
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[krakenUIManager]: " << messageStr << std::endl;
+    KRAKEN_LOG(VERBOSE) << "[krakenUIManager]: " << messageStr.utf8(context) << std::endl;
   }
 
   if (getDartMethod()->invokeUIManager == nullptr) {
@@ -51,21 +54,20 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
                   "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.");
   }
 
-  const char *result = getDartMethod()->invokeUIManager(context.getContextId(), messageStr.c_str());
-  std::string resultStr = std::string(result);
+  NativeString nativeString{};
+  nativeString.string = unicodeString;
+  nativeString.length = unicodeLength;
 
-  if (resultStr.find("Error:", 0) != std::string::npos) {
-    throw JSError(context, result);
-  }
+  const NativeString *result = getDartMethod()->invokeUIManager(context.getContextId(), &nativeString);
+  String retValue = String::createFromUInt16(context, result->string, result->length);
 
-  if (resultStr.empty()) {
-    return Value::null();
-  }
+  delete[] result->string;
+  delete result;
 
-  return Value(context, String::createFromUtf8(context, resultStr));
+  return Value(context, retValue);
 }
 
-void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextId, char *json) {
+void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextId, NativeString *json) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
@@ -84,15 +86,17 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
   }
 
   Object callback = obj->_callback->getObject(_context);
-  callback.asFunction(_context).call(_context, String::createFromUtf8(_context, std::string(json)));
+  callback.asFunction(_context).call(_context, String::createFromUInt16(_context, json->string, json->length));
 }
 
 Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   const Value &message = args[0];
-  const std::string messageStr = message.getString(context).utf8(context);
+  String &&messageStr = message.getString(context);
+  const uint16_t *unicodeStrPtr = messageStr.getUnicodePtr(context);
+  size_t unicodeLength = messageStr.unicodeLength(context);
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[invokeModule]: " << messageStr << std::endl;
+    KRAKEN_LOG(VERBOSE) << "[invokeModule]: " << messageStr.utf8(context) << std::endl;
   }
 
   if (getDartMethod()->invokeModule == nullptr) {
@@ -116,18 +120,26 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
     callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   }
 
-  auto bridge = static_cast<JSBridge*>(context.getOwner());
-  const char *result = bridge->bridgeCallback.registerCallback<const char *>(
-    std::move(callbackContext),
-    [&messageStr](BridgeCallback::Context *bridgeContext, int32_t contextId) {
-      return getDartMethod()->invokeModule(bridgeContext, contextId, messageStr.c_str(),
-                                           handleInvokeModuleTransientCallback);
+  auto bridge = static_cast<JSBridge *>(context.getOwner());
+
+  NativeString nativeString{};
+  nativeString.string = unicodeStrPtr;
+  nativeString.length = unicodeLength;
+
+  const NativeString *result = bridge->bridgeCallback.registerCallback<const NativeString *>(
+    std::move(callbackContext), [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
+      const NativeString *response =
+        getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString, handleInvokeModuleTransientCallback);
+      return response;
     });
 
   if (result == nullptr) {
     return Value::null();
   }
-  return Value(context, String::createFromUtf8(context, std::string(result)));
+  String ret = String::createFromUInt16(context, result->string, result->length);
+  delete[] result->string;
+  delete result;
+  return Value(context, ret);
 }
 
 /**
@@ -226,7 +238,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
       "Failed to execute '__kraken_request_batch_update__': dart method (requestBatchUpdate) is not registered.");
   }
 
-  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  auto bridge = static_cast<JSBridge *>(context.getOwner());
   bridge->bridgeCallback.registerCallback<void>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleTransientCallback);
@@ -304,7 +316,7 @@ void JSBridge::detachDevtools() {
 }
 #endif // ENABLE_DEBUGGER
 
-void JSBridge::handleUIListener(const char *args) {
+void JSBridge::handleUIListener(const NativeString *args) {
   for (const auto &callback : krakenUIListenerList) {
     if (callback == nullptr) {
       throw JSError(*context, "Failed to execute '__kraken_ui_listener__': can not get listener callback.");
@@ -314,12 +326,12 @@ void JSBridge::handleUIListener(const char *args) {
       throw JSError(*context, "Failed to execute '__kraken_ui_listener__': callback is not a function.");
     }
 
-    const String str = String::createFromAscii(*context, args);
+    const String str = String::createFromUInt16(*context, args->string, args->length);
     callback->getObject(*context).asFunction(*context).callWithThis(*context, context->global(), str, 1);
   }
 }
 
-void JSBridge::handleModuleListener(const char *args) {
+void JSBridge::handleModuleListener(const NativeString *args) {
   for (const auto &callback : krakenModuleListenerList) {
     if (callback == nullptr) {
       throw JSError(*context, "Failed to execute '__kraken_module_listener__': can not get callback.");
@@ -329,11 +341,7 @@ void JSBridge::handleModuleListener(const char *args) {
       throw JSError(*context, "Failed to execute '__kraken_module_listener__': callback is not a function.");
     }
 
-    if (std::string(args).substr(0, 5) == "Error") {
-      throw JSError(*context, args);
-    }
-
-    const String str = String::createFromAscii(*context, args);
+    const String str = String::createFromUInt16(*context, args->string, args->length);
     callback->getObject(*context).asFunction(*context).callWithThis(*context, context->global(), str, 1);
   }
 }
@@ -341,7 +349,7 @@ void JSBridge::handleModuleListener(const char *args) {
 const int UI_EVENT = 0;
 const int MODULE_EVENT = 1;
 
-void JSBridge::invokeEventListener(int32_t type, const char *args) {
+void JSBridge::invokeEventListener(int32_t type, const NativeString *args) {
   if (!context->isValid()) return;
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
@@ -358,10 +366,10 @@ void JSBridge::invokeEventListener(int32_t type, const char *args) {
   }
 }
 
-alibaba::jsa::Value JSBridge::evaluateScript(const std::string &script, const std::string &url, int startLine) {
+alibaba::jsa::Value JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
   if (!context->isValid()) return Value::undefined();
   binding::updateLocation(url);
-  return context->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
+  return context->evaluateJavaScript(script->string, script->length, url, startLine);
 
 #ifdef ENABLE_DEBUGGER
   devtools_front_door_->notifyPageDiscovered(url, script);
