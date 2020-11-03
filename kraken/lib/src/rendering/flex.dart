@@ -1424,14 +1424,17 @@ class RenderFlexLayout extends RenderLayoutBox {
                   minCrossAxisSize = childSize.width;
                   maxCrossAxisSize = double.infinity;
                 } else {
+                  // Stretch child height to flex line' height
+                  double flexLineHeight = runCrossAxisExtent + runBetweenSpace;
+
                   // Should substract margin when layout child
                   double marginHorizontal = 0;
                   if (child is RenderBoxModel) {
                     RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
                     marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
                   }
-                  minCrossAxisSize = (contentConstraints.maxWidth != double.infinity ?
-                    contentConstraints.maxWidth : runCrossAxisExtent) - marginHorizontal;
+
+                  minCrossAxisSize = flexLineHeight - marginHorizontal;
                   maxCrossAxisSize = double.infinity;
                 }
               } else {
