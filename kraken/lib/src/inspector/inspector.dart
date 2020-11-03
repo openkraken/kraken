@@ -6,85 +6,80 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
 
+const int INSPECTOR_DEFAULT_PORT = 8082;
+const String INSPECTOR_DEFAULT_ADDRESS = '127.0.0.1';
+
 class DebugInspector {
-  dynamic address;
+  String address;
   int port;
   InspectorWebSocketAgent websocketAgent;
-  InspectorHttpHandler httpHandler;
 
   DebugInspector(ElementManager elementManager,
-      {this.port = 8082, this.address = '127.0.0.1'}) {
+      {this.port = INSPECTOR_DEFAULT_PORT, this.address = INSPECTOR_DEFAULT_ADDRESS }) {
     websocketAgent = InspectorWebSocketAgent(elementManager);
-    httpHandler = InspectorHttpHandler();
-    serverStart();
+    startServer();
   }
 
-  void serverStart() async {
-    try {
-      HttpServer server = await HttpServer.bind(address, port);
-      print('DevTool WebSocket listening at -- ws://${address}:${port}');
-      await for (HttpRequest request in server) {
-        HttpHeaders headers = request.headers;
+  void startServer() async {
+    HttpServer server = await HttpServer.bind(address, port);
+    print('DevTool listening at ws://${address}:${port}');
 
-        if (headers.value('upgrade') == 'websocket') {
-          WebSocket ws = await WebSocketTransformer.upgrade(request);
+    await for (HttpRequest request in server) {
+      HttpHeaders headers = request.headers;
 
-          ws.listen((message) {
-            InspectorData protocolData = new InspectorData();
-            ResponseState response =
-                websocketAgent.onRequest(protocolData, message);
-            if (response == ResponseState.Success ||
-                response == ResponseState.NotFound) {
-              if (protocolData.isNotEmptyExtra()) {
-                protocolData.extra.forEach((RequestData req) {
-                  ws.add(jsonEncode(req.toJson()));
-                });
+      if (headers.value('upgrade') == 'websocket') {
+        WebSocket ws = await WebSocketTransformer.upgrade(request);
+
+        ws.listen((message) {
+          InspectorData inspectorData = InspectorData();
+          ResponseState response =
+          websocketAgent.onRequest(inspectorData, message);
+          if (response == ResponseState.Success ||
+              response == ResponseState.NotFound) {
+            if (inspectorData.isRequestsNotEmpty) {
+              for (RequestData requestData in inspectorData.requests) {
+                ws.add(jsonEncode(requestData.toJson()));
               }
-
-              ws.add(jsonEncode(protocolData.response.toJson()));
             }
+            ws.add(jsonEncode(inspectorData.response.toJson()));
+          }
 
-            if (response == ResponseState.Error) ws.add('');
-          });
-        } else {
-          httpHandler.onHttpRequest(request);
-        }
+          if (response == ResponseState.Error) ws.add('');
+        });
+      } else {
+        // @TODO: handle with http request.
       }
-    } catch (error) {
-      print(error);
     }
   }
 }
 
 /// Inspector object record data, which used to response valid websocket message.
-/// 
+///
 /// Inspector data including one response data sequence, request data sequence List (optional).
 class InspectorData {
-  ResponseData res = new ResponseData();
-  List<RequestData> reqList = [];
-
-  bool isNotEmptyExtra() => reqList.isNotEmpty;
-
-  get response => res;
-
-  void addExtra(RequestData value) {
-    reqList.add(value);
-  }
+  ResponseData _response = ResponseData();
+  ResponseData get response => _response;
 
   void setId(int id) {
-    res.setId(id);
+    _response.setId(id);
   }
 
-  void setResult(String key, dynamic value) {
-    res.setResult(key, value);
+  void setResult(String key, value) {
+    _response.setResult(key, value);
   }
 
-  List<RequestData> get extra {
-    return reqList;
+  List<RequestData> _requests = [];
+  List<RequestData> get requests => _requests;
+  bool get isRequestsNotEmpty => _requests.isNotEmpty;
+
+  void addExtra(RequestData value) {
+    _requests.add(value);
   }
+
+
 }
 
 /// Inspector WebSocket response object based on JSON-RPC.

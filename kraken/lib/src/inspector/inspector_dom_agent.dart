@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
 
 const String DOM_GET_DOCUMENT = 'DOM.getDocument';
@@ -20,25 +20,26 @@ const int _textType = 3;
 const int _commentType = 8;
 const int _documentType = 9;
 
-class InspectorDomAgent {
+class InspectorDOMAgent {
   ElementManager _elementManager;
-  Map<int, InspectorDomNode> idToDomNodeMap = {};
+  // ID -> Node
+  Map<int, InspectorDOMNode> nodeMap = {};
   int count = 0;
 
-  InspectorDomAgent(this._elementManager);
+  InspectorDOMAgent(this._elementManager);
 
   Node getElementById(int id) {
     return _elementManager.getEventTargetByTargetId<Element>(id);
   }
 
-  InspectorDomNode getDomNode(int nodeId) {
+  InspectorDOMNode getDOMNode(int nodeId) {
     if (nodeId == null) return null;
 
-    InspectorDomNode domNode = idToDomNodeMap[nodeId];
+    InspectorDOMNode node = nodeMap[nodeId];
 
-    if (domNode == null) return null;
+    if (node == null) return null;
 
-    return domNode;
+    return node;
   }
 
   ResponseState onRequest(
@@ -60,7 +61,7 @@ class InspectorDomAgent {
   ResponseState requestChildNodes(InspectorData jsonData, int nodeId) {
     if (nodeId == null) return ResponseState.Error;
 
-    InspectorDomNode domNode = idToDomNodeMap[nodeId];
+    InspectorDOMNode domNode = nodeMap[nodeId];
 
     if (domNode == null) return ResponseState.Error;
 
@@ -71,7 +72,7 @@ class InspectorDomAgent {
 
     List<Map<String, dynamic>> nodes = [];
     node.childNodes.forEach((Node child) {
-      InspectorDomNode domNode = buildDomNode(child);
+      InspectorDOMNode domNode = buildDOMNode(child);
       if (domNode != null) nodes.add(domNode.toJson());
     });
 
@@ -91,9 +92,8 @@ class InspectorDomAgent {
     Node root = _elementManager.getRootElement();
     if (root == null) return ResponseState.Error;
 
-    InspectorDomNode body = buildDomNode(root, depth: 2);
-
-    InspectorDomNode document = InspectorDomNode()
+    InspectorDOMNode body = buildDOMNode(root, depth: 2);
+    InspectorDOMNode document = InspectorDOMNode()
       ..setNodeId(++count)
       ..setNodeType(_documentType)
       ..setBackendNodeId(_documentId)
@@ -106,17 +106,17 @@ class InspectorDomAgent {
     return ResponseState.Success;
   }
 
-  InspectorDomNode buildDomNode(Node node, {int depth = 1}) {
-    InspectorDomNode domNode;
+  InspectorDOMNode buildDOMNode(Node node, {int depth = 1}) {
+    InspectorDOMNode domNode;
     String nodeName = node.nodeName;
     int backendNodeId = node.targetId;
 
-    domNode = InspectorDomNode()
+    domNode = InspectorDOMNode()
       ..setNodeId(++count)
       ..setBackendNodeId(backendNodeId)
       ..setNodeName(nodeName);
 
-    idToDomNodeMap[count] = domNode;
+    nodeMap[count] = domNode;
 
     if (node is TextNode) {
       String nodeValue = node.data;
@@ -142,12 +142,11 @@ class InspectorDomAgent {
         ..setNodeType(_elementType);
 
       int childCount = node.childNodes.length;
-
       if (childCount > 0) {
         domNode.setChildNodeCount(childCount);
 
         if (childCount == 1 && node.childNodes[0] is TextNode) {
-          InspectorDomNode child = buildDomNode(node.childNodes[0]);
+          InspectorDOMNode child = buildDOMNode(node.childNodes[0]);
 
           if (child != null) {
             domNode.setChildren([child]);
@@ -155,16 +154,15 @@ class InspectorDomAgent {
         }
 
         if (depth > 1) {
-          List<InspectorDomNode> children = [];
+          List<InspectorDOMNode> children = [];
           int parentId = count;
 
-          node.childNodes.forEach((node) {
-            InspectorDomNode child = buildDomNode(node);
+          for (Node node in node.childNodes) {
+            InspectorDOMNode child = buildDOMNode(node);
 
             child.setParentId(parentId);
             if (child != null) children.add(child);
-          });
-
+          }
           domNode.setChildren(children);
         }
       }
@@ -184,7 +182,7 @@ class InspectorDomAgent {
 /// A base node mirror type.
 ///
 /// Used by inspector DOM interaction to represent the actual DOM nodes.
-class InspectorDomNode {
+class InspectorDOMNode {
   /// Node identifier that is passed into the rest of the DOM messages as the [nodeId]
   int nodeId = 0;
 
@@ -213,7 +211,7 @@ class InspectorDomNode {
   int parentId;
 
   /// Optional: Child nodes of this node when requested with children.
-  List<InspectorDomNode> children;
+  List<InspectorDOMNode> children;
 
   /// Optional: Base URL that [Document] node uses for URL completion.
   String baseURL;
@@ -240,7 +238,7 @@ class InspectorDomNode {
     childNodeCount = value;
   }
 
-  void setChildren(List<InspectorDomNode> value) {
+  void setChildren(List<InspectorDOMNode> value) {
     children = value;
   }
 

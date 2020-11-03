@@ -6,7 +6,7 @@
 import 'dart:convert';
 
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
 
 const String CSS_GET_COMPUTED_STYLE_FOR_NODE = 'CSS.getComputedStyleForNode';
@@ -35,13 +35,13 @@ String camelize(String str) {
   });
 }
 
-class InspectorCssAgent {
-  InspectorDomAgent _domAgent;
+class InspectorCSSAgent {
+  InspectorDOMAgent _domAgent;
   int count = 0;
   Map<String, InspectorCSSStyle> idToInspectorCSSStyle = {};
   Map<InspectorCSSStyle, int> inspectorCSSStyleToTargetId = {};
 
-  InspectorCssAgent(this._domAgent);
+  InspectorCSSAgent(this._domAgent);
 
   ResponseState onRequest(
       Map<String, dynamic> params, String method, InspectorData protocolData) {
@@ -61,14 +61,12 @@ class InspectorCssAgent {
       case CSS_SET_STYLE_TEXTS:
         return setStyleTexts(protocolData, params);
         break;
-      default:
-        break;
     }
 
     return ResponseState.Success;
   }
 
-  ResponseState setStyleTexts(InspectorData protocolData, Map<String, dynamic> params) {
+  ResponseState setStyleTexts(InspectorData inspectorData, Map<String, dynamic> params) {
     assert(params['edits'] is List<dynamic>);
 
     List<dynamic> edits = params['edits'];
@@ -87,12 +85,14 @@ class InspectorCssAgent {
 
       InspectorCSSStyle cssStyle = setStyleText(styleSheetId, cssText, range);
 
-      if (cssStyle == null) continue;
+      if (cssStyle == null) {
+        continue;
+      }
 
       styles.add(cssStyle);
     }
 
-    protocolData.setResult('styles', styles);
+    inspectorData.setResult('styles', styles);
 
     return ResponseState.Success;
   }
@@ -149,7 +149,7 @@ class InspectorCssAgent {
   }
 
   ResponseState getInlineStylesForNode(InspectorData jsonData, int nodeId) {
-    InspectorDomNode domNode = _domAgent.getDomNode(nodeId);
+    InspectorDOMNode domNode = _domAgent.getDOMNode(nodeId);
 
     if (domNode == null) return ResponseState.Error;
 
@@ -167,7 +167,7 @@ class InspectorCssAgent {
   }
 
   ResponseState getComputedStyleForNode(InspectorData jsonData, int nodeId) {
-    InspectorDomNode domNode = _domAgent.getDomNode(nodeId);
+    InspectorDOMNode domNode = _domAgent.getDOMNode(nodeId);
 
     if (domNode == null) return ResponseState.Error;
 
