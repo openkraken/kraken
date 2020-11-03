@@ -12,13 +12,15 @@ import 'package:kraken/inspector.dart';
 const int INSPECTOR_DEFAULT_PORT = 8082;
 const String INSPECTOR_DEFAULT_ADDRESS = '127.0.0.1';
 
-class DebugInspector {
+class Inspector {
   String address;
   int port;
   InspectorWebSocketAgent websocketAgent;
 
-  DebugInspector(ElementManager elementManager,
-      {this.port = INSPECTOR_DEFAULT_PORT, this.address = INSPECTOR_DEFAULT_ADDRESS }) {
+  Inspector(ElementManager elementManager, {
+    this.port = INSPECTOR_DEFAULT_PORT,
+    this.address = INSPECTOR_DEFAULT_ADDRESS
+  }) {
     websocketAgent = InspectorWebSocketAgent(elementManager);
     startServer();
   }

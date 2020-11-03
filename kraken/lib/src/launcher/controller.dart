@@ -57,8 +57,13 @@ class KrakenViewController {
     }
     _elementManager = ElementManager(viewportWidth, viewportHeight,
         showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
-    DebugInspector(_elementManager);    
+
+    debugStartInspector();
   }
+
+  /// Used for debugger inspector.
+  Inspector _inspector;
+  Inspector get inspector => _inspector;
 
   // the manager which controller all renderObjects of Kraken
   ElementManager _elementManager;
@@ -196,6 +201,10 @@ class KrakenViewController {
 
   RenderObject getRootRenderObject() {
     return _elementManager.getRootRenderObject();
+  }
+
+  void debugStartInspector() {
+    _inspector = Inspector(_elementManager);
   }
 }
 
