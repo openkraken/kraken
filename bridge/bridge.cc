@@ -42,7 +42,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   auto &&message = args[0];
   String &&messageStr = message.getString(context);
 
-  const uint16_t*unicodeString = messageStr.getUnicodePtr(context);
+  const uint16_t *unicodeString = messageStr.getUnicodePtr(context);
   size_t unicodeLength = messageStr.unicodeLength(context);
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
@@ -54,12 +54,15 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
                   "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.");
   }
 
-  NativeString nativeString {};
+  NativeString nativeString{};
   nativeString.string = unicodeString;
   nativeString.length = unicodeLength;
 
   const NativeString *result = getDartMethod()->invokeUIManager(context.getContextId(), &nativeString);
   String retValue = String::createFromUInt16(context, result->string, result->length);
+
+  delete[] result->string;
+  delete result;
 
   return Value(context, retValue);
 }
@@ -89,7 +92,7 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
 Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   const Value &message = args[0];
   String &&messageStr = message.getString(context);
-  const uint16_t* unicodeStrPtr = messageStr.getUnicodePtr(context);
+  const uint16_t *unicodeStrPtr = messageStr.getUnicodePtr(context);
   size_t unicodeLength = messageStr.unicodeLength(context);
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
@@ -117,24 +120,26 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
     callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   }
 
-  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  auto bridge = static_cast<JSBridge *>(context.getOwner());
 
-  NativeString nativeString {};
+  NativeString nativeString{};
   nativeString.string = unicodeStrPtr;
   nativeString.length = unicodeLength;
 
-  const auto *result = bridge->bridgeCallback.registerCallback<const NativeString *>(
-    std::move(callbackContext),
-    [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
-      const NativeString *response = getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString,
-                                           handleInvokeModuleTransientCallback);
+  const NativeString *result = bridge->bridgeCallback.registerCallback<const NativeString *>(
+    std::move(callbackContext), [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
+      const NativeString *response =
+        getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString, handleInvokeModuleTransientCallback);
       return response;
     });
 
   if (result == nullptr) {
     return Value::null();
   }
-  return Value(context, String::createFromUInt16(context, result->string, result->length));
+  String ret = String::createFromUInt16(context, result->string, result->length);
+  delete[] result->string;
+  delete result;
+  return Value(context, ret);
 }
 
 /**
@@ -233,7 +238,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
       "Failed to execute '__kraken_request_batch_update__': dart method (requestBatchUpdate) is not registered.");
   }
 
-  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  auto bridge = static_cast<JSBridge *>(context.getOwner());
   bridge->bridgeCallback.registerCallback<void>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleTransientCallback);

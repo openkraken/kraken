@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 
@@ -116,6 +116,11 @@ class RenderLayoutBox extends RenderBoxModel
 
   @override
   void remove(RenderBox child) {
+    if (child is RenderBoxModel) {
+      if (child.renderPositionHolder != null) {
+        (child.renderPositionHolder.parent as ContainerRenderObjectMixin)?.remove(child.renderPositionHolder);
+      }
+    }
     super.remove(child);
     _isChildrenSorted = false;
   }

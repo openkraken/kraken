@@ -1,7 +1,8 @@
-import 'package:web_socket_channel/io.dart';
 import 'dart:convert';
 import 'dart:io';
-import '../element/event.dart';
+
+import 'package:kraken/dom.dart';
+import 'package:web_socket_channel/io.dart';
 
 enum _ConnectionState { closed }
 typedef WebSocketEventCallback = void Function(String id, String event);

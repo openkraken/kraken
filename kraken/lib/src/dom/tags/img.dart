@@ -4,7 +4,7 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'dart:async';
@@ -19,14 +19,16 @@ bool _isNumber(String str) {
 }
 
 class ImageElement extends Element {
-  ImageProvider image;
-  RenderImage imageBox;
-  ImageStream imageStream;
-  List<ImageStreamListener> imageListeners;
+  String _source;
+  ImageProvider _image;
+  RenderImage _imageBox;
+  ImageStream _imageStream;
   ImageInfo _imageInfo;
-
   double _propertyWidth;
   double _propertyHeight;
+  ImageStreamListener _imageStreamListener;
+
+  bool _hasLazyLoading = false;
 
   ImageElement(int targetId, ElementManager elementManager)
       : super(
@@ -35,28 +37,43 @@ class ImageElement extends Element {
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,
         tagName: IMAGE) {
+    _imageStreamListener = ImageStreamListener(_initImageInfo);
+  }
+
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+    style.addStyleChangeListener(_stylePropertyChanged);
     _renderImage();
   }
 
-  bool _hasLazyLoading = false;
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+    _resize();
+  }
+
+  @override
+  void didDetachRenderer() {
+    super.didDetachRenderer();
+    style.removeStyleChangeListener(_stylePropertyChanged);
+  }
 
   void _renderImage() {
     if (_hasLazyLoading) return;
     String loading = properties['loading'];
-    // Image dimensions(width/height) should specified for performance when lazyload
+    // Image dimensions(width/height) should specified for performance when lazy-load.
     if (loading == 'lazy') {
       _hasLazyLoading = true;
       renderBoxModel.addIntersectionChangeListener(_handleIntersectionChange);
     } else {
       _constructImageChild();
-      _setImage();
     }
   }
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     // When appear
     if (entry.isIntersecting) {
-      _setImage();
       // Once appear remove the listener
       _resetLazyLoading();
     }
@@ -69,15 +86,15 @@ class ImageElement extends Element {
 
   void _removeImage() {
     _removeStreamListener();
-    image = null;
-    imageBox.image = null;
+    _image = null;
+    _imageBox.image = null;
   }
 
   void _constructImageChild() {
-    imageBox = getRenderImageBox(style, image);
+    _imageBox = createRenderImageBox();
 
     if (childNodes.isEmpty) {
-      addChild(imageBox);
+      addChild(_imageBox);
     }
   }
 
@@ -90,70 +107,70 @@ class ImageElement extends Element {
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
-    imageBox.image = _imageInfo?.image;
+    if (_imageBox != null) {
+      _imageBox.image = _imageInfo?.image;
+
+      // Image size may affect parent layout,
+      // make parent relayout after image init.
+      _imageBox.markNeedsLayoutForSizedByParentChange();
+    }
+
     _handleEventAfterImageLoaded(imageInfo, synchronousCall);
     _removeStreamListener();
     _resize();
-
-    // Image size may affect parent layout,
-    // make parent relayout after image inited
-    imageBox.markNeedsLayoutForSizedByParentChange();
   }
 
   void _resize() {
-    double naturalWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
-    double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
-    double width = 0.0;
-    double height = 0.0;
-    bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
-    bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
-    if (!containWidth && !containHeight) {
-      width = naturalWidth;
-      height = naturalHeight;
-    } else {
-      if (containWidth && containHeight) {
-        width = renderBoxModel.width ?? _propertyWidth;
-        height = renderBoxModel.height ?? _propertyHeight;
-      } else if (containWidth) {
-        width = renderBoxModel.width ?? _propertyWidth;
-        if (naturalWidth != 0) {
-          height = width * naturalHeight / naturalWidth;
-        }
-      } else if (containHeight) {
-        height = renderBoxModel.height ?? _propertyHeight;
-        if (naturalHeight != 0) {
-          width = height * naturalWidth / naturalHeight;
+    if (isRendererAttached) {
+      double naturalWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
+      double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
+      double width = 0.0;
+      double height = 0.0;
+      bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
+      bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
+      if (!containWidth && !containHeight) {
+        width = naturalWidth;
+        height = naturalHeight;
+      } else {
+        if (containWidth && containHeight) {
+          width = renderBoxModel.width ?? _propertyWidth;
+          height = renderBoxModel.height ?? _propertyHeight;
+        } else if (containWidth) {
+          width = renderBoxModel.width ?? _propertyWidth;
+          if (naturalWidth != 0) {
+            height = width * naturalHeight / naturalWidth;
+          }
+        } else if (containHeight) {
+          height = renderBoxModel.height ?? _propertyHeight;
+          if (naturalHeight != 0) {
+            width = height * naturalWidth / naturalHeight;
+          }
         }
       }
-    }
 
-    if (!height.isFinite) {
-      height = 0.0;
-    }
-    if (!width.isFinite) {
-      width = 0.0;
-    }
+      if (!height.isFinite) {
+        height = 0.0;
+      }
+      if (!width.isFinite) {
+        width = 0.0;
+      }
 
-    imageBox?.width = width;
-    imageBox?.height = height;
-    renderBoxModel.intrinsicWidth = naturalWidth;
-    renderBoxModel.intrinsicHeight = naturalHeight;
+      _imageBox?.width = width;
+      _imageBox?.height = height;
+      renderBoxModel.intrinsicWidth = naturalWidth;
+      renderBoxModel.intrinsicHeight = naturalHeight;
 
-    if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-      renderBoxModel.intrinsicRatio = null;
-    } else {
-      renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
+      if (naturalWidth == 0.0 || naturalHeight == 0.0) {
+        renderBoxModel.intrinsicRatio = null;
+      } else {
+        renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
+      }
     }
   }
 
   void _removeStreamListener() {
-    if (imageListeners != null) {
-      for (ImageStreamListener imageListener in imageListeners) {
-        imageStream?.removeListener(imageListener);
-      }
-    }
-    imageStream = null;
-    imageListeners = null;
+    _imageStream?.removeListener(_imageStreamListener);
+    _imageStream = null;
   }
 
   BoxFit _getBoxFit(String fit) {
@@ -199,7 +216,7 @@ class ImageElement extends Element {
     return Alignment.center;
   }
 
-  double _getAlignmentValueFromString(String value) {
+  static double _getAlignmentValueFromString(String value) {
     assert(value != null);
 
     // Support percentage
@@ -225,7 +242,7 @@ class ImageElement extends Element {
     }
   }
 
-  RenderImage getRenderImageBox(CSSStyleDeclaration style, ImageProvider image) {
+  RenderImage createRenderImageBox() {
     BoxFit fit = _getBoxFit(style[OBJECT_FIT]);
     Alignment alignment = _getAlignment(style[OBJECT_POSITION]);
     return RenderImage(
@@ -240,7 +257,7 @@ class ImageElement extends Element {
     super.removeProperty(key);
     if (key == 'src') {
       _removeImage();
-    } else if (key == 'loading' && _hasLazyLoading && image == null) {
+    } else if (key == 'loading' && _hasLazyLoading && _image == null) {
       _resetLazyLoading();
     }
   }
@@ -250,11 +267,11 @@ class ImageElement extends Element {
     super.setProperty(key, value);
 
     if (key == 'src') {
-      _setImage();
+      _setImage(value);
     } else if (key == 'loading' && _hasLazyLoading) {
-      // Should reset lazy when value change
+      // Should reset lazy when value change.
       _resetLazyLoading();
-    } else if (key == 'width') {
+    } else if (key == WIDTH) {
       if (value is String && _isNumber(value)) {
         value += 'px';
       }
@@ -271,20 +288,16 @@ class ImageElement extends Element {
     }
   }
 
-  void _setImage() {
-    String src = properties['src'];
-    if (src != null && src.isNotEmpty) {
-      _removeStreamListener();
-      image = CSSUrl.parseUrl(src, cache: properties['caching']);
-      imageStream = image.resolve(ImageConfiguration.empty);
-      
-      ImageStreamListener imageListener = ImageStreamListener(_initImageInfo);
-      imageStream.addListener(imageListener);
+  void _setImage(String source) {
+    if (_source == null || _source != source) {
+      _source = source;
+      if (source != null && source.isNotEmpty) {
+        _removeStreamListener();
+        _image = CSSUrl.parseUrl(source, cache: properties['caching']);
+        _imageStream = _image.resolve(ImageConfiguration.empty);
 
-      // Store listeners for remove listener.
-      imageListeners = [
-        imageListener,
-      ];
+        _imageStream.addListener(_imageStreamListener);
+      }
     }
   }
 
@@ -300,15 +313,13 @@ class ImageElement extends Element {
     return super.getProperty(key);
   }
 
-  @override
-  void setStyle(String key, dynamic value) {
-    super.setStyle(key, value);
-    if (key == WIDTH || key == HEIGHT) {
+  void _stylePropertyChanged(String property, String original, String present, bool inAnimation) {
+    if (property == WIDTH || property == HEIGHT) {
       _resize();
-    } else if (key == OBJECT_FIT) {
-      imageBox.fit = _getBoxFit(value);
-    } else if (key == OBJECT_POSITION) {
-      imageBox.alignment = _getAlignment(value);
+    } else if (property == OBJECT_FIT) {
+      _imageBox.fit = _getBoxFit(present);
+    } else if (property == OBJECT_POSITION) {
+      _imageBox.alignment = _getAlignment(present);
     }
   }
 }
