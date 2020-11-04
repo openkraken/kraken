@@ -834,7 +834,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       placeholderChild,
       childSizeMap,
       containerSizeMap,
-      contentSize,
       maxScrollableWidthMap,
       maxScrollableHeightMap,
     );
@@ -1512,7 +1511,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderPositionHolder placeholderChild,
     Map<int, dynamic> childSizeMap,
     Map<String, double> containerSizeMap,
-    Size contentSize,
     Map<int, double> maxScrollableWidthMap,
     Map<int, double> maxScrollableHeightMap,
     ) {
