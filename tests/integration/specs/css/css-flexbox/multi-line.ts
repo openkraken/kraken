@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('multi-line', () => {
-  xit('wrap-reverse-column-reverse', async () => {
+  it('wrap-reverse-column-reverse', async () => {
     let col3Row1;
     let col2Row2;
     let col2Row1;
@@ -270,7 +270,7 @@ describe('multi-line', () => {
 
     await matchViewportSnapshot();
   });
-  xit('wrap-with-column-reverse', async () => {
+  it('wrap-with-column-reverse', async () => {
     let col1Row3;
     let col1Row2;
     let col1Row1;

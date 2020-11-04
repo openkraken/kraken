@@ -29,4 +29,62 @@ describe('Text TextAlign', () => {
       return matchElementImageSnapshot(cont);
     });
   });
+
+  it('should work with flex-shrink', async () => {
+    const cont = createElement(
+      'div',
+      {style: {
+        display: 'flex',
+        width: '200px',
+        height: '100px',
+        border: '1px solid #000',
+      }},
+      [
+        createElement('div', {
+          style: {
+            flexShrink: 1,
+            width: '400px',
+            height: '50px',
+            backgroundColor: 'green',
+            textAlign: 'center',
+          }
+        }, [
+          createText('center')
+        ])
+      ]
+    );
+    document.body.appendChild(cont);
+
+    await matchViewportSnapshot();
+
+  });
+
+  it('should work with flex-grow', async () => {
+    const cont = createElement(
+      'div',
+      {style: {
+        display: 'flex',
+        width: '200px',
+        height: '100px',
+        border: '1px solid #000',
+      }},
+      [
+        createElement('div', {
+          style: {
+            flexGrow: 1,
+            width: '50px',
+            height: '50px',
+            backgroundColor: 'green',
+            textAlign: 'center',
+          }
+        }, [
+          createText('center')
+        ])
+      ]
+    );
+    document.body.appendChild(cont);
+
+    await matchViewportSnapshot();
+
+  });
 });
