@@ -49,19 +49,20 @@ struct Screen {
 
 enum UICommandType {
   initWindow,
+  initBody,
   createElement,
   disposeEventTarget,
   addEvent
 };
 
 struct UICommandItem {
-  UICommandItem(int64_t id, int8_t type, NativeString **args, size_t length, int64_t nativePtr)
+  UICommandItem(int64_t id, int8_t type, NativeString **args, size_t length, void* nativePtr)
     : type(type), args(args), id(id), length(length), nativePtr(nativePtr) {};
   int8_t type;
   NativeString **args;
   int64_t id;
   int32_t length;
-  int64_t nativePtr;
+  void* nativePtr;
 };
 
 using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);

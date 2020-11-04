@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'dart:ffi';
+import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
@@ -25,7 +27,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   ObjectElementClientFactory _objectElementClientFactory;
   ObjectElementClient _objectElementClient;
 
-  ObjectElement(int targetId, int nativePtr, ElementManager elementManager)
+  ObjectElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();

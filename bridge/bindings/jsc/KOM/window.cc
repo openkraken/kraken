@@ -13,8 +13,10 @@ namespace kraken::binding::jsc {
 JSWindow::WindowInstance::WindowInstance(JSWindow *window) : EventTargetInstance(window, WINDOW_TARGET_ID) {
   location_ = new JSLocation(_hostClass->context);
 
+  auto nativeEventTarget = new NativeEventTarget(this, NativeEventTarget::dispatchEventImpl);
+
   foundation::UICommandTaskMessageQueue::instance(window->context->getContextId())
-    ->registerCommand(WINDOW_TARGET_ID, UICommandType::initWindow, nullptr, 0, reinterpret_cast<int64_t>(this));
+    ->registerCommand(WINDOW_TARGET_ID, UICommandType::initWindow, nullptr, 0, nativeEventTarget);
 }
 
 JSWindow::WindowInstance::~WindowInstance() {

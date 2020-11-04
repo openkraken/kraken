@@ -131,7 +131,7 @@ class Element extends Node
 
   Element(
     int targetId,
-    int nativePtr,
+    Pointer<NativeEventTarget> nativePtr,
     ElementManager elementManager, {
     this.tagName,
     this.defaultStyle = const {},

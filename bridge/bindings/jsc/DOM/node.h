@@ -26,6 +26,10 @@ public:
   explicit JSNode(JSContext *context, NodeType nodeType);
   explicit JSNode(JSContext *context, const char *name, NodeType type);
 
+  class NodeInstance : EventTargetInstance {
+    NodeInstance() = delete;
+  };
+
 private:
   NodeType nodeType;
 };

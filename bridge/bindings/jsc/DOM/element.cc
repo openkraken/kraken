@@ -63,8 +63,15 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
   }
 
   auto nativeEventTarget = new NativeEventTarget(this, NativeEventTarget::dispatchEventImpl);
-  UICommandTaskMessageQueue::instance(element->context->getContextId())
-    ->registerCommand(targetId, UICommandType::createElement, args, argsLength, reinterpret_cast<int64_t>(nativeEventTarget));
+
+  // No needs to send create element for BODY element.
+  if (targetId == BODY_TARGET_ID) {
+    UICommandTaskMessageQueue::instance(element->context->getContextId())
+        ->registerCommand(targetId, UICommandType::initBody, args, argsLength, nativeEventTarget);
+  } else {
+    UICommandTaskMessageQueue::instance(element->context->getContextId())
+        ->registerCommand(targetId, UICommandType::createElement, args, argsLength, nativeEventTarget);
+  }
 }
 
 void JSElement::ElementInstance::initialized() {

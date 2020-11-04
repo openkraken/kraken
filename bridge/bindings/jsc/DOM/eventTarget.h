@@ -8,6 +8,7 @@
 
 #include "bindings/jsc/host_class.h"
 #include "bindings/jsc/js_context.h"
+#include "bindings/jsc/DOM/event.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
 #include "foundation/ui_command_queue.h"
@@ -53,7 +54,9 @@ public:
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     ~EventTargetInstance() override;
     int64_t eventTargetId;
-    std::map<std::string, std::deque<JSObjectRef>> _eventHandlers;
+  private:
+    std::map<EventType, std::deque<JSObjectRef>> _eventHandlers;
+    bool _dispatchEvent(JSEvent::EventInstance *eventInstance);
 
   private:
     std::array<JSStringRef, 3> propertyNames{

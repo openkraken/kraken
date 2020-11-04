@@ -5,7 +5,9 @@
 
 import 'dart:async';
 import 'dart:ui';
+import 'dart:ffi';
 
+import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -100,7 +102,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   InputElement(
     int targetId,
-    int nativePtr,
+    Pointer<NativeEventTarget> nativePtr,
     ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,

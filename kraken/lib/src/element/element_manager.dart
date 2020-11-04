@@ -6,7 +6,9 @@
 import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui';
+import 'dart:ffi';
 
+import 'package:kraken/bridge.dart';
 import 'package:kraken/launcher.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
@@ -15,12 +17,11 @@ import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 
 Element _createElement(
-    int id, int nativePtr, String type, Map<String, dynamic> props, List<EventType> events, ElementManager elementManager) {
+    int id, Pointer<NativeEventTarget> nativePtr, String type, Map<String, dynamic> props, List<EventType> events, ElementManager elementManager) {
   Element element;
   switch (type) {
     case BODY:
-      element = BodyElement(elementManager.viewportWidth, elementManager.viewportHeight, id, nativePtr, elementManager);
-      elementManager._setRootElement(element);
+
       break;
     case DIV:
       element = DivElement(id, nativePtr, elementManager);
@@ -108,7 +109,13 @@ class ElementManager {
   final List<VoidCallback> _detachCallbacks = [];
 
   ElementManager(this.viewportWidth, this.viewportHeight,
-      {this.controller, this.showPerformanceOverlayOverride});
+      {this.controller, this.showPerformanceOverlayOverride}) {
+    _rootElement = BodyElement(viewportWidth, viewportHeight, BODY_ID, nullptr, this);
+    RenderBoxModel root = _rootElement.renderBoxModel;
+    root.controller = controller;
+    _root = root;
+    setEventTarget(_rootElement);
+  }
 
   T getEventTargetByTargetId<T>(int targetId) {
     assert(targetId != null);
@@ -143,9 +150,13 @@ class ElementManager {
     _eventTargets = <int, EventTarget>{};
   }
 
-  void initWindow(int nativePtr) {
+  void initWindow(Pointer<NativeEventTarget> nativePtr) {
     Window window = Window(WINDOW_ID, nativePtr, this);
     setEventTarget(window);
+  }
+
+  void initBody(Pointer<NativeEventTarget> nativePtr) {
+    _rootElement.nativePtr = nativePtr;
   }
 
   void _setRootElement(Element element) {
@@ -156,7 +167,7 @@ class ElementManager {
     setEventTarget(element);
   }
 
-  Element createElement(int id, int nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
+  Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<EventType> eventList;
@@ -172,12 +183,12 @@ class ElementManager {
     return element;
   }
 
-  void createTextNode(int id, int nativePtr, String data) {
+  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
     TextNode textNode = TextNode(id, nativePtr, data, this);
     setEventTarget(textNode);
   }
 
-  void createComment(int id, int nativePtr, String data) {
+  void createComment(int id, Pointer<NativeEventTarget> nativePtr, String data) {
     EventTarget comment = Comment(targetId: id, nativePtr: nativePtr, data: data, elementManager: this);
     setEventTarget(comment);
   }

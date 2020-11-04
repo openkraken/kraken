@@ -46,11 +46,9 @@ class NativeEvent extends Struct {
   @Int8()
   int defaultPrevented;
 
-  @Int64()
-  int target;
+  Pointer target;
 
-  @Int64()
-  int currentTarget;
+  Pointer currentTarget;
 }
 
 typedef Native_DispatchEvent = Void Function(Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
@@ -126,8 +124,9 @@ void invokeEventListener(int contextId, int type, String data) {
 const UI_EVENT = 0;
 const MODULE_EVENT = 1;
 
-void emitUIEvent(int contextId, int nativePtr, Pointer<NativeEvent> nativeEvent) {
-  Pointer<NativeEventTarget> nativeEventTarget = Pointer.fromAddress(nativePtr);
+void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Pointer<NativeEvent> nativeEvent) {
+  print('emit UI Event: $nativePtr');
+  Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   dispatchEvent(nativeEventTarget, nativeEvent);;
 }
@@ -231,7 +230,7 @@ void bridgeFrameCallback() {
   _frameCallback();
 }
 
-enum UICommandType { initWindow, createElement, disposeEventTarget, addEvent, }
+enum UICommandType { initWindow, initBody, createElement, disposeEventTarget, addEvent, }
 
 class UICommandItem extends Struct {
   @Int8()
@@ -245,8 +244,7 @@ class UICommandItem extends Struct {
   @Int32()
   int length;
 
-  @Int64()
-  int nativePtr;
+  Pointer<NativeEventTarget> nativePtr;
 }
 
 typedef Native_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(Int32 contextId);
@@ -291,6 +289,9 @@ void flushUICommand() {
         case UICommandType.initWindow:
           controller.view.initWindow(nativeCommand.ref.nativePtr);
           break;
+        case UICommandType.initBody:
+          controller.view.initBody(nativeCommand.ref.nativePtr);
+          break;
         case UICommandType.createElement:
           controller.view.createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
           break;
@@ -299,7 +300,7 @@ void flushUICommand() {
           break;
         case UICommandType.addEvent:
           String eventType = nativeStringToString(nativeCommand.ref.args[0]);
-          print(nativeCommand.ref.nativePtr);
+          print(eventType);
           controller.view.addEvent(id, int.parse(eventType));
           break;
         default:

@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'dart:ffi';
+import 'package:kraken/bridge.dart';
 import 'package:flare_flutter/provider/asset_flare.dart';
 import 'package:flare_flutter/flare_controls.dart';
 import 'package:flutter/rendering.dart';
@@ -25,7 +27,7 @@ class AnimationPlayerElement extends Element {
   RenderObject _animationRenderObject;
   FlareControls _animationController;
 
-  AnimationPlayerElement(int targetId, int nativePtr, ElementManager elementManager)
+  AnimationPlayerElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true);
 
   String get objectFit => style[OBJECT_FIT];

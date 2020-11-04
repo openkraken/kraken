@@ -30,7 +30,7 @@ public:
     return instanceList_[contextId];
   };
 
-  void registerCommand(int64_t id, int8_t type, NativeString **args, size_t length, int64_t nativePtr);
+  void registerCommand(int64_t id, int8_t type, NativeString **args, size_t length, void* nativePtr);
   UICommandItem **data() {
     return queue.data();
   };

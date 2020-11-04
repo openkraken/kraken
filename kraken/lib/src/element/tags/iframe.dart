@@ -2,7 +2,9 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:ffi';
 import 'dart:async';
+import 'package:kraken/bridge.dart';
 import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/foundation.dart';
@@ -445,7 +447,7 @@ abstract class WebViewElement extends Element {
   /// The `javascriptMode` and `autoMediaPlaybackPolicy` parameters must not be null.
   WebViewElement(
     int targetId,
-    int nativePtr,
+    Pointer<NativeEventTarget> nativePtr,
     ElementManager elementManager, {
     String tagName,
     this.initialUrl,
@@ -761,7 +763,7 @@ abstract class WebViewElement extends Element {
 //   Document? getSVGDocument();
 // };
 class IFrameElement extends WebViewElement {
-  IFrameElement(int targetId, int nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager, tagName: IFRAME);
+  IFrameElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager, tagName: IFRAME);
 
   @override
   void onWebViewCreated(WebViewController controller) {}

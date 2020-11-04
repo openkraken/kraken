@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'dart:ffi';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
@@ -16,7 +18,7 @@ class AnchorElement extends Element {
   String _href;
   String _target;
 
-  AnchorElement(int targetId, int nativePtr, ElementManager elementManager)
+  AnchorElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: ANCHOR, defaultStyle: _defaultStyle) {
     addEvent(EventType.click);
   }

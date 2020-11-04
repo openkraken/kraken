@@ -1,5 +1,7 @@
 import 'dart:ui';
+import 'dart:ffi';
 
+import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
@@ -15,7 +17,7 @@ class AudioElement extends Element {
   static double defaultWidth = 300.0;
   static double defaultHeight = 150.0;
 
-  AudioElement(int targetId, int nativePtr, ElementManager elementManager)
+  AudioElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, isIntrinsicBox: true, tagName: AUDIO) {
     initAudioPlayer();
     initSizedBox();

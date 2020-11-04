@@ -2,13 +2,16 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+
+import 'dart:ffi';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
-  TextNode(int targetId, int nativePtr, this._data, ElementManager elementManager)
+  TextNode(int targetId, Pointer<NativeEventTarget> nativePtr, this._data, ElementManager elementManager)
       : super(NodeType.TEXT_NODE, targetId, nativePtr, elementManager, '#text') {
     InlineSpan text = createTextSpan(_data, null);
 

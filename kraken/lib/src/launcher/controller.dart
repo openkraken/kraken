@@ -4,6 +4,7 @@
  */
 
 import 'dart:io';
+import 'dart:ffi';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:async';
@@ -148,13 +149,17 @@ class KrakenViewController {
     return completer.future;
   }
 
-  void initWindow(int nativePtr) {
+  void initWindow(Pointer<NativeEventTarget> nativePtr) {
     _elementManager.initWindow(nativePtr);
   }
 
-  Element createElement(int id, int nativeAddress, String tagName) {
+  void initBody(Pointer<NativeEventTarget> nativePtr) {
+    _elementManager.initBody(nativePtr);
+  }
+
+  Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String tagName) {
     print('create element id: $id, tagName: $tagName');
-    return _elementManager.createElement(id, nativeAddress, tagName.toUpperCase(), null, null);
+    return _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
   }
 
   void addEvent(int targetId, int eventTypeIndex) {

@@ -2,7 +2,10 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+
+import 'dart:ffi';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/painting.dart';
@@ -17,7 +20,7 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class CanvasElement extends Element {
-  CanvasElement(int targetId, int nativePtr, ElementManager elementManager)
+  CanvasElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
       : super(
           targetId,
           nativePtr,

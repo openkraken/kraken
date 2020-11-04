@@ -91,8 +91,14 @@ class Event {
     event.ref.cancelable = cancelable ? 1 : 0;
     event.ref.timeStamp = timeStamp;
     event.ref.defaultPrevented = defaultPrevented ? 1 : 0;
-    event.ref.target = target?.nativePtr;
-    event.ref.currentTarget = currentTarget?.nativePtr;
+    if (target != null) {
+      event.ref.target = target.nativePtr;
+    }
+
+    if (currentTarget != null) {
+      event.ref.currentTarget = currentTarget.nativePtr;
+    }
+
     return event;
   }
 

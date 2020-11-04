@@ -4,6 +4,8 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'dart:ffi';
+import 'package:kraken/bridge.dart';
 import 'package:meta/meta.dart';
 
 const String DATA = 'data';
@@ -17,7 +19,7 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  Comment({int targetId, int nativePtr, ElementManager elementManager, this.data})
+  Comment({int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager, this.data})
       : super(NodeType.COMMENT_NODE, targetId, nativePtr, elementManager, '#comment');
 
   // The comment information.
@@ -68,7 +70,7 @@ abstract class Node extends EventTarget {
     return _children;
   }
 
-  Node(this.nodeType, int targetId, int nativePtr, ElementManager elementManager, this.nodeName) : super(targetId, nativePtr, elementManager) {
+  Node(this.nodeType, int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager, this.nodeName) : super(targetId, nativePtr, elementManager) {
     assert(nodeType != null);
     assert(targetId != null);
     nodeName = nodeName ?? '';

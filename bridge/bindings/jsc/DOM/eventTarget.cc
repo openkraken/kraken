@@ -57,8 +57,16 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   };
   foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
 
+  // Release propertyNames;
   for (auto &propertyName : propertyNames) {
     JSStringRelease(propertyName);
+  }
+
+  // Release handler callbacks.
+  for (auto &it : _eventHandlers) {
+    for (auto &handler : it.second) {
+      JSValueUnprotect(_hostClass->ctx, handler);
+    }
   }
 }
 
@@ -93,19 +101,22 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
 
   JSStringRef eventNameStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
   std::string eventName = JSStringToStdString(eventNameStringRef);
+  EventType eventType = EventTypeValues[eventName];
 
   // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and
   // no one can stop element to trigger event from dart side. this can led to significant performance improvement when
   // using Front-End frameworks such as Rax, or cause some overhead performance issue when some event trigger more
   // frequently.
-  if (!eventTargetInstance->_eventHandlers.contains(eventName) ||
+  if (!eventTargetInstance->_eventHandlers.contains(eventType) ||
       eventTargetInstance->eventTargetId == BODY_TARGET_ID) {
-    eventTargetInstance->_eventHandlers[eventName] = std::deque<JSObjectRef>();
+    eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->context->getContextId();
 
+    JSStringRef eventTypeString = JSStringCreateWithUTF8CString(std::to_string(eventType).c_str());
+
     NativeString eventNameArgs{};
-    eventNameArgs.string = JSStringGetCharactersPtr(eventNameStringRef);
-    eventNameArgs.length = JSStringGetLength(eventNameStringRef);
+    eventNameArgs.string = JSStringGetCharactersPtr(eventTypeString);
+    eventNameArgs.length = JSStringGetLength(eventTypeString);
 
     NativeString **args = new NativeString *[1];
     args[0] = eventNameArgs.clone();
@@ -113,7 +124,7 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
                                                                                 UICommandType::addEvent, args, 1, 0x00);
   }
 
-  std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventName];
+  std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
   JSValueProtect(ctx, callbackObjectRef);
   handlers.emplace_back(callbackObjectRef);
 
@@ -151,12 +162,13 @@ JSValueRef JSEventTarget::EventTargetInstance::removeEventListener(JSContextRef 
 
   JSStringRef eventNameStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
   std::string eventName = JSStringToStdString(eventNameStringRef);
+  EventType eventType = EventTypeValues[eventName];
 
-  if (!eventTargetInstance->_eventHandlers.contains(eventName)) {
+  if (!eventTargetInstance->_eventHandlers.contains(eventType)) {
     return nullptr;
   }
 
-  std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventName];
+  std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
 
   for (auto it = handlers.begin(); it != handlers.end();) {
     if (*it == callbackObjectRef) {
@@ -178,8 +190,33 @@ JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, J
     return nullptr;
   }
 
-  // TODO implement event object;
-  return nullptr;
+  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(function));
+  const JSValueRef eventObjectValueRef = arguments[0];
+  JSObjectRef eventObjectRef = JSValueToObject(ctx, eventObjectValueRef, exception);
+  auto eventInstance = reinterpret_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(eventObjectRef));
+  auto eventType = static_cast<EventType>(eventInstance->nativeEvent->type);
+
+  if (!eventTargetInstance->_eventHandlers.contains(eventType)) {
+    return nullptr;
+  }
+
+  eventInstance->nativeEvent->target = eventInstance->nativeEvent->currentTarget = eventTargetInstance;
+
+  // event has been dispatched, then do not dispatch
+  eventInstance->_dispatchFlag = true;
+  bool cancelled = true;
+
+  while (eventInstance->nativeEvent->currentTarget != nullptr) {
+    cancelled = eventTargetInstance->_dispatchEvent(eventInstance);
+    if (eventInstance->nativeEvent->bubbles || cancelled) break;
+    if (eventInstance->nativeEvent->currentTarget != nullptr) {
+      auto target = reinterpret_cast<JSEventTarget::EventTargetInstance *>(eventInstance->nativeEvent->currentTarget);
+      // TODO: event.target = node.parentNode;
+    }
+  }
+
+  eventInstance->_dispatchFlag = false;
+  return JSValueMakeBoolean(ctx, !eventInstance->_canceledFlag);
 }
 
 JSValueRef JSEventTarget::EventTargetInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
@@ -200,6 +237,21 @@ void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumula
   for (auto &propertyName : propertyNames) {
     JSPropertyNameAccumulatorAddName(accumulator, propertyName);
   }
+}
+
+bool JSEventTarget::EventTargetInstance::_dispatchEvent(JSEvent::EventInstance *eventInstance) {
+  auto eventType = static_cast<EventType>(eventInstance->nativeEvent->type);
+  auto stack = _eventHandlers[eventType];
+
+  for (auto &handler : stack) {
+    JSValueRef exception = nullptr;
+    const JSValueRef arguments[] = {eventInstance->object};
+    JSObjectCallAsFunction(_hostClass->ctx, handler, handler, 1, arguments, &exception);
+    _hostClass->context->handleException(exception);
+  }
+
+  // do not dispatch event when event has been canceled
+  return !eventInstance->_canceledFlag;
 }
 
 // This function will be called back by dart side when trigger events.

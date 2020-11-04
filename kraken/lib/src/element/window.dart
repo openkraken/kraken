@@ -3,15 +3,15 @@
  * Author: Kraken Team.
  */
 
+import 'dart:ffi';
 import 'dart:ui';
-import 'dart:convert';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 
 const String WINDOW = 'WINDOW';
 
 class Window extends EventTarget {
-  Window(int targetId, int nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager) {
+  Window(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent();
       event.platformBrightness = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';

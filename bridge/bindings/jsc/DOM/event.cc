@@ -5,6 +5,7 @@
 
 #include "event.h"
 #include "eventTarget.h"
+#include <chrono>
 
 namespace kraken::binding::jsc {
 
@@ -48,6 +49,8 @@ JSEvent::EventInstance::EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent
 
 JSEvent::EventInstance::EventInstance(JSEvent *jsEvent, EventType eventType) : Instance(jsEvent) {
   nativeEvent = new NativeEvent(eventType);
+  auto ms = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+  nativeEvent->timeStamp = ms.count();
 }
 
 JSValueRef JSEvent::EventInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
@@ -64,21 +67,80 @@ JSValueRef JSEvent::EventInstance::getProperty(JSStringRef nameRef, JSValueRef *
     return JSValueMakeNumber(_hostClass->ctx, nativeEvent->timeStamp);
   } else if (name == "defaultPrevented") {
     return JSValueMakeBoolean(_hostClass->ctx, nativeEvent->defaultPrevented);
-  } else if (name == "targetId") {
-    if (nativeEvent->targetId != 0) {
-      auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->targetId);
+  } else if (name == "target" || name == "srcElement") {
+    if (nativeEvent->target != nullptr) {
+      auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->target);
       return instance->object;
     }
     return JSValueMakeNull(_hostClass->ctx);
   } else if (name == "currentTarget") {
-    if (nativeEvent->currentTarget != 0) {
+    if (nativeEvent->currentTarget != nullptr) {
       auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->currentTarget);
       return instance->object;
     }
     return JSValueMakeNull(_hostClass->ctx);
+  } else if (name == "returnValue") {
+    return JSValueMakeBoolean(_hostClass->ctx, !_canceledFlag);
+  } else if (name == "defaultPrevented") {
+    return JSValueMakeBoolean(_hostClass->ctx, _canceledFlag);
+  } else if (name == "stopPropagation") {
+    return propertyBindingFunction(_hostClass->context, this, "stopPropagation", stopPropagation);
+  } else if (name == "cancelBubble") {
+    return JSValueMakeBoolean(_hostClass->ctx, _stopPropagationFlag);
+  } else if (name == "stopImmediatePropagation") {
+    return propertyBindingFunction(_hostClass->context, this, "stopImmediatePropagation", stopImmediatePropagation);
+  } else if (name == "preventDefault") {
+    return propertyBindingFunction(_hostClass->context, this, "preventDefault", preventDefault);
   }
 
   return nullptr;
+}
+
+JSValueRef JSEvent::EventInstance::stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                                   size_t argumentCount, const JSValueRef *arguments,
+                                                   JSValueRef *exception) {
+  auto eventInstance = static_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(function));
+  eventInstance->_stopPropagationFlag = true;
+  return nullptr;
+}
+
+JSValueRef JSEvent::EventInstance::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
+                                                            JSObjectRef thisObject, size_t argumentCount,
+                                                            const JSValueRef *arguments, JSValueRef *exception) {
+  auto eventInstance = static_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(function));
+  eventInstance->_stopPropagationFlag = true;
+  eventInstance->_stopImmediatePropagationFlag = true;
+  return nullptr;
+}
+
+JSValueRef JSEvent::EventInstance::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                                  size_t argumentCount, const JSValueRef *arguments,
+                                                  JSValueRef *exception) {
+  auto eventInstance = static_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(function));
+  if (eventInstance->nativeEvent->cancelable && !eventInstance->_inPassiveListenerFlag) {
+    eventInstance->_canceledFlag = true;
+  }
+  return nullptr;
+}
+
+void JSEvent::EventInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
+  std::string name = JSStringToStdString(nameRef);
+
+  if (name == "cancelBubble") {
+    bool v = JSValueToBoolean(_hostClass->ctx, value);
+    if (v) {
+      _stopPropagationFlag = true;
+    }
+  }
+}
+
+JSEvent::EventInstance::~EventInstance() {
+  // Release propertyNames;
+  for (auto &propertyName : propertyNames) {
+    JSStringRelease(propertyName);
+  }
+
+  delete nativeEvent;
 }
 
 } // namespace kraken::binding::jsc

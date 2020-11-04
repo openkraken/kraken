@@ -59,8 +59,10 @@ struct NativeEvent {
   int8_t cancelable{0};
   int64_t timeStamp{0};
   int8_t defaultPrevented{0};
-  int64_t targetId{0};
-  int64_t currentTarget{0};
+  // The pointer address of target EventTargetInstance object.
+  void* target{nullptr};
+  // The pointer address of current target EventTargetInstance object.
+  void* currentTarget{nullptr};
 };
 
 namespace {
@@ -102,38 +104,38 @@ const char *EventTypeKeys[]{
 
 std::map<std::string, EventType> EventTypeValues{
   {"none", EventType::none},
-  {"input,", EventType::input},
-  {"appear,", EventType::appear},
-  {"disappear,", EventType::disappear},
-  {"error,", EventType::error},
-  {"message,", EventType::message},
-  {"close,", EventType::close},
-  {"open,", EventType::open},
-  {"intersectionchange,", EventType::intersectionchange},
-  {"touchstart,", EventType::touchstart},
-  {"touchend,", EventType::touchend},
-  {"touchmove,", EventType::touchmove},
-  {"touchcancel,", EventType::touchcancel},
-  {"click,", EventType::click},
-  {"colorschemechange,", EventType::colorschemechange},
-  {"load,", EventType::load},
-  {"finish,", EventType::finish},
-  {"cancel,", EventType::cancel},
-  {"transitionrun,", EventType::transitionrun},
-  {"transitionstart,", EventType::transitionstart},
-  {"transitionend,", EventType::transitionend},
-  {"transitioncancel,", EventType::transitioncancel},
-  {"focus,", EventType::focus},
-  {"unload,", EventType::unload},
-  {"change,", EventType::change},
-  {"canplay,", EventType::canplay},
-  {"canplaythrough,", EventType::canplaythrough},
-  {"ended,", EventType::ended},
-  {"play,", EventType::play},
-  {"pause,", EventType::pause},
-  {"seeked,", EventType::seeked},
-  {"seeking,", EventType::seeking},
-  {"volumechange,", EventType::volumechange},
+  {"input", EventType::input},
+  {"appear", EventType::appear},
+  {"disappear", EventType::disappear},
+  {"error", EventType::error},
+  {"message", EventType::message},
+  {"close", EventType::close},
+  {"open", EventType::open},
+  {"intersectionchange", EventType::intersectionchange},
+  {"touchstart", EventType::touchstart},
+  {"touchend", EventType::touchend},
+  {"touchmove", EventType::touchmove},
+  {"touchcancel", EventType::touchcancel},
+  {"click", EventType::click},
+  {"colorschemechange", EventType::colorschemechange},
+  {"load", EventType::load},
+  {"finish", EventType::finish},
+  {"cancel", EventType::cancel},
+  {"transitionrun", EventType::transitionrun},
+  {"transitionstart", EventType::transitionstart},
+  {"transitionend", EventType::transitionend},
+  {"transitioncancel", EventType::transitioncancel},
+  {"focus", EventType::focus},
+  {"unload", EventType::unload},
+  {"change", EventType::change},
+  {"canplay", EventType::canplay},
+  {"canplaythrough", EventType::canplaythrough},
+  {"ended", EventType::ended},
+  {"play", EventType::play},
+  {"pause", EventType::pause},
+  {"seeked", EventType::seeked},
+  {"seeking", EventType::seeking},
+  {"volumechange", EventType::volumechange},
 };
 } // namespace
 
@@ -151,16 +153,29 @@ public:
   class EventInstance : public Instance {
   public:
     EventInstance() = delete;
+    static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                      const JSValueRef arguments[], JSValueRef *exception);
+
+    static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                               const JSValueRef arguments[], JSValueRef *exception);
+
+    static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                     const JSValueRef arguments[], JSValueRef *exception);
+
     explicit EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent);
     explicit EventInstance(JSEvent *jsEvent, EventType eventType);
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
-    ~EventInstance() override {
-      delete nativeEvent;
-    };
+    void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
+    ~EventInstance() override;
     NativeEvent *nativeEvent;
-
+    bool _dispatchFlag {false};
+    bool _canceledFlag {false};
+    bool _initializedFlag {true};
+    bool _stopPropagationFlag {false};
+    bool _stopImmediatePropagationFlag {false};
+    bool _inPassiveListenerFlag {false};
   private:
-    std::array<JSStringRef, 7> propertyNames{
+    std::array<JSStringRef, 8> propertyNames{
       JSStringCreateWithUTF8CString("type"),
       JSStringCreateWithUTF8CString("bubbles"),
       JSStringCreateWithUTF8CString("cancelable"),
@@ -168,6 +183,7 @@ public:
       JSStringCreateWithUTF8CString("defaultPrevented"),
       JSStringCreateWithUTF8CString("targetId"),
       JSStringCreateWithUTF8CString("currentTarget"),
+      JSStringCreateWithUTF8CString("srcElement"),
     };
   };
 };

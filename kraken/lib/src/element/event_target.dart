@@ -5,6 +5,8 @@
 
 import 'package:meta/meta.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/bridge.dart';
+import 'dart:ffi';
 
 typedef EventHandler = void Function(Event event);
 
@@ -12,7 +14,7 @@ class EventTarget {
   // A unique target identifier.
   int targetId;
   // The Add
-  int nativePtr;
+  Pointer<NativeEventTarget> nativePtr;
 
   // the self reference the ElementManager
   ElementManager elementManager;
