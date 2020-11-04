@@ -5,6 +5,7 @@
 
 export 'src/inspector/css_text_parse.dart';
 export 'src/inspector/inspector.dart';
-export 'src/inspector/inspector_websocket_handler.dart';
-export 'src/inspector/inspector_css_agent.dart';
-export 'src/inspector/inspector_dom_agent.dart';
+export 'src/inspector/http_agent.dart';
+export 'src/inspector/websocket_agent.dart';
+export 'src/inspector/css_agent.dart';
+export 'src/inspector/dom_agent.dart';

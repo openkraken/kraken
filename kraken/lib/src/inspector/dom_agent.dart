@@ -51,9 +51,6 @@ class InspectorDOMAgent {
       case DOM_REQUEST_CHILD_NODES:
         int nodeId = params['nodeId'];
         return requestChildNodes(protocolData, nodeId);
-        break;
-      default:
-        break;
     }
     return ResponseState.Success;
   }
@@ -129,7 +126,7 @@ class InspectorDOMAgent {
 
     if (node is Element) {
       String tagName = node.tagName.toLowerCase();
-      List<String> attributes;
+      List<String> attributes = List<String>();
 
       node.properties.forEach((k, v) {
         attributes.add(k);

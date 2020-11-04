@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
+import 'page_agent.dart';
 
 enum ResponseState {
   Success,
@@ -15,13 +16,16 @@ enum ResponseState {
 }
 
 class InspectorWebSocketAgent {
-  ElementManager _elementManager;
+  Inspector inspector;
+  ElementManager get elementManager => inspector.elementManager;
   InspectorCSSAgent cssAgent;
   InspectorDOMAgent domAgent;
+  InspectorPageAgent pageAgent;
 
-  InspectorWebSocketAgent(this._elementManager) {
-    domAgent = InspectorDOMAgent(_elementManager);
+  InspectorWebSocketAgent(this.inspector) {
+    domAgent = InspectorDOMAgent(elementManager);
     cssAgent = InspectorCSSAgent(domAgent);
+    pageAgent = InspectorPageAgent(inspector);
   }
 
   ResponseState onRequest(InspectorData protocolData, String message) {
@@ -46,12 +50,14 @@ class InspectorWebSocketAgent {
     responseData.setId(connectId);
 
     switch (methodType) {
-      case ('CSS'):
+      case 'CSS':
         return cssAgent.onRequest(params, method, protocolData);
         break;
-      case ('DOM'):
+      case 'DOM':
         return domAgent.onRequest(params, method, protocolData);
         break;
+      case 'Page':
+        return pageAgent.onRequest(params, method, protocolData);
     }
 
     return ResponseState.NotFound;

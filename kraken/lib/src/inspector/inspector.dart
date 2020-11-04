@@ -9,52 +9,59 @@ import 'dart:io';
 import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
 
-const int INSPECTOR_DEFAULT_PORT = 8082;
-const String INSPECTOR_DEFAULT_ADDRESS = '127.0.0.1';
+const int INSPECTOR_DEFAULT_PORT = 9222;
 
 class Inspector {
-  String address;
-  int port;
-  InspectorWebSocketAgent websocketAgent;
+  InternetAddress get address => server?.address;
+  int get port => server?.port;
 
-  Inspector(ElementManager elementManager, {
-    this.port = INSPECTOR_DEFAULT_PORT,
-    this.address = INSPECTOR_DEFAULT_ADDRESS
-  }) {
-    websocketAgent = InspectorWebSocketAgent(elementManager);
-    startServer();
+  ElementManager elementManager;
+  HttpServer server;
+  WebSocket ws;
+  InspectorWebSocketAgent websocketAgent;
+  InspectorHTTPAgent httpAgent;
+
+  Inspector(this.elementManager, { int port, String address }) {
+    websocketAgent = InspectorWebSocketAgent(this);
+    httpAgent = InspectorHTTPAgent(this);
+
+    startServer(address, port);
   }
 
-  void startServer() async {
-    HttpServer server = await HttpServer.bind(address, port);
-    print('DevTool listening at ws://${address}:${port}');
+  Future startServer(String address, int port) async {
+    server = await HttpServer.bind(
+      address ?? InternetAddress.loopbackIPv4,
+      port ?? INSPECTOR_DEFAULT_PORT
+    );
+    print('Kraken DevTool listening at ws://${server.address.address}:${server.port}');
+    print('Open Chrome/Edge and paste following url to your navigator:');
+    print('        $INSPECTOR_URL?ws=${server.address.address}:${server.port}');
 
     await for (HttpRequest request in server) {
       HttpHeaders headers = request.headers;
-
       if (headers.value('upgrade') == 'websocket') {
-        WebSocket ws = await WebSocketTransformer.upgrade(request);
-
-        ws.listen((message) {
-          InspectorData inspectorData = InspectorData();
-          ResponseState response =
-          websocketAgent.onRequest(inspectorData, message);
-          if (response == ResponseState.Success ||
-              response == ResponseState.NotFound) {
-            if (inspectorData.isRequestsNotEmpty) {
-              for (RequestData requestData in inspectorData.requests) {
-                ws.add(jsonEncode(requestData.toJson()));
-              }
-            }
-            ws.add(jsonEncode(inspectorData.response.toJson()));
-          }
-
-          if (response == ResponseState.Error) ws.add('');
-        });
+        ws = await WebSocketTransformer.upgrade(request);
+        ws.listen(onWebSocketData);
       } else {
-        // @TODO: handle with http request.
+        await httpAgent.onRequest(request);
       }
     }
+  }
+
+  void onWebSocketData(message) {
+    InspectorData inspectorData = InspectorData();
+    ResponseState response = websocketAgent.onRequest(inspectorData, message);
+    if (response == ResponseState.Success ||
+        response == ResponseState.NotFound) {
+      if (inspectorData.isRequestsNotEmpty) {
+        for (RequestData requestData in inspectorData.requests) {
+          ws.add(jsonEncode(requestData.toJson()));
+        }
+      }
+      ws.add(jsonEncode(inspectorData.response.toJson()));
+    }
+
+    if (response == ResponseState.Error) ws.add('');
   }
 }
 
@@ -80,8 +87,6 @@ class InspectorData {
   void addExtra(RequestData value) {
     _requests.add(value);
   }
-
-
 }
 
 /// Inspector WebSocket response object based on JSON-RPC.
@@ -133,4 +138,8 @@ class RequestData {
   Map<String, dynamic> toJson() {
     return {if (id != null) 'id': id, 'method': method, 'params': params};
   }
+}
+
+abstract class JSONEncodable {
+  Map toJson();
 }
