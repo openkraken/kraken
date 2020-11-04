@@ -258,68 +258,36 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Get start/end padding in the main axis according to flex direction
   double flowAwareMainAxisPadding({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? paddingRight : paddingLeft;
-      } else {
-        return isEnd ? paddingLeft : paddingRight;
-      }
     } else {
-      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? paddingBottom : paddingTop;
-      } else {
-        return isEnd ? paddingTop : paddingBottom;
-      }
     }
   }
 
   /// Get start/end padding in the cross axis according to flex direction
   double flowAwareCrossAxisPadding({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? paddingBottom : paddingTop;
-      } else {
-        return isEnd ? paddingTop : paddingBottom;
-      }
     } else {
-      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? paddingRight : paddingLeft;
-      } else {
-        return isEnd ? paddingLeft : paddingRight;
-      }
     }
   }
 
   /// Get start/end border in the main axis according to flex direction
   double flowAwareMainAxisBorder({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? borderRight : borderLeft;
-      } else {
-        return isEnd ? borderLeft : borderRight;
-      }
     } else {
-      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? borderBottom : borderTop;
-      } else {
-        return isEnd ? borderTop : borderBottom;
-      }
     }
   }
 
   /// Get start/end border in the cross axis according to flex direction
   double flowAwareCrossAxisBorder({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? borderBottom : borderTop;
-      } else {
-        return isEnd ? borderTop : borderBottom;
-      }
     } else {
-      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? borderRight : borderLeft;
-      } else {
-        return isEnd ? borderLeft : borderRight;
-      }
     }
   }
 
@@ -334,17 +302,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? childRenderBoxModel.marginRight : childRenderBoxModel.marginLeft;
-      } else {
-        return isEnd ? childRenderBoxModel.marginLeft : childRenderBoxModel.marginRight;
-      }
     } else {
-      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? childRenderBoxModel.marginBottom : childRenderBoxModel.marginTop;
-      } else {
-        return isEnd ? childRenderBoxModel.marginTop : childRenderBoxModel.marginBottom;
-      }
     }
   }
 
@@ -358,17 +318,17 @@ class RenderFlexLayout extends RenderLayoutBox {
       return 0;
     }
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-      if (_startIsTopLeft(flexDirection)) {
+//      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? childRenderBoxModel.marginBottom : childRenderBoxModel.marginTop;
-      } else {
-        return isEnd ? childRenderBoxModel.marginTop : childRenderBoxModel.marginBottom;
-      }
+//      } else {
+//        return isEnd ? childRenderBoxModel.marginTop : childRenderBoxModel.marginBottom;
+//      }
     } else {
-      if (_startIsTopLeft(flexDirection)) {
+//      if (_startIsTopLeft(flexDirection)) {
         return isEnd ? childRenderBoxModel.marginRight : childRenderBoxModel.marginLeft;
-      } else {
-        return isEnd ? childRenderBoxModel.marginLeft : childRenderBoxModel.marginRight;
-      }
+//      } else {
+//        return isEnd ? childRenderBoxModel.marginLeft : childRenderBoxModel.marginRight;
+//      }
     }
   }
 
@@ -1565,6 +1525,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     Map<int, double> maxScrollableHeightMap,
     ) {
     RenderBox child = placeholderChild != null ? placeholderChild : firstChild;
+    // Cross axis offset of each flex line
     double crossAxisOffset = runLeadingSpace;
     double mainAxisContentSize;
     double crossAxisContentSize;
@@ -1809,7 +1770,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         double crossOffset;
         if (flexWrap == FlexWrap.wrapReverse) {
-          crossOffset = crossAxisContentSize - (childCrossPosition + crossAxisOffset + _getCrossSize(child));
+          double childCrossAxisEndMargin = flowAwareChildCrossAxisMargin(child, isEnd: true);
+          crossOffset = crossAxisContentSize - (crossAxisOffset + _getCrossSize(child) + childCrossAxisEndMargin);
         } else {
           crossOffset = childCrossPosition + crossAxisOffset;
         }

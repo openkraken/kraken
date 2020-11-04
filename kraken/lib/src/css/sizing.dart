@@ -339,10 +339,11 @@ class CSSSizing {
         String marginRight = element.style[MARGIN_RIGHT];
 
         bool isVerticalDirection = style[FLEX_DIRECTION] == COLUMN || style[FLEX_DIRECTION] == COLUMN_REVERSE;
+        // Flex item will not stretch in stretch alignment when flex wrap is set to wrap or wrap-reverse
+        bool isFlexNoWrap = !style.contains(FLEX_WRAP) || (style.contains(FLEX_WRAP) && style[FLEX_WRAP] == NO_WRAP);
         // Display as block if flex vertical layout children and stretch children
-        if (marginLeft != AUTO && marginRight != AUTO && isVerticalDirection &&
-          (!style.contains(FLEX_WRAP) || (style.contains(FLEX_WRAP) && style[FLEX_WRAP]!= WRAP)) &&
-          (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
+        if (marginLeft != AUTO && marginRight != AUTO && isVerticalDirection && isFlexNoWrap &&
+        (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
           display = CSSDisplay.block;
         }
       }
