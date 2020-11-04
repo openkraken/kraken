@@ -70,7 +70,6 @@ using AsyncRAFCallback = void (*)(void *callbackContext, int32_t contextId, doub
 using AsyncModuleCallback = void (*)(void *callbackContext, int32_t contextId, NativeString *json);
 using AsyncBlobCallback = void (*)(void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes,
                                    int32_t length);
-typedef NativeString *(*InvokeUIManager)(int32_t contextId, NativeString *json);
 typedef NativeString *(*InvokeModule)(void *callbackContext, int32_t contextId, NativeString *,
                                       AsyncModuleCallback callback);
 typedef void (*RequestBatchUpdate)(void *callbackContext, int32_t contextId, AsyncCallback callback);
@@ -121,8 +120,6 @@ void invokeEventListener(int32_t contextId, int32_t type, NativeString *code);
 KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
 
-KRAKEN_EXPORT
-void registerInvokeUIManager(InvokeUIManager invokeUIManager);
 KRAKEN_EXPORT
 void registerInvokeModule(InvokeModule invokeUIManager);
 KRAKEN_EXPORT

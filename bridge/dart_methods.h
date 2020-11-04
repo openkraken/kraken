@@ -15,7 +15,6 @@ namespace kraken {
 
 struct DartMethodPointer {
   DartMethodPointer() = default;
-  InvokeUIManager invokeUIManager{nullptr};
   InvokeModule invokeModule{nullptr};
   RequestBatchUpdate requestBatchUpdate{nullptr};
   ReloadApp reloadApp{nullptr};
@@ -37,7 +36,6 @@ struct DartMethodPointer {
   RequestUpdateFrame requestUpdateFrame{nullptr};
 };
 
-void registerInvokeUIManager(InvokeUIManager callback);
 void registerInvokeModule(InvokeModule callback);
 void registerRequestBatchUpdate(RequestBatchUpdate callback);
 void registerReloadApp(ReloadApp callback);

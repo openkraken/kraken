@@ -70,48 +70,6 @@ final Dart_RegisterInvokeUIManager _registerInvokeUIManager =
 
 const String BATCH_UPDATE = 'batchUpdate';
 
-String handleAction(int contextId, List directive) {
-  String action = directive[0];
-  List payload = directive[1];
-
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  return controller.view.applyViewAction(action, payload);
-}
-
-String invokeUIManager(int contextId, String json) {
-  dynamic directive = jsonDecode(json);
-
-  if (directive == null) {
-    return EMPTY_STRING;
-  }
-
-  if (directive[0] == BATCH_UPDATE) {
-    List<dynamic> directiveList = directive[1];
-    List<String> result = [];
-    for (dynamic item in directiveList) {
-      result.add(handleAction(contextId, item as List));
-    }
-    return EMPTY_STRING;
-  } else {
-    return handleAction(contextId, directive);
-  }
-}
-
-Pointer<NativeString> _invokeUIManager(int contextId, Pointer<NativeString> json) {
-  try {
-    String result = invokeUIManager(contextId, nativeStringToString(json));
-    return stringToNativeString(result);
-  } catch (e, stack) {
-    String errmsg = 'Error: $e\n$stack';
-    return stringToNativeString(errmsg);
-  }
-}
-
-void registerInvokeUIManager() {
-  Pointer<NativeFunction<Native_InvokeUIManager>> pointer = Pointer.fromFunction(_invokeUIManager);
-  _registerInvokeUIManager(pointer);
-}
-
 // Register InvokeModule
 typedef NativeAsyncModuleCallback = Void Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeString> json);
@@ -685,7 +643,6 @@ void registerRequestUpdateFrame() {
 }
 
 void registerDartMethodsToCpp() {
-  registerInvokeUIManager();
   registerInvokeModule();
   registerRequestBatchUpdate();
   registerReloadApp();

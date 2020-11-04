@@ -13,70 +13,6 @@
 namespace kraken::binding::jsc {
 using namespace foundation;
 
-JSValueRef krakenUIManager(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                           const JSValueRef arguments[], JSValueRef *exception) {
-  if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_ui_manager__': 1 argument required, but only 0 present.",
-                    exception);
-    return nullptr;
-  }
-
-  const JSValueRef &messageValue = arguments[0];
-  JSStringRef messageStr = JSValueToStringCopy(ctx, messageValue, exception);
-  const uint16_t *unicodeString = JSStringGetCharactersPtr(messageStr);
-  size_t unicodeLength = JSStringGetLength(messageStr);
-
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[krakenUIManager]: " << JSStringToStdString(messageStr) << std::endl;
-  }
-
-  if (getDartMethod()->invokeUIManager == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.",
-                    exception);
-    return nullptr;
-  }
-
-  NativeString nativeString{};
-  nativeString.string = unicodeString;
-  nativeString.length = unicodeLength;
-
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
-  const NativeString *result = getDartMethod()->invokeUIManager(context->getContextId(), &nativeString);
-  JSStringRef retValue = JSStringCreateWithCharacters(result->string, result->length);
-  return JSValueMakeString(ctx, retValue);
-}
-
-JSValueRef krakenUIListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                            const JSValueRef arguments[], JSValueRef *exception) {
-  if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_ui_listener__': 1 parameter required, but only 0 present.",
-                    exception);
-    return nullptr;
-  }
-
-  const JSValueRef &callbackValue = arguments[0];
-  if (!JSValueIsObject(ctx, callbackValue)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_ui_listener__': parameter 1 (callback) must be an function.",
-                    exception);
-    return nullptr;
-  }
-
-  JSObjectRef callbackObject = JSValueToObject(ctx, callbackValue, exception);
-  if (!JSObjectIsFunction(ctx, callbackObject)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_ui_listener__': parameter 1 (callback) must be an function.",
-                    exception);
-    return nullptr;
-  }
-
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
-  auto bridge = static_cast<JSBridge *>(context->getOwner());
-
-  // Needs to protect this function been garbage collected by GC.
-  JSValueProtect(ctx, callbackObject);
-  bridge->krakenUIListenerList.push_back(callbackObject);
-  return nullptr;
-}
-
 JSValueRef krakenModuleListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount < 1) {
@@ -281,8 +217,6 @@ JSValueRef requestBatchUpdate(JSContextRef ctx, JSObjectRef function, JSObjectRe
 }
 
 void bindUIManager(std::unique_ptr<JSContext> &context) {
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_ui_manager__", krakenUIManager);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_ui_listener__", krakenUIListener);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_module_listener__", krakenModuleListener);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_invoke_module__", krakenInvokeModule);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_request_batch_update__", requestBatchUpdate);

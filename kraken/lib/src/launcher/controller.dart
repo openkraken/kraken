@@ -175,24 +175,6 @@ class KrakenViewController {
     _elementManager.removeTarget(getEventTargetById(id));
   }
 
-  String applyViewAction(String action, List payload) {
-    var result = _elementManager.applyAction(action, payload);
-
-    if (result == null) {
-      return '';
-    }
-
-    switch (result.runtimeType) {
-      case String:
-        return result;
-      case Map:
-      case List:
-        return jsonEncode(result);
-      default:
-        return result.toString();
-    }
-  }
-
   void handleNavigationAction(String sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
     KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
 

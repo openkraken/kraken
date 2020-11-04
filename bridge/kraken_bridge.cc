@@ -154,10 +154,6 @@ void invokeEventListener(int32_t contextId, int32_t type, NativeString *data) {
   context->invokeEventListener(type, data);
 }
 
-void registerInvokeUIManager(InvokeUIManager callbacks) {
-  kraken::registerInvokeUIManager(callbacks);
-}
-
 void registerInvokeModule(InvokeModule callbacks) {
   kraken::registerInvokeModule(callbacks);
 }
