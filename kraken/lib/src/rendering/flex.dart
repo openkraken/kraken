@@ -258,36 +258,36 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Get start/end padding in the main axis according to flex direction
   double flowAwareMainAxisPadding({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-        return isEnd ? paddingRight : paddingLeft;
+      return isEnd ? paddingRight : paddingLeft;
     } else {
-        return isEnd ? paddingBottom : paddingTop;
+      return isEnd ? paddingBottom : paddingTop;
     }
   }
 
   /// Get start/end padding in the cross axis according to flex direction
   double flowAwareCrossAxisPadding({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-        return isEnd ? paddingBottom : paddingTop;
+      return isEnd ? paddingBottom : paddingTop;
     } else {
-        return isEnd ? paddingRight : paddingLeft;
+      return isEnd ? paddingRight : paddingLeft;
     }
   }
 
   /// Get start/end border in the main axis according to flex direction
   double flowAwareMainAxisBorder({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-        return isEnd ? borderRight : borderLeft;
+      return isEnd ? borderRight : borderLeft;
     } else {
-        return isEnd ? borderBottom : borderTop;
+      return isEnd ? borderBottom : borderTop;
     }
   }
 
   /// Get start/end border in the cross axis according to flex direction
   double flowAwareCrossAxisBorder({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-        return isEnd ? borderBottom : borderTop;
+      return isEnd ? borderBottom : borderTop;
     } else {
-        return isEnd ? borderRight : borderLeft;
+      return isEnd ? borderRight : borderLeft;
     }
   }
 
@@ -302,9 +302,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-        return isEnd ? childRenderBoxModel.marginRight : childRenderBoxModel.marginLeft;
+      return isEnd ? childRenderBoxModel.marginRight : childRenderBoxModel.marginLeft;
     } else {
-        return isEnd ? childRenderBoxModel.marginBottom : childRenderBoxModel.marginTop;
+      return isEnd ? childRenderBoxModel.marginBottom : childRenderBoxModel.marginTop;
     }
   }
 
@@ -318,17 +318,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       return 0;
     }
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-//      if (_startIsTopLeft(flexDirection)) {
-        return isEnd ? childRenderBoxModel.marginBottom : childRenderBoxModel.marginTop;
-//      } else {
-//        return isEnd ? childRenderBoxModel.marginTop : childRenderBoxModel.marginBottom;
-//      }
+      return isEnd ? childRenderBoxModel.marginBottom : childRenderBoxModel.marginTop;
     } else {
-//      if (_startIsTopLeft(flexDirection)) {
-        return isEnd ? childRenderBoxModel.marginRight : childRenderBoxModel.marginLeft;
-//      } else {
-//        return isEnd ? childRenderBoxModel.marginLeft : childRenderBoxModel.marginRight;
-//      }
+      return isEnd ? childRenderBoxModel.marginRight : childRenderBoxModel.marginLeft;
     }
   }
 

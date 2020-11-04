@@ -19,9 +19,8 @@ void main() {
     },
   );
   runApp(MaterialApp(
-    title: 'Loading Test',
-    debugShowCheckedModeBanner: false,
-    home: kraken
+      title: 'Loading Test',
+      debugShowCheckedModeBanner: false,
+      home: kraken
   ));
 }
-
