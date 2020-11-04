@@ -32,10 +32,18 @@ public:
     ~WindowInstance();
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
   private:
-    std::array<JSStringRef, 3> propertyNames {
+    std::array<JSStringRef, 11> propertyNames {
         JSStringCreateWithUTF8CString("devicePixelRatio"),
         JSStringCreateWithUTF8CString("colorScheme"),
         JSStringCreateWithUTF8CString("location"),
+        JSStringCreateWithUTF8CString("window"),
+        JSStringCreateWithUTF8CString("history"),
+        JSStringCreateWithUTF8CString("parent"),
+        JSStringCreateWithUTF8CString("scroll"),
+        JSStringCreateWithUTF8CString("scrollBy"),
+        JSStringCreateWithUTF8CString("scrollTo"),
+        JSStringCreateWithUTF8CString("scrollX"),
+        JSStringCreateWithUTF8CString("scrollY"),
     };
     JSLocation *location_;
   };

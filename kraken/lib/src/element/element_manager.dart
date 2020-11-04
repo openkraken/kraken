@@ -297,7 +297,7 @@ class ElementManager {
   void addEvent(int targetId, int eventTypeIndex) {
     EventType eventType = EventType.values[eventTypeIndex];
     assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
-    assert(eventType != EventType.none, 'unknown event types');
+    if (eventType == EventType.none) return;
 
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId);
     assert(target != null);

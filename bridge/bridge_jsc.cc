@@ -61,7 +61,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsc::bindToBlob(context);
   kraken::binding::jsc::bindBlob(context);
 
-//  initKrakenPolyFill(this);
+  initKrakenPolyFill(this);
 #ifdef KRAKEN_ENABLE_JSA
   Object promiseHandler = context->global().getPropertyAsObject(*context, "__global_unhandled_promise_handler__");
   context->setUnhandledPromiseRejectionHandler(promiseHandler);

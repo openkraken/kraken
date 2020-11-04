@@ -1,16 +1,3 @@
-export interface KrakenLocation {
-  reload: () => void;
-  href: string;
-}
-
-export interface KrakenWindow {
-  onLoad: any;
-  onColorSchemeChange: any;
-  devicePixelRatio: number;
-  colorScheme: string;
-  location: KrakenLocation;
-  parent: any;
-}
 
 export interface KrakenBlob {
   size: number;
@@ -30,10 +17,8 @@ export interface PrivateKraken {
   userAgent: string;
 }
 
-declare const __kraken_window__: KrakenWindow;
 declare const __kraken_blob__: (blobParts?: KrakenBlob[], options?: BlobPropertyBag) => KrakenBlob;
 declare const __kraken__: PrivateKraken;
-export const krakenWindow = process.env.ENABLE_JSA ? __kraken_window__ : window;
 export const krakenBlob = __kraken_blob__;
 export const privateKraken = __kraken__;
 

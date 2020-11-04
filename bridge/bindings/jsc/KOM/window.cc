@@ -51,6 +51,21 @@ JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef
     return JSValueMakeString(_hostClass->context->context(), resultRef);
   } else if (name == "location") {
     return location_->jsObject;
+  } else if (name == "window") {
+    return this->object;
+  } else if (name == "history" || name == "parent") {
+    // TODO: implement history API.
+    return nullptr;
+  } else if (name == "scroll") {
+    // TODO: implement window.scroll();
+  } else if (name == "scrollBy") {
+    // TODO: implement window.scrollBy();
+  } else if (name == "scrollTo") {
+    // TODO: implement window.scrollTo();
+  } else if (name == "scrollX") {
+    // TODO: implement window.scrollX();
+  } else if (name == "scrollY") {
+    // TODO: implement window.scrollY();
   }
 
   return nullptr;

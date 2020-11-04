@@ -228,9 +228,66 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(JSStringRef nameRef, 
     return propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
   } else if (name == "dispatchEvent") {
     return propertyBindingFunction(_hostClass->context, this, "dispatchEvent", dispatchEvent);
+  } else if (name.substr(0, 2) == "on") {
+    return getPropertyHandler(name, exception);
   }
 
   return nullptr;
+}
+
+void JSEventTarget::EventTargetInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
+  std::string name = JSStringToStdString(nameRef);
+
+  if (name.substr(0, 2) == "on") {
+    setPropertyHandler(name, value, exception);
+  }
+}
+
+JSValueRef JSEventTarget::EventTargetInstance::getPropertyHandler(std::string &name, JSValueRef *exception) {
+  std::string subName = name.substr(2);
+
+  EventType eventType = EventTypeValues[subName];
+
+  if (!_eventHandlers.contains(eventType)) {
+    return nullptr;
+  }
+  return _eventHandlers[eventType].front();
+}
+
+void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value,
+                                                            JSValueRef *exception) {
+  std::string subName = name.substr(2);
+  EventType eventType = EventTypeValues[subName];
+
+  if (eventType == EventType::none) return;
+
+  if (_eventHandlers.contains(eventType)) {
+    for (auto &it : _eventHandlers) {
+      for (auto &handler : it.second) {
+        JSValueUnprotect(_hostClass->ctx, handler);
+      }
+    }
+    _eventHandlers[eventType].clear();
+  } else {
+    _eventHandlers[eventType] = std::deque<JSObjectRef>();
+  }
+
+  JSObjectRef handlerObjectRef = JSValueToObject(_hostClass->ctx, value, exception);
+  JSValueProtect(_hostClass->ctx, handlerObjectRef);
+  _eventHandlers[eventType].emplace_back(handlerObjectRef);
+
+  int32_t contextId = _hostClass->context->getContextId();
+
+  JSStringRef eventTypeString = JSStringCreateWithUTF8CString(std::to_string(eventType).c_str());
+
+  NativeString eventNameArgs{};
+  eventNameArgs.string = JSStringGetCharactersPtr(eventTypeString);
+  eventNameArgs.length = JSStringGetLength(eventTypeString);
+
+  NativeString **args = new NativeString *[1];
+  args[0] = eventNameArgs.clone();
+  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId,
+                                                                              UICommandType::addEvent, args, 1, 0x00);
 }
 
 void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

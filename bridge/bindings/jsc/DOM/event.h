@@ -60,9 +60,9 @@ struct NativeEvent {
   int64_t timeStamp{0};
   int8_t defaultPrevented{0};
   // The pointer address of target EventTargetInstance object.
-  void* target{nullptr};
+  void *target{nullptr};
   // The pointer address of current target EventTargetInstance object.
-  void* currentTarget{nullptr};
+  void *currentTarget{nullptr};
 };
 
 namespace {
@@ -153,14 +153,15 @@ public:
   class EventInstance : public Instance {
   public:
     EventInstance() = delete;
-    static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                      const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
-    static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                               const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                               size_t argumentCount, const JSValueRef arguments[],
+                                               JSValueRef *exception);
 
-    static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                     const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
     explicit EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent);
     explicit EventInstance(JSEvent *jsEvent, EventType eventType);
@@ -168,12 +169,13 @@ public:
     void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
     ~EventInstance() override;
     NativeEvent *nativeEvent;
-    bool _dispatchFlag {false};
-    bool _canceledFlag {false};
-    bool _initializedFlag {true};
-    bool _stopPropagationFlag {false};
-    bool _stopImmediatePropagationFlag {false};
-    bool _inPassiveListenerFlag {false};
+    bool _dispatchFlag{false};
+    bool _canceledFlag{false};
+    bool _initializedFlag{true};
+    bool _stopPropagationFlag{false};
+    bool _stopImmediatePropagationFlag{false};
+    bool _inPassiveListenerFlag{false};
+
   private:
     std::array<JSStringRef, 8> propertyNames{
       JSStringCreateWithUTF8CString("type"),

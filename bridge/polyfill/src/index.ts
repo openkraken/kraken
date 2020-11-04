@@ -15,8 +15,6 @@ import { Performance, performance } from './modules/performance';
 import { kraken } from './kom/kraken';
 import { MQTT } from './modules/mqtt';
 
-import './kom/window';
-
 defineGlobalProperty('console', console);
 defineGlobalProperty('WebSocket', WebSocket);
 defineGlobalProperty('Request', Request);
@@ -78,6 +76,6 @@ window.__global_onerror_handler__ = function (error) {
 };
 
 // default unhandled project handler
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled Promise Rejection: ' + event.reason);
-});
+// window.addEventListener('unhandledrejection', (event) => {
+//   console.error('Unhandled Promise Rejection: ' + event.reason);
+// });
