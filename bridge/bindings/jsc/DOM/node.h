@@ -8,6 +8,7 @@
 
 #include "eventTarget.h"
 #include "include/kraken_bridge.h"
+#include <vector>
 
 namespace kraken::binding::jsc {
 
@@ -23,15 +24,50 @@ enum NodeType {
 class JSNode : public JSEventTarget {
 public:
   JSNode() = delete;
-  explicit JSNode(JSContext *context, NodeType nodeType);
-  explicit JSNode(JSContext *context, const char *name, NodeType type);
+  explicit JSNode(JSContext *context);
+  explicit JSNode(JSContext *context, const char *name);
 
-  class NodeInstance : EventTargetInstance {
+  class NodeInstance : public EventTargetInstance {
+  public:
     NodeInstance() = delete;
-  };
+    NodeInstance(JSNode *node, NodeType nodeType);
 
-private:
-  NodeType nodeType;
+    static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef arguments[], JSValueRef *exception);
+    /**
+     * The ChildNode.remove() method removes the object
+     * from the tree it belongs to.
+     * reference: https://dom.spec.whatwg.org/#dom-childnode-remove
+     */
+    static JSValueRef remove(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+
+    static JSValueRef insertBefore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+
+    static JSValueRef replaceChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+
+    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+    void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
+
+    bool isConnected();
+    JSNode::NodeInstance *firstChild();
+    JSNode::NodeInstance *lastChild();
+    JSNode::NodeInstance *previousSibling();
+    JSNode::NodeInstance *nextSibling();
+    void internalAppendChild(JSNode::NodeInstance *node);
+    void internalRemove(JSValueRef *exception);
+    JSNode::NodeInstance *internalRemoveChild(JSNode::NodeInstance *node, JSValueRef *exception);
+    void internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode);
+    JSNode::NodeInstance *internalReplaceChild(JSNode::NodeInstance *newChild, JSNode::NodeInstance *oldChild);
+
+  private:
+    void ensureDetached(JSNode::NodeInstance *node);
+    NodeType nodeType;
+    std::vector<JSNode::NodeInstance *> childNodes;
+    JSNode::NodeInstance *parentNode{nullptr};
+  };
 };
 
 } // namespace kraken::binding::jsc

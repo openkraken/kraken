@@ -21,7 +21,7 @@ void bindElement(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "Element", element->classObject);
 }
 
-JSElement::JSElement(JSContext *context) : JSNode(context, "Element", NodeType::ELEMENT_NODE) {}
+JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
 JSElement *JSElement::instance(JSContext *context) {
   if (_instance == nullptr) {
@@ -47,7 +47,7 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId,
                                             JSValueRef *exception)
-  : EventTargetInstance(element) {
+  : NodeInstance(element, NodeType::ELEMENT_NODE) {
   JSStringRef tagNameStrRef = JSValueToStringCopy(element->ctx, tagNameValue, exception);
   NativeString tagName{};
   tagName.string = JSStringGetCharactersPtr(tagNameStrRef);

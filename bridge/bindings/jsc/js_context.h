@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_JS_CONTEXT_H
 
 #include "bindings/jsc/macros.h"
+#include "include/kraken_bridge.h"
 #include "foundation/js_engine_adaptor.h"
 #include <JavaScriptCore/JavaScript.h>
 #include <deque>
@@ -61,7 +62,7 @@ JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *
                                     JSObjectCallAsFunctionCallback callback);
 
 std::string JSStringToStdString(JSStringRef jsString);
-std::string JSValueToStdString(JSContextRef ctx, JSValueRef jsValue, JSValueRef *exception);
+NativeString* stdStringToNativeString(std::string string);
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
 

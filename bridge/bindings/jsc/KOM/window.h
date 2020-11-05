@@ -13,7 +13,6 @@
 #include <memory>
 
 #define JSWindowName "Window"
-#define WINDOW_TARGET_ID -2
 
 namespace kraken::binding::jsc {
 

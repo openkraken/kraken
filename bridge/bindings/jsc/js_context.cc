@@ -113,10 +113,6 @@ std::string JSStringToStdString(JSStringRef jsString) {
   return std::string(buffer.data());
 }
 
-std::string JSValueToStdString(JSContextRef ctx, JSValueRef jsValue, JSValueRef *exception) {
-  JSStringRef stringRef = JSValueToStringCopy(ctx, jsValue, exception);
-  return std::move(JSStringToStdString(stringRef));
-}
 
 JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
                                     JSObjectCallAsFunctionCallback callback) {
@@ -126,5 +122,13 @@ JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *
   functionDefinition.version = 0;
   JSClassRef functionClass = JSClassCreate(&functionDefinition);
   return JSObjectMake(context->context(), functionClass, data);
+}
+
+NativeString *stdStringToNativeString(std::string string) {
+  JSStringRef stringRef = JSStringCreateWithUTF8CString(string.c_str());
+  auto nativeString = new NativeString();
+  nativeString->string = JSStringGetCharactersPtr(stringRef);
+  nativeString->length = JSStringGetLength(stringRef);
+  return nativeString;
 }
 } // namespace kraken::binding::jsc

@@ -36,7 +36,7 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
   return elementInstance;
 }
 
-JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document", NodeType::DOCUMENT_NODE) {}
+JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {}
 
 JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                           const JSValueRef *arguments, JSValueRef *exception) {
@@ -44,7 +44,7 @@ JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constr
   return instance->object;
 }
 
-JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : EventTargetInstance(document) {
+JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : NodeInstance(document, NodeType::DOCUMENT_NODE) {
   auto elementConstructor = JSElement::instance(document->context);
   JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
   const JSValueRef arguments[] = {

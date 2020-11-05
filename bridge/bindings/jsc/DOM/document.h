@@ -22,7 +22,7 @@ public:
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) override;
 
-  class DocumentInstance : public EventTargetInstance {
+  class DocumentInstance : public NodeInstance {
   public:
     DocumentInstance() = delete;
     explicit DocumentInstance(JSDocument *document);

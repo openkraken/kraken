@@ -1,5 +1,8 @@
 #define KRAKEN_BINDING_CONSOLE "__kraken_print__"
 
+#define BODY_TARGET_ID -1
+#define WINDOW_TARGET_ID -2
+
 #define JSC_GLOBAL_BINDING_FUNCTION(context, nameStr, func)                                                            \
   {                                                                                                                    \
     JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;                                                    \

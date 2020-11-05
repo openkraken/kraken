@@ -52,7 +52,11 @@ enum UICommandType {
   initBody,
   createElement,
   disposeEventTarget,
-  addEvent
+  addEvent,
+  appendChild,
+  removeNode,
+  insertBefore,
+  replaceChild
 };
 
 struct UICommandItem {
