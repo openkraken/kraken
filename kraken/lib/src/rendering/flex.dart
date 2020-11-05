@@ -14,6 +14,7 @@ class _RunMetrics {
     this.totalFlexGrow,
     this.totalFlexShrink,
     this.baselineExtent,
+    this.childrenMetrics,
   );
 
   final double mainAxisExtent;
@@ -22,6 +23,7 @@ class _RunMetrics {
   final double totalFlexGrow;
   final double totalFlexShrink;
   final double baselineExtent;
+  final Map<int, dynamic> childrenMetrics;
 }
 
 class RenderFlexParentData extends RenderLayoutParentData {
@@ -393,9 +395,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     return childParentData.flexBasis ?? AUTO;
   }
 
-  double _getShrinkConstraints(RenderBox child, Map<int, dynamic> childSizeMap, double freeSpace) {
+  double _getShrinkConstraints(RenderBox child, Map<int, dynamic> childrenMetrics, double freeSpace) {
     double totalExtent = 0;
-    childSizeMap.forEach((targetId, item) {
+    childrenMetrics.forEach((targetId, item) {
       totalExtent += item['flexShrink'] * item['size'];
     });
 
@@ -405,7 +407,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     } else if (child is RenderBoxModel) {
       childNodeId = child.targetId;
     }
-    dynamic current = childSizeMap[childNodeId];
+    dynamic current = childrenMetrics[childNodeId];
     double currentExtent = current['flexShrink'] * current['size'];
 
     double minusConstraints = (currentExtent / totalExtent) * freeSpace;
@@ -736,14 +738,11 @@ class RenderFlexLayout extends RenderLayoutBox {
       'main': 0.0,
       'cross': 0.0,
     };
-    // Flex item size map
-    Map<int, dynamic> childSizeMap = {};
 
     /// Stage 1: Layout children in flow order to calculate flex lines
     _layoutByFlexLine(
       runMetrics,
       placeholderChild,
-      childSizeMap,
       containerSizeMap,
       contentWidth,
       contentHeight,
@@ -827,7 +826,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       placeholderChild,
       contentWidth,
       contentHeight,
-      childSizeMap,
       containerSizeMap,
       maxScrollableWidthMap,
       maxScrollableHeightMap,
@@ -849,7 +847,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       runBetweenSpace,
       runLeadingSpace,
       placeholderChild,
-      childSizeMap,
       containerSizeMap,
       maxScrollableWidthMap,
       maxScrollableHeightMap,
@@ -860,7 +857,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   void _layoutByFlexLine(
     List<_RunMetrics> runMetrics,
     RenderPositionHolder placeholderChild,
-    Map<int, dynamic> childSizeMap,
     Map<String, double> containerSizeMap,
     double contentWidth,
     double contentHeight,
@@ -894,6 +890,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     RenderBox child = placeholderChild ?? firstChild;
+
+    // Infos about each flex item in each flex line
+    Map<int, dynamic> childrenMetrics = {};
 
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
@@ -995,10 +994,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         maxScrollableHeightMap[child.targetId] = math.max(child.maxScrollableSize.height, childSize.height);
       }
 
-      childSizeMap[childNodeId] = {
-        'size': _getMainSize(child),
-        'flexShrink': _getFlexShrink(child),
-      };
       bool isExceedFlexLineLimit = runMainAxisExtent + childMainAxisExtent > flexLineLimit;
 
       // calculate flex line
@@ -1015,7 +1010,9 @@ class RenderFlexLayout extends RenderLayoutBox {
           totalFlexGrow,
           totalFlexShrink,
           maxSizeAboveBaseline,
+          childrenMetrics,
         ));
+        childrenMetrics = {};
         runMainAxisExtent = 0.0;
         runCrossAxisExtent = 0.0;
         maxSizeAboveBaseline = 0.0;
@@ -1063,6 +1060,11 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
       runChildCount += 1;
 
+      childrenMetrics[childNodeId] = {
+        'size': _getMainSize(child),
+        'flexShrink': _getFlexShrink(child),
+      };
+
       childParentData.runIndex = runMetrics.length;
 
       assert(child.parentData == childParentData);
@@ -1089,6 +1091,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         totalFlexGrow,
         totalFlexShrink,
         maxSizeAboveBaseline,
+        childrenMetrics,
       ));
 
       containerSizeMap['cross'] = crossAxisExtent;
@@ -1103,7 +1106,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderPositionHolder placeholderChild,
     double contentWidth,
     double contentHeight,
-    Map<int, dynamic> childSizeMap,
     Map<String, double> containerSizeMap,
     Map<int, double> maxScrollableWidthMap,
     Map<int, double> maxScrollableHeightMap,
@@ -1130,6 +1132,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double totalFlexGrow = metrics.totalFlexGrow;
       final double totalFlexShrink = metrics.totalFlexShrink;
+      final Map<int, dynamic> childrenMetrics = metrics.childrenMetrics;
       final bool canFlex = maxMainSize < double.infinity;
       final BoxSizeType mainSizeType = maxMainSize == 0.0 ? BoxSizeType.automatic : BoxSizeType.specified;
 
@@ -1260,14 +1263,14 @@ class RenderFlexLayout extends RenderLayoutBox {
           }
 
           double computedSize;
-          dynamic current = childSizeMap[childNodeId];
+          dynamic current = childrenMetrics[childNodeId];
 
           // If child's mainAxis have clips, it will create a new format context in it's children's.
           // so we do't need to care about child's size.
           if (child is RenderBoxModel && _isChildMainAxisClip(child)) {
             computedSize = current['size'] + freeMainAxisSpace;
           } else {
-            double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeMainAxisSpace);
+            double shrinkValue = _getShrinkConstraints(child, childrenMetrics, freeMainAxisSpace);
             computedSize = current['size'] + shrinkValue;
 
             // if shrink size is lower than child's min-content, should reset to min-content size
@@ -1528,7 +1531,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     double runBetweenSpace,
     double runLeadingSpace,
     RenderPositionHolder placeholderChild,
-    Map<int, dynamic> childSizeMap,
     Map<String, double> containerSizeMap,
     Map<int, double> maxScrollableWidthMap,
     Map<int, double> maxScrollableHeightMap,
@@ -1554,13 +1556,14 @@ class RenderFlexLayout extends RenderLayoutBox {
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double runBaselineExtent = metrics.baselineExtent;
       final double totalFlexGrow = metrics.totalFlexGrow;
+      final Map<int, dynamic> childrenMetrics = metrics.childrenMetrics;
       final double mainContentSizeDelta = mainAxisContentSize - runMainAxisExtent;
       _overflow = math.max(0.0, - mainContentSizeDelta);
       final double remainingSpace = math.max(0.0, mainContentSizeDelta);
       double leadingSpace;
       double betweenSpace;
 
-      int totalChildren = childSizeMap.length;
+      int totalChildren = childrenMetrics.length;
 
       // flipMainAxis is used to decide whether to lay out left-to-right/top-to-bottom (false), or
       // right-to-left/bottom-to-top (true). The _startIsTopLeft will return null if there's only
