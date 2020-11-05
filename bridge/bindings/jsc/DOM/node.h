@@ -9,6 +9,7 @@
 #include "eventTarget.h"
 #include "include/kraken_bridge.h"
 #include <vector>
+#include <array>
 
 namespace kraken::binding::jsc {
 
@@ -31,6 +32,7 @@ public:
   public:
     NodeInstance() = delete;
     NodeInstance(JSNode *node, NodeType nodeType);
+    ~NodeInstance();
 
     static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
@@ -67,6 +69,18 @@ public:
     NodeType nodeType;
     std::vector<JSNode::NodeInstance *> childNodes;
     JSNode::NodeInstance *parentNode{nullptr};
+
+    std::array<JSStringRef, 9> propertyNames{
+        JSStringCreateWithUTF8CString("isConnected"),
+        JSStringCreateWithUTF8CString("firstChild"),
+        JSStringCreateWithUTF8CString("lastChild"),
+        JSStringCreateWithUTF8CString("previousSibling"),
+        JSStringCreateWithUTF8CString("nextSibling"),
+        JSStringCreateWithUTF8CString("appendChild"),
+        JSStringCreateWithUTF8CString("remove"),
+        JSStringCreateWithUTF8CString("insertBefore"),
+        JSStringCreateWithUTF8CString("replaceChild"),
+    };
   };
 };
 

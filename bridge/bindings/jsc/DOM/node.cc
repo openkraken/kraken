@@ -12,6 +12,19 @@ namespace kraken::binding::jsc {
 JSNode::JSNode(JSContext *context) : JSEventTarget(context, "Node") {}
 JSNode::JSNode(JSContext *context, const char *name) : JSEventTarget(context, name) {}
 
+JSNode::NodeInstance::~NodeInstance() {
+  // Release propertyNames;
+  for (auto &propertyName : propertyNames) {
+    JSStringRelease(propertyName);
+  }
+
+  // The this node is finalized, should tell all children this parent will no longer protecting them.
+  for (auto &node : childNodes) {
+    node->parentNode = nullptr;
+    JSValueUnprotect(_hostClass->ctx, node->object);
+  }
+}
+
 JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType) : EventTargetInstance(node), nodeType(nodeType) {}
 
 bool JSNode::NodeInstance::isConnected() {
@@ -223,7 +236,6 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   JSValueProtect(_hostClass->ctx, node->object);
 
   //  TODO: child._notifyNodeInsert(this);
-
   NativeString *childTargetId = stdStringToNativeString(std::to_string(node->eventTargetId));
   auto args = new NativeString *[1];
   args[0] = childTargetId;
@@ -234,12 +246,6 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
 
 void JSNode::NodeInstance::internalRemove(JSValueRef *exception) {
   if (parentNode == nullptr) return;
-  if (!childNodes.empty()) {
-    while (firstChild() != nullptr) {
-      firstChild()->internalRemove(exception);
-    }
-  }
-
   parentNode->internalRemoveChild(this, exception);
 }
 
