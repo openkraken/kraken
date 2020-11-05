@@ -275,11 +275,11 @@ class RenderBoxModel extends RenderBox with
   ElementManager elementManager;
 
   BoxSizeType get widthSizeType {
-    bool widthDefined = width != null || (minWidth != null && minWidth > 0);
+    bool widthDefined = width != null;
     return widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
   }
   BoxSizeType get heightSizeType {
-    bool heightDefined = height != null || (minHeight != null && minHeight > 0);
+    bool heightDefined = height != null;
     return heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
   }
 

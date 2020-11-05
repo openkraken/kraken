@@ -772,7 +772,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     /// Calculate leading and between space between flex lines
-    final double crossAxisFreeSpace = math.max(0.0, containerCrossAxisExtent - containerSizeMap['cross']);
+    final double crossAxisFreeSpace = containerCrossAxisExtent - containerSizeMap['cross'];
     final int runCount = runMetrics.length;
     double runLeadingSpace = 0.0;
     double runBetweenSpace = 0.0;
@@ -788,18 +788,35 @@ class RenderFlexLayout extends RenderLayoutBox {
         runLeadingSpace = crossAxisFreeSpace / 2.0;
         break;
       case AlignContent.spaceBetween:
-        runBetweenSpace = runCount > 1 ? crossAxisFreeSpace / (runCount - 1) : 0.0;
+        if (crossAxisFreeSpace < 0) {
+          runBetweenSpace = 0;
+        } else {
+          runBetweenSpace = runCount > 1 ? crossAxisFreeSpace / (runCount - 1) : 0.0;
+        }
         break;
       case AlignContent.spaceAround:
-        runBetweenSpace = crossAxisFreeSpace / runCount;
-        runLeadingSpace = runBetweenSpace / 2.0;
+        if (crossAxisFreeSpace < 0) {
+          runLeadingSpace = crossAxisFreeSpace / 2.0;
+          runBetweenSpace = 0;
+        } else {
+          runBetweenSpace = crossAxisFreeSpace / runCount;
+          runLeadingSpace = runBetweenSpace / 2.0;
+        }
         break;
       case AlignContent.spaceEvenly:
-        runBetweenSpace = crossAxisFreeSpace / (runCount + 1);
-        runLeadingSpace = runBetweenSpace;
+        if (crossAxisFreeSpace < 0) {
+          runLeadingSpace = crossAxisFreeSpace / 2.0;
+          runBetweenSpace = 0;
+        } else {
+          runBetweenSpace = crossAxisFreeSpace / (runCount + 1);
+          runLeadingSpace = runBetweenSpace;
+        }
         break;
       case AlignContent.stretch:
         runBetweenSpace = crossAxisFreeSpace / runCount;
+        if (runBetweenSpace < 0) {
+          runBetweenSpace = 0;
+        }
         break;
     }
 
@@ -1314,8 +1331,9 @@ class RenderFlexLayout extends RenderLayoutBox {
                   minCrossAxisSize = childSize.height;
                   maxCrossAxisSize = double.infinity;
                 } else {
-                  // Stretch child height to flex line' height
-                  double flexLineHeight = runCrossAxisExtent + runBetweenSpace;
+                  // Stretch child height to flex line' height if align-content is stretch
+                  double flexLineHeight = runCrossAxisExtent +
+                    (alignContent == AlignContent.stretch ? runBetweenSpace : 0);
                   // Should substract margin when layout child
                   double marginVertical = 0;
                   if (child is RenderBoxModel) {
@@ -1375,8 +1393,9 @@ class RenderFlexLayout extends RenderLayoutBox {
                   minCrossAxisSize = childSize.width;
                   maxCrossAxisSize = double.infinity;
                 } else {
-                  // Stretch child height to flex line' height
-                  double flexLineHeight = runCrossAxisExtent + runBetweenSpace;
+                  // Stretch child height to flex line' height if align-content is stretch
+                  double flexLineHeight = runCrossAxisExtent +
+                    (alignContent == AlignContent.stretch ? runBetweenSpace : 0);
 
                   // Should substract margin when layout child
                   double marginHorizontal = 0;
