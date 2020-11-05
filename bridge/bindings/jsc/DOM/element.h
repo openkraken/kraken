@@ -22,7 +22,7 @@ public:
   JSElement() = delete;
   explicit JSElement(JSContext *context);
 
-  JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) override;
 
   class ElementInstance : public EventTargetInstance {

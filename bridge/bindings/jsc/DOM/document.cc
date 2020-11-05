@@ -12,7 +12,8 @@ namespace kraken::binding::jsc {
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto document = new JSDocument(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Document", document->classObject);
-  auto documentObjectRef = document->constructInstance(context->context(), document->classObject, 0, nullptr, nullptr);
+  auto documentObjectRef =
+    document->instanceConstructor(context->context(), document->classObject, 0, nullptr, nullptr);
   JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
 }
 
@@ -37,7 +38,7 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
 
 JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document", NodeType::DOCUMENT_NODE) {}
 
-JSObjectRef JSDocument::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                           const JSValueRef *arguments, JSValueRef *exception) {
   auto instance = new DocumentInstance(this);
   return instance->object;

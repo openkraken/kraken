@@ -22,7 +22,7 @@ public:
   JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName) {};
   ~JSWindow();
 
-  JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) override;
 
   class WindowInstance : public EventTargetInstance {

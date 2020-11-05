@@ -73,7 +73,7 @@ JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef
 
 JSWindow::~JSWindow() {}
 
-JSObjectRef JSWindow::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+JSObjectRef JSWindow::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                         const JSValueRef *arguments, JSValueRef *exception) {
   auto window = new WindowInstance(this);
   return window->object;
@@ -82,7 +82,7 @@ JSObjectRef JSWindow::constructInstance(JSContextRef ctx, JSObjectRef constructo
 void bindWindow(std::unique_ptr<JSContext> &context) {
   auto window = new JSWindow(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Window", window->classObject);
-  auto windowInstance = window->constructInstance(window->ctx, window->classObject, 0, nullptr, nullptr);
+  auto windowInstance = window->instanceConstructor(window->ctx, window->classObject, 0, nullptr, nullptr);
   JSC_GLOBAL_SET_PROPERTY(context, "window", windowInstance);
 }
 

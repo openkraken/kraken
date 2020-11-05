@@ -30,7 +30,7 @@ JSElement *JSElement::instance(JSContext *context) {
   return _instance;
 }
 
-JSObjectRef JSElement::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                          const JSValueRef *arguments, JSValueRef *exception) {
   JSValueRef tagNameValue = arguments[0];
   double targetId;

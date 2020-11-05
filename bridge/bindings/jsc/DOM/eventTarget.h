@@ -36,7 +36,7 @@ public:
   explicit JSEventTarget(JSContext *context, const char *name);
   explicit JSEventTarget(JSContext *context);
 
-  JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) override;
 
   class EventTargetInstance : public Instance {

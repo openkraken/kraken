@@ -33,9 +33,9 @@ JSEventTarget *JSEventTarget::instance(JSContext *context) {
 JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostClass(context, name) {}
 JSEventTarget::JSEventTarget(JSContext *context) : HostClass(context, "EventTarget") {}
 
-JSObjectRef JSEventTarget::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                              const JSValueRef *arguments, JSValueRef *exception) {
-  return HostClass::constructInstance(ctx, constructor, argumentCount, arguments, exception);
+  return HostClass::instanceConstructor(ctx, constructor, argumentCount, arguments, exception);
 }
 
 JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget) : Instance(eventTarget) {

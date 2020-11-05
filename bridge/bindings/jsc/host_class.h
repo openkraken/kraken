@@ -38,7 +38,7 @@ public:
   // Triggered when this HostClass had been finalized by GC.
   virtual ~HostClass();
 
-  virtual JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+  virtual JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                         const JSValueRef *arguments, JSValueRef *exception);
 
   // The instance class represent every javascript instance objects created by new expression.

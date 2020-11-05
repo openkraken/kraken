@@ -69,7 +69,7 @@ bool HostClass::proxyHasInstance(JSContextRef ctx, JSObjectRef constructor, JSVa
 JSObjectRef HostClass::proxyCallAsConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                               const JSValueRef *arguments, JSValueRef *exception) {
   auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(constructor));
-  return hostClass->constructInstance(ctx, constructor, argumentCount, arguments, exception);
+  return hostClass->instanceConstructor(ctx, constructor, argumentCount, arguments, exception);
 }
 
 JSValueRef HostClass::proxyCallAsFunction(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -90,7 +90,8 @@ JSValueRef constructorCall(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     instanceArguments[0] = arguments[i];
   }
 
-  JSObjectRef instanceReturn = hostClass->constructInstance(ctx, thisObject, argumentCount - 1, instanceArguments, exception);
+  JSObjectRef instanceReturn =
+    hostClass->instanceConstructor(ctx, thisObject, argumentCount - 1, instanceArguments, exception);
   delete[] instanceArguments;
 
   return instanceReturn;
@@ -146,7 +147,7 @@ void HostClass::proxyInstanceFinalize(JSObjectRef object) {
   delete hostClassInstance;
 }
 
-JSObjectRef HostClass::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+JSObjectRef HostClass::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                          const JSValueRef *arguments, JSValueRef *exception) {
   return JSObjectMake(ctx, nullptr, nullptr);
 }
