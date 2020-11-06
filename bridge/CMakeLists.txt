@@ -18,7 +18,7 @@ list(APPEND BRIDGE_SOURCE
     foundation/ui_task_queue.h
     foundation/ui_task_queue.cpp
     foundation/ui_command_queue.h
-    foundation/ui_command_queue.cpp
+    foundation/ui_command_queue.cc
     foundation/closure.h
     foundation/bridge_callback.h
     dart_methods.cc
@@ -119,6 +119,8 @@ else()
       bindings/jsc/DOM/eventTarget.h
       bindings/jsc/DOM/node.cc
       bindings/jsc/DOM/node.h
+      bindings/jsc/DOM/style_declaration.cc
+      bindings/jsc/DOM/style_declaration.h
       bindings/jsc/KOM/console.h
       bindings/jsc/KOM/console.cc
       bridge_jsc.cc

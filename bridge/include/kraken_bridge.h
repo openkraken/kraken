@@ -56,7 +56,8 @@ enum UICommandType {
   appendChild,
   removeNode,
   insertBefore,
-  replaceChild
+  replaceChild,
+  setStyle
 };
 
 struct UICommandItem {

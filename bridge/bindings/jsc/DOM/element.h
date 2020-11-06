@@ -8,6 +8,7 @@
 
 #include "include/kraken_bridge.h"
 #include "node.h"
+#include <vector>
 
 namespace kraken::binding::jsc {
 
@@ -28,6 +29,8 @@ public:
     ElementInstance() = delete;
     explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId, JSValueRef *exception);
     void initialized() override;
+  private:
+    const char* tagName;
   };
 };
 

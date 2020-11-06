@@ -11,9 +11,6 @@
 namespace kraken::binding::jsc {
 using namespace foundation;
 
-namespace {
-JSElement *_instance{nullptr};
-}
 
 void bindElement(std::unique_ptr<JSContext> &context) {
   auto element = JSElement::instance(context.get());
@@ -24,6 +21,7 @@ void bindElement(std::unique_ptr<JSContext> &context) {
 JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
 JSElement *JSElement::instance(JSContext *context) {
+  static JSElement *_instance{nullptr};
   if (_instance == nullptr) {
     _instance = new JSElement(context);
   }
@@ -61,8 +59,6 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
   if (isnan(targetId)) {
     targetId = eventTargetId;
   }
-
-  auto nativeEventTarget = new NativeEventTarget(this, NativeEventTarget::dispatchEventImpl);
 
   // No needs to send create element for BODY element.
   if (targetId == BODY_TARGET_ID) {

@@ -21,27 +21,27 @@ namespace kraken {
 JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : contextId(contextId) {
   auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
     handler(contextId, errmsg);
-//    // trigger window.onerror handler.
-//    JSStringRef errmsgStringRef = JSStringCreateWithUTF8CString(errmsg);
-//    const JSValueRef errorArguments[] = {JSValueMakeString(context->context(), errmsgStringRef)};
-//    JSValueRef exception = nullptr;
-//    JSObjectRef errorObject = JSObjectMakeError(context->context(), 1, errorArguments, &exception);
-//
-//    JSStringRef errorHandlerKeyRef = JSStringCreateWithUTF8CString("__global_onerror_handler__");
-//    JSValueRef errorHandlerValueRef =
-//      JSObjectGetProperty(context->context(), context->global(), errorHandlerKeyRef, &exception);
-//
-//    if (!JSValueIsObject(context->context(), errorHandlerValueRef)) {
-//      context->reportError("Failed to trigger global onerror: __global_onerror_handler__ is not registered.");
-//      return;
-//    }
-//
-//    JSObjectRef errorHandlerFunction = JSValueToObject(context->context(), errorHandlerValueRef, &exception);
-//    const JSValueRef errorHandlerArguments[] = {errorObject};
-//    JSObjectCallAsFunction(context->context(), errorHandlerFunction, context->global(), 1, errorHandlerArguments,
-//                           &exception);
-//
-//    context->handleException(exception);
+    // trigger window.onerror handler.
+    JSStringRef errmsgStringRef = JSStringCreateWithUTF8CString(errmsg);
+    const JSValueRef errorArguments[] = {JSValueMakeString(context->context(), errmsgStringRef)};
+    JSValueRef exception = nullptr;
+    JSObjectRef errorObject = JSObjectMakeError(context->context(), 1, errorArguments, &exception);
+
+    JSStringRef errorHandlerKeyRef = JSStringCreateWithUTF8CString("__global_onerror_handler__");
+    JSValueRef errorHandlerValueRef =
+      JSObjectGetProperty(context->context(), context->global(), errorHandlerKeyRef, &exception);
+
+    if (!JSValueIsObject(context->context(), errorHandlerValueRef)) {
+      context->reportError("Failed to trigger global onerror: __global_onerror_handler__ is not registered.");
+      return;
+    }
+
+    JSObjectRef errorHandlerFunction = JSValueToObject(context->context(), errorHandlerValueRef, &exception);
+    const JSValueRef errorHandlerArguments[] = {errorObject};
+    JSObjectCallAsFunction(context->context(), errorHandlerFunction, context->global(), 1, errorHandlerArguments,
+                           &exception);
+
+    context->handleException(exception);
   };
 
   bridgeCallback = new foundation::BridgeCallback();
@@ -56,6 +56,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsc::bindDocument(context);
   kraken::binding::jsc::bindElement(context);
   kraken::binding::jsc::bindWindow(context);
+  kraken::binding::jsc::bindCSSStyleDeclaration(context);
   kraken::binding::jsc::bindScreen(context);
   kraken::binding::jsc::bindTimer(context);
   kraken::binding::jsc::bindToBlob(context);

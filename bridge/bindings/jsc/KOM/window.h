@@ -46,8 +46,6 @@ public:
     };
     JSLocation *location_;
   };
-
-//  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
 };
 
 void bindWindow(std::unique_ptr<JSContext> &context);

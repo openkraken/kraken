@@ -28,6 +28,9 @@ struct DisposeCallbackData {
   int32_t contextId;
 };
 
+struct NativeEvent;
+struct NativeEventTarget;
+
 class JSEventTarget : public HostClass {
 public:
   static JSEventTarget *instance(JSContext *context);
@@ -58,6 +61,7 @@ public:
 
     ~EventTargetInstance() override;
     int64_t eventTargetId;
+    NativeEventTarget *nativeEventTarget {nullptr};
   private:
     std::map<EventType, std::deque<JSObjectRef>> _eventHandlers;
     bool _dispatchEvent(JSEvent::EventInstance *eventInstance);
@@ -71,8 +75,6 @@ public:
   };
 };
 
-struct NativeEvent;
-struct NativeEventTarget;
 using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);
 
 struct NativeEventTarget {

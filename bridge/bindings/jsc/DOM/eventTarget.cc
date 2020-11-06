@@ -13,10 +13,6 @@ namespace kraken::binding::jsc {
 
 static std::atomic<int64_t> globalEventTargetId{-2};
 
-namespace {
-JSEventTarget *_instance{nullptr};
-}
-
 void bindEventTarget(std::unique_ptr<JSContext> &context) {
   auto eventTarget = JSEventTarget::instance(context.get());
   JSValueProtect(context->context(), eventTarget->classObject);
@@ -24,6 +20,7 @@ void bindEventTarget(std::unique_ptr<JSContext> &context) {
 }
 
 JSEventTarget *JSEventTarget::instance(JSContext *context) {
+  static JSEventTarget *_instance{nullptr};
   if (_instance == nullptr) {
     _instance = new JSEventTarget(context);
   }
@@ -41,10 +38,13 @@ JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef con
 JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget) : Instance(eventTarget) {
   eventTargetId = globalEventTargetId;
   globalEventTargetId++;
+  nativeEventTarget = new NativeEventTarget(this, NativeEventTarget::dispatchEventImpl);
 }
 
 JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, int64_t id)
-  : Instance(eventTarget), eventTargetId(id) {}
+  : Instance(eventTarget), eventTargetId(id) {
+  nativeEventTarget = new NativeEventTarget(this, NativeEventTarget::dispatchEventImpl);
+}
 
 JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
@@ -68,6 +68,8 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
       JSValueUnprotect(_hostClass->ctx, handler);
     }
   }
+
+  delete nativeEventTarget;
 }
 
 JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx, JSObjectRef function,
