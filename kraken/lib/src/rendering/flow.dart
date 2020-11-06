@@ -761,9 +761,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     final int runCount = runMetrics.length;
 
-    double containerMainAxisExtent = 0.0;
-    double containerCrossAxisExtent = 0.0;
-
     // Default to children's width
     double constraintWidth = mainAxisExtent;
     bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
@@ -790,25 +787,30 @@ class RenderFlowLayout extends RenderLayoutBox {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
 
+    // Main and cross content size of flow layout
+    double mainAxisContentSize = 0.0;
+    double crossAxisContentSize = 0.0;
+
     switch (direction) {
       case Axis.horizontal:
-        Size contentSize = Size(constraintWidth, constraintHeight);
-        setMaxScrollableSize(contentSize.width, contentSize.height);
-        size = getBoxSize(contentSize);
-        // AxisExtent should be size.
-        containerMainAxisExtent = contentWidth ?? size.width;
-        containerCrossAxisExtent = contentHeight ?? size.height;
+        Size logicalSize = Size(constraintWidth, constraintHeight);
+        setMaxScrollableSize(logicalSize.width, logicalSize.height);
+        size = getBoxSize(logicalSize);
+
+        mainAxisContentSize = contentSize.width;
+        crossAxisContentSize = contentSize.height;
         break;
       case Axis.vertical:
-        Size contentSize = Size(crossAxisExtent, mainAxisExtent);
-        setMaxScrollableSize(contentSize.width, contentSize.height);
-        size = getBoxSize(contentSize);
-        containerMainAxisExtent = contentHeight ?? size.height;
-        containerCrossAxisExtent = contentWidth ?? size.width;
+        Size logicalSize = Size(crossAxisExtent, mainAxisExtent);
+        setMaxScrollableSize(logicalSize.width, logicalSize.height);
+        size = getBoxSize(logicalSize);
+
+        mainAxisContentSize = contentSize.height;
+        crossAxisContentSize = contentSize.width;
         break;
     }
 
-    final double crossAxisFreeSpace = math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
+    final double crossAxisFreeSpace = math.max(0.0, crossAxisContentSize - crossAxisExtent);
     double runLeadingSpace = 0.0;
     double runBetweenSpace = 0.0;
     switch (runAlignment) {
@@ -834,7 +836,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     runBetweenSpace += runSpacing;
-    double crossAxisOffset = flipCrossAxis ? containerCrossAxisExtent - runLeadingSpace : runLeadingSpace;
+    double crossAxisOffset = flipCrossAxis ? crossAxisContentSize - runLeadingSpace : runLeadingSpace;
     child = firstChild;
 
     /// Set offset of children
@@ -845,7 +847,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       final double runBaselineExtent = metrics.baselineExtent;
       final int metricChildCount = metrics.childCount;
 
-      final double mainAxisFreeSpace = math.max(0.0, containerMainAxisExtent - runMainAxisExtent);
+      final double mainAxisFreeSpace = math.max(0.0, mainAxisContentSize - runMainAxisExtent);
+
       double childLeadingSpace = 0.0;
       double childBetweenSpace = 0.0;
 
@@ -872,7 +875,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
 
       childBetweenSpace += spacing;
-      double childMainPosition = flipMainAxis ? containerMainAxisExtent - childLeadingSpace : childLeadingSpace;
+      double childMainPosition = flipMainAxis ? mainAxisContentSize - childLeadingSpace : childLeadingSpace;
 
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
 
@@ -909,7 +912,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           // 'border-right-width' + 'margin-right' = width of containing block
           if (childRealDisplay == CSSDisplay.block || childRealDisplay == CSSDisplay.flex) {
             if (marginLeft == AUTO) {
-              double remainingSpace = containerMainAxisExtent - childMainAxisExtent;
+              double remainingSpace = mainAxisContentSize - childMainAxisExtent;
               if (marginRight == AUTO) {
                 childMainPosition = remainingSpace / 2;
               } else {
