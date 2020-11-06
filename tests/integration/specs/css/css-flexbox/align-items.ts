@@ -938,5 +938,57 @@ describe('align-items', () => {
     await matchViewportSnapshot();
   });
 
+  it("works with stretch in row direction when flex-wrap is nowrap", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'row',
+        width: '300px',
+        height: '100px',
+        alignItems: 'stretch',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           width: '100px',
+           backgroundColor: 'red',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("does not work with stretch in row direction when flex-wrap is wrap", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'row',
+        width: '300px',
+        height: '100px',
+        alignItems: 'stretch',
+        flexWrap: 'wrap',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           width: '100px',
+           backgroundColor: 'red',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
 });
 

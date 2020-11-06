@@ -275,11 +275,11 @@ class RenderBoxModel extends RenderBox with
   ElementManager elementManager;
 
   BoxSizeType get widthSizeType {
-    bool widthDefined = width != null || (minWidth != null);
+    bool widthDefined = width != null || (minWidth != null && minWidth > 0);
     return widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
   }
   BoxSizeType get heightSizeType {
-    bool heightDefined = height != null || (minHeight != null);
+    bool heightDefined = height != null || (minHeight != null && minHeight > 0);
     return heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
   }
 
@@ -444,6 +444,35 @@ class RenderBoxModel extends RenderBox with
     markNeedsLayout();
   }
 
+  bool needsLayout = false;
+
+  @override
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+    needsLayout = true;
+  }
+
+  @override
+  void dropChild(RenderBox child) {
+    super.dropChild(child);
+    // Loop to mark all the children to needsLayout as flutter did
+    if (child is RenderBoxModel) {
+      child.cleanRelayoutBoundary();
+    }
+  }
+
+  void cleanRelayoutBoundary() {
+    needsLayout = true;
+    visitChildren(_cleanChildRelayoutBoundary);
+  }
+
+  static void _cleanChildRelayoutBoundary(RenderObject child) {
+    if (child is RenderBoxModel) {
+      child.cleanRelayoutBoundary();
+    }
+  }
+
+  /// Width of render box model calcaluted from style
   static double getContentWidth(RenderBoxModel renderBoxModel) {
     double cropWidth = 0;
     CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
@@ -566,6 +595,7 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
+  /// Height of render box model calcaluted from style
   static double getContentHeight(RenderBoxModel renderBoxModel) {
     CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
 
@@ -841,6 +871,8 @@ class RenderBoxModel extends RenderBox with
         CSSPositionedLayout.applyPositionedChildOffset(parentBox, this, parentBox.boxSize, parentBox.borderEdge);
       }
     }
+
+    needsLayout = false;
   }
 
   void setMaximumScrollableSizeForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
