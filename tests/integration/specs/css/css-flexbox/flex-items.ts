@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('flex-items', () => {
-  xit('flexibility', async () => {
+  it('flexibility', async () => {
     let failFlag;
     let flex;
     let container;
@@ -59,7 +59,7 @@ describe('flex-items', () => {
             height: '40px',
             'text-align': 'center',
             flex: '2 0 auto',
-            border: '2px dotted blue',
+            border: '2px solid blue',
             background: 'green',
             'border-radius': '3px',
             'box-sizing': 'border-box',
