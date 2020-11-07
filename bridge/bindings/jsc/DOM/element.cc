@@ -68,6 +68,27 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
     UICommandTaskMessageQueue::instance(element->context->getContextId())
         ->registerCommand(targetId, UICommandType::createElement, args, argsLength, nativeEventTarget);
   }
+
+  style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(element->context), this);
+  JSValueProtect(element->ctx, style->object);
+}
+
+JSElement::ElementInstance::~ElementInstance() {
+  JSValueUnprotect(_hostClass->ctx, style->object);
+}
+
+JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
+  JSValueRef result = JSNode::NodeInstance::getProperty(nameRef, exception);
+
+  if (result != nullptr) return result;
+
+  std::string name = JSStringToStdString(nameRef);
+
+  if (name == "style") {
+    return style->object;
+  }
+
+  return nullptr;
 }
 
 void JSElement::ElementInstance::initialized() {

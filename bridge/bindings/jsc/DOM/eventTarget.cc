@@ -80,6 +80,7 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
     return nullptr;
   }
 
+  assert(false);
   auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(function));
 
   const JSValueRef eventNameValueRef = arguments[0];

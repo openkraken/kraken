@@ -123,12 +123,4 @@ JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *
   JSClassRef functionClass = JSClassCreate(&functionDefinition);
   return JSObjectMake(context->context(), functionClass, data);
 }
-
-NativeString *stdStringToNativeString(std::string string) {
-  JSStringRef stringRef = JSStringCreateWithUTF8CString(string.c_str());
-  auto nativeString = new NativeString();
-  nativeString->string = JSStringGetCharactersPtr(stringRef);
-  nativeString->length = JSStringGetLength(stringRef);
-  return nativeString;
-}
 } // namespace kraken::binding::jsc

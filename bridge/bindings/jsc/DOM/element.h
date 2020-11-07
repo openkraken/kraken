@@ -8,6 +8,7 @@
 
 #include "include/kraken_bridge.h"
 #include "node.h"
+#include "style_declaration.h"
 #include <vector>
 
 namespace kraken::binding::jsc {
@@ -28,8 +29,11 @@ public:
   public:
     ElementInstance() = delete;
     explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId, JSValueRef *exception);
+    ~ElementInstance();
+    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
     void initialized() override;
   private:
+    CSSStyleDeclaration::StyleDeclarationInstance *style;
     const char* tagName;
   };
 };

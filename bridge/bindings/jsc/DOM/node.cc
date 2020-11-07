@@ -163,7 +163,8 @@ JSValueRef JSNode::NodeInstance::replaceChild(JSContextRef ctx, JSObjectRef func
                                               JSValueRef *exception) {
 
   if (argumentCount < 2) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required", exception);
+    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required",
+                    exception);
     return nullptr;
   }
 
@@ -171,14 +172,16 @@ JSValueRef JSNode::NodeInstance::replaceChild(JSContextRef ctx, JSObjectRef func
   const JSValueRef oldChildValueRef = arguments[1];
 
   if (!JSValueIsObject(ctx, newChildValueRef)) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 1 arguments is not object", exception);
+    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 1 arguments is not object",
+                    exception);
     return nullptr;
   }
 
   JSObjectRef newChildObjectRef = JSValueToObject(ctx, newChildValueRef, exception);
 
   if (!JSValueIsObject(ctx, oldChildValueRef)) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments is not object.", exception);
+    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments is not object.",
+                    exception);
     return nullptr;
   }
 
@@ -189,7 +192,9 @@ JSValueRef JSNode::NodeInstance::replaceChild(JSContextRef ctx, JSObjectRef func
   auto oldChildInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(oldChildObjectRef));
 
   if (oldChildInstance == nullptr || oldChildInstance->parentNode == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.", exception);
+    JSC_THROW_ERROR(ctx,
+                    "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.",
+                    exception);
     return nullptr;
   }
 
@@ -212,12 +217,17 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       JSValueProtect(_hostClass->ctx, node->object);
       // TODO: newChild._notifyNodeInsert(parentNode);
 
-      NativeString *nodeTargetId = stdStringToNativeString(std::to_string(node->eventTargetId));
-      auto args = new NativeString *[1];
-      args[0] = nodeTargetId;
+      NativeString *nodeTargetId;
+      NativeString *position;
+      STD_STRING_TO_NATIVE_STRING(std::to_string(node->eventTargetId).c_str(), nodeTargetId);
+      STD_STRING_TO_NATIVE_STRING("beforebegin", position);
+
+      auto args = new NativeString *[2];
+      args[0] = nodeTargetId->clone();
+      args[1] = position->clone();
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
-        ->registerCommand(referenceNode->eventTargetId, UICommandType::insertBefore, args, 1, nullptr);
+        ->registerCommand(referenceNode->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
     }
   }
 }
@@ -236,12 +246,17 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   JSValueProtect(_hostClass->ctx, node->object);
 
   //  TODO: child._notifyNodeInsert(this);
-  NativeString *childTargetId = stdStringToNativeString(std::to_string(node->eventTargetId));
-  auto args = new NativeString *[1];
-  args[0] = childTargetId;
+  NativeString *childTargetId;
+  STD_STRING_TO_NATIVE_STRING(std::to_string(node->eventTargetId).c_str(), childTargetId);
+
+  NativeString *position;
+  STD_STRING_TO_NATIVE_STRING("beforeend", position);
+  auto args = new NativeString *[2];
+  args[0] = childTargetId->clone();
+  args[1] = position->clone();
 
   foundation::UICommandTaskMessageQueue::instance(node->_hostClass->context->getContextId())
-    ->registerCommand(eventTargetId, UICommandType::appendChild, args, 1, nullptr);
+    ->registerCommand(eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
 }
 
 void JSNode::NodeInstance::internalRemove(JSValueRef *exception) {
@@ -285,12 +300,16 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   //  TODO: oldChild._notifyNodeRemoved(parentNode);
   //  TODO: newChild._notifyNodeInsert(parentNode);
 
-  NativeString *newChildTargetId = stdStringToNativeString(std::to_string(newChild->eventTargetId));
-  auto args = new NativeString *[1];
-  args[0] = newChildTargetId;
+  NativeString *newChildTargetId;
+  NativeString *position;
+  STD_STRING_TO_NATIVE_STRING(std::to_string(newChild->eventTargetId).c_str(), newChildTargetId);
+  STD_STRING_TO_NATIVE_STRING("afterend", position);
+  auto args = new NativeString *[2];
+  args[0] = newChildTargetId->clone();
+  args[1] = position->clone();
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
-    ->registerCommand(oldChild->eventTargetId, UICommandType::replaceChild, args, 1, nullptr);
+    ->registerCommand(oldChild->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
     ->registerCommand(oldChild->eventTargetId, UICommandType::removeNode, nullptr, 0, nullptr);
@@ -324,10 +343,19 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
   } else if (name == "replaceChild") {
     return propertyBindingFunction(_hostClass->context, this, "replaceChild", replaceChild);
   }
-
-  return nullptr;
+  return JSEventTarget::EventTargetInstance::getProperty(nameRef, exception);
 }
 
-void JSNode::NodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {}
+void JSNode::NodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
+  JSEventTarget::EventTargetInstance::setProperty(nameRef, value, exception);
+}
+
+void JSNode::NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  EventTargetInstance::getPropertyNames(accumulator);
+
+  for (auto &property : propertyNames) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+}
 
 } // namespace kraken::binding::jsc

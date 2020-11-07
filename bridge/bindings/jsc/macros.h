@@ -106,3 +106,12 @@
     *exception = JSObjectMakeError(ctx, 1, args, nullptr);                                                             \
     JSStringRelease(_errmsg);                                                                                          \
   }
+
+#define STD_STRING_TO_NATIVE_STRING(str, nativeString)                                                              \
+  {                                                                                                                    \
+    JSStringRef stringRef = JSStringCreateWithUTF8CString(str);                                             \
+    nativeString = new NativeString();                                                                                 \
+    nativeString->string = JSStringGetCharactersPtr(stringRef);                                                        \
+    nativeString->length = JSStringGetLength(stringRef);                                                               \
+    JSStringRelease(stringRef);                                                                                        \
+  }

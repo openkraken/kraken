@@ -53,10 +53,8 @@ enum UICommandType {
   createElement,
   disposeEventTarget,
   addEvent,
-  appendChild,
   removeNode,
-  insertBefore,
-  replaceChild,
+  insertAdjacentNode,
   setStyle
 };
 

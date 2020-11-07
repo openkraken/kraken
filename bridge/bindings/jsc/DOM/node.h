@@ -52,6 +52,7 @@ public:
 
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
     void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
+    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
     bool isConnected();
     JSNode::NodeInstance *firstChild();

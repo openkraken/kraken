@@ -50,9 +50,9 @@ public:
     std::map<std::string, JSStringRef> properties;
     const JSEventTarget::EventTargetInstance *ownerEventTarget;
     std::array<JSStringRef, 3> propertyNames{
-        JSStringCreateWithUTF8CString("setProperty"),
-        JSStringCreateWithUTF8CString("removeProperty"),
-        JSStringCreateWithUTF8CString("getPropertyValue"),
+      JSStringCreateWithUTF8CString("setProperty"),
+      JSStringCreateWithUTF8CString("removeProperty"),
+      JSStringCreateWithUTF8CString("getPropertyValue"),
     };
   };
 };

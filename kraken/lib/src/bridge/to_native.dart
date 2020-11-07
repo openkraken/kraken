@@ -51,8 +51,10 @@ class NativeEvent extends Struct {
   Pointer currentTarget;
 }
 
-typedef Native_DispatchEvent = Void Function(Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
-typedef Dart_DispatchEvent = void Function(Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
+typedef Native_DispatchEvent = Void Function(
+    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
+typedef Dart_DispatchEvent = void Function(
+    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
 
 class NativeEventTarget extends Struct {
   Pointer<Void> instance;
@@ -95,7 +97,7 @@ typedef Native_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
 typedef Dart_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
 
 final Dart_GetKrakenInfo _getKrakenInfo =
-nativeDynamicLibrary.lookup<NativeFunction<Native_GetKrakenInfo>>('getKrakenInfo').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetKrakenInfo>>('getKrakenInfo').asFunction();
 
 KrakenInfo _cachedInfo;
 
@@ -112,7 +114,7 @@ typedef Native_InvokeEventListener = Void Function(Int32 contextId, Int32 type, 
 typedef Dart_InvokeEventListener = void Function(int contextId, int type, Pointer<NativeString>);
 
 final Dart_InvokeEventListener _invokeEventListener =
-nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
 
 void invokeEventListener(int contextId, int type, String data) {
   print('type: $type, data: $data');
@@ -128,7 +130,8 @@ void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Pointer<Na
   print('emit UI Event: $nativePtr');
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
-  dispatchEvent(nativeEventTarget, nativeEvent);;
+  dispatchEvent(nativeEventTarget, nativeEvent);
+  ;
 }
 
 void emitModuleEvent(int contextId, String data) {
@@ -147,7 +150,7 @@ typedef Native_CreateScreen = Pointer<ScreenSize> Function(Double, Double);
 typedef Dart_CreateScreen = Pointer<ScreenSize> Function(double, double);
 
 final Dart_CreateScreen _createScreen =
-nativeDynamicLibrary.lookup<NativeFunction<Native_CreateScreen>>('createScreen').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_CreateScreen>>('createScreen').asFunction();
 
 Pointer<ScreenSize> createScreen(double width, double height) {
   return _createScreen(width, height);
@@ -160,7 +163,7 @@ typedef Dart_EvaluateScripts = void Function(
     int contextId, Pointer<NativeString> code, Pointer<Utf8> url, int startLine);
 
 final Dart_EvaluateScripts _evaluateScripts =
-nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
 
 void evaluateScripts(int contextId, String code, String url, int line) {
   Pointer<NativeString> nativeString = stringToNativeString(code);
@@ -178,7 +181,7 @@ typedef Native_InitJSContextPool = Void Function(Int32 poolSize);
 typedef Dart_InitJSContextPool = void Function(int poolSize);
 
 final Dart_InitJSContextPool _initJSContextPool =
-nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSContextPool>>('initJSContextPool').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSContextPool>>('initJSContextPool').asFunction();
 
 void initJSContextPool(int poolSize) {
   _initJSContextPool(poolSize);
@@ -188,7 +191,7 @@ typedef Native_DisposeContext = Void Function(Int32 contextId);
 typedef Dart_DisposeContext = void Function(int contextId);
 
 final Dart_DisposeContext _disposeContext =
-nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeContext>>('disposeContext').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeContext>>('disposeContext').asFunction();
 
 void disposeBridge(int contextId) {
   _disposeContext(contextId);
@@ -198,7 +201,7 @@ typedef Native_AllocateNewContext = Int32 Function();
 typedef Dart_AllocateNewContext = int Function();
 
 final Dart_AllocateNewContext _allocateNewContext =
-nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewContext>>('allocateNewContext').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewContext>>('allocateNewContext').asFunction();
 
 int allocateNewContext() {
   return _allocateNewContext();
@@ -209,7 +212,7 @@ typedef Native_ReloadJSContext = Void Function(Int32 contextId);
 typedef Dart_ReloadJSContext = void Function(int contextId);
 
 final Dart_ReloadJSContext _reloadJSContext =
-nativeDynamicLibrary.lookup<NativeFunction<Native_ReloadJSContext>>('reloadJsContext').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_ReloadJSContext>>('reloadJsContext').asFunction();
 
 void reloadJSContext(int contextId) async {
   Completer completer = Completer<void>();
@@ -224,13 +227,22 @@ typedef Native_FrameCallback = Void Function();
 typedef Dart_FrameCallback = void Function();
 
 final Dart_FrameCallback _frameCallback =
-nativeDynamicLibrary.lookup<NativeFunction<Native_FrameCallback>>('uiFrameCallback').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_FrameCallback>>('uiFrameCallback').asFunction();
 
 void bridgeFrameCallback() {
   _frameCallback();
 }
 
-enum UICommandType { initWindow, initBody, createElement, disposeEventTarget, addEvent, }
+enum UICommandType {
+  initWindow,
+  initBody,
+  createElement,
+  disposeEventTarget,
+  addEvent,
+  removeNode,
+  insertAdjacentNode,
+  setStyle
+}
 
 class UICommandItem extends Struct {
   @Int8()
@@ -251,22 +263,22 @@ typedef Native_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(Int3
 typedef Dart_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(int contextId);
 
 final Dart_GetUICommandItems _getUICommandItems =
-nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItems>>('getUICommandItems').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItems>>('getUICommandItems').asFunction();
 
 typedef Native_GetUICommandItemSize = Int32 Function(Int32 contextId);
 typedef Dart_GetUICommandItemSize = int Function(int contextId);
 
 final Dart_GetUICommandItemSize _getUICommandItemSize =
-nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItemSize>>('getUICommandItemSize').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItemSize>>('getUICommandItemSize').asFunction();
 
 typedef Native_ClearUICommandItems = Void Function(Int32 contextId);
 typedef Dart_ClearUICommandItems = void Function(int contextId);
 
 final Dart_ClearUICommandItems _clearUICommandItems =
-nativeDynamicLibrary.lookup<NativeFunction<Native_ClearUICommandItems>>('clearUICommandItems').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_ClearUICommandItems>>('clearUICommandItems').asFunction();
 
 void _freeUICommand(Pointer<UICommandItem> nativeCommand) {
-  for (int i = 0; i < nativeCommand.ref.length; i ++) {
+  for (int i = 0; i < nativeCommand.ref.length; i++) {
     freeNativeString(nativeCommand.ref.args[i]);
   }
   free(nativeCommand.ref.args);
@@ -293,15 +305,25 @@ void flushUICommand() {
           controller.view.initBody(nativeCommand.ref.nativePtr);
           break;
         case UICommandType.createElement:
-          controller.view.createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
+          controller.view
+              .createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
           break;
         case UICommandType.disposeEventTarget:
           ElementManager.disposeEventTarget(controller.view.contextId, id);
           break;
         case UICommandType.addEvent:
           String eventType = nativeStringToString(nativeCommand.ref.args[0]);
-          print(eventType);
           controller.view.addEvent(id, int.parse(eventType));
+          break;
+        case UICommandType.insertAdjacentNode:
+          int childId = int.parse(nativeStringToString(nativeCommand.ref.args[0]));
+          String position = nativeStringToString(nativeCommand.ref.args[1]);
+          controller.view.insertAdjacentNode(id, position, childId);
+          break;
+        case UICommandType.removeNode:
+
+          break;
+        case UICommandType.setStyle:
           break;
         default:
           return;

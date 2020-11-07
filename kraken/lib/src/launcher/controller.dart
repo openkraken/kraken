@@ -167,6 +167,11 @@ class KrakenViewController {
     _elementManager.addEvent(targetId, eventTypeIndex);
   }
 
+  void insertAdjacentNode(int targetId, String position, int childId) {
+    print('insertAdjacent targetId: $targetId, position: $position, child: $childId');
+    _elementManager.insertAdjacentNode(targetId, position, childId);
+  }
+
   EventTarget getEventTargetById(int id) {
     return _elementManager.getEventTargetByTargetId<EventTarget>(id);
   }
