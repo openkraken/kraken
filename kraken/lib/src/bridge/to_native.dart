@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:convert';
+import 'dart:ui';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
@@ -290,13 +290,18 @@ void flushUICommand() {
   for (KrakenController controller in controllerMap.values) {
     Pointer<Pointer<UICommandItem>> nativeCommandItems = _getUICommandItems(controller.view.contextId);
     int itemSize = _getUICommandItemSize(controller.view.contextId);
+
+    // For new ui commands, we needs to tell engine to update frames.
+    if (itemSize > 0) {
+      window.scheduleFrame();
+    }
+
     for (int i = 0; i < itemSize; i++) {
       Pointer<UICommandItem> nativeCommand = nativeCommandItems[i];
       if (nativeCommand == nullptr) continue;
 
       UICommandType commandType = UICommandType.values[nativeCommand.ref.type];
       int id = nativeCommand.ref.id;
-      print(commandType);
       switch (commandType) {
         case UICommandType.initWindow:
           controller.view.initWindow(nativeCommand.ref.nativePtr);
@@ -321,9 +326,12 @@ void flushUICommand() {
           controller.view.insertAdjacentNode(id, position, childId);
           break;
         case UICommandType.removeNode:
-
+          controller.view.removeNode(id);
           break;
         case UICommandType.setStyle:
+          String key = nativeStringToString(nativeCommand.ref.args[0]);
+          String value = nativeStringToString(nativeCommand.ref.args[1]);
+          controller.view.setStyle(id, key, value);
           break;
         default:
           return;

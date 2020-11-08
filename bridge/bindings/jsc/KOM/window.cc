@@ -36,7 +36,7 @@ JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef
       return nullptr;
     }
 
-    double devicePixelRatio = getDartMethod()->devicePixelRatio(_hostClass->context->getContextId());
+    double devicePixelRatio = getDartMethod()->devicePixelRatio(_hostClass->contextId);
     return JSValueMakeNumber(_hostClass->context->context(), devicePixelRatio);
   } else if (name == "colorScheme") {
     if (getDartMethod()->platformBrightness == nullptr) {
@@ -44,7 +44,7 @@ JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef
                       "Failed to read colorScheme: dart method (platformBrightness) not register.", exception);
       return nullptr;
     }
-    const NativeString *code = getDartMethod()->platformBrightness(_hostClass->context->getContextId());
+    const NativeString *code = getDartMethod()->platformBrightness(_hostClass->contextId);
     JSStringRef resultRef = JSStringCreateWithCharacters(code->string, code->length);
     return JSValueMakeString(_hostClass->context->context(), resultRef);
   } else if (name == "location") {

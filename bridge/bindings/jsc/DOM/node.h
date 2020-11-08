@@ -71,10 +71,11 @@ public:
     std::vector<JSNode::NodeInstance *> childNodes;
     JSNode::NodeInstance *parentNode{nullptr};
 
-    std::array<JSStringRef, 9> propertyNames{
+    std::array<JSStringRef, 10> propertyNames{
         JSStringCreateWithUTF8CString("isConnected"),
         JSStringCreateWithUTF8CString("firstChild"),
         JSStringCreateWithUTF8CString("lastChild"),
+      JSStringCreateWithUTF8CString("childNodes"),
         JSStringCreateWithUTF8CString("previousSibling"),
         JSStringCreateWithUTF8CString("nextSibling"),
         JSStringCreateWithUTF8CString("appendChild"),

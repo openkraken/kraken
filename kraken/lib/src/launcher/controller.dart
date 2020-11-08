@@ -172,6 +172,15 @@ class KrakenViewController {
     _elementManager.insertAdjacentNode(targetId, position, childId);
   }
 
+  void removeNode(int targetId) {
+    _elementManager.removeNode(targetId);
+  }
+
+  void setStyle(int targetId, String key, String value) {
+    print('setStyle: targetId: $targetId, key: $key, value: $value');
+    _elementManager.setStyle(targetId, key, value);
+  }
+
   EventTarget getEventTargetById(int id) {
     return _elementManager.getEventTargetByTargetId<EventTarget>(id);
   }

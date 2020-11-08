@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'dart:ffi';
 
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/launcher.dart';
 import 'package:flutter/rendering.dart';
@@ -270,6 +271,7 @@ class ElementManager {
     Node target = getEventTargetByTargetId<Node>(targetId);
     Node newNode = getEventTargetByTargetId<Node>(newTargetId);
 
+    print('target node: $target, newNode: $newNode');
     switch (position) {
       case 'beforebegin':
         target?.parentNode?.insertBefore(newNode, target);
@@ -278,6 +280,7 @@ class ElementManager {
         target.insertBefore(newNode, target.firstChild);
         break;
       case 'beforeend':
+        print('apendChild');
         target.appendChild(newNode);
         break;
       case 'afterend':

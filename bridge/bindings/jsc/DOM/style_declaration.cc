@@ -109,6 +109,12 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(JSStringRe
   return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(""));
 }
 
+void CSSStyleDeclaration::StyleDeclarationInstance::setProperty(JSStringRef nameRef, JSValueRef value,
+                                                                JSValueRef *exception) {
+  std::string name = JSStringToStdString(nameRef);
+  internalSetProperty(nameRef, value, exception);
+}
+
 void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(JSStringRef nameRef, JSValueRef value,
                                                                         JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
@@ -138,7 +144,7 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(JSString
 
   args[1] = valueNativeString.clone();
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(ownerEventTarget->eventTargetId, UICommandType::setStyle, args, 2, nullptr);
 }
 
@@ -168,8 +174,8 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStr
   args[0] = camelizedProperty.clone();
   args[1] = valueNativeString.clone();
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
-      ->registerCommand(ownerEventTarget->eventTargetId, UICommandType::setStyle, args, 2, nullptr);
+  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
+    ->registerCommand(ownerEventTarget->eventTargetId, UICommandType::setStyle, args, 2, nullptr);
 }
 
 JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::internalGetPropertyValue(JSStringRef nameRef,

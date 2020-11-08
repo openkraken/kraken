@@ -226,7 +226,7 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       args[0] = nodeTargetId->clone();
       args[1] = position->clone();
 
-      foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(referenceNode->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
     }
   }
@@ -255,7 +255,7 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   args[0] = childTargetId->clone();
   args[1] = position->clone();
 
-  foundation::UICommandTaskMessageQueue::instance(node->_hostClass->context->getContextId())
+  foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
     ->registerCommand(eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
 }
 
@@ -272,7 +272,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalRemoveChild(JSNode::NodeInst
     node->parentNode = nullptr;
     JSValueUnprotect(_hostClass->ctx, node->object);
     // TODO: child._notifyNodeRemove(this);
-    foundation::UICommandTaskMessageQueue::instance(node->_hostClass->context->getContextId())
+    foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
       ->registerCommand(node->eventTargetId, UICommandType::removeNode, nullptr, 0, nullptr);
   } else {
     JSC_THROW_ERROR(_hostClass->ctx,
@@ -308,10 +308,10 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   args[0] = newChildTargetId->clone();
   args[1] = position->clone();
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(oldChild->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(oldChild->eventTargetId, UICommandType::removeNode, nullptr, 0, nullptr);
 
   return oldChild;
@@ -342,7 +342,17 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
     return propertyBindingFunction(_hostClass->context, this, "insertBefore", insertBefore);
   } else if (name == "replaceChild") {
     return propertyBindingFunction(_hostClass->context, this, "replaceChild", replaceChild);
+  } else if (name == "childNodes") {
+    auto arguments = new JSValueRef[childNodes.size()];
+
+    for (int i = 0; i < childNodes.size(); i ++) {
+      arguments[i] = childNodes[i]->object;
+    }
+
+    JSObjectRef array = JSObjectMakeArray(_hostClass->ctx, childNodes.size(), arguments, nullptr);
+    return array;
   }
+
   return JSEventTarget::EventTargetInstance::getProperty(nameRef, exception);
 }
 

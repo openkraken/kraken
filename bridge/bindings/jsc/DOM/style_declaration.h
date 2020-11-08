@@ -39,9 +39,9 @@ public:
     static JSValueRef getPropertyValue(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
-    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+    void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
+    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     void internalSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
     void internalRemoveProperty(JSStringRef name, JSValueRef *exception);
     JSValueRef internalGetPropertyValue(JSStringRef name, JSValueRef *exception);

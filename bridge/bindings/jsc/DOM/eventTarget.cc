@@ -48,7 +48,7 @@ JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarg
 
 JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
-  auto data = new DisposeCallbackData(_hostClass->context->getContextId(), eventTargetId);
+  auto data = new DisposeCallbackData(_hostClass->contextId, eventTargetId);
   foundation::Task disposeTask = [](void *data) {
     auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
     foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
@@ -80,7 +80,6 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
     return nullptr;
   }
 
-  assert(false);
   auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(function));
 
   const JSValueRef eventNameValueRef = arguments[0];
@@ -113,7 +112,7 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
   if (!eventTargetInstance->_eventHandlers.contains(eventType) ||
       eventTargetInstance->eventTargetId == BODY_TARGET_ID) {
     eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
-    int32_t contextId = eventTargetInstance->_hostClass->context->getContextId();
+    int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
     JSStringRef eventTypeString = JSStringCreateWithUTF8CString(std::to_string(eventType).c_str());
 
@@ -279,7 +278,7 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
   JSValueProtect(_hostClass->ctx, handlerObjectRef);
   _eventHandlers[eventType].emplace_back(handlerObjectRef);
 
-  int32_t contextId = _hostClass->context->getContextId();
+  int32_t contextId = _hostClass->contextId;
 
   JSStringRef eventTypeString = JSStringCreateWithUTF8CString(std::to_string(eventType).c_str());
 

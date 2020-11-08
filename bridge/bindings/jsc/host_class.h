@@ -58,6 +58,7 @@ public:
 
   std::string _name;
   JSContext *context{nullptr};
+  int32_t contextId;
   JSContextRef ctx{nullptr};
   // The javascript constructor function.
   JSObjectRef classObject{nullptr};
