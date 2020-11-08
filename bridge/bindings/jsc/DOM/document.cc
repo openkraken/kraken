@@ -5,6 +5,7 @@
 
 #include "document.h"
 #include "element.h"
+#include "text_node.h"
 #include <mutex>
 
 namespace kraken::binding::jsc {
@@ -36,10 +37,23 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
   return elementInstance;
 }
 
+JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                      size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  if (argumentCount != 1) {
+    JSC_THROW_ERROR(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.", exception);
+    return nullptr;
+  }
+
+  auto document = static_cast<JSDocument *>(JSObjectGetPrivate(function));
+  auto textNode = JSTextNode::instance(document->context);
+  auto textNodeInstance = JSObjectCallAsConstructor(ctx, textNode->classObject, 1, arguments, exception);
+  return textNodeInstance;
+}
+
 JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {}
 
 JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                          const JSValueRef *arguments, JSValueRef *exception) {
+                                            const JSValueRef *arguments, JSValueRef *exception) {
   auto instance = new DocumentInstance(this);
   return instance->object;
 }
@@ -47,10 +61,8 @@ JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : NodeInstance(document, NodeType::DOCUMENT_NODE) {
   auto elementConstructor = JSElement::instance(document->context);
   JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
-  const JSValueRef arguments[] = {
-    JSValueMakeString(document->ctx, bodyTagName),
-    JSValueMakeNumber(document->ctx, BODY_TARGET_ID)
-  };
+  const JSValueRef arguments[] = {JSValueMakeString(document->ctx, bodyTagName),
+                                  JSValueMakeNumber(document->ctx, BODY_TARGET_ID)};
   body = JSObjectCallAsConstructor(document->ctx, elementConstructor->classObject, 2, arguments, nullptr);
   JSValueProtect(document->ctx, body);
 }
@@ -61,6 +73,8 @@ JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValu
     return propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
   } else if (name == "body") {
     return body;
+  } else if (name == "createTextNode") {
+    return propertyBindingFunction(_hostClass->context, this, "createTextNode", createTextNode);
   }
 
   return nullptr;

@@ -237,11 +237,13 @@ enum UICommandType {
   initWindow,
   initBody,
   createElement,
+  createTextNode,
   disposeEventTarget,
   addEvent,
   removeNode,
   insertAdjacentNode,
-  setStyle
+  setStyle,
+  setProperty
 }
 
 class UICommandItem extends Struct {
@@ -313,6 +315,9 @@ void flushUICommand() {
           controller.view
               .createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
           break;
+        case UICommandType.createTextNode:
+          controller.view.createTextNode(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
+          break;
         case UICommandType.disposeEventTarget:
           ElementManager.disposeEventTarget(controller.view.contextId, id);
           break;
@@ -329,6 +334,11 @@ void flushUICommand() {
           controller.view.removeNode(id);
           break;
         case UICommandType.setStyle:
+          String key = nativeStringToString(nativeCommand.ref.args[0]);
+          String value = nativeStringToString(nativeCommand.ref.args[1]);
+          controller.view.setStyle(id, key, value);
+          break;
+        case UICommandType.setProperty:
           String key = nativeStringToString(nativeCommand.ref.args[0]);
           String value = nativeStringToString(nativeCommand.ref.args[1]);
           controller.view.setStyle(id, key, value);

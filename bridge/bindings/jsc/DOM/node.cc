@@ -9,6 +9,12 @@
 
 namespace kraken::binding::jsc {
 
+void bindNode(std::unique_ptr<JSContext> &context) {
+  auto node = JSNode::instance(context.get());
+  JSValueProtect(context->context(), node->classObject);
+  JSC_GLOBAL_SET_PROPERTY(context, "Node", node->classObject);
+}
+
 JSNode::JSNode(JSContext *context) : JSEventTarget(context, "Node") {}
 JSNode::JSNode(JSContext *context, const char *name) : JSEventTarget(context, name) {}
 
@@ -203,6 +209,16 @@ JSValueRef JSNode::NodeInstance::replaceChild(JSContextRef ctx, JSObjectRef func
   return nullptr;
 }
 
+JSValueRef JSNode::NodeInstance::textContent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                       size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(function));
+  std::string &&textContent = selfInstance->internalTextContent();
+
+  JSStringRef textContentRef = JSStringCreateWithUTF8CString(textContent.c_str());
+
+  return JSValueMakeString(ctx, textContentRef);
+}
+
 void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode) {
   if (referenceNode == nullptr) {
     internalAppendChild(node);
@@ -217,14 +233,14 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       JSValueProtect(_hostClass->ctx, node->object);
       // TODO: newChild._notifyNodeInsert(parentNode);
 
-      NativeString *nodeTargetId;
-      NativeString *position;
+      NativeString nodeTargetId {};
+      NativeString position {};
       STD_STRING_TO_NATIVE_STRING(std::to_string(node->eventTargetId).c_str(), nodeTargetId);
       STD_STRING_TO_NATIVE_STRING("beforebegin", position);
 
       auto args = new NativeString *[2];
-      args[0] = nodeTargetId->clone();
-      args[1] = position->clone();
+      args[0] = nodeTargetId.clone();
+      args[1] = position.clone();
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(referenceNode->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
@@ -246,14 +262,14 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   JSValueProtect(_hostClass->ctx, node->object);
 
   //  TODO: child._notifyNodeInsert(this);
-  NativeString *childTargetId;
+  NativeString childTargetId {};
   STD_STRING_TO_NATIVE_STRING(std::to_string(node->eventTargetId).c_str(), childTargetId);
 
-  NativeString *position;
+  NativeString position {};
   STD_STRING_TO_NATIVE_STRING("beforeend", position);
   auto args = new NativeString *[2];
-  args[0] = childTargetId->clone();
-  args[1] = position->clone();
+  args[0] = childTargetId.clone();
+  args[1] = position.clone();
 
   foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
     ->registerCommand(eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
@@ -300,13 +316,13 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   //  TODO: oldChild._notifyNodeRemoved(parentNode);
   //  TODO: newChild._notifyNodeInsert(parentNode);
 
-  NativeString *newChildTargetId;
-  NativeString *position;
+  NativeString newChildTargetId {};
+  NativeString position {};
   STD_STRING_TO_NATIVE_STRING(std::to_string(newChild->eventTargetId).c_str(), newChildTargetId);
   STD_STRING_TO_NATIVE_STRING("afterend", position);
   auto args = new NativeString *[2];
-  args[0] = newChildTargetId->clone();
-  args[1] = position->clone();
+  args[0] = newChildTargetId.clone();
+  args[1] = position.clone();
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(oldChild->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
@@ -345,7 +361,7 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
   } else if (name == "childNodes") {
     auto arguments = new JSValueRef[childNodes.size()];
 
-    for (int i = 0; i < childNodes.size(); i ++) {
+    for (int i = 0; i < childNodes.size(); i++) {
       arguments[i] = childNodes[i]->object;
     }
 
@@ -354,6 +370,10 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
   }
 
   return JSEventTarget::EventTargetInstance::getProperty(nameRef, exception);
+}
+
+std::string JSNode::NodeInstance::internalTextContent() {
+
 }
 
 void JSNode::NodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {

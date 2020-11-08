@@ -79,8 +79,8 @@ using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, Nativ
 
 struct NativeEventTarget {
   NativeEventTarget() = delete;
-  NativeEventTarget(JSEventTarget::EventTargetInstance *_instance, NativeDispatchEvent dispatchEvent)
-    : instance(_instance), dispatchEvent(dispatchEvent){};
+  NativeEventTarget(JSEventTarget::EventTargetInstance *_instance)
+    : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl) {};
 
   static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);
 

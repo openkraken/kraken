@@ -119,6 +119,8 @@ else()
       bindings/jsc/DOM/eventTarget.h
       bindings/jsc/DOM/node.cc
       bindings/jsc/DOM/node.h
+      bindings/jsc/DOM/text_node.cc
+      bindings/jsc/DOM/text_node.h
       bindings/jsc/DOM/style_declaration.cc
       bindings/jsc/DOM/style_declaration.h
       bindings/jsc/KOM/console.h

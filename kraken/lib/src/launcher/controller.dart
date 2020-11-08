@@ -162,6 +162,10 @@ class KrakenViewController {
     return _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
   }
 
+  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
+    return _elementManager.createTextNode(id, nativePtr, data);
+  }
+
   void addEvent(int targetId, int eventTypeIndex) {
     print('add event id: $targetId, eventName: ${EventType.values[eventTypeIndex]}');
     _elementManager.addEvent(targetId, eventTypeIndex);
@@ -179,6 +183,11 @@ class KrakenViewController {
   void setStyle(int targetId, String key, String value) {
     print('setStyle: targetId: $targetId, key: $key, value: $value');
     _elementManager.setStyle(targetId, key, value);
+  }
+
+  void setProperty(int targetId, String key, String value) {
+    print('setProperty: targetId: $targetId, key: $key, value: $value');
+    _elementManager.setProperty(targetId, key, value);
   }
 
   EventTarget getEventTargetById(int id) {

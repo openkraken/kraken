@@ -51,11 +51,13 @@ enum UICommandType {
   initWindow,
   initBody,
   createElement,
+  createTextNode,
   disposeEventTarget,
   addEvent,
   removeNode,
   insertAdjacentNode,
-  setStyle
+  setStyle,
+  setProperty
 };
 
 struct UICommandItem {

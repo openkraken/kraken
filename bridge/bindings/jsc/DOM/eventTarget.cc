@@ -38,12 +38,12 @@ JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef con
 JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget) : Instance(eventTarget) {
   eventTargetId = globalEventTargetId;
   globalEventTargetId++;
-  nativeEventTarget = new NativeEventTarget(this, NativeEventTarget::dispatchEventImpl);
+  nativeEventTarget = new NativeEventTarget(this);
 }
 
 JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, int64_t id)
   : Instance(eventTarget), eventTargetId(id) {
-  nativeEventTarget = new NativeEventTarget(this, NativeEventTarget::dispatchEventImpl);
+  nativeEventTarget = new NativeEventTarget(this);
 }
 
 JSEventTarget::EventTargetInstance::~EventTargetInstance() {

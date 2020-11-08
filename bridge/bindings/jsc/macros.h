@@ -107,11 +107,10 @@
     JSStringRelease(_errmsg);                                                                                          \
   }
 
-#define STD_STRING_TO_NATIVE_STRING(str, nativeString)                                                              \
+#define STD_STRING_TO_NATIVE_STRING(str, nativeString)                                                                 \
   {                                                                                                                    \
-    JSStringRef stringRef = JSStringCreateWithUTF8CString(str);                                             \
-    nativeString = new NativeString();                                                                                 \
-    nativeString->string = JSStringGetCharactersPtr(stringRef);                                                        \
-    nativeString->length = JSStringGetLength(stringRef);                                                               \
-    JSStringRelease(stringRef);                                                                                        \
+    JSStringRef ref = JSStringCreateWithUTF8CString(str);                                                              \
+    nativeString.string = JSStringGetCharactersPtr(ref);                                                              \
+    nativeString.length = JSStringGetLength(ref);                                                                     \
+    JSStringRelease(ref);                                                                                              \
   }

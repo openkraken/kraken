@@ -8,8 +8,8 @@
 
 #include "eventTarget.h"
 #include "include/kraken_bridge.h"
-#include <vector>
 #include <array>
+#include <vector>
 
 namespace kraken::binding::jsc {
 
@@ -21,6 +21,8 @@ enum NodeType {
   DOCUMENT_TYPE_NODE = 10,
   DOCUMENT_FRAGMENT_NODE = 11
 };
+
+void bindNode(std::unique_ptr<JSContext> &context);
 
 class JSNode : public JSEventTarget {
 public:
@@ -50,6 +52,9 @@ public:
     static JSValueRef replaceChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
 
+    static JSValueRef textContent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef arguments[], JSValueRef *exception);
+
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
     void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
@@ -59,6 +64,7 @@ public:
     JSNode::NodeInstance *lastChild();
     JSNode::NodeInstance *previousSibling();
     JSNode::NodeInstance *nextSibling();
+    std::string internalTextContent();
     void internalAppendChild(JSNode::NodeInstance *node);
     void internalRemove(JSValueRef *exception);
     JSNode::NodeInstance *internalRemoveChild(JSNode::NodeInstance *node, JSValueRef *exception);
@@ -72,18 +78,18 @@ public:
     JSNode::NodeInstance *parentNode{nullptr};
 
     std::array<JSStringRef, 10> propertyNames{
-        JSStringCreateWithUTF8CString("isConnected"),
-        JSStringCreateWithUTF8CString("firstChild"),
-        JSStringCreateWithUTF8CString("lastChild"),
-      JSStringCreateWithUTF8CString("childNodes"),
-        JSStringCreateWithUTF8CString("previousSibling"),
-        JSStringCreateWithUTF8CString("nextSibling"),
-        JSStringCreateWithUTF8CString("appendChild"),
-        JSStringCreateWithUTF8CString("remove"),
-        JSStringCreateWithUTF8CString("insertBefore"),
-        JSStringCreateWithUTF8CString("replaceChild"),
+      JSStringCreateWithUTF8CString("isConnected"),     JSStringCreateWithUTF8CString("firstChild"),
+      JSStringCreateWithUTF8CString("lastChild"),       JSStringCreateWithUTF8CString("childNodes"),
+      JSStringCreateWithUTF8CString("previousSibling"), JSStringCreateWithUTF8CString("nextSibling"),
+      JSStringCreateWithUTF8CString("appendChild"),     JSStringCreateWithUTF8CString("remove"),
+      JSStringCreateWithUTF8CString("insertBefore"),    JSStringCreateWithUTF8CString("replaceChild"),
     };
   };
+};
+
+class NativeNode : public NativeEventTarget {
+  NativeNode() = delete;
+  NativeNode(JSNode::NodeInstance *instance) : NativeEventTarget(instance) {};
 };
 
 } // namespace kraken::binding::jsc

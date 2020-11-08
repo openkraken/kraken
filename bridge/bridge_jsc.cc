@@ -54,6 +54,8 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsc::bindEvent(context);
   kraken::binding::jsc::bindEventTarget(context);
   kraken::binding::jsc::bindDocument(context);
+  kraken::binding::jsc::bindNode(context);
+  kraken::binding::jsc::bindTextNode(context);
   kraken::binding::jsc::bindElement(context);
   kraken::binding::jsc::bindWindow(context);
   kraken::binding::jsc::bindCSSStyleDeclaration(context);
