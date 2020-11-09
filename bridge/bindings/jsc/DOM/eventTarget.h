@@ -16,6 +16,7 @@
 #include "include/kraken_bridge.h"
 #include <array>
 #include <atomic>
+#include <unordered_map>
 #include <condition_variable>
 
 namespace kraken::binding::jsc {
@@ -44,6 +45,8 @@ public:
 
   class EventTargetInstance : public Instance {
   public:
+    static std::array<JSStringRef, 3> &getEventTargetPropertyNames();
+
     static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -64,14 +67,11 @@ public:
     NativeEventTarget *nativeEventTarget {nullptr};
   private:
     std::unordered_map<EventType, std::deque<JSObjectRef>> _eventHandlers;
-    bool _dispatchEvent(JSEvent::EventInstance *eventInstance);
+    bool internalDispatchEvent(JSEvent::EventInstance *eventInstance);
 
-  private:
-//    std::array<JSStringRef, 3> propertyNames{
-//      JSStringCreateWithUTF8CString("addEventListener"),
-//      JSStringCreateWithUTF8CString("removeEventListener"),
-//      JSStringCreateWithUTF8CString("dispatchEvent"),
-//    };
+    JSObjectRef _addEventListener {nullptr};
+    JSObjectRef _removeEventListener {nullptr};
+    JSObjectRef _dispatchEvent {nullptr};
   };
 };
 

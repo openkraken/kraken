@@ -83,13 +83,22 @@ JSValueRef JSEvent::EventInstance::getProperty(JSStringRef nameRef, JSValueRef *
   } else if (name == "defaultPrevented") {
     return JSValueMakeBoolean(_hostClass->ctx, _canceledFlag);
   } else if (name == "stopPropagation") {
-    return propertyBindingFunction(_hostClass->context, this, "stopPropagation", stopPropagation);
+    if (_stopPropagation == nullptr) {
+      _stopPropagation = propertyBindingFunction(_hostClass->context, this, "stopPropagation", stopPropagation);
+    }
+    return _stopPropagation;
   } else if (name == "cancelBubble") {
     return JSValueMakeBoolean(_hostClass->ctx, _stopPropagationFlag);
   } else if (name == "stopImmediatePropagation") {
-    return propertyBindingFunction(_hostClass->context, this, "stopImmediatePropagation", stopImmediatePropagation);
+    if (_stopImmediatePropagation == nullptr) {
+      _stopImmediatePropagation = propertyBindingFunction(_hostClass->context, this, "stopImmediatePropagation", stopImmediatePropagation);
+    }
+    return _stopImmediatePropagation;
   } else if (name == "preventDefault") {
-    return propertyBindingFunction(_hostClass->context, this, "preventDefault", preventDefault);
+    if (_preventDefault == nullptr) {
+      _preventDefault = propertyBindingFunction(_hostClass->context, this, "preventDefault", preventDefault);
+    }
+    return _preventDefault;
   }
 
   return nullptr;
@@ -134,17 +143,26 @@ void JSEvent::EventInstance::setProperty(JSStringRef nameRef, JSValueRef value, 
 }
 
 JSEvent::EventInstance::~EventInstance() {
-  // Release propertyNames;
-  for (auto &propertyName : propertyNames) {
-    JSStringRelease(propertyName);
-  }
-
   delete nativeEvent;
 }
 void JSEvent::EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-  for (auto &property : propertyNames) {
+  for (auto &property : getEventPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
+}
+
+std::array<JSStringRef, 8> &JSEvent::EventInstance::getEventPropertyNames() {
+  static std::array<JSStringRef, 8> propertyNames{
+      JSStringCreateWithUTF8CString("type"),
+      JSStringCreateWithUTF8CString("bubbles"),
+      JSStringCreateWithUTF8CString("cancelable"),
+      JSStringCreateWithUTF8CString("timeStamp"),
+      JSStringCreateWithUTF8CString("defaultPrevented"),
+      JSStringCreateWithUTF8CString("targetId"),
+      JSStringCreateWithUTF8CString("currentTarget"),
+      JSStringCreateWithUTF8CString("srcElement"),
+  };
+  return propertyNames;
 }
 
 } // namespace kraken::binding::jsc

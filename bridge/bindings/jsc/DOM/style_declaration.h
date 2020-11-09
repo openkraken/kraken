@@ -27,6 +27,8 @@ public:
 
   class StyleDeclarationInstance : public Instance {
   public:
+    static std::array<JSStringRef, 3> &getStyleDeclarationPropertyNames();
+
     StyleDeclarationInstance() = delete;
     StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration,
                              JSEventTarget::EventTargetInstance *ownerEventTarget);
@@ -49,11 +51,10 @@ public:
   private:
     std::unordered_map<std::string, JSStringRef> properties;
     const JSEventTarget::EventTargetInstance *ownerEventTarget;
-//    std::array<JSStringRef, 3> propertyNames{
-//      JSStringCreateWithUTF8CString("setProperty"),
-//      JSStringCreateWithUTF8CString("removeProperty"),
-//      JSStringCreateWithUTF8CString("getPropertyValue"),
-//    };
+
+    JSObjectRef _setProperty;
+    JSObjectRef _getPropertyValue;
+    JSObjectRef _removeProperty;
   };
 };
 

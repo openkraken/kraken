@@ -27,6 +27,8 @@ public:
 
   class DocumentInstance : public NodeInstance {
   public:
+    static std::array<JSStringRef, 4> &getDocumentPropertyNames();
+
     DocumentInstance() = delete;
     explicit DocumentInstance(JSDocument *document);
     ~DocumentInstance();
@@ -35,13 +37,8 @@ public:
 
   private:
     JSObjectRef body;
-    JSObjectRef createElement_;
-    std::array<JSStringRef, 4> propertyNames{
-      JSStringCreateWithUTF8CString("body"),
-      JSStringCreateWithUTF8CString("createElement"),
-      JSStringCreateWithUTF8CString("createTextNode"),
-      JSStringCreateWithUTF8CString("createComment"),
-    };
+    JSObjectRef _createElement;
+    JSObjectRef _createTextNode;
   };
 };
 

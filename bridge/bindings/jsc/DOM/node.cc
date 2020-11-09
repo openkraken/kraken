@@ -18,11 +18,6 @@ JSNode::JSNode(JSContext *context) : JSEventTarget(context, "Node") {}
 JSNode::JSNode(JSContext *context, const char *name) : JSEventTarget(context, name) {}
 
 JSNode::NodeInstance::~NodeInstance() {
-  // Release propertyNames;
-//  for (auto &propertyName : propertyNames) {
-//    JSStringRelease(propertyName);
-//  }
-
   // The this node is finalized, should tell all children this parent will no longer protecting them.
   for (auto &node : childNodes) {
     node->parentNode = nullptr;
@@ -209,7 +204,7 @@ JSValueRef JSNode::NodeInstance::replaceChild(JSContextRef ctx, JSObjectRef func
 }
 
 JSValueRef JSNode::NodeInstance::textContent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                       size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(function));
   std::string &&textContent = selfInstance->internalTextContent();
 
@@ -232,8 +227,8 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       JSValueProtect(_hostClass->ctx, node->object);
       // TODO: newChild._notifyNodeInsert(parentNode);
 
-      NativeString nodeTargetId {};
-      NativeString position {};
+      NativeString nodeTargetId{};
+      NativeString position{};
       STD_STRING_TO_NATIVE_STRING(std::to_string(node->eventTargetId).c_str(), nodeTargetId);
       STD_STRING_TO_NATIVE_STRING("beforebegin", position);
 
@@ -261,10 +256,10 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   JSValueProtect(_hostClass->ctx, node->object);
 
   //  TODO: child._notifyNodeInsert(this);
-  NativeString childTargetId {};
+  NativeString childTargetId{};
   STD_STRING_TO_NATIVE_STRING(std::to_string(node->eventTargetId).c_str(), childTargetId);
 
-  NativeString position {};
+  NativeString position{};
   STD_STRING_TO_NATIVE_STRING("beforeend", position);
   auto args = new NativeString *[2];
   args[0] = childTargetId.clone();
@@ -315,8 +310,8 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   //  TODO: oldChild._notifyNodeRemoved(parentNode);
   //  TODO: newChild._notifyNodeInsert(parentNode);
 
-  NativeString newChildTargetId {};
-  NativeString position {};
+  NativeString newChildTargetId{};
+  NativeString position{};
   STD_STRING_TO_NATIVE_STRING(std::to_string(newChild->eventTargetId).c_str(), newChildTargetId);
   STD_STRING_TO_NATIVE_STRING("afterend", position);
   auto args = new NativeString *[2];
@@ -350,13 +345,25 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
     auto instance = nextSibling();
     return instance != nullptr ? instance->object : nullptr;
   } else if (name == "appendChild") {
-    return propertyBindingFunction(_hostClass->context, this, "appendChild", appendChild);
+    if (_appendChild == nullptr) {
+      _appendChild = propertyBindingFunction(_hostClass->context, this, "appendChild", appendChild);;
+    }
+    return _appendChild;
   } else if (name == "remove") {
-    return propertyBindingFunction(_hostClass->context, this, "remove", remove);
+    if (_remove == nullptr) {
+      _remove = propertyBindingFunction(_hostClass->context, this, "remove", remove);
+    }
+    return _remove;
   } else if (name == "insertBefore") {
-    return propertyBindingFunction(_hostClass->context, this, "insertBefore", insertBefore);
+    if (_insertBefore == nullptr) {
+      _insertBefore = propertyBindingFunction(_hostClass->context, this, "insertBefore", insertBefore);
+    }
+    return _insertBefore;
   } else if (name == "replaceChild") {
-    return propertyBindingFunction(_hostClass->context, this, "replaceChild", replaceChild);
+    if (_replaceChild == nullptr) {
+      _replaceChild = propertyBindingFunction(_hostClass->context, this, "replaceChild", replaceChild);
+    }
+    return _replaceChild;
   } else if (name == "childNodes") {
     auto arguments = new JSValueRef[childNodes.size()];
 
@@ -374,7 +381,7 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
 }
 
 std::string JSNode::NodeInstance::internalTextContent() {
-
+  //TODO: implement textContent;
 }
 
 void JSNode::NodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
@@ -384,9 +391,20 @@ void JSNode::NodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JS
 void JSNode::NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   EventTargetInstance::getPropertyNames(accumulator);
 
-//  for (auto &property : propertyNames) {
-//    JSPropertyNameAccumulatorAddName(accumulator, property);
-//  }
+  for (auto &property : getNodePropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+}
+
+std::array<JSStringRef, 12> &JSNode::NodeInstance::getNodePropertyNames() {
+  static std::array<JSStringRef, 12> propertyNames{
+    JSStringCreateWithUTF8CString("isConnected"),     JSStringCreateWithUTF8CString("firstChild"),
+    JSStringCreateWithUTF8CString("lastChild"),       JSStringCreateWithUTF8CString("childNodes"),
+    JSStringCreateWithUTF8CString("previousSibling"), JSStringCreateWithUTF8CString("nextSibling"),
+    JSStringCreateWithUTF8CString("appendChild"),     JSStringCreateWithUTF8CString("remove"),
+    JSStringCreateWithUTF8CString("insertBefore"),    JSStringCreateWithUTF8CString("replaceChild"),
+    JSStringCreateWithUTF8CString("nodeType"),        JSStringCreateWithUTF8CString("nodeName")};
+  return propertyNames;
 }
 
 } // namespace kraken::binding::jsc

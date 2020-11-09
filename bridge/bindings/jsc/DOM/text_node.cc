@@ -48,8 +48,6 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(JSStringRef nameRef, JSValu
 
   if (name == "data" || name == "textContent") {
     return JSValueMakeString(_hostClass->ctx, data);
-  } else if (name == "nodeType") {
-    return JSValueMakeNumber(_hostClass->ctx, nodeType);
   } else if (name == "nodeName") {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#text");
     return JSValueMakeString(_hostClass->ctx, nodeName);
@@ -85,6 +83,23 @@ void JSTextNode::TextNodeInstance::setProperty(JSStringRef nameRef, JSValueRef v
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   }
   JSNode::NodeInstance::setProperty(nameRef, value, exception);
+}
+
+std::array<JSStringRef, 3> & JSTextNode::TextNodeInstance::getTextNodePropertyNames() {
+  static std::array<JSStringRef, 3> propertyNames {
+    JSStringCreateWithUTF8CString("data"),
+    JSStringCreateWithUTF8CString("textContent"),
+    JSStringCreateWithUTF8CString("nodeName")
+  };
+  return propertyNames;
+}
+
+void JSTextNode::TextNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  NodeInstance::getPropertyNames(accumulator);
+
+  for (auto &property : getTextNodePropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
 }
 
 } // namespace kraken::binding::jsc

@@ -30,7 +30,7 @@ JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostClass(c
 JSEventTarget::JSEventTarget(JSContext *context) : HostClass(context, "EventTarget") {}
 
 JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                             const JSValueRef *arguments, JSValueRef *exception) {
+                                               const JSValueRef *arguments, JSValueRef *exception) {
   return HostClass::instanceConstructor(ctx, constructor, argumentCount, arguments, exception);
 }
 
@@ -55,11 +55,6 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
     delete disposeCallbackData;
   };
   foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
-
-  // Release propertyNames;
-//  for (auto &propertyName : propertyNames) {
-//    JSStringRelease(propertyName);
-//  }
 
   // Release handler callbacks.
   for (auto &it : _eventHandlers) {
@@ -208,7 +203,7 @@ JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, J
   bool cancelled;
 
   while (eventInstance->nativeEvent->currentTarget != nullptr) {
-    cancelled = eventTargetInstance->_dispatchEvent(eventInstance);
+    cancelled = eventTargetInstance->internalDispatchEvent(eventInstance);
     if (eventInstance->nativeEvent->bubbles || cancelled) break;
     if (eventInstance->nativeEvent->currentTarget != nullptr) {
       auto node = reinterpret_cast<JSNode::NodeInstance *>(eventInstance->nativeEvent->currentTarget);
@@ -224,11 +219,20 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(JSStringRef nameRef, 
   std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "addEventListener") {
-    return propertyBindingFunction(_hostClass->context, this, "addEventListener", addEventListener);
+    if (_addEventListener == nullptr) {
+      _addEventListener = propertyBindingFunction(_hostClass->context, this, "addEventListener", addEventListener);
+    }
+    return _addEventListener;
   } else if (name == "removeEventListener") {
-    return propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
+    if (_removeEventListener) {
+      _removeEventListener = propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
+    }
+    return _removeEventListener;
   } else if (name == "dispatchEvent") {
-    return propertyBindingFunction(_hostClass->context, this, "dispatchEvent", dispatchEvent);
+    if (_dispatchEvent == nullptr) {
+      _dispatchEvent = propertyBindingFunction(_hostClass->context, this, "dispatchEvent", dispatchEvent);
+    }
+    return _dispatchEvent;
   } else if (name.substr(0, 2) == "on") {
     return getPropertyHandler(name, exception);
   }
@@ -287,17 +291,26 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
 
   NativeString **args = new NativeString *[1];
   args[0] = eventNameArgs.clone();
-  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId,
-                                                                              UICommandType::addEvent, args, 1, 0x00);
+  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommandType::addEvent,
+                                                                              args, 1, nullptr);
 }
 
 void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-//  for (auto &propertyName : propertyNames) {
-//    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
-//  }
+  for (auto &propertyName : getEventTargetPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
+  }
 }
 
-bool JSEventTarget::EventTargetInstance::_dispatchEvent(JSEvent::EventInstance *eventInstance) {
+std::array<JSStringRef, 3> &JSEventTarget::EventTargetInstance::getEventTargetPropertyNames() {
+  static std::array<JSStringRef, 3> propertyNames{
+    JSStringCreateWithUTF8CString("addEventListener"),
+    JSStringCreateWithUTF8CString("removeEventListener"),
+    JSStringCreateWithUTF8CString("dispatchEvent"),
+  };
+  return propertyNames;
+}
+
+bool JSEventTarget::EventTargetInstance::internalDispatchEvent(JSEvent::EventInstance *eventInstance) {
   auto eventType = static_cast<EventType>(eventInstance->nativeEvent->type);
   auto stack = _eventHandlers[eventType];
 

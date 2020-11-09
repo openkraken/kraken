@@ -40,7 +40,8 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
 JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                       size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.", exception);
+    JSC_THROW_ERROR(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.",
+                    exception);
     return nullptr;
   }
 
@@ -66,40 +67,51 @@ JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : NodeInsta
   body = JSObjectCallAsConstructor(document->ctx, elementConstructor->classObject, 2, arguments, nullptr);
   JSValueProtect(document->ctx, body);
 
-  createElement_ = propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
-  JSValueProtect(document->ctx, createElement_);
+  _createElement = propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
+  JSValueProtect(document->ctx, _createElement);
+
+  _createTextNode = propertyBindingFunction(_hostClass->context, this, "createTextNode", createTextNode);
+  JSValueProtect(document->ctx, _createTextNode);
 }
 
 JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  JSValueRef nodeResult = JSNode::NodeInstance::getProperty(nameRef, exception);
-  if (nodeResult != nullptr) return nodeResult;
-
   std::string &&name = JSStringToStdString(nameRef);
   if (name == "createElement") {
-    return createElement_;
+    return _createElement;
   } else if (name == "body") {
     return body;
   } else if (name == "createTextNode") {
-    return propertyBindingFunction(_hostClass->context, this, "createTextNode", createTextNode);
+    return _createTextNode;
   } else if (name == "nodeName") {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#document");
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
 
-  return nullptr;
+  return JSNode::NodeInstance::getProperty(nameRef, exception);
 }
 
 JSDocument::DocumentInstance::~DocumentInstance() {
   JSValueUnprotect(_hostClass->ctx, body);
-  JSValueUnprotect(_hostClass->ctx, createElement_);
+  JSValueUnprotect(_hostClass->ctx, _createElement);
+  JSValueUnprotect(_hostClass->ctx, _createTextNode);
 }
 
 void JSDocument::DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   JSNode::NodeInstance::getPropertyNames(accumulator);
 
-  for (auto &property : propertyNames) {
+  for (auto &property : getDocumentPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
+}
+
+std::array<JSStringRef, 4> &JSDocument::DocumentInstance::getDocumentPropertyNames() {
+  static std::array<JSStringRef, 4> propertyNames{
+    JSStringCreateWithUTF8CString("body"),
+    JSStringCreateWithUTF8CString("createElement"),
+    JSStringCreateWithUTF8CString("createTextNode"),
+    JSStringCreateWithUTF8CString("createComment"),
+  };
+  return propertyNames;
 }
 
 } // namespace kraken::binding::jsc

@@ -29,21 +29,14 @@ JSObjectRef JSCommentNode::instanceConstructor(JSContextRef ctx, JSObjectRef con
 }
 
 JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsCommentNode)
-  : NodeInstance(jsCommentNode, NodeType::COMMENT_NODE) {
-}
-
+  : NodeInstance(jsCommentNode, NodeType::COMMENT_NODE) {}
 
 void JSCommentNode::CommentNodeInstance::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {
   NodeInstance::setProperty(name, value, exception);
   if (exception != nullptr) return;
-
-
 }
 
 JSValueRef JSCommentNode::CommentNodeInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  JSValueRef nodeResult = NodeInstance::getProperty(nameRef, exception);
-  if (nodeResult != nullptr) return nodeResult;
-
   std::string &&name = JSStringToStdString(nameRef);
   if (name == "data" || name == "textContent") {
     return JSValueMakeString(_hostClass->ctx, data);
@@ -54,10 +47,22 @@ JSValueRef JSCommentNode::CommentNodeInstance::getProperty(JSStringRef nameRef, 
     return JSValueMakeNumber(_hostClass->ctx, JSStringGetLength(data));
   }
 
-  return nullptr;
+  return NodeInstance::getProperty(nameRef, exception);
 }
 
 void JSCommentNode::CommentNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   NodeInstance::getPropertyNames(accumulator);
+
+  for (auto &property : getCommentPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+}
+
+std::array<JSStringRef, 2> &JSCommentNode::CommentNodeInstance::getCommentPropertyNames() {
+  static std::array<JSStringRef, 2> propertyNames{
+    JSStringCreateWithUTF8CString("data"),
+    JSStringCreateWithUTF8CString("length"),
+  };
+  return propertyNames;
 }
 } // namespace kraken::binding::jsc

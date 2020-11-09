@@ -27,6 +27,8 @@ public:
 
   class ElementInstance : public NodeInstance {
   public:
+    static std::array<JSStringRef, 1> &getElementPropertyNames();
+
     ElementInstance() = delete;
     explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId, JSValueRef *exception);
     ~ElementInstance();
@@ -35,10 +37,6 @@ public:
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style {nullptr};
     JSStringRef tagNameStringRef_;
-
-    std::array<JSStringRef, 1> propertyNames{
-      JSStringCreateWithUTF8CString("style")
-    };
   };
 };
 

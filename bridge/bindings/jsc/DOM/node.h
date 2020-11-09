@@ -32,9 +32,11 @@ public:
 
   class NodeInstance : public EventTargetInstance {
   public:
+    static std::array<JSStringRef, 12> &getNodePropertyNames();
+
     NodeInstance() = delete;
     NodeInstance(JSNode *node, NodeType nodeType);
-    ~NodeInstance();
+    ~NodeInstance() override;
 
     static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
@@ -78,14 +80,10 @@ public:
     void ensureDetached(JSNode::NodeInstance *node);
     std::vector<JSNode::NodeInstance *> childNodes;
 
-//    std::array<JSStringRef, 12> propertyNames{
-//      JSStringCreateWithUTF8CString("isConnected"),     JSStringCreateWithUTF8CString("firstChild"),
-//      JSStringCreateWithUTF8CString("lastChild"),       JSStringCreateWithUTF8CString("childNodes"),
-//      JSStringCreateWithUTF8CString("previousSibling"), JSStringCreateWithUTF8CString("nextSibling"),
-//      JSStringCreateWithUTF8CString("appendChild"),     JSStringCreateWithUTF8CString("remove"),
-//      JSStringCreateWithUTF8CString("insertBefore"),    JSStringCreateWithUTF8CString("replaceChild"),
-//      JSStringCreateWithUTF8CString("nodeType"), JSStringCreateWithUTF8CString("nodeName")
-//    };
+    JSObjectRef _appendChild {nullptr};
+    JSObjectRef _remove {nullptr};
+    JSObjectRef _insertBefore {nullptr};
+    JSObjectRef _replaceChild {nullptr};
   };
 };
 

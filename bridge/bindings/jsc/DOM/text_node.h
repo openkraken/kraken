@@ -25,10 +25,13 @@ public:
 
   class TextNodeInstance : public NodeInstance {
   public:
+    static std::array<JSStringRef, 3> &getTextNodePropertyNames();
+
     TextNodeInstance() = delete;
     explicit TextNodeInstance(JSTextNode *jsTextNode, JSStringRef data);
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
     void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
+    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   private:
     JSStringRef data {nullptr};
   };

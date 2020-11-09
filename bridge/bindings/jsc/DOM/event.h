@@ -148,10 +148,12 @@ public:
   explicit JSEvent(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                const JSValueRef *arguments, JSValueRef *exception) override;
+                                  const JSValueRef *arguments, JSValueRef *exception) override;
 
   class EventInstance : public Instance {
   public:
+    static std::array<JSStringRef, 8> &getEventPropertyNames();
+
     EventInstance() = delete;
     static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                       size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
@@ -178,16 +180,9 @@ public:
     bool _inPassiveListenerFlag{false};
 
   private:
-    std::array<JSStringRef, 8> propertyNames{
-      JSStringCreateWithUTF8CString("type"),
-      JSStringCreateWithUTF8CString("bubbles"),
-      JSStringCreateWithUTF8CString("cancelable"),
-      JSStringCreateWithUTF8CString("timeStamp"),
-      JSStringCreateWithUTF8CString("defaultPrevented"),
-      JSStringCreateWithUTF8CString("targetId"),
-      JSStringCreateWithUTF8CString("currentTarget"),
-      JSStringCreateWithUTF8CString("srcElement"),
-    };
+    JSObjectRef _stopImmediatePropagation{nullptr};
+    JSObjectRef _stopPropagation{nullptr};
+    JSObjectRef _preventDefault{nullptr};
   };
 };
 

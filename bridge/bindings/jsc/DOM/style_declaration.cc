@@ -87,21 +87,26 @@ CSSStyleDeclaration::StyleDeclarationInstance::~StyleDeclarationInstance() {
   for (auto &string : properties) {
     JSStringRelease(string.second);
   }
-
-//  for (auto &string : propertyNames) {
-//    JSStringRelease(string);
-//  }
 }
 
 JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "setProperty") {
-    return propertyBindingFunction(_hostClass->context, this, "setProperty", setProperty);
+    if (_setProperty == nullptr) {
+      _setProperty = propertyBindingFunction(_hostClass->context, this, "setProperty", setProperty);
+    }
+    return _setProperty;
   } else if (name == "removeProperty") {
-    return propertyBindingFunction(_hostClass->context, this, "removeProperty", removeProperty);
+    if (_removeProperty == nullptr) {
+      _removeProperty = propertyBindingFunction(_hostClass->context, this, "removeProperty", removeProperty);
+    }
+    return _removeProperty;
   } else if (name == "getPropertyValue") {
-    return propertyBindingFunction(_hostClass->context, this, "getPropertyValue", getPropertyValue);
+    if (_getPropertyValue == nullptr) {
+      _getPropertyValue = propertyBindingFunction(_hostClass->context, this, "getPropertyValue", getPropertyValue);
+    }
+    return _getPropertyValue;
   } else if (properties.contains(name)) {
     return JSValueMakeString(_hostClass->ctx, properties[name]);
   }
@@ -264,9 +269,18 @@ void CSSStyleDeclaration::StyleDeclarationInstance::getPropertyNames(JSPropertyN
     JSPropertyNameAccumulatorAddName(accumulator, prop.second);
   }
 
-//  for (auto &prop : propertyNames) {
-//    JSPropertyNameAccumulatorAddName(accumulator, prop);
-//  }
+  for (auto &prop : getStyleDeclarationPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, prop);
+  }
+}
+
+std::array<JSStringRef, 3> &CSSStyleDeclaration::StyleDeclarationInstance::getStyleDeclarationPropertyNames() {
+  static std::array<JSStringRef, 3> propertyNames{
+    JSStringCreateWithUTF8CString("setProperty"),
+    JSStringCreateWithUTF8CString("removeProperty"),
+    JSStringCreateWithUTF8CString("getPropertyValue"),
+  };
+  return propertyNames;
 }
 
 } // namespace kraken::binding::jsc

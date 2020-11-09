@@ -25,6 +25,8 @@ public:
 
   class CommentNodeInstance : public NodeInstance {
   public:
+    static std::array<JSStringRef, 2> &getCommentPropertyNames();
+
     CommentNodeInstance() = delete;
     explicit CommentNodeInstance(JSCommentNode *jsCommentNode);
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
@@ -33,11 +35,6 @@ public:
 
   private:
     JSStringRef data;
-
-    std::array<JSStringRef, 2> propertyNames{
-      JSStringCreateWithUTF8CString("data"),
-      JSStringCreateWithUTF8CString("length"),
-    };
   };
 };
 

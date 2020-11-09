@@ -11,7 +11,6 @@
 namespace kraken::binding::jsc {
 using namespace foundation;
 
-
 void bindElement(std::unique_ptr<JSContext> &context) {
   auto element = JSElement::instance(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Element", element->classObject);
@@ -28,7 +27,7 @@ JSElement *JSElement::instance(JSContext *context) {
 }
 
 JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                         const JSValueRef *arguments, JSValueRef *exception) {
+                                           const JSValueRef *arguments, JSValueRef *exception) {
   JSValueRef tagNameValue = arguments[0];
   double targetId;
 
@@ -65,12 +64,11 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
   // No needs to send create element for BODY element.
   if (targetId == BODY_TARGET_ID) {
     UICommandTaskMessageQueue::instance(element->context->getContextId())
-        ->registerCommand(targetId, UICommandType::initBody, args, argsLength, nativeEventTarget);
+      ->registerCommand(targetId, UICommandType::initBody, args, argsLength, nativeEventTarget);
   } else {
     UICommandTaskMessageQueue::instance(element->context->getContextId())
-        ->registerCommand(targetId, UICommandType::createElement, args, argsLength, nativeEventTarget);
+      ->registerCommand(targetId, UICommandType::createElement, args, argsLength, nativeEventTarget);
   }
-
 }
 
 JSElement::ElementInstance::~ElementInstance() {
@@ -81,15 +79,12 @@ JSElement::ElementInstance::~ElementInstance() {
 }
 
 JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  JSValueRef result = JSNode::NodeInstance::getProperty(nameRef, exception);
-
-  if (result != nullptr) return result;
-
   std::string name = JSStringToStdString(nameRef);
 
   if (name == "style") {
     if (style == nullptr) {
-      style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(_hostClass->context), this);
+      style =
+        new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(_hostClass->context), this);
       JSValueProtect(_hostClass->ctx, style->object);
     }
 
@@ -98,11 +93,20 @@ JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueR
     return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
   }
 
-  return nullptr;
+  return JSNode::NodeInstance::getProperty(nameRef, exception);
 }
 
 void JSElement::ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   NodeInstance::getPropertyNames(accumulator);
+
+  for (auto &property : getElementPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+}
+
+std::array<JSStringRef, 1> &JSElement::ElementInstance::getElementPropertyNames() {
+  static std::array<JSStringRef, 1> propertyNames{JSStringCreateWithUTF8CString("style")};
+  return propertyNames;
 }
 
 } // namespace kraken::binding::jsc
