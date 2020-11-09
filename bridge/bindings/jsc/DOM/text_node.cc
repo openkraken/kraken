@@ -59,7 +59,7 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(JSStringRef nameRef, JSValu
 void JSTextNode::TextNodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
   std::string &&name = JSStringToStdString(nameRef);
 
-  if (name == "data" || name == "textContent") {
+  if (name == "data") {
     JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(stringRef);
 
@@ -100,6 +100,10 @@ void JSTextNode::TextNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef
   for (auto &property : getTextNodePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
+}
+
+JSStringRef JSTextNode::TextNodeInstance::internalTextContent() {
+  return data;
 }
 
 } // namespace kraken::binding::jsc

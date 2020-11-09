@@ -203,16 +203,6 @@ JSValueRef JSNode::NodeInstance::replaceChild(JSContextRef ctx, JSObjectRef func
   return nullptr;
 }
 
-JSValueRef JSNode::NodeInstance::textContent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(function));
-  std::string &&textContent = selfInstance->internalTextContent();
-
-  JSStringRef textContentRef = JSStringCreateWithUTF8CString(textContent.c_str());
-
-  return JSValueMakeString(ctx, textContentRef);
-}
-
 void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode) {
   if (referenceNode == nullptr) {
     internalAppendChild(node);
@@ -375,13 +365,12 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
     return array;
   } else if (name == "nodeType") {
     return JSValueMakeNumber(_hostClass->ctx, nodeType);
+  } else if (name == "textContent") {
+    JSStringRef textContent = internalTextContent();
+    return JSValueMakeString(_hostClass->ctx, textContent);
   }
 
   return JSEventTarget::EventTargetInstance::getProperty(nameRef, exception);
-}
-
-std::string JSNode::NodeInstance::internalTextContent() {
-  //TODO: implement textContent;
 }
 
 void JSNode::NodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
@@ -406,5 +395,7 @@ std::array<JSStringRef, 12> &JSNode::NodeInstance::getNodePropertyNames() {
     JSStringCreateWithUTF8CString("nodeType"),        JSStringCreateWithUTF8CString("nodeName")};
   return propertyNames;
 }
+
+JSStringRef JSNode::NodeInstance::internalTextContent() {return nullptr;}
 
 } // namespace kraken::binding::jsc

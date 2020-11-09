@@ -38,7 +38,7 @@ void JSCommentNode::CommentNodeInstance::setProperty(JSStringRef name, JSValueRe
 
 JSValueRef JSCommentNode::CommentNodeInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string &&name = JSStringToStdString(nameRef);
-  if (name == "data" || name == "textContent") {
+  if (name == "data") {
     return JSValueMakeString(_hostClass->ctx, data);
   } else if (name == "nodeName") {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#comment");
@@ -64,5 +64,9 @@ std::array<JSStringRef, 2> &JSCommentNode::CommentNodeInstance::getCommentProper
     JSStringCreateWithUTF8CString("length"),
   };
   return propertyNames;
+}
+
+JSStringRef JSCommentNode::CommentNodeInstance::internalTextContent() {
+  return data;
 }
 } // namespace kraken::binding::jsc

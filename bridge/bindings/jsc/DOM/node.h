@@ -54,9 +54,6 @@ public:
     static JSValueRef replaceChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
 
-    static JSValueRef textContent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef arguments[], JSValueRef *exception);
-
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
     void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
@@ -66,19 +63,19 @@ public:
     JSNode::NodeInstance *lastChild();
     JSNode::NodeInstance *previousSibling();
     JSNode::NodeInstance *nextSibling();
-    std::string internalTextContent();
     void internalAppendChild(JSNode::NodeInstance *node);
     void internalRemove(JSValueRef *exception);
     JSNode::NodeInstance *internalRemoveChild(JSNode::NodeInstance *node, JSValueRef *exception);
     void internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode);
+    virtual JSStringRef internalTextContent();
     JSNode::NodeInstance *internalReplaceChild(JSNode::NodeInstance *newChild, JSNode::NodeInstance *oldChild);
 
     NodeType nodeType;
     JSNode::NodeInstance *parentNode{nullptr};
+    std::vector<JSNode::NodeInstance *> childNodes;
 
   private:
     void ensureDetached(JSNode::NodeInstance *node);
-    std::vector<JSNode::NodeInstance *> childNodes;
 
     JSObjectRef _appendChild {nullptr};
     JSObjectRef _remove {nullptr};

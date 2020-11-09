@@ -28,12 +28,12 @@ public:
   class ElementInstance : public NodeInstance {
   public:
     static std::array<JSStringRef, 1> &getElementPropertyNames();
-
     ElementInstance() = delete;
     explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId, JSValueRef *exception);
     ~ElementInstance();
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+    JSStringRef internalTextContent() override;
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style {nullptr};
     JSStringRef tagNameStringRef_;

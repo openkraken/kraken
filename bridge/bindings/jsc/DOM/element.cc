@@ -104,6 +104,22 @@ void JSElement::ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef a
   }
 }
 
+JSStringRef JSElement::ElementInstance::internalTextContent() {
+  std::vector<char> buffer;
+
+  for (auto &node : childNodes) {
+    JSStringRef nodeText = node->internalTextContent();
+    size_t maxBufferSize = JSStringGetMaximumUTF8CStringSize(nodeText);
+    std::vector<char> nodeBuffer(maxBufferSize);
+    JSStringGetUTF8CString(nodeText, nodeBuffer.data(), maxBufferSize);
+    std::string nodeString = std::string(nodeBuffer.data());
+    buffer.reserve(buffer.size() + nodeString.size());
+    buffer.insert(buffer.end(), nodeString.begin(), nodeString.end());
+  }
+
+  return JSStringCreateWithUTF8CString(buffer.data());
+}
+
 std::array<JSStringRef, 1> &JSElement::ElementInstance::getElementPropertyNames() {
   static std::array<JSStringRef, 1> propertyNames{JSStringCreateWithUTF8CString("style")};
   return propertyNames;
