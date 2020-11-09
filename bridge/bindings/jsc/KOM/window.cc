@@ -27,7 +27,7 @@ JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef
   JSValueRef result = EventTargetInstance::getProperty(nameRef, exception);
   if (result != nullptr) return result;
 
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "devicePixelRatio") {
     if (getDartMethod()->devicePixelRatio == nullptr) {

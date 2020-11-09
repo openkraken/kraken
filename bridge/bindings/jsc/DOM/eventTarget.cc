@@ -57,9 +57,9 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
 
   // Release propertyNames;
-  for (auto &propertyName : propertyNames) {
-    JSStringRelease(propertyName);
-  }
+//  for (auto &propertyName : propertyNames) {
+//    JSStringRelease(propertyName);
+//  }
 
   // Release handler callbacks.
   for (auto &it : _eventHandlers) {
@@ -101,7 +101,7 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
   }
 
   JSStringRef eventNameStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
-  std::string eventName = JSStringToStdString(eventNameStringRef);
+  std::string &&eventName = JSStringToStdString(eventNameStringRef);
   EventType eventType = EventTypeValues[eventName];
 
   // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and
@@ -162,7 +162,7 @@ JSValueRef JSEventTarget::EventTargetInstance::removeEventListener(JSContextRef 
   }
 
   JSStringRef eventNameStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
-  std::string eventName = JSStringToStdString(eventNameStringRef);
+  std::string &&eventName = JSStringToStdString(eventNameStringRef);
   EventType eventType = EventTypeValues[eventName];
 
   if (!eventTargetInstance->_eventHandlers.contains(eventType)) {
@@ -221,7 +221,7 @@ JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, J
 }
 
 JSValueRef JSEventTarget::EventTargetInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "addEventListener") {
     return propertyBindingFunction(_hostClass->context, this, "addEventListener", addEventListener);
@@ -237,7 +237,7 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(JSStringRef nameRef, 
 }
 
 void JSEventTarget::EventTargetInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name.substr(0, 2) == "on") {
     setPropertyHandler(name, value, exception);
@@ -292,9 +292,9 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
 }
 
 void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-  for (auto &propertyName : propertyNames) {
-    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
-  }
+//  for (auto &propertyName : propertyNames) {
+//    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
+//  }
 }
 
 bool JSEventTarget::EventTargetInstance::_dispatchEvent(JSEvent::EventInstance *eventInstance) {

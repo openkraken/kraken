@@ -101,7 +101,7 @@ JSValueRef constructorCall(JSContextRef ctx, JSObjectRef function, JSObjectRef t
 
 JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                        JSValueRef *exception) {
-  auto name = JSStringToStdString(propertyName);
+  auto &&name = JSStringToStdString(propertyName);
   auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));
 
   if (name == "call") {

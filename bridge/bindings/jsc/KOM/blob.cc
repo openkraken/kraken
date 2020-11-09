@@ -10,7 +10,7 @@
 namespace kraken::binding::jsc {
 
 void BlobBuilder::append(JSContext &context, JSStringRef text) {
-  std::string str = JSStringToStdString(text);
+  std::string &&str = JSStringToStdString(text);
   std::vector<uint8_t> strArr(str.begin(), str.end());
   _data.reserve(_data.size() + strArr.size());
   _data.insert(_data.end(), strArr.begin(), strArr.end());
@@ -148,7 +148,7 @@ JSValueRef JSBlob::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 
   if (!JSValueIsUndefined(ctx, contentTypeValueRef)) {
     JSStringRef contentTypeStringRef = JSValueToStringCopy(ctx, contentTypeValueRef, exception);
-    mimeType = JSStringToStdString(contentTypeStringRef);
+    mimeType = std::move(JSStringToStdString(contentTypeStringRef));
     JSStringRelease(contentTypeStringRef);
   }
 
@@ -182,7 +182,7 @@ JSValueRef JSBlob::arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectR
 }
 
 JSValueRef JSBlob::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "slice") {
     return propertyBindingFunction(context, this, "slice", slice);

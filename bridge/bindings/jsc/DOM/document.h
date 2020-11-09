@@ -35,6 +35,7 @@ public:
 
   private:
     JSObjectRef body;
+    JSObjectRef createElement_;
     std::array<JSStringRef, 4> propertyNames{
       JSStringCreateWithUTF8CString("body"),
       JSStringCreateWithUTF8CString("createElement"),

@@ -44,7 +44,7 @@ JSValueRef JSCommentNode::CommentNodeInstance::getProperty(JSStringRef nameRef, 
   JSValueRef nodeResult = NodeInstance::getProperty(nameRef, exception);
   if (nodeResult != nullptr) return nodeResult;
 
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
   if (name == "data" || name == "textContent") {
     return JSValueMakeString(_hostClass->ctx, data);
   } else if (name == "nodeName") {

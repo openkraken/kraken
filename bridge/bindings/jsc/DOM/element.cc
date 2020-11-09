@@ -71,13 +71,13 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
         ->registerCommand(targetId, UICommandType::createElement, args, argsLength, nativeEventTarget);
   }
 
-  style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(element->context), this);
-  JSValueProtect(element->ctx, style->object);
 }
 
 JSElement::ElementInstance::~ElementInstance() {
   JSStringRelease(tagNameStringRef_);
-  JSValueUnprotect(_hostClass->ctx, style->object);
+  if (style != nullptr) {
+    JSValueUnprotect(_hostClass->ctx, style->object);
+  }
 }
 
 JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
@@ -88,6 +88,11 @@ JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueR
   std::string name = JSStringToStdString(nameRef);
 
   if (name == "style") {
+    if (style == nullptr) {
+      style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(_hostClass->context), this);
+      JSValueProtect(_hostClass->ctx, style->object);
+    }
+
     return style->object;
   } else if (name == "nodeName") {
     return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
@@ -98,10 +103,6 @@ JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueR
 
 void JSElement::ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   NodeInstance::getPropertyNames(accumulator);
-
-  for (auto &property : propertyNames) {
-    JSPropertyNameAccumulatorAddName(accumulator, property);
-  }
 }
 
 } // namespace kraken::binding::jsc

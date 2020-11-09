@@ -19,9 +19,9 @@ JSNode::JSNode(JSContext *context, const char *name) : JSEventTarget(context, na
 
 JSNode::NodeInstance::~NodeInstance() {
   // Release propertyNames;
-  for (auto &propertyName : propertyNames) {
-    JSStringRelease(propertyName);
-  }
+//  for (auto &propertyName : propertyNames) {
+//    JSStringRelease(propertyName);
+//  }
 
   // The this node is finalized, should tell all children this parent will no longer protecting them.
   for (auto &node : childNodes) {
@@ -333,7 +333,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
 }
 
 JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "isConnected") {
     return JSValueMakeBoolean(_hostClass->ctx, isConnected());
@@ -384,9 +384,9 @@ void JSNode::NodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JS
 void JSNode::NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   EventTargetInstance::getPropertyNames(accumulator);
 
-  for (auto &property : propertyNames) {
-    JSPropertyNameAccumulatorAddName(accumulator, property);
-  }
+//  for (auto &property : propertyNames) {
+//    JSPropertyNameAccumulatorAddName(accumulator, property);
+//  }
 }
 
 } // namespace kraken::binding::jsc

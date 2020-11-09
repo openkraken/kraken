@@ -67,11 +67,11 @@ public:
     bool _dispatchEvent(JSEvent::EventInstance *eventInstance);
 
   private:
-    std::array<JSStringRef, 3> propertyNames{
-      JSStringCreateWithUTF8CString("addEventListener"),
-      JSStringCreateWithUTF8CString("removeEventListener"),
-      JSStringCreateWithUTF8CString("dispatchEvent"),
-    };
+//    std::array<JSStringRef, 3> propertyNames{
+//      JSStringCreateWithUTF8CString("addEventListener"),
+//      JSStringCreateWithUTF8CString("removeEventListener"),
+//      JSStringCreateWithUTF8CString("dispatchEvent"),
+//    };
   };
 };
 

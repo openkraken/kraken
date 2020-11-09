@@ -33,7 +33,7 @@ public:
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   private:
-    CSSStyleDeclaration::StyleDeclarationInstance *style;
+    CSSStyleDeclaration::StyleDeclarationInstance *style {nullptr};
     JSStringRef tagNameStringRef_;
 
     std::array<JSStringRef, 1> propertyNames{

@@ -33,14 +33,15 @@ static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
     return propertyCache[propertyName];
   }
 
-  std::vector<char> buffer(propertyName.size() * 2);
+  std::vector<char> buffer(propertyName.size());
 
-  for (int i = 0; i < propertyName.size(); ++i) {
-    char c = propertyName[i];
-    if (!c) return propertyName;
+  size_t hyphen = 0;
+  for (size_t i = 0; i < propertyName.size(); ++i) {
+    char c = propertyName[i + hyphen];
+    if (!c) break;
     if (c == '-') {
-      i++;
-      buffer[i] = toASCIIUpper(c);
+      hyphen++;
+      buffer[i] = toASCIIUpper(propertyName[i + hyphen]);
     } else {
       buffer[i] = c;
     }
@@ -87,13 +88,13 @@ CSSStyleDeclaration::StyleDeclarationInstance::~StyleDeclarationInstance() {
     JSStringRelease(string.second);
   }
 
-  for (auto &string : propertyNames) {
-    JSStringRelease(string);
-  }
+//  for (auto &string : propertyNames) {
+//    JSStringRelease(string);
+//  }
 }
 
 JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "setProperty") {
     return propertyBindingFunction(_hostClass->context, this, "setProperty", setProperty);
@@ -110,13 +111,13 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(JSStringRe
 
 void CSSStyleDeclaration::StyleDeclarationInstance::setProperty(JSStringRef nameRef, JSValueRef value,
                                                                 JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
   internalSetProperty(nameRef, value, exception);
 }
 
 void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(JSStringRef nameRef, JSValueRef value,
                                                                         JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "setProperty" || name == "removeProperty" || name == "getPropertyValue") return;
 
@@ -148,7 +149,7 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(JSString
 }
 
 void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
   name = parseJavaScriptCSSPropertyName(name);
 
   if (!properties.contains(name)) {
@@ -179,7 +180,7 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStr
 
 JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::internalGetPropertyValue(JSStringRef nameRef,
                                                                                    JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
   name = parseJavaScriptCSSPropertyName(name);
 
   return JSValueMakeString(_hostClass->ctx, properties[name]);
@@ -263,9 +264,9 @@ void CSSStyleDeclaration::StyleDeclarationInstance::getPropertyNames(JSPropertyN
     JSPropertyNameAccumulatorAddName(accumulator, prop.second);
   }
 
-  for (auto &prop : propertyNames) {
-    JSPropertyNameAccumulatorAddName(accumulator, prop);
-  }
+//  for (auto &prop : propertyNames) {
+//    JSPropertyNameAccumulatorAddName(accumulator, prop);
+//  }
 }
 
 } // namespace kraken::binding::jsc

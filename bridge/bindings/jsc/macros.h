@@ -52,8 +52,8 @@
     JSValueRef stackRef = JSObjectGetProperty(ctx_, error, stackKey, nullptr);                                         \
     JSStringRef messageStr = JSValueToStringCopy(ctx_, messageRef, nullptr);                                           \
     JSStringRef stackStr = JSValueToStringCopy(ctx_, stackRef, nullptr);                                               \
-    std::string message = JSStringToStdString(messageStr);                                                             \
-    std::string stack = JSStringToStdString(stackStr);                                                                 \
+    std::string &&message = JSStringToStdString(messageStr);                                                             \
+    std::string &&stack = JSStringToStdString(stackStr);                                                                 \
     handler(getContextId(), (message + '\n' + stack).c_str());                                                         \
     JSStringRelease(messageKey);                                                                                       \
     JSStringRelease(stackKey);                                                                                         \

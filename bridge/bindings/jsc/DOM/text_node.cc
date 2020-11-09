@@ -44,10 +44,7 @@ JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringR
 }
 
 JSValueRef JSTextNode::TextNodeInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  JSValueRef nodeResult = JSNode::NodeInstance::getProperty(nameRef, exception);
-  if (nodeResult != nullptr) return nodeResult;
-
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "data" || name == "textContent") {
     return JSValueMakeString(_hostClass->ctx, data);
@@ -58,14 +55,11 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(JSStringRef nameRef, JSValu
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
 
-  return nullptr;
+  return JSNode::NodeInstance::getProperty(nameRef, exception);
 }
 
 void JSTextNode::TextNodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
-  JSNode::NodeInstance::setProperty(nameRef, value, exception);
-  if (exception != nullptr) return;
-
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "data" || name == "textContent") {
     JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
@@ -90,6 +84,7 @@ void JSTextNode::TextNodeInstance::setProperty(JSStringRef nameRef, JSValueRef v
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   }
+  JSNode::NodeInstance::setProperty(nameRef, value, exception);
 }
 
 } // namespace kraken::binding::jsc

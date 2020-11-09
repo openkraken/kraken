@@ -37,7 +37,7 @@ JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef construct
 
   const JSValueRef eventTypeValueRef = arguments[0];
   JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventTypeValueRef, exception);
-  std::string eventTypeName = JSStringToStdString(eventTypeStringRef);
+  std::string &&eventTypeName = JSStringToStdString(eventTypeStringRef);
   EventType eventType = EventTypeValues[eventTypeName];
   auto event = new EventInstance(this, eventType);
   return event->object;
@@ -53,7 +53,7 @@ JSEvent::EventInstance::EventInstance(JSEvent *jsEvent, EventType eventType) : I
 }
 
 JSValueRef JSEvent::EventInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "type") {
     JSStringRef eventStringRef = JSStringCreateWithUTF8CString(EventTypeKeys[nativeEvent->type]);
@@ -123,7 +123,7 @@ JSValueRef JSEvent::EventInstance::preventDefault(JSContextRef ctx, JSObjectRef 
 }
 
 void JSEvent::EventInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+  std::string &&name = JSStringToStdString(nameRef);
 
   if (name == "cancelBubble") {
     bool v = JSValueToBoolean(_hostClass->ctx, value);
