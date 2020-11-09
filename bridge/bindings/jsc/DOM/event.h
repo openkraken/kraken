@@ -9,7 +9,7 @@
 #include "bindings/jsc/host_class.h"
 #include "bindings/jsc/js_context.h"
 #include <array>
-#include <map>
+#include <unordered_map>
 
 namespace kraken::binding::jsc {
 
@@ -102,7 +102,7 @@ const char *EventTypeKeys[]{
   "volumechange",
 };
 
-std::map<std::string, EventType> EventTypeValues{
+std::unordered_map<std::string, EventType> EventTypeValues{
   {"none", EventType::none},
   {"input", EventType::input},
   {"appear", EventType::appear},

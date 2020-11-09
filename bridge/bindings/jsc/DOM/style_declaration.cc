@@ -27,7 +27,7 @@ template <typename CharacterType> inline CharacterType toASCIIUpper(CharacterTyp
 }
 
 static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
-  static std::map<std::string, std::string> propertyCache{};
+  static std::unordered_map<std::string, std::string> propertyCache{};
 
   if (propertyCache.contains(propertyName)) {
     return propertyCache[propertyName];

@@ -47,7 +47,7 @@ public:
     JSValueRef internalGetPropertyValue(JSStringRef name, JSValueRef *exception);
 
   private:
-    std::map<std::string, JSStringRef> properties;
+    std::unordered_map<std::string, JSStringRef> properties;
     const JSEventTarget::EventTargetInstance *ownerEventTarget;
 //    std::array<JSStringRef, 3> propertyNames{
 //      JSStringCreateWithUTF8CString("setProperty"),

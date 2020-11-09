@@ -63,7 +63,7 @@ public:
     int64_t eventTargetId;
     NativeEventTarget *nativeEventTarget {nullptr};
   private:
-    std::map<EventType, std::deque<JSObjectRef>> _eventHandlers;
+    std::unordered_map<EventType, std::deque<JSObjectRef>> _eventHandlers;
     bool _dispatchEvent(JSEvent::EventInstance *eventInstance);
 
   private:
