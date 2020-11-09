@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('flexbox_wrap', () => {
-  xit('long', async () => {
+  it('long', async () => {
     let div;
     div = createElement(
       'div',

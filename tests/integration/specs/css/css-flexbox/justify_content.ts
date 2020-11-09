@@ -398,4 +398,552 @@ describe('flexbox justify-content', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('should work with center when flex-grow exists', async () => {
+    let failFlag;
+    let flex;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          display: 'flex',
+          'justify-content': 'flex-end',
+          'align-items': 'center',
+          border: '5px solid green',
+          margin: '25px',
+          width: '250px',
+          height: '200px',
+          padding: '5px',
+          'border-radius': '3px',
+          position: 'absolute',
+          top: '70px',
+          left: '10px',
+          'text-align': 'center',
+          flex: '1 0 auto',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '30px',
+            height: '40px',
+            'text-align': 'center',
+            flex: '1 0 auto',
+            backgroundColor: 'yellow',
+            'box-sizing': 'border-box',
+          },
+        }),
+        (flex = createElement('div', {
+          id: 'flex',
+          style: {
+            padding: '10px',
+            width: '30px',
+            height: '40px',
+            'text-align': 'center',
+            flex: '2 0 auto',
+            background: 'green',
+            'box-sizing': 'border-box',
+          },
+        })),
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '30px',
+            height: '40px',
+            backgroundColor: 'blue',
+            'text-align': 'center',
+            flex: '1 0 auto',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with center when flex-shrink exists', async () => {
+    let failFlag;
+    let flex;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          display: 'flex',
+          'justify-content': 'flex-end',
+          'align-items': 'center',
+          border: '5px solid green',
+          margin: '25px',
+          width: '250px',
+          height: '200px',
+          padding: '5px',
+          'border-radius': '3px',
+          position: 'absolute',
+          top: '70px',
+          left: '10px',
+          'text-align': 'center',
+          flex: '1 0 auto',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            backgroundColor: 'yellow',
+            'box-sizing': 'border-box',
+          },
+        }),
+        (flex = createElement('div', {
+          id: 'flex',
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            background: 'green',
+            'box-sizing': 'border-box',
+          },
+        })),
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            backgroundColor: 'blue',
+            'text-align': 'center',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex-start when children width is larger than container', async () => {
+    let failFlag;
+    let flex;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          display: 'flex',
+          'justify-content': 'flex-start',
+          'align-items': 'center',
+          border: '5px solid green',
+          margin: '25px',
+          width: '250px',
+          height: '200px',
+          padding: '5px',
+          'border-radius': '3px',
+          position: 'absolute',
+          top: '70px',
+          left: '10px',
+          'text-align': 'center',
+          flex: '1 0 auto',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            backgroundColor: 'yellow',
+            'box-sizing': 'border-box',
+          },
+        }),
+        (flex = createElement('div', {
+          id: 'flex',
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            background: 'green',
+            'box-sizing': 'border-box',
+          },
+        })),
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            backgroundColor: 'blue',
+            flexShrink: 0,
+            'text-align': 'center',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex-end when children width is larger than container', async () => {
+    let failFlag;
+    let flex;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          display: 'flex',
+          'justify-content': 'flex-end',
+          'align-items': 'center',
+          border: '5px solid green',
+          margin: '25px',
+          width: '250px',
+          height: '200px',
+          padding: '5px',
+          'border-radius': '3px',
+          position: 'absolute',
+          top: '70px',
+          left: '10px',
+          'text-align': 'center',
+          flex: '1 0 auto',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            backgroundColor: 'yellow',
+            'box-sizing': 'border-box',
+          },
+        }),
+        (flex = createElement('div', {
+          id: 'flex',
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            background: 'green',
+            'box-sizing': 'border-box',
+          },
+        })),
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            backgroundColor: 'blue',
+            flexShrink: 0,
+            'text-align': 'center',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
+  it('should work with center when children width is larger than container', async () => {
+    let failFlag;
+    let flex;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          display: 'flex',
+          'justify-content': 'center',
+          'align-items': 'center',
+          border: '5px solid green',
+          margin: '25px',
+          width: '250px',
+          height: '200px',
+          padding: '5px',
+          'border-radius': '3px',
+          position: 'absolute',
+          top: '70px',
+          left: '10px',
+          'text-align': 'center',
+          flex: '1 0 auto',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            backgroundColor: 'yellow',
+            'box-sizing': 'border-box',
+          },
+        }),
+        (flex = createElement('div', {
+          id: 'flex',
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            background: 'green',
+            'box-sizing': 'border-box',
+          },
+        })),
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            backgroundColor: 'blue',
+            flexShrink: 0,
+            'text-align': 'center',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with space-between when children width is larger than container', async () => {
+    let failFlag;
+    let flex;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          display: 'flex',
+          'justify-content': 'space-between',
+          'align-items': 'center',
+          border: '5px solid green',
+          margin: '25px',
+          width: '250px',
+          height: '200px',
+          padding: '5px',
+          'border-radius': '3px',
+          position: 'absolute',
+          top: '70px',
+          left: '10px',
+          'text-align': 'center',
+          flex: '1 0 auto',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            backgroundColor: 'yellow',
+            'box-sizing': 'border-box',
+          },
+        }),
+        (flex = createElement('div', {
+          id: 'flex',
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            background: 'green',
+            'box-sizing': 'border-box',
+          },
+        })),
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            backgroundColor: 'blue',
+            flexShrink: 0,
+            'text-align': 'center',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with space-around when children width is larger than container', async () => {
+    let failFlag;
+    let flex;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          display: 'flex',
+          'justify-content': 'space-around',
+          'align-items': 'center',
+          border: '5px solid green',
+          margin: '25px',
+          width: '250px',
+          height: '200px',
+          padding: '5px',
+          'border-radius': '3px',
+          position: 'absolute',
+          top: '70px',
+          left: '10px',
+          'text-align': 'center',
+          flex: '1 0 auto',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            backgroundColor: 'yellow',
+            'box-sizing': 'border-box',
+          },
+        }),
+        (flex = createElement('div', {
+          id: 'flex',
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            background: 'green',
+            'box-sizing': 'border-box',
+          },
+        })),
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            backgroundColor: 'blue',
+            flexShrink: 0,
+            'text-align': 'center',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with space-evenly when children width is larger than container', async () => {
+    let failFlag;
+    let flex;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          display: 'flex',
+          'justify-content': 'space-evenly',
+          'align-items': 'center',
+          border: '5px solid green',
+          margin: '25px',
+          width: '250px',
+          height: '200px',
+          padding: '5px',
+          'border-radius': '3px',
+          position: 'absolute',
+          top: '70px',
+          left: '10px',
+          'text-align': 'center',
+          flex: '1 0 auto',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            backgroundColor: 'yellow',
+            'box-sizing': 'border-box',
+          },
+        }),
+        (flex = createElement('div', {
+          id: 'flex',
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            'text-align': 'center',
+            flexShrink: 0,
+            background: 'green',
+            'box-sizing': 'border-box',
+          },
+        })),
+        createElement('div', {
+          style: {
+            padding: '10px',
+            width: '100px',
+            height: '40px',
+            backgroundColor: 'blue',
+            flexShrink: 0,
+            'text-align': 'center',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
 });
