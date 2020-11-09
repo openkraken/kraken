@@ -8,12 +8,12 @@
 
 #include "bindings/jsc/js_context.h"
 #include "bindings/jsc/macros.h"
-#include "node.h"
 #include "element.h"
+#include "node.h"
 
 namespace kraken::binding::jsc {
 
-class JSDocument :  public JSNode {
+class JSDocument : public JSNode {
 public:
   JSDocument(JSContext *context);
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -23,7 +23,7 @@ public:
                                    const JSValueRef arguments[], JSValueRef *exception);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                const JSValueRef *arguments, JSValueRef *exception) override;
+                                  const JSValueRef *arguments, JSValueRef *exception) override;
 
   class DocumentInstance : public NodeInstance {
   public:
@@ -31,9 +31,16 @@ public:
     explicit DocumentInstance(JSDocument *document);
     ~DocumentInstance();
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
   private:
     JSObjectRef body;
+    std::array<JSStringRef, 4> propertyNames{
+      JSStringCreateWithUTF8CString("body"),
+      JSStringCreateWithUTF8CString("createElement"),
+      JSStringCreateWithUTF8CString("createTextNode"),
+      JSStringCreateWithUTF8CString("createComment"),
+    };
   };
 };
 

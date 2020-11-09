@@ -68,6 +68,9 @@ JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : NodeInsta
 }
 
 JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
+  JSValueRef nodeResult = JSNode::NodeInstance::getProperty(nameRef, exception);
+  if (nodeResult != nullptr) return nodeResult;
+
   std::string name = JSStringToStdString(nameRef);
   if (name == "createElement") {
     return propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
@@ -75,6 +78,9 @@ JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValu
     return body;
   } else if (name == "createTextNode") {
     return propertyBindingFunction(_hostClass->context, this, "createTextNode", createTextNode);
+  } else if (name == "nodeName") {
+    JSStringRef nodeName = JSStringCreateWithUTF8CString("#document");
+    return JSValueMakeString(_hostClass->ctx, nodeName);
   }
 
   return nullptr;
@@ -82,6 +88,14 @@ JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValu
 
 JSDocument::DocumentInstance::~DocumentInstance() {
   JSValueUnprotect(_hostClass->ctx, body);
+}
+
+void JSDocument::DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  JSNode::NodeInstance::getPropertyNames(accumulator);
+
+  for (auto &property : propertyNames) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
 }
 
 } // namespace kraken::binding::jsc

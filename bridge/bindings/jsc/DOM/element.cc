@@ -14,7 +14,6 @@ using namespace foundation;
 
 void bindElement(std::unique_ptr<JSContext> &context) {
   auto element = JSElement::instance(context.get());
-  JSValueProtect(context->context(), element->classObject);
   JSC_GLOBAL_SET_PROPERTY(context, "Element", element->classObject);
 }
 
@@ -46,7 +45,10 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
 JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId,
                                             JSValueRef *exception)
   : NodeInstance(element, NodeType::ELEMENT_NODE) {
-  JSStringRef tagNameStrRef = JSValueToStringCopy(element->ctx, tagNameValue, exception);
+  JSStringRef tagNameStrRef = tagNameStringRef_ = JSValueToStringCopy(element->ctx, tagNameValue, exception);
+
+  JSStringRetain(tagNameStringRef_);
+
   NativeString tagName{};
   tagName.string = JSStringGetCharactersPtr(tagNameStrRef);
   tagName.length = JSStringGetLength(tagNameStrRef);
@@ -74,6 +76,7 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
 }
 
 JSElement::ElementInstance::~ElementInstance() {
+  JSStringRelease(tagNameStringRef_);
   JSValueUnprotect(_hostClass->ctx, style->object);
 }
 
@@ -86,13 +89,19 @@ JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueR
 
   if (name == "style") {
     return style->object;
+  } else if (name == "nodeName") {
+    return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
   }
 
   return nullptr;
 }
 
-void JSElement::ElementInstance::initialized() {
-  Instance::initialized();
+void JSElement::ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  NodeInstance::getPropertyNames(accumulator);
+
+  for (auto &property : propertyNames) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
 }
 
 } // namespace kraken::binding::jsc

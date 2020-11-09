@@ -10,7 +10,6 @@ namespace kraken::binding::jsc {
 
 void bindTextNode(std::unique_ptr<JSContext> &context) {
   auto textNode = JSTextNode::instance(context.get());
-  JSValueProtect(context->context(), textNode->classObject);
   JSC_GLOBAL_SET_PROPERTY(context, "TextNode", textNode->classObject);
 }
 
@@ -52,6 +51,11 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(JSStringRef nameRef, JSValu
 
   if (name == "data" || name == "textContent") {
     return JSValueMakeString(_hostClass->ctx, data);
+  } else if (name == "nodeType") {
+    return JSValueMakeNumber(_hostClass->ctx, nodeType);
+  } else if (name == "nodeName") {
+    JSStringRef nodeName = JSStringCreateWithUTF8CString("#text");
+    return JSValueMakeString(_hostClass->ctx, nodeName);
   }
 
   return nullptr;

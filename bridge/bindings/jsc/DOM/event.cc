@@ -11,7 +11,6 @@ namespace kraken::binding::jsc {
 
 void bindEvent(std::unique_ptr<JSContext> &context) {
   auto event = JSEvent::instance(context.get());
-  JSValueProtect(context->context(), event->classObject);
   JSC_GLOBAL_SET_PROPERTY(context, "Event", event->classObject);
 };
 
@@ -141,6 +140,11 @@ JSEvent::EventInstance::~EventInstance() {
   }
 
   delete nativeEvent;
+}
+void JSEvent::EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &property : propertyNames) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
 }
 
 } // namespace kraken::binding::jsc

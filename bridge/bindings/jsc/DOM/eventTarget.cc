@@ -15,7 +15,6 @@ static std::atomic<int64_t> globalEventTargetId{-2};
 
 void bindEventTarget(std::unique_ptr<JSContext> &context) {
   auto eventTarget = JSEventTarget::instance(context.get());
-  JSValueProtect(context->context(), eventTarget->classObject);
   JSC_GLOBAL_SET_PROPERTY(context, "EventTarget", eventTarget->classObject);
 }
 
@@ -206,14 +205,14 @@ JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, J
 
   // event has been dispatched, then do not dispatch
   eventInstance->_dispatchFlag = true;
-  bool cancelled = true;
+  bool cancelled;
 
   while (eventInstance->nativeEvent->currentTarget != nullptr) {
     cancelled = eventTargetInstance->_dispatchEvent(eventInstance);
     if (eventInstance->nativeEvent->bubbles || cancelled) break;
     if (eventInstance->nativeEvent->currentTarget != nullptr) {
-      auto target = reinterpret_cast<JSEventTarget::EventTargetInstance *>(eventInstance->nativeEvent->currentTarget);
-      // TODO: event.target = node.parentNode;
+      auto node = reinterpret_cast<JSNode::NodeInstance *>(eventInstance->nativeEvent->currentTarget);
+      eventInstance->nativeEvent->currentTarget = node->parentNode;
     }
   }
 

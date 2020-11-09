@@ -31,10 +31,14 @@ public:
     explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId, JSValueRef *exception);
     ~ElementInstance();
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
-    void initialized() override;
+    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style;
-    const char* tagName;
+    JSStringRef tagNameStringRef_;
+
+    std::array<JSStringRef, 1> propertyNames{
+      JSStringCreateWithUTF8CString("style")
+    };
   };
 };
 

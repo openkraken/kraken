@@ -12,7 +12,6 @@ namespace kraken::binding::jsc {
 
 void bindCSSStyleDeclaration(std::unique_ptr<JSContext> &context) {
   auto style = CSSStyleDeclaration::instance(context.get());
-  JSValueProtect(context->context(), style->classObject);
   JSC_GLOBAL_SET_PROPERTY(context, "CSSStyleDeclaration", style->classObject);
 }
 

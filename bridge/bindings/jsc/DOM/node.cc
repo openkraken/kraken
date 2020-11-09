@@ -11,7 +11,6 @@ namespace kraken::binding::jsc {
 
 void bindNode(std::unique_ptr<JSContext> &context) {
   auto node = JSNode::instance(context.get());
-  JSValueProtect(context->context(), node->classObject);
   JSC_GLOBAL_SET_PROPERTY(context, "Node", node->classObject);
 }
 
@@ -367,6 +366,8 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
 
     JSObjectRef array = JSObjectMakeArray(_hostClass->ctx, childNodes.size(), arguments, nullptr);
     return array;
+  } else if (name == "nodeType") {
+    return JSValueMakeNumber(_hostClass->ctx, nodeType);
   }
 
   return JSEventTarget::EventTargetInstance::getProperty(nameRef, exception);

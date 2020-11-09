@@ -167,6 +167,7 @@ public:
     explicit EventInstance(JSEvent *jsEvent, EventType eventType);
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
     void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
+    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     ~EventInstance() override;
     NativeEvent *nativeEvent;
     bool _dispatchFlag{false};

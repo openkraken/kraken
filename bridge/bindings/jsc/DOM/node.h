@@ -71,25 +71,27 @@ public:
     void internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode);
     JSNode::NodeInstance *internalReplaceChild(JSNode::NodeInstance *newChild, JSNode::NodeInstance *oldChild);
 
-  private:
-    void ensureDetached(JSNode::NodeInstance *node);
     NodeType nodeType;
-    std::vector<JSNode::NodeInstance *> childNodes;
     JSNode::NodeInstance *parentNode{nullptr};
 
-    std::array<JSStringRef, 10> propertyNames{
+  private:
+    void ensureDetached(JSNode::NodeInstance *node);
+    std::vector<JSNode::NodeInstance *> childNodes;
+
+    std::array<JSStringRef, 12> propertyNames{
       JSStringCreateWithUTF8CString("isConnected"),     JSStringCreateWithUTF8CString("firstChild"),
       JSStringCreateWithUTF8CString("lastChild"),       JSStringCreateWithUTF8CString("childNodes"),
       JSStringCreateWithUTF8CString("previousSibling"), JSStringCreateWithUTF8CString("nextSibling"),
       JSStringCreateWithUTF8CString("appendChild"),     JSStringCreateWithUTF8CString("remove"),
       JSStringCreateWithUTF8CString("insertBefore"),    JSStringCreateWithUTF8CString("replaceChild"),
+      JSStringCreateWithUTF8CString("nodeType"), JSStringCreateWithUTF8CString("nodeName")
     };
   };
 };
 
 class NativeNode : public NativeEventTarget {
   NativeNode() = delete;
-  NativeNode(JSNode::NodeInstance *instance) : NativeEventTarget(instance) {};
+  NativeNode(JSNode::NodeInstance *instance) : NativeEventTarget(instance){};
 };
 
 } // namespace kraken::binding::jsc
