@@ -1556,10 +1556,16 @@ class RenderFlexLayout extends RenderLayoutBox {
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double runBaselineExtent = metrics.baselineExtent;
       final double totalFlexGrow = metrics.totalFlexGrow;
+      final double totalFlexShrink = metrics.totalFlexShrink;
       final Map<int, dynamic> childrenMetrics = metrics.childrenMetrics;
+
       final double mainContentSizeDelta = mainAxisContentSize - runMainAxisExtent;
+      bool isFlexGrow = mainContentSizeDelta >= 0 && totalFlexGrow > 0;
+      bool isFlexShrink = mainContentSizeDelta < 0 && totalFlexShrink > 0;
+
       _overflow = math.max(0.0, - mainContentSizeDelta);
-      final double remainingSpace = math.max(0.0, mainContentSizeDelta);
+      // If flex grow or flex shrink exists, remaining space should be zero
+      final double remainingSpace = (isFlexGrow || isFlexShrink) ? 0 : mainContentSizeDelta;
       double leadingSpace;
       double betweenSpace;
 
@@ -1587,15 +1593,29 @@ class RenderFlexLayout extends RenderLayoutBox {
           break;
         case JustifyContent.spaceBetween:
           leadingSpace = 0.0;
-          betweenSpace = totalChildren > 1 ? remainingSpace / (totalChildren - 1) : 0.0;
+          if (remainingSpace < 0) {
+            betweenSpace = 0;
+          } else {
+            betweenSpace = totalChildren > 1 ? remainingSpace / (totalChildren - 1) : 0.0;
+          }
           break;
         case JustifyContent.spaceAround:
-          betweenSpace = totalChildren > 0 ? remainingSpace / totalChildren : 0.0;
-          leadingSpace = betweenSpace / 2.0;
+          if (remainingSpace < 0) {
+            leadingSpace = remainingSpace / 2.0;
+            betweenSpace = 0;
+          } else {
+            betweenSpace = totalChildren > 0 ? remainingSpace / totalChildren : 0.0;
+            leadingSpace = betweenSpace / 2.0;
+          }
           break;
         case JustifyContent.spaceEvenly:
-          betweenSpace = totalChildren > 0 ? remainingSpace / (totalChildren + 1) : 0.0;
-          leadingSpace = betweenSpace;
+          if (remainingSpace < 0) {
+            leadingSpace = remainingSpace / 2.0;
+            betweenSpace = 0;
+          } else {
+            betweenSpace = totalChildren > 0 ? remainingSpace / (totalChildren + 1) : 0.0;
+            leadingSpace = betweenSpace;
+          }
           break;
         default:
       }
@@ -1734,8 +1754,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
           double horizontalRemainingSpace;
           double verticalRemainingSpace;
-          double mainAxisRemainingSpace = remainingSpace;
-          double crossAxisRemainingSpace = crossAxisContentSize - _getCrossAxisExtent(child);
+          // Margin auto does not work with negative remaining space
+          double mainAxisRemainingSpace = math.max(0, remainingSpace);
+          double crossAxisRemainingSpace = math.max(0, crossAxisContentSize - _getCrossAxisExtent(child));
 
           if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
             horizontalRemainingSpace = mainAxisRemainingSpace;
