@@ -19,11 +19,11 @@ void bindElement(std::unique_ptr<JSContext> &context) {
 JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
 JSElement *JSElement::instance(JSContext *context) {
-  static JSElement *_instance{nullptr};
-  if (_instance == nullptr) {
-    _instance = new JSElement(context);
+  static std::unordered_map<JSContext *, JSElement*> instanceMap {};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSElement(context);
   }
-  return _instance;
+  return instanceMap[context];
 }
 
 JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -41,6 +41,8 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
   return instance->object;
 }
 
+JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagName)
+  : NodeInstance(element, NodeType::ELEMENT_NODE), tagNameStringRef_(JSStringCreateWithUTF8CString(tagName)) {}
 JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId,
                                             JSValueRef *exception)
   : NodeInstance(element, new NativeElement(this), NodeType::ELEMENT_NODE) {
@@ -85,7 +87,7 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
   getDartMethod()->requestUpdateFrame();
   auto nativeElement = reinterpret_cast<NativeElement *>(elementInstance->nativeEventTarget);
   NativeBoundingClientRect *nativeBoundingClientRect =
-      nativeElement->getBoundingClientRect(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
+    nativeElement->getBoundingClientRect(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
   auto boundingClientRect = new BoundingClientRect(elementInstance->_hostClass->context, nativeBoundingClientRect);
   return boundingClientRect->jsObject;
 }
@@ -142,7 +144,8 @@ JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueR
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollWidth(_hostClass->contextId, eventTargetId));
   } else if (name == "getBoundingClientRect") {
     if (_getBoundingClientRect == nullptr) {
-      _getBoundingClientRect = propertyBindingFunction(_hostClass->context, this, "getBoundingClientRect", getBoundingClientRect);
+      _getBoundingClientRect =
+        propertyBindingFunction(_hostClass->context, this, "getBoundingClientRect", getBoundingClientRect);
     }
     return _getBoundingClientRect;
   }

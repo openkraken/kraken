@@ -111,6 +111,8 @@ else()
       bindings/jsc/ui_manager.cc
       bindings/jsc/DOM/document.h
       bindings/jsc/DOM/document.cc
+      bindings/jsc/DOM/elements/anchor_element.cc
+      bindings/jsc/DOM/elements/anchor_element.h
       bindings/jsc/DOM/element.cc
       bindings/jsc/DOM/element.h
       bindings/jsc/DOM/event.h

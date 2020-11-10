@@ -19,11 +19,11 @@ void bindEventTarget(std::unique_ptr<JSContext> &context) {
 }
 
 JSEventTarget *JSEventTarget::instance(JSContext *context) {
-  static JSEventTarget *_instance{nullptr};
-  if (_instance == nullptr) {
-    _instance = new JSEventTarget(context);
+  static std::unordered_map<JSContext *, JSEventTarget*> instanceMap {};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSEventTarget(context);
   }
-  return _instance;
+  return instanceMap[context];
 }
 
 JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostClass(context, name) {}

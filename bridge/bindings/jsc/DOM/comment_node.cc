@@ -14,11 +14,11 @@ void bindCommentNode(std::unique_ptr<JSContext> &context) {
 
 JSCommentNode::JSCommentNode(JSContext *context) : JSNode(context, "CommentNode") {}
 JSCommentNode *JSCommentNode::instance(JSContext *context) {
-  static JSCommentNode *_instance{nullptr};
-  if (_instance == nullptr) {
-    _instance = new JSCommentNode(context);
+  static std::unordered_map<JSContext *, JSCommentNode*> instanceMap {};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSCommentNode(context);
   }
-  return _instance;
+  return instanceMap[context];
 }
 
 JSObjectRef JSCommentNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

@@ -14,11 +14,11 @@ void bindTextNode(std::unique_ptr<JSContext> &context) {
 }
 
 JSTextNode *JSTextNode::instance(JSContext *context) {
-  static JSTextNode *_instance{nullptr};
-  if (_instance == nullptr) {
-    _instance = new JSTextNode(context);
+  static std::unordered_map<JSContext *, JSTextNode*> instanceMap {};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSTextNode(context);
   }
-  return _instance;
+  return instanceMap[context];
 }
 
 JSTextNode::JSTextNode(JSContext *context) : JSNode(context, "TextNode") {}

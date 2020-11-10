@@ -35,6 +35,7 @@ public:
 
     ElementInstance() = delete;
     explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId, JSValueRef *exception);
+    explicit ElementInstance(JSElement *element, const char* tagName);
     ~ElementInstance();
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;

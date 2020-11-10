@@ -14,15 +14,12 @@ void bindEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "Event", event->classObject);
 };
 
-namespace {
-JSEvent *_instance{nullptr};
-}
-
 JSEvent *JSEvent::instance(JSContext *context) {
-  if (_instance == nullptr) {
-    _instance = new JSEvent(context);
+  static std::unordered_map<JSContext *, JSEvent*> instanceMap {};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSEvent(context);
   }
-  return _instance;
+  return instanceMap[context];
 }
 
 JSEvent::JSEvent(JSContext *context) : HostClass(context, "Event") {}

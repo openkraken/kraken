@@ -15,12 +15,18 @@ namespace kraken::binding::jsc {
 
 class JSDocument : public JSNode {
 public:
+  static JSElement *getElementOfTagName(JSContext *context, std::string &tagName);
+
   JSDocument(JSContext *context);
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -37,8 +43,9 @@ public:
 
   private:
     JSObjectRef body;
-    JSObjectRef _createElement;
-    JSObjectRef _createTextNode;
+    JSObjectRef _createElement {nullptr};
+    JSObjectRef _createTextNode {nullptr};
+    JSObjectRef _createComment {nullptr};
   };
 };
 

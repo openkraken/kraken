@@ -16,7 +16,6 @@ void bindCSSStyleDeclaration(std::unique_ptr<JSContext> &context) {
 }
 
 namespace {
-CSSStyleDeclaration *_instance{nullptr};
 
 template <typename CharacterType> inline bool isASCIILower(CharacterType character) {
   return character >= 'a' && character <= 'z';
@@ -58,10 +57,11 @@ static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
 CSSStyleDeclaration::CSSStyleDeclaration(JSContext *context) : HostClass(context, "CSSStyleDeclaration") {}
 
 CSSStyleDeclaration *CSSStyleDeclaration::instance(JSContext *context) {
-  if (_instance == nullptr) {
-    _instance = new CSSStyleDeclaration(context);
+  static std::unordered_map<JSContext *, CSSStyleDeclaration*> instanceMap {};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new CSSStyleDeclaration(context);
   }
-  return _instance;
+  return instanceMap[context];
 }
 
 JSObjectRef CSSStyleDeclaration::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

@@ -6,6 +6,8 @@
 #include "document.h"
 #include "element.h"
 #include "text_node.h"
+#include "comment_node.h"
+#include "bindings/jsc/DOM/elements/anchor_element.h"
 #include <mutex>
 
 namespace kraken::binding::jsc {
@@ -31,8 +33,11 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
     return nullptr;
   }
 
+  JSStringRef tagNameStringRef = JSValueToStringCopy(ctx, tagNameValue, exception);
+  std::string tagName = JSStringToStdString(tagNameStringRef);
+
   auto document = static_cast<JSDocument *>(JSObjectGetPrivate(function));
-  auto element = JSElement::instance(document->context);
+  auto element = getElementOfTagName(document->context, tagName);
   auto elementInstance = JSObjectCallAsConstructor(ctx, element->classObject, 1, arguments, exception);
   return elementInstance;
 }
@@ -51,12 +56,28 @@ JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JS
   return textNodeInstance;
 }
 
+JSValueRef JSDocument::createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                     size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  auto document = static_cast<JSDocument *>(JSObjectGetPrivate(function));
+  auto commentNode = JSCommentNode::instance(document->context);
+  auto commentNodeInstance = JSObjectCallAsConstructor(ctx, commentNode->classObject, argumentCount, arguments, exception);
+  return commentNodeInstance;
+}
+
 JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {}
 
 JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                             const JSValueRef *arguments, JSValueRef *exception) {
   auto instance = new DocumentInstance(this);
   return instance->object;
+}
+
+JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagName) {
+  static std::unordered_map<std::string, JSElement*> elementMap {
+      {"a", JSAnchorElement::instance(context)},
+      {"div", JSElement::instance(context)}
+  };
+  return elementMap[tagName];
 }
 
 JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : NodeInstance(document, NodeType::DOCUMENT_NODE) {
@@ -66,22 +87,27 @@ JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : NodeInsta
                                   JSValueMakeNumber(document->ctx, BODY_TARGET_ID)};
   body = JSObjectCallAsConstructor(document->ctx, elementConstructor->classObject, 2, arguments, nullptr);
   JSValueProtect(document->ctx, body);
-
-  _createElement = propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
-  JSValueProtect(document->ctx, _createElement);
-
-  _createTextNode = propertyBindingFunction(_hostClass->context, this, "createTextNode", createTextNode);
-  JSValueProtect(document->ctx, _createTextNode);
 }
 
 JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string &&name = JSStringToStdString(nameRef);
   if (name == "createElement") {
+    if (_createElement == nullptr) {
+      _createElement = propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
+    }
     return _createElement;
   } else if (name == "body") {
     return body;
   } else if (name == "createTextNode") {
+    if (_createTextNode == nullptr) {
+      _createTextNode = propertyBindingFunction(_hostClass->context, this, "createTextNode", createTextNode);
+    }
     return _createTextNode;
+  } else if (name == "createComment") {
+    if (_createComment == nullptr) {
+      _createComment = propertyBindingFunction(_hostClass->context, this, "createComment", createComment);
+    }
+    return _createComment;
   } else if (name == "nodeName") {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#document");
     return JSValueMakeString(_hostClass->ctx, nodeName);
@@ -92,8 +118,6 @@ JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValu
 
 JSDocument::DocumentInstance::~DocumentInstance() {
   JSValueUnprotect(_hostClass->ctx, body);
-  JSValueUnprotect(_hostClass->ctx, _createElement);
-  JSValueUnprotect(_hostClass->ctx, _createTextNode);
 }
 
 void JSDocument::DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
