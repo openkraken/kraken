@@ -135,3 +135,163 @@ String trim(String str) {
 
   return str.replaceAll(_trimRegExp, '');
 }
+
+
+/// Inspector CSS property declaration data.
+class CSSProperty implements JSONEncodable {
+  /// The property name.
+  String name = '';
+
+  /// The property value.
+  String value = '';
+
+  /// Optional: whether the property has !important annotaion
+  bool important;
+
+  /// Optional: whether the property is implicit.
+  bool implicit;
+
+  /// Optional: the full property text.
+  String text;
+
+  /// Optional: whether the property is understood by the browser.
+  bool parsedOk;
+
+  /// Optional: whether the property is disabled by the user.
+  bool disabled;
+
+  /// Optional: the entire property range.
+  SourceRange range;
+
+  void setName(String value) {
+    name = value;
+  }
+
+  String getName() {
+    return name;
+  }
+
+  void setValue(String value) {
+    this.value = value;
+  }
+
+  String getValue() {
+    return value;
+  }
+
+  void setParsedOk(bool value) {
+    parsedOk = value;
+  }
+
+  void setText(String value) {
+    text = value;
+  }
+
+  void setImportant(bool value) {
+    important = value;
+  }
+
+  void setImplicit(bool value) {
+    implicit = value;
+  }
+
+  void setDisabled(bool value) {
+    disabled = value;
+  }
+
+  bool getDisabled() {
+    return disabled;
+  }
+
+  void setRange(SourceRange value) {
+    range = value;
+  }
+
+  SourceRange getRange() {
+    return range;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'value': value,
+      if (important != null) 'important': important,
+      if (implicit != null) 'implicit': implicit,
+      if (text != null) 'text': text,
+      if (parsedOk != null) 'parsedOk': parsedOk,
+      if (disabled != null) 'disabled': disabled,
+      if (range != null) 'range': range.toJson()
+    };
+  }
+}
+
+
+/// Text range within a resource. All number are zero-based.
+class SourceRange implements JSONEncodable {
+  /// Start line of range.
+  int startLine;
+
+  /// Start column of range (inclusive).
+  int startColumn;
+
+  /// End line of range.
+  int endLine;
+
+  /// End column of range (exclusive).
+  int endColumn;
+
+  SourceRange(
+      {this.startLine = 0,
+        this.startColumn = 0,
+        this.endLine = 0,
+        this.endColumn = 0});
+
+  SourceRange.fromJson(Map<String, dynamic> json) {
+    startLine = json['startLine'];
+    startColumn = json['startColumn'];
+    endColumn = json['endColumn'];
+    endLine = json['endLine'];
+  }
+
+  void setStartLine(int value) {
+    startLine = value;
+  }
+
+  void setStartColumn(int value) {
+    startColumn = value;
+  }
+
+  void setEndLine(int value) {
+    endLine = value;
+  }
+
+  void setEndColumn(int value) {
+    endColumn = value;
+  }
+
+  Map<String, int> toJson() {
+    return {
+      'startLine': startLine,
+      'startColumn': startColumn,
+      'endLine': endLine,
+      'endColumn': endColumn
+    };
+  }
+}
+
+/// ShortHand Entry for property.
+class ShorthandEntry implements JSONEncodable {
+  String name;
+  String value;
+  bool important;
+
+  ShorthandEntry(this.name, this.value, {this.important});
+
+  Map<String, dynamic> toJson() {
+    return {
+      name: 'name',
+      value: 'name',
+      if (important != null) 'important': important
+    };
+  }
+}

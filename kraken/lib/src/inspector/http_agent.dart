@@ -36,7 +36,7 @@ class InspectorHTTPAgent {
 
   void onRequestList(HttpRequest request) {
     request.response.headers.clear();
-    String entryURL = '${inspector.server.address.address}:${inspector.server.port}';
+    String entryURL = '${inspector.address}:${inspector.port}';
     KrakenController controller = inspector.elementManager.controller;
     String bundleURL = controller.bundleURL ?? controller.bundlePath ?? '<EmbedBundle>';
     _writeJSONObject(request, [{

@@ -3,9 +3,6 @@
  * Author: Kraken Team.
  */
 
-export 'src/inspector/css_text_parse.dart';
 export 'src/inspector/inspector.dart';
-export 'src/inspector/http_agent.dart';
-export 'src/inspector/websocket_agent.dart';
-export 'src/inspector/css_agent.dart';
-export 'src/inspector/dom_agent.dart';
+export 'src/inspector/server.dart';
+export 'src/inspector/css_text_parse.dart';
