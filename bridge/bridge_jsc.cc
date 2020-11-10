@@ -62,7 +62,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsc::bindCSSStyleDeclaration(context);
   kraken::binding::jsc::bindScreen(context);
   kraken::binding::jsc::bindTimer(context);
-  kraken::binding::jsc::bindToBlob(context);
   kraken::binding::jsc::bindBlob(context);
 
   initKrakenPolyFill(this);

@@ -161,14 +161,6 @@ class ElementManager {
     _rootElement.bindNativeMethods();
   }
 
-  void _setRootElement(Element element) {
-    RenderBoxModel root = element.renderBoxModel;
-    _rootElement = element;
-    root.controller = controller;
-    _root = root;
-    setEventTarget(element);
-  }
-
   Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 

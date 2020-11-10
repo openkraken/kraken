@@ -168,21 +168,9 @@ mixin CSSOverflowMixin on ElementBase {
     return renderBoxModel.hasSize ? renderBoxModel.size.width : 0;
   }
 
-  void scroll(List args, {bool isScrollBy = false}) {
-    if (args != null && args.length > 0) {
-      dynamic option = args[0];
-      if (option is Map) {
-        num top = option['top'];
-        num left = option['left'];
-        dynamic behavior = option['behavior'];
-        Curve curve;
-        if (behavior == 'smooth') {
-          curve = Curves.linear;
-        }
-        _scroll(top, curve, isScrollBy: isScrollBy, isDirectionX: false);
-        _scroll(left, curve, isScrollBy: isScrollBy, isDirectionX: true);
-      }
-    }
+  void scroll(num x, num y, {bool isScrollBy = false}) {
+    _scroll(x, Curves.linear, isScrollBy: isScrollBy, isDirectionX: true);
+    _scroll(y, Curves.linear, isScrollBy: isScrollBy, isDirectionX: false);
   }
 
   void _scroll(num aim, Curve curve, {bool isScrollBy = false, bool isDirectionX = false}) {

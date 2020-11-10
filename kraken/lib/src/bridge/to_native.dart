@@ -100,6 +100,9 @@ typedef Native_GetScrollTop = Double Function(Int32 contextId, Int64 targetId);
 typedef Native_GetScrollWidth = Double Function(Int32 contextId, Int64 targetId);
 typedef Native_GetScrollHeight = Double Function(Int32 contextId, Int64 targetId);
 typedef Native_GetBoundingClientRect = Pointer<NativeBoundingClientRect> Function(Int32 contextId, Int64 targetId);
+typedef Native_Click = Void Function(Int32 contextId, Int64 targetId);
+typedef Native_Scroll = Void Function(Int32 contextId, Int64 targetId, Int32 x, Int32 y);
+typedef Native_ScrollBy = Void Function(Int32 contextId, Int64 targetId, Int32 x, Int32 y);
 
 class NativeElement extends Struct {
   Pointer<Void> instance;
@@ -118,6 +121,9 @@ class NativeElement extends Struct {
   Pointer<NativeFunction<Native_GetScrollWidth>> getScrollWidth;
   Pointer<NativeFunction<Native_GetScrollHeight>> getScrollHeight;
   Pointer<NativeFunction<Native_GetBoundingClientRect>> getBoundingClientRect;
+  Pointer<NativeFunction<Native_Click>> click;
+  Pointer<NativeFunction<Native_Scroll>> scroll;
+  Pointer<NativeFunction<Native_ScrollBy>> scrollBy;
 }
 
 class KrakenInfo {

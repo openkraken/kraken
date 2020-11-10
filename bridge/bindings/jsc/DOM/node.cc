@@ -358,7 +358,7 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
     }
     return _replaceChild;
   } else if (name == "childNodes") {
-    auto arguments = new JSValueRef[childNodes.size()];
+    JSValueRef arguments[childNodes.size()];
 
     for (int i = 0; i < childNodes.size(); i++) {
       arguments[i] = childNodes[i]->object;

@@ -33,9 +33,22 @@ public:
     static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
+    static JSValueRef setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                            const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef arguments[], JSValueRef *exception);
+
     ElementInstance() = delete;
     explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId, JSValueRef *exception);
-    explicit ElementInstance(JSElement *element, const char* tagName);
+    explicit ElementInstance(JSElement *element, const char *tagName);
     ~ElementInstance();
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
@@ -44,7 +57,14 @@ public:
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
     JSStringRef tagNameStringRef_;
-    JSObjectRef _getBoundingClientRect {nullptr};
+    JSObjectRef _getBoundingClientRect{nullptr};
+    JSObjectRef _setAttribute;
+    JSObjectRef _getAttribute;
+    JSObjectRef _toBlob;
+    JSObjectRef _click;
+    JSObjectRef _scroll;
+    JSObjectRef _scrollBy;
+    std::unordered_map<std::string, JSStringRef> attributes;
   };
 };
 
@@ -72,6 +92,9 @@ using GetScrollLeft = double (*)(int32_t contextId, int64_t targetId);
 using GetScrollHeight = double (*)(int32_t contextId, int64_t targetId);
 using GetScrollWidth = double (*)(int32_t contextId, int64_t targetId);
 using GetBoundingClientRect = NativeBoundingClientRect *(*)(int32_t contextId, int64_t targetId);
+using Click = void (*)(int32_t contextId, int64_t targetId);
+using Scroll = void (*)(int32_t contextId, int64_t targetId, int32_t x, int32_t y);
+using ScrollBy = void (*)(int32_t contextId, int64_t targetId, int32_t x, int32_t y);
 
 class BoundingClientRect : public HostObject {
 public:
@@ -105,6 +128,9 @@ struct NativeElement : public NativeNode {
   GetScrollHeight getScrollHeight{nullptr};
   GetScrollWidth getScrollWidth{nullptr};
   GetBoundingClientRect getBoundingClientRect{nullptr};
+  Click click{nullptr};
+  Scroll scroll{nullptr};
+  ScrollBy scrollBy{nullptr};
 };
 
 } // namespace kraken::binding::jsc

@@ -123,4 +123,17 @@ JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *
   JSClassRef functionClass = JSClassCreate(&functionDefinition);
   return JSObjectMake(context->context(), functionClass, data);
 }
+
+JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback, JSValueRef *exception) {
+  JSValueRef promiseConstructorValueRef =
+      JSObjectGetProperty(context->context(), context->global(), JSStringCreateWithUTF8CString("Promise"), exception);
+  JSObjectRef promiseConstructor = JSValueToObject(context->context(), promiseConstructorValueRef, exception);
+
+  const JSValueRef constructorArguments[1]{
+      propertyBindingFunction(context, data, "P", callback)
+  };
+
+  return JSObjectCallAsConstructor(context->context(), promiseConstructor, 1, constructorArguments, exception);
+}
+
 } // namespace kraken::binding::jsc

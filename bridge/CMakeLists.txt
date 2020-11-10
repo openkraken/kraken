@@ -41,8 +41,6 @@ if (${KRAKEN_ENABLE_JSA})
     bindings/jsa/ui_manager.h
     bindings/jsa/KOM/blob.cc
     bindings/jsa/KOM/blob.h
-    bindings/jsa/KOM/toBlob.cc
-    bindings/jsa/KOM/toBlob.h
     bindings/jsa/DOM/document.cc
     bindings/jsa/DOM/document.h
     bindings/jsa/DOM/element.cc
@@ -105,8 +103,6 @@ else()
       bindings/jsc/KOM/screen.h
       bindings/jsc/KOM/timer.cc
       bindings/jsc/KOM/timer.h
-      bindings/jsc/KOM/toBlob.cc
-      bindings/jsc/KOM/toBlob.h
       bindings/jsc/ui_manager.h
       bindings/jsc/ui_manager.cc
       bindings/jsc/DOM/document.h

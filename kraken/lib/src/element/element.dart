@@ -998,14 +998,6 @@ class Element extends Node
 
   @mustCallSuper
   dynamic method(String name, List args) {
-    switch (name) {
-      case 'click':
-        return click();
-      case 'scroll':
-        return scroll(args);
-      case 'scrollBy':
-        return scroll(args, isScrollBy: true);
-    }
   }
 
   Pointer<NativeBoundingClientRect> get boundingClientRect {

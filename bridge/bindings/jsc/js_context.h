@@ -61,6 +61,8 @@ private:
 JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
                                     JSObjectCallAsFunctionCallback callback);
 
+JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback, JSValueRef *exception);
+
 std::string JSStringToStdString(JSStringRef jsString);
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
