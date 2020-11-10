@@ -7,11 +7,13 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/scheduler.dart';
+import 'package:flutter/gestures.dart';
 
 
 mixin EventHandlerMixin on Node {
   num _touchStartTime = 0;
   num _touchEndTime = 0;
+  OffsetPair _initialPosition;
 
   static const int MAX_STEP_MS = 10;
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
@@ -38,9 +40,15 @@ mixin EventHandlerMixin on Node {
         eventHandlers.containsKey('touchcancel');
   }
 
+  double _getGlobalDistance(PointerEvent event) {
+    final Offset offset = event.position - _initialPosition.global;
+    return offset.distance;
+  }
+
   void handlePointDown(PointerDownEvent pointEvent) {
     TouchEvent event = _getTouchEvent('touchstart', pointEvent);
     _touchStartTime = event.timeStamp;
+    _initialPosition = OffsetPair(local: pointEvent.localPosition, global: pointEvent.position);
     dispatchEvent(event);
   }
 
@@ -56,10 +64,9 @@ mixin EventHandlerMixin on Node {
     _touchEndTime = event.timeStamp;
     dispatchEvent(event);
 
-    // <300ms to trigger click
-//    if (_touchStartTime > 0 && _touchEndTime > 0 && _touchEndTime - _touchStartTime < 300) {
-//      handleClick(Event('click', EventInit()));
-//    }
+    if (_getGlobalDistance(pointEvent) < kTouchSlop) {
+      handleClick(Event('click', EventInit()));
+    }
   }
 
   void handlePointCancel(PointerCancelEvent pointEvent) {
