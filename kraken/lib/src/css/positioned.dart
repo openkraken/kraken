@@ -59,6 +59,18 @@ BoxSizeType _getChildHeightSizeType(RenderBox child) {
   return null;
 }
 
+/// Get child size through boxSize to avoid flutter error when parentUsesSize is set to false
+Size _getChildSize(RenderBox child) {
+  if (child is RenderBoxModel) {
+    return child.boxSize;
+  } else if (child is RenderPositionHolder) {
+    return child.boxSize;
+  } else if (child is RenderTextBox) {
+    return child.boxSize;
+  }
+  return null;
+}
+
 // RenderPositionHolder may be affected by overflow: scroller offset.
 // We need to reset these offset to keep positioned elements render at their original position.
 Offset _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, RenderObject root) {
@@ -247,8 +259,28 @@ class CSSPositionedLayout {
       childConstraints =
           childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);
     }
-    // Should create relayoutBoundary for positioned child.
-    child.layout(childConstraints, parentUsesSize: false);
+
+    // Whether child need to layout
+    bool isChildNeedsLayout = true;
+    if (child is RenderBoxModel && child.hasSize) {
+      double childContentWidth = RenderBoxModel.getContentWidth(child);
+      double childContentHeight = RenderBoxModel.getContentHeight(child);
+      // Always layout child when parent is not laid out yet or child is marked as needsLayout
+      if (!parent.hasSize || child.needsLayout) {
+        isChildNeedsLayout = true;
+      } else {
+        Size childOldSize = _getChildSize(child);
+        // Need to layout child when width and height of child are both specified and differ from its previous size
+        isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
+          (childOldSize.width != childContentWidth ||
+            childOldSize.height != childContentHeight);
+      }
+    }
+
+    if (isChildNeedsLayout) {
+      // Should create relayoutBoundary for positioned child.
+      child.layout(childConstraints, parentUsesSize: false);
+    }
   }
 
   static void applyPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size parentSize, EdgeInsets borderEdge) {
