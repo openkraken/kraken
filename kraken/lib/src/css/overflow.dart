@@ -45,7 +45,7 @@ CSSOverflowType _getOverflowType(String definition) {
   }
 }
 
-mixin CSSOverflowMixin {
+mixin CSSOverflowMixin on ElementBase {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
@@ -140,33 +140,31 @@ mixin CSSOverflowMixin {
     }
   }
 
-  double getScrollTop() {
+  double get scrollTop {
     if (_scrollableY != null) {
       return _scrollableY.position?.pixels ?? 0;
     }
-    return 0;
+    return 0.0;
   }
-
-  void setScrollTop(double value) {
+  set scrollTop(double value) {
     _scroll(value, null, isScrollBy: false, isDirectionX: false);
   }
 
-  void setScrollLeft(double value) {
-    _scroll(value, null, isScrollBy: false, isDirectionX: true);
-  }
-
-  double getScrollLeft() {
+  double get scrollLeft {
     if (_scrollableX != null) {
       return _scrollableX.position?.pixels ?? 0;
     }
-    return 0;
+    return 0.0;
+  }
+  set scrollLeft(double value) {
+    _scroll(value, null, isScrollBy: false, isDirectionX: true);
   }
 
-  double getScrollHeight(RenderBoxModel renderBoxModel) {
+  double get scrollHeight {
     return renderBoxModel.hasSize ? renderBoxModel.size.height : 0;
   }
 
-  double getScrollWidth(RenderBoxModel renderBoxModel) {
+  double get scrollWidth {
     return renderBoxModel.hasSize ? renderBoxModel.size.width : 0;
   }
 

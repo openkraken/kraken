@@ -45,6 +45,12 @@ JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarg
   nativeEventTarget = new NativeEventTarget(this);
 }
 
+JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, NativeEventTarget *native)
+  : Instance(eventTarget), nativeEventTarget(native) {
+  eventTargetId = globalEventTargetId;
+  globalEventTargetId++;
+}
+
 JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
   auto data = new DisposeCallbackData(_hostClass->contextId, eventTargetId);
@@ -225,7 +231,8 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(JSStringRef nameRef, 
     return _addEventListener;
   } else if (name == "removeEventListener") {
     if (_removeEventListener) {
-      _removeEventListener = propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
+      _removeEventListener =
+        propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
     }
     return _removeEventListener;
   } else if (name == "dispatchEvent") {

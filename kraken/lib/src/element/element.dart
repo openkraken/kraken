@@ -19,10 +19,11 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
+import 'package:ffi/ffi.dart';
 
 import '../css/flow.dart';
 import 'event_handler.dart';
-import 'bounding_client_rect.dart';
+import 'element_native_methods.dart';
 
 const String STYLE = 'style';
 
@@ -73,6 +74,7 @@ mixin ElementBase {
 class Element extends Node
     with
         ElementBase,
+        ElementNativeMethods,
         NodeLifeCycle,
         EventHandlerMixin,
         CSSTextMixin,
@@ -160,6 +162,7 @@ class Element extends Node
       renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
     }
 
+    bindNativeMethods();
     _setDefaultStyle();
   }
 
@@ -964,12 +967,12 @@ class Element extends Node
         case 'scrollTop':
           // need to flush layout to get correct size
           elementManager.getRootRenderObject().owner.flushLayout();
-          setScrollTop(value.toDouble());
+          scrollTop = value.toDouble();
           break;
         case 'scrollLeft':
           // need to flush layout to get correct size
           elementManager.getRootRenderObject().owner.flushLayout();
-          setScrollLeft(value.toDouble());
+          scrollLeft = value.toDouble();
           break;
       }
       properties[key] = value;
@@ -979,51 +982,6 @@ class Element extends Node
   @mustCallSuper
   dynamic getProperty(String key) {
     switch(key) {
-      case 'offsetTop':
-        // need to flush layout to get correct size
-        elementManager.getRootRenderObject().owner.flushLayout();
-        return getOffsetY();
-      case 'offsetLeft':
-        // need to flush layout to get correct size
-        elementManager.getRootRenderObject().owner.flushLayout();
-        return getOffsetX();
-      case 'offsetWidth':
-        // need to flush layout to get correct size
-        elementManager.getRootRenderObject().owner.flushLayout();
-        return renderBoxModel.hasSize ? renderBoxModel.size.width : 0;
-      case 'offsetHeight':
-        // need to flush layout to get correct size
-        elementManager.getRootRenderObject().owner.flushLayout();
-        return renderBoxModel.hasSize ? renderBoxModel.size.height : 0;
-        // @TODO support clientWidth clientHeight clientLeft clientTop
-      case 'clientWidth':
-        // need to flush layout to get correct size
-        elementManager.getRootRenderObject().owner.flushLayout();
-        return renderLayoutBox.clientWidth;
-      case 'clientHeight':
-        // need to flush layout to get correct size
-        elementManager.getRootRenderObject().owner.flushLayout();
-        return renderLayoutBox.clientHeight;
-      case 'clientLeft':
-        // need to flush layout to get correct size
-        elementManager.getRootRenderObject().owner.flushLayout();
-        return renderLayoutBox.borderLeft;
-        break;
-      case 'clientTop':
-        // need to flush layout to get correct size
-        elementManager.getRootRenderObject().owner.flushLayout();
-        return renderLayoutBox.borderTop;
-        break;
-      case 'scrollTop':
-        return getScrollTop();
-      case 'scrollLeft':
-        return getScrollLeft();
-      case 'scrollHeight':
-        return getScrollHeight(renderBoxModel);
-      case 'scrollWidth':
-        return getScrollWidth(renderBoxModel);
-      case 'getBoundingClientRect':
-        return getBoundingClientRect();
       default:
         return properties[key];
     }
@@ -1050,8 +1008,8 @@ class Element extends Node
     }
   }
 
-  String getBoundingClientRect() {
-    BoundingClientRect boundingClientRect;
+  Pointer<NativeBoundingClientRect> get boundingClientRect {
+    Pointer<NativeBoundingClientRect> nativeBoundingClientRect = allocate<NativeBoundingClientRect>();
     RenderBox sizedBox = renderBoxModel;
     if (isConnected) {
       // need to flush layout to get correct size
@@ -1065,21 +1023,17 @@ class Element extends Node
 
       Offset offset = getOffset(sizedBox);
       Size size = sizedBox.size;
-      boundingClientRect = BoundingClientRect(
-        x: offset.dx,
-        y: offset.dy,
-        width: size.width,
-        height: size.height,
-        top: offset.dy,
-        left: offset.dx,
-        right: offset.dx + size.width,
-        bottom: offset.dy + size.height,
-      );
-    } else {
-      boundingClientRect = BoundingClientRect();
+      nativeBoundingClientRect.ref.x = offset.dx;
+      nativeBoundingClientRect.ref.y = offset.dy;
+      nativeBoundingClientRect.ref.width = size.width;
+      nativeBoundingClientRect.ref.height = size.height;
+      nativeBoundingClientRect.ref.top = offset.dy;
+      nativeBoundingClientRect.ref.left = offset.dx;
+      nativeBoundingClientRect.ref.right = offset.dx + size.width;
+      nativeBoundingClientRect.ref.bottom = offset.dy + size.height;
     }
 
-    return boundingClientRect.toJSON();
+    return nativeBoundingClientRect;
   }
 
   double getOffsetX() {

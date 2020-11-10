@@ -26,6 +26,8 @@ JSNode::NodeInstance::~NodeInstance() {
 }
 
 JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType) : EventTargetInstance(node), nodeType(nodeType) {}
+JSNode::NodeInstance::NodeInstance(JSNode *node, NativeNode *nativeNode, NodeType nodeType)
+  : EventTargetInstance(node, nativeNode), nodeType(nodeType) {}
 
 bool JSNode::NodeInstance::isConnected() {
   bool _isConnected = eventTargetId == BODY_TARGET_ID;
@@ -336,7 +338,8 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
     return instance != nullptr ? instance->object : nullptr;
   } else if (name == "appendChild") {
     if (_appendChild == nullptr) {
-      _appendChild = propertyBindingFunction(_hostClass->context, this, "appendChild", appendChild);;
+      _appendChild = propertyBindingFunction(_hostClass->context, this, "appendChild", appendChild);
+      ;
     }
     return _appendChild;
   } else if (name == "remove") {
@@ -396,6 +399,8 @@ std::array<JSStringRef, 12> &JSNode::NodeInstance::getNodePropertyNames() {
   return propertyNames;
 }
 
-JSStringRef JSNode::NodeInstance::internalTextContent() {return nullptr;}
+JSStringRef JSNode::NodeInstance::internalTextContent() {
+  return nullptr;
+}
 
 } // namespace kraken::binding::jsc

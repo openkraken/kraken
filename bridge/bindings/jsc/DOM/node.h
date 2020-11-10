@@ -24,6 +24,8 @@ enum NodeType {
 
 void bindNode(std::unique_ptr<JSContext> &context);
 
+struct NativeNode;
+
 class JSNode : public JSEventTarget {
 public:
   JSNode() = delete;
@@ -36,6 +38,7 @@ public:
 
     NodeInstance() = delete;
     NodeInstance(JSNode *node, NodeType nodeType);
+    NodeInstance(JSNode *node, NativeNode *nativeNode, NodeType nodeType);
     ~NodeInstance() override;
 
     static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -84,9 +87,9 @@ public:
   };
 };
 
-class NativeNode : public NativeEventTarget {
+struct NativeNode : public NativeEventTarget {
   NativeNode() = delete;
-  NativeNode(JSNode::NodeInstance *instance) : NativeEventTarget(instance){};
+  NativeNode(JSNode::NodeInstance *instance) : NativeEventTarget(instance) {};
 };
 
 } // namespace kraken::binding::jsc

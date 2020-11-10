@@ -43,7 +43,7 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId,
                                             JSValueRef *exception)
-  : NodeInstance(element, NodeType::ELEMENT_NODE) {
+  : NodeInstance(element, new NativeElement(this), NodeType::ELEMENT_NODE) {
   JSStringRef tagNameStrRef = tagNameStringRef_ = JSValueToStringCopy(element->ctx, tagNameValue, exception);
 
   JSStringRetain(tagNameStringRef_);
@@ -78,8 +78,21 @@ JSElement::ElementInstance::~ElementInstance() {
   }
 }
 
+JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, JSObjectRef function,
+                                                             JSObjectRef thisObject, size_t argumentCount,
+                                                             const JSValueRef *arguments, JSValueRef *exception) {
+  auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
+  getDartMethod()->requestUpdateFrame();
+  auto nativeElement = reinterpret_cast<NativeElement *>(elementInstance->nativeEventTarget);
+  NativeBoundingClientRect *nativeBoundingClientRect =
+      nativeElement->getBoundingClientRect(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
+  auto boundingClientRect = new BoundingClientRect(elementInstance->_hostClass->context, nativeBoundingClientRect);
+  return boundingClientRect->jsObject;
+}
+
 JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
+  auto nativeElement = reinterpret_cast<NativeElement *>(nativeEventTarget);
 
   if (name == "style") {
     if (style == nullptr) {
@@ -91,6 +104,47 @@ JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueR
     return style->object;
   } else if (name == "nodeName") {
     return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
+  } else if (name == "offsetLeft") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetLeft(_hostClass->contextId, eventTargetId));
+  } else if (name == "offsetTop") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetTop(_hostClass->contextId, eventTargetId));
+  } else if (name == "offsetWidth") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetWidth(_hostClass->contextId, eventTargetId));
+  } else if (name == "offsetHeight") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetHeight(_hostClass->contextId, eventTargetId));
+  } else if (name == "clientWidth") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientWidth(_hostClass->contextId, eventTargetId));
+  } else if (name == "clientHeight") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientHeight(_hostClass->contextId, eventTargetId));
+  } else if (name == "clientTop") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientTop(_hostClass->contextId, eventTargetId));
+  } else if (name == "clientLeft") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientLeft(_hostClass->contextId, eventTargetId));
+  } else if (name == "scrollTop") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollTop(_hostClass->contextId, eventTargetId));
+  } else if (name == "scrollLeft") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollLeft(_hostClass->contextId, eventTargetId));
+  } else if (name == "scrollHeight") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollHeight(_hostClass->contextId, eventTargetId));
+  } else if (name == "scrollWidth") {
+    getDartMethod()->requestUpdateFrame();
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollWidth(_hostClass->contextId, eventTargetId));
+  } else if (name == "getBoundingClientRect") {
+    if (_getBoundingClientRect == nullptr) {
+      _getBoundingClientRect = propertyBindingFunction(_hostClass->context, this, "getBoundingClientRect", getBoundingClientRect);
+    }
+    return _getBoundingClientRect;
   }
 
   return JSNode::NodeInstance::getProperty(nameRef, exception);
@@ -123,6 +177,53 @@ JSStringRef JSElement::ElementInstance::internalTextContent() {
 std::array<JSStringRef, 1> &JSElement::ElementInstance::getElementPropertyNames() {
   static std::array<JSStringRef, 1> propertyNames{JSStringCreateWithUTF8CString("style")};
   return propertyNames;
+}
+
+BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientRect *boundingClientRect)
+  : HostObject(context, "BoundingClientRect"), nativeBoundingClientRect(boundingClientRect) {}
+
+JSValueRef BoundingClientRect::getProperty(JSStringRef nameRef, JSValueRef *exception) {
+  auto name = JSStringToStdString(nameRef);
+
+  if (name == "x") {
+    return JSValueMakeNumber(ctx, nativeBoundingClientRect->x);
+  } else if (name == "y") {
+    return JSValueMakeNumber(ctx, nativeBoundingClientRect->y);
+  } else if (name == "width") {
+    return JSValueMakeNumber(ctx, nativeBoundingClientRect->width);
+  } else if (name == "height") {
+    return JSValueMakeNumber(ctx, nativeBoundingClientRect->height);
+  } else if (name == "left") {
+    return JSValueMakeNumber(ctx, nativeBoundingClientRect->left);
+  } else if (name == "right") {
+    return JSValueMakeNumber(ctx, nativeBoundingClientRect->right);
+  } else if (name == "bottom") {
+    return JSValueMakeNumber(ctx, nativeBoundingClientRect->bottom);
+  } else if (name == "top") {
+    return JSValueMakeNumber(ctx, nativeBoundingClientRect->top);
+  }
+
+  return nullptr;
+}
+
+std::array<JSStringRef, 8> &BoundingClientRect::getBoundingClientRectPropertyNames() {
+  static std::array<JSStringRef, 8> propertyNames{
+    JSStringCreateWithUTF8CString("x"),      JSStringCreateWithUTF8CString("y"),
+    JSStringCreateWithUTF8CString("width"),  JSStringCreateWithUTF8CString("height"),
+    JSStringCreateWithUTF8CString("top"),    JSStringCreateWithUTF8CString("right"),
+    JSStringCreateWithUTF8CString("bottom"), JSStringCreateWithUTF8CString("left"),
+  };
+  return propertyNames;
+}
+
+void BoundingClientRect::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &property : getBoundingClientRectPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+}
+
+BoundingClientRect::~BoundingClientRect() {
+  delete nativeBoundingClientRect;
 }
 
 } // namespace kraken::binding::jsc

@@ -158,6 +158,7 @@ class ElementManager {
 
   void initBody(Pointer<NativeEventTarget> nativePtr) {
     _rootElement.nativePtr = nativePtr;
+    _rootElement.bindNativeMethods();
   }
 
   void _setRootElement(Element element) {
