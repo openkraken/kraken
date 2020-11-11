@@ -444,6 +444,9 @@ class RenderBoxModel extends RenderBox with
     markNeedsLayout();
   }
 
+  double autoMinWidth = 0;
+  double autoMinHeight = 0;
+
   bool needsLayout = false;
 
   @override

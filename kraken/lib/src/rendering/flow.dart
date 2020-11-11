@@ -10,12 +10,19 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 
 class _RunMetrics {
-  _RunMetrics(this.mainAxisExtent, this.crossAxisExtent, this.baselineExtent, this.childCount);
+  _RunMetrics(
+    this.mainAxisExtent,
+    this.crossAxisExtent,
+    this.baselineExtent,
+    this.childCount,
+    this.runChildren,
+  );
 
   final double mainAxisExtent;
   final double crossAxisExtent;
   final double baselineExtent;
   final int childCount;
+  final Map<int, RenderBox> runChildren;
 }
 
 /// Impl flow layout algorithm.
@@ -644,12 +651,22 @@ class RenderFlowLayout extends RenderLayoutBox {
     double maxSizeAboveBaseline = 0;
     double maxSizeBelowBaseline = 0;
 
+    // Infos about each flex item in each flex line
+    Map<int, RenderBox> runChildren = {};
+
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (childParentData.isPositioned) {
         child = childParentData.nextSibling;
         continue;
+      }
+
+      int childNodeId;
+      if (child is RenderTextBox) {
+        childNodeId = child.targetId;
+      } else if (child is RenderBoxModel) {
+        childNodeId = child.targetId;
       }
 
       // Whether child need to layout
@@ -693,7 +710,14 @@ class RenderFlowLayout extends RenderLayoutBox {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
-        runMetrics.add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, maxSizeAboveBaseline, _effectiveChildCount));
+        runMetrics.add(_RunMetrics(
+          runMainAxisExtent,
+          runCrossAxisExtent,
+          maxSizeAboveBaseline,
+          _effectiveChildCount,
+          runChildren,
+        ));
+        runChildren = {};
         runMainAxisExtent = 0.0;
         runCrossAxisExtent = 0.0;
         maxSizeAboveBaseline = 0.0;
@@ -747,6 +771,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
       _effectiveChildCount += 1;
+      runChildren[childNodeId] = child;
+
       childParentData.runIndex = runMetrics.length;
       preChild = child;
       child = childParentData.nextSibling;
@@ -756,7 +782,13 @@ class RenderFlowLayout extends RenderLayoutBox {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
       if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
-      runMetrics.add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, maxSizeAboveBaseline, childCount));
+      runMetrics.add(_RunMetrics(
+        runMainAxisExtent,
+        runCrossAxisExtent,
+        maxSizeAboveBaseline,
+        childCount,
+        runChildren,
+      ));
     }
 
     final int runCount = runMetrics.length;
@@ -809,6 +841,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         crossAxisContentSize = contentSize.width;
         break;
     }
+
+    autoMinWidth = _getMainAxisAutoSize(runMetrics);
+    autoMinHeight = _getCrossAxisAutoSize(runMetrics);
 
     final double crossAxisFreeSpace = math.max(0.0, crossAxisContentSize - crossAxisExtent);
     double runLeadingSpace = 0.0;
@@ -995,6 +1030,42 @@ class RenderFlowLayout extends RenderLayoutBox {
       else
         crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
+  }
+
+  /// Set main size of layout if min-width is not defined, otherwise use main size of its contents
+  /// https://www.w3.org/TR/css-sizing-3/#automatic-minimum-size
+  double _getMainAxisAutoSize(
+    List<_RunMetrics> runMetrics,
+    ) {
+    double contentWidth = 0;
+    if (minWidth == null) {
+      // Find the line which has the max main size
+      _RunMetrics maxMainSizeMetrics = runMetrics.reduce((_RunMetrics curr, _RunMetrics next) {
+        return curr.mainAxisExtent > next.mainAxisExtent ? curr : next;
+      });
+      contentWidth = maxMainSizeMetrics.mainAxisExtent;
+    } else {
+      contentWidth = minWidth;
+    }
+    return contentWidth;
+  }
+
+  /// Get cross size of layout if min-height is not defined, otherwise use cross size of its contents
+  /// https://www.w3.org/TR/css-sizing-3/#automatic-minimum-size
+  double _getCrossAxisAutoSize(
+    List<_RunMetrics> runMetrics,
+    ) {
+    double contentHeight = 0;
+    if (minHeight == null) {
+      runMetrics.forEach((_RunMetrics curr) {
+        curr.runChildren.forEach((int targetId, RenderBox child) {
+          contentHeight += child.size.height;
+        });
+      });
+    } else {
+      contentHeight = minHeight;
+    }
+    return contentHeight;
   }
 
   // Get distance from top to baseline of child incluing margin
