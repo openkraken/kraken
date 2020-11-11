@@ -6,7 +6,7 @@
 import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/src/launcher/controller.dart';

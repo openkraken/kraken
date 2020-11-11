@@ -1,6 +1,6 @@
 {
   "name": "@kraken-project/cli",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Kraken Cli Client for desktop including macOS and Linux.",
   "bin": {
     "kraken": "bin/kraken.js"

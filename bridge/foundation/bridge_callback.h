@@ -32,7 +32,6 @@ class BridgeCallback {
 public:
   ~BridgeCallback() {
     contextList.clear();
-    callbackCount = 0;
   }
 
 #ifdef KRAKEN_ENABLE_JSA
@@ -74,13 +73,26 @@ public:
     auto &jsContext = context->_context;
     int32_t contextId = context->_context.getContextId();
     contextList.emplace_back(std::move(context));
-    callbackCount.fetch_add(1);
     return fn(p, contextId);
+  }
+
+  void freeBridgeCallbackContext(Context *context) {
+    auto begin = std::begin(contextList);
+    auto end = std::end(contextList);
+
+    while (begin != end) {
+      auto &&ctx = *begin;
+      if (ctx.get() == context) {
+        ctx.reset();
+        contextList.erase(begin);
+      }
+
+      begin++;
+    }
   }
 
 private:
   std::vector<std::unique_ptr<Context>> contextList;
-  std::atomic<int> callbackCount{0};
 };
 
 } // namespace kraken::foundation

@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:kraken/bridge.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'bundle.dart';

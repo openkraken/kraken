@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
@@ -981,9 +981,14 @@ class CSSOrigin {
 mixin CSSTransformMixin on Node {
 
   void updateRenderTransform(Element element, RenderBoxModel renderBoxModel, String value) {
+    // If render box model was not creared yet, then exit.
+    if (renderBoxModel == null) {
+      return;
+    }
+
     Matrix4 matrix4 = CSSTransform.parseTransform(value);
     // Upgrade this renderObject into repaintSelf mode.
-    if (renderBoxModel.transform == null && matrix4 != CSSTransform.initial && !renderBoxModel.isRepaintBoundary) {
+    if (!renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;
       RenderBoxModel repaintSelfBox = createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
       if (parent is ContainerRenderObjectMixin) {

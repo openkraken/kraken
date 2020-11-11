@@ -4,7 +4,7 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -54,6 +54,18 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
   set overflow(TextOverflow value) {
     assert(_renderParagraph != null);
     _renderParagraph.overflow = value;
+  }
+
+  // Box size equals to RenderBox.size to avoid flutter complain when read size property.
+  Size _boxSize;
+  Size get boxSize {
+    assert(_boxSize != null, 'box does not have laid out.');
+    return _boxSize;
+  }
+
+  set size(Size value) {
+    _boxSize = value;
+    super.size = value;
   }
 
   WhiteSpace _whiteSpace;
