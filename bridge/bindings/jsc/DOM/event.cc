@@ -49,9 +49,7 @@ JSEvent::EventInstance::EventInstance(JSEvent *jsEvent, EventType eventType) : I
   nativeEvent->timeStamp = ms.count();
 }
 
-JSValueRef JSEvent::EventInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
-
+JSValueRef JSEvent::EventInstance::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "type") {
     JSStringRef eventStringRef = JSStringCreateWithUTF8CString(EventTypeKeys[nativeEvent->type]);
     return JSValueMakeString(_hostClass->ctx, eventStringRef);

@@ -48,7 +48,7 @@ public:
     explicit Instance(HostClass *hostClass);
     virtual ~Instance();
     virtual void initialized();
-    virtual JSValueRef getProperty(JSStringRef name, JSValueRef *exception);
+    virtual JSValueRef getProperty(std::string &name, JSValueRef *exception);
     virtual void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
     virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
 

@@ -38,7 +38,7 @@ public:
     DocumentInstance() = delete;
     explicit DocumentInstance(JSDocument *document);
     ~DocumentInstance();
-    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
   private:

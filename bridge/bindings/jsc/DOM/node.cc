@@ -319,8 +319,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   return oldChild;
 }
 
-JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
+JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
 
   if (name == "isConnected") {
     return JSValueMakeBoolean(_hostClass->ctx, isConnected());
@@ -373,7 +372,7 @@ JSValueRef JSNode::NodeInstance::getProperty(JSStringRef nameRef, JSValueRef *ex
     return JSValueMakeString(_hostClass->ctx, textContent);
   }
 
-  return JSEventTarget::EventTargetInstance::getProperty(nameRef, exception);
+  return JSEventTarget::EventTargetInstance::getProperty(name, exception);
 }
 
 void JSNode::NodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {

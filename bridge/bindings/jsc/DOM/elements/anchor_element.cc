@@ -27,15 +27,14 @@ JSObjectRef JSAnchorElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "a") {}
 
-JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  auto name = JSStringToStdString(nameRef);
+JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "href") {
     return JSValueMakeString(_hostClass->ctx, _href);
   } else if (name == "target") {
     return JSValueMakeString(_hostClass->ctx, _target);
   }
 
-  return ElementInstance::getProperty(nameRef, exception);
+  return ElementInstance::getProperty(name, exception);
 }
 
 void JSAnchorElement::AnchorElementInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {

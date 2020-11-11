@@ -93,8 +93,7 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
   return boundingClientRect->jsObject;
 }
 
-JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto nativeElement = reinterpret_cast<NativeElement *>(nativeEventTarget);
 
   if (name == "style") {
@@ -193,7 +192,7 @@ JSValueRef JSElement::ElementInstance::getProperty(JSStringRef nameRef, JSValueR
     return JSObjectMakeArray(_hostClass->ctx, elementCount, arguments, nullptr);
   }
 
-  return JSNode::NodeInstance::getProperty(nameRef, exception);
+  return JSNode::NodeInstance::getProperty(name, exception);
 }
 
 void JSElement::ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -447,9 +446,7 @@ JSValueRef JSElement::ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef fu
 BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientRect *boundingClientRect)
   : HostObject(context, "BoundingClientRect"), nativeBoundingClientRect(boundingClientRect) {}
 
-JSValueRef BoundingClientRect::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  auto name = JSStringToStdString(nameRef);
-
+JSValueRef BoundingClientRect::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "x") {
     return JSValueMakeNumber(ctx, nativeBoundingClientRect->x);
   } else if (name == "y") {

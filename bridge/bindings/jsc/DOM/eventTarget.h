@@ -58,7 +58,7 @@ public:
     explicit EventTargetInstance(JSEventTarget *eventTarget, int64_t targetId);
     explicit EventTargetInstance(JSEventTarget *eventTarget, NativeEventTarget *nativeEventTarget);
     explicit EventTargetInstance(JSEventTarget *eventTarget, NativeEventTarget *nativeEventTarget, int64_t targetId);
-    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSValueRef getPropertyHandler(std::string &name, JSValueRef *exception);

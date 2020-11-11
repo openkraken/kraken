@@ -89,8 +89,7 @@ JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : NodeInsta
   JSValueProtect(document->ctx, body);
 }
 
-JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
+JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "createElement") {
     if (_createElement == nullptr) {
       _createElement = propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
@@ -113,7 +112,7 @@ JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValu
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
 
-  return JSNode::NodeInstance::getProperty(nameRef, exception);
+  return JSNode::NodeInstance::getProperty(name, exception);
 }
 
 JSDocument::DocumentInstance::~DocumentInstance() {

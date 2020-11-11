@@ -50,7 +50,7 @@ public:
     explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId, JSValueRef *exception);
     explicit ElementInstance(JSElement *element, const char *tagName);
     ~ElementInstance();
-    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;
 
@@ -103,7 +103,7 @@ public:
   BoundingClientRect() = delete;
   ~BoundingClientRect() override;
   BoundingClientRect(JSContext *context, NativeBoundingClientRect *boundingClientRect);
-  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:

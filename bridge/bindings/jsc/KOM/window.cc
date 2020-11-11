@@ -24,12 +24,7 @@ JSWindow::WindowInstance::~WindowInstance() {
   }
 }
 
-JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  JSValueRef result = EventTargetInstance::getProperty(nameRef, exception);
-  if (result != nullptr) return result;
-
-  std::string &&name = JSStringToStdString(nameRef);
-
+JSValueRef JSWindow::WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "devicePixelRatio") {
     if (getDartMethod()->devicePixelRatio == nullptr) {
       JSC_THROW_ERROR(_hostClass->context->context(),
@@ -67,7 +62,7 @@ JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef
     // TODO: implement window.scrollY();
   }
 
-  return nullptr;
+  return JSEventTarget::EventTargetInstance::getProperty(name, exception);
 }
 
 JSWindow::~JSWindow() {}

@@ -29,7 +29,7 @@ public:
     WindowInstance() = delete;
     explicit WindowInstance(JSWindow *window);
     ~WindowInstance();
-    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
   private:
     std::array<JSStringRef, 11> propertyNames{

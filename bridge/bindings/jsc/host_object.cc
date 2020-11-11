@@ -19,9 +19,8 @@ JSValueRef HostObject::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JS
                                         JSValueRef *exception) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
   auto &context = hostObject->context;
-  JSStringRetain(propertyName);
-  JSValueRef ret = hostObject->getProperty(propertyName, exception);
-  JSStringRelease(propertyName);
+  std::string name = JSStringToStdString(propertyName);
+  JSValueRef ret = hostObject->getProperty(name, exception);
   if (!context->handleException(*exception)) {
     return nullptr;
   }
@@ -52,7 +51,7 @@ void HostObject::proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSP
 
 HostObject::~HostObject() {}
 
-JSValueRef HostObject::getProperty(JSStringRef name, JSValueRef *exception) {
+JSValueRef HostObject::getProperty(std::string &name, JSValueRef *exception) {
   return nullptr;
 }
 

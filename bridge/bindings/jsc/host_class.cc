@@ -120,10 +120,9 @@ void HostClass::proxyInstanceInitialize(JSContextRef ctx, JSObjectRef object) {
 JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                                JSValueRef *exception) {
   auto hostClassInstance = reinterpret_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
-  JSStringRetain(propertyName);
-  JSValueRef result = hostClassInstance->getProperty(propertyName, exception);
+  std::string name = JSStringToStdString(propertyName);
+  JSValueRef result = hostClassInstance->getProperty(name, exception);
 
-  JSStringRelease(propertyName);
   return result;
 }
 
@@ -157,7 +156,7 @@ HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass) {
   object = JSObjectMake(hostClass->ctx, hostClass->instanceClass, this);
 }
 void HostClass::Instance::initialized() {}
-JSValueRef HostClass::Instance::getProperty(JSStringRef name, JSValueRef *exception) {
+JSValueRef HostClass::Instance::getProperty(std::string &name, JSValueRef *exception) {
   return nullptr;
 }
 void HostClass::Instance::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}

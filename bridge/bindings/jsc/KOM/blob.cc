@@ -181,9 +181,7 @@ JSValueRef JSBlob::arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectR
   return buffer;
 }
 
-JSValueRef JSBlob::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
-
+JSValueRef JSBlob::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "slice") {
     return propertyBindingFunction(context, this, "slice", slice);
   } else if (name == "text") {

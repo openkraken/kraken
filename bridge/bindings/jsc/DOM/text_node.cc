@@ -43,9 +43,7 @@ JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringR
     ->registerCommand(eventTargetId, UICommandType::createTextNode, args, 1, nativeEventTarget);
 }
 
-JSValueRef JSTextNode::TextNodeInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
-
+JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "data" || name == "textContent") {
     return JSValueMakeString(_hostClass->ctx, data);
   } else if (name == "nodeName") {
@@ -53,7 +51,7 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(JSStringRef nameRef, JSValu
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
 
-  return JSNode::NodeInstance::getProperty(nameRef, exception);
+  return JSNode::NodeInstance::getProperty(name, exception);
 }
 
 void JSTextNode::TextNodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {

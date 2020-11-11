@@ -225,8 +225,7 @@ JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, J
   return JSValueMakeBoolean(ctx, !eventInstance->_canceledFlag);
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
+JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
 
   if (name == "addEventListener") {
     if (_addEventListener == nullptr) {

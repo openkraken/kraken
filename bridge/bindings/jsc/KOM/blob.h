@@ -60,7 +60,7 @@ public:
   /// get bytes data's length
   int32_t size();
 
-  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 

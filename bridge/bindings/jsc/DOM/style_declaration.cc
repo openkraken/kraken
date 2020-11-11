@@ -89,9 +89,7 @@ CSSStyleDeclaration::StyleDeclarationInstance::~StyleDeclarationInstance() {
   }
 }
 
-JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
-
+JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "setProperty") {
     if (_setProperty == nullptr) {
       _setProperty = propertyBindingFunction(_hostClass->context, this, "setProperty", setProperty);

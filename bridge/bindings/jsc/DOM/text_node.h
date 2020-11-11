@@ -29,7 +29,7 @@ public:
 
     TextNodeInstance() = delete;
     explicit TextNodeInstance(JSTextNode *jsTextNode, JSStringRef data);
-    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;

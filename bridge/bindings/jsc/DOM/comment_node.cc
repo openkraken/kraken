@@ -36,8 +36,7 @@ void JSCommentNode::CommentNodeInstance::setProperty(JSStringRef name, JSValueRe
   if (exception != nullptr) return;
 }
 
-JSValueRef JSCommentNode::CommentNodeInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
+JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "data") {
     return JSValueMakeString(_hostClass->ctx, data);
   } else if (name == "nodeName") {
@@ -47,7 +46,7 @@ JSValueRef JSCommentNode::CommentNodeInstance::getProperty(JSStringRef nameRef, 
     return JSValueMakeNumber(_hostClass->ctx, JSStringGetLength(data));
   }
 
-  return NodeInstance::getProperty(nameRef, exception);
+  return NodeInstance::getProperty(name, exception);
 }
 
 void JSCommentNode::CommentNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
