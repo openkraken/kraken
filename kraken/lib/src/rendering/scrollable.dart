@@ -12,8 +12,7 @@ import 'package:kraken/rendering.dart';
 import 'ticker_provider.dart';
 
 typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
-
-class RenderSingleViewPortParentData extends ContainerBoxParentData<RenderBox> {}
+typedef PointListener = void Function(PointerEvent event);
 
 class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollContext {
   AxisDirection _axisDirection;
@@ -182,6 +181,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
 
 mixin RenderOverflowMixin on RenderBox {
   ScrollListener scrollListener;
+  PointListener pointerListener;
 
   bool _clipX = false;
   bool get clipX => _clipX;
@@ -343,7 +343,7 @@ mixin RenderOverflowMixin on RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     double result;
-    final RenderSingleViewPortParentData childParentData = parentData;
+    final BoxParentData childParentData = parentData;
     double candidate = getDistanceToActualBaseline(baseline);
     if (candidate != null) {
       candidate += childParentData.offset.dy;

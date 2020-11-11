@@ -104,6 +104,8 @@ const String ALIGN_ITEMS = 'alignItems';
 const String ALIGN_SELF = 'alignSelf';
 const String ALIGN_CONTENT = 'alignContent';
 
+const String SLIVER_DIRECTION = 'sliverDirection';
+
 const String TRANSFORM = 'transform';
 const String TRANSFORM_ORIGIN = 'transformOrigin';
 

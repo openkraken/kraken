@@ -70,7 +70,7 @@ describe('flexbox_justifycontent-spacearound', () => {
 
     await matchViewportSnapshot();
   });
-  xit('negative', async () => {
+  it('negative', async () => {
     let div;
     div = createElement(
       'div',

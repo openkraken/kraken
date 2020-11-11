@@ -3,9 +3,7 @@ import 'dart:core';
 
 import 'package:flutter/animation.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
-import 'package:kraken/src/css/values/keywords.dart';
-import 'package:kraken/src/element/event.dart';
+import 'package:kraken/dom.dart';
 import 'package:flutter/scheduler.dart';
 
 // https://drafts.csswg.org/web-animations/#enumdef-animationplaystate

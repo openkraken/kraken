@@ -1,5 +1,5 @@
 import 'package:flutter/animation.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/css.dart';
 
@@ -91,7 +91,7 @@ class CSSTransition {
     } else if (status == CSSTransitionEvent.start) {
       // An Event fired when a CSS transition is created,
       // when it is added to a set of running transitions,
-      // though not nessarilty started.
+      // though not necessarily started.
       target.dispatchEvent(Event(EventType.transitionstart));
     } else if (status == CSSTransitionEvent.end) {
       // An Event fired when a CSS transition has finished playing.

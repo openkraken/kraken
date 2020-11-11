@@ -71,6 +71,12 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     _listeners.add(callback);
   }
 
+  void clearIntersectionChangeListeners() {
+    _listeners?.clear();
+    _listeners = null;
+    _onIntersectionChange = null;
+  }
+
   void removeIntersectionChangeListener(IntersectionChangeCallback callback) {
     for (int i = 0; i < _listeners.length; i += 1) {
       if (_listeners[i] == callback) {
@@ -85,7 +91,10 @@ mixin RenderIntersectionObserverMixin on RenderBox {
   }
 
   void _dispatchChange(IntersectionObserverEntry info) {
-    for (IntersectionChangeCallback callback in _listeners) {
+    // Not use for-in, and not cache length, due to callback call stack may
+    // clear [_listeners], which case concurrent exception.
+    for (int i = 0; i < (_listeners == null ? 0 : _listeners.length); i ++) {
+      IntersectionChangeCallback callback = _listeners[i];
       callback(info);
     }
   }

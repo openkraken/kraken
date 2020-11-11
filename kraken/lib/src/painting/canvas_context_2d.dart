@@ -40,6 +40,8 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
 }
 
 class _CanvasRenderingContext2D extends CanvasRenderingContext {
+  int get actionCount => _actions.length;
+
   List<CanvasAction> _actions = [];
   List<CanvasAction> takeActionRecords() => _actions;
 
