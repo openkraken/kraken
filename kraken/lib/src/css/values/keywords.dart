@@ -50,6 +50,7 @@ const String ROW_REVERSE = 'row-reverse';
 const String COLUMN = 'column';
 const String COLUMN_REVERSE = 'column-reverse';
 const String STRETCH = 'stretch';
+const String NO_WRAP = 'nowrap';
 const String WRAP = 'wrap';
 const String WRAP_REVERSE = 'wrap-reverse';
 

@@ -148,4 +148,87 @@ describe('flexbox flex-wrap', () => {
     document.body.appendChild(container);
     await matchViewportSnapshot();
   });
+
+  it("should work with wrap when flex-direction is column and height not exists", async () => {
+    let flexbox_1;
+
+    flexbox_1 = createElement(
+      'div',
+      {
+        class: 'flexbox column align-items-flex-start wrap-reverse',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          'flex-wrap': 'wrap',
+          'align-items': 'flex-start',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`This text`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`should be left aligned.`)]
+        ),
+      ]
+    );
+    BODY.appendChild(flexbox_1);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with wrap when flex-direction is column and height is smaller than children's height", async () => {
+    let flexbox_1;
+
+    flexbox_1 = createElement(
+      'div',
+      {
+        class: 'flexbox column align-items-flex-start wrap-reverse',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          'flex-wrap': 'wrap',
+          'align-items': 'flex-start',
+          'box-sizing': 'border-box',
+          'height': '30px',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`This text`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`should not be left aligned.`)]
+        ),
+      ]
+    );
+    BODY.appendChild(flexbox_1);
+
+    await matchViewportSnapshot();
+  });
 });

@@ -5,7 +5,7 @@
 
 import 'dart:ui';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 
 /// Fps callback.
