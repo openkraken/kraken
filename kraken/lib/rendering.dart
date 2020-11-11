@@ -13,6 +13,7 @@ export 'src/rendering/flow.dart';
 export 'src/rendering/intersection_observer.dart';
 export 'src/rendering/box_model.dart';
 export 'src/rendering/intrinsic.dart';
+export 'src/rendering/recycler.dart';
 export 'src/rendering/preferred_size.dart';
 export 'src/rendering/margin.dart';
 export 'src/rendering/scrollable.dart';

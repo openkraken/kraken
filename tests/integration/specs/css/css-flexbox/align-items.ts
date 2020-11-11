@@ -938,5 +938,195 @@ describe('align-items', () => {
     await matchViewportSnapshot();
   });
 
+  it("works with stretch in row direction when flex-wrap is nowrap", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'row',
+        width: '300px',
+        height: '100px',
+        alignItems: 'stretch',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           width: '100px',
+           backgroundColor: 'red',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("does not work with stretch in row direction when flex-wrap is wrap", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'row',
+        width: '300px',
+        height: '100px',
+        alignItems: 'stretch',
+        flexWrap: 'wrap',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           width: '100px',
+           backgroundColor: 'red',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it('does work with stretch when min-height exists and height does not exist', async () => {
+    let flexbox;
+
+    flexbox = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          'background-color': '#aaa',
+          position: 'relative',
+          'flex-wrap': 'wrap',
+          width: '200px',
+          height: '120px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            'min-height': '10px',
+            width: '100px',
+            'background-color': 'lightblue',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+
+    BODY.appendChild(flexbox);
+
+
+    await matchViewportSnapshot();
+  });
+
+  it('does not work with stretch when height exists', async () => {
+    let flexbox;
+
+    flexbox = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          'background-color': '#aaa',
+          position: 'relative',
+          'flex-wrap': 'wrap',
+          width: '200px',
+          height: '120px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            'height': '50px',
+            width: '100px',
+            'background-color': 'lightblue',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+
+    BODY.appendChild(flexbox);
+
+
+    await matchViewportSnapshot();
+  });
+
+  it('does work with stretch when min-width exists and width does not exist', async () => {
+    let flexbox;
+
+    flexbox = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          'background-color': '#aaa',
+          position: 'relative',
+          flexDirection: 'column',
+          'flex-wrap': 'wrap',
+          width: '200px',
+          height: '120px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            'height': '50px',
+            minWidth: '100px',
+            'background-color': 'lightblue',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+
+    BODY.appendChild(flexbox);
+
+
+    await matchViewportSnapshot();
+  });
+
+  it('does not work with stretch when width exists', async () => {
+    let flexbox;
+
+    flexbox = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          'background-color': '#aaa',
+          position: 'relative',
+          flexDirection: 'column',
+          'flex-wrap': 'wrap',
+          width: '200px',
+          height: '120px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            'height': '50px',
+            width: '100px',
+            'background-color': 'lightblue',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+
+    BODY.appendChild(flexbox);
+
+
+    await matchViewportSnapshot();
+  });
 });
 

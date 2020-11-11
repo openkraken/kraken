@@ -94,6 +94,7 @@ const builtInCSSProperties = [
   'align-items',
   'align-self',
   'align-content',
+  'sliver-direction',
   'transform',
   'transform-origin',
   'transition',

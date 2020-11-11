@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('align-baseline', () => {
-  xit("001", async () => {
+  it("001", async () => {
     let flexbox;
     let flexbox_1;
     flexbox = createElement(
@@ -75,7 +75,7 @@ describe('align-baseline', () => {
     await matchViewportSnapshot();
   });
 
-  xit('ref', async () => {
+  it('ref', async () => {
     let flexbox;
     let flexbox_1;
     flexbox = createElement(

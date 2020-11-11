@@ -6,7 +6,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 // CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
 
@@ -14,8 +14,12 @@ enum CSSDisplay {
   inline,
   block,
   inlineBlock,
+
   flex,
   inlineFlex,
+
+  sliver, // @TODO temp name.
+
   none
 }
 
@@ -29,6 +33,7 @@ enum CSSDisplay {
 mixin CSSSizingMixin {
 
   void updateRenderSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
+    assert(renderBoxModel != null, 'RenderBoxModel should not be null');
     double value = CSSLength.toDisplayPortValue(present);
 
     switch (property) {
@@ -334,9 +339,11 @@ class CSSSizing {
         String marginRight = element.style[MARGIN_RIGHT];
 
         bool isVerticalDirection = style[FLEX_DIRECTION] == COLUMN || style[FLEX_DIRECTION] == COLUMN_REVERSE;
+        // Flex item will not stretch in stretch alignment when flex wrap is set to wrap or wrap-reverse
+        bool isFlexNoWrap = !style.contains(FLEX_WRAP) || (style.contains(FLEX_WRAP) && style[FLEX_WRAP] == NO_WRAP);
         // Display as block if flex vertical layout children and stretch children
-        if (marginLeft != AUTO && marginRight != AUTO && isVerticalDirection &&
-            (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
+        if (marginLeft != AUTO && marginRight != AUTO && isVerticalDirection && isFlexNoWrap &&
+        (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
           display = CSSDisplay.block;
         }
       }
@@ -346,14 +353,11 @@ class CSSSizing {
   }
 
   static CSSDisplay getDisplay(String displayString) {
-    CSSDisplay display = CSSDisplay.inline;
-    if (displayString == null) {
-      return display;
-    }
-
-    switch(displayString) {
+    switch (displayString) {
       case 'none':
         return CSSDisplay.none;
+      case 'sliver':
+        return CSSDisplay.sliver;
       case 'block':
         return CSSDisplay.block;
       case 'inline-block':
