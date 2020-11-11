@@ -22,7 +22,6 @@ void main() {
   CSSText.DEFAULT_FONT_SIZE = 14.0;
   setObjectElementFactory(customObjectElementFactory);
 
-
   // This line enables the extension.
   enableFlutterDriverExtension(handler: (String payload) async {
     Completer<String> completer = Completer();
@@ -43,7 +42,8 @@ void main() {
         bundleContent: 'console.log("starting integration test")',
         disableViewportWidthAssertion: true,
         disableViewportHeightAssertion: true,
-        javaScriptChannel: javaScriptChannel
+        javaScriptChannel: javaScriptChannel,
+        debugEnableInspector: false,
       );
       widgets.add(widget);
     }

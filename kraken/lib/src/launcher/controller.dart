@@ -40,13 +40,16 @@ class KrakenViewController {
   // during a kraken view's process of loading, and completing a navigation request.
   KrakenNavigationDelegate navigationDelegate;
 
-  KrakenViewController(double viewportWidth, double viewportHeight,
-      {this.showPerformanceOverlay,
+  KrakenViewController(
+    double viewportWidth, double viewportHeight,
+    {
+      this.showPerformanceOverlay,
       this.enableDebug = false,
       int contextId,
       this.rootController,
-      this.navigationDelegate})
-      : _contextId = contextId {
+      this.navigationDelegate,
+    }
+  ): _contextId = contextId {
     if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
@@ -58,7 +61,9 @@ class KrakenViewController {
     _elementManager = ElementManager(viewportWidth, viewportHeight,
         showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
 
-    debugStartInspector();
+    if (kDebugMode && rootController.debugEnableInspector != false) {
+      debugStartInspector();
+    }
   }
 
   /// Used for debugger inspector.
@@ -276,17 +281,20 @@ class KrakenController {
   KrakenMethodChannel get methodChannel => _methodChannel;
 
   final String name;
+  // Enable debug inspector.
+  bool debugEnableInspector;
 
-  KrakenController(this.name, double viewportWidth, double viewportHeight,
-      {bool showPerformanceOverlay = false,
+  KrakenController(this.name, double viewportWidth, double viewportHeight, {
+      bool showPerformanceOverlay = false,
       enableDebug = false,
       String bundleURL,
       String bundlePath,
       String bundleContent,
       KrakenNavigationDelegate navigationDelegate,
       KrakenMethodChannel methodChannel,
-      this.loadErrorHandler})
-      : _bundleURL = bundleURL,
+      this.loadErrorHandler,
+      this.debugEnableInspector,
+    }): _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent {
     _methodChannel = methodChannel;
