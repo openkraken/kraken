@@ -6,7 +6,7 @@
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 
 class CustomObjectElement implements ObjectElementClient {

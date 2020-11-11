@@ -25,6 +25,9 @@ Value JSWindow::get(JSContext &context, const PropNameID &name) {
     const NativeString *code = getDartMethod()->platformBrightness(context.getContextId());
     String &&result = String::createFromUInt16(context, code->string, code->length);
 
+    delete[] code->string;
+    delete code;
+
     return Value(context, result);
   } else if (_name == "location") {
     return Value(context, Object::createFromHostObject(context, location_->shared_from_this()));
