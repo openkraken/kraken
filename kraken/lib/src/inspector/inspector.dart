@@ -2,6 +2,7 @@
  * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
 import 'package:kraken/module.dart';
@@ -20,6 +21,9 @@ class Inspector {
 
   Inspector(this.elementManager, { int port = INSPECTOR_DEFAULT_PORT, String address = '127.0.0.1' }) {
     registerModule(InspectDOMModule(this));
+    registerModule(InspectOverlayModule(this));
+    registerModule(InspectPageModule(this));
+    registerModule(InspectCSSModule(this));
 
     server = InspectServer(this, address: address, port: port)
       ..onStarted = onServerStart
@@ -41,6 +45,7 @@ class Inspector {
   }
 
   void messageRouter(Map<String, dynamic> data) {
+    int id = data['id'];
     String _method = data['method'];
     Map<String, dynamic> params = data['params'];
 
@@ -48,87 +53,20 @@ class Inspector {
     String module = moduleMethod[0];
     String method = moduleMethod[1];
 
-    print('Receive $data');
+    if (!kReleaseMode) {
+      print('Receive $data');
+    }
+
     if (moduleRegistrar.containsKey(module)) {
-      moduleRegistrar[module].invoke(method, params);
+      moduleRegistrar[module].invoke(id, method, params);
     }
   }
+
+  void dispose() {
+    moduleRegistrar.clear();
+    server?.dispose();
+  }
 }
-
-/// Inspector object record data, which used to response valid websocket message.
-///
-/// Inspector data including one response data sequence, request data sequence List (optional).
-// class InspectorData {
-//   ResponseData _response = ResponseData();
-//   ResponseData get response => _response;
-//
-//   void setId(int id) {
-//     _response.setId(id);
-//   }
-//
-//   void setResult(String key, value) {
-//     _response.setResult(key, value);
-//   }
-//
-//   List<RequestData> _requests = [];
-//   List<RequestData> get requests => _requests;
-//   bool get isRequestsNotEmpty => _requests.isNotEmpty;
-//
-//   void addExtra(RequestData value) {
-//     _requests.add(value);
-//   }
-// }
-
-/// Inspector WebSocket response object based on JSON-RPC.
-///
-/// Response including [id] and [result] members.
-// class ResponseData {
-//   int id = 0;
-//   Map<String, dynamic> result = {};
-//
-//   /// Set [id] with new [value].
-//   void setId(int value) {
-//     id = value;
-//   }
-//
-//   /// Set item in result map with [key] and [value]
-//   void setResult(String key, dynamic value) {
-//     result[key] = value;
-//   }
-//
-//   /// Encoding response data into the standard json format.
-//   Map<String, dynamic> toJson() {
-//     return {'id': id, 'result': result};
-//   }
-// }
-
-/// Inspector WebSocket request object based on JSON-RPC.
-///
-/// Request including [id], [method] and [params] members.
-
-// class RequestData {
-//   int id;
-//
-//   String method = '';
-//
-//   Map<String, dynamic> params = {};
-//
-//   void setId(int value) {
-//     id = value;
-//   }
-//
-//   void setMethod(String value) {
-//     method = value;
-//   }
-//
-//   void setParams(String key, dynamic value) {
-//     params[key] = value;
-//   }
-//
-//   Map<String, dynamic> toJson() {
-//     return {if (id != null) 'id': id, 'method': method, 'params': params};
-//   }
-// }
 
 abstract class JSONEncodable {
   Map toJson();

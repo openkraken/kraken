@@ -4,6 +4,8 @@ import 'package:kraken/module.dart';
 import 'package:kraken/widget.dart';
 import 'dart:ui';
 
+const String DEFAULT_BUNDLE = 'https://kraken.oss-cn-hangzhou.aliyuncs.com/go-rax/kraken.js';
+
 void main() {
   KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
   javaScriptChannel.onMethodCall = (String method, dynamic arguments) async {
@@ -11,6 +13,7 @@ void main() {
   };
 
   Kraken kraken = Kraken(
+    bundleURL: DEFAULT_BUNDLE,
     viewportWidth: window.physicalSize.width / window.devicePixelRatio,
     viewportHeight: window.physicalSize.height / window.devicePixelRatio,
     javaScriptChannel: javaScriptChannel,

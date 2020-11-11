@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:kraken/inspector.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/kraken.dart';
@@ -22,6 +23,9 @@ class InspectServer {
   HttpServer _httpServer;
   WebSocket _ws;
 
+  /// InspectServer has connected backend.
+  bool get connected => _ws != null;
+
   Future<void> start() async {
     _httpServer = await HttpServer.bind(address, port);
 
@@ -40,14 +44,20 @@ class InspectServer {
     }
   }
 
-  void sendToBackend(String method, JSONEncodable params) {
+  void sendToBackend(int id, JSONEncodable result) {
     assert(_ws != null, 'WebSocket should connect.');
 
     String data = jsonEncode({
-      'method': method,
-      'params': params,
+      if (id != null) 'id': id,
+      // Give an empty object for response.
+      'result': result ?? '{}',
     });
     _ws.add(data);
+  }
+
+  void sendEventToBackend(InspectorEvent event) {
+    assert(_ws != null, 'WebSocket should connect.');
+    _ws.add(jsonEncode(event));
   }
 
   Map<String, dynamic> _parseMessage(message) {
@@ -70,7 +80,6 @@ class InspectServer {
   }
 
   void onHTTPRequest(HttpRequest request) async {
-    print(request);
     switch (request.requestedUri.path) {
       case '/json/version':
         onRequestVersion(request);
@@ -152,5 +161,13 @@ class InspectServer {
   void onRequestFallback(HttpRequest request) {
     request.response.statusCode = 404;
     request.response.write('Unknown request.');
+  }
+
+  void dispose() async {
+    onStarted = null;
+    onBackendMessage = null;
+
+    await _ws.close();
+    await _httpServer.close();
   }
 }

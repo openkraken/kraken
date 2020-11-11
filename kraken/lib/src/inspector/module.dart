@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:kraken/inspector.dart';
 
 export 'modules/dom.dart';
@@ -16,21 +18,32 @@ abstract class InspectModule {
   String get name;
 
   bool _enable = false;
-  void invoke(String method, Map<String, dynamic> params) {
+  void invoke(int id, String method, Map<String, dynamic> params) {
     if (method == 'enable') {
       _enable = true;
+      sendToBackend(id, null);
     } else if (method == 'disable') {
       _enable = false;
+      sendToBackend(id, null);
     }
+
 
     if (_enable) {
-      receiveFromBackend(method, params);
+      receiveFromBackend(id, method, params);
     }
   }
 
-  void sendToBackend(String method, JSONEncodable params) {
-    inspector.server.sendToBackend('$name.$method', params);
+  void sendToBackend(int id, JSONEncodable result) {
+    if (inspector.server.connected) {
+      inspector.server.sendToBackend(id, result);
+    }
   }
 
-  void receiveFromBackend(String method, Map<String, dynamic> params);
+  void sendEventToBackend(InspectorEvent event) {
+    if (inspector.server.connected) {
+      inspector.server.sendEventToBackend(event);
+    }
+  }
+
+  void receiveFromBackend(int id, String method, Map<String, dynamic> params);
 }
