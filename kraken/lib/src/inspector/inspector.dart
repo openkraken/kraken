@@ -4,7 +4,6 @@
  */
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
 import 'package:kraken/module.dart';

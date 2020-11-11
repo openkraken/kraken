@@ -20,10 +20,25 @@ class InspectCSSModule extends InspectModule {
       case 'getMatchedStylesForNode':
         handleGetMatchedStylesForNode(id, params);
         break;
+      case 'getComputedStyleForNode':
+        handleGetComputedStyleForNode(id, params);
+        break;
     }
   }
 
   void handleGetMatchedStylesForNode(int id, Map<String, dynamic> params) {
+    int nodeId = params['nodeId'];
+    Element element = elementManager.getEventTargetByTargetId<Element>(nodeId);
+
+    if (element != null) {
+      MatchedStyles matchedStyles = MatchedStyles(
+        inlineStyle: buildInlineStyle(element.style),
+      );
+      sendToBackend(id, matchedStyles);
+    }
+  }
+
+  void handleGetComputedStyleForNode(int id, Map<String, dynamic> params) {
     int nodeId = params['nodeId'];
     Element element = elementManager.getEventTargetByTargetId<Element>(nodeId);
 
