@@ -31,8 +31,8 @@ class InspectServer {
     try {
       _httpServer = await HttpServer.bind(address, port);
       this.port = port;
-    } on SocketException catch (e) {
-      if (e.osError.errorCode == 48 && _bindServerRetryTime < 10) {
+    } on SocketException {
+      if (_bindServerRetryTime < 10) {
         _bindServerRetryTime++;
         await _bindServer(port + 1);
       } else {
@@ -182,7 +182,7 @@ class InspectServer {
     onStarted = null;
     onBackendMessage = null;
 
-    await _ws.close();
-    await _httpServer.close();
+    await _ws?.close();
+    await _httpServer?.close();
   }
 }
