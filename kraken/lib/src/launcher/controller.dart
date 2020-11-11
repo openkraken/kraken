@@ -119,6 +119,9 @@ class KrakenViewController {
     detachView();
     disposeBridge(_contextId);
 
+    _inspector?.dispose();
+    _inspector = null;
+
     // break circle reference
     _elementManager.getRootElement();
     _elementManager.controller = null;
