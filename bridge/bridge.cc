@@ -111,7 +111,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
   }
 
   std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
-  bool hasCallback = false;
+  bool hasCallback = count == 2;
 
   if (count < 2) {
     HostFunctionType emptyCallback = [](JSContext &context, const Value &thisVal, const Value *args,
@@ -125,7 +125,6 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
     std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[1].getObject(context)));
     Object &&callbackFunction = callbackValue->getObject(context);
     callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
-    hasCallback = true;
   }
 
   auto bridge = static_cast<JSBridge *>(context.getOwner());
