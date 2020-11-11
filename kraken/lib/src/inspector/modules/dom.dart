@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:kraken/dom.dart';
 import '../module.dart';
 import '../inspector.dart';
@@ -22,8 +24,20 @@ class InspectDOMModule extends InspectModule {
         onGetBoxModel(id, params);
         break;
       case 'setInspectedNode':
-        sendToBackend(id, null);
+        onSetInspectedNode(id, params);
         break;
+    }
+  }
+
+  /// Enables console to refer to the node with given id via $x
+  /// (see Command Line API for more details $x functions).
+  Node inspectedNode;
+
+  void onSetInspectedNode(int id, Map<String, dynamic> params) {
+    int nodeId = params['nodeId'];
+    Node node = elementManager.getEventTargetByTargetId(nodeId);
+    if (node != null) {
+      inspectedNode = node;
     }
   }
 
@@ -38,8 +52,54 @@ class InspectDOMModule extends InspectModule {
   }
 
   void onGetBoxModel(int id, Map<String, dynamic> params) {
-    // int nodeId = params['nodeId'];
-    sendToBackend(id, null);
+    int nodeId = params['nodeId'];
+    Element element = elementManager.getEventTargetByTargetId<Element>(nodeId);
+
+    // BoxModel design to BorderBox in kraken.
+    if (element != null && element.renderBoxModel != null && element.renderBoxModel.hasSize) {
+      ui.Offset contentBoxOffset = element.renderBoxModel.localToGlobal(ui.Offset.zero);
+
+      int widthWithinBorder = element.renderBoxModel.size.width.toInt();
+      int heightWithinBorder = element.renderBoxModel.size.height.toInt();
+      List<double> border = [
+        contentBoxOffset.dx, contentBoxOffset.dy,
+        contentBoxOffset.dx + widthWithinBorder, contentBoxOffset.dy,
+        contentBoxOffset.dx + widthWithinBorder, contentBoxOffset.dy + heightWithinBorder,
+        contentBoxOffset.dx, contentBoxOffset.dy + heightWithinBorder,
+      ];
+      List<double> padding = [
+        border[0] + element.renderBoxModel.borderLeft, border[1] + element.renderBoxModel.borderTop,
+        border[2] - element.renderBoxModel.borderRight, border[3] + element.renderBoxModel.borderTop,
+        border[4] - element.renderBoxModel.borderRight, border[5] - element.renderBoxModel.borderBottom,
+        border[6] + element.renderBoxModel.borderLeft, border[7] - element.renderBoxModel.borderBottom,
+      ];
+      List<double> content = [
+        padding[0] + element.renderBoxModel.paddingLeft, padding[1] + element.renderBoxModel.paddingTop,
+        padding[2] - element.renderBoxModel.paddingRight, padding[3] + element.renderBoxModel.paddingTop,
+        padding[4] - element.renderBoxModel.paddingRight, padding[5] - element.renderBoxModel.paddingBottom,
+        padding[6] + element.renderBoxModel.paddingLeft, padding[7] - element.renderBoxModel.paddingBottom,
+      ];
+      List<double> margin = [
+        border[0] - element.renderBoxModel.marginLeft, border[1] - element.renderBoxModel.marginTop,
+        border[2] + element.renderBoxModel.marginRight, border[3] - element.renderBoxModel.marginTop,
+        border[4] + element.renderBoxModel.marginRight, border[5] + element.renderBoxModel.marginBottom,
+        border[6] - element.renderBoxModel.marginLeft, border[7] + element.renderBoxModel.marginBottom,
+      ];
+
+      BoxModel boxModel = BoxModel(
+        content: content,
+        padding: padding,
+        border: border,
+        margin: margin,
+        width: widthWithinBorder,
+        height: heightWithinBorder,
+      );
+      sendToBackend(id, JSONEncodableMap({
+        'model': boxModel,
+      }));
+    } else {
+      sendToBackend(id, null);
+    }
   }
 }
 
@@ -148,3 +208,46 @@ class InspectorNode extends JSONEncodable {
     };
   }
 }
+
+class BoxModel extends JSONEncodable {
+  List<double> content;
+  List<double> padding;
+  List<double> border;
+  List<double> margin;
+  int width;
+  int height;
+
+  BoxModel({ this.content, this.padding, this.border, this.margin, this.width, this.height });
+
+  @override
+  Map toJson() {
+    return {
+      'content': content,
+      'padding': padding,
+      'border': border,
+      'margin': content,
+      'width': width,
+      'height': height,
+    };
+  }
+}
+
+class Rect extends JSONEncodable {
+  num x;
+  num y;
+  num width;
+  num height;
+
+  Rect({ this.x, this.y, this.width, this.height });
+
+  @override
+  Map toJson() {
+    return {
+      'x': x,
+      'y': y,
+      'width': width,
+      'height': height,
+    };
+  }
+}
+

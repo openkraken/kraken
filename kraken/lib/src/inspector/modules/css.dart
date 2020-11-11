@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:meta/meta.dart';
@@ -5,6 +7,7 @@ import '../module.dart';
 import '../inspector.dart';
 
 const int INLINED_STYLESHEET_ID = 1;
+const String ZERO_PX = '0px';
 
 class InspectCSSModule extends InspectModule {
   final Inspector inspector;
@@ -22,6 +25,12 @@ class InspectCSSModule extends InspectModule {
         break;
       case 'getComputedStyleForNode':
         handleGetComputedStyleForNode(id, params);
+        break;
+      case 'getInlineStylesForNode':
+        handleGetInlineStylesForNode(id, params);
+        break;
+      case 'setStyleTexts':
+        handleSetStyleTexts(id, params);
         break;
     }
   }
@@ -43,11 +52,58 @@ class InspectCSSModule extends InspectModule {
     Element element = elementManager.getEventTargetByTargetId<Element>(nodeId);
 
     if (element != null) {
-      MatchedStyles matchedStyles = MatchedStyles(
-        inlineStyle: buildInlineStyle(element.style),
+      ComputedStyle computedStyle = ComputedStyle(
+        computedStyle: buildComputedStyle(element),
       );
-      sendToBackend(id, matchedStyles);
+      sendToBackend(id, computedStyle);
     }
+  }
+
+  // Returns the styles defined inline (explicitly in the "style" attribute and
+  // implicitly, using DOM attributes) for a DOM node identified by nodeId.
+  void handleGetInlineStylesForNode(int id, Map<String, dynamic> params) {
+    int nodeId = params['nodeId'];
+    Element element = elementManager.getEventTargetByTargetId<Element>(nodeId);
+
+    if (element != null) {
+      InlinedStyle inlinedStyle = InlinedStyle(
+        inlineStyle: buildInlineStyle(element.style),
+        attributesStyle: buildAttributesStyle(element.properties),
+      );
+
+      sendToBackend(id, inlinedStyle);
+    }
+  }
+
+  void handleSetStyleTexts(int id, Map<String, dynamic> params) {
+    List edits = params['edits'];
+    List<CSSStyle> styles = [];
+
+    for (Map<String, dynamic> edit in edits) {
+      // Use styleSheetId to identity element.
+      int nodeId = edit['styleSheetId'];
+      String text = edit['text'] ?? '';
+      List<String> texts = text.split(';');
+      Element element = elementManager.getEventTargetByTargetId<Element>(nodeId);
+      if (element != null) {
+        for (String kv in texts) {
+          kv = kv.trim();
+          List<String> _kv = kv.split(':');
+          if (_kv.length == 2) {
+            String name = _kv[0].trim();
+            String value = _kv[1].trim();
+            element.style.setProperty(camelize(name), value);
+          }
+        }
+        styles.add(buildInlineStyle(element.style));
+      } else {
+        styles.add(null);
+      }
+    }
+
+    sendToBackend(id, JSONEncodableMap({
+      'styles': styles,
+    }));
   }
 
   static CSSStyle buildInlineStyle(CSSStyleDeclaration style) {
@@ -78,12 +134,60 @@ class InspectCSSModule extends InspectModule {
 
     return CSSStyle(
       // Absent for user agent stylesheet and user-specified stylesheet rules.
-      styleSheetId: INLINED_STYLESHEET_ID,
+      // Use eventTarget id to identity which element the rule belongs to.
+      styleSheetId: style.target.targetId,
       cssProperties: cssProperties,
       shorthandEntries: <ShorthandEntry>[],
       cssText: cssText,
       range: SourceRange(startLine: 0, startColumn: 0, endLine: 0, endColumn: cssText.length)
     );
+  }
+
+  static List<CSSComputedStyleProperty> buildComputedStyle(Element element) {
+    List<CSSComputedStyleProperty> computedStyle = [];
+    CSSStyleDeclaration style = element.style;
+    for (int i = 0; i < style.length; i++) {
+      String propertyName = style.item(i);
+      String propertyValue = style.getPropertyValue(propertyName);
+      propertyName = kebabize(propertyName);
+
+      if (CSSLength.isLength(propertyValue)) {
+        double len = CSSLength.toDisplayPortValue(propertyValue);
+        propertyValue = len == 0 ? '0' : '${len}px';
+      }
+
+      if (propertyName == DISPLAY) {
+        propertyValue ??= element.defaultDisplay;
+      }
+
+      computedStyle.add(CSSComputedStyleProperty(name: propertyName, value: propertyValue));
+    }
+
+    if (!style.contains(BORDER_TOP_STYLE)) {
+      computedStyle.add(CSSComputedStyleProperty(name: kebabize(BORDER_TOP_STYLE), value: ZERO_PX));
+    }
+    if (!style.contains(BORDER_RIGHT_STYLE)) {
+      computedStyle.add(CSSComputedStyleProperty(name: kebabize(BORDER_RIGHT_STYLE), value: ZERO_PX));
+    }
+    if (!style.contains(BORDER_BOTTOM_STYLE)) {
+      computedStyle.add(CSSComputedStyleProperty(name: kebabize(BORDER_BOTTOM_STYLE), value: ZERO_PX));
+    }
+    if (!style.contains(BORDER_LEFT_STYLE)) {
+      computedStyle.add(CSSComputedStyleProperty(name: kebabize(BORDER_LEFT_STYLE), value: ZERO_PX));
+    }
+
+    // Calc computed size.
+    Map<String, dynamic> boundingClientRect = jsonDecode(element.getBoundingClientRect());
+    boundingClientRect.forEach((String name, value) {
+      computedStyle.add(CSSComputedStyleProperty(name: name, value: '${value}px'));
+    });
+
+    return computedStyle;
+  }
+
+  // Kraken not supports attribute style for now.
+  static CSSStyle buildAttributesStyle(Map<String, dynamic> properties) {
+    return null;
   }
 }
 
@@ -258,3 +362,47 @@ class ShorthandEntry extends JSONEncodable {
   }
 }
 
+/// https://chromedevtools.github.io/devtools-protocol/tot/CSS/#method-getComputedStyleForNode
+class ComputedStyle extends JSONEncodable {
+  List<CSSComputedStyleProperty> computedStyle;
+
+  ComputedStyle({ @required this.computedStyle });
+
+  @override
+  Map toJson() {
+    return {
+      'computedStyle': computedStyle,
+    };
+  }
+}
+
+/// https://chromedevtools.github.io/devtools-protocol/tot/CSS/#type-CSSComputedStyleProperty
+class CSSComputedStyleProperty extends JSONEncodable {
+  String name;
+  String value;
+
+  CSSComputedStyleProperty({ @required this.name, @required this.value });
+
+  @override
+  Map toJson() {
+    return {
+      'name': name,
+      'value': value,
+    };
+  }
+}
+
+class InlinedStyle extends JSONEncodable {
+  CSSStyle inlineStyle;
+  CSSStyle attributesStyle;
+
+  InlinedStyle({ this.inlineStyle, this.attributesStyle });
+
+  @override
+  Map toJson() {
+    return {
+      if (inlineStyle != null) 'inlineStyle': inlineStyle,
+      if (attributesStyle != null) 'attributesStyle': attributesStyle,
+    };
+  }
+}

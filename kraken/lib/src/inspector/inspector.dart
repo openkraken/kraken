@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
 import 'package:kraken/module.dart';
+import 'package:meta/meta.dart';
 import 'server.dart';
 import 'module.dart';
 
@@ -77,6 +78,8 @@ class Inspector {
     String module = moduleMethod[0];
     String method = moduleMethod[1];
 
+    // print('Receive $module.$method $params');
+
     if (moduleRegistrar.containsKey(module)) {
       moduleRegistrar[module].invoke(id, method, params);
     }
@@ -113,4 +116,25 @@ class Inspector {
 
 abstract class JSONEncodable {
   Map toJson();
+}
+
+@immutable
+class InspectorEvent implements JSONEncodable {
+  final String method;
+  final JSONEncodable params;
+  InspectorEvent(this.method, this.params) : assert(method != null);
+
+  Map toJson() {
+    return {
+      'method': method,
+      'params': params?.toJson() ?? {},
+    };
+  }
+}
+
+class JSONEncodableMap extends JSONEncodable {
+  Map map;
+  JSONEncodableMap(this.map);
+
+  Map toJson() => map;
 }

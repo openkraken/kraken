@@ -25,7 +25,6 @@ abstract class InspectModule {
       sendToBackend(id, null);
     }
 
-
     if (_enable) {
       receiveFromBackend(id, method, params);
     }

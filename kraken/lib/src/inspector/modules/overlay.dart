@@ -1,6 +1,7 @@
 
 import 'package:kraken/inspector.dart';
 import 'package:kraken/dom.dart';
+import '../module.dart';
 
 class InspectOverlayModule extends InspectModule {
   @override

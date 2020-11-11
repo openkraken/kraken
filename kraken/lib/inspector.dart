@@ -5,5 +5,4 @@
 
 export 'src/inspector/inspector.dart';
 export 'src/inspector/server.dart';
-export 'src/inspector/module.dart';
 export 'src/inspector/overlay.dart';

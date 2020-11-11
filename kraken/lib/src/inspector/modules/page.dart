@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/inspector.dart';
 import 'package:kraken/dom.dart';
+import '../module.dart';
 
 class InspectPageModule extends InspectModule {
   final Inspector inspector;
@@ -140,20 +141,6 @@ class ScreencastFrameMetadata implements JSONEncodable {
       'scrollOffsetX': scrollOffsetX,
       'scrollOffsetY': scrollOffsetY,
       'timestamp': timestamp
-    };
-  }
-}
-
-@immutable
-class InspectorEvent implements JSONEncodable {
-  final String method;
-  final JSONEncodable params;
-  InspectorEvent(this.method, this.params) : assert(method != null);
-
-  Map toJson() {
-    return {
-      'method': method,
-      'params': params?.toJson() ?? {},
     };
   }
 }
