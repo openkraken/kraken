@@ -63,10 +63,6 @@ mixin EventHandlerMixin on Node {
     TouchEvent event = _getTouchEvent('touchend', pointEvent);
     _touchEndTime = event.timeStamp;
     dispatchEvent(event);
-
-    if (_getGlobalDistance(pointEvent) < kTouchSlop) {
-      handleClick(Event('click', EventInit()));
-    }
   }
 
   void handlePointCancel(PointerCancelEvent pointEvent) {
