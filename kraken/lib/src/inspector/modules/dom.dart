@@ -1,10 +1,13 @@
 import 'dart:ui' as ui;
 
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
+import 'package:flutter/rendering.dart';
 import '../module.dart';
 import '../inspector.dart';
 
 const int DOCUMENT_NODE_ID = -3;
+const String DEFAULT_FRAME_ID = 'main_frame';
 
 class InspectDOMModule extends InspectModule {
   @override
@@ -26,6 +29,29 @@ class InspectDOMModule extends InspectModule {
       case 'setInspectedNode':
         onSetInspectedNode(id, params);
         break;
+      case 'getNodeForLocation':
+        onGetNodeForLocation(id, params);
+        break;
+    }
+  }
+
+  void onGetNodeForLocation(int id, Map<String, dynamic> params) {
+    int x = params['x'];
+    int y = params['y'];
+
+    RenderBox rootRenderObject = elementManager.getRootRenderObject();
+    BoxHitTestResult result = BoxHitTestResult();
+    rootRenderObject.hitTest(result, position: Offset(x.toDouble(), y.toDouble()));
+    if (result.path.first != null && result.path.first.target is RenderBoxModel) {
+      RenderBoxModel lastHitRenderBoxModel = result.path.first.target;
+      int targetId = lastHitRenderBoxModel.targetId;
+      sendToBackend(id, JSONEncodableMap({
+        'backendId': targetId,
+        'frameId': DEFAULT_FRAME_ID,
+        'nodeId': targetId,
+      }));
+    } else {
+      sendToBackend(id, null);
     }
   }
 
