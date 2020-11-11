@@ -47,6 +47,7 @@ class Inspector {
     registerModule(InspectOverlayModule(this));
     registerModule(InspectPageModule(this));
     registerModule(InspectCSSModule(this));
+    registerModule(InspectRuntimeModule(this));
 
     // Listen with broadcast address (0.0.0.0), not to restrict incoming ip address.
     server = InspectServer(this, address: '0.0.0.0', port: port)
@@ -77,9 +78,7 @@ class Inspector {
     List<String> moduleMethod = _method.split('.');
     String module = moduleMethod[0];
     String method = moduleMethod[1];
-
-    // print('Receive $module.$method $params');
-
+    
     if (moduleRegistrar.containsKey(module)) {
       moduleRegistrar[module].invoke(id, method, params);
     }
