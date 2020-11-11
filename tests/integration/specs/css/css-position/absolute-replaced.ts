@@ -43,7 +43,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
   xit('height-001', async () => {
     let p;
@@ -153,7 +153,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
   xit('height-002', async () => {
     let p;
@@ -216,7 +216,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
   xit('height-003', async () => {
     let p;

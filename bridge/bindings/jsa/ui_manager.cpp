@@ -3,12 +3,12 @@
  * Author: Kraken Team.
  */
 
+#include "ui_manager.h"
 #include "bridge.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include "foundation/logging.h"
 #include "jsa.h"
-#include "ui_manager.h"
 
 namespace kraken {
 namespace binding {
@@ -52,6 +52,9 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   const NativeString *result = getDartMethod()->invokeUIManager(context.getContextId(), &nativeString);
   String retValue = String::createFromUInt16(context, result->string, result->length);
 
+  delete[] result->string;
+  delete result;
+
   return Value(context, retValue);
 }
 
@@ -75,6 +78,12 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
 
   Object callback = obj->_callback->getObject(_context);
   callback.asFunction(_context).call(_context, String::createFromUInt16(_context, json->string, json->length));
+  auto bridge = static_cast<JSBridge *>(obj->_context.getOwner());
+  bridge->bridgeCallback.freeBridgeCallbackContext(obj);
+}
+
+void handleInvokeModuleUnexpectedCallback(void *callbackContext, int32_t contextId, NativeString *json) {
+  static_assert("Unexpected module callback, please check your invokeModule implementation on the dart side.", "");
 }
 
 Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -93,6 +102,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
   }
 
   std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
+  bool hasCallback = count == 2;
 
   if (count < 2) {
     HostFunctionType emptyCallback = [](JSContext &context, const Value &thisVal, const Value *args,
@@ -114,18 +124,36 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
   nativeString.string = unicodeStrPtr;
   nativeString.length = unicodeLength;
 
-  const auto *result = bridge->bridgeCallback.registerCallback<const NativeString *>(
-    std::move(callbackContext), [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
-      const NativeString *response =
-        getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString, handleInvokeModuleTransientCallback);
-      return response;
-    });
+  const NativeString *result;
+  if (hasCallback) {
+    result = bridge->bridgeCallback.registerCallback<const NativeString *>(
+      std::move(callbackContext), [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
+        const NativeString *response =
+          getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString, handleInvokeModuleTransientCallback);
+        return response;
+      });
+  } else {
+    result = getDartMethod()->invokeModule(callbackContext.get(), context.getContextId(), &nativeString,
+                                           handleInvokeModuleUnexpectedCallback);
+  }
 
   if (result == nullptr) {
     return Value::null();
   }
-  return Value(context, String::createFromUInt16(context, result->string, result->length));
+  String ret = String::createFromUInt16(context, result->string, result->length);
+  delete[] result->string;
+  delete result;
+  return Value(context, ret);
 }
+
+/**
+ * Message channel, send message from Dart to JS.
+ * @param context
+ * @param thisVal
+ * @param args
+ * @param count
+ * @return
+ */
 
 /**
  * Message channel, send message from Dart to JS.
@@ -148,7 +176,7 @@ Value krakenUIListener(JSContext &context, const Value &thisVal, const Value *ar
   Object &&func = val->getObject(context);
 
   auto bridge = static_cast<JSBridge *>(context.getOwner());
-  //  bridge->krakenUIListenerList.emplace_back(val);
+  bridge->krakenUIListenerList.emplace_back(val);
 
   return Value::undefined();
 }
@@ -172,7 +200,7 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   return Value::undefined();
 }
 
-void handleBatchUpdate(void *callbackContext, int32_t contextId, const char *errmsg) {
+void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
@@ -198,6 +226,8 @@ void handleBatchUpdate(void *callbackContext, int32_t contextId, const char *err
 
   Object callback = obj->_callback->getObject(_context);
   callback.asFunction(_context).call(_context, Value::undefined(), 0);
+  auto bridge = static_cast<JSBridge *>(obj->_context.getOwner());
+  bridge->bridgeCallback.freeBridgeCallbackContext(obj);
 }
 
 Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -226,7 +256,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   auto bridge = static_cast<JSBridge *>(context.getOwner());
   bridge->bridgeCallback.registerCallback<void>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
-      getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleBatchUpdate);
+      getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleTransientCallback);
     });
 
   return Value::undefined();

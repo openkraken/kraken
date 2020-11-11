@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('multiline-column', () => {
-  xit('max-height', async () => {
+  it('max-height', async () => {
     let item;
     let item_1;
     let item_2;
