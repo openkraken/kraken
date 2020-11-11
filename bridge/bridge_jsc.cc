@@ -94,13 +94,6 @@ void JSBridge::detachDevtools() {
 }
 #endif // ENABLE_DEBUGGER
 
-void JSBridge::handleUIListener(const NativeString *args, JSValueRef *exception) {
-  for (const auto &callback : krakenUIListenerList) {
-    JSStringRef argsRef = JSStringCreateWithCharacters(args->string, args->length);
-    const JSValueRef arguments[] = {JSValueMakeString(context->context(), argsRef)};
-    JSObjectCallAsFunction(context->context(), callback, context->global(), 1, arguments, exception);
-  }
-}
 
 void JSBridge::handleModuleListener(const NativeString *args, JSValueRef *exception) {
   for (const auto &callback : krakenModuleListenerList) {
@@ -121,9 +114,7 @@ void JSBridge::invokeEventListener(int32_t type, const NativeString *args) {
   }
 
   JSValueRef exception = nullptr;
-  if (UI_EVENT == type) {
-    this->handleUIListener(args, &exception);
-  } else if (MODULE_EVENT == type) {
+  if (MODULE_EVENT == type) {
     this->handleModuleListener(args, &exception);
   }
   context->handleException(exception);
@@ -144,14 +135,10 @@ void JSBridge::evaluateScript(const char *script, const char *url, int startLine
 JSBridge::~JSBridge() {
   if (!context->isValid()) return;
 
-  for (auto &callback : krakenUIListenerList) {
-    JSValueUnprotect(context->context(), callback);
-  }
   for (auto &callback : krakenModuleListenerList) {
     JSValueUnprotect(context->context(), callback);
   }
 
-  krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
 
   delete bridgeCallback;

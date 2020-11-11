@@ -78,14 +78,23 @@ void handleRAFPersistentCallback(void *ptr, int32_t contextId, double result, co
   JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr,
                          &exception);
   _context.handleException(exception);
+
+  auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
+  bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
 }
 
-void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
+void handleTransientCallback(void *ptr, int32_t contextId, const char *errmsg) {
+  auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
   handlePersistentCallback(callbackContext, contextId, errmsg);
+  auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
+  bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
 }
 
-void handleRAFTransientCallback(void *callbackContext, int32_t contextId, double result, const char *errmsg) {
-  handleRAFPersistentCallback(callbackContext, contextId, result, errmsg);
+void handleRAFTransientCallback(void *ptr, int32_t contextId, double result, const char *errmsg) {
+  handleRAFPersistentCallback(ptr, contextId, result, errmsg);
+  auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
+  auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
+  bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
 }
 
 JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,

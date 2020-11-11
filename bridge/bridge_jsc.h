@@ -50,7 +50,6 @@ public:
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
-  std::deque<JSObjectRef> krakenUIListenerList;
   std::deque<JSObjectRef> krakenModuleListenerList;
 
   int32_t contextId;
@@ -66,7 +65,6 @@ public:
   }
 
   void invokeEventListener(int32_t type, const NativeString *args);
-  void handleUIListener(const NativeString *args, JSValueRef *exception);
   void handleModuleListener(const NativeString *args, JSValueRef *exception);
   void reportError(const char *errmsg);
   //#ifdef ENABLE_DEBUGGER

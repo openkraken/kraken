@@ -21,8 +21,9 @@ import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
 import 'package:ffi/ffi.dart';
 
-const String STYLE = 'style';
 import 'element_native_methods.dart';
+
+const String STYLE = 'style';
 
 /// Defined by W3C Standard,
 /// Most element's default width is 300 in pixel,

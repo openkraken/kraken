@@ -19,7 +19,7 @@ void bindEventTarget(std::unique_ptr<JSContext> &context) {
 }
 
 JSEventTarget *JSEventTarget::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSEventTarget*> instanceMap {};
+  static std::unordered_map<JSContext *, JSEventTarget *> instanceMap{};
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSEventTarget(context);
   }
@@ -50,6 +50,10 @@ JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarg
   eventTargetId = globalEventTargetId;
   globalEventTargetId++;
 }
+
+JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget,
+                                                        NativeEventTarget *nativeEventTarget, int64_t targetId)
+  : Instance(eventTarget), nativeEventTarget(nativeEventTarget), eventTargetId(targetId) {}
 
 JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.

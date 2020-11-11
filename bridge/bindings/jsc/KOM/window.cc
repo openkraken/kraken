@@ -10,7 +10,8 @@
 
 namespace kraken::binding::jsc {
 
-JSWindow::WindowInstance::WindowInstance(JSWindow *window) : EventTargetInstance(window, WINDOW_TARGET_ID) {
+JSWindow::WindowInstance::WindowInstance(JSWindow *window)
+  : EventTargetInstance(window, new NativeWindow(this), WINDOW_TARGET_ID) {
   location_ = new JSLocation(_hostClass->context);
 
   foundation::UICommandTaskMessageQueue::instance(window->context->getContextId())
@@ -72,7 +73,7 @@ JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef
 JSWindow::~JSWindow() {}
 
 JSObjectRef JSWindow::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                        const JSValueRef *arguments, JSValueRef *exception) {
+                                          const JSValueRef *arguments, JSValueRef *exception) {
   auto window = new WindowInstance(this);
   return window->object;
 }
@@ -84,4 +85,5 @@ void bindWindow(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "window", windowInstance);
 }
 
+NativeWindow::NativeWindow(JSWindow::WindowInstance *window) : NativeEventTarget(window) {}
 } // namespace kraken::binding::jsc

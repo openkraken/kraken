@@ -1,4 +1,4 @@
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'dart:ffi';
@@ -66,7 +66,7 @@ mixin ElementNativeMethods on Node {
     EventTarget target = controller.view.getEventTargetById(targetId);
     if (target is Element) {
       controller.view.getRootRenderObject().owner.flushLayout();
-      return target.renderLayoutBox.clientWidth;
+      return target.renderBoxModel.clientWidth;
     }
     return 0.0;
   }
@@ -76,7 +76,7 @@ mixin ElementNativeMethods on Node {
     EventTarget target = controller.view.getEventTargetById(targetId);
     if (target is Element) {
       controller.view.getRootRenderObject().owner.flushLayout();
-      return target.renderLayoutBox.clientHeight;
+      return target.renderBoxModel.clientHeight;
     }
     return 0.0;
   }
@@ -86,7 +86,7 @@ mixin ElementNativeMethods on Node {
     EventTarget target = controller.view.getEventTargetById(targetId);
     if (target is Element) {
       controller.view.getRootRenderObject().owner.flushLayout();
-      return target.renderLayoutBox.borderLeft;
+      return target.renderBoxModel.borderLeft;
     }
     return 0.0;
   }
@@ -96,7 +96,7 @@ mixin ElementNativeMethods on Node {
     EventTarget target = controller.view.getEventTargetById(targetId);
     if (target is Element) {
       controller.view.getRootRenderObject().owner.flushLayout();
-      return target.renderLayoutBox.borderTop;
+      return target.renderBoxModel.borderTop;
     }
     return 0.0;
   }
