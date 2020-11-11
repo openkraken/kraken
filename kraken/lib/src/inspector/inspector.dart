@@ -16,18 +16,39 @@ const int INSPECTOR_DEFAULT_PORT = 9222;
 const String INSPECTOR_DEFAULT_ADDRESS = '127.0.0.1';
 
 class Inspector {
+  /// Design preInspector for reload page,
+  /// do not use it in any other place.
+  /// More detail see [InspectPageModule.handleReloadPage].
+  static Inspector prevInspector;
+
   String get address => server?.address;
   int get port => server?.port;
-  final ElementManager elementManager;
+  ElementManager elementManager;
   final Map<String, InspectModule> moduleRegistrar = {};
   InspectServer server;
 
-  Inspector(this.elementManager, { int port = INSPECTOR_DEFAULT_PORT, String address }) {
+  factory Inspector(ElementManager elementManager, { int port = INSPECTOR_DEFAULT_PORT, String address }) {
+    if (Inspector.prevInspector != null) {
+      // Apply reload page, reuse prev inspector instance.
+      Inspector prevInspector = Inspector.prevInspector;
+
+      prevInspector.elementManager = elementManager;
+      elementManager.debugDOMTreeChanged = prevInspector.onDOMTreeChanged;
+
+      Inspector.prevInspector = null;
+      return prevInspector;
+    } else {
+      return Inspector._(elementManager, port: port, address: address);
+    }
+  }
+
+  Inspector._(this.elementManager, { int port = INSPECTOR_DEFAULT_PORT, String address }) {
     registerModule(InspectDOMModule(this));
     registerModule(InspectOverlayModule(this));
     registerModule(InspectPageModule(this));
     registerModule(InspectCSSModule(this));
 
+    // Listen with broadcast address (0.0.0.0), not to restrict incoming ip address.
     server = InspectServer(this, address: '0.0.0.0', port: port)
       ..onStarted = onServerStart
       ..onBackendMessage = messageRouter
@@ -57,12 +78,14 @@ class Inspector {
     String module = moduleMethod[0];
     String method = moduleMethod[1];
 
-    if (!kReleaseMode) {
-      print('Receive $data');
-    }
-
     if (moduleRegistrar.containsKey(module)) {
       moduleRegistrar[module].invoke(id, method, params);
+    }
+  }
+
+  void onDOMTreeChanged() {
+    if (server.connected) {
+      server.sendEventToBackend(InspectorEvent('DOM.documentUpdated', null));
     }
   }
 

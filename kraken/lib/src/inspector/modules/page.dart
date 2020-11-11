@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -29,12 +30,22 @@ class InspectPageModule extends InspectModule {
         sendToBackend(id, null);
         handleScreencastFrameAck(params);
         break;
+      case 'reload':
+        sendToBackend(id, null);
+        handleReloadPage();
     }
   }
 
+  void handleReloadPage() async {
+    try {
+      Inspector.prevInspector = elementManager.controller.view.inspector;
+      await elementManager.controller.reload();
+    } catch (e, stack) {
+      print('Dart Error: $e\n$stack');
+    }
+  }
 
   int _lastSentSessionID;
-
   bool _isFramingScreenCast = false;
   void _frameScreenCast(Duration timeStamp) {
     Element root = elementManager.getRootElement();

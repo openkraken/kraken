@@ -119,6 +119,7 @@ class KrakenViewController {
     detachView();
     disposeBridge(_contextId);
 
+    _elementManager.debugDOMTreeChanged = null;
     _inspector?.dispose();
     _inspector = null;
 
@@ -208,6 +209,7 @@ class KrakenViewController {
 
   void debugStartInspector() {
     _inspector = Inspector(_elementManager);
+    _elementManager.debugDOMTreeChanged = inspector.onDOMTreeChanged;
   }
 }
 

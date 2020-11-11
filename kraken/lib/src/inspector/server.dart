@@ -15,8 +15,8 @@ class InspectServer {
   InspectServer(this.inspector, { this.port, this.address });
 
   final Inspector inspector;
-  final int port;
   final String address;
+  int port;
 
   VoidCallback onStarted;
   MessageCallback onBackendMessage;
@@ -26,8 +26,23 @@ class InspectServer {
   /// InspectServer has connected backend.
   bool get connected => _ws != null;
 
+  int _bindServerRetryTime = 0;
+  void _bindServer(int port) async {
+    try {
+      _httpServer = await HttpServer.bind(address, port);
+      this.port = port;
+    } on SocketException catch (e) {
+      if (e.osError.errorCode == 48 && _bindServerRetryTime < 10) {
+        _bindServerRetryTime++;
+        await _bindServer(port + 1);
+      } else {
+        rethrow;
+      }
+    }
+  }
+
   Future<void> start() async {
-    _httpServer = await HttpServer.bind(address, port);
+    await _bindServer(port);
 
     if (onStarted != null) {
       onStarted();

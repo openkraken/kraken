@@ -10,9 +10,7 @@ class InspectDOMModule extends InspectModule {
 
   final Inspector inspector;
   ElementManager get elementManager => inspector.elementManager;
-  InspectDOMModule(this.inspector) {
-    elementManager.debugDOMTreeChanged = handleDOMTreeChanged;
-  }
+  InspectDOMModule(this.inspector);
 
   @override
   void receiveFromBackend(int id, String method, Map<String, dynamic> params) {
@@ -27,10 +25,6 @@ class InspectDOMModule extends InspectModule {
         sendToBackend(id, null);
         break;
     }
-  }
-
-  void handleDOMTreeChanged() {
-    sendEventToBackend(InspectorEvent('DOM.documentUpdated', null));
   }
 
   /// https://chromedevtools.github.io/devtools-protocol/tot/DOM/#method-getDocument
