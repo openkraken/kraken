@@ -2,6 +2,8 @@
  * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
@@ -11,6 +13,7 @@ import 'module.dart';
 
 const String INSPECTOR_URL = 'devtools://devtools/bundled/inspector.html';
 const int INSPECTOR_DEFAULT_PORT = 9222;
+const String INSPECTOR_DEFAULT_ADDRESS = '127.0.0.1';
 
 class Inspector {
   String get address => server?.address;
@@ -19,16 +22,19 @@ class Inspector {
   final Map<String, InspectModule> moduleRegistrar = {};
   InspectServer server;
 
-  Inspector(this.elementManager, { int port = INSPECTOR_DEFAULT_PORT, String address = '127.0.0.1' }) {
+  Inspector(this.elementManager, { int port = INSPECTOR_DEFAULT_PORT, String address }) {
     registerModule(InspectDOMModule(this));
     registerModule(InspectOverlayModule(this));
     registerModule(InspectPageModule(this));
     registerModule(InspectCSSModule(this));
 
-    server = InspectServer(this, address: address, port: port)
-      ..onStarted = onServerStart
-      ..onBackendMessage = messageRouter
-      ..start();
+    Inspector.getConnectedLocalNetworkAddress()
+      .then((String addressFallback) {
+        server = InspectServer(this, address: address ?? addressFallback, port: port)
+          ..onStarted = onServerStart
+          ..onBackendMessage = messageRouter
+          ..start();
+      });
   }
 
   void registerModule(InspectModule module) {
@@ -65,6 +71,19 @@ class Inspector {
   void dispose() {
     moduleRegistrar.clear();
     server?.dispose();
+  }
+
+  static Future<String> getConnectedLocalNetworkAddress() async {
+    List<NetworkInterface> interfaces = await NetworkInterface.list(
+        includeLoopback: false, type: InternetAddressType.IPv4);
+
+    if (interfaces != null) {
+      for (NetworkInterface interface in interfaces) {
+        return interface.addresses.first.address;
+      }
+    }
+
+    return INSPECTOR_DEFAULT_ADDRESS;
   }
 }
 
