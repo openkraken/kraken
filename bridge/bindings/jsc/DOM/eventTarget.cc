@@ -250,9 +250,7 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
   return nullptr;
 }
 
-void JSEventTarget::EventTargetInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
-
+void JSEventTarget::EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name.substr(0, 2) == "on") {
     setPropertyHandler(name, value, exception);
   }

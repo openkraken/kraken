@@ -54,9 +54,7 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueR
   return JSNode::NodeInstance::getProperty(name, exception);
 }
 
-void JSTextNode::TextNodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
-
+void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name == "data") {
     JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(stringRef);
@@ -80,7 +78,7 @@ void JSTextNode::TextNodeInstance::setProperty(JSStringRef nameRef, JSValueRef v
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   }
-  JSNode::NodeInstance::setProperty(nameRef, value, exception);
+  JSNode::NodeInstance::setProperty(name, value, exception);
 }
 
 std::array<JSStringRef, 3> & JSTextNode::TextNodeInstance::getTextNodePropertyNames() {

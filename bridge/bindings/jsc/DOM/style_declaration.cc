@@ -112,16 +112,11 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::strin
   return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(""));
 }
 
-void CSSStyleDeclaration::StyleDeclarationInstance::setProperty(JSStringRef nameRef, JSValueRef value,
-                                                                JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
-  internalSetProperty(nameRef, value, exception);
+void CSSStyleDeclaration::StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  internalSetProperty(name, value, exception);
 }
 
-void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(JSStringRef nameRef, JSValueRef value,
-                                                                        JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
-
+void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name == "setProperty" || name == "removeProperty" || name == "getPropertyValue") return;
 
   JSStringRef valueStr = JSValueToStringCopy(_hostClass->ctx, value, exception);
@@ -214,7 +209,8 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::setProperty(JSContextR
   }
 
   auto styleInstance = static_cast<CSSStyleDeclaration::StyleDeclarationInstance *>(JSObjectGetPrivate(function));
-  styleInstance->internalSetProperty(propertyStringRef, valueValueRef, exception);
+  std::string name = JSStringToStdString(propertyStringRef);
+  styleInstance->internalSetProperty(name, valueValueRef, exception);
 
   return nullptr;
 }

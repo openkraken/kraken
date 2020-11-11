@@ -31,7 +31,7 @@ JSObjectRef JSCommentNode::instanceConstructor(JSContextRef ctx, JSObjectRef con
 JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsCommentNode)
   : NodeInstance(jsCommentNode, NodeType::COMMENT_NODE) {}
 
-void JSCommentNode::CommentNodeInstance::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {
+void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   NodeInstance::setProperty(name, value, exception);
   if (exception != nullptr) return;
 }

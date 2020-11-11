@@ -37,8 +37,7 @@ JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSAnchorElement::AnchorElementInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
-  auto name = JSStringToStdString(nameRef);
+void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name == "href") {
     NativeString hrefProperty{};
     STD_STRING_TO_NATIVE_STRING(name.c_str(), hrefProperty);
@@ -76,7 +75,7 @@ void JSAnchorElement::AnchorElementInstance::setProperty(JSStringRef nameRef, JS
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   }
 
-  ElementInstance::setProperty(nameRef, value, exception);
+  ElementInstance::setProperty(name, value, exception);
 }
 
 void JSAnchorElement::AnchorElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

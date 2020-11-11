@@ -47,7 +47,7 @@ public:
   // it will call this method. If it throws an exception, the call will
   // throw a JS \c Error object. By default this throws a type error exception
   // mimicking the behavior of a frozen object in strict mode.
-  virtual void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
+  virtual void setProperty(std::string &name, JSValueRef value, JSValueRef *exception);
 
   virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
 

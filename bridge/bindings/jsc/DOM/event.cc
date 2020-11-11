@@ -126,9 +126,7 @@ JSValueRef JSEvent::EventInstance::preventDefault(JSContextRef ctx, JSObjectRef 
   return nullptr;
 }
 
-void JSEvent::EventInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
-
+void JSEvent::EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name == "cancelBubble") {
     bool v = JSValueToBoolean(_hostClass->ctx, value);
     if (v) {

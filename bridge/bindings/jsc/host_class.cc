@@ -120,7 +120,7 @@ void HostClass::proxyInstanceInitialize(JSContextRef ctx, JSObjectRef object) {
 JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                                JSValueRef *exception) {
   auto hostClassInstance = reinterpret_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
-  std::string name = JSStringToStdString(propertyName);
+  std::string &&name = JSStringToStdString(propertyName);
   JSValueRef result = hostClassInstance->getProperty(name, exception);
 
   return result;
@@ -129,8 +129,8 @@ JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef obj
 bool HostClass::proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                          JSValueRef value, JSValueRef *exception) {
   auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
-  JSStringRetain(propertyName);
-  hostClassInstance->setProperty(propertyName, value, exception);
+  std::string &&name = JSStringToStdString(propertyName);
+  hostClassInstance->setProperty(name, value, exception);
   JSStringRelease(propertyName);
   return hostClassInstance->_hostClass->context->handleException(*exception);
 }
@@ -159,7 +159,7 @@ void HostClass::Instance::initialized() {}
 JSValueRef HostClass::Instance::getProperty(std::string &name, JSValueRef *exception) {
   return nullptr;
 }
-void HostClass::Instance::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
+void HostClass::Instance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {}
 void HostClass::Instance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
 HostClass::Instance::~Instance() {}
 } // namespace kraken::binding::jsc

@@ -31,8 +31,8 @@ bool HostObject::proxySetProperty(JSContextRef ctx, JSObjectRef object, JSString
                                   JSValueRef *exception) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
   auto &context = hostObject->context;
-  JSStringRetain(propertyName);
-  hostObject->setProperty(propertyName, value, exception);
+  std::string &&name = JSStringToStdString(propertyName);
+  hostObject->setProperty(name, value, exception);
   JSStringRelease(propertyName);
   return context->handleException(*exception);
 }
@@ -55,7 +55,7 @@ JSValueRef HostObject::getProperty(std::string &name, JSValueRef *exception) {
   return nullptr;
 }
 
-void HostObject::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
+void HostObject::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {}
 
 void HostObject::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
 

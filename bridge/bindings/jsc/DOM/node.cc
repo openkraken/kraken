@@ -375,8 +375,8 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
   return JSEventTarget::EventTargetInstance::getProperty(name, exception);
 }
 
-void JSNode::NodeInstance::setProperty(JSStringRef nameRef, JSValueRef value, JSValueRef *exception) {
-  JSEventTarget::EventTargetInstance::setProperty(nameRef, value, exception);
+void JSNode::NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  JSEventTarget::EventTargetInstance::setProperty(name, value, exception);
 }
 
 void JSNode::NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
