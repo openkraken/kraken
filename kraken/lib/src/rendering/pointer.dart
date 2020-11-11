@@ -4,9 +4,6 @@
  */
 
 import 'package:kraken/gesture.dart';
-import 'package:kraken/dom.dart';
-import 'dart:collection';
-import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
