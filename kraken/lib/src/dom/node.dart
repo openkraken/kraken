@@ -240,7 +240,8 @@ abstract class Node extends EventTarget implements RenderObjectNode {
   void ensureChildAttached() {}
 }
 
-int nodeTypeIntegerValue(NodeType nodeType) {
+/// https://dom.spec.whatwg.org/#dom-node-nodetype
+int getNodeTypeValue(NodeType nodeType) {
   switch (nodeType) {
     case NodeType.ELEMENT_NODE:
       return 1;

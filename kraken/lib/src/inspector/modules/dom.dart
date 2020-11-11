@@ -95,7 +95,7 @@ class InspectorNode extends JSONEncodable {
   int backendNodeId = 0;
 
   /// [Node]'s nodeType.
-  int get nodeType => nodeTypeIntegerValue(referencedNode.nodeType);
+  int get nodeType => getNodeTypeValue(referencedNode.nodeType);
 
   /// Node's nodeName.
   String get nodeName => referencedNode.nodeName.toLowerCase();
