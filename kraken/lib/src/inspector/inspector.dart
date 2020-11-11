@@ -28,13 +28,10 @@ class Inspector {
     registerModule(InspectPageModule(this));
     registerModule(InspectCSSModule(this));
 
-    Inspector.getConnectedLocalNetworkAddress()
-      .then((String addressFallback) {
-        server = InspectServer(this, address: address ?? addressFallback, port: port)
-          ..onStarted = onServerStart
-          ..onBackendMessage = messageRouter
-          ..start();
-      });
+    server = InspectServer(this, address: '0.0.0.0', port: port)
+      ..onStarted = onServerStart
+      ..onBackendMessage = messageRouter
+      ..start();
   }
 
   void registerModule(InspectModule module) {
@@ -42,10 +39,11 @@ class Inspector {
   }
 
   void onServerStart() async {
-    String inspectorURL = '$INSPECTOR_URL?ws=$address:$port';
+    String remoteAddress = await Inspector.getConnectedLocalNetworkAddress();
+    String inspectorURL = '$INSPECTOR_URL?ws=$remoteAddress:$port';
     await KrakenClipboard.writeText(inspectorURL);
 
-    print('Kraken DevTool listening at ws://$address:$port');
+    print('Kraken DevTool listening at ws://$remoteAddress:$port');
     print('Open Chrome/Edge and paste following url to your navigator:');
     print('    $inspectorURL');
   }
@@ -77,13 +75,17 @@ class Inspector {
     List<NetworkInterface> interfaces = await NetworkInterface.list(
         includeLoopback: false, type: InternetAddressType.IPv4);
 
+    String result = INSPECTOR_DEFAULT_ADDRESS;
     if (interfaces != null) {
       for (NetworkInterface interface in interfaces) {
-        return interface.addresses.first.address;
+        if (interface.name == 'en0' || interface.name == 'eth0') {
+          result = interface.addresses.first.address;
+          break;
+        }
       }
     }
 
-    return INSPECTOR_DEFAULT_ADDRESS;
+    return result;
   }
 }
 
