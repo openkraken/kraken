@@ -27,7 +27,6 @@ class InspectRuntimeModule extends InspectModule {
         onGetIsolateId(id, params);
         break;
     }
-    print('$id $method $params');
   }
 
   void enable() {

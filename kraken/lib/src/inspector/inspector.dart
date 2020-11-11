@@ -78,7 +78,7 @@ class Inspector {
     List<String> moduleMethod = _method.split('.');
     String module = moduleMethod[0];
     String method = moduleMethod[1];
-    
+
     if (moduleRegistrar.containsKey(module)) {
       moduleRegistrar[module].invoke(id, method, params);
     }
