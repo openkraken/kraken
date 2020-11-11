@@ -14,7 +14,7 @@ void bindCommentNode(std::unique_ptr<JSContext> &context) {
 
 JSCommentNode::JSCommentNode(JSContext *context) : JSNode(context, "CommentNode") {}
 JSCommentNode *JSCommentNode::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSCommentNode*> instanceMap {};
+  static std::unordered_map<JSContext *, JSCommentNode *> instanceMap{};
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSCommentNode(context);
   }
@@ -37,16 +37,22 @@ void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueR
 }
 
 JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "data") {
+  auto propertyMap = getPropertyMap();
+
+  if (!propertyMap.contains(name)) return NodeInstance::getProperty(name, exception);
+
+  CommentProperty property = propertyMap[name];
+
+  switch (property) {
+  case CommentProperty::kData:
     return JSValueMakeString(_hostClass->ctx, data);
-  } else if (name == "nodeName") {
+  case CommentProperty::kNodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#comment");
     return JSValueMakeString(_hostClass->ctx, nodeName);
-  } else if (name == "length") {
+  }
+  case CommentProperty::kLength:
     return JSValueMakeNumber(_hostClass->ctx, JSStringGetLength(data));
   }
-
-  return NodeInstance::getProperty(name, exception);
 }
 
 void JSCommentNode::CommentNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -63,6 +69,16 @@ std::array<JSStringRef, 2> &JSCommentNode::CommentNodeInstance::getCommentProper
     JSStringCreateWithUTF8CString("length"),
   };
   return propertyNames;
+}
+
+const std::unordered_map<std::string, JSCommentNode::CommentNodeInstance::CommentProperty> &
+JSCommentNode::CommentNodeInstance::getPropertyMap() {
+  static std::unordered_map<std::string, CommentProperty> propertyMap{
+    {"data", CommentProperty::kData},
+    {"nodeName", CommentProperty::kNodeName},
+    {"length", CommentProperty::kLength},
+  };
+  return propertyMap;
 }
 
 JSStringRef JSCommentNode::CommentNodeInstance::internalTextContent() {

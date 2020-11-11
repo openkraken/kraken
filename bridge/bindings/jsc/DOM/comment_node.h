@@ -25,7 +25,13 @@ public:
 
   class CommentNodeInstance : public NodeInstance {
   public:
+    enum class CommentProperty {
+      kData,
+      kNodeName,
+      kLength
+    };
     static std::array<JSStringRef, 2> &getCommentPropertyNames();
+    static const std::unordered_map<std::string, CommentProperty> &getPropertyMap();
 
     CommentNodeInstance() = delete;
     explicit CommentNodeInstance(JSCommentNode *jsCommentNode);

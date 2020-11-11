@@ -4,10 +4,10 @@
  */
 
 #include "document.h"
+#include "bindings/jsc/DOM/elements/anchor_element.h"
+#include "comment_node.h"
 #include "element.h"
 #include "text_node.h"
-#include "comment_node.h"
-#include "bindings/jsc/DOM/elements/anchor_element.h"
 #include <mutex>
 
 namespace kraken::binding::jsc {
@@ -60,7 +60,8 @@ JSValueRef JSDocument::createComment(JSContextRef ctx, JSObjectRef function, JSO
                                      size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto document = static_cast<JSDocument *>(JSObjectGetPrivate(function));
   auto commentNode = JSCommentNode::instance(document->context);
-  auto commentNodeInstance = JSObjectCallAsConstructor(ctx, commentNode->classObject, argumentCount, arguments, exception);
+  auto commentNodeInstance =
+    JSObjectCallAsConstructor(ctx, commentNode->classObject, argumentCount, arguments, exception);
   return commentNodeInstance;
 }
 
@@ -73,10 +74,8 @@ JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 }
 
 JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagName) {
-  static std::unordered_map<std::string, JSElement*> elementMap {
-      {"a", JSAnchorElement::instance(context)},
-      {"div", JSElement::instance(context)}
-  };
+  static std::unordered_map<std::string, JSElement *> elementMap{{"a", JSAnchorElement::instance(context)},
+                                                                 {"div", JSElement::instance(context)}};
   return elementMap[tagName];
 }
 
@@ -90,29 +89,41 @@ JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : NodeInsta
 }
 
 JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "createElement") {
+  auto propertyMap = getPropertyMap();
+  if (!propertyMap.contains(name)) {
+    return JSNode::NodeInstance::getProperty(name, exception);
+  }
+
+  DocumentProperty property = propertyMap[name];
+
+  switch (property) {
+  case DocumentProperty::kCreateElement: {
     if (_createElement == nullptr) {
       _createElement = propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
     }
     return _createElement;
-  } else if (name == "body") {
+  }
+  case DocumentProperty::kBody:
     return body;
-  } else if (name == "createTextNode") {
+  case DocumentProperty::kCreateTextNode: {
     if (_createTextNode == nullptr) {
       _createTextNode = propertyBindingFunction(_hostClass->context, this, "createTextNode", createTextNode);
     }
     return _createTextNode;
-  } else if (name == "createComment") {
+  }
+  case DocumentProperty::kCreateComment: {
     if (_createComment == nullptr) {
       _createComment = propertyBindingFunction(_hostClass->context, this, "createComment", createComment);
     }
     return _createComment;
-  } else if (name == "nodeName") {
+  }
+  case DocumentProperty::kNodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#document");
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
+  }
 
-  return JSNode::NodeInstance::getProperty(name, exception);
+  return nullptr;
 }
 
 JSDocument::DocumentInstance::~DocumentInstance() {
@@ -135,6 +146,16 @@ std::array<JSStringRef, 4> &JSDocument::DocumentInstance::getDocumentPropertyNam
     JSStringCreateWithUTF8CString("createComment"),
   };
   return propertyNames;
+}
+
+const std::unordered_map<std::string, JSDocument::DocumentInstance::DocumentProperty> &
+JSDocument::DocumentInstance::getPropertyMap() {
+  static const std::unordered_map<std::string, DocumentProperty> propertyMap{
+    {"body", DocumentProperty::kBody},
+    {"createElement", DocumentProperty::kCreateComment},
+    {"createTextNode", DocumentProperty::kCreateTextNode},
+    {"createComment", DocumentProperty::kCreateComment}};
+  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

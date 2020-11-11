@@ -57,7 +57,7 @@ static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
 CSSStyleDeclaration::CSSStyleDeclaration(JSContext *context) : HostClass(context, "CSSStyleDeclaration") {}
 
 CSSStyleDeclaration *CSSStyleDeclaration::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, CSSStyleDeclaration*> instanceMap {};
+  static std::unordered_map<JSContext *, CSSStyleDeclaration *> instanceMap{};
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new CSSStyleDeclaration(context);
   }
@@ -90,21 +90,30 @@ CSSStyleDeclaration::StyleDeclarationInstance::~StyleDeclarationInstance() {
 }
 
 JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "setProperty") {
-    if (_setProperty == nullptr) {
-      _setProperty = propertyBindingFunction(_hostClass->context, this, "setProperty", setProperty);
+  auto propertyMap = getStyleDeclarationPropertyMap();
+
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+    switch (property) {
+    case CSSStyleDeclarationProperty::kSetProperty: {
+      if (_setProperty == nullptr) {
+        _setProperty = propertyBindingFunction(_hostClass->context, this, "setProperty", setProperty);
+      }
+      return _setProperty;
     }
-    return _setProperty;
-  } else if (name == "removeProperty") {
-    if (_removeProperty == nullptr) {
-      _removeProperty = propertyBindingFunction(_hostClass->context, this, "removeProperty", removeProperty);
+    case CSSStyleDeclarationProperty::kGetPropertyValue: {
+      if (_getPropertyValue == nullptr) {
+        _getPropertyValue = propertyBindingFunction(_hostClass->context, this, "getPropertyValue", getPropertyValue);
+      }
+      return _getPropertyValue;
     }
-    return _removeProperty;
-  } else if (name == "getPropertyValue") {
-    if (_getPropertyValue == nullptr) {
-      _getPropertyValue = propertyBindingFunction(_hostClass->context, this, "getPropertyValue", getPropertyValue);
+    case CSSStyleDeclarationProperty::kRemoveProperty: {
+      if (_removeProperty == nullptr) {
+        _removeProperty = propertyBindingFunction(_hostClass->context, this, "removeProperty", removeProperty);
+      }
+      return _removeProperty;
     }
-    return _getPropertyValue;
+    }
   } else if (properties.contains(name)) {
     return JSValueMakeString(_hostClass->ctx, properties[name]);
   }
@@ -112,11 +121,13 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::strin
   return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(""));
 }
 
-void CSSStyleDeclaration::StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+void CSSStyleDeclaration::StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value,
+                                                                JSValueRef *exception) {
   internalSetProperty(name, value, exception);
 }
 
-void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value,
+                                                                        JSValueRef *exception) {
   if (name == "setProperty" || name == "removeProperty" || name == "getPropertyValue") return;
 
   JSStringRef valueStr = JSValueToStringCopy(_hostClass->ctx, value, exception);
@@ -275,6 +286,14 @@ std::array<JSStringRef, 3> &CSSStyleDeclaration::StyleDeclarationInstance::getSt
     JSStringCreateWithUTF8CString("getPropertyValue"),
   };
   return propertyNames;
+}
+const std::unordered_map<std::string, CSSStyleDeclaration::StyleDeclarationInstance::CSSStyleDeclarationProperty> &
+CSSStyleDeclaration::StyleDeclarationInstance::getStyleDeclarationPropertyMap() {
+  static const std::unordered_map<std::string, CSSStyleDeclarationProperty> propertyMap{
+    {"setProperty", CSSStyleDeclarationProperty::kSetProperty},
+    {"getPropertyValue", CSSStyleDeclarationProperty::kGetPropertyValue},
+    {"removeProperty", CSSStyleDeclarationProperty::kRemoveProperty}};
+  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

@@ -33,7 +33,15 @@ public:
 
   class DocumentInstance : public NodeInstance {
   public:
+    enum class DocumentProperty {
+      kCreateElement,
+      kBody,
+      kCreateTextNode,
+      kCreateComment,
+      kNodeName,
+    };
     static std::array<JSStringRef, 4> &getDocumentPropertyNames();
+    static const std::unordered_map<std::string, DocumentProperty> &getPropertyMap();
 
     DocumentInstance() = delete;
     explicit DocumentInstance(JSDocument *document);

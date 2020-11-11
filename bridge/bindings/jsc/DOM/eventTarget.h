@@ -45,7 +45,13 @@ public:
 
   class EventTargetInstance : public Instance {
   public:
+    enum class EventTargetProperty {
+      kAddEventListener,
+      kRemoveEventListener,
+      kDispatchEvent
+    };
     static std::array<JSStringRef, 3> &getEventTargetPropertyNames();
+    static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
 
     static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
@@ -69,7 +75,7 @@ public:
     NativeEventTarget *nativeEventTarget {nullptr};
 
   private:
-    std::unordered_map<EventType, std::deque<JSObjectRef>> _eventHandlers;
+    std::unordered_map<JSEvent::EventType, std::deque<JSObjectRef>> _eventHandlers;
     bool internalDispatchEvent(JSEvent::EventInstance *eventInstance);
 
     JSObjectRef _addEventListener {nullptr};

@@ -18,6 +18,31 @@ void bindElement(std::unique_ptr<JSContext> &context);
 
 class JSElement : public JSNode {
 public:
+  enum class ElementProperty {
+    kStyle,
+    kNodeName,
+    kOffsetLeft,
+    kOffsetTop,
+    kOffsetWidth,
+    kOffsetHeight,
+    kClientWidth,
+    kClientHeight,
+    kClientTop,
+    kClientLeft,
+    kScrollTop,
+    kScrollLeft,
+    kScrollHeight,
+    kScrollWidth,
+    kGetBoundingClientRect,
+    kClick,
+    kScroll,
+    kScrollBy,
+    kToBlob,
+    kGetAttribute,
+    kSetAttribute,
+    kChildren
+  };
+
   static JSElement *instance(JSContext *context);
 
   JSElement() = delete;
@@ -29,6 +54,7 @@ public:
   class ElementInstance : public NodeInstance {
   public:
     static std::array<JSStringRef, 1> &getElementPropertyNames();
+    static const std::unordered_map<std::string, ElementProperty> &getPropertyMap();
 
     static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
@@ -58,12 +84,12 @@ public:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
     JSStringRef tagNameStringRef_;
     JSObjectRef _getBoundingClientRect{nullptr};
-    JSObjectRef _setAttribute;
-    JSObjectRef _getAttribute;
-    JSObjectRef _toBlob;
-    JSObjectRef _click;
-    JSObjectRef _scroll;
-    JSObjectRef _scrollBy;
+    JSObjectRef _setAttribute{nullptr};
+    JSObjectRef _getAttribute{nullptr};
+    JSObjectRef _toBlob{nullptr};
+    JSObjectRef _click{nullptr};
+    JSObjectRef _scroll{nullptr};
+    JSObjectRef _scrollBy{nullptr};
     std::unordered_map<std::string, JSStringRef> attributes;
   };
 };
@@ -98,7 +124,19 @@ using ScrollBy = void (*)(int32_t contextId, int64_t targetId, int32_t x, int32_
 
 class BoundingClientRect : public HostObject {
 public:
+  enum BoundingClientRectProperty {
+    kX,
+    kY,
+    kWidth,
+    kHeight,
+    kLeft,
+    kTop,
+    kRight,
+    kBottom
+  };
+
   static std::array<JSStringRef, 8> &getBoundingClientRectPropertyNames();
+  static const std::unordered_map<std::string, BoundingClientRectProperty> &getPropertyMap();
 
   BoundingClientRect() = delete;
   ~BoundingClientRect() override;

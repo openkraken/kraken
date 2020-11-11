@@ -93,10 +93,45 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
   return boundingClientRect->jsObject;
 }
 
+const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::ElementInstance::getPropertyMap() {
+  static const std::unordered_map<std::string, ElementProperty> propertyHandler = {
+    {"style", ElementProperty::kStyle},
+    {"nodeName", ElementProperty::kNodeName},
+    {"offsetLeft", ElementProperty::kOffsetLeft},
+    {"offsetTop", ElementProperty::kOffsetTop},
+    {"offsetWidth", ElementProperty::kOffsetWidth},
+    {"offsetHeight", ElementProperty::kOffsetHeight},
+    {"clientWidth", ElementProperty::kClientWidth},
+    {"clientHeight", ElementProperty::kClientHeight},
+    {"clientTop", ElementProperty::kClientTop},
+    {"clientLeft", ElementProperty::kClientLeft},
+    {"scrollTop", ElementProperty::kScrollTop},
+    {"scrollLeft", ElementProperty::kScrollLeft},
+    {"scrollHeight", ElementProperty::kScrollHeight},
+    {"scrollWidth", ElementProperty::kScrollWidth},
+    {"getBoundingClientRect", ElementProperty::kGetBoundingClientRect},
+    {"click", ElementProperty::kClick},
+    {"scroll", ElementProperty::kScroll},
+    {"scrollBy", ElementProperty::kScrollBy},
+    {"toBlob", ElementProperty::kToBlob},
+    {"getAttribute", ElementProperty::kGetAttribute},
+    {"setAttribute", ElementProperty::kGetAttribute},
+    {"children", ElementProperty::kChildren}};
+  return propertyHandler;
+}
+
 JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto nativeElement = reinterpret_cast<NativeElement *>(nativeEventTarget);
+  auto propertyMap = getPropertyMap();
 
-  if (name == "style") {
+  if (!propertyMap.contains(name)) {
+    return JSNode::NodeInstance::getProperty(name, exception);
+  }
+
+  ElementProperty property = propertyMap[name];
+
+  switch (property) {
+  case ElementProperty::kStyle: {
     if (style == nullptr) {
       style =
         new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(_hostClass->context), this);
@@ -104,81 +139,101 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
     }
 
     return style->object;
-  } else if (name == "nodeName") {
+  }
+  case ElementProperty::kNodeName:
     return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
-  } else if (name == "offsetLeft") {
+  case ElementProperty::kOffsetLeft: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetLeft(_hostClass->contextId, eventTargetId));
-  } else if (name == "offsetTop") {
+  }
+  case ElementProperty::kOffsetTop: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetTop(_hostClass->contextId, eventTargetId));
-  } else if (name == "offsetWidth") {
+  }
+  case ElementProperty::kOffsetWidth: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetWidth(_hostClass->contextId, eventTargetId));
-  } else if (name == "offsetHeight") {
+  }
+  case ElementProperty::kOffsetHeight: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetHeight(_hostClass->contextId, eventTargetId));
-  } else if (name == "clientWidth") {
+  }
+  case ElementProperty::kClientWidth: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientWidth(_hostClass->contextId, eventTargetId));
-  } else if (name == "clientHeight") {
+  }
+  case ElementProperty::kClientHeight: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientHeight(_hostClass->contextId, eventTargetId));
-  } else if (name == "clientTop") {
+  }
+  case ElementProperty::kClientTop: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientTop(_hostClass->contextId, eventTargetId));
-  } else if (name == "clientLeft") {
+  }
+  case ElementProperty::kClientLeft: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientLeft(_hostClass->contextId, eventTargetId));
-  } else if (name == "scrollTop") {
+  }
+  case ElementProperty::kScrollTop: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollTop(_hostClass->contextId, eventTargetId));
-  } else if (name == "scrollLeft") {
+  }
+  case ElementProperty::kScrollLeft: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollLeft(_hostClass->contextId, eventTargetId));
-  } else if (name == "scrollHeight") {
+  }
+  case ElementProperty::kScrollHeight: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollHeight(_hostClass->contextId, eventTargetId));
-  } else if (name == "scrollWidth") {
+  }
+  case ElementProperty::kScrollWidth: {
     getDartMethod()->requestUpdateFrame();
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollWidth(_hostClass->contextId, eventTargetId));
-  } else if (name == "getBoundingClientRect") {
+  }
+  case ElementProperty::kGetBoundingClientRect: {
     if (_getBoundingClientRect == nullptr) {
       _getBoundingClientRect =
         propertyBindingFunction(_hostClass->context, this, "getBoundingClientRect", getBoundingClientRect);
     }
     return _getBoundingClientRect;
-  } else if (name == "click") {
+  }
+  case ElementProperty::kClick: {
     if (_click == nullptr) {
       _click = propertyBindingFunction(_hostClass->context, this, "click", click);
     }
     return _click;
-  } else if (name == "scroll") {
+  }
+  case ElementProperty::kScroll: {
     if (_scroll == nullptr) {
       _scroll = propertyBindingFunction(_hostClass->context, this, "scroll", scroll);
     }
     return _scroll;
-  } else if (name == "scrollBy") {
+  }
+  case ElementProperty::kScrollBy: {
     if (_scrollBy == nullptr) {
       _scrollBy = propertyBindingFunction(_hostClass->context, this, "scrollBy", scrollBy);
     }
     return _scrollBy;
-  } else if (name == "toBlob") {
+  }
+  case ElementProperty::kToBlob: {
     if (_toBlob == nullptr) {
       _toBlob = propertyBindingFunction(_hostClass->context, this, "toBlob", toBlob);
     }
     return _toBlob;
-  } else if (name == "getAttribute") {
+  }
+  case ElementProperty::kGetAttribute: {
     if (_getAttribute == nullptr) {
       _getAttribute = propertyBindingFunction(_hostClass->context, this, "getAttribute", getAttribute);
     }
     return _getAttribute;
-  } else if (name == "setAttribute") {
+  }
+  case ElementProperty::kSetAttribute: {
     if (_setAttribute == nullptr) {
       _setAttribute = propertyBindingFunction(_hostClass->context, this, "setAttribute", setAttribute);
     }
     return _setAttribute;
-  } else if (name == "children") {
+  }
+  case ElementProperty::kChildren: {
     JSValueRef arguments[childNodes.size()];
 
     size_t elementCount = 0;
@@ -191,8 +246,9 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
 
     return JSObjectMakeArray(_hostClass->ctx, elementCount, arguments, nullptr);
   }
+  }
 
-  return JSNode::NodeInstance::getProperty(name, exception);
+  return nullptr;
 }
 
 void JSElement::ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -398,7 +454,8 @@ JSValueRef JSElement::ElementInstance::click(JSContextRef ctx, JSObjectRef funct
 }
 
 JSValueRef JSElement::ElementInstance::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                              size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+                                              size_t argumentCount, const JSValueRef *arguments,
+                                              JSValueRef *exception) {
   const JSValueRef xValueRef = arguments[0];
   const JSValueRef yValueRef = arguments[1];
 
@@ -421,7 +478,8 @@ JSValueRef JSElement::ElementInstance::scroll(JSContextRef ctx, JSObjectRef func
 }
 
 JSValueRef JSElement::ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                                size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+                                                size_t argumentCount, const JSValueRef *arguments,
+                                                JSValueRef *exception) {
   const JSValueRef xValueRef = arguments[0];
   const JSValueRef yValueRef = arguments[1];
 
@@ -447,22 +505,28 @@ BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientR
   : HostObject(context, "BoundingClientRect"), nativeBoundingClientRect(boundingClientRect) {}
 
 JSValueRef BoundingClientRect::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "x") {
+  auto propertyMap = getPropertyMap();
+
+  if (!propertyMap.contains(name)) return nullptr;
+  auto property = propertyMap[name];
+
+  switch (property) {
+  case kX:
     return JSValueMakeNumber(ctx, nativeBoundingClientRect->x);
-  } else if (name == "y") {
+  case kY:
     return JSValueMakeNumber(ctx, nativeBoundingClientRect->y);
-  } else if (name == "width") {
+  case kWidth:
     return JSValueMakeNumber(ctx, nativeBoundingClientRect->width);
-  } else if (name == "height") {
+  case kHeight:
     return JSValueMakeNumber(ctx, nativeBoundingClientRect->height);
-  } else if (name == "left") {
+  case kLeft:
     return JSValueMakeNumber(ctx, nativeBoundingClientRect->left);
-  } else if (name == "right") {
-    return JSValueMakeNumber(ctx, nativeBoundingClientRect->right);
-  } else if (name == "bottom") {
-    return JSValueMakeNumber(ctx, nativeBoundingClientRect->bottom);
-  } else if (name == "top") {
+  case kTop:
     return JSValueMakeNumber(ctx, nativeBoundingClientRect->top);
+  case kRight:
+    return JSValueMakeNumber(ctx, nativeBoundingClientRect->right);
+  case kBottom:
+    return JSValueMakeNumber(ctx, nativeBoundingClientRect->bottom);
   }
 
   return nullptr;
@@ -476,6 +540,16 @@ std::array<JSStringRef, 8> &BoundingClientRect::getBoundingClientRectPropertyNam
     JSStringCreateWithUTF8CString("bottom"), JSStringCreateWithUTF8CString("left"),
   };
   return propertyNames;
+}
+
+const std::unordered_map<std::string, BoundingClientRect::BoundingClientRectProperty> &
+BoundingClientRect::getPropertyMap() {
+  static const std::unordered_map<std::string, BoundingClientRectProperty> propertyMap{
+    {"x", BoundingClientRectProperty::kX},         {"y", BoundingClientRectProperty::kY},
+    {"width", BoundingClientRectProperty::kWidth}, {"height", BoundingClientRectProperty::kHeight},
+    {"top", BoundingClientRectProperty::kTop},     {"left", BoundingClientRectProperty::kLeft},
+    {"right", BoundingClientRectProperty::kRight}, {"bottom", BoundingClientRectProperty::kBottom}};
+  return propertyMap;
 }
 
 void BoundingClientRect::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

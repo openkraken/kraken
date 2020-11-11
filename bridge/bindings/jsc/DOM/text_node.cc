@@ -14,7 +14,7 @@ void bindTextNode(std::unique_ptr<JSContext> &context) {
 }
 
 JSTextNode *JSTextNode::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSTextNode*> instanceMap {};
+  static std::unordered_map<JSContext *, JSTextNode *> instanceMap{};
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSTextNode(context);
   }
@@ -44,14 +44,23 @@ JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringR
 }
 
 JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "data" || name == "textContent") {
+  auto propertyMap = getTextNodePropertyMap();
+
+  if (!propertyMap.contains(name)) {
+    return JSNode::NodeInstance::getProperty(name, exception);
+  }
+
+  auto property = propertyMap[name];
+  switch (property) {
+  case TextNodeProperty::kTextContent:
+  case TextNodeProperty::kData: {
     return JSValueMakeString(_hostClass->ctx, data);
-  } else if (name == "nodeName") {
+  }
+  case TextNodeProperty::kNodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#text");
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
-
-  return JSNode::NodeInstance::getProperty(name, exception);
+  }
 }
 
 void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
@@ -81,12 +90,10 @@ void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
   JSNode::NodeInstance::setProperty(name, value, exception);
 }
 
-std::array<JSStringRef, 3> & JSTextNode::TextNodeInstance::getTextNodePropertyNames() {
-  static std::array<JSStringRef, 3> propertyNames {
-    JSStringCreateWithUTF8CString("data"),
-    JSStringCreateWithUTF8CString("textContent"),
-    JSStringCreateWithUTF8CString("nodeName")
-  };
+std::array<JSStringRef, 3> &JSTextNode::TextNodeInstance::getTextNodePropertyNames() {
+  static std::array<JSStringRef, 3> propertyNames{JSStringCreateWithUTF8CString("data"),
+                                                  JSStringCreateWithUTF8CString("textContent"),
+                                                  JSStringCreateWithUTF8CString("nodeName")};
   return propertyNames;
 }
 
@@ -100,6 +107,15 @@ void JSTextNode::TextNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef
 
 JSStringRef JSTextNode::TextNodeInstance::internalTextContent() {
   return data;
+}
+
+const std::unordered_map<std::string, JSTextNode::TextNodeInstance::TextNodeProperty> &
+JSTextNode::TextNodeInstance::getTextNodePropertyMap() {
+  static const std::unordered_map<std::string, TextNodeProperty> nodeProperty{
+    {"data", TextNodeProperty::kData},
+    {"textContent", TextNodeProperty::kTextContent},
+    {"nodeName", TextNodeProperty::kNodeName}};
+  return nodeProperty;
 }
 
 } // namespace kraken::binding::jsc

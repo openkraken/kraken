@@ -15,18 +15,60 @@ void bindEvent(std::unique_ptr<JSContext> &context) {
 };
 
 JSEvent *JSEvent::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSEvent*> instanceMap {};
+  static std::unordered_map<JSContext *, JSEvent *> instanceMap{};
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSEvent(context);
   }
   return instanceMap[context];
 }
 
+JSEvent::EventType JSEvent::getEventTypeOfName(std::string &name) {
+  static std::unordered_map<std::string, EventType> eventTypeMap{
+    {"none", EventType::none},
+    {"input", EventType::input},
+    {"appear", EventType::appear},
+    {"disappear", EventType::disappear},
+    {"error", EventType::error},
+    {"message", EventType::message},
+    {"close", EventType::close},
+    {"open", EventType::open},
+    {"intersectionchange", EventType::intersectionchange},
+    {"touchstart", EventType::touchstart},
+    {"touchend", EventType::touchend},
+    {"touchmove", EventType::touchmove},
+    {"touchcancel", EventType::touchcancel},
+    {"click", EventType::click},
+    {"colorschemechange", EventType::colorschemechange},
+    {"load", EventType::load},
+    {"finish", EventType::finish},
+    {"cancel", EventType::cancel},
+    {"transitionrun", EventType::transitionrun},
+    {"transitionstart", EventType::transitionstart},
+    {"transitionend", EventType::transitionend},
+    {"transitioncancel", EventType::transitioncancel},
+    {"focus", EventType::focus},
+    {"unload", EventType::unload},
+    {"change", EventType::change},
+    {"canplay", EventType::canplay},
+    {"canplaythrough", EventType::canplaythrough},
+    {"ended", EventType::ended},
+    {"play", EventType::play},
+    {"pause", EventType::pause},
+    {"seeked", EventType::seeked},
+    {"seeking", EventType::seeking},
+    {"volumechange", EventType::volumechange},
+  };
+
+  if (!eventTypeMap.contains(name)) return EventType::none;
+
+  return eventTypeMap[name];
+}
+
 JSEvent::JSEvent(JSContext *context) : HostClass(context, "Event") {}
 JSEvent::JSEvent(JSContext *context, const char *name) : HostClass(context, name) {}
 
 JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                       const JSValueRef *arguments, JSValueRef *exception) {
+                                         const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     JSC_THROW_ERROR(ctx, "Failed to construct 'Event': 1 argument required, but only 0 present.", exception);
     return nullptr;
@@ -35,9 +77,49 @@ JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef construct
   const JSValueRef eventTypeValueRef = arguments[0];
   JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventTypeValueRef, exception);
   std::string &&eventTypeName = JSStringToStdString(eventTypeStringRef);
-  EventType eventType = EventTypeValues[eventTypeName];
+  EventType eventType = getEventTypeOfName(eventTypeName);
   auto event = new EventInstance(this, eventType);
   return event->object;
+}
+
+const char *JSEvent::getEventNameOfTypeIndex(int8_t typeIndex) {
+  static const char *eventTypeKeys[]{
+    "none",
+    "input",
+    "appear",
+    "disappear",
+    "error",
+    "message",
+    "close",
+    "open",
+    "intersectionchange",
+    "touchstart",
+    "touchend",
+    "touchmove",
+    "touchcancel",
+    "click",
+    "colorschemechange",
+    "load",
+    "finish",
+    "cancel",
+    "transitionrun",
+    "transitionstart",
+    "transitionend",
+    "transitioncancel",
+    "focus",
+    "unload",
+    "change",
+    "canplay",
+    "canplaythrough",
+    "ended",
+    "play",
+    "pause",
+    "seeked",
+    "seeking",
+    "volumechange",
+  };
+
+  return eventTypeKeys[typeIndex];
 }
 
 JSEvent::EventInstance::EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent)
@@ -50,50 +132,59 @@ JSEvent::EventInstance::EventInstance(JSEvent *jsEvent, EventType eventType) : I
 }
 
 JSValueRef JSEvent::EventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "type") {
-    JSStringRef eventStringRef = JSStringCreateWithUTF8CString(EventTypeKeys[nativeEvent->type]);
+  auto propertyMap = getEventPropertyMap();
+
+  if (!propertyMap.contains(name)) return nullptr;
+
+  auto property = propertyMap[name];
+  switch (property) {
+  case EventProperty::kType: {
+    JSStringRef eventStringRef = JSStringCreateWithUTF8CString(getEventNameOfTypeIndex(nativeEvent->type));
     return JSValueMakeString(_hostClass->ctx, eventStringRef);
-  } else if (name == "bubbles") {
+  }
+  case EventProperty::kBubbles: {
     return JSValueMakeBoolean(_hostClass->ctx, nativeEvent->bubbles);
-  } else if (name == "cancelable") {
+  }
+  case EventProperty::kCancelable: {
     return JSValueMakeBoolean(_hostClass->ctx, nativeEvent->cancelable);
-  } else if (name == "timeStamp") {
+  }
+  case EventProperty::kTimestamp:
     return JSValueMakeNumber(_hostClass->ctx, nativeEvent->timeStamp);
-  } else if (name == "defaultPrevented") {
-    return JSValueMakeBoolean(_hostClass->ctx, nativeEvent->defaultPrevented);
-  } else if (name == "target" || name == "srcElement") {
+  case EventProperty::kDefaultPrevented:
+    return JSValueMakeBoolean(_hostClass->ctx, _canceledFlag);
+  case EventProperty::kTarget:
+  case EventProperty::kSrcElement:
     if (nativeEvent->target != nullptr) {
       auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->target);
       return instance->object;
     }
-    return JSValueMakeNull(_hostClass->ctx);
-  } else if (name == "currentTarget") {
+      return JSValueMakeNull(_hostClass->ctx);
+  case EventProperty::kCurrentTarget:
     if (nativeEvent->currentTarget != nullptr) {
       auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->currentTarget);
       return instance->object;
     }
-    return JSValueMakeNull(_hostClass->ctx);
-  } else if (name == "returnValue") {
+      return JSValueMakeNull(_hostClass->ctx);
+  case EventProperty::kReturnValue:
     return JSValueMakeBoolean(_hostClass->ctx, !_canceledFlag);
-  } else if (name == "defaultPrevented") {
-    return JSValueMakeBoolean(_hostClass->ctx, _canceledFlag);
-  } else if (name == "stopPropagation") {
+  case EventProperty::kStopPropagation:
     if (_stopPropagation == nullptr) {
       _stopPropagation = propertyBindingFunction(_hostClass->context, this, "stopPropagation", stopPropagation);
     }
-    return _stopPropagation;
-  } else if (name == "cancelBubble") {
+      return _stopPropagation;
+  case EventProperty::kCancelBubble:
     return JSValueMakeBoolean(_hostClass->ctx, _stopPropagationFlag);
-  } else if (name == "stopImmediatePropagation") {
+  case EventProperty::kStopImmediatePropagation:
     if (_stopImmediatePropagation == nullptr) {
-      _stopImmediatePropagation = propertyBindingFunction(_hostClass->context, this, "stopImmediatePropagation", stopImmediatePropagation);
+      _stopImmediatePropagation =
+          propertyBindingFunction(_hostClass->context, this, "stopImmediatePropagation", stopImmediatePropagation);
     }
-    return _stopImmediatePropagation;
-  } else if (name == "preventDefault") {
+      return _stopImmediatePropagation;
+  case EventProperty::kPreventDefault:
     if (_preventDefault == nullptr) {
       _preventDefault = propertyBindingFunction(_hostClass->context, this, "preventDefault", preventDefault);
     }
-    return _preventDefault;
+      return _preventDefault;
   }
 
   return nullptr;
@@ -144,18 +235,42 @@ void JSEvent::EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accum
   }
 }
 
-std::array<JSStringRef, 8> &JSEvent::EventInstance::getEventPropertyNames() {
-  static std::array<JSStringRef, 8> propertyNames{
-      JSStringCreateWithUTF8CString("type"),
-      JSStringCreateWithUTF8CString("bubbles"),
-      JSStringCreateWithUTF8CString("cancelable"),
-      JSStringCreateWithUTF8CString("timeStamp"),
-      JSStringCreateWithUTF8CString("defaultPrevented"),
-      JSStringCreateWithUTF8CString("targetId"),
-      JSStringCreateWithUTF8CString("currentTarget"),
-      JSStringCreateWithUTF8CString("srcElement"),
+std::vector<JSStringRef> &JSEvent::EventInstance::getEventPropertyNames() {
+  static std::vector<JSStringRef> propertyNames{
+    JSStringCreateWithUTF8CString("type"),
+    JSStringCreateWithUTF8CString("bubbles"),
+    JSStringCreateWithUTF8CString("cancelable"),
+    JSStringCreateWithUTF8CString("timeStamp"),
+    JSStringCreateWithUTF8CString("defaultPrevented"),
+    JSStringCreateWithUTF8CString("target"),
+    JSStringCreateWithUTF8CString("currentTarget"),
+    JSStringCreateWithUTF8CString("srcElement"),
+    JSStringCreateWithUTF8CString("returnValue"),
+    JSStringCreateWithUTF8CString("stopPropagation"),
+    JSStringCreateWithUTF8CString("cancelBubble"),
+    JSStringCreateWithUTF8CString("stopImmediatePropagation"),
+    JSStringCreateWithUTF8CString("preventDefault"),
   };
   return propertyNames;
+}
+
+const std::unordered_map<std::string, JSEvent::EventInstance::EventProperty> &
+JSEvent::EventInstance::getEventPropertyMap() {
+  static std::unordered_map<std::string, EventProperty> propertyMap{
+    {"type", EventProperty::kType},
+    {"bubbles", EventProperty::kBubbles},
+    {"cancelable", EventProperty::kCancelable},
+    {"timeStamp", EventProperty::kTimestamp},
+    {"defaultPrevented", EventProperty::kDefaultPrevented},
+    {"target", EventProperty::kTarget},
+    {"srcElement", EventProperty::kSrcElement},
+    {"currentTarget", EventProperty::kCurrentTarget},
+    {"returnValue", EventProperty::kReturnValue},
+    {"stopPropagation", EventProperty::kStopPropagation},
+    {"cancelBubble", EventProperty::kCancelable},
+    {"stopImmediatePropagation", EventProperty::kStopImmediatePropagation},
+    {"preventDefault", EventProperty::kPreventDefault}};
+  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

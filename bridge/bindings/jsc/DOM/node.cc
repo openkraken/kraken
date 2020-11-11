@@ -320,43 +320,58 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
 }
 
 JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
+  auto propertyMap = getNodePropertyMap();
 
-  if (name == "isConnected") {
+  if (!propertyMap.contains(name)) {
+    return JSEventTarget::EventTargetInstance::getProperty(name, exception);
+  }
+
+  auto property = propertyMap[name];
+
+  switch (property) {
+  case NodeProperty::kIsConnected:
     return JSValueMakeBoolean(_hostClass->ctx, isConnected());
-  } else if (name == "firstChild") {
+  case NodeProperty::kFirstChild: {
     auto instance = firstChild();
     return instance != nullptr ? instance->object : nullptr;
-  } else if (name == "lastChild") {
+  }
+  case NodeProperty::kLastChild: {
     auto instance = lastChild();
     return instance != nullptr ? instance->object : nullptr;
-  } else if (name == "previousSibling") {
+  }
+  case NodeProperty::kPreviousSibling: {
     auto instance = previousSibling();
     return instance != nullptr ? instance->object : nullptr;
-  } else if (name == "nextSibling") {
+  }
+  case NodeProperty::kNextSibling: {
     auto instance = nextSibling();
     return instance != nullptr ? instance->object : nullptr;
-  } else if (name == "appendChild") {
+  }
+  case NodeProperty::kAppendChild: {
     if (_appendChild == nullptr) {
       _appendChild = propertyBindingFunction(_hostClass->context, this, "appendChild", appendChild);
-      ;
     }
     return _appendChild;
-  } else if (name == "remove") {
+  }
+  case NodeProperty::kRemove: {
     if (_remove == nullptr) {
       _remove = propertyBindingFunction(_hostClass->context, this, "remove", remove);
     }
     return _remove;
-  } else if (name == "insertBefore") {
+  }
+  case NodeProperty::kInsertBefore: {
     if (_insertBefore == nullptr) {
       _insertBefore = propertyBindingFunction(_hostClass->context, this, "insertBefore", insertBefore);
     }
     return _insertBefore;
-  } else if (name == "replaceChild") {
+  }
+  case NodeProperty::kReplaceChild: {
     if (_replaceChild == nullptr) {
       _replaceChild = propertyBindingFunction(_hostClass->context, this, "replaceChild", replaceChild);
     }
     return _replaceChild;
-  } else if (name == "childNodes") {
+  }
+  case NodeProperty::kChildNodes: {
     JSValueRef arguments[childNodes.size()];
 
     for (int i = 0; i < childNodes.size(); i++) {
@@ -365,14 +380,16 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
 
     JSObjectRef array = JSObjectMakeArray(_hostClass->ctx, childNodes.size(), arguments, nullptr);
     return array;
-  } else if (name == "nodeType") {
+  }
+  case NodeProperty::kNodeType:
     return JSValueMakeNumber(_hostClass->ctx, nodeType);
-  } else if (name == "textContent") {
+  case NodeProperty::kNodeName: {
     JSStringRef textContent = internalTextContent();
     return JSValueMakeString(_hostClass->ctx, textContent);
   }
+  }
 
-  return JSEventTarget::EventTargetInstance::getProperty(name, exception);
+  return nullptr;
 }
 
 void JSNode::NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
@@ -400,6 +417,22 @@ std::array<JSStringRef, 12> &JSNode::NodeInstance::getNodePropertyNames() {
 
 JSStringRef JSNode::NodeInstance::internalTextContent() {
   return nullptr;
+}
+
+const std::unordered_map<std::string, JSNode::NodeInstance::NodeProperty> &JSNode::NodeInstance::getNodePropertyMap() {
+  static std::unordered_map<std::string, NodeProperty> propertyMap{{"isConnected", NodeProperty::kIsConnected},
+                                                                   {"firstChild", NodeProperty::kFirstChild},
+                                                                   {"lastChild", NodeProperty::kLastChild},
+                                                                   {"childNodes", NodeProperty::kChildNodes},
+                                                                   {"previousSibling", NodeProperty::kPreviousSibling},
+                                                                   {"nextSibling", NodeProperty::kNextSibling},
+                                                                   {"appendChild", NodeProperty::kAppendChild},
+                                                                   {"remove", NodeProperty::kRemove},
+                                                                   {"insertBefore", NodeProperty::kInsertBefore},
+                                                                   {"replaceChild", NodeProperty::kReplaceChild},
+                                                                   {"nodeType", NodeProperty::kNodeType},
+                                                                   {"nodeName", NodeProperty::kNodeName}};
+  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

@@ -34,7 +34,22 @@ public:
 
   class NodeInstance : public EventTargetInstance {
   public:
+    enum class NodeProperty {
+      kIsConnected,
+      kFirstChild,
+      kLastChild,
+      kChildNodes,
+      kPreviousSibling,
+      kNextSibling,
+      kAppendChild,
+      kRemove,
+      kInsertBefore,
+      kReplaceChild,
+      kNodeType,
+      kNodeName
+    };
     static std::array<JSStringRef, 12> &getNodePropertyNames();
+    static const std::unordered_map<std::string, NodeProperty> &getNodePropertyMap();
 
     NodeInstance() = delete;
     NodeInstance(JSNode *node, NodeType nodeType);
