@@ -44,8 +44,7 @@ class InspectDOMModule extends InspectModule {
   }
 
   void onGetBoxModel(int id, Map<String, dynamic> params) {
-    int nodeId = params['nodeId'];
-
+    // int nodeId = params['nodeId'];
     sendToBackend(id, null);
   }
 }

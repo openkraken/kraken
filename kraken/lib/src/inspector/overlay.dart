@@ -46,7 +46,6 @@ class InspectorOverlayLayer extends Layer {
   Picture _buildPicture() {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, overlayRect);
-    final Size size = overlayRect.size;
 
     final Paint fillPaint = Paint()
       ..style = PaintingStyle.fill

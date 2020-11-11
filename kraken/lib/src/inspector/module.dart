@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:kraken/inspector.dart';
 
 export 'modules/dom.dart';
