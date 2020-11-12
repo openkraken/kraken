@@ -19,11 +19,11 @@ class InspectServer {
   int port;
 
   VoidCallback onStarted;
-  MessageCallback onBackendMessage;
+  MessageCallback onFrontendMessage;
   HttpServer _httpServer;
   WebSocket _ws;
 
-  /// InspectServer has connected backend.
+  /// InspectServer has connected frontend.
   bool get connected => _ws != null;
 
   int _bindServerRetryTime = 0;
@@ -59,7 +59,7 @@ class InspectServer {
     }
   }
 
-  void sendToBackend(int id, JSONEncodable result) {
+  void sendToFrontend(int id, JSONEncodable result) {
     assert(_ws != null, 'WebSocket should connect.');
 
     String data = jsonEncode({
@@ -70,7 +70,7 @@ class InspectServer {
     _ws.add(data);
   }
 
-  void sendEventToBackend(InspectorEvent event) {
+  void sendEventToFrontend(InspectorEvent event) {
     assert(_ws != null, 'WebSocket should connect.');
     _ws.add(jsonEncode(event));
   }
@@ -80,7 +80,7 @@ class InspectServer {
       Map<String, dynamic> data = jsonDecode(message);
       return data;
     } catch(err) {
-      print('Error while decoding backend message: $message');
+      print('Error while decoding frontend message: $message');
       rethrow;
     }
   }
@@ -88,8 +88,8 @@ class InspectServer {
   void onWebSocketRequest(message) {
     if (message is String) {
       Map<String, dynamic> data = _parseMessage(message);
-      if (onBackendMessage != null) {
-        onBackendMessage(data);
+      if (onFrontendMessage != null) {
+        onFrontendMessage(data);
       }
     }
   }
@@ -180,7 +180,7 @@ class InspectServer {
 
   void dispose() async {
     onStarted = null;
-    onBackendMessage = null;
+    onFrontendMessage = null;
 
     await _ws?.close();
     await _httpServer?.close();

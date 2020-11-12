@@ -15,13 +15,13 @@ class InspectRuntimeModule extends InspectModule {
   String get name => 'Runtime';
 
   @override
-  void receiveFromBackend(int id, String method, Map<String, dynamic> params) {
+  void receiveFromFrontend(int id, String method, Map<String, dynamic> params) {
     switch (method) {
       case 'enable':
         enable();
         break;
       case 'runIfWaitingForDebugger':
-        sendToBackend(id, null);
+        sendToFrontend(id, null);
         break;
       case 'getIsolateId':
         onGetIsolateId(id, params);
@@ -30,7 +30,7 @@ class InspectRuntimeModule extends InspectModule {
   }
 
   void enable() {
-    sendEventToBackend(InspectorEvent('executionContextCreated', JSONEncodableMap({
+    sendEventToFrontend(InspectorEvent('executionContextCreated', JSONEncodableMap({
       'context': {
         'auxData': {
           'isDefault': true,
@@ -45,6 +45,6 @@ class InspectRuntimeModule extends InspectModule {
   }
 
   void onGetIsolateId(int id, Map<String, dynamic> params) {
-    sendToBackend(id, JSONEncodableMap({ 'id': DEFAULT_ISOLATE_ID }));
+    sendToFrontend(id, JSONEncodableMap({ 'id': DEFAULT_ISOLATE_ID }));
   }
 }

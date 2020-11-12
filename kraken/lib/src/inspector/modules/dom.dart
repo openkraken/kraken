@@ -18,7 +18,7 @@ class InspectDOMModule extends InspectModule {
   InspectDOMModule(this.inspector);
 
   @override
-  void receiveFromBackend(int id, String method, Map<String, dynamic> params) {
+  void receiveFromFrontend(int id, String method, Map<String, dynamic> params) {
     switch (method) {
       case 'getDocument':
         onGetDocument(id, method, params);
@@ -45,13 +45,13 @@ class InspectDOMModule extends InspectModule {
     if (result.path.first != null && result.path.first.target is RenderBoxModel) {
       RenderBoxModel lastHitRenderBoxModel = result.path.first.target;
       int targetId = lastHitRenderBoxModel.targetId;
-      sendToBackend(id, JSONEncodableMap({
+      sendToFrontend(id, JSONEncodableMap({
         'backendId': targetId,
         'frameId': DEFAULT_FRAME_ID,
         'nodeId': targetId,
       }));
     } else {
-      sendToBackend(id, null);
+      sendToFrontend(id, null);
     }
   }
 
@@ -74,7 +74,7 @@ class InspectDOMModule extends InspectModule {
       InspectorNode(root)
     );
 
-    sendToBackend(id, document);
+    sendToFrontend(id, document);
   }
 
   void onGetBoxModel(int id, Map<String, dynamic> params) {
@@ -120,11 +120,11 @@ class InspectDOMModule extends InspectModule {
         width: widthWithinBorder,
         height: heightWithinBorder,
       );
-      sendToBackend(id, JSONEncodableMap({
+      sendToFrontend(id, JSONEncodableMap({
         'model': boxModel,
       }));
     } else {
-      sendToBackend(id, null);
+      sendToFrontend(id, null);
     }
   }
 }

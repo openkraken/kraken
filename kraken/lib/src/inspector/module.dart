@@ -19,28 +19,28 @@ abstract class InspectModule {
   void invoke(int id, String method, Map<String, dynamic> params) {
     if (method == 'enable') {
       _enable = true;
-      sendToBackend(id, null);
+      sendToFrontend(id, null);
     } else if (method == 'disable') {
       _enable = false;
-      sendToBackend(id, null);
+      sendToFrontend(id, null);
     }
 
     if (_enable) {
-      receiveFromBackend(id, method, params);
+      receiveFromFrontend(id, method, params);
     }
   }
 
-  void sendToBackend(int id, JSONEncodable result) {
+  void sendToFrontend(int id, JSONEncodable result) {
     if (inspector.server.connected) {
-      inspector.server.sendToBackend(id, result);
+      inspector.server.sendToFrontend(id, result);
     }
   }
 
-  void sendEventToBackend(InspectorEvent event) {
+  void sendEventToFrontend(InspectorEvent event) {
     if (inspector.server.connected) {
-      inspector.server.sendEventToBackend(event);
+      inspector.server.sendEventToFrontend(event);
     }
   }
 
-  void receiveFromBackend(int id, String method, Map<String, dynamic> params);
+  void receiveFromFrontend(int id, String method, Map<String, dynamic> params);
 }

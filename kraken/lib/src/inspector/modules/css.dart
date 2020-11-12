@@ -18,7 +18,7 @@ class InspectCSSModule extends InspectModule {
   String get name => 'CSS';
 
   @override
-  void receiveFromBackend(int id, String method, Map<String, dynamic> params) {
+  void receiveFromFrontend(int id, String method, Map<String, dynamic> params) {
     switch (method) {
       case 'getMatchedStylesForNode':
         handleGetMatchedStylesForNode(id, params);
@@ -43,7 +43,7 @@ class InspectCSSModule extends InspectModule {
       MatchedStyles matchedStyles = MatchedStyles(
         inlineStyle: buildInlineStyle(element.style),
       );
-      sendToBackend(id, matchedStyles);
+      sendToFrontend(id, matchedStyles);
     }
   }
 
@@ -55,7 +55,7 @@ class InspectCSSModule extends InspectModule {
       ComputedStyle computedStyle = ComputedStyle(
         computedStyle: buildComputedStyle(element),
       );
-      sendToBackend(id, computedStyle);
+      sendToFrontend(id, computedStyle);
     }
   }
 
@@ -71,7 +71,7 @@ class InspectCSSModule extends InspectModule {
         attributesStyle: buildAttributesStyle(element.properties),
       );
 
-      sendToBackend(id, inlinedStyle);
+      sendToFrontend(id, inlinedStyle);
     }
   }
 
@@ -101,7 +101,7 @@ class InspectCSSModule extends InspectModule {
       }
     }
 
-    sendToBackend(id, JSONEncodableMap({
+    sendToFrontend(id, JSONEncodableMap({
       'styles': styles,
     }));
   }

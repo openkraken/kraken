@@ -16,22 +16,22 @@ class InspectPageModule extends InspectModule {
   String get name => 'Page';
 
   @override
-  void receiveFromBackend(int id, String method, Map<String, dynamic> params) {
+  void receiveFromFrontend(int id, String method, Map<String, dynamic> params) {
     switch (method) {
       case 'startScreencast':
-        sendToBackend(id, null);
+        sendToFrontend(id, null);
         startScreenCast();
         break;
       case 'stopScreencast':
-        sendToBackend(id, null);
+        sendToFrontend(id, null);
         stopScreenCast();
         break;
       case 'screencastFrameAck':
-        sendToBackend(id, null);
+        sendToFrontend(id, null);
         handleScreencastFrameAck(params);
         break;
       case 'reload':
-        sendToBackend(id, null);
+        sendToFrontend(id, null);
         handleReloadPage();
     }
   }
@@ -69,7 +69,7 @@ class InspectPageModule extends InspectModule {
           )
       );
 
-      sendEventToBackend(event);
+      sendEventToFrontend(event);
     });
   }
 

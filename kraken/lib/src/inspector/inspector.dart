@@ -52,7 +52,7 @@ class Inspector {
     // Listen with broadcast address (0.0.0.0), not to restrict incoming ip address.
     server = InspectServer(this, address: '0.0.0.0', port: port)
       ..onStarted = onServerStart
-      ..onBackendMessage = messageRouter
+      ..onFrontendMessage = messageRouter
       ..start();
   }
 
@@ -86,7 +86,7 @@ class Inspector {
 
   void onDOMTreeChanged() {
     if (server.connected) {
-      server.sendEventToBackend(InspectorEvent('DOM.documentUpdated', null));
+      server.sendEventToFrontend(InspectorEvent('DOM.documentUpdated', null));
     }
   }
 

@@ -12,7 +12,7 @@ class InspectOverlayModule extends InspectModule {
   InspectOverlayModule(this.inspector);
 
   @override
-  void receiveFromBackend(int id, String method, Map<String, dynamic> params) {
+  void receiveFromFrontend(int id, String method, Map<String, dynamic> params) {
     switch (method) {
       case 'highlightNode':
         onHighlightNode(id, params);
@@ -35,13 +35,13 @@ class InspectOverlayModule extends InspectModule {
       element.debugHighlight();
       _highlightElement = element;
     }
-    sendToBackend(id, null);
+    sendToFrontend(id, null);
   }
 
   void onHideHighlight(int id) {
     _highlightElement?.debugHideHighlight();
     _highlightElement = null;
-    sendToBackend(id, null);
+    sendToFrontend(id, null);
   }
 }
 
