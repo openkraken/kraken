@@ -1,14 +1,13 @@
-import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/widget.dart';
 import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
-import 'package:flutter_driver/driver_extension.dart';
+import 'package:path/path.dart' as path;
 import '../bridge/from_native.dart';
 import '../bridge/to_native.dart';
 import 'custom/custom_object_element.dart';
@@ -16,89 +15,101 @@ import 'custom/custom_object_element.dart';
 String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST FAILED]');
 
-void main() {
+final Directory specsDirectory = Directory('./integration/.specs');
+final Directory snapshotsDirectory = Directory('./integration/snapshots');
+
+void main() async {
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
   CSSText.DEFAULT_FONT_SIZE = 14.0;
   setObjectElementFactory(customObjectElementFactory);
 
-  // This line enables the extension.
-  enableFlutterDriverExtension(handler: (String payload) async {
-    Completer<String> completer = Completer();
-    List allSpecsPayload = jsonDecode(payload);
+  List<FileSystemEntity> specs = specsDirectory.listSync(recursive: true);
+  List<Map<String, String>> mainTestPayload = [];
+  for (FileSystemEntity file in specs) {
+    if (file.path.endsWith('js')) {
+      String filename = path.basename(file.path);
+      String code = File(file.path).readAsStringSync();
+      mainTestPayload.add({
+        'filename': filename,
+        'filepath': file.path,
+        'code': code,
+      });
+    }
+  }
 
-    List<Kraken> widgets = [];
+  List<List<Map<String, String>>> allSpecsPayload = [
+    mainTestPayload,
+    mainTestPayload.reversed.toList()
+  ];
+  List<Kraken> widgets = [];
 
-    for (int i = 0; i < 2; i ++) {
-      KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
-      javaScriptChannel.onMethodCall = (String method, dynamic arguments) async {
-        javaScriptChannel.invokeMethod(method, arguments);
-        return 'method: ' + method;
-      };
+  for (int i = 0; i < 1; i ++) {
+    KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
+    javaScriptChannel.onMethodCall = (String method, dynamic arguments) async {
+      javaScriptChannel.invokeMethod(method, arguments);
+      return 'method: ' + method;
+    };
 
-      Kraken widget = Kraken(
-        viewportWidth: 360,
-        viewportHeight: 640,
-        bundleContent: 'console.log("starting integration test")',
-        disableViewportWidthAssertion: true,
-        disableViewportHeightAssertion: true,
-        javaScriptChannel: javaScriptChannel,
-        debugEnableInspector: false,
-      );
-      widgets.add(widget);
+    Kraken widget = Kraken(
+      viewportWidth: 360,
+      viewportHeight: 640,
+      bundleContent: 'console.log("starting integration test")',
+      disableViewportWidthAssertion: true,
+      disableViewportHeightAssertion: true,
+      javaScriptChannel: javaScriptChannel,
+      debugEnableInspector: false,
+    );
+    widgets.add(widget);
+  }
+
+  runApp(MaterialApp(
+    title: 'Kraken Intergration Test',
+    debugShowCheckedModeBanner: false,
+    home: Scaffold(
+      appBar: AppBar(
+        title: Text('Kraken Integration Test')
+      ),
+      body: Wrap(
+        children: widgets,
+      ),
+    ),
+  ));
+
+  WidgetsBinding.instance
+      .addPostFrameCallback((_) async {
+    registerDartTestMethodsToCpp();
+
+    List<Future<String>> testResults = [];
+
+    for (int i = 0; i < widgets.length; i ++) {
+      int contextId = i;
+      initTestFramework(contextId);
+      addJSErrorListener(contextId, (String err) {
+        print(err);
+      });
+
+      List<Map<String, String>> testPayload = allSpecsPayload[i];
+
+      // Preload load test cases
+      for (Map spec in testPayload) {
+        String filename = spec['filename'];
+        String code = spec['code'];
+        evaluateTestScripts(contextId, code, url: filename);
+      }
+
+      testResults.add(executeTest(contextId));
     }
 
-    runApp(MaterialApp(
-        title: 'Loading Test',
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          appBar: AppBar(
-            title: Text('Kraken Integration Test')
-          ),
-          body: Wrap(
-            children: widgets,
-          )
-        )
-    ));
+    List<String> results = await Future.wait(testResults);
 
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) async {
-      registerDartTestMethodsToCpp();
-
-      List<Future<String>> testResults = [];
-
-      for (int i = 0; i < widgets.length; i ++) {
-        int contextId = i;
-        initTestFramework(contextId);
-        addJSErrorListener(contextId, (String err) {
-          print(err);
-        });
-
-        List testPayload = allSpecsPayload[i];
-
-        // Preload load test cases
-        for (Map spec in testPayload) {
-          String filename = spec['filename'];
-          String code = spec['code'];
-          evaluateTestScripts(contextId, code, url: filename);
-        }
-
-        testResults.add(executeTest(contextId));
+    for (int i = 0; i < results.length; i ++) {
+      String status = results[i];
+      if (status == 'failed') {
+        exit(1);
       }
+    }
 
-      List<String> results = await Future.wait(testResults);
-
-      for (int i = 0; i < results.length; i ++) {
-        String status = results[i];
-        if (status == 'failed') {
-          completer.complete('failed');
-          return;
-        }
-      }
-
-      completer.complete('success');
-    });
-
-    return completer.future;
+    exit(0);
   });
 }

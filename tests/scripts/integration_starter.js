@@ -4,7 +4,7 @@ const {startWsServer} = require('./ws_server');
 const isPortReachable = require('is-port-reachable');
 
 function startIntegrationTest() {
-  const tester = spawn('flutter', ['driver', '--target=integration/app.dart', '--driver=integration/app_test.dart', '-d', 'macos'], {
+  const tester = spawn('flutter', ['run', '--target=integration/app.dart', '--no-hot'], {
     env: {
       ...process.env,
       KRAKEN_LIBRARY_PATH: path.join(__dirname, '../../targets/darwin/lib')
