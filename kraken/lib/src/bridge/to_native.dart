@@ -190,7 +190,6 @@ void bridgeFrameCallback() {
 
 enum UICommandType {
   initWindow,
-  initBody,
   createElement,
   createTextNode,
   disposeEventTarget,
@@ -263,9 +262,6 @@ void flushUICommand() {
         case UICommandType.initWindow:
           controller.view.initWindow(nativeCommand.ref.nativePtr.cast<NativeWindow>());
           break;
-//        case UICommandType.initBody:
-//          controller.view.initBody(nativeCommand.ref.nativePtr);
-//          break;
         case UICommandType.createElement:
           controller.view
               .createElement(id, nativeCommand.ref.nativePtr.cast<NativeElement>(), nativeStringToString(nativeCommand.ref.args[0]));

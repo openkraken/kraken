@@ -36,8 +36,8 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
   JSStringRef tagNameStringRef = JSValueToStringCopy(ctx, tagNameValue, exception);
   std::string tagName = JSStringToStdString(tagNameStringRef);
 
-  auto document = static_cast<JSDocument *>(JSObjectGetPrivate(function));
-  auto element = getElementOfTagName(document->context, tagName);
+  auto document = static_cast<JSDocument::DocumentInstance *>(JSObjectGetPrivate(function));
+  auto element = getElementOfTagName(document->_hostClass->context, tagName);
   auto elementInstance = JSObjectCallAsConstructor(ctx, element->classObject, 1, arguments, exception);
   return elementInstance;
 }
@@ -50,16 +50,16 @@ JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JS
     return nullptr;
   }
 
-  auto document = static_cast<JSDocument *>(JSObjectGetPrivate(function));
-  auto textNode = JSTextNode::instance(document->context);
+  auto document = static_cast<JSDocument::DocumentInstance *>(JSObjectGetPrivate(function));
+  auto textNode = JSTextNode::instance(document->_hostClass->context);
   auto textNodeInstance = JSObjectCallAsConstructor(ctx, textNode->classObject, 1, arguments, exception);
   return textNodeInstance;
 }
 
 JSValueRef JSDocument::createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  auto document = static_cast<JSDocument *>(JSObjectGetPrivate(function));
-  auto commentNode = JSCommentNode::instance(document->context);
+  auto document = static_cast<JSDocument::DocumentInstance *>(JSObjectGetPrivate(function));
+  auto commentNode = JSCommentNode::instance(document->_hostClass->context);
   auto commentNodeInstance =
     JSObjectCallAsConstructor(ctx, commentNode->classObject, argumentCount, arguments, exception);
   return commentNodeInstance;
