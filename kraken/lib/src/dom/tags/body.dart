@@ -12,7 +12,7 @@ import 'package:meta/meta.dart';
 const String BODY = 'BODY';
 
 class BodyElement extends Element {
-  BodyElement(double viewportWidth, double viewportHeight, int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  BodyElement(double viewportWidth, double viewportHeight, int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(
         targetId,
         nativePtr,

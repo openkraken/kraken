@@ -52,8 +52,8 @@
     JSValueRef stackRef = JSObjectGetProperty(ctx_, error, stackKey, nullptr);                                         \
     JSStringRef messageStr = JSValueToStringCopy(ctx_, messageRef, nullptr);                                           \
     JSStringRef stackStr = JSValueToStringCopy(ctx_, stackRef, nullptr);                                               \
-    std::string &&message = JSStringToStdString(messageStr);                                                             \
-    std::string &&stack = JSStringToStdString(stackStr);                                                                 \
+    std::string &&message = JSStringToStdString(messageStr);                                                           \
+    std::string &&stack = JSStringToStdString(stackStr);                                                               \
     handler(getContextId(), (message + '\n' + stack).c_str());                                                         \
     JSStringRelease(messageKey);                                                                                       \
     JSStringRelease(stackKey);                                                                                         \
@@ -110,7 +110,17 @@
 #define STD_STRING_TO_NATIVE_STRING(str, nativeString)                                                                 \
   {                                                                                                                    \
     JSStringRef ref = JSStringCreateWithUTF8CString(str);                                                              \
-    nativeString.string = JSStringGetCharactersPtr(ref);                                                              \
-    nativeString.length = JSStringGetLength(ref);                                                                     \
+    nativeString.string = JSStringGetCharactersPtr(ref);                                                               \
+    nativeString.length = JSStringGetLength(ref);                                                                      \
     JSStringRelease(ref);                                                                                              \
+  }
+
+#define ELEMENT_SET_PROPERTY(key, value, args)                                                                         \
+  {                                                                                                                    \
+    NativeString keyNativeString{};                                                                                    \
+    STD_STRING_TO_NATIVE_STRING(key, keyNativeString);                                                                 \
+    NativeString valueNativeString{};                                                                                  \
+    STD_STRING_TO_NATIVE_STRING(value, valueNativeString);                                                             \
+    args[0] = keyNativeString.clone();                                                                                 \
+    args[1] = valueNativeString.clone();                                                                               \
   }

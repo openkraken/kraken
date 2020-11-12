@@ -53,7 +53,6 @@ public:
 
     NodeInstance() = delete;
     NodeInstance(JSNode *node, NodeType nodeType);
-    NodeInstance(JSNode *node, NativeNode *nativeNode, NodeType nodeType);
     ~NodeInstance() override;
 
     static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -92,6 +91,8 @@ public:
     JSNode::NodeInstance *parentNode{nullptr};
     std::vector<JSNode::NodeInstance *> childNodes;
 
+    NativeNode *nativeNode;
+
   private:
     void ensureDetached(JSNode::NodeInstance *node);
 
@@ -102,9 +103,10 @@ public:
   };
 };
 
-struct NativeNode : public NativeEventTarget {
+struct NativeNode {
   NativeNode() = delete;
-  NativeNode(JSNode::NodeInstance *instance) : NativeEventTarget(instance) {};
+  NativeNode(NativeEventTarget *nativeEventTarget) : nativeEventTarget(nativeEventTarget) {};
+  NativeEventTarget *nativeEventTarget;
 };
 
 } // namespace kraken::binding::jsc

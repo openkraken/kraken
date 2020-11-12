@@ -23,7 +23,13 @@ public:
 
   class AnchorElementInstance : public ElementInstance {
   public:
+    enum class AnchorElementProperty {
+      kHref,
+      kTarget
+    };
+
     static std::array<JSStringRef, 2> &getAnchorElementPropertyNames();
+    static const std::unordered_map<std::string, AnchorElementProperty> &getAnchorElementPropertyMap();
 
     AnchorElementInstance() = delete;
     AnchorElementInstance(JSAnchorElement *jsAnchorElement);

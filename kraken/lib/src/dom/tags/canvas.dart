@@ -31,7 +31,7 @@ class RenderCanvasPaint extends RenderCustomPaint {
 }
 
 class CanvasElement extends Element {
-  CanvasElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  CanvasElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(
           targetId,
           nativePtr,

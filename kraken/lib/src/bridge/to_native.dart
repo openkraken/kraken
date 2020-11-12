@@ -7,6 +7,7 @@ import 'package:kraken/kraken.dart';
 
 import 'from_native.dart';
 import 'platform.dart';
+import 'native_types.dart';
 
 // Steps for using dart:ffi to call a C function from Dart:
 // 1. Import dart:ffi.
@@ -15,116 +16,6 @@ import 'platform.dart';
 // 4. Open the dynamic library that contains the C function.
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call the C function.
-
-// representation of JSContext
-class JSCallbackContext extends Struct {}
-
-typedef Native_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
-typedef Dart_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
-
-class NativeKrakenInfo extends Struct {
-  Pointer<Utf8> app_name;
-  Pointer<Utf8> app_version;
-  Pointer<Utf8> app_revision;
-  Pointer<Utf8> system_name;
-  Pointer<NativeFunction<Native_GetUserAgent>> getUserAgent;
-}
-
-class NativeEvent extends Struct {
-  @Int8()
-  int type;
-
-  @Int8()
-  int bubbles;
-
-  @Int8()
-  int cancelable;
-
-  @Int64()
-  int timeStamp;
-
-  @Int8()
-  int defaultPrevented;
-
-  Pointer target;
-
-  Pointer currentTarget;
-}
-
-typedef Native_DispatchEvent = Void Function(
-    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
-typedef Dart_DispatchEvent = void Function(
-    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
-
-class NativeEventTarget extends Struct {
-  Pointer<Void> instance;
-  Pointer<NativeFunction<Native_DispatchEvent>> dispatchEvent;
-}
-
-class NativeBoundingClientRect extends Struct {
-  @Double()
-  double x;
-
-  @Double()
-  double y;
-
-  @Double()
-  double width;
-
-  @Double()
-  double height;
-
-  @Double()
-  double top;
-
-  @Double()
-  double right;
-
-  @Double()
-  double bottom;
-
-  @Double()
-  double left;
-}
-
-typedef Native_GetOffsetTop = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetOffsetLeft = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetOffsetWidth = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetOffsetHeight = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetClientWidth = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetClientHeight = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetClientTop = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetClientLeft = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetScrollLeft = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetScrollTop = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetScrollWidth = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetScrollHeight = Double Function(Int32 contextId, Int64 targetId);
-typedef Native_GetBoundingClientRect = Pointer<NativeBoundingClientRect> Function(Int32 contextId, Int64 targetId);
-typedef Native_Click = Void Function(Int32 contextId, Int64 targetId);
-typedef Native_Scroll = Void Function(Int32 contextId, Int64 targetId, Int32 x, Int32 y);
-typedef Native_ScrollBy = Void Function(Int32 contextId, Int64 targetId, Int32 x, Int32 y);
-
-class NativeElement extends Struct {
-  Pointer<Void> instance;
-  Pointer<NativeFunction<Native_DispatchEvent>> dispatchEvent;
-
-  Pointer<NativeFunction<Native_GetOffsetTop>> getOffsetTop;
-  Pointer<NativeFunction<Native_GetOffsetLeft>> getOffsetLeft;
-  Pointer<NativeFunction<Native_GetOffsetWidth>> getOffsetWidth;
-  Pointer<NativeFunction<Native_GetOffsetHeight>> getOffsetHeight;
-  Pointer<NativeFunction<Native_GetOffsetWidth>> getClientWidth;
-  Pointer<NativeFunction<Native_GetOffsetHeight>> getClientHeight;
-  Pointer<NativeFunction<Native_GetClientTop>> getClientTop;
-  Pointer<NativeFunction<Native_GetClientLeft>> getClientLeft;
-  Pointer<NativeFunction<Native_GetScrollTop>> getScrollTop;
-  Pointer<NativeFunction<Native_GetScrollLeft>> getScrollLeft;
-  Pointer<NativeFunction<Native_GetScrollWidth>> getScrollWidth;
-  Pointer<NativeFunction<Native_GetScrollHeight>> getScrollHeight;
-  Pointer<NativeFunction<Native_GetBoundingClientRect>> getBoundingClientRect;
-  Pointer<NativeFunction<Native_Click>> click;
-  Pointer<NativeFunction<Native_Scroll>> scroll;
-  Pointer<NativeFunction<Native_ScrollBy>> scrollBy;
-}
 
 class KrakenInfo {
   Pointer<NativeKrakenInfo> _nativeKrakenInfo;
@@ -196,7 +87,6 @@ void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Pointer<Na
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   dispatchEvent(nativeEventTarget, nativeEvent);
-  ;
 }
 
 void emitModuleEvent(int contextId, String data) {
@@ -205,9 +95,9 @@ void emitModuleEvent(int contextId, String data) {
 
 void invokeOnPlatformBrightnessChangedCallback(int contextId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  EventTarget window = controller.view.getEventTargetById(WINDOW_ID);
+  Window window = controller.view.getEventTargetById(WINDOW_ID);
   ColorSchemeChangeEvent event = ColorSchemeChangeEvent();
-  emitUIEvent(contextId, window.nativePtr, event.toNativeEvent());
+  emitUIEvent(contextId, window.nativeWindowPtr.ref.nativeEventTarget, event.toNativeEvent());
 }
 
 // Register createScreen
@@ -323,7 +213,7 @@ class UICommandItem extends Struct {
   @Int32()
   int length;
 
-  Pointer<NativeEventTarget> nativePtr;
+  Pointer<Void> nativePtr;
 }
 
 typedef Native_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(Int32 contextId);
@@ -371,17 +261,17 @@ void flushUICommand() {
       int id = nativeCommand.ref.id;
       switch (commandType) {
         case UICommandType.initWindow:
-          controller.view.initWindow(nativeCommand.ref.nativePtr);
+          controller.view.initWindow(nativeCommand.ref.nativePtr.cast<NativeWindow>());
           break;
-        case UICommandType.initBody:
-          controller.view.initBody(nativeCommand.ref.nativePtr);
-          break;
+//        case UICommandType.initBody:
+//          controller.view.initBody(nativeCommand.ref.nativePtr);
+//          break;
         case UICommandType.createElement:
           controller.view
-              .createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
+              .createElement(id, nativeCommand.ref.nativePtr.cast<NativeElement>(), nativeStringToString(nativeCommand.ref.args[0]));
           break;
         case UICommandType.createTextNode:
-          controller.view.createTextNode(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
+          controller.view.createTextNode(id, nativeCommand.ref.nativePtr.cast<NativeTextNode>(), nativeStringToString(nativeCommand.ref.args[0]));
           break;
         case UICommandType.disposeEventTarget:
           ElementManager.disposeEventTarget(controller.view.contextId, id);

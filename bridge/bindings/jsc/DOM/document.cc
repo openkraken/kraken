@@ -79,7 +79,8 @@ JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagN
   return elementMap[tagName];
 }
 
-JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : NodeInstance(document, NodeType::DOCUMENT_NODE) {
+JSDocument::DocumentInstance::DocumentInstance(JSDocument *document)
+  : NodeInstance(document, NodeType::DOCUMENT_NODE), nativeDocument(new NativeDocument(nativeNode)) {
   auto elementConstructor = JSElement::instance(document->context);
   JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
   const JSValueRef arguments[] = {JSValueMakeString(document->ctx, bodyTagName),
@@ -128,6 +129,7 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
 
 JSDocument::DocumentInstance::~DocumentInstance() {
   JSValueUnprotect(_hostClass->ctx, body);
+  delete nativeDocument;
 }
 
 void JSDocument::DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -152,7 +154,7 @@ const std::unordered_map<std::string, JSDocument::DocumentInstance::DocumentProp
 JSDocument::DocumentInstance::getPropertyMap() {
   static const std::unordered_map<std::string, DocumentProperty> propertyMap{
     {"body", DocumentProperty::kBody},
-    {"createElement", DocumentProperty::kCreateComment},
+    {"createElement", DocumentProperty::kCreateElement},
     {"createTextNode", DocumentProperty::kCreateTextNode},
     {"createComment", DocumentProperty::kCreateComment}};
   return propertyMap;

@@ -13,6 +13,8 @@
 
 namespace kraken::binding::jsc {
 
+struct NativeDocument;
+
 class JSDocument : public JSNode {
 public:
   static JSElement *getElementOfTagName(JSContext *context, std::string &tagName);
@@ -49,12 +51,21 @@ public:
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
+    NativeDocument *nativeDocument;
+
   private:
     JSObjectRef body;
     JSObjectRef _createElement {nullptr};
     JSObjectRef _createTextNode {nullptr};
     JSObjectRef _createComment {nullptr};
   };
+};
+
+struct NativeDocument {
+  NativeDocument() = delete;
+  explicit NativeDocument(NativeNode *nativeNode) : nativeNode(nativeNode) {};
+
+  NativeNode *nativeNode;
 };
 
 void bindDocument(std::unique_ptr<JSContext> &context);

@@ -14,6 +14,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/css.dart';
 import 'package:vibration/vibration.dart';
 import 'platform.dart';
+import 'native_types.dart';
 
 // An native struct can be directly convert to javaScript String without any conversion cost.
 class NativeString extends Struct {
@@ -642,6 +643,28 @@ void registerRequestUpdateFrame() {
   _registerRequestUpdateFrame(pointer);
 }
 
+// Body Element are special element which created at initialize time, so we can't use UICommandQueue to init body element.
+typedef Native_InitBody = Void Function(Int32 contextId, Pointer<NativeElement> nativePtr);
+typedef Dart_InitBody = void Function(int contextId, Pointer<NativeElement> nativePtr);
+
+typedef Native_RegisterInitBody = Void Function(Pointer<NativeFunction<Native_InitBody>>);
+typedef Dart_RegisterInitBody = void Function(Pointer<NativeFunction<Native_InitBody>>);
+
+final Dart_RegisterInitBody _registerInitBody = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterInitBody>>('registerInitBody')
+    .asFunction();
+
+Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
+
+void _initBody(int contextId, Pointer<NativeElement> nativePtr) {
+  bodyNativePtrMap[contextId] = nativePtr;
+}
+
+void registerInitBody() {
+  Pointer<NativeFunction<Native_InitBody>> pointer = Pointer.fromFunction(_initBody);
+  _registerInitBody(pointer);
+}
+
 void registerDartMethodsToCpp() {
   registerInvokeModule();
   registerRequestBatchUpdate();
@@ -656,4 +679,5 @@ void registerDartMethodsToCpp() {
   registerPlatformBrightness();
   registerToBlob();
   registerRequestUpdateFrame();
+  registerInitBody();
 }

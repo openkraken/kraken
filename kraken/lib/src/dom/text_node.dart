@@ -11,8 +11,10 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
-  TextNode(int targetId, Pointer<NativeEventTarget> nativePtr, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativePtr, elementManager, '#text');
+  final Pointer<NativeTextNode> nativeTextNodePtr;
+
+  TextNode(int targetId, this.nativeTextNodePtr, this._data, ElementManager elementManager)
+      : super(NodeType.TEXT_NODE, targetId, nativeTextNodePtr.ref.nativeNode, elementManager, '#text');
 
   RenderTextBox _renderTextBox;
 

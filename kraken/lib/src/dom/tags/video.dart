@@ -20,7 +20,7 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class VideoElement extends Element {
-  VideoElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  VideoElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(
     targetId,
     nativePtr,

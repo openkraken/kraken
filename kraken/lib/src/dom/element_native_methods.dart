@@ -170,7 +170,7 @@ mixin ElementNativeMethods on Node {
     }
   }
 
-  void bindNativeMethods() {
+  void bindNativeMethods(Pointer<NativeElement> nativePtr) {
     if (nativePtr == nullptr) return;
     Pointer<NativeElement> nativeElement = nativePtr.cast<NativeElement>();
     nativeElement.ref.getOffsetLeft = nativeGetOffsetLeft;

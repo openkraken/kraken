@@ -13,6 +13,8 @@ namespace kraken::binding::jsc {
 
 void bindTextNode(std::unique_ptr<JSContext> &context);
 
+struct NativeTextNode;
+
 class JSTextNode : public JSNode {
 public:
   JSTextNode() = delete;
@@ -35,14 +37,25 @@ public:
     static const std::unordered_map<std::string, TextNodeProperty> &getTextNodePropertyMap();
 
     TextNodeInstance() = delete;
+    ~TextNodeInstance();
     explicit TextNodeInstance(JSTextNode *jsTextNode, JSStringRef data);
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;
+
+    NativeTextNode *nativeTextNode;
+
   private:
     JSStringRef data {nullptr};
   };
+};
+
+struct NativeTextNode {
+  NativeTextNode() = delete;
+  NativeTextNode(NativeNode *nativeNode) : nativeNode(nativeNode) {};
+
+  NativeNode *nativeNode;
 };
 
 } // namespace kraken::binding::jsc

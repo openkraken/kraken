@@ -43,10 +43,12 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
 }
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagName)
-  : NodeInstance(element, NodeType::ELEMENT_NODE), tagNameStringRef_(JSStringCreateWithUTF8CString(tagName)) {}
+  : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)),
+    tagNameStringRef_(JSStringCreateWithUTF8CString(tagName)) {}
+
 JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId,
                                             JSValueRef *exception)
-  : NodeInstance(element, new NativeElement(this), NodeType::ELEMENT_NODE) {
+  : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)) {
   JSStringRef tagNameStrRef = tagNameStringRef_ = JSValueToStringCopy(element->ctx, tagNameValue, exception);
 
   JSStringRetain(tagNameStringRef_);
@@ -66,11 +68,10 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
 
   // No needs to send create element for BODY element.
   if (targetId == BODY_TARGET_ID) {
-    ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(targetId, UICommandType::initBody, args, argsLength, nativeEventTarget);
+    getDartMethod()->initBody(element->contextId, nativeElement);
   } else {
     ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(targetId, UICommandType::createElement, args, argsLength, nativeEventTarget);
+      ->registerCommand(targetId, UICommandType::createElement, args, argsLength, nativeElement);
   }
 }
 
@@ -79,6 +80,8 @@ JSElement::ElementInstance::~ElementInstance() {
   if (style != nullptr) {
     JSValueUnprotect(_hostClass->ctx, style->object);
   }
+
+  delete nativeElement;
 }
 
 JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, JSObjectRef function,
@@ -86,9 +89,8 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
                                                              const JSValueRef *arguments, JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
   getDartMethod()->requestUpdateFrame();
-  auto nativeElement = reinterpret_cast<NativeElement *>(elementInstance->nativeEventTarget);
   NativeBoundingClientRect *nativeBoundingClientRect =
-    nativeElement->getBoundingClientRect(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
+    elementInstance->nativeElement->getBoundingClientRect(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
   auto boundingClientRect = new BoundingClientRect(elementInstance->_hostClass->context, nativeBoundingClientRect);
   return boundingClientRect->jsObject;
 }
@@ -121,7 +123,6 @@ const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::El
 }
 
 JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto nativeElement = reinterpret_cast<NativeElement *>(nativeEventTarget);
   auto propertyMap = getPropertyMap();
 
   if (!propertyMap.contains(name)) {
@@ -447,8 +448,7 @@ JSValueRef JSElement::ElementInstance::toBlob(JSContextRef ctx, JSObjectRef func
 JSValueRef JSElement::ElementInstance::click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                              size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
-  auto nativeElement = reinterpret_cast<NativeElement *>(elementInstance->nativeEventTarget);
-  nativeElement->click(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
+  elementInstance->nativeElement->click(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
 
   return nullptr;
 }
@@ -471,8 +471,7 @@ JSValueRef JSElement::ElementInstance::scroll(JSContextRef ctx, JSObjectRef func
   }
 
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
-  auto nativeElement = reinterpret_cast<NativeElement *>(elementInstance->nativeEventTarget);
-  nativeElement->scroll(elementInstance->_hostClass->contextId, elementInstance->eventTargetId, x, y);
+  elementInstance->nativeElement->scroll(elementInstance->_hostClass->contextId, elementInstance->eventTargetId, x, y);
 
   return nullptr;
 }
@@ -495,8 +494,7 @@ JSValueRef JSElement::ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef fu
   }
 
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
-  auto nativeElement = reinterpret_cast<NativeElement *>(elementInstance->nativeEventTarget);
-  nativeElement->scrollBy(elementInstance->_hostClass->contextId, elementInstance->eventTargetId, x, y);
+  elementInstance->nativeElement->scrollBy(elementInstance->_hostClass->contextId, elementInstance->eventTargetId, x, y);
 
   return nullptr;
 }

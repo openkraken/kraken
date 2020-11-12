@@ -11,17 +11,18 @@
 namespace kraken::binding::jsc {
 
 JSWindow::WindowInstance::WindowInstance(JSWindow *window)
-  : EventTargetInstance(window, new NativeWindow(this), WINDOW_TARGET_ID) {
+  : EventTargetInstance(window, WINDOW_TARGET_ID), nativeWindow(new NativeWindow(nativeEventTarget)) {
   location_ = new JSLocation(_hostClass->context);
 
   foundation::UICommandTaskMessageQueue::instance(window->context->getContextId())
-    ->registerCommand(WINDOW_TARGET_ID, UICommandType::initWindow, nullptr, 0, nativeEventTarget);
+    ->registerCommand(WINDOW_TARGET_ID, UICommandType::initWindow, nullptr, 0, nativeWindow);
 }
 
 JSWindow::WindowInstance::~WindowInstance() {
   for (auto &propertyName : propertyNames) {
     JSStringRelease(propertyName);
   }
+  delete nativeWindow;
 }
 
 JSValueRef JSWindow::WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -80,5 +81,4 @@ void bindWindow(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "window", windowInstance);
 }
 
-NativeWindow::NativeWindow(JSWindow::WindowInstance *window) : NativeEventTarget(window) {}
 } // namespace kraken::binding::jsc

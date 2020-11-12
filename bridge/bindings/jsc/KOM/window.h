@@ -16,6 +16,8 @@
 
 namespace kraken::binding::jsc {
 
+struct NativeWindow;
+
 class JSWindow : public JSEventTarget {
 public:
   JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName){};
@@ -31,6 +33,8 @@ public:
     ~WindowInstance();
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
+    NativeWindow *nativeWindow;
+
   private:
     std::array<JSStringRef, 11> propertyNames{
       JSStringCreateWithUTF8CString("devicePixelRatio"), JSStringCreateWithUTF8CString("colorScheme"),
@@ -44,9 +48,11 @@ public:
   };
 };
 
-struct NativeWindow : public NativeEventTarget {
+struct NativeWindow {
   NativeWindow() = delete;
-  NativeWindow(JSWindow::WindowInstance *window);
+  NativeWindow(NativeEventTarget *nativeEventTarget) : nativeEventTarget(nativeEventTarget){};
+
+  NativeEventTarget *nativeEventTarget;
 };
 
 void bindWindow(std::unique_ptr<JSContext> &context);

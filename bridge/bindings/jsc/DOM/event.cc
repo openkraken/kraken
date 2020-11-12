@@ -158,33 +158,33 @@ JSValueRef JSEvent::EventInstance::getProperty(std::string &name, JSValueRef *ex
       auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->target);
       return instance->object;
     }
-      return JSValueMakeNull(_hostClass->ctx);
+    return JSValueMakeNull(_hostClass->ctx);
   case EventProperty::kCurrentTarget:
     if (nativeEvent->currentTarget != nullptr) {
       auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->currentTarget);
       return instance->object;
     }
-      return JSValueMakeNull(_hostClass->ctx);
+    return JSValueMakeNull(_hostClass->ctx);
   case EventProperty::kReturnValue:
     return JSValueMakeBoolean(_hostClass->ctx, !_canceledFlag);
   case EventProperty::kStopPropagation:
     if (_stopPropagation == nullptr) {
       _stopPropagation = propertyBindingFunction(_hostClass->context, this, "stopPropagation", stopPropagation);
     }
-      return _stopPropagation;
+    return _stopPropagation;
   case EventProperty::kCancelBubble:
     return JSValueMakeBoolean(_hostClass->ctx, _stopPropagationFlag);
   case EventProperty::kStopImmediatePropagation:
     if (_stopImmediatePropagation == nullptr) {
       _stopImmediatePropagation =
-          propertyBindingFunction(_hostClass->context, this, "stopImmediatePropagation", stopImmediatePropagation);
+        propertyBindingFunction(_hostClass->context, this, "stopImmediatePropagation", stopImmediatePropagation);
     }
-      return _stopImmediatePropagation;
+    return _stopImmediatePropagation;
   case EventProperty::kPreventDefault:
     if (_preventDefault == nullptr) {
       _preventDefault = propertyBindingFunction(_hostClass->context, this, "preventDefault", preventDefault);
     }
-      return _preventDefault;
+    return _preventDefault;
   }
 
   return nullptr;
@@ -218,10 +218,15 @@ JSValueRef JSEvent::EventInstance::preventDefault(JSContextRef ctx, JSObjectRef 
 }
 
 void JSEvent::EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  if (name == "cancelBubble") {
-    bool v = JSValueToBoolean(_hostClass->ctx, value);
-    if (v) {
-      _stopPropagationFlag = true;
+  auto propertyMap = getEventPropertyMap();
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+
+    if (property == EventProperty::kCancelBubble) {
+      bool v = JSValueToBoolean(_hostClass->ctx, value);
+      if (v) {
+        _stopPropagationFlag = true;
+      }
     }
   }
 }

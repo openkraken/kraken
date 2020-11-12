@@ -13,6 +13,8 @@ namespace kraken::binding::jsc {
 
 void bindCommentNode(std::unique_ptr<JSContext> &context);
 
+struct NativeComment;
+
 class JSCommentNode : public JSNode {
 public:
   JSCommentNode() = delete;
@@ -35,13 +37,23 @@ public:
 
     CommentNodeInstance() = delete;
     explicit CommentNodeInstance(JSCommentNode *jsCommentNode);
+    ~CommentNodeInstance();
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;
+
+    NativeComment *nativeComment;
   private:
     JSStringRef data;
   };
+};
+
+struct NativeComment {
+  NativeComment() = delete;
+  NativeComment(NativeNode *nativeNode) : nativeNode(nativeNode) {};
+
+  NativeNode *nativeNode;
 };
 
 } // namespace kraken::binding::jsc

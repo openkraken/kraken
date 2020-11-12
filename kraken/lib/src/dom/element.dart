@@ -112,6 +112,8 @@ class Element extends Node
   /// Is element an intrinsic box.
   final bool _isIntrinsicBox;
 
+  final Pointer<NativeElement> nativeElementPtr;
+
   /// Style declaration from user input.
   CSSStyleDeclaration style;
 
@@ -124,7 +126,7 @@ class Element extends Node
 
   Element(
     int targetId,
-    Pointer<NativeEventTarget> nativePtr,
+    this.nativeElementPtr,
     ElementManager elementManager, {
     this.tagName,
     this.defaultStyle = const <String, dynamic>{},
@@ -135,10 +137,10 @@ class Element extends Node
         assert(tagName != null),
         _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK,
-        super(NodeType.ELEMENT_NODE, targetId, nativePtr, elementManager, tagName) {
+        super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
 
     style = CSSStyleDeclaration(this);
-    bindNativeMethods();
+    bindNativeMethods(nativeElementPtr);
     _setDefaultStyle();
   }
 
@@ -1097,7 +1099,7 @@ class Element extends Node
 
   void _eventResponder(Event event) {
     Pointer<NativeEvent> nativeEvent = event.toNativeEvent();
-    emitUIEvent(elementManager.controller.view.contextId, nativePtr, nativeEvent);
+    emitUIEvent(elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, nativeEvent);
   }
 
   void click() {

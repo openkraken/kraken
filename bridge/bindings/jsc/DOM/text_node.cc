@@ -31,7 +31,7 @@ JSObjectRef JSTextNode::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 }
 
 JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringRef data)
-  : NodeInstance(jsTextNode, NodeType::TEXT_NODE), data(JSStringRetain(data)) {
+  : NodeInstance(jsTextNode, NodeType::TEXT_NODE), nativeTextNode(new NativeTextNode(nativeNode)), data(JSStringRetain(data)) {
   NativeString textNodeData{};
   textNodeData.string = JSStringGetCharactersPtr(data);
   textNodeData.length = JSStringGetLength(data);
@@ -40,7 +40,7 @@ JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringR
   args[0] = textNodeData.clone();
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(eventTargetId, UICommandType::createTextNode, args, 1, nativeEventTarget);
+    ->registerCommand(eventTargetId, UICommandType::createTextNode, args, 1, nativeTextNode);
 }
 
 JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -116,6 +116,10 @@ JSTextNode::TextNodeInstance::getTextNodePropertyMap() {
     {"textContent", TextNodeProperty::kTextContent},
     {"nodeName", TextNodeProperty::kNodeName}};
   return nodeProperty;
+}
+
+JSTextNode::TextNodeInstance::~TextNodeInstance() {
+  delete nativeTextNode;
 }
 
 } // namespace kraken::binding::jsc

@@ -11,7 +11,7 @@ namespace kraken::binding::jsc {
 JSAnchorElement::JSAnchorElement(JSContext *context) : JSElement(context) {}
 
 JSAnchorElement *JSAnchorElement::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSAnchorElement*> instanceMap {};
+  static std::unordered_map<JSContext *, JSAnchorElement *> instanceMap{};
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSAnchorElement(context);
   }
@@ -28,9 +28,12 @@ JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *j
   : ElementInstance(jsAnchorElement, "a") {}
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "href") {
+  auto propertyMap = getAnchorElementPropertyMap();
+  auto property = propertyMap[name];
+
+  if (property == AnchorElementProperty::kHref) {
     return JSValueMakeString(_hostClass->ctx, _href);
-  } else if (name == "target") {
+  } else if (property == AnchorElementProperty::kTarget) {
     return JSValueMakeString(_hostClass->ctx, _target);
   }
 
@@ -38,41 +41,33 @@ JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name
 }
 
 void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  if (name == "href") {
-    NativeString hrefProperty{};
-    STD_STRING_TO_NATIVE_STRING(name.c_str(), hrefProperty);
-
-    NativeString hrefValue{};
-    JSStringRef hrefValueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    std::string hrefValueString = JSStringToStdString(hrefValueStringRef);
-    STD_STRING_TO_NATIVE_STRING(hrefValueString.c_str(), hrefValue);
-
+  auto propertyMap = getAnchorElementPropertyMap();
+  auto property = propertyMap[name];
+  if (property == AnchorElementProperty::kHref) {
     NativeString **args = new NativeString *[2];
-    args[0] = hrefProperty.clone();
-    args[1] = hrefValue.clone();
-
+    JSStringRef hrefValueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(hrefValueStringRef);
     _href = hrefValueStringRef;
 
+    std::string hrefValueString = JSStringToStdString(hrefValueStringRef);
+
+    ELEMENT_SET_PROPERTY(name.c_str(), hrefValueString.c_str(), args);
+
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
-  } else if (name == "target") {
-    NativeString targetProperty{};
-    STD_STRING_TO_NATIVE_STRING(name.c_str(), targetProperty);
+  } else if (property == AnchorElementProperty::kTarget) {
+    NativeString **args = new NativeString *[2];
 
-    NativeString targetValue{};
     JSStringRef targetValueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    std::string targetValueString = JSStringToStdString(targetValueStringRef);
-    STD_STRING_TO_NATIVE_STRING(targetValueString.c_str(), targetValue);
-
     JSStringRetain(targetValueStringRef);
     _target = targetValueStringRef;
 
-    NativeString **args = new NativeString *[2];
-    args[0] = targetProperty.clone();
-    args[1] = targetValue.clone();
+    std::string targetValueString = JSStringToStdString(targetValueStringRef);
 
-    foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+    ELEMENT_SET_PROPERTY(name.c_str(), targetValueString.c_str(), args);
+
+    foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
+      ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   }
 
   ElementInstance::setProperty(name, value, exception);
@@ -86,12 +81,18 @@ void JSAnchorElement::AnchorElementInstance::getPropertyNames(JSPropertyNameAccu
   }
 }
 
-std::array<JSStringRef, 2> & JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyNames() {
-  static std::array<JSStringRef, 2> propertyNames {
+std::array<JSStringRef, 2> &JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyNames() {
+  static std::array<JSStringRef, 2> propertyNames{
     JSStringCreateWithUTF8CString("href"),
     JSStringCreateWithUTF8CString("target"),
   };
   return propertyNames;
+}
+const std::unordered_map<std::string, JSAnchorElement::AnchorElementInstance::AnchorElementProperty> &
+JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyMap() {
+  static const std::unordered_map<std::string, AnchorElementProperty> propertyMap{
+    {"href", AnchorElementProperty::kHref}, {"target", AnchorElementProperty::kTarget}};
+  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

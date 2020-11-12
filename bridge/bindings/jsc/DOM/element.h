@@ -16,6 +16,8 @@ namespace kraken::binding::jsc {
 
 void bindElement(std::unique_ptr<JSContext> &context);
 
+struct NativeElement;
+
 class JSElement : public JSNode {
 public:
   enum class ElementProperty {
@@ -79,6 +81,8 @@ public:
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;
+
+    NativeElement *nativeElement {nullptr};
 
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
@@ -149,9 +153,11 @@ private:
 };
 
 // An struct represent Element object from dart side.
-struct NativeElement : public NativeNode {
+struct NativeElement {
   NativeElement() = delete;
-  NativeElement(JSElement::ElementInstance *instance) : NativeNode(instance){};
+  explicit NativeElement(NativeNode *nativeNode): nativeNode(nativeNode) {};
+
+  const NativeNode *nativeNode;
 
   GetOffsetTop getOffsetTop{nullptr};
   GetOffsetLeft getOffsetLeft{nullptr};

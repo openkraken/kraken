@@ -13,8 +13,9 @@ typedef EventHandler = void Function(Event event);
 class EventTarget {
   // A unique target identifier.
   int targetId;
+
   // The Add
-  Pointer<NativeEventTarget> nativePtr;
+  final Pointer<NativeEventTarget> nativeEventTargetPtr;
 
   // the self reference the ElementManager
   ElementManager elementManager;
@@ -22,7 +23,7 @@ class EventTarget {
   @protected
   Map<EventType, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(this.targetId, this.nativePtr, this.elementManager) {
+  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
     assert(targetId != null);
     assert(elementManager != null);
   }

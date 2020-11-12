@@ -449,7 +449,7 @@ abstract class WebViewElement extends Element {
   /// The `javascriptMode` and `autoMediaPlaybackPolicy` parameters must not be null.
   WebViewElement(
     int targetId,
-    Pointer<NativeEventTarget> nativePtr,
+    Pointer<NativeElement> nativePtr,
     ElementManager elementManager, {
     String tagName,
     this.initialUrl,
@@ -804,7 +804,7 @@ abstract class WebViewElement extends Element {
 //   Document? getSVGDocument();
 // };
 class IFrameElement extends WebViewElement {
-  IFrameElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager, tagName: IFRAME);
+  IFrameElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager, tagName: IFRAME);
 
   @override
   void onWebViewCreated(WebViewController controller) {}

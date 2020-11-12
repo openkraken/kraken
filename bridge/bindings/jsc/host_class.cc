@@ -108,7 +108,6 @@ JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSS
     return propertyBindingFunction(hostClass->context, hostClass, "call", constructorCall);
   }
 
-  KRAKEN_LOG(VERBOSE) << "Constructor get property " << name;
   return nullptr;
 }
 

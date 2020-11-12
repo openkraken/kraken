@@ -56,6 +56,7 @@ class KrakenViewController {
       _contextId = initBridge();
     }
     _elementManager = ElementManager(viewportWidth, viewportHeight,
+        contextId: _contextId,
         showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
   }
 
@@ -149,20 +150,16 @@ class KrakenViewController {
     return completer.future;
   }
 
-  void initWindow(Pointer<NativeEventTarget> nativePtr) {
+  void initWindow(Pointer<NativeWindow> nativePtr) {
     _elementManager.initWindow(nativePtr);
   }
 
-  void initBody(Pointer<NativeEventTarget> nativePtr) {
-    _elementManager.initBody(nativePtr);
-  }
-
-  Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String tagName) {
+  Element createElement(int id, Pointer<NativeElement> nativePtr, String tagName) {
     print('create element id: $id, tagName: $tagName');
     return _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
   }
 
-  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
+  void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
     return _elementManager.createTextNode(id, nativePtr, data);
   }
 
@@ -442,7 +439,7 @@ class KrakenController {
       module.requestAnimationFrame((_) {
         Event loadEvent = Event(EventType.load);
         EventTarget window = view.getEventTargetById(WINDOW_ID);
-        emitUIEvent(_view.contextId, window.nativePtr, loadEvent.toNativeEvent());
+        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, loadEvent.toNativeEvent());
       });
     }
   }

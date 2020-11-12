@@ -17,7 +17,7 @@ class AudioElement extends Element {
   static double defaultWidth = 300.0;
   static double defaultHeight = 150.0;
 
-  AudioElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  AudioElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, isIntrinsicBox: true, tagName: AUDIO);
 
   @override

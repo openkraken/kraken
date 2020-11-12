@@ -23,11 +23,12 @@ JSNode::NodeInstance::~NodeInstance() {
     node->parentNode = nullptr;
     JSValueUnprotect(_hostClass->ctx, node->object);
   }
+
+  delete nativeNode;
 }
 
-JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType) : EventTargetInstance(node), nodeType(nodeType) {}
-JSNode::NodeInstance::NodeInstance(JSNode *node, NativeNode *nativeNode, NodeType nodeType)
-  : EventTargetInstance(node, nativeNode), nodeType(nodeType) {}
+JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)
+  : EventTargetInstance(node), nativeNode(new NativeNode(nativeEventTarget)), nodeType(nodeType) {}
 
 bool JSNode::NodeInstance::isConnected() {
   bool _isConnected = eventTargetId == BODY_TARGET_ID;

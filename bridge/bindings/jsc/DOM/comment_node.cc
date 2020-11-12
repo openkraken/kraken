@@ -29,7 +29,7 @@ JSObjectRef JSCommentNode::instanceConstructor(JSContextRef ctx, JSObjectRef con
 }
 
 JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsCommentNode)
-  : NodeInstance(jsCommentNode, NodeType::COMMENT_NODE) {}
+  : NodeInstance(jsCommentNode, NodeType::COMMENT_NODE), nativeComment(new NativeComment(nativeNode)) {}
 
 void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   NodeInstance::setProperty(name, value, exception);
@@ -84,4 +84,9 @@ JSCommentNode::CommentNodeInstance::getPropertyMap() {
 JSStringRef JSCommentNode::CommentNodeInstance::internalTextContent() {
   return data;
 }
+
+JSCommentNode::CommentNodeInstance::~CommentNodeInstance() {
+  delete nativeComment;
+}
+
 } // namespace kraken::binding::jsc

@@ -11,7 +11,9 @@ import 'package:kraken/dom.dart';
 const String WINDOW = 'WINDOW';
 
 class Window extends EventTarget {
-  Window(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager) {
+  final Pointer<NativeWindow> nativeWindowPtr;
+
+  Window(int targetId, this.nativeWindowPtr, ElementManager elementManager) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent();
       event.platformBrightness = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
@@ -20,11 +22,11 @@ class Window extends EventTarget {
   }
 
   void _handleColorSchemeChange(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativePtr, event.toNativeEvent());
+    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event.toNativeEvent());
   }
 
   void _handleLoad(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativePtr, event.toNativeEvent());
+    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event.toNativeEvent());
   }
 
   @override
@@ -37,6 +39,8 @@ class Window extends EventTarget {
         return addEventListener(EventType.colorschemechange, _handleColorSchemeChange);
       case EventType.load:
         return addEventListener(EventType.load, _handleLoad);
+      default:
+        break;
     }
   }
 }

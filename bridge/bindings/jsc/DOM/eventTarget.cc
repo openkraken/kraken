@@ -45,16 +45,6 @@ JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarg
   nativeEventTarget = new NativeEventTarget(this);
 }
 
-JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, NativeEventTarget *native)
-  : Instance(eventTarget), nativeEventTarget(native) {
-  eventTargetId = globalEventTargetId;
-  globalEventTargetId++;
-}
-
-JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget,
-                                                        NativeEventTarget *nativeEventTarget, int64_t targetId)
-  : Instance(eventTarget), nativeEventTarget(nativeEventTarget), eventTargetId(targetId) {}
-
 JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
   auto data = new DisposeCallbackData(_hostClass->contextId, eventTargetId);

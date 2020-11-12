@@ -19,12 +19,11 @@ import 'package:kraken/rendering.dart';
 
 const String UNKNOWN = 'UNKNOWN';
 
-Element _createElement(
-    int id, Pointer<NativeEventTarget> nativePtr, String type, Map<String, dynamic> props, List<EventType> events, ElementManager elementManager) {
+Element _createElement(int id, Pointer<NativeElement> nativePtr, String type, Map<String, dynamic> props,
+    List<EventType> events, ElementManager elementManager) {
   Element element;
   switch (type) {
     case BODY:
-
       break;
     case DIV:
       element = DivElement(id, nativePtr, elementManager);
@@ -114,10 +113,11 @@ class ElementManager {
 
   final List<VoidCallback> _detachCallbacks = [];
 
-  ElementManager(this.viewportWidth, this.viewportHeight,
-      {this.controller, this.showPerformanceOverlayOverride}) {
-    _rootElement = BodyElement(viewportWidth, viewportHeight, BODY_ID, nullptr, this)
-      ..attachBody();
+  ElementManager(this.viewportWidth, this.viewportHeight, {int contextId, this.controller, this.showPerformanceOverlayOverride}) {
+    print('body nativePtr: ${bodyNativePtrMap[contextId]}');
+    _rootElement =
+        BodyElement(viewportWidth, viewportHeight, BODY_ID, bodyNativePtrMap[contextId], this)
+          ..attachBody();
 
     RenderBoxModel root = _rootElement.renderBoxModel;
     root.controller = controller;
@@ -158,17 +158,13 @@ class ElementManager {
     _eventTargets = <int, EventTarget>{};
   }
 
-  void initWindow(Pointer<NativeEventTarget> nativePtr) {
+  void initWindow(Pointer<NativeWindow> nativePtr) {
     Window window = Window(WINDOW_ID, nativePtr, this);
     setEventTarget(window);
   }
 
-  void initBody(Pointer<NativeEventTarget> nativePtr) {
-    _rootElement.nativePtr = nativePtr;
-    _rootElement.bindNativeMethods();
-  }
-
-  Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
+  Element createElement(
+      int id, Pointer<NativeElement> nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<EventType> eventList;
@@ -184,13 +180,13 @@ class ElementManager {
     return element;
   }
 
-  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
+  void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
     TextNode textNode = TextNode(id, nativePtr, data, this);
     setEventTarget(textNode);
   }
 
-  void createComment(int id, Pointer<NativeEventTarget> nativePtr, String data) {
-    EventTarget comment = Comment(targetId: id, nativePtr: nativePtr, data: data, elementManager: this);
+  void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
+    EventTarget comment = Comment(targetId: id, nativeCommentNodePtr: nativePtr, data: data, elementManager: this);
     setEventTarget(comment);
   }
 
@@ -333,7 +329,9 @@ class ElementManager {
   }
 
   RenderObject _root;
+
   RenderObject get root => _root;
+
   set root(RenderObject root) {
     assert(() {
       throw FlutterError('Can not set root to ElementManagerActionDelegate.');
@@ -350,7 +348,7 @@ class ElementManager {
 
   bool showPerformanceOverlay = false;
 
-  RenderBox buildRenderBox({ bool showPerformanceOverlay  }) {
+  RenderBox buildRenderBox({bool showPerformanceOverlay}) {
     if (showPerformanceOverlay != null) {
       this.showPerformanceOverlay = showPerformanceOverlay;
     }
@@ -408,7 +406,7 @@ class ElementManager {
 
     clearTargets();
     for (var callback in _detachCallbacks) {
-       callback();
+      callback();
     }
     _detachCallbacks.clear();
     _rootElement = null;
