@@ -44,34 +44,37 @@ class Kraken extends StatelessWidget {
 
   final KrakenOnLoad onLoad;
 
+  final bool debugEnableInspector;
+
   KrakenController get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
 
   Kraken({
-      Key key,
-      @required this.viewportWidth,
-      @required this.viewportHeight,
-      this.bundleURL,
-      this.bundlePath,
-      this.bundleContent,
-      this.onLoad,
-      this.navigationDelegate,
-      this.javaScriptChannel,
-      // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
-      // Maybe got unexpected error when change to other values, use this at your own risk!
-      // We will fixed this on next version released. (v0.6.0)
-      // Disable viewportWidth check and no assertion error report.
-      bool disableViewportWidthAssertion = false,
-      // Kraken's viewportHeight options only works fine when viewportHeight is equal to window.physicalSize.height / window.devicePixelRatio.
-      // Maybe got unexpected error when change to other values, use this at your own risk!
-      // We will fixed this on next version release. (v0.6.0)
-      // Disable viewportHeight check and no assertion error report.
-      bool disableViewportHeightAssertion = false,
-      // Callback functions when loading Javascript scripts failed.
-      this.loadErrorHandler,
-      this.animationController})
-      : super(key: key) {
+    Key key,
+    @required this.viewportWidth,
+    @required this.viewportHeight,
+    this.bundleURL,
+    this.bundlePath,
+    this.bundleContent,
+    this.onLoad,
+    this.navigationDelegate,
+    this.javaScriptChannel,
+    // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
+    // Maybe got unexpected error when change to other values, use this at your own risk!
+    // We will fixed this on next version released. (v0.6.0)
+    // Disable viewportWidth check and no assertion error report.
+    bool disableViewportWidthAssertion = false,
+    // Kraken's viewportHeight options only works fine when viewportHeight is equal to window.physicalSize.height / window.devicePixelRatio.
+    // Maybe got unexpected error when change to other values, use this at your own risk!
+    // We will fixed this on next version release. (v0.6.0)
+    // Disable viewportHeight check and no assertion error report.
+    bool disableViewportHeightAssertion = false,
+    // Callback functions when loading Javascript scripts failed.
+    this.loadErrorHandler,
+    this.animationController,
+    this.debugEnableInspector,
+  }) : super(key: key) {
 
     assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
     'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
@@ -103,12 +106,14 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     KrakenController controller = KrakenController(shortHash(_widget.hashCode), _widget.viewportWidth, _widget.viewportHeight,
-        showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-        bundleURL: _widget.bundleURL,
-        bundlePath: _widget.bundlePath,
-        loadErrorHandler: _widget.loadErrorHandler,
-        methodChannel: _widget.javaScriptChannel,
-        bundleContent: _widget.bundleContent);
+      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      bundleURL: _widget.bundleURL,
+      bundlePath: _widget.bundlePath,
+      loadErrorHandler: _widget.loadErrorHandler,
+      methodChannel: _widget.javaScriptChannel,
+      bundleContent: _widget.bundleContent,
+      debugEnableInspector: _widget.debugEnableInspector,
+    );
     return controller.view.getRootRenderObject();
   }
 

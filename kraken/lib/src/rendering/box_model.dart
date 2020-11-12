@@ -12,6 +12,7 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/inspector.dart';
 
 import 'padding.dart';
 
@@ -242,10 +243,20 @@ class RenderBoxModel extends RenderBox with
   @override
   bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
 
+
   RenderPositionHolder renderPositionHolder;
 
   // Kraken controller reference which control all kraken created renderObjects.
   KrakenController controller;
+
+  bool _debugShouldPaintOverlay = false;
+  bool get debugShouldPaintOverlay => _debugShouldPaintOverlay;
+  set debugShouldPaintOverlay(bool value) {
+    if (value != null && _debugShouldPaintOverlay != value) {
+      _debugShouldPaintOverlay = value;
+      markNeedsPaint();
+    }
+  }
 
   bool _debugHasBoxLayout = false;
 
@@ -919,6 +930,13 @@ class RenderBoxModel extends RenderBox with
     paintBoxModel(context, offset);
   }
 
+  void debugPaintOverlay(PaintingContext context, Offset offset) {
+    Rect overlayRect = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+    context.addLayer(InspectorOverlayLayer(
+      overlayRect: overlayRect,
+    ));
+  }
+
   void paintBoxModel(PaintingContext context, Offset offset) {
     paintColorFilter(context, offset, _chainPaintImageFilter);
   }
@@ -951,7 +969,15 @@ class RenderBoxModel extends RenderBox with
   }
 
   void _chainPaintContentVisibility(PaintingContext context, Offset offset) {
-    paintContentVisibility(context, offset, performPaint);
+    paintContentVisibility(context, offset, _chainPaintOverlay);
+  }
+
+  void _chainPaintOverlay(PaintingContext context, Offset offset) {
+    performPaint(context, offset);
+
+    if (_debugShouldPaintOverlay) {
+      debugPaintOverlay(context, offset);
+    }
   }
 
   @override
