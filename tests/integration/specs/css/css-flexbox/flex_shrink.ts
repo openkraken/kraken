@@ -157,4 +157,508 @@ describe('flexbox flex-shrink', () => {
       done();
     });
   });
+
+  it('should work with intrinsic element with no min-height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+        createElement('img', {
+          src: 'assets/100x100-green.png',
+        }),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with intrinsic element with min-height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+        createElement('img', {
+          src: 'assets/100x100-green.png',
+          style: {
+            minHeight: '30px'
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with intrinsic element with width and no height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+        createElement('img', {
+          src: 'assets/100x100-green.png',
+          style: {
+              width: '30px'
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex layout in the column direction with children and height is not larger than children height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            createText('foooo'),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex layout in the column direction with children and height is larger than children height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '300px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            createText('foooo'),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex layout in the column direction with children and min-height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '300px',
+              minHeight: '30px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            createText('foooo'),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex layout in the row direction with children and height is not larger than children height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              display: 'flex',
+              height: '50px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex layout in the row direction with children and height is larger than children height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              display: 'flex',
+              height: '250px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex layout in the row direction with children and min-height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              display: 'flex',
+              height: '250px',
+              minHeight: '30px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flow layout with children and height is not larger than children height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '100px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '200px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            createText('foooo'),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flow layout with children and height is larger than children height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '300px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '200px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            createText('foooo'),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flow layout with children and min-height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '300px',
+              minHeight: '30px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            createText('foooo'),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
 });
