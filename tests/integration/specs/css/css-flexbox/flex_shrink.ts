@@ -242,7 +242,7 @@ describe('flexbox flex-shrink', () => {
     await matchViewportSnapshot();
   });
 
-  it('should work with flex layout with children and height is not larger than children height', async () => {
+  it('should work with flex layout in the column direction with children and height is not larger than children height', async () => {
     let constrainedFlex;
     constrainedFlex = createElement(
       'div',
@@ -258,7 +258,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (testFlexItemOverlappingGreen = createElement(
+         (createElement(
           'div',
           {
             style: {
@@ -269,7 +269,7 @@ describe('flexbox flex-shrink', () => {
             },
           },
           [
-            (content100X200 = createElement('div', {
+            (createElement('div', {
               style: {
                 width: '100px',
                 height: '100px',
@@ -287,7 +287,7 @@ describe('flexbox flex-shrink', () => {
     await matchViewportSnapshot();
   });
 
-  it('should work with flex layout with children and height is larger than children height', async () => {
+  it('should work with flex layout in the column direction with children and height is larger than children height', async () => {
     let constrainedFlex;
     constrainedFlex = createElement(
       'div',
@@ -303,7 +303,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (testFlexItemOverlappingGreen = createElement(
+         (createElement(
           'div',
           {
             style: {
@@ -314,7 +314,7 @@ describe('flexbox flex-shrink', () => {
             },
           },
           [
-            (content100X200 = createElement('div', {
+            (createElement('div', {
               style: {
                 width: '100px',
                 height: '100px',
@@ -332,7 +332,7 @@ describe('flexbox flex-shrink', () => {
     await matchViewportSnapshot();
   });
 
-  it('should work with flex layout with children and min-height', async () => {
+  it('should work with flex layout in the column direction with children and min-height', async () => {
     let constrainedFlex;
     constrainedFlex = createElement(
       'div',
@@ -348,7 +348,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (testFlexItemOverlappingGreen = createElement(
+         (createElement(
           'div',
           {
             style: {
@@ -360,7 +360,7 @@ describe('flexbox flex-shrink', () => {
             },
           },
           [
-            (content100X200 = createElement('div', {
+            (createElement('div', {
               style: {
                 width: '100px',
                 height: '100px',
@@ -369,6 +369,160 @@ describe('flexbox flex-shrink', () => {
               },
             })),
             createText('foooo'),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex layout in the row direction with children and height is not larger than children height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              display: 'flex',
+              height: '50px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex layout in the row direction with children and height is larger than children height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              display: 'flex',
+              height: '250px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex layout in the row direction with children and min-height', async () => {
+    let constrainedFlex;
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          width: '100px',
+          height: '10px',
+          backgroundColor: 'red',
+        },
+      },
+      [
+         (createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              display: 'flex',
+              height: '250px',
+              minHeight: '30px',
+            },
+          },
+          [
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
+            (createElement('div', {
+              style: {
+                width: '100px',
+                height: '100px',
+                opacity: 0.5,
+                flexShrink: 0,
+              },
+            })),
           ]
         )),
       ]
@@ -394,7 +548,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (testFlexItemOverlappingGreen = createElement(
+         (createElement(
           'div',
           {
             style: {
@@ -403,7 +557,7 @@ describe('flexbox flex-shrink', () => {
             },
           },
           [
-            (content100X200 = createElement('div', {
+            (createElement('div', {
               style: {
                 width: '100px',
                 height: '200px',
@@ -437,7 +591,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (testFlexItemOverlappingGreen = createElement(
+         (createElement(
           'div',
           {
             style: {
@@ -446,7 +600,7 @@ describe('flexbox flex-shrink', () => {
             },
           },
           [
-            (content100X200 = createElement('div', {
+            (createElement('div', {
               style: {
                 width: '100px',
                 height: '200px',
@@ -480,7 +634,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (testFlexItemOverlappingGreen = createElement(
+         (createElement(
           'div',
           {
             style: {
@@ -490,7 +644,7 @@ describe('flexbox flex-shrink', () => {
             },
           },
           [
-            (content100X200 = createElement('div', {
+            (createElement('div', {
               style: {
                 width: '100px',
                 height: '100px',
