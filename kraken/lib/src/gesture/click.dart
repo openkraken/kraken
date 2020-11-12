@@ -19,7 +19,6 @@ class KrakenClickGestureRecognizer extends OneSequenceGestureRecognizer {
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   KrakenClickGestureRecognizer({
     this.deadline,
-    GestureClickCallback onPointClick,
     this.acceptSlopTolerance = kTouchSlop,
     Object debugOwner,
     PointerDeviceKind kind,
