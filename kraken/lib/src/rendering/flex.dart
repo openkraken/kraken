@@ -398,7 +398,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Calculate automatic minimum size of flex item
   /// https://www.w3.org/TR/css-flexbox-1/#min-size-auto
   double _getMinMainAxisSize(RenderBox child) {
-    double minMainSize = null;
+    double minMainSize;
 //    double contentMainSize = CSSFlex.isHorizontalFlexDirection(flexDirection) ?
 //      contentSize.width : contentSize.height;
 
@@ -444,37 +444,11 @@ class RenderFlexLayout extends RenderLayoutBox {
   double _getShrinkConstraints(RenderBox child, Map<int, RenderBox> runChildren, double freeSpace) {
     double totalExtent = 0;
     runChildren.forEach((targetId, child) {
-      double childMinMainSize = _getMinMainAxisSize(child);
       double childMainSize = _getMainSize(child);
       double childFlexShrink = _getFlexShrink(child);
-//      totalExtent += childMainSize * childFlexShrink;
       totalExtent += childMainSize * childFlexShrink;
-
-//      double contentSize = 0;
-//      double autoMinWidth = 0;
-//      double autoMinHeight = 0;
-//      if (child is RenderFlowLayout) {
-//        autoMinWidth = child.autoMinWidth;
-//        autoMinHeight = child.autoMinHeight;
-//      } else if (child is RenderFlexLayout) {
-//        autoMinWidth = child.autoMinWidth;
-//        autoMinHeight = child.autoMinHeight;
-//      }
-//
-//      contentSize = CSSFlex.isHorizontalFlexDirection(flexDirection) ?
-//        autoMinWidth : autoMinHeight;
-
-      print('child content size-----------------$childMinMainSize');
     });
 
-    int childNodeId;
-    if (child is RenderTextBox) {
-      childNodeId = child.targetId;
-    } else if (child is RenderBoxModel) {
-      childNodeId = child.targetId;
-    }
-
-    RenderBox current = runChildren[childNodeId];
     double currentMainSize = _getMainSize(child);
     double currentFlexShrink = _getFlexShrink(child);
     double currentExtent = currentFlexShrink * currentMainSize;
@@ -1533,12 +1507,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Actual main axis size of flex items
     double maxAllocatedMainSize = maxMainSizeMetrics.mainAxisExtent;
 
-    // Actual cross axis size of flex lines
-    double crossChildrenSize = 0;
-    runMetrics.forEach((_RunMetrics curr) {
-      crossChildrenSize += curr.crossAxisExtent;
-    });
-
     CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
     // Get layout width from children's width by flex axis
     double constraintWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? containerSizeMap['main'] : containerSizeMap['cross'];
@@ -1622,12 +1590,13 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double contentHeight = 0;
+
     if (minHeight == null) {
-      runMetrics.forEach((_RunMetrics curr) {
+      for (_RunMetrics curr in runMetrics) {
         curr.runChildren.forEach((int targetId, RenderBox child) {
           contentHeight += child.size.height;
         });
-      });
+      }
     } else {
       contentHeight = minHeight;
     }

@@ -1056,12 +1056,13 @@ class RenderFlowLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double contentHeight = 0;
+
     if (minHeight == null) {
-      runMetrics.forEach((_RunMetrics curr) {
+      for (_RunMetrics curr in runMetrics) {
         curr.runChildren.forEach((int targetId, RenderBox child) {
           contentHeight += child.size.height;
         });
-      });
+      }
     } else {
       contentHeight = minHeight;
     }
