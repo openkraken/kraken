@@ -1,10 +1,14 @@
-const {spawn, fork} = require('child_process');
+const {spawn, fork, spawnSync} = require('child_process');
 const path = require('path');
 const {startWsServer} = require('./ws_server');
 const isPortReachable = require('is-port-reachable');
 
 function startIntegrationTest() {
-  const tester = spawn('flutter', ['run', '--target=integration/app.dart', '--no-hot'], {
+  console.log('Building macos application...');
+  spawnSync('flutter', ['build', 'macos', '--debug', '--target=integration/app.dart']);
+
+  const testExecutable = path.join(__dirname, '../build/macos/Build/Products/Debug/tests.app/Contents/MacOS/tests');
+  const tester = spawn(testExecutable, [], {
     env: {
       ...process.env,
       KRAKEN_LIBRARY_PATH: path.join(__dirname, '../../targets/darwin/lib')

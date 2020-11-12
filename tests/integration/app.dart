@@ -106,6 +106,7 @@ void main() async {
       String status = results[i];
       if (status == 'failed') {
         exit(1);
+        return;
       }
     }
 
