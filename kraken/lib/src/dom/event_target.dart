@@ -68,6 +68,8 @@ class EventTarget {
     return false;
   }
 
+  void dispose() {}
+
   List<EventHandler> getEventHandlers(EventType type) {
     assert(type != null);
     return eventHandlers[type];

@@ -26,8 +26,8 @@ class ObjectElement extends Element implements ObjectElementHost {
   ObjectElementClientFactory _objectElementClientFactory;
   ObjectElementClient _objectElementClient;
 
-  ObjectElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  ObjectElement(int targetId, Pointer<NativeObjectElement> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();
     initDetachCallback(elementManager);
@@ -86,11 +86,11 @@ class ObjectElement extends Element implements ObjectElementHost {
     _objectElementClient?.dispose();
   }
 
-  @override
-  method(String name, List args) {
-   super.method(name, args);
-   _objectElementClient?.method(name, args);
-  }
+//  @override
+//  method(String name, List args) {
+//   super.method(name, args);
+//   _objectElementClient?.method(name, args);
+//  }
 }
 
 class _DefaultObjectElementClient implements ObjectElementClient {

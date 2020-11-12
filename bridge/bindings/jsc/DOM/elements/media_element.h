@@ -13,7 +13,9 @@ namespace kraken::binding::jsc {
 
 using Play = void(*)(int32_t contextId, int64_t targetId);
 using Pause = void(*)(int32_t contextId, int64_t targetId);
-using FastSeek = void(*)(int32_t contextId, int64_t targetId);
+using FastSeek = void(*)(int32_t contextId, int64_t targetId, double duration);
+
+struct NativeMediaElement;
 
 class JSMediaElement : public JSElement {
 public:
@@ -31,26 +33,37 @@ public:
       kPlay,
       kPause,
       kFastSeek,
-      kCurrentSrc,
-      kCurrentTime
+      kCurrentSrc
     };
 
     static std::vector<JSStringRef> &getMediaElementPropertyNames();
     static const std::unordered_map<std::string, MediaElementProperty> &getMediaElementPropertyMap();
 
+    static JSValueRef play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                           const JSValueRef arguments[], JSValueRef *exception);
+
+    static JSValueRef pause(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                            const JSValueRef arguments[], JSValueRef *exception);
+
+    static JSValueRef fastSeek(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef arguments[], JSValueRef *exception);
+
     MediaElementInstance() = delete;
     explicit MediaElementInstance(JSMediaElement *jsMediaElement, const char* tagName);
+    ~MediaElementInstance();
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+
+    NativeMediaElement *nativeMediaElement;
 
   private:
     JSStringRef _src;
     bool _autoPlay {false};
     bool _loop {false};
-    JSObjectRef _play;
-    JSObjectRef _pause;
-    JSObjectRef _fastSeek;
+    JSObjectRef _play {nullptr};
+    JSObjectRef _pause {nullptr};
+    JSObjectRef _fastSeek {nullptr};
   };
 };
 

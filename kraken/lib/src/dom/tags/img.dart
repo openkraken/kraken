@@ -32,10 +32,10 @@ class ImageElement extends Element {
 
   bool _hasLazyLoading = false;
 
-  ImageElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  ImageElement(int targetId, Pointer<NativeImgElement> nativePtr, ElementManager elementManager)
       : super(
         targetId,
-        nativePtr,
+        nativePtr.ref.nativeElement,
         elementManager,
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,

@@ -25,7 +25,7 @@ JSObjectRef JSAnchorElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 }
 
 JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *jsAnchorElement)
-  : ElementInstance(jsAnchorElement, "a") {}
+  : ElementInstance(jsAnchorElement, "a"), nativeAnchorElement(new NativeAnchorElement(nativeElement)) {}
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getAnchorElementPropertyMap();
@@ -93,6 +93,10 @@ JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyMap() {
   static const std::unordered_map<std::string, AnchorElementProperty> propertyMap{
     {"href", AnchorElementProperty::kHref}, {"target", AnchorElementProperty::kTarget}};
   return propertyMap;
+}
+
+JSAnchorElement::AnchorElementInstance::~AnchorElementInstance() {
+  delete nativeAnchorElement;
 }
 
 } // namespace kraken::binding::jsc

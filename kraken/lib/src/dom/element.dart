@@ -999,10 +999,6 @@ class Element extends Node
     }
   }
 
-  @mustCallSuper
-  dynamic method(String name, List args) {
-  }
-
   Pointer<NativeBoundingClientRect> get boundingClientRect {
     Pointer<NativeBoundingClientRect> nativeBoundingClientRect = allocate<NativeBoundingClientRect>();
     RenderBox sizedBox = renderBoxModel;

@@ -18,13 +18,18 @@ JSMediaElement *JSMediaElement::instance(JSContext *context) {
 JSMediaElement::JSMediaElement(JSContext *context) : JSElement(context) {}
 
 JSMediaElement::MediaElementInstance::MediaElementInstance(JSMediaElement *jsMediaElement, const char *tagName)
-  : ElementInstance(jsMediaElement, tagName) {}
+  : ElementInstance(jsMediaElement, tagName), nativeMediaElement(new NativeMediaElement(nativeElement)) {}
+
+JSMediaElement::MediaElementInstance::~MediaElementInstance() {
+  delete nativeMediaElement;
+}
 
 std::vector<JSStringRef> &JSMediaElement::MediaElementInstance::getMediaElementPropertyNames() {
   static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("src"),
-    JSStringCreateWithUTF8CString("autoplay"),
-    JSStringCreateWithUTF8CString("loop"),
+    JSStringCreateWithUTF8CString("src"),        JSStringCreateWithUTF8CString("autoplay"),
+    JSStringCreateWithUTF8CString("loop"),       JSStringCreateWithUTF8CString("play"),
+    JSStringCreateWithUTF8CString("pause"),      JSStringCreateWithUTF8CString("fastSeek"),
+    JSStringCreateWithUTF8CString("currentSrc"),
   };
   return propertyNames;
 }
@@ -34,8 +39,50 @@ JSMediaElement::MediaElementInstance::getMediaElementPropertyMap() {
   static std::unordered_map<std::string, MediaElementProperty> propertyMap{
     {"src", MediaElementProperty::kSrc},
     {"autoplay", MediaElementProperty::kAutoPlay},
-    {"loop", MediaElementProperty::kLoop}};
+    {"loop", MediaElementProperty::kLoop},
+    {"play", MediaElementProperty::kPlay},
+    {"pause", MediaElementProperty::kPause},
+    {"fastSeek", MediaElementProperty::kFastSeek},
+    {"currentSrc", MediaElementProperty::kCurrentSrc}};
   return propertyMap;
+}
+
+JSValueRef JSMediaElement::MediaElementInstance::play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                                      size_t argumentCount, const JSValueRef *arguments,
+                                                      JSValueRef *exception) {
+  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  elementInstance->nativeMediaElement->play(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
+  return nullptr;
+}
+
+JSValueRef JSMediaElement::MediaElementInstance::pause(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                                       size_t argumentCount, const JSValueRef *arguments,
+                                                       JSValueRef *exception) {
+  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  elementInstance->nativeMediaElement->pause(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
+  return nullptr;
+}
+
+JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSObjectRef function,
+                                                          JSObjectRef thisObject, size_t argumentCount,
+                                                          const JSValueRef *arguments, JSValueRef *exception) {
+  if (argumentCount != 1) {
+    JSC_THROW_ERROR(ctx, "Failed to execute fastSeek() on MediaElement: 1 arguments is required but got 0.", exception);
+    return nullptr;
+  }
+
+  if (!JSValueIsNumber(ctx, arguments[0])) {
+    JSC_THROW_ERROR(ctx, "Failed to execute fastSeek() on MediaElement: duration must be an number.", exception);
+    return nullptr;
+  }
+
+  double duration = JSValueToNumber(ctx, arguments[0], exception);
+
+  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  elementInstance->nativeMediaElement->fastSeek(elementInstance->_hostClass->contextId, elementInstance->eventTargetId,
+                                                duration);
+
+  return nullptr;
 }
 
 JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -49,7 +96,20 @@ JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, 
   } else if (property == MediaElementProperty::kAutoPlay) {
     return JSValueMakeBoolean(_hostClass->ctx, _autoPlay);
   } else if (property == MediaElementProperty::kPlay) {
-
+    if (_play == nullptr) {
+      _play = propertyBindingFunction(_hostClass->context, this, "play", play);
+    }
+    return _play;
+  } else if (property == MediaElementProperty::kPause) {
+    if (_pause == nullptr) {
+      _pause = propertyBindingFunction(_hostClass->context, this, "pause", pause);
+    }
+    return _pause;
+  } else if (property == MediaElementProperty::kFastSeek) {
+    if (_fastSeek == nullptr) {
+      _fastSeek = propertyBindingFunction(_hostClass->context, this, "fastSeek", fastSeek);
+    }
+    return _fastSeek;
   }
 
   return ElementInstance::getProperty(name, exception);
@@ -84,4 +144,5 @@ void JSMediaElement::MediaElementInstance::getPropertyNames(JSPropertyNameAccumu
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
+
 } // namespace kraken::binding::jsc

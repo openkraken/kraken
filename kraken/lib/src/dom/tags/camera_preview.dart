@@ -46,8 +46,8 @@ Future<CameraDescription> detectCamera(String lens) async {
 }
 
 class CameraPreviewElement extends Element {
-  CameraPreviewElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+  CameraPreviewElement(int targetId, Pointer<NativeCameraElement> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   @override
   void willAttachRenderer() {

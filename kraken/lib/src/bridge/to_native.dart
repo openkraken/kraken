@@ -212,7 +212,7 @@ class UICommandItem extends Struct {
   @Int32()
   int length;
 
-  Pointer<Void> nativePtr;
+  Pointer nativePtr;
 }
 
 typedef Native_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(Int32 contextId);
@@ -263,8 +263,7 @@ void flushUICommand() {
           controller.view.initWindow(nativeCommand.ref.nativePtr.cast<NativeWindow>());
           break;
         case UICommandType.createElement:
-          controller.view
-              .createElement(id, nativeCommand.ref.nativePtr.cast<NativeElement>(), nativeStringToString(nativeCommand.ref.args[0]));
+          controller.view.createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
           break;
         case UICommandType.createTextNode:
           controller.view.createTextNode(id, nativeCommand.ref.nativePtr.cast<NativeTextNode>(), nativeStringToString(nativeCommand.ref.args[0]));

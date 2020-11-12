@@ -154,7 +154,7 @@ class KrakenViewController {
     _elementManager.initWindow(nativePtr);
   }
 
-  Element createElement(int id, Pointer<NativeElement> nativePtr, String tagName) {
+  Element createElement(int id, Pointer nativePtr, String tagName) {
     print('create element id: $id, tagName: $tagName');
     return _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
   }

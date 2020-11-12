@@ -13,6 +13,6 @@ const String SPAN = 'SPAN';
 const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE};
 
 class SpanElement extends Element {
-  SpanElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr, elementManager, tagName: SPAN, defaultStyle: _defaultStyle);
+  SpanElement(int targetId, Pointer<NativeSpanElement> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: SPAN, defaultStyle: _defaultStyle);
 }

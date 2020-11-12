@@ -1,5 +1,6 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
+import 'from_native.dart';
 
 
 // representation of JSContext
@@ -130,4 +131,83 @@ class NativeTextNode extends Struct {
 
 class NativeCommentNode extends Struct {
   Pointer<NativeNode> nativeNode;
+}
+
+class NativeAnchorElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativeSpanElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativeDivElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativeBodyElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativeCameraElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativeIframeElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativeImgElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativeInputElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativeObjectElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativeParagraphElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativePreElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+class NativeStrongElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+typedef Native_PlayMedia = Void Function(Int32 contextId, Int64 targetId);
+typedef Native_PauseMedia = Void Function(Int32 contextId, Int64 targetId);
+typedef Native_FastSeek = Void Function(Int32 contextId, Int64 targetId, double duration);
+
+class NativeMediaElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+
+  Pointer<NativeFunction<Native_PlayMedia>> play;
+  Pointer<NativeFunction<Native_PauseMedia>> pause;
+  Pointer<NativeFunction<Native_FastSeek>> fastSeek;
+}
+
+class NativeAudioElement extends Struct {
+  Pointer<NativeMediaElement> nativeMediaElement;
+}
+
+class NativeVideoElement extends Struct {
+  Pointer<NativeMediaElement> nativeMediaElement;
+}
+
+class NativeCanvasElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+}
+
+typedef Native_PlayAnimation = Void Function(Int32 contextId, Int64 targetId, Pointer<NativeString> name, Double mix, Double mixSeconds);
+class NativeAnimationElement extends Struct {
+  Pointer<NativeElement> nativeElement;
+
+  Pointer<NativeFunction<Native_PlayAnimation>> play;
 }

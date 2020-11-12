@@ -31,10 +31,10 @@ class RenderCanvasPaint extends RenderCustomPaint {
 }
 
 class CanvasElement extends Element {
-  CanvasElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+  CanvasElement(int targetId, Pointer<NativeCanvasElement> nativePtr, ElementManager elementManager)
       : super(
           targetId,
-          nativePtr,
+          nativePtr.ref.nativeElement,
           elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
@@ -212,16 +212,16 @@ class CanvasElement extends Element {
     }
   }
 
-  @override
-  method(String name, List args) {
-    if (name == 'getContext') {
-      return getContext(args[0]);
-    } else if (name == 'applyContext2DMethod') {
-      return _applyContext2DMethod(args);
-    } else if (name == 'updateContext2DProperty') {
-      return _updateContext2DProperty(args);
-    } else {
-      return super.method(name, args);
-    }
-  }
+//  @override
+//  method(String name, List args) {
+//    if (name == 'getContext') {
+//      return getContext(args[0]);
+//    } else if (name == 'applyContext2DMethod') {
+//      return _applyContext2DMethod(args);
+//    } else if (name == 'updateContext2DProperty') {
+//      return _updateContext2DProperty(args);
+//    } else {
+//      return super.method(name, args);
+//    }
+//  }
 }

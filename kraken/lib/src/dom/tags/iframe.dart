@@ -14,7 +14,6 @@ import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken_webview/kraken_webview.dart';
 
-
 const String IFRAME = 'IFRAME';
 
 const Map<String, dynamic> _defaultStyle = {
@@ -463,7 +462,8 @@ abstract class WebViewElement extends Element {
     this.initialMediaPlaybackPolicy = AutoMediaPlaybackPolicy.require_user_action_for_all_media_types,
   })  : assert(javascriptMode != null),
         assert(initialMediaPlaybackPolicy != null),
-        super(targetId, nativePtr, elementManager, tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true);
+        super(targetId, nativePtr, elementManager,
+            tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true);
 
   @override
   void willAttachRenderer() {
@@ -557,7 +557,9 @@ abstract class WebViewElement extends Element {
 
   /// Element attribute width
   double _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
+
   double get width => _width;
+
   set width(double value) {
     if (value == null) {
       return;
@@ -573,7 +575,9 @@ abstract class WebViewElement extends Element {
 
   /// Element attribute height
   double _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
+
   double get height => _height;
+
   set height(double value) {
     if (value == null) {
       return;
@@ -804,7 +808,8 @@ abstract class WebViewElement extends Element {
 //   Document? getSVGDocument();
 // };
 class IFrameElement extends WebViewElement {
-  IFrameElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager, tagName: IFRAME);
+  IFrameElement(int targetId, Pointer<NativeIframeElement> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: IFRAME);
 
   @override
   void onWebViewCreated(WebViewController controller) {}
@@ -815,6 +820,7 @@ class IFrameElement extends WebViewElement {
   }
 
   bool _isFirstLoaded;
+
   @override
   void onPageStarted(String url) {
     if (_isFirstLoaded) {
@@ -849,15 +855,15 @@ class IFrameElement extends WebViewElement {
     });
   }
 
-  @override
-  method(String name, List args) async {
-    switch (name) {
-      case 'postMessage':
-        var firstArg = args[0];
-        String message = firstArg?.toString();
-        return await _postMessage(message);
-      default:
-        super.method(name, args);
-    }
-  }
+//  @override
+//  method(String name, List args) async {
+//    switch (name) {
+//      case 'postMessage':
+//        var firstArg = args[0];
+//        String message = firstArg?.toString();
+//        return await _postMessage(message);
+//      default:
+//        super.method(name, args);
+//    }
+//  }
 }

@@ -19,56 +19,56 @@ import 'package:kraken/rendering.dart';
 
 const String UNKNOWN = 'UNKNOWN';
 
-Element _createElement(int id, Pointer<NativeElement> nativePtr, String type, Map<String, dynamic> props,
+Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynamic> props,
     List<EventType> events, ElementManager elementManager) {
   Element element;
   switch (type) {
     case BODY:
       break;
     case DIV:
-      element = DivElement(id, nativePtr, elementManager);
+      element = DivElement(id, nativePtr.cast<NativeDivElement>(), elementManager);
       break;
     case SPAN:
-      element = SpanElement(id, nativePtr, elementManager);
+      element = SpanElement(id, nativePtr.cast<NativeSpanElement>(), elementManager);
       break;
     case ANCHOR:
-      element = AnchorElement(id, nativePtr, elementManager);
+      element = AnchorElement(id, nativePtr.cast<NativeAnchorElement>(), elementManager);
       break;
     case STRONG:
-      element = StrongElement(id, nativePtr, elementManager);
+      element = StrongElement(id, nativePtr.cast<NativeStrongElement>(), elementManager);
       break;
     case IMAGE:
-      element = ImageElement(id, nativePtr, elementManager);
+      element = ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager);
       break;
     case PARAGRAPH:
-      element = ParagraphElement(id, nativePtr, elementManager);
+      element = ParagraphElement(id, nativePtr.cast<NativeParagraphElement>(), elementManager);
       break;
     case INPUT:
-      element = InputElement(id, nativePtr, elementManager);
+      element = InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager);
       break;
     case PRE:
-      element = PreElement(id, nativePtr, elementManager);
+      element = PreElement(id, nativePtr.cast<NativePreElement>(), elementManager);
       break;
     case CANVAS:
-      element = CanvasElement(id, nativePtr, elementManager);
+      element = CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager);
       break;
     case ANIMATION_PLAYER:
-      element = AnimationPlayerElement(id, nativePtr, elementManager);
+      element = AnimationPlayerElement(id, nativePtr.cast<NativeAnimationElement>(), elementManager);
       break;
     case VIDEO:
-      element = VideoElement(id, nativePtr, elementManager);
+      element = VideoElement(id, nativePtr.cast<NativeVideoElement>(), elementManager);
       break;
     case CAMERA_PREVIEW:
-      element = CameraPreviewElement(id, nativePtr, elementManager);
+      element = CameraPreviewElement(id, nativePtr.cast<NativeCameraElement>(), elementManager);
       break;
     case IFRAME:
-      element = IFrameElement(id, nativePtr, elementManager);
+      element = IFrameElement(id, nativePtr.cast<NativeIframeElement>(), elementManager);
       break;
     case AUDIO:
-      element = AudioElement(id, nativePtr, elementManager);
+      element = AudioElement(id, nativePtr.cast<NativeAudioElement>(), elementManager);
       break;
     case OBJECT:
-      element = ObjectElement(id, nativePtr, elementManager);
+      element = ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager);
       break;
     default:
       element = Element(id, nativePtr, elementManager, tagName: UNKNOWN);
@@ -164,7 +164,7 @@ class ElementManager {
   }
 
   Element createElement(
-      int id, Pointer<NativeElement> nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
+      int id, Pointer nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<EventType> eventList;
@@ -309,23 +309,6 @@ class ElementManager {
     assert(target != null);
 
     target.removeEvent(eventType);
-  }
-
-  method(int targetId, String method, args) {
-    assert(existsTarget(targetId), 'targetId: $targetId, method: $method, args: $args');
-    Element target = getEventTargetByTargetId<Element>(targetId);
-    List _args;
-    try {
-      _args = (args as List).cast();
-    } catch (e, stack) {
-      if (!PRODUCTION) {
-        print('Method parse error: $e\n$stack');
-      }
-      _args = [];
-    }
-    assert(target != null);
-    assert(target.method != null);
-    return target.method(method, _args);
   }
 
   RenderObject _root;
