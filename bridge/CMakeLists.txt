@@ -111,8 +111,12 @@ else()
       bindings/jsc/DOM/elements/anchor_element.h
       bindings/jsc/DOM/elements/animation_player_element.cc
       bindings/jsc/DOM/elements/animation_player_element.h
-            bindings/jsc/DOM/elements/media_element.cc
-            bindings/jsc/DOM/elements/media_element.h
+      bindings/jsc/DOM/elements/media_element.cc
+      bindings/jsc/DOM/elements/media_element.h
+      bindings/jsc/DOM/elements/audio_element.cc
+      bindings/jsc/DOM/elements/audio_element.h
+      bindings/jsc/DOM/elements/video_element.cc
+      bindings/jsc/DOM/elements/video_element.h
       bindings/jsc/DOM/element.cc
       bindings/jsc/DOM/element.h
       bindings/jsc/DOM/event.h

@@ -6,7 +6,8 @@
 #include "document.h"
 #include "bindings/jsc/DOM/elements/anchor_element.h"
 #include "bindings/jsc/DOM/elements/animation_player_element.h"
-#include "bindings/jsc/DOM/elements/media_element.h"
+#include "bindings/jsc/DOM/elements/audio_element.h"
+#include "bindings/jsc/DOM/elements/video_element.h"
 #include "comment_node.h"
 #include "element.h"
 #include "text_node.h"
@@ -77,7 +78,10 @@ JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 
 JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagName) {
   static std::unordered_map<std::string, JSElement *> elementMap{
-    {"a", JSAnchorElement::instance(context)}, {"animation-player", JSAnimationPlayerElement::instance(context)}};
+    {"a", JSAnchorElement::instance(context)},
+    {"animation-player", JSAnimationPlayerElement::instance(context)},
+    {"audio", JSAudioElement::instance(context)},
+    {"video", JSVideoElement::instance(context)}};
   return elementMap[tagName];
 }
 
