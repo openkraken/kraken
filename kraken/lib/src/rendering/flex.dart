@@ -394,11 +394,9 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   /// Calculate automatic minimum size of flex item
-  /// https://www.w3.org/TR/css-flexbox-1/#min-size-auto
+  /// Refer to https://www.w3.org/TR/css-flexbox-1/#min-size-auto for detail rules
   double _getMinMainAxisSize(RenderBox child) {
     double minMainSize;
-//    double contentMainSize = CSSFlex.isHorizontalFlexDirection(flexDirection) ?
-//      contentSize.width : contentSize.height;
 
     double contentSize = 0;
     // Min width of flex item if min-width is not specified use auto min width instead
