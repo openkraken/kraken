@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 
+/// Infos of each run (line box) in flow layout
+/// https://www.w3.org/TR/css-inline-3/#line-boxes
 class _RunMetrics {
   _RunMetrics(
     this.mainAxisExtent,
@@ -17,9 +19,13 @@ class _RunMetrics {
     this.runChildren,
   );
 
+  // Main size extent of the run
   final double mainAxisExtent;
+  // Cross size extent of the run
   final double crossAxisExtent;
+  // Max extent above each flex items in the run
   final double baselineExtent;
+  // All the children RenderBox of layout in the run
   final Map<int, RenderBox> runChildren;
 }
 

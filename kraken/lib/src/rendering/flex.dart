@@ -6,6 +6,8 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 
+/// Infos of each run (flex line) in flex layout
+/// https://www.w3.org/TR/css-flexbox-1/#flex-lines
 class _RunMetrics {
   _RunMetrics(
     this.mainAxisExtent,
@@ -16,11 +18,17 @@ class _RunMetrics {
     this.runChildren,
   );
 
+  // Main size extent of the run
   final double mainAxisExtent;
+  // Cross size extent of the run
   final double crossAxisExtent;
+  // Total flex grow factor in the run
   final double totalFlexGrow;
+  // Total flex shrink factor in the run
   final double totalFlexShrink;
+  // Max extent above each flex items in the run
   final double baselineExtent;
+  // All the children RenderBox of layout in the run
   final Map<int, dynamic> runChildren;
 }
 
