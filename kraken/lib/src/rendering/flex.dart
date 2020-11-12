@@ -1560,6 +1560,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
     size = getBoxSize(contentSize);
 
+    /// Set auto value of min-width and min-height based on size of flex items
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       autoMinWidth = _getMainAxisAutoSize(runMetrics);
       autoMinHeight = _getCrossAxisAutoSize(runMetrics);
@@ -1575,7 +1576,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double autoMinSize = 0;
-    // Get the line of which has the max main size
+    // Get the length of the line which has the max main size
     _RunMetrics maxMainSizeMetrics = runMetrics.reduce((_RunMetrics curr, _RunMetrics next) {
       return curr.mainAxisExtent > next.mainAxisExtent ? curr : next;
     });
@@ -1589,7 +1590,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double autoMinSize = 0;
-    // Get the sum of lines
+    // Get the sum size of flex lines
     for (_RunMetrics curr in runMetrics) {
       autoMinSize += curr.crossAxisExtent;
     }
