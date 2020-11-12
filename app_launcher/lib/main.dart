@@ -17,7 +17,6 @@ void main() {
     onLoad: (_) {
       javaScriptChannel.invokeMethod('1234', ['123']);
     },
-    bundlePath: '',
   );
   runApp(MaterialApp(
       title: 'Loading Test',
