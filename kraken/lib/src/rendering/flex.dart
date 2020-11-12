@@ -1765,7 +1765,12 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         AlignSelf alignSelf = childParentData.alignSelf;
         double crossStartAddedOffset = crossAxisStartPadding + crossAxisStartBorder + childCrossAxisStartMargin;
-        double contentCrossSize = _getContentCrossSize();
+
+        // Cross size used to align flex item is different which depends on flex-wrap value
+        // 1. When flex-wrap is wrap/wrap-reverse, cross size equals cross size of flex line,
+        // 2. When flex-wrap is nowrap, cross size equals cross size of flex container
+        double contentCrossSize = flexWrap == FlexWrap.wrap || flexWrap == FlexWrap.wrapReverse ?
+          runCrossAxisExtent : _getContentCrossSize();
 
         if (alignSelf == AlignSelf.auto) {
           switch (alignItems) {
