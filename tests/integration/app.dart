@@ -52,27 +52,28 @@ void main() async {
     };
 
     Kraken widget = Kraken(
-        viewportWidth: 360,
-        viewportHeight: 640,
-        bundleContent: 'console.log("starting integration test")',
-        disableViewportWidthAssertion: true,
-        disableViewportHeightAssertion: true,
-        javaScriptChannel: javaScriptChannel
+      viewportWidth: 360,
+      viewportHeight: 640,
+      bundleContent: 'console.log("starting integration test")',
+      disableViewportWidthAssertion: true,
+      disableViewportHeightAssertion: true,
+      javaScriptChannel: javaScriptChannel,
+      debugEnableInspector: false,
     );
     widgets.add(widget);
   }
 
   runApp(MaterialApp(
-      title: 'Loading Test',
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-          appBar: AppBar(
-              title: Text('Kraken Integration Test')
-          ),
-          body: Wrap(
-            children: widgets,
-          )
-      )
+    title: 'Kraken Intergration Test',
+    debugShowCheckedModeBanner: false,
+    home: Scaffold(
+      appBar: AppBar(
+        title: Text('Kraken Integration Test')
+      ),
+      body: Wrap(
+        children: widgets,
+      ),
+    ),
   ));
 
   WidgetsBinding.instance
