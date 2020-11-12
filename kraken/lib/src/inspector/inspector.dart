@@ -102,7 +102,7 @@ class Inspector {
     String result = INSPECTOR_DEFAULT_ADDRESS;
     if (interfaces != null) {
       for (NetworkInterface interface in interfaces) {
-        if (interface.name == 'en0' || interface.name == 'eth0') {
+        if (interface.name == 'en0' || interface.name == 'eth0' || interface.name == 'wlan0') {
           result = interface.addresses.first.address;
           break;
         }
