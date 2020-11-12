@@ -3,8 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'package:kraken/gesture.dart';
-import 'dart:collection';
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
