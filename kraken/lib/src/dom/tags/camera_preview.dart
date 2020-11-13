@@ -87,6 +87,12 @@ class CameraPreviewElement extends Element {
     detectedFunc = [];
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+  }
+
   /// Element attribute width
   double _width;
   double get width => _width;

@@ -12,6 +12,6 @@ const String STRONG = 'STRONG';
 const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE, FONT_WEIGHT: BOLD};
 
 class StrongElement extends Element {
-  StrongElement(int targetId, Pointer<NativeStrongElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: STRONG, defaultStyle: _defaultStyle);
+  StrongElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr, elementManager, tagName: STRONG, defaultStyle: _defaultStyle);
 }

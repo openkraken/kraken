@@ -26,28 +26,28 @@ Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynam
     case BODY:
       break;
     case DIV:
-      element = DivElement(id, nativePtr.cast<NativeDivElement>(), elementManager);
+      element = DivElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case SPAN:
-      element = SpanElement(id, nativePtr.cast<NativeSpanElement>(), elementManager);
+      element = SpanElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case ANCHOR:
       element = AnchorElement(id, nativePtr.cast<NativeAnchorElement>(), elementManager);
       break;
     case STRONG:
-      element = StrongElement(id, nativePtr.cast<NativeStrongElement>(), elementManager);
+      element = StrongElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case IMAGE:
       element = ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager);
       break;
     case PARAGRAPH:
-      element = ParagraphElement(id, nativePtr.cast<NativeParagraphElement>(), elementManager);
+      element = ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case INPUT:
       element = InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager);
       break;
     case PRE:
-      element = PreElement(id, nativePtr.cast<NativePreElement>(), elementManager);
+      element = PreElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case CANVAS:
       element = CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager);
@@ -98,9 +98,9 @@ const int WINDOW_ID = -2;
 class ElementManager {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
-    print('dispose event target: $id');
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-    controller.view.removeEventTargetById(id);
+    EventTarget eventTarget = controller.view.getEventTargetById(id);
+    eventTarget.dispose();
   }
 
   Element _rootElement;
@@ -140,6 +140,7 @@ class ElementManager {
 
   void removeTarget(Node target) {
     assert(target.targetId != null);
+    assert(_eventTargets.containsKey(target.targetId));
     _eventTargets.remove(target.targetId);
   }
 

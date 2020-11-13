@@ -5,6 +5,7 @@
 
 import 'package:meta/meta.dart';
 import 'dart:ffi';
+import 'dart:collection';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 
@@ -68,7 +69,10 @@ class EventTarget {
     return false;
   }
 
-  void dispose() {}
+  @mustCallSuper
+  void dispose() {
+    elementManager.removeTarget(this);
+  }
 
   List<EventHandler> getEventHandlers(EventType type) {
     assert(type != null);

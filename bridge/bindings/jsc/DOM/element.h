@@ -109,22 +109,22 @@ struct NativeBoundingClientRect {
   double left;
 };
 
-using GetOffsetTop = double (*)(int32_t contextId, int64_t targetId);
-using GetOffsetLeft = double (*)(int32_t contextId, int64_t targetId);
-using GetOffsetWidth = double (*)(int32_t contextId, int64_t targetId);
-using GetOffsetHeight = double (*)(int32_t contextId, int64_t targetId);
-using GetClientWidth = double (*)(int32_t contextId, int64_t targetId);
-using GetClientHeight = double (*)(int32_t contextId, int64_t targetId);
-using GetClientTop = double (*)(int32_t contextId, int64_t targetId);
-using GetClientLeft = double (*)(int32_t contextId, int64_t targetId);
-using GetScrollTop = double (*)(int32_t contextId, int64_t targetId);
-using GetScrollLeft = double (*)(int32_t contextId, int64_t targetId);
-using GetScrollHeight = double (*)(int32_t contextId, int64_t targetId);
-using GetScrollWidth = double (*)(int32_t contextId, int64_t targetId);
-using GetBoundingClientRect = NativeBoundingClientRect *(*)(int32_t contextId, int64_t targetId);
-using Click = void (*)(int32_t contextId, int64_t targetId);
-using Scroll = void (*)(int32_t contextId, int64_t targetId, int32_t x, int32_t y);
-using ScrollBy = void (*)(int32_t contextId, int64_t targetId, int32_t x, int32_t y);
+using GetOffsetTop = double (*)(NativeElement *nativeElement);
+using GetOffsetLeft = double (*)(NativeElement *nativeElement);
+using GetOffsetWidth = double (*)(NativeElement *nativeElement);
+using GetOffsetHeight = double (*)(NativeElement *nativeElement);
+using GetClientWidth = double (*)(NativeElement *nativeElement);
+using GetClientHeight = double (*)(NativeElement *nativeElement);
+using GetClientTop = double (*)(NativeElement *nativeElement);
+using GetClientLeft = double (*)(NativeElement *nativeElement);
+using GetScrollTop = double (*)(NativeElement *nativeElement);
+using GetScrollLeft = double (*)(NativeElement *nativeElement);
+using GetScrollHeight = double (*)(NativeElement *nativeElement);
+using GetScrollWidth = double (*)(NativeElement *nativeElement);
+using GetBoundingClientRect = NativeBoundingClientRect *(*)(NativeElement *nativeElement);
+using Click = void (*)(NativeElement *nativeElement);
+using Scroll = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
+using ScrollBy = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
 
 class BoundingClientRect : public HostObject {
 public:

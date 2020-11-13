@@ -53,8 +53,7 @@ JSValueRef JSAnimationPlayerElement::play(JSContextRef ctx, JSObjectRef function
     static_cast<JSAnimationPlayerElement::AnimationPlayerElementInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->requestUpdateFrame();
-  elementInstance->nativeAnimationPlayerElement->play(elementInstance->_hostClass->contextId,
-                                                      elementInstance->eventTargetId, &name, mix, mixSeconds);
+  elementInstance->nativeAnimationPlayerElement->play(elementInstance->nativeAnimationPlayerElement, &name, mix, mixSeconds);
 
   return nullptr;
 }

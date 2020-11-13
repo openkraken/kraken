@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'dart:collection';
 import 'dart:ffi';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -12,6 +13,9 @@ import 'package:kraken/painting.dart';
 import 'package:kraken/css.dart';
 
 const String CANVAS = 'CANVAS';
+
+final Pointer<NativeFunction<Native_CanvasGetContext>> nativeGetContext =
+    Pointer.fromFunction(CanvasElement._getContext);
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
@@ -23,24 +27,47 @@ class RenderCanvasPaint extends RenderCustomPaint {
   @override
   bool get isRepaintBoundary => true;
 
-  RenderCanvasPaint({ CustomPainter painter, Size preferredSize }) : super(
-    painter: painter,
-    foregroundPainter: null, // Ignore foreground painter
-    preferredSize: preferredSize,
-  );
+  RenderCanvasPaint({CustomPainter painter, Size preferredSize})
+      : super(
+          painter: painter,
+          foregroundPainter: null, // Ignore foreground painter
+          preferredSize: preferredSize,
+        );
 }
 
 class CanvasElement extends Element {
-  CanvasElement(int targetId, Pointer<NativeCanvasElement> nativePtr, ElementManager elementManager)
+  static SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
+
+  static CanvasElement getCanvasElementOfNativePtr(Pointer<NativeCanvasElement> nativeCanvasElement) {
+    CanvasElement canvasElement = _nativeMap[nativeCanvasElement.address];
+    assert(canvasElement != null, 'Can not get canvasElement from nativeElement: $nativeCanvasElement');
+    return canvasElement;
+  }
+
+  static Pointer<NativeCanvasRenderingContext2D> _getContext(
+      Pointer<NativeCanvasElement> nativeCanvasElement, Pointer<NativeString> contextId) {
+    CanvasElement canvasElement = getCanvasElementOfNativePtr(nativeCanvasElement);
+    canvasElement.getContext(nativeStringToString(contextId));
+    return canvasElement.painter.context.nativeCanvasRenderingContext2D;
+  }
+
+  final Pointer<NativeCanvasElement> nativeCanvasElement;
+
+  CanvasElement(int targetId, this.nativeCanvasElement, ElementManager elementManager)
       : super(
           targetId,
-          nativePtr.ref.nativeElement,
+          nativeCanvasElement.ref.nativeElement,
           elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
           repaintSelf: true,
           tagName: CANVAS,
-        );
+        ) {
+    nativeCanvasElement.ref.getContext = nativeGetContext;
+
+    // Keep reference so that we can search back with nativePtr from bridge.
+    _nativeMap[nativeCanvasElement.address] = this;
+  }
 
   @override
   void willAttachRenderer() {
@@ -53,7 +80,6 @@ class CanvasElement extends Element {
     addChild(renderCustomPaint);
     style.addStyleChangeListener(_propertyChangedListener);
   }
-
 
   @override
   void didDetachRenderer() {
@@ -89,7 +115,9 @@ class CanvasElement extends Element {
 
   /// Element attribute width
   double _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
+
   double get width => _width;
+
   set width(double value) {
     if (value == null) {
       return;
@@ -105,7 +133,9 @@ class CanvasElement extends Element {
 
   /// Element attribute height
   double _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
+
   double get height => _height;
+
   set height(double value) {
     if (value == null) {
       return;
@@ -130,6 +160,12 @@ class CanvasElement extends Element {
         height = CSSLength.toDisplayPortValue(present);
         break;
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _nativeMap.remove(nativeCanvasElement.address);
   }
 
   void _applyContext2DMethod(List args) {
@@ -209,6 +245,20 @@ class CanvasElement extends Element {
       case 'font':
         painter.context.font = args[1];
         break;
+    }
+  }
+
+  @override
+  void setProperty(String key, value) {
+    switch (key) {
+      case 'width':
+        width = CSSLength.toDisplayPortValue(value);
+        break;
+      case 'height':
+        height = CSSLength.toDisplayPortValue(value);
+        break;
+      default:
+        super.setProperty(key, value);
     }
   }
 

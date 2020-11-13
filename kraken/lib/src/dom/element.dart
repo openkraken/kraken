@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:ffi';
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -88,6 +89,14 @@ class Element extends Node
         CSSContentVisibilityMixin,
         CSSTransitionMixin,
         CSSFilterEffectsMixin {
+
+  static SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
+  static Element getElementOfNativePtr(Pointer<NativeElement> nativeElement) {
+    Element element = _nativeMap[nativeElement.address];
+    assert(element != null, 'Can not get element from nativeElement: $nativeElement');
+    return element;
+  }
+
   Map<String, dynamic> properties = Map<String, dynamic>();
 
   /// Should create repaintBoundary for this element to repaint separately from parent.
@@ -140,6 +149,9 @@ class Element extends Node
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
 
     style = CSSStyleDeclaration(this);
+
+    _nativeMap[nativeElementPtr.address] = this;
+
     bindNativeMethods(nativeElementPtr);
     _setDefaultStyle();
   }
@@ -396,8 +408,12 @@ class Element extends Node
 
   @override
   void dispose() {
+    super.dispose();
     assert(renderBoxModel != null);
     assert(renderBoxModel.parent == null);
+
+    // Remove native reference.
+    _nativeMap.remove(nativeElementPtr.address);
 
     renderBoxModel = null;
   }

@@ -54,7 +54,7 @@ public:
   };
 };
 
-using PlayAnimation = void(*)(int32_t contextId, int64_t targetId, NativeString *name, double mix, double mixSeconds);
+using PlayAnimation = void(*)(NativeAnimationPlayerElement *nativePtr, NativeString *name, double mix, double mixSeconds);
 
 struct NativeAnimationPlayerElement {
   NativeAnimationPlayerElement() = delete;

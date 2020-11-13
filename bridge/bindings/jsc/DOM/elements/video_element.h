@@ -30,7 +30,7 @@ public:
 
   class VideoElementInstance : public MediaElementInstance {
   public:
-    enum AudioElementProperty {};
+    enum class AudioElementProperty {};
     static std::vector<JSStringRef> &getAudioElementPropertyNames();
     static const std::unordered_map<std::string, AudioElementProperty> &getAudioElementPropertyMap();
 

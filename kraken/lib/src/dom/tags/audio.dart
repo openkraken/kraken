@@ -36,6 +36,14 @@ class AudioElement extends MediaElement {
     style.removeStyleChangeListener(_stylePropertyChanged);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    audioPlayer.dispose();
+    audioPlayer = null;
+    _sizedBox = null;
+  }
+
   void initAudioPlayer() {
     audioPlayer = AudioPlayer();
 

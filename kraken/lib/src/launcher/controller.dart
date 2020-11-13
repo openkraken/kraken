@@ -5,7 +5,7 @@
 
 import 'dart:io';
 import 'dart:ffi';
-import 'dart:convert';
+import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:async';
 
@@ -264,7 +264,7 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
 }
 
 class KrakenController {
-  static Map<int, KrakenController> _controllerMap = Map();
+  static SplayTreeMap<int, KrakenController> _controllerMap = SplayTreeMap();
   static Map<String, int> _nameIdMap = Map();
 
   static KrakenController getControllerOfJSContextId(int contextId) {
@@ -275,7 +275,7 @@ class KrakenController {
     return _controllerMap[contextId];
   }
 
-  static Map<int, KrakenController> getControllerMap() {
+  static SplayTreeMap<int, KrakenController> getControllerMap() {
     return _controllerMap;
   }
 

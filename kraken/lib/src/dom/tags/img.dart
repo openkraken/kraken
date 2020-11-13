@@ -62,6 +62,16 @@ class ImageElement extends Element {
     style.removeStyleChangeListener(_stylePropertyChanged);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    _image = null;
+    _imageBox = null;
+    _imageStream = null;
+    _imageStream = null;
+    _imageStreamListener = null;
+  }
+
   void _renderImage() {
     if (_hasLazyLoading) return;
     String loading = properties['loading'];

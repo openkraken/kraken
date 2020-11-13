@@ -51,6 +51,7 @@ JSValueRef JSMediaElement::MediaElementInstance::play(JSContextRef ctx, JSObject
                                                       size_t argumentCount, const JSValueRef *arguments,
                                                       JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  getDartMethod()->requestUpdateFrame();
   elementInstance->nativeMediaElement->play(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
   return nullptr;
 }
@@ -59,6 +60,7 @@ JSValueRef JSMediaElement::MediaElementInstance::pause(JSContextRef ctx, JSObjec
                                                        size_t argumentCount, const JSValueRef *arguments,
                                                        JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  getDartMethod()->requestUpdateFrame();
   elementInstance->nativeMediaElement->pause(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
   return nullptr;
 }
@@ -79,6 +81,8 @@ JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSOb
   double duration = JSValueToNumber(ctx, arguments[0], exception);
 
   auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+
+  getDartMethod()->requestUpdateFrame();
   elementInstance->nativeMediaElement->fastSeek(elementInstance->_hostClass->contextId, elementInstance->eventTargetId,
                                                 duration);
 

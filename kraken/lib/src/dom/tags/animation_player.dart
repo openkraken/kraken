@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'dart:collection';
 import 'dart:ffi';
 import 'package:kraken/bridge.dart';
 import 'package:flare_flutter/provider/asset_flare.dart';
@@ -25,12 +26,16 @@ final Pointer<NativeFunction<Native_PlayAnimation>> nativePlay = Pointer.fromFun
 
 // Ref: https://github.com/LottieFiles/lottie-player
 class AnimationPlayerElement extends Element {
-  static void _play(int contextId, int targetId, Pointer<NativeString> name, double mix, double mixSeconds) {
-    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-    EventTarget animationPlayerElement = controller.view.getEventTargetById(targetId);
-    if (animationPlayerElement is AnimationPlayerElement) {
-      animationPlayerElement.play(nativeStringToString(name), mix, mixSeconds);
-    }
+  static SplayTreeMap<int, AnimationPlayerElement> _nativeMap = SplayTreeMap();
+  static AnimationPlayerElement getAnimationPlayerOfNativePtr(Pointer<NativeAnimationElement> nativeAnimationElement) {
+    AnimationPlayerElement animationPlayerElement = _nativeMap[nativeAnimationElement.address];
+    assert(animationPlayerElement != null, 'Can not get animationPlayerElement from nativeElement: $nativeAnimationElement');
+    return animationPlayerElement;
+  }
+
+  static void _play(Pointer<NativeAnimationElement> nativePtr, Pointer<NativeString> name, double mix, double mixSeconds) {
+    AnimationPlayerElement element = getAnimationPlayerOfNativePtr(nativePtr);
+    element.play(nativeStringToString(name), mix, mixSeconds);
   }
 
   RenderObject _animationRenderObject;

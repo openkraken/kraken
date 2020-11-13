@@ -77,8 +77,8 @@ class ObjectElement extends Element implements ObjectElementHost {
   }
 
   @override
-  void detach() {
-    super.detach();
+  void dispose() {
+    super.dispose();
     disposeClient();
   }
 

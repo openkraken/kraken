@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:collection';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -10,31 +11,27 @@ final Pointer<NativeFunction<Native_PauseMedia>> nativePause = Pointer.fromFunct
 final Pointer<NativeFunction<Native_FastSeek>> nativeFastSeek = Pointer.fromFunction(MediaElement._fastSeek);
 
 abstract class MediaElement extends Element {
-  static void _play(int contextId, int targetId) {
-    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-    EventTarget mediaElement = controller.view.getEventTargetById(targetId);
+  static SplayTreeMap<int, MediaElement> _nativeMap = SplayTreeMap();
 
-    if (mediaElement is MediaElement) {
-      mediaElement.play();
-    }
+  static MediaElement getMediaElementOfNativePtr(Pointer<NativeMediaElement> nativeMediaElement) {
+    MediaElement mediaElement = _nativeMap[nativeMediaElement.address];
+    assert(mediaElement != null, 'Can not get mediaElement from nativeElement: $nativeMediaElement');
+    return mediaElement;
   }
 
-  static void _pause(int contextId, int targetId) {
-    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-    EventTarget mediaElement = controller.view.getEventTargetById(targetId);
-
-    if (mediaElement is MediaElement) {
-      mediaElement.pause();
-    }
+  static void _play(Pointer<NativeMediaElement> nativeMediaElement) {
+    MediaElement mediaElement = getMediaElementOfNativePtr(nativeMediaElement);
+    mediaElement.play();
   }
 
-  static void _fastSeek(int contextId, int targetId, double duration) {
-    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-    EventTarget mediaElement = controller.view.getEventTargetById(targetId);
+  static void _pause(Pointer<NativeMediaElement> nativeMediaElement) {
+    MediaElement mediaElement = getMediaElementOfNativePtr(nativeMediaElement);
+    mediaElement.pause();
+  }
 
-    if (mediaElement is MediaElement) {
-      mediaElement.fastSeek(duration);
-    }
+  static void _fastSeek(Pointer<NativeMediaElement> nativeMediaElement, double duration) {
+    MediaElement mediaElement = getMediaElementOfNativePtr(nativeMediaElement);
+    mediaElement.fastSeek(duration);
   }
 
   final Pointer<NativeMediaElement> nativeMediaElementPtr;
@@ -49,5 +46,4 @@ abstract class MediaElement extends Element {
   void pause();
 
   void fastSeek(double duration);
-
 }

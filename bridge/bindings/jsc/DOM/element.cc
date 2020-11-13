@@ -90,7 +90,7 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
   getDartMethod()->requestUpdateFrame();
   NativeBoundingClientRect *nativeBoundingClientRect =
-    elementInstance->nativeElement->getBoundingClientRect(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
+    elementInstance->nativeElement->getBoundingClientRect(elementInstance->nativeElement);
   auto boundingClientRect = new BoundingClientRect(elementInstance->_hostClass->context, nativeBoundingClientRect);
   return boundingClientRect->jsObject;
 }
@@ -145,51 +145,51 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
     return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
   case ElementProperty::kOffsetLeft: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetLeft(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetLeft(nativeElement));
   }
   case ElementProperty::kOffsetTop: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetTop(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetTop(nativeElement));
   }
   case ElementProperty::kOffsetWidth: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetWidth(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetWidth(nativeElement));
   }
   case ElementProperty::kOffsetHeight: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetHeight(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetHeight(nativeElement));
   }
   case ElementProperty::kClientWidth: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientWidth(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientWidth(nativeElement));
   }
   case ElementProperty::kClientHeight: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientHeight(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientHeight(nativeElement));
   }
   case ElementProperty::kClientTop: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientTop(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientTop(nativeElement));
   }
   case ElementProperty::kClientLeft: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientLeft(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientLeft(nativeElement));
   }
   case ElementProperty::kScrollTop: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollTop(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollTop(nativeElement));
   }
   case ElementProperty::kScrollLeft: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollLeft(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollLeft(nativeElement));
   }
   case ElementProperty::kScrollHeight: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollHeight(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollHeight(nativeElement));
   }
   case ElementProperty::kScrollWidth: {
     getDartMethod()->requestUpdateFrame();
-    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollWidth(_hostClass->contextId, eventTargetId));
+    return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollWidth(nativeElement));
   }
   case ElementProperty::kGetBoundingClientRect: {
     if (_getBoundingClientRect == nullptr) {
@@ -390,6 +390,8 @@ JSValueRef JSElement::ElementInstance::toBlob(JSContextRef ctx, JSObjectRef func
     return nullptr;
   }
 
+  getDartMethod()->requestUpdateFrame();
+
   double id = JSValueToNumber(ctx, idValueRef, exception);
   double devicePixelRatio = JSValueToNumber(ctx, devicePixelRatioValueRef, exception);
   auto bridge = static_cast<JSBridge *>(context->getOwner());
@@ -448,7 +450,8 @@ JSValueRef JSElement::ElementInstance::toBlob(JSContextRef ctx, JSObjectRef func
 JSValueRef JSElement::ElementInstance::click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                              size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
-  elementInstance->nativeElement->click(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
+  getDartMethod()->requestUpdateFrame();
+  elementInstance->nativeElement->click(elementInstance->nativeElement);
 
   return nullptr;
 }
@@ -471,7 +474,8 @@ JSValueRef JSElement::ElementInstance::scroll(JSContextRef ctx, JSObjectRef func
   }
 
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
-  elementInstance->nativeElement->scroll(elementInstance->_hostClass->contextId, elementInstance->eventTargetId, x, y);
+  getDartMethod()->requestUpdateFrame();
+  elementInstance->nativeElement->scroll(elementInstance->nativeElement, x, y);
 
   return nullptr;
 }
@@ -494,7 +498,8 @@ JSValueRef JSElement::ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef fu
   }
 
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
-  elementInstance->nativeElement->scrollBy(elementInstance->_hostClass->contextId, elementInstance->eventTargetId, x, y);
+  getDartMethod()->requestUpdateFrame();
+  elementInstance->nativeElement->scrollBy(elementInstance->nativeElement, x, y);
 
   return nullptr;
 }

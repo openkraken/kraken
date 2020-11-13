@@ -163,7 +163,15 @@ abstract class Node extends EventTarget implements RenderObjectNode {
   void detach() {}
 
   /// Dispose renderObject, but not do anything.
-  void dispose() {}
+  void dispose() {
+    super.dispose();
+
+    parentNode = null;
+    for (int i = 0; i < childNodes.length; i ++) {
+      childNodes[i].parentNode = null;
+    }
+    childNodes.clear();
+  }
 
   @override
   RenderObject createRenderer() => null;

@@ -8,6 +8,7 @@
 #include "bindings/jsc/DOM/elements/animation_player_element.h"
 #include "bindings/jsc/DOM/elements/audio_element.h"
 #include "bindings/jsc/DOM/elements/video_element.h"
+#include "bindings/jsc/DOM/elements/canvas_element.h"
 #include "comment_node.h"
 #include "element.h"
 #include "text_node.h"
@@ -41,6 +42,11 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
 
   auto document = static_cast<JSDocument::DocumentInstance *>(JSObjectGetPrivate(function));
   auto element = getElementOfTagName(document->_hostClass->context, tagName);
+
+  if (element == nullptr) {
+    element = JSElement::instance(document->_hostClass->context);
+  }
+
   auto elementInstance = JSObjectCallAsConstructor(ctx, element->classObject, 1, arguments, exception);
   return elementInstance;
 }
@@ -81,7 +87,13 @@ JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagN
     {"a", JSAnchorElement::instance(context)},
     {"animation-player", JSAnimationPlayerElement::instance(context)},
     {"audio", JSAudioElement::instance(context)},
-    {"video", JSVideoElement::instance(context)}};
+    {"video", JSVideoElement::instance(context)},
+    {"canvas", JSCanvasElement::instance(context)},
+    {"div", JSElement::instance(context)},
+    {"span", JSElement::instance(context)},
+    {"strong", JSElement::instance(context)},
+    {"pre", JSElement::instance(context)},
+    {"p", JSElement::instance(context)}};
   return elementMap[tagName];
 }
 

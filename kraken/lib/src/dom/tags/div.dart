@@ -10,5 +10,5 @@ import 'package:kraken/bridge.dart';
 const String DIV = 'DIV';
 
 class DivElement extends Element {
-  DivElement(int targetId, Pointer<NativeDivElement> nativePtr, ElementManager elementManager) : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: DIV);
+  DivElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager, tagName: DIV);
 }

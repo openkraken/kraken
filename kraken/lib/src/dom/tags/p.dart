@@ -10,6 +10,6 @@ import 'package:kraken/bridge.dart';
 const String PARAGRAPH = 'P';
 
 class ParagraphElement extends Element {
-  ParagraphElement(int targetId, Pointer<NativeParagraphElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: PARAGRAPH);
+  ParagraphElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr, elementManager, tagName: PARAGRAPH);
 }

@@ -49,6 +49,12 @@ class VideoElement extends MediaElement {
     }
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+  }
+
   void renderVideo() {
     _textureBox = TextureBox(textureId: 0);
     if (childNodes.isEmpty) {
