@@ -157,7 +157,7 @@ class NativeObjectElement extends Struct {
 
 typedef Native_PlayMedia = Void Function(Pointer<NativeMediaElement> nativeMediaElement);
 typedef Native_PauseMedia = Void Function(Pointer<NativeMediaElement> nativeMediaElement);
-typedef Native_FastSeek = Void Function(Pointer<NativeMediaElement> nativeMediaElement, double duration);
+typedef Native_FastSeek = Void Function(Pointer<NativeMediaElement> nativeMediaElement, Double duration);
 
 class NativeMediaElement extends Struct {
   Pointer<NativeElement> nativeElement;

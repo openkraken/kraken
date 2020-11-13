@@ -25,7 +25,20 @@ JSObjectRef JSCanvasElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 }
 
 JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *jsCanvasElement)
-  : ElementInstance(jsCanvasElement, "canvas"), nativeCanvasElement(new NativeCanvasElement(nativeElement)) {}
+  : ElementInstance(jsCanvasElement, "canvas"), nativeCanvasElement(new NativeCanvasElement(nativeElement)) {
+
+  JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("canvas");
+  NativeString tagName{};
+  tagName.string = JSStringGetCharactersPtr(canvasTagNameStringRef);
+  tagName.length = JSStringGetLength(canvasTagNameStringRef);
+
+  const int32_t argsLength = 1;
+  auto **args = new NativeString *[argsLength];
+  args[0] = tagName.clone();
+
+  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+      ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength, nativeCanvasElement);
+}
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
   delete nativeCanvasElement;
@@ -42,7 +55,11 @@ std::vector<JSStringRef> &JSCanvasElement::CanvasElementInstance::getCanvasEleme
 
 const std::unordered_map<std::string, JSCanvasElement::CanvasElementInstance::CanvasElementProperty> &
 JSCanvasElement::CanvasElementInstance::getCanvasElementPropertyMap() {
-  static std::unordered_map<std::string, CanvasElementProperty> propertyMap{};
+  static std::unordered_map<std::string, CanvasElementProperty> propertyMap{
+      {"width", CanvasElementProperty::kWidth},
+      {"height", CanvasElementProperty::kHeight},
+      {"getContext", CanvasElementProperty::kGetContext}
+  };
   return propertyMap;
 }
 
@@ -141,6 +158,8 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getContext(JSContextRef ctx, 
   contextId.string = JSStringGetCharactersPtr(contextIdStringRef);
   contextId.length = JSStringGetLength(contextIdStringRef);
 
+  getDartMethod()->requestUpdateFrame();
+
   auto elementInstance = reinterpret_cast<JSCanvasElement::CanvasElementInstance *>(JSObjectGetPrivate(function));
   NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D =
     elementInstance->nativeCanvasElement->getContext(elementInstance->nativeCanvasElement, &contextId);
@@ -194,6 +213,7 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getCanvasRenderingCo
     {"strokeStyle", CanvasRenderingContext2DProperty::kStrokeStyle},
     {"fillRect", CanvasRenderingContext2DProperty::kFillRect},
     {"clearRect", CanvasRenderingContext2DProperty::kClearRect},
+    {"strokeRect", CanvasRenderingContext2DProperty::kStrokeRect},
     {"fillText", CanvasRenderingContext2DProperty::kFillText},
     {"strokeText", CanvasRenderingContext2DProperty::kStrokeText},
     {"save", CanvasRenderingContext2DProperty::kSave},
@@ -243,7 +263,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
       return _fillText;
     }
     case CanvasRenderingContext2DProperty::kStrokeText: {
-      if (_strokeRect == nullptr) {
+      if (_strokeText == nullptr) {
         _strokeText = propertyBindingFunction(_hostClass->context, this, "strokeText", strokeText);
       }
       return _strokeText;
@@ -414,7 +434,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillText(
 
   double x = JSValueToNumber(ctx, arguments[1], exception);
   double y = JSValueToNumber(ctx, arguments[2], exception);
-  double maxWidth = -25536;
+  double maxWidth = NAN;
 
   if (argumentCount == 4) {
     maxWidth = JSValueToNumber(ctx, arguments[3], exception);
@@ -486,6 +506,13 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::restore(J
   getDartMethod()->requestUpdateFrame();
   instance->nativeCanvasRenderingContext2D->restore(instance->nativeCanvasRenderingContext2D);
   return nullptr;
+}
+
+void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getPropertyNames(
+  JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &property : getCanvasRenderingContext2DPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
 }
 
 } // namespace kraken::binding::jsc

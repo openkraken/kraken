@@ -24,7 +24,19 @@ JSObjectRef JSVideoElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 }
 
 JSVideoElement::VideoElementInstance::VideoElementInstance(JSVideoElement *JSVideoElement)
-  : MediaElementInstance(JSVideoElement, "video"), nativeVideoElement(new NativeVideoElement(nativeMediaElement)) {}
+  : MediaElementInstance(JSVideoElement, "video"), nativeVideoElement(new NativeVideoElement(nativeMediaElement)) {
+  JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("video");
+  NativeString tagName{};
+  tagName.string = JSStringGetCharactersPtr(canvasTagNameStringRef);
+  tagName.length = JSStringGetLength(canvasTagNameStringRef);
+
+  const int32_t argsLength = 1;
+  auto **args = new NativeString *[argsLength];
+  args[0] = tagName.clone();
+
+  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+      ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength, nativeVideoElement);
+}
 
 JSVideoElement::VideoElementInstance::~VideoElementInstance() {
   delete nativeVideoElement;

@@ -1,10 +1,7 @@
 import 'dart:ffi';
 import 'dart:collection';
 import 'package:kraken/bridge.dart';
-import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/launcher.dart';
 
 final Pointer<NativeFunction<Native_PlayMedia>> nativePlay = Pointer.fromFunction(MediaElement._play);
 final Pointer<NativeFunction<Native_PauseMedia>> nativePause = Pointer.fromFunction(MediaElement._pause);

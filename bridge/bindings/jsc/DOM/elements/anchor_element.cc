@@ -25,7 +25,19 @@ JSObjectRef JSAnchorElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 }
 
 JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *jsAnchorElement)
-  : ElementInstance(jsAnchorElement, "a"), nativeAnchorElement(new NativeAnchorElement(nativeElement)) {}
+  : ElementInstance(jsAnchorElement, "a"), nativeAnchorElement(new NativeAnchorElement(nativeElement)) {
+  JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("a");
+  NativeString tagName{};
+  tagName.string = JSStringGetCharactersPtr(canvasTagNameStringRef);
+  tagName.length = JSStringGetLength(canvasTagNameStringRef);
+
+  const int32_t argsLength = 1;
+  auto **args = new NativeString *[argsLength];
+  args[0] = tagName.clone();
+
+  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+      ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength, nativeAnchorElement);
+}
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getAnchorElementPropertyMap();

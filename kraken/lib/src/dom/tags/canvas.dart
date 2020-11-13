@@ -166,6 +166,7 @@ class CanvasElement extends Element {
   void dispose() {
     super.dispose();
     _nativeMap.remove(nativeCanvasElement.address);
+    painter.context.dispose();
   }
 
   void _applyContext2DMethod(List args) {
