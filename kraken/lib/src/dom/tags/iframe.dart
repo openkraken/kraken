@@ -4,6 +4,7 @@
  */
 import 'dart:ffi';
 import 'dart:async';
+import 'dart:collection';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
@@ -807,9 +808,30 @@ abstract class WebViewElement extends Element {
 //   readonly attribute WindowProxy? contentWindow;
 //   Document? getSVGDocument();
 // };
+
+final Pointer<NativeFunction<Native_IframePostMessage>> nativePostMessage = Pointer.fromFunction(IFrameElement._postMessage);
+
 class IFrameElement extends WebViewElement {
-  IFrameElement(int targetId, Pointer<NativeIframeElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: IFRAME);
+  static SplayTreeMap<int, IFrameElement> _nativeMap = SplayTreeMap();
+
+  static IFrameElement getIframeElementOfNativePtr(Pointer<NativeIframeElement> nativeIframeElement) {
+    IFrameElement iframeElement = _nativeMap[nativeIframeElement.address];
+    assert(iframeElement != null, 'Can not get iframeElement from nativeElement: $nativeIframeElement');
+    return iframeElement;
+  }
+
+  static void _postMessage(Pointer<NativeIframeElement> nativeIframeElement, Pointer<NativeString> message) {
+    IFrameElement iframeElement = getIframeElementOfNativePtr(nativeIframeElement);
+    iframeElement.postMessage(nativeStringToString(message));
+  }
+
+  final Pointer<NativeIframeElement> nativeIframeElement;
+
+
+  IFrameElement(int targetId, this.nativeIframeElement, ElementManager elementManager)
+      : super(targetId, nativeIframeElement.ref.nativeElement, elementManager, tagName: IFRAME) {
+    nativeIframeElement.ref.postMessage = nativePostMessage;
+  }
 
   @override
   void onWebViewCreated(WebViewController controller) {}
@@ -840,7 +862,7 @@ class IFrameElement extends WebViewElement {
     dispatchEvent(event);
   }
 
-  Future<String> _postMessage(String message) {
+  Future<String> postMessage(String message) {
     String escapedMessage = message?.replaceAll(RegExp('\"', multiLine: true), '\\"');
     String invoker = '''
       window.dispatchEvent(Object.assign(new CustomEvent('message'), {
@@ -855,15 +877,8 @@ class IFrameElement extends WebViewElement {
     });
   }
 
-//  @override
-//  method(String name, List args) async {
-//    switch (name) {
-//      case 'postMessage':
-//        var firstArg = args[0];
-//        String message = firstArg?.toString();
-//        return await _postMessage(message);
-//      default:
-//        super.method(name, args);
-//    }
-//  }
+  void dispose() {
+    super.dispose();
+    _nativeMap.remove(nativePostMessage.address);
+  }
 }

@@ -9,6 +9,7 @@
 #include "bindings/jsc/DOM/elements/audio_element.h"
 #include "bindings/jsc/DOM/elements/video_element.h"
 #include "bindings/jsc/DOM/elements/canvas_element.h"
+#include "bindings/jsc/DOM/elements/iframe_element.h"
 #include "comment_node.h"
 #include "element.h"
 #include "text_node.h"
@@ -93,7 +94,8 @@ JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagN
     {"span", JSElement::instance(context)},
     {"strong", JSElement::instance(context)},
     {"pre", JSElement::instance(context)},
-    {"p", JSElement::instance(context)}};
+    {"p", JSElement::instance(context)},
+    {"iframe", JSIframeElement::instance(context)}};
   return elementMap[tagName];
 }
 

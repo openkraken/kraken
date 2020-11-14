@@ -139,8 +139,12 @@ class NativeCameraElement extends Struct {
   Pointer<NativeElement> nativeElement;
 }
 
+typedef Native_IframePostMessage = Void Function(Pointer<NativeIframeElement> nativePtr, Pointer<NativeString> message);
+
 class NativeIframeElement extends Struct {
   Pointer<NativeElement> nativeElement;
+
+  Pointer<NativeFunction<Native_IframePostMessage>> postMessage;
 }
 
 class NativeImgElement extends Struct {

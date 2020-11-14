@@ -38,6 +38,12 @@ abstract class MediaElement extends Element {
       : super(targetId, nativeMediaElementPtr.ref.nativeElement, elementManager,
             isIntrinsicBox: true, tagName: tagName, repaintSelf: true, defaultStyle: defaultStyle);
 
+  @override
+  void dispose() {
+    super.dispose();
+    _nativeMap.remove(nativeMediaElementPtr.address);
+  }
+
   void play();
 
   void pause();
