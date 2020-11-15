@@ -241,3 +241,21 @@ abstract class Node extends EventTarget implements RenderObjectNode {
   /// Ensure child and child's child render object is attached.
   void ensureChildAttached() {}
 }
+
+/// https://dom.spec.whatwg.org/#dom-node-nodetype
+int getNodeTypeValue(NodeType nodeType) {
+  switch (nodeType) {
+    case NodeType.ELEMENT_NODE:
+      return 1;
+    case NodeType.TEXT_NODE:
+      return 3;
+    case NodeType.COMMENT_NODE:
+      return 8;
+    case NodeType.DOCUMENT_NODE:
+      return 9;
+    case NodeType.DOCUMENT_FRAGMENT_NODE:
+      return 11;
+  }
+  // 0 means unknown node type.
+  return 0;
+}
