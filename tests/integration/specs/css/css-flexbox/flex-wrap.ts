@@ -357,7 +357,7 @@ describe('flex-wrap', () => {
 
     await matchViewportSnapshot();
   });
-  xit('005', async () => {
+  it('005', async () => {
     let p;
     let div;
     let div_1;
