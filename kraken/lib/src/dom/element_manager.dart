@@ -209,6 +209,8 @@ class ElementManager {
     target.parentNode?.removeChild(target);
     // Remove node reference to ElementManager
     target.elementManager = null;
+
+    _debugDOMTreeChanged();
   }
 
   void setProperty(int targetId, String key, dynamic value) {
@@ -297,6 +299,8 @@ class ElementManager {
 
         break;
     }
+
+    _debugDOMTreeChanged();
   }
 
   void addEvent(int targetId, int eventTypeIndex) {
@@ -416,5 +420,13 @@ class ElementManager {
     }
     _detachCallbacks.clear();
     _rootElement = null;
+  }
+
+  // Hooks for DevTools.
+  VoidCallback debugDOMTreeChanged;
+  void _debugDOMTreeChanged() {
+    if (debugDOMTreeChanged != null) {
+      debugDOMTreeChanged();
+    }
   }
 }

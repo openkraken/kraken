@@ -54,7 +54,7 @@ describe('flex-minimum', () => {
 
     await matchViewportSnapshot();
   });
-  xit('height-flex-items-002', async () => {
+  it('height-flex-items-002', async () => {
     let referenceOverlappedRed;
     let content100X200;
     let testFlexItemOverlappingGreen;
