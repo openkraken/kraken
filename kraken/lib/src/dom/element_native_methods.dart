@@ -1,6 +1,4 @@
-import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'dart:ffi';
 
@@ -110,7 +108,7 @@ mixin ElementNativeMethods on Node {
   static Pointer<NativeBoundingClientRect> _getBoundingClientRect(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.renderBoxModel.owner.flushLayout();
-    return element.boundingClientRect;
+    return element.boundingClientRect.toNative();
   }
 
   static void _click(Pointer<NativeElement> nativeElement) {

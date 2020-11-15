@@ -55,6 +55,7 @@ mixin ElementBase on Node {
   RenderIntrinsic _renderIntrinsic;
 
   RenderBoxModel get renderBoxModel => _renderLayoutBox ?? _renderIntrinsic ?? null;
+
   set renderBoxModel(RenderBoxModel value) {
     if (value == null) {
       _renderIntrinsic = null;
@@ -64,8 +65,7 @@ mixin ElementBase on Node {
     } else if (value is RenderLayoutBox) {
       _renderLayoutBox = value;
     } else {
-      if (!kReleaseMode)
-        throw FlutterError('Unknown RenderBoxModel value.');
+      if (!kReleaseMode) throw FlutterError('Unknown RenderBoxModel value.');
     }
   }
 }
@@ -89,8 +89,8 @@ class Element extends Node
         CSSContentVisibilityMixin,
         CSSTransitionMixin,
         CSSFilterEffectsMixin {
-
   static SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
+
   static Element getElementOfNativePtr(Pointer<NativeElement> nativeElement) {
     Element element = _nativeMap[nativeElement.address];
     assert(element != null, 'Can not get element from nativeElement: $nativeElement');
@@ -106,8 +106,10 @@ class Element extends Node
 
   // Position of sticky element changes between relative and fixed of scroll container
   StickyPositionType stickyStatus = StickyPositionType.relative;
+
   // Original offset to scroll container of sticky element
   Offset originalScrollContainerOffset;
+
   // Original offset of sticky element
   Offset originalOffset;
 
@@ -133,21 +135,17 @@ class Element extends Node
 
   bool get isValidSticky => style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
 
-  Element(
-    int targetId,
-    this.nativeElementPtr,
-    ElementManager elementManager, {
-    this.tagName,
-    this.defaultStyle = const <String, dynamic>{},
-    // Whether element allows children.
-    bool isIntrinsicBox = false,
-    this.repaintSelf = false
-  }) : assert(targetId != null),
+  Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
+      {this.tagName,
+        this.defaultStyle = const <String, dynamic>{},
+        // Whether element allows children.
+        bool isIntrinsicBox = false,
+        this.repaintSelf = false})
+      : assert(targetId != null),
         assert(tagName != null),
         _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
-
     style = CSSStyleDeclaration(this);
 
     _nativeMap[nativeElementPtr.address] = this;
@@ -231,11 +229,11 @@ class Element extends Node
 
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
-          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject()) -
+              renderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
-          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject()) -
+              renderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -425,8 +423,8 @@ class Element extends Node
     style.applyTargetProperties();
 
     CSSStyleDeclaration parentStyle = parent.style;
-    CSSDisplay parentDisplayValue =
-       CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(parentStyle[DISPLAY]) ? parent.defaultDisplay : parentStyle[DISPLAY]);
+    CSSDisplay parentDisplayValue = CSSSizing.getDisplay(
+        CSSStyleDeclaration.isNullOrEmptyValue(parentStyle[DISPLAY]) ? parent.defaultDisplay : parentStyle[DISPLAY]);
     // InlineFlex or Flex
     bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
 
@@ -478,7 +476,8 @@ class Element extends Node
     if (isRendererAttached) {
       for (Node child in childNodes) {
         if (_renderLayoutBox != null && !child.isRendererAttached) {
-          RenderObject after = _renderLayoutBox.lastChild;;
+          RenderObject after = _renderLayoutBox.lastChild;
+          ;
           child.attachTo(this, after: after);
 
           child.ensureChildAttached();
@@ -607,6 +606,7 @@ class Element extends Node
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
 
     parentRenderLayoutBox.add(childRenderBoxModel);
+
     /// Placeholder of flexbox needs to inherit size from its real display box,
     /// so it needs to layout after real box layout
     child.parent.addChild(childPositionHolder);
@@ -793,7 +793,7 @@ class Element extends Node
     }
 
     // Text Style
-    switch(property) {
+    switch (property) {
       case COLOR:
         _updateTextChildNodesStyle();
         // Color change should trigger currentColor update
@@ -818,8 +818,10 @@ class Element extends Node
     // Display change may case width/height doesn't works at all.
     _styleSizeChangedListener(property, original, present);
 
-    CSSDisplay originalDisplay = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(original) ? defaultDisplay : original);
-    CSSDisplay presentDisplay = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(present) ? defaultDisplay : present);
+    CSSDisplay originalDisplay =
+    CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(original) ? defaultDisplay : original);
+    CSSDisplay presentDisplay =
+    CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(present) ? defaultDisplay : present);
 
     renderBoxModel.display = presentDisplay;
 
@@ -900,7 +902,8 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
-    CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
+    CSSDisplay display =
+    CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       for (Element child in children) {
         child._updateFlexItemStyle();
@@ -909,7 +912,8 @@ class Element extends Node
   }
 
   void _styleSliverDirectionChangedListener(String property, String original, String present) {
-    CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
+    CSSDisplay display =
+    CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
     if (display == CSSDisplay.sliver) {
       assert(renderBoxModel is RenderRecyclerLayout);
       RenderRecyclerLayout renderRecyclerLayout = renderBoxModel;
@@ -984,13 +988,19 @@ class Element extends Node
     } else {
       switch (key) {
         case 'scrollTop':
-          // need to flush layout to get correct size
-          elementManager.getRootRenderObject().owner.flushLayout();
+        // need to flush layout to get correct size
+          elementManager
+              .getRootRenderObject()
+              .owner
+              .flushLayout();
           scrollTop = value.toDouble();
           break;
         case 'scrollLeft':
-          // need to flush layout to get correct size
-          elementManager.getRootRenderObject().owner.flushLayout();
+        // need to flush layout to get correct size
+          elementManager
+              .getRootRenderObject()
+              .owner
+              .flushLayout();
           scrollLeft = value.toDouble();
           break;
       }
@@ -1000,7 +1010,7 @@ class Element extends Node
 
   @mustCallSuper
   dynamic getProperty(String key) {
-    switch(key) {
+    switch (key) {
       default:
         return properties[key];
     }
@@ -1015,12 +1025,23 @@ class Element extends Node
     }
   }
 
-  Pointer<NativeBoundingClientRect> get boundingClientRect {
-    Pointer<NativeBoundingClientRect> nativeBoundingClientRect = allocate<NativeBoundingClientRect>();
+  BoundingClientRect get boundingClientRect {
+    BoundingClientRect boundingClientRect = BoundingClientRect(
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0);
     RenderBox sizedBox = renderBoxModel;
     if (isRendererAttached) {
       // need to flush layout to get correct size
-      elementManager.getRootRenderObject().owner.flushLayout();
+      elementManager
+          .getRootRenderObject()
+          .owner
+          .flushLayout();
 
       // Force flush layout.
       if (!sizedBox.hasSize) {
@@ -1030,17 +1051,18 @@ class Element extends Node
 
       Offset offset = getOffset(sizedBox);
       Size size = sizedBox.size;
-      nativeBoundingClientRect.ref.x = offset.dx;
-      nativeBoundingClientRect.ref.y = offset.dy;
-      nativeBoundingClientRect.ref.width = size.width;
-      nativeBoundingClientRect.ref.height = size.height;
-      nativeBoundingClientRect.ref.top = offset.dy;
-      nativeBoundingClientRect.ref.left = offset.dx;
-      nativeBoundingClientRect.ref.right = offset.dx + size.width;
-      nativeBoundingClientRect.ref.bottom = offset.dy + size.height;
+      boundingClientRect = BoundingClientRect(
+          offset.dx,
+          offset.dy,
+          size.width,
+          size.height,
+          offset.dy,
+          offset.dx + size.width,
+          offset.dy + size.height,
+          offset.dx);
     }
 
-    return nativeBoundingClientRect;
+    return boundingClientRect;
   }
 
   double getOffsetX() {
@@ -1063,7 +1085,10 @@ class Element extends Node
 
   Offset getOffset(RenderBox renderBox) {
     // need to flush layout to get correct size
-    elementManager.getRootRenderObject().owner.flushLayout();
+    elementManager
+        .getRootRenderObject()
+        .owner
+        .flushLayout();
 
     Element element = _findContainingBlock(this);
     if (element == null) {
@@ -1111,7 +1136,8 @@ class Element extends Node
 
   void _eventResponder(Event event) {
     Pointer<NativeEvent> nativeEvent = event.toNativeEvent();
-    emitUIEvent(elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, nativeEvent);
+    emitUIEvent(
+        elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, nativeEvent);
   }
 
   void click() {
@@ -1122,7 +1148,10 @@ class Element extends Node
       // HitTest will test rootView's every child (including
       // child's child), so must flush rootView every times,
       // or child may miss size.
-      elementManager.getRootRenderObject().owner.flushLayout();
+      elementManager
+          .getRootRenderObject()
+          .owner
+          .flushLayout();
 
       // Position the center of element.
       Offset position = box.localToGlobal(box.size.center(Offset.zero), ancestor: elementManager.getRootRenderObject());
@@ -1145,7 +1174,7 @@ class Element extends Node
     }
   }
 
-  Future<Uint8List> toBlob({ double devicePixelRatio }) {
+  Future<Uint8List> toBlob({double devicePixelRatio}) {
     if (devicePixelRatio == null) {
       devicePixelRatio = window.devicePixelRatio;
     }
@@ -1208,17 +1237,18 @@ class Element extends Node
 
 RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
   CSSStyleDeclaration style = element.style;
-  CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]);
+  CSSDisplay display = CSSSizing.getDisplay(
+      CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]);
   if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
     RenderFlexLayout flexLayout;
 
     if (prevRenderLayoutBox == null) {
       if (repaintSelf) {
-        flexLayout = RenderSelfRepaintFlexLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+        flexLayout = RenderSelfRepaintFlexLayout(
+            style: style, targetId: element.targetId, elementManager: element.elementManager);
       } else {
         flexLayout = RenderFlexLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
       }
-
     } else if (prevRenderLayoutBox is RenderFlowLayout) {
       if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
         if (repaintSelf) {
@@ -1263,12 +1293,16 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
 
     CSSFlexboxMixin.decorateRenderFlex(flexLayout, style);
     return flexLayout;
-  } else if (display == CSSDisplay.block || display == CSSDisplay.none || display == CSSDisplay.inline || display == CSSDisplay.inlineBlock) {
+  } else if (display == CSSDisplay.block ||
+      display == CSSDisplay.none ||
+      display == CSSDisplay.inline ||
+      display == CSSDisplay.inlineBlock) {
     RenderFlowLayout flowLayout;
 
     if (prevRenderLayoutBox == null) {
       if (repaintSelf) {
-        flowLayout = RenderSelfRepaintFlowLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+        flowLayout = RenderSelfRepaintFlowLayout(
+            style: style, targetId: element.targetId, elementManager: element.elementManager);
       } else {
         flowLayout = RenderFlowLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
       }
@@ -1321,7 +1355,8 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
     RenderRecyclerLayout renderRecyclerLayout;
 
     if (prevRenderLayoutBox == null) {
-      renderRecyclerLayout = RenderRecyclerLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+      renderRecyclerLayout =
+          RenderRecyclerLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
     } else if (prevRenderLayoutBox is RenderFlowLayout) {
       renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
     } else if (prevRenderLayoutBox is RenderFlexLayout) {
@@ -1336,7 +1371,8 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
   }
 }
 
-RenderIntrinsic _createRenderIntrinsic(Element element, {RenderIntrinsic prevRenderIntrinsic, bool repaintSelf = false}) {
+RenderIntrinsic _createRenderIntrinsic(Element element,
+    {RenderIntrinsic prevRenderIntrinsic, bool repaintSelf = false}) {
   RenderIntrinsic intrinsic;
 
   if (prevRenderIntrinsic == null) {
@@ -1443,6 +1479,45 @@ bool _hasIntersectionObserverEvent(Map eventHandlers) {
   return eventHandlers.containsKey('appear') ||
       eventHandlers.containsKey('disappear') ||
       eventHandlers.containsKey('intersectionchange');
+}
+
+class BoundingClientRect {
+  final double x;
+  final double y;
+  final double width;
+  final double height;
+  final double top;
+  final double right;
+  final double bottom;
+  final double left;
+
+  BoundingClientRect(this.x, this.y, this.width, this.height, this.top, this.right, this.bottom, this.left);
+
+  Pointer<NativeBoundingClientRect> toNative() {
+    Pointer<NativeBoundingClientRect> nativeBoundingClientRect = allocate<NativeBoundingClientRect>();
+    nativeBoundingClientRect.ref.width = width;
+    nativeBoundingClientRect.ref.height = height;
+    nativeBoundingClientRect.ref.x = x;
+    nativeBoundingClientRect.ref.y = y;
+    nativeBoundingClientRect.ref.top = top;
+    nativeBoundingClientRect.ref.right = right;
+    nativeBoundingClientRect.ref.left = left;
+    nativeBoundingClientRect.ref.bottom = bottom;
+    return nativeBoundingClientRect;
+  }
+
+  Map<String, dynamic> toJSON() {
+    return {
+      'x': x,
+      'y': y,
+      'width': width,
+      'height': height,
+      'left': left,
+      'top': top,
+      'right': right,
+      'bottom': bottom
+    };
+  }
 }
 
 void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Element child) {
