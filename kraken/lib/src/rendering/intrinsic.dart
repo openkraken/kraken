@@ -88,6 +88,10 @@ class RenderIntrinsic extends RenderBoxModel
 
       Size contentSize = Size(constraintWidth, constraintHeight);
       size = getBoxSize(contentSize);
+
+      autoMinWidth = size.width;
+      autoMinHeight = size.height;
+
       didLayout();
     } else {
       super.performResize();

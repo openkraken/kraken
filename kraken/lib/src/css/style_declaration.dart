@@ -84,6 +84,9 @@ const Map<String, bool> CSSShorthandProperty = {
   TEXT_DECORATION: true,
 };
 
+RegExp _kebabCaseReg = RegExp(r'[A-Z]');
+RegExp _camelCaseReg = RegExp(r'-(\w)');
+
 // CSS Object Model: https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
 
 /// The [CSSStyleDeclaration] interface represents an object that is a CSS
@@ -218,7 +221,7 @@ class CSSStyleDeclaration {
     String css = EMPTY_STRING;
     _properties.forEach((property, value) {
       if (css.isNotEmpty) css += ' ';
-      css += '$property: $value;';
+      css += '${kebabize(property)}: $value;';
     });
     return css;
   }
@@ -538,4 +541,17 @@ class CSSStyleDeclaration {
 
   @override
   String toString() => 'CSSStyleDeclaration($cssText)';
+}
+
+// aB to a-b
+String kebabize(String str) {
+  return str.replaceAllMapped(_kebabCaseReg, (match) => '-${match[0].toLowerCase()}');
+}
+
+// a-b to aB
+String camelize(String str) {
+  return str.replaceAllMapped(_camelCaseReg, (match) {
+    String subStr = match[0].substring(1);
+    return subStr.isNotEmpty ? subStr.toUpperCase() : '';
+  });
 }
