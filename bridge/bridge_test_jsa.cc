@@ -62,7 +62,8 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
     } else {
       ctx->_callback->getObject(_context).getFunction(_context).call(_context);
     }
-    delete ctx;
+    auto bridge = static_cast<JSBridge *>(ctx->_context.getOwner());
+    bridge->bridgeCallback.freeBridgeCallbackContext(ctx);
   };
 
   auto bridge = static_cast<JSBridge*>(context.getOwner());
@@ -118,7 +119,8 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
     auto ctx = static_cast<BridgeCallback::Context *>(callbackContext);
     JSContext &_context = ctx->_context;
     ctx->_callback->getObject(_context).getFunction(_context).call(_context, {Value(static_cast<bool>(result))});
-    delete ctx;
+    auto bridge = static_cast<JSBridge *>(ctx->_context.getOwner());
+    bridge->bridgeCallback.freeBridgeCallbackContext(ctx);
   };
 
   auto bridge = static_cast<JSBridge*>(context.getOwner());

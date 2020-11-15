@@ -1178,6 +1178,18 @@ class Element extends Node
 
     return completer.future;
   }
+
+  void debugHighlight() {
+    if (isRendererAttached) {
+      renderBoxModel?.debugShouldPaintOverlay = true;
+    }
+  }
+
+  void debugHideHighlight() {
+    if (isRendererAttached) {
+      renderBoxModel?.debugShouldPaintOverlay = false;
+    }
+  }
 }
 
 RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
