@@ -121,6 +121,8 @@ else()
       bindings/jsc/DOM/elements/canvas_element.h
       bindings/jsc/DOM/elements/iframe_element.cc
       bindings/jsc/DOM/elements/iframe_element.h
+      bindings/jsc/KOM/performance.cc
+      bindings/jsc/KOM/performance.h
       bindings/jsc/DOM/element.cc
       bindings/jsc/DOM/element.h
       bindings/jsc/DOM/event.h

@@ -24,6 +24,8 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
   JSStringRelease(windowName);
   JSStringRelease(globalThis);
+
+  timeOrigin = std::chrono::system_clock::now();
 }
 
 JSContext::~JSContext() {

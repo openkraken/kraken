@@ -11,7 +11,6 @@ import { Blob } from './kom/blob';
 import { asyncStorage } from './modules/async-storage';
 import { URLSearchParams } from './kom/url-search-params';
 import { URL } from './kom/url';
-import { Performance, performance } from './modules/performance';
 import { kraken } from './kom/kraken';
 import { MQTT } from './modules/mqtt';
 
@@ -29,8 +28,6 @@ defineGlobalProperty('Blob', Blob);
 defineGlobalProperty('asyncStorage', asyncStorage);
 defineGlobalProperty('URLSearchParams', URLSearchParams);
 defineGlobalProperty('URL', URL);
-defineGlobalProperty('Performance', Performance);
-defineGlobalProperty('performance', performance);
 defineGlobalProperty('kraken', kraken);
 defineGlobalProperty('MQTT', MQTT);
 

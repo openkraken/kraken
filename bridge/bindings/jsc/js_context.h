@@ -13,6 +13,7 @@
 #include <deque>
 #include <map>
 #include <string>
+#include <chrono>
 
 #ifndef __has_builtin
 #define __has_builtin(x) 0
@@ -50,6 +51,7 @@ public:
 
   void reportError(const char *errmsg);
 
+  std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 private:
   int32_t contextId;
   JSExceptionHandler _handler;

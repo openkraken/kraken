@@ -26,11 +26,9 @@
     JSStringRelease(name);                                                                                             \
   }
 
-#define JSC_SET_STRING_PROPERTY(context, object, name, value)                                                          \
+#define JSC_SET_STRING_PROPERTY(context, object, name, valueRef)                                                       \
   {                                                                                                                    \
     JSStringRef keyRef = JSStringCreateWithUTF8CString(name);                                                          \
-    JSStringRef valueStringRef = JSStringCreateWithUTF8CString(value);                                                 \
-    JSValueRef valueRef = JSValueMakeString(context->context(), valueStringRef);                                       \
     JSObjectSetProperty(context->context(), object, keyRef, valueRef, kJSPropertyAttributeNone, nullptr);              \
     JSStringRelease(keyRef);                                                                                           \
   }

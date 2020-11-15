@@ -226,13 +226,6 @@ String invokeModule(
         int id = positionArgs[0];
         Geolocation.clearWatch(id);
       }
-    } else if (module == 'Performance') {
-      String method = args[1];
-      if (method == 'now') {
-        return Performance.now().toString();
-      } else if (method == 'getTimeOrigin') {
-        return Performance.getTimeOrigin().toString();
-      }
     } else if (module == 'MethodChannel') {
       String method = args[1];
       assert(controller.methodChannel != null);

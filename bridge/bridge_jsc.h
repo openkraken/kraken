@@ -34,6 +34,7 @@
 #include "bindings/jsc/KOM/screen.h"
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/KOM/window.h"
+#include "bindings/jsc/KOM/performance.h"
 #include "bindings/jsc/js_context.h"
 #include "bindings/jsc/kraken.h"
 #include "bindings/jsc/ui_manager.h"
