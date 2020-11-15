@@ -156,6 +156,33 @@ global.simulatePointer = function simulatePointer(list) {
   });
 }
 
+function clearAllNodes() {
+  while (document.body.firstChild) {
+    document.body.firstChild.remove();
+  }
+}
+
+function traverseNode(node, handle) {
+  const shouldExit = handle(node);
+  if (shouldExit) return;
+
+  if (node.childNodes.length > 0) {
+    for (let i = 0, l = node.childNodes.length; i < l; i++) {
+      traverseNode(node.childNodes[i], handle);
+    }
+  }
+}
+
+function clearAllEventsListeners() {
+  // @ts-ignore
+  window.__clearListeners__();
+  // @ts-ignore
+  traverseNode(document.body, (node) => {
+    node.__clearListeners__();
+  });
+}
+
+
 __kraken_executeTest__((done) => {
   jasmineTracker.onSpecDone = (result) => {
     return new Promise((resolve, reject) => {
@@ -164,8 +191,8 @@ __kraken_executeTest__((done) => {
           resolve();
         } else {
           clearAllTimer();
-          window.clearAllEventsListeners();
-          window.clearAllNodes();
+          clearAllEventsListeners();
+          clearAllNodes();
           requestAnimationFrame(() => {
             __kraken_refresh_paint__(function (e) {
               if (e) {
