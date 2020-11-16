@@ -25,6 +25,11 @@ JSNode::NodeInstance::~NodeInstance() {
   }
 
   delete nativeNode;
+
+  if (_insertBefore != nullptr) JSValueUnprotect(_hostClass->ctx, _insertBefore);
+  if (_replaceChild != nullptr) JSValueUnprotect(_hostClass->ctx, _replaceChild);
+  if (_appendChild != nullptr) JSValueUnprotect(_hostClass->ctx, _appendChild);
+  if (_remove != nullptr) JSValueUnprotect(_hostClass->ctx, _remove);
 }
 
 JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)
@@ -351,24 +356,28 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
   case NodeProperty::kAppendChild: {
     if (_appendChild == nullptr) {
       _appendChild = propertyBindingFunction(_hostClass->context, this, "appendChild", appendChild);
+      JSValueProtect(_hostClass->ctx, _appendChild);
     }
     return _appendChild;
   }
   case NodeProperty::kRemove: {
     if (_remove == nullptr) {
       _remove = propertyBindingFunction(_hostClass->context, this, "remove", remove);
+      JSValueProtect(_hostClass->ctx, _remove);
     }
     return _remove;
   }
   case NodeProperty::kInsertBefore: {
     if (_insertBefore == nullptr) {
       _insertBefore = propertyBindingFunction(_hostClass->context, this, "insertBefore", insertBefore);
+      JSValueProtect(_hostClass->ctx, _insertBefore);
     }
     return _insertBefore;
   }
   case NodeProperty::kReplaceChild: {
     if (_replaceChild == nullptr) {
       _replaceChild = propertyBindingFunction(_hostClass->context, this, "replaceChild", replaceChild);
+      JSValueProtect(_hostClass->ctx, _replaceChild);
     }
     return _replaceChild;
   }

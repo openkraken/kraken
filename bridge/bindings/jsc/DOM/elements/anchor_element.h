@@ -42,8 +42,8 @@ public:
 
     NativeAnchorElement *nativeAnchorElement;
   private:
-    JSStringRef _href;
-    JSStringRef _target;
+    JSStringRef _href{nullptr};
+    JSStringRef _target{nullptr};
   };
 };
 

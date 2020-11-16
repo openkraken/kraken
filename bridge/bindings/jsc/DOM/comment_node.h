@@ -27,11 +27,7 @@ public:
 
   class CommentNodeInstance : public NodeInstance {
   public:
-    enum class CommentProperty {
-      kData,
-      kNodeName,
-      kLength
-    };
+    enum class CommentProperty { kData, kNodeName, kLength };
     static std::array<JSStringRef, 2> &getCommentPropertyNames();
     static const std::unordered_map<std::string, CommentProperty> &getPropertyMap();
 
@@ -44,14 +40,15 @@ public:
     JSStringRef internalTextContent() override;
 
     NativeComment *nativeComment;
+
   private:
-    JSStringRef data;
+    JSStringRef data{nullptr};
   };
 };
 
 struct NativeComment {
   NativeComment() = delete;
-  NativeComment(NativeNode *nativeNode) : nativeNode(nativeNode) {};
+  NativeComment(NativeNode *nativeNode) : nativeNode(nativeNode){};
 
   NativeNode *nativeNode;
 };

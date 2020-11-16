@@ -89,6 +89,10 @@ CSSStyleDeclaration::StyleDeclarationInstance::~StyleDeclarationInstance() {
   for (auto &string : properties) {
     JSStringRelease(string.second);
   }
+
+  if (_setProperty != nullptr) JSValueUnprotect(_hostClass->ctx, _setProperty);
+  if (_getPropertyValue != nullptr) JSValueUnprotect(_hostClass->ctx, _getPropertyValue);
+  if (_removeProperty != nullptr) JSValueUnprotect(_hostClass->ctx, _removeProperty);
 }
 
 JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -100,18 +104,21 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::strin
     case CSSStyleDeclarationProperty::kSetProperty: {
       if (_setProperty == nullptr) {
         _setProperty = propertyBindingFunction(_hostClass->context, this, "setProperty", setProperty);
+        JSValueProtect(_hostClass->ctx, _setProperty);
       }
       return _setProperty;
     }
     case CSSStyleDeclarationProperty::kGetPropertyValue: {
       if (_getPropertyValue == nullptr) {
         _getPropertyValue = propertyBindingFunction(_hostClass->context, this, "getPropertyValue", getPropertyValue);
+        JSValueProtect(_hostClass->ctx, _getPropertyValue);
       }
       return _getPropertyValue;
     }
     case CSSStyleDeclarationProperty::kRemoveProperty: {
       if (_removeProperty == nullptr) {
         _removeProperty = propertyBindingFunction(_hostClass->context, this, "removeProperty", removeProperty);
+        JSValueProtect(_hostClass->ctx, _removeProperty);
       }
       return _removeProperty;
     }

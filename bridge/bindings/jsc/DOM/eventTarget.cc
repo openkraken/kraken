@@ -64,6 +64,11 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   }
 
   delete nativeEventTarget;
+
+  if (_addEventListener != nullptr) JSValueUnprotect(_hostClass->ctx, _addEventListener);
+  if (_removeEventListener != nullptr) JSValueUnprotect(_hostClass->ctx, _removeEventListener);
+  if (_dispatchEvent != nullptr) JSValueUnprotect(_hostClass->ctx, _dispatchEvent);
+  if (_clearListeners != nullptr) JSValueUnprotect(_hostClass->ctx, _clearListeners);
 }
 
 JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx, JSObjectRef function,
@@ -227,6 +232,7 @@ JSValueRef JSEventTarget::EventTargetInstance::__clearListeners__(JSContextRef c
   }
 
   eventTargetInstance->_eventHandlers.clear();
+  return nullptr;
 }
 
 JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -238,6 +244,7 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
     case EventTargetProperty::kAddEventListener: {
       if (_addEventListener == nullptr) {
         _addEventListener = propertyBindingFunction(_hostClass->context, this, "addEventListener", addEventListener);
+        JSValueProtect(_hostClass->ctx, _clearListeners);
       }
       return _addEventListener;
     }
@@ -245,21 +252,24 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
       if (_removeEventListener) {
         _removeEventListener =
           propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
+        JSValueProtect(_hostClass->ctx, _clearListeners);
       }
       return _removeEventListener;
     }
     case EventTargetProperty::kDispatchEvent: {
       if (_dispatchEvent == nullptr) {
         _dispatchEvent = propertyBindingFunction(_hostClass->context, this, "dispatchEvent", dispatchEvent);
+        JSValueProtect(_hostClass->ctx, _clearListeners);
       }
       return _dispatchEvent;
     }
-    case EventTargetProperty::kClearListeners:
+    case EventTargetProperty::kClearListeners: {
       if (_clearListeners == nullptr) {
         _clearListeners = propertyBindingFunction(_hostClass->context, this, "__clearListeners__", __clearListeners__);
+        JSValueProtect(_hostClass->ctx, _clearListeners);
       }
       return _clearListeners;
-      break;
+    }
     }
   } else if (name.substr(0, 2) == "on") {
     return getPropertyHandler(name, exception);
@@ -354,7 +364,7 @@ JSEventTarget::EventTargetInstance::getEventTargetPropertyMap() {
     {"addEventListener", EventTargetProperty::kAddEventListener},
     {"removeEventListener", EventTargetProperty::kRemoveEventListener},
     {"dispatchEvent", EventTargetProperty::kDispatchEvent},
-    {"__clearListeners__", EventTargetProperty::kDispatchEvent}};
+    {"__clearListeners__", EventTargetProperty::kClearListeners}};
   return eventTargetProperty;
 }
 

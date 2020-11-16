@@ -77,10 +77,14 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
 
 JSElement::ElementInstance::~ElementInstance() {
   JSStringRelease(tagNameStringRef_);
-  if (style != nullptr) {
-    JSValueUnprotect(_hostClass->ctx, style->object);
-  }
-
+  if (style != nullptr) JSValueUnprotect(_hostClass->ctx, style->object);
+  if (_getBoundingClientRect != nullptr) JSValueUnprotect(_hostClass->ctx, _getBoundingClientRect);
+  if (_setAttribute != nullptr) JSValueUnprotect(_hostClass->ctx, _setAttribute);
+  if (_getAttribute != nullptr) JSValueUnprotect(_hostClass->ctx, _getAttribute);
+  if (_toBlob != nullptr) JSValueUnprotect(_hostClass->ctx, _toBlob);
+  if (_click != nullptr) JSValueUnprotect(_hostClass->ctx, _click);
+  if (_scroll != nullptr) JSValueUnprotect(_hostClass->ctx, _scroll);
+  if (_scrollBy != nullptr) JSValueUnprotect(_hostClass->ctx, _scrollBy);
   delete nativeElement;
 }
 
@@ -195,42 +199,49 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
     if (_getBoundingClientRect == nullptr) {
       _getBoundingClientRect =
         propertyBindingFunction(_hostClass->context, this, "getBoundingClientRect", getBoundingClientRect);
+      JSValueProtect(_hostClass->ctx, _getBoundingClientRect);
     }
     return _getBoundingClientRect;
   }
   case ElementProperty::kClick: {
     if (_click == nullptr) {
       _click = propertyBindingFunction(_hostClass->context, this, "click", click);
+      JSValueProtect(_hostClass->ctx, _click);
     }
     return _click;
   }
   case ElementProperty::kScroll: {
     if (_scroll == nullptr) {
       _scroll = propertyBindingFunction(_hostClass->context, this, "scroll", scroll);
+      JSValueProtect(_hostClass->ctx, _scroll);
     }
     return _scroll;
   }
   case ElementProperty::kScrollBy: {
     if (_scrollBy == nullptr) {
       _scrollBy = propertyBindingFunction(_hostClass->context, this, "scrollBy", scrollBy);
+      JSValueProtect(_hostClass->ctx, _scrollBy);
     }
     return _scrollBy;
   }
   case ElementProperty::kToBlob: {
     if (_toBlob == nullptr) {
       _toBlob = propertyBindingFunction(_hostClass->context, this, "toBlob", toBlob);
+      JSValueProtect(_hostClass->ctx, _toBlob);
     }
     return _toBlob;
   }
   case ElementProperty::kGetAttribute: {
     if (_getAttribute == nullptr) {
       _getAttribute = propertyBindingFunction(_hostClass->context, this, "getAttribute", getAttribute);
+      JSValueProtect(_hostClass->ctx, _getAttribute);
     }
     return _getAttribute;
   }
   case ElementProperty::kSetAttribute: {
     if (_setAttribute == nullptr) {
       _setAttribute = propertyBindingFunction(_hostClass->context, this, "setAttribute", setAttribute);
+      JSValueProtect(_hostClass->ctx, _setAttribute);
     }
     return _setAttribute;
   }

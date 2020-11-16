@@ -47,8 +47,8 @@ public:
     NativeAnimationPlayerElement *nativeAnimationPlayerElement;
 
   private:
-    JSStringRef _src;
-    JSStringRef _type;
+    JSStringRef _src {nullptr};
+    JSStringRef _type {nullptr};
 
     JSObjectRef _play {nullptr};
   };

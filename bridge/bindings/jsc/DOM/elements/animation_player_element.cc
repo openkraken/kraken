@@ -101,6 +101,7 @@ JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty
   } else if (property == AnimationPlayerProperty::kPlay) {
     if (_play == nullptr) {
       _play = propertyBindingFunction(_hostClass->context, this, "play", play);
+      JSValueProtect(_hostClass->ctx, _play);
     }
     return _play;
   }
@@ -155,6 +156,9 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::getPropertyNames(
 
 JSAnimationPlayerElement::AnimationPlayerElementInstance::~AnimationPlayerElementInstance() {
   delete nativeAnimationPlayerElement;
+  if (_play != nullptr) JSValueUnprotect(_hostClass->ctx, _play);
+  if (_src != nullptr) JSStringRelease(_src);
+  if (_type != nullptr) JSStringRelease(_type);
 }
 
 } // namespace kraken::binding::jsc

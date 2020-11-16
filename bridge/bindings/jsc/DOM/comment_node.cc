@@ -87,6 +87,8 @@ JSStringRef JSCommentNode::CommentNodeInstance::internalTextContent() {
 
 JSCommentNode::CommentNodeInstance::~CommentNodeInstance() {
   delete nativeComment;
+
+  if (data != nullptr) JSStringRelease(data);
 }
 
 } // namespace kraken::binding::jsc

@@ -120,6 +120,7 @@ JSTextNode::TextNodeInstance::getTextNodePropertyMap() {
 
 JSTextNode::TextNodeInstance::~TextNodeInstance() {
   delete nativeTextNode;
+  if (data != nullptr) JSStringRelease(data);
 }
 
 } // namespace kraken::binding::jsc

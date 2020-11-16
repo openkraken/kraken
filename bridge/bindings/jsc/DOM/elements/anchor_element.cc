@@ -109,6 +109,8 @@ JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyMap() {
 
 JSAnchorElement::AnchorElementInstance::~AnchorElementInstance() {
   delete nativeAnchorElement;
+  if (_target != nullptr) JSStringRelease(_target);
+  if (_href != nullptr) JSStringRelease(_href);
 }
 
 } // namespace kraken::binding::jsc

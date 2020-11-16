@@ -58,7 +58,7 @@ public:
     NativeMediaElement *nativeMediaElement;
 
   private:
-    JSStringRef _src;
+    JSStringRef _src {nullptr};
     bool _autoPlay {false};
     bool _loop {false};
     JSObjectRef _play {nullptr};

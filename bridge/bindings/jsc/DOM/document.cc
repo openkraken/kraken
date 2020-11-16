@@ -121,6 +121,7 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
   case DocumentProperty::kCreateElement: {
     if (_createElement == nullptr) {
       _createElement = propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
+      JSValueProtect(_hostClass->ctx, _createElement);
     }
     return _createElement;
   }
@@ -129,12 +130,14 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
   case DocumentProperty::kCreateTextNode: {
     if (_createTextNode == nullptr) {
       _createTextNode = propertyBindingFunction(_hostClass->context, this, "createTextNode", createTextNode);
+      JSValueProtect(_hostClass->ctx, _createElement);
     }
     return _createTextNode;
   }
   case DocumentProperty::kCreateComment: {
     if (_createComment == nullptr) {
       _createComment = propertyBindingFunction(_hostClass->context, this, "createComment", createComment);
+      JSValueProtect(_hostClass->ctx, _createElement);
     }
     return _createComment;
   }
@@ -149,6 +152,9 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
 
 JSDocument::DocumentInstance::~DocumentInstance() {
   JSValueUnprotect(_hostClass->ctx, body);
+  if (_createElement != nullptr) JSValueUnprotect(_hostClass->ctx, _createElement);
+  if (_createComment != nullptr) JSValueUnprotect(_hostClass->ctx, _createComment);
+  if (_createTextNode != nullptr) JSValueUnprotect(_hostClass->ctx, _createTextNode);
   delete nativeDocument;
 }
 

@@ -170,6 +170,7 @@ JSValueRef JSEvent::EventInstance::getProperty(std::string &name, JSValueRef *ex
   case EventProperty::kStopPropagation:
     if (_stopPropagation == nullptr) {
       _stopPropagation = propertyBindingFunction(_hostClass->context, this, "stopPropagation", stopPropagation);
+      JSValueProtect(_hostClass->ctx, _stopPropagation);
     }
     return _stopPropagation;
   case EventProperty::kCancelBubble:
@@ -178,11 +179,13 @@ JSValueRef JSEvent::EventInstance::getProperty(std::string &name, JSValueRef *ex
     if (_stopImmediatePropagation == nullptr) {
       _stopImmediatePropagation =
         propertyBindingFunction(_hostClass->context, this, "stopImmediatePropagation", stopImmediatePropagation);
+      JSValueProtect(_hostClass->ctx, _stopImmediatePropagation);
     }
     return _stopImmediatePropagation;
   case EventProperty::kPreventDefault:
     if (_preventDefault == nullptr) {
       _preventDefault = propertyBindingFunction(_hostClass->context, this, "preventDefault", preventDefault);
+      JSValueProtect(_hostClass->ctx, _preventDefault);
     }
     return _preventDefault;
   }
@@ -233,6 +236,9 @@ void JSEvent::EventInstance::setProperty(std::string &name, JSValueRef value, JS
 
 JSEvent::EventInstance::~EventInstance() {
   delete nativeEvent;
+  if (_stopImmediatePropagation != nullptr) JSValueUnprotect(_hostClass->ctx, _stopImmediatePropagation);
+  if (_stopPropagation != nullptr) JSValueUnprotect(_hostClass->ctx, _stopPropagation);
+  if (_preventDefault != nullptr) JSValueUnprotect(_hostClass->ctx, _preventDefault);
 }
 void JSEvent::EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : getEventPropertyNames()) {

@@ -69,6 +69,7 @@ JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name
     case IframeProperty::kPostMessage:
       if (_postMessage == nullptr) {
         _postMessage = propertyBindingFunction(_hostClass->context, this, "postMessage", postMessage);
+        JSValueProtect(_hostClass->ctx, _postMessage);
       }
       return _postMessage;
     }
@@ -131,6 +132,7 @@ void JSIframeElement::IframeElementInstance::getPropertyNames(JSPropertyNameAccu
 
 JSIframeElement::IframeElementInstance::~IframeElementInstance() {
   delete nativeIframeElement;
+  if (_postMessage != nullptr) JSValueUnprotect(_hostClass->ctx, _postMessage);
 }
 
 JSValueRef JSIframeElement::IframeElementInstance::postMessage(JSContextRef ctx, JSObjectRef function,

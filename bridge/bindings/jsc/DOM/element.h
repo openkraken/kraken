@@ -83,7 +83,6 @@ public:
     JSStringRef internalTextContent() override;
 
     NativeElement *nativeElement {nullptr};
-
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
     JSStringRef tagNameStringRef_;

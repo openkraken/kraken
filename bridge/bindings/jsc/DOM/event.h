@@ -17,12 +17,6 @@ void bindEvent(std::unique_ptr<JSContext> &context);
 
 struct NativeEvent;
 
-namespace {
-
-
-
-} // namespace
-
 class JSEvent : public HostClass {
 public:
   enum EventType {

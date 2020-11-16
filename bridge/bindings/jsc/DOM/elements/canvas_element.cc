@@ -190,6 +190,14 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingCont
   if (_font != nullptr) JSStringRelease(_font);
   if (_strokeStyle != nullptr) JSStringRelease(_strokeStyle);
   if (_fillStyle != nullptr) JSStringRelease(_fillStyle);
+
+  if (_fillRect != nullptr) JSValueUnprotect(_hostClass->ctx, _fillRect);
+  if (_clearRect != nullptr) JSValueUnprotect(_hostClass->ctx, _clearRect);
+  if (_strokeRect != nullptr) JSValueUnprotect(_hostClass->ctx, _strokeRect);
+  if (_fillText != nullptr) JSValueUnprotect(_hostClass->ctx, _fillText);
+  if (_strokeText != nullptr) JSValueUnprotect(_hostClass->ctx, _strokeText);
+  if (_save != nullptr) JSValueUnprotect(_hostClass->ctx, _save);
+  if (_restore != nullptr) JSValueUnprotect(_hostClass->ctx, _restore);
 }
 
 std::vector<JSStringRef> &
@@ -241,42 +249,49 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
     case CanvasRenderingContext2DProperty::kFillRect: {
       if (_fillRect == nullptr) {
         _fillRect = propertyBindingFunction(_hostClass->context, this, "fillRect", fillRect);
+        JSValueProtect(_hostClass->ctx, _fillRect);
       }
       return _fillRect;
     }
     case CanvasRenderingContext2DProperty::kClearRect: {
       if (_clearRect == nullptr) {
         _clearRect = propertyBindingFunction(_hostClass->context, this, "clearRect", clearRect);
+        JSValueProtect(_hostClass->ctx, _clearRect);
       }
       return _clearRect;
     }
     case CanvasRenderingContext2DProperty::kStrokeRect: {
       if (_strokeRect == nullptr) {
         _strokeRect = propertyBindingFunction(_hostClass->context, this, "strokeRect", strokeRect);
+        JSValueProtect(_hostClass->ctx, _strokeRect);
       }
       return _strokeRect;
     }
     case CanvasRenderingContext2DProperty::kFillText: {
       if (_fillText == nullptr) {
         _fillText = propertyBindingFunction(_hostClass->context, this, "fillText", fillText);
+        JSValueProtect(_hostClass->ctx, _fillText);
       }
       return _fillText;
     }
     case CanvasRenderingContext2DProperty::kStrokeText: {
       if (_strokeText == nullptr) {
         _strokeText = propertyBindingFunction(_hostClass->context, this, "strokeText", strokeText);
+        JSValueProtect(_hostClass->ctx, _strokeText);
       }
       return _strokeText;
     }
     case CanvasRenderingContext2DProperty::kSave: {
       if (_save == nullptr) {
         _save = propertyBindingFunction(_hostClass->context, this, "save", save);
+        JSValueProtect(_hostClass->ctx, _save);
       }
       return _save;
     }
     case CanvasRenderingContext2DProperty::kReStore: {
       if (_restore == nullptr) {
         _restore = propertyBindingFunction(_hostClass->context, this, "restore", restore);
+        JSValueProtect(_hostClass->ctx, _restore);
       }
       return _restore;
     }
