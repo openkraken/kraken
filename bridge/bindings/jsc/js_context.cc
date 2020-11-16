@@ -131,8 +131,9 @@ JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFu
       JSObjectGetProperty(context->context(), context->global(), JSStringCreateWithUTF8CString("Promise"), exception);
   JSObjectRef promiseConstructor = JSValueToObject(context->context(), promiseConstructorValueRef, exception);
 
+  JSObjectRef functionArgs = propertyBindingFunction(context, data, "P", callback);
   const JSValueRef constructorArguments[1]{
-      propertyBindingFunction(context, data, "P", callback)
+    functionArgs
   };
 
   return JSObjectCallAsConstructor(context->context(), promiseConstructor, 1, constructorArguments, exception);

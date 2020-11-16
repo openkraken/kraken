@@ -17,9 +17,7 @@ export interface PrivateKraken {
   userAgent: string;
 }
 
-declare const __kraken_blob__: (blobParts?: KrakenBlob[], options?: BlobPropertyBag) => KrakenBlob;
 declare const __kraken__: PrivateKraken;
-export const krakenBlob = __kraken_blob__;
 export const privateKraken = __kraken__;
 
 declare const __kraken_invoke_module__: (message: string, fn?: (message: string) => void) => string;

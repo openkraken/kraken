@@ -32,7 +32,7 @@ static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
     return propertyCache[propertyName];
   }
 
-  std::vector<char> buffer(propertyName.size());
+  std::vector<char> buffer(propertyName.size() + 1);
 
   size_t hyphen = 0;
   for (size_t i = 0; i < propertyName.size(); ++i) {
@@ -45,6 +45,8 @@ static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
       buffer[i] = c;
     }
   }
+
+  buffer.emplace_back('\0');
 
   std::string result = std::string(buffer.data());
 

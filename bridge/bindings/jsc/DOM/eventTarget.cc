@@ -215,6 +215,20 @@ JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, J
   return JSValueMakeBoolean(ctx, !eventInstance->_canceledFlag);
 }
 
+JSValueRef JSEventTarget::EventTargetInstance::__clearListeners__(JSContextRef ctx, JSObjectRef function,
+                                                                  JSObjectRef thisObject, size_t argumentCount,
+                                                                  const JSValueRef *arguments, JSValueRef *exception) {
+  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(function));
+
+  for (auto &it : eventTargetInstance->_eventHandlers) {
+    for (auto &handler : it.second) {
+      JSValueUnprotect(eventTargetInstance->_hostClass->ctx, handler);
+    }
+  }
+
+  eventTargetInstance->_eventHandlers.clear();
+}
+
 JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getEventTargetPropertyMap();
   if (propertyMap.contains(name)) {
@@ -230,7 +244,7 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
     case EventTargetProperty::kRemoveEventListener: {
       if (_removeEventListener) {
         _removeEventListener =
-            propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
+          propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
       }
       return _removeEventListener;
     }
@@ -240,6 +254,12 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
       }
       return _dispatchEvent;
     }
+    case EventTargetProperty::kClearListeners:
+      if (_clearListeners == nullptr) {
+        _clearListeners = propertyBindingFunction(_hostClass->context, this, "__clearListeners__", __clearListeners__);
+      }
+      return _clearListeners;
+      break;
     }
   } else if (name.substr(0, 2) == "on") {
     return getPropertyHandler(name, exception);
@@ -307,12 +327,10 @@ void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumula
   }
 }
 
-std::array<JSStringRef, 3> &JSEventTarget::EventTargetInstance::getEventTargetPropertyNames() {
-  static std::array<JSStringRef, 3> propertyNames{
-    JSStringCreateWithUTF8CString("addEventListener"),
-    JSStringCreateWithUTF8CString("removeEventListener"),
-    JSStringCreateWithUTF8CString("dispatchEvent"),
-  };
+std::vector<JSStringRef> &JSEventTarget::EventTargetInstance::getEventTargetPropertyNames() {
+  static std::vector<JSStringRef> propertyNames{
+    JSStringCreateWithUTF8CString("addEventListener"), JSStringCreateWithUTF8CString("removeEventListener"),
+    JSStringCreateWithUTF8CString("dispatchEvent"), JSStringCreateWithUTF8CString("__clearListeners__")};
   return propertyNames;
 }
 
@@ -335,7 +353,8 @@ JSEventTarget::EventTargetInstance::getEventTargetPropertyMap() {
   static const std::unordered_map<std::string, EventTargetProperty> eventTargetProperty{
     {"addEventListener", EventTargetProperty::kAddEventListener},
     {"removeEventListener", EventTargetProperty::kRemoveEventListener},
-    {"dispatchEvent", EventTargetProperty::kDispatchEvent}};
+    {"dispatchEvent", EventTargetProperty::kDispatchEvent},
+    {"__clearListeners__", EventTargetProperty::kDispatchEvent}};
   return eventTargetProperty;
 }
 

@@ -87,7 +87,8 @@ JSValueRef refreshPaint(JSContextRef ctx, JSObjectRef function, JSObjectRef this
     }
 
     _context.handleException(exception);
-    delete callbackContext;
+    auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
+    bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
   };
 
   auto bridge = static_cast<JSBridge *>(context->getOwner());
@@ -113,9 +114,9 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
   }
 
   JSObjectRef blobObjectRef = JSValueToObject(ctx, blobValueRef, exception);
-  auto blob = static_cast<binding::jsc::JSBlob *>(JSObjectGetPrivate(blobObjectRef));
+  auto blob = static_cast<binding::jsc::JSBlob::BlobInstance *>(JSObjectGetPrivate(blobObjectRef));
 
-  if (blob == nullptr || std::string(blob->name) != JSBlobName) {
+  if (blob == nullptr || std::string(blob->_hostClass->_name) != JSBlobName) {
     JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_match_screenshot__': parameter 1 (blob) must be an Blob object.",
                     exception);
     return nullptr;
@@ -168,7 +169,8 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
     JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
     const JSValueRef arguments[] = {JSValueMakeBoolean(ctx, result)};
     JSObjectCallAsFunction(ctx, callbackObjectRef, _context.global(), 1, arguments, &exception);
-    delete callbackContext;
+    auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
+    bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
     _context.handleException(exception);
   };
 

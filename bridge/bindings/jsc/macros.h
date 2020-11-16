@@ -75,7 +75,6 @@
     definition.version = 0;                                                                                            \
     definition.className = name;                                                                                       \
     definition.attributes = kJSClassAttributeNoAutomaticPrototype;                                                     \
-    definition.initialize = classObject::proxyInstanceInitialize;                                                      \
     definition.finalize = classObject::proxyInstanceFinalize;                                                          \
     definition.getProperty = classObject::proxyInstanceGetProperty;                                                    \
     definition.setProperty = classObject::proxyInstanceSetProperty;                                                    \

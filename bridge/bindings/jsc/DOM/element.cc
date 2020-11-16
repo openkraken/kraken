@@ -357,31 +357,10 @@ struct ToBlobPromiseContext {
 JSValueRef JSElement::ElementInstance::toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                               size_t argumentCount, const JSValueRef *arguments,
                                               JSValueRef *exception) {
-  const JSValueRef &idValueRef = arguments[0];
-  const JSValueRef &devicePixelRatioValueRef = arguments[1];
-  const JSValueRef &callbackValueRef = arguments[2];
-
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
-
-  if (!JSValueIsNumber(ctx, idValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to export blob: missing element's id.", exception);
-    return nullptr;
-  }
+  const JSValueRef &devicePixelRatioValueRef = arguments[0];
 
   if (!JSValueIsNumber(ctx, devicePixelRatioValueRef)) {
     JSC_THROW_ERROR(ctx, "Failed to export blob: parameter 2 (devicePixelRatio) is not an number.", exception);
-    return nullptr;
-  }
-
-  if (!JSValueIsObject(ctx, callbackValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to export blob': parameter 1 (callback) must be a function.", exception);
-    return nullptr;
-  }
-
-  JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackValueRef, exception);
-
-  if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to export blob': parameter 1 (callback) must be a function.", exception);
     return nullptr;
   }
 
@@ -390,13 +369,14 @@ JSValueRef JSElement::ElementInstance::toBlob(JSContextRef ctx, JSObjectRef func
     return nullptr;
   }
 
+  auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
+  auto context = elementInstance->_hostClass->context;
   getDartMethod()->requestUpdateFrame();
 
-  double id = JSValueToNumber(ctx, idValueRef, exception);
   double devicePixelRatio = JSValueToNumber(ctx, devicePixelRatioValueRef, exception);
   auto bridge = static_cast<JSBridge *>(context->getOwner());
 
-  auto toBlobPromiseContext = new ToBlobPromiseContext(bridge, context, id, devicePixelRatio);
+  auto toBlobPromiseContext = new ToBlobPromiseContext(bridge, context, elementInstance->eventTargetId, devicePixelRatio);
 
   auto promiseCallback = [](JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef arguments[], JSValueRef *exception) -> JSValueRef {
@@ -425,8 +405,8 @@ JSValueRef JSElement::ElementInstance::toBlob(JSContextRef ctx, JSObjectRef func
       } else {
         std::vector<uint8_t> vec(bytes, bytes + length);
         JSObjectRef resolveObjectRef = JSValueToObject(ctx, resolveValueRef, nullptr);
-        auto blob = new JSBlob(&callbackContext->_context, std::move(vec));
-        const JSValueRef arguments[] = {blob->jsObject};
+        auto blob = new JSBlob::BlobInstance(JSBlob::instance(&callbackContext->_context), std::move(vec));
+        const JSValueRef arguments[] = {blob->object};
 
         JSObjectCallAsFunction(ctx, resolveObjectRef, callbackContext->_context.global(), 1, arguments, nullptr);
       }

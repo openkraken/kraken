@@ -48,9 +48,8 @@ public:
     enum class EventTargetProperty {
       kAddEventListener,
       kRemoveEventListener,
-      kDispatchEvent
-    };
-    static std::array<JSStringRef, 3> &getEventTargetPropertyNames();
+      kDispatchEvent, kClearListeners };
+    static std::vector<JSStringRef> &getEventTargetPropertyNames();
     static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
 
     static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -59,6 +58,8 @@ public:
                                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef __clearListeners__(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     EventTargetInstance() = delete;
     explicit EventTargetInstance(JSEventTarget *eventTarget);
     explicit EventTargetInstance(JSEventTarget *eventTarget, int64_t targetId);
@@ -79,6 +80,7 @@ public:
     JSObjectRef _addEventListener {nullptr};
     JSObjectRef _removeEventListener {nullptr};
     JSObjectRef _dispatchEvent {nullptr};
+    JSObjectRef _clearListeners{nullptr};
   };
 };
 
