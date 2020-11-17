@@ -28,9 +28,11 @@ mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener onPointerSignal;
 
+  GestureClickCallback onClick;
+
   /// called when click
-  void initPointerCallback(GestureClickCallback onPointClick) {
-    _recognizer.onPointClick = onPointClick;
+  void initPointerCallback() {
+    _recognizer.onClick = onClick;
   }
 
   KrakenClickGestureRecognizer _recognizer = KrakenClickGestureRecognizer();

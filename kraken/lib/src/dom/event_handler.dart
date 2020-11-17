@@ -18,7 +18,8 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerMove = handlePointMove;
     renderBoxModel.onPointerUp = handlePointUp;
     renderBoxModel.onPointerCancel = handlePointCancel;
-    renderBoxModel.initPointerCallback(handlePointClick);
+    renderBoxModel.onClick = handleClick;
+    renderBoxModel.initPointerCallback();
   }
 
   void removeEventResponder(RenderBoxModel renderBoxModel) {
@@ -57,10 +58,6 @@ mixin EventHandlerMixin on Node {
     Event event = Event('touchcancel', EventInit());
     event.detail = {};
     dispatchEvent(event);
-  }
-
-  void handlePointClick() {
-    handleClick(Event('click', EventInit()));
   }
 
   TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {

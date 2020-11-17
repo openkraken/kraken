@@ -5,11 +5,17 @@
 
 import 'dart:async';
 
+
+import 'package:flutter/rendering.dart';
+import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/scheduler.dart';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 /// A tap with a primary button has occurred.
-typedef GestureClickCallback = void Function();
+typedef GestureClickCallback = void Function(Event);
 
 class KrakenClickGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
@@ -56,7 +62,7 @@ class KrakenClickGestureRecognizer extends OneSequenceGestureRecognizer {
 
   PointerDownEvent _down;
 
-  GestureClickCallback onPointClick;
+  GestureClickCallback onClick;
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
@@ -82,8 +88,8 @@ class KrakenClickGestureRecognizer extends OneSequenceGestureRecognizer {
         stopTrackingPointer(primaryPointer);
       } else {
         if (event is PointerUpEvent) {
-          if (onPointClick != null)
-            onPointClick();
+          if (onClick != null)
+            onClick(Event('click', EventInit()));
           _reset();
         } else if (event is PointerCancelEvent) {
           _reset();
