@@ -244,7 +244,7 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
     case EventTargetProperty::kAddEventListener: {
       if (_addEventListener == nullptr) {
         _addEventListener = propertyBindingFunction(_hostClass->context, this, "addEventListener", addEventListener);
-        JSValueProtect(_hostClass->ctx, _clearListeners);
+        JSValueProtect(_hostClass->ctx, _addEventListener);
       }
       return _addEventListener;
     }
@@ -252,14 +252,14 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
       if (_removeEventListener) {
         _removeEventListener =
           propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
-        JSValueProtect(_hostClass->ctx, _clearListeners);
+        JSValueProtect(_hostClass->ctx, _removeEventListener);
       }
       return _removeEventListener;
     }
     case EventTargetProperty::kDispatchEvent: {
       if (_dispatchEvent == nullptr) {
         _dispatchEvent = propertyBindingFunction(_hostClass->context, this, "dispatchEvent", dispatchEvent);
-        JSValueProtect(_hostClass->ctx, _clearListeners);
+        JSValueProtect(_hostClass->ctx, _dispatchEvent);
       }
       return _dispatchEvent;
     }

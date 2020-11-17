@@ -136,14 +136,14 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
   case DocumentProperty::kCreateTextNode: {
     if (_createTextNode == nullptr) {
       _createTextNode = propertyBindingFunction(_hostClass->context, this, "createTextNode", createTextNode);
-      JSValueProtect(_hostClass->ctx, _createElement);
+      JSValueProtect(_hostClass->ctx, _createTextNode);
     }
     return _createTextNode;
   }
   case DocumentProperty::kCreateComment: {
     if (_createComment == nullptr) {
       _createComment = propertyBindingFunction(_hostClass->context, this, "createComment", createComment);
-      JSValueProtect(_hostClass->ctx, _createElement);
+      JSValueProtect(_hostClass->ctx, _createComment);
     }
     return _createComment;
   }
