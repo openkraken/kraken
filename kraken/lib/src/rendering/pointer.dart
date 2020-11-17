@@ -35,7 +35,7 @@ mixin RenderPointerListenerMixin on RenderBox {
     _recognizer.onClick = onClick;
   }
 
-  KrakenClickGestureRecognizer _recognizer = KrakenClickGestureRecognizer();
+  ClickGestureRecognizer _recognizer = ClickGestureRecognizer();
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {

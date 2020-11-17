@@ -17,11 +17,11 @@ import 'package:flutter/rendering.dart';
 /// A tap with a primary button has occurred.
 typedef GestureClickCallback = void Function(Event);
 
-class KrakenClickGestureRecognizer extends OneSequenceGestureRecognizer {
+class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
-  KrakenClickGestureRecognizer({
+  ClickGestureRecognizer({
     this.deadline,
     this.acceptSlopTolerance = kTouchSlop,
     Object debugOwner,
