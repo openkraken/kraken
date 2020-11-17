@@ -43,7 +43,7 @@ Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynam
       element = ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case INPUT:
-      element = InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager);
+      element = InputElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case PRE:
       element = PreElement(id, nativePtr.cast<NativeElement>(), elementManager);
@@ -58,7 +58,7 @@ Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynam
       element = VideoElement(id, nativePtr.cast<NativeVideoElement>(), elementManager);
       break;
     case CAMERA_PREVIEW:
-      element = CameraPreviewElement(id, nativePtr.cast<NativeCameraElement>(), elementManager);
+      element = CameraPreviewElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case IFRAME:
       element = IFrameElement(id, nativePtr.cast<NativeIframeElement>(), elementManager);

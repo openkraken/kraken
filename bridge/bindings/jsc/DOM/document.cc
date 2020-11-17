@@ -7,9 +7,11 @@
 #include "bindings/jsc/DOM/elements/anchor_element.h"
 #include "bindings/jsc/DOM/elements/animation_player_element.h"
 #include "bindings/jsc/DOM/elements/audio_element.h"
-#include "bindings/jsc/DOM/elements/video_element.h"
 #include "bindings/jsc/DOM/elements/canvas_element.h"
 #include "bindings/jsc/DOM/elements/iframe_element.h"
+#include "bindings/jsc/DOM/elements/image_element.h"
+#include "bindings/jsc/DOM/elements/object_element.h"
+#include "bindings/jsc/DOM/elements/video_element.h"
 #include "comment_node.h"
 #include "element.h"
 #include "text_node.h"
@@ -85,17 +87,12 @@ JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 
 JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagName) {
   static std::unordered_map<std::string, JSElement *> elementMap{
-    {"a", JSAnchorElement::instance(context)},
-    {"animation-player", JSAnimationPlayerElement::instance(context)},
-    {"audio", JSAudioElement::instance(context)},
-    {"video", JSVideoElement::instance(context)},
-    {"canvas", JSCanvasElement::instance(context)},
-    {"div", JSElement::instance(context)},
-    {"span", JSElement::instance(context)},
-    {"strong", JSElement::instance(context)},
-    {"pre", JSElement::instance(context)},
-    {"p", JSElement::instance(context)},
-    {"iframe", JSIframeElement::instance(context)}};
+    {"a", JSAnchorElement::instance(context)},      {"animation-player", JSAnimationPlayerElement::instance(context)},
+    {"audio", JSAudioElement::instance(context)},   {"video", JSVideoElement::instance(context)},
+    {"canvas", JSCanvasElement::instance(context)}, {"div", JSElement::instance(context)},
+    {"span", JSElement::instance(context)},         {"strong", JSElement::instance(context)},
+    {"pre", JSElement::instance(context)},          {"p", JSElement::instance(context)},
+    {"iframe", JSIframeElement::instance(context)}, {"object", JSObjectElement::instance(context)}};
   return elementMap[tagName];
 }
 
