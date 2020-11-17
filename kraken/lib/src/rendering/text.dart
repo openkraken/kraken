@@ -41,6 +41,11 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
   BoxSizeType widthSizeType;
   BoxSizeType heightSizeType;
 
+  // Auto value for min-width
+  double autoMinWidth = 0;
+  // Auto value for min-height
+  double autoMinHeight = 0;
+
   set text(InlineSpan value) {
     assert(_renderParagraph != null);
     _renderParagraph.text = value;
@@ -111,6 +116,9 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
       }
       child.layout(boxConstraints, parentUsesSize: true);
       size = child.size;
+
+      autoMinWidth = size.width;
+      autoMinHeight = size.height;
     } else {
       performResize();
     }
