@@ -54,7 +54,7 @@ public:
     HostClass *_hostClass{nullptr};
   };
 
-  std::string _name;
+  std::string _name {""};
   JSContext *context{nullptr};
   int32_t contextId;
   JSContextRef ctx{nullptr};

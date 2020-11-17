@@ -108,7 +108,7 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
 
   auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
   if (!JSValueIsObject(ctx, blobValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_match_screenshot__': parameter 1 (blob) must be an Blob object.",
+    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.",
                     exception);
     return nullptr;
   }
@@ -117,7 +117,7 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
   auto blob = static_cast<binding::jsc::JSBlob::BlobInstance *>(JSObjectGetPrivate(blobObjectRef));
 
   if (blob == nullptr || std::string(blob->_hostClass->_name) != JSBlobName) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_match_screenshot__': parameter 1 (blob) must be an Blob object.",
+    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.",
                     exception);
     return nullptr;
   }

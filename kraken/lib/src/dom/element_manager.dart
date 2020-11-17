@@ -141,7 +141,6 @@ class ElementManager {
   void removeTarget(Node target) {
     assert(target.targetId != null);
     assert(_eventTargets.containsKey(target.targetId));
-    print('remove event target id: ${target.targetId}');
     _eventTargets.remove(target.targetId);
   }
 
@@ -152,7 +151,6 @@ class ElementManager {
   void setEventTarget(EventTarget target) {
     assert(target != null);
 
-    print('set event targets id: ${target.targetId}');
     _eventTargets[target.targetId] = target;
   }
 
@@ -268,7 +266,6 @@ class ElementManager {
     Node target = getEventTargetByTargetId<Node>(targetId);
     Node newNode = getEventTargetByTargetId<Node>(newTargetId);
 
-    print('target node: $target, newNode: $newNode');
     switch (position) {
       case 'beforebegin':
         target?.parentNode?.insertBefore(newNode, target);
@@ -277,7 +274,6 @@ class ElementManager {
         target.insertBefore(newNode, target.firstChild);
         break;
       case 'beforeend':
-        print('apendChild');
         target.appendChild(newNode);
         break;
       case 'afterend':

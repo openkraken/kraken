@@ -44,7 +44,7 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagName)
   : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)),
-    tagNameStringRef_(JSStringCreateWithUTF8CString(tagName)) {}
+    tagNameStringRef_(JSStringRetain(JSStringCreateWithUTF8CString(tagName))) {}
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId,
                                             JSValueRef *exception)
@@ -121,7 +121,7 @@ const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::El
     {"scrollBy", ElementProperty::kScrollBy},
     {"toBlob", ElementProperty::kToBlob},
     {"getAttribute", ElementProperty::kGetAttribute},
-    {"setAttribute", ElementProperty::kGetAttribute},
+    {"setAttribute", ElementProperty::kSetAttribute},
     {"children", ElementProperty::kChildren}};
   return propertyHandler;
 }
@@ -287,8 +287,12 @@ JSStringRef JSElement::ElementInstance::internalTextContent() {
   return JSStringCreateWithUTF8CString(buffer.data());
 }
 
-std::array<JSStringRef, 1> &JSElement::ElementInstance::getElementPropertyNames() {
-  static std::array<JSStringRef, 1> propertyNames{JSStringCreateWithUTF8CString("style")};
+std::vector<JSStringRef> &JSElement::ElementInstance::getElementPropertyNames() {
+  static std::vector<JSStringRef> propertyNames{
+    JSStringCreateWithUTF8CString("style"),
+    JSStringCreateWithUTF8CString("getAttribute"),
+    JSStringCreateWithUTF8CString("setAttribute")
+  };
   return propertyNames;
 }
 
@@ -416,7 +420,8 @@ JSValueRef JSElement::ElementInstance::toBlob(JSContextRef ctx, JSObjectRef func
       } else {
         std::vector<uint8_t> vec(bytes, bytes + length);
         JSObjectRef resolveObjectRef = JSValueToObject(ctx, resolveValueRef, nullptr);
-        auto blob = new JSBlob::BlobInstance(JSBlob::instance(&callbackContext->_context), std::move(vec));
+        JSBlob *Blob = JSBlob::instance(&callbackContext->_context);
+        auto blob = new JSBlob::BlobInstance(Blob, std::move(vec));
         const JSValueRef arguments[] = {blob->object};
 
         JSObjectCallAsFunction(ctx, resolveObjectRef, callbackContext->_context.global(), 1, arguments, nullptr);

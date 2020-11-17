@@ -55,7 +55,7 @@ public:
 
   class ElementInstance : public NodeInstance {
   public:
-    static std::array<JSStringRef, 1> &getElementPropertyNames();
+    static std::vector<JSStringRef> &getElementPropertyNames();
     static const std::unordered_map<std::string, ElementProperty> &getPropertyMap();
 
     static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
