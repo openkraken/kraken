@@ -21,7 +21,8 @@ JSNode::NodeInstance::~NodeInstance() {
   // The this node is finalized, should tell all children this parent will no longer protecting them.
   for (auto &node : childNodes) {
     node->parentNode = nullptr;
-    JSValueUnprotect(_hostClass->ctx, node->object);
+    node->unrefer();
+    assert(node->_referenceCount == 0 && ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
   }
 
   delete nativeNode;
@@ -94,7 +95,7 @@ void JSNode::NodeInstance::ensureDetached(JSNode::NodeInstance *node) {
       // TODO: child._notifyNodeRemoved(child.parentNode);
       node->parentNode->childNodes.erase(it);
       node->parentNode = nullptr;
-      JSValueUnprotect(_hostClass->ctx, node->object);
+      node->unrefer();
     }
   }
 }
@@ -222,7 +223,11 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), referenceNode);
       parentChildNodes.insert(it, node);
       node->parentNode = parent;
-      JSValueProtect(_hostClass->ctx, node->object);
+      if (node->_referenceCount == 0) {
+        JSValueProtect(_hostClass->ctx, node->object);
+      } else {
+        node->_referenceCount++;
+      }
       // TODO: newChild._notifyNodeInsert(parentNode);
 
       NativeString nodeTargetId{};
@@ -251,7 +256,7 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   ensureDetached(node);
   childNodes.emplace_back(node);
   node->parentNode = this;
-  JSValueProtect(_hostClass->ctx, node->object);
+  node->refer();
 
   //  TODO: child._notifyNodeInsert(this);
   NativeString childTargetId{};
@@ -278,7 +283,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalRemoveChild(JSNode::NodeInst
   if (it != childNodes.end()) {
     childNodes.erase(it);
     node->parentNode = nullptr;
-    JSValueUnprotect(_hostClass->ctx, node->object);
+    node->unrefer();
     // TODO: child._notifyNodeRemove(this);
     foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
       ->registerCommand(node->eventTargetId, UICommandType::removeNode, nullptr, 0, nullptr);
@@ -297,13 +302,13 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   ensureDetached(newChild);
   auto parent = oldChild->parentNode;
   oldChild->parentNode = nullptr;
-  JSValueUnprotect(_hostClass->ctx, oldChild->object);
+  oldChild->unrefer();
 
   auto childIndex = std::find(parent->childNodes.begin(), parent->childNodes.end(), oldChild);
   newChild->parentNode = parent;
   parent->childNodes.erase(childIndex);
   parent->childNodes.insert(childIndex, newChild);
-  JSValueProtect(_hostClass->ctx, newChild->object);
+  newChild->refer();
 
   //  TODO: oldChild._notifyNodeRemoved(parentNode);
   //  TODO: newChild._notifyNodeInsert(parentNode);
@@ -443,6 +448,20 @@ const std::unordered_map<std::string, JSNode::NodeInstance::NodeProperty> &JSNod
                                                                    {"nodeType", NodeProperty::kNodeType},
                                                                    {"nodeName", NodeProperty::kNodeName}};
   return propertyMap;
+}
+
+void JSNode::NodeInstance::refer() {
+  if (_referenceCount == 0) {
+    JSValueProtect(_hostClass->ctx, this->object);
+  }
+  _referenceCount++;
+}
+
+void JSNode::NodeInstance::unrefer() {
+  _referenceCount--;
+  if (_referenceCount == 0) {
+    JSValueUnprotect(_hostClass->ctx, this->object);
+  }
 }
 
 } // namespace kraken::binding::jsc

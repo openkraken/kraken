@@ -280,7 +280,7 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getPropertyValue(JSCon
 
 void CSSStyleDeclaration::StyleDeclarationInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &prop : properties) {
-    JSPropertyNameAccumulatorAddName(accumulator, prop.second);
+    JSPropertyNameAccumulatorAddName(accumulator, JSStringCreateWithUTF8CString(prop.first.c_str()));
   }
 
   for (auto &prop : getStyleDeclarationPropertyNames()) {

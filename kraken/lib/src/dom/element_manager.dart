@@ -99,6 +99,7 @@ class ElementManager {
   static void disposeEventTarget(int contextId, int id) {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
     EventTarget eventTarget = controller.view.getEventTargetById(id);
+    assert(eventTarget != null, 'can not get eventTarget of id: $id');
     eventTarget.dispose();
   }
 
@@ -140,6 +141,7 @@ class ElementManager {
   void removeTarget(Node target) {
     assert(target.targetId != null);
     assert(_eventTargets.containsKey(target.targetId));
+    print('remove event target id: ${target.targetId}');
     _eventTargets.remove(target.targetId);
   }
 
@@ -150,6 +152,7 @@ class ElementManager {
   void setEventTarget(EventTarget target) {
     assert(target != null);
 
+    print('set event targets id: ${target.targetId}');
     _eventTargets[target.targetId] = target;
   }
 
@@ -197,8 +200,6 @@ class ElementManager {
     assert(target != null);
 
     target.parentNode?.removeChild(target);
-    // Remove node reference to ElementManager
-    target.elementManager = null;
 
     _debugDOMTreeChanged();
   }

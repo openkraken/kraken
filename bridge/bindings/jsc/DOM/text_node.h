@@ -44,7 +44,7 @@ public:
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;
 
-    NativeTextNode *nativeTextNode;
+    NativeTextNode *nativeTextNode {nullptr};
 
   private:
     JSStringRef data {nullptr};

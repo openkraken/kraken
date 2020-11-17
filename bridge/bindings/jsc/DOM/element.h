@@ -85,7 +85,7 @@ public:
     NativeElement *nativeElement {nullptr};
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
-    JSStringRef tagNameStringRef_;
+    JSStringRef tagNameStringRef_ {nullptr};
     JSObjectRef _getBoundingClientRect{nullptr};
     JSObjectRef _setAttribute{nullptr};
     JSObjectRef _getAttribute{nullptr};

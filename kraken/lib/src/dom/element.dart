@@ -407,13 +407,13 @@ class Element extends Node
   @override
   void dispose() {
     super.dispose();
-    assert(renderBoxModel != null);
-    assert(renderBoxModel.parent == null);
+
+    if (renderBoxModel != null && isRendererAttached) {
+      detach();
+    }
 
     // Remove native reference.
     _nativeMap.remove(nativeElementPtr.address);
-
-    renderBoxModel = null;
   }
 
   // Attach renderObject of current node to parent
@@ -468,7 +468,8 @@ class Element extends Node
     }
 
     didDetachRenderer();
-    dispose();
+
+    renderBoxModel = null;
   }
 
   @override

@@ -174,14 +174,11 @@ function traverseNode(node, handle) {
 }
 
 function clearAllEventsListeners() {
-  // @ts-ignore
   window.__clearListeners__();
-  // @ts-ignore
   traverseNode(document.body, (node) => {
     node.__clearListeners__();
   });
 }
-
 
 __kraken_executeTest__((done) => {
   jasmineTracker.onSpecDone = (result) => {
@@ -194,13 +191,7 @@ __kraken_executeTest__((done) => {
           clearAllEventsListeners();
           clearAllNodes();
           requestAnimationFrame(() => {
-            __kraken_refresh_paint__(function (e) {
-              if (e) {
-                reject(e);
-              } else {
-                resolve();
-              }
-            });
+            resolve();
           });
         }
       } catch (e) {

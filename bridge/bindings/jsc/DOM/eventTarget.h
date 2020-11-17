@@ -48,7 +48,9 @@ public:
     enum class EventTargetProperty {
       kAddEventListener,
       kRemoveEventListener,
-      kDispatchEvent, kClearListeners };
+      kDispatchEvent, kClearListeners,
+      kTargetId
+    };
     static std::vector<JSStringRef> &getEventTargetPropertyNames();
     static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
 

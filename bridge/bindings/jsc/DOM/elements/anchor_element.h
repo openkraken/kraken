@@ -40,7 +40,7 @@ public:
     void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
-    NativeAnchorElement *nativeAnchorElement;
+    NativeAnchorElement *nativeAnchorElement{nullptr};
   private:
     JSStringRef _href{nullptr};
     JSStringRef _target{nullptr};

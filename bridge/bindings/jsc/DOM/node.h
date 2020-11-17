@@ -91,10 +91,14 @@ public:
     JSNode::NodeInstance *parentNode{nullptr};
     std::vector<JSNode::NodeInstance *> childNodes;
 
-    NativeNode *nativeNode;
+    NativeNode *nativeNode{nullptr};
 
   private:
     void ensureDetached(JSNode::NodeInstance *node);
+
+    int32_t _referenceCount {0};
+    void refer();
+    void unrefer();
 
     JSObjectRef _appendChild {nullptr};
     JSObjectRef _remove {nullptr};

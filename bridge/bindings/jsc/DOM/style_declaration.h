@@ -58,9 +58,9 @@ public:
     std::unordered_map<std::string, JSStringRef> properties;
     const JSEventTarget::EventTargetInstance *ownerEventTarget;
 
-    JSObjectRef _setProperty;
-    JSObjectRef _getPropertyValue;
-    JSObjectRef _removeProperty;
+    JSObjectRef _setProperty {nullptr};
+    JSObjectRef _getPropertyValue {nullptr};
+    JSObjectRef _removeProperty {nullptr};
   };
 };
 

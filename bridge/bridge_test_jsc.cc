@@ -6,6 +6,7 @@
 #include "bridge_test_jsc.h"
 #include "bindings/jsc/KOM/blob.h"
 #include "bindings/jsc/KOM/location.h"
+#include "bindings/jsc/js_context.h"
 #include "bindings/jsc/macros.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
@@ -82,8 +83,7 @@ JSValueRef refreshPaint(JSContextRef ctx, JSObjectRef function, JSObjectRef this
       JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 1, arguments, &exception);
     } else {
       JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
-      JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 0, nullptr,
-                             &exception);
+      JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 0, nullptr, &exception);
     }
 
     _context.handleException(exception);
@@ -93,9 +93,9 @@ JSValueRef refreshPaint(JSContextRef ctx, JSObjectRef function, JSObjectRef this
 
   auto bridge = static_cast<JSBridge *>(context->getOwner());
   bridge->bridgeCallback->registerCallback<void>(std::move(callbackContext),
-                                                [&fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
-                                                  getDartMethod()->refreshPaint(callbackContext, contextId, fn);
-                                                });
+                                                 [&fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
+                                                   getDartMethod()->refreshPaint(callbackContext, contextId, fn);
+                                                 });
 
   return nullptr;
 }
@@ -257,8 +257,11 @@ JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->
 }
 
 struct ExecuteCallbackContext {
-  ExecuteCallbackContext(ExecuteCallback &executeCallback): executeCallback(executeCallback) {};
-  ExecuteCallback &executeCallback;
+  ExecuteCallbackContext() = delete;
+  explicit ExecuteCallbackContext(binding::jsc::JSContext *context, ExecuteCallback executeCallback)
+    : executeCallback(executeCallback), context(context){};
+  ExecuteCallback executeCallback;
+  binding::jsc::JSContext *context;
 };
 
 void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
@@ -266,33 +269,29 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     return;
   }
 
-  auto *callbackContext = new ExecuteCallbackContext(executeCallback);
+  auto *callbackContext = new ExecuteCallbackContext(context.get(), executeCallback);
 
   auto done = [](JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                  const JSValueRef arguments[], JSValueRef *exception) -> JSValueRef {
-    auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
     const JSValueRef &statusValueRef = arguments[0];
-    auto callbackContext = static_cast<ExecuteCallbackContext*>(JSObjectGetPrivate(function));
+    auto callbackContext = static_cast<ExecuteCallbackContext *>(JSObjectGetPrivate(function));
 
     if (!JSValueIsString(ctx, statusValueRef)) {
       JSC_THROW_ERROR(ctx, "failed to execute 'done': parameter 1 (status) is not a string", exception);
       return nullptr;
     }
     JSStringRef statusString = JSValueToStringCopy(ctx, statusValueRef, exception);
-    NativeString nativeString {};
+    NativeString nativeString{};
     nativeString.string = JSStringGetCharactersPtr(statusString);
     nativeString.length = JSStringGetLength(statusString);
-    callbackContext->executeCallback(context->getContextId(), &nativeString);
+    callbackContext->executeCallback(callbackContext->context->getContextId(), &nativeString);
     return nullptr;
   };
 
   JSObjectRef executeTestCallbackObject = JSValueToObject(context->context(), executeTestCallback, nullptr);
-
   JSObjectSetPrivate(executeTestCallbackObject, callbackContext);
 
-  JSObjectRef callback =
-    JSObjectMakeFunctionWithCallback(context->context(), JSStringCreateWithUTF8CString("done"), done);
-  JSObjectSetPrivate(callback, context.get());
+  JSObjectRef callback = kraken::binding::jsc::propertyBindingFunction(context.get(), callbackContext, "done", done);
   const JSValueRef arguments[] = {callback};
 
   JSObjectCallAsFunction(context->context(), executeTestCallbackObject, context->global(), 1, arguments, nullptr);
