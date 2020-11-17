@@ -25,9 +25,6 @@ class JSBlob : public HostClass {
 public:
   static JSBlob *instance(JSContext *context);
 
-  JSBlob() = delete;
-  JSBlob(JSContext *context) : HostClass(context, "Blob"){};
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -57,8 +54,8 @@ public:
     explicit BlobInstance(JSBlob *jsBlob) : _size(0), Instance(jsBlob){};
     explicit BlobInstance(JSBlob *jsBlob, std::vector<uint8_t> &&data)
       : _size(data.size()), _data(std::move(data)), Instance(jsBlob){};
-    explicit BlobInstance(JSBlob *jsBlob, std::vector<uint8_t> &&data, std::string mime)
-      : mimeType(std::move(mime)), _size(data.size()), _data(std::move(data)), Instance(jsBlob){};
+    explicit BlobInstance(JSBlob *jsBlob, std::vector<uint8_t> &&data, std::string &mime)
+      : mimeType(mime), _size(data.size()), _data(std::move(data)), Instance(jsBlob){};
 
     ~BlobInstance() override;
 
@@ -84,6 +81,10 @@ public:
   struct BlobPromiseContext {
     BlobInstance *blobInstance;
   };
+
+protected:
+  JSBlob() = delete;
+  explicit JSBlob(JSContext *context) : HostClass(context, "Blob"){};
 };
 
 class BlobBuilder {

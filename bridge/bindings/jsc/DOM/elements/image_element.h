@@ -16,10 +16,6 @@ struct NativeImageElement;
 class JSImageElement : public JSElement {
 public:
   static JSImageElement *instance(JSContext *context);
-
-  JSImageElement() = delete;
-  explicit JSImageElement(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -45,6 +41,9 @@ public:
     double _width;
     double _height;
   };
+protected:
+  JSImageElement() = delete;
+  explicit JSImageElement(JSContext *context);
 };
 
 struct NativeImageElement {

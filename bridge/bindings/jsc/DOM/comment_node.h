@@ -17,9 +17,6 @@ struct NativeComment;
 
 class JSCommentNode : public JSNode {
 public:
-  JSCommentNode() = delete;
-  explicit JSCommentNode(JSContext *context);
-
   static JSCommentNode *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -44,6 +41,9 @@ public:
   private:
     JSStringRef data{nullptr};
   };
+protected:
+  JSCommentNode() = delete;
+  explicit JSCommentNode(JSContext *context);
 };
 
 struct NativeComment {

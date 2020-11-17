@@ -12,6 +12,7 @@ namespace kraken::binding::jsc {
 void bindKraken(std::unique_ptr<JSContext> &context) {
   JSObjectRef kraken = JSObjectMake(context->context(), nullptr, nullptr);
   KrakenInfo *krakenInfo = getKrakenInfo();
+  JSValueProtect(context->context(), kraken);
 
   // Other properties are injected by dart.
   JSStringRef userAgentStr = JSStringCreateWithUTF8CString(krakenInfo->getUserAgent(krakenInfo));

@@ -97,9 +97,6 @@ class CanvasRenderingContext2D : public HostClass {
 public:
   static CanvasRenderingContext2D *instance(JSContext *context);
 
-  CanvasRenderingContext2D() = delete;
-  explicit CanvasRenderingContext2D(JSContext *context);
-
   class CanvasRenderingContext2DInstance : public Instance {
   public:
     enum class CanvasRenderingContext2DProperty {
@@ -162,6 +159,9 @@ public:
     JSObjectRef _save{nullptr};
     JSObjectRef _restore{nullptr};
   };
+protected:
+  CanvasRenderingContext2D() = delete;
+  explicit CanvasRenderingContext2D(JSContext *context);
 };
 
 } // namespace kraken::binding::jsc

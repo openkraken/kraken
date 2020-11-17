@@ -16,10 +16,6 @@ struct NativeAnchorElement;
 class JSAnchorElement : public JSElement {
 public:
   static JSAnchorElement *instance(JSContext *context);
-
-  JSAnchorElement() = delete;
-  explicit JSAnchorElement(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -45,6 +41,9 @@ public:
     JSStringRef _href{nullptr};
     JSStringRef _target{nullptr};
   };
+protected:
+  JSAnchorElement() = delete;
+  explicit JSAnchorElement(JSContext *context);
 };
 
 struct NativeAnchorElement {

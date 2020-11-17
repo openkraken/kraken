@@ -17,9 +17,10 @@ struct NativeDocument;
 
 class JSDocument : public JSNode {
 public:
+  static JSDocument *instance(JSContext *context);
+
   static JSElement *getElementOfTagName(JSContext *context, std::string &tagName);
 
-  JSDocument(JSContext *context);
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
 
@@ -59,6 +60,10 @@ public:
     JSObjectRef _createTextNode {nullptr};
     JSObjectRef _createComment {nullptr};
   };
+
+protected:
+  JSDocument() = delete;
+  JSDocument(JSContext *context);
 };
 
 struct NativeDocument {

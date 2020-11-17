@@ -28,9 +28,7 @@ struct NativeNode;
 
 class JSNode : public JSEventTarget {
 public:
-  JSNode() = delete;
-  explicit JSNode(JSContext *context);
-  explicit JSNode(JSContext *context, const char *name);
+  static JSNode *instance(JSContext *context);
 
   class NodeInstance : public EventTargetInstance {
   public:
@@ -105,6 +103,11 @@ public:
     JSObjectRef _insertBefore {nullptr};
     JSObjectRef _replaceChild {nullptr};
   };
+
+protected:
+  JSNode() = delete;
+  explicit JSNode(JSContext *context);
+  explicit JSNode(JSContext *context, const char *name);
 };
 
 struct NativeNode {

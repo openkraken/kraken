@@ -17,9 +17,6 @@ struct NativeTextNode;
 
 class JSTextNode : public JSNode {
 public:
-  JSTextNode() = delete;
-  explicit JSTextNode(JSContext *context);
-
   static JSTextNode *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -49,6 +46,10 @@ public:
   private:
     JSStringRef data {nullptr};
   };
+
+protected:
+  JSTextNode() = delete;
+  explicit JSTextNode(JSContext *context);
 };
 
 struct NativeTextNode {

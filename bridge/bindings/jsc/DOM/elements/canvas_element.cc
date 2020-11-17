@@ -42,6 +42,8 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
   delete nativeCanvasElement;
+
+  if (_getContext != nullptr) JSValueUnprotect(_hostClass->ctx, _getContext);
 }
 
 std::vector<JSStringRef> &JSCanvasElement::CanvasElementInstance::getCanvasElementPropertyNames() {
@@ -78,6 +80,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
     case CanvasElementProperty::kGetContext:
       if (_getContext == nullptr) {
         _getContext = propertyBindingFunction(_hostClass->context, this, "getContext", getContext);
+        JSValueProtect(_hostClass->ctx, _getContext);
       }
       return _getContext;
     }

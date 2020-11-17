@@ -59,10 +59,6 @@ public:
   static EventType getEventTypeOfName(std::string &name);
   static const char* getEventNameOfTypeIndex(int8_t index);
 
-  JSEvent() = delete;
-  explicit JSEvent(JSContext *context, const char *name);
-  explicit JSEvent(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -117,6 +113,10 @@ public:
     JSObjectRef _stopPropagation{nullptr};
     JSObjectRef _preventDefault{nullptr};
   };
+protected:
+  JSEvent() = delete;
+  explicit JSEvent(JSContext *context, const char *name);
+  explicit JSEvent(JSContext *context);
 };
 
 struct NativeEvent {

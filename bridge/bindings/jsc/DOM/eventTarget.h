@@ -36,10 +36,6 @@ class JSEventTarget : public HostClass {
 public:
   static JSEventTarget *instance(JSContext *context);
 
-  JSEventTarget() = delete;
-  explicit JSEventTarget(JSContext *context, const char *name);
-  explicit JSEventTarget(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -84,6 +80,11 @@ public:
     JSObjectRef _dispatchEvent {nullptr};
     JSObjectRef _clearListeners{nullptr};
   };
+
+protected:
+  JSEventTarget() = delete;
+  explicit JSEventTarget(JSContext *context, const char *name);
+  explicit JSEventTarget(JSContext *context);
 };
 
 using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);

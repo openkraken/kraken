@@ -17,9 +17,6 @@ class JSAnimationPlayerElement : public JSElement {
 public:
   static JSAnimationPlayerElement *instance(JSContext *context);
 
-  JSAnimationPlayerElement() = delete;
-  explicit JSAnimationPlayerElement(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -52,6 +49,9 @@ public:
 
     JSObjectRef _play {nullptr};
   };
+protected:
+  JSAnimationPlayerElement() = delete;
+  explicit JSAnimationPlayerElement(JSContext *context);
 };
 
 using PlayAnimation = void(*)(NativeAnimationPlayerElement *nativePtr, NativeString *name, double mix, double mixSeconds);

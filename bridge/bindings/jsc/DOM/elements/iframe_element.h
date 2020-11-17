@@ -16,10 +16,6 @@ struct NativeIframeElement;
 class JSIframeElement : public JSElement {
 public:
   static JSIframeElement *instance(JSContext *context);
-
-  JSIframeElement() = delete;
-  explicit JSIframeElement(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -48,6 +44,9 @@ public:
 
     JSObjectRef _postMessage{nullptr};
   };
+protected:
+  JSIframeElement() = delete;
+  explicit JSIframeElement(JSContext *context);
 };
 
 using IframePostMessage = void (*)(NativeIframeElement *nativePtr, NativeString *message);

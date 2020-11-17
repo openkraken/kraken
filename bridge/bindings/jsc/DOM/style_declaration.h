@@ -17,9 +17,6 @@ void bindCSSStyleDeclaration(std::unique_ptr<JSContext> &context);
 
 class CSSStyleDeclaration : public HostClass {
 public:
-  CSSStyleDeclaration() = delete;
-  explicit CSSStyleDeclaration(JSContext *context);
-
   static CSSStyleDeclaration *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -62,6 +59,10 @@ public:
     JSObjectRef _getPropertyValue {nullptr};
     JSObjectRef _removeProperty {nullptr};
   };
+
+protected:
+  CSSStyleDeclaration() = delete;
+  explicit CSSStyleDeclaration(JSContext *context);
 };
 
 } // namespace kraken::binding::jsc

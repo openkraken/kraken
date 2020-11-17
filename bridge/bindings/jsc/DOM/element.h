@@ -46,10 +46,6 @@ public:
   };
 
   static JSElement *instance(JSContext *context);
-
-  JSElement() = delete;
-  explicit JSElement(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -95,6 +91,9 @@ public:
     JSObjectRef _scrollBy{nullptr};
     std::unordered_map<std::string, JSStringRef> attributes;
   };
+protected:
+  JSElement() = delete;
+  explicit JSElement(JSContext *context);
 };
 
 struct NativeBoundingClientRect {

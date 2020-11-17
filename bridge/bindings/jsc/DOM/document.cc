@@ -20,11 +20,19 @@
 namespace kraken::binding::jsc {
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
-  auto document = new JSDocument(context.get());
+  auto document = JSDocument::instance(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Document", document->classObject);
   auto documentObjectRef =
     document->instanceConstructor(context->context(), document->classObject, 0, nullptr, nullptr);
   JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
+}
+
+JSDocument * JSDocument::instance(JSContext *context) {
+  static std::unordered_map<JSContext *, JSDocument *> instanceMap{};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSDocument(context);
+  }
+  return instanceMap[context];
 }
 
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -92,7 +100,8 @@ JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagN
     {"canvas", JSCanvasElement::instance(context)}, {"div", JSElement::instance(context)},
     {"span", JSElement::instance(context)},         {"strong", JSElement::instance(context)},
     {"pre", JSElement::instance(context)},          {"p", JSElement::instance(context)},
-    {"iframe", JSIframeElement::instance(context)}, {"object", JSObjectElement::instance(context)}};
+    {"iframe", JSIframeElement::instance(context)}, {"object", JSObjectElement::instance(context)},
+    {"img", JSImageElement::instance(context)}};
   return elementMap[tagName];
 }
 

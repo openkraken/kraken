@@ -116,7 +116,7 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
   JSObjectRef blobObjectRef = JSValueToObject(ctx, blobValueRef, exception);
   auto blob = static_cast<binding::jsc::JSBlob::BlobInstance *>(JSObjectGetPrivate(blobObjectRef));
 
-  if (blob == nullptr || std::string(blob->_hostClass->_name) != JSBlobName) {
+  if (blob == nullptr) {
     JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.",
                     exception);
     return nullptr;

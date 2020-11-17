@@ -23,8 +23,8 @@ JSObjectRef JSImageElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 }
 
 JSImageElement::ImageElementInstance::ImageElementInstance(JSImageElement *jsAnchorElement)
-  : ElementInstance(jsAnchorElement, "image"), nativeImageElement(new NativeImageElement(nativeElement)) {
-  JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("image");
+  : ElementInstance(jsAnchorElement, "img"), nativeImageElement(new NativeImageElement(nativeElement)) {
+  JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("img");
   NativeString tagName{};
   tagName.string = JSStringGetCharactersPtr(canvasTagNameStringRef);
   tagName.length = JSStringGetLength(canvasTagNameStringRef);

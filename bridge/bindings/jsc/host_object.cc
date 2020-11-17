@@ -4,6 +4,7 @@
  */
 
 #include "host_object.h"
+#include "foundation/logging.h"
 
 namespace kraken::binding::jsc {
 
@@ -49,7 +50,10 @@ void HostObject::proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSP
   hostObject->getPropertyNames(accumulator);
 }
 
-HostObject::~HostObject() {}
+HostObject::~HostObject() {
+  assert(false);
+  KRAKEN_LOG(VERBOSE) << "dispose HostObject " << this;
+}
 
 JSValueRef HostObject::getProperty(std::string &name, JSValueRef *exception) {
   return nullptr;

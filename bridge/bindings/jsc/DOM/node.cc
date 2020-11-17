@@ -17,6 +17,14 @@ void bindNode(std::unique_ptr<JSContext> &context) {
 JSNode::JSNode(JSContext *context) : JSEventTarget(context, "Node") {}
 JSNode::JSNode(JSContext *context, const char *name) : JSEventTarget(context, name) {}
 
+JSNode *JSNode::instance(JSContext *context) {
+  static std::unordered_map<JSContext *, JSNode *> instanceMap{};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSNode(context);
+  }
+  return instanceMap[context];
+}
+
 JSNode::NodeInstance::~NodeInstance() {
   // The this node is finalized, should tell all children this parent will no longer protecting them.
   for (auto &node : childNodes) {

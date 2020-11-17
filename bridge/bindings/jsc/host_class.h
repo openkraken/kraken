@@ -63,6 +63,8 @@ public:
   // The class template of javascript instance objects.
   JSClassRef instanceClass{nullptr};
 
+  JSObjectRef _call{nullptr};
+
 private:
   // The class template of javascript constructor function.
   JSClassRef jsClass{nullptr};

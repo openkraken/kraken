@@ -20,8 +20,7 @@ struct NativeWindow;
 
 class JSWindow : public JSEventTarget {
 public:
-  JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName){};
-  ~JSWindow();
+  static JSWindow *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -46,6 +45,9 @@ public:
     };
     JSLocation *location_;
   };
+private:
+  JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName){};
+  ~JSWindow();
 };
 
 struct NativeWindow {

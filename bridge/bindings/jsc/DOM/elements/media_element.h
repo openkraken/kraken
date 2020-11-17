@@ -20,10 +20,6 @@ struct NativeMediaElement;
 class JSMediaElement : public JSElement {
 public:
   static JSMediaElement *instance(JSContext *context);
-
-  JSMediaElement() = delete;
-  explicit JSMediaElement(JSContext *context);
-
   class MediaElementInstance : public ElementInstance {
   public:
     enum class MediaElementProperty {
@@ -65,6 +61,9 @@ public:
     JSObjectRef _pause {nullptr};
     JSObjectRef _fastSeek {nullptr};
   };
+protected:
+  JSMediaElement() = delete;
+  explicit JSMediaElement(JSContext *context);
 };
 
 struct NativeMediaElement {

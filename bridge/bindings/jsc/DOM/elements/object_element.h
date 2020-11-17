@@ -16,10 +16,6 @@ struct NativeObjectElement;
 class JSObjectElement : public JSElement {
 public:
   static JSObjectElement *instance(JSContext *context);
-
-  JSObjectElement() = delete;
-  explicit JSObjectElement(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -48,6 +44,9 @@ public:
     JSStringRef _data{nullptr};
     JSStringRef _type{nullptr};
   };
+protected:
+  JSObjectElement() = delete;
+  explicit JSObjectElement(JSContext *context);
 };
 
 struct NativeObjectElement {

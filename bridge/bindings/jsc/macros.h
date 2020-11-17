@@ -11,6 +11,7 @@
     functionDefinition.version = 0;                                                                                    \
     JSClassRef functionClass = JSClassCreate(&functionDefinition);                                                     \
     JSObjectRef function = JSObjectMake(context->context(), functionClass, context.get());                             \
+    JSValueProtect(context->context(), function);                                                                      \
     JSStringRef name = JSStringCreateWithUTF8CString(nameStr);                                                         \
     JSValueRef exc = nullptr;                                                                                          \
     JSObjectSetProperty(context->context(), context->global(), name, function, kJSPropertyAttributeNone, &exc);        \
@@ -21,6 +22,7 @@
 #define JSC_GLOBAL_BINDING_HOST_OBJECT(context, nameStr, hostObject)                                                   \
   {                                                                                                                    \
     JSObjectRef object = hostObject->jsObject;                                                                         \
+    JSValueProtect(context->context(), object);                                                                        \
     JSStringRef name = JSStringCreateWithUTF8CString(nameStr);                                                         \
     JSObjectSetProperty(context->context(), context->global(), name, object, kJSPropertyAttributeReadOnly, nullptr);   \
     JSStringRelease(name);                                                                                             \
