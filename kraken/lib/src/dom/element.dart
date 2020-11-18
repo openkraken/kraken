@@ -1209,7 +1209,8 @@ class Element extends Node
         ContainerBoxParentData parentData = renderBoxModel.parentData;
         RenderObject previousSibling = parentData.previousSibling;
         parent.remove(renderBoxModel);
-        parent.insert(renderReplacedBoxModel, after: previousSibling);
+        renderBoxModel = renderReplacedBoxModel;
+        this.parent.addChildRenderObject(this, after: previousSibling);
       }
       renderBoxModel = renderReplacedBoxModel;
     }
