@@ -8,11 +8,8 @@ import 'dart:async';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/scheduler.dart';
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 
 /// A tap with a primary button has occurred.
 typedef GestureClickCallback = void Function(Event);
