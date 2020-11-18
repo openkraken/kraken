@@ -354,8 +354,8 @@ mixin ElementsBinding
 class ElementsFlutterBinding extends BindingBase
     with
         GestureBinding,
-        ServicesBinding,
         SchedulerBinding,
+        ServicesBinding,
         PaintingBinding,
         SemanticsBinding,
         RendererBinding,
