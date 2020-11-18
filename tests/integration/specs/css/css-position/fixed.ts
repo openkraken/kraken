@@ -113,4 +113,53 @@ describe('Position fixed', () => {
 
     expect(clickCount).toBe(2);
   });
+
+  it('works with left, right and no width', async () => {
+    let test01;
+    test01 = createElement(
+      'div',
+      {
+        style: {
+          position: 'fixed',
+          left: 0,
+          right: 0,
+          height: '50px',
+          'background-color': 'green',
+          display: 'flex',
+          flexDirection: 'row'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            display: 'flex',
+            position: 'relative',
+            'flex-direction': 'column',
+            flex: '1 1 0',
+            'align-items': 'center',
+            backgroundColor: 'red',
+          }
+        }, [
+          createText('A')
+        ]),
+        createElement('div', {
+          style: {
+            display: 'flex',
+            position: 'relative',
+            'flex-direction': 'column',
+            flex: '1 1 0',
+            'align-items': 'center',
+            backgroundColor: 'blue',
+          }
+        }, [
+          createText('B')
+        ])
+      ]
+    );
+
+    BODY.appendChild(test01);
+
+    await matchViewportSnapshot();
+  });
+
 });
