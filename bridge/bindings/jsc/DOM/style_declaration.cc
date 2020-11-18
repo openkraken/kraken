@@ -147,21 +147,7 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::str
 
   properties[name] = valueStr;
 
-  JSStringRef camelizedPropertyStringRef = JSStringCreateWithUTF8CString(name.c_str());
-  NativeString camelizedProperty;
-  camelizedProperty.string = JSStringGetCharactersPtr(camelizedPropertyStringRef);
-  camelizedProperty.length = JSStringGetLength(camelizedPropertyStringRef);
-
-  NativeString **args = new NativeString *[2];
-  args[0] = camelizedProperty.clone();
-
-  JSStringRef valueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-  NativeString valueNativeString;
-  valueNativeString.string = JSStringGetCharactersPtr(valueStringRef);
-  valueNativeString.length = JSStringGetLength(valueStringRef);
-
-  args[1] = valueNativeString.clone();
-
+  auto args = buildUICommandArgs(name, valueStr);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(ownerEventTarget->eventTargetId, UICommandType::setStyle, args, 2, nullptr);
 }
@@ -178,19 +164,7 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStr
   JSStringRetain(emptyStringRef);
   properties[name] = emptyStringRef;
 
-  NativeString **args = new NativeString *[2];
-
-  JSStringRef camelizedPropertyStringRef = JSStringCreateWithUTF8CString(name.c_str());
-  NativeString camelizedProperty;
-  camelizedProperty.string = JSStringGetCharactersPtr(camelizedPropertyStringRef);
-  camelizedProperty.length = JSStringGetLength(camelizedPropertyStringRef);
-
-  NativeString valueNativeString;
-  valueNativeString.string = JSStringGetCharactersPtr(emptyStringRef);
-  valueNativeString.length = JSStringGetLength(emptyStringRef);
-
-  args[0] = camelizedProperty.clone();
-  args[1] = valueNativeString.clone();
+  auto args = buildUICommandArgs(name, emptyStringRef);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(ownerEventTarget->eventTargetId, UICommandType::setStyle, args, 2, nullptr);

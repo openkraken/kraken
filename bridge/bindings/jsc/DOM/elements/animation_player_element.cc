@@ -62,16 +62,10 @@ JSAnimationPlayerElement::AnimationPlayerElementInstance::AnimationPlayerElement
   JSAnimationPlayerElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "animation-player"), nativeAnimationPlayerElement(new NativeAnimationPlayerElement(nativeElement)) {
   JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("animation-player");
-  NativeString tagName{};
-  tagName.string = JSStringGetCharactersPtr(canvasTagNameStringRef);
-  tagName.length = JSStringGetLength(canvasTagNameStringRef);
 
-  const int32_t argsLength = 1;
-  auto **args = new NativeString *[argsLength];
-  args[0] = tagName.clone();
-
+  auto args = buildUICommandArgs(canvasTagNameStringRef);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
-      ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength, nativeAnimationPlayerElement);
+      ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnimationPlayerElement);
 }
 
 std::vector<JSStringRef> &
@@ -115,34 +109,22 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::
   auto property = propertyMap[name];
 
   if (property == AnimationPlayerProperty::kSrc) {
-    NativeString **args = new NativeString *[2];
+    _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(_src);
 
-    JSStringRef srcValueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(srcValueStringRef);
-    _src = srcValueStringRef;
-
-    std::string valueString = JSStringToStdString(srcValueStringRef);
-
-    ELEMENT_SET_PROPERTY(name.c_str(), valueString.c_str(), args);
-
+    auto args = buildUICommandArgs(name, _src);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   } else if (property == AnimationPlayerProperty::kType) {
-    NativeString **args = new NativeString *[2];
+    _type = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(_type);
 
-    JSStringRef valueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(valueStringRef);
-    _type = valueStringRef;
-
-    std::string valueString = JSStringToStdString(valueStringRef);
-
-    ELEMENT_SET_PROPERTY(name.c_str(), valueString.c_str(), args);
-
+    auto args = buildUICommandArgs(name, _type);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+  } else {
+    ElementInstance::setProperty(name, value, exception);
   }
-
-  NodeInstance::setProperty(name, value, exception);
 }
 
 void JSAnimationPlayerElement::AnimationPlayerElementInstance::getPropertyNames(

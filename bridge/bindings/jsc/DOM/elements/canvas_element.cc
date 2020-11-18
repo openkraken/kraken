@@ -28,16 +28,10 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
   : ElementInstance(jsCanvasElement, "canvas"), nativeCanvasElement(new NativeCanvasElement(nativeElement)) {
 
   JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("canvas");
-  NativeString tagName{};
-  tagName.string = JSStringGetCharactersPtr(canvasTagNameStringRef);
-  tagName.length = JSStringGetLength(canvasTagNameStringRef);
-
-  const int32_t argsLength = 1;
-  auto **args = new NativeString *[argsLength];
-  args[0] = tagName.clone();
+  auto args = buildUICommandArgs(canvasTagNameStringRef);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
-      ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength, nativeCanvasElement);
+      ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeCanvasElement);
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
@@ -99,15 +93,7 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     case CanvasElementProperty::kWidth: {
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      NativeString widthKey{};
-      STD_STRING_TO_NATIVE_STRING("width", widthKey);
-
-      NativeString widthValue{};
-      STD_STRING_TO_NATIVE_STRING(std::to_string(_width).c_str(), widthValue);
-
-      NativeString **args = new NativeString *[2];
-      args[0] = widthKey.clone();
-      args[1] = widthValue.clone();
+      auto args = buildUICommandArgs(name, std::to_string(_width));
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
@@ -116,16 +102,7 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     case CanvasElementProperty::kHeight: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      NativeString heightKey{};
-      STD_STRING_TO_NATIVE_STRING("height", heightKey);
-
-      NativeString heightValue{};
-      STD_STRING_TO_NATIVE_STRING(std::to_string(_height).c_str(), heightValue);
-
-      NativeString **args = new NativeString *[2];
-      args[0] = heightKey.clone();
-      args[1] = heightValue.clone();
-
+      auto args = buildUICommandArgs(name, std::to_string(_height));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;

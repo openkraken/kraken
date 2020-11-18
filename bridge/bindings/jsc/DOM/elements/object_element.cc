@@ -24,17 +24,11 @@ JSObjectRef JSObjectElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 
 JSObjectElement::ObjectElementInstance::ObjectElementInstance(JSObjectElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "object"), nativeObjectElement(new NativeObjectElement(nativeElement)) {
-  JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("object");
-  NativeString tagName{};
-  tagName.string = JSStringGetCharactersPtr(canvasTagNameStringRef);
-  tagName.length = JSStringGetLength(canvasTagNameStringRef);
+  JSStringRef tagNameStringRef = JSStringCreateWithUTF8CString("object");
 
-  const int32_t argsLength = 1;
-  auto **args = new NativeString *[argsLength];
-  args[0] = tagName.clone();
-
+  auto args = buildUICommandArgs(tagNameStringRef);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
-    ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength, nativeObjectElement);
+    ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeObjectElement);
 }
 
 std::vector<JSStringRef> &JSObjectElement::ObjectElementInstance::getObjectElementPropertyNames() {
@@ -87,15 +81,7 @@ void JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSVa
       _data = JSValueToStringCopy(_hostClass->ctx, value, exception);
       JSStringRetain(_data);
 
-      NativeString **args = new NativeString *[2];
-
-      NativeString propertyKey{};
-      STD_STRING_TO_NATIVE_STRING("data", propertyKey);
-
-      NativeString propertyValue{};
-      propertyValue.string = JSStringGetCharactersPtr(_data);
-      propertyValue.length = JSStringGetLength(_data);
-
+      auto args = buildUICommandArgs(name, _data);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;
@@ -104,15 +90,7 @@ void JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSVa
       _type = JSValueToStringCopy(_hostClass->ctx, value, exception);
       JSStringRetain(_type);
 
-      NativeString **args = new NativeString *[2];
-
-      NativeString propertyKey{};
-      STD_STRING_TO_NATIVE_STRING("type", propertyKey);
-
-      NativeString propertyValue{};
-      propertyValue.string = JSStringGetCharactersPtr(_type);
-      propertyValue.length = JSStringGetLength(_type);
-
+      auto args = buildUICommandArgs(name, _type);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;
@@ -121,7 +99,7 @@ void JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSVa
       break;
     }
   } else {
-    NodeInstance::setProperty(name, value, exception);
+    ElementInstance::setProperty(name, value, exception);
   }
 }
 

@@ -113,13 +113,3 @@
     nativeString.length = JSStringGetLength(ref);                                                                      \
     JSStringRelease(ref);                                                                                              \
   }
-
-#define ELEMENT_SET_PROPERTY(key, value, args)                                                                         \
-  {                                                                                                                    \
-    NativeString keyNativeString{};                                                                                    \
-    STD_STRING_TO_NATIVE_STRING(key, keyNativeString);                                                                 \
-    NativeString valueNativeString{};                                                                                  \
-    STD_STRING_TO_NATIVE_STRING(value, valueNativeString);                                                             \
-    args[0] = keyNativeString.clone();                                                                                 \
-    args[1] = valueNativeString.clone();                                                                               \
-  }

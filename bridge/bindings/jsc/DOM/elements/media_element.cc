@@ -132,21 +132,15 @@ void JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValu
   auto property = propertyMap[name];
 
   if (property == MediaElementProperty::kSrc) {
-    NativeString **args = new NativeString *[2];
+    _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(_src);
 
-    JSStringRef srcValueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(srcValueStringRef);
-    _src = srcValueStringRef;
-
-    std::string valueString = JSStringToStdString(srcValueStringRef);
-
-    ELEMENT_SET_PROPERTY(name.c_str(), valueString.c_str(), args);
-
+    auto args = buildUICommandArgs(name, _src);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   }
 
-  NodeInstance::setProperty(name, value, exception);
+  ElementInstance::setProperty(name, value, exception);
 }
 
 void JSMediaElement::MediaElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

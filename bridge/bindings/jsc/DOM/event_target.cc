@@ -113,14 +113,9 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
     eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
-    JSStringRef eventTypeString = JSStringCreateWithUTF8CString(std::to_string(eventType).c_str());
+    std::string eventTypeString = std::to_string(eventType);
+    auto args = buildUICommandArgs(eventTypeString);
 
-    NativeString eventNameArgs{};
-    eventNameArgs.string = JSStringGetCharactersPtr(eventTypeString);
-    eventNameArgs.length = JSStringGetLength(eventTypeString);
-
-    NativeString **args = new NativeString *[1];
-    args[0] = eventNameArgs.clone();
     foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetInstance->eventTargetId,
                                                                                 UICommandType::addEvent, args, 1, 0x00);
   }
@@ -322,14 +317,8 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
 
   int32_t contextId = _hostClass->contextId;
 
-  JSStringRef eventTypeString = JSStringCreateWithUTF8CString(std::to_string(eventType).c_str());
-
-  NativeString eventNameArgs{};
-  eventNameArgs.string = JSStringGetCharactersPtr(eventTypeString);
-  eventNameArgs.length = JSStringGetLength(eventTypeString);
-
-  NativeString **args = new NativeString *[1];
-  args[0] = eventNameArgs.clone();
+  std::string eventTypeString = std::to_string(eventType);
+  auto args = buildUICommandArgs(eventTypeString);
   foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommandType::addEvent,
                                                                               args, 1, nullptr);
 }

@@ -26,17 +26,11 @@ JSObjectRef JSAnchorElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 
 JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "a"), nativeAnchorElement(new NativeAnchorElement(nativeElement)) {
-  JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("a");
-  NativeString tagName{};
-  tagName.string = JSStringGetCharactersPtr(canvasTagNameStringRef);
-  tagName.length = JSStringGetLength(canvasTagNameStringRef);
+  JSStringRef tagNameStringRef = JSStringCreateWithUTF8CString("a");
 
-  const int32_t argsLength = 1;
-  auto **args = new NativeString *[argsLength];
-  args[0] = tagName.clone();
-
+  auto args = buildUICommandArgs(tagNameStringRef);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
-      ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength, nativeAnchorElement);
+      ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnchorElement);
 }
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -56,33 +50,23 @@ void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSVa
   auto propertyMap = getAnchorElementPropertyMap();
   auto property = propertyMap[name];
   if (property == AnchorElementProperty::kHref) {
-    NativeString **args = new NativeString *[2];
-    JSStringRef hrefValueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(hrefValueStringRef);
-    _href = hrefValueStringRef;
-
-    std::string hrefValueString = JSStringToStdString(hrefValueStringRef);
-
-    ELEMENT_SET_PROPERTY(name.c_str(), hrefValueString.c_str(), args);
+    _href = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(_href);
+    auto args = buildUICommandArgs(name, _href);
 
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   } else if (property == AnchorElementProperty::kTarget) {
-    NativeString **args = new NativeString *[2];
+    _target = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(_target);
 
-    JSStringRef targetValueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(targetValueStringRef);
-    _target = targetValueStringRef;
-
-    std::string targetValueString = JSStringToStdString(targetValueStringRef);
-
-    ELEMENT_SET_PROPERTY(name.c_str(), targetValueString.c_str(), args);
+    auto args = buildUICommandArgs(name, _target);
 
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+  } else {
+    ElementInstance::setProperty(name, value, exception);
   }
-
-  ElementInstance::setProperty(name, value, exception);
 }
 
 void JSAnchorElement::AnchorElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

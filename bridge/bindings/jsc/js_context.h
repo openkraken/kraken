@@ -63,6 +63,13 @@ private:
 JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
                                     JSObjectCallAsFunctionCallback callback);
 
+NativeString **buildUICommandArgs(JSStringRef key);
+NativeString **buildUICommandArgs(std::string &key);
+NativeString **buildUICommandArgs(std::string &key, JSStringRef value);
+NativeString **buildUICommandArgs(std::string &key, std::string &&value);
+NativeString **buildUICommandArgs(std::string &&key, std::string &&value);
+NativeString **buildUICommandArgs(std::string &key, JSContextRef ctx, JSValueRef value, JSValueRef *exception);
+
 JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback, JSValueRef *exception);
 
 std::string JSStringToStdString(JSStringRef jsString);

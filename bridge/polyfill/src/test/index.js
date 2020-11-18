@@ -61,6 +61,9 @@ class JasmineTracker {
     return this.onJasmineDone(result);
   }
 
+  specStarted(result) {
+    console.log('START:' + result.fullName);
+  }
   specDone(result) {
     return this.onSpecDone(result);
   }

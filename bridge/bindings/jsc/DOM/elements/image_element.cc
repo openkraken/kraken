@@ -24,28 +24,29 @@ JSObjectRef JSImageElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 
 JSImageElement::ImageElementInstance::ImageElementInstance(JSImageElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "img"), nativeImageElement(new NativeImageElement(nativeElement)) {
-  JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("img");
-  NativeString tagName{};
-  tagName.string = JSStringGetCharactersPtr(canvasTagNameStringRef);
-  tagName.length = JSStringGetLength(canvasTagNameStringRef);
-
-  const int32_t argsLength = 1;
-  auto **args = new NativeString *[argsLength];
-  args[0] = tagName.clone();
+  JSStringRef tagNameStringRef = JSStringCreateWithUTF8CString("img");
+  auto args = buildUICommandArgs(tagNameStringRef);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
-    ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength, nativeImageElement);
+    ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeImageElement);
 }
 
 std::vector<JSStringRef> &JSImageElement::ImageElementInstance::getImageElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{};
+  static std::vector<JSStringRef> propertyNames{
+    JSStringCreateWithUTF8CString("width"),
+    JSStringCreateWithUTF8CString("height"),
+    JSStringCreateWithUTF8CString("src"),
+    JSStringCreateWithUTF8CString("loading"),
+  };
   return propertyNames;
 }
 
 const std::unordered_map<std::string, JSImageElement::ImageElementInstance::ImageProperty> &
 JSImageElement::ImageElementInstance::getImageElementPropertyMap() {
   static std::unordered_map<std::string, ImageProperty> propertyMap{{"width", ImageProperty::kWidth},
-                                                                    {"height", ImageProperty::kHeight}};
+                                                                    {"height", ImageProperty::kHeight},
+                                                                    {"src", ImageProperty::kSrc},
+                                                                    {"loading", ImageProperty::kLoading}};
   return propertyMap;
 }
 
@@ -58,6 +59,14 @@ JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, 
       return JSValueMakeNumber(_hostClass->ctx, _width);
     case ImageProperty::kHeight:
       return JSValueMakeNumber(_hostClass->ctx, _height);
+    case ImageProperty::kSrc: {
+      if (_src == nullptr) return nullptr;
+      return JSValueMakeString(_hostClass->ctx, _src);
+    }
+    case ImageProperty::kLoading: {
+      if (_loading == nullptr) return nullptr;
+      return JSValueMakeString(_hostClass->ctx, _loading);
+    }
     }
   }
 
@@ -73,14 +82,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
     case ImageProperty::kWidth: {
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      NativeString **args = new NativeString *[2];
-
-      NativeString propertyKey{};
-      STD_STRING_TO_NATIVE_STRING("width", propertyKey);
-
-      NativeString propertyValue{};
-      STD_STRING_TO_NATIVE_STRING(std::to_string(_width).c_str(), propertyValue);
-
+      auto args = buildUICommandArgs(name, std::to_string(_width));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;
@@ -88,23 +90,34 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
     case ImageProperty::kHeight: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      NativeString **args = new NativeString *[2];
-
-      NativeString propertyKey{};
-      STD_STRING_TO_NATIVE_STRING("height", propertyKey);
-
-      NativeString propertyValue{};
-      STD_STRING_TO_NATIVE_STRING(std::to_string(_height).c_str(), propertyValue);
-
+      auto args = buildUICommandArgs(name, std::to_string(_height));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+      break;
+    }
+    case ImageProperty::kSrc: {
+      _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      JSStringRetain(_src);
+
+      auto args = buildUICommandArgs(name, _src);
+      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
+        ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+      break;
+    }
+    case ImageProperty::kLoading: {
+      _loading = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      JSStringRetain(_loading);
+
+      auto args = buildUICommandArgs(name, _loading);
+      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
+          ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;
     }
     default:
       break;
     }
   } else {
-    NodeInstance::setProperty(name, value, exception);
+    ElementInstance::setProperty(name, value, exception);
   }
 }
 
@@ -118,6 +131,9 @@ void JSImageElement::ImageElementInstance::getPropertyNames(JSPropertyNameAccumu
 
 JSImageElement::ImageElementInstance::~ImageElementInstance() {
   delete nativeImageElement;
+
+  if (_src != nullptr) JSStringRelease(_src);
+  if (_loading != nullptr) JSStringRelease(_loading);
 }
 
 } // namespace kraken::binding::jsc

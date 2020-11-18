@@ -23,6 +23,8 @@ public:
   public:
     enum class ImageProperty {
       kWidth, kHeight,
+      kSrc,
+      kLoading
     };
 
     static std::vector<JSStringRef> &getImageElementPropertyNames();
@@ -40,6 +42,9 @@ public:
   private:
     double _width;
     double _height;
+
+    JSStringRef _src{nullptr};
+    JSStringRef _loading{nullptr};
   };
 protected:
   JSImageElement() = delete;

@@ -349,6 +349,11 @@ JSValueRef JSElement::ElementInstance::setAttribute(JSContextRef ctx, JSObjectRe
   JSStringRetain(valueStringRef);
   elementInstance->attributes[name] = valueStringRef;
 
+  auto args = buildUICommandArgs(name, valueStringRef);
+
+  ::foundation::UICommandTaskMessageQueue::instance(elementInstance->_hostClass->contextId)
+    ->registerCommand(elementInstance->eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+
   return nullptr;
 }
 

@@ -238,14 +238,7 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       }
       // TODO: newChild._notifyNodeInsert(parentNode);
 
-      NativeString nodeTargetId{};
-      NativeString position{};
-      STD_STRING_TO_NATIVE_STRING(std::to_string(node->eventTargetId).c_str(), nodeTargetId);
-      STD_STRING_TO_NATIVE_STRING("beforebegin", position);
-
-      auto args = new NativeString *[2];
-      args[0] = nodeTargetId.clone();
-      args[1] = position.clone();
+      auto args = buildUICommandArgs(std::to_string(node->eventTargetId), std::string("beforebegin"));
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(referenceNode->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
@@ -267,15 +260,8 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   node->refer();
 
   //  TODO: child._notifyNodeInsert(this);
-  NativeString childTargetId{};
-  STD_STRING_TO_NATIVE_STRING(std::to_string(node->eventTargetId).c_str(), childTargetId);
 
-  NativeString position{};
-  STD_STRING_TO_NATIVE_STRING("beforeend", position);
-  auto args = new NativeString *[2];
-  args[0] = childTargetId.clone();
-  args[1] = position.clone();
-
+  auto args = buildUICommandArgs(std::to_string(node->eventTargetId), std::string("beforeend"));
   foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
     ->registerCommand(eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
 }
@@ -321,14 +307,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   //  TODO: oldChild._notifyNodeRemoved(parentNode);
   //  TODO: newChild._notifyNodeInsert(parentNode);
 
-  NativeString newChildTargetId{};
-  NativeString position{};
-  STD_STRING_TO_NATIVE_STRING(std::to_string(newChild->eventTargetId).c_str(), newChildTargetId);
-  STD_STRING_TO_NATIVE_STRING("afterend", position);
-  auto args = new NativeString *[2];
-  args[0] = newChildTargetId.clone();
-  args[1] = position.clone();
-
+  auto args = buildUICommandArgs(std::to_string(newChild->eventTargetId), "afterend");
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(oldChild->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
 

@@ -32,13 +32,8 @@ JSObjectRef JSTextNode::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 
 JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringRef data)
   : NodeInstance(jsTextNode, NodeType::TEXT_NODE), nativeTextNode(new NativeTextNode(nativeNode)), data(JSStringRetain(data)) {
-  NativeString textNodeData{};
-  textNodeData.string = JSStringGetCharactersPtr(data);
-  textNodeData.length = JSStringGetLength(data);
 
-  auto args = new NativeString *[1];
-  args[0] = textNodeData.clone();
-
+  auto args = buildUICommandArgs(data);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(eventTargetId, UICommandType::createTextNode, args, 1, nativeTextNode);
 }
@@ -65,25 +60,15 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueR
 
 void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name == "data") {
-    JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(stringRef);
-
     if (data != nullptr) {
       // Should release the previous data string reference.
       JSStringRelease(data);
     }
 
-    data = stringRef;
-    NativeString property{};
-    NativeString propertyValue{};
-    propertyValue.string = JSStringGetCharactersPtr(stringRef);
-    propertyValue.length = JSStringGetLength(stringRef);
-    STD_STRING_TO_NATIVE_STRING("data", property);
+    data = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(data);
 
-    auto args = new NativeString *[2];
-    args[0] = property.clone();
-    args[1] = propertyValue.clone();
-
+    auto args = buildUICommandArgs(data);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   }

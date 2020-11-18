@@ -26,16 +26,10 @@ JSObjectRef JSAudioElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 JSAudioElement::AudioElementInstance::AudioElementInstance(JSAudioElement *jsAudioElement)
   : MediaElementInstance(jsAudioElement, "audio"), nativeAudioElement(new NativeAudioElement(nativeMediaElement)) {
   JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("audio");
-  NativeString tagName{};
-  tagName.string = JSStringGetCharactersPtr(canvasTagNameStringRef);
-  tagName.length = JSStringGetLength(canvasTagNameStringRef);
 
-  const int32_t argsLength = 1;
-  auto **args = new NativeString *[argsLength];
-  args[0] = tagName.clone();
-
+  auto args = buildUICommandArgs(canvasTagNameStringRef);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
-      ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength, nativeAudioElement);
+      ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAudioElement);
 }
 
 JSAudioElement::AudioElementInstance::~AudioElementInstance() {
