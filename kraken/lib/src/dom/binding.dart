@@ -269,6 +269,7 @@ mixin ElementsBinding
   /// This method exposes the `memoryPressure` notification from
   /// [SystemChannels.system].
   void handleMemoryPressure() {
+    super.handleMemoryPressure();
     for (ElementsBindingObserver observer in _observers) observer.didHaveMemoryPressure();
   }
 

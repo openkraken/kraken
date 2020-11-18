@@ -387,7 +387,7 @@ class CSSStyleDeclaration {
     return lowerCase;
   }
 
-  String _toLowerCase(String string, [int start = 0]) {
+  String _toLowerCase(String string) {
     // Like url("http://path") declared with quotation marks and
     // custom property names are case sensitive.
     String lowerCase = string.toLowerCase();
