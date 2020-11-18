@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_STYLE_DECLARATION_H
 #define KRAKENBRIDGE_STYLE_DECLARATION_H
 
-#include "bindings/jsc/DOM/eventTarget.h"
+#include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/host_class.h"
 #include "bindings/jsc/js_context.h"
 #include <map>

@@ -93,6 +93,8 @@ typedef Native_GetBoundingClientRect = Pointer<NativeBoundingClientRect> Functio
 typedef Native_Click = Void Function(Pointer<NativeElement> nativeElement);
 typedef Native_Scroll = Void Function(Pointer<NativeElement> nativeElement, Int32 x, Int32 y);
 typedef Native_ScrollBy = Void Function(Pointer<NativeElement> nativeElement, Int32 x, Int32 y);
+typedef Native_SetScrollLeft = Void Function(Pointer<NativeElement> nativeElement, Double left);
+typedef Native_SetScrollTop = Void Function(Pointer<NativeElement> nativeElement, Double top);
 
 class NativeElement extends Struct {
   Pointer<NativeNode> nativeNode;
@@ -113,6 +115,8 @@ class NativeElement extends Struct {
   Pointer<NativeFunction<Native_Click>> click;
   Pointer<NativeFunction<Native_Scroll>> scroll;
   Pointer<NativeFunction<Native_ScrollBy>> scrollBy;
+  Pointer<NativeFunction<Native_SetScrollLeft>> setScrollLeft;
+  Pointer<NativeFunction<Native_SetScrollTop>> setScrollTop;
 }
 
 class NativeWindow extends Struct {

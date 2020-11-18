@@ -32,6 +32,9 @@ final Pointer<NativeFunction<Native_Click>> nativeClick = Pointer.fromFunction(E
 final Pointer<NativeFunction<Native_Scroll>> nativeScroll = Pointer.fromFunction(ElementNativeMethods._scroll);
 final Pointer<NativeFunction<Native_ScrollBy>> nativeScrollBy = Pointer.fromFunction(ElementNativeMethods._scrollBy);
 
+final Pointer<NativeFunction<Native_SetScrollLeft>> nativeSetScrollLeft = Pointer.fromFunction(ElementNativeMethods._setScrollLeft);
+final Pointer<NativeFunction<Native_SetScrollTop>> nativeSetScrollTop = Pointer.fromFunction(ElementNativeMethods._setScrollTop);
+
 mixin ElementNativeMethods on Node {
   static double _getOffsetLeft(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
@@ -93,6 +96,20 @@ mixin ElementNativeMethods on Node {
     return element.scrollLeft;
   }
 
+  static void _setScrollTop(Pointer<NativeElement> nativeElement, double top) {
+    print('set scrollTop $top');
+    Element element = Element.getElementOfNativePtr(nativeElement);
+    element.renderBoxModel.owner.flushLayout();
+    element.scrollTop = top;
+  }
+
+  static void _setScrollLeft(Pointer<NativeElement> nativeElement, double left) {
+    Element element = Element.getElementOfNativePtr(nativeElement);
+    element.renderBoxModel.owner.flushLayout();
+    print('set scrollLeft $left');
+    element.scrollLeft = left;
+  }
+
   static double _getScrollWidth(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.renderBoxModel.owner.flushLayout();
@@ -140,7 +157,9 @@ mixin ElementNativeMethods on Node {
     nativeElement.ref.getClientTop = nativeGetClientTop;
     nativeElement.ref.getClientLeft = nativeGetClientLeft;
     nativeElement.ref.getScrollTop = nativeGetScrollTop;
+    nativeElement.ref.setScrollTop = nativeSetScrollTop;
     nativeElement.ref.getScrollLeft = nativeGetScrollLeft;
+    nativeElement.ref.setScrollLeft = nativeSetScrollLeft;
     nativeElement.ref.getScrollWidth = nativeGetScrollWidth;
     nativeElement.ref.getScrollHeight = nativeGetScrollHeight;
     nativeElement.ref.getBoundingClientRect = nativeGetBoundingClientRect;

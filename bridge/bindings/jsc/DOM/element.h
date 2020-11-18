@@ -75,6 +75,7 @@ public:
     explicit ElementInstance(JSElement *element, const char *tagName);
     ~ElementInstance();
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;
 
@@ -123,6 +124,8 @@ using GetBoundingClientRect = NativeBoundingClientRect *(*)(NativeElement *nativ
 using Click = void (*)(NativeElement *nativeElement);
 using Scroll = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
 using ScrollBy = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
+using SetScrollTop = void (*)(NativeElement *nativeElement, double top);
+using SetScrollLeft = double (*)(NativeElement *nativeElement, double left);
 
 class BoundingClientRect : public HostObject {
 public:
@@ -173,6 +176,8 @@ struct NativeElement {
   Click click{nullptr};
   Scroll scroll{nullptr};
   ScrollBy scrollBy{nullptr};
+  SetScrollLeft setScrollLeft{nullptr};
+  SetScrollTop setScrollTop{nullptr};
 };
 
 } // namespace kraken::binding::jsc

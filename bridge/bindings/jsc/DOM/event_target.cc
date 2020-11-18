@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "eventTarget.h"
+#include "event_target.h"
 #include "dart_methods.h"
 #include "document.h"
 #include "event.h"

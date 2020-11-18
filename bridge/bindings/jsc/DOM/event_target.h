@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_EVENTTARGET_H
-#define KRAKENBRIDGE_EVENTTARGET_H
+#ifndef KRAKENBRIDGE_EVENT_TARGET_H
+#define KRAKENBRIDGE_EVENT_TARGET_H
 
 #include "bindings/jsc/host_class.h"
 #include "bindings/jsc/js_context.h"
@@ -102,4 +102,4 @@ struct NativeEventTarget {
 
 } // namespace kraken::binding::jsc
 
-#endif // KRAKENBRIDGE_EVENTTARGET_H
+#endif // KRAKENBRIDGE_EVENT_TARGET_H

@@ -138,7 +138,7 @@ class ElementManager {
     return _eventTargets.containsKey(id);
   }
 
-  void removeTarget(Node target) {
+  void removeTarget(EventTarget target) {
     assert(target.targetId != null);
     assert(_eventTargets.containsKey(target.targetId));
     _eventTargets.remove(target.targetId);

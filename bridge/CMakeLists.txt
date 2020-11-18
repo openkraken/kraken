@@ -131,8 +131,8 @@ else()
       bindings/jsc/DOM/element.h
       bindings/jsc/DOM/event.h
       bindings/jsc/DOM/event.cc
-      bindings/jsc/DOM/eventTarget.cc
-      bindings/jsc/DOM/eventTarget.h
+      bindings/jsc/DOM/event_target.cc
+      bindings/jsc/DOM/event_target.h
       bindings/jsc/DOM/node.cc
       bindings/jsc/DOM/node.h
       bindings/jsc/DOM/text_node.cc

@@ -51,7 +51,6 @@ void HostObject::proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSP
 }
 
 HostObject::~HostObject() {
-  assert(false);
   KRAKEN_LOG(VERBOSE) << "dispose HostObject " << this;
 }
 

@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_NODE_H
 #define KRAKENBRIDGE_NODE_H
 
-#include "eventTarget.h"
+#include "event_target.h"
 #include "include/kraken_bridge.h"
 #include <array>
 #include <vector>

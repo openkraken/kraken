@@ -6,7 +6,7 @@
 #include "element.h"
 #include "bridge_jsc.h"
 #include "dart_methods.h"
-#include "eventTarget.h"
+#include "event_target.h"
 #include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
@@ -263,6 +263,27 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
   return nullptr;
 }
 
+void JSElement::ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  auto propertyMap = getPropertyMap();
+
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+
+    switch (property) {
+    case ElementProperty::kScrollTop:
+      nativeElement->setScrollTop(nativeElement, JSValueToNumber(_hostClass->ctx, value, exception));
+      break;
+    case ElementProperty::kScrollLeft:
+      nativeElement->setScrollLeft(nativeElement, JSValueToNumber(_hostClass->ctx, value, exception));
+      break;
+    default:
+      break;
+    }
+  }
+
+  NodeInstance::setProperty(name, value, exception);
+}
+
 void JSElement::ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   NodeInstance::getPropertyNames(accumulator);
 
@@ -288,11 +309,9 @@ JSStringRef JSElement::ElementInstance::internalTextContent() {
 }
 
 std::vector<JSStringRef> &JSElement::ElementInstance::getElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("style"),
-    JSStringCreateWithUTF8CString("getAttribute"),
-    JSStringCreateWithUTF8CString("setAttribute")
-  };
+  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("style"),
+                                                JSStringCreateWithUTF8CString("getAttribute"),
+                                                JSStringCreateWithUTF8CString("setAttribute")};
   return propertyNames;
 }
 
@@ -391,7 +410,8 @@ JSValueRef JSElement::ElementInstance::toBlob(JSContextRef ctx, JSObjectRef func
   double devicePixelRatio = JSValueToNumber(ctx, devicePixelRatioValueRef, exception);
   auto bridge = static_cast<JSBridge *>(context->getOwner());
 
-  auto toBlobPromiseContext = new ToBlobPromiseContext(bridge, context, elementInstance->eventTargetId, devicePixelRatio);
+  auto toBlobPromiseContext =
+    new ToBlobPromiseContext(bridge, context, elementInstance->eventTargetId, devicePixelRatio);
 
   auto promiseCallback = [](JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef arguments[], JSValueRef *exception) -> JSValueRef {

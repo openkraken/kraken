@@ -462,7 +462,13 @@ class Element extends Node
   void detach() {
     willDetachRenderer();
 
-    (renderBoxModel.parent as ContainerRenderObjectMixin).remove(renderBoxModel);
+    RenderObject parent = renderBoxModel.parent;
+    if (parent is ContainerRenderObjectMixin) {
+      parent.remove(renderBoxModel);
+    } else if (parent is RenderProxyBox) {
+      parent.child = null;
+    }
+
     for (Node child in childNodes) {
       child.detach();
     }

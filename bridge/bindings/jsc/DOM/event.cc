@@ -4,7 +4,7 @@
  */
 
 #include "event.h"
-#include "eventTarget.h"
+#include "event_target.h"
 #include <chrono>
 
 namespace kraken::binding::jsc {

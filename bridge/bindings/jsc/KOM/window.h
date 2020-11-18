@@ -5,7 +5,7 @@
 #ifndef KRAKEN_JS_BINDINGS_WINDOW_H_
 #define KRAKEN_JS_BINDINGS_WINDOW_H_
 
-#include "bindings/jsc/DOM/eventTarget.h"
+#include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/js_context.h"
 #include "location.h"
 

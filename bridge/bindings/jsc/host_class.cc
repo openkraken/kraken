@@ -154,10 +154,10 @@ JSObjectRef HostClass::instanceConstructor(JSContextRef ctx, JSObjectRef constru
   return JSObjectMake(ctx, nullptr, nullptr);
 }
 HostClass::~HostClass() {
-  assert(false);
   if (_call != nullptr) JSValueUnprotect(ctx, _call);
   JSClassRelease(jsClass);
   JSClassRelease(instanceClass);
+  JSValueUnprotect(ctx, classObject);
 }
 
 HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass) {
