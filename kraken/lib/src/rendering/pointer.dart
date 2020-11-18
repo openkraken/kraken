@@ -30,7 +30,7 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   GestureClickCallback onClick;
 
-  /// called when click
+  /// Called when a click pointer signal this object.
   void initPointerCallback() {
     _recognizer.onClick = onClick;
   }
@@ -41,7 +41,9 @@ mixin RenderPointerListenerMixin on RenderBox {
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
 
-    /// addPointer when point down
+    /// AddPointer when a pointer comes into contact with the screen (for touch
+    /// pointers), or has its button pressed (for mouse pointers) at this widget's
+    /// location.
     if (event is PointerDownEvent) {
       _recognizer.addPointer(event);
     }
