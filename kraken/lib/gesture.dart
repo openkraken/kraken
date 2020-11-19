@@ -11,3 +11,4 @@ export 'src/gesture/scroll_physics.dart';
 export 'src/gesture/scroll_position.dart';
 export 'src/gesture/scroll_position_with_single_context.dart';
 export 'src/gesture/scroll_simulation.dart';
+export 'src/gesture/click.dart';
