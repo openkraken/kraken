@@ -30,7 +30,8 @@ JSNode::NodeInstance::~NodeInstance() {
   for (auto &node : childNodes) {
     node->parentNode = nullptr;
     node->unrefer();
-    assert(node->_referenceCount == 0 && ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
+    assert(node->_referenceCount == 0 &&
+           ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
   }
 
   delete nativeNode;
@@ -255,6 +256,45 @@ JSValueRef JSNode::NodeInstance::remove(JSContextRef ctx, JSObjectRef function, 
   return nullptr;
 }
 
+JSValueRef JSNode::NodeInstance::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  if (argumentCount < 1) {
+    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1 arguments required",
+                    exception);
+    return nullptr;
+  }
+
+  const JSValueRef nodeValueRef = arguments[0];
+
+  if (!JSValueIsObject(ctx, nodeValueRef)) {
+    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object",
+                    exception);
+    return nullptr;
+  }
+
+  JSObjectRef nodeObjectRef = JSValueToObject(ctx, nodeValueRef, exception);
+
+  if (!JSValueIsObject(ctx, nodeObjectRef)) {
+    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object.",
+                    exception);
+    return nullptr;
+  }
+
+  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(function));
+  auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
+
+  if (nodeInstance == nullptr) {
+    JSC_THROW_ERROR(ctx,
+                    "Failed to execute 'removeChild' on 'Node': 1st arguments is not a Node object.",
+                    exception);
+    return nullptr;
+  }
+
+  auto removedNode = selfInstance->internalRemoveChild(nodeInstance, exception);
+
+  return removedNode->object;
+}
+
 void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   ensureDetached(node);
   childNodes.emplace_back(node);
@@ -286,11 +326,6 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalRemoveChild(JSNode::NodeInst
     // TODO: child._notifyNodeRemove(this);
     foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
       ->registerCommand(node->eventTargetId, UICommandType::removeNode, nullptr, 0, nullptr);
-  } else {
-    JSC_THROW_ERROR(_hostClass->ctx,
-                    "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.",
-                    exception);
-    return node;
   }
 
   return node;
@@ -367,6 +402,13 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     }
     return _remove;
   }
+  case NodeProperty::kRemoveChild: {
+    if (_removeChild == nullptr) {
+      _removeChild = propertyBindingFunction(_hostClass->context, this, "removeChild", removeChild);
+      JSValueProtect(_hostClass->ctx, _removeChild);
+    }
+    return _removeChild;
+  }
   case NodeProperty::kInsertBefore: {
     if (_insertBefore == nullptr) {
       _insertBefore = propertyBindingFunction(_hostClass->context, this, "insertBefore", insertBefore);
@@ -415,12 +457,13 @@ void JSNode::NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumul
   }
 }
 
-std::array<JSStringRef, 12> &JSNode::NodeInstance::getNodePropertyNames() {
-  static std::array<JSStringRef, 12> propertyNames{
+std::vector<JSStringRef> &JSNode::NodeInstance::getNodePropertyNames() {
+  static std::vector<JSStringRef> propertyNames{
     JSStringCreateWithUTF8CString("isConnected"),     JSStringCreateWithUTF8CString("firstChild"),
     JSStringCreateWithUTF8CString("lastChild"),       JSStringCreateWithUTF8CString("childNodes"),
     JSStringCreateWithUTF8CString("previousSibling"), JSStringCreateWithUTF8CString("nextSibling"),
     JSStringCreateWithUTF8CString("appendChild"),     JSStringCreateWithUTF8CString("remove"),
+    JSStringCreateWithUTF8CString("removeChild"),
     JSStringCreateWithUTF8CString("insertBefore"),    JSStringCreateWithUTF8CString("replaceChild"),
     JSStringCreateWithUTF8CString("nodeType"),        JSStringCreateWithUTF8CString("nodeName")};
   return propertyNames;
@@ -439,6 +482,7 @@ const std::unordered_map<std::string, JSNode::NodeInstance::NodeProperty> &JSNod
                                                                    {"nextSibling", NodeProperty::kNextSibling},
                                                                    {"appendChild", NodeProperty::kAppendChild},
                                                                    {"remove", NodeProperty::kRemove},
+                                                                   {"removeChild", NodeProperty::kRemoveChild},
                                                                    {"insertBefore", NodeProperty::kInsertBefore},
                                                                    {"replaceChild", NodeProperty::kReplaceChild},
                                                                    {"nodeType", NodeProperty::kNodeType},

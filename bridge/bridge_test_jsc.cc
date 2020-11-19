@@ -167,7 +167,7 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
     binding::jsc::JSContext &_context = callbackContext->_context;
     JSContextRef ctx = _context.context();
     JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
-    const JSValueRef arguments[] = {JSValueMakeBoolean(ctx, result)};
+    const JSValueRef arguments[] = {JSValueMakeBoolean(ctx, result != 0)};
     JSObjectCallAsFunction(ctx, callbackObjectRef, _context.global(), 1, arguments, &exception);
     auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
     bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);

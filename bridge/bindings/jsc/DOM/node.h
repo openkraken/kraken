@@ -41,12 +41,13 @@ public:
       kNextSibling,
       kAppendChild,
       kRemove,
+      kRemoveChild,
       kInsertBefore,
       kReplaceChild,
       kNodeType,
       kNodeName
     };
-    static std::array<JSStringRef, 12> &getNodePropertyNames();
+    static std::vector<JSStringRef> &getNodePropertyNames();
     static const std::unordered_map<std::string, NodeProperty> &getNodePropertyMap();
 
     NodeInstance() = delete;
@@ -61,6 +62,9 @@ public:
      * reference: https://dom.spec.whatwg.org/#dom-childnode-remove
      */
     static JSValueRef remove(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+
+    static JSValueRef removeChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
 
     static JSValueRef insertBefore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -98,6 +102,7 @@ public:
     void refer();
     void unrefer();
 
+    JSObjectRef _removeChild {nullptr};
     JSObjectRef _appendChild {nullptr};
     JSObjectRef _remove {nullptr};
     JSObjectRef _insertBefore {nullptr};
