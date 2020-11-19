@@ -7,8 +7,11 @@
 #include "bindings/jsc/DOM/elements/anchor_element.h"
 #include "bindings/jsc/DOM/elements/animation_player_element.h"
 #include "bindings/jsc/DOM/elements/audio_element.h"
-#include "bindings/jsc/DOM/elements/video_element.h"
 #include "bindings/jsc/DOM/elements/canvas_element.h"
+#include "bindings/jsc/DOM/elements/iframe_element.h"
+#include "bindings/jsc/DOM/elements/image_element.h"
+#include "bindings/jsc/DOM/elements/object_element.h"
+#include "bindings/jsc/DOM/elements/video_element.h"
 #include "comment_node.h"
 #include "element.h"
 #include "text_node.h"
@@ -17,11 +20,19 @@
 namespace kraken::binding::jsc {
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
-  auto document = new JSDocument(context.get());
+  auto document = JSDocument::instance(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Document", document->classObject);
   auto documentObjectRef =
     document->instanceConstructor(context->context(), document->classObject, 0, nullptr, nullptr);
   JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
+}
+
+JSDocument * JSDocument::instance(JSContext *context) {
+  static std::unordered_map<JSContext *, JSDocument *> instanceMap{};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSDocument(context);
+  }
+  return instanceMap[context];
 }
 
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -84,16 +95,13 @@ JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 
 JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagName) {
   static std::unordered_map<std::string, JSElement *> elementMap{
-    {"a", JSAnchorElement::instance(context)},
-    {"animation-player", JSAnimationPlayerElement::instance(context)},
-    {"audio", JSAudioElement::instance(context)},
-    {"video", JSVideoElement::instance(context)},
-    {"canvas", JSCanvasElement::instance(context)},
-    {"div", JSElement::instance(context)},
-    {"span", JSElement::instance(context)},
-    {"strong", JSElement::instance(context)},
-    {"pre", JSElement::instance(context)},
-    {"p", JSElement::instance(context)}};
+    {"a", JSAnchorElement::instance(context)},      {"animation-player", JSAnimationPlayerElement::instance(context)},
+    {"audio", JSAudioElement::instance(context)},   {"video", JSVideoElement::instance(context)},
+    {"canvas", JSCanvasElement::instance(context)}, {"div", JSElement::instance(context)},
+    {"span", JSElement::instance(context)},         {"strong", JSElement::instance(context)},
+    {"pre", JSElement::instance(context)},          {"p", JSElement::instance(context)},
+    {"iframe", JSIframeElement::instance(context)}, {"object", JSObjectElement::instance(context)},
+    {"img", JSImageElement::instance(context)}};
   return elementMap[tagName];
 }
 
@@ -119,6 +127,7 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
   case DocumentProperty::kCreateElement: {
     if (_createElement == nullptr) {
       _createElement = propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
+      JSValueProtect(_hostClass->ctx, _createElement);
     }
     return _createElement;
   }
@@ -127,12 +136,14 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
   case DocumentProperty::kCreateTextNode: {
     if (_createTextNode == nullptr) {
       _createTextNode = propertyBindingFunction(_hostClass->context, this, "createTextNode", createTextNode);
+      JSValueProtect(_hostClass->ctx, _createTextNode);
     }
     return _createTextNode;
   }
   case DocumentProperty::kCreateComment: {
     if (_createComment == nullptr) {
       _createComment = propertyBindingFunction(_hostClass->context, this, "createComment", createComment);
+      JSValueProtect(_hostClass->ctx, _createComment);
     }
     return _createComment;
   }
@@ -147,6 +158,9 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
 
 JSDocument::DocumentInstance::~DocumentInstance() {
   JSValueUnprotect(_hostClass->ctx, body);
+  if (_createElement != nullptr) JSValueUnprotect(_hostClass->ctx, _createElement);
+  if (_createComment != nullptr) JSValueUnprotect(_hostClass->ctx, _createComment);
+  if (_createTextNode != nullptr) JSValueUnprotect(_hostClass->ctx, _createTextNode);
   delete nativeDocument;
 }
 

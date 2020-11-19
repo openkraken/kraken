@@ -171,7 +171,6 @@ class KrakenViewController {
   }
 
   Element createElement(int id, Pointer nativePtr, String tagName) {
-    print('create element id: $id, tagName: $tagName');
     return _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
   }
 
@@ -180,12 +179,10 @@ class KrakenViewController {
   }
 
   void addEvent(int targetId, int eventTypeIndex) {
-    print('add event id: $targetId, eventName: ${EventType.values[eventTypeIndex]}');
     _elementManager.addEvent(targetId, eventTypeIndex);
   }
 
   void insertAdjacentNode(int targetId, String position, int childId) {
-    print('insertAdjacent targetId: $targetId, position: $position, child: $childId');
     _elementManager.insertAdjacentNode(targetId, position, childId);
   }
 
@@ -194,12 +191,10 @@ class KrakenViewController {
   }
 
   void setStyle(int targetId, String key, String value) {
-    print('setStyle: targetId: $targetId, key: $key, value: $value');
     _elementManager.setStyle(targetId, key, value);
   }
 
   void setProperty(int targetId, String key, String value) {
-    print('setProperty: targetId: $targetId, key: $key, value: $value');
     _elementManager.setProperty(targetId, key, value);
   }
 

@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_STYLE_DECLARATION_H
 #define KRAKENBRIDGE_STYLE_DECLARATION_H
 
-#include "bindings/jsc/DOM/eventTarget.h"
+#include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/host_class.h"
 #include "bindings/jsc/js_context.h"
 #include <map>
@@ -17,9 +17,6 @@ void bindCSSStyleDeclaration(std::unique_ptr<JSContext> &context);
 
 class CSSStyleDeclaration : public HostClass {
 public:
-  CSSStyleDeclaration() = delete;
-  explicit CSSStyleDeclaration(JSContext *context);
-
   static CSSStyleDeclaration *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -58,10 +55,14 @@ public:
     std::unordered_map<std::string, JSStringRef> properties;
     const JSEventTarget::EventTargetInstance *ownerEventTarget;
 
-    JSObjectRef _setProperty;
-    JSObjectRef _getPropertyValue;
-    JSObjectRef _removeProperty;
+    JSObjectRef _setProperty {nullptr};
+    JSObjectRef _getPropertyValue {nullptr};
+    JSObjectRef _removeProperty {nullptr};
   };
+
+protected:
+  CSSStyleDeclaration() = delete;
+  explicit CSSStyleDeclaration(JSContext *context);
 };
 
 } // namespace kraken::binding::jsc

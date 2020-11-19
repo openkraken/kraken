@@ -119,12 +119,20 @@ else()
       bindings/jsc/DOM/elements/video_element.h
       bindings/jsc/DOM/elements/canvas_element.cc
       bindings/jsc/DOM/elements/canvas_element.h
+      bindings/jsc/DOM/elements/iframe_element.cc
+      bindings/jsc/DOM/elements/iframe_element.h
+      bindings/jsc/DOM/elements/image_element.cc
+      bindings/jsc/DOM/elements/image_element.h
+      bindings/jsc/DOM/elements/object_element.cc
+      bindings/jsc/DOM/elements/object_element.h
+      bindings/jsc/KOM/performance.cc
+      bindings/jsc/KOM/performance.h
       bindings/jsc/DOM/element.cc
       bindings/jsc/DOM/element.h
       bindings/jsc/DOM/event.h
       bindings/jsc/DOM/event.cc
-      bindings/jsc/DOM/eventTarget.cc
-      bindings/jsc/DOM/eventTarget.h
+      bindings/jsc/DOM/event_target.cc
+      bindings/jsc/DOM/event_target.h
       bindings/jsc/DOM/node.cc
       bindings/jsc/DOM/node.h
       bindings/jsc/DOM/text_node.cc

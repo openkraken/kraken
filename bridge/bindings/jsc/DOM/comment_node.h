@@ -17,9 +17,6 @@ struct NativeComment;
 
 class JSCommentNode : public JSNode {
 public:
-  JSCommentNode() = delete;
-  explicit JSCommentNode(JSContext *context);
-
   static JSCommentNode *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -27,11 +24,7 @@ public:
 
   class CommentNodeInstance : public NodeInstance {
   public:
-    enum class CommentProperty {
-      kData,
-      kNodeName,
-      kLength
-    };
+    enum class CommentProperty { kData, kNodeName, kLength };
     static std::array<JSStringRef, 2> &getCommentPropertyNames();
     static const std::unordered_map<std::string, CommentProperty> &getPropertyMap();
 
@@ -44,14 +37,18 @@ public:
     JSStringRef internalTextContent() override;
 
     NativeComment *nativeComment;
+
   private:
-    JSStringRef data;
+    JSStringRef data = JSStringCreateWithUTF8CString("");
   };
+protected:
+  JSCommentNode() = delete;
+  explicit JSCommentNode(JSContext *context);
 };
 
 struct NativeComment {
   NativeComment() = delete;
-  NativeComment(NativeNode *nativeNode) : nativeNode(nativeNode) {};
+  NativeComment(NativeNode *nativeNode) : nativeNode(nativeNode){};
 
   NativeNode *nativeNode;
 };

@@ -138,32 +138,6 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBox child
   return Offset(x ?? 0, y ?? 0);
 }
 
-/// Check whether render object parent is layout.
-bool _isLayout(RenderObject renderer, { RenderObject ancestor }) {
-  if (renderer == null || !renderer.attached) {
-    return false;
-  }
-
-  while (renderer != null && renderer != ancestor) {
-    if (renderer is RenderBox) {
-      // Whether this render box has undergone layout and has a [size].
-      if (!renderer.hasSize) {
-        return false;
-      }
-    } else if (renderer is RenderSliver) {
-      // The geometry of a sliver should be set only during the sliver's
-      // [performLayout] or [performResize] functions.
-      if (renderer.geometry == null) {
-        return false;
-      }
-    }
-
-    renderer = renderer.parent;
-  }
-
-  return true;
-}
-
 class CSSPositionedLayout {
   static CSSPositionType parsePositionType(String input) {
     switch (input) {
@@ -305,11 +279,8 @@ class CSSPositionedLayout {
       RenderObject root = parent.elementManager.getRootRenderObject();
       Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childRenderBoxModel.renderPositionHolder, parent) ?? Offset.zero;
 
-      // If [renderPositionHolder] is not laid out, then base offset must be [Offset.zero].
-      Offset baseOffset = _isLayout(childRenderBoxModel.renderPositionHolder, ancestor: root) ?
-          (childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
-            parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root))
-        : Offset.zero;
+      Offset baseOffset = (childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
+        parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root));
 
       double borderLeft = borderEdge != null ? borderEdge.left : 0;
       double borderRight = borderEdge != null ? borderEdge.right : 0;

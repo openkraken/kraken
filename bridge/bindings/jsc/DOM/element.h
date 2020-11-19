@@ -46,17 +46,13 @@ public:
   };
 
   static JSElement *instance(JSContext *context);
-
-  JSElement() = delete;
-  explicit JSElement(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class ElementInstance : public NodeInstance {
   public:
-    static std::array<JSStringRef, 1> &getElementPropertyNames();
-    static const std::unordered_map<std::string, ElementProperty> &getPropertyMap();
+    static std::vector<JSStringRef> &getElementPropertyNames();
+    static const std::unordered_map<std::string, ElementProperty> &getElementPropertyMap();
 
     static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
@@ -79,14 +75,14 @@ public:
     explicit ElementInstance(JSElement *element, const char *tagName);
     ~ElementInstance();
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;
 
     NativeElement *nativeElement {nullptr};
-
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
-    JSStringRef tagNameStringRef_;
+    JSStringRef tagNameStringRef_ {JSStringCreateWithUTF8CString("")};
     JSObjectRef _getBoundingClientRect{nullptr};
     JSObjectRef _setAttribute{nullptr};
     JSObjectRef _getAttribute{nullptr};
@@ -96,6 +92,9 @@ public:
     JSObjectRef _scrollBy{nullptr};
     std::unordered_map<std::string, JSStringRef> attributes;
   };
+protected:
+  JSElement() = delete;
+  explicit JSElement(JSContext *context);
 };
 
 struct NativeBoundingClientRect {
@@ -125,6 +124,8 @@ using GetBoundingClientRect = NativeBoundingClientRect *(*)(NativeElement *nativ
 using Click = void (*)(NativeElement *nativeElement);
 using Scroll = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
 using ScrollBy = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
+using SetScrollTop = void (*)(NativeElement *nativeElement, double top);
+using SetScrollLeft = double (*)(NativeElement *nativeElement, double left);
 
 class BoundingClientRect : public HostObject {
 public:
@@ -175,6 +176,8 @@ struct NativeElement {
   Click click{nullptr};
   Scroll scroll{nullptr};
   ScrollBy scrollBy{nullptr};
+  SetScrollLeft setScrollLeft{nullptr};
+  SetScrollTop setScrollTop{nullptr};
 };
 
 } // namespace kraken::binding::jsc

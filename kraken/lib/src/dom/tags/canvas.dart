@@ -166,86 +166,7 @@ class CanvasElement extends Element {
   void dispose() {
     super.dispose();
     _nativeMap.remove(nativeCanvasElement.address);
-  }
-
-  void _applyContext2DMethod(List args) {
-    // [String method, [...args]]
-    if (args == null) return;
-    if (args.length < 1) return;
-    String method = args[0];
-    switch (method) {
-      case 'fillRect':
-        double x = CSSLength.toDouble(args[1]) ?? 0.0;
-        double y = CSSLength.toDouble(args[2]) ?? 0.0;
-        double w = CSSLength.toDouble(args[3]) ?? 0.0;
-        double h = CSSLength.toDouble(args[4]) ?? 0.0;
-        painter.context.fillRect(x, y, w, h);
-        break;
-
-      case 'clearRect':
-        double x = CSSLength.toDouble(args[1]) ?? 0.0;
-        double y = CSSLength.toDouble(args[2]) ?? 0.0;
-        double w = CSSLength.toDouble(args[3]) ?? 0.0;
-        double h = CSSLength.toDouble(args[4]) ?? 0.0;
-        painter.context.clearRect(x, y, w, h);
-        break;
-
-      case 'strokeRect':
-        double x = CSSLength.toDouble(args[1]) ?? 0.0;
-        double y = CSSLength.toDouble(args[2]) ?? 0.0;
-        double w = CSSLength.toDouble(args[3]) ?? 0.0;
-        double h = CSSLength.toDouble(args[4]) ?? 0.0;
-        painter.context.strokeRect(x, y, w, h);
-        break;
-
-      case 'fillText':
-        String text = args[1];
-        double x = CSSLength.toDouble(args[2]) ?? 0.0;
-        double y = CSSLength.toDouble(args[3]) ?? 0.0;
-        if (args.length == 5) {
-          // optional maxWidth
-          double maxWidth = CSSLength.toDouble(args[4]) ?? 0.0;
-          painter.context.fillText(text, x, y, maxWidth: maxWidth);
-        } else {
-          painter.context.fillText(text, x, y);
-        }
-        break;
-
-      case 'strokeText':
-        String text = args[1];
-        double x = CSSLength.toDouble(args[2]) ?? 0.0;
-        double y = CSSLength.toDouble(args[3]) ?? 0.0;
-        if (args.length == 5) {
-          // optional maxWidth
-          double maxWidth = CSSLength.toDouble(args[4]) ?? 0.0;
-          painter.context.strokeText(text, x, y, maxWidth: maxWidth);
-        } else {
-          painter.context.strokeText(text, x, y);
-        }
-        break;
-    }
-
-    if (renderCustomPaint != null) {
-      renderCustomPaint.markNeedsPaint();
-    }
-  }
-
-  void _updateContext2DProperty(List args) {
-    // [String method, [...args]]
-    if (args == null) return;
-    if (args.length < 1) return;
-    String property = args[0];
-    switch (property) {
-      case 'fillStyle':
-        painter.context.fillStyle = CSSColor.parseColor(args[1]);
-        break;
-      case 'strokeStyle':
-        painter.context.strokeStyle = CSSColor.parseColor(args[1]);
-        break;
-      case 'font':
-        painter.context.font = args[1];
-        break;
-    }
+    painter.context.dispose();
   }
 
   @override
@@ -261,17 +182,4 @@ class CanvasElement extends Element {
         super.setProperty(key, value);
     }
   }
-
-//  @override
-//  method(String name, List args) {
-//    if (name == 'getContext') {
-//      return getContext(args[0]);
-//    } else if (name == 'applyContext2DMethod') {
-//      return _applyContext2DMethod(args);
-//    } else if (name == 'updateContext2DProperty') {
-//      return _updateContext2DProperty(args);
-//    } else {
-//      return super.method(name, args);
-//    }
-//  }
 }

@@ -32,7 +32,7 @@ static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
     return propertyCache[propertyName];
   }
 
-  std::vector<char> buffer(propertyName.size());
+  std::vector<char> buffer(propertyName.size() + 1);
 
   size_t hyphen = 0;
   for (size_t i = 0; i < propertyName.size(); ++i) {
@@ -45,6 +45,8 @@ static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
       buffer[i] = c;
     }
   }
+
+  buffer.emplace_back('\0');
 
   std::string result = std::string(buffer.data());
 
@@ -87,6 +89,10 @@ CSSStyleDeclaration::StyleDeclarationInstance::~StyleDeclarationInstance() {
   for (auto &string : properties) {
     JSStringRelease(string.second);
   }
+
+  if (_setProperty != nullptr) JSValueUnprotect(_hostClass->ctx, _setProperty);
+  if (_getPropertyValue != nullptr) JSValueUnprotect(_hostClass->ctx, _getPropertyValue);
+  if (_removeProperty != nullptr) JSValueUnprotect(_hostClass->ctx, _removeProperty);
 }
 
 JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -98,18 +104,21 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::strin
     case CSSStyleDeclarationProperty::kSetProperty: {
       if (_setProperty == nullptr) {
         _setProperty = propertyBindingFunction(_hostClass->context, this, "setProperty", setProperty);
+        JSValueProtect(_hostClass->ctx, _setProperty);
       }
       return _setProperty;
     }
     case CSSStyleDeclarationProperty::kGetPropertyValue: {
       if (_getPropertyValue == nullptr) {
         _getPropertyValue = propertyBindingFunction(_hostClass->context, this, "getPropertyValue", getPropertyValue);
+        JSValueProtect(_hostClass->ctx, _getPropertyValue);
       }
       return _getPropertyValue;
     }
     case CSSStyleDeclarationProperty::kRemoveProperty: {
       if (_removeProperty == nullptr) {
         _removeProperty = propertyBindingFunction(_hostClass->context, this, "removeProperty", removeProperty);
+        JSValueProtect(_hostClass->ctx, _removeProperty);
       }
       return _removeProperty;
     }
@@ -138,21 +147,7 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::str
 
   properties[name] = valueStr;
 
-  JSStringRef camelizedPropertyStringRef = JSStringCreateWithUTF8CString(name.c_str());
-  NativeString camelizedProperty;
-  camelizedProperty.string = JSStringGetCharactersPtr(camelizedPropertyStringRef);
-  camelizedProperty.length = JSStringGetLength(camelizedPropertyStringRef);
-
-  NativeString **args = new NativeString *[2];
-  args[0] = camelizedProperty.clone();
-
-  JSStringRef valueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-  NativeString valueNativeString;
-  valueNativeString.string = JSStringGetCharactersPtr(valueStringRef);
-  valueNativeString.length = JSStringGetLength(valueStringRef);
-
-  args[1] = valueNativeString.clone();
-
+  auto args = buildUICommandArgs(name, valueStr);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(ownerEventTarget->eventTargetId, UICommandType::setStyle, args, 2, nullptr);
 }
@@ -169,19 +164,7 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStr
   JSStringRetain(emptyStringRef);
   properties[name] = emptyStringRef;
 
-  NativeString **args = new NativeString *[2];
-
-  JSStringRef camelizedPropertyStringRef = JSStringCreateWithUTF8CString(name.c_str());
-  NativeString camelizedProperty;
-  camelizedProperty.string = JSStringGetCharactersPtr(camelizedPropertyStringRef);
-  camelizedProperty.length = JSStringGetLength(camelizedPropertyStringRef);
-
-  NativeString valueNativeString;
-  valueNativeString.string = JSStringGetCharactersPtr(emptyStringRef);
-  valueNativeString.length = JSStringGetLength(emptyStringRef);
-
-  args[0] = camelizedProperty.clone();
-  args[1] = valueNativeString.clone();
+  auto args = buildUICommandArgs(name, emptyStringRef);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(ownerEventTarget->eventTargetId, UICommandType::setStyle, args, 2, nullptr);
@@ -271,7 +254,7 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getPropertyValue(JSCon
 
 void CSSStyleDeclaration::StyleDeclarationInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &prop : properties) {
-    JSPropertyNameAccumulatorAddName(accumulator, prop.second);
+    JSPropertyNameAccumulatorAddName(accumulator, JSStringCreateWithUTF8CString(prop.first.c_str()));
   }
 
   for (auto &prop : getStyleDeclarationPropertyNames()) {

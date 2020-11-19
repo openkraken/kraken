@@ -21,10 +21,6 @@ struct NativeVideoElement {
 class JSVideoElement : public JSMediaElement {
 public:
   static JSVideoElement *instance(JSContext *context);
-
-  JSVideoElement() = delete;
-  explicit JSVideoElement(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -42,6 +38,9 @@ public:
 
   private:
   };
+protected:
+  JSVideoElement() = delete;
+  explicit JSVideoElement(JSContext *context);
 };
 
 } // namespace kraken::binding::jsc

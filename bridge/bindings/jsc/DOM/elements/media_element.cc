@@ -22,6 +22,11 @@ JSMediaElement::MediaElementInstance::MediaElementInstance(JSMediaElement *jsMed
 
 JSMediaElement::MediaElementInstance::~MediaElementInstance() {
   delete nativeMediaElement;
+
+  if (_src != nullptr) JSStringRelease(_src);
+  if (_play != nullptr) JSValueUnprotect(_hostClass->ctx, _play);
+  if (_pause != nullptr) JSValueUnprotect(_hostClass->ctx, _pause);
+  if (_fastSeek != nullptr) JSValueUnprotect(_hostClass->ctx, _fastSeek);
 }
 
 std::vector<JSStringRef> &JSMediaElement::MediaElementInstance::getMediaElementPropertyNames() {
@@ -102,16 +107,19 @@ JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, 
   } else if (property == MediaElementProperty::kPlay) {
     if (_play == nullptr) {
       _play = propertyBindingFunction(_hostClass->context, this, "play", play);
+      JSValueProtect(_hostClass->ctx, _play);
     }
     return _play;
   } else if (property == MediaElementProperty::kPause) {
     if (_pause == nullptr) {
       _pause = propertyBindingFunction(_hostClass->context, this, "pause", pause);
+      JSValueProtect(_hostClass->ctx, _pause);
     }
     return _pause;
   } else if (property == MediaElementProperty::kFastSeek) {
     if (_fastSeek == nullptr) {
       _fastSeek = propertyBindingFunction(_hostClass->context, this, "fastSeek", fastSeek);
+      JSValueProtect(_hostClass->ctx, _fastSeek);
     }
     return _fastSeek;
   }
@@ -124,21 +132,15 @@ void JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValu
   auto property = propertyMap[name];
 
   if (property == MediaElementProperty::kSrc) {
-    NativeString **args = new NativeString *[2];
+    _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(_src);
 
-    JSStringRef srcValueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(srcValueStringRef);
-    _src = srcValueStringRef;
-
-    std::string valueString = JSStringToStdString(srcValueStringRef);
-
-    ELEMENT_SET_PROPERTY(name.c_str(), valueString.c_str(), args);
-
+    auto args = buildUICommandArgs(name, JSStringRetain(_src));
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   }
 
-  NodeInstance::setProperty(name, value, exception);
+  ElementInstance::setProperty(name, value, exception);
 }
 
 void JSMediaElement::MediaElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

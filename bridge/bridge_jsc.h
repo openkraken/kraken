@@ -20,17 +20,18 @@
 #include <devtools/frontdoor.h>
 #endif // ENABLE_DEBUGGER
 
+#include "bindings/jsc/DOM/comment_node.h"
 #include "bindings/jsc/DOM/document.h"
 #include "bindings/jsc/DOM/element.h"
-#include "bindings/jsc/DOM/node.h"
-#include "bindings/jsc/DOM/text_node.h"
-#include "bindings/jsc/DOM/comment_node.h"
-#include "bindings/jsc/DOM/style_declaration.h"
-#include "bindings/jsc/DOM/eventTarget.h"
 #include "bindings/jsc/DOM/event.h"
+#include "bindings/jsc/DOM/event_target.h"
+#include "bindings/jsc/DOM/node.h"
+#include "bindings/jsc/DOM/style_declaration.h"
+#include "bindings/jsc/DOM/text_node.h"
 #include "bindings/jsc/KOM/blob.h"
 #include "bindings/jsc/KOM/console.h"
 #include "bindings/jsc/KOM/location.h"
+#include "bindings/jsc/KOM/performance.h"
 #include "bindings/jsc/KOM/screen.h"
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/KOM/window.h"

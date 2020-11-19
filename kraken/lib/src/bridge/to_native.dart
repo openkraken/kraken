@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:ui';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
+import 'dart:io';
 
 import 'from_native.dart';
 import 'platform.dart';
@@ -258,6 +260,15 @@ void flushUICommand() {
 
       UICommandType commandType = UICommandType.values[nativeCommand.ref.type];
       int id = nativeCommand.ref.id;
+
+      if (kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true') {
+        String printMsg = '$commandType, id: $id';
+        for (int i = 0; i < nativeCommand.ref.length; i ++) {
+          printMsg += ' args[$i]: ${nativeStringToString(nativeCommand.ref.args[i])}';
+        };
+        print(printMsg);
+      }
+
       switch (commandType) {
         case UICommandType.initWindow:
           controller.view.initWindow(nativeCommand.ref.nativePtr.cast<NativeWindow>());
@@ -291,7 +302,7 @@ void flushUICommand() {
         case UICommandType.setProperty:
           String key = nativeStringToString(nativeCommand.ref.args[0]);
           String value = nativeStringToString(nativeCommand.ref.args[1]);
-          controller.view.setStyle(id, key, value);
+          controller.view.setProperty(id, key, value);
           break;
         default:
           return;

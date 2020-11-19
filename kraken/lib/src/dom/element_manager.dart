@@ -13,7 +13,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/launcher.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 
@@ -44,7 +43,7 @@ Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynam
       element = ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case INPUT:
-      element = InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager);
+      element = InputElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case PRE:
       element = PreElement(id, nativePtr.cast<NativeElement>(), elementManager);
@@ -59,7 +58,7 @@ Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynam
       element = VideoElement(id, nativePtr.cast<NativeVideoElement>(), elementManager);
       break;
     case CAMERA_PREVIEW:
-      element = CameraPreviewElement(id, nativePtr.cast<NativeCameraElement>(), elementManager);
+      element = CameraPreviewElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case IFRAME:
       element = IFrameElement(id, nativePtr.cast<NativeIframeElement>(), elementManager);
@@ -100,6 +99,7 @@ class ElementManager {
   static void disposeEventTarget(int contextId, int id) {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
     EventTarget eventTarget = controller.view.getEventTargetById(id);
+    assert(eventTarget != null, 'can not get eventTarget of id: $id');
     eventTarget.dispose();
   }
 
@@ -138,7 +138,7 @@ class ElementManager {
     return _eventTargets.containsKey(id);
   }
 
-  void removeTarget(Node target) {
+  void removeTarget(EventTarget target) {
     assert(target.targetId != null);
     assert(_eventTargets.containsKey(target.targetId));
     _eventTargets.remove(target.targetId);
@@ -198,8 +198,6 @@ class ElementManager {
     assert(target != null);
 
     target.parentNode?.removeChild(target);
-    // Remove node reference to ElementManager
-    target.elementManager = null;
 
     _debugDOMTreeChanged();
   }
@@ -268,7 +266,6 @@ class ElementManager {
     Node target = getEventTargetByTargetId<Node>(targetId);
     Node newNode = getEventTargetByTargetId<Node>(newTargetId);
 
-    print('target node: $target, newNode: $newNode');
     switch (position) {
       case 'beforebegin':
         target?.parentNode?.insertBefore(newNode, target);
@@ -277,7 +274,6 @@ class ElementManager {
         target.insertBefore(newNode, target.firstChild);
         break;
       case 'beforeend':
-        print('apendChild');
         target.appendChild(newNode);
         break;
       case 'afterend':

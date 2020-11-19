@@ -74,8 +74,16 @@ JSObjectRef JSWindow::instanceConstructor(JSContextRef ctx, JSObjectRef construc
   return window->object;
 }
 
+JSWindow *JSWindow::instance(JSContext *context) {
+  static std::unordered_map<JSContext *, JSWindow *> instanceMap{};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSWindow(context);
+  }
+  return instanceMap[context];
+}
+
 void bindWindow(std::unique_ptr<JSContext> &context) {
-  auto window = new JSWindow(context.get());
+  auto window = JSWindow::instance(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Window", window->classObject);
   auto windowInstance = window->instanceConstructor(window->ctx, window->classObject, 0, nullptr, nullptr);
   JSC_GLOBAL_SET_PROPERTY(context, "window", windowInstance);

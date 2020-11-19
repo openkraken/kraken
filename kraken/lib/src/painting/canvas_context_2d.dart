@@ -21,7 +21,7 @@ class CanvasRenderingContext2DSettings {
 
 final Pointer<NativeFunction<Native_RenderingContextSetFont>> nativeSetFont = Pointer.fromFunction(CanvasRenderingContext2D._setFont);
 final Pointer<NativeFunction<Native_RenderingContextSetFillStyle>> nativeSetFillStyle = Pointer.fromFunction(CanvasRenderingContext2D._setFillStyle);
-final Pointer<NativeFunction<Native_RenderingContextSetStrokeStyle>> nativeSetStrokeStyle = Pointer.fromFunction(CanvasRenderingContext2D._setStokeStyle);
+final Pointer<NativeFunction<Native_RenderingContextSetStrokeStyle>> nativeSetStrokeStyle = Pointer.fromFunction(CanvasRenderingContext2D._setStrokeStyle);
 final Pointer<NativeFunction<Native_RenderingContextFillRect>> nativeFillRect = Pointer.fromFunction(CanvasRenderingContext2D._fillRect);
 final Pointer<NativeFunction<Native_RenderingContextClearRect>> nativeClearRect = Pointer.fromFunction(CanvasRenderingContext2D._clearRect);
 final Pointer<NativeFunction<Native_RenderingContextStrokeRect>> nativeStrokeRect = Pointer.fromFunction(CanvasRenderingContext2D._strokeRect);
@@ -52,7 +52,7 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
     canvasRenderingContext2D.fillStyle = CSSColor.parseColor(nativeStringToString(fillStyle));
   }
 
-  static void _setStokeStyle(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> strokeStyle) {
+  static void _setStrokeStyle(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> strokeStyle) {
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
     canvasRenderingContext2D.strokeStyle = CSSColor.parseColor(nativeStringToString(strokeStyle));
   }
@@ -106,6 +106,9 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
 
   CanvasRenderingContext2D() : nativeCanvasRenderingContext2D = allocate<NativeCanvasRenderingContext2D>() {
     _settings = CanvasRenderingContext2DSettings();
+
+    _nativeMap[nativeCanvasRenderingContext2D.address] = this;
+
     nativeCanvasRenderingContext2D.ref.setFont = nativeSetFont;
     nativeCanvasRenderingContext2D.ref.setFillStyle = nativeSetFillStyle;
     nativeCanvasRenderingContext2D.ref.setStrokeStyle = nativeSetStrokeStyle;
@@ -138,6 +141,10 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
 
   void restore() {
     canvas.restore();
+  }
+
+  void dispose() {
+    _nativeMap.remove(nativeCanvasRenderingContext2D.address);
   }
 }
 

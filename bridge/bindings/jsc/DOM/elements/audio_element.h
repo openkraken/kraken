@@ -23,10 +23,6 @@ struct NativeAudioElement {
 class JSAudioElement : public JSMediaElement {
 public:
   static JSAudioElement *instance(JSContext *context);
-
-  JSAudioElement() = delete;
-  explicit JSAudioElement(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -43,6 +39,9 @@ public:
     NativeAudioElement *nativeAudioElement;
   private:
   };
+protected:
+  JSAudioElement() = delete;
+  explicit JSAudioElement(JSContext *context);
 };
 
 } // namespace kraken::binding::jsc

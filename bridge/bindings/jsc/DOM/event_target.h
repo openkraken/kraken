@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_EVENTTARGET_H
-#define KRAKENBRIDGE_EVENTTARGET_H
+#ifndef KRAKENBRIDGE_EVENT_TARGET_H
+#define KRAKENBRIDGE_EVENT_TARGET_H
 
 #include "bindings/jsc/host_class.h"
 #include "bindings/jsc/js_context.h"
@@ -36,10 +36,6 @@ class JSEventTarget : public HostClass {
 public:
   static JSEventTarget *instance(JSContext *context);
 
-  JSEventTarget() = delete;
-  explicit JSEventTarget(JSContext *context, const char *name);
-  explicit JSEventTarget(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -48,9 +44,10 @@ public:
     enum class EventTargetProperty {
       kAddEventListener,
       kRemoveEventListener,
-      kDispatchEvent
+      kDispatchEvent, kClearListeners,
+      kTargetId
     };
-    static std::array<JSStringRef, 3> &getEventTargetPropertyNames();
+    static std::vector<JSStringRef> &getEventTargetPropertyNames();
     static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
 
     static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -59,6 +56,8 @@ public:
                                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef __clearListeners__(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     EventTargetInstance() = delete;
     explicit EventTargetInstance(JSEventTarget *eventTarget);
     explicit EventTargetInstance(JSEventTarget *eventTarget, int64_t targetId);
@@ -79,7 +78,13 @@ public:
     JSObjectRef _addEventListener {nullptr};
     JSObjectRef _removeEventListener {nullptr};
     JSObjectRef _dispatchEvent {nullptr};
+    JSObjectRef _clearListeners{nullptr};
   };
+
+protected:
+  JSEventTarget() = delete;
+  explicit JSEventTarget(JSContext *context, const char *name);
+  explicit JSEventTarget(JSContext *context);
 };
 
 using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);
@@ -97,4 +102,4 @@ struct NativeEventTarget {
 
 } // namespace kraken::binding::jsc
 
-#endif // KRAKENBRIDGE_EVENTTARGET_H
+#endif // KRAKENBRIDGE_EVENT_TARGET_H

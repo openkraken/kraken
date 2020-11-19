@@ -9,28 +9,33 @@
 namespace kraken::binding::jsc {
 
 HostClass::HostClass(JSContext *context, std::string name)
-  : context(context), _name(std::move(name)), ctx(context->context()), contextId(context->getContextId()) {
+  : context(context), _name(name), ctx(context->context()), contextId(context->getContextId()) {
   JSClassDefinition hostClassDefinition = kJSClassDefinitionEmpty;
   JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), nullptr, nullptr, HostClass);
   jsClass = JSClassCreate(&hostClassDefinition);
+  JSClassRetain(jsClass);
   classObject = JSObjectMake(ctx, jsClass, this);
-
+  JSValueProtect(ctx, classObject);
   JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
   JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), HostClass);
   instanceClass = JSClassCreate(&hostInstanceDefinition);
+  JSClassRetain(instanceClass);
 }
 
 HostClass::HostClass(JSContext *context, HostClass *parentHostClass, std::string name,
                      const JSStaticFunction *staticFunction, const JSStaticValue *staticValue)
-  : context(context), _name(std::move(name)), ctx(context->context()), _parentHostClass(parentHostClass) {
+  : context(context), _name(name), ctx(context->context()), _parentHostClass(parentHostClass) {
   JSClassDefinition hostClassDefinition = kJSClassDefinitionEmpty;
   JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), staticFunction, staticValue, HostClass);
   hostClassDefinition.attributes = kJSClassAttributeNone;
   jsClass = JSClassCreate(&hostClassDefinition);
+  JSClassRetain(jsClass);
   classObject = JSObjectMake(ctx, jsClass, this);
+  JSValueProtect(ctx, classObject);
   JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
   JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), HostClass);
   instanceClass = JSClassCreate(&hostInstanceDefinition);
+  JSClassRetain(instanceClass);
 }
 
 void HostClass::proxyInitialize(JSContextRef ctx, JSObjectRef object) {
@@ -105,15 +110,14 @@ JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSS
   auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));
 
   if (name == "call") {
-    return propertyBindingFunction(hostClass->context, hostClass, "call", constructorCall);
+    if (hostClass->_call != nullptr) {
+      hostClass->_call = propertyBindingFunction(hostClass->context, hostClass, "call", constructorCall);
+      JSValueProtect(hostClass->ctx, hostClass->_call);
+    }
+    return hostClass->_call;
   }
 
   return nullptr;
-}
-
-void HostClass::proxyInstanceInitialize(JSContextRef ctx, JSObjectRef object) {
-  auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
-  hostClassInstance->initialized();
 }
 
 JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
@@ -130,7 +134,6 @@ bool HostClass::proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, J
   auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
   std::string &&name = JSStringToStdString(propertyName);
   hostClassInstance->setProperty(name, value, exception);
-  JSStringRelease(propertyName);
   return hostClassInstance->_hostClass->context->handleException(*exception);
 }
 
@@ -149,16 +152,21 @@ JSObjectRef HostClass::instanceConstructor(JSContextRef ctx, JSObjectRef constru
                                          const JSValueRef *arguments, JSValueRef *exception) {
   return JSObjectMake(ctx, nullptr, nullptr);
 }
-HostClass::~HostClass() {}
+HostClass::~HostClass() {
+  if (_call != nullptr) JSValueUnprotect(ctx, _call);
+  JSClassRelease(jsClass);
+  JSClassRelease(instanceClass);
+  JSValueUnprotect(ctx, classObject);
+}
 
 HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass) {
   object = JSObjectMake(hostClass->ctx, hostClass->instanceClass, this);
 }
-void HostClass::Instance::initialized() {}
 JSValueRef HostClass::Instance::getProperty(std::string &name, JSValueRef *exception) {
   return nullptr;
 }
 void HostClass::Instance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {}
 void HostClass::Instance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
-HostClass::Instance::~Instance() {}
+HostClass::Instance::~Instance() {
+}
 } // namespace kraken::binding::jsc

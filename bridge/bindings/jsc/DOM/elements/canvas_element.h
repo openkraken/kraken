@@ -97,9 +97,6 @@ class CanvasRenderingContext2D : public HostClass {
 public:
   static CanvasRenderingContext2D *instance(JSContext *context);
 
-  CanvasRenderingContext2D() = delete;
-  explicit CanvasRenderingContext2D(JSContext *context);
-
   class CanvasRenderingContext2DInstance : public Instance {
   public:
     enum class CanvasRenderingContext2DProperty {
@@ -145,13 +142,14 @@ public:
     ~CanvasRenderingContext2DInstance() override;
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
     NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D;
 
   private:
-    JSStringRef _font;
-    JSStringRef _fillStyle;
-    JSStringRef _strokeStyle;
+    JSStringRef _font{JSStringCreateWithUTF8CString("")};
+    JSStringRef _fillStyle{JSStringCreateWithUTF8CString("")};
+    JSStringRef _strokeStyle{JSStringCreateWithUTF8CString("")};
 
     JSObjectRef _fillRect{nullptr};
     JSObjectRef _clearRect{nullptr};
@@ -161,6 +159,9 @@ public:
     JSObjectRef _save{nullptr};
     JSObjectRef _restore{nullptr};
   };
+protected:
+  CanvasRenderingContext2D() = delete;
+  explicit CanvasRenderingContext2D(JSContext *context);
 };
 
 } // namespace kraken::binding::jsc

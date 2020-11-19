@@ -1163,9 +1163,23 @@ class RenderFlexLayout extends RenderLayoutBox {
   ) {
     RenderBox child = placeholderChild != null ? placeholderChild : firstChild;
 
-    double widthLimit = contentWidth != null ? contentWidth : 0;
-    double heightLimit = contentHeight != null ? contentHeight : 0;
-    double maxMainSize = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? widthLimit : heightLimit;
+    // Container's width specified by style or inherited from parent
+    double containerWidth = 0;
+    if (contentWidth != null) {
+      containerWidth = contentWidth;
+    } else if (contentConstraints.hasTightWidth) {
+      containerWidth = contentConstraints.maxWidth;
+    }
+
+    // Container's height specified by style or inherited from parent
+    double containerHeight = 0;
+    if (contentHeight != null) {
+      containerHeight = contentHeight;
+    } else if (contentConstraints.hasTightHeight) {
+      containerHeight = contentConstraints.maxHeight;
+    }
+
+    double maxMainSize = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? containerWidth : containerHeight;
     final BoxSizeType mainSizeType = maxMainSize == 0.0 ? BoxSizeType.automatic : BoxSizeType.specified;
 
     // Find max size of flex lines

@@ -102,13 +102,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   InputElement(
     int targetId,
-    Pointer<NativeInputElement> nativePtr,
+    Pointer<NativeElement> nativePtr,
     ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  }) : super(targetId, nativePtr, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     textInputConfiguration = TextInputConfiguration(
       inputType: inputType,
       obscureText: false,
