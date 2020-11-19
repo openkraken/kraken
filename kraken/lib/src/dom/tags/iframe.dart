@@ -2,7 +2,10 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:ffi';
 import 'dart:async';
+import 'dart:collection';
+import 'package:kraken/bridge.dart';
 import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +14,6 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken_webview/kraken_webview.dart';
-
 
 const String IFRAME = 'IFRAME';
 
@@ -447,6 +449,7 @@ abstract class WebViewElement extends Element {
   /// The `javascriptMode` and `autoMediaPlaybackPolicy` parameters must not be null.
   WebViewElement(
     int targetId,
+    Pointer<NativeElement> nativePtr,
     ElementManager elementManager, {
     String tagName,
     this.initialUrl,
@@ -460,7 +463,8 @@ abstract class WebViewElement extends Element {
     this.initialMediaPlaybackPolicy = AutoMediaPlaybackPolicy.require_user_action_for_all_media_types,
   })  : assert(javascriptMode != null),
         assert(initialMediaPlaybackPolicy != null),
-        super(targetId, elementManager, tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true);
+        super(targetId, nativePtr, elementManager,
+            tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true);
 
   @override
   void willAttachRenderer() {
@@ -554,7 +558,9 @@ abstract class WebViewElement extends Element {
 
   /// Element attribute width
   double _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
+
   double get width => _width;
+
   set width(double value) {
     if (value == null) {
       return;
@@ -570,7 +576,9 @@ abstract class WebViewElement extends Element {
 
   /// Element attribute height
   double _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
+
   double get height => _height;
+
   set height(double value) {
     if (value == null) {
       return;
@@ -800,29 +808,52 @@ abstract class WebViewElement extends Element {
 //   readonly attribute WindowProxy? contentWindow;
 //   Document? getSVGDocument();
 // };
+
+final Pointer<NativeFunction<Native_IframePostMessage>> nativePostMessage = Pointer.fromFunction(IFrameElement._postMessage);
+
 class IFrameElement extends WebViewElement {
-  IFrameElement(int targetId, ElementManager elementManager) : super(targetId, elementManager, tagName: IFRAME);
+  static SplayTreeMap<int, IFrameElement> _nativeMap = SplayTreeMap();
+
+  static IFrameElement getIframeElementOfNativePtr(Pointer<NativeIframeElement> nativeIframeElement) {
+    IFrameElement iframeElement = _nativeMap[nativeIframeElement.address];
+    assert(iframeElement != null, 'Can not get iframeElement from nativeElement: $nativeIframeElement');
+    return iframeElement;
+  }
+
+  static void _postMessage(Pointer<NativeIframeElement> nativeIframeElement, Pointer<NativeString> message) {
+    IFrameElement iframeElement = getIframeElementOfNativePtr(nativeIframeElement);
+    iframeElement.postMessage(nativeStringToString(message));
+  }
+
+  final Pointer<NativeIframeElement> nativeIframeElement;
+
+
+  IFrameElement(int targetId, this.nativeIframeElement, ElementManager elementManager)
+      : super(targetId, nativeIframeElement.ref.nativeElement, elementManager, tagName: IFRAME) {
+    nativeIframeElement.ref.postMessage = nativePostMessage;
+  }
 
   @override
   void onWebViewCreated(WebViewController controller) {}
 
   @override
   void onFocus() {
-    dispatchEvent(Event('focus'));
+    dispatchEvent(Event(EventType.focus));
   }
 
   bool _isFirstLoaded;
+
   @override
   void onPageStarted(String url) {
     if (_isFirstLoaded) {
-      dispatchEvent(Event('unload'));
+      dispatchEvent(Event(EventType.unload));
     }
   }
 
   @override
   void onPageFinished(String url) {
     _isFirstLoaded = true;
-    dispatchEvent(Event('load'));
+    dispatchEvent(Event(EventType.load));
   }
 
   @override
@@ -831,7 +862,7 @@ class IFrameElement extends WebViewElement {
     dispatchEvent(event);
   }
 
-  Future<String> _postMessage(String message) {
+  Future<String> postMessage(String message) {
     String escapedMessage = message?.replaceAll(RegExp('\"', multiLine: true), '\\"');
     String invoker = '''
       window.dispatchEvent(Object.assign(new CustomEvent('message'), {
@@ -846,15 +877,8 @@ class IFrameElement extends WebViewElement {
     });
   }
 
-  @override
-  method(String name, List args) async {
-    switch (name) {
-      case 'postMessage':
-        var firstArg = args[0];
-        String message = firstArg?.toString();
-        return await _postMessage(message);
-      default:
-        super.method(name, args);
-    }
+  void dispose() {
+    super.dispose();
+    _nativeMap.remove(nativePostMessage.address);
   }
 }

@@ -20,23 +20,26 @@
 #include <devtools/frontdoor.h>
 #endif // ENABLE_DEBUGGER
 
+#include "bindings/jsc/DOM/comment_node.h"
 #include "bindings/jsc/DOM/document.h"
+#include "bindings/jsc/DOM/element.h"
+#include "bindings/jsc/DOM/event.h"
+#include "bindings/jsc/DOM/event_target.h"
+#include "bindings/jsc/DOM/node.h"
+#include "bindings/jsc/DOM/style_declaration.h"
+#include "bindings/jsc/DOM/text_node.h"
 #include "bindings/jsc/KOM/blob.h"
 #include "bindings/jsc/KOM/console.h"
 #include "bindings/jsc/KOM/location.h"
+#include "bindings/jsc/KOM/performance.h"
 #include "bindings/jsc/KOM/screen.h"
 #include "bindings/jsc/KOM/timer.h"
-#include "bindings/jsc/KOM/toBlob.h"
 #include "bindings/jsc/KOM/window.h"
 #include "bindings/jsc/js_context.h"
 #include "bindings/jsc/kraken.h"
 #include "bindings/jsc/ui_manager.h"
 
 namespace kraken {
-
-#ifdef KRAKEN_ENABLE_JSA
-using namespace alibaba::jsa;
-#endif
 
 class JSBridge final {
 public:
@@ -48,7 +51,6 @@ public:
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
-  std::deque<JSObjectRef> krakenUIListenerList;
   std::deque<JSObjectRef> krakenModuleListenerList;
 
   int32_t contextId;
@@ -64,7 +66,6 @@ public:
   }
 
   void invokeEventListener(int32_t type, const NativeString *args);
-  void handleUIListener(const NativeString *args, JSValueRef *exception);
   void handleModuleListener(const NativeString *args, JSValueRef *exception);
   void reportError(const char *errmsg);
   //#ifdef ENABLE_DEBUGGER

@@ -5,7 +5,9 @@
 
 import 'dart:async';
 import 'dart:ui';
+import 'dart:ffi';
 
+import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -100,12 +102,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   InputElement(
     int targetId,
+    Pointer<NativeElement> nativePtr,
     ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  }) : super(targetId, nativePtr, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     textInputConfiguration = TextInputConfiguration(
       inputType: inputType,
       obscureText: false,
@@ -116,7 +119,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
 
     // Make element listen to click event to trigger focus.
-    addEvent('click');
+    addEvent(EventType.click);
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
@@ -282,7 +285,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _triggerChangeEvent() {
     String currentText = textSelectionDelegate.textEditingValue?.text;
     if (_lastChangedTextString != currentText) {
-      Event changeEvent = Event('change');
+      Event changeEvent = Event(EventType.change);
       dispatchEvent(changeEvent);
       _lastChangedTextString = currentText;
     }

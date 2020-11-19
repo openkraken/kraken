@@ -24,10 +24,6 @@ std::shared_ptr<DartMethodPointer> getDartMethod() {
   return methodPointer;
 }
 
-void registerInvokeUIManager(InvokeUIManager callback) {
-  methodPointer->invokeUIManager = callback;
-}
-
 void registerInvokeModule(InvokeModule callback) {
   methodPointer->invokeModule = callback;
 }
@@ -102,6 +98,10 @@ void registerSimulatePointer(SimulatePointer simulatePointer) {
 
 void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame) {
   methodPointer->requestUpdateFrame = requestUpdateFrame;
+}
+
+void registerInitBody(InitBody initBody) {
+  methodPointer->initBody = initBody;
 }
 
 } // namespace kraken

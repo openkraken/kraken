@@ -14,31 +14,34 @@ class EventTarget {
   // A unique target identifier.
   int targetId;
 
+  // The Add
+  final Pointer<NativeEventTarget> nativeEventTargetPtr;
+
   // the self reference the ElementManager
   ElementManager elementManager;
 
   @protected
-  Map<String, List<EventHandler>> eventHandlers = {};
+  Map<EventType, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(this.targetId, this.elementManager) {
+  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
     assert(targetId != null);
     assert(elementManager != null);
   }
 
-  void addEvent(String eventName) {}
+  void addEvent(EventType eventType) {}
 
-  void addEventListener(String eventName, EventHandler eventHandler) {
+  void addEventListener(EventType eventType, EventHandler eventHandler) {
     if (!eventHandlers.containsKey(eventHandler)) {
-      eventHandlers[eventName] = [];
+      eventHandlers[eventType] = [];
     }
-    eventHandlers[eventName].add(eventHandler);
+    eventHandlers[eventType].add(eventHandler);
   }
 
-  void removeEventListener(String eventName, EventHandler eventHandler) {
-    if (!eventHandlers.containsKey(eventName)) {
+  void removeEventListener(EventType eventType, EventHandler eventHandler) {
+    if (!eventHandlers.containsKey(eventType)) {
       return;
     }
-    List<EventHandler> currentHandlers = eventHandlers[eventName];
+    List<EventHandler> currentHandlers = eventHandlers[eventType];
     currentHandlers.remove(eventHandler);
   }
 
@@ -65,7 +68,14 @@ class EventTarget {
     return false;
   }
 
-  List<EventHandler> getEventHandlers(String type) {
+  @mustCallSuper
+  void dispose() {
+    elementManager.removeTarget(this);
+    // @remove reference to elementManager.
+    elementManager = null;
+  }
+
+  List<EventHandler> getEventHandlers(EventType type) {
     assert(type != null);
     return eventHandlers[type];
   }

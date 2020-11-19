@@ -7,11 +7,13 @@
 #define KRAKENBRIDGE_JS_CONTEXT_H
 
 #include "bindings/jsc/macros.h"
+#include "include/kraken_bridge.h"
 #include "foundation/js_engine_adaptor.h"
 #include <JavaScriptCore/JavaScript.h>
 #include <deque>
 #include <map>
 #include <string>
+#include <chrono>
 
 #ifndef __has_builtin
 #define __has_builtin(x) 0
@@ -49,6 +51,7 @@ public:
 
   void reportError(const char *errmsg);
 
+  std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 private:
   int32_t contextId;
   JSExceptionHandler _handler;
@@ -57,62 +60,15 @@ private:
   JSGlobalContextRef ctx_;
 };
 
-class HostObject {
-public:
-  static JSValueRef proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
-                                     JSValueRef *exception);
-  static bool proxySetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value,
-                               JSValueRef *exception);
-  static void proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef propertyNames);
-  static void finalize(JSObjectRef obj);
-  static bool hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
-                          JSValueRef *exception);
+JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
+                                    JSObjectCallAsFunctionCallback callback);
 
-  static JSObjectRef propertyBindingFunction(JSContext* context, HostObject *selfObject,
-                                             const char *name, JSObjectCallAsFunctionCallback callback) {
-    JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;
-    functionDefinition.className = name;
-    functionDefinition.callAsFunction = callback;
-    functionDefinition.version = 0;
-    JSClassRef functionClass = JSClassCreate(&functionDefinition);
-    return JSObjectMake(context->context(), functionClass, selfObject);
-  }
+NativeString **buildUICommandArgs(JSStringRef key);
+NativeString **buildUICommandArgs(std::string &key);
+NativeString **buildUICommandArgs(std::string &key, JSStringRef value);
+NativeString **buildUICommandArgs(std::string &key, std::string &value);;
 
-  HostObject() = delete;
-  HostObject(JSContext *context, std::string name);
-  std::string name;
-
-  JSContext *context;
-  JSObjectRef jsObject;
-  JSContextRef ctx;
-  // The C++ object's dtor will be called when the GC finalizes this
-  // object.  (This may be as late as when the JSContext is shut down.)
-  // You have no control over which thread it is called on.  This will
-  // be called from inside the GC, so it is unsafe to do any VM
-  // operations which require a JSContext&.  Derived classes' dtors
-  // should also avoid doing anything expensive.  Calling the dtor on
-  // a js object is explicitly ok.  If you want to do JS operations,
-  // or any nontrivial work, you should add it to a work queue, and
-  // manage it externally.
-  virtual ~HostObject();
-
-  // When JS wants a property with a given name from the HostObject,
-  // it will call this method.  If it throws an exception, the call
-  // will throw a JS \c Error object. By default this returns undefined.
-  // \return the value for the property.
-  virtual JSValueRef getProperty(JSStringRef name, JSValueRef *exception);
-
-  // When JS wants to set a property with a given name on the HostObject,
-  // it will call this method. If it throws an exception, the call will
-  // throw a JS \c Error object. By default this throws a type error exception
-  // mimicking the behavior of a frozen object in strict mode.
-  virtual void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
-
-  virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
-
-private:
-  JSClassRef jsClass;
-};
+JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback, JSValueRef *exception);
 
 std::string JSStringToStdString(JSStringRef jsString);
 

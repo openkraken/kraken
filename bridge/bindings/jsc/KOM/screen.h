@@ -7,6 +7,7 @@
 #define KRAKEN_SCREEN_H
 
 #include "bindings/jsc/js_context.h"
+#include "bindings/jsc/host_object.h"
 #include <array>
 
 namespace kraken::binding::jsc {
@@ -19,7 +20,7 @@ public:
 
   ~JSScreen() override;
 
-  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 

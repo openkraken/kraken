@@ -30,10 +30,9 @@ JSValueRef reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
   return nullptr;
 };
 
-JSValueRef JSLocation::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
+JSValueRef JSLocation::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "reload") {
-    return JSLocation::propertyBindingFunction(context, this, "reload", reload);
+    return propertyBindingFunction(context, this, "reload", reload);
   } else if (name == "href") {
     JSStringRef hrefRef = JSStringCreateWithUTF8CString(href.c_str());
     return JSValueMakeString(context->context(), hrefRef);
@@ -42,7 +41,7 @@ JSValueRef JSLocation::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   return nullptr;
 }
 
-//void JSLocation::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+//void JSLocation::instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
 //  for (auto &propertyName : propertyNames) {
 //    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
 //  }

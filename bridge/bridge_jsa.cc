@@ -6,6 +6,7 @@
 #include "bridge_jsa.h"
 #include "foundation/logging.h"
 #include "polyfill.h"
+#include "dom.h"
 
 #include "dart_methods.h"
 #include <atomic>
@@ -43,6 +44,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   screen_ = std::make_shared<kraken::binding::jsa::JSScreen>();
   screen_->bind(context);
 
+  initKrakenDom(this);
   initKrakenPolyFill(this);
   Object promiseHandler = context->global().getPropertyAsObject(*context, "__global_unhandled_promise_handler__");
   context->setUnhandledPromiseRejectionHandler(promiseHandler);

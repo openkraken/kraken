@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_LOCATION_H
 
 #include "bindings/jsc/js_context.h"
+#include "bindings/jsc/host_object.h"
 #include <array>
 
 namespace kraken::binding::jsc {
@@ -22,9 +23,9 @@ public:
   JSLocation(JSContext *context) : HostObject(context, JSLocationName) {}
 
   ~JSLocation() override;
-  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
-//  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+//  void instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:
   std::array<JSStringRef, 2> propertyNames {
