@@ -35,7 +35,7 @@ const paths = {
 
 program
   .description('Kraken Cli Build Scripts')
-  .option('--disable-jsa', 'Disable JSA (JavaScript Abstraction)', false)
+  .option('--disable-jsa', 'Disable JSA (JavaScript Abstraction)', true)
   .option('--js-engine <engine>', 'The JavaScript Engine used by Kraken.', 'jsc')
   .parse(process.argv);
 

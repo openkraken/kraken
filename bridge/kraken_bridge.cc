@@ -154,10 +154,6 @@ void invokeEventListener(int32_t contextId, int32_t type, NativeString *data) {
   context->invokeEventListener(type, data);
 }
 
-void registerInvokeUIManager(InvokeUIManager callbacks) {
-  kraken::registerInvokeUIManager(callbacks);
-}
-
 void registerInvokeModule(InvokeModule callbacks) {
   kraken::registerInvokeModule(callbacks);
 }
@@ -208,6 +204,10 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
 
 void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame) {
   kraken::registerRequestUpdateFrame(requestUpdateFrame);
+}
+
+void registerInitBody(InitBody initBody) {
+  kraken::registerInitBody(initBody);
 }
 
 Screen *createScreen(double width, double height) {

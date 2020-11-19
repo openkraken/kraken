@@ -2,6 +2,7 @@
 import { getNodeByTargetId } from './document';
 
 export function krakenUIListener(message: any) {
+  console.log(message);
   const parsed = JSON.parse(message);
   const targetId = parsed[0];
   const event = parsed[1];

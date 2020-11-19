@@ -3,42 +3,44 @@
  * Author: Kraken Team.
  */
 
+import 'dart:ffi';
 import 'dart:ui';
-import 'dart:convert';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 
 const String WINDOW = 'WINDOW';
 
 class Window extends EventTarget {
-  Window(ElementManager elementManager) : super(WINDOW_ID, elementManager) {
+  final Pointer<NativeWindow> nativeWindowPtr;
+
+  Window(int targetId, this.nativeWindowPtr, ElementManager elementManager) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
-      Event event = Event('colorschemechange');
-      event.detail = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
+      ColorSchemeChangeEvent event = ColorSchemeChangeEvent();
+      event.platformBrightness = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
       dispatchEvent(event);
     };
   }
 
   void _handleColorSchemeChange(Event event) {
-    String json = jsonEncode([targetId, event]);
-    emitUIEvent(elementManager.controller.view.contextId, json);
+    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event.toNativeEvent());
   }
 
   void _handleLoad(Event event) {
-    String json = jsonEncode([targetId, event]);
-    emitUIEvent(elementManager.controller.view.contextId, json);
+    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event.toNativeEvent());
   }
 
   @override
-  void addEvent(String eventName) {
+  void addEvent(EventType eventName) {
     super.addEvent(eventName);
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
 
     switch (eventName) {
-      case 'colorschemechange':
-        return addEventListener(eventName, _handleColorSchemeChange);
-      case 'load':
-        return addEventListener(eventName, _handleLoad);
+      case EventType.colorschemechange:
+        return addEventListener(EventType.colorschemechange, _handleColorSchemeChange);
+      case EventType.load:
+        return addEventListener(EventType.load, _handleLoad);
+      default:
+        break;
     }
   }
 }

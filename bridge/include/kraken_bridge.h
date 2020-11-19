@@ -48,18 +48,25 @@ struct Screen {
 };
 
 enum UICommandType {
-  createElement = 0,
-  disposeEventTarget = 1,
-  addEvent = 2,
+  initWindow,
+  createElement,
+  createTextNode,
+  disposeEventTarget,
+  addEvent,
+  removeNode,
+  insertAdjacentNode,
+  setStyle,
+  setProperty
 };
 
 struct UICommandItem {
-  UICommandItem(int64_t id, int8_t type, NativeString **args, size_t length)
-    : type(type), args(args), id(id), length(length) {};
+  UICommandItem(int64_t id, int8_t type, NativeString **args, size_t length, void* nativePtr)
+    : type(type), args(args), id(id), length(length), nativePtr(nativePtr) {};
   int8_t type;
   NativeString **args;
   int64_t id;
   int32_t length;
+  void* nativePtr;
 };
 
 using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
@@ -67,7 +74,6 @@ using AsyncRAFCallback = void (*)(void *callbackContext, int32_t contextId, doub
 using AsyncModuleCallback = void (*)(void *callbackContext, int32_t contextId, NativeString *json);
 using AsyncBlobCallback = void (*)(void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes,
                                    int32_t length);
-typedef NativeString *(*InvokeUIManager)(int32_t contextId, NativeString *json);
 typedef NativeString *(*InvokeModule)(void *callbackContext, int32_t contextId, NativeString *,
                                       AsyncModuleCallback callback);
 typedef void (*RequestBatchUpdate)(void *callbackContext, int32_t contextId, AsyncCallback callback);
@@ -85,6 +91,7 @@ typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallba
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
 typedef void (*RequestUpdateFrame)();
+typedef void (*InitBody)(int32_t contextId, void *nativePtr);
 
 KRAKEN_EXPORT
 void initJSContextPool(int poolSize);
@@ -119,8 +126,6 @@ KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
 
 KRAKEN_EXPORT
-void registerInvokeUIManager(InvokeUIManager invokeUIManager);
-KRAKEN_EXPORT
 void registerInvokeModule(InvokeModule invokeUIManager);
 KRAKEN_EXPORT
 void registerRequestBatchUpdate(RequestBatchUpdate requestBatchUpdate);
@@ -148,5 +153,7 @@ KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
 KRAKEN_EXPORT
 void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame);
+KRAKEN_EXPORT
+void registerInitBody(InitBody initBody);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

@@ -4,7 +4,8 @@
  */
 
 import 'dart:io';
-import 'dart:convert';
+import 'dart:ffi';
+import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:async';
 
@@ -59,6 +60,7 @@ class KrakenViewController {
       _contextId = initBridge();
     }
     _elementManager = ElementManager(viewportWidth, viewportHeight,
+        contextId: _contextId,
         showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
 
     if (kDebugMode && rootController.debugEnableInspector != false) {
@@ -164,14 +166,36 @@ class KrakenViewController {
     return completer.future;
   }
 
-  Element createElement(int id, String tagName) {
-    print('create element id: $id, tagName: $tagName');
-    return _elementManager.createElement(id, tagName.toUpperCase(), null, null);
+  void initWindow(Pointer<NativeWindow> nativePtr) {
+    _elementManager.initWindow(nativePtr);
   }
 
-  void addEvent(int targetId, String eventName) {
-    print('add event id: $targetId, eventName: $eventName');
-    _elementManager.addEvent(targetId, eventName);
+  Element createElement(int id, Pointer nativePtr, String tagName) {
+    return _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
+  }
+
+  void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
+    return _elementManager.createTextNode(id, nativePtr, data);
+  }
+
+  void addEvent(int targetId, int eventTypeIndex) {
+    _elementManager.addEvent(targetId, eventTypeIndex);
+  }
+
+  void insertAdjacentNode(int targetId, String position, int childId) {
+    _elementManager.insertAdjacentNode(targetId, position, childId);
+  }
+
+  void removeNode(int targetId) {
+    _elementManager.removeNode(targetId);
+  }
+
+  void setStyle(int targetId, String key, String value) {
+    _elementManager.setStyle(targetId, key, value);
+  }
+
+  void setProperty(int targetId, String key, String value) {
+    _elementManager.setProperty(targetId, key, value);
   }
 
   EventTarget getEventTargetById(int id) {
@@ -180,24 +204,6 @@ class KrakenViewController {
 
   void removeEventTargetById(int id) {
     _elementManager.removeTarget(getEventTargetById(id));
-  }
-
-  String applyViewAction(String action, List payload) {
-    var result = _elementManager.applyAction(action, payload);
-
-    if (result == null) {
-      return '';
-    }
-
-    switch (result.runtimeType) {
-      case String:
-        return result;
-      case Map:
-      case List:
-        return jsonEncode(result);
-      default:
-        return result.toString();
-    }
   }
 
   void handleNavigationAction(String sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
@@ -274,7 +280,7 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
 }
 
 class KrakenController {
-  static Map<int, KrakenController> _controllerMap = Map();
+  static SplayTreeMap<int, KrakenController> _controllerMap = SplayTreeMap();
   static Map<String, int> _nameIdMap = Map();
 
   static KrakenController getControllerOfJSContextId(int contextId) {
@@ -285,7 +291,7 @@ class KrakenController {
     return _controllerMap[contextId];
   }
 
-  static Map<int, KrakenController> getControllerMap() {
+  static SplayTreeMap<int, KrakenController> getControllerMap() {
     return _controllerMap;
   }
 
@@ -450,8 +456,9 @@ class KrakenController {
       await _bundle.run(_view.contextId);
       // trigger window load event
       module.requestAnimationFrame((_) {
-        String json = jsonEncode([WINDOW_ID, Event('load')]);
-        emitUIEvent(_view.contextId, json);
+        Event loadEvent = Event(EventType.load);
+        EventTarget window = view.getEventTargetById(WINDOW_ID);
+        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, loadEvent.toNativeEvent());
       });
     }
   }

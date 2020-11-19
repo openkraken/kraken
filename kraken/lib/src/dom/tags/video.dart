@@ -3,12 +3,16 @@
  * Author: Kraken Team.
  */
 
+import 'dart:ffi';
 import 'dart:async';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
+
+import 'media.dart';
 
 const String VIDEO = 'VIDEO';
 
@@ -17,16 +21,15 @@ const Map<String, dynamic> _defaultStyle = {
   HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
-class VideoElement extends Element {
-  VideoElement(int targetId, ElementManager elementManager)
+class VideoElement extends MediaElement {
+  VideoElement(int targetId, Pointer<NativeVideoElement> nativePtr, ElementManager elementManager)
       : super(
-    targetId,
-    elementManager,
-    defaultStyle: _defaultStyle,
-    isIntrinsicBox: true,
-    repaintSelf: true,
-    tagName: VIDEO,
-  );
+          targetId,
+          nativePtr.ref.nativeMediaElement,
+          elementManager,
+          VIDEO,
+          defaultStyle: _defaultStyle,
+        );
 
   @override
   void willAttachRenderer() {
@@ -46,6 +49,12 @@ class VideoElement extends Element {
     }
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+  }
+
   void renderVideo() {
     _textureBox = TextureBox(textureId: 0);
     if (childNodes.isEmpty) {
@@ -57,7 +66,9 @@ class VideoElement extends Element {
   VideoPlayerController controller;
 
   String _src;
+
   String get src => _src;
+
   set src(String value) {
     if (_src != value) {
       bool needDispose = _src != null;
@@ -131,17 +142,17 @@ class VideoElement extends Element {
   }
 
   onCanPlay() async {
-    Event event = Event('canplay', EventInit());
+    Event event = Event(EventType.cancel, EventInit());
     dispatchEvent(event);
   }
 
   onCanPlayThrough() async {
-    Event event = Event('canplaythrough', EventInit());
+    Event event = Event(EventType.canplaythrough, EventInit());
     dispatchEvent(event);
   }
 
   onEnded() async {
-    Event event = Event('ended', EventInit());
+    Event event = Event(EventType.ended, EventInit());
     dispatchEvent(event);
   }
 
@@ -151,46 +162,43 @@ class VideoElement extends Element {
   }
 
   onPause() async {
-    Event event = Event('pause', EventInit());
+    Event event = Event(EventType.pause, EventInit());
     dispatchEvent(event);
   }
 
   onPlay() async {
-    Event event = Event('play', EventInit());
+    Event event = Event(EventType.play, EventInit());
     dispatchEvent(event);
   }
 
   onSeeked() async {
-    Event event = Event('seeked', EventInit());
+    Event event = Event(EventType.seeked, EventInit());
     dispatchEvent(event);
   }
 
   onSeeking() async {
-    Event event = Event('seeking', EventInit());
+    Event event = Event(EventType.seeking, EventInit());
     dispatchEvent(event);
   }
 
   onVolumeChange() async {
-    Event event = Event('volumechange', EventInit());
+    Event event = Event(EventType.volumechange, EventInit());
     dispatchEvent(event);
   }
 
   @override
-  method(String name, List args) {
-    if (controller == null) {
-      return;
-    }
+  void play() {
+    controller.play();
+  }
 
-    switch (name) {
-      case 'play':
-        controller.play();
-        break;
-      case 'pause':
-        controller.pause();
-        break;
-      default:
-        super.method(name, args);
-    }
+  @override
+  void pause() {
+    controller.pause();
+  }
+
+  @override
+  void fastSeek(double duration) {
+    controller.seekTo(Duration(seconds: duration.toInt()));
   }
 
   @override

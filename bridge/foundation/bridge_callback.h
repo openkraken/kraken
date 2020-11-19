@@ -47,11 +47,22 @@ public:
       : _context(context), _callback(callback) {
       JSValueProtect(context.context(), callback);
     };
+    Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef secondaryCallback,
+            JSValueRef *exception)
+      : _context(context), _callback(callback), _secondaryCallback(secondaryCallback) {
+      JSValueProtect(context.context(), callback);
+      JSValueProtect(context.context(), secondaryCallback);
+    };
     ~Context() {
       JSValueUnprotect(_context.context(), _callback);
+
+      if (_secondaryCallback != nullptr) {
+        JSValueUnprotect(_context.context(), _secondaryCallback);
+      }
     }
     kraken::binding::jsc::JSContext &_context;
-    JSValueRef _callback;
+    JSValueRef _callback{nullptr};
+    JSValueRef _secondaryCallback{nullptr};
   };
 #endif
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.

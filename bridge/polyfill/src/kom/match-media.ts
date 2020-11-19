@@ -1,5 +1,4 @@
 
-import { krakenWindow } from '../bridge';
 // https://github.com/ericf/css-mediaquery
 const RE_MEDIA_QUERY = /^(?:(only|not)?\s*([_a-z][_a-z0-9-]*)|(\([^\)]+\)))(?:\s*and\s*(.*))?$/i;
 const RE_MQ_EXPRESSION = /^\(\s*([_a-z-][_a-z0-9-]*)\s*(?:\:\s*([^\)]+))?\s*\)$/;
@@ -104,17 +103,17 @@ export function matchMedia(mediaQuery: string): MediaQueryList {
         // FIXME: change listener will override by other media query, it's bug
         if (typeof listener == 'function') {
           // @ts-ignore
-          krakenWindow.onColorSchemeChange = () => {
+          window.onColorSchemeChange = () => {
             listener(matchMedia(mediaQuery));
           };
         }
       }
       _removeListener = () => {
         // @ts-ignore
-        krakenWindow.onColorSchemeChange = null;
+        window.onColorSchemeChange = null;
       };
       // @ts-ignore
-      expMatches = expValue === '' || krakenWindow.colorScheme === expValue;
+      expMatches = expValue === '' || window.colorScheme === expValue;
       break;
     default:
       // If query is invalid, serialized text should turn into "not all".

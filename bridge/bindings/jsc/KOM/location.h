@@ -23,7 +23,7 @@ public:
   JSLocation(JSContext *context) : HostObject(context, JSLocationName) {}
 
   ~JSLocation() override;
-  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
 //  void instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 

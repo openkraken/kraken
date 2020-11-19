@@ -1,4 +1,5 @@
 import { krakenUIManager, krakenRequestBatchUpdate, krakenToBlob } from './bridge';
+import { EventType, getEventTypeOfName } from './events/event';
 
 const updateMessageQueue: any[] = [];
 let updateRequested: boolean = false;
@@ -78,8 +79,8 @@ export function setStyle(id: number, key: string, value: string) {
   appendMessage(['setStyle', [id, key, value]]);
 }
 
-export function addEvent(id: number, eventName: string) {
-  appendMessage(['addEvent', [id, eventName]]);
+export function addEvent(id: number, eventType: EventType) {
+  appendMessage(['addEvent', [id, eventType]]);
 }
 
 export function removeEvent(id: number, eventName: string) {

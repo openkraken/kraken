@@ -13,70 +13,6 @@
 namespace kraken::binding::jsc {
 using namespace foundation;
 
-JSValueRef krakenUIManager(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                           const JSValueRef arguments[], JSValueRef *exception) {
-  if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_ui_manager__': 1 argument required, but only 0 present.",
-                    exception);
-    return nullptr;
-  }
-
-  const JSValueRef &messageValue = arguments[0];
-  JSStringRef messageStr = JSValueToStringCopy(ctx, messageValue, exception);
-  const uint16_t *unicodeString = JSStringGetCharactersPtr(messageStr);
-  size_t unicodeLength = JSStringGetLength(messageStr);
-
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[krakenUIManager]: " << JSStringToStdString(messageStr) << std::endl;
-  }
-
-  if (getDartMethod()->invokeUIManager == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.",
-                    exception);
-    return nullptr;
-  }
-
-  NativeString nativeString{};
-  nativeString.string = unicodeString;
-  nativeString.length = unicodeLength;
-
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
-  const NativeString *result = getDartMethod()->invokeUIManager(context->getContextId(), &nativeString);
-  JSStringRef retValue = JSStringCreateWithCharacters(result->string, result->length);
-  return JSValueMakeString(ctx, retValue);
-}
-
-JSValueRef krakenUIListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                            const JSValueRef arguments[], JSValueRef *exception) {
-  if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_ui_listener__': 1 parameter required, but only 0 present.",
-                    exception);
-    return nullptr;
-  }
-
-  const JSValueRef &callbackValue = arguments[0];
-  if (!JSValueIsObject(ctx, callbackValue)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_ui_listener__': parameter 1 (callback) must be an function.",
-                    exception);
-    return nullptr;
-  }
-
-  JSObjectRef callbackObject = JSValueToObject(ctx, callbackValue, exception);
-  if (!JSObjectIsFunction(ctx, callbackObject)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_ui_listener__': parameter 1 (callback) must be an function.",
-                    exception);
-    return nullptr;
-  }
-
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
-  auto bridge = static_cast<JSBridge *>(context->getOwner());
-
-  // Needs to protect this function been garbage collected by GC.
-  JSValueProtect(ctx, callbackObject);
-  bridge->krakenUIListenerList.push_back(callbackObject);
-  return nullptr;
-}
-
 JSValueRef krakenModuleListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount < 1) {
@@ -134,6 +70,13 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
   const JSValueRef arguments[] = {JSValueMakeString(ctx, argumentsString)};
   JSObjectCallAsFunction(ctx, callback, obj->_context.global(), 1, arguments, &exception);
   _context.handleException(exception);
+
+  auto bridge = static_cast<JSBridge *>(obj->_context.getOwner());
+  bridge->bridgeCallback->freeBridgeCallbackContext(obj);
+}
+
+void handleInvokeModuleUnexpectedCallback(void *callbackContext, int32_t contextId, NativeString *json) {
+  static_assert("Unexpected module callback, please check your invokeModule implementation on the dart side.");
 }
 
 JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -175,18 +118,30 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
   nativeString.string = unicodeStrPtr;
   nativeString.length = unicodeLength;
 
-  const auto *result = bridge->bridgeCallback->registerCallback<const NativeString *>(
-    std::move(callbackContext), [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
-      const NativeString *response =
-        getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString, handleInvokeModuleTransientCallback);
-      return response;
-    });
+  bool hasCallback = argumentCount == 2;
+
+  const NativeString *result;
+  if (hasCallback) {
+    result = bridge->bridgeCallback->registerCallback<const NativeString *>(
+      std::move(callbackContext), [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
+        const NativeString *response =
+          getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString, handleInvokeModuleTransientCallback);
+        return response;
+      });
+  } else {
+    result = getDartMethod()->invokeModule(callbackContext.get(), context->getContextId(), &nativeString,
+                                           handleInvokeModuleUnexpectedCallback);
+  }
 
   if (result == nullptr) {
     return JSValueMakeNull(ctx);
   }
 
   JSStringRef resultString = JSStringCreateWithCharacters(result->string, result->length);
+
+  delete[] result->string;
+  delete result;
+
   return JSValueMakeString(ctx, resultString);
 }
 
@@ -202,90 +157,9 @@ JSValueRef requestUpdateFrame(JSContextRef ctx, JSObjectRef function, JSObjectRe
   return nullptr;
 }
 
-void handleBatchUpdate(void *ptr, int32_t contextId, const char *errmsg) {
-  auto callbackContext = static_cast<BridgeCallback::Context *>(ptr);
-  JSContext &_context = callbackContext->_context;
-  JSContextRef ctx = _context.context();
-
-  if (!checkContext(contextId, &_context)) return;
-
-  if (!_context.isValid()) return;
-
-  JSValueRef exception = nullptr;
-
-  if (callbackContext->_callback == nullptr) {
-    JSC_THROW_ERROR(_context.context(), "Failed to execute '__kraken_request_batch_update__': callback is null.", &exception);
-    _context.handleException(exception);
-    return;
-  }
-
-  if (!JSValueIsObject(ctx, callbackContext->_callback)) {
-    return;
-  }
-
-  if (errmsg != nullptr) {
-    JSC_THROW_ERROR(_context.context(), errmsg, &exception);
-    _context.handleException(exception);
-    return;
-  }
-
-  JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
-  JSObjectCallAsFunction(ctx, callbackObjectRef, _context.global(), 0, nullptr, &exception);
-  _context.handleException(exception);
-}
-
-JSValueRef requestBatchUpdate(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                              const JSValueRef arguments[], JSValueRef *exception) {
-  if (argumentCount <= 0) {
-    JSC_THROW_ERROR(
-      ctx, "Failed to execute '__kraken_request_batch_update__': 1 parameter required, but only 0 present.", exception);
-    return nullptr;
-  }
-
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
-  const JSValueRef &callbackValueRef = arguments[0];
-
-  if (!JSValueIsObject(ctx, callbackValueRef)) {
-    JSC_THROW_ERROR(ctx,
-                    "Failed to execute '__kraken_request_batch_update__': parameter 1 (callback) must be an function.",
-                    exception);
-    return nullptr;
-  }
-
-  JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackValueRef, exception);
-
-  if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx,
-                    "Failed to execute '__kraken_request_batch_update__': parameter 1 (callback) must be an function.",
-                    exception);
-    return nullptr;
-  }
-
-  // the context pointer which will be pass by pointer address to dart code.
-  auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
-
-  if (getDartMethod()->requestBatchUpdate == nullptr) {
-    JSC_THROW_ERROR(
-      ctx, "Failed to execute '__kraken_request_batch_update__': dart method (requestBatchUpdate) is not registered.",
-      exception);
-    return nullptr;
-  }
-
-  auto bridge = static_cast<JSBridge *>(context->getOwner());
-  bridge->bridgeCallback->registerCallback<void>(
-    std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
-      getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleBatchUpdate);
-    });
-
-  return nullptr;
-}
-
 void bindUIManager(std::unique_ptr<JSContext> &context) {
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_ui_manager__", krakenUIManager);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_ui_listener__", krakenUIListener);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_module_listener__", krakenModuleListener);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_invoke_module__", krakenInvokeModule);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_request_batch_update__", requestBatchUpdate);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_request_update_frame__", requestUpdateFrame);
 }
 

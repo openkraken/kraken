@@ -30,10 +30,6 @@ public:
   explicit JSEventTarget(JSContext &context);
   ~JSEventTarget() override;
 
-  NativeEventTarget *getEventTarget() {
-    return nativeEventTarget;
-  }
-
   Value get(JSContext &, const PropNameID &name) override;
 
   void set(JSContext &, const PropNameID &name, const Value &value) override;
@@ -43,7 +39,6 @@ public:
   int64_t getEventTargetId();
 
 private:
-  NativeEventTarget *nativeEventTarget{nullptr};
   JSContext &context;
   int64_t eventTargetId;
 };

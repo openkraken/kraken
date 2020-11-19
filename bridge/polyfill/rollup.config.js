@@ -6,7 +6,6 @@ const commonjs = require('@rollup/plugin-commonjs');
 const { terser } = require('rollup-plugin-terser');
 
 const NODE_ENV = process.env['NODE_ENV'] || 'development';
-const ENABLE_JSA = process.env['ENABLE_JSA'] || 'false';
 const output = {
   format: 'iife',
   sourcemap: NODE_ENV === 'development',
@@ -27,7 +26,6 @@ const plugins = [
   resolve(),
   replace({
     'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
-    'process.env.ENABLE_JSA': ENABLE_JSA === 'true'
   }),
   bundleSize(),
 ];
@@ -42,15 +40,6 @@ module.exports = [
       NODE_ENV === 'development' ? null : terser(uglifyOptions),
     ],
     context: 'window'
-  },
-  {
-    input: 'src/dom/index.ts',
-    output: Object.assign({ file: 'dist/dom.js'}, output),
-    plugins: [
-      ...plugins,
-      typescript(),
-      NODE_ENV === 'development' ? null : terser(uglifyOptions),
-    ]
   },
   {
     input: 'src/test/index.js',

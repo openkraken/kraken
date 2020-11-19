@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'dart:ffi';
+import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -24,8 +26,8 @@ class ObjectElement extends Element implements ObjectElementHost {
   ObjectElementClientFactory _objectElementClientFactory;
   ObjectElementClient _objectElementClient;
 
-  ObjectElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  ObjectElement(int targetId, Pointer<NativeObjectElement> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();
     initDetachCallback(elementManager);
@@ -75,8 +77,8 @@ class ObjectElement extends Element implements ObjectElementHost {
   }
 
   @override
-  void detach() {
-    super.detach();
+  void dispose() {
+    super.dispose();
     disposeClient();
   }
 
@@ -84,11 +86,11 @@ class ObjectElement extends Element implements ObjectElementHost {
     _objectElementClient?.dispose();
   }
 
-  @override
-  method(String name, List args) {
-   super.method(name, args);
-   _objectElementClient?.method(name, args);
-  }
+//  @override
+//  method(String name, List args) {
+//   super.method(name, args);
+//   _objectElementClient?.method(name, args);
+//  }
 }
 
 class _DefaultObjectElementClient implements ObjectElementClient {
