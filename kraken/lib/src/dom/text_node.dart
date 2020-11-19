@@ -117,7 +117,6 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     parent.remove(_renderTextBox);
 
     didDetachRenderer();
-    dispose();
   }
 
   @override

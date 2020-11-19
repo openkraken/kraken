@@ -74,7 +74,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::lastChild() {
 JSNode::NodeInstance *JSNode::NodeInstance::previousSibling() {
   if (parentNode == nullptr) return nullptr;
 
-  auto parentChildNodes = parentNode->childNodes;
+  auto &&parentChildNodes = parentNode->childNodes;
   auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), this);
 
   if (it != parentChildNodes.end()) {
@@ -87,7 +87,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::previousSibling() {
 JSNode::NodeInstance *JSNode::NodeInstance::nextSibling() {
   if (parentNode == nullptr) return nullptr;
 
-  auto parentChildNodes = parentNode->childNodes;
+  auto &&parentChildNodes = parentNode->childNodes;
   auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), this);
 
   if (it != parentChildNodes.end()) {
@@ -171,7 +171,7 @@ JSValueRef JSNode::NodeInstance::insertBefore(JSContextRef ctx, JSObjectRef func
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
   auto referenceInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(referenceNodeObjectRef));
 
-  selfInstance->internalInsertBefore(nodeInstance, referenceInstance);
+  selfInstance->internalInsertBefore(nodeInstance, referenceInstance, exception);
 
   return nullptr;
 }
@@ -221,22 +221,23 @@ JSValueRef JSNode::NodeInstance::replaceChild(JSContextRef ctx, JSObjectRef func
   return nullptr;
 }
 
-void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode) {
+void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode, JSValueRef *exception) {
   if (referenceNode == nullptr) {
     internalAppendChild(node);
   } else {
+    if (referenceNode->parentNode != this) {
+      JSC_THROW_ERROR(_hostClass->ctx, "Uncaught TypeError: Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.", exception);
+      return;
+    }
+
     ensureDetached(node);
     auto parent = referenceNode->parentNode;
     if (parent != nullptr) {
-      auto parentChildNodes = parent->childNodes;
+      auto &&parentChildNodes = parent->childNodes;
       auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), referenceNode);
       parentChildNodes.insert(it, node);
       node->parentNode = parent;
-      if (node->_referenceCount == 0) {
-        JSValueProtect(_hostClass->ctx, node->object);
-      } else {
-        node->_referenceCount++;
-      }
+      node->refer();
       // TODO: newChild._notifyNodeInsert(parentNode);
 
       std::string nodeEventTargetId = std::to_string(node->eventTargetId);

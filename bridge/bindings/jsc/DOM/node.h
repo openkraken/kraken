@@ -85,7 +85,7 @@ public:
     void internalAppendChild(JSNode::NodeInstance *node);
     void internalRemove(JSValueRef *exception);
     JSNode::NodeInstance *internalRemoveChild(JSNode::NodeInstance *node, JSValueRef *exception);
-    void internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode);
+    void internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode, JSValueRef *exception);
     virtual JSStringRef internalTextContent();
     JSNode::NodeInstance *internalReplaceChild(JSNode::NodeInstance *newChild, JSNode::NodeInstance *oldChild);
 

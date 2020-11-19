@@ -997,24 +997,6 @@ class Element extends Node
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
     } else {
-      switch (key) {
-        case 'scrollTop':
-        // need to flush layout to get correct size
-          elementManager
-              .getRootRenderObject()
-              .owner
-              .flushLayout();
-          scrollTop = value.toDouble();
-          break;
-        case 'scrollLeft':
-        // need to flush layout to get correct size
-          elementManager
-              .getRootRenderObject()
-              .owner
-              .flushLayout();
-          scrollLeft = value.toDouble();
-          break;
-      }
       properties[key] = value;
     }
   }

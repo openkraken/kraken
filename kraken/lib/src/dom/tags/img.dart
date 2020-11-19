@@ -16,7 +16,7 @@ const String IMAGE = 'IMG';
 const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK};
 
 bool _isNumber(String str) {
-  RegExp regExp = RegExp(r"^\d+$");
+  RegExp regExp = RegExp(r"^\d+");
   return regExp.hasMatch(str);
 }
 

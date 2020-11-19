@@ -168,6 +168,5 @@ JSValueRef HostClass::Instance::getProperty(std::string &name, JSValueRef *excep
 void HostClass::Instance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {}
 void HostClass::Instance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
 HostClass::Instance::~Instance() {
-  KRAKEN_LOG(VERBOSE) << "dispose HostClass Instance: " << this;
 }
 } // namespace kraken::binding::jsc
