@@ -206,6 +206,10 @@ void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame) {
   kraken::registerRequestUpdateFrame(requestUpdateFrame);
 }
 
+void registerInitBody(InitBody initBody) {
+  kraken::registerInitBody(initBody);
+}
+
 Screen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;

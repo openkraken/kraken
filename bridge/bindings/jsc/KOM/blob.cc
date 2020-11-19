@@ -16,7 +16,7 @@ void BlobBuilder::append(JSContext &context, JSStringRef text) {
   _data.insert(_data.end(), strArr.begin(), strArr.end());
 }
 
-void BlobBuilder::append(JSContext &context, JSBlob *blob) {
+void BlobBuilder::append(JSContext &context, JSBlob::BlobInstance *blob) {
   std::vector<uint8_t> blobData = blob->_data;
   _data.reserve(_data.size() + blobData.size());
   _data.insert(_data.end(), blobData.begin(), blobData.end());
@@ -61,12 +61,13 @@ void BlobBuilder::append(JSContext &context, const JSValueRef value, JSValueRef 
         _data.emplace_back(ptr[i]);
       }
     } else {
-      auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(JSValueToObject(context.context(), value, exception)));
+      auto blob =
+        static_cast<JSBlob::BlobInstance *>(JSObjectGetPrivate(JSValueToObject(context.context(), value, exception)));
       if (blob == nullptr) {
         return;
       }
 
-      if (std::string(blob->name) == JSBlobName) {
+      if (std::string(blob->_hostClass->_name) == JSBlobName) {
         std::vector<uint8_t> blobData = blob->_data;
         _data.reserve(_data.size() + blobData.size());
         _data.insert(_data.end(), blobData.begin(), blobData.end());
@@ -79,21 +80,22 @@ std::vector<uint8_t> BlobBuilder::finalize() {
   return std::move(_data);
 }
 
-uint8_t *JSBlob::bytes() {
-  return _data.data();
+JSBlob *JSBlob::instance(JSContext *context) {
+  static std::unordered_map<JSContext *, JSBlob *> instanceMap{};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSBlob(context);
+    KRAKEN_LOG(VERBOSE) << "created Blob constructor " << instanceMap[context];
+  }
+  return instanceMap[context];
 }
 
-int32_t JSBlob::size() {
-  return _data.size();
-}
-
-JSValueRef JSBlob::constructor(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                               const JSValueRef *arguments, JSValueRef *exception) {
+JSObjectRef JSBlob::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                        const JSValueRef *arguments, JSValueRef *exception) {
   BlobBuilder builder;
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  auto Blob = static_cast<JSBlob *>(JSObjectGetPrivate(constructor));
   if (argumentCount == 0) {
-    auto blob = new JSBlob(context);
-    return blob->jsObject;
+    auto blob = new JSBlob::BlobInstance(Blob);
+    return blob->object;
   }
 
   const JSValueRef &arrayValue = arguments[0];
@@ -106,8 +108,8 @@ JSValueRef JSBlob::constructor(JSContextRef ctx, JSObjectRef function, JSObjectR
 
   if (JSValueIsUndefined(ctx, optionValue)) {
     builder.append(*context, arrayValue, exception);
-    auto blob = new JSBlob(context, builder.finalize());
-    return blob->jsObject;
+    auto blob = new JSBlob::BlobInstance(Blob, builder.finalize());
+    return blob->object;
   }
 
   if (!JSValueIsObject(ctx, optionValue)) {
@@ -123,17 +125,37 @@ JSValueRef JSBlob::constructor(JSContextRef ctx, JSObjectRef function, JSObjectR
     JSObjectGetProperty(ctx, optionObject, JSStringCreateWithUTF8CString("type"), exception);
   JSStringRef mineTypeStringRef = JSValueToStringCopy(ctx, mimeTypeValueRef, exception);
   builder.append(*context, arrayValue, exception);
-  auto blob = new JSBlob(context, builder.finalize(), JSStringToStdString(mineTypeStringRef));
-  return blob->jsObject;
+  std::string mimeType = JSStringToStdString(mineTypeStringRef);
+  auto blob = new JSBlob::BlobInstance(Blob, builder.finalize(), mimeType);
+  return blob->object;
 }
 
-JSValueRef JSBlob::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                         const JSValueRef *arguments, JSValueRef *exception) {
+std::unordered_map<std::string, JSBlob::BlobInstance::BlobProperty> &JSBlob::BlobInstance::getBlobPropertyMap() {
+  static std::unordered_map<std::string, BlobProperty> propertyMap{
+    {"arrayBuffer", BlobProperty::kArrayBuffer},
+    {"slice", BlobProperty::kSlice},
+    {"text", BlobProperty::kText},
+    {"type", BlobProperty::kType},
+    {"size", BlobProperty::kSize},
+  };
+  return propertyMap;
+}
+
+std::vector<JSStringRef> &JSBlob::BlobInstance::getBlobPropertyNames() {
+  static std::vector<JSStringRef> propertyNames{
+    JSStringCreateWithUTF8CString("arrayBuffer"), JSStringCreateWithUTF8CString("slice"),
+    JSStringCreateWithUTF8CString("text"), JSStringCreateWithUTF8CString("type"),
+    JSStringCreateWithUTF8CString("size")};
+  return propertyNames;
+}
+
+JSValueRef JSBlob::BlobInstance::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                       size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef startValueRef = arguments[0];
   const JSValueRef endValueRef = arguments[1];
   const JSValueRef contentTypeValueRef = arguments[2];
 
-  auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(function));
+  auto blob = static_cast<JSBlob::BlobInstance *>(JSObjectGetPrivate(function));
   size_t start = 0;
   size_t end = blob->_data.size();
   std::string mimeType = blob->mimeType;
@@ -153,67 +175,128 @@ JSValueRef JSBlob::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
   }
 
   if (start == 0 && end == blob->_data.size()) {
-    auto newBlob = new JSBlob(blob->context, std::move(blob->_data), mimeType);
-    return newBlob->jsObject;
+    auto newBlob =
+      new JSBlob::BlobInstance(reinterpret_cast<JSBlob *>(blob->_hostClass), std::move(blob->_data), mimeType);
+    return newBlob->object;
   }
 
   std::vector<uint8_t> newData;
   newData.reserve(blob->_data.size() - (end - start));
   newData.insert(newData.begin(), blob->_data.begin() + start, blob->_data.end() - (blob->_data.size() - end));
 
-  auto newBlob = new JSBlob(blob->context, std::move(newData), mimeType);
-  return newBlob->jsObject;
+  auto newBlob = new JSBlob::BlobInstance(reinterpret_cast<JSBlob *>(blob->_hostClass), std::move(newData), mimeType);
+  return newBlob->object;
 }
 
-JSValueRef JSBlob::text(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                        const JSValueRef *arguments, JSValueRef *exception) {
-  auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(function));
-  std::string newString(reinterpret_cast<const char *>(blob->_data.data()), blob->_data.size());
-  JSStringRef newStringRef = JSStringCreateWithUTF8CString(newString.c_str());
-  return JSValueMakeString(ctx, newStringRef);
+JSValueRef JSBlob::BlobInstance::text(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                      size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  auto blob = static_cast<JSBlob::BlobInstance *>(JSObjectGetPrivate(function));
+  auto context = new BlobPromiseContext();
+  context->blobInstance = blob;
+  JSObjectCallAsFunctionCallback callback = [](JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                               size_t argumentCount, const JSValueRef arguments[],
+                                               JSValueRef *exception) -> JSValueRef {
+    auto blobContext = reinterpret_cast<BlobPromiseContext *>(JSObjectGetPrivate(function));
+    const JSValueRef resolveValueRef = arguments[0];
+
+    JSObjectRef resolveObjectRef = JSValueToObject(ctx, resolveValueRef, exception);
+
+    std::string newString(reinterpret_cast<const char *>(blobContext->blobInstance->_data.data()),
+                          blobContext->blobInstance->_data.size());
+    JSStringRef newStringRef = JSStringCreateWithUTF8CString(newString.c_str());
+
+    const JSValueRef resolveArgs[] = {JSValueMakeString(ctx, newStringRef)};
+    JSObjectCallAsFunction(ctx, resolveObjectRef, thisObject, 1, resolveArgs, exception);
+    return nullptr;
+  };
+
+  return JSObjectMakePromise(blob->_hostClass->context, context, callback, exception);
 }
 
-JSValueRef JSBlob::arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                               const JSValueRef *arguments, JSValueRef *exception) {
-  auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(function));
-  auto buffer = JSObjectMakeArrayBufferWithBytesNoCopy(
-    ctx, blob->bytes(), blob->size(), [](void *bytes, void *deallocatorContext) {}, nullptr, exception);
-  return buffer;
+JSValueRef JSBlob::BlobInstance::arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  auto blob = static_cast<JSBlob::BlobInstance *>(JSObjectGetPrivate(function));
+  auto context = new BlobPromiseContext();
+  context->blobInstance = blob;
+  JSObjectCallAsFunctionCallback callback = [](JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                               size_t argumentCount, const JSValueRef arguments[],
+                                               JSValueRef *exception) -> JSValueRef {
+    auto blobContext = reinterpret_cast<BlobPromiseContext *>(JSObjectGetPrivate(function));
+    const JSValueRef resolveValueRef = arguments[0];
+
+    JSObjectRef resolveObjectRef = JSValueToObject(ctx, resolveValueRef, exception);
+    auto buffer = JSObjectMakeArrayBufferWithBytesNoCopy(
+      ctx, blobContext->blobInstance->bytes(), blobContext->blobInstance->size(),
+      [](void *bytes, void *deallocatorContext) {}, nullptr, exception);
+    const JSValueRef resolveArgs[] = {buffer};
+    JSObjectCallAsFunction(ctx, resolveObjectRef, thisObject, 1, resolveArgs, exception);
+    return nullptr;
+  };
+
+  return JSObjectMakePromise(blob->_hostClass->context, context, callback, exception);
 }
 
-JSValueRef JSBlob::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
+JSBlob::BlobInstance::~BlobInstance() {
+  if (_slice != nullptr) JSValueUnprotect(_hostClass->ctx, _slice);
+  if (_arrayBuffer != nullptr) JSValueUnprotect(_hostClass->ctx, _arrayBuffer);
+  if (_text != nullptr) JSValueUnprotect(_hostClass->ctx, _text);
+}
 
-  if (name == "slice") {
-    return propertyBindingFunction(context, this, "slice", slice);
-  } else if (name == "text") {
-    return propertyBindingFunction(context, this, "text", text);
-  } else if (name == "arrayBuffer") {
-    return propertyBindingFunction(context, this, "arrayBuffer", arrayBuffer);
-  } else if (name == "size") {
-    return JSValueMakeNumber(context->context(), _data.size());
-  } else if (name == "type") {
-    JSStringRef string = JSStringCreateWithUTF8CString(mimeType.c_str());
-    return JSValueMakeString(context->context(), string);
+uint8_t *JSBlob::BlobInstance::bytes() {
+  return _data.data();
+}
+
+int32_t JSBlob::BlobInstance::size() {
+  return _data.size();
+}
+
+JSValueRef JSBlob::BlobInstance::getProperty(std::string &name, JSValueRef *exception) {
+  auto propertyMap = getBlobPropertyMap();
+
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+    switch (property) {
+    case kArrayBuffer:
+      if (_arrayBuffer == nullptr) {
+        _arrayBuffer = propertyBindingFunction(_hostClass->context, this, "arrayBuffer", arrayBuffer);
+        JSValueProtect(_hostClass->ctx, _arrayBuffer);
+      }
+      return _arrayBuffer;
+    case kSlice:
+      if (_slice == nullptr) {
+        _slice = propertyBindingFunction(_hostClass->context, this, "slice", slice);
+        JSValueProtect(_hostClass->ctx, _slice);
+      }
+      return _slice;
+    case kText:
+      if (_text == nullptr) {
+        _text = propertyBindingFunction(_hostClass->context, this, "text", text);
+        JSValueProtect(_hostClass->ctx, _text);
+      }
+      return _text;
+    case kStream:
+      return nullptr;
+    case kType: {
+      JSStringRef typeStringRef = JSStringCreateWithUTF8CString(mimeType.empty() ? "" : mimeType.c_str());
+      return JSValueMakeString(_hostClass->ctx, typeStringRef);
+    }
+    case kSize:
+      return JSValueMakeNumber(_hostClass->ctx, _size);
+    }
   }
 
   return nullptr;
 }
 
-void JSBlob::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-  for (auto &propertyName : propertyNames) {
-    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
-  }
-}
-
-JSBlob::~JSBlob() {
-  for (auto &propertyName : propertyNames) {
-    JSStringRelease(propertyName);
+void JSBlob::BlobInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &property : getBlobPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
 
 void bindBlob(std::unique_ptr<JSContext> &context) {
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_blob__", JSBlob::constructor);
+  auto Blob = JSBlob::instance(context.get());
+  JSC_GLOBAL_SET_PROPERTY(context, "Blob", Blob->classObject);
 }
 
 } // namespace kraken::binding::jsc

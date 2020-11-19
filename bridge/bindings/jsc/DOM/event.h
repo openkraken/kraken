@@ -15,144 +15,73 @@ namespace kraken::binding::jsc {
 
 void bindEvent(std::unique_ptr<JSContext> &context);
 
-enum EventType {
-  none,
-  input,
-  appear,
-  disappear,
-  error,
-  message,
-  close,
-  open,
-  intersectionchange,
-  touchstart,
-  touchend,
-  touchmove,
-  touchcancel,
-  click,
-  colorschemechange,
-  load,
-  finish,
-  cancel,
-  transitionrun,
-  transitionstart,
-  transitionend,
-  transitioncancel,
-  focus,
-  unload,
-  change,
-  canplay,
-  canplaythrough,
-  ended,
-  play,
-  pause,
-  seeked,
-  seeking,
-  volumechange
-};
-
-struct NativeEvent {
-  NativeEvent() = delete;
-  explicit NativeEvent(EventType eventType) : type(eventType){};
-  int8_t type;
-  int8_t bubbles{0};
-  int8_t cancelable{0};
-  int64_t timeStamp{0};
-  int8_t defaultPrevented{0};
-  // The pointer address of target EventTargetInstance object.
-  void *target{nullptr};
-  // The pointer address of current target EventTargetInstance object.
-  void *currentTarget{nullptr};
-};
-
-namespace {
-const char *EventTypeKeys[]{
-  "none",
-  "input",
-  "appear",
-  "disappear",
-  "error",
-  "message",
-  "close",
-  "open",
-  "intersectionchange",
-  "touchstart",
-  "touchend",
-  "touchmove",
-  "touchcancel",
-  "click",
-  "colorschemechange",
-  "load",
-  "finish",
-  "cancel",
-  "transitionrun",
-  "transitionstart",
-  "transitionend",
-  "transitioncancel",
-  "focus",
-  "unload",
-  "change",
-  "canplay",
-  "canplaythrough",
-  "ended",
-  "play",
-  "pause",
-  "seeked",
-  "seeking",
-  "volumechange",
-};
-
-std::unordered_map<std::string, EventType> EventTypeValues{
-  {"none", EventType::none},
-  {"input", EventType::input},
-  {"appear", EventType::appear},
-  {"disappear", EventType::disappear},
-  {"error", EventType::error},
-  {"message", EventType::message},
-  {"close", EventType::close},
-  {"open", EventType::open},
-  {"intersectionchange", EventType::intersectionchange},
-  {"touchstart", EventType::touchstart},
-  {"touchend", EventType::touchend},
-  {"touchmove", EventType::touchmove},
-  {"touchcancel", EventType::touchcancel},
-  {"click", EventType::click},
-  {"colorschemechange", EventType::colorschemechange},
-  {"load", EventType::load},
-  {"finish", EventType::finish},
-  {"cancel", EventType::cancel},
-  {"transitionrun", EventType::transitionrun},
-  {"transitionstart", EventType::transitionstart},
-  {"transitionend", EventType::transitionend},
-  {"transitioncancel", EventType::transitioncancel},
-  {"focus", EventType::focus},
-  {"unload", EventType::unload},
-  {"change", EventType::change},
-  {"canplay", EventType::canplay},
-  {"canplaythrough", EventType::canplaythrough},
-  {"ended", EventType::ended},
-  {"play", EventType::play},
-  {"pause", EventType::pause},
-  {"seeked", EventType::seeked},
-  {"seeking", EventType::seeking},
-  {"volumechange", EventType::volumechange},
-};
-} // namespace
+struct NativeEvent;
 
 class JSEvent : public HostClass {
 public:
-  static JSEvent *instance(JSContext *context);
+  enum EventType {
+    none,
+    input,
+    appear,
+    disappear,
+    error,
+    message,
+    close,
+    open,
+    intersectionchange,
+    touchstart,
+    touchend,
+    touchmove,
+    touchcancel,
+    click,
+    colorschemechange,
+    load,
+    finish,
+    cancel,
+    transitionrun,
+    transitionstart,
+    transitionend,
+    transitioncancel,
+    focus,
+    unload,
+    change,
+    canplay,
+    canplaythrough,
+    ended,
+    play,
+    pause,
+    seeked,
+    seeking,
+    volumechange
+  };
 
-  JSEvent() = delete;
-  explicit JSEvent(JSContext *context, const char *name);
-  explicit JSEvent(JSContext *context);
+  static JSEvent *instance(JSContext *context);
+  static EventType getEventTypeOfName(std::string &name);
+  static const char* getEventNameOfTypeIndex(int8_t index);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class EventInstance : public Instance {
   public:
-    static std::array<JSStringRef, 8> &getEventPropertyNames();
+    enum class EventProperty {
+      kType,
+      kBubbles,
+      kCancelable,
+      kTimestamp,
+      kDefaultPrevented,
+      kTarget,
+      kSrcElement,
+      kCurrentTarget,
+      kReturnValue,
+      kStopPropagation,
+      kCancelBubble,
+      kStopImmediatePropagation,
+      kPreventDefault
+    };
+
+    static std::vector<JSStringRef> &getEventPropertyNames();
+    const static std::unordered_map<std::string, EventProperty> &getEventPropertyMap();
 
     EventInstance() = delete;
     static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -167,8 +96,8 @@ public:
 
     explicit EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent);
     explicit EventInstance(JSEvent *jsEvent, EventType eventType);
-    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
-    void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
+    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     ~EventInstance() override;
     NativeEvent *nativeEvent;
@@ -184,6 +113,24 @@ public:
     JSObjectRef _stopPropagation{nullptr};
     JSObjectRef _preventDefault{nullptr};
   };
+protected:
+  JSEvent() = delete;
+  explicit JSEvent(JSContext *context, const char *name);
+  explicit JSEvent(JSContext *context);
+};
+
+struct NativeEvent {
+  NativeEvent() = delete;
+  explicit NativeEvent(JSEvent::EventType eventType) : type(eventType){};
+  int8_t type;
+  int8_t bubbles{0};
+  int8_t cancelable{0};
+  int64_t timeStamp{0};
+  int8_t defaultPrevented{0};
+  // The pointer address of target EventTargetInstance object.
+  void *target{nullptr};
+  // The pointer address of current target EventTargetInstance object.
+  void *currentTarget{nullptr};
 };
 
 } // namespace kraken::binding::jsc

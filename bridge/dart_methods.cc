@@ -100,4 +100,8 @@ void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame) {
   methodPointer->requestUpdateFrame = requestUpdateFrame;
 }
 
+void registerInitBody(InitBody initBody) {
+  methodPointer->initBody = initBody;
+}
+
 } // namespace kraken

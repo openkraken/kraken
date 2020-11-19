@@ -39,7 +39,7 @@ mixin RenderTransformMixin on RenderBox {
     }
     Offset translation;
     if (alignment != null && alignment != Alignment.topLeft) {
-      translation = alignment.alongSize(size);
+      translation = hasSize ? alignment.alongSize(size) : Offset.zero;
       result.translate(translation.dx, translation.dy);
     }
 

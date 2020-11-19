@@ -12,6 +12,8 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 
+import 'media.dart';
+
 const String VIDEO = 'VIDEO';
 
 const Map<String, dynamic> _defaultStyle = {
@@ -19,17 +21,15 @@ const Map<String, dynamic> _defaultStyle = {
   HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
-class VideoElement extends Element {
-  VideoElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+class VideoElement extends MediaElement {
+  VideoElement(int targetId, Pointer<NativeVideoElement> nativePtr, ElementManager elementManager)
       : super(
-    targetId,
-    nativePtr,
-    elementManager,
-    defaultStyle: _defaultStyle,
-    isIntrinsicBox: true,
-    repaintSelf: true,
-    tagName: VIDEO,
-  );
+          targetId,
+          nativePtr.ref.nativeMediaElement,
+          elementManager,
+          VIDEO,
+          defaultStyle: _defaultStyle,
+        );
 
   @override
   void willAttachRenderer() {
@@ -49,6 +49,12 @@ class VideoElement extends Element {
     }
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+  }
+
   void renderVideo() {
     _textureBox = TextureBox(textureId: 0);
     if (childNodes.isEmpty) {
@@ -60,7 +66,9 @@ class VideoElement extends Element {
   VideoPlayerController controller;
 
   String _src;
+
   String get src => _src;
+
   set src(String value) {
     if (_src != value) {
       bool needDispose = _src != null;
@@ -179,21 +187,18 @@ class VideoElement extends Element {
   }
 
   @override
-  method(String name, List args) {
-    if (controller == null) {
-      return;
-    }
+  void play() {
+    controller.play();
+  }
 
-    switch (name) {
-      case 'play':
-        controller.play();
-        break;
-      case 'pause':
-        controller.pause();
-        break;
-      default:
-        super.method(name, args);
-    }
+  @override
+  void pause() {
+    controller.pause();
+  }
+
+  @override
+  void fastSeek(double duration) {
+    controller.seekTo(Duration(seconds: duration.toInt()));
   }
 
   @override

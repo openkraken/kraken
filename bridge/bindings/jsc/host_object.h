@@ -41,13 +41,13 @@ public:
   // it will call this method.  If it throws an exception, the call
   // will throw a JS \c Error object. By default this returns undefined.
   // \return the value for the property.
-  virtual JSValueRef getProperty(JSStringRef name, JSValueRef *exception);
+  virtual JSValueRef getProperty(std::string &name, JSValueRef *exception);
 
   // When JS wants to set a property with a given name on the HostObject,
   // it will call this method. If it throws an exception, the call will
   // throw a JS \c Error object. By default this throws a type error exception
   // mimicking the behavior of a frozen object in strict mode.
-  virtual void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
+  virtual void setProperty(std::string &name, JSValueRef value, JSValueRef *exception);
 
   virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
 

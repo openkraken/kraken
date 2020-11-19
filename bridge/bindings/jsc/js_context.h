@@ -13,6 +13,7 @@
 #include <deque>
 #include <map>
 #include <string>
+#include <chrono>
 
 #ifndef __has_builtin
 #define __has_builtin(x) 0
@@ -50,6 +51,7 @@ public:
 
   void reportError(const char *errmsg);
 
+  std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 private:
   int32_t contextId;
   JSExceptionHandler _handler;
@@ -60,6 +62,13 @@ private:
 
 JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
                                     JSObjectCallAsFunctionCallback callback);
+
+NativeString **buildUICommandArgs(JSStringRef key);
+NativeString **buildUICommandArgs(std::string &key);
+NativeString **buildUICommandArgs(std::string &key, JSStringRef value);
+NativeString **buildUICommandArgs(std::string &key, std::string &value);;
+
+JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback, JSValueRef *exception);
 
 std::string JSStringToStdString(JSStringRef jsString);
 

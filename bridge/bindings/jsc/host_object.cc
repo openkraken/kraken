@@ -4,6 +4,7 @@
  */
 
 #include "host_object.h"
+#include "foundation/logging.h"
 
 namespace kraken::binding::jsc {
 
@@ -19,9 +20,8 @@ JSValueRef HostObject::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JS
                                         JSValueRef *exception) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
   auto &context = hostObject->context;
-  JSStringRetain(propertyName);
-  JSValueRef ret = hostObject->getProperty(propertyName, exception);
-  JSStringRelease(propertyName);
+  std::string name = JSStringToStdString(propertyName);
+  JSValueRef ret = hostObject->getProperty(name, exception);
   if (!context->handleException(*exception)) {
     return nullptr;
   }
@@ -32,8 +32,8 @@ bool HostObject::proxySetProperty(JSContextRef ctx, JSObjectRef object, JSString
                                   JSValueRef *exception) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
   auto &context = hostObject->context;
-  JSStringRetain(propertyName);
-  hostObject->setProperty(propertyName, value, exception);
+  std::string &&name = JSStringToStdString(propertyName);
+  hostObject->setProperty(name, value, exception);
   JSStringRelease(propertyName);
   return context->handleException(*exception);
 }
@@ -50,13 +50,14 @@ void HostObject::proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSP
   hostObject->getPropertyNames(accumulator);
 }
 
-HostObject::~HostObject() {}
+HostObject::~HostObject() {
+}
 
-JSValueRef HostObject::getProperty(JSStringRef name, JSValueRef *exception) {
+JSValueRef HostObject::getProperty(std::string &name, JSValueRef *exception) {
   return nullptr;
 }
 
-void HostObject::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
+void HostObject::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {}
 
 void HostObject::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
 

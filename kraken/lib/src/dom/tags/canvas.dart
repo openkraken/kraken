@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'dart:collection';
 import 'dart:ffi';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -12,6 +13,9 @@ import 'package:kraken/painting.dart';
 import 'package:kraken/css.dart';
 
 const String CANVAS = 'CANVAS';
+
+final Pointer<NativeFunction<Native_CanvasGetContext>> nativeGetContext =
+    Pointer.fromFunction(CanvasElement._getContext);
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
@@ -23,24 +27,47 @@ class RenderCanvasPaint extends RenderCustomPaint {
   @override
   bool get isRepaintBoundary => true;
 
-  RenderCanvasPaint({ CustomPainter painter, Size preferredSize }) : super(
-    painter: painter,
-    foregroundPainter: null, // Ignore foreground painter
-    preferredSize: preferredSize,
-  );
+  RenderCanvasPaint({CustomPainter painter, Size preferredSize})
+      : super(
+          painter: painter,
+          foregroundPainter: null, // Ignore foreground painter
+          preferredSize: preferredSize,
+        );
 }
 
 class CanvasElement extends Element {
-  CanvasElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  static SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
+
+  static CanvasElement getCanvasElementOfNativePtr(Pointer<NativeCanvasElement> nativeCanvasElement) {
+    CanvasElement canvasElement = _nativeMap[nativeCanvasElement.address];
+    assert(canvasElement != null, 'Can not get canvasElement from nativeElement: $nativeCanvasElement');
+    return canvasElement;
+  }
+
+  static Pointer<NativeCanvasRenderingContext2D> _getContext(
+      Pointer<NativeCanvasElement> nativeCanvasElement, Pointer<NativeString> contextId) {
+    CanvasElement canvasElement = getCanvasElementOfNativePtr(nativeCanvasElement);
+    canvasElement.getContext(nativeStringToString(contextId));
+    return canvasElement.painter.context.nativeCanvasRenderingContext2D;
+  }
+
+  final Pointer<NativeCanvasElement> nativeCanvasElement;
+
+  CanvasElement(int targetId, this.nativeCanvasElement, ElementManager elementManager)
       : super(
           targetId,
-          nativePtr,
+          nativeCanvasElement.ref.nativeElement,
           elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
           repaintSelf: true,
           tagName: CANVAS,
-        );
+        ) {
+    nativeCanvasElement.ref.getContext = nativeGetContext;
+
+    // Keep reference so that we can search back with nativePtr from bridge.
+    _nativeMap[nativeCanvasElement.address] = this;
+  }
 
   @override
   void willAttachRenderer() {
@@ -53,7 +80,6 @@ class CanvasElement extends Element {
     addChild(renderCustomPaint);
     style.addStyleChangeListener(_propertyChangedListener);
   }
-
 
   @override
   void didDetachRenderer() {
@@ -89,7 +115,9 @@ class CanvasElement extends Element {
 
   /// Element attribute width
   double _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
+
   double get width => _width;
+
   set width(double value) {
     if (value == null) {
       return;
@@ -105,7 +133,9 @@ class CanvasElement extends Element {
 
   /// Element attribute height
   double _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
+
   double get height => _height;
+
   set height(double value) {
     if (value == null) {
       return;
@@ -132,96 +162,24 @@ class CanvasElement extends Element {
     }
   }
 
-  void _applyContext2DMethod(List args) {
-    // [String method, [...args]]
-    if (args == null) return;
-    if (args.length < 1) return;
-    String method = args[0];
-    switch (method) {
-      case 'fillRect':
-        double x = CSSLength.toDouble(args[1]) ?? 0.0;
-        double y = CSSLength.toDouble(args[2]) ?? 0.0;
-        double w = CSSLength.toDouble(args[3]) ?? 0.0;
-        double h = CSSLength.toDouble(args[4]) ?? 0.0;
-        painter.context.fillRect(x, y, w, h);
-        break;
-
-      case 'clearRect':
-        double x = CSSLength.toDouble(args[1]) ?? 0.0;
-        double y = CSSLength.toDouble(args[2]) ?? 0.0;
-        double w = CSSLength.toDouble(args[3]) ?? 0.0;
-        double h = CSSLength.toDouble(args[4]) ?? 0.0;
-        painter.context.clearRect(x, y, w, h);
-        break;
-
-      case 'strokeRect':
-        double x = CSSLength.toDouble(args[1]) ?? 0.0;
-        double y = CSSLength.toDouble(args[2]) ?? 0.0;
-        double w = CSSLength.toDouble(args[3]) ?? 0.0;
-        double h = CSSLength.toDouble(args[4]) ?? 0.0;
-        painter.context.strokeRect(x, y, w, h);
-        break;
-
-      case 'fillText':
-        String text = args[1];
-        double x = CSSLength.toDouble(args[2]) ?? 0.0;
-        double y = CSSLength.toDouble(args[3]) ?? 0.0;
-        if (args.length == 5) {
-          // optional maxWidth
-          double maxWidth = CSSLength.toDouble(args[4]) ?? 0.0;
-          painter.context.fillText(text, x, y, maxWidth: maxWidth);
-        } else {
-          painter.context.fillText(text, x, y);
-        }
-        break;
-
-      case 'strokeText':
-        String text = args[1];
-        double x = CSSLength.toDouble(args[2]) ?? 0.0;
-        double y = CSSLength.toDouble(args[3]) ?? 0.0;
-        if (args.length == 5) {
-          // optional maxWidth
-          double maxWidth = CSSLength.toDouble(args[4]) ?? 0.0;
-          painter.context.strokeText(text, x, y, maxWidth: maxWidth);
-        } else {
-          painter.context.strokeText(text, x, y);
-        }
-        break;
-    }
-
-    if (renderCustomPaint != null) {
-      renderCustomPaint.markNeedsPaint();
-    }
-  }
-
-  void _updateContext2DProperty(List args) {
-    // [String method, [...args]]
-    if (args == null) return;
-    if (args.length < 1) return;
-    String property = args[0];
-    switch (property) {
-      case 'fillStyle':
-        painter.context.fillStyle = CSSColor.parseColor(args[1]);
-        break;
-      case 'strokeStyle':
-        painter.context.strokeStyle = CSSColor.parseColor(args[1]);
-        break;
-      case 'font':
-        painter.context.font = args[1];
-        break;
-    }
+  @override
+  void dispose() {
+    super.dispose();
+    _nativeMap.remove(nativeCanvasElement.address);
+    painter.context.dispose();
   }
 
   @override
-  method(String name, List args) {
-    if (name == 'getContext') {
-      return getContext(args[0]);
-    } else if (name == 'applyContext2DMethod') {
-      return _applyContext2DMethod(args);
-    } else if (name == 'updateContext2DProperty') {
-      return _updateContext2DProperty(args);
-    } else {
-      return super.method(name, args);
+  void setProperty(String key, value) {
+    switch (key) {
+      case 'width':
+        width = CSSLength.toDisplayPortValue(value);
+        break;
+      case 'height':
+        height = CSSLength.toDisplayPortValue(value);
+        break;
+      default:
+        super.setProperty(key, value);
     }
   }
 }

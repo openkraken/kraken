@@ -20,7 +20,7 @@ public:
 
   ~JSScreen() override;
 
-  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 

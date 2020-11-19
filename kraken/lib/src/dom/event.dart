@@ -92,11 +92,11 @@ class Event {
     event.ref.timeStamp = timeStamp;
     event.ref.defaultPrevented = defaultPrevented ? 1 : 0;
     if (target != null) {
-      event.ref.target = target.nativePtr;
+      event.ref.target = target.nativeEventTargetPtr;
     }
 
     if (currentTarget != null) {
-      event.ref.currentTarget = currentTarget.nativePtr;
+      event.ref.currentTarget = currentTarget.nativeEventTargetPtr;
     }
 
     return event;

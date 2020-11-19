@@ -22,26 +22,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
     handler(contextId, errmsg);
     // trigger window.onerror handler.
-    JSStringRef errmsgStringRef = JSStringCreateWithUTF8CString(errmsg);
-    const JSValueRef errorArguments[] = {JSValueMakeString(context->context(), errmsgStringRef)};
-    JSValueRef exception = nullptr;
-    JSObjectRef errorObject = JSObjectMakeError(context->context(), 1, errorArguments, &exception);
-
-    JSStringRef errorHandlerKeyRef = JSStringCreateWithUTF8CString("__global_onerror_handler__");
-    JSValueRef errorHandlerValueRef =
-      JSObjectGetProperty(context->context(), context->global(), errorHandlerKeyRef, &exception);
-
-    if (!JSValueIsObject(context->context(), errorHandlerValueRef)) {
-      context->reportError("Failed to trigger global onerror: __global_onerror_handler__ is not registered.");
-      return;
-    }
-
-    JSObjectRef errorHandlerFunction = JSValueToObject(context->context(), errorHandlerValueRef, &exception);
-    const JSValueRef errorHandlerArguments[] = {errorObject};
-    JSObjectCallAsFunction(context->context(), errorHandlerFunction, context->global(), 1, errorHandlerArguments,
-                           &exception);
-
-    context->handleException(exception);
+    // TODO: trigger oneror event.
   };
 
   bridgeCallback = new foundation::BridgeCallback();
@@ -59,10 +40,10 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsc::bindCommentNode(context);
   kraken::binding::jsc::bindElement(context);
   kraken::binding::jsc::bindWindow(context);
+  kraken::binding::jsc::bindPerformance(context);
   kraken::binding::jsc::bindCSSStyleDeclaration(context);
   kraken::binding::jsc::bindScreen(context);
   kraken::binding::jsc::bindTimer(context);
-  kraken::binding::jsc::bindToBlob(context);
   kraken::binding::jsc::bindBlob(context);
 
   initKrakenPolyFill(this);
@@ -95,13 +76,6 @@ void JSBridge::detachDevtools() {
 }
 #endif // ENABLE_DEBUGGER
 
-void JSBridge::handleUIListener(const NativeString *args, JSValueRef *exception) {
-  for (const auto &callback : krakenUIListenerList) {
-    JSStringRef argsRef = JSStringCreateWithCharacters(args->string, args->length);
-    const JSValueRef arguments[] = {JSValueMakeString(context->context(), argsRef)};
-    JSObjectCallAsFunction(context->context(), callback, context->global(), 1, arguments, exception);
-  }
-}
 
 void JSBridge::handleModuleListener(const NativeString *args, JSValueRef *exception) {
   for (const auto &callback : krakenModuleListenerList) {
@@ -122,9 +96,7 @@ void JSBridge::invokeEventListener(int32_t type, const NativeString *args) {
   }
 
   JSValueRef exception = nullptr;
-  if (UI_EVENT == type) {
-    this->handleUIListener(args, &exception);
-  } else if (MODULE_EVENT == type) {
+  if (MODULE_EVENT == type) {
     this->handleModuleListener(args, &exception);
   }
   context->handleException(exception);
@@ -145,14 +117,10 @@ void JSBridge::evaluateScript(const char *script, const char *url, int startLine
 JSBridge::~JSBridge() {
   if (!context->isValid()) return;
 
-  for (auto &callback : krakenUIListenerList) {
-    JSValueUnprotect(context->context(), callback);
-  }
   for (auto &callback : krakenModuleListenerList) {
     JSValueUnprotect(context->context(), callback);
   }
 
-  krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
 
   delete bridgeCallback;

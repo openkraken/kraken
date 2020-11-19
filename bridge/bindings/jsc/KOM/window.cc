@@ -10,25 +10,22 @@
 
 namespace kraken::binding::jsc {
 
-JSWindow::WindowInstance::WindowInstance(JSWindow *window) : EventTargetInstance(window, WINDOW_TARGET_ID) {
+JSWindow::WindowInstance::WindowInstance(JSWindow *window)
+  : EventTargetInstance(window, WINDOW_TARGET_ID), nativeWindow(new NativeWindow(nativeEventTarget)) {
   location_ = new JSLocation(_hostClass->context);
 
   foundation::UICommandTaskMessageQueue::instance(window->context->getContextId())
-    ->registerCommand(WINDOW_TARGET_ID, UICommandType::initWindow, nullptr, 0, nativeEventTarget);
+    ->registerCommand(WINDOW_TARGET_ID, UICommandType::initWindow, nullptr, 0, nativeWindow);
 }
 
 JSWindow::WindowInstance::~WindowInstance() {
   for (auto &propertyName : propertyNames) {
     JSStringRelease(propertyName);
   }
+  delete nativeWindow;
 }
 
-JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
-  JSValueRef result = EventTargetInstance::getProperty(nameRef, exception);
-  if (result != nullptr) return result;
-
-  std::string &&name = JSStringToStdString(nameRef);
-
+JSValueRef JSWindow::WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "devicePixelRatio") {
     if (getDartMethod()->devicePixelRatio == nullptr) {
       JSC_THROW_ERROR(_hostClass->context->context(),
@@ -66,19 +63,27 @@ JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef
     // TODO: implement window.scrollY();
   }
 
-  return nullptr;
+  return JSEventTarget::EventTargetInstance::getProperty(name, exception);
 }
 
 JSWindow::~JSWindow() {}
 
 JSObjectRef JSWindow::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                        const JSValueRef *arguments, JSValueRef *exception) {
+                                          const JSValueRef *arguments, JSValueRef *exception) {
   auto window = new WindowInstance(this);
   return window->object;
 }
 
+JSWindow *JSWindow::instance(JSContext *context) {
+  static std::unordered_map<JSContext *, JSWindow *> instanceMap{};
+  if (!instanceMap.contains(context)) {
+    instanceMap[context] = new JSWindow(context);
+  }
+  return instanceMap[context];
+}
+
 void bindWindow(std::unique_ptr<JSContext> &context) {
-  auto window = new JSWindow(context.get());
+  auto window = JSWindow::instance(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Window", window->classObject);
   auto windowInstance = window->instanceConstructor(window->ctx, window->classObject, 0, nullptr, nullptr);
   JSC_GLOBAL_SET_PROPERTY(context, "window", windowInstance);

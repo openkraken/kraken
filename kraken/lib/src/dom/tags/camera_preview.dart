@@ -46,7 +46,7 @@ Future<CameraDescription> detectCamera(String lens) async {
 }
 
 class CameraPreviewElement extends Element {
-  CameraPreviewElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  CameraPreviewElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   @override
@@ -85,6 +85,12 @@ class CameraPreviewElement extends Element {
   void _invokeReady() {
     for (VoidCallback fn in detectedFunc) fn();
     detectedFunc = [];
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
   }
 
   /// Element attribute width
