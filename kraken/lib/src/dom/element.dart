@@ -416,6 +416,25 @@ class Element extends Node
     _nativeMap.remove(nativeElementPtr.address);
   }
 
+  void addChildRenderObject(Element child, {RenderObject after}) {
+    CSSPositionType positionType = CSSPositionedLayout.parsePositionType(child.style[POSITION]);
+    switch (positionType) {
+      case CSSPositionType.absolute:
+      case CSSPositionType.fixed:
+        _addPositionedChild(child, positionType);
+        _renderLayoutBox.markNeedsSortChildren();
+        break;
+      case CSSPositionType.sticky:
+        _addStickyChild(child, after);
+        _renderLayoutBox.markNeedsSortChildren();
+        break;
+      case CSSPositionType.relative:
+      case CSSPositionType.static:
+        _renderLayoutBox.insert(child.renderBoxModel, after: after);
+        break;
+    }
+  }
+
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
@@ -428,22 +447,7 @@ class Element extends Node
     // InlineFlex or Flex
     bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
 
-    CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
-    switch (positionType) {
-      case CSSPositionType.absolute:
-      case CSSPositionType.fixed:
-        parent._addPositionedChild(this, positionType);
-        parent._renderLayoutBox.markNeedsSortChildren();
-        break;
-      case CSSPositionType.sticky:
-        parent._addStickyChild(this, after);
-        parent._renderLayoutBox.markNeedsSortChildren();
-        break;
-      case CSSPositionType.relative:
-      case CSSPositionType.static:
-        parent._renderLayoutBox.insert(renderBoxModel, after: after);
-        break;
-    }
+    parent.addChildRenderObject(this, after: after);
 
     ensureChildAttached();
 
@@ -1204,7 +1208,8 @@ class Element extends Node
         ContainerBoxParentData parentData = renderBoxModel.parentData;
         RenderObject previousSibling = parentData.previousSibling;
         parent.remove(renderBoxModel);
-        parent.insert(renderReplacedBoxModel, after: previousSibling);
+        renderBoxModel = renderReplacedBoxModel;
+        this.parent.addChildRenderObject(this, after: previousSibling);
       }
       renderBoxModel = renderReplacedBoxModel;
     }
