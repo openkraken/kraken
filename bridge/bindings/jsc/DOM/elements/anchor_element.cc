@@ -11,7 +11,7 @@ namespace kraken::binding::jsc {
 JSAnchorElement::JSAnchorElement(JSContext *context) : JSElement(context) {}
 
 JSAnchorElement *JSAnchorElement::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSAnchorElement*> instanceMap {};
+  static std::unordered_map<JSContext *, JSAnchorElement *> instanceMap{};
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSAnchorElement(context);
   }
@@ -25,12 +25,20 @@ JSObjectRef JSAnchorElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 }
 
 JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *jsAnchorElement)
-  : ElementInstance(jsAnchorElement, "a") {}
+  : ElementInstance(jsAnchorElement, "a"), nativeAnchorElement(new NativeAnchorElement(nativeElement)) {
+  std::string tagName = "a";
+  auto args = buildUICommandArgs(tagName);
+  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+      ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnchorElement);
+}
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "href") {
+  auto propertyMap = getAnchorElementPropertyMap();
+  auto property = propertyMap[name];
+
+  if (property == AnchorElementProperty::kHref) {
     return JSValueMakeString(_hostClass->ctx, _href);
-  } else if (name == "target") {
+  } else if (property == AnchorElementProperty::kTarget) {
     return JSValueMakeString(_hostClass->ctx, _target);
   }
 
@@ -38,44 +46,28 @@ JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name
 }
 
 void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  if (name == "href") {
-    NativeString hrefProperty{};
-    STD_STRING_TO_NATIVE_STRING(name.c_str(), hrefProperty);
+  auto propertyMap = getAnchorElementPropertyMap();
+  auto property = propertyMap[name];
+  if (property == AnchorElementProperty::kHref) {
+    _href = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(_href);
 
-    NativeString hrefValue{};
-    JSStringRef hrefValueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    std::string hrefValueString = JSStringToStdString(hrefValueStringRef);
-    STD_STRING_TO_NATIVE_STRING(hrefValueString.c_str(), hrefValue);
-
-    NativeString **args = new NativeString *[2];
-    args[0] = hrefProperty.clone();
-    args[1] = hrefValue.clone();
-
-    JSStringRetain(hrefValueStringRef);
-    _href = hrefValueStringRef;
+    std::string hrefString = JSStringToStdString(_href);
+    auto args = buildUICommandArgs(name, hrefString);
 
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
-  } else if (name == "target") {
-    NativeString targetProperty{};
-    STD_STRING_TO_NATIVE_STRING(name.c_str(), targetProperty);
+  } else if (property == AnchorElementProperty::kTarget) {
+    _target = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(_target);
 
-    NativeString targetValue{};
-    JSStringRef targetValueStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    std::string targetValueString = JSStringToStdString(targetValueStringRef);
-    STD_STRING_TO_NATIVE_STRING(targetValueString.c_str(), targetValue);
+    auto args = buildUICommandArgs(name, _target);
 
-    JSStringRetain(targetValueStringRef);
-    _target = targetValueStringRef;
-
-    NativeString **args = new NativeString *[2];
-    args[0] = targetProperty.clone();
-    args[1] = targetValue.clone();
-
-    foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+    foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
+      ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+  } else {
+    ElementInstance::setProperty(name, value, exception);
   }
-
-  ElementInstance::setProperty(name, value, exception);
 }
 
 void JSAnchorElement::AnchorElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -86,12 +78,24 @@ void JSAnchorElement::AnchorElementInstance::getPropertyNames(JSPropertyNameAccu
   }
 }
 
-std::array<JSStringRef, 2> & JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyNames() {
-  static std::array<JSStringRef, 2> propertyNames {
+std::array<JSStringRef, 2> &JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyNames() {
+  static std::array<JSStringRef, 2> propertyNames{
     JSStringCreateWithUTF8CString("href"),
     JSStringCreateWithUTF8CString("target"),
   };
   return propertyNames;
+}
+const std::unordered_map<std::string, JSAnchorElement::AnchorElementInstance::AnchorElementProperty> &
+JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyMap() {
+  static const std::unordered_map<std::string, AnchorElementProperty> propertyMap{
+    {"href", AnchorElementProperty::kHref}, {"target", AnchorElementProperty::kTarget}};
+  return propertyMap;
+}
+
+JSAnchorElement::AnchorElementInstance::~AnchorElementInstance() {
+  delete nativeAnchorElement;
+  if (_target != nullptr) JSStringRelease(_target);
+  if (_href != nullptr) JSStringRelease(_href);
 }
 
 } // namespace kraken::binding::jsc

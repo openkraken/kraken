@@ -16,7 +16,7 @@ const String IMAGE = 'IMG';
 const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK};
 
 bool _isNumber(String str) {
-  RegExp regExp = RegExp(r"^\d+$");
+  RegExp regExp = RegExp(r"^\d+");
   return regExp.hasMatch(str);
 }
 
@@ -32,10 +32,10 @@ class ImageElement extends Element {
 
   bool _hasLazyLoading = false;
 
-  ImageElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  ImageElement(int targetId, Pointer<NativeImgElement> nativePtr, ElementManager elementManager)
       : super(
         targetId,
-        nativePtr,
+        nativePtr.ref.nativeElement,
         elementManager,
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,
@@ -60,6 +60,16 @@ class ImageElement extends Element {
   void didDetachRenderer() {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_stylePropertyChanged);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _image = null;
+    _imageBox = null;
+    _imageStream = null;
+    _imageStream = null;
+    _imageStreamListener = null;
   }
 
   void _renderImage() {

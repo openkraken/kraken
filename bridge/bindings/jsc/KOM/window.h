@@ -5,7 +5,7 @@
 #ifndef KRAKEN_JS_BINDINGS_WINDOW_H_
 #define KRAKEN_JS_BINDINGS_WINDOW_H_
 
-#include "bindings/jsc/DOM/eventTarget.h"
+#include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/js_context.h"
 #include "location.h"
 
@@ -16,10 +16,11 @@
 
 namespace kraken::binding::jsc {
 
+struct NativeWindow;
+
 class JSWindow : public JSEventTarget {
 public:
-  JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName){};
-  ~JSWindow();
+  static JSWindow *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -30,6 +31,8 @@ public:
     explicit WindowInstance(JSWindow *window);
     ~WindowInstance();
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+
+    NativeWindow *nativeWindow;
 
   private:
     std::array<JSStringRef, 11> propertyNames{
@@ -42,11 +45,16 @@ public:
     };
     JSLocation *location_;
   };
+private:
+  JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName){};
+  ~JSWindow();
 };
 
-struct NativeWindow : public NativeEventTarget {
+struct NativeWindow {
   NativeWindow() = delete;
-  NativeWindow(JSWindow::WindowInstance *window);
+  NativeWindow(NativeEventTarget *nativeEventTarget) : nativeEventTarget(nativeEventTarget){};
+
+  NativeEventTarget *nativeEventTarget;
 };
 
 void bindWindow(std::unique_ptr<JSContext> &context);

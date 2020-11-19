@@ -7,12 +7,11 @@ import 'dart:ffi';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:meta/meta.dart';
 
 const String BODY = 'BODY';
 
 class BodyElement extends Element {
-  BodyElement(double viewportWidth, double viewportHeight, int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  BodyElement(double viewportWidth, double viewportHeight, int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(
         targetId,
         nativePtr,

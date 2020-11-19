@@ -14,6 +14,6 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class PreElement extends Element {
-  PreElement(int targetId, Pointer<NativeEventTarget> nativePtr, ElementManager elementManager)
+  PreElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: PRE, defaultStyle: _defaultStyle);
 }

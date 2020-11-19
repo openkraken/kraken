@@ -16,19 +16,43 @@ namespace kraken::binding::jsc {
 
 void bindElement(std::unique_ptr<JSContext> &context);
 
+struct NativeElement;
+
 class JSElement : public JSNode {
 public:
+  enum class ElementProperty {
+    kStyle,
+    kNodeName,
+    kOffsetLeft,
+    kOffsetTop,
+    kOffsetWidth,
+    kOffsetHeight,
+    kClientWidth,
+    kClientHeight,
+    kClientTop,
+    kClientLeft,
+    kScrollTop,
+    kScrollLeft,
+    kScrollHeight,
+    kScrollWidth,
+    kGetBoundingClientRect,
+    kClick,
+    kScroll,
+    kScrollBy,
+    kToBlob,
+    kGetAttribute,
+    kSetAttribute,
+    kChildren
+  };
+
   static JSElement *instance(JSContext *context);
-
-  JSElement() = delete;
-  explicit JSElement(JSContext *context);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class ElementInstance : public NodeInstance {
   public:
-    static std::array<JSStringRef, 1> &getElementPropertyNames();
+    static std::vector<JSStringRef> &getElementPropertyNames();
+    static const std::unordered_map<std::string, ElementProperty> &getElementPropertyMap();
 
     static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
@@ -51,21 +75,26 @@ public:
     explicit ElementInstance(JSElement *element, const char *tagName);
     ~ElementInstance();
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;
 
+    NativeElement *nativeElement {nullptr};
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
-    JSStringRef tagNameStringRef_;
+    JSStringRef tagNameStringRef_ {JSStringCreateWithUTF8CString("")};
     JSObjectRef _getBoundingClientRect{nullptr};
-    JSObjectRef _setAttribute;
-    JSObjectRef _getAttribute;
-    JSObjectRef _toBlob;
-    JSObjectRef _click;
-    JSObjectRef _scroll;
-    JSObjectRef _scrollBy;
+    JSObjectRef _setAttribute{nullptr};
+    JSObjectRef _getAttribute{nullptr};
+    JSObjectRef _toBlob{nullptr};
+    JSObjectRef _click{nullptr};
+    JSObjectRef _scroll{nullptr};
+    JSObjectRef _scrollBy{nullptr};
     std::unordered_map<std::string, JSStringRef> attributes;
   };
+protected:
+  JSElement() = delete;
+  explicit JSElement(JSContext *context);
 };
 
 struct NativeBoundingClientRect {
@@ -79,26 +108,40 @@ struct NativeBoundingClientRect {
   double left;
 };
 
-using GetOffsetTop = double (*)(int32_t contextId, int64_t targetId);
-using GetOffsetLeft = double (*)(int32_t contextId, int64_t targetId);
-using GetOffsetWidth = double (*)(int32_t contextId, int64_t targetId);
-using GetOffsetHeight = double (*)(int32_t contextId, int64_t targetId);
-using GetClientWidth = double (*)(int32_t contextId, int64_t targetId);
-using GetClientHeight = double (*)(int32_t contextId, int64_t targetId);
-using GetClientTop = double (*)(int32_t contextId, int64_t targetId);
-using GetClientLeft = double (*)(int32_t contextId, int64_t targetId);
-using GetScrollTop = double (*)(int32_t contextId, int64_t targetId);
-using GetScrollLeft = double (*)(int32_t contextId, int64_t targetId);
-using GetScrollHeight = double (*)(int32_t contextId, int64_t targetId);
-using GetScrollWidth = double (*)(int32_t contextId, int64_t targetId);
-using GetBoundingClientRect = NativeBoundingClientRect *(*)(int32_t contextId, int64_t targetId);
-using Click = void (*)(int32_t contextId, int64_t targetId);
-using Scroll = void (*)(int32_t contextId, int64_t targetId, int32_t x, int32_t y);
-using ScrollBy = void (*)(int32_t contextId, int64_t targetId, int32_t x, int32_t y);
+using GetOffsetTop = double (*)(NativeElement *nativeElement);
+using GetOffsetLeft = double (*)(NativeElement *nativeElement);
+using GetOffsetWidth = double (*)(NativeElement *nativeElement);
+using GetOffsetHeight = double (*)(NativeElement *nativeElement);
+using GetClientWidth = double (*)(NativeElement *nativeElement);
+using GetClientHeight = double (*)(NativeElement *nativeElement);
+using GetClientTop = double (*)(NativeElement *nativeElement);
+using GetClientLeft = double (*)(NativeElement *nativeElement);
+using GetScrollTop = double (*)(NativeElement *nativeElement);
+using GetScrollLeft = double (*)(NativeElement *nativeElement);
+using GetScrollHeight = double (*)(NativeElement *nativeElement);
+using GetScrollWidth = double (*)(NativeElement *nativeElement);
+using GetBoundingClientRect = NativeBoundingClientRect *(*)(NativeElement *nativeElement);
+using Click = void (*)(NativeElement *nativeElement);
+using Scroll = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
+using ScrollBy = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
+using SetScrollTop = void (*)(NativeElement *nativeElement, double top);
+using SetScrollLeft = double (*)(NativeElement *nativeElement, double left);
 
 class BoundingClientRect : public HostObject {
 public:
+  enum BoundingClientRectProperty {
+    kX,
+    kY,
+    kWidth,
+    kHeight,
+    kLeft,
+    kTop,
+    kRight,
+    kBottom
+  };
+
   static std::array<JSStringRef, 8> &getBoundingClientRectPropertyNames();
+  static const std::unordered_map<std::string, BoundingClientRectProperty> &getPropertyMap();
 
   BoundingClientRect() = delete;
   ~BoundingClientRect() override;
@@ -111,9 +154,11 @@ private:
 };
 
 // An struct represent Element object from dart side.
-struct NativeElement : public NativeNode {
+struct NativeElement {
   NativeElement() = delete;
-  NativeElement(JSElement::ElementInstance *instance) : NativeNode(instance){};
+  explicit NativeElement(NativeNode *nativeNode): nativeNode(nativeNode) {};
+
+  const NativeNode *nativeNode;
 
   GetOffsetTop getOffsetTop{nullptr};
   GetOffsetLeft getOffsetLeft{nullptr};
@@ -131,6 +176,8 @@ struct NativeElement : public NativeNode {
   Click click{nullptr};
   Scroll scroll{nullptr};
   ScrollBy scrollBy{nullptr};
+  SetScrollLeft setScrollLeft{nullptr};
+  SetScrollTop setScrollTop{nullptr};
 };
 
 } // namespace kraken::binding::jsc

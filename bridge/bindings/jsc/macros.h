@@ -11,6 +11,7 @@
     functionDefinition.version = 0;                                                                                    \
     JSClassRef functionClass = JSClassCreate(&functionDefinition);                                                     \
     JSObjectRef function = JSObjectMake(context->context(), functionClass, context.get());                             \
+    JSValueProtect(context->context(), function);                                                                      \
     JSStringRef name = JSStringCreateWithUTF8CString(nameStr);                                                         \
     JSValueRef exc = nullptr;                                                                                          \
     JSObjectSetProperty(context->context(), context->global(), name, function, kJSPropertyAttributeNone, &exc);        \
@@ -21,16 +22,15 @@
 #define JSC_GLOBAL_BINDING_HOST_OBJECT(context, nameStr, hostObject)                                                   \
   {                                                                                                                    \
     JSObjectRef object = hostObject->jsObject;                                                                         \
+    JSValueProtect(context->context(), object);                                                                        \
     JSStringRef name = JSStringCreateWithUTF8CString(nameStr);                                                         \
     JSObjectSetProperty(context->context(), context->global(), name, object, kJSPropertyAttributeReadOnly, nullptr);   \
     JSStringRelease(name);                                                                                             \
   }
 
-#define JSC_SET_STRING_PROPERTY(context, object, name, value)                                                          \
+#define JSC_SET_STRING_PROPERTY(context, object, name, valueRef)                                                       \
   {                                                                                                                    \
     JSStringRef keyRef = JSStringCreateWithUTF8CString(name);                                                          \
-    JSStringRef valueStringRef = JSStringCreateWithUTF8CString(value);                                                 \
-    JSValueRef valueRef = JSValueMakeString(context->context(), valueStringRef);                                       \
     JSObjectSetProperty(context->context(), object, keyRef, valueRef, kJSPropertyAttributeNone, nullptr);              \
     JSStringRelease(keyRef);                                                                                           \
   }
@@ -52,8 +52,8 @@
     JSValueRef stackRef = JSObjectGetProperty(ctx_, error, stackKey, nullptr);                                         \
     JSStringRef messageStr = JSValueToStringCopy(ctx_, messageRef, nullptr);                                           \
     JSStringRef stackStr = JSValueToStringCopy(ctx_, stackRef, nullptr);                                               \
-    std::string &&message = JSStringToStdString(messageStr);                                                             \
-    std::string &&stack = JSStringToStdString(stackStr);                                                                 \
+    std::string &&message = JSStringToStdString(messageStr);                                                           \
+    std::string &&stack = JSStringToStdString(stackStr);                                                               \
     handler(getContextId(), (message + '\n' + stack).c_str());                                                         \
     JSStringRelease(messageKey);                                                                                       \
     JSStringRelease(stackKey);                                                                                         \
@@ -77,7 +77,6 @@
     definition.version = 0;                                                                                            \
     definition.className = name;                                                                                       \
     definition.attributes = kJSClassAttributeNoAutomaticPrototype;                                                     \
-    definition.initialize = classObject::proxyInstanceInitialize;                                                      \
     definition.finalize = classObject::proxyInstanceFinalize;                                                          \
     definition.getProperty = classObject::proxyInstanceGetProperty;                                                    \
     definition.setProperty = classObject::proxyInstanceSetProperty;                                                    \
@@ -105,12 +104,4 @@
     const JSValueRef args[] = {JSValueMakeString(ctx, _errmsg), nullptr};                                              \
     *exception = JSObjectMakeError(ctx, 1, args, nullptr);                                                             \
     JSStringRelease(_errmsg);                                                                                          \
-  }
-
-#define STD_STRING_TO_NATIVE_STRING(str, nativeString)                                                                 \
-  {                                                                                                                    \
-    JSStringRef ref = JSStringCreateWithUTF8CString(str);                                                              \
-    nativeString.string = JSStringGetCharactersPtr(ref);                                                              \
-    nativeString.length = JSStringGetLength(ref);                                                                     \
-    JSStringRelease(ref);                                                                                              \
   }
