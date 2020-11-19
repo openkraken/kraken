@@ -994,7 +994,8 @@ mixin CSSTransformMixin on Node {
       if (parent is ContainerRenderObjectMixin) {
         RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
         parent.remove(renderBoxModel);
-        parent.insert(repaintSelfBox, after: previousSibling);
+        element.renderBoxModel = repaintSelfBox;
+        element.parent.addChildRenderObject(this, after: previousSibling);
       } else if (parent is RenderObjectWithChildMixin) {
         parent.child = repaintSelfBox;
       }

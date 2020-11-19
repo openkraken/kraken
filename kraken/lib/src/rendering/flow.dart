@@ -1033,11 +1033,15 @@ class RenderFlowLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double autoMinSize = 0;
-    // Get the line of which has the max main size
-    _RunMetrics maxMainSizeMetrics = runMetrics.reduce((_RunMetrics curr, _RunMetrics next) {
-      return curr.mainAxisExtent > next.mainAxisExtent ? curr : next;
-    });
-    autoMinSize = maxMainSizeMetrics.mainAxisExtent;
+
+    if (runMetrics.length != 0) {
+      // Get the line of which has the max main size
+      _RunMetrics maxMainSizeMetrics = runMetrics.reduce((_RunMetrics curr, _RunMetrics next) {
+        return curr.mainAxisExtent > next.mainAxisExtent ? curr : next;
+      });
+      autoMinSize = maxMainSizeMetrics.mainAxisExtent;
+    }
+
     return autoMinSize;
   }
 
