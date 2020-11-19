@@ -26,4 +26,12 @@ describe('Blob construct', () => {
     expect(await blob.text()).toBe('abcde');
     expect(blob.size).toBe(5);
   });
+
+  it('with int16Array', async () => {
+    let buffer = new Int16Array([100, 101, 102, 103, 104]);
+    let blob = new Blob([buffer]);
+    let arrayBuffer = await blob.arrayBuffer();
+    let u8Array = new Uint8Array(arrayBuffer);
+    expect(Array.from(u8Array)).toEqual([100, 0, 101, 0, 102, 0, 103, 0, 104, 0]);
+  });
 });

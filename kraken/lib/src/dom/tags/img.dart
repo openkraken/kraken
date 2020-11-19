@@ -7,14 +7,16 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/bridge.dart';
 import 'dart:async';
+import 'dart:ffi';
 
 const String IMAGE = 'IMG';
 
 const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK};
 
 bool _isNumber(String str) {
-  RegExp regExp = RegExp(r"^\d+$");
+  RegExp regExp = RegExp(r"^\d+");
   return regExp.hasMatch(str);
 }
 
@@ -30,9 +32,10 @@ class ImageElement extends Element {
 
   bool _hasLazyLoading = false;
 
-  ImageElement(int targetId, ElementManager elementManager)
+  ImageElement(int targetId, Pointer<NativeImgElement> nativePtr, ElementManager elementManager)
       : super(
         targetId,
+        nativePtr.ref.nativeElement,
         elementManager,
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,
@@ -57,6 +60,16 @@ class ImageElement extends Element {
   void didDetachRenderer() {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_stylePropertyChanged);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _image = null;
+    _imageBox = null;
+    _imageStream = null;
+    _imageStream = null;
+    _imageStreamListener = null;
   }
 
   void _renderImage() {
@@ -101,7 +114,7 @@ class ImageElement extends Element {
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
     // img load event should trigger asynchronously to make sure load event had bind.
     Timer.run(() {
-      dispatchEvent(Event('load'));
+      dispatchEvent(Event(EventType.load));
     });
   }
 

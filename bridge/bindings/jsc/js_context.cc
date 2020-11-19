@@ -7,6 +7,7 @@
 #include "bindings/jsc/macros.h"
 #include <memory>
 #include <mutex>
+#include <vector>
 
 namespace kraken::binding::jsc {
 
@@ -14,20 +15,25 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false) {
 
   ctx_ = JSGlobalContextCreateInGroup(nullptr, nullptr);
+
   JSObjectRef global = JSContextGetGlobalObject(ctx_);
   JSStringRef windowName = JSStringCreateWithUTF8CString("window");
   JSStringRef globalThis = JSStringCreateWithUTF8CString("globalThis");
   JSObjectSetProperty(ctx_, global, windowName, global, kJSPropertyAttributeNone, nullptr);
   JSObjectSetProperty(ctx_, global, globalThis, global, kJSPropertyAttributeNone, nullptr);
+
+  JSStringRelease(windowName);
+  JSStringRelease(globalThis);
+
+  timeOrigin = std::chrono::system_clock::now();
 }
 
 JSContext::~JSContext() {
   ctxInvalid_ = true;
-  releaseGlobalString();
   JSGlobalContextRelease(ctx_);
 }
 
-void JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
+bool JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
   JSStringRef sourceRef = JSStringCreateWithCharacters(code, codeLength);
   JSStringRef sourceURLRef = nullptr;
   if (sourceURL != nullptr) {
@@ -42,10 +48,10 @@ void JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, cons
     JSStringRelease(sourceURLRef);
   }
 
-  handleException(exc);
+  return handleException(exc);
 }
 
-void JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
+bool JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
   JSStringRef sourceRef = JSStringCreateWithUTF8CString(code);
   JSStringRef sourceURLRef = nullptr;
   if (sourceURL != nullptr) {
@@ -60,7 +66,7 @@ void JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int 
     JSStringRelease(sourceURLRef);
   }
 
-  handleException(exc);
+  return handleException(exc);
 }
 
 bool JSContext::isValid() {
@@ -68,10 +74,12 @@ bool JSContext::isValid() {
 }
 
 int32_t JSContext::getContextId() {
+  assert(!ctxInvalid_ && "context has been released");
   return contextId;
 }
 
 void *JSContext::getOwner() {
+  assert(!ctxInvalid_ && "context has been released");
   return owner;
 }
 
@@ -88,21 +96,12 @@ JSObjectRef JSContext::global() {
 }
 
 JSGlobalContextRef JSContext::context() {
+  assert(!ctxInvalid_ && "context has been released");
   return ctx_;
 }
 
-void JSContext::releaseGlobalString() {
-  auto head = std::begin(globalStrings);
-  auto tail = std::end(globalStrings);
-
-  while (head != tail) {
-    JSStringRef str = *head;
-    // Release all global string reference.
-    JSStringRelease(str);
-    ++head;
-  }
-
-  globalStrings.clear();
+void JSContext::reportError(const char *errmsg) {
+  _handler(contextId, errmsg);
 }
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
@@ -111,59 +110,95 @@ std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionH
 
 std::string JSStringToStdString(JSStringRef jsString) {
   size_t maxBufferSize = JSStringGetMaximumUTF8CStringSize(jsString);
-  char *utf8Buffer = new char[maxBufferSize];
-  size_t bytesWritten = JSStringGetUTF8CString(jsString, utf8Buffer, maxBufferSize);
-  std::string utf_string = std::string(utf8Buffer, bytesWritten - 1);
-  delete[] utf8Buffer;
-  return utf_string;
+  std::vector<char> buffer(maxBufferSize);
+  JSStringGetUTF8CString(jsString, buffer.data(), maxBufferSize);
+  return std::string(buffer.data());
 }
 
-HostObject::HostObject(std::unique_ptr<JSContext> &context, const char *name) : context(context) {
-  JSClassDefinition hostObjectDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_CLASS_DEFINITION(hostObjectDefinition, name, HostObject);
-  object = JSClassCreate(&hostObjectDefinition);
+JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
+                                    JSObjectCallAsFunctionCallback callback) {
+  JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;
+  functionDefinition.className = name;
+  functionDefinition.callAsFunction = callback;
+  functionDefinition.version = 0;
+  JSClassRef functionClass = JSClassCreate(&functionDefinition);
+  return JSObjectMake(context->context(), functionClass, data);
 }
 
-JSValueRef HostObject::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
-                                        JSValueRef *exception) {
-  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
-  auto &context = hostObject->context;
-  JSValueRef ret = hostObject->getProperty(propertyName, exception);
-  if (!context->handleException(*exception)) {
-    return nullptr;
-  }
-  return ret;
+JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback,
+                                JSValueRef *exception) {
+  JSValueRef promiseConstructorValueRef =
+    JSObjectGetProperty(context->context(), context->global(), JSStringCreateWithUTF8CString("Promise"), exception);
+  JSObjectRef promiseConstructor = JSValueToObject(context->context(), promiseConstructorValueRef, exception);
+
+  JSObjectRef functionArgs = propertyBindingFunction(context, data, "P", callback);
+  const JSValueRef constructorArguments[1]{functionArgs};
+
+  return JSObjectCallAsConstructor(context->context(), promiseConstructor, 1, constructorArguments, exception);
 }
 
-bool HostObject::proxySetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value,
-                                  JSValueRef *exception) {
-  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
-  auto &context = hostObject->context;
-  hostObject->setProperty(propertyName, value, exception);
-  return context->handleException(*exception);
+NativeString **buildUICommandArgs(JSStringRef key) {
+  auto args = new NativeString *[1];
+  NativeString nativeKey{};
+  nativeKey.string = JSStringGetCharactersPtr(key);
+  nativeKey.length = JSStringGetLength(key);
+  args[0] = nativeKey.clone();
+
+  JSStringRelease(key);
+  return args;
+}
+NativeString **buildUICommandArgs(std::string &key) {
+  auto args = new NativeString *[1];
+
+  JSStringRef keyStringRef = JSStringCreateWithUTF8CString(key.c_str());
+  NativeString nativeKey{};
+  nativeKey.string = JSStringGetCharactersPtr(keyStringRef);
+  nativeKey.length = JSStringGetLength(keyStringRef);
+  args[0] = nativeKey.clone();
+
+  JSStringRelease(keyStringRef);
+  return args;
+}
+NativeString **buildUICommandArgs(std::string &key, JSStringRef value) {
+  auto args = new NativeString *[2];
+  JSStringRef keyStringRef = JSStringCreateWithUTF8CString(key.c_str());
+
+  NativeString nativeKey{};
+  nativeKey.string = JSStringGetCharactersPtr(keyStringRef);
+  nativeKey.length = JSStringGetLength(keyStringRef);
+
+  NativeString nativeValue{};
+  nativeValue.string = JSStringGetCharactersPtr(value);
+  nativeValue.length = JSStringGetLength(value);
+
+  args[0] = nativeKey.clone();
+  args[1] = nativeValue.clone();
+
+  JSStringRelease(keyStringRef);
+  JSStringRelease(value);
+  return args;
 }
 
-void HostObject::finalize(JSObjectRef obj) {
-  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(obj));
-  JSClassRelease(hostObject->object);
-  delete hostObject;
-}
+NativeString **buildUICommandArgs(std::string &key, std::string &value) {
+  auto args = new NativeString *[2];
+  JSStringRef keyStringRef = JSStringCreateWithUTF8CString(key.c_str());
+  JSStringRef valueStringRef = JSStringCreateWithUTF8CString(value.c_str());
 
-void HostObject::proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef accumulator) {
-  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
-  hostObject->getPropertyNames(accumulator);
-}
+  NativeString nativeKey{};
+  nativeKey.string = JSStringGetCharactersPtr(keyStringRef);
+  nativeKey.length = JSStringGetLength(keyStringRef);
 
-HostObject::~HostObject() {}
+  NativeString nativeValue{};
+  nativeValue.string = JSStringGetCharactersPtr(valueStringRef);
+  nativeValue.length = JSStringGetLength(valueStringRef);
 
-JSValueRef HostObject::getProperty(JSStringRef name, JSValueRef *exception) {
-  return nullptr;
-}
+  args[0] = nativeKey.clone();
+  args[1] = nativeValue.clone();
 
-void HostObject::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
+  JSStringRelease(keyStringRef);
+  JSStringRelease(valueStringRef);
 
-void HostObject::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-
+  return args;
 }
 
 } // namespace kraken::binding::jsc

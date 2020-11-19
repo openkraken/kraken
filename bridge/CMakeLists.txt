@@ -18,13 +18,11 @@ list(APPEND BRIDGE_SOURCE
     foundation/ui_task_queue.h
     foundation/ui_task_queue.cpp
     foundation/ui_command_queue.h
-    foundation/ui_command_queue.cpp
+    foundation/ui_command_queue.cc
     foundation/closure.h
     foundation/bridge_callback.h
     dart_methods.cc
     dart_methods.h
-    bridge.cc
-    bridge.h
     polyfill/dist/polyfill.cc
 )
 
@@ -43,8 +41,6 @@ if (${KRAKEN_ENABLE_JSA})
     bindings/jsa/ui_manager.h
     bindings/jsa/KOM/blob.cc
     bindings/jsa/KOM/blob.h
-    bindings/jsa/KOM/toBlob.cc
-    bindings/jsa/KOM/toBlob.h
     bindings/jsa/DOM/document.cc
     bindings/jsa/DOM/document.h
     bindings/jsa/DOM/element.cc
@@ -53,6 +49,9 @@ if (${KRAKEN_ENABLE_JSA})
     bindings/jsa/DOM/node.h
     bindings/jsa/DOM/eventTarget.cc
     bindings/jsa/DOM/eventTarget.h
+    polyfill/dist/dom.cc
+    bridge_jsa.cc
+    bridge_jsa.h
   )
 
   list(APPEND BRIDGE_LINK_LIBS
@@ -88,18 +87,64 @@ else()
     list(APPEND BRIDGE_SOURCE
       bindings/jsc/js_context.h
       bindings/jsc/js_context.cc
+      bindings/jsc/host_object.cc
+      bindings/jsc/host_object.h
+      bindings/jsc/host_class.cc
+      bindings/jsc/host_class.h
+      bindings/jsc/kraken.h
+      bindings/jsc/kraken.cc
+      bindings/jsc/KOM/blob.cc
+      bindings/jsc/KOM/blob.h
+      bindings/jsc/KOM/location.cc
+      bindings/jsc/KOM/location.h
+      bindings/jsc/KOM/window.cc
+      bindings/jsc/KOM/window.h
+      bindings/jsc/KOM/screen.cc
+      bindings/jsc/KOM/screen.h
+      bindings/jsc/KOM/timer.cc
+      bindings/jsc/KOM/timer.h
       bindings/jsc/ui_manager.h
       bindings/jsc/ui_manager.cc
       bindings/jsc/DOM/document.h
       bindings/jsc/DOM/document.cc
+      bindings/jsc/DOM/elements/anchor_element.cc
+      bindings/jsc/DOM/elements/anchor_element.h
+      bindings/jsc/DOM/elements/animation_player_element.cc
+      bindings/jsc/DOM/elements/animation_player_element.h
+      bindings/jsc/DOM/elements/media_element.cc
+      bindings/jsc/DOM/elements/media_element.h
+      bindings/jsc/DOM/elements/audio_element.cc
+      bindings/jsc/DOM/elements/audio_element.h
+      bindings/jsc/DOM/elements/video_element.cc
+      bindings/jsc/DOM/elements/video_element.h
+      bindings/jsc/DOM/elements/canvas_element.cc
+      bindings/jsc/DOM/elements/canvas_element.h
+      bindings/jsc/DOM/elements/iframe_element.cc
+      bindings/jsc/DOM/elements/iframe_element.h
+      bindings/jsc/DOM/elements/image_element.cc
+      bindings/jsc/DOM/elements/image_element.h
+      bindings/jsc/DOM/elements/object_element.cc
+      bindings/jsc/DOM/elements/object_element.h
+      bindings/jsc/KOM/performance.cc
+      bindings/jsc/KOM/performance.h
       bindings/jsc/DOM/element.cc
       bindings/jsc/DOM/element.h
-      bindings/jsc/DOM/eventTarget.cc
-      bindings/jsc/DOM/eventTarget.h
+      bindings/jsc/DOM/event.h
+      bindings/jsc/DOM/event.cc
+      bindings/jsc/DOM/event_target.cc
+      bindings/jsc/DOM/event_target.h
       bindings/jsc/DOM/node.cc
       bindings/jsc/DOM/node.h
+      bindings/jsc/DOM/text_node.cc
+      bindings/jsc/DOM/text_node.h
+      bindings/jsc/DOM/comment_node.cc
+      bindings/jsc/DOM/comment_node.h
+      bindings/jsc/DOM/style_declaration.cc
+      bindings/jsc/DOM/style_declaration.h
       bindings/jsc/KOM/console.h
       bindings/jsc/KOM/console.cc
+      bridge_jsc.cc
+      bridge_jsc.h
     )
   endif()
 endif()

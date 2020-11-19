@@ -35,7 +35,7 @@ const paths = {
 
 program
   .description('Kraken Cli Build Scripts')
-  .option('--enable-jsa', 'Enable JSA (JavaScript Abstraction)', true)
+  .option('--disable-jsa', 'Disable JSA (JavaScript Abstraction)', true)
   .option('--js-engine <engine>', 'The JavaScript Engine used by Kraken.', 'jsc')
   .parse(process.argv);
 
@@ -155,7 +155,9 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       '-DENABLE_TEST=true'
     ];
 
-    if (program.enableJsa) {
+    if (program.disableJsa) {
+      cmakeArgs.push('-DKRAKEN_ENABLE_JSA=NO');
+    } else {
       cmakeArgs.push('-DKRAKEN_ENABLE_JSA=YES');
     }
 

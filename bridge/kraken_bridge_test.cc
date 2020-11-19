@@ -4,8 +4,13 @@
  */
 
 #include "kraken_bridge_test.h"
-#include "bridge_test.h"
 #include "dart_methods.h"
+
+#ifdef KRAKEN_ENABLE_JSA
+#include "bridge_test_jsa.h"
+#elif KRAKEN_JSC_ENGINE
+#include "bridge_test_jsc.h"
+#endif
 #include <atomic>
 
 kraken::JSBridgeTest **bridgeTestPool {nullptr};

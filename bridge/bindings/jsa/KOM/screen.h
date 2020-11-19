@@ -9,9 +9,7 @@
 #include "jsa.h"
 #include <memory>
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 
 using namespace alibaba::jsa;
 
@@ -30,8 +28,6 @@ private:
   }
 };
 
-}
-} // namespace binding
 } // namespace kraken
 
 #endif /* KRAKEN_SCREEN_H */

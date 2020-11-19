@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#ifdef KRAKEN_JSC_ENGINE
+#ifdef KRAKEN_ENABLE_JSA
 
 #include "jsa.h"
 #include "jsc/jsc_implementation.h"

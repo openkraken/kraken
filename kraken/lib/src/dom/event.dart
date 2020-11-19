@@ -3,19 +3,57 @@
  * Author: Kraken Team.
  */
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:kraken/dom.dart';
+import 'package:kraken/bridge.dart';
+import 'package:ffi/ffi.dart';
+
+enum EventType {
+  none,
+  input,
+  appear,
+  disappear,
+  error,
+  message,
+  close,
+  open,
+  intersectionchange,
+  touchstart,
+  touchend,
+  touchmove,
+  touchcancel,
+  click,
+  colorschemechange,
+  load,
+  finish,
+  cancel,
+  transitionrun,
+  transitionstart,
+  transitionend,
+  transitioncancel,
+  focus,
+  unload,
+  change,
+  canplay,
+  canplaythrough,
+  ended,
+  play,
+  pause,
+  seeked,
+  seeking,
+  volumechange
+}
 
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
-  String type;
+  EventType type;
   bool bubbles;
   bool cancelable;
   EventTarget currentTarget;
   EventTarget target;
   num timeStamp;
   bool defaultPrevented = false;
-  dynamic detail;
 
   bool _immediateBubble = true;
 
@@ -46,16 +84,33 @@ class Event {
     bubbles = false;
   }
 
+  Pointer<NativeEvent> toNativeEvent() {
+    Pointer<NativeEvent> event = allocate<NativeEvent>();
+    event.ref.type = type.index;
+    event.ref.bubbles = bubbles ? 1 : 0;
+    event.ref.cancelable = cancelable ? 1 : 0;
+    event.ref.timeStamp = timeStamp;
+    event.ref.defaultPrevented = defaultPrevented ? 1 : 0;
+    if (target != null) {
+      event.ref.target = target.nativeEventTargetPtr;
+    }
+
+    if (currentTarget != null) {
+      event.ref.currentTarget = currentTarget.nativeEventTargetPtr;
+    }
+
+    return event;
+  }
+
   Map toJson() {
     return {
-      'type': type,
+      'type': type.index,
       'bubbles': bubbles,
       'cancelable': cancelable,
       'timeStamp': timeStamp,
       'defaultPrevented': defaultPrevented,
       'target': target?.targetId,
       'currentTarget': currentTarget?.targetId,
-      'detail': detail,
     };
   }
 
@@ -85,15 +140,20 @@ class InputEvent extends Event {
   InputEvent(
     this.detail, {
     this.inputType = 'insertText',
-  }) : super('input', EventInit(cancelable: true));
+  }) : super(EventType.input, EventInit(cancelable: true));
 }
 
 class AppearEvent extends Event {
-  AppearEvent() : super('appear');
+  AppearEvent() : super(EventType.appear);
 }
 
 class DisappearEvent extends Event {
-  DisappearEvent() : super('disappear');
+  DisappearEvent() : super(EventType.disappear);
+}
+
+class ColorSchemeChangeEvent extends Event {
+  ColorSchemeChangeEvent() : super(EventType.colorschemechange);
+  String platformBrightness;
 }
 
 class MediaErrorCode {
@@ -117,7 +177,7 @@ class MediaError extends Event {
   /// If no diagnostics are available, or no explanation can be provided, this value is an empty string ("").
   String message;
 
-  MediaError(this.code, this.message) : super('error');
+  MediaError(this.code, this.message) : super(EventType.error);
 }
 
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
@@ -128,7 +188,7 @@ class MessageEvent extends Event {
   /// A USVString representing the origin of the message emitter.
   String origin;
 
-  MessageEvent(this.data, {this.origin}) : super('message');
+  MessageEvent(this.data, {this.origin}) : super(EventType.message);
 
   @override
   Map toJson() {
@@ -150,7 +210,7 @@ class CloseEvent extends Event {
   /// Indicates whether or not the connection was cleanly closed
   bool wasClean;
 
-  CloseEvent(this.code, this.reason, this.wasClean) : super('close');
+  CloseEvent(this.code, this.reason, this.wasClean) : super(EventType.close);
 
   @override
   Map toJson() {
@@ -163,7 +223,7 @@ class CloseEvent extends Event {
 }
 
 class IntersectionChangeEvent extends Event {
-  IntersectionChangeEvent(this.intersectionRatio) : super('intersectionchange');
+  IntersectionChangeEvent(this.intersectionRatio) : super(EventType.intersectionchange);
   double intersectionRatio;
 
   Map toJson() {
@@ -175,7 +235,7 @@ class IntersectionChangeEvent extends Event {
 
 /// reference: https://w3c.github.io/touch-events/#touchevent-interface
 class TouchEvent extends Event {
-  TouchEvent(String type) : super(type, EventInit(bubbles: true, cancelable: true));
+  TouchEvent(EventType type) : super(type, EventInit(bubbles: true, cancelable: true));
 
   TouchList touches = TouchList();
   TouchList targetTouches = TouchList();

@@ -7,9 +7,7 @@
 #include "dart_methods.h"
 #include "foundation/ui_command_queue.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 using namespace foundation;
 
@@ -32,6 +30,4 @@ std::vector<PropNameID> JSElement::getPropertyNames(JSContext &context) {
   return propertyNames;
 }
 
-}
-} // namespace binding
-} // namespace kraken
+} // namespace kraken::binding::jsa

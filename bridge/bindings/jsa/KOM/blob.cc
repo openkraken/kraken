@@ -6,9 +6,7 @@
 #include "blob.h"
 #include "foundation/logging.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 
 void BlobBuilder::append(JSContext &context, ArrayBuffer &&arrayBuffer) {
   auto data = arrayBuffer.data<uint8_t>(context);
@@ -201,6 +199,4 @@ void bindBlob(std::unique_ptr<JSContext> &context) {
                                                     JSBlob::constructor));
 }
 
-}
-} // namespace binding
 } // namespace kraken

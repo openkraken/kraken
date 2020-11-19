@@ -12,9 +12,7 @@
 #include <devtools/impl/jsc_console_client_impl.h>
 #endif
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 namespace {
 using namespace alibaba::jsa;
 using namespace foundation;
@@ -48,6 +46,4 @@ void bindConsole(std::unique_ptr<JSContext> &context) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_print__", 0, print);
 }
 
-}
-} // namespace binding
 } // namespace kraken

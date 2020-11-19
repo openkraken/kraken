@@ -6,11 +6,14 @@
 #ifndef KRAKENBRIDGE_JS_CONTEXT_H
 #define KRAKENBRIDGE_JS_CONTEXT_H
 
+#include "bindings/jsc/macros.h"
+#include "include/kraken_bridge.h"
 #include "foundation/js_engine_adaptor.h"
 #include <JavaScriptCore/JavaScript.h>
 #include <deque>
 #include <map>
 #include <string>
+#include <chrono>
 
 #ifndef __has_builtin
 #define __has_builtin(x) 0
@@ -32,8 +35,8 @@ public:
   JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
   ~JSContext();
 
-  void evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
-  void evaluateJavaScript(const char *code, const char *sourceURL, int startLine);
+  bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
+  bool evaluateJavaScript(const char *code, const char *sourceURL, int startLine);
 
   bool isValid();
 
@@ -46,64 +49,26 @@ public:
 
   bool handleException(JSValueRef exc);
 
-  void emplaceGlobalString(JSStringRef string) {
-    globalStrings.emplace_back(string);
-  }
+  void reportError(const char *errmsg);
 
+  std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 private:
-  void releaseGlobalString();
-
   int32_t contextId;
   JSExceptionHandler _handler;
   void *owner;
   std::atomic<bool> ctxInvalid_{false};
   JSGlobalContextRef ctx_;
-  std::deque<JSStringRef> globalStrings;
 };
 
-typedef JSValueRef (*KrakenJSObjectCallAsFunctionCallback)(std::unique_ptr<JSContext> context, JSObjectRef function,
-                                                           JSObjectRef thisObject, size_t argumentCount,
-                                                           const JSValueRef arguments[], JSValueRef *exception);
+JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
+                                    JSObjectCallAsFunctionCallback callback);
 
-class HostObject {
-public:
-  static JSValueRef proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
-                                     JSValueRef *exception);
-  static bool proxySetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value,
-                               JSValueRef *exception);
-  static void proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef propertyNames);
-  static void finalize(JSObjectRef obj);
+NativeString **buildUICommandArgs(JSStringRef key);
+NativeString **buildUICommandArgs(std::string &key);
+NativeString **buildUICommandArgs(std::string &key, JSStringRef value);
+NativeString **buildUICommandArgs(std::string &key, std::string &value);;
 
-  HostObject() = delete;
-  HostObject(std::unique_ptr<JSContext> &context, const char *name);
-
-  std::unique_ptr<JSContext> &context;
-  JSClassRef object;
-  // The C++ object's dtor will be called when the GC finalizes this
-  // object.  (This may be as late as when the JSContext is shut down.)
-  // You have no control over which thread it is called on.  This will
-  // be called from inside the GC, so it is unsafe to do any VM
-  // operations which require a JSContext&.  Derived classes' dtors
-  // should also avoid doing anything expensive.  Calling the dtor on
-  // a js object is explicitly ok.  If you want to do JS operations,
-  // or any nontrivial work, you should add it to a work queue, and
-  // manage it externally.
-  virtual ~HostObject();
-
-  // When JS wants a property with a given name from the HostObject,
-  // it will call this method.  If it throws an exception, the call
-  // will throw a JS \c Error object. By default this returns undefined.
-  // \return the value for the property.
-  virtual JSValueRef getProperty(JSStringRef name, JSValueRef *exception);
-
-  // When JS wants to set a property with a given name on the HostObject,
-  // it will call this method. If it throws an exception, the call will
-  // throw a JS \c Error object. By default this throws a type error exception
-  // mimicking the behavior of a frozen object in strict mode.
-  virtual void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
-
-  virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
-};
+JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback, JSValueRef *exception);
 
 std::string JSStringToStdString(JSStringRef jsString);
 

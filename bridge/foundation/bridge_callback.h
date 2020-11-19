@@ -34,28 +34,43 @@ public:
     contextList.clear();
   }
 
+#ifdef KRAKEN_ENABLE_JSA
   struct Context {
-    Context(KRAKEN_JS_CONTEXT &context, std::shared_ptr<KRAKEN_JS_VALUE> callback)
-      : _context(context), _callback(std::move(callback)) {
-#ifndef KRAKEN_ENABLE_JSA
-      JSValueProtect(_context.context(), *_callback);
-#endif
+    Context(JSContext &context, std::shared_ptr<Value> callback) : _context(context), _callback(std::move(callback)){};
+    ~Context() {}
+    JSContext &_context;
+    std::shared_ptr<Value> _callback;
+  };
+#elif KRAKEN_JSC_ENGINE
+  struct Context {
+    Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef *exception)
+      : _context(context), _callback(callback) {
+      JSValueProtect(context.context(), callback);
+    };
+    Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef secondaryCallback,
+            JSValueRef *exception)
+      : _context(context), _callback(callback), _secondaryCallback(secondaryCallback) {
+      JSValueProtect(context.context(), callback);
+      JSValueProtect(context.context(), secondaryCallback);
     };
     ~Context() {
-#ifndef KRAKEN_ENABLE_JSA
-      JSValueUnprotect(_context.context(), *_callback);
-#endif
-    }
-    KRAKEN_JS_CONTEXT &_context;
-    std::shared_ptr<KRAKEN_JS_VALUE> _callback;
-  };
+      JSValueUnprotect(_context.context(), _callback);
 
+      if (_secondaryCallback != nullptr) {
+        JSValueUnprotect(_context.context(), _secondaryCallback);
+      }
+    }
+    kraken::binding::jsc::JSContext &_context;
+    JSValueRef _callback{nullptr};
+    JSValueRef _secondaryCallback{nullptr};
+  };
+#endif
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.
   template <typename T>
   T registerCallback(std::unique_ptr<Context> &&context, std::function<T(BridgeCallback::Context *, int32_t)> fn) {
     Context *p = context.get();
     assert(p != nullptr && "Callback context can not be nullptr");
-    KRAKEN_JS_CONTEXT &jsContext = context->_context;
+    auto &jsContext = context->_context;
     int32_t contextId = context->_context.getContextId();
     contextList.emplace_back(std::move(context));
     return fn(p, contextId);

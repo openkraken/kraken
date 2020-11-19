@@ -36,7 +36,7 @@ JSValueRef print(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
   std::string logLevel = "log";
   const JSValueRef &level = arguments[1];
   if (JSValueIsString(ctx, level)) {
-    logLevel = JSStringToStdString(JSValueToStringCopy(ctx, level, nullptr));
+    logLevel = std::move(JSStringToStdString(JSValueToStringCopy(ctx, level, nullptr)));
   }
 
   foundation::printLog(stream, logLevel);
@@ -49,7 +49,7 @@ JSValueRef print(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
 ////////////////
 
 void bindConsole(std::unique_ptr<JSContext> &context) {
-  JSC_BINDING_FUNCTION(context, KRAKEN_BINDING_CONSOLE, print);
+  JSC_GLOBAL_BINDING_FUNCTION(context, KRAKEN_BINDING_CONSOLE, print);
 }
 
 } // namespace kraken::binding::jsc

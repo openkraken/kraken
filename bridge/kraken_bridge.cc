@@ -4,11 +4,16 @@
  */
 
 #include "kraken_bridge.h"
-#include "bridge.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
 #include "foundation/ui_command_queue.h"
 #include "foundation/ui_task_queue.h"
+
+#ifdef KRAKEN_ENABLE_JSA
+#include "bridge_jsa.h"
+#elif KRAKEN_JSC_ENGINE
+#include "bridge_jsc.h"
+#endif
 
 #include <atomic>
 #include <thread>
@@ -125,7 +130,7 @@ bool checkContext(int32_t contextId) {
 
 bool checkContext(int32_t contextId, void *context) {
   auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
-  return bridge->getContext() == context;
+  return bridge->getContext().get() == context;
 }
 
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine) {
@@ -147,10 +152,6 @@ void invokeEventListener(int32_t contextId, int32_t type, NativeString *data) {
   assert(checkContext(contextId) && "invokeEventListener: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->invokeEventListener(type, data);
-}
-
-void registerInvokeUIManager(InvokeUIManager callbacks) {
-  kraken::registerInvokeUIManager(callbacks);
 }
 
 void registerInvokeModule(InvokeModule callbacks) {
@@ -203,6 +204,10 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
 
 void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame) {
   kraken::registerRequestUpdateFrame(requestUpdateFrame);
+}
+
+void registerInitBody(InitBody initBody) {
+  kraken::registerInitBody(initBody);
 }
 
 Screen *createScreen(double width, double height) {

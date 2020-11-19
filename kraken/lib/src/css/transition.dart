@@ -5,10 +5,6 @@ import 'package:kraken/css.dart';
 
 // CSS Transitions: https://drafts.csswg.org/css-transitions/
 const String _0s = '0s';
-const String _transitionRun = 'transitionrun';
-const String _transitionStart = 'transitionstart';
-const String _transitionEnd = 'transitionend';
-const String _transitionCancel = 'transitioncancel';
 
 String _toCamelCase(String s) {
   var sb = StringBuffer();
@@ -88,18 +84,18 @@ class CSSTransition {
 
   static void dispatchTransitionEvent(Element target, CSSTransitionEvent status) {
     if (status == CSSTransitionEvent.run) {
-      target.dispatchEvent(Event(_transitionRun));
+      target.dispatchEvent(Event(EventType.transitionrun));
     } else if (status == CSSTransitionEvent.cancel) {
       // An Event fired when a CSS transition has been cancelled.
-      target.dispatchEvent(Event(_transitionCancel));
+      target.dispatchEvent(Event(EventType.transitioncancel));
     } else if (status == CSSTransitionEvent.start) {
       // An Event fired when a CSS transition is created,
       // when it is added to a set of running transitions,
       // though not necessarily started.
-      target.dispatchEvent(Event(_transitionStart));
+      target.dispatchEvent(Event(EventType.transitionstart));
     } else if (status == CSSTransitionEvent.end) {
       // An Event fired when a CSS transition has finished playing.
-      target.dispatchEvent(Event(_transitionEnd));
+      target.dispatchEvent(Event(EventType.transitionend));
     }
   }
 }

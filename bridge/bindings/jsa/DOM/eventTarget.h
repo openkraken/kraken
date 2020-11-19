@@ -6,18 +6,16 @@
 #ifndef KRAKENBRIDGE_EVENTTARGET_H
 #define KRAKENBRIDGE_EVENTTARGET_H
 
-#include "jsa.h"
-#include "include/kraken_bridge.h"
-#include "foundation/logging.h"
-#include "foundation/ui_task_queue.h"
-#include "foundation/ui_command_queue.h"
 #include "dart_methods.h"
-#include <condition_variable>
+#include "foundation/logging.h"
+#include "foundation/ui_command_queue.h"
+#include "foundation/ui_task_queue.h"
+#include "include/kraken_bridge.h"
+#include "jsa.h"
 #include <atomic>
+#include <condition_variable>
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 struct DisposeCallbackData {
@@ -32,10 +30,6 @@ public:
   explicit JSEventTarget(JSContext &context);
   ~JSEventTarget() override;
 
-  NativeEventTarget *getEventTarget() {
-    return nativeEventTarget;
-  }
-
   Value get(JSContext &, const PropNameID &name) override;
 
   void set(JSContext &, const PropNameID &name, const Value &value) override;
@@ -45,13 +39,10 @@ public:
   int64_t getEventTargetId();
 
 private:
-  NativeEventTarget *nativeEventTarget{nullptr};
   JSContext &context;
   int64_t eventTargetId;
 };
 
-}
-}
-}
+} // namespace kraken::binding::jsa
 
 #endif // KRAKENBRIDGE_EVENTTARGET_H

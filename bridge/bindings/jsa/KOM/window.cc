@@ -6,9 +6,7 @@
 #include "window.h"
 #include "dart_methods.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 Value JSWindow::get(JSContext &context, const PropNameID &name) {
@@ -63,6 +61,4 @@ std::vector<PropNameID> JSWindow::getPropertyNames(JSContext &context) {
   return names;
 }
 
-}
-} // namespace binding
 } // namespace kraken

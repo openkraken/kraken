@@ -5,14 +5,12 @@
 
 #include "toBlob.h"
 #include "blob.h"
-#include "bridge.h"
+#include "bridge_jsa.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include <vector>
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 
 using namespace kraken::foundation;
 
@@ -41,7 +39,7 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args, size_t
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, func);
   auto bridge = static_cast<JSBridge *>(context.getOwner());
-  bridge->bridgeCallback.registerCallback<void>(
+  bridge->bridgeCallback->registerCallback<void>(
     std::move(callbackContext), [&id, &devicePixelRatio](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->toBlob(
         callbackContext, contextId,
@@ -69,6 +67,4 @@ void bindToBlob(std::unique_ptr<JSContext> &context) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_to_blob__", 0, toBlob);
 }
 
-}
-} // namespace binding
 } // namespace kraken

@@ -4,6 +4,8 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'dart:ffi';
+import 'package:kraken/bridge.dart';
 import 'package:meta/meta.dart';
 
 const String DATA = 'data';
@@ -17,17 +19,17 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  Comment({int targetId, ElementManager elementManager, this.data})
-      : super(NodeType.COMMENT_NODE, targetId, elementManager, '#comment');
+  final Pointer<NativeCommentNode> nativeCommentNodePtr;
+
+  Comment({int targetId, this.nativeCommentNodePtr, ElementManager elementManager, this.data})
+      : super(NodeType.COMMENT_NODE, targetId, nativeCommentNodePtr.ref.nativeNode, elementManager, '#comment');
 
   // The comment information.
   String data;
 }
 
 // TODO: remove it.
-mixin NodeLifeCycle on Node {
-
-}
+mixin NodeLifeCycle on Node {}
 
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
@@ -71,6 +73,8 @@ abstract class Node extends EventTarget implements RenderObjectNode {
 
   RenderObject _renderer;
 
+  final Pointer<NativeNode> nativeNodePtr;
+
   @override
   RenderObject get renderer => _renderer;
 
@@ -80,6 +84,7 @@ abstract class Node extends EventTarget implements RenderObjectNode {
   String nodeName;
 
   Element get parent => parentNode;
+
   Element get parentElement => parent;
 
   List<Element> get children {
@@ -90,7 +95,8 @@ abstract class Node extends EventTarget implements RenderObjectNode {
     return _children;
   }
 
-  Node(this.nodeType, int targetId, ElementManager elementManager, this.nodeName) : super(targetId, elementManager) {
+  Node(this.nodeType, int targetId, this.nativeNodePtr, ElementManager elementManager, this.nodeName)
+      : super(targetId, nativeNodePtr.ref.nativeEventTarget, elementManager) {
     assert(nodeType != null);
     assert(targetId != null);
     nodeName = nodeName ?? '';
@@ -106,7 +112,9 @@ abstract class Node extends EventTarget implements RenderObjectNode {
   }
 
   Node get firstChild => childNodes?.first;
+
   Node get lastChild => childNodes?.last;
+
   Node get previousSibling {
     if (parentNode == null) return null;
     int index = parentNode.childNodes?.indexOf(this);
@@ -155,7 +163,15 @@ abstract class Node extends EventTarget implements RenderObjectNode {
   void detach() {}
 
   /// Dispose renderObject, but not do anything.
-  void dispose() {}
+  void dispose() {
+    super.dispose();
+
+    parentNode = null;
+    for (int i = 0; i < childNodes.length; i ++) {
+      childNodes[i].parentNode = null;
+    }
+    childNodes.clear();
+  }
 
   @override
   RenderObject createRenderer() => null;

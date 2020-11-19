@@ -2,14 +2,19 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+
+import 'dart:ffi';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
-  TextNode(int targetId, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, elementManager, '#text');
+  final Pointer<NativeTextNode> nativeTextNodePtr;
+
+  TextNode(int targetId, this.nativeTextNodePtr, this._data, ElementManager elementManager)
+      : super(NodeType.TEXT_NODE, targetId, nativeTextNodePtr.ref.nativeNode, elementManager, '#text');
 
   RenderTextBox _renderTextBox;
 
@@ -112,7 +117,6 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     parent.remove(_renderTextBox);
 
     didDetachRenderer();
-    dispose();
   }
 
   @override
@@ -144,6 +148,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
 
   @override
   void dispose() {
+    super.dispose();
     assert(_renderTextBox != null);
     assert(_renderTextBox.parent == null);
 

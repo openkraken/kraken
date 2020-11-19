@@ -7,9 +7,7 @@
 #include "element.h"
 #include "jsa.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 
 // An persistent createElement function pointer which will recycle JSDocument had been disposed.
 static Value *createElementPtr{nullptr};
@@ -67,6 +65,4 @@ void bindDocument(std::unique_ptr<JSContext> &context) {
   context->global().setProperty(*context, "document", document);
 }
 
-}
-} // namespace binding
-} // namespace kraken
+} // namespace kraken::binding::jsa

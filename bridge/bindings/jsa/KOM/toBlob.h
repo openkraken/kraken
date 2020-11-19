@@ -9,15 +9,11 @@
 #include "jsa.h"
 #include <memory>
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 void bindToBlob(std::unique_ptr<JSContext> &context);
 
-}
-} // namespace binding
 } // namespace kraken
 
 #endif // KRAKENBRIDGE_TOBLOB_H

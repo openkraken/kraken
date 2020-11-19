@@ -16,7 +16,11 @@ const getPolyFillHeader = (outputName) => `/*
 #ifndef KRAKEN_${outputName.toUpperCase()}_H
 #define KRAKEN_${outputName.toUpperCase()}_H
 
-#include "bridge.h"
+#ifdef KRAKEN_ENABLE_JSA
+#include "bridge_jsa.h"
+#elif KRAKEN_JSC_ENGINE
+#include "bridge_jsc.h"
+#endif
 
 void initKraken${outputName}(kraken::JSBridge *bridge);
 
@@ -29,7 +33,6 @@ const getPolyFillSource = (source, outputName) => `/*
  */
 
 #include "${outputName.toLowerCase()}.h"
-#include "bridge.h"
 
 static std::string jsCode = std::string(R"(${source})");
 

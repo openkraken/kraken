@@ -8,9 +8,7 @@
 
 #include "jsa.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 void updateLocation(std::string url);
@@ -36,8 +34,6 @@ private:
   Value reload(JSContext &context, const Value &thisVal, const Value *args, size_t count);
 };
 
-}
-} // namespace binding
 } // namespace kraken
 
 #endif // KRAKENBRIDGE_LOCATION_H

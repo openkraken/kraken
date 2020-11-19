@@ -4,7 +4,11 @@
  */
 import 'dart:core';
 import 'dart:ui';
+import 'dart:ffi';
+import 'dart:collection';
+import 'package:ffi/ffi.dart';
 import 'package:flutter/painting.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'canvas_context.dart';
 
@@ -15,14 +19,106 @@ class CanvasRenderingContext2DSettings {
   bool desynchronized = false;
 }
 
+final Pointer<NativeFunction<Native_RenderingContextSetFont>> nativeSetFont = Pointer.fromFunction(CanvasRenderingContext2D._setFont);
+final Pointer<NativeFunction<Native_RenderingContextSetFillStyle>> nativeSetFillStyle = Pointer.fromFunction(CanvasRenderingContext2D._setFillStyle);
+final Pointer<NativeFunction<Native_RenderingContextSetStrokeStyle>> nativeSetStrokeStyle = Pointer.fromFunction(CanvasRenderingContext2D._setStrokeStyle);
+final Pointer<NativeFunction<Native_RenderingContextFillRect>> nativeFillRect = Pointer.fromFunction(CanvasRenderingContext2D._fillRect);
+final Pointer<NativeFunction<Native_RenderingContextClearRect>> nativeClearRect = Pointer.fromFunction(CanvasRenderingContext2D._clearRect);
+final Pointer<NativeFunction<Native_RenderingContextStrokeRect>> nativeStrokeRect = Pointer.fromFunction(CanvasRenderingContext2D._strokeRect);
+final Pointer<NativeFunction<Native_RenderingContextFillText>> nativeFillText = Pointer.fromFunction(CanvasRenderingContext2D._fillText);
+final Pointer<NativeFunction<Native_RenderingContextStrokeText>> nativeStrokeText = Pointer.fromFunction(CanvasRenderingContext2D._strokeText);
+final Pointer<NativeFunction<Native_RenderingContextSave>> nativeSave = Pointer.fromFunction(CanvasRenderingContext2D._save);
+final Pointer<NativeFunction<Native_RenderingContextRestore>> nativeRestore = Pointer.fromFunction(CanvasRenderingContext2D._restore);
+
 class CanvasRenderingContext2D extends _CanvasRenderingContext2D
     with CanvasFillStrokeStyles2D, CanvasPathDrawingStyles2D, CanvasRect2D, CanvasTextDrawingStyles2D, CanvasText2D {
   @override
   String type = 'CanvasRenderingContext2D';
 
+  static SplayTreeMap<int, CanvasRenderingContext2D> _nativeMap = SplayTreeMap();
+  static CanvasRenderingContext2D getCanvasRenderContext2dOfNativePtr(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
+    CanvasRenderingContext2D renderingContext = _nativeMap[nativePtr.address];
+    assert(renderingContext != null, 'Can not get nativeRenderingContext2D from pointer: $nativePtr');
+    return renderingContext;
+  }
+
+  static void _setFont(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> font) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.font = nativeStringToString(font);
+  }
+
+  static void _setFillStyle(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> fillStyle) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.fillStyle = CSSColor.parseColor(nativeStringToString(fillStyle));
+  }
+
+  static void _setStrokeStyle(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> strokeStyle) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.strokeStyle = CSSColor.parseColor(nativeStringToString(strokeStyle));
+  }
+
+  static void _fillRect(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y, double width, double height) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.fillRect(x, y, width, height);
+  }
+
+  static void _clearRect(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y, double width, double height) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.clearRect(x, y, width, height);
+  }
+
+  static void _strokeRect(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y, double width, double height) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.strokeRect(x, y, width, height);
+  }
+
+  static void _fillText(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text, double x, double y, double maxWidth) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    if (maxWidth != double.nan) {
+      canvasRenderingContext2D.fillText(nativeStringToString(text), x, y, maxWidth: maxWidth);
+    } else {
+      canvasRenderingContext2D.fillText(nativeStringToString(text), x, y);
+    }
+  }
+
+  static void _strokeText(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text, double x, double y, double maxWidth) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    if (maxWidth != double.nan) {
+      canvasRenderingContext2D.fillText(nativeStringToString(text), x, y, maxWidth: maxWidth);
+    } else {
+      canvasRenderingContext2D.fillText(nativeStringToString(text), x, y);
+    }
+  }
+
+  static void _save(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.save();
+  }
+
+  static void _restore(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.restore();
+  }
+
+  final Pointer<NativeCanvasRenderingContext2D> nativeCanvasRenderingContext2D;
+
   Canvas canvas;
-  CanvasRenderingContext2D() {
+
+  CanvasRenderingContext2D() : nativeCanvasRenderingContext2D = allocate<NativeCanvasRenderingContext2D>() {
     _settings = CanvasRenderingContext2DSettings();
+
+    _nativeMap[nativeCanvasRenderingContext2D.address] = this;
+
+    nativeCanvasRenderingContext2D.ref.setFont = nativeSetFont;
+    nativeCanvasRenderingContext2D.ref.setFillStyle = nativeSetFillStyle;
+    nativeCanvasRenderingContext2D.ref.setStrokeStyle = nativeSetStrokeStyle;
+    nativeCanvasRenderingContext2D.ref.fillRect = nativeFillRect;
+    nativeCanvasRenderingContext2D.ref.clearRect = nativeClearRect;
+    nativeCanvasRenderingContext2D.ref.strokeRect = nativeStrokeRect;
+    nativeCanvasRenderingContext2D.ref.fillText = nativeFillText;
+    nativeCanvasRenderingContext2D.ref.strokeText = nativeStrokeText;
+    nativeCanvasRenderingContext2D.ref.save = nativeSave;
+    nativeCanvasRenderingContext2D.ref.restore = nativeRestore;
   }
 
   /// Perform canvas drawing.
@@ -36,13 +132,27 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
   }
 
   CanvasRenderingContext2DSettings _settings;
+
   CanvasRenderingContext2DSettings getContextAttributes() => _settings;
+
+  void save() {
+    canvas.save();
+  }
+
+  void restore() {
+    canvas.restore();
+  }
+
+  void dispose() {
+    _nativeMap.remove(nativeCanvasRenderingContext2D.address);
+  }
 }
 
 class _CanvasRenderingContext2D extends CanvasRenderingContext {
   int get actionCount => _actions.length;
 
   List<CanvasAction> _actions = [];
+
   List<CanvasAction> takeActionRecords() => _actions;
 
   void clearActionRecords() {
@@ -71,6 +181,7 @@ class CanvasPathDrawingStyles2D implements CanvasPathDrawingStyles {
   double miterLimit = 10.0;
 
   String _lineDash = 'empty';
+
   @override
   String getLineDash() {
     return _lineDash;
@@ -109,14 +220,15 @@ class CanvasFillStrokeStyles2D implements CanvasFillStrokeStyles {
 }
 
 mixin CanvasRect2D
-    on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, CanvasPathDrawingStyles2D
-    implements CanvasRect {
+on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, CanvasPathDrawingStyles2D
+implements CanvasRect {
   @override
   void clearRect(double x, double y, double w, double h) {
     Rect rect = Rect.fromLTWH(x, y, w, h);
 
     action((Canvas canvas, Size size) {
-      Paint paint = Paint()..blendMode = BlendMode.src;
+      Paint paint = Paint()
+        ..blendMode = BlendMode.src;
       canvas.drawRect(rect, paint);
     });
   }
@@ -124,7 +236,8 @@ mixin CanvasRect2D
   @override
   void fillRect(double x, double y, double w, double h) {
     Rect rect = Rect.fromLTWH(x, y, w, h);
-    Paint paint = Paint()..color = fillStyle;
+    Paint paint = Paint()
+      ..color = fillStyle;
 
     action((Canvas canvas, Size size) {
       canvas.drawRect(rect, paint);
@@ -146,8 +259,8 @@ mixin CanvasRect2D
 }
 
 mixin CanvasText2D
-    on _CanvasRenderingContext2D, CanvasTextDrawingStyles2D, CanvasFillStrokeStyles2D
-    implements CanvasText {
+on _CanvasRenderingContext2D, CanvasTextDrawingStyles2D, CanvasFillStrokeStyles2D
+implements CanvasText {
   TextStyle _getTextStyle(Color color) {
     return TextStyle(
       color: color,

@@ -32,7 +32,7 @@ describe('insert-inline-in-blocks', () => {
     ]);
 
     BODY.addEventListener('click', async function onClick() {
-      insertPoint.insertBefore(insertBlock, insertPoint);
+      container1.insertBefore(insertBlock, insertPoint);
       await matchViewportSnapshot();
       BODY.removeEventListener('click', onClick);
       container1.removeChild(insertBlock);

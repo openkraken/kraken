@@ -9,9 +9,7 @@
 #include <memory>
 #include <vector>
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 
 using namespace alibaba::jsa;
 
@@ -83,8 +81,6 @@ private:
   std::vector<uint8_t> _data;
 };
 
-}
-} // namespace binding
 } // namespace kraken
 
 #endif // KRAKENBRIDGE_BLOB_H

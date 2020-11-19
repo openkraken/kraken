@@ -4,8 +4,12 @@
  */
 import 'package:kraken/dom.dart';
 
+import 'dart:ffi';
+import 'package:kraken/bridge.dart';
+
 const String PARAGRAPH = 'P';
 
 class ParagraphElement extends Element {
-  ParagraphElement(int targetId, ElementManager elementManager) : super(targetId, elementManager, tagName: PARAGRAPH);
+  ParagraphElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr, elementManager, tagName: PARAGRAPH);
 }

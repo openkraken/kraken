@@ -9,9 +9,7 @@
 
 #include <memory>
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 class JSWindow : public HostObject, public std::enable_shared_from_this<JSWindow> {
@@ -37,8 +35,6 @@ private:
   }
   std::shared_ptr<kraken::binding::jsa::JSLocation> location_;
 };
-} // namespace jsa
-} // namespace binding
 } // namespace kraken
 
 #endif

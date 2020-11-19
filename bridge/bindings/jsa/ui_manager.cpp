@@ -4,15 +4,13 @@
  */
 
 #include "ui_manager.h"
-#include "bridge.h"
+#include "bridge_jsa.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include "foundation/logging.h"
 #include "jsa.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 
 using namespace alibaba::jsa;
 using namespace foundation;
@@ -126,12 +124,12 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
 
   const NativeString *result;
   if (hasCallback) {
-    result = bridge->bridgeCallback.registerCallback<const NativeString *>(
-      std::move(callbackContext), [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
-        const NativeString *response =
-          getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString, handleInvokeModuleTransientCallback);
-        return response;
-      });
+    result = bridge->bridgeCallback->registerCallback<const NativeString *>(
+        std::move(callbackContext), [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
+          const NativeString *response =
+              getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString, handleInvokeModuleTransientCallback);
+          return response;
+        });
   } else {
     result = getDartMethod()->invokeModule(callbackContext.get(), context.getContextId(), &nativeString,
                                            handleInvokeModuleUnexpectedCallback);
@@ -254,7 +252,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   }
 
   auto bridge = static_cast<JSBridge *>(context.getOwner());
-  bridge->bridgeCallback.registerCallback<void>(
+  bridge->bridgeCallback->registerCallback<void>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleTransientCallback);
     });
@@ -282,6 +280,4 @@ void bindUIManager(KRAKEN_JS_CONTEXT &context) {
   JSA_BINDING_FUNCTION(context, context.global(), "__kraken_request_update_frame__", 0, requestUpdateFrame);
 }
 
-} // namespace jsa
-} // namespace binding
 } // namespace kraken
