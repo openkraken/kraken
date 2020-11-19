@@ -10,9 +10,6 @@ import 'package:kraken/scheduler.dart';
 
 
 mixin EventHandlerMixin on Node {
-  num _touchStartTime = 0;
-  num _touchEndTime = 0;
-
   static const int MAX_STEP_MS = 10;
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
 
@@ -21,6 +18,8 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerMove = handlePointMove;
     renderBoxModel.onPointerUp = handlePointUp;
     renderBoxModel.onPointerCancel = handlePointCancel;
+    renderBoxModel.onClick = handleClick;
+    renderBoxModel.initPointerCallback();
   }
 
   void removeEventResponder(RenderBoxModel renderBoxModel) {
@@ -40,7 +39,6 @@ mixin EventHandlerMixin on Node {
 
   void handlePointDown(PointerDownEvent pointEvent) {
     TouchEvent event = _getTouchEvent('touchstart', pointEvent);
-    _touchStartTime = event.timeStamp;
     dispatchEvent(event);
   }
 
@@ -53,13 +51,7 @@ mixin EventHandlerMixin on Node {
 
   void handlePointUp(PointerUpEvent pointEvent) {
     TouchEvent event = _getTouchEvent('touchend', pointEvent);
-    _touchEndTime = event.timeStamp;
     dispatchEvent(event);
-
-    // <300ms to trigger click
-    if (_touchStartTime > 0 && _touchEndTime > 0 && _touchEndTime - _touchStartTime < 300) {
-      handleClick(Event('click', EventInit()));
-    }
   }
 
   void handlePointCancel(PointerCancelEvent pointEvent) {
