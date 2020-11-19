@@ -33,7 +33,8 @@ JSObjectRef JSTextNode::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringRef data)
   : NodeInstance(jsTextNode, NodeType::TEXT_NODE), nativeTextNode(new NativeTextNode(nativeNode)), data(JSStringRetain(data)) {
 
-  auto args = buildUICommandArgs(data);
+  std::string dataString = JSStringToStdString(data);
+  auto args = buildUICommandArgs(dataString);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(eventTargetId, UICommandType::createTextNode, args, 1, nativeTextNode);
 }
@@ -68,7 +69,8 @@ void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
     data = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(data);
 
-    auto args = buildUICommandArgs(data);
+    std::string dataString = JSStringToStdString(data);
+    auto args = buildUICommandArgs(dataString);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   }

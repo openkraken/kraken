@@ -105,11 +105,3 @@
     *exception = JSObjectMakeError(ctx, 1, args, nullptr);                                                             \
     JSStringRelease(_errmsg);                                                                                          \
   }
-
-#define STD_STRING_TO_NATIVE_STRING(str, nativeString)                                                                 \
-  {                                                                                                                    \
-    JSStringRef ref = JSStringCreateWithUTF8CString(str);                                                              \
-    nativeString.string = JSStringGetCharactersPtr(ref);                                                               \
-    nativeString.length = JSStringGetLength(ref);                                                                      \
-    JSStringRelease(ref);                                                                                              \
-  }

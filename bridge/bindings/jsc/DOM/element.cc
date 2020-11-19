@@ -50,7 +50,6 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
                                             JSValueRef *exception)
   : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)) {
   JSStringRef tagNameStrRef = tagNameStringRef_ = JSValueToStringCopy(element->ctx, tagNameValue, exception);
-
   JSStringRetain(tagNameStringRef_);
 
   NativeString tagName{};
@@ -344,12 +343,15 @@ JSValueRef JSElement::ElementInstance::setAttribute(JSContextRef ctx, JSObjectRe
   JSStringRef valueStringRef = JSValueToStringCopy(ctx, attributeValueRef, exception);
   std::string &&name = JSStringToStdString(nameStringRef);
 
+  getDartMethod()->requestUpdateFrame();
+
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
 
   JSStringRetain(valueStringRef);
   elementInstance->attributes[name] = valueStringRef;
 
-  auto args = buildUICommandArgs(name, valueStringRef);
+  std::string valueString = JSStringToStdString(valueStringRef);
+  auto args = buildUICommandArgs(name, valueString);
 
   ::foundation::UICommandTaskMessageQueue::instance(elementInstance->_hostClass->contextId)
     ->registerCommand(elementInstance->eventTargetId, UICommandType::setProperty, args, 2, nullptr);

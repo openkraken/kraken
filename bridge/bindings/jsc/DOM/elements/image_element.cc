@@ -24,8 +24,8 @@ JSObjectRef JSImageElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 
 JSImageElement::ImageElementInstance::ImageElementInstance(JSImageElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "img"), nativeImageElement(new NativeImageElement(nativeElement)) {
-  JSStringRef tagNameStringRef = JSStringCreateWithUTF8CString("img");
-  auto args = buildUICommandArgs(tagNameStringRef);
+  std::string tagName = "img";
+  auto args = buildUICommandArgs(tagName);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
     ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeImageElement);
@@ -82,7 +82,8 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
     case ImageProperty::kWidth: {
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      auto args = buildUICommandArgs(name, std::to_string(_width));
+      std::string widthString = std::to_string(_width);
+      auto args = buildUICommandArgs(name, widthString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;
@@ -90,7 +91,8 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
     case ImageProperty::kHeight: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      auto args = buildUICommandArgs(name, std::to_string(_height));
+      std::string heightString = std::to_string(_height);
+      auto args = buildUICommandArgs(name, heightString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;
@@ -99,7 +101,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
       _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
       JSStringRetain(_src);
 
-      auto args = buildUICommandArgs(name, _src);
+      auto args = buildUICommandArgs(name, JSStringRetain(_src));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;
@@ -108,7 +110,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
       _loading = JSValueToStringCopy(_hostClass->ctx, value, exception);
       JSStringRetain(_loading);
 
-      auto args = buildUICommandArgs(name, _loading);
+      auto args = buildUICommandArgs(name, JSStringRetain(_loading));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
           ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;

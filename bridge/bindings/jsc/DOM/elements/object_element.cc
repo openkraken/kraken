@@ -24,9 +24,9 @@ JSObjectRef JSObjectElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 
 JSObjectElement::ObjectElementInstance::ObjectElementInstance(JSObjectElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "object"), nativeObjectElement(new NativeObjectElement(nativeElement)) {
-  JSStringRef tagNameStringRef = JSStringCreateWithUTF8CString("object");
+  std::string tagName = "object";
 
-  auto args = buildUICommandArgs(tagNameStringRef);
+  auto args = buildUICommandArgs(tagName);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
     ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeObjectElement);
 }
@@ -81,7 +81,7 @@ void JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSVa
       _data = JSValueToStringCopy(_hostClass->ctx, value, exception);
       JSStringRetain(_data);
 
-      auto args = buildUICommandArgs(name, _data);
+      auto args = buildUICommandArgs(name, JSStringRetain(_data));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;
@@ -90,7 +90,7 @@ void JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSVa
       _type = JSValueToStringCopy(_hostClass->ctx, value, exception);
       JSStringRetain(_type);
 
-      auto args = buildUICommandArgs(name, _type);
+      auto args = buildUICommandArgs(name, JSStringRetain(_type));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;

@@ -291,7 +291,7 @@ void flushUICommand() {
         case UICommandType.setProperty:
           String key = nativeStringToString(nativeCommand.ref.args[0]);
           String value = nativeStringToString(nativeCommand.ref.args[1]);
-          controller.view.setStyle(id, key, value);
+          controller.view.setProperty(id, key, value);
           break;
         default:
           return;

@@ -27,8 +27,8 @@ JSObjectRef JSCanvasElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *jsCanvasElement)
   : ElementInstance(jsCanvasElement, "canvas"), nativeCanvasElement(new NativeCanvasElement(nativeElement)) {
 
-  JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("canvas");
-  auto args = buildUICommandArgs(canvasTagNameStringRef);
+  std::string tagName = "canvas";
+  auto args = buildUICommandArgs(tagName);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
       ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeCanvasElement);
@@ -93,7 +93,8 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     case CanvasElementProperty::kWidth: {
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      auto args = buildUICommandArgs(name, std::to_string(_width));
+      std::string widthString = std::to_string(_width);
+      auto args = buildUICommandArgs(name, widthString);
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
@@ -102,7 +103,8 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     case CanvasElementProperty::kHeight: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      auto args = buildUICommandArgs(name, std::to_string(_height));
+      std::string heightString = std::to_string(_height);
+      auto args = buildUICommandArgs(name, heightString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;

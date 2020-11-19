@@ -26,9 +26,8 @@ JSObjectRef JSAnchorElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 
 JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "a"), nativeAnchorElement(new NativeAnchorElement(nativeElement)) {
-  JSStringRef tagNameStringRef = JSStringCreateWithUTF8CString("a");
-
-  auto args = buildUICommandArgs(tagNameStringRef);
+  std::string tagName = "a";
+  auto args = buildUICommandArgs(tagName);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
       ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnchorElement);
 }
@@ -52,7 +51,9 @@ void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSVa
   if (property == AnchorElementProperty::kHref) {
     _href = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_href);
-    auto args = buildUICommandArgs(name, _href);
+
+    std::string hrefString = JSStringToStdString(_href);
+    auto args = buildUICommandArgs(name, hrefString);
 
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);

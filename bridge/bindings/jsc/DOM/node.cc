@@ -238,7 +238,9 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       }
       // TODO: newChild._notifyNodeInsert(parentNode);
 
-      auto args = buildUICommandArgs(std::to_string(node->eventTargetId), std::string("beforebegin"));
+      std::string nodeEventTargetId = std::to_string(node->eventTargetId);
+      std::string position = std::string("beforebegin");
+      auto args = buildUICommandArgs(nodeEventTargetId, position);
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(referenceNode->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
@@ -261,7 +263,10 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
 
   //  TODO: child._notifyNodeInsert(this);
 
-  auto args = buildUICommandArgs(std::to_string(node->eventTargetId), std::string("beforeend"));
+  std::string nodeEventTargetId = std::to_string(node->eventTargetId);
+  std::string position = std::string("beforeend");
+  auto args = buildUICommandArgs(nodeEventTargetId, position);
+
   foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
     ->registerCommand(eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
 }
@@ -307,7 +312,10 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   //  TODO: oldChild._notifyNodeRemoved(parentNode);
   //  TODO: newChild._notifyNodeInsert(parentNode);
 
-  auto args = buildUICommandArgs(std::to_string(newChild->eventTargetId), "afterend");
+  std::string newChildEventTargetId = std::to_string(newChild->eventTargetId);
+  std::string position = std::string("afterend");
+
+  auto args = buildUICommandArgs(newChildEventTargetId, position);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(oldChild->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
 

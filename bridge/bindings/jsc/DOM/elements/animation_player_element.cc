@@ -61,9 +61,8 @@ JSValueRef JSAnimationPlayerElement::play(JSContextRef ctx, JSObjectRef function
 JSAnimationPlayerElement::AnimationPlayerElementInstance::AnimationPlayerElementInstance(
   JSAnimationPlayerElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "animation-player"), nativeAnimationPlayerElement(new NativeAnimationPlayerElement(nativeElement)) {
-  JSStringRef canvasTagNameStringRef = JSStringCreateWithUTF8CString("animation-player");
-
-  auto args = buildUICommandArgs(canvasTagNameStringRef);
+  std::string tagName = "animation-player";
+  auto args = buildUICommandArgs(tagName);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
       ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnimationPlayerElement);
 }

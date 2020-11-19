@@ -24,9 +24,9 @@ JSObjectRef JSIframeElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 
 JSIframeElement::IframeElementInstance::IframeElementInstance(JSIframeElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "iframe"), nativeIframeElement(new NativeIframeElement(nativeElement)) {
-  JSStringRef tagNameStringRef = JSStringCreateWithUTF8CString("iframe");
+  std::string tagName = "iframe";
 
-  auto args = buildUICommandArgs(tagNameStringRef);
+  auto args = buildUICommandArgs(tagName);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
     ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeIframeElement);
 }
@@ -81,7 +81,9 @@ void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSVa
     case IframeProperty::kWidth: {
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      auto args = buildUICommandArgs(name, std::to_string(_width));
+      std::string widthString = std::to_string(_width);
+
+      auto args = buildUICommandArgs(name, widthString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;
@@ -89,7 +91,9 @@ void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSVa
     case IframeProperty::kHeight: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      auto args = buildUICommandArgs(name, std::to_string(_height));
+      std::string heightString = std::to_string(_height);
+
+      auto args = buildUICommandArgs(name, heightString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
       break;
