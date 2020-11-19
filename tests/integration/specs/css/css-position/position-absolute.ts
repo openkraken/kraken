@@ -663,4 +663,51 @@ describe('position-absolute', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('should work with nested parent', async () => {
+    let item;
+    let flex;
+    let container = createElement(
+      'div', {
+        style: {
+          'box-sizing': 'border-box',
+        }
+      }
+    );
+    flex = createElement(
+      'div',
+      {
+        id: 'flex',
+        style: {
+          display: 'flex',
+          position: 'relative',
+          background: 'red',
+          flexShrink: 0,
+          minWidth: 0,
+          height: '200px',
+          padding: '123px 0 0',
+          'box-sizing': 'border-box',
+          transformOrigin: 'center',
+        },
+      },
+      [
+        (item = createElement('div', {
+          id: 'item',
+          style: {
+            position: 'absolute',
+            width: '50px',
+            height: '50px',
+            left: '20px',
+            background: 'green',
+            transformOrigin: 'center',
+          },
+        }
+        )),
+      ]
+    );
+    BODY.appendChild(container);
+    container.appendChild(flex);
+
+    await matchViewportSnapshot();
+  });
 });
