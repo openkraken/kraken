@@ -49,10 +49,14 @@ struct Screen {
 
 enum UICommandType {
   initWindow,
-  initBody,
   createElement,
+  createTextNode,
   disposeEventTarget,
-  addEvent
+  addEvent,
+  removeNode,
+  insertAdjacentNode,
+  setStyle,
+  setProperty
 };
 
 struct UICommandItem {
@@ -87,6 +91,7 @@ typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallba
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
 typedef void (*RequestUpdateFrame)();
+typedef void (*InitBody)(int32_t contextId, void *nativePtr);
 
 KRAKEN_EXPORT
 void initJSContextPool(int poolSize);
@@ -148,5 +153,7 @@ KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
 KRAKEN_EXPORT
 void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame);
+KRAKEN_EXPORT
+void registerInitBody(InitBody initBody);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

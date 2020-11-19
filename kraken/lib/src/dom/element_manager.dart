@@ -8,67 +8,66 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'dart:ffi';
 
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/launcher.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 
 const String UNKNOWN = 'UNKNOWN';
 
-Element _createElement(
-    int id, Pointer<NativeEventTarget> nativePtr, String type, Map<String, dynamic> props, List<EventType> events, ElementManager elementManager) {
+Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynamic> props,
+    List<EventType> events, ElementManager elementManager) {
   Element element;
   switch (type) {
     case BODY:
-
       break;
     case DIV:
-      element = DivElement(id, nativePtr, elementManager);
+      element = DivElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case SPAN:
-      element = SpanElement(id, nativePtr, elementManager);
+      element = SpanElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case ANCHOR:
-      element = AnchorElement(id, nativePtr, elementManager);
+      element = AnchorElement(id, nativePtr.cast<NativeAnchorElement>(), elementManager);
       break;
     case STRONG:
-      element = StrongElement(id, nativePtr, elementManager);
+      element = StrongElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case IMAGE:
-      element = ImageElement(id, nativePtr, elementManager);
+      element = ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager);
       break;
     case PARAGRAPH:
-      element = ParagraphElement(id, nativePtr, elementManager);
+      element = ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case INPUT:
-      element = InputElement(id, nativePtr, elementManager);
+      element = InputElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case PRE:
-      element = PreElement(id, nativePtr, elementManager);
+      element = PreElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case CANVAS:
-      element = CanvasElement(id, nativePtr, elementManager);
+      element = CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager);
       break;
     case ANIMATION_PLAYER:
-      element = AnimationPlayerElement(id, nativePtr, elementManager);
+      element = AnimationPlayerElement(id, nativePtr.cast<NativeAnimationElement>(), elementManager);
       break;
     case VIDEO:
-      element = VideoElement(id, nativePtr, elementManager);
+      element = VideoElement(id, nativePtr.cast<NativeVideoElement>(), elementManager);
       break;
     case CAMERA_PREVIEW:
-      element = CameraPreviewElement(id, nativePtr, elementManager);
+      element = CameraPreviewElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case IFRAME:
-      element = IFrameElement(id, nativePtr, elementManager);
+      element = IFrameElement(id, nativePtr.cast<NativeIframeElement>(), elementManager);
       break;
     case AUDIO:
-      element = AudioElement(id, nativePtr, elementManager);
+      element = AudioElement(id, nativePtr.cast<NativeAudioElement>(), elementManager);
       break;
     case OBJECT:
-      element = ObjectElement(id, nativePtr, elementManager);
+      element = ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager);
       break;
     default:
       element = Element(id, nativePtr, elementManager, tagName: UNKNOWN);
@@ -98,9 +97,10 @@ const int WINDOW_ID = -2;
 class ElementManager {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
-    print('dispose event target: $id');
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-    controller.view.removeEventTargetById(id);
+    EventTarget eventTarget = controller.view.getEventTargetById(id);
+    assert(eventTarget != null, 'can not get eventTarget of id: $id');
+    eventTarget.dispose();
   }
 
   Element _rootElement;
@@ -113,10 +113,11 @@ class ElementManager {
 
   final List<VoidCallback> _detachCallbacks = [];
 
-  ElementManager(this.viewportWidth, this.viewportHeight,
-      {this.controller, this.showPerformanceOverlayOverride}) {
-    _rootElement = BodyElement(viewportWidth, viewportHeight, BODY_ID, nullptr, this)
-      ..attachBody();
+  ElementManager(this.viewportWidth, this.viewportHeight, {int contextId, this.controller, this.showPerformanceOverlayOverride}) {
+    print('body nativePtr: ${bodyNativePtrMap[contextId]}');
+    _rootElement =
+        BodyElement(viewportWidth, viewportHeight, BODY_ID, bodyNativePtrMap[contextId], this)
+          ..attachBody();
 
     RenderBoxModel root = _rootElement.renderBoxModel;
     root.controller = controller;
@@ -137,8 +138,9 @@ class ElementManager {
     return _eventTargets.containsKey(id);
   }
 
-  void removeTarget(Node target) {
+  void removeTarget(EventTarget target) {
     assert(target.targetId != null);
+    assert(_eventTargets.containsKey(target.targetId));
     _eventTargets.remove(target.targetId);
   }
 
@@ -157,24 +159,13 @@ class ElementManager {
     _eventTargets = <int, EventTarget>{};
   }
 
-  void initWindow(Pointer<NativeEventTarget> nativePtr) {
+  void initWindow(Pointer<NativeWindow> nativePtr) {
     Window window = Window(WINDOW_ID, nativePtr, this);
     setEventTarget(window);
   }
 
-  void initBody(Pointer<NativeEventTarget> nativePtr) {
-    _rootElement.nativePtr = nativePtr;
-  }
-
-  void _setRootElement(Element element) {
-    RenderBoxModel root = element.renderBoxModel;
-    _rootElement = element;
-    root.controller = controller;
-    _root = root;
-    setEventTarget(element);
-  }
-
-  Element createElement(int id, Pointer<NativeEventTarget> nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
+  Element createElement(
+      int id, Pointer nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<EventType> eventList;
@@ -190,13 +181,13 @@ class ElementManager {
     return element;
   }
 
-  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
+  void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
     TextNode textNode = TextNode(id, nativePtr, data, this);
     setEventTarget(textNode);
   }
 
-  void createComment(int id, Pointer<NativeEventTarget> nativePtr, String data) {
-    EventTarget comment = Comment(targetId: id, nativePtr: nativePtr, data: data, elementManager: this);
+  void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
+    EventTarget comment = Comment(targetId: id, nativeCommentNodePtr: nativePtr, data: data, elementManager: this);
     setEventTarget(comment);
   }
 
@@ -207,8 +198,6 @@ class ElementManager {
     assert(target != null);
 
     target.parentNode?.removeChild(target);
-    // Remove node reference to ElementManager
-    target.elementManager = null;
 
     _debugDOMTreeChanged();
   }
@@ -323,25 +312,10 @@ class ElementManager {
     target.removeEvent(eventType);
   }
 
-  method(int targetId, String method, args) {
-    assert(existsTarget(targetId), 'targetId: $targetId, method: $method, args: $args');
-    Element target = getEventTargetByTargetId<Element>(targetId);
-    List _args;
-    try {
-      _args = (args as List).cast();
-    } catch (e, stack) {
-      if (!PRODUCTION) {
-        print('Method parse error: $e\n$stack');
-      }
-      _args = [];
-    }
-    assert(target != null);
-    assert(target.method != null);
-    return target.method(method, _args);
-  }
-
   RenderObject _root;
+
   RenderObject get root => _root;
+
   set root(RenderObject root) {
     assert(() {
       throw FlutterError('Can not set root to ElementManagerActionDelegate.');
@@ -358,7 +332,7 @@ class ElementManager {
 
   bool showPerformanceOverlay = false;
 
-  RenderBox buildRenderBox({ bool showPerformanceOverlay  }) {
+  RenderBox buildRenderBox({bool showPerformanceOverlay}) {
     if (showPerformanceOverlay != null) {
       this.showPerformanceOverlay = showPerformanceOverlay;
     }
@@ -416,7 +390,7 @@ class ElementManager {
 
     clearTargets();
     for (var callback in _detachCallbacks) {
-       callback();
+      callback();
     }
     _detachCallbacks.clear();
     _rootElement = null;

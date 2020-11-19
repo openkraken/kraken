@@ -1,6 +1,11 @@
 import { Element } from "./element";
 
-export const elementMapById = {};
+export const elementMapById: {
+  [key: string]: {
+    element: any;
+    elementList: any[];
+  }
+} = {};
 
 export function removeElementById(elementId: string, element: Element): void {
   const mapEntity = elementMapById[elementId];

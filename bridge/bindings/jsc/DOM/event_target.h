@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_EVENTTARGET_H
-#define KRAKENBRIDGE_EVENTTARGET_H
+#ifndef KRAKENBRIDGE_EVENT_TARGET_H
+#define KRAKENBRIDGE_EVENT_TARGET_H
 
 #include "bindings/jsc/host_class.h"
 #include "bindings/jsc/js_context.h"
@@ -16,6 +16,7 @@
 #include "include/kraken_bridge.h"
 #include <array>
 #include <atomic>
+#include <unordered_map>
 #include <condition_variable>
 
 namespace kraken::binding::jsc {
@@ -28,57 +29,70 @@ struct DisposeCallbackData {
   int32_t contextId;
 };
 
+struct NativeEvent;
+struct NativeEventTarget;
+
 class JSEventTarget : public HostClass {
 public:
   static JSEventTarget *instance(JSContext *context);
 
-  JSEventTarget() = delete;
-  explicit JSEventTarget(JSContext *context, const char *name);
-  explicit JSEventTarget(JSContext *context);
-
-  JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) override;
 
   class EventTargetInstance : public Instance {
   public:
+    enum class EventTargetProperty {
+      kAddEventListener,
+      kRemoveEventListener,
+      kDispatchEvent, kClearListeners,
+      kTargetId
+    };
+    static std::vector<JSStringRef> &getEventTargetPropertyNames();
+    static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
+
     static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef __clearListeners__(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     EventTargetInstance() = delete;
     explicit EventTargetInstance(JSEventTarget *eventTarget);
     explicit EventTargetInstance(JSEventTarget *eventTarget, int64_t targetId);
-    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
-    void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
+    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSValueRef getPropertyHandler(std::string &name, JSValueRef *exception);
     void setPropertyHandler(std::string &name, JSValueRef value, JSValueRef *exception);
 
     ~EventTargetInstance() override;
     int64_t eventTargetId;
-  private:
-    std::map<EventType, std::deque<JSObjectRef>> _eventHandlers;
-    bool _dispatchEvent(JSEvent::EventInstance *eventInstance);
+    NativeEventTarget *nativeEventTarget {nullptr};
 
   private:
-    std::array<JSStringRef, 3> propertyNames{
-      JSStringCreateWithUTF8CString("addEventListener"),
-      JSStringCreateWithUTF8CString("removeEventListener"),
-      JSStringCreateWithUTF8CString("dispatchEvent"),
-    };
+    std::unordered_map<JSEvent::EventType, std::deque<JSObjectRef>> _eventHandlers;
+    bool internalDispatchEvent(JSEvent::EventInstance *eventInstance);
+
+    JSObjectRef _addEventListener {nullptr};
+    JSObjectRef _removeEventListener {nullptr};
+    JSObjectRef _dispatchEvent {nullptr};
+    JSObjectRef _clearListeners{nullptr};
   };
+
+protected:
+  JSEventTarget() = delete;
+  explicit JSEventTarget(JSContext *context, const char *name);
+  explicit JSEventTarget(JSContext *context);
 };
 
-struct NativeEvent;
-struct NativeEventTarget;
 using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);
 
 struct NativeEventTarget {
   NativeEventTarget() = delete;
-  NativeEventTarget(JSEventTarget::EventTargetInstance *_instance, NativeDispatchEvent dispatchEvent)
-    : instance(_instance), dispatchEvent(dispatchEvent){};
+  NativeEventTarget(JSEventTarget::EventTargetInstance *_instance)
+    : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl) {};
 
   static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);
 
@@ -88,4 +102,4 @@ struct NativeEventTarget {
 
 } // namespace kraken::binding::jsc
 
-#endif // KRAKENBRIDGE_EVENTTARGET_H
+#endif // KRAKENBRIDGE_EVENT_TARGET_H

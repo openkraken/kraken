@@ -14,6 +14,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/css.dart';
 import 'package:vibration/vibration.dart';
 import 'platform.dart';
+import 'native_types.dart';
 
 // An native struct can be directly convert to javaScript String without any conversion cost.
 class NativeString extends Struct {
@@ -59,16 +60,6 @@ void freeNativeString(Pointer<NativeString> pointer) {
 // 4. Open the dynamic library that register in the C.
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call from C.
-
-// Register InvokeUIManager
-typedef Native_InvokeUIManager = Pointer<NativeString> Function(Int32 contextId, Pointer<NativeString>);
-typedef Native_RegisterInvokeUIManager = Void Function(Pointer<NativeFunction<Native_InvokeUIManager>>);
-typedef Dart_RegisterInvokeUIManager = void Function(Pointer<NativeFunction<Native_InvokeUIManager>>);
-
-final Dart_RegisterInvokeUIManager _registerInvokeUIManager =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeUIManager>>('registerInvokeUIManager').asFunction();
-
-const String BATCH_UPDATE = 'batchUpdate';
 
 // Register InvokeModule
 typedef NativeAsyncModuleCallback = Void Function(
@@ -224,13 +215,6 @@ String invokeModule(
         List positionArgs = args[2];
         int id = positionArgs[0];
         Geolocation.clearWatch(id);
-      }
-    } else if (module == 'Performance') {
-      String method = args[1];
-      if (method == 'now') {
-        return Performance.now().toString();
-      } else if (method == 'getTimeOrigin') {
-        return Performance.getTimeOrigin().toString();
       }
     } else if (module == 'MethodChannel') {
       String method = args[1];
@@ -642,6 +626,28 @@ void registerRequestUpdateFrame() {
   _registerRequestUpdateFrame(pointer);
 }
 
+// Body Element are special element which created at initialize time, so we can't use UICommandQueue to init body element.
+typedef Native_InitBody = Void Function(Int32 contextId, Pointer<NativeElement> nativePtr);
+typedef Dart_InitBody = void Function(int contextId, Pointer<NativeElement> nativePtr);
+
+typedef Native_RegisterInitBody = Void Function(Pointer<NativeFunction<Native_InitBody>>);
+typedef Dart_RegisterInitBody = void Function(Pointer<NativeFunction<Native_InitBody>>);
+
+final Dart_RegisterInitBody _registerInitBody = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterInitBody>>('registerInitBody')
+    .asFunction();
+
+Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
+
+void _initBody(int contextId, Pointer<NativeElement> nativePtr) {
+  bodyNativePtrMap[contextId] = nativePtr;
+}
+
+void registerInitBody() {
+  Pointer<NativeFunction<Native_InitBody>> pointer = Pointer.fromFunction(_initBody);
+  _registerInitBody(pointer);
+}
+
 void registerDartMethodsToCpp() {
   registerInvokeModule();
   registerRequestBatchUpdate();
@@ -656,4 +662,5 @@ void registerDartMethodsToCpp() {
   registerPlatformBrightness();
   registerToBlob();
   registerRequestUpdateFrame();
+  registerInitBody();
 }

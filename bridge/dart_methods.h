@@ -34,6 +34,7 @@ struct DartMethodPointer {
   Environment environment{nullptr};
   SimulatePointer simulatePointer{nullptr};
   RequestUpdateFrame requestUpdateFrame{nullptr};
+  InitBody initBody{nullptr};
 };
 
 void registerInvokeModule(InvokeModule callback);
@@ -51,6 +52,7 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
 void registerToBlob(ToBlob toBlob);
 void registerJSError(OnJSError onJsError);
 void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame);
+void registerInitBody(InitBody initBody);
 
 // test only methods
 void registerRefreshPaint(RefreshPaint refreshPaint);

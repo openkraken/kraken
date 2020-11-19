@@ -22,7 +22,6 @@ public:
                                             const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                      JSValueRef *exception);
-  static void proxyInstanceInitialize(JSContextRef ctx, JSObjectRef object);
   static JSValueRef proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                              JSValueRef *exception);
   static bool proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value,
@@ -38,7 +37,7 @@ public:
   // Triggered when this HostClass had been finalized by GC.
   virtual ~HostClass();
 
-  virtual JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+  virtual JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                         const JSValueRef *arguments, JSValueRef *exception);
 
   // The instance class represent every javascript instance objects created by new expression.
@@ -47,22 +46,24 @@ public:
     Instance() = delete;
     explicit Instance(HostClass *hostClass);
     virtual ~Instance();
-    virtual void initialized();
-    virtual JSValueRef getProperty(JSStringRef name, JSValueRef *exception);
-    virtual void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
+    virtual JSValueRef getProperty(std::string &name, JSValueRef *exception);
+    virtual void setProperty(std::string &name, JSValueRef value, JSValueRef *exception);
     virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
 
     JSObjectRef object{nullptr};
     HostClass *_hostClass{nullptr};
   };
 
-  std::string _name;
+  std::string _name {""};
   JSContext *context{nullptr};
+  int32_t contextId;
   JSContextRef ctx{nullptr};
   // The javascript constructor function.
   JSObjectRef classObject{nullptr};
   // The class template of javascript instance objects.
   JSClassRef instanceClass{nullptr};
+
+  JSObjectRef _call{nullptr};
 
 private:
   // The class template of javascript constructor function.

@@ -29,28 +29,3 @@ defineGlobalProperty('Event', Event);
 defineGlobalProperty('ErrorEvent', ErrorEvent);
 defineGlobalProperty('PromiseRejectionEvent', PromiseRejectionEvent);
 defineGlobalProperty('document', document);
-
-
-if (process.env.NODE_ENV !== 'production') {
-  // @ts-ignore
-  function clearAllEventsListeners() {
-    // @ts-ignore
-    window.__clearListeners__();
-    // @ts-ignore
-    traverseNode(document.body, (node) => {
-      node.__clearListeners__();
-    });
-  }
-
-  // @ts-ignore
-  function clearAllNodes() {
-    while (document.body.firstChild) {
-      document.body.firstChild.remove();
-    }
-  }
-
-  // @ts-ignore
-  window.clearAllEventsListeners = clearAllEventsListeners;
-  // @ts-ignore
-  window.clearAllNodes = clearAllNodes;
-}
