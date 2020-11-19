@@ -38,8 +38,8 @@ public:
 
     NativeAnchorElement *nativeAnchorElement{nullptr};
   private:
-    JSStringRef _href{nullptr};
-    JSStringRef _target{nullptr};
+    JSStringRef _href{JSStringCreateWithUTF8CString("")};
+    JSStringRef _target {JSStringCreateWithUTF8CString("")};
   };
 protected:
   JSAnchorElement() = delete;

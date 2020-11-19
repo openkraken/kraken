@@ -39,7 +39,7 @@ public:
     NativeComment *nativeComment;
 
   private:
-    JSStringRef data{nullptr};
+    JSStringRef data = JSStringCreateWithUTF8CString("");
   };
 protected:
   JSCommentNode() = delete;

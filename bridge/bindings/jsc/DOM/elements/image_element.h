@@ -43,8 +43,8 @@ public:
     double _width;
     double _height;
 
-    JSStringRef _src{nullptr};
-    JSStringRef _loading{nullptr};
+    JSStringRef _src{JSStringCreateWithUTF8CString("")};
+    JSStringRef _loading{JSStringCreateWithUTF8CString("")};
   };
 protected:
   JSImageElement() = delete;

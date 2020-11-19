@@ -244,7 +244,7 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
       return _addEventListener;
     }
     case EventTargetProperty::kRemoveEventListener: {
-      if (_removeEventListener) {
+      if (_removeEventListener == nullptr) {
         _removeEventListener =
           propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
         JSValueProtect(_hostClass->ctx, _removeEventListener);

@@ -57,12 +57,10 @@ JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name
     switch (property) {
     case ObjectProperty::kType:
     case ObjectProperty::kCurrentType: {
-      if (_type == nullptr) return nullptr;
       return JSValueMakeString(_hostClass->ctx, _type);
     }
     case ObjectProperty::kData:
     case ObjectProperty::kCurrentData: {
-      if (_data == nullptr) return nullptr;
       return JSValueMakeString(_hostClass->ctx, _data);
     }
     }

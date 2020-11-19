@@ -44,7 +44,7 @@ public:
     NativeTextNode *nativeTextNode {nullptr};
 
   private:
-    JSStringRef data {nullptr};
+    JSStringRef data {JSStringCreateWithUTF8CString("")};
   };
 
 protected:

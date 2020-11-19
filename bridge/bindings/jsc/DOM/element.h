@@ -52,7 +52,7 @@ public:
   class ElementInstance : public NodeInstance {
   public:
     static std::vector<JSStringRef> &getElementPropertyNames();
-    static const std::unordered_map<std::string, ElementProperty> &getPropertyMap();
+    static const std::unordered_map<std::string, ElementProperty> &getElementPropertyMap();
 
     static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
@@ -82,7 +82,7 @@ public:
     NativeElement *nativeElement {nullptr};
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
-    JSStringRef tagNameStringRef_ {nullptr};
+    JSStringRef tagNameStringRef_ {JSStringCreateWithUTF8CString("")};
     JSObjectRef _getBoundingClientRect{nullptr};
     JSObjectRef _setAttribute{nullptr};
     JSObjectRef _getAttribute{nullptr};

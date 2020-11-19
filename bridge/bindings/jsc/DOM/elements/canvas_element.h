@@ -147,9 +147,9 @@ public:
     NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D;
 
   private:
-    JSStringRef _font{nullptr};
-    JSStringRef _fillStyle{nullptr};
-    JSStringRef _strokeStyle{nullptr};
+    JSStringRef _font{JSStringCreateWithUTF8CString("")};
+    JSStringRef _fillStyle{JSStringCreateWithUTF8CString("")};
+    JSStringRef _strokeStyle{JSStringCreateWithUTF8CString("")};
 
     JSObjectRef _fillRect{nullptr};
     JSObjectRef _clearRect{nullptr};

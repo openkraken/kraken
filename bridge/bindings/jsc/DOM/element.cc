@@ -98,7 +98,7 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
   return boundingClientRect->jsObject;
 }
 
-const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::ElementInstance::getPropertyMap() {
+const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::ElementInstance::getElementPropertyMap() {
   static const std::unordered_map<std::string, ElementProperty> propertyHandler = {
     {"style", ElementProperty::kStyle},
     {"nodeName", ElementProperty::kNodeName},
@@ -126,7 +126,7 @@ const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::El
 }
 
 JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getPropertyMap();
+  auto propertyMap = getElementPropertyMap();
 
   if (!propertyMap.contains(name)) {
     return JSNode::NodeInstance::getProperty(name, exception);
@@ -263,7 +263,7 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
 }
 
 void JSElement::ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getPropertyMap();
+  auto propertyMap = getElementPropertyMap();
 
   if (propertyMap.contains(name)) {
     auto property = propertyMap[name];

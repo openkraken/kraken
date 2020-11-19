@@ -54,7 +54,7 @@ public:
     NativeMediaElement *nativeMediaElement;
 
   private:
-    JSStringRef _src {nullptr};
+    JSStringRef _src {JSStringCreateWithUTF8CString("")};
     bool _autoPlay {false};
     bool _loop {false};
     JSObjectRef _play {nullptr};

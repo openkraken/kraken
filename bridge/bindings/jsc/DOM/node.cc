@@ -395,6 +395,7 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     return JSValueMakeNumber(_hostClass->ctx, nodeType);
   case NodeProperty::kNodeName: {
     JSStringRef textContent = internalTextContent();
+    if (textContent == nullptr) textContent = JSStringCreateWithUTF8CString("");
     return JSValueMakeString(_hostClass->ctx, textContent);
   }
   }

@@ -277,7 +277,7 @@ JSValueRef JSBlob::BlobInstance::getProperty(std::string &name, JSValueRef *exce
     case kStream:
       return nullptr;
     case kType: {
-      JSStringRef typeStringRef = JSStringCreateWithUTF8CString(mimeType.c_str());
+      JSStringRef typeStringRef = JSStringCreateWithUTF8CString(mimeType.empty() ? "" : mimeType.c_str());
       return JSValueMakeString(_hostClass->ctx, typeStringRef);
     }
     case kSize:

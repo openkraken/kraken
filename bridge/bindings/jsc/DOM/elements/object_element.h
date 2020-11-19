@@ -41,8 +41,8 @@ public:
     NativeObjectElement *nativeObjectElement;
 
   private:
-    JSStringRef _data{nullptr};
-    JSStringRef _type{nullptr};
+    JSStringRef _data{JSStringCreateWithUTF8CString("")};
+    JSStringRef _type{JSStringCreateWithUTF8CString("")};
   };
 protected:
   JSObjectElement() = delete;
