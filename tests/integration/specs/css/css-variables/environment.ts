@@ -9,15 +9,15 @@ describe('CSS Environment', () => {
         'env(safe-area-inset-left)',
       ];
       container.style.padding = paddings.join(' ');
-      // Should be empty white box.
       container.style.background = 'red';
+      document.body.appendChild(document.createTextNode('PASS if no red appears.'));
       document.body.appendChild(container);
       await matchViewportSnapshot();
   });
 
   it('work with safe-area-inset fallback', async () => {
       const container = document.createElement('div');
-      // Should be empty white box.
+      // Env has value, so not fallback to other.
       const paddings = [
         'env(safe-area-inset-top, 50px)',
         'env(safe-area-inset-right, 40px)',
@@ -26,6 +26,7 @@ describe('CSS Environment', () => {
       ];
       container.style.padding = paddings.join(' ');
       container.style.background = 'red';
+      document.body.appendChild(document.createTextNode('PASS if no red appears.'));
       document.body.appendChild(container);
       await matchViewportSnapshot();
   });
