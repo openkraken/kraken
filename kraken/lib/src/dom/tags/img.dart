@@ -116,12 +116,12 @@ class ImageElement extends Element {
 
   void _renderMultiFrameImage(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
-    _imageBox.image = _imageInfo?.image;
+    _imageBox?.image = _imageInfo?.image;
     _resize();
 
     // Image size may affect parent layout,
     // make parent relayout after image init.
-    _imageBox.markNeedsLayoutForSizedByParentChange();
+    _imageBox?.markNeedsLayoutForSizedByParentChange();
   }
 
   void _resize() {
