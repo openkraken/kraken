@@ -70,7 +70,7 @@ Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynam
       element = ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager);
       break;
     default:
-      element = Element(id, nativePtr, elementManager, tagName: UNKNOWN);
+      element = Element(id, nativePtr.cast<NativeElement>(), elementManager, tagName: UNKNOWN);
       print('ERROR: unexpected element type "$type"');
   }
 
