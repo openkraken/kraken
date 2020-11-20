@@ -382,17 +382,18 @@ class ElementManager {
 
     if (parent == null) return;
 
-    if (parent is ContainerRenderObjectMixin) {
-      parent.remove(root);
-    } else if (parent is RenderObjectWithChildMixin) {
-      parent.child = null;
-    }
+    // Detach renderObjects
+    _rootElement.dispose();
 
+    // Clears eventTargets map
     clearTargets();
+
+    // run detachCallbacks
     for (var callback in _detachCallbacks) {
       callback();
     }
     _detachCallbacks.clear();
+
     _rootElement = null;
   }
 
