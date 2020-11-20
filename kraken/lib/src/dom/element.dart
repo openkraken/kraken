@@ -408,10 +408,12 @@ class Element extends Node
   void dispose() {
     super.dispose();
 
-    if (renderBoxModel != null && isRendererAttached) {
+    if (isRendererAttached) {
       detach();
     }
 
+    assert(renderBoxModel == null);
+    // assert(renderBoxModel != null && renderBoxModel.parent == null);
     // Remove native reference.
     _nativeMap.remove(nativeElementPtr.address);
   }

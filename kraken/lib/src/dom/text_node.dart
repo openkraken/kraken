@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'dart:collection';
 import 'dart:ffi';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -13,8 +14,18 @@ import 'package:kraken/css.dart';
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   final Pointer<NativeTextNode> nativeTextNodePtr;
 
+  static SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
+
+  static TextNode getTextNodeOfNativePtr(Pointer<NativeTextNode> nativeTextNode) {
+    TextNode textNode = _nativeMap[nativeTextNode.address];
+    assert(textNode != null, 'Can not get textNode from nativeTextNode: $nativeTextNode');
+    return textNode;
+  }
+
   TextNode(int targetId, this.nativeTextNodePtr, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativeTextNodePtr.ref.nativeNode, elementManager, '#text');
+      : super(NodeType.TEXT_NODE, targetId, nativeTextNodePtr.ref.nativeNode, elementManager, '#text') {
+    _nativeMap[nativeTextNodePtr.address] = this;
+  }
 
   RenderTextBox _renderTextBox;
 
@@ -117,6 +128,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     parent.remove(_renderTextBox);
 
     didDetachRenderer();
+    _renderTextBox = null;
   }
 
   @override
@@ -149,10 +161,12 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   @override
   void dispose() {
     super.dispose();
-    assert(_renderTextBox != null);
-    assert(_renderTextBox.parent == null);
+    if (isRendererAttached) {
+      detach();
+    }
 
-    _renderTextBox = null;
+    assert(_renderTextBox == null);
+    _nativeMap.remove(nativeTextNodePtr.address);
   }
 }
 
