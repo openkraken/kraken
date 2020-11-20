@@ -22,6 +22,7 @@ class ImageElement extends Element {
   ImageProvider image;
   RenderImage imageBox;
   ImageStream imageStream;
+  ImageStreamListener initImageListener;
   List<ImageStreamListener> imageListeners;
   ImageInfo _imageInfo;
 
@@ -89,10 +90,16 @@ class ImageElement extends Element {
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
+    _handleEventAfterImageLoaded(imageInfo, synchronousCall);
+    if (initImageListener != null) {
+      imageStream?.removeListener(initImageListener);
+      initImageListener = null;
+    }
+  }
+
+  void _renderMultiFrameImage(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
     imageBox.image = _imageInfo?.image;
-    _handleEventAfterImageLoaded(imageInfo, synchronousCall);
-    _removeStreamListener();
     _resize();
 
     // Image size may affect parent layout,
@@ -150,6 +157,11 @@ class ImageElement extends Element {
     imageListeners?.forEach((ImageStreamListener imageListener) {
       imageStream?.removeListener(imageListener);
     });
+
+    if (initImageListener != null) {
+      imageStream?.removeListener(initImageListener);
+    }
+    initImageListener = null;
     imageStream = null;
     imageListeners = null;
   }
@@ -275,9 +287,11 @@ class ImageElement extends Element {
       _removeStreamListener();
       image = CSSUrl.parseUrl(src, cache: properties['caching']);
       imageStream = image.resolve(ImageConfiguration.empty);
+      initImageListener = ImageStreamListener(_initImageInfo);
+      imageStream.addListener(initImageListener);
       // Store listeners for remove listener.
       imageListeners = [
-        ImageStreamListener(_initImageInfo),
+        ImageStreamListener(_renderMultiFrameImage),
       ];
       imageListeners.forEach((ImageStreamListener imageListener) {
         imageStream.addListener(imageListener);
