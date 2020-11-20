@@ -221,12 +221,16 @@ JSValueRef JSNode::NodeInstance::replaceChild(JSContextRef ctx, JSObjectRef func
   return nullptr;
 }
 
-void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode, JSValueRef *exception) {
+void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode,
+                                                JSValueRef *exception) {
   if (referenceNode == nullptr) {
     internalAppendChild(node);
   } else {
     if (referenceNode->parentNode != this) {
-      JSC_THROW_ERROR(_hostClass->ctx, "Uncaught TypeError: Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.", exception);
+      JSC_THROW_ERROR(
+        _hostClass->ctx,
+        "Uncaught TypeError: Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.",
+        exception);
       return;
     }
 
@@ -285,9 +289,7 @@ JSValueRef JSNode::NodeInstance::removeChild(JSContextRef ctx, JSObjectRef funct
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
   if (nodeInstance == nullptr) {
-    JSC_THROW_ERROR(ctx,
-                    "Failed to execute 'removeChild' on 'Node': 1st arguments is not a Node object.",
-                    exception);
+    JSC_THROW_ERROR(ctx, "Failed to execute 'removeChild' on 'Node': 1st arguments is not a Node object.", exception);
     return nullptr;
   }
 
@@ -377,6 +379,10 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     auto instance = firstChild();
     return instance != nullptr ? instance->object : nullptr;
   }
+  case NodeProperty::kParentNode: {
+    if (parentNode == nullptr) return nullptr;
+    return parentNode->object;
+  }
   case NodeProperty::kLastChild: {
     auto instance = lastChild();
     return instance != nullptr ? instance->object : nullptr;
@@ -464,7 +470,7 @@ std::vector<JSStringRef> &JSNode::NodeInstance::getNodePropertyNames() {
     JSStringCreateWithUTF8CString("lastChild"),       JSStringCreateWithUTF8CString("childNodes"),
     JSStringCreateWithUTF8CString("previousSibling"), JSStringCreateWithUTF8CString("nextSibling"),
     JSStringCreateWithUTF8CString("appendChild"),     JSStringCreateWithUTF8CString("remove"),
-    JSStringCreateWithUTF8CString("removeChild"),
+    JSStringCreateWithUTF8CString("removeChild"),     JSStringCreateWithUTF8CString("parentNode"),
     JSStringCreateWithUTF8CString("insertBefore"),    JSStringCreateWithUTF8CString("replaceChild"),
     JSStringCreateWithUTF8CString("nodeType"),        JSStringCreateWithUTF8CString("nodeName")};
   return propertyNames;
@@ -478,6 +484,7 @@ const std::unordered_map<std::string, JSNode::NodeInstance::NodeProperty> &JSNod
   static std::unordered_map<std::string, NodeProperty> propertyMap{{"isConnected", NodeProperty::kIsConnected},
                                                                    {"firstChild", NodeProperty::kFirstChild},
                                                                    {"lastChild", NodeProperty::kLastChild},
+                                                                   {"parentNode", NodeProperty::kParentNode},
                                                                    {"childNodes", NodeProperty::kChildNodes},
                                                                    {"previousSibling", NodeProperty::kPreviousSibling},
                                                                    {"nextSibling", NodeProperty::kNextSibling},

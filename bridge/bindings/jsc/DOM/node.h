@@ -36,6 +36,7 @@ public:
       kIsConnected,
       kFirstChild,
       kLastChild,
+      kParentNode,
       kChildNodes,
       kPreviousSibling,
       kNextSibling,
