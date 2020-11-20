@@ -38,4 +38,50 @@ describe('Event', () => {
     container2.click();
     await matchViewportSnapshot();
   });
+
+  it('do not trigger click when scrolling', async () => {
+    let clickCount = 0;
+    let container;
+    let list:any = [];
+    for (let i = 0; i < 100; i ++) {
+      list.push(i);
+    }
+    let scroller;
+    container = createViewElement(
+      {
+        width: '200px',
+        height: '500px',
+        flexShrink: 1,
+        border: '2px solid #000',
+      },
+      [
+        createViewElement(
+          {
+            height: '20px',
+          },
+          []
+        ),
+        scroller = createViewElement(
+          {
+            flex: 1,
+            width: '200px',
+            overflow: 'scroll',
+          },
+          list.map(index => {
+            let element =  createElement('div', {}, [createText(`${index}`)]);
+            element.onclick = () => {
+              clickCount += 1;
+            }
+            return element;
+          })
+        ),
+      ]
+    );
+
+    BODY.appendChild(container);
+
+    await simulateClick(20, 60);
+    await simulateSwipe(20, 100, 20, 20, 0.1);
+    expect(clickCount).toBe(1);
+  });
 });

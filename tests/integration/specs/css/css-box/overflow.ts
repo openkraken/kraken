@@ -359,7 +359,7 @@ describe('Overflow', () => {
 
     await simulateClick(20, 60);
 
-    await simulateSwipe(20, 60, 20, 0, 0.1);
+    await simulateSwipe(20, 60, 20, 0, 0.5);
 
     await simulateClick(20, 0);
 
