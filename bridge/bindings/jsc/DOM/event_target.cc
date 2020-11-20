@@ -52,7 +52,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
     foundation::Task disposeTask = [](void *data) {
       auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
       foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
-          ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0, nullptr);
+          ->registerCommand(disposeCallbackData->id, UI_COMMAND_DISPOSE_EVENT_TARGET, nullptr, 0, nullptr);
       delete disposeCallbackData;
     };
     foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
@@ -116,7 +116,7 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
     auto args = buildUICommandArgs(eventTypeString);
 
     foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetInstance->eventTargetId,
-                                                                                UICommandType::addEvent, args, 1, 0x00);
+                                                                                UI_COMMAND_ADD_EVENT, args, 1, 0x00);
   }
 
   std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
@@ -301,7 +301,7 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
 
   std::string eventTypeString = std::to_string(eventType);
   auto args = buildUICommandArgs(eventTypeString);
-  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommandType::addEvent,
+  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UI_COMMAND_ADD_EVENT,
                                                                               args, 1, nullptr);
 }
 

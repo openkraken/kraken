@@ -15,7 +15,7 @@ JSWindow::WindowInstance::WindowInstance(JSWindow *window)
   location_ = new JSLocation(context);
 
   foundation::UICommandTaskMessageQueue::instance(window->context->getContextId())
-    ->registerCommand(WINDOW_TARGET_ID, UICommandType::initWindow, nullptr, 0, nativeWindow);
+    ->registerCommand(WINDOW_TARGET_ID, UI_COMMAND_INIT_WINDOW, nullptr, 0, nativeWindow);
 }
 
 JSWindow::WindowInstance::~WindowInstance() {

@@ -244,7 +244,7 @@ KrakenInfo *getKrakenInfo() {
   return krakenInfo;
 }
 
-void uiFrameCallback() {
+void flushBridgeTask() {
   foundation::UITaskMessageQueue::instance()->flushTaskFromUIThread();
 }
 

@@ -19,7 +19,7 @@ int initBridge() {
 
   // Port flutter's frame callback into bridge.
   SchedulerBinding.instance.addPersistentFrameCallback((_) {
-    bridgeFrameCallback();
+    flushBridgeTask();
     flushUICommand();
   });
 

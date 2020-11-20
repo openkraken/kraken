@@ -181,14 +181,14 @@ void reloadJSContext(int contextId) async {
   return completer.future;
 }
 
-typedef Native_FrameCallback = Void Function();
-typedef Dart_FrameCallback = void Function();
+typedef Native_FlushBridgeTask = Void Function();
+typedef Dart_FlushBridgeTask = void Function();
 
-final Dart_FrameCallback _frameCallback =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_FrameCallback>>('uiFrameCallback').asFunction();
+final Dart_FlushBridgeTask _flushBridgeTask =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_FlushBridgeTask>>('flushBridgeTask').asFunction();
 
-void bridgeFrameCallback() {
-  _frameCallback();
+void flushBridgeTask() {
+  _flushBridgeTask();
 }
 
 enum UICommandType {
@@ -204,7 +204,7 @@ enum UICommandType {
 }
 
 class UICommandItem extends Struct {
-  @Int8()
+  @Int32()
   int type;
 
   Pointer<Pointer<NativeString>> args;
@@ -236,26 +236,14 @@ typedef Dart_ClearUICommandItems = void Function(int contextId);
 final Dart_ClearUICommandItems _clearUICommandItems =
     nativeDynamicLibrary.lookup<NativeFunction<Native_ClearUICommandItems>>('clearUICommandItems').asFunction();
 
-void _freeUICommand(Pointer<UICommandItem> nativeCommand) {
-  for (int i = 0; i < nativeCommand.ref.length; i++) {
-    freeNativeString(nativeCommand.ref.args[i]);
-  }
-  free(nativeCommand.ref.args);
-  free(nativeCommand);
-}
-
 void flushUICommand() {
   Map<int, KrakenController> controllerMap = KrakenController.getControllerMap();
   for (KrakenController controller in controllerMap.values) {
     Pointer<Pointer<UICommandItem>> nativeCommandItems = _getUICommandItems(controller.view.contextId);
-    int itemSize = _getUICommandItemSize(controller.view.contextId);
+    int commandLength = _getUICommandItemSize(controller.view.contextId);
 
     // For new ui commands, we needs to tell engine to update frames.
-    if (itemSize > 0) {
-      SchedulerBinding.instance.scheduleFrame();
-    }
-
-    for (int i = 0; i < itemSize; i++) {
+    for (int i = 0; i < commandLength; i++) {
       Pointer<UICommandItem> nativeCommand = nativeCommandItems[i];
       if (nativeCommand == nullptr) continue;
 
@@ -267,49 +255,53 @@ void flushUICommand() {
         for (int i = 0; i < nativeCommand.ref.length; i ++) {
           printMsg += ' args[$i]: ${nativeStringToString(nativeCommand.ref.args[i])}';
         };
+        printMsg += 'nativePtr: ${nativeCommand.ref.nativePtr}';
         print(printMsg);
       }
 
-      switch (commandType) {
-        case UICommandType.initWindow:
-          controller.view.initWindow(nativeCommand.ref.nativePtr.cast<NativeWindow>());
-          break;
-        case UICommandType.createElement:
-          controller.view.createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
-          break;
-        case UICommandType.createTextNode:
-          controller.view.createTextNode(id, nativeCommand.ref.nativePtr.cast<NativeTextNode>(), nativeStringToString(nativeCommand.ref.args[0]));
-          break;
-        case UICommandType.disposeEventTarget:
-          ElementManager.disposeEventTarget(controller.view.contextId, id);
-          break;
-        case UICommandType.addEvent:
-          String eventType = nativeStringToString(nativeCommand.ref.args[0]);
-          controller.view.addEvent(id, int.parse(eventType));
-          break;
-        case UICommandType.insertAdjacentNode:
-          int childId = int.parse(nativeStringToString(nativeCommand.ref.args[0]));
-          String position = nativeStringToString(nativeCommand.ref.args[1]);
-          controller.view.insertAdjacentNode(id, position, childId);
-          break;
-        case UICommandType.removeNode:
-          controller.view.removeNode(id);
-          break;
-        case UICommandType.setStyle:
-          String key = nativeStringToString(nativeCommand.ref.args[0]);
-          String value = nativeStringToString(nativeCommand.ref.args[1]);
-          controller.view.setStyle(id, key, value);
-          break;
-        case UICommandType.setProperty:
-          String key = nativeStringToString(nativeCommand.ref.args[0]);
-          String value = nativeStringToString(nativeCommand.ref.args[1]);
-          controller.view.setProperty(id, key, value);
-          break;
-        default:
-          return;
+      try {
+        switch (commandType) {
+          case UICommandType.initWindow:
+            controller.view.initWindow(nativeCommand.ref.nativePtr.cast<NativeWindow>());
+            break;
+          case UICommandType.createElement:
+            controller.view.createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
+            break;
+          case UICommandType.createTextNode:
+            controller.view.createTextNode(id, nativeCommand.ref.nativePtr.cast<NativeTextNode>(), nativeStringToString(nativeCommand.ref.args[0]));
+            break;
+          case UICommandType.disposeEventTarget:
+            ElementManager.disposeEventTarget(controller.view.contextId, id);
+            break;
+          case UICommandType.addEvent:
+            String eventType = nativeStringToString(nativeCommand.ref.args[0]);
+            controller.view.addEvent(id, int.parse(eventType));
+            break;
+          case UICommandType.insertAdjacentNode:
+            int childId = int.parse(nativeStringToString(nativeCommand.ref.args[0]));
+            String position = nativeStringToString(nativeCommand.ref.args[1]);
+            controller.view.insertAdjacentNode(id, position, childId);
+            break;
+          case UICommandType.removeNode:
+            controller.view.removeNode(id);
+            break;
+          case UICommandType.setStyle:
+            String key = nativeStringToString(nativeCommand.ref.args[0]);
+            String value = nativeStringToString(nativeCommand.ref.args[1]);
+            controller.view.setStyle(id, key, value);
+            break;
+          case UICommandType.setProperty:
+            String key = nativeStringToString(nativeCommand.ref.args[0]);
+            String value = nativeStringToString(nativeCommand.ref.args[1]);
+            controller.view.setProperty(id, key, value);
+            break;
+          default:
+            break;
+        }
+      } catch (e, stack) {
+        print('$e\n$stack');
       }
-      _clearUICommandItems(controller.view.contextId);
-      _freeUICommand(nativeCommand);
     }
+    _clearUICommandItems(controller.view.contextId);
   }
 }

@@ -25,6 +25,7 @@ JSValueRef reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
     return nullptr;
   }
 
+  getDartMethod()->requestUpdateFrame();
   getDartMethod()->reloadApp(jsLocation->context->getContextId());
 
   return nullptr;

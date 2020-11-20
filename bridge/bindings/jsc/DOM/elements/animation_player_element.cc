@@ -66,7 +66,7 @@ JSAnimationPlayerElement::AnimationPlayerElementInstance::AnimationPlayerElement
   std::string tagName = "animation-player";
   auto args = buildUICommandArgs(tagName);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnimationPlayerElement);
+    ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeAnimationPlayerElement);
 }
 
 std::vector<JSStringRef> &
@@ -114,14 +114,14 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::
 
     auto args = buildUICommandArgs(name, m_src);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
   } else if (property == AnimationPlayerProperty::kType) {
     m_type = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(m_type);
 
     auto args = buildUICommandArgs(name, m_type);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
   } else {
     ElementInstance::setProperty(name, value, exception);
   }

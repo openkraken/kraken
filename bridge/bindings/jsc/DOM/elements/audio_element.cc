@@ -28,7 +28,7 @@ JSAudioElement::AudioElementInstance::AudioElementInstance(JSAudioElement *jsAud
   std::string tagName = "audio";
   auto args = buildUICommandArgs(tagName);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAudioElement);
+      ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeAudioElement);
 }
 
 JSAudioElement::AudioElementInstance::~AudioElementInstance() {

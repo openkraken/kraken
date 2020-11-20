@@ -114,7 +114,6 @@ class ElementManager {
   final List<VoidCallback> _detachCallbacks = [];
 
   ElementManager(this.viewportWidth, this.viewportHeight, {int contextId, this.controller, this.showPerformanceOverlayOverride}) {
-    print('body nativePtr: ${bodyNativePtrMap[contextId]}');
     _rootElement =
         BodyElement(viewportWidth, viewportHeight, BODY_ID, bodyNativePtrMap[contextId], this)
           ..attachBody();

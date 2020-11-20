@@ -63,7 +63,7 @@ public:
     NativeDocument *nativeDocument;
 
   private:
-    JSObjectRef m_body;
+    JSElement::ElementInstance *m_body;
     JSFunctionHolder m_createElement{context, this, "createElement", createElement};
     JSFunctionHolder m_createTextNode{context, this, "createTextNode", createTextNode};
     JSFunctionHolder m_createComment{context, this, "createComment", createComment};

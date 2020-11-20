@@ -45,14 +45,14 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
 
   auto document = static_cast<JSDocument::DocumentInstance *>(JSObjectGetPrivate(function));
   auto Document = reinterpret_cast<JSDocument*>(document->_hostClass);
-  auto element = Document->getElementOfTagName(document->context, tagName);
+  auto Element = Document->getElementOfTagName(document->context, tagName);
 
-  if (element == nullptr) {
-    element = JSElement::instance(document->context);
+  if (Element == nullptr) {
+    Element = JSElement::instance(document->context);
   }
 
-  auto elementInstance = JSObjectCallAsConstructor(ctx, element->classObject, 1, arguments, exception);
-  return elementInstance;
+  auto element = new JSElement::ElementInstance(Element, tagName.c_str());
+  return element->object;
 }
 
 JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -92,12 +92,10 @@ JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagN
 
 JSDocument::DocumentInstance::DocumentInstance(JSDocument *document)
   : NodeInstance(document, NodeType::DOCUMENT_NODE), nativeDocument(new NativeDocument(nativeNode)) {
-  auto elementConstructor = JSElement::instance(document->context);
   JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
-  const JSValueRef arguments[] = {JSValueMakeString(document->ctx, bodyTagName),
-                                  JSValueMakeNumber(document->ctx, BODY_TARGET_ID)};
-  m_body = JSObjectCallAsConstructor(document->ctx, elementConstructor->classObject, 2, arguments, nullptr);
-  JSValueProtect(document->ctx, m_body);
+  auto Element = JSElement::instance(document->context);
+  m_body = new JSElement::ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
+  JSValueProtect(document->ctx, m_body->object);
 }
 
 JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -113,7 +111,7 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
     return m_createElement.function();
   }
   case DocumentProperty::kBody:
-    return m_body;
+    return m_body->object;
   case DocumentProperty::kCreateTextNode: {
     return m_createTextNode.function();
   }
@@ -130,9 +128,6 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
 }
 
 JSDocument::DocumentInstance::~DocumentInstance() {
-  if (context->isValid()) {
-    JSValueUnprotect(_hostClass->ctx, m_body);
-  }
   delete nativeDocument;
 }
 

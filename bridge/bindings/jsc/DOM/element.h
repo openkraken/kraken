@@ -46,8 +46,6 @@ public:
   };
 
   static JSElement *instance(JSContext *context);
-  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                  const JSValueRef *arguments, JSValueRef *exception) override;
 
   class ElementInstance : public NodeInstance {
   public:
@@ -71,7 +69,7 @@ public:
                                const JSValueRef arguments[], JSValueRef *exception);
 
     ElementInstance() = delete;
-    explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId, JSValueRef *exception);
+    explicit ElementInstance(JSElement *element, JSStringRef tagName, double targetId);
     explicit ElementInstance(JSElement *element, const char *tagName);
     ~ElementInstance();
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;

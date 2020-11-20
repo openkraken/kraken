@@ -40,6 +40,9 @@ JSNode::NodeInstance::~NodeInstance() {
 JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)
   : EventTargetInstance(node), nativeNode(new NativeNode(nativeEventTarget)), nodeType(nodeType) {}
 
+JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId)
+  : EventTargetInstance(node, targetId), nativeNode(new NativeNode(nativeEventTarget)), nodeType(nodeType) {}
+
 bool JSNode::NodeInstance::isConnected() {
   bool _isConnected = eventTargetId == BODY_TARGET_ID;
   auto parent = parentNode;
@@ -244,7 +247,7 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       auto args = buildUICommandArgs(nodeEventTargetId, position);
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(referenceNode->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
+        ->registerCommand(referenceNode->eventTargetId, UI_COMMAND_INSERT_ADJACENT_NODE, args, 2, nullptr);
     }
   }
 }
@@ -306,7 +309,7 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   auto args = buildUICommandArgs(nodeEventTargetId, position);
 
   foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
-    ->registerCommand(eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
+    ->registerCommand(eventTargetId, UI_COMMAND_INSERT_ADJACENT_NODE, args, 2, nullptr);
 }
 
 void JSNode::NodeInstance::internalRemove(JSValueRef *exception) {
@@ -323,7 +326,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalRemoveChild(JSNode::NodeInst
     node->unrefer();
     // TODO: child._notifyNodeRemove(this);
     foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
-      ->registerCommand(node->eventTargetId, UICommandType::removeNode, nullptr, 0, nullptr);
+      ->registerCommand(node->eventTargetId, UI_COMMAND_REMOVE_NODE, nullptr, 0, nullptr);
   }
 
   return node;
@@ -350,10 +353,10 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
 
   auto args = buildUICommandArgs(newChildEventTargetId, position);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(oldChild->eventTargetId, UICommandType::insertAdjacentNode, args, 2, nullptr);
+    ->registerCommand(oldChild->eventTargetId, UI_COMMAND_INSERT_ADJACENT_NODE, args, 2, nullptr);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(oldChild->eventTargetId, UICommandType::removeNode, nullptr, 0, nullptr);
+    ->registerCommand(oldChild->eventTargetId, UI_COMMAND_REMOVE_NODE, nullptr, 0, nullptr);
 
   return oldChild;
 }

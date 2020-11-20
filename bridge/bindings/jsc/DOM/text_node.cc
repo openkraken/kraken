@@ -36,7 +36,7 @@ JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringR
   std::string dataString = JSStringToStdString(data);
   auto args = buildUICommandArgs(dataString);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(eventTargetId, UICommandType::createTextNode, args, 1, nativeTextNode);
+    ->registerCommand(eventTargetId, UI_COMMAND_CREATE_TEXT_NODE, args, 1, nativeTextNode);
 }
 
 JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -72,7 +72,7 @@ void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
     std::string dataString = JSStringToStdString(data);
     auto args = buildUICommandArgs(dataString);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId,UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
   }
   JSNode::NodeInstance::setProperty(name, value, exception);
 }

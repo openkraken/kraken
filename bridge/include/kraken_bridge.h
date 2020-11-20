@@ -47,22 +47,20 @@ struct Screen {
   double height;
 };
 
-enum UICommandType {
-  initWindow,
-  createElement,
-  createTextNode,
-  disposeEventTarget,
-  addEvent,
-  removeNode,
-  insertAdjacentNode,
-  setStyle,
-  setProperty
-};
+#define UI_COMMAND_INIT_WINDOW 0
+#define UI_COMMAND_CREATE_ELEMENT 1
+#define UI_COMMAND_CREATE_TEXT_NODE 2
+#define UI_COMMAND_DISPOSE_EVENT_TARGET 3
+#define UI_COMMAND_ADD_EVENT 4
+#define UI_COMMAND_REMOVE_NODE 5
+#define UI_COMMAND_INSERT_ADJACENT_NODE 6
+#define UI_COMMAND_SET_STYLE 7
+#define UI_COMMAND_SET_PROPERTY 8
 
 struct UICommandItem {
-  UICommandItem(int64_t id, int8_t type, NativeString **args, size_t length, void* nativePtr)
+  UICommandItem(int64_t id, int32_t type, NativeString **args, size_t length, void* nativePtr)
     : type(type), args(args), id(id), length(length), nativePtr(nativePtr) {};
-  int8_t type;
+  int32_t type;
   NativeString **args;
   int64_t id;
   int32_t length;
@@ -116,7 +114,7 @@ KRAKEN_EXPORT
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT
-void uiFrameCallback();
+void flushBridgeTask();
 
 KRAKEN_EXPORT
 void reloadJsContext(int32_t contextId);

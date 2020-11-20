@@ -29,7 +29,7 @@ JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *j
   std::string tagName = "a";
   auto args = buildUICommandArgs(tagName);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnchorElement);
+    ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeAnchorElement);
 }
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -58,7 +58,7 @@ void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSVa
     auto args = buildUICommandArgs(name, hrefString);
 
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
   } else if (property == AnchorElementProperty::kTarget) {
     _target = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_target);
@@ -66,7 +66,7 @@ void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSVa
     auto args = buildUICommandArgs(name, _target);
 
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
   } else {
     ElementInstance::setProperty(name, value, exception);
   }

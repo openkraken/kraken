@@ -30,7 +30,7 @@ public:
     return instanceList_[contextId];
   };
 
-  void registerCommand(int64_t id, int8_t type, NativeString **args, size_t length, void* nativePtr);
+  void registerCommand(int64_t id, int32_t type, NativeString **args, size_t length, void* nativePtr);
   UICommandItem **data() {
     return queue.data();
   };
@@ -38,6 +38,14 @@ public:
     return queue.size();
   }
   void clear() {
+    for (auto command : queue) {
+      for (size_t j = 0; j < command->length; j ++) {
+        delete[] command->args[j]->string;
+        delete command->args[j];
+      }
+
+      delete command;
+    }
     queue.clear();
   }
 

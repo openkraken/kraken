@@ -371,6 +371,8 @@ class KrakenController {
     }
     _module.dispose();
     _view.detachView();
+    // Should init JS first
+    await reloadJSContext(_view.contextId);
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         showPerformanceOverlay: _view.showPerformanceOverlay,
         enableDebug: _view.enableDebug,
@@ -378,9 +380,9 @@ class KrakenController {
         rootController: this,
         navigationDelegate: _view.navigationDelegate);
     _view.attachView(parent, previousSibling);
-    await reloadJSContext(_view.contextId);
     await loadBundle();
     await run();
+    SchedulerBinding.instance.scheduleFrame();
   }
 
   void reloadWithUrl(String url) async {

@@ -27,50 +27,26 @@ JSElement *JSElement::instance(JSContext *context) {
   return instanceMap[context];
 }
 
-JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                           const JSValueRef *arguments, JSValueRef *exception) {
-  JSValueRef tagNameValue = arguments[0];
-  double targetId;
-
-  if (argumentCount == 2) {
-    targetId = JSValueToNumber(ctx, arguments[1], exception);
-  } else {
-    targetId = NAN;
-  }
-
-  auto instance = new ElementInstance(this, tagNameValue, targetId, exception);
-  return instance->object;
-}
-
 JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagName)
   : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)),
     tagNameStringRef_(JSStringRetain(JSStringCreateWithUTF8CString(tagName))) {}
 
-JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId,
-                                            JSValueRef *exception)
-  : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)) {
-  JSStringRef tagNameStrRef = tagNameStringRef_ = JSValueToStringCopy(element->ctx, tagNameValue, exception);
-  JSStringRetain(tagNameStringRef_);
-
+JSElement::ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRef, double targetId)
+  : NodeInstance(element, NodeType::ELEMENT_NODE, targetId), nativeElement(new NativeElement(nativeNode)), tagNameStringRef_(JSStringRetain(tagNameStringRef)) {
   NativeString tagName{};
-  tagName.string = JSStringGetCharactersPtr(tagNameStrRef);
-  tagName.length = JSStringGetLength(tagNameStrRef);
+  tagName.string = JSStringGetCharactersPtr(tagNameStringRef_);
+  tagName.length = JSStringGetLength(tagNameStringRef_);
 
   const int32_t argsLength = 1;
   auto **args = new NativeString *[argsLength];
   args[0] = tagName.clone();
-
-  // If target did't set up by constructor parameter, use default eventTargetId.
-  if (isnan(targetId)) {
-    targetId = eventTargetId;
-  }
 
   // No needs to send create element for BODY element.
   if (targetId == BODY_TARGET_ID) {
     getDartMethod()->initBody(element->contextId, nativeElement);
   } else {
     ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(targetId, UICommandType::createElement, args, argsLength, nativeElement);
+      ->registerCommand(targetId, UI_COMMAND_CREATE_ELEMENT, args, argsLength, nativeElement);
   }
 }
 
@@ -130,8 +106,7 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
   switch (property) {
   case ElementProperty::kStyle: {
     if (style == nullptr) {
-      style =
-        new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
+      style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
       JSValueProtect(_hostClass->ctx, style->object);
     }
 
@@ -320,7 +295,7 @@ JSValueRef JSElement::ElementInstance::setAttribute(JSContextRef ctx, JSObjectRe
   auto args = buildUICommandArgs(name, valueString);
 
   ::foundation::UICommandTaskMessageQueue::instance(elementInstance->_hostClass->contextId)
-    ->registerCommand(elementInstance->eventTargetId, UICommandType::setProperty, args, 2, nullptr);
+    ->registerCommand(elementInstance->eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
 
   return nullptr;
 }

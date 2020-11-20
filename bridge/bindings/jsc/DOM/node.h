@@ -53,6 +53,7 @@ public:
 
     NodeInstance() = delete;
     NodeInstance(JSNode *node, NodeType nodeType);
+    NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId);
     ~NodeInstance() override;
 
     static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
