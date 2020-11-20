@@ -109,6 +109,9 @@ class ImageElement extends Element {
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
     _handleEventAfterImageLoaded(imageInfo, synchronousCall);
+    if (_initImageListener != null) {
+      _imageStream?.removeListener(_initImageListener);
+    }
   }
 
   void _renderMultiFrameImage(ImageInfo imageInfo, bool synchronousCall) {
