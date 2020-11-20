@@ -59,7 +59,7 @@ public:
     double _width{300};
     double _height{150};
 
-    JSObjectRef _getContext{nullptr};
+    JSFunctionHolder m_getContext{context, this, "getContext", getContext};
   };
 };
 
@@ -151,13 +151,13 @@ public:
     JSStringRef _fillStyle{JSStringCreateWithUTF8CString("")};
     JSStringRef _strokeStyle{JSStringCreateWithUTF8CString("")};
 
-    JSObjectRef _fillRect{nullptr};
-    JSObjectRef _clearRect{nullptr};
-    JSObjectRef _strokeRect{nullptr};
-    JSObjectRef _fillText{nullptr};
-    JSObjectRef _strokeText{nullptr};
-    JSObjectRef _save{nullptr};
-    JSObjectRef _restore{nullptr};
+    JSFunctionHolder m_fillRect{context, this, "fillRect", fillRect};
+    JSFunctionHolder m_clearRect{context, this, "clearRect", clearRect};
+    JSFunctionHolder m_strokeRect{context, this, "strokeRect", strokeRect};
+    JSFunctionHolder m_fillText{context, this, "fillText", fillText};
+    JSFunctionHolder m_strokeText{context, this, "strokeText", strokeText};
+    JSFunctionHolder m_save{context, this, "save", save};
+    JSFunctionHolder m_restore{context, this, "restore", restore};
   };
 protected:
   CanvasRenderingContext2D() = delete;

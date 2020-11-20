@@ -24,9 +24,6 @@ JSMediaElement::MediaElementInstance::~MediaElementInstance() {
   delete nativeMediaElement;
 
   if (_src != nullptr) JSStringRelease(_src);
-  if (_play != nullptr) JSValueUnprotect(_hostClass->ctx, _play);
-  if (_pause != nullptr) JSValueUnprotect(_hostClass->ctx, _pause);
-  if (_fastSeek != nullptr) JSValueUnprotect(_hostClass->ctx, _fastSeek);
 }
 
 std::vector<JSStringRef> &JSMediaElement::MediaElementInstance::getMediaElementPropertyNames() {
@@ -108,22 +105,11 @@ JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, 
     case MediaElementProperty::kLoop:
       return JSValueMakeBoolean(_hostClass->ctx, _loop);
     case MediaElementProperty::kPlay:
-      if (_play == nullptr) {
-        _play = propertyBindingFunction(_hostClass->context, this, "play", play);
-        JSValueProtect(_hostClass->ctx, _play);
-      }
-      return _play;
+      return m_play.function();
     case MediaElementProperty::kPause:
-      if (_pause == nullptr) {
-        _pause = propertyBindingFunction(_hostClass->context, this, "pause", pause);
-        JSValueProtect(_hostClass->ctx, _pause);
-      }
+      return m_pause.function();
     case MediaElementProperty::kFastSeek:
-      if (_fastSeek == nullptr) {
-        _fastSeek = propertyBindingFunction(_hostClass->context, this, "fastSeek", fastSeek);
-        JSValueProtect(_hostClass->ctx, _fastSeek);
-      }
-        return _fastSeek;
+      return m_fastSeek.function();
     }
   }
 

@@ -27,7 +27,7 @@ JSIframeElement::IframeElementInstance::IframeElementInstance(JSIframeElement *j
   std::string tagName = "iframe";
 
   auto args = buildUICommandArgs(tagName);
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
     ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeIframeElement);
 }
 
@@ -61,11 +61,7 @@ JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name
       // TODO: support contentWindow property.
       break;
     case IframeProperty::kPostMessage:
-      if (_postMessage == nullptr) {
-        _postMessage = propertyBindingFunction(_hostClass->context, this, "postMessage", postMessage);
-        JSValueProtect(_hostClass->ctx, _postMessage);
-      }
-      return _postMessage;
+      return m_postMessage.function();
     }
   }
 
@@ -116,7 +112,6 @@ void JSIframeElement::IframeElementInstance::getPropertyNames(JSPropertyNameAccu
 
 JSIframeElement::IframeElementInstance::~IframeElementInstance() {
   delete nativeIframeElement;
-  if (_postMessage != nullptr) JSValueUnprotect(_hostClass->ctx, _postMessage);
 }
 
 JSValueRef JSIframeElement::IframeElementInstance::postMessage(JSContextRef ctx, JSObjectRef function,

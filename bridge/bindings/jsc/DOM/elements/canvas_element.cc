@@ -30,14 +30,12 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
   std::string tagName = "canvas";
   auto args = buildUICommandArgs(tagName);
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
       ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeCanvasElement);
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
   delete nativeCanvasElement;
-
-  if (_getContext != nullptr) JSValueUnprotect(_hostClass->ctx, _getContext);
 }
 
 std::vector<JSStringRef> &JSCanvasElement::CanvasElementInstance::getCanvasElementPropertyNames() {
@@ -72,11 +70,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
     case CanvasElementProperty::kHeight:
       return JSValueMakeNumber(_hostClass->ctx, _height);
     case CanvasElementProperty::kGetContext:
-      if (_getContext == nullptr) {
-        _getContext = propertyBindingFunction(_hostClass->context, this, "getContext", getContext);
-        JSValueProtect(_hostClass->ctx, _getContext);
-      }
-      return _getContext;
+      return m_getContext.function();
     }
   }
 
@@ -93,7 +87,7 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     case CanvasElementProperty::kWidth: {
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      std::string widthString = std::to_string(_width);
+      std::string widthString = std::to_string(_width) + "px";
       auto args = buildUICommandArgs(name, widthString);
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
@@ -103,7 +97,7 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     case CanvasElementProperty::kHeight: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      std::string heightString = std::to_string(_height);
+      std::string heightString = std::to_string(_height) + "px";
       auto args = buildUICommandArgs(name, heightString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
@@ -145,7 +139,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getContext(JSContextRef ctx, 
   auto elementInstance = reinterpret_cast<JSCanvasElement::CanvasElementInstance *>(JSObjectGetPrivate(function));
   NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D =
     elementInstance->nativeCanvasElement->getContext(elementInstance->nativeCanvasElement, &contextId);
-  auto canvasRenderContext2d = CanvasRenderingContext2D::instance(elementInstance->_hostClass->context);
+  auto canvasRenderContext2d = CanvasRenderingContext2D::instance(elementInstance->context);
   auto canvasRenderContext2dInstance = new CanvasRenderingContext2D::CanvasRenderingContext2DInstance(
     canvasRenderContext2d, nativeCanvasRenderingContext2D);
   return canvasRenderContext2dInstance->object;
@@ -172,14 +166,6 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingCont
   if (_font != nullptr) JSStringRelease(_font);
   if (_strokeStyle != nullptr) JSStringRelease(_strokeStyle);
   if (_fillStyle != nullptr) JSStringRelease(_fillStyle);
-
-  if (_fillRect != nullptr) JSValueUnprotect(_hostClass->ctx, _fillRect);
-  if (_clearRect != nullptr) JSValueUnprotect(_hostClass->ctx, _clearRect);
-  if (_strokeRect != nullptr) JSValueUnprotect(_hostClass->ctx, _strokeRect);
-  if (_fillText != nullptr) JSValueUnprotect(_hostClass->ctx, _fillText);
-  if (_strokeText != nullptr) JSValueUnprotect(_hostClass->ctx, _strokeText);
-  if (_save != nullptr) JSValueUnprotect(_hostClass->ctx, _save);
-  if (_restore != nullptr) JSValueUnprotect(_hostClass->ctx, _restore);
 }
 
 std::vector<JSStringRef> &
@@ -229,53 +215,25 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
       return JSValueMakeString(_hostClass->ctx, _strokeStyle);
     }
     case CanvasRenderingContext2DProperty::kFillRect: {
-      if (_fillRect == nullptr) {
-        _fillRect = propertyBindingFunction(_hostClass->context, this, "fillRect", fillRect);
-        JSValueProtect(_hostClass->ctx, _fillRect);
-      }
-      return _fillRect;
+      return m_fillRect.function();
     }
     case CanvasRenderingContext2DProperty::kClearRect: {
-      if (_clearRect == nullptr) {
-        _clearRect = propertyBindingFunction(_hostClass->context, this, "clearRect", clearRect);
-        JSValueProtect(_hostClass->ctx, _clearRect);
-      }
-      return _clearRect;
+      return m_clearRect.function();
     }
     case CanvasRenderingContext2DProperty::kStrokeRect: {
-      if (_strokeRect == nullptr) {
-        _strokeRect = propertyBindingFunction(_hostClass->context, this, "strokeRect", strokeRect);
-        JSValueProtect(_hostClass->ctx, _strokeRect);
-      }
-      return _strokeRect;
+      return m_strokeRect.function();
     }
     case CanvasRenderingContext2DProperty::kFillText: {
-      if (_fillText == nullptr) {
-        _fillText = propertyBindingFunction(_hostClass->context, this, "fillText", fillText);
-        JSValueProtect(_hostClass->ctx, _fillText);
-      }
-      return _fillText;
+      return m_fillText.function();
     }
     case CanvasRenderingContext2DProperty::kStrokeText: {
-      if (_strokeText == nullptr) {
-        _strokeText = propertyBindingFunction(_hostClass->context, this, "strokeText", strokeText);
-        JSValueProtect(_hostClass->ctx, _strokeText);
-      }
-      return _strokeText;
+      return m_strokeText.function();
     }
     case CanvasRenderingContext2DProperty::kSave: {
-      if (_save == nullptr) {
-        _save = propertyBindingFunction(_hostClass->context, this, "save", save);
-        JSValueProtect(_hostClass->ctx, _save);
-      }
-      return _save;
+      return m_save.function();
     }
     case CanvasRenderingContext2DProperty::kReStore: {
-      if (_restore == nullptr) {
-        _restore = propertyBindingFunction(_hostClass->context, this, "restore", restore);
-        JSValueProtect(_hostClass->ctx, _restore);
-      }
-      return _restore;
+      return m_restore.function();
     }
     }
   }

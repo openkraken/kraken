@@ -44,10 +44,9 @@ public:
     NativeAnimationPlayerElement *nativeAnimationPlayerElement;
 
   private:
-    JSStringRef _src = JSStringCreateWithUTF8CString("");
-    JSStringRef _type = JSStringCreateWithUTF8CString("");
-
-    JSObjectRef _play {nullptr};
+    JSStringRef m_src = JSStringCreateWithUTF8CString("");
+    JSStringRef m_type = JSStringCreateWithUTF8CString("");
+    JSFunctionHolder m_play{context, this, "play", play};
   };
 protected:
   JSAnimationPlayerElement() = delete;

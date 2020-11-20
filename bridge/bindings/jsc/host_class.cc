@@ -134,7 +134,7 @@ bool HostClass::proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, J
   auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
   std::string &&name = JSStringToStdString(propertyName);
   hostClassInstance->setProperty(name, value, exception);
-  return hostClassInstance->_hostClass->context->handleException(*exception);
+  return hostClassInstance->context->handleException(*exception);
 }
 
 void HostClass::proxyInstanceGetPropertyNames(JSContextRef ctx, JSObjectRef object,
@@ -153,13 +153,16 @@ JSObjectRef HostClass::instanceConstructor(JSContextRef ctx, JSObjectRef constru
   return JSObjectMake(ctx, nullptr, nullptr);
 }
 HostClass::~HostClass() {
-  if (_call != nullptr) JSValueUnprotect(ctx, _call);
+  if (context->isValid()) {
+    if (_call != nullptr) JSValueUnprotect(ctx, _call);
+    JSValueUnprotect(ctx, classObject);
+  }
+
   JSClassRelease(jsClass);
   JSClassRelease(instanceClass);
-  JSValueUnprotect(ctx, classObject);
 }
 
-HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass) {
+HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass), context(_hostClass->context), ctx(_hostClass->ctx) {
   object = JSObjectMake(hostClass->ctx, hostClass->instanceClass, this);
 }
 JSValueRef HostClass::Instance::getProperty(std::string &name, JSValueRef *exception) {

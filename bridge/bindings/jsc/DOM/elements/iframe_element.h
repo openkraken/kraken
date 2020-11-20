@@ -42,7 +42,7 @@ public:
     double _width;
     double _height;
 
-    JSObjectRef _postMessage{nullptr};
+    JSFunctionHolder m_postMessage{context, this, "postMessage", postMessage};
   };
 protected:
   JSIframeElement() = delete;

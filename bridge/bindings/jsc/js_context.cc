@@ -201,4 +201,22 @@ NativeString **buildUICommandArgs(std::string &key, std::string &value) {
   return args;
 }
 
+JSFunctionHolder::JSFunctionHolder(JSContext *context, void *data, std::string name,
+                                   JSObjectCallAsFunctionCallback callback)
+  : context(context), m_data(data), m_callback(callback), m_name(std::move(name)) {}
+
+JSFunctionHolder::~JSFunctionHolder() {
+  if (context->isValid() && m_function != nullptr) {
+    JSValueUnprotect(context->context(), m_function);
+  }
+}
+
+JSObjectRef JSFunctionHolder::function() {
+  if (m_function == nullptr) {
+    m_function = propertyBindingFunction(context, m_data, m_name.c_str(), m_callback);
+    JSValueProtect(context->context(), m_function);
+  }
+  return m_function;
+}
+
 } // namespace kraken::binding::jsc

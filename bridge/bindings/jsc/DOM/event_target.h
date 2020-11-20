@@ -75,10 +75,10 @@ public:
     std::unordered_map<JSEvent::EventType, std::deque<JSObjectRef>> _eventHandlers;
     bool internalDispatchEvent(JSEvent::EventInstance *eventInstance);
 
-    JSObjectRef _addEventListener {nullptr};
-    JSObjectRef _removeEventListener {nullptr};
-    JSObjectRef _dispatchEvent {nullptr};
-    JSObjectRef _clearListeners{nullptr};
+    JSFunctionHolder m_addEventListener{context, this, "addEventListener", addEventListener};
+    JSFunctionHolder m_removeEventListener{context, this, "removeEventListener", removeEventListener};
+    JSFunctionHolder m_dispatchEvent{context, this, "dispatchEvent", dispatchEvent};
+    JSFunctionHolder m_clearListeners{context, this, "clearListeners", __clearListeners__};
   };
 
 protected:

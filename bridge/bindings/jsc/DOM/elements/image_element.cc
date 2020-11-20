@@ -27,7 +27,7 @@ JSImageElement::ImageElementInstance::ImageElementInstance(JSImageElement *jsAnc
   std::string tagName = "img";
   auto args = buildUICommandArgs(tagName);
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
     ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeImageElement);
 }
 
@@ -82,7 +82,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
     case ImageProperty::kWidth: {
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      std::string widthString = std::to_string(_width);
+      std::string widthString = std::to_string(_width) + "px";
       auto args = buildUICommandArgs(name, widthString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
@@ -91,7 +91,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
     case ImageProperty::kHeight: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      std::string heightString = std::to_string(_height);
+      std::string heightString = std::to_string(_height) + "px";
       auto args = buildUICommandArgs(name, heightString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);

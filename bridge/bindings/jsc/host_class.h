@@ -52,6 +52,8 @@ public:
 
     JSObjectRef object{nullptr};
     HostClass *_hostClass{nullptr};
+    JSContext *context{nullptr};
+    JSContextRef ctx{nullptr};
   };
 
   std::string _name {""};

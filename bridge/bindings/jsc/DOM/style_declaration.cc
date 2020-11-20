@@ -89,10 +89,6 @@ CSSStyleDeclaration::StyleDeclarationInstance::~StyleDeclarationInstance() {
   for (auto &string : properties) {
     JSStringRelease(string.second);
   }
-
-  if (_setProperty != nullptr) JSValueUnprotect(_hostClass->ctx, _setProperty);
-  if (_getPropertyValue != nullptr) JSValueUnprotect(_hostClass->ctx, _getPropertyValue);
-  if (_removeProperty != nullptr) JSValueUnprotect(_hostClass->ctx, _removeProperty);
 }
 
 JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -102,25 +98,13 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::strin
     auto property = propertyMap[name];
     switch (property) {
     case CSSStyleDeclarationProperty::kSetProperty: {
-      if (_setProperty == nullptr) {
-        _setProperty = propertyBindingFunction(_hostClass->context, this, "setProperty", setProperty);
-        JSValueProtect(_hostClass->ctx, _setProperty);
-      }
-      return _setProperty;
+      return m_setProperty.function();
     }
     case CSSStyleDeclarationProperty::kGetPropertyValue: {
-      if (_getPropertyValue == nullptr) {
-        _getPropertyValue = propertyBindingFunction(_hostClass->context, this, "getPropertyValue", getPropertyValue);
-        JSValueProtect(_hostClass->ctx, _getPropertyValue);
-      }
-      return _getPropertyValue;
+      return m_getPropertyValue.function();
     }
     case CSSStyleDeclarationProperty::kRemoveProperty: {
-      if (_removeProperty == nullptr) {
-        _removeProperty = propertyBindingFunction(_hostClass->context, this, "removeProperty", removeProperty);
-        JSValueProtect(_hostClass->ctx, _removeProperty);
-      }
-      return _removeProperty;
+      return m_removeProperty.function();
     }
     }
   } else if (properties.contains(name)) {
@@ -139,7 +123,12 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::str
                                                                         JSValueRef *exception) {
   if (name == "setProperty" || name == "removeProperty" || name == "getPropertyValue") return;
 
-  JSStringRef valueStr = JSValueToStringCopy(_hostClass->ctx, value, exception);
+  JSStringRef valueStr;
+  if (JSValueIsNull(_hostClass->ctx, value)) {
+    valueStr = JSStringCreateWithUTF8CString("");
+  } else {
+    valueStr = JSValueToStringCopy(_hostClass->ctx, value, exception);
+  }
 
   JSStringRetain(valueStr);
 

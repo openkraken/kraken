@@ -27,7 +27,7 @@ JSObjectElement::ObjectElementInstance::ObjectElementInstance(JSObjectElement *j
   std::string tagName = "object";
 
   auto args = buildUICommandArgs(tagName);
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
     ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeObjectElement);
 }
 

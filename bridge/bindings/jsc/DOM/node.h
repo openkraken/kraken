@@ -103,11 +103,11 @@ public:
     void refer();
     void unrefer();
 
-    JSObjectRef _removeChild {nullptr};
-    JSObjectRef _appendChild {nullptr};
-    JSObjectRef _remove {nullptr};
-    JSObjectRef _insertBefore {nullptr};
-    JSObjectRef _replaceChild {nullptr};
+    JSFunctionHolder m_removeChild{context, this, "removeChild", removeChild};
+    JSFunctionHolder m_appendChild{context, this, "appendChild", appendChild};
+    JSFunctionHolder m_remove{context, this, "remove", remove};
+    JSFunctionHolder m_insertBefore{context, this, "insertBefore", insertBefore};
+    JSFunctionHolder m_replaceChild{context, this, "replaceChild", replaceChild};
   };
 
 protected:

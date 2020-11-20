@@ -76,14 +76,7 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
 
 JSElement::ElementInstance::~ElementInstance() {
   JSStringRelease(tagNameStringRef_);
-  if (style != nullptr) JSValueUnprotect(_hostClass->ctx, style->object);
-  if (_getBoundingClientRect != nullptr) JSValueUnprotect(_hostClass->ctx, _getBoundingClientRect);
-  if (_setAttribute != nullptr) JSValueUnprotect(_hostClass->ctx, _setAttribute);
-  if (_getAttribute != nullptr) JSValueUnprotect(_hostClass->ctx, _getAttribute);
-  if (_toBlob != nullptr) JSValueUnprotect(_hostClass->ctx, _toBlob);
-  if (_click != nullptr) JSValueUnprotect(_hostClass->ctx, _click);
-  if (_scroll != nullptr) JSValueUnprotect(_hostClass->ctx, _scroll);
-  if (_scrollBy != nullptr) JSValueUnprotect(_hostClass->ctx, _scrollBy);
+  if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
   delete nativeElement;
 }
 
@@ -94,7 +87,7 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
   getDartMethod()->requestUpdateFrame();
   NativeBoundingClientRect *nativeBoundingClientRect =
     elementInstance->nativeElement->getBoundingClientRect(elementInstance->nativeElement);
-  auto boundingClientRect = new BoundingClientRect(elementInstance->_hostClass->context, nativeBoundingClientRect);
+  auto boundingClientRect = new BoundingClientRect(elementInstance->context, nativeBoundingClientRect);
   return boundingClientRect->jsObject;
 }
 
@@ -138,7 +131,7 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
   case ElementProperty::kStyle: {
     if (style == nullptr) {
       style =
-        new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(_hostClass->context), this);
+        new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
       JSValueProtect(_hostClass->ctx, style->object);
     }
 
@@ -195,54 +188,25 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollWidth(nativeElement));
   }
   case ElementProperty::kGetBoundingClientRect: {
-    if (_getBoundingClientRect == nullptr) {
-      _getBoundingClientRect =
-        propertyBindingFunction(_hostClass->context, this, "getBoundingClientRect", getBoundingClientRect);
-      JSValueProtect(_hostClass->ctx, _getBoundingClientRect);
-    }
-    return _getBoundingClientRect;
+    return m_getBoundingClientRect.function();
   }
   case ElementProperty::kClick: {
-    if (_click == nullptr) {
-      _click = propertyBindingFunction(_hostClass->context, this, "click", click);
-      JSValueProtect(_hostClass->ctx, _click);
-    }
-    return _click;
+    return m_click.function();
   }
   case ElementProperty::kScroll: {
-    if (_scroll == nullptr) {
-      _scroll = propertyBindingFunction(_hostClass->context, this, "scroll", scroll);
-      JSValueProtect(_hostClass->ctx, _scroll);
-    }
-    return _scroll;
+    return m_scroll.function();
   }
   case ElementProperty::kScrollBy: {
-    if (_scrollBy == nullptr) {
-      _scrollBy = propertyBindingFunction(_hostClass->context, this, "scrollBy", scrollBy);
-      JSValueProtect(_hostClass->ctx, _scrollBy);
-    }
-    return _scrollBy;
+    return m_scrollBy.function();
   }
   case ElementProperty::kToBlob: {
-    if (_toBlob == nullptr) {
-      _toBlob = propertyBindingFunction(_hostClass->context, this, "toBlob", toBlob);
-      JSValueProtect(_hostClass->ctx, _toBlob);
-    }
-    return _toBlob;
+    return m_toBlob.function();
   }
   case ElementProperty::kGetAttribute: {
-    if (_getAttribute == nullptr) {
-      _getAttribute = propertyBindingFunction(_hostClass->context, this, "getAttribute", getAttribute);
-      JSValueProtect(_hostClass->ctx, _getAttribute);
-    }
-    return _getAttribute;
+    return m_getAttribute.function();
   }
   case ElementProperty::kSetAttribute: {
-    if (_setAttribute == nullptr) {
-      _setAttribute = propertyBindingFunction(_hostClass->context, this, "setAttribute", setAttribute);
-      JSValueProtect(_hostClass->ctx, _setAttribute);
-    }
-    return _setAttribute;
+    return m_setAttribute.function();
   }
   case ElementProperty::kChildren: {
     JSValueRef arguments[childNodes.size()];
@@ -270,9 +234,11 @@ void JSElement::ElementInstance::setProperty(std::string &name, JSValueRef value
 
     switch (property) {
     case ElementProperty::kScrollTop:
+      getDartMethod()->requestUpdateFrame();
       nativeElement->setScrollTop(nativeElement, JSValueToNumber(_hostClass->ctx, value, exception));
       break;
     case ElementProperty::kScrollLeft:
+      getDartMethod()->requestUpdateFrame();
       nativeElement->setScrollLeft(nativeElement, JSValueToNumber(_hostClass->ctx, value, exception));
       break;
     default:
@@ -411,7 +377,7 @@ JSValueRef JSElement::ElementInstance::toBlob(JSContextRef ctx, JSObjectRef func
   }
 
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
-  auto context = elementInstance->_hostClass->context;
+  auto context = elementInstance->context;
   getDartMethod()->requestUpdateFrame();
 
   double devicePixelRatio = JSValueToNumber(ctx, devicePixelRatioValueRef, exception);

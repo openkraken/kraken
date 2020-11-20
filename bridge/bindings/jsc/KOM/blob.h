@@ -69,9 +69,9 @@ public:
     int32_t size();
 
   private:
-    JSObjectRef _arrayBuffer{nullptr};
-    JSObjectRef _slice{nullptr};
-    JSObjectRef _text{nullptr};
+    JSFunctionHolder m_arrayBuffer{context, this, "arrayBuffer", arrayBuffer};
+    JSFunctionHolder m_slice{context, this, "slice", slice};
+    JSFunctionHolder m_text{context, this, "text", text};
 
     size_t _size;
     std::string mimeType{""};

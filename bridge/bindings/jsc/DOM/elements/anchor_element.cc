@@ -28,7 +28,7 @@ JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *j
   : ElementInstance(jsAnchorElement, "a"), nativeAnchorElement(new NativeAnchorElement(nativeElement)) {
   std::string tagName = "a";
   auto args = buildUICommandArgs(tagName);
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
       ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnchorElement);
 }
 

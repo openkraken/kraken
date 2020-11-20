@@ -65,7 +65,7 @@ JSAnimationPlayerElement::AnimationPlayerElementInstance::AnimationPlayerElement
     nativeAnimationPlayerElement(new NativeAnimationPlayerElement(nativeElement)) {
   std::string tagName = "animation-player";
   auto args = buildUICommandArgs(tagName);
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
     ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnimationPlayerElement);
 }
 
@@ -91,15 +91,11 @@ JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty
     auto property = propertyMap[name];
     switch (property) {
     case AnimationPlayerProperty::kSrc:
-      return JSValueMakeString(_hostClass->ctx, _src);
+      return JSValueMakeString(_hostClass->ctx, m_src);
     case AnimationPlayerProperty::kType:
-      return JSValueMakeString(_hostClass->ctx, _type);
+      return JSValueMakeString(_hostClass->ctx, m_type);
     case AnimationPlayerProperty::kPlay: {
-      if (_play == nullptr) {
-        _play = propertyBindingFunction(_hostClass->context, this, "play", play);
-        JSValueProtect(_hostClass->ctx, _play);
-      }
-      return _play;
+      return m_play.function();
     }
     }
   }
@@ -113,17 +109,17 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::
   auto property = propertyMap[name];
 
   if (property == AnimationPlayerProperty::kSrc) {
-    _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(_src);
+    m_src = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(m_src);
 
-    auto args = buildUICommandArgs(name, _src);
+    auto args = buildUICommandArgs(name, m_src);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   } else if (property == AnimationPlayerProperty::kType) {
-    _type = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(_type);
+    m_type = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    JSStringRetain(m_type);
 
-    auto args = buildUICommandArgs(name, _type);
+    auto args = buildUICommandArgs(name, m_type);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommandType::setProperty, args, 2, nullptr);
   } else {
@@ -142,9 +138,8 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::getPropertyNames(
 
 JSAnimationPlayerElement::AnimationPlayerElementInstance::~AnimationPlayerElementInstance() {
   delete nativeAnimationPlayerElement;
-  if (_play != nullptr) JSValueUnprotect(_hostClass->ctx, _play);
-  if (_src != nullptr) JSStringRelease(_src);
-  if (_type != nullptr) JSStringRelease(_type);
+  if (m_src != nullptr) JSStringRelease(m_src);
+  if (m_type != nullptr) JSStringRelease(m_type);
 }
 
 } // namespace kraken::binding::jsc

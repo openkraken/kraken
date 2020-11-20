@@ -210,7 +210,7 @@ JSValueRef JSBlob::BlobInstance::text(JSContextRef ctx, JSObjectRef function, JS
     return nullptr;
   };
 
-  return JSObjectMakePromise(blob->_hostClass->context, context, callback, exception);
+  return JSObjectMakePromise(blob->context, context, callback, exception);
 }
 
 JSValueRef JSBlob::BlobInstance::arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -233,13 +233,10 @@ JSValueRef JSBlob::BlobInstance::arrayBuffer(JSContextRef ctx, JSObjectRef funct
     return nullptr;
   };
 
-  return JSObjectMakePromise(blob->_hostClass->context, context, callback, exception);
+  return JSObjectMakePromise(blob->context, context, callback, exception);
 }
 
 JSBlob::BlobInstance::~BlobInstance() {
-  if (_slice != nullptr) JSValueUnprotect(_hostClass->ctx, _slice);
-  if (_arrayBuffer != nullptr) JSValueUnprotect(_hostClass->ctx, _arrayBuffer);
-  if (_text != nullptr) JSValueUnprotect(_hostClass->ctx, _text);
 }
 
 uint8_t *JSBlob::BlobInstance::bytes() {
@@ -257,23 +254,11 @@ JSValueRef JSBlob::BlobInstance::getProperty(std::string &name, JSValueRef *exce
     auto property = propertyMap[name];
     switch (property) {
     case kArrayBuffer:
-      if (_arrayBuffer == nullptr) {
-        _arrayBuffer = propertyBindingFunction(_hostClass->context, this, "arrayBuffer", arrayBuffer);
-        JSValueProtect(_hostClass->ctx, _arrayBuffer);
-      }
-      return _arrayBuffer;
+      return m_arrayBuffer.function();
     case kSlice:
-      if (_slice == nullptr) {
-        _slice = propertyBindingFunction(_hostClass->context, this, "slice", slice);
-        JSValueProtect(_hostClass->ctx, _slice);
-      }
-      return _slice;
+      return m_slice.function();
     case kText:
-      if (_text == nullptr) {
-        _text = propertyBindingFunction(_hostClass->context, this, "text", text);
-        JSValueProtect(_hostClass->ctx, _text);
-      }
-      return _text;
+      return m_text.function();
     case kStream:
       return nullptr;
     case kType: {

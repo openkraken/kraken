@@ -35,11 +35,6 @@ JSNode::NodeInstance::~NodeInstance() {
   }
 
   delete nativeNode;
-
-  if (_insertBefore != nullptr) JSValueUnprotect(_hostClass->ctx, _insertBefore);
-  if (_replaceChild != nullptr) JSValueUnprotect(_hostClass->ctx, _replaceChild);
-  if (_appendChild != nullptr) JSValueUnprotect(_hostClass->ctx, _appendChild);
-  if (_remove != nullptr) JSValueUnprotect(_hostClass->ctx, _remove);
 }
 
 JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)
@@ -396,39 +391,19 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     return instance != nullptr ? instance->object : nullptr;
   }
   case NodeProperty::kAppendChild: {
-    if (_appendChild == nullptr) {
-      _appendChild = propertyBindingFunction(_hostClass->context, this, "appendChild", appendChild);
-      JSValueProtect(_hostClass->ctx, _appendChild);
-    }
-    return _appendChild;
+    return m_appendChild.function();
   }
   case NodeProperty::kRemove: {
-    if (_remove == nullptr) {
-      _remove = propertyBindingFunction(_hostClass->context, this, "remove", remove);
-      JSValueProtect(_hostClass->ctx, _remove);
-    }
-    return _remove;
+    return m_remove.function();
   }
   case NodeProperty::kRemoveChild: {
-    if (_removeChild == nullptr) {
-      _removeChild = propertyBindingFunction(_hostClass->context, this, "removeChild", removeChild);
-      JSValueProtect(_hostClass->ctx, _removeChild);
-    }
-    return _removeChild;
+    return m_removeChild.function();
   }
   case NodeProperty::kInsertBefore: {
-    if (_insertBefore == nullptr) {
-      _insertBefore = propertyBindingFunction(_hostClass->context, this, "insertBefore", insertBefore);
-      JSValueProtect(_hostClass->ctx, _insertBefore);
-    }
-    return _insertBefore;
+    return m_insertBefore.function();
   }
   case NodeProperty::kReplaceChild: {
-    if (_replaceChild == nullptr) {
-      _replaceChild = propertyBindingFunction(_hostClass->context, this, "replaceChild", replaceChild);
-      JSValueProtect(_hostClass->ctx, _replaceChild);
-    }
-    return _replaceChild;
+    return m_replaceChild.function();
   }
   case NodeProperty::kChildNodes: {
     JSValueRef arguments[childNodes.size()];
@@ -507,7 +482,7 @@ void JSNode::NodeInstance::refer() {
 
 void JSNode::NodeInstance::unrefer() {
   _referenceCount--;
-  if (_referenceCount == 0) {
+  if (_referenceCount == 0 && context->isValid()) {
     JSValueUnprotect(_hostClass->ctx, this->object);
   }
 }

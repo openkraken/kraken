@@ -47,28 +47,27 @@ JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarg
 
 JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
-  auto data = new DisposeCallbackData(_hostClass->contextId, eventTargetId);
-  foundation::Task disposeTask = [](void *data) {
-    auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
-    foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
-      ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0, 0x00);
-    delete disposeCallbackData;
-  };
-  foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
+  if (context->isValid()) {
+    auto data = new DisposeCallbackData(_hostClass->contextId, eventTargetId);
+    foundation::Task disposeTask = [](void *data) {
+      auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
+      foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
+          ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0, nullptr);
+      delete disposeCallbackData;
+    };
+    foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
+  }
 
   // Release handler callbacks.
-  for (auto &it : _eventHandlers) {
-    for (auto &handler : it.second) {
-      JSValueUnprotect(_hostClass->ctx, handler);
+  if (context->isValid()) {
+    for (auto &it : _eventHandlers) {
+      for (auto &handler : it.second) {
+        JSValueUnprotect(_hostClass->ctx, handler);
+      }
     }
   }
 
   delete nativeEventTarget;
-
-  if (_addEventListener != nullptr) JSValueUnprotect(_hostClass->ctx, _addEventListener);
-  if (_removeEventListener != nullptr) JSValueUnprotect(_hostClass->ctx, _removeEventListener);
-  if (_dispatchEvent != nullptr) JSValueUnprotect(_hostClass->ctx, _dispatchEvent);
-  if (_clearListeners != nullptr) JSValueUnprotect(_hostClass->ctx, _clearListeners);
 }
 
 JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx, JSObjectRef function,
@@ -237,33 +236,16 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
 
     switch (property) {
     case EventTargetProperty::kAddEventListener: {
-      if (_addEventListener == nullptr) {
-        _addEventListener = propertyBindingFunction(_hostClass->context, this, "addEventListener", addEventListener);
-        JSValueProtect(_hostClass->ctx, _addEventListener);
-      }
-      return _addEventListener;
+      return m_addEventListener.function();
     }
     case EventTargetProperty::kRemoveEventListener: {
-      if (_removeEventListener == nullptr) {
-        _removeEventListener =
-          propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
-        JSValueProtect(_hostClass->ctx, _removeEventListener);
-      }
-      return _removeEventListener;
+      return m_removeEventListener.function();
     }
     case EventTargetProperty::kDispatchEvent: {
-      if (_dispatchEvent == nullptr) {
-        _dispatchEvent = propertyBindingFunction(_hostClass->context, this, "dispatchEvent", dispatchEvent);
-        JSValueProtect(_hostClass->ctx, _dispatchEvent);
-      }
-      return _dispatchEvent;
+      return m_dispatchEvent.function();
     }
     case EventTargetProperty::kClearListeners: {
-      if (_clearListeners == nullptr) {
-        _clearListeners = propertyBindingFunction(_hostClass->context, this, "__clearListeners__", __clearListeners__);
-        JSValueProtect(_hostClass->ctx, _clearListeners);
-      }
-      return _clearListeners;
+      return m_clearListeners.function();
     }
     case EventTargetProperty::kTargetId: {
       return JSValueMakeNumber(_hostClass->ctx, eventTargetId);
@@ -344,7 +326,7 @@ bool JSEventTarget::EventTargetInstance::internalDispatchEvent(JSEvent::EventIns
     JSValueRef exception = nullptr;
     const JSValueRef arguments[] = {eventInstance->object};
     JSObjectCallAsFunction(_hostClass->ctx, handler, handler, 1, arguments, &exception);
-    _hostClass->context->handleException(exception);
+    context->handleException(exception);
   }
 
   // do not dispatch event when event has been canceled
@@ -364,7 +346,7 @@ JSEventTarget::EventTargetInstance::getEventTargetPropertyMap() {
 // This function will be called back by dart side when trigger events.
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent) {
   JSEventTarget::EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
-  JSContext *context = eventTargetInstance->_hostClass->context;
+  JSContext *context = eventTargetInstance->context;
   JSContextRef ctx = eventTargetInstance->_hostClass->ctx;
 
   JSValueRef exception = nullptr;

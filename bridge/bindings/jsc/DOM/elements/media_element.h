@@ -57,9 +57,9 @@ public:
     JSStringRef _src {JSStringCreateWithUTF8CString("")};
     bool _autoPlay {false};
     bool _loop {false};
-    JSObjectRef _play {nullptr};
-    JSObjectRef _pause {nullptr};
-    JSObjectRef _fastSeek {nullptr};
+    JSFunctionHolder m_play{context, this, "play", play};
+    JSFunctionHolder m_pause{context, this, "pause", pause};
+    JSFunctionHolder m_fastSeek{context, this, "fastSeek", fastSeek};
   };
 protected:
   JSMediaElement() = delete;

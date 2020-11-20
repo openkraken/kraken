@@ -12,7 +12,7 @@ namespace kraken::binding::jsc {
 
 JSWindow::WindowInstance::WindowInstance(JSWindow *window)
   : EventTargetInstance(window, WINDOW_TARGET_ID), nativeWindow(new NativeWindow(nativeEventTarget)) {
-  location_ = new JSLocation(_hostClass->context);
+  location_ = new JSLocation(context);
 
   foundation::UICommandTaskMessageQueue::instance(window->context->getContextId())
     ->registerCommand(WINDOW_TARGET_ID, UICommandType::initWindow, nullptr, 0, nativeWindow);
@@ -28,22 +28,22 @@ JSWindow::WindowInstance::~WindowInstance() {
 JSValueRef JSWindow::WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "devicePixelRatio") {
     if (getDartMethod()->devicePixelRatio == nullptr) {
-      JSC_THROW_ERROR(_hostClass->context->context(),
+      JSC_THROW_ERROR(context->context(),
                       "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.", exception);
       return nullptr;
     }
 
     double devicePixelRatio = getDartMethod()->devicePixelRatio(_hostClass->contextId);
-    return JSValueMakeNumber(_hostClass->context->context(), devicePixelRatio);
+    return JSValueMakeNumber(context->context(), devicePixelRatio);
   } else if (name == "colorScheme") {
     if (getDartMethod()->platformBrightness == nullptr) {
-      JSC_THROW_ERROR(_hostClass->context->context(),
+      JSC_THROW_ERROR(context->context(),
                       "Failed to read colorScheme: dart method (platformBrightness) not register.", exception);
       return nullptr;
     }
     const NativeString *code = getDartMethod()->platformBrightness(_hostClass->contextId);
     JSStringRef resultRef = JSStringCreateWithCharacters(code->string, code->length);
-    return JSValueMakeString(_hostClass->context->context(), resultRef);
+    return JSValueMakeString(context->context(), resultRef);
   } else if (name == "location") {
     return location_->jsObject;
   } else if (name == "window") {

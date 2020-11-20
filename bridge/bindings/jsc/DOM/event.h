@@ -109,9 +109,9 @@ public:
     bool _inPassiveListenerFlag{false};
 
   private:
-    JSObjectRef _stopImmediatePropagation{nullptr};
-    JSObjectRef _stopPropagation{nullptr};
-    JSObjectRef _preventDefault{nullptr};
+    JSFunctionHolder m_stopImmediatePropagation{context, this, "stopImmediatePropagation", stopImmediatePropagation};
+    JSFunctionHolder m_stopPropagation{context, this, "stopPropagation", stopPropagation};
+    JSFunctionHolder m_preventDefault{context, this, "preventDefault", preventDefault};
   };
 protected:
   JSEvent() = delete;

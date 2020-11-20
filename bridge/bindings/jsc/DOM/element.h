@@ -83,13 +83,14 @@ public:
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
     JSStringRef tagNameStringRef_ {JSStringCreateWithUTF8CString("")};
-    JSObjectRef _getBoundingClientRect{nullptr};
-    JSObjectRef _setAttribute{nullptr};
-    JSObjectRef _getAttribute{nullptr};
-    JSObjectRef _toBlob{nullptr};
-    JSObjectRef _click{nullptr};
-    JSObjectRef _scroll{nullptr};
-    JSObjectRef _scrollBy{nullptr};
+
+    JSFunctionHolder m_getBoundingClientRect{context, this, "getBoundingClientRect", getBoundingClientRect};
+    JSFunctionHolder m_setAttribute{context, this, "setAttribute", setAttribute};
+    JSFunctionHolder m_getAttribute{context, this, "getAttribute", getAttribute};
+    JSFunctionHolder m_toBlob{context, this, "toBlob", toBlob};
+    JSFunctionHolder m_click{context, this, "click", click};
+    JSFunctionHolder m_scroll{context, this, "scroll", scroll};
+    JSFunctionHolder m_scrollBy{context, this, "scrollBy", scrollBy};
     std::unordered_map<std::string, JSStringRef> attributes;
   };
 protected:

@@ -11,6 +11,15 @@
 #include "element.h"
 #include "node.h"
 
+#include "bindings/jsc/DOM/elements/anchor_element.h"
+#include "bindings/jsc/DOM/elements/animation_player_element.h"
+#include "bindings/jsc/DOM/elements/audio_element.h"
+#include "bindings/jsc/DOM/elements/canvas_element.h"
+#include "bindings/jsc/DOM/elements/iframe_element.h"
+#include "bindings/jsc/DOM/elements/image_element.h"
+#include "bindings/jsc/DOM/elements/object_element.h"
+#include "bindings/jsc/DOM/elements/video_element.h"
+
 namespace kraken::binding::jsc {
 
 struct NativeDocument;
@@ -18,8 +27,6 @@ struct NativeDocument;
 class JSDocument : public JSNode {
 public:
   static JSDocument *instance(JSContext *context);
-
-  static JSElement *getElementOfTagName(JSContext *context, std::string &tagName);
 
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
@@ -30,6 +37,7 @@ public:
   static JSValueRef createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
 
+  JSElement *getElementOfTagName(JSContext *context, std::string &tagName);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -55,11 +63,21 @@ public:
     NativeDocument *nativeDocument;
 
   private:
-    JSObjectRef body;
-    JSObjectRef _createElement {nullptr};
-    JSObjectRef _createTextNode {nullptr};
-    JSObjectRef _createComment {nullptr};
+    JSObjectRef m_body;
+    JSFunctionHolder m_createElement{context, this, "createElement", createElement};
+    JSFunctionHolder m_createTextNode{context, this, "createTextNode", createTextNode};
+    JSFunctionHolder m_createComment{context, this, "createComment", createComment};
   };
+
+private:
+  std::unordered_map<std::string, JSElement *> m_elementMaps {
+      {"a", JSAnchorElement::instance(context)},      {"animation-player", JSAnimationPlayerElement::instance(context)},
+      {"audio", JSAudioElement::instance(context)},   {"video", JSVideoElement::instance(context)},
+      {"canvas", JSCanvasElement::instance(context)}, {"div", JSElement::instance(context)},
+      {"span", JSElement::instance(context)},         {"strong", JSElement::instance(context)},
+      {"pre", JSElement::instance(context)},          {"p", JSElement::instance(context)},
+      {"iframe", JSIframeElement::instance(context)}, {"object", JSObjectElement::instance(context)},
+      {"img", JSImageElement::instance(context)}};
 
 protected:
   JSDocument() = delete;
