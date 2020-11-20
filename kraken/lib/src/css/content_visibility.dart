@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
 // CSS Content Visibility: https://www.w3.org/TR/css-contain-2/#content-visibility
@@ -42,19 +42,20 @@ mixin CSSContentVisibilityMixin on ElementBase {
   }
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
-    if (!entry.isIntersecting) {
-      renderBoxModel.contentVisibility = ContentVisibility.hidden;
-    } else {
-      renderBoxModel.contentVisibility = ContentVisibility.auto;
-    }
+    assert(renderBoxModel != null);
+    renderBoxModel.contentVisibility = entry.isIntersecting
+        ? ContentVisibility.auto
+        : ContentVisibility.hidden;
   }
 
   void updateRenderContentVisibility(ContentVisibility contentVisibility) {
-    renderBoxModel.contentVisibility = contentVisibility;
-    if (contentVisibility != ContentVisibility.auto && _hasIntersectionObserver) {
-      renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);
-      _hasIntersectionObserver = false;
+    if (renderBoxModel != null) {
+      renderBoxModel.contentVisibility = contentVisibility;
+      if (contentVisibility != ContentVisibility.auto && _hasIntersectionObserver) {
+        renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);
+        _hasIntersectionObserver = false;
+      }
+      setContentVisibilityIntersectionObserver(renderBoxModel, contentVisibility);
     }
-    setContentVisibilityIntersectionObserver(renderBoxModel, contentVisibility);
   }
 }

@@ -584,7 +584,7 @@ class CSSStyleProperty {
           duration = part;
         } else if (timingFuction == null && CSSTransition.isValidTransitionTimingFunctionValue(part)) {
           timingFuction = part;
-        } else if (delay == null && CSSTime.isTime(delay)) {
+        } else if (delay == null && CSSTime.isTime(part)) {
           delay = part;
         } else {
           return null;

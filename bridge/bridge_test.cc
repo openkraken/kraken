@@ -13,10 +13,10 @@ namespace kraken {
 using namespace alibaba::jsa;
 using namespace kraken::foundation;
 
-bool JSBridgeTest::evaluateTestScripts(const std::string &script, const std::string &url, int startLine) {
+bool JSBridgeTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   if (!context->isValid()) return false;
-  binding::updateLocation(url);
-  return !context->evaluateJavaScript(script.c_str(), url.c_str(), startLine).isNull();
+  binding::updateLocation(sourceURL);
+  return !context->evaluateJavaScript(code, codeLength, sourceURL, startLine).isNull();
 }
 
 Value executeTest(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -60,7 +60,8 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
     } else {
       ctx->_callback->getObject(_context).getFunction(_context).call(_context);
     }
-    delete ctx;
+    auto bridge = static_cast<JSBridge *>(ctx->_context.getOwner());
+    bridge->bridgeCallback.freeBridgeCallbackContext(ctx);
   };
 
   auto bridge = static_cast<JSBridge*>(context.getOwner());
@@ -101,7 +102,14 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
 
   std::shared_ptr<binding::JSBlob> jsBlob = blob.getObject(context).getHostObject<binding::JSBlob>(context);
 
-  std::string &&name = screenShotName.getString(context).utf8(context);
+  String name = screenShotName.getString(context);
+  const uint16_t* unicodePtr = name.getUnicodePtr(context);
+  size_t unicodeLength = name.unicodeLength(context);
+
+  NativeString nativeString;
+  nativeString.string = unicodePtr;
+  nativeString.length = unicodeLength;
+
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
@@ -109,15 +117,16 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
     auto ctx = static_cast<BridgeCallback::Context *>(callbackContext);
     JSContext &_context = ctx->_context;
     ctx->_callback->getObject(_context).getFunction(_context).call(_context, {Value(static_cast<bool>(result))});
-    delete ctx;
+    auto bridge = static_cast<JSBridge *>(ctx->_context.getOwner());
+    bridge->bridgeCallback.freeBridgeCallbackContext(ctx);
   };
 
   auto bridge = static_cast<JSBridge*>(context.getOwner());
   bridge->bridgeCallback.registerCallback<void>(
     std::move(callbackContext),
-    [&jsBlob, &name, &fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
+    [&jsBlob, &nativeString, &fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->matchImageSnapshot(callbackContext, contextId, jsBlob->bytes(), jsBlob->size(),
-                                          name.c_str(), fn);
+                                          &nativeString, fn);
     });
 
   return Value::undefined();
@@ -135,12 +144,44 @@ Value environment(JSContext &context, const Value &thisVal, const Value *args, s
     .call(context, {Value(context, String::createFromAscii(context, env))});
 }
 
+Value simulatePointer(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  if (getDartMethod()->simulatePointer == nullptr) {
+    throw JSError(context, "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.");
+  }
+
+  const Value &firstArgs = args[0];
+  if (!firstArgs.isObject()) {
+    throw JSError(context, "Failed to execute '__kraken_simulate_pointer__': first arguments should be an array.");
+  }
+
+  Array &&inputArray = firstArgs.getObject(context).getArray(context);
+  auto **mousePointerList = new MousePointer* [inputArray.length(context)];
+
+  for (int i = 0; i < inputArray.length(context); i ++) {
+    auto mouse = new MousePointer();
+    Array &&params = inputArray.getValueAtIndex(context, i).getObject(context).getArray(context);
+    mouse->contextId = context.getContextId();
+    mouse->x = params.getValueAtIndex(context, 0).getNumber();
+    mouse->y = params.getValueAtIndex(context, 1).getNumber();
+    mouse->change = params.getValueAtIndex(context, 2).getNumber();
+    mousePointerList[i] = mouse;
+  }
+
+  getDartMethod()->simulatePointer(mousePointerList, inputArray.length(context));
+
+  delete[] mousePointerList;
+
+  return Value::undefined();
+}
+
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   bridge->owner = this;
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_executeTest__", 0, executeTest);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_refresh_paint__", 0, refreshPaint);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_match_image_snapshot__", 0, matchImageSnapshot);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_environment__", 0, environment);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_simulate_pointer__", 0, simulatePointer);
+
   initKrakenTestFramework(bridge->getContext());
 }
 
@@ -154,7 +195,11 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     if (!status.isString()) {
       throw JSError(context, "failed to execute 'done': parameter 1 (status) is not a string");
     }
-    executeCallback(context.getContextId(), status.getString(context).utf8(context).c_str());
+    String statusString = status.getString(context);
+    NativeString nativeString;
+    nativeString.string = statusString.getUnicodePtr(context);
+    nativeString.length = statusString.unicodeLength(context);
+    executeCallback(context.getContextId(), &nativeString);
     return Value::undefined();
   };
 

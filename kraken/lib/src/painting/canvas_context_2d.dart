@@ -26,7 +26,7 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
   }
 
   /// Perform canvas drawing.
-  performAction(Canvas _canvas, Size _size) {
+  void performAction(Canvas _canvas, Size _size) {
     canvas = _canvas;
     List<CanvasAction> actions = takeActionRecords();
     for (int i = 0; i < actions.length; i++) {
@@ -40,6 +40,8 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
 }
 
 class _CanvasRenderingContext2D extends CanvasRenderingContext {
+  int get actionCount => _actions.length;
+
   List<CanvasAction> _actions = [];
   List<CanvasAction> takeActionRecords() => _actions;
 
@@ -47,8 +49,8 @@ class _CanvasRenderingContext2D extends CanvasRenderingContext {
     _actions.clear();
   }
 
-  void action(CanvasAction) {
-    _actions.add(CanvasAction);
+  void action(CanvasAction action) {
+    _actions.add(action);
   }
 }
 

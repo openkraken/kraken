@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/src/css/animation.dart';
 
 typedef StyleChangeListener = void Function(
@@ -84,6 +84,9 @@ const Map<String, bool> CSSShorthandProperty = {
   TEXT_DECORATION: true,
 };
 
+RegExp _kebabCaseReg = RegExp(r'[A-Z]');
+RegExp _camelCaseReg = RegExp(r'-(\w)');
+
 // CSS Object Model: https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
 
 /// The [CSSStyleDeclaration] interface represents an object that is a CSS
@@ -101,7 +104,7 @@ const Map<String, bool> CSSShorthandProperty = {
 class CSSStyleDeclaration {
   Element target;
 
-  CSSStyleDeclaration(Element this.target);
+  CSSStyleDeclaration(this.target);
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
   List<StyleChangeListener> _styleChangeListeners = [];
@@ -116,7 +119,7 @@ class CSSStyleDeclaration {
     return currentColor ?? CSSColor.INITIAL_COLOR;
   }
 
-  set transitions (Map<String, List> value) {
+  set transitions(Map<String, List> value) {
     _transitions = value;
   }
 
@@ -218,7 +221,7 @@ class CSSStyleDeclaration {
     String css = EMPTY_STRING;
     _properties.forEach((property, value) {
       if (css.isNotEmpty) css += ' ';
-      css += '$property: $value;';
+      css += '${kebabize(property)}: $value;';
     });
     return css;
   }
@@ -466,6 +469,17 @@ class CSSStyleDeclaration {
         break;
     }
 
+    // https://github.com/WebKit/webkit/blob/master/Source/WebCore/animation/AnimationTimeline.cpp#L257
+    // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
+    // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
+    // Therefore we should cancel all running transition to get thing works.
+    if (propertyName == TRANSITION_PROPERTY && _propertyRunningTransition.length > 0) {
+      for (String property in _propertyRunningTransition.keys) {
+        _propertyRunningTransition[property].finish();
+      }
+      _propertyRunningTransition.clear();
+    }
+
     if (!fromAnimation && _shouldTransition(propertyName, prevValue, normalizedValue)) {
       return _transition(propertyName, prevValue, normalizedValue);
     }
@@ -505,13 +519,20 @@ class CSSStyleDeclaration {
   void _invokePropertyChangedListener(String property, String original, String present, [bool inAnimation]) {
     assert(property != null);
 
-    _styleChangeListeners.forEach((StyleChangeListener listener) {
+    for (int i = 0; i < _styleChangeListeners.length; i++) {
+      StyleChangeListener listener = _styleChangeListeners[i];
       listener(property, original, present, inAnimation);
+    }
+  }
+
+  void applyTargetProperties() {
+    _properties.forEach((key, value) {
+      _invokePropertyChangedListener(key, null, value);
     });
   }
 
-  double getLengthByPropertyName(properyName) {
-    return CSSLength.toDisplayPortValue(getPropertyValue(properyName));
+  double getLengthByPropertyName(propertyName) {
+    return CSSLength.toDisplayPortValue(getPropertyValue(propertyName));
   }
 
   static bool isNullOrEmptyValue(value) {
@@ -520,4 +541,17 @@ class CSSStyleDeclaration {
 
   @override
   String toString() => 'CSSStyleDeclaration($cssText)';
+}
+
+// aB to a-b
+String kebabize(String str) {
+  return str.replaceAllMapped(_kebabCaseReg, (match) => '-${match[0].toLowerCase()}');
+}
+
+// a-b to aB
+String camelize(String str) {
+  return str.replaceAllMapped(_camelCaseReg, (match) {
+    String subStr = match[0].substring(1);
+    return subStr.isNotEmpty ? subStr.toUpperCase() : '';
+  });
 }

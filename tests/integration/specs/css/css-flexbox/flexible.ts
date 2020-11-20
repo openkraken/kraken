@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('Flexible', () => {
-  xit('order', async () => {
+  it('order', async () => {
     let red;
     let blue;
     let black;

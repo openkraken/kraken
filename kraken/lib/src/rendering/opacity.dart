@@ -2,8 +2,8 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
 
 mixin RenderOpacityMixin on RenderBox {
   /// The fraction to scale the child's alpha value.

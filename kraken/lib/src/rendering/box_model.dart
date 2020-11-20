@@ -2,17 +2,17 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ui';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/inspector.dart';
 
 import 'padding.dart';
 
@@ -117,6 +117,11 @@ class RenderLayoutBox extends RenderBoxModel
 
   @override
   void remove(RenderBox child) {
+    if (child is RenderBoxModel) {
+      if (child.renderPositionHolder != null) {
+        (child.renderPositionHolder.parent as ContainerRenderObjectMixin)?.remove(child.renderPositionHolder);
+      }
+    }
     super.remove(child);
     _isChildrenSorted = false;
   }
@@ -238,10 +243,20 @@ class RenderBoxModel extends RenderBox with
   @override
   bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
 
+
   RenderPositionHolder renderPositionHolder;
 
   // Kraken controller reference which control all kraken created renderObjects.
   KrakenController controller;
+
+  bool _debugShouldPaintOverlay = false;
+  bool get debugShouldPaintOverlay => _debugShouldPaintOverlay;
+  set debugShouldPaintOverlay(bool value) {
+    if (value != null && _debugShouldPaintOverlay != value) {
+      _debugShouldPaintOverlay = value;
+      markNeedsPaint();
+    }
+  }
 
   bool _debugHasBoxLayout = false;
 
@@ -253,7 +268,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   CSSDisplay _display;
-  get display => _display;
+  CSSDisplay get display => _display;
   set display(CSSDisplay value) {
     if (value == null) return;
     if (_display != value) {
@@ -271,81 +286,81 @@ class RenderBoxModel extends RenderBox with
   ElementManager elementManager;
 
   BoxSizeType get widthSizeType {
-    bool widthDefined = width != null || (minWidth != null);
+    bool widthDefined = width != null;
     return widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
   }
   BoxSizeType get heightSizeType {
-    bool heightDefined = height != null || (minHeight != null);
+    bool heightDefined = height != null;
     return heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
   }
 
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;
 
-  RenderBoxModel copyWith(RenderBoxModel newBox) {
-    // Copy Sizing
-    newBox.width = width;
-    newBox.height = height;
-    newBox.minWidth = minWidth;
-    newBox.minHeight = minHeight;
-    newBox.maxWidth = maxWidth;
-    newBox.maxHeight = maxHeight;
-
-    // Copy padding
-    newBox.padding = padding;
-
-    // Copy margin
-    newBox.margin = margin;
-
-    // Copy Border
-    newBox.borderEdge = borderEdge;
-    newBox.decoration = decoration;
-    newBox.cssBoxDecoration = cssBoxDecoration;
-    newBox.position = position;
-    newBox.configuration = configuration;
-    newBox.boxPainter = boxPainter;
-
-    // Copy background
-    newBox.backgroundClip = backgroundClip;
-    newBox.backgroundOrigin = backgroundOrigin;
-
-    // Copy overflow
-    newBox.scrollListener = scrollListener;
-    newBox.clipX = clipX;
-    newBox.clipY = clipY;
-    newBox.enableScrollX = enableScrollX;
-    newBox.enableScrollY = enableScrollY;
-    newBox.scrollOffsetX = scrollOffsetX;
-    newBox.scrollOffsetY = scrollOffsetY;
-
-    // Copy pointer listener
-    newBox.onPointerDown = onPointerDown;
-    newBox.onPointerCancel = onPointerCancel;
-    newBox.onPointerUp = onPointerUp;
-    newBox.onPointerMove = onPointerMove;
-    newBox.onPointerSignal = onPointerSignal;
-
-    // Copy transform
-    newBox.transform = transform;
-    newBox.origin = origin;
-    newBox.alignment = alignment;
-
-    // Copy display
-    newBox.display = display;
-
-    // Copy ContentVisibility
-    newBox.contentVisibility = contentVisibility;
-
-    // Copy renderPositionHolder
-    newBox.renderPositionHolder = renderPositionHolder;
+  T copyWith<T extends RenderBoxModel>(T copiedRenderBoxModel) {
     if (renderPositionHolder != null) {
-      renderPositionHolder.realDisplayedBox = newBox;
+      renderPositionHolder.realDisplayedBox = copiedRenderBoxModel;
     }
 
-    // Copy parentData
-    newBox.parentData = parentData;
+    return copiedRenderBoxModel
 
-    return newBox;
+      // Copy Sizing
+      ..width = width
+      ..height = height
+      ..minWidth = minWidth
+      ..minHeight = minHeight
+      ..maxWidth = maxWidth
+      ..maxHeight = maxHeight
+
+      // Copy padding
+      ..padding = padding
+
+      // Copy margin
+      ..margin = margin
+
+      // Copy Border
+      ..borderEdge = borderEdge
+      ..decoration = decoration
+      ..cssBoxDecoration = cssBoxDecoration
+      ..position = position
+      ..configuration = configuration
+      ..boxPainter = boxPainter
+
+      // Copy background
+      ..backgroundClip = backgroundClip
+      ..backgroundOrigin = backgroundOrigin
+
+      // Copy overflow
+      ..scrollListener = scrollListener
+      ..clipX = clipX
+      ..clipY = clipY
+      ..enableScrollX = enableScrollX
+      ..enableScrollY = enableScrollY
+      ..scrollOffsetX = scrollOffsetX
+      ..scrollOffsetY = scrollOffsetY
+
+      // Copy pointer listener
+      ..onPointerDown = onPointerDown
+      ..onPointerCancel = onPointerCancel
+      ..onPointerUp = onPointerUp
+      ..onPointerMove = onPointerMove
+      ..onPointerSignal = onPointerSignal
+
+      // Copy transform
+      ..transform = transform
+      ..origin = origin
+      ..alignment = alignment
+
+      // Copy display
+      ..display = display
+
+      // Copy ContentVisibility
+      ..contentVisibility = contentVisibility
+
+      // Copy renderPositionHolder
+      ..renderPositionHolder = renderPositionHolder
+      // Copy parentData
+      ..parentData = parentData;
   }
 
   double _width;
@@ -440,6 +455,40 @@ class RenderBoxModel extends RenderBox with
     markNeedsLayout();
   }
 
+  // Auto value for min-width
+  double autoMinWidth = 0;
+  // Auto value for min-height
+  double autoMinHeight = 0;
+
+  bool needsLayout = false;
+
+  @override
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+    needsLayout = true;
+  }
+
+  @override
+  void dropChild(RenderBox child) {
+    super.dropChild(child);
+    // Loop to mark all the children to needsLayout as flutter did
+    if (child is RenderBoxModel) {
+      child.cleanRelayoutBoundary();
+    }
+  }
+
+  void cleanRelayoutBoundary() {
+    needsLayout = true;
+    visitChildren(_cleanChildRelayoutBoundary);
+  }
+
+  static void _cleanChildRelayoutBoundary(RenderObject child) {
+    if (child is RenderBoxModel) {
+      child.cleanRelayoutBoundary();
+    }
+  }
+
+  /// Width of render box model calcaluted from style
   static double getContentWidth(RenderBoxModel renderBoxModel) {
     double cropWidth = 0;
     CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
@@ -468,6 +517,7 @@ class RenderBoxModel extends RenderBox with
     switch (display) {
       case CSSDisplay.block:
       case CSSDisplay.flex:
+      case CSSDisplay.sliver:
         // Get own width if exists else get the width of nearest ancestor width width
         if (renderBoxModel.width != null) {
           cropPaddingBorder(renderBoxModel);
@@ -491,7 +541,7 @@ class RenderBoxModel extends RenderBox with
                 width = renderBoxModel.width;
                 cropPaddingBorder(renderBoxModel);
                 break;
-              } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex) {
+              } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex || display == CSSDisplay.sliver) {
                 // Collapse width to children
                 width = null;
                 break;
@@ -561,6 +611,7 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
+  /// Height of render box model calcaluted from style
   static double getContentHeight(RenderBoxModel renderBoxModel) {
     CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
 
@@ -836,6 +887,8 @@ class RenderBoxModel extends RenderBox with
         CSSPositionedLayout.applyPositionedChildOffset(parentBox, this, parentBox.boxSize, parentBox.borderEdge);
       }
     }
+
+    needsLayout = false;
   }
 
   void setMaximumScrollableSizeForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
@@ -867,7 +920,7 @@ class RenderBoxModel extends RenderBox with
   /// Override which to paint layout or intrinsic things.
   /// Used by [RenderIntrinsic], [RenderFlowLayout], [RenderFlexLayout].
   void performPaint(PaintingContext context, Offset offset) {
-    throw new FlutterError('Please impl performPaint of $runtimeType.');
+    throw FlutterError('Please impl performPaint of $runtimeType.');
   }
 
   @override
@@ -875,6 +928,13 @@ class RenderBoxModel extends RenderBox with
     if (isCSSDisplayNone || isCSSVisibilityHidden) return;
 
     paintBoxModel(context, offset);
+  }
+
+  void debugPaintOverlay(PaintingContext context, Offset offset) {
+    Rect overlayRect = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+    context.addLayer(InspectorOverlayLayer(
+      overlayRect: overlayRect,
+    ));
   }
 
   void paintBoxModel(PaintingContext context, Offset offset) {
@@ -909,7 +969,15 @@ class RenderBoxModel extends RenderBox with
   }
 
   void _chainPaintContentVisibility(PaintingContext context, Offset offset) {
-    paintContentVisibility(context, offset, performPaint);
+    paintContentVisibility(context, offset, _chainPaintOverlay);
+  }
+
+  void _chainPaintOverlay(PaintingContext context, Offset offset) {
+    performPaint(context, offset);
+
+    if (_debugShouldPaintOverlay) {
+      debugPaintOverlay(context, offset);
+    }
   }
 
   @override
@@ -998,6 +1066,14 @@ class RenderBoxModel extends RenderBox with
     assert(isRepaintBoundary);
     final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
+  }
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    super.handleEvent(event, entry);
+    if (pointerListener != null) {
+      pointerListener(event);
+    }
   }
 
   @override

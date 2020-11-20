@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:convert';
 import 'package:ffi/ffi.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 import 'from_native.dart';
 import 'platform.dart';
@@ -73,14 +73,16 @@ KrakenInfo getKrakenInfo() {
 }
 
 // Register invokeEventListener
-typedef Native_InvokeEventListener = Void Function(Int32 contextId, Int32 type, Pointer<Utf8>);
-typedef Dart_InvokeEventListener = void Function(int contextId, int type, Pointer<Utf8>);
+typedef Native_InvokeEventListener = Void Function(Int32 contextId, Int32 type, Pointer<NativeString>);
+typedef Dart_InvokeEventListener = void Function(int contextId, int type, Pointer<NativeString>);
 
 final Dart_InvokeEventListener _invokeEventListener =
     nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
 
 void invokeEventListener(int contextId, int type, String data) {
-  _invokeEventListener(contextId, type, Utf8.toUtf8(data));
+  Pointer<NativeString> nativeString = stringToNativeString(data);
+  _invokeEventListener(contextId, type, nativeString);
+  freeNativeString(nativeString);
 }
 
 const UI_EVENT = 0;
@@ -111,20 +113,21 @@ Pointer<ScreenSize> createScreen(double width, double height) {
 }
 
 // Register evaluateScripts
-typedef Native_EvaluateScripts = Void Function(Int32 contextId, Pointer<Utf8> code, Pointer<Utf8> url, Int32 startLine);
-typedef Dart_EvaluateScripts = void Function(int contextId, Pointer<Utf8> code, Pointer<Utf8> url, int startLine);
+typedef Native_EvaluateScripts = Void Function(Int32 contextId, Pointer<NativeString> code, Pointer<Utf8> url, Int32 startLine);
+typedef Dart_EvaluateScripts = void Function(int contextId, Pointer<NativeString> code, Pointer<Utf8> url, int startLine);
 
 final Dart_EvaluateScripts _evaluateScripts =
     nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
 
 void evaluateScripts(int contextId, String code, String url, int line) {
-  Pointer<Utf8> _code = Utf8.toUtf8(code);
+  Pointer<NativeString> nativeString = stringToNativeString(code);
   Pointer<Utf8> _url = Utf8.toUtf8(url);
   try {
-    _evaluateScripts(contextId, _code, _url, line);
+    _evaluateScripts(contextId, nativeString, _url, line);
   } catch (e, stack) {
     print('$e\n$stack');
   }
+  freeNativeString(nativeString);
 }
 
 // Register initJsEngine

@@ -5,7 +5,7 @@
 
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
 class RenderIntrinsic extends RenderBoxModel
@@ -88,6 +88,10 @@ class RenderIntrinsic extends RenderBoxModel
 
       Size contentSize = Size(constraintWidth, constraintHeight);
       size = getBoxSize(contentSize);
+
+      autoMinWidth = size.width;
+      autoMinHeight = size.height;
+
       didLayout();
     } else {
       super.performResize();
@@ -139,7 +143,7 @@ class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
         super(targetId, style, elementManager);
 
   @override
-  get isRepaintBoundary => true;
+  bool get isRepaintBoundary => true;
 
   RenderIntrinsic toParentRepaint() {
     RenderObject childRenderObject = child;

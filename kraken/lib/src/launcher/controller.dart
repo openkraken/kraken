@@ -12,9 +12,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:kraken/bridge.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/inspector.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -39,14 +40,17 @@ class KrakenViewController {
   // during a kraken view's process of loading, and completing a navigation request.
   KrakenNavigationDelegate navigationDelegate;
 
-  KrakenViewController(double viewportWidth, double viewportHeight,
-      {this.showPerformanceOverlay,
+  KrakenViewController(
+    double viewportWidth, double viewportHeight,
+    {
+      this.showPerformanceOverlay,
       this.enableDebug = false,
       int contextId,
       this.rootController,
-      this.navigationDelegate})
-      : _contextId = contextId {
-    if (this.enableDebug) {
+      this.navigationDelegate,
+    }
+  ): _contextId = contextId {
+    if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
     }
@@ -56,7 +60,15 @@ class KrakenViewController {
     }
     _elementManager = ElementManager(viewportWidth, viewportHeight,
         showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
+
+    if (kDebugMode && rootController.debugEnableInspector != false) {
+      debugStartInspector();
+    }
   }
+
+  /// Used for debugger inspector.
+  Inspector _inspector;
+  Inspector get inspector => _inspector;
 
   // the manager which controller all renderObjects of Kraken
   ElementManager _elementManager;
@@ -112,6 +124,10 @@ class KrakenViewController {
     detachView();
     disposeBridge(_contextId);
 
+    _elementManager.debugDOMTreeChanged = null;
+    _inspector?.dispose();
+    _inspector = null;
+
     // break circle reference
     _elementManager.getRootElement();
     _elementManager.controller = null;
@@ -126,7 +142,7 @@ class KrakenViewController {
     try {
       if (!_elementManager.existsTarget(eventTargetId)) {
         String msg = 'toImage: unknown node id: $eventTargetId';
-        completer.completeError(new Exception(msg));
+        completer.completeError(Exception(msg));
         return completer.future;
       }
 
@@ -136,11 +152,11 @@ class KrakenViewController {
           completer.complete(bytes);
         }).catchError((e, stack) {
           String msg = 'toBlob: failed to export image data from element id: $eventTargetId. error: $e}.\n$stack';
-          completer.completeError(new Exception(msg));
+          completer.completeError(Exception(msg));
         });
       } else {
         String msg = 'toBlob: node is not an element, id: $eventTargetId';
-        completer.completeError(new Exception(msg));
+        completer.completeError(Exception(msg));
       }
     } catch (e, stack) {
       completer.completeError(e, stack);
@@ -194,6 +210,11 @@ class KrakenViewController {
 
   RenderObject getRootRenderObject() {
     return _elementManager.getRootRenderObject();
+  }
+
+  void debugStartInspector() {
+    _inspector = Inspector(_elementManager);
+    _elementManager.debugDOMTreeChanged = inspector.onDOMTreeChanged;
   }
 }
 
@@ -260,18 +281,20 @@ class KrakenController {
   KrakenMethodChannel get methodChannel => _methodChannel;
 
   final String name;
+  // Enable debug inspector.
+  bool debugEnableInspector;
 
-  KrakenController(String name, double viewportWidth, double viewportHeight,
-      {bool showPerformanceOverlay = false,
+  KrakenController(this.name, double viewportWidth, double viewportHeight, {
+      bool showPerformanceOverlay = false,
       enableDebug = false,
       String bundleURL,
       String bundlePath,
       String bundleContent,
       KrakenNavigationDelegate navigationDelegate,
       KrakenMethodChannel methodChannel,
-      LoadErrorHandler this.loadErrorHandler})
-      : name = name,
-        _bundleURL = bundleURL,
+      this.loadErrorHandler,
+      this.debugEnableInspector,
+    }): _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent {
     _methodChannel = methodChannel;

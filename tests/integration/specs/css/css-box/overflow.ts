@@ -316,4 +316,53 @@ describe('Overflow', () => {
       doneFn();
     });
   });
+
+  it('hitTest with scroll offset', async () => {
+    let box;
+    let clickCount = 0;
+    let container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        overflow: 'scroll'
+      }
+    }, [
+      createElement('div', {
+        style: {
+          width: '50px',
+          height: '50px'
+        }
+      }, []),
+      box = createElement('div', {
+        style: {
+          width: '50px',
+          height: '50px'
+        }
+      }, []),
+      createElement('div', {
+        style: {
+          width: '50px',
+          height: '50px'
+        }
+      }, []),
+      createElement('div', {
+        style: {
+          width: '50px',
+          height: '50px'
+        }
+      }, []),
+    ]);
+
+    BODY.appendChild(container);
+
+    box.addEventListener('click', () => clickCount++);
+
+    await simulateClick(20, 60);
+
+    await simulateSwipe(20, 60, 20, 0, 0.5);
+
+    await simulateClick(20, 0);
+
+    expect(clickCount).toBe(2);
+  });
 });

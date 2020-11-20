@@ -6,7 +6,7 @@
 import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/src/launcher/controller.dart';
@@ -19,13 +19,16 @@ void launch({
   String bundleURLOverride,
   String bundlePathOverride,
   String bundleContentOverride,
+  bool debugEnableInspector,
 }) async {
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
   KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-      methodChannel: KrakenNativeChannel());
+    showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+    methodChannel: KrakenNativeChannel(),
+    debugEnableInspector: debugEnableInspector,
+  );
 
   controller.view.attachView(RendererBinding.instance.renderView);
 

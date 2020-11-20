@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 class RenderPreferredSize extends RenderProxyBox {
   RenderPreferredSize({
     @required Size preferredSize,
-    RenderBox child = null,
+    RenderBox child,
   })  : assert(preferredSize != null),
         _preferredSize = preferredSize,
         super(child);
@@ -43,10 +43,22 @@ class RenderPreferredSize extends RenderProxyBox {
 class RenderPositionHolder extends RenderPreferredSize {
   RenderPositionHolder({
     @required Size preferredSize,
-    RenderBox child = null,
+    RenderBox child,
   }) : super(preferredSize: preferredSize, child: child);
 
   RenderBoxModel realDisplayedBox;
+
+  // Box size equals to RenderBox.size to avoid flutter complain when read size property.
+  Size _boxSize;
+  Size get boxSize {
+    assert(_boxSize != null, 'box does not have laid out.');
+    return _boxSize;
+  }
+
+  set size(Size value) {
+    _boxSize = value;
+    super.size = value;
+  }
 }
 
 bool isPositionHolder(RenderBox box) {
