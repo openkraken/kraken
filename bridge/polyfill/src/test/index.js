@@ -62,7 +62,9 @@ class JasmineTracker {
   }
 
   specStarted(result) {
-    console.log('START:' + result.fullName);
+    return new Promise((resolve) => {
+      requestAnimationFrame(resolve);
+    });
   }
   specDone(result) {
     return this.onSpecDone(result);

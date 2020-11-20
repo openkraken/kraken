@@ -53,18 +53,20 @@ JSValueRef JSAnimationPlayerElement::play(JSContextRef ctx, JSObjectRef function
     static_cast<JSAnimationPlayerElement::AnimationPlayerElementInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->requestUpdateFrame();
-  elementInstance->nativeAnimationPlayerElement->play(elementInstance->nativeAnimationPlayerElement, &name, mix, mixSeconds);
+  elementInstance->nativeAnimationPlayerElement->play(elementInstance->nativeAnimationPlayerElement, &name, mix,
+                                                      mixSeconds);
 
   return nullptr;
 }
 
 JSAnimationPlayerElement::AnimationPlayerElementInstance::AnimationPlayerElementInstance(
   JSAnimationPlayerElement *jsAnchorElement)
-  : ElementInstance(jsAnchorElement, "animation-player"), nativeAnimationPlayerElement(new NativeAnimationPlayerElement(nativeElement)) {
+  : ElementInstance(jsAnchorElement, "animation-player"),
+    nativeAnimationPlayerElement(new NativeAnimationPlayerElement(nativeElement)) {
   std::string tagName = "animation-player";
   auto args = buildUICommandArgs(tagName);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->context->getContextId())
-      ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnimationPlayerElement);
+    ->registerCommand(eventTargetId, UICommandType::createElement, args, 1, nativeAnimationPlayerElement);
 }
 
 std::vector<JSStringRef> &
@@ -85,18 +87,21 @@ const std::unordered_map<std::string, JSAnimationPlayerElement::AnimationPlayerE
 JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty(std::string &name,
                                                                                  JSValueRef *exception) {
   auto propertyMap = getAnimationPlayerElementPropertyMap();
-  auto property = propertyMap[name];
-
-  if (property == AnimationPlayerProperty::kSrc) {
-    return JSValueMakeString(_hostClass->ctx, _src);
-  } else if (property == AnimationPlayerProperty::kType) {
-    return JSValueMakeString(_hostClass->ctx, _type);
-  } else if (property == AnimationPlayerProperty::kPlay) {
-    if (_play == nullptr) {
-      _play = propertyBindingFunction(_hostClass->context, this, "play", play);
-      JSValueProtect(_hostClass->ctx, _play);
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+    switch (property) {
+    case AnimationPlayerProperty::kSrc:
+      return JSValueMakeString(_hostClass->ctx, _src);
+    case AnimationPlayerProperty::kType:
+      return JSValueMakeString(_hostClass->ctx, _type);
+    case AnimationPlayerProperty::kPlay: {
+      if (_play == nullptr) {
+        _play = propertyBindingFunction(_hostClass->context, this, "play", play);
+        JSValueProtect(_hostClass->ctx, _play);
+      }
+      return _play;
     }
-    return _play;
+    }
   }
 
   return ElementInstance::getProperty(name, exception);

@@ -96,32 +96,35 @@ JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSOb
 
 JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getMediaElementPropertyMap();
-  auto property = propertyMap[name];
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+    switch(property) {
 
-  if (property == MediaElementProperty::kSrc || property == MediaElementProperty::kCurrentSrc) {
-    return JSValueMakeString(_hostClass->ctx, _src);
-  } else if (property == MediaElementProperty::kLoop) {
-    return JSValueMakeBoolean(_hostClass->ctx, _loop);
-  } else if (property == MediaElementProperty::kAutoPlay) {
-    return JSValueMakeBoolean(_hostClass->ctx, _autoPlay);
-  } else if (property == MediaElementProperty::kPlay) {
-    if (_play == nullptr) {
-      _play = propertyBindingFunction(_hostClass->context, this, "play", play);
-      JSValueProtect(_hostClass->ctx, _play);
+    case MediaElementProperty::kCurrentSrc:
+    case MediaElementProperty::kSrc:
+      return JSValueMakeString(_hostClass->ctx, _src);
+    case MediaElementProperty::kAutoPlay:
+      return JSValueMakeBoolean(_hostClass->ctx, _autoPlay);
+    case MediaElementProperty::kLoop:
+      return JSValueMakeBoolean(_hostClass->ctx, _loop);
+    case MediaElementProperty::kPlay:
+      if (_play == nullptr) {
+        _play = propertyBindingFunction(_hostClass->context, this, "play", play);
+        JSValueProtect(_hostClass->ctx, _play);
+      }
+      return _play;
+    case MediaElementProperty::kPause:
+      if (_pause == nullptr) {
+        _pause = propertyBindingFunction(_hostClass->context, this, "pause", pause);
+        JSValueProtect(_hostClass->ctx, _pause);
+      }
+    case MediaElementProperty::kFastSeek:
+      if (_fastSeek == nullptr) {
+        _fastSeek = propertyBindingFunction(_hostClass->context, this, "fastSeek", fastSeek);
+        JSValueProtect(_hostClass->ctx, _fastSeek);
+      }
+        return _fastSeek;
     }
-    return _play;
-  } else if (property == MediaElementProperty::kPause) {
-    if (_pause == nullptr) {
-      _pause = propertyBindingFunction(_hostClass->context, this, "pause", pause);
-      JSValueProtect(_hostClass->ctx, _pause);
-    }
-    return _pause;
-  } else if (property == MediaElementProperty::kFastSeek) {
-    if (_fastSeek == nullptr) {
-      _fastSeek = propertyBindingFunction(_hostClass->context, this, "fastSeek", fastSeek);
-      JSValueProtect(_hostClass->ctx, _fastSeek);
-    }
-    return _fastSeek;
   }
 
   return ElementInstance::getProperty(name, exception);

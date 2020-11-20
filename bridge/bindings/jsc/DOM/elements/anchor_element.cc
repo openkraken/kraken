@@ -34,12 +34,14 @@ JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *j
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getAnchorElementPropertyMap();
-  auto property = propertyMap[name];
-
-  if (property == AnchorElementProperty::kHref) {
-    return JSValueMakeString(_hostClass->ctx, _href);
-  } else if (property == AnchorElementProperty::kTarget) {
-    return JSValueMakeString(_hostClass->ctx, _target);
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+    switch (property) {
+    case AnchorElementProperty::kHref:
+      return JSValueMakeString(_hostClass->ctx, _href);
+    case AnchorElementProperty::kTarget:
+      return JSValueMakeString(_hostClass->ctx, _target);
+    }
   }
 
   return ElementInstance::getProperty(name, exception);
