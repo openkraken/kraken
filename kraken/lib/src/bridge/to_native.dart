@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:ui';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'dart:io';
@@ -251,7 +252,7 @@ void flushUICommand() {
 
     // For new ui commands, we needs to tell engine to update frames.
     if (itemSize > 0) {
-      window.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrame();
     }
 
     for (int i = 0; i < itemSize; i++) {
