@@ -772,7 +772,7 @@ class CSSTransform {
           } else {
             y = 0;
           }
-          double x = CSSLength.toDisplayPortValue(method.args[0].trim());
+          double x = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
           return Matrix4.identity()..translate(x, y);
         }
         break;
@@ -784,38 +784,38 @@ class CSSTransform {
         if (method.args.length >= 1 && method.args.length <= 3) {
           double y = 0, z = 0;
           if (method.args.length == 2) {
-            y = CSSLength.toDisplayPortValue(method.args[1].trim());
+            y = CSSLength.toDisplayPortValue(method.args[1].trim()) ?? 0;
           }
           if (method.args.length == 3) {
-            y = CSSLength.toDisplayPortValue(method.args[1].trim());
-            z = CSSLength.toDisplayPortValue(method.args[2].trim());
+            y = CSSLength.toDisplayPortValue(method.args[1].trim()) ?? 0;
+            z = CSSLength.toDisplayPortValue(method.args[2].trim()) ?? 0;
           }
-          double x = CSSLength.toDisplayPortValue(method.args[0].trim());
+          double x = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
           return Matrix4.identity()..translate(x, y, z);
         }
         break;
       case TRANSLATE_X:
         if (method.args.length == 1) {
-          double x = CSSLength.toDisplayPortValue(method.args[0].trim());
+          double x = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
           return Matrix4.identity()..translate(x);
         }
         break;
       case TRANSLATE_Y:
         if (method.args.length == 1) {
-          double y = CSSLength.toDisplayPortValue(method.args[0].trim());
+          double y = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
           return Matrix4.identity()..translate(0.0, y);
         }
         break;
       case TRANSLATE_Z:
         if (method.args.length == 1) {
-          double z = CSSLength.toDisplayPortValue(method.args[0].trim());
+          double z = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
           return Matrix4.identity()..translate(0.0, 0.0, z);
         }
         break;
       case ROTATE:
       case ROTATE_Z:
         if (method.args.length == 1) {
-          double angle = CSSAngle.parseAngle(method.args[0].trim());
+          double angle = CSSAngle.parseAngle(method.args[0].trim()) ?? 0;
           return Matrix4.rotationZ(angle);
         }
         break;
@@ -824,20 +824,20 @@ class CSSTransform {
           double x = double.tryParse(method.args[0].trim()) ?? 0.0;
           double y = double.tryParse(method.args[1].trim()) ?? 0.0;
           double z = double.tryParse(method.args[2].trim()) ?? 0.0;
-          double angle = CSSAngle.parseAngle(method.args[3].trim());
+          double angle = CSSAngle.parseAngle(method.args[3].trim()) ?? 0;
           Vector3 vector3 = Vector3(x, y, z);
           return Matrix4.identity()..rotate(vector3, angle);
         }
         break;
       case ROTATE_X:
         if (method.args.length == 1) {
-          double x = CSSAngle.parseAngle(method.args[0].trim());
+          double x = CSSAngle.parseAngle(method.args[0].trim()) ?? 0;
           return Matrix4.rotationX(x);
         }
         break;
       case ROTATE_Y:
         if (method.args.length == 1) {
-          double y = CSSAngle.parseAngle(method.args[0].trim());
+          double y = CSSAngle.parseAngle(method.args[0].trim()) ?? 0;
           return Matrix4.rotationY(y);
         }
         break;
@@ -846,7 +846,7 @@ class CSSTransform {
           double x = double.tryParse(method.args[0].trim()) ?? 1.0;
           double y = x;
           if (method.args.length == 2) {
-            y = double.tryParse(method.args[1].trim()) ?? x;
+            y = double.tryParse(method.args[1].trim()) ?? x ?? 0;
           }
           return Matrix4.identity()..scale(x, y, 1);
         }
@@ -881,10 +881,10 @@ class CSSTransform {
         break;
       case SKEW:
         if (method.args.length == 1 || method.args.length == 2) {
-          double alpha = CSSAngle.parseAngle(method.args[0].trim());
+          double alpha = CSSAngle.parseAngle(method.args[0].trim()) ?? 0;
           double beta = 0.0;
           if (method.args.length == 2) {
-            beta = CSSAngle.parseAngle(method.args[1].trim());
+            beta = CSSAngle.parseAngle(method.args[1].trim()) ?? 0;
           }
           return Matrix4.skew(alpha, beta);
         }
@@ -892,7 +892,7 @@ class CSSTransform {
       case SKEW_X:
       case SKEW_Y:
         if (method.args.length == 1) {
-          double angle = CSSAngle.parseAngle(method.args[0].trim());
+          double angle = CSSAngle.parseAngle(method.args[0].trim()) ?? 0;
           if (method.name == SKEW_X) {
             return Matrix4.skewX(angle);
           } else {
@@ -907,7 +907,7 @@ class CSSTransform {
         //   0, 0, 1, perspective,
         //   0, 0, 0, 1]
         if (method.args.length == 1) {
-          double p = CSSLength.toDisplayPortValue(method.args[0].trim());
+          double p = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
           p = p != null ? (-1 / p) : 0;
           return Matrix4.identity()..storage[11] = p;
         }

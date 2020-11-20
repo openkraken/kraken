@@ -91,10 +91,13 @@ class CSSText {
     double lineHeight;
     if (value.isNotEmpty) {
       if (CSSLength.isLength(value)) {
-        lineHeight = CSSLength.toDisplayPortValue(value);
+        double lineHeightValue = CSSLength.toDisplayPortValue(value);
+        if (lineHeightValue > 0) {
+          lineHeight = lineHeightValue;
+        }
       } else {
         double multipliedNumber = double.tryParse(value);
-        if (multipliedNumber != null) {
+        if (multipliedNumber != null && multipliedNumber > 0) {
           lineHeight = getFontSize(style) * multipliedNumber;
         }
       }
