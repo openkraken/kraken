@@ -26,4 +26,20 @@ describe('border_radius', () => {
 
     await matchViewportSnapshot();
   });
+
+  it("works with image", async () => {
+    let image;
+    image = createElement(
+      'img',
+      {
+        src: 'assets/100x100-green.png',
+        style: {
+          'border-radius': '20px',
+        },
+      },
+    );
+    BODY.appendChild(image);
+
+    await matchViewportSnapshot();
+  });
 });
