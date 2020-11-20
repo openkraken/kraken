@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'package:kraken/gesture.dart';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
@@ -26,9 +28,26 @@ mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener onPointerSignal;
 
+  GestureClickCallback onClick;
+
+  /// Called when a click pointer signal this object.
+  void initPointerCallback() {
+    _recognizer.onClick = onClick;
+  }
+
+  ClickGestureRecognizer _recognizer = ClickGestureRecognizer();
+
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
+
+    /// AddPointer when a pointer comes into contact with the screen (for touch
+    /// pointers), or has its button pressed (for mouse pointers) at this widget's
+    /// location.
+    if (event is PointerDownEvent) {
+      _recognizer.addPointer(event);
+    }
+
     if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
     if (onPointerMove != null && event is PointerMoveEvent)
@@ -39,5 +58,6 @@ mixin RenderPointerListenerMixin on RenderBox {
       return onPointerCancel(event);
     if (onPointerSignal != null && event is PointerSignalEvent)
       return onPointerSignal(event);
+
   }
 }
