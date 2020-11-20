@@ -2,9 +2,17 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:ui';
+
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/src/css/animation.dart';
+
+const String SAFE_AREA_INSET = 'safe-area-inset';
+const String SAFE_AREA_INSET_TOP = '$SAFE_AREA_INSET-top';
+const String SAFE_AREA_INSET_LEFT = '$SAFE_AREA_INSET-left';
+const String SAFE_AREA_INSET_RIGHT = '$SAFE_AREA_INSET-right';
+const String SAFE_AREA_INSET_BOTTOM = '$SAFE_AREA_INSET-bottom';
 
 typedef StyleChangeListener = void Function(
   String property,
@@ -397,6 +405,47 @@ class CSSStyleDeclaration {
     return lowerCase;
   }
 
+  String _normalizeValue(value) {
+    String result = _toLowerCase(value.toString().trim());
+
+    if (CSSFunction.isFunction(result)) {
+      String normalizedFunctionValue = '';
+      List<CSSFunctionalNotation> funcs = CSSFunction.parseFunction(result);
+      if (funcs != null) {
+        for (CSSFunctionalNotation func in funcs) {
+          String loweredFuncName = func.name.toLowerCase();
+          if (loweredFuncName == 'env' && func.args.length > 0) {
+            String defaultValue = func.args.length > 1 ? func.args[1] : null;
+            switch (func.args.first) {
+              case SAFE_AREA_INSET_TOP:
+                normalizedFunctionValue += '${window.viewPadding.top / window.devicePixelRatio}${CSSLength.PX},';
+                break;
+              case SAFE_AREA_INSET_RIGHT:
+                normalizedFunctionValue += '${window.viewPadding.right / window.devicePixelRatio}${CSSLength.PX},';
+                break;
+              case SAFE_AREA_INSET_BOTTOM:
+                normalizedFunctionValue += '${window.viewPadding.bottom / window.devicePixelRatio}${CSSLength.PX},';
+                break;
+              case SAFE_AREA_INSET_LEFT:
+                normalizedFunctionValue += '${window.viewPadding.left / window.devicePixelRatio}${CSSLength.PX},';
+                break;
+              default:
+                normalizedFunctionValue += '$defaultValue,';
+                break;
+            }
+          } else if (loweredFuncName == 'var') {
+            // TODO: impl CSS Variables.
+          } else {
+            normalizedFunctionValue += '${func.name}(${func.args.join(',')}),';
+          }
+        }
+        result = normalizedFunctionValue.substring(0, normalizedFunctionValue.length - 1);
+      }
+    }
+
+    return result;
+  }
+
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
   void setProperty(String propertyName, value, [bool fromAnimation = false]) {
@@ -406,9 +455,9 @@ class CSSStyleDeclaration {
       return;
     }
 
-    String normalizedValue = _toLowerCase(value.toString().trim());
+    String normalizedValue = _normalizeValue(value);
 
-    // Illegal value like '   ' after trim is '' shoud do nothing.
+    // Illegal value like '   ' after trim is '' should do nothing.
     if (normalizedValue.isEmpty) return;
 
     String prevValue = _properties[propertyName];
@@ -527,7 +576,8 @@ class CSSStyleDeclaration {
 
   void applyTargetProperties() {
     _properties.forEach((key, value) {
-      _invokePropertyChangedListener(key, null, value);
+      String normalizedValue = _normalizeValue(value);
+      _invokePropertyChangedListener(key, null, normalizedValue);
     });
   }
 
