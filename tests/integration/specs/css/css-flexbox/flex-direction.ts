@@ -76,7 +76,7 @@ describe('flex-direction', () => {
 
     await matchViewportSnapshot();
   });
-  xit('with-element-insert', async () => {
+  it('with-element-insert', async () => {
     let flexItem;
     let flexItem_1;
     let flexItem_2;
