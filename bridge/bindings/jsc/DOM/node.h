@@ -25,6 +25,8 @@ enum NodeType {
 void bindNode(std::unique_ptr<JSContext> &context);
 
 struct NativeNode;
+class JSDocument;
+class DocumentInstance;
 
 class JSNode : public JSEventTarget {
 public:
@@ -97,13 +99,17 @@ public:
 
     NativeNode *nativeNode{nullptr};
 
-  private:
-    void ensureDetached(JSNode::NodeInstance *node);
-
-    int32_t _referenceCount {0};
     void refer();
     void unrefer();
 
+    int32_t _referenceCount {0};
+
+    DocumentInstance *document{nullptr};
+    virtual void _notifyNodeRemoved(JSNode::NodeInstance *node);
+    virtual void _notifyNodeInsert(JSNode::NodeInstance *node);
+
+  private:
+    void ensureDetached(JSNode::NodeInstance *node);
     JSFunctionHolder m_removeChild{context, this, "removeChild", removeChild};
     JSFunctionHolder m_appendChild{context, this, "appendChild", appendChild};
     JSFunctionHolder m_remove{context, this, "remove", remove};

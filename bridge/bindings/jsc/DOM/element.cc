@@ -32,7 +32,8 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagN
     tagNameStringRef_(JSStringRetain(JSStringCreateWithUTF8CString(tagName))) {}
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRef, double targetId)
-  : NodeInstance(element, NodeType::ELEMENT_NODE, targetId), nativeElement(new NativeElement(nativeNode)), tagNameStringRef_(JSStringRetain(tagNameStringRef)) {
+  : NodeInstance(element, NodeType::ELEMENT_NODE, targetId), nativeElement(new NativeElement(nativeNode)),
+    tagNameStringRef_(JSStringRetain(tagNameStringRef)) {
   NativeString tagName{};
   tagName.string = JSStringGetCharactersPtr(tagNameStringRef_);
   tagName.length = JSStringGetLength(tagNameStringRef_);
@@ -67,6 +68,29 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
   return boundingClientRect->jsObject;
 }
 
+JSValueRef JSElement::ElementInstance::getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                                      size_t argumentCount, const JSValueRef *arguments,
+                                                      JSValueRef *exception) {
+  if (argumentCount < 1) {
+    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only 0 present.", exception);
+    return nullptr;
+  }
+
+  JSStringRef idStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
+  std::string id = JSStringToStdString(idStringRef);
+  if (id.empty()) return nullptr;
+
+  auto selfElement = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
+  assert(selfElement->document != nullptr);
+
+  if (!selfElement->document->elementMapById.contains(id)) {
+    return nullptr;
+  }
+
+  auto targetElement = selfElement->document->elementMapById[id];
+  return targetElement->object;
+}
+
 const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::ElementInstance::getElementPropertyMap() {
   static const std::unordered_map<std::string, ElementProperty> propertyHandler = {
     {"style", ElementProperty::kStyle},
@@ -90,7 +114,9 @@ const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::El
     {"toBlob", ElementProperty::kToBlob},
     {"getAttribute", ElementProperty::kGetAttribute},
     {"setAttribute", ElementProperty::kSetAttribute},
-    {"children", ElementProperty::kChildren}};
+    {"removeAttribute", ElementProperty::kRemoveAttribute},
+    {"children", ElementProperty::kChildren},
+    {"getElementById", ElementProperty::kGetElementById}};
   return propertyHandler;
 }
 
@@ -183,6 +209,12 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
   case ElementProperty::kSetAttribute: {
     return m_setAttribute.function();
   }
+  case ElementProperty::kRemoveAttribute: {
+    return m_removeAttribute.function();
+  }
+  case ElementProperty::kGetElementById: {
+    return m_getElementById.function();
+  }
   case ElementProperty::kChildren: {
     JSValueRef arguments[childNodes.size()];
 
@@ -249,9 +281,19 @@ JSStringRef JSElement::ElementInstance::internalTextContent() {
 }
 
 std::vector<JSStringRef> &JSElement::ElementInstance::getElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("style"),
-                                                JSStringCreateWithUTF8CString("getAttribute"),
-                                                JSStringCreateWithUTF8CString("setAttribute")};
+  static std::vector<JSStringRef> propertyNames{
+    JSStringCreateWithUTF8CString("style"),        JSStringCreateWithUTF8CString("getAttribute"),
+    JSStringCreateWithUTF8CString("setAttribute"), JSStringCreateWithUTF8CString("removeAttribute"),
+    JSStringCreateWithUTF8CString("nodeName"),     JSStringCreateWithUTF8CString("offsetLeft"),
+    JSStringCreateWithUTF8CString("offsetTop"),    JSStringCreateWithUTF8CString("offsetWidth"),
+    JSStringCreateWithUTF8CString("offsetHeight"), JSStringCreateWithUTF8CString("clientWidth"),
+    JSStringCreateWithUTF8CString("clientHeight"), JSStringCreateWithUTF8CString("clientTop"),
+    JSStringCreateWithUTF8CString("clientLeft"),   JSStringCreateWithUTF8CString("scrollTop"),
+    JSStringCreateWithUTF8CString("scrollLeft"),   JSStringCreateWithUTF8CString("scrollWidth"),
+    JSStringCreateWithUTF8CString("scrollHeight"), JSStringCreateWithUTF8CString("getBoundingClientRect"),
+    JSStringCreateWithUTF8CString("click"),        JSStringCreateWithUTF8CString("scroll"),
+    JSStringCreateWithUTF8CString("scrollBy"),     JSStringCreateWithUTF8CString("toBlob"),
+    JSStringCreateWithUTF8CString("children"),     JSStringCreateWithUTF8CString("getElementById")};
   return propertyNames;
 }
 
@@ -289,9 +331,21 @@ JSValueRef JSElement::ElementInstance::setAttribute(JSContextRef ctx, JSObjectRe
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
 
   JSStringRetain(valueStringRef);
-  elementInstance->attributes[name] = valueStringRef;
 
   std::string valueString = JSStringToStdString(valueStringRef);
+
+  if (elementInstance->attributes.contains(name)) {
+    JSStringRef oldValueRef = elementInstance->attributes[name];
+    std::string oldValue = JSStringToStdString(oldValueRef);
+    JSStringRelease(oldValueRef);
+    elementInstance->attributes[name] = valueStringRef;
+    elementInstance->_didModifyAttribute(name, oldValue, valueString);
+  } else {
+    elementInstance->attributes[name] = valueStringRef;
+    std::string empty;
+    elementInstance->_didModifyAttribute(name, empty, valueString);
+  }
+
   auto args = buildUICommandArgs(name, valueString);
 
   ::foundation::UICommandTaskMessageQueue::instance(elementInstance->_hostClass->contextId)
@@ -324,6 +378,40 @@ JSValueRef JSElement::ElementInstance::getAttribute(JSContextRef ctx, JSObjectRe
   }
 
   return nullptr;
+}
+
+JSValueRef JSElement::ElementInstance::removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                                       size_t argumentCount, const JSValueRef *arguments,
+                                                       JSValueRef *exception) {
+  if (argumentCount != 1) {
+    JSC_THROW_ERROR(ctx, "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present",
+                    exception);
+    return nullptr;
+  }
+
+  const JSValueRef nameValueRef = arguments[0];
+
+  if (!JSValueIsString(ctx, nameValueRef)) {
+    JSC_THROW_ERROR(ctx, "Failed to execute 'removeAttribute' on 'Element': name attribute is not valid.", exception);
+    return nullptr;
+  }
+
+  JSStringRef nameStringRef = JSValueToStringCopy(ctx, nameValueRef, exception);
+  std::string &&name = JSStringToStdString(nameStringRef);
+  auto element = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
+
+  if (element->attributes.contains(name)) {
+    JSStringRef idRef = element->attributes[name];
+    std::string id = JSStringToStdString(idRef);
+    std::string empty;
+
+    element->attributes.erase(name);
+    element->_didModifyAttribute(name, id, empty);
+
+    auto args = buildUICommandArgs(name);
+    ::foundation::UICommandTaskMessageQueue::instance(element->_hostClass->contextId)
+      ->registerCommand(element->eventTargetId, UI_COMMAND_REMOVE_PROPERTY, args, 1, nullptr);
+  }
 }
 
 struct ToBlobPromiseContext {
@@ -467,6 +555,66 @@ JSValueRef JSElement::ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef fu
 
   return nullptr;
 }
+void JSElement::ElementInstance::_notifyNodeRemoved(JSNode::NodeInstance *insertionNode) {
+  if (insertionNode->isConnected()) {
+    traverseNode(this, [](JSNode::NodeInstance *node) {
+      auto Element = JSElement::instance(node->context);
+      if (node->_hostClass == Element) {
+        auto element = reinterpret_cast<JSElement::ElementInstance *>(node);
+        element->_notifyChildRemoved();
+      }
+
+      return false;
+    });
+  }
+}
+void JSElement::ElementInstance::_notifyChildRemoved() {
+  if (attributes.contains("id")) {
+    JSStringRef idRef = attributes["id"];
+    std::string id = JSStringToStdString(idRef);
+    document->removeElementById(id);
+  }
+}
+void JSElement::ElementInstance::_notifyNodeInsert(JSNode::NodeInstance *insertNode) {
+  if (insertNode->isConnected()) {
+    traverseNode(this, [](JSNode::NodeInstance *node) {
+      auto Element = JSElement::instance(node->context);
+      if (node->_hostClass == Element) {
+        auto element = reinterpret_cast<JSElement::ElementInstance *>(node);
+        element->_notifyChildInsert();
+      }
+
+      return false;
+    });
+  }
+}
+void JSElement::ElementInstance::_notifyChildInsert() {
+  if (attributes.contains("id")) {
+    JSStringRef idRef = attributes["id"];
+    std::string id = JSStringToStdString(idRef);
+    document->addElementById(id, this);
+  }
+}
+void JSElement::ElementInstance::_didModifyAttribute(std::string &name, std::string &oldId, std::string &newId) {
+  if (name == "id") {
+    _beforeUpdateId(oldId, newId);
+  }
+}
+void JSElement::ElementInstance::_beforeUpdateId(std::string &oldId, std::string &newId) {
+  if (!isConnected()) {
+    return;
+  }
+
+  if (oldId == newId) return;
+
+  if (!oldId.empty()) {
+    document->removeElementById(oldId);
+  }
+
+  if (!newId.empty()) {
+    document->addElementById(newId, this);
+  }
+}
 
 BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientRect *boundingClientRect)
   : HostObject(context, "BoundingClientRect"), nativeBoundingClientRect(boundingClientRect) {}
@@ -527,6 +675,17 @@ void BoundingClientRect::getPropertyNames(JSPropertyNameAccumulatorRef accumulat
 
 BoundingClientRect::~BoundingClientRect() {
   delete nativeBoundingClientRect;
+}
+
+void traverseNode(JSNode::NodeInstance *node, TraverseHandler handler) {
+  bool shouldContinue = handler(node);
+  if (shouldContinue) return;
+
+  if (!node->childNodes.empty()) {
+    for (auto &n : node->childNodes) {
+      traverseNode(n, handler);
+    }
+  }
 }
 
 } // namespace kraken::binding::jsc

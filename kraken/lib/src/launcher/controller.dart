@@ -199,6 +199,10 @@ class KrakenViewController {
     _elementManager.setProperty(targetId, key, value);
   }
 
+  void removeProperty(int targetId, String key) {
+    _elementManager.removeProperty(targetId, key);
+  }
+
   EventTarget getEventTargetById(int id) {
     return _elementManager.getEventTargetByTargetId<EventTarget>(id);
   }

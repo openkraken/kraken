@@ -20,8 +20,8 @@
 #include <devtools/frontdoor.h>
 #endif // ENABLE_DEBUGGER
 
-#include "bindings/jsc/DOM/comment_node.h"
 #include "bindings/jsc/DOM/document.h"
+#include "bindings/jsc/DOM/comment_node.h"
 #include "bindings/jsc/DOM/element.h"
 #include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/DOM/event_target.h"

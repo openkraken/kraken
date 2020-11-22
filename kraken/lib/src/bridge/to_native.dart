@@ -200,7 +200,8 @@ enum UICommandType {
   removeNode,
   insertAdjacentNode,
   setStyle,
-  setProperty
+  setProperty,
+  removeProperty
 }
 
 class UICommandItem extends Struct {
@@ -294,6 +295,10 @@ void flushUICommand() {
             String key = nativeStringToString(nativeCommand.ref.args[0]);
             String value = nativeStringToString(nativeCommand.ref.args[1]);
             controller.view.setProperty(id, key, value);
+            break;
+          case UICommandType.removeProperty:
+            String key = nativeStringToString(nativeCommand.ref.args[0]);
+            controller.view.removeProperty(id, key);
             break;
           default:
             break;

@@ -75,7 +75,6 @@
 		1B9FA450242CC54F00FB3624 /* libv8_libbase.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8_libbase.dylib; path = ../../targets/darwin/lib/libv8_libbase.dylib; sourceTree = "<group>"; };
 		1B9FA451242CC54F00FB3624 /* libv8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8.dylib; path = ../../targets/darwin/lib/libv8.dylib; sourceTree = "<group>"; };
 		1B9FA452242CC54F00FB3624 /* libicui18n.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicui18n.dylib; path = ../../targets/darwin/lib/libicui18n.dylib; sourceTree = "<group>"; };
-		1B9FA453242CC54F00FB3624 /* libkraken_v8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libkraken_v8.dylib; path = ../../targets/darwin/lib/libkraken_v8.dylib; sourceTree = "<group>"; };
 		1B9FA454242CC54F00FB3624 /* libv8_libplatform.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8_libplatform.dylib; path = ../../targets/darwin/lib/libv8_libplatform.dylib; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 		335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
@@ -198,7 +197,6 @@
 				1B9FA452242CC54F00FB3624 /* libicui18n.dylib */,
 				1B9FA44F242CC54F00FB3624 /* libicuuc.dylib */,
 				1B9FA44E242CC54E00FB3624 /* libkraken_jsc.dylib */,
-				1B9FA453242CC54F00FB3624 /* libkraken_v8.dylib */,
 				1B9FA450242CC54F00FB3624 /* libv8_libbase.dylib */,
 				1B9FA454242CC54F00FB3624 /* libv8_libplatform.dylib */,
 				1B9FA451242CC54F00FB3624 /* libv8.dylib */,

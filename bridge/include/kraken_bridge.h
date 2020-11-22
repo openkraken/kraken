@@ -56,6 +56,7 @@ struct Screen {
 #define UI_COMMAND_INSERT_ADJACENT_NODE 6
 #define UI_COMMAND_SET_STYLE 7
 #define UI_COMMAND_SET_PROPERTY 8
+#define UI_COMMAND_REMOVE_PROPERTY 9
 
 struct UICommandItem {
   UICommandItem(int64_t id, int32_t type, NativeString **args, size_t length, void* nativePtr)

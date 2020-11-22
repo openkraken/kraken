@@ -27,7 +27,7 @@ JSDocument * JSDocument::instance(JSContext *context) {
   return instanceMap[context];
 }
 
-JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 1) {
     JSC_THROW_ERROR(ctx, "Failed to createElement: only accept 1 parameter.", exception)
@@ -43,7 +43,7 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
   JSStringRef tagNameStringRef = JSValueToStringCopy(ctx, tagNameValue, exception);
   std::string tagName = JSStringToStdString(tagNameStringRef);
 
-  auto document = static_cast<JSDocument::DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(function));
   auto Document = reinterpret_cast<JSDocument*>(document->_hostClass);
   auto Element = Document->getElementOfTagName(document->context, tagName);
 
@@ -52,10 +52,11 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
   }
 
   auto element = new JSElement::ElementInstance(Element, tagName.c_str());
+  element->document = document;
   return element->object;
 }
 
-JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef DocumentInstance::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                       size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.",
@@ -63,18 +64,22 @@ JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JS
     return nullptr;
   }
 
-  auto document = static_cast<JSDocument::DocumentInstance *>(JSObjectGetPrivate(function));
-  auto textNode = JSTextNode::instance(document->context);
-  auto textNodeInstance = JSObjectCallAsConstructor(ctx, textNode->classObject, 1, arguments, exception);
+  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto TextNode = JSTextNode::instance(document->context);
+  auto textNodeInstance = JSObjectCallAsConstructor(ctx, TextNode->classObject, 1, arguments, exception);
+  auto textNode = reinterpret_cast<JSTextNode::TextNodeInstance*>(JSObjectGetPrivate(textNodeInstance));
+  textNode->document = document;
   return textNodeInstance;
 }
 
-JSValueRef JSDocument::createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef DocumentInstance::createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  auto document = static_cast<JSDocument::DocumentInstance *>(JSObjectGetPrivate(function));
-  auto commentNode = JSCommentNode::instance(document->context);
+  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto CommentNode = JSCommentNode::instance(document->context);
   auto commentNodeInstance =
-    JSObjectCallAsConstructor(ctx, commentNode->classObject, argumentCount, arguments, exception);
+    JSObjectCallAsConstructor(ctx, CommentNode->classObject, argumentCount, arguments, exception);
+  auto commentNode = reinterpret_cast<JSCommentNode::CommentNodeInstance*>(JSObjectGetPrivate(commentNodeInstance));
+  commentNode->document = document;
   return commentNodeInstance;
 }
 
@@ -90,15 +95,16 @@ JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagN
   return m_elementMaps[tagName];
 }
 
-JSDocument::DocumentInstance::DocumentInstance(JSDocument *document)
+DocumentInstance::DocumentInstance(JSDocument *document)
   : NodeInstance(document, NodeType::DOCUMENT_NODE), nativeDocument(new NativeDocument(nativeNode)) {
   JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
   auto Element = JSElement::instance(document->context);
   m_body = new JSElement::ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
+  m_body->document = this;
   JSValueProtect(document->ctx, m_body->object);
 }
 
-JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
+JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getPropertyMap();
   if (!propertyMap.contains(name)) {
     return JSNode::NodeInstance::getProperty(name, exception);
@@ -127,11 +133,11 @@ JSValueRef JSDocument::DocumentInstance::getProperty(std::string &name, JSValueR
   return nullptr;
 }
 
-JSDocument::DocumentInstance::~DocumentInstance() {
+DocumentInstance::~DocumentInstance() {
   delete nativeDocument;
 }
 
-void JSDocument::DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   JSNode::NodeInstance::getPropertyNames(accumulator);
 
   for (auto &property : getDocumentPropertyNames()) {
@@ -139,7 +145,7 @@ void JSDocument::DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef
   }
 }
 
-std::array<JSStringRef, 4> &JSDocument::DocumentInstance::getDocumentPropertyNames() {
+std::array<JSStringRef, 4> &DocumentInstance::getDocumentPropertyNames() {
   static std::array<JSStringRef, 4> propertyNames{
     JSStringCreateWithUTF8CString("body"),
     JSStringCreateWithUTF8CString("createElement"),
@@ -149,8 +155,8 @@ std::array<JSStringRef, 4> &JSDocument::DocumentInstance::getDocumentPropertyNam
   return propertyNames;
 }
 
-const std::unordered_map<std::string, JSDocument::DocumentInstance::DocumentProperty> &
-JSDocument::DocumentInstance::getPropertyMap() {
+const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &
+DocumentInstance::getPropertyMap() {
   static const std::unordered_map<std::string, DocumentProperty> propertyMap{
     {"body", DocumentProperty::kBody},
     {"createElement", DocumentProperty::kCreateElement},
@@ -159,4 +165,13 @@ JSDocument::DocumentInstance::getPropertyMap() {
   return propertyMap;
 }
 
+void DocumentInstance::removeElementById(std::string &id) {
+  if (elementMapById.contains(id)) {
+    elementMapById.erase(id);
+  }
+}
+
+void DocumentInstance::addElementById(std::string &id, JSElement::ElementInstance *element) {
+  elementMapById[id] = element;
+}
 } // namespace kraken::binding::jsc

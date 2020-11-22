@@ -28,6 +28,38 @@ class JSDocument : public JSNode {
 public:
   static JSDocument *instance(JSContext *context);
 
+  JSElement *getElementOfTagName(JSContext *context, std::string &tagName);
+
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                  const JSValueRef *arguments, JSValueRef *exception) override;
+
+private:
+  std::unordered_map<std::string, JSElement *> m_elementMaps{
+    {"a", JSAnchorElement::instance(context)},      {"animation-player", JSAnimationPlayerElement::instance(context)},
+    {"audio", JSAudioElement::instance(context)},   {"video", JSVideoElement::instance(context)},
+    {"canvas", JSCanvasElement::instance(context)}, {"div", JSElement::instance(context)},
+    {"span", JSElement::instance(context)},         {"strong", JSElement::instance(context)},
+    {"pre", JSElement::instance(context)},          {"p", JSElement::instance(context)},
+    {"iframe", JSIframeElement::instance(context)}, {"object", JSObjectElement::instance(context)},
+    {"img", JSImageElement::instance(context)}};
+
+protected:
+  JSDocument() = delete;
+  JSDocument(JSContext *context);
+};
+
+class DocumentInstance : public JSNode::NodeInstance {
+public:
+  enum class DocumentProperty {
+    kCreateElement,
+    kBody,
+    kCreateTextNode,
+    kCreateComment,
+    kNodeName,
+  };
+  static std::array<JSStringRef, 4> &getDocumentPropertyNames();
+  static const std::unordered_map<std::string, DocumentProperty> &getPropertyMap();
+
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
 
@@ -35,58 +67,30 @@ public:
                                    const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
+                                  const JSValueRef arguments[], JSValueRef *exception);
 
-  JSElement *getElementOfTagName(JSContext *context, std::string &tagName);
+  DocumentInstance() = delete;
+  explicit DocumentInstance(JSDocument *document);
+  ~DocumentInstance();
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
-  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                  const JSValueRef *arguments, JSValueRef *exception) override;
+  void removeElementById(std::string &id);
+  void addElementById(std::string &id, JSElement::ElementInstance *element);
 
-  class DocumentInstance : public NodeInstance {
-  public:
-    enum class DocumentProperty {
-      kCreateElement,
-      kBody,
-      kCreateTextNode,
-      kCreateComment,
-      kNodeName,
-    };
-    static std::array<JSStringRef, 4> &getDocumentPropertyNames();
-    static const std::unordered_map<std::string, DocumentProperty> &getPropertyMap();
-
-    DocumentInstance() = delete;
-    explicit DocumentInstance(JSDocument *document);
-    ~DocumentInstance();
-    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-
-    NativeDocument *nativeDocument;
-
-  private:
-    JSElement::ElementInstance *m_body;
-    JSFunctionHolder m_createElement{context, this, "createElement", createElement};
-    JSFunctionHolder m_createTextNode{context, this, "createTextNode", createTextNode};
-    JSFunctionHolder m_createComment{context, this, "createComment", createComment};
-  };
+  NativeDocument *nativeDocument;
+  std::unordered_map<std::string, JSElement::ElementInstance *> elementMapById;
 
 private:
-  std::unordered_map<std::string, JSElement *> m_elementMaps {
-      {"a", JSAnchorElement::instance(context)},      {"animation-player", JSAnimationPlayerElement::instance(context)},
-      {"audio", JSAudioElement::instance(context)},   {"video", JSVideoElement::instance(context)},
-      {"canvas", JSCanvasElement::instance(context)}, {"div", JSElement::instance(context)},
-      {"span", JSElement::instance(context)},         {"strong", JSElement::instance(context)},
-      {"pre", JSElement::instance(context)},          {"p", JSElement::instance(context)},
-      {"iframe", JSIframeElement::instance(context)}, {"object", JSObjectElement::instance(context)},
-      {"img", JSImageElement::instance(context)}};
-
-protected:
-  JSDocument() = delete;
-  JSDocument(JSContext *context);
+  JSElement::ElementInstance *m_body;
+  JSFunctionHolder m_createElement{context, this, "createElement", createElement};
+  JSFunctionHolder m_createTextNode{context, this, "createTextNode", createTextNode};
+  JSFunctionHolder m_createComment{context, this, "createComment", createComment};
 };
 
 struct NativeDocument {
   NativeDocument() = delete;
-  explicit NativeDocument(NativeNode *nativeNode) : nativeNode(nativeNode) {};
+  explicit NativeDocument(NativeNode *nativeNode) : nativeNode(nativeNode){};
 
   NativeNode *nativeNode;
 };

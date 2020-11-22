@@ -42,6 +42,8 @@ public:
     kToBlob,
     kGetAttribute,
     kSetAttribute,
+    kRemoveAttribute,
+    kGetElementById,
     kChildren
   };
 
@@ -55,9 +57,14 @@ public:
     static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
+    static JSValueRef getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                      const JSValueRef arguments[], JSValueRef *exception);
+
     static JSValueRef setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
@@ -82,9 +89,17 @@ public:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
     JSStringRef tagNameStringRef_ {JSStringCreateWithUTF8CString("")};
 
+    void _notifyNodeRemoved(JSNode::NodeInstance *node) override;
+    void _notifyChildRemoved();
+    void _notifyNodeInsert(JSNode::NodeInstance *insertNode) override;
+    void _notifyChildInsert();
+    void _didModifyAttribute(std::string &name, std::string &oldId, std::string &newId);
+    void _beforeUpdateId(std::string &oldId, std::string &newId);
     JSFunctionHolder m_getBoundingClientRect{context, this, "getBoundingClientRect", getBoundingClientRect};
     JSFunctionHolder m_setAttribute{context, this, "setAttribute", setAttribute};
     JSFunctionHolder m_getAttribute{context, this, "getAttribute", getAttribute};
+    JSFunctionHolder m_removeAttribute{context, this, "removeAttribute", removeAttribute};
+    JSFunctionHolder m_getElementById{context, this, "getElementById", getElementById};
     JSFunctionHolder m_toBlob{context, this, "toBlob", toBlob};
     JSFunctionHolder m_click{context, this, "click", click};
     JSFunctionHolder m_scroll{context, this, "scroll", scroll};
@@ -178,6 +193,9 @@ struct NativeElement {
   SetScrollLeft setScrollLeft{nullptr};
   SetScrollTop setScrollTop{nullptr};
 };
+
+using TraverseHandler = bool(*)(JSNode::NodeInstance *node);
+void traverseNode(JSNode::NodeInstance *node, TraverseHandler handler);
 
 } // namespace kraken::binding::jsc
 #endif // KRAKENBRIDGE_ELEMENT_H

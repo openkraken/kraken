@@ -99,7 +99,7 @@ void JSNode::NodeInstance::ensureDetached(JSNode::NodeInstance *node) {
   if (node->parentNode != nullptr) {
     auto it = std::find(node->parentNode->childNodes.begin(), node->parentNode->childNodes.end(), node);
     if (it != node->parentNode->childNodes.end()) {
-      // TODO: child._notifyNodeRemoved(child.parentNode);
+      node->_notifyNodeRemoved(node->parentNode);
       node->parentNode->childNodes.erase(it);
       node->parentNode = nullptr;
       node->unrefer();
@@ -240,7 +240,7 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       parentChildNodes.insert(it, node);
       node->parentNode = parent;
       node->refer();
-      // TODO: newChild._notifyNodeInsert(parentNode);
+      node->_notifyNodeInsert(parent);
 
       std::string nodeEventTargetId = std::to_string(node->eventTargetId);
       std::string position = std::string("beforebegin");
@@ -302,7 +302,7 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   node->parentNode = this;
   node->refer();
 
-  //  TODO: child._notifyNodeInsert(this);
+  node->_notifyNodeInsert(this);
 
   std::string nodeEventTargetId = std::to_string(node->eventTargetId);
   std::string position = std::string("beforeend");
@@ -324,7 +324,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalRemoveChild(JSNode::NodeInst
     childNodes.erase(it);
     node->parentNode = nullptr;
     node->unrefer();
-    // TODO: child._notifyNodeRemove(this);
+    node->_notifyNodeRemoved(this);
     foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
       ->registerCommand(node->eventTargetId, UI_COMMAND_REMOVE_NODE, nullptr, 0, nullptr);
   }
@@ -345,8 +345,8 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   parent->childNodes.insert(childIndex, newChild);
   newChild->refer();
 
-  //  TODO: oldChild._notifyNodeRemoved(parentNode);
-  //  TODO: newChild._notifyNodeInsert(parentNode);
+  oldChild->_notifyNodeRemoved(parent);
+  newChild->_notifyNodeInsert(parent);
 
   std::string newChildEventTargetId = std::to_string(newChild->eventTargetId);
   std::string position = std::string("afterend");
@@ -489,5 +489,8 @@ void JSNode::NodeInstance::unrefer() {
     JSValueUnprotect(_hostClass->ctx, this->object);
   }
 }
+
+void JSNode::NodeInstance::_notifyNodeRemoved(JSNode::NodeInstance *node) {}
+void JSNode::NodeInstance::_notifyNodeInsert(JSNode::NodeInstance *node) {}
 
 } // namespace kraken::binding::jsc
