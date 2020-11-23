@@ -90,7 +90,7 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
       auto args = buildUICommandArgs(name, widthString);
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UI_COMMAND_SET_STYLE, args, 2, nullptr);
       break;
     }
     case CanvasElementProperty::kHeight: {
@@ -99,7 +99,7 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
       std::string heightString = std::to_string(_height) + "px";
       auto args = buildUICommandArgs(name, heightString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UI_COMMAND_SET_STYLE, args, 2, nullptr);
       break;
     }
     default:
