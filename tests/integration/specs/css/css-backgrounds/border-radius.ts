@@ -27,7 +27,7 @@ describe('border_radius', () => {
     await matchViewportSnapshot();
   });
 
-  it("works with image", async () => {
+  it('works with image', async () => {
     let image;
     image = createElement(
       'img',
