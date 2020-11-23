@@ -47,8 +47,7 @@ CSSOverflowType _getOverflowType(String definition) {
 
 typedef ScrollListener = void Function(double scrollTop, AxisDirection axisDirection);
 
-mixin CSSOverflowMixin {
-  KrakenScrollable get scrollableX => _scrollableX;
+mixin CSSOverflowMixin on Node {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
@@ -210,6 +209,13 @@ mixin CSSOverflowMixin {
         distance = (scrollable.position?.pixels ?? 0) + aim;
       } else {
         distance = aim.toDouble();
+      }
+
+      // Apply scroll effect after layout.
+      assert(renderer is RenderBox && isRendererAttached, 'Overflow can only be added to a RenderBox.');
+      RenderBox renderBox = renderer;
+      if (!renderBox.hasSize) {
+        renderBox.owner.flushLayout();
       }
       scrollable.position.moveTo(distance, duration: duration, curve: curve);
     }
