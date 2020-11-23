@@ -79,11 +79,11 @@ public:
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
-  void removeElementById(std::string &id);
+  void removeElementById(std::string &id, JSElement::ElementInstance *element);
   void addElementById(std::string &id, JSElement::ElementInstance *element);
 
   NativeDocument *nativeDocument;
-  std::unordered_map<std::string, JSElement::ElementInstance *> elementMapById;
+  std::unordered_map<std::string, std::vector<JSElement::ElementInstance *>> elementMapById;
 
 private:
   JSElement::ElementInstance *m_body;

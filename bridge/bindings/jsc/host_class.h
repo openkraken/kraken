@@ -38,7 +38,7 @@ public:
   virtual ~HostClass();
 
   virtual JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                        const JSValueRef *arguments, JSValueRef *exception);
+                                          const JSValueRef *arguments, JSValueRef *exception);
 
   // The instance class represent every javascript instance objects created by new expression.
   class Instance {
@@ -56,7 +56,7 @@ public:
     JSContextRef ctx{nullptr};
   };
 
-  std::string _name {""};
+  std::string _name{""};
   JSContext *context{nullptr};
   int32_t contextId;
   JSContextRef ctx{nullptr};
@@ -71,6 +71,23 @@ private:
   // The class template of javascript constructor function.
   JSClassRef jsClass{nullptr};
   HostClass *_parentHostClass{nullptr};
+};
+
+template <typename T> class JSHostClassHolder {
+public:
+  JSHostClassHolder() = delete;
+  explicit JSHostClassHolder(T *hostClass) : m_object(hostClass) {
+    JSValueProtect(m_object->ctx, m_object->object);
+  }
+  ~JSHostClassHolder() {
+    JSValueUnprotect(m_object->ctx, m_object->object);
+  }
+  T *operator*() {
+    return m_object;
+  }
+
+private:
+  T *m_object;
 };
 
 } // namespace kraken::binding::jsc

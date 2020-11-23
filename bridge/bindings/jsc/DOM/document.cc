@@ -166,14 +166,24 @@ const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &Docum
   return propertyMap;
 }
 
-void DocumentInstance::removeElementById(std::string &id) {
+void DocumentInstance::removeElementById(std::string &id, JSElement::ElementInstance *element) {
   if (elementMapById.contains(id)) {
-    elementMapById.erase(id);
+    auto &list = elementMapById[id];
+    list.erase(std::find(list.begin(), list.end(), element));
   }
 }
 
 void DocumentInstance::addElementById(std::string &id, JSElement::ElementInstance *element) {
-  elementMapById[id] = element;
+  if (!elementMapById.contains(id)) {
+    elementMapById[id] = std::vector<JSElement::ElementInstance*>();
+  }
+
+  auto &list = elementMapById[id];
+  auto it = std::find(list.begin(), list.end(), element);
+
+  if (it == list.end()) {
+    elementMapById[id].emplace_back(element);
+  }
 }
 
 JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -195,8 +205,13 @@ JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef functi
     return nullptr;
   }
 
-  auto targetElement = document->elementMapById[id];
-  if (targetElement->isConnected()) return targetElement->object;
+  auto targetElementList = document->elementMapById[id];
+  if (targetElementList.empty()) return nullptr;
+
+  for (auto &element : targetElementList) {
+    if (element->isConnected()) return element->object;
+  }
+
   return nullptr;
 }
 
