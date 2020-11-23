@@ -172,8 +172,8 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void scroll(num x, num y, {bool isScrollBy = false}) {
-    _scroll(x, Curves.linear, isScrollBy: isScrollBy, isDirectionX: true);
-    _scroll(y, Curves.linear, isScrollBy: isScrollBy, isDirectionX: false);
+    _scroll(x, null, isScrollBy: isScrollBy, isDirectionX: true);
+    _scroll(y, null, isScrollBy: isScrollBy, isDirectionX: false);
   }
 
   void _scroll(num aim, Curve curve, {bool isScrollBy = false, bool isDirectionX = false}) {

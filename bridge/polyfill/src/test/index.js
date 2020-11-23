@@ -196,7 +196,13 @@ __kraken_executeTest__((done) => {
           clearAllEventsListeners();
           clearAllNodes();
           requestAnimationFrame(() => {
-            resolve();
+            __kraken_refresh_paint__(function (e) {
+              if (e) {
+                reject(e);
+              } else {
+                resolve();
+              }
+            });
           });
         }
       } catch (e) {

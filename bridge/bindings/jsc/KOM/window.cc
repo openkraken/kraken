@@ -95,11 +95,13 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
     case WindowProperty::kScrollBy:
       return m_scrollBy.function();
     case WindowProperty::kScrollX: {
+      getDartMethod()->requestUpdateFrame();
       auto document = DocumentInstance::instance(_hostClass->context);
       return JSValueMakeNumber(_hostClass->ctx,
                                document->body->nativeElement->getScrollLeft(document->body->nativeElement));
     }
     case WindowProperty::kScrollY: {
+      getDartMethod()->requestUpdateFrame();
       auto document = DocumentInstance::instance(_hostClass->context);
       return JSValueMakeNumber(_hostClass->ctx,
                                document->body->nativeElement->getScrollTop(document->body->nativeElement));

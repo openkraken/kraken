@@ -99,7 +99,7 @@ class ElementManager {
   static void disposeEventTarget(int contextId, int id) {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
     EventTarget eventTarget = controller.view.getEventTargetById(id);
-    assert(eventTarget != null, 'can not get eventTarget of id: $id');
+    if (eventTarget == null) return;
     eventTarget.dispose();
   }
 
@@ -195,6 +195,9 @@ class ElementManager {
 
     Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
+
+    // Should detach renderObject.
+    target.detach();
 
     target.parentNode?.removeChild(target);
 

@@ -97,7 +97,6 @@ mixin ElementNativeMethods on Node {
   }
 
   static void _setScrollTop(Pointer<NativeElement> nativeElement, double top) {
-    print('set scrollTop $top');
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.renderBoxModel.owner.flushLayout();
     element.scrollTop = top;
@@ -106,7 +105,6 @@ mixin ElementNativeMethods on Node {
   static void _setScrollLeft(Pointer<NativeElement> nativeElement, double left) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.renderBoxModel.owner.flushLayout();
-    print('set scrollLeft $left');
     element.scrollLeft = left;
   }
 

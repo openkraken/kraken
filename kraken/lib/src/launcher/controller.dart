@@ -95,21 +95,6 @@ class KrakenViewController {
 
   bool get disposed => _disposed;
 
-  // regenerate generate renderObject created by kraken but not affect jsBridge context.
-  // test used only.
-  testRefreshPaint() {
-    RenderObject root = _elementManager.getRootRenderObject();
-    RenderObject parent = root.parent;
-    RenderObject previousSibling;
-    if (parent is ContainerRenderObjectMixin) {
-      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
-    }
-    detachView();
-    _elementManager = ElementManager(_elementManager.viewportWidth, _elementManager.viewportHeight,
-        showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
-    attachView(parent, previousSibling);
-  }
-
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
     assert(!_disposed, "Kraken have already disposed");
     evaluateScripts(_contextId, code, source, 0);
@@ -363,6 +348,29 @@ class KrakenController {
   void setNavigationDelegate(KrakenNavigationDelegate delegate) {
     assert(_view != null);
     _view.navigationDelegate = delegate;
+  }
+
+  // regenerate generate renderObject created by kraken but not affect jsBridge context.
+  // test used only.
+  testRefreshPaint() async {
+    assert(!_view._disposed, "Kraken have already disposed");
+    RenderObject root = _view.getRootRenderObject();
+    RenderObject parent = root.parent;
+    RenderObject previousSibling;
+    if (parent is ContainerRenderObjectMixin) {
+      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
+    }
+    _module.dispose();
+    _view.detachView();
+    Inspector.prevInspector = view._elementManager.controller.view.inspector;
+    _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
+        showPerformanceOverlay: _view.showPerformanceOverlay,
+        enableDebug: _view.enableDebug,
+        contextId: _view.contextId,
+        rootController: this,
+        navigationDelegate: _view.navigationDelegate);
+    _view.attachView(parent, previousSibling);
+    SchedulerBinding.instance.scheduleFrame();
   }
 
   // reload current kraken view.
