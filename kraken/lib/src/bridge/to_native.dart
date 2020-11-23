@@ -256,7 +256,7 @@ void flushUICommand() {
         for (int i = 0; i < nativeCommand.ref.length; i ++) {
           printMsg += ' args[$i]: ${nativeStringToString(nativeCommand.ref.args[i])}';
         };
-        printMsg += 'nativePtr: ${nativeCommand.ref.nativePtr}';
+        printMsg += ' nativePtr: ${nativeCommand.ref.nativePtr}';
         print(printMsg);
       }
 

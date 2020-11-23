@@ -83,6 +83,9 @@ public:
 
   static JSElement *instance(JSContext *context);
 
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                  const JSValueRef *arguments, JSValueRef *exception) override;
+
   class ElementInstance : public NodeInstance {
   public:
     static std::vector<JSStringRef> &getElementPropertyNames();
@@ -107,15 +110,18 @@ public:
                                const JSValueRef arguments[], JSValueRef *exception);
 
     ElementInstance() = delete;
+    explicit ElementInstance(JSElement *element, const char *tagName, bool sendUICommand);
     explicit ElementInstance(JSElement *element, JSStringRef tagName, double targetId);
-    explicit ElementInstance(JSElement *element, const char *tagName);
     ~ElementInstance();
+
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;
 
     NativeElement *nativeElement{nullptr};
+
+    std::string tagName();
 
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
@@ -217,7 +223,7 @@ struct NativeElement {
   SetScrollTop setScrollTop{nullptr};
 };
 
-using TraverseHandler = bool (*)(JSNode::NodeInstance *node);
+using TraverseHandler = std::function<bool(JSNode::NodeInstance*)>;
 void traverseNode(JSNode::NodeInstance *node, TraverseHandler handler);
 
 } // namespace kraken::binding::jsc

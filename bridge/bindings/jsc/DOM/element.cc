@@ -115,13 +115,23 @@ JSElement *JSElement::instance(JSContext *context) {
   return instanceMap[context];
 }
 
-JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagName)
+JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                           const JSValueRef *arguments, JSValueRef *exception) {
+  JSStringRef tagNameStrRef = JSValueToStringCopy(ctx, arguments[0], exception);
+  std::string tagName = JSStringToStdString(tagNameStrRef);
+  auto instance = new ElementInstance(this, tagName.c_str(), true);
+  return instance->object;
+}
+
+JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool sendUICommand)
   : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)),
     tagNameStringRef_(JSStringRetain(JSStringCreateWithUTF8CString(tagName))) {
 
-  auto args = buildUICommandArgs(JSStringRetain(tagNameStringRef_));
-  ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeElement);
+  if (sendUICommand) {
+    auto args = buildUICommandArgs(JSStringRetain(tagNameStringRef_));
+    ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
+        ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeElement);
+  }
 }
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRef, double targetId)
@@ -210,9 +220,7 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
     return style->object;
   }
   case ElementProperty::kTagName: {
-    std::string tagName = JSStringToStdString(tagNameStringRef_);
-    std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
-    return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName.c_str()));
+    return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName().c_str()));
   }
   case ElementProperty::kNodeName:
     return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
@@ -700,6 +708,12 @@ void JSElement::ElementInstance::_beforeUpdateId(std::string &oldId, std::string
   }
 }
 
+std::string JSElement::ElementInstance::tagName() {
+  std::string tagName = JSStringToStdString(tagNameStringRef_);
+  std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
+  return tagName;
+}
+
 BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientRect *boundingClientRect)
   : HostObject(context, "BoundingClientRect"), nativeBoundingClientRect(boundingClientRect) {}
 
@@ -762,8 +776,8 @@ BoundingClientRect::~BoundingClientRect() {
 }
 
 void traverseNode(JSNode::NodeInstance *node, TraverseHandler handler) {
-  bool shouldContinue = handler(node);
-  if (shouldContinue) return;
+  bool shouldExit = handler(node);
+  if (shouldExit) return;
 
   if (!node->childNodes.empty()) {
     for (auto &n : node->childNodes) {

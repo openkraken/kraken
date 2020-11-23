@@ -25,7 +25,13 @@ JSObjectRef JSCanvasElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 }
 
 JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *jsCanvasElement)
-  : ElementInstance(jsCanvasElement, "canvas"), nativeCanvasElement(new NativeCanvasElement(nativeElement)) {
+  : ElementInstance(jsCanvasElement, "canvas", false), nativeCanvasElement(new NativeCanvasElement(nativeElement)) {
+
+  std::string tagName = "canvas";
+  auto args = buildUICommandArgs(tagName);
+
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
+    ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeCanvasElement);
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {

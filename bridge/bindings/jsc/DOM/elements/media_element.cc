@@ -18,7 +18,7 @@ JSMediaElement *JSMediaElement::instance(JSContext *context) {
 JSMediaElement::JSMediaElement(JSContext *context) : JSElement(context) {}
 
 JSMediaElement::MediaElementInstance::MediaElementInstance(JSMediaElement *jsMediaElement, const char *tagName)
-  : ElementInstance(jsMediaElement, tagName), nativeMediaElement(new NativeMediaElement(nativeElement)) {}
+  : ElementInstance(jsMediaElement, tagName, false), nativeMediaElement(new NativeMediaElement(nativeElement)) {}
 
 JSMediaElement::MediaElementInstance::~MediaElementInstance() {
   delete nativeMediaElement;

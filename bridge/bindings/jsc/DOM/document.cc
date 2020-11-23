@@ -51,9 +51,14 @@ JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef functio
     Element = JSElement::instance(document->context);
   }
 
-  auto element = new JSElement::ElementInstance(Element, tagName.c_str());
+  const JSValueRef constructorArgs[] {
+    tagNameValue,
+  };
+
+  auto elementInstance = JSObjectCallAsConstructor(ctx, Element->classObject, 1, constructorArgs, exception);
+  auto element = reinterpret_cast<JSElement::ElementInstance*>(JSObjectGetPrivate(elementInstance));
   element->document = document;
-  return element->object;
+  return elementInstance;
 }
 
 JSValueRef DocumentInstance::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -131,6 +136,9 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   case DocumentProperty::kGetElementById: {
     return m_getElementById.function();
   }
+  case DocumentProperty::kGetElementsByTagName: {
+    return m_getElementsByTagName.function();
+  }
   }
 
   return nullptr;
@@ -152,7 +160,7 @@ std::vector<JSStringRef> &DocumentInstance::getDocumentPropertyNames() {
   static std::vector<JSStringRef> propertyNames{
     JSStringCreateWithUTF8CString("body"), JSStringCreateWithUTF8CString("createElement"),
     JSStringCreateWithUTF8CString("createTextNode"), JSStringCreateWithUTF8CString("createComment"),
-    JSStringCreateWithUTF8CString("getElementById")};
+    JSStringCreateWithUTF8CString("getElementById"), JSStringCreateWithUTF8CString("getElementsByTagName")};
   return propertyNames;
 }
 
@@ -162,7 +170,8 @@ const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &Docum
     {"createElement", DocumentProperty::kCreateElement},
     {"createTextNode", DocumentProperty::kCreateTextNode},
     {"createComment", DocumentProperty::kCreateComment},
-    {"getElementById", DocumentProperty::kGetElementById}};
+    {"getElementById", DocumentProperty::kGetElementById},
+    {"getElementsByTagName", DocumentProperty::kGetElementsByTagName}};
   return propertyMap;
 }
 
@@ -213,6 +222,41 @@ JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef functi
   }
 
   return nullptr;
+}
+
+JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                                  size_t argumentCount, const JSValueRef *arguments,
+                                                  JSValueRef *exception) {
+  if (argumentCount < 1) {
+    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, but only 0 present.", exception);
+    return nullptr;
+  }
+
+  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  JSStringRef tagNameStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
+  std::string tagName = JSStringToStdString(tagNameStringRef);
+  std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
+
+  std::vector<JSElement::ElementInstance *> elements;
+
+  traverseNode(document->m_body, [tagName, &elements](JSNode::NodeInstance *node) {
+    if (node->nodeType == NodeType::ELEMENT_NODE) {
+      auto element = reinterpret_cast<JSElement::ElementInstance*>(node);
+      if (element->tagName() == tagName) {
+        elements.emplace_back(element);
+      }
+    }
+
+    return false;
+  });
+
+  JSValueRef elementArguments[elements.size()];
+
+  for (int i = 0; i < elements.size(); i++) {
+    elementArguments[i] = elements[i]->object;
+  }
+
+  return JSObjectMakeArray(ctx, elements.size(), elementArguments, exception);
 }
 
 } // namespace kraken::binding::jsc

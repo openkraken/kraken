@@ -57,10 +57,12 @@ describe('Position fixed', () => {
         }),
       ]
     );
-    requestAnimationFrame(async () => {
+    requestAnimationFrame( () => {
       container.scroll(0, 200);
-      await matchViewportSnapshot();
-      done();
+      setTimeout(async () => {
+        await matchViewportSnapshot();
+        done();
+      }, 100);
     });
 
     BODY.appendChild(container);
