@@ -48,7 +48,7 @@ public:
       kInsertBefore,
       kReplaceChild,
       kNodeType,
-      kNodeName
+      kTextContent
     };
     static std::vector<JSStringRef> &getNodePropertyNames();
     static const std::unordered_map<std::string, NodeProperty> &getNodePropertyMap();

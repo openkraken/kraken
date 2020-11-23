@@ -56,8 +56,9 @@ public:
     kCreateTextNode,
     kCreateComment,
     kNodeName,
+    kGetElementById,
   };
-  static std::array<JSStringRef, 4> &getDocumentPropertyNames();
+  static std::vector<JSStringRef> &getDocumentPropertyNames();
   static const std::unordered_map<std::string, DocumentProperty> &getPropertyMap();
 
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -68,6 +69,9 @@ public:
 
   static JSValueRef createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
 
   DocumentInstance() = delete;
   explicit DocumentInstance(JSDocument *document);
@@ -86,6 +90,7 @@ private:
   JSFunctionHolder m_createElement{context, this, "createElement", createElement};
   JSFunctionHolder m_createTextNode{context, this, "createTextNode", createTextNode};
   JSFunctionHolder m_createComment{context, this, "createComment", createComment};
+  JSFunctionHolder m_getElementById{context, this, "getElementById", getElementById};
 };
 
 struct NativeDocument {

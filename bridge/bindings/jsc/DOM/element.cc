@@ -17,6 +17,94 @@ void bindElement(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "Element", element->classObject);
 }
 
+std::vector<JSStringRef> &JSElementAttributes::getAttributePropertyNames() {
+  static std::vector<JSStringRef> propertyMaps{JSStringCreateWithUTF8CString("length")};
+  return propertyMaps;
+}
+const std::unordered_map<std::string, JSElementAttributes::AttributeProperty> &
+JSElementAttributes::getAttributePropertyMap() {
+  static std::unordered_map<std::string, AttributeProperty> propertyMap{{"length", AttributeProperty::kLength}};
+  return propertyMap;
+}
+
+JSValueRef JSElementAttributes::getProperty(std::string &name, JSValueRef *exception) {
+  auto propertyMap = getAttributePropertyMap();
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+    switch (property) {
+    case AttributeProperty::kLength:
+      return JSValueMakeNumber(ctx, m_attributes.size());
+    }
+  } else if (hasAttribute(name)) {
+    return JSValueMakeString(ctx, getAttribute(name));
+  }
+  return nullptr;
+}
+void JSElementAttributes::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {}
+void JSElementAttributes::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &property : getAttributePropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : m_attributes) {
+    JSPropertyNameAccumulatorAddName(accumulator, property.second);
+  }
+}
+JSElementAttributes::~JSElementAttributes() {}
+
+JSStringRef JSElementAttributes::getAttribute(std::string &name) {
+  bool numberIndex = isNumberIndex(name);
+
+  if (numberIndex) {
+    int64_t index = std::stoi(name);
+    return v_attributes[index];
+  }
+
+  return m_attributes[name];
+}
+
+void JSElementAttributes::setAttribute(std::string &name, JSStringRef value) {
+  bool numberIndex = isNumberIndex(name);
+
+  if (numberIndex) {
+    int64_t index = std::stoi(name);
+
+    if (v_attributes[index] != nullptr) {
+      JSStringRelease(v_attributes[index]);
+    }
+
+    v_attributes[index] = value;
+  } else {
+    v_attributes.emplace_back(value);
+  }
+
+  if (m_attributes.contains(name)) {
+    JSStringRelease(m_attributes[name]);
+  }
+
+  m_attributes[name] = value;
+}
+
+bool JSElementAttributes::hasAttribute(std::string &name) {
+  bool numberIndex = isNumberIndex(name);
+
+  if (numberIndex) {
+    size_t index = std::stoi(name);
+    return v_attributes[index] != nullptr;
+  }
+
+  return m_attributes.contains(name);
+}
+
+void JSElementAttributes::removeAttribute(std::string &name) {
+  JSStringRef value = m_attributes[name];
+
+  auto index = std::find(v_attributes.begin(), v_attributes.end(), value);
+  v_attributes.erase(index);
+
+  m_attributes.erase(name);
+}
+
 JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
 JSElement *JSElement::instance(JSContext *context) {
@@ -68,33 +156,11 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
   return boundingClientRect->jsObject;
 }
 
-JSValueRef JSElement::ElementInstance::getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                                      size_t argumentCount, const JSValueRef *arguments,
-                                                      JSValueRef *exception) {
-  if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only 0 present.", exception);
-    return nullptr;
-  }
-
-  JSStringRef idStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
-  std::string id = JSStringToStdString(idStringRef);
-  if (id.empty()) return nullptr;
-
-  auto selfElement = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
-  assert(selfElement->document != nullptr);
-
-  if (!selfElement->document->elementMapById.contains(id)) {
-    return nullptr;
-  }
-
-  auto targetElement = selfElement->document->elementMapById[id];
-  return targetElement->object;
-}
-
 const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::ElementInstance::getElementPropertyMap() {
   static const std::unordered_map<std::string, ElementProperty> propertyHandler = {
     {"style", ElementProperty::kStyle},
     {"nodeName", ElementProperty::kNodeName},
+    {"tagName", ElementProperty::kTagName},
     {"offsetLeft", ElementProperty::kOffsetLeft},
     {"offsetTop", ElementProperty::kOffsetTop},
     {"offsetWidth", ElementProperty::kOffsetWidth},
@@ -116,7 +182,7 @@ const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::El
     {"setAttribute", ElementProperty::kSetAttribute},
     {"removeAttribute", ElementProperty::kRemoveAttribute},
     {"children", ElementProperty::kChildren},
-    {"getElementById", ElementProperty::kGetElementById}};
+    {"attributes", ElementProperty::kAttributes}};
   return propertyHandler;
 }
 
@@ -138,6 +204,7 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
 
     return style->object;
   }
+  case ElementProperty::kTagName:
   case ElementProperty::kNodeName:
     return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
   case ElementProperty::kOffsetLeft: {
@@ -212,9 +279,6 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
   case ElementProperty::kRemoveAttribute: {
     return m_removeAttribute.function();
   }
-  case ElementProperty::kGetElementById: {
-    return m_getElementById.function();
-  }
   case ElementProperty::kChildren: {
     JSValueRef arguments[childNodes.size()];
 
@@ -227,6 +291,9 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
     }
 
     return JSObjectMakeArray(_hostClass->ctx, elementCount, arguments, nullptr);
+  }
+  case ElementProperty::kAttributes: {
+    return (*m_attributes)->jsObject;
   }
   }
 
@@ -293,7 +360,8 @@ std::vector<JSStringRef> &JSElement::ElementInstance::getElementPropertyNames() 
     JSStringCreateWithUTF8CString("scrollHeight"), JSStringCreateWithUTF8CString("getBoundingClientRect"),
     JSStringCreateWithUTF8CString("click"),        JSStringCreateWithUTF8CString("scroll"),
     JSStringCreateWithUTF8CString("scrollBy"),     JSStringCreateWithUTF8CString("toBlob"),
-    JSStringCreateWithUTF8CString("children"),     JSStringCreateWithUTF8CString("getElementById")};
+    JSStringCreateWithUTF8CString("children"),     JSStringCreateWithUTF8CString("tagName"),
+    JSStringCreateWithUTF8CString("attributes")};
   return propertyNames;
 }
 
@@ -334,14 +402,16 @@ JSValueRef JSElement::ElementInstance::setAttribute(JSContextRef ctx, JSObjectRe
 
   std::string valueString = JSStringToStdString(valueStringRef);
 
-  if (elementInstance->attributes.contains(name)) {
-    JSStringRef oldValueRef = elementInstance->attributes[name];
+  auto attributes = *elementInstance->m_attributes;
+
+  if (attributes->hasAttribute(name)) {
+    JSStringRef oldValueRef = attributes->getAttribute(name);
     std::string oldValue = JSStringToStdString(oldValueRef);
     JSStringRelease(oldValueRef);
-    elementInstance->attributes[name] = valueStringRef;
+    attributes->setAttribute(name, valueStringRef);
     elementInstance->_didModifyAttribute(name, oldValue, valueString);
   } else {
-    elementInstance->attributes[name] = valueStringRef;
+    attributes->setAttribute(name, valueStringRef);
     std::string empty;
     elementInstance->_didModifyAttribute(name, empty, valueString);
   }
@@ -373,8 +443,10 @@ JSValueRef JSElement::ElementInstance::getAttribute(JSContextRef ctx, JSObjectRe
   JSStringRef nameStringRef = JSValueToStringCopy(ctx, nameValueRef, exception);
   std::string &&name = JSStringToStdString(nameStringRef);
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
-  if (elementInstance->attributes.contains(name)) {
-    return JSValueMakeString(ctx, elementInstance->attributes[name]);
+  auto attributes = *elementInstance->m_attributes;
+
+  if (attributes->hasAttribute(name)) {
+    return JSValueMakeString(ctx, attributes->getAttribute(name));
   }
 
   return nullptr;
@@ -399,19 +471,22 @@ JSValueRef JSElement::ElementInstance::removeAttribute(JSContextRef ctx, JSObjec
   JSStringRef nameStringRef = JSValueToStringCopy(ctx, nameValueRef, exception);
   std::string &&name = JSStringToStdString(nameStringRef);
   auto element = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
+  auto attributes = *element->m_attributes;
 
-  if (element->attributes.contains(name)) {
-    JSStringRef idRef = element->attributes[name];
+  if (attributes->hasAttribute(name)) {
+    JSStringRef idRef = attributes->getAttribute(name);
     std::string id = JSStringToStdString(idRef);
     std::string empty;
 
-    element->attributes.erase(name);
+    (*element->m_attributes)->removeAttribute(name);
     element->_didModifyAttribute(name, id, empty);
 
     auto args = buildUICommandArgs(name);
     ::foundation::UICommandTaskMessageQueue::instance(element->_hostClass->contextId)
       ->registerCommand(element->eventTargetId, UI_COMMAND_REMOVE_PROPERTY, args, 1, nullptr);
   }
+
+  return nullptr;
 }
 
 struct ToBlobPromiseContext {
@@ -569,8 +644,10 @@ void JSElement::ElementInstance::_notifyNodeRemoved(JSNode::NodeInstance *insert
   }
 }
 void JSElement::ElementInstance::_notifyChildRemoved() {
-  if (attributes.contains("id")) {
-    JSStringRef idRef = attributes["id"];
+  auto attributes = *m_attributes;
+  std::string idString = "id";
+  if (attributes->hasAttribute(idString)) {
+    JSStringRef idRef = attributes->getAttribute(idString);
     std::string id = JSStringToStdString(idRef);
     document->removeElementById(id);
   }
@@ -589,8 +666,10 @@ void JSElement::ElementInstance::_notifyNodeInsert(JSNode::NodeInstance *insertN
   }
 }
 void JSElement::ElementInstance::_notifyChildInsert() {
-  if (attributes.contains("id")) {
-    JSStringRef idRef = attributes["id"];
+  std::string idKey = "id";
+  auto attributes = *m_attributes;
+  if (attributes->hasAttribute(idKey)) {
+    JSStringRef idRef = attributes->getAttribute(idKey);
     std::string id = JSStringToStdString(idRef);
     document->addElementById(id, this);
   }

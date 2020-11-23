@@ -55,6 +55,24 @@ private:
   JSClassRef jsClass;
 };
 
+template<typename T>
+class JSHostObjectHolder {
+public:
+  JSHostObjectHolder() = delete;
+  explicit JSHostObjectHolder(T *hostObject): m_object(hostObject) {
+    JSValueProtect(m_object->ctx, m_object->jsObject);
+  }
+  ~JSHostObjectHolder() {
+    JSValueUnprotect(m_object->ctx, m_object->jsObject);
+  }
+  T* operator*() {
+    return m_object;
+  }
+
+private:
+  T *m_object;
+};
+
 } // namespace kraken::binding::jsc
 
 #endif // KRAKENBRIDGE_HOST_OBJECT_H

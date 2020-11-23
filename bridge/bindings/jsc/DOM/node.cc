@@ -420,7 +420,7 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
   }
   case NodeProperty::kNodeType:
     return JSValueMakeNumber(_hostClass->ctx, nodeType);
-  case NodeProperty::kNodeName: {
+  case NodeProperty::kTextContent: {
     JSStringRef textContent = internalTextContent();
     if (textContent == nullptr) textContent = JSStringCreateWithUTF8CString("");
     return JSValueMakeString(_hostClass->ctx, textContent);
@@ -450,7 +450,7 @@ std::vector<JSStringRef> &JSNode::NodeInstance::getNodePropertyNames() {
     JSStringCreateWithUTF8CString("appendChild"),     JSStringCreateWithUTF8CString("remove"),
     JSStringCreateWithUTF8CString("removeChild"),     JSStringCreateWithUTF8CString("parentNode"),
     JSStringCreateWithUTF8CString("insertBefore"),    JSStringCreateWithUTF8CString("replaceChild"),
-    JSStringCreateWithUTF8CString("nodeType"),        JSStringCreateWithUTF8CString("nodeName")};
+    JSStringCreateWithUTF8CString("nodeType"),        JSStringCreateWithUTF8CString("textContent")};
   return propertyNames;
 }
 
@@ -472,7 +472,7 @@ const std::unordered_map<std::string, JSNode::NodeInstance::NodeProperty> &JSNod
                                                                    {"insertBefore", NodeProperty::kInsertBefore},
                                                                    {"replaceChild", NodeProperty::kReplaceChild},
                                                                    {"nodeType", NodeProperty::kNodeType},
-                                                                   {"nodeName", NodeProperty::kNodeName}};
+                                                                   {"textContent", NodeProperty::kTextContent}};
   return propertyMap;
 }
 

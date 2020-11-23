@@ -17,12 +17,47 @@ namespace kraken::binding::jsc {
 void bindElement(std::unique_ptr<JSContext> &context);
 
 struct NativeElement;
+class JSElement;
+
+class JSElementAttributes : public HostObject {
+public:
+  JSElementAttributes() = delete;
+  JSElementAttributes(JSContext *context) : HostObject(context, "NamedNodeMap") {}
+  ~JSElementAttributes() override;
+
+  enum class AttributeProperty { kLength };
+
+  static std::vector<JSStringRef> &getAttributePropertyNames();
+  static const std::unordered_map<std::string, AttributeProperty> &getAttributePropertyMap();
+
+  JSStringRef getAttribute(std::string &name);
+  void setAttribute(std::string &name, JSStringRef value);
+  bool hasAttribute(std::string &name);
+  void removeAttribute(std::string &name);
+
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+  void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+
+private:
+
+  static inline bool isNumberIndex(std::string &name) {
+    if (name.empty()) return false;
+    char f = name[0];
+    return f >= '0' && f <= '9';
+  }
+
+  std::map<std::string, JSStringRef> m_attributes;
+  std::vector<JSStringRef> v_attributes;
+};
 
 class JSElement : public JSNode {
 public:
   enum class ElementProperty {
     kStyle,
     kNodeName,
+    kTagName,
+    kAttributes,
     kOffsetLeft,
     kOffsetTop,
     kOffsetWidth,
@@ -43,7 +78,6 @@ public:
     kGetAttribute,
     kSetAttribute,
     kRemoveAttribute,
-    kGetElementById,
     kChildren
   };
 
@@ -57,15 +91,12 @@ public:
     static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
-    static JSValueRef getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                      const JSValueRef arguments[], JSValueRef *exception);
-
     static JSValueRef setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -84,10 +115,11 @@ public:
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSStringRef internalTextContent() override;
 
-    NativeElement *nativeElement {nullptr};
+    NativeElement *nativeElement{nullptr};
+
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
-    JSStringRef tagNameStringRef_ {JSStringCreateWithUTF8CString("")};
+    JSStringRef tagNameStringRef_{JSStringCreateWithUTF8CString("")};
 
     void _notifyNodeRemoved(JSNode::NodeInstance *node) override;
     void _notifyChildRemoved();
@@ -99,13 +131,13 @@ public:
     JSFunctionHolder m_setAttribute{context, this, "setAttribute", setAttribute};
     JSFunctionHolder m_getAttribute{context, this, "getAttribute", getAttribute};
     JSFunctionHolder m_removeAttribute{context, this, "removeAttribute", removeAttribute};
-    JSFunctionHolder m_getElementById{context, this, "getElementById", getElementById};
     JSFunctionHolder m_toBlob{context, this, "toBlob", toBlob};
     JSFunctionHolder m_click{context, this, "click", click};
     JSFunctionHolder m_scroll{context, this, "scroll", scroll};
     JSFunctionHolder m_scrollBy{context, this, "scrollBy", scrollBy};
-    std::unordered_map<std::string, JSStringRef> attributes;
+    JSHostObjectHolder<JSElementAttributes> m_attributes{new JSElementAttributes(context)};
   };
+
 protected:
   JSElement() = delete;
   explicit JSElement(JSContext *context);
@@ -143,16 +175,7 @@ using SetScrollLeft = double (*)(NativeElement *nativeElement, double left);
 
 class BoundingClientRect : public HostObject {
 public:
-  enum BoundingClientRectProperty {
-    kX,
-    kY,
-    kWidth,
-    kHeight,
-    kLeft,
-    kTop,
-    kRight,
-    kBottom
-  };
+  enum BoundingClientRectProperty { kX, kY, kWidth, kHeight, kLeft, kTop, kRight, kBottom };
 
   static std::array<JSStringRef, 8> &getBoundingClientRectPropertyNames();
   static const std::unordered_map<std::string, BoundingClientRectProperty> &getPropertyMap();
@@ -170,7 +193,7 @@ private:
 // An struct represent Element object from dart side.
 struct NativeElement {
   NativeElement() = delete;
-  explicit NativeElement(NativeNode *nativeNode): nativeNode(nativeNode) {};
+  explicit NativeElement(NativeNode *nativeNode) : nativeNode(nativeNode){};
 
   const NativeNode *nativeNode;
 
@@ -194,7 +217,7 @@ struct NativeElement {
   SetScrollTop setScrollTop{nullptr};
 };
 
-using TraverseHandler = bool(*)(JSNode::NodeInstance *node);
+using TraverseHandler = bool (*)(JSNode::NodeInstance *node);
 void traverseNode(JSNode::NodeInstance *node, TraverseHandler handler);
 
 } // namespace kraken::binding::jsc
