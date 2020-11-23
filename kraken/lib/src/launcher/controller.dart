@@ -377,6 +377,8 @@ class KrakenController {
     _view.detachView();
     // Should init JS first
     await reloadJSContext(_view.contextId);
+    Inspector.prevInspector = view._elementManager.controller.view.inspector;
+
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         showPerformanceOverlay: _view.showPerformanceOverlay,
         enableDebug: _view.enableDebug,
