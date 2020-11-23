@@ -25,29 +25,49 @@ public:
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
-  class WindowInstance : public EventTargetInstance {
-  public:
-    WindowInstance() = delete;
-    explicit WindowInstance(JSWindow *window);
-    ~WindowInstance();
-    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-
-    NativeWindow *nativeWindow;
-
-  private:
-    std::array<JSStringRef, 11> propertyNames{
-      JSStringCreateWithUTF8CString("devicePixelRatio"), JSStringCreateWithUTF8CString("colorScheme"),
-      JSStringCreateWithUTF8CString("location"),         JSStringCreateWithUTF8CString("window"),
-      JSStringCreateWithUTF8CString("history"),          JSStringCreateWithUTF8CString("parent"),
-      JSStringCreateWithUTF8CString("scroll"),           JSStringCreateWithUTF8CString("scrollBy"),
-      JSStringCreateWithUTF8CString("scrollTo"),         JSStringCreateWithUTF8CString("scrollX"),
-      JSStringCreateWithUTF8CString("scrollY"),
-    };
-    JSLocation *location_;
-  };
 private:
   JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName){};
   ~JSWindow();
+};
+
+class WindowInstance : public JSEventTarget::EventTargetInstance {
+public:
+  enum class WindowProperty {
+    kDevicePixelRatio,
+    kColorScheme,
+    kLocation,
+    kWindow,
+    kHistory,
+    kParent,
+    kScroll,
+    kScrollBy,
+    kScrollTo,
+    kScrollX,
+    kScrollY
+  };
+
+  static std::vector<JSStringRef> &getWindowPropertyNames();
+  static std::unordered_map<std::string, WindowProperty> &getWindowPropertyMap();
+
+  WindowInstance() = delete;
+  explicit WindowInstance(JSWindow *window);
+  ~WindowInstance();
+
+  static JSValueRef scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                           const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+
+  NativeWindow *nativeWindow;
+
+private:
+  JSLocation *location_;
+
+  JSFunctionHolder m_scroll{context, this, "scroll", scroll};
+  JSFunctionHolder m_scrollBy{context, this, "scrollBy", scrollBy};
 };
 
 struct NativeWindow {

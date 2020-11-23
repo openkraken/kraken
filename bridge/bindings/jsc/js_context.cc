@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+#include "dart_methods.h"
+#include "bindings/jsc/KOM/window.h"
 #include "js_context.h"
 #include "bindings/jsc/macros.h"
 #include <memory>

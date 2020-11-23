@@ -12,6 +12,7 @@ import { URLSearchParams } from './kom/url-search-params';
 import { URL } from './kom/url';
 import { kraken } from './kom/kraken';
 import { MQTT } from './modules/mqtt';
+import { history } from './kom/history';
 
 defineGlobalProperty('console', console);
 defineGlobalProperty('WebSocket', WebSocket);
@@ -22,6 +23,7 @@ defineGlobalProperty('fetch', fetch);
 defineGlobalProperty('matchMedia', matchMedia);
 defineGlobalProperty('location', location);
 defineGlobalProperty('navigator', navigator);
+defineGlobalProperty('__history__', history);
 defineGlobalProperty('XMLHttpRequest', XMLHttpRequest);
 defineGlobalProperty('asyncStorage', asyncStorage);
 defineGlobalProperty('URLSearchParams', URLSearchParams);

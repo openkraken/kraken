@@ -74,6 +74,7 @@ public:
     kClick,
     kScroll,
     kScrollBy,
+    kScrollTo,
     kToBlob,
     kGetAttribute,
     kSetAttribute,

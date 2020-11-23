@@ -59,6 +59,9 @@ public:
     kGetElementById,
     kGetElementsByTagName
   };
+
+  static DocumentInstance *instance(JSContext *context);
+
   static std::vector<JSStringRef> &getDocumentPropertyNames();
   static const std::unordered_map<std::string, DocumentProperty> &getPropertyMap();
 
@@ -89,8 +92,9 @@ public:
   NativeDocument *nativeDocument;
   std::unordered_map<std::string, std::vector<JSElement::ElementInstance *>> elementMapById;
 
+  JSElement::ElementInstance *body;
+
 private:
-  JSElement::ElementInstance *m_body;
   JSFunctionHolder m_createElement{context, this, "createElement", createElement};
   JSFunctionHolder m_createTextNode{context, this, "createTextNode", createTextNode};
   JSFunctionHolder m_createComment{context, this, "createComment", createComment};

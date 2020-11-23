@@ -130,7 +130,7 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagN
   if (sendUICommand) {
     auto args = buildUICommandArgs(JSStringRetain(tagNameStringRef_));
     ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-        ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeElement);
+      ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeElement);
   }
 }
 
@@ -197,7 +197,8 @@ const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::El
     {"setAttribute", ElementProperty::kSetAttribute},
     {"removeAttribute", ElementProperty::kRemoveAttribute},
     {"children", ElementProperty::kChildren},
-    {"attributes", ElementProperty::kAttributes}};
+    {"attributes", ElementProperty::kAttributes},
+    {"scrollTo", ElementProperty::kScrollTo}};
   return propertyHandler;
 }
 
@@ -278,6 +279,7 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
   case ElementProperty::kClick: {
     return m_click.function();
   }
+  case ElementProperty::kScrollTo:
   case ElementProperty::kScroll: {
     return m_scroll.function();
   }
@@ -378,7 +380,7 @@ std::vector<JSStringRef> &JSElement::ElementInstance::getElementPropertyNames() 
     JSStringCreateWithUTF8CString("click"),        JSStringCreateWithUTF8CString("scroll"),
     JSStringCreateWithUTF8CString("scrollBy"),     JSStringCreateWithUTF8CString("toBlob"),
     JSStringCreateWithUTF8CString("children"),     JSStringCreateWithUTF8CString("tagName"),
-    JSStringCreateWithUTF8CString("attributes")};
+    JSStringCreateWithUTF8CString("attributes"), JSStringCreateWithUTF8CString("scrollTo")};
   return propertyNames;
 }
 
@@ -609,11 +611,11 @@ JSValueRef JSElement::ElementInstance::scroll(JSContextRef ctx, JSObjectRef func
   double x = 0.0;
   double y = 0.0;
 
-  if (JSValueIsNumber(ctx, xValueRef) && argumentCount > 0) {
+  if (argumentCount > 0 && JSValueIsNumber(ctx, xValueRef)) {
     x = JSValueToNumber(ctx, xValueRef, exception);
   }
 
-  if (JSValueIsNumber(ctx, yValueRef) && argumentCount > 1) {
+  if (argumentCount > 1 && JSValueIsNumber(ctx, yValueRef)) {
     y = JSValueToNumber(ctx, yValueRef, exception);
   }
 
@@ -633,11 +635,11 @@ JSValueRef JSElement::ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef fu
   double x = 0.0;
   double y = 0.0;
 
-  if (JSValueIsNumber(ctx, xValueRef) && argumentCount > 0) {
+  if (argumentCount > 0 && JSValueIsNumber(ctx, xValueRef)) {
     x = JSValueToNumber(ctx, xValueRef, exception);
   }
 
-  if (JSValueIsNumber(ctx, yValueRef) && argumentCount > 1) {
+  if (argumentCount > 1 && JSValueIsNumber(ctx, yValueRef)) {
     y = JSValueToNumber(ctx, yValueRef, exception);
   }
 
@@ -647,6 +649,7 @@ JSValueRef JSElement::ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef fu
 
   return nullptr;
 }
+
 void JSElement::ElementInstance::_notifyNodeRemoved(JSNode::NodeInstance *insertionNode) {
   if (insertionNode->isConnected()) {
     traverseNode(this, [](JSNode::NodeInstance *node) {

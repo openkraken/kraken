@@ -168,18 +168,4 @@ class CanvasElement extends Element {
     _nativeMap.remove(nativeCanvasElement.address);
     painter.context.dispose();
   }
-
-  @override
-  void setProperty(String key, value) {
-    switch (key) {
-      case 'width':
-        width = CSSLength.toDisplayPortValue(value);
-        break;
-      case 'height':
-        height = CSSLength.toDisplayPortValue(value);
-        break;
-      default:
-        super.setProperty(key, value);
-    }
-  }
 }

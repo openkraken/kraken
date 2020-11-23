@@ -51,12 +51,12 @@ JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef functio
     Element = JSElement::instance(document->context);
   }
 
-  const JSValueRef constructorArgs[] {
+  const JSValueRef constructorArgs[]{
     tagNameValue,
   };
 
   auto elementInstance = JSObjectCallAsConstructor(ctx, Element->classObject, 1, constructorArgs, exception);
-  auto element = reinterpret_cast<JSElement::ElementInstance*>(JSObjectGetPrivate(elementInstance));
+  auto element = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(elementInstance));
   element->document = document;
   return elementInstance;
 }
@@ -100,13 +100,21 @@ JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagN
   return m_elementMaps[tagName];
 }
 
+static std::unordered_map<JSContext *, DocumentInstance*> instanceMap{};
+
+DocumentInstance *DocumentInstance::instance(JSContext *context) {
+  return instanceMap[context];
+}
+
 DocumentInstance::DocumentInstance(JSDocument *document)
-  : NodeInstance(document, NodeType::DOCUMENT_NODE, DOCUMENT_TARGET_ID), nativeDocument(new NativeDocument(nativeNode)) {
+  : NodeInstance(document, NodeType::DOCUMENT_NODE, DOCUMENT_TARGET_ID),
+    nativeDocument(new NativeDocument(nativeNode)) {
   JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
   auto Element = JSElement::instance(document->context);
-  m_body = new JSElement::ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
-  m_body->document = this;
-  JSValueProtect(document->ctx, m_body->object);
+  body = new JSElement::ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
+  body->document = this;
+  JSValueProtect(document->ctx, body->object);
+  instanceMap[document->context] = this;
 }
 
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -122,7 +130,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
     return m_createElement.function();
   }
   case DocumentProperty::kBody:
-    return m_body->object;
+    return body->object;
   case DocumentProperty::kCreateTextNode: {
     return m_createTextNode.function();
   }
@@ -158,7 +166,7 @@ void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator
 
 std::vector<JSStringRef> &DocumentInstance::getDocumentPropertyNames() {
   static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("body"), JSStringCreateWithUTF8CString("createElement"),
+    JSStringCreateWithUTF8CString("body"),           JSStringCreateWithUTF8CString("createElement"),
     JSStringCreateWithUTF8CString("createTextNode"), JSStringCreateWithUTF8CString("createComment"),
     JSStringCreateWithUTF8CString("getElementById"), JSStringCreateWithUTF8CString("getElementsByTagName")};
   return propertyNames;
@@ -184,7 +192,7 @@ void DocumentInstance::removeElementById(std::string &id, JSElement::ElementInst
 
 void DocumentInstance::addElementById(std::string &id, JSElement::ElementInstance *element) {
   if (!elementMapById.contains(id)) {
-    elementMapById[id] = std::vector<JSElement::ElementInstance*>();
+    elementMapById[id] = std::vector<JSElement::ElementInstance *>();
   }
 
   auto &list = elementMapById[id];
@@ -228,7 +236,10 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
                                                   size_t argumentCount, const JSValueRef *arguments,
                                                   JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, but only 0 present.", exception);
+    JSC_THROW_ERROR(ctx,
+                    "Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, "
+                    "but only 0 present.",
+                    exception);
     return nullptr;
   }
 
@@ -239,9 +250,9 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
 
   std::vector<JSElement::ElementInstance *> elements;
 
-  traverseNode(document->m_body, [tagName, &elements](JSNode::NodeInstance *node) {
+  traverseNode(document->body, [tagName, &elements](JSNode::NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
-      auto element = reinterpret_cast<JSElement::ElementInstance*>(node);
+      auto element = reinterpret_cast<JSElement::ElementInstance *>(node);
       if (element->tagName() == tagName) {
         elements.emplace_back(element);
       }

@@ -6,15 +6,15 @@
 #ifndef KRAKENBRIDGE_JS_CONTEXT_H
 #define KRAKENBRIDGE_JS_CONTEXT_H
 
-#include "foundation/macros.h"
 #include "bindings/jsc/macros.h"
-#include "include/kraken_bridge.h"
 #include "foundation/js_engine_adaptor.h"
+#include "foundation/macros.h"
+#include "include/kraken_bridge.h"
 #include <JavaScriptCore/JavaScript.h>
+#include <chrono>
 #include <deque>
 #include <map>
 #include <string>
-#include <chrono>
 
 #ifndef __has_builtin
 #define __has_builtin(x) 0
@@ -29,6 +29,25 @@
 #endif
 
 namespace kraken::binding::jsc {
+
+class JSContext;
+
+class JSFunctionHolder {
+public:
+  JSFunctionHolder() = delete;
+  explicit JSFunctionHolder(JSContext *context, void *data, std::string name, JSObjectCallAsFunctionCallback callback);
+  ~JSFunctionHolder();
+
+  JSObjectRef function();
+
+private:
+  JSObjectRef m_function{nullptr};
+  JSContext *context;
+  void *m_data;
+  std::string m_name;
+  JSObjectCallAsFunctionCallback m_callback;
+  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
+};
 
 class JSContext {
 public:
@@ -61,32 +80,16 @@ private:
   JSGlobalContextRef ctx_;
 };
 
-class JSFunctionHolder {
-public:
-  JSFunctionHolder() = delete;
-  explicit JSFunctionHolder(JSContext *context, void *data, std::string name, JSObjectCallAsFunctionCallback callback);
-  ~JSFunctionHolder();
-
-  JSObjectRef function();
-
-private:
-  JSObjectRef m_function{nullptr};
-  JSContext *context;
-  void *m_data;
-  std::string m_name;
-  JSObjectCallAsFunctionCallback m_callback;
-  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
-};
-
 JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
                                     JSObjectCallAsFunctionCallback callback);
 
 NativeString **buildUICommandArgs(JSStringRef key);
 NativeString **buildUICommandArgs(std::string &key);
 NativeString **buildUICommandArgs(std::string &key, JSStringRef value);
-NativeString **buildUICommandArgs(std::string &key, std::string &value);;
+NativeString **buildUICommandArgs(std::string &key, std::string &value);
 
-JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback, JSValueRef *exception);
+JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback,
+                                JSValueRef *exception);
 
 std::string JSStringToStdString(JSStringRef jsString);
 

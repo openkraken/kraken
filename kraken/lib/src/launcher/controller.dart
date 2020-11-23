@@ -464,8 +464,6 @@ class KrakenController {
     assert(!_view._disposed, "Kraken have already disposed");
     if (_bundle != null) {
       await _bundle.run(_view.contextId);
-      // Make sure to trigger first ui frame callback
-      SchedulerBinding.instance.scheduleFrame();
       // trigger window load event
       module.requestAnimationFrame((_) {
         Event loadEvent = Event(EventType.load);

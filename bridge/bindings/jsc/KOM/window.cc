@@ -4,13 +4,14 @@
  */
 
 #include "window.h"
+#include "bindings/jsc/DOM/document.h"
 #include "bindings/jsc/macros.h"
 #include "dart_methods.h"
 #include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
 
-JSWindow::WindowInstance::WindowInstance(JSWindow *window)
+WindowInstance::WindowInstance(JSWindow *window)
   : EventTargetInstance(window, WINDOW_TARGET_ID), nativeWindow(new NativeWindow(nativeEventTarget)) {
   location_ = new JSLocation(context);
 
@@ -18,52 +19,155 @@ JSWindow::WindowInstance::WindowInstance(JSWindow *window)
     ->registerCommand(WINDOW_TARGET_ID, UI_COMMAND_INIT_WINDOW, nullptr, 0, nativeWindow);
 }
 
-JSWindow::WindowInstance::~WindowInstance() {
-  for (auto &propertyName : propertyNames) {
-    JSStringRelease(propertyName);
-  }
+WindowInstance::~WindowInstance() {
   delete nativeWindow;
 }
 
-JSValueRef JSWindow::WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "devicePixelRatio") {
-    if (getDartMethod()->devicePixelRatio == nullptr) {
-      JSC_THROW_ERROR(context->context(),
-                      "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.", exception);
-      return nullptr;
-    }
+std::unordered_map<std::string, WindowInstance::WindowProperty> &WindowInstance::getWindowPropertyMap() {
+  static std::unordered_map<std::string, WindowProperty> propertyMap{
+    {"devicePixelRatio", WindowProperty::kDevicePixelRatio},
+    {"colorScheme", WindowProperty::kColorScheme},
+    {"location", WindowProperty::kLocation},
+    {"window", WindowProperty::kWindow},
+    {"history", WindowProperty::kHistory},
+    {"parent", WindowProperty::kParent},
+    {"scroll", WindowProperty::kScroll},
+    {"scrollBy", WindowProperty::kScrollBy},
+    {"scrollTo", WindowProperty::kScrollTo},
+    {"scrollX", WindowProperty::kScrollX},
+    {"scrollY", WindowProperty::kScrollY}};
+  return propertyMap;
+}
 
-    double devicePixelRatio = getDartMethod()->devicePixelRatio(_hostClass->contextId);
-    return JSValueMakeNumber(context->context(), devicePixelRatio);
-  } else if (name == "colorScheme") {
-    if (getDartMethod()->platformBrightness == nullptr) {
-      JSC_THROW_ERROR(context->context(),
-                      "Failed to read colorScheme: dart method (platformBrightness) not register.", exception);
-      return nullptr;
+std::vector<JSStringRef> &WindowInstance::getWindowPropertyNames() {
+  static std::vector<JSStringRef> propertyNames{
+    JSStringCreateWithUTF8CString("devicePixelRatio"), JSStringCreateWithUTF8CString("colorScheme"),
+    JSStringCreateWithUTF8CString("location"),         JSStringCreateWithUTF8CString("window"),
+    JSStringCreateWithUTF8CString("history"),          JSStringCreateWithUTF8CString("parent"),
+    JSStringCreateWithUTF8CString("scroll"),           JSStringCreateWithUTF8CString("scrollBy"),
+    JSStringCreateWithUTF8CString("scrollTo"),         JSStringCreateWithUTF8CString("scrollX"),
+    JSStringCreateWithUTF8CString("scrollY"),
+  };
+  return propertyNames;
+}
+
+JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
+  auto propertyMap = getWindowPropertyMap();
+
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+
+    switch (property) {
+    case WindowProperty::kDevicePixelRatio: {
+      if (getDartMethod()->devicePixelRatio == nullptr) {
+        JSC_THROW_ERROR(context->context(),
+                        "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.", exception);
+        return nullptr;
+      }
+
+      double devicePixelRatio = getDartMethod()->devicePixelRatio(_hostClass->contextId);
+      return JSValueMakeNumber(context->context(), devicePixelRatio);
     }
-    const NativeString *code = getDartMethod()->platformBrightness(_hostClass->contextId);
-    JSStringRef resultRef = JSStringCreateWithCharacters(code->string, code->length);
-    return JSValueMakeString(context->context(), resultRef);
-  } else if (name == "location") {
-    return location_->jsObject;
-  } else if (name == "window") {
-    return this->object;
-  } else if (name == "history" || name == "parent") {
-    // TODO: implement history API.
-    return nullptr;
-  } else if (name == "scroll") {
-    // TODO: implement window.scroll();
-  } else if (name == "scrollBy") {
-    // TODO: implement window.scrollBy();
-  } else if (name == "scrollTo") {
-    // TODO: implement window.scrollTo();
-  } else if (name == "scrollX") {
-    // TODO: implement window.scrollX();
-  } else if (name == "scrollY") {
-    // TODO: implement window.scrollY();
+    case WindowProperty::kColorScheme: {
+      if (getDartMethod()->platformBrightness == nullptr) {
+        JSC_THROW_ERROR(context->context(),
+                        "Failed to read colorScheme: dart method (platformBrightness) not register.", exception);
+        return nullptr;
+      }
+      const NativeString *code = getDartMethod()->platformBrightness(_hostClass->contextId);
+      JSStringRef resultRef = JSStringCreateWithCharacters(code->string, code->length);
+      return JSValueMakeString(context->context(), resultRef);
+    }
+    case WindowProperty::kLocation:
+      return location_->jsObject;
+    case WindowProperty::kParent:
+    case WindowProperty::kWindow:
+      return this->object;
+    case WindowProperty::kHistory: {
+      JSStringRef key = JSStringCreateWithUTF8CString("__history__");
+      JSValueRef history = JSObjectGetProperty(_hostClass->ctx, _hostClass->context->global(), key, exception);
+      JSStringRelease(key);
+      return history;
+    }
+    case WindowProperty::kScrollTo:
+    case WindowProperty::kScroll:
+      return m_scroll.function();
+    case WindowProperty::kScrollBy:
+      return m_scrollBy.function();
+    case WindowProperty::kScrollX: {
+      auto document = DocumentInstance::instance(_hostClass->context);
+      return JSValueMakeNumber(_hostClass->ctx,
+                               document->body->nativeElement->getScrollLeft(document->body->nativeElement));
+    }
+    case WindowProperty::kScrollY: {
+      auto document = DocumentInstance::instance(_hostClass->context);
+      return JSValueMakeNumber(_hostClass->ctx,
+                               document->body->nativeElement->getScrollTop(document->body->nativeElement));
+    }
+    }
   }
 
-  return JSEventTarget::EventTargetInstance::getProperty(name, exception);
+  JSValueRef eventTargetRet = JSEventTarget::EventTargetInstance::getProperty(name, exception);
+  if (eventTargetRet != nullptr) return eventTargetRet;
+
+  JSStringRef keyStringRef = JSStringCreateWithUTF8CString(name.c_str());
+  return JSObjectGetProperty(_hostClass->ctx, _hostClass->context->global(), keyStringRef, exception);
+}
+
+void WindowInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  EventTargetInstance::getPropertyNames(accumulator);
+
+  for (auto &property : getWindowPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+}
+
+JSValueRef WindowInstance::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef *arguments, JSValueRef *exception) {
+  const JSValueRef xValueRef = arguments[0];
+  const JSValueRef yValueRef = arguments[1];
+
+  double x = 0.0;
+  double y = 0.0;
+
+  if (argumentCount > 0 && JSValueIsNumber(ctx, xValueRef)) {
+    x = JSValueToNumber(ctx, xValueRef, exception);
+  }
+
+  if (argumentCount > 1 && JSValueIsNumber(ctx, yValueRef)) {
+    y = JSValueToNumber(ctx, yValueRef, exception);
+  }
+
+  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(function));
+  getDartMethod()->requestUpdateFrame();
+  auto document = DocumentInstance::instance(window->context);
+  document->body->nativeElement->scroll(document->body->nativeElement, x, y);
+
+  return nullptr;
+}
+
+JSValueRef WindowInstance::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  const JSValueRef xValueRef = arguments[0];
+  const JSValueRef yValueRef = arguments[1];
+
+  double x = 0.0;
+  double y = 0.0;
+
+  if (argumentCount > 0 && JSValueIsNumber(ctx, xValueRef)) {
+    x = JSValueToNumber(ctx, xValueRef, exception);
+  }
+
+  if (argumentCount > 1 && JSValueIsNumber(ctx, yValueRef)) {
+    y = JSValueToNumber(ctx, yValueRef, exception);
+  }
+
+  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(function));
+  getDartMethod()->requestUpdateFrame();
+  auto document = DocumentInstance::instance(window->context);
+  document->body->nativeElement->scrollBy(document->body->nativeElement, x, y);
+
+  return nullptr;
 }
 
 JSWindow::~JSWindow() {}

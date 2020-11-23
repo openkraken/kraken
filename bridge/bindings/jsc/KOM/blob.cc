@@ -106,7 +106,7 @@ JSObjectRef JSBlob::instanceConstructor(JSContextRef ctx, JSObjectRef constructo
     return nullptr;
   }
 
-  if (JSValueIsUndefined(ctx, optionValue)) {
+  if (argumentCount == 1 || JSValueIsUndefined(ctx, optionValue)) {
     builder.append(*context, arrayValue, exception);
     auto blob = new JSBlob::BlobInstance(Blob, builder.finalize());
     return blob->object;
@@ -160,15 +160,15 @@ JSValueRef JSBlob::BlobInstance::slice(JSContextRef ctx, JSObjectRef function, J
   size_t end = blob->_data.size();
   std::string mimeType = blob->mimeType;
 
-  if (!JSValueIsUndefined(ctx, startValueRef)) {
+  if (argumentCount > 0 && !JSValueIsUndefined(ctx, startValueRef)) {
     start = JSValueToNumber(ctx, startValueRef, exception);
   }
 
-  if (!JSValueIsUndefined(ctx, endValueRef)) {
+  if (argumentCount > 1 && !JSValueIsUndefined(ctx, endValueRef)) {
     end = JSValueToNumber(ctx, endValueRef, exception);
   }
 
-  if (!JSValueIsUndefined(ctx, contentTypeValueRef)) {
+  if (argumentCount > 2 && !JSValueIsUndefined(ctx, contentTypeValueRef)) {
     JSStringRef contentTypeStringRef = JSValueToStringCopy(ctx, contentTypeValueRef, exception);
     mimeType = std::move(JSStringToStdString(contentTypeStringRef));
     JSStringRelease(contentTypeStringRef);
