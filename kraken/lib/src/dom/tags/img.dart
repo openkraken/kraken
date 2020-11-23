@@ -69,8 +69,6 @@ class ImageElement extends Element {
     _image = null;
     _imageBox = null;
     _imageStream = null;
-    _imageStream = null;
-    _imageStreamListener = null;
   }
 
   void _renderImage() {
