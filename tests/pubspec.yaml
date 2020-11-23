@@ -23,6 +23,7 @@ dependencies:
     sdk: flutter
   kraken:
     path: ../kraken
+  image: ^2.1.19
 
 dev_dependencies:
   flutter_driver:
