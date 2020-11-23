@@ -28,7 +28,8 @@ class ImageElement extends Element {
   ImageInfo _imageInfo;
   double _propertyWidth;
   double _propertyHeight;
-  ImageStreamListener _imageStreamListener;
+  ImageStreamListener _initImageListener;
+  ImageStreamListener _renderStreamListener;
 
   bool _hasLazyLoading = false;
 
@@ -40,7 +41,7 @@ class ImageElement extends Element {
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,
         tagName: IMAGE) {
-    _imageStreamListener = ImageStreamListener(_initImageInfo);
+    _renderStreamListener = ImageStreamListener(_renderMultiFrameImage);
   }
 
   @override
@@ -120,17 +121,20 @@ class ImageElement extends Element {
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
-    if (_imageBox != null) {
-      _imageBox.image = _imageInfo?.image;
-
-      // Image size may affect parent layout,
-      // make parent relayout after image init.
-      _imageBox.markNeedsLayoutForSizedByParentChange();
-    }
-
     _handleEventAfterImageLoaded(imageInfo, synchronousCall);
-    _removeStreamListener();
+    if (_initImageListener != null) {
+      _imageStream?.removeListener(_initImageListener);
+    }
+  }
+
+  void _renderMultiFrameImage(ImageInfo imageInfo, bool synchronousCall) {
+    _imageInfo = imageInfo;
+    _imageBox?.image = _imageInfo?.image;
     _resize();
+
+    // Image size may affect parent layout,
+    // make parent relayout after image init.
+    _imageBox?.markNeedsLayoutForSizedByParentChange();
   }
 
   void _resize() {
@@ -182,7 +186,11 @@ class ImageElement extends Element {
   }
 
   void _removeStreamListener() {
-    _imageStream?.removeListener(_imageStreamListener);
+    _imageStream?.removeListener(_renderStreamListener);
+
+    if (_initImageListener != null) {
+      _imageStream?.removeListener(_initImageListener);
+    }
     _imageStream = null;
   }
 
@@ -308,8 +316,10 @@ class ImageElement extends Element {
         _removeStreamListener();
         _image = CSSUrl.parseUrl(source, cache: properties['caching']);
         _imageStream = _image.resolve(ImageConfiguration.empty);
+        _imageStream.addListener(_renderStreamListener);
 
-        _imageStream.addListener(_imageStreamListener);
+        _initImageListener = ImageStreamListener(_initImageInfo);
+        _imageStream.addListener(_initImageListener);
       }
     }
   }

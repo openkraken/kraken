@@ -1329,7 +1329,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
           // If child's mainAxis have clips, it will create a new format context in it's children's.
           // so we do't need to care about child's size.
-          if (child is RenderBoxModel && _isChildMainAxisClip(child)) {
+          if (child is RenderBoxModel && child is! RenderIntrinsic && _isChildMainAxisClip(child)) {
             computedSize = current['originalMainSize'] + freeMainAxisSpace;
           } else {
             double shrinkValue = _getShrinkConstraints(child, runChildren, freeMainAxisSpace);
