@@ -2,6 +2,7 @@
 
 #define BODY_TARGET_ID -1
 #define WINDOW_TARGET_ID -2
+#define DOCUMENT_TARGET_ID -3
 
 #define JSC_GLOBAL_BINDING_FUNCTION(context, nameStr, func)                                                            \
   {                                                                                                                    \

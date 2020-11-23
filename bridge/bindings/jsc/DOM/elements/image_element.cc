@@ -24,11 +24,6 @@ JSObjectRef JSImageElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 
 JSImageElement::ImageElementInstance::ImageElementInstance(JSImageElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "img"), nativeImageElement(new NativeImageElement(nativeElement)) {
-  std::string tagName = "img";
-  auto args = buildUICommandArgs(tagName);
-
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeImageElement);
 }
 
 std::vector<JSStringRef> &JSImageElement::ImageElementInstance::getImageElementPropertyNames() {

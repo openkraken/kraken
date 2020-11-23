@@ -17,14 +17,6 @@ void bindCSSStyleDeclaration(std::unique_ptr<JSContext> &context) {
 
 namespace {
 
-template <typename CharacterType> inline bool isASCIILower(CharacterType character) {
-  return character >= 'a' && character <= 'z';
-}
-
-template <typename CharacterType> inline CharacterType toASCIIUpper(CharacterType character) {
-  return character & ~(isASCIILower(character) << 5);
-}
-
 static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
   static std::unordered_map<std::string, std::string> propertyCache{};
 

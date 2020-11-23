@@ -117,7 +117,12 @@ JSElement *JSElement::instance(JSContext *context) {
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagName)
   : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)),
-    tagNameStringRef_(JSStringRetain(JSStringCreateWithUTF8CString(tagName))) {}
+    tagNameStringRef_(JSStringRetain(JSStringCreateWithUTF8CString(tagName))) {
+
+  auto args = buildUICommandArgs(JSStringRetain(tagNameStringRef_));
+  ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
+      ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeElement);
+}
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRef, double targetId)
   : NodeInstance(element, NodeType::ELEMENT_NODE, targetId), nativeElement(new NativeElement(nativeNode)),
@@ -204,7 +209,11 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
 
     return style->object;
   }
-  case ElementProperty::kTagName:
+  case ElementProperty::kTagName: {
+    std::string tagName = JSStringToStdString(tagNameStringRef_);
+    std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
+    return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName.c_str()));
+  }
   case ElementProperty::kNodeName:
     return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
   case ElementProperty::kOffsetLeft: {

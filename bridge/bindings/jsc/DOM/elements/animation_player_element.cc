@@ -63,10 +63,6 @@ JSAnimationPlayerElement::AnimationPlayerElementInstance::AnimationPlayerElement
   JSAnimationPlayerElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "animation-player"),
     nativeAnimationPlayerElement(new NativeAnimationPlayerElement(nativeElement)) {
-  std::string tagName = "animation-player";
-  auto args = buildUICommandArgs(tagName);
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeAnimationPlayerElement);
 }
 
 std::vector<JSStringRef> &

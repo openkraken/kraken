@@ -25,11 +25,6 @@ JSObjectRef JSVideoElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 
 JSVideoElement::VideoElementInstance::VideoElementInstance(JSVideoElement *JSVideoElement)
   : MediaElementInstance(JSVideoElement, "video"), nativeVideoElement(new NativeVideoElement(nativeMediaElement)) {
-  std::string tagName = "video";
-  auto args = buildUICommandArgs(tagName);
-
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeVideoElement);
 }
 
 JSVideoElement::VideoElementInstance::~VideoElementInstance() {

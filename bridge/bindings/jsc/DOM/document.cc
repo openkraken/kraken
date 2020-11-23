@@ -96,7 +96,7 @@ JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagN
 }
 
 DocumentInstance::DocumentInstance(JSDocument *document)
-  : NodeInstance(document, NodeType::DOCUMENT_NODE), nativeDocument(new NativeDocument(nativeNode)) {
+  : NodeInstance(document, NodeType::DOCUMENT_NODE, DOCUMENT_TARGET_ID), nativeDocument(new NativeDocument(nativeNode)) {
   JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
   auto Element = JSElement::instance(document->context);
   m_body = new JSElement::ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
@@ -196,7 +196,8 @@ JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef functi
   }
 
   auto targetElement = document->elementMapById[id];
-  return targetElement->object;
+  if (targetElement->isConnected()) return targetElement->object;
+  return nullptr;
 }
 
 } // namespace kraken::binding::jsc

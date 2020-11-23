@@ -24,11 +24,6 @@ JSObjectRef JSIframeElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 
 JSIframeElement::IframeElementInstance::IframeElementInstance(JSIframeElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "iframe"), nativeIframeElement(new NativeIframeElement(nativeElement)) {
-  std::string tagName = "iframe";
-
-  auto args = buildUICommandArgs(tagName);
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeIframeElement);
 }
 
 std::vector<JSStringRef> &JSIframeElement::IframeElementInstance::getIframeElementPropertyNames() {

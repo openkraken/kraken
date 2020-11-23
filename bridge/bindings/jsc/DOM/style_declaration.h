@@ -15,6 +15,14 @@ namespace kraken::binding::jsc {
 
 void bindCSSStyleDeclaration(std::unique_ptr<JSContext> &context);
 
+template <typename CharacterType> inline bool isASCIILower(CharacterType character) {
+  return character >= 'a' && character <= 'z';
+}
+
+template <typename CharacterType> inline CharacterType toASCIIUpper(CharacterType character) {
+  return character & ~(isASCIILower(character) << 5);
+}
+
 class CSSStyleDeclaration : public HostClass {
 public:
   static CSSStyleDeclaration *instance(JSContext *context);

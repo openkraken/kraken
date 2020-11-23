@@ -11,7 +11,7 @@
 
 namespace kraken::binding::jsc {
 
-static std::atomic<int64_t> globalEventTargetId{-2};
+static std::atomic<int64_t> globalEventTargetId{0};
 
 void bindEventTarget(std::unique_ptr<JSContext> &context) {
   auto eventTarget = JSEventTarget::instance(context.get());
