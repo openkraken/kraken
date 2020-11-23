@@ -45,14 +45,14 @@ CSSOverflowType _getOverflowType(String definition) {
   }
 }
 
+typedef ScrollListener = void Function(double scrollTop, AxisDirection axisDirection);
+
 mixin CSSOverflowMixin {
+  KrakenScrollable get scrollableX => _scrollableX;
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
-  void updateRenderOverflow(
-      RenderBoxModel renderBoxModel,
-      Element element,
-      void scrollListener(double scrollTop, AxisDirection axisDirection)) {
+  void updateRenderOverflow(RenderBoxModel renderBoxModel, Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
     if (style != null) {
       List<CSSOverflowType> overflow = getOverflowTypes(style);
@@ -166,11 +166,13 @@ mixin CSSOverflowMixin {
   }
 
   double getScrollHeight(RenderBoxModel renderBoxModel) {
-    return renderBoxModel.hasSize ? renderBoxModel.size.height : 0;
+    Size scrollContainerSize = renderBoxModel.maxScrollableSize;
+    return scrollContainerSize.height;
   }
 
   double getScrollWidth(RenderBoxModel renderBoxModel) {
-    return renderBoxModel.hasSize ? renderBoxModel.size.width : 0;
+    Size scrollContainerSize = renderBoxModel.maxScrollableSize;
+    return scrollContainerSize.width;
   }
 
   void scroll(List args, {bool isScrollBy = false}) {

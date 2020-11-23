@@ -6,6 +6,8 @@ import 'dart:convert';
 
 import 'package:kraken/dom.dart';
 
+const String CLICK = 'click';
+
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
   String type;
