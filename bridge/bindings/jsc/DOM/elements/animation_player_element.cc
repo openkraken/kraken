@@ -35,17 +35,17 @@ JSValueRef JSAnimationPlayerElement::play(JSContextRef ctx, JSObjectRef function
     return nullptr;
   }
 
-  if (argumentCount < 2) {
+  if (argumentCount > 0) {
     JSStringRef nameStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
     name.string = JSStringGetCharactersPtr(nameStringRef);
     name.length = JSStringGetLength(nameStringRef);
   }
 
-  if (argumentCount < 3) {
+  if (argumentCount > 1) {
     mix = JSValueToNumber(ctx, arguments[1], exception);
   }
 
-  if (argumentCount < 4) {
+  if (argumentCount > 2) {
     mixSeconds = JSValueToNumber(ctx, arguments[2], exception);
   }
 
@@ -53,6 +53,7 @@ JSValueRef JSAnimationPlayerElement::play(JSContextRef ctx, JSObjectRef function
     static_cast<JSAnimationPlayerElement::AnimationPlayerElementInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->requestUpdateFrame();
+  assert_m(elementInstance->nativeAnimationPlayerElement->play != nullptr, "Failed to call dart method: play() is nullptr");
   elementInstance->nativeAnimationPlayerElement->play(elementInstance->nativeAnimationPlayerElement, &name, mix,
                                                       mixSeconds);
 

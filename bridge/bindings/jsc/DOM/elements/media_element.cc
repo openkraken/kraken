@@ -54,6 +54,7 @@ JSValueRef JSMediaElement::MediaElementInstance::play(JSContextRef ctx, JSObject
                                                       JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
   getDartMethod()->requestUpdateFrame();
+  assert_m(elementInstance->nativeMediaElement->play != nullptr, "Failed to execute play(): dart method is nullptr.");
   elementInstance->nativeMediaElement->play(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
   return nullptr;
 }
@@ -63,6 +64,7 @@ JSValueRef JSMediaElement::MediaElementInstance::pause(JSContextRef ctx, JSObjec
                                                        JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
   getDartMethod()->requestUpdateFrame();
+  assert_m(elementInstance->nativeMediaElement->pause != nullptr, "Failed to execute pause(): dart method is nullptr.");
   elementInstance->nativeMediaElement->pause(elementInstance->_hostClass->contextId, elementInstance->eventTargetId);
   return nullptr;
 }
@@ -85,6 +87,7 @@ JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSOb
   auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->requestUpdateFrame();
+  assert_m(elementInstance->nativeMediaElement->fastSeek != nullptr, "Failed to execute fastSeek(): dart method is nullptr.");
   elementInstance->nativeMediaElement->fastSeek(elementInstance->_hostClass->contextId, elementInstance->eventTargetId,
                                                 duration);
 

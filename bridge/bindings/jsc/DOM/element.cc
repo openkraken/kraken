@@ -148,6 +148,7 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSStringRef tagN
 
   // No needs to send create element for BODY element.
   if (targetId == BODY_TARGET_ID) {
+    assert_m(getDartMethod()->initBody != nullptr, "Failed to execute initBody(): dart method is nullptr.");
     getDartMethod()->initBody(element->contextId, nativeElement);
   } else {
     ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
@@ -166,6 +167,7 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
                                                              const JSValueRef *arguments, JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
   getDartMethod()->requestUpdateFrame();
+  assert_m(elementInstance->nativeElement->getBoundingClientRect != nullptr, "Failed to execute getBoundingClientRect(): dart method is nullptr.");
   NativeBoundingClientRect *nativeBoundingClientRect =
     elementInstance->nativeElement->getBoundingClientRect(elementInstance->nativeElement);
   auto boundingClientRect = new BoundingClientRect(elementInstance->context, nativeBoundingClientRect);
@@ -228,50 +230,62 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
     return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
   case ElementProperty::kOffsetLeft: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getOffsetLeft != nullptr, "Failed to execute getOffsetLeft(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetLeft(nativeElement));
   }
   case ElementProperty::kOffsetTop: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getOffsetTop != nullptr, "Failed to execute getOffsetTop(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetTop(nativeElement));
   }
   case ElementProperty::kOffsetWidth: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getOffsetWidth != nullptr, "Failed to execute getOffsetWidth(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetWidth(nativeElement));
   }
   case ElementProperty::kOffsetHeight: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getOffsetHeight != nullptr, "Failed to execute getOffsetHeight(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetHeight(nativeElement));
   }
   case ElementProperty::kClientWidth: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getClientWidth != nullptr, "Failed to execute getClientWidth(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientWidth(nativeElement));
   }
   case ElementProperty::kClientHeight: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getClientHeight != nullptr, "Failed to execute getClientHeight(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientHeight(nativeElement));
   }
   case ElementProperty::kClientTop: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getClientTop != nullptr, "Failed to execute getClientTop(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientTop(nativeElement));
   }
   case ElementProperty::kClientLeft: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getClientLeft != nullptr, "Failed to execute getClientLeft(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientLeft(nativeElement));
   }
   case ElementProperty::kScrollTop: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getScrollTop != nullptr, "Failed to execute getScrollTop(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollTop(nativeElement));
   }
   case ElementProperty::kScrollLeft: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getScrollLeft != nullptr, "Failed to execute getScrollLeft(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollLeft(nativeElement));
   }
   case ElementProperty::kScrollHeight: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getScrollHeight != nullptr, "Failed to execute getScrollHeight(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollHeight(nativeElement));
   }
   case ElementProperty::kScrollWidth: {
     getDartMethod()->requestUpdateFrame();
+    assert_m(nativeElement->getScrollWidth != nullptr, "Failed to execute getScrollWidth(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollWidth(nativeElement));
   }
   case ElementProperty::kGetBoundingClientRect: {
@@ -327,14 +341,18 @@ void JSElement::ElementInstance::setProperty(std::string &name, JSValueRef value
     auto property = propertyMap[name];
 
     switch (property) {
-    case ElementProperty::kScrollTop:
+    case ElementProperty::kScrollTop: {
       getDartMethod()->requestUpdateFrame();
+      assert_m(nativeElement->setScrollTop != nullptr, "Failed to execute setScrollTop(): dart method is nullptr.");
       nativeElement->setScrollTop(nativeElement, JSValueToNumber(_hostClass->ctx, value, exception));
       break;
-    case ElementProperty::kScrollLeft:
+    }
+    case ElementProperty::kScrollLeft: {
       getDartMethod()->requestUpdateFrame();
+      assert_m(nativeElement->setScrollLeft != nullptr, "Failed to execute setScrollLeft(): dart method is nullptr.");
       nativeElement->setScrollLeft(nativeElement, JSValueToNumber(_hostClass->ctx, value, exception));
       break;
+    }
     default:
       break;
     }
@@ -593,6 +611,7 @@ JSValueRef JSElement::ElementInstance::click(JSContextRef ctx, JSObjectRef funct
                                              size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
   getDartMethod()->requestUpdateFrame();
+  assert_m(elementInstance->nativeElement->click != nullptr, "Failed to execute click(): dart method is nullptr.");
   elementInstance->nativeElement->click(elementInstance->nativeElement);
 
   return nullptr;
@@ -617,6 +636,7 @@ JSValueRef JSElement::ElementInstance::scroll(JSContextRef ctx, JSObjectRef func
 
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
   getDartMethod()->requestUpdateFrame();
+  assert_m(elementInstance->nativeElement->scroll != nullptr, "Failed to execute scroll(): dart method is nullptr.");
   elementInstance->nativeElement->scroll(elementInstance->nativeElement, x, y);
 
   return nullptr;
@@ -641,6 +661,7 @@ JSValueRef JSElement::ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef fu
 
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
   getDartMethod()->requestUpdateFrame();
+  assert_m(elementInstance->nativeElement->scrollBy != nullptr, "Failed to execute scrollBy(): dart method is nullptr.");
   elementInstance->nativeElement->scrollBy(elementInstance->nativeElement, x, y);
 
   return nullptr;

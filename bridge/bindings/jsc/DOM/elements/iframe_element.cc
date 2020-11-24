@@ -134,6 +134,7 @@ JSValueRef JSIframeElement::IframeElementInstance::postMessage(JSContextRef ctx,
   message.length = JSStringGetLength(messageStringRef);
 
   auto instance = reinterpret_cast<JSIframeElement::IframeElementInstance *>(JSObjectGetPrivate(function));
+  assert_m(instance->nativeIframeElement->postMessage != nullptr, "Failed to execute postMessage(): dart method is nullptr.");
   instance->nativeIframeElement->postMessage(instance->nativeIframeElement, &message);
 
   return nullptr;

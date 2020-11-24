@@ -4,6 +4,8 @@
 #define WINDOW_TARGET_ID -2
 #define DOCUMENT_TARGET_ID -3
 
+#define assert_m(exp, msg) assert(((void)msg, exp))
+
 #define JSC_GLOBAL_BINDING_FUNCTION(context, nameStr, func)                                                            \
   {                                                                                                                    \
     JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;                                                    \
