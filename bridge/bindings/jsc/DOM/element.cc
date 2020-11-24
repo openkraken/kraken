@@ -424,11 +424,6 @@ JSValueRef JSElement::ElementInstance::setAttribute(JSContextRef ctx, JSObjectRe
     return nullptr;
   }
 
-  if (!JSValueIsString(ctx, attributeValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setAttribute' on 'Element': value is not valid.", exception);
-    return nullptr;
-  }
-
   JSStringRef nameStringRef = JSValueToStringCopy(ctx, nameValueRef, exception);
   JSStringRef valueStringRef = JSValueToStringCopy(ctx, attributeValueRef, exception);
   std::string &&name = JSStringToStdString(nameStringRef);
