@@ -391,7 +391,7 @@ describe('flex-shrink', () => {
 
     await matchViewportSnapshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let p;
     let test1;
     let test2;
@@ -554,7 +554,7 @@ describe('flex-shrink', () => {
 
     await matchViewportSnapshot();
   });
-  xit('008', async () => {
+  it('008', async () => {
     let p;
     let test1;
     let container;
