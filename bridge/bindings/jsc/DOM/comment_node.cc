@@ -81,7 +81,7 @@ JSCommentNode::CommentNodeInstance::getPropertyMap() {
   return propertyMap;
 }
 
-JSStringRef JSCommentNode::CommentNodeInstance::internalTextContent() {
+JSStringRef JSCommentNode::CommentNodeInstance::internalGetTextContent() {
   return data;
 }
 
@@ -89,6 +89,10 @@ JSCommentNode::CommentNodeInstance::~CommentNodeInstance() {
   delete nativeComment;
 
   if (data != nullptr) JSStringRelease(data);
+}
+
+void JSCommentNode::CommentNodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {
+  data = JSStringRetain(content);
 }
 
 } // namespace kraken::binding::jsc

@@ -70,7 +70,7 @@ void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
     JSStringRetain(data);
 
     std::string dataString = JSStringToStdString(data);
-    auto args = buildUICommandArgs(dataString);
+    auto args = buildUICommandArgs(name, dataString);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId,UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
   }
@@ -92,7 +92,7 @@ void JSTextNode::TextNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef
   }
 }
 
-JSStringRef JSTextNode::TextNodeInstance::internalTextContent() {
+JSStringRef JSTextNode::TextNodeInstance::internalGetTextContent() {
   return data;
 }
 
@@ -108,6 +108,10 @@ JSTextNode::TextNodeInstance::getTextNodePropertyMap() {
 JSTextNode::TextNodeInstance::~TextNodeInstance() {
   delete nativeTextNode;
   if (data != nullptr) JSStringRelease(data);
+}
+
+void JSTextNode::TextNodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {
+  data = JSStringRetain(content);
 }
 
 } // namespace kraken::binding::jsc

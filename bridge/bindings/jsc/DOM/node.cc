@@ -421,7 +421,7 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
   case NodeProperty::kNodeType:
     return JSValueMakeNumber(_hostClass->ctx, nodeType);
   case NodeProperty::kTextContent: {
-    JSStringRef textContent = internalTextContent();
+    JSStringRef textContent = internalGetTextContent();
     if (textContent == nullptr) textContent = JSStringCreateWithUTF8CString("");
     return JSValueMakeString(_hostClass->ctx, textContent);
   }
@@ -432,6 +432,17 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
 
 void JSNode::NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   JSEventTarget::EventTargetInstance::setProperty(name, value, exception);
+
+  auto propertyMap = getNodePropertyMap();
+
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+
+    if (property == NodeProperty::kTextContent) {
+      JSStringRef textContent = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      internalSetTextContent(textContent, exception);
+    }
+  }
 }
 
 void JSNode::NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -454,7 +465,7 @@ std::vector<JSStringRef> &JSNode::NodeInstance::getNodePropertyNames() {
   return propertyNames;
 }
 
-JSStringRef JSNode::NodeInstance::internalTextContent() {
+JSStringRef JSNode::NodeInstance::internalGetTextContent() {
   return nullptr;
 }
 
@@ -492,5 +503,6 @@ void JSNode::NodeInstance::unrefer() {
 
 void JSNode::NodeInstance::_notifyNodeRemoved(JSNode::NodeInstance *node) {}
 void JSNode::NodeInstance::_notifyNodeInsert(JSNode::NodeInstance *node) {}
+void JSNode::NodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {}
 
 } // namespace kraken::binding::jsc

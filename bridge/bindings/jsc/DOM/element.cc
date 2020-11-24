@@ -4,6 +4,7 @@
  */
 
 #include "element.h"
+#include "text_node.h"
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "event_target.h"
@@ -350,20 +351,15 @@ void JSElement::ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef a
   }
 }
 
-JSStringRef JSElement::ElementInstance::internalTextContent() {
-  std::vector<char> buffer;
+JSStringRef JSElement::ElementInstance::internalGetTextContent() {
+  std::string buffer;
 
   for (auto &node : childNodes) {
-    JSStringRef nodeText = node->internalTextContent();
-    size_t maxBufferSize = JSStringGetMaximumUTF8CStringSize(nodeText);
-    std::vector<char> nodeBuffer(maxBufferSize);
-    JSStringGetUTF8CString(nodeText, nodeBuffer.data(), maxBufferSize);
-    std::string nodeString = std::string(nodeBuffer.data());
-    buffer.reserve(buffer.size() + nodeString.size());
-    buffer.insert(buffer.end(), nodeString.begin(), nodeString.end());
+    JSStringRef nodeText = node->internalGetTextContent();
+    buffer += JSStringToStdString(nodeText);
   }
 
-  return JSStringCreateWithUTF8CString(buffer.data());
+  return JSStringCreateWithUTF8CString(buffer.c_str());
 }
 
 std::vector<JSStringRef> &JSElement::ElementInstance::getElementPropertyNames() {
@@ -715,6 +711,18 @@ std::string JSElement::ElementInstance::tagName() {
   std::string tagName = JSStringToStdString(tagNameStringRef_);
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
   return tagName;
+}
+
+void JSElement::ElementInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {
+  auto node = firstChild();
+  while (node != nullptr) {
+    internalRemoveChild(node, exception);
+    node = firstChild();
+  }
+
+  auto TextNode = JSTextNode::instance(_hostClass->context);
+  auto textNode = new JSTextNode::TextNodeInstance(TextNode, content);
+  internalAppendChild(textNode);
 }
 
 BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientRect *boundingClientRect)

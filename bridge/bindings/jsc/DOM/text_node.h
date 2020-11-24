@@ -39,7 +39,8 @@ public:
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-    JSStringRef internalTextContent() override;
+    JSStringRef internalGetTextContent() override;
+    void internalSetTextContent(JSStringRef content, JSValueRef *exception) override;
 
     NativeTextNode *nativeTextNode {nullptr};
 
