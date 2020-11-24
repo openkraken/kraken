@@ -43,6 +43,7 @@ class AnimationPlayerElement extends Element {
 
   AnimationPlayerElement(int targetId, Pointer<NativeAnimationElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true) {
+    _nativeMap[nativePtr.address] = this;
     nativePtr.ref.play = nativePlay;
   }
 

@@ -92,9 +92,9 @@ JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty
     auto property = propertyMap[name];
     switch (property) {
     case AnimationPlayerProperty::kSrc:
-      return JSValueMakeString(_hostClass->ctx, m_src);
+      return m_src.makeString();
     case AnimationPlayerProperty::kType:
-      return JSValueMakeString(_hostClass->ctx, m_type);
+      return m_type.makeString();
     case AnimationPlayerProperty::kPlay: {
       return m_play.function();
     }
@@ -110,17 +110,17 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::
   auto property = propertyMap[name];
 
   if (property == AnimationPlayerProperty::kSrc) {
-    m_src = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(m_src);
+    JSStringRef src = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    m_src.setString(src);
 
-    auto args = buildUICommandArgs(name, m_src);
+    auto args = buildUICommandArgs(name, src);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
   } else if (property == AnimationPlayerProperty::kType) {
-    m_type = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(m_type);
+    JSStringRef type = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    m_type.setString(type);
 
-    auto args = buildUICommandArgs(name, m_type);
+    auto args = buildUICommandArgs(name, type);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
   } else {
@@ -139,8 +139,6 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::getPropertyNames(
 
 JSAnimationPlayerElement::AnimationPlayerElementInstance::~AnimationPlayerElementInstance() {
   delete nativeAnimationPlayerElement;
-  if (m_src != nullptr) JSStringRelease(m_src);
-  if (m_type != nullptr) JSStringRelease(m_type);
 }
 
 } // namespace kraken::binding::jsc
