@@ -36,7 +36,12 @@ abstract class MediaElement extends Element {
   MediaElement(int targetId, this.nativeMediaElementPtr, ElementManager elementManager, String tagName,
       {Map<String, dynamic> defaultStyle})
       : super(targetId, nativeMediaElementPtr.ref.nativeElement, elementManager,
-            isIntrinsicBox: true, tagName: tagName, repaintSelf: true, defaultStyle: defaultStyle);
+            isIntrinsicBox: true, tagName: tagName, repaintSelf: true, defaultStyle: defaultStyle) {
+    _nativeMap[nativeMediaElementPtr.address] = this;
+    nativeMediaElementPtr.ref.play = nativePlay;
+    nativeMediaElementPtr.ref.pause = nativePause;
+    nativeMediaElementPtr.ref.fastSeek = nativeFastSeek;
+  }
 
   @override
   void dispose() {

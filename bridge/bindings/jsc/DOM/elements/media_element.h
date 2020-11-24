@@ -11,26 +11,18 @@
 
 namespace kraken::binding::jsc {
 
-using Play = void(*)(int32_t contextId, int64_t targetId);
-using Pause = void(*)(int32_t contextId, int64_t targetId);
-using FastSeek = void(*)(int32_t contextId, int64_t targetId, double duration);
-
 struct NativeMediaElement;
+
+using Play = void (*)(NativeMediaElement *mediaElement);
+using Pause = void (*)(NativeMediaElement *mediaElement);
+using FastSeek = void (*)(NativeMediaElement *mediaElement, double duration);
 
 class JSMediaElement : public JSElement {
 public:
   static JSMediaElement *instance(JSContext *context);
   class MediaElementInstance : public ElementInstance {
   public:
-    enum class MediaElementProperty {
-      kSrc,
-      kAutoPlay,
-      kLoop,
-      kPlay,
-      kPause,
-      kFastSeek,
-      kCurrentSrc
-    };
+    enum class MediaElementProperty { kSrc, kAutoPlay, kLoop, kPlay, kPause, kFastSeek, kCurrentSrc };
 
     static std::vector<JSStringRef> &getMediaElementPropertyNames();
     static const std::unordered_map<std::string, MediaElementProperty> &getMediaElementPropertyMap();
@@ -45,7 +37,7 @@ public:
                                const JSValueRef arguments[], JSValueRef *exception);
 
     MediaElementInstance() = delete;
-    explicit MediaElementInstance(JSMediaElement *jsMediaElement, const char* tagName);
+    explicit MediaElementInstance(JSMediaElement *jsMediaElement, const char *tagName);
     ~MediaElementInstance();
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
@@ -54,13 +46,14 @@ public:
     NativeMediaElement *nativeMediaElement;
 
   private:
-    JSStringRef _src {JSStringCreateWithUTF8CString("")};
-    bool _autoPlay {false};
-    bool _loop {false};
+    JSStringRef _src{JSStringCreateWithUTF8CString("")};
+    bool _autoPlay{false};
+    bool _loop{false};
     JSFunctionHolder m_play{context, this, "play", play};
     JSFunctionHolder m_pause{context, this, "pause", pause};
     JSFunctionHolder m_fastSeek{context, this, "fastSeek", fastSeek};
   };
+
 protected:
   JSMediaElement() = delete;
   explicit JSMediaElement(JSContext *context);

@@ -11,6 +11,9 @@ import 'media.dart';
 
 const String AUDIO = 'AUDIO';
 
+const Map<String, dynamic> _defaultStyle = {
+};
+
 class AudioElement extends MediaElement {
   AudioPlayer audioPlayer;
   String audioSrc;
@@ -20,7 +23,7 @@ class AudioElement extends MediaElement {
   static double defaultHeight = 150.0;
 
   AudioElement(int targetId, Pointer<NativeAudioElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr.ref.nativeMediaElement, elementManager, AUDIO);
+      : super(targetId, nativePtr.ref.nativeMediaElement, elementManager, AUDIO, defaultStyle: _defaultStyle);
 
   @override
   void willAttachRenderer() {
