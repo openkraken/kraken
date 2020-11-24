@@ -76,7 +76,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::previousSibling() {
   auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), this);
 
   if (it != parentChildNodes.end()) {
-    return *(it--);
+    return *(--it);
   }
 
   return nullptr;
@@ -89,7 +89,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::nextSibling() {
   auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), this);
 
   if (it != parentChildNodes.end()) {
-    return *(it++);
+    return *(++it);
   }
 
   return nullptr;
