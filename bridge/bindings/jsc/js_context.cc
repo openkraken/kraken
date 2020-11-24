@@ -263,6 +263,5 @@ const JSChar *JSStringHolder::ptr() {
 bool JSStringHolder::empty() {
   return size() == 0;
 }
-JSStringHolder::JSStringHolder(JSContext *context, JSStringRef string): m_context(context), m_string(string) {}
 
 } // namespace kraken::binding::jsc

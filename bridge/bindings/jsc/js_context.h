@@ -66,10 +66,9 @@ public:
   void setString(JSStringRef value);
 
 private:
-  explicit JSStringHolder(JSContext *context, JSStringRef stringRef);
   JSContext *m_context;
   JSStringRef m_string{nullptr};
-  FML_DISALLOW_COPY_AND_ASSIGN(JSStringHolder);
+  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSStringHolder);
 };
 
 class JSContext {

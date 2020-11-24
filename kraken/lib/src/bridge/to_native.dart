@@ -76,7 +76,6 @@ final Dart_InvokeEventListener _invokeEventListener =
     nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
 
 void invokeEventListener(int contextId, int type, String data) {
-  print('type: $type, data: $data');
   Pointer<NativeString> nativeString = stringToNativeString(data);
   _invokeEventListener(contextId, type, nativeString);
   freeNativeString(nativeString);
@@ -86,7 +85,6 @@ const UI_EVENT = 0;
 const MODULE_EVENT = 1;
 
 void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Pointer<NativeEvent> nativeEvent) {
-  print('emit UI Event: $nativePtr');
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   dispatchEvent(nativeEventTarget, nativeEvent);
@@ -195,6 +193,7 @@ enum UICommandType {
   initWindow,
   createElement,
   createTextNode,
+  createComment,
   disposeEventTarget,
   addEvent,
   removeNode,
@@ -275,6 +274,9 @@ void flushUICommand() {
             break;
           case UICommandType.createTextNode:
             controller.view.createTextNode(id, nativeCommand.ref.nativePtr.cast<NativeTextNode>(), nativeStringToString(nativeCommand.ref.args[0]));
+            break;
+          case UICommandType.createComment:
+            controller.view.createComment(id, nativeCommand.ref.nativePtr.cast<NativeCommentNode>(), nativeStringToString(nativeCommand.ref.args[0]));
             break;
           case UICommandType.disposeEventTarget:
             ElementManager.disposeEventTarget(controller.view.contextId, id);

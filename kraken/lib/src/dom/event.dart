@@ -42,7 +42,8 @@ enum EventType {
   pause,
   seeked,
   seeking,
-  volumechange
+  volumechange,
+  scroll
 }
 
 const String CLICK = 'click';

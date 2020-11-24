@@ -227,7 +227,7 @@ class Element extends Node
 
   /// https://drafts.csswg.org/cssom-view/#scrolling-events
   void _fireScrollEvent() {
-    dispatchEvent(Event(SCROLL));
+    dispatchEvent(Event(EventType.scroll));
   }
 
   // Set sticky child offset according to scroll offset and direction

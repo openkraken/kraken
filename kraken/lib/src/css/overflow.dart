@@ -162,12 +162,12 @@ mixin CSSOverflowMixin on ElementBase {
     _scroll(value, null, isScrollBy: false, isDirectionX: true);
   }
 
-  double getScrollHeight(RenderBoxModel renderBoxModel) {
+  get scrollHeight {
     Size scrollContainerSize = renderBoxModel.maxScrollableSize;
     return scrollContainerSize.height;
   }
 
-  double getScrollWidth(RenderBoxModel renderBoxModel) {
+  get scrollWidth {
     Size scrollContainerSize = renderBoxModel.maxScrollableSize;
     return scrollContainerSize.width;
   }

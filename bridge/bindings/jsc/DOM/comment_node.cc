@@ -23,7 +23,13 @@ JSCommentNode *JSCommentNode::instance(JSContext *context) {
 
 JSObjectRef JSCommentNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                                const JSValueRef *arguments, JSValueRef *exception) {
-  auto textNode = new CommentNodeInstance(this, nullptr);
+  JSStringRef commentData = nullptr;
+
+  if (argumentCount > 0) {
+    commentData = JSValueToStringCopy(ctx, arguments[0], exception);
+  }
+
+  auto textNode = new CommentNodeInstance(this, commentData);
   return textNode->object;
 }
 
@@ -32,6 +38,12 @@ JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsComment
   if (data != nullptr) {
     m_data.setString(data);
   }
+
+  std::string str = m_data.string();
+  auto args = buildUICommandArgs(str);
+
+  ::foundation::UICommandTaskMessageQueue::instance(jsCommentNode->contextId)
+    ->registerCommand(eventTargetId, UI_COMMAND_CREATE_COMMENT, args, 1, nativeComment);
 }
 
 void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {

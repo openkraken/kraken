@@ -264,6 +264,7 @@ class ElementManager {
   /// <!-- afterend -->
   void insertAdjacentNode(int targetId, String position, int newTargetId) {
     assert(existsTarget(targetId), 'targetId: $targetId position: $position newTargetId: $newTargetId');
+    assert(existsTarget(newTargetId), 'newtargetId: $newTargetId position: $position');
 
     Node target = getEventTargetByTargetId<Node>(targetId);
     Node newNode = getEventTargetByTargetId<Node>(newTargetId);

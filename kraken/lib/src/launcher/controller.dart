@@ -165,6 +165,10 @@ class KrakenViewController {
     return _elementManager.createTextNode(id, nativePtr, data);
   }
 
+  void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
+    return _elementManager.createComment(id, nativePtr, data);
+  }
+
   void addEvent(int targetId, int eventTypeIndex) {
     _elementManager.addEvent(targetId, eventTypeIndex);
   }

@@ -22,7 +22,7 @@ describe('DOM Element API', () => {
     document.body.appendChild(div);
 
     const boundingClientRect = div.getBoundingClientRect();
-    expect(boundingClientRect).toEqual({
+    expect(JSON.parse(JSON.stringify(boundingClientRect))).toEqual({
       x: 20.0,
       y: 20.0,
       width: 200.0,
