@@ -232,7 +232,7 @@ describe('flexbox flex-shrink', () => {
         createElement('img', {
           src: 'assets/100x100-green.png',
           style: {
-              width: '30px'
+            width: '30px'
           }
         }),
       ]
@@ -258,7 +258,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (createElement(
+        (createElement(
           'div',
           {
             style: {
@@ -303,7 +303,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (createElement(
+        (createElement(
           'div',
           {
             style: {
@@ -348,7 +348,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (createElement(
+        (createElement(
           'div',
           {
             style: {
@@ -394,7 +394,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (createElement(
+        (createElement(
           'div',
           {
             style: {
@@ -445,7 +445,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (createElement(
+        (createElement(
           'div',
           {
             style: {
@@ -496,7 +496,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (createElement(
+        (createElement(
           'div',
           {
             style: {
@@ -548,7 +548,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (createElement(
+        (createElement(
           'div',
           {
             style: {
@@ -591,7 +591,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (createElement(
+        (createElement(
           'div',
           {
             style: {
@@ -634,7 +634,7 @@ describe('flexbox flex-shrink', () => {
         },
       },
       [
-         (createElement(
+        (createElement(
           'div',
           {
             style: {
@@ -658,6 +658,141 @@ describe('flexbox flex-shrink', () => {
       ]
     );
     BODY.appendChild(constrainedFlex);
+
+    await matchViewportSnapshot();
+  });
+
+  it('works with min violation', async () => {
+    let test1;
+    let test2;
+    let test3;
+    let test4;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (test1 = createElement('div', {
+          id: 'test1',
+          style: {
+            height: '100px',
+            width: '100px',
+            'background-color': 'green',
+            'flex-shrink': '4',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test2 = createElement('div', {
+          id: 'test2',
+          style: {
+            height: '100px',
+            width: '100px',
+            'background-color': 'black',
+            'flex-shrink': '3',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test3 = createElement('div', {
+          id: 'test3',
+          style: {
+            height: '100px',
+            width: '100px',
+            'background-color': 'blue',
+            'flex-shrink': '2',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test4 = createElement('div', {
+          id: 'test4',
+          style: {
+            height: '100px',
+            width: '100px',
+            'background-color': 'yellow',
+            'box-sizing': 'border-box',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(container);
+
+
+    await matchViewportSnapshot();
+  });
+
+  it('works with flex factor sum less than 1', async () => {
+    let test1;
+    let test2;
+    let test3;
+    let test4;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (test1 = createElement('div', {
+          id: 'test1',
+          style: {
+            height: '100px',
+            width: '100px',
+            'background-color': 'green',
+            'flex-shrink': '0.2',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test2 = createElement('div', {
+          id: 'test2',
+          style: {
+            height: '100px',
+            width: '100px',
+            'background-color': 'black',
+            'flex-shrink': '10',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test3 = createElement('div', {
+          id: 'test3',
+          style: {
+            height: '100px',
+            width: '100px',
+            'background-color': 'blue',
+            'flex-shrink': '0.2',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test4 = createElement('div', {
+          id: 'test4',
+          style: {
+            height: '100px',
+            width: '100px',
+            'background-color': 'yellow',
+            'flex-shrink': '0.1',
+            'box-sizing': 'border-box',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(container);
+
 
     await matchViewportSnapshot();
   });

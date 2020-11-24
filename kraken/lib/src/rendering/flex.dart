@@ -539,14 +539,12 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   double _getShrinkConstraints(RenderBox child, Map<int, _RunChild> runChildren, double remainingFreeSpace) {
     double totalWeightedFlexShrink = 0;
-    double sumFlexShrink = 0;
     runChildren.forEach((int targetId, _RunChild runChild) {
       double childOriginalMainSize = runChild.originalMainSize;
       RenderBox child = runChild.child;
       if (!runChild.frozen) {
         double childFlexShrink = _getFlexShrink(child);
         totalWeightedFlexShrink += childOriginalMainSize * childFlexShrink;
-        sumFlexShrink += childFlexShrink;
       }
     });
 
@@ -1262,18 +1260,17 @@ class RenderFlexLayout extends RenderLayoutBox {
     bool isFlexGrow = initialFreeSpace >= 0 && totalFlexGrow > 0;
     bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
 
-    double remainingFreeSpace = initialFreeSpace;
     double sumFlexFactors = isFlexGrow ? totalFlexGrow : totalFlexShrink;
     /// If the sum of the unfrozen flex items’ flex factors is less than one,
     /// multiply the initial free space by this sum as remaining free space
     if (sumFlexFactors > 0 && sumFlexFactors < 1) {
+      double remainingFreeSpace = initialFreeSpace;
       double fractional = initialFreeSpace * sumFlexFactors;
       if (fractional.abs() < remainingFreeSpace.abs()) {
         remainingFreeSpace = fractional;
       }
+      runMetric.remainingFreeSpace = remainingFreeSpace;
     }
-
-    runMetric.remainingFreeSpace = remainingFreeSpace;
 
     List<_RunChild> minViolations = [];
     List<_RunChild> maxViolations = [];
@@ -1300,6 +1297,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         childNodeId = child.targetId;
       }
 
+      double remainingFreeSpace = runMetric.remainingFreeSpace;
       if (isFlexGrow && flexGrow != null && flexGrow > 0) {
         final double spacePerFlex = totalFlexGrow > 0 ? (remainingFreeSpace / totalFlexGrow) : double.nan;
         final double flexGrow = _getFlexGrow(child);
@@ -1317,6 +1315,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
 
       adjustedSize = computedSize;
+      /// Find all the violations by comparing min and max size of flex items
       if (child is RenderBoxModel && !_isChildMainAxisClip(child)) {
         double minMainAxisSize = _getMinMainAxisSize(child);
         double maxMainAxisSize = _getMaxMainAxisSize(child);
@@ -1346,6 +1345,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       });
     } else {
       List<_RunChild> violations = totalViolation < 0 ? maxViolations : minViolations;
+      /// Find all the violations, set main size and freeze all the flex items
       for (int i = 0; i < violations.length; i++) {
         _RunChild runChild = violations[i];
         runChild.frozen = true;
@@ -1424,6 +1424,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
 
       if (isFlexGrow || isFlexShrink) {
+        /// remainingFreeSpace starts out at the same value as initialFreeSpace
+        /// but as we place and lay out flex items we subtract from it.
+        metrics.remainingFreeSpace = initialFreeSpace;
         /// Loop flex items to resolve flexible length of flex items with flex factor
         while(_resolveFlexibleLengths(metrics, initialFreeSpace));
       }
