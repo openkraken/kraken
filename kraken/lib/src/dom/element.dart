@@ -219,6 +219,15 @@ class Element extends Node
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
     layoutStickyChildren(scrollOffset, axisDirection);
+
+    if (eventHandlers.containsKey(SCROLL)) {
+      _fireScrollEvent();
+    }
+  }
+
+  /// https://drafts.csswg.org/cssom-view/#scrolling-events
+  void _fireScrollEvent() {
+    dispatchEvent(Event(SCROLL));
   }
 
   // Set sticky child offset according to scroll offset and direction

@@ -236,9 +236,9 @@ export class Element extends Node {
 
   public scrollTo(x: number | any, y?: number) {
     if (typeof y === 'number') {
-      scroll(x, y);
+      this.scroll(x, y);
     } else {
-      scroll(x, 0);
+      this.scroll(x, 0);
     }
   }
 

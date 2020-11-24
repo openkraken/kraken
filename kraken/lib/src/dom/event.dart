@@ -45,6 +45,8 @@ enum EventType {
   volumechange
 }
 
+const String CLICK = 'click';
+
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
   EventType type;

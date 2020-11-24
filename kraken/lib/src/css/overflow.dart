@@ -45,14 +45,13 @@ CSSOverflowType _getOverflowType(String definition) {
   }
 }
 
+typedef ScrollListener = void Function(double scrollTop, AxisDirection axisDirection);
+
 mixin CSSOverflowMixin on ElementBase {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
-  void updateRenderOverflow(
-      RenderBoxModel renderBoxModel,
-      Element element,
-      void scrollListener(double scrollTop, AxisDirection axisDirection)) {
+  void updateRenderOverflow(RenderBoxModel renderBoxModel, Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
     if (style != null) {
       List<CSSOverflowType> overflow = getOverflowTypes(style);
@@ -163,12 +162,14 @@ mixin CSSOverflowMixin on ElementBase {
     _scroll(value, null, isScrollBy: false, isDirectionX: true);
   }
 
-  double get scrollHeight {
-    return renderBoxModel.hasSize ? renderBoxModel.size.height : 0;
+  double getScrollHeight(RenderBoxModel renderBoxModel) {
+    Size scrollContainerSize = renderBoxModel.maxScrollableSize;
+    return scrollContainerSize.height;
   }
 
-  double get scrollWidth {
-    return renderBoxModel.hasSize ? renderBoxModel.size.width : 0;
+  double getScrollWidth(RenderBoxModel renderBoxModel) {
+    Size scrollContainerSize = renderBoxModel.maxScrollableSize;
+    return scrollContainerSize.width;
   }
 
   void scroll(num x, num y, {bool isScrollBy = false}) {
@@ -194,6 +195,13 @@ mixin CSSOverflowMixin on ElementBase {
         distance = (scrollable.position?.pixels ?? 0) + aim;
       } else {
         distance = aim.toDouble();
+      }
+
+      // Apply scroll effect after layout.
+      assert(renderer is RenderBox && isRendererAttached, 'Overflow can only be added to a RenderBox.');
+      RenderBox renderBox = renderer;
+      if (!renderBox.hasSize) {
+        renderBox.owner.flushLayout();
       }
       scrollable.position.moveTo(distance, duration: duration, curve: curve);
     }
