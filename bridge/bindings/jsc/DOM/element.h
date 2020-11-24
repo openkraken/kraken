@@ -78,6 +78,7 @@ public:
     kToBlob,
     kGetAttribute,
     kSetAttribute,
+    kHasAttribute,
     kRemoveAttribute,
     kChildren
   };
@@ -95,6 +96,8 @@ public:
     static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
+    static JSValueRef hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -138,6 +141,7 @@ public:
     JSFunctionHolder m_getBoundingClientRect{context, this, "getBoundingClientRect", getBoundingClientRect};
     JSFunctionHolder m_setAttribute{context, this, "setAttribute", setAttribute};
     JSFunctionHolder m_getAttribute{context, this, "getAttribute", getAttribute};
+    JSFunctionHolder m_hasAttribute{context, this, "hasAttribute", hasAttribute};
     JSFunctionHolder m_removeAttribute{context, this, "removeAttribute", removeAttribute};
     JSFunctionHolder m_toBlob{context, this, "toBlob", toBlob};
     JSFunctionHolder m_click{context, this, "click", click};

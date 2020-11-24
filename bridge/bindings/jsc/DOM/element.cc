@@ -4,11 +4,11 @@
  */
 
 #include "element.h"
-#include "text_node.h"
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "event_target.h"
 #include "foundation/ui_command_queue.h"
+#include "text_node.h"
 
 namespace kraken::binding::jsc {
 using namespace foundation;
@@ -167,7 +167,8 @@ JSValueRef JSElement::ElementInstance::getBoundingClientRect(JSContextRef ctx, J
                                                              const JSValueRef *arguments, JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
   getDartMethod()->requestUpdateFrame();
-  assert_m(elementInstance->nativeElement->getBoundingClientRect != nullptr, "Failed to execute getBoundingClientRect(): dart method is nullptr.");
+  assert_m(elementInstance->nativeElement->getBoundingClientRect != nullptr,
+           "Failed to execute getBoundingClientRect(): dart method is nullptr.");
   NativeBoundingClientRect *nativeBoundingClientRect =
     elementInstance->nativeElement->getBoundingClientRect(elementInstance->nativeElement);
   auto boundingClientRect = new BoundingClientRect(elementInstance->context, nativeBoundingClientRect);
@@ -201,7 +202,8 @@ const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::El
     {"removeAttribute", ElementProperty::kRemoveAttribute},
     {"children", ElementProperty::kChildren},
     {"attributes", ElementProperty::kAttributes},
-    {"scrollTo", ElementProperty::kScrollTo}};
+    {"scrollTo", ElementProperty::kScrollTo},
+    {"hasAttribute", ElementProperty::kHasAttribute}};
   return propertyHandler;
 }
 
@@ -223,11 +225,10 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
 
     return style->object;
   }
+  case ElementProperty::kNodeName:
   case ElementProperty::kTagName: {
     return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName().c_str()));
   }
-  case ElementProperty::kNodeName:
-    return JSValueMakeString(_hostClass->ctx, tagNameStringRef_);
   case ElementProperty::kOffsetLeft: {
     getDartMethod()->requestUpdateFrame();
     assert_m(nativeElement->getOffsetLeft != nullptr, "Failed to execute getOffsetLeft(): dart method is nullptr.");
@@ -313,6 +314,8 @@ JSValueRef JSElement::ElementInstance::getProperty(std::string &name, JSValueRef
   case ElementProperty::kRemoveAttribute: {
     return m_removeAttribute.function();
   }
+  case ElementProperty::kHasAttribute:
+    return m_hasAttribute.function();
   case ElementProperty::kChildren: {
     JSValueRef arguments[childNodes.size()];
 
@@ -394,7 +397,8 @@ std::vector<JSStringRef> &JSElement::ElementInstance::getElementPropertyNames() 
     JSStringCreateWithUTF8CString("click"),        JSStringCreateWithUTF8CString("scroll"),
     JSStringCreateWithUTF8CString("scrollBy"),     JSStringCreateWithUTF8CString("toBlob"),
     JSStringCreateWithUTF8CString("children"),     JSStringCreateWithUTF8CString("tagName"),
-    JSStringCreateWithUTF8CString("attributes"), JSStringCreateWithUTF8CString("scrollTo")};
+    JSStringCreateWithUTF8CString("attributes"),   JSStringCreateWithUTF8CString("scrollTo"),
+    JSStringCreateWithUTF8CString("hasAttribute")};
   return propertyNames;
 }
 
@@ -483,6 +487,30 @@ JSValueRef JSElement::ElementInstance::getAttribute(JSContextRef ctx, JSObjectRe
   }
 
   return nullptr;
+}
+
+JSValueRef JSElement::ElementInstance::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                                    size_t argumentCount, const JSValueRef *arguments,
+                                                    JSValueRef *exception) {
+  if (argumentCount < 1) {
+    JSC_THROW_ERROR(ctx, "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present",
+                    exception);
+    return nullptr;
+  }
+
+  const JSValueRef nameValueRef = arguments[0];
+
+  if (!JSValueIsString(ctx, nameValueRef)) {
+    JSC_THROW_ERROR(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.", exception);
+    return nullptr;
+  }
+
+  JSStringRef nameStringRef = JSValueToStringCopy(ctx, nameValueRef, exception);
+  std::string &&name = JSStringToStdString(nameStringRef);
+  auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
+  auto attributes = *elementInstance->m_attributes;
+
+  return JSValueMakeBoolean(ctx, attributes->hasAttribute(name));
 }
 
 JSValueRef JSElement::ElementInstance::removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -661,7 +689,8 @@ JSValueRef JSElement::ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef fu
 
   auto elementInstance = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(function));
   getDartMethod()->requestUpdateFrame();
-  assert_m(elementInstance->nativeElement->scrollBy != nullptr, "Failed to execute scrollBy(): dart method is nullptr.");
+  assert_m(elementInstance->nativeElement->scrollBy != nullptr,
+           "Failed to execute scrollBy(): dart method is nullptr.");
   elementInstance->nativeElement->scrollBy(elementInstance->nativeElement, x, y);
 
   return nullptr;
