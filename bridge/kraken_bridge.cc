@@ -256,7 +256,7 @@ UICommandItem **getUICommandItems(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->data();
 }
 
-size_t getUICommandItemSize(int32_t contextId) {
+int64_t getUICommandItemSize(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->size();
 }
 

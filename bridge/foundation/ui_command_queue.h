@@ -8,46 +8,24 @@
 
 #include "closure.h"
 #include "include/kraken_bridge.h"
+#include "logging.h"
 #include <vector>
+#include <unordered_map>
 
 namespace foundation {
 
 class UICommandTaskMessageQueue;
 
-static UICommandTaskMessageQueue *instanceList_[8];
-
 // An un thread safe queue used for dart side to read ui command items.
 class UICommandTaskMessageQueue {
   UICommandTaskMessageQueue() = default;
-
 public:
-  static UICommandTaskMessageQueue* instance(int32_t contextId) {
-    if (!instanceList_[contextId]) {
-      instanceList_[contextId] = new UICommandTaskMessageQueue();
-      // preallocate 100 commandItem space.
-      instanceList_[contextId]->queue.reserve(1000);
-    }
-    return instanceList_[contextId];
-  };
+  static UICommandTaskMessageQueue* instance(int32_t contextId);
 
   void registerCommand(int64_t id, int32_t type, NativeString **args, size_t length, void* nativePtr);
-  UICommandItem **data() {
-    return queue.data();
-  };
-  size_t size() {
-    return queue.size();
-  }
-  void clear() {
-    for (auto command : queue) {
-      for (size_t j = 0; j < command->length; j ++) {
-        delete[] command->args[j]->string;
-        delete command->args[j];
-      }
-
-      delete command;
-    }
-    queue.clear();
-  }
+  UICommandItem **data();
+  int64_t size();
+  void clear();
 
 private:
   std::vector<UICommandItem *> queue;

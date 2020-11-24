@@ -223,7 +223,7 @@ typedef Dart_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(int co
 final Dart_GetUICommandItems _getUICommandItems =
     nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItems>>('getUICommandItems').asFunction();
 
-typedef Native_GetUICommandItemSize = Int32 Function(Int32 contextId);
+typedef Native_GetUICommandItemSize = Int64 Function(Int64 contextId);
 typedef Dart_GetUICommandItemSize = int Function(int contextId);
 
 final Dart_GetUICommandItemSize _getUICommandItemSize =

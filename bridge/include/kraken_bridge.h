@@ -106,7 +106,7 @@ KrakenInfo *getKrakenInfo();
 KRAKEN_EXPORT
 UICommandItem **getUICommandItems(int32_t contextId);
 KRAKEN_EXPORT
-size_t getUICommandItemSize(int32_t contextId);
+int64_t getUICommandItemSize(int32_t contextId);
 KRAKEN_EXPORT
 void clearUICommandItems(int32_t contextId);
 
