@@ -126,6 +126,16 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   DocumentProperty property = propertyMap[name];
 
   switch (property) {
+  case DocumentProperty::kAll: {
+    auto all = new JSAllCollection(context);
+
+    traverseNode(body, [&all](JSNode::NodeInstance *node) {
+      all->internalAdd(node, nullptr);
+      return false;
+    });
+
+    return all->jsObject;
+  }
   case DocumentProperty::kCreateElement: {
     return m_createElement.function();
   }
@@ -170,7 +180,7 @@ std::vector<JSStringRef> &DocumentInstance::getDocumentPropertyNames() {
     JSStringCreateWithUTF8CString("body"),           JSStringCreateWithUTF8CString("createElement"),
     JSStringCreateWithUTF8CString("createTextNode"), JSStringCreateWithUTF8CString("createComment"),
     JSStringCreateWithUTF8CString("getElementById"), JSStringCreateWithUTF8CString("getElementsByTagName"),
-    JSStringCreateWithUTF8CString("documentElement")};
+    JSStringCreateWithUTF8CString("documentElement"), JSStringCreateWithUTF8CString("all")};
   return propertyNames;
 }
 
@@ -182,7 +192,8 @@ const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &Docum
     {"createComment", DocumentProperty::kCreateComment},
     {"getElementById", DocumentProperty::kGetElementById},
     {"documentElement", DocumentProperty::kDocumentElement},
-    {"getElementsByTagName", DocumentProperty::kGetElementsByTagName}};
+    {"getElementsByTagName", DocumentProperty::kGetElementsByTagName},
+    {"all", DocumentProperty::kAll}};
   return propertyMap;
 }
 

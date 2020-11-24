@@ -107,6 +107,8 @@ else()
       bindings/jsc/ui_manager.cc
       bindings/jsc/DOM/document.h
       bindings/jsc/DOM/document.cc
+      bindings/jsc/DOM/all_collection.cc
+      bindings/jsc/DOM/all_collection.h
       bindings/jsc/DOM/elements/anchor_element.cc
       bindings/jsc/DOM/elements/anchor_element.h
       bindings/jsc/DOM/elements/animation_player_element.cc

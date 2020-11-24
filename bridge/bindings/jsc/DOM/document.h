@@ -10,6 +10,7 @@
 #include "bindings/jsc/macros.h"
 #include "element.h"
 #include "node.h"
+#include "all_collection.h"
 
 #include "bindings/jsc/DOM/elements/anchor_element.h"
 #include "bindings/jsc/DOM/elements/animation_player_element.h"
@@ -58,7 +59,8 @@ public:
     kNodeName,
     kGetElementById,
     kDocumentElement,
-    kGetElementsByTagName
+    kGetElementsByTagName,
+    kAll
   };
 
   static DocumentInstance *instance(JSContext *context);
