@@ -162,10 +162,6 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::CanvasRenderingConte
 
 CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingContext2DInstance() {
   delete nativeCanvasRenderingContext2D;
-
-  if (_font != nullptr) JSStringRelease(_font);
-  if (_strokeStyle != nullptr) JSStringRelease(_strokeStyle);
-  if (_fillStyle != nullptr) JSStringRelease(_fillStyle);
 }
 
 std::vector<JSStringRef> &
@@ -206,13 +202,13 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
     auto property = propertyMap[name];
     switch (property) {
     case CanvasRenderingContext2DProperty::kFont: {
-      return JSValueMakeString(_hostClass->ctx, _font);
+      return m_font.makeString();
     }
     case CanvasRenderingContext2DProperty::kFillStyle: {
-      return JSValueMakeString(_hostClass->ctx, _fillStyle);
+      return m_fillStyle.makeString();
     }
     case CanvasRenderingContext2DProperty::kStrokeStyle: {
-      return JSValueMakeString(_hostClass->ctx, _strokeStyle);
+      return m_strokeStyle.makeString();
     }
     case CanvasRenderingContext2DProperty::kFillRect: {
       return m_fillRect.function();
@@ -251,34 +247,34 @@ void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
 
     switch (property) {
     case CanvasRenderingContext2DProperty::kFont: {
-      _font = JSValueToStringCopy(_hostClass->ctx, value, exception);
-      JSStringRetain(_font);
+      JSStringRef font = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_font.setString(font);
 
       NativeString nativeFont{};
-      nativeFont.string = JSStringGetCharactersPtr(_font);
-      nativeFont.length = JSStringGetLength(_font);
+      nativeFont.string = m_font.ptr();
+      nativeFont.length = m_font.size();
       assert_m(nativeCanvasRenderingContext2D->setFont != nullptr, "Failed to execute setFont(): dart method is nullptr.");
       nativeCanvasRenderingContext2D->setFont(nativeCanvasRenderingContext2D, &nativeFont);
       break;
     }
     case CanvasRenderingContext2DProperty::kFillStyle: {
-      _fillStyle = JSValueToStringCopy(_hostClass->ctx, value, exception);
-      JSStringRetain(_fillStyle);
+      JSStringRef fillStyle = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_fillStyle.setString(fillStyle);
 
       NativeString nativeFillStyle{};
-      nativeFillStyle.string = JSStringGetCharactersPtr(_fillStyle);
-      nativeFillStyle.length = JSStringGetLength(_fillStyle);
+      nativeFillStyle.string = m_fillStyle.ptr();
+      nativeFillStyle.length = m_fillStyle.size();
       assert_m(nativeCanvasRenderingContext2D->setFillStyle != nullptr, "Failed to execute setFillStyle(): dart method is nullptr.");
       nativeCanvasRenderingContext2D->setFillStyle(nativeCanvasRenderingContext2D, &nativeFillStyle);
       break;
     }
     case CanvasRenderingContext2DProperty::kStrokeStyle: {
-      _strokeStyle = JSValueToStringCopy(_hostClass->ctx, value, exception);
-      JSStringRetain(_strokeStyle);
+      JSStringRef strokeStyle = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_strokeStyle.setString(strokeStyle);
 
       NativeString nativeStrokeStyle{};
-      nativeStrokeStyle.string = JSStringGetCharactersPtr(_strokeStyle);
-      nativeStrokeStyle.length = JSStringGetLength(_strokeStyle);
+      nativeStrokeStyle.string = m_strokeStyle.ptr();
+      nativeStrokeStyle.length = m_strokeStyle.size();
       assert_m(nativeCanvasRenderingContext2D->setStrokeStyle != nullptr, "Failed to execute setStrokeStyle(): dart method is nullptr.");
       nativeCanvasRenderingContext2D->setStrokeStyle(nativeCanvasRenderingContext2D, &nativeStrokeStyle);
       break;

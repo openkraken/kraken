@@ -84,9 +84,9 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
   static void _strokeText(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text, double x, double y, double maxWidth) {
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
     if (maxWidth != double.nan) {
-      canvasRenderingContext2D.fillText(nativeStringToString(text), x, y, maxWidth: maxWidth);
+      canvasRenderingContext2D.strokeText(nativeStringToString(text), x, y, maxWidth: maxWidth);
     } else {
-      canvasRenderingContext2D.fillText(nativeStringToString(text), x, y);
+      canvasRenderingContext2D.strokeText(nativeStringToString(text), x, y);
     }
   }
 
