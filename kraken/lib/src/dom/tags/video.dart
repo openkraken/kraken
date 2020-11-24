@@ -142,7 +142,7 @@ class VideoElement extends MediaElement {
   }
 
   onCanPlay() async {
-    Event event = Event(EventType.cancel, EventInit());
+    Event event = Event(EventType.canplay, EventInit());
     dispatchEvent(event);
   }
 

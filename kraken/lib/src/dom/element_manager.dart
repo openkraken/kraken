@@ -386,7 +386,7 @@ class ElementManager {
     if (parent == null) return;
 
     // Detach renderObjects
-    _rootElement.dispose();
+    _rootElement.detach();
 
     // Clears eventTargets map
     clearTargets();

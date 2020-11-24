@@ -427,6 +427,7 @@ JSValueRef JSElement::ElementInstance::setAttribute(JSContextRef ctx, JSObjectRe
   JSStringRef nameStringRef = JSValueToStringCopy(ctx, nameValueRef, exception);
   JSStringRef valueStringRef = JSValueToStringCopy(ctx, attributeValueRef, exception);
   std::string &&name = JSStringToStdString(nameStringRef);
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
   getDartMethod()->requestUpdateFrame();
 
