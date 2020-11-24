@@ -363,8 +363,7 @@ typedef DartRAFAsyncCallback = void Function(
     Pointer<JSCallbackContext>, int contextId, double data, Pointer<Utf8> errmsg);
 
 // Register requestBatchUpdate
-typedef Native_RequestBatchUpdate = Void Function(
-    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeFunction<NativeAsyncCallback>>);
+typedef Native_RequestBatchUpdate = Void Function(Int32 contextId);
 typedef Native_RegisterRequestBatchUpdate = Void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
 typedef Dart_RegisterRequestBatchUpdate = void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
 
@@ -372,17 +371,9 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
     .lookup<NativeFunction<Native_RegisterRequestBatchUpdate>>('registerRequestBatchUpdate')
     .asFunction();
 
-void _requestBatchUpdate(
-    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
+void _requestBatchUpdate(int contextId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  return controller.module.requestBatchUpdate((Duration timeStamp) {
-    DartAsyncCallback func = callback.asFunction();
-    try {
-      func(callbackContext, contextId, nullptr);
-    } catch (e, stack) {
-      func(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
-    }
-  });
+  return controller.module.requestBatchUpdate();
 }
 
 void registerRequestBatchUpdate() {
@@ -608,23 +599,23 @@ void registerToBlob() {
   _registerToBlob(pointer);
 }
 
-typedef Native_RequestUpdateFrame = Void Function();
-typedef Dart_RequestUpdateFrame = void Function();
+typedef Native_FlushUICommand = Void Function();
+typedef Dart_FlushUICommand = void Function();
 
-typedef Native_RegisterRequestUpdateFrame = Void Function(Pointer<NativeFunction<Native_RequestUpdateFrame>>);
-typedef Dart_RegisterRequestUpdateFrame = void Function(Pointer<NativeFunction<Native_RequestUpdateFrame>>);
+typedef Native_RegisterFlushUICommand = Void Function(Pointer<NativeFunction<Native_FlushUICommand>>);
+typedef Dart_RegisterFlushUICommand = void Function(Pointer<NativeFunction<Native_FlushUICommand>>);
 
-final Dart_RegisterRequestUpdateFrame _registerRequestUpdateFrame = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterRequestUpdateFrame>>('registerRequestUpdateFrame')
+final Dart_RegisterFlushUICommand _registerFlushUICommand = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterFlushUICommand>>('registerFlushUICommand')
     .asFunction();
 
-void _requestUpdateFrame() {
+void _flushUICommand() {
   flushUICommand();
 }
 
-void registerRequestUpdateFrame() {
-  Pointer<NativeFunction<Native_RequestUpdateFrame>> pointer = Pointer.fromFunction(_requestUpdateFrame);
-  _registerRequestUpdateFrame(pointer);
+void registerFlushUICommand() {
+  Pointer<NativeFunction<Native_FlushUICommand>> pointer = Pointer.fromFunction(_flushUICommand);
+  _registerFlushUICommand(pointer);
 }
 
 // Body Element are special element which created at initialize time, so we can't use UICommandQueue to init body element.
@@ -679,7 +670,7 @@ void registerDartMethodsToCpp() {
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerToBlob();
-  registerRequestUpdateFrame();
+  registerFlushUICommand();
   registerInitBody();
   registerInitWindow();
 }

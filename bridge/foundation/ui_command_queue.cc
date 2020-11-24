@@ -4,10 +4,14 @@
  */
 
 #include "ui_command_queue.h"
+#include "dart_methods.h"
 
 namespace foundation {
 
+UICommandTaskMessageQueue::UICommandTaskMessageQueue(int32_t contextId): contextId(contextId) {}
+
 void UICommandTaskMessageQueue::registerCommand(int64_t id, int32_t type, NativeString **args, size_t length, void* nativePtr) {
+  kraken::getDartMethod()->requestBatchUpdate(contextId);
   auto item = new UICommandItem(id, type, args, length, nativePtr);
   queue.push_back(item);
 }
@@ -16,7 +20,7 @@ UICommandTaskMessageQueue *UICommandTaskMessageQueue::instance(int32_t contextId
   static std::unordered_map<int32_t, UICommandTaskMessageQueue*> instanceMap;
 
   if (!instanceMap.contains(contextId)) {
-    instanceMap[contextId] = new UICommandTaskMessageQueue();
+    instanceMap[contextId] = new UICommandTaskMessageQueue(contextId);
   }
 
   return instanceMap[contextId];

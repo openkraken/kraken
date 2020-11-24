@@ -145,22 +145,22 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
   return JSValueMakeString(ctx, resultString);
 }
 
-JSValueRef requestUpdateFrame(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                              const JSValueRef arguments[], JSValueRef *exception) {
-  if (getDartMethod()->requestUpdateFrame == nullptr) {
+JSValueRef flushUICommand(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                          JSValueRef const *arguments, JSValueRef *exception) {
+  if (getDartMethod()->flushUICommand == nullptr) {
     JSC_THROW_ERROR(
-      ctx, "Failed to execute '__kraken_request_update_frame__': dart method (requestUpdateFrame) is not registered.",
+      ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.",
       exception);
     return nullptr;
   }
-  getDartMethod()->requestUpdateFrame();
+  getDartMethod()->flushUICommand();
   return nullptr;
 }
 
 void bindUIManager(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_module_listener__", krakenModuleListener);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_invoke_module__", krakenInvokeModule);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_request_update_frame__", requestUpdateFrame);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_flush_ui_command", flushUICommand);
 }
 
 } // namespace kraken::binding::jsc

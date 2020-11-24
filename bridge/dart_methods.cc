@@ -96,9 +96,9 @@ void registerSimulatePointer(SimulatePointer simulatePointer) {
   methodPointer->simulatePointer = simulatePointer;
 }
 
-void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame) {
-  methodPointer->requestUpdateFrame = requestUpdateFrame;
-}
+void registerFlushUICommand(FlushUICommand flushUiCommand){
+  methodPointer->flushUICommand = flushUiCommand;
+};
 
 void registerInitBody(InitBody initBody) {
   methodPointer->initBody = initBody;
@@ -106,6 +106,6 @@ void registerInitBody(InitBody initBody) {
 
 void registerInitWindow(InitWindow initWindow) {
   methodPointer->initWindow = initWindow;
-};
+}
 
 } // namespace kraken

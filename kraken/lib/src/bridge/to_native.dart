@@ -3,7 +3,6 @@ import 'dart:ffi';
 import 'dart:ui';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'dart:io';
@@ -240,11 +239,6 @@ void flushUICommand() {
   for (KrakenController controller in controllerMap.values) {
     Pointer<Pointer<UICommandItem>> nativeCommandItems = _getUICommandItems(controller.view.contextId);
     int commandLength = _getUICommandItemSize(controller.view.contextId);
-
-    // For new ui commands, we needs to tell engine to update frames.
-    if (commandLength > 0) {
-      SchedulerBinding.instance.scheduleFrame();
-    }
 
     // For new ui commands, we needs to tell engine to update frames.
     for (int i = 0; i < commandLength; i++) {

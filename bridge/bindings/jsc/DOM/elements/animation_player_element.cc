@@ -52,7 +52,7 @@ JSValueRef JSAnimationPlayerElement::play(JSContextRef ctx, JSObjectRef function
   auto elementInstance =
     static_cast<JSAnimationPlayerElement::AnimationPlayerElementInstance *>(JSObjectGetPrivate(function));
 
-  getDartMethod()->requestUpdateFrame();
+  getDartMethod()->flushUICommand();
   assert_m(elementInstance->nativeAnimationPlayerElement->play != nullptr, "Failed to call dart method: play() is nullptr");
   elementInstance->nativeAnimationPlayerElement->play(elementInstance->nativeAnimationPlayerElement, &name, mix,
                                                       mixSeconds);

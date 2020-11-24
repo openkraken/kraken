@@ -18,7 +18,8 @@ class UICommandTaskMessageQueue;
 
 // An un thread safe queue used for dart side to read ui command items.
 class UICommandTaskMessageQueue {
-  UICommandTaskMessageQueue() = default;
+  UICommandTaskMessageQueue() = delete;
+  explicit UICommandTaskMessageQueue(int32_t contextId);
 public:
   static UICommandTaskMessageQueue* instance(int32_t contextId);
 
@@ -28,6 +29,7 @@ public:
   void clear();
 
 private:
+  int32_t contextId;
   std::vector<UICommandItem *> queue;
 };
 

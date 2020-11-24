@@ -75,7 +75,7 @@ using AsyncBlobCallback = void (*)(void *callbackContext, int32_t contextId, con
                                    int32_t length);
 typedef NativeString *(*InvokeModule)(void *callbackContext, int32_t contextId, NativeString *,
                                       AsyncModuleCallback callback);
-typedef void (*RequestBatchUpdate)(void *callbackContext, int32_t contextId, AsyncCallback callback);
+typedef void (*RequestBatchUpdate)(int32_t contextId);
 typedef void (*ReloadApp)(int32_t contextId);
 typedef int32_t (*SetTimeout)(void *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
 typedef int32_t (*SetInterval)(void *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
@@ -89,7 +89,7 @@ typedef void (*OnPlatformBrightnessChanged)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
-typedef void (*RequestUpdateFrame)();
+typedef void (*FlushUICommand)();
 typedef void (*InitBody)(int32_t contextId, void *nativePtr);
 typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
 
@@ -152,7 +152,7 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
 KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
 KRAKEN_EXPORT
-void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame);
+void registerFlushUICommand(FlushUICommand flushUICommand);
 KRAKEN_EXPORT
 void registerInitBody(InitBody initBody);
 KRAKEN_EXPORT

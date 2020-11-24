@@ -33,7 +33,7 @@ struct DartMethodPointer {
   MatchImageSnapshot matchImageSnapshot{nullptr};
   Environment environment{nullptr};
   SimulatePointer simulatePointer{nullptr};
-  RequestUpdateFrame requestUpdateFrame{nullptr};
+  FlushUICommand flushUICommand{nullptr};
   InitBody initBody{nullptr};
   InitWindow initWindow{nullptr};
 };
@@ -52,7 +52,7 @@ void registerPlatformBrightness(PlatformBrightness platformBrightness);
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 void registerToBlob(ToBlob toBlob);
 void registerJSError(OnJSError onJsError);
-void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame);
+void registerFlushUICommand(FlushUICommand flushUiCommand);
 void registerInitBody(InitBody initBody);
 void registerInitWindow(InitWindow initWindow);
 

@@ -202,8 +202,8 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
   kraken::registerOnPlatformBrightnessChanged(onPlatformBrightnessChanged);
 }
 
-void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame) {
-  kraken::registerRequestUpdateFrame(requestUpdateFrame);
+void registerFlushUICommand(FlushUICommand flushUICommand) {
+  kraken::registerFlushUICommand(flushUICommand);
 }
 
 void registerInitBody(InitBody initBody) {

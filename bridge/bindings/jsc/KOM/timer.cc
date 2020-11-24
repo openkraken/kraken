@@ -291,14 +291,14 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   // the context pointer which will be pass by pointer address to dart code.
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
 
-  if (getDartMethod()->requestUpdateFrame == nullptr) {
+  if (getDartMethod()->flushUICommand == nullptr) {
     JSC_THROW_ERROR(
-      ctx, "Failed to execute '__kraken_request_update_frame__': dart method (requestUpdateFrame) is not registered.",
+      ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.",
       exception);
     return nullptr;
   }
   // Flush all pending ui messages.
-  getDartMethod()->requestUpdateFrame();
+  getDartMethod()->flushUICommand();
 
   if (getDartMethod()->requestAnimationFrame == nullptr) {
     JSC_THROW_ERROR(ctx,
