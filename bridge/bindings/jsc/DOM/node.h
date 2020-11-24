@@ -90,7 +90,7 @@ public:
     void internalRemove(JSValueRef *exception);
     JSNode::NodeInstance *internalRemoveChild(JSNode::NodeInstance *node, JSValueRef *exception);
     void internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode, JSValueRef *exception);
-    virtual JSStringRef internalGetTextContent();
+    virtual std::string internalGetTextContent();
     virtual void internalSetTextContent(JSStringRef content, JSValueRef *exception);
     JSNode::NodeInstance *internalReplaceChild(JSNode::NodeInstance *newChild, JSNode::NodeInstance *oldChild);
 

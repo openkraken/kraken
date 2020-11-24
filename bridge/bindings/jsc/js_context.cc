@@ -3,10 +3,10 @@
  * Author: Kraken Team.
  */
 
-#include "dart_methods.h"
-#include "bindings/jsc/KOM/window.h"
 #include "js_context.h"
+#include "bindings/jsc/KOM/window.h"
 #include "bindings/jsc/macros.h"
+#include "dart_methods.h"
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -220,5 +220,49 @@ JSObjectRef JSFunctionHolder::function() {
   }
   return m_function;
 }
+
+JSStringHolder::JSStringHolder(JSContext *context, const std::string& string)
+  : m_context(context), m_string(JSStringRetain(JSStringCreateWithUTF8CString(string.c_str()))) {}
+
+JSStringHolder::~JSStringHolder() {
+  if (m_string != nullptr) JSStringRelease(m_string);
+}
+
+JSValueRef JSStringHolder::makeString() {
+  if (m_string == nullptr) return nullptr;
+  return JSValueMakeString(m_context->context(), m_string);
+}
+
+void JSStringHolder::setString(JSStringRef value) {
+  assert(value != nullptr);
+
+  // Should release previous string reference.
+  if (m_string != nullptr) {
+    JSStringRelease(m_string);
+  }
+
+  m_string = JSStringRetain(value);
+}
+
+size_t JSStringHolder::utf8Size() {
+  return JSStringGetMaximumUTF8CStringSize(m_string);
+}
+
+size_t JSStringHolder::size() {
+  return JSStringGetLength(m_string);
+}
+
+std::string JSStringHolder::string() {
+  return JSStringToStdString(m_string);
+}
+
+const JSChar *JSStringHolder::ptr() {
+  return JSStringGetCharactersPtr(m_string);
+}
+
+bool JSStringHolder::empty() {
+  return size() == 0;
+}
+JSStringHolder::JSStringHolder(JSContext *context, JSStringRef string): m_context(context), m_string(string) {}
 
 } // namespace kraken::binding::jsc

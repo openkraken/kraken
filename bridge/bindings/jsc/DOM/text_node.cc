@@ -31,7 +31,9 @@ JSObjectRef JSTextNode::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 }
 
 JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringRef data)
-  : NodeInstance(jsTextNode, NodeType::TEXT_NODE), nativeTextNode(new NativeTextNode(nativeNode)), data(JSStringRetain(data)) {
+  : NodeInstance(jsTextNode, NodeType::TEXT_NODE), nativeTextNode(new NativeTextNode(nativeNode)) {
+
+  m_data.setString(data);
 
   std::string dataString = JSStringToStdString(data);
   auto args = buildUICommandArgs(dataString);
@@ -50,7 +52,7 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueR
   switch (property) {
   case TextNodeProperty::kTextContent:
   case TextNodeProperty::kData: {
-    return JSValueMakeString(_hostClass->ctx, data);
+    return m_data.makeString();
   }
   case TextNodeProperty::kNodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#text");
@@ -61,13 +63,8 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueR
 
 void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name == "data") {
-    if (data != nullptr) {
-      // Should release the previous data string reference.
-      JSStringRelease(data);
-    }
-
-    data = JSValueToStringCopy(_hostClass->ctx, value, exception);
-    JSStringRetain(data);
+    JSStringRef data = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    m_data.setString(data);
 
     std::string dataString = JSStringToStdString(data);
     auto args = buildUICommandArgs(name, dataString);
@@ -92,8 +89,8 @@ void JSTextNode::TextNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef
   }
 }
 
-JSStringRef JSTextNode::TextNodeInstance::internalGetTextContent() {
-  return data;
+std::string JSTextNode::TextNodeInstance::internalGetTextContent() {
+  return m_data.string();
 }
 
 const std::unordered_map<std::string, JSTextNode::TextNodeInstance::TextNodeProperty> &
@@ -107,11 +104,10 @@ JSTextNode::TextNodeInstance::getTextNodePropertyMap() {
 
 JSTextNode::TextNodeInstance::~TextNodeInstance() {
   delete nativeTextNode;
-  if (data != nullptr) JSStringRelease(data);
 }
 
 void JSTextNode::TextNodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {
-  data = JSStringRetain(content);
+  m_data.setString(content);
 }
 
 } // namespace kraken::binding::jsc

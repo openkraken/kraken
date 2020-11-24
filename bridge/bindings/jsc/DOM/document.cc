@@ -129,6 +129,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   case DocumentProperty::kCreateElement: {
     return m_createElement.function();
   }
+  case DocumentProperty::kDocumentElement:
   case DocumentProperty::kBody:
     return body->object;
   case DocumentProperty::kCreateTextNode: {
@@ -168,7 +169,8 @@ std::vector<JSStringRef> &DocumentInstance::getDocumentPropertyNames() {
   static std::vector<JSStringRef> propertyNames{
     JSStringCreateWithUTF8CString("body"),           JSStringCreateWithUTF8CString("createElement"),
     JSStringCreateWithUTF8CString("createTextNode"), JSStringCreateWithUTF8CString("createComment"),
-    JSStringCreateWithUTF8CString("getElementById"), JSStringCreateWithUTF8CString("getElementsByTagName")};
+    JSStringCreateWithUTF8CString("getElementById"), JSStringCreateWithUTF8CString("getElementsByTagName"),
+    JSStringCreateWithUTF8CString("documentElement")};
   return propertyNames;
 }
 
@@ -179,6 +181,7 @@ const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &Docum
     {"createTextNode", DocumentProperty::kCreateTextNode},
     {"createComment", DocumentProperty::kCreateComment},
     {"getElementById", DocumentProperty::kGetElementById},
+    {"documentElement", DocumentProperty::kDocumentElement},
     {"getElementsByTagName", DocumentProperty::kGetElementsByTagName}};
   return propertyMap;
 }

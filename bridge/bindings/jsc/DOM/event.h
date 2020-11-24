@@ -52,7 +52,8 @@ public:
     pause,
     seeked,
     seeking,
-    volumechange
+    volumechange,
+    scroll
   };
 
   static JSEvent *instance(JSContext *context);

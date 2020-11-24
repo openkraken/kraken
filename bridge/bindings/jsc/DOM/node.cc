@@ -146,6 +146,11 @@ JSValueRef JSNode::NodeInstance::appendChild(JSContextRef ctx, JSObjectRef funct
 JSValueRef JSNode::NodeInstance::insertBefore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                               size_t argumentCount, const JSValueRef *arguments,
                                               JSValueRef *exception) {
+  if (argumentCount != 2) {
+    JSC_THROW_ERROR(ctx, "Failed to execute 'insertBefore' on 'Node': 2 arguments is required.", exception);
+    return nullptr;
+  }
+
   const JSValueRef nodeValueRef = arguments[0];
   const JSValueRef referenceNodeValueRef = arguments[1];
 
@@ -155,19 +160,19 @@ JSValueRef JSNode::NodeInstance::insertBefore(JSContextRef ctx, JSObjectRef func
   }
 
   JSObjectRef nodeObjectRef = JSValueToObject(ctx, nodeValueRef, exception);
+  JSObjectRef referenceNodeObjectRef = nullptr;
+  JSNode::NodeInstance* referenceInstance = nullptr;
 
-  if (!JSValueIsObject(ctx, referenceNodeValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'insertBefore' on 'Node': the reference node element is not object.",
-                    exception);
+  if (JSValueIsObject(ctx, referenceNodeValueRef)) {
+    referenceNodeObjectRef = JSValueToObject(ctx, referenceNodeValueRef, exception);
+    referenceInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(referenceNodeObjectRef));
+  } else if (!JSValueIsNull(ctx, referenceNodeValueRef)) {
+    JSC_THROW_ERROR(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'", exception);
     return nullptr;
   }
 
-  JSObjectRef referenceNodeObjectRef = JSValueToObject(ctx, referenceNodeValueRef, exception);
-
   auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(function));
-
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
-  auto referenceInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(referenceNodeObjectRef));
 
   selfInstance->internalInsertBefore(nodeInstance, referenceInstance, exception);
 
@@ -421,9 +426,8 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
   case NodeProperty::kNodeType:
     return JSValueMakeNumber(_hostClass->ctx, nodeType);
   case NodeProperty::kTextContent: {
-    JSStringRef textContent = internalGetTextContent();
-    if (textContent == nullptr) textContent = JSStringCreateWithUTF8CString("");
-    return JSValueMakeString(_hostClass->ctx, textContent);
+    std::string textContent = internalGetTextContent();
+    return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(textContent.c_str()));
   }
   }
 
@@ -465,8 +469,8 @@ std::vector<JSStringRef> &JSNode::NodeInstance::getNodePropertyNames() {
   return propertyNames;
 }
 
-JSStringRef JSNode::NodeInstance::internalGetTextContent() {
-  return nullptr;
+std::string JSNode::NodeInstance::internalGetTextContent() {
+  return "";
 }
 
 const std::unordered_map<std::string, JSNode::NodeInstance::NodeProperty> &JSNode::NodeInstance::getNodePropertyMap() {

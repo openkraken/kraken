@@ -49,6 +49,29 @@ private:
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
 };
 
+class JSStringHolder {
+public:
+  JSStringHolder() = delete;
+  explicit JSStringHolder(JSContext *context, const std::string& string);
+  ~JSStringHolder();
+
+  JSValueRef makeString();
+  std::string string();
+
+  const JSChar *ptr();
+  size_t utf8Size();
+  size_t size();
+  bool empty();
+
+  void setString(JSStringRef value);
+
+private:
+  explicit JSStringHolder(JSContext *context, JSStringRef stringRef);
+  JSContext *m_context;
+  JSStringRef m_string{nullptr};
+  FML_DISALLOW_COPY_AND_ASSIGN(JSStringHolder);
+};
+
 class JSContext {
 public:
   JSContext() = delete;

@@ -57,6 +57,7 @@ public:
     kCreateComment,
     kNodeName,
     kGetElementById,
+    kDocumentElement,
     kGetElementsByTagName
   };
 

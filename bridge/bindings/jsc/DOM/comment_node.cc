@@ -23,13 +23,16 @@ JSCommentNode *JSCommentNode::instance(JSContext *context) {
 
 JSObjectRef JSCommentNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                                const JSValueRef *arguments, JSValueRef *exception) {
-
-  auto textNode = new CommentNodeInstance(this);
+  auto textNode = new CommentNodeInstance(this, nullptr);
   return textNode->object;
 }
 
-JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsCommentNode)
-  : NodeInstance(jsCommentNode, NodeType::COMMENT_NODE), nativeComment(new NativeComment(nativeNode)) {}
+JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsCommentNode, JSStringRef data)
+  : NodeInstance(jsCommentNode, NodeType::COMMENT_NODE), nativeComment(new NativeComment(nativeNode)) {
+  if (data != nullptr) {
+    m_data.setString(data);
+  }
+}
 
 void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   NodeInstance::setProperty(name, value, exception);
@@ -45,13 +48,13 @@ JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JS
 
   switch (property) {
   case CommentProperty::kData:
-    return JSValueMakeString(_hostClass->ctx, data);
+    return m_data.makeString();
   case CommentProperty::kNodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#comment");
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
   case CommentProperty::kLength:
-    return JSValueMakeNumber(_hostClass->ctx, JSStringGetLength(data));
+    return JSValueMakeNumber(_hostClass->ctx, m_data.size());
   }
 }
 
@@ -81,18 +84,16 @@ JSCommentNode::CommentNodeInstance::getPropertyMap() {
   return propertyMap;
 }
 
-JSStringRef JSCommentNode::CommentNodeInstance::internalGetTextContent() {
-  return data;
+std::string JSCommentNode::CommentNodeInstance::internalGetTextContent() {
+  return m_data.string();
 }
 
 JSCommentNode::CommentNodeInstance::~CommentNodeInstance() {
   delete nativeComment;
-
-  if (data != nullptr) JSStringRelease(data);
 }
 
 void JSCommentNode::CommentNodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {
-  data = JSStringRetain(content);
+  m_data.setString(content);
 }
 
 } // namespace kraken::binding::jsc

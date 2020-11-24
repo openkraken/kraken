@@ -125,22 +125,25 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
 }
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool sendUICommand)
-  : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)),
-    tagNameStringRef_(JSStringRetain(JSStringCreateWithUTF8CString(tagName))) {
+  : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)) {
+
+  m_tagName.setString(JSStringCreateWithUTF8CString(tagName));
 
   if (sendUICommand) {
-    auto args = buildUICommandArgs(JSStringRetain(tagNameStringRef_));
+    std::string t = std::string(tagName);
+    auto args = buildUICommandArgs(t);
     ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
       ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeElement);
   }
 }
 
 JSElement::ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRef, double targetId)
-  : NodeInstance(element, NodeType::ELEMENT_NODE, targetId), nativeElement(new NativeElement(nativeNode)),
-    tagNameStringRef_(JSStringRetain(tagNameStringRef)) {
+  : NodeInstance(element, NodeType::ELEMENT_NODE, targetId), nativeElement(new NativeElement(nativeNode)) {
+  m_tagName.setString(tagNameStringRef);
+
   NativeString tagName{};
-  tagName.string = JSStringGetCharactersPtr(tagNameStringRef_);
-  tagName.length = JSStringGetLength(tagNameStringRef_);
+  tagName.string = m_tagName.ptr();
+  tagName.length = m_tagName.size();
 
   const int32_t argsLength = 1;
   auto **args = new NativeString *[argsLength];
@@ -157,7 +160,6 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSStringRef tagN
 }
 
 JSElement::ElementInstance::~ElementInstance() {
-  JSStringRelease(tagNameStringRef_);
   if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
   delete nativeElement;
 }
@@ -372,15 +374,15 @@ void JSElement::ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef a
   }
 }
 
-JSStringRef JSElement::ElementInstance::internalGetTextContent() {
+std::string JSElement::ElementInstance::internalGetTextContent() {
   std::string buffer;
 
   for (auto &node : childNodes) {
-    JSStringRef nodeText = node->internalGetTextContent();
-    buffer += JSStringToStdString(nodeText);
+    std::string nodeText = node->internalGetTextContent();
+    buffer += nodeText;
   }
 
-  return JSStringCreateWithUTF8CString(buffer.c_str());
+  return buffer;
 }
 
 std::vector<JSStringRef> &JSElement::ElementInstance::getElementPropertyNames() {
@@ -758,7 +760,7 @@ void JSElement::ElementInstance::_beforeUpdateId(std::string &oldId, std::string
 }
 
 std::string JSElement::ElementInstance::tagName() {
-  std::string tagName = JSStringToStdString(tagNameStringRef_);
+  std::string tagName = m_tagName.string();
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
   return tagName;
 }

@@ -121,7 +121,7 @@ public:
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-    JSStringRef internalGetTextContent() override;
+    std::string internalGetTextContent() override;
     void internalSetTextContent(JSStringRef content, JSValueRef *exception) override;
 
     NativeElement *nativeElement{nullptr};
@@ -130,7 +130,7 @@ public:
 
   private:
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
-    JSStringRef tagNameStringRef_{JSStringCreateWithUTF8CString("")};
+    JSStringHolder m_tagName{context, ""};
 
     void _notifyNodeRemoved(JSNode::NodeInstance *node) override;
     void _notifyChildRemoved();

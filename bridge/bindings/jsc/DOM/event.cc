@@ -57,6 +57,7 @@ JSEvent::EventType JSEvent::getEventTypeOfName(std::string &name) {
     {"seeked", EventType::seeked},
     {"seeking", EventType::seeking},
     {"volumechange", EventType::volumechange},
+    {"scroll", EventType::scroll}
   };
 
   if (!eventTypeMap.contains(name)) return EventType::none;
@@ -117,6 +118,7 @@ const char *JSEvent::getEventNameOfTypeIndex(int8_t typeIndex) {
     "seeked",
     "seeking",
     "volumechange",
+    "scroll"
   };
 
   return eventTypeKeys[typeIndex];
