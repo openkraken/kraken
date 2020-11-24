@@ -39,7 +39,7 @@ JSValueRef JSLocation::getProperty(std::string &name, JSValueRef *exception) {
     return JSValueMakeString(context->context(), hrefRef);
   }
 
-  return nullptr;
+  return HostObject::getProperty(name, exception);
 }
 
 //void JSLocation::instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

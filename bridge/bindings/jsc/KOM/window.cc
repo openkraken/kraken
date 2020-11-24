@@ -15,8 +15,7 @@ WindowInstance::WindowInstance(JSWindow *window)
   : EventTargetInstance(window, WINDOW_TARGET_ID), nativeWindow(new NativeWindow(nativeEventTarget)) {
   location_ = new JSLocation(context);
 
-  foundation::UICommandTaskMessageQueue::instance(window->context->getContextId())
-    ->registerCommand(WINDOW_TARGET_ID, UI_COMMAND_INIT_WINDOW, nullptr, 0, nativeWindow);
+  getDartMethod()->initWindow(window->contextId, nativeWindow);
 }
 
 WindowInstance::~WindowInstance() {

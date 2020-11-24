@@ -38,7 +38,7 @@ JSValueRef JSPerformance::getProperty(std::string &name, JSValueRef *exception) 
     }
   }
 
-  return nullptr;
+  return HostObject::getProperty(name, exception);
 }
 
 JSPerformance::~JSPerformance() {}

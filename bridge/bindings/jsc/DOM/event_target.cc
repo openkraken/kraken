@@ -255,12 +255,14 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
     return getPropertyHandler(name, exception);
   }
 
-  return nullptr;
+  return Instance::getProperty(name, exception);
 }
 
 void JSEventTarget::EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name.substr(0, 2) == "on") {
     setPropertyHandler(name, value, exception);
+  } else {
+    Instance::setProperty(name, value, exception);
   }
 }
 

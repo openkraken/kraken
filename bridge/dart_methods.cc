@@ -104,4 +104,8 @@ void registerInitBody(InitBody initBody) {
   methodPointer->initBody = initBody;
 }
 
+void registerInitWindow(InitWindow initWindow) {
+  methodPointer->initWindow = initWindow;
+};
+
 } // namespace kraken

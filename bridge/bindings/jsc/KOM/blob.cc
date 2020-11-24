@@ -270,7 +270,7 @@ JSValueRef JSBlob::BlobInstance::getProperty(std::string &name, JSValueRef *exce
     }
   }
 
-  return nullptr;
+  return Instance::getProperty(name, exception);
 }
 
 void JSBlob::BlobInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

@@ -25,7 +25,7 @@ JSValueRef JSAllCollection::getProperty(std::string &name, JSValueRef *exception
     }
   }
 
-  return nullptr;
+  return HostObject::getProperty(name, exception);
 }
 
 std::vector<JSStringRef> &JSAllCollection::getAllCollectionPropertyNames() {

@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_HOST_CLASS_H
 
 #include "js_context.h"
+#include <unordered_map>
 
 namespace kraken::binding::jsc {
 
@@ -54,6 +55,8 @@ public:
     HostClass *_hostClass{nullptr};
     JSContext *context{nullptr};
     JSContextRef ctx{nullptr};
+  private:
+    std::unordered_map<std::string, JSValueRef> m_propertyMap;
   };
 
   std::string _name{""};

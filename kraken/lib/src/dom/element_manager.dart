@@ -103,6 +103,9 @@ class ElementManager {
     eventTarget.dispose();
   }
 
+  static Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
+  static Map<int, Pointer<NativeWindow>> windowNativePtrMap = Map();
+
   Element _rootElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
@@ -122,6 +125,9 @@ class ElementManager {
     root.controller = controller;
     _root = root;
     setEventTarget(_rootElement);
+
+    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this);
+    setEventTarget(window);
   }
 
   T getEventTargetByTargetId<T>(int targetId) {
@@ -156,11 +162,6 @@ class ElementManager {
   void clearTargets() {
     // Set current eventTargets to a new object, clean old targets by gc.
     _eventTargets = <int, EventTarget>{};
-  }
-
-  void initWindow(Pointer<NativeWindow> nativePtr) {
-    Window window = Window(WINDOW_ID, nativePtr, this);
-    setEventTarget(window);
   }
 
   Element createElement(

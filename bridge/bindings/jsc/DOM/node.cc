@@ -435,8 +435,6 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
 }
 
 void JSNode::NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  JSEventTarget::EventTargetInstance::setProperty(name, value, exception);
-
   auto propertyMap = getNodePropertyMap();
 
   if (propertyMap.contains(name)) {
@@ -446,6 +444,8 @@ void JSNode::NodeInstance::setProperty(std::string &name, JSValueRef value, JSVa
       JSStringRef textContent = JSValueToStringCopy(_hostClass->ctx, value, exception);
       internalSetTextContent(textContent, exception);
     }
+  } else {
+    JSEventTarget::EventTargetInstance::setProperty(name, value, exception);
   }
 }
 

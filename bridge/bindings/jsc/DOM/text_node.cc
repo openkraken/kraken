@@ -70,8 +70,9 @@ void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
     auto args = buildUICommandArgs(name, dataString);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId,UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
+  } else {
+    JSNode::NodeInstance::setProperty(name, value, exception);
   }
-  JSNode::NodeInstance::setProperty(name, value, exception);
 }
 
 std::array<JSStringRef, 3> &JSTextNode::TextNodeInstance::getTextNodePropertyNames() {

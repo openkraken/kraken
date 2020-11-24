@@ -190,7 +190,6 @@ void flushBridgeTask() {
 }
 
 enum UICommandType {
-  initWindow,
   createElement,
   createTextNode,
   createComment,
@@ -266,9 +265,6 @@ void flushUICommand() {
 
       try {
         switch (commandType) {
-          case UICommandType.initWindow:
-            controller.view.initWindow(nativeCommand.ref.nativePtr.cast<NativeWindow>());
-            break;
           case UICommandType.createElement:
             controller.view.createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
             break;

@@ -165,11 +165,27 @@ HostClass::~HostClass() {
 HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass), context(_hostClass->context), ctx(_hostClass->ctx) {
   object = JSObjectMake(hostClass->ctx, hostClass->instanceClass, this);
 }
+
 JSValueRef HostClass::Instance::getProperty(std::string &name, JSValueRef *exception) {
+  if (m_propertyMap.contains(name)) {
+    return m_propertyMap[name];
+  }
   return nullptr;
 }
-void HostClass::Instance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {}
+
+void HostClass::Instance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  if (m_propertyMap.contains(name)) {
+    JSValueUnprotect(ctx, m_propertyMap[name]);
+  }
+
+  JSValueProtect(ctx, value);
+  m_propertyMap[name] = value;
+}
+
 void HostClass::Instance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
 HostClass::Instance::~Instance() {
+  for (auto &prop : m_propertyMap) {
+    JSValueUnprotect(ctx, prop.second);
+  }
 }
 } // namespace kraken::binding::jsc

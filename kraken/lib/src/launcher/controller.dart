@@ -153,10 +153,6 @@ class KrakenViewController {
     return completer.future;
   }
 
-  void initWindow(Pointer<NativeWindow> nativePtr) {
-    _elementManager.initWindow(nativePtr);
-  }
-
   Element createElement(int id, Pointer nativePtr, String tagName) {
     return _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
   }

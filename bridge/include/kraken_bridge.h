@@ -47,17 +47,16 @@ struct Screen {
   double height;
 };
 
-#define UI_COMMAND_INIT_WINDOW 0
-#define UI_COMMAND_CREATE_ELEMENT 1
-#define UI_COMMAND_CREATE_TEXT_NODE 2
-#define UI_COMMAND_CREATE_COMMENT 3
-#define UI_COMMAND_DISPOSE_EVENT_TARGET 4
-#define UI_COMMAND_ADD_EVENT 5
-#define UI_COMMAND_REMOVE_NODE 6
-#define UI_COMMAND_INSERT_ADJACENT_NODE 7
-#define UI_COMMAND_SET_STYLE 8
-#define UI_COMMAND_SET_PROPERTY 9
-#define UI_COMMAND_REMOVE_PROPERTY 10
+#define UI_COMMAND_CREATE_ELEMENT 0
+#define UI_COMMAND_CREATE_TEXT_NODE 1
+#define UI_COMMAND_CREATE_COMMENT 2
+#define UI_COMMAND_DISPOSE_EVENT_TARGET 3
+#define UI_COMMAND_ADD_EVENT 4
+#define UI_COMMAND_REMOVE_NODE 5
+#define UI_COMMAND_INSERT_ADJACENT_NODE 6
+#define UI_COMMAND_SET_STYLE 7
+#define UI_COMMAND_SET_PROPERTY 8
+#define UI_COMMAND_REMOVE_PROPERTY 9
 
 struct UICommandItem {
   UICommandItem(int64_t id, int32_t type, NativeString **args, size_t length, void* nativePtr)
@@ -92,6 +91,7 @@ typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallba
 typedef void (*OnJSError)(int32_t contextId, const char *);
 typedef void (*RequestUpdateFrame)();
 typedef void (*InitBody)(int32_t contextId, void *nativePtr);
+typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
 
 KRAKEN_EXPORT
 void initJSContextPool(int poolSize);
@@ -155,5 +155,7 @@ KRAKEN_EXPORT
 void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame);
 KRAKEN_EXPORT
 void registerInitBody(InitBody initBody);
+KRAKEN_EXPORT
+void registerInitWindow(InitWindow initWindow);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

@@ -220,6 +220,8 @@ void JSEvent::EventInstance::setProperty(std::string &name, JSValueRef value, JS
         _stopPropagationFlag = true;
       }
     }
+  } else {
+    Instance::setProperty(name, value, exception);
   }
 }
 

@@ -105,9 +105,9 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     default:
       break;
     }
+  } else {
+    ElementInstance::setProperty(name, value, exception);
   }
-
-  NodeInstance::setProperty(name, value, exception);
 }
 
 void JSCanvasElement::CanvasElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -234,7 +234,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
     }
   }
 
-  return nullptr;
+  return Instance::getProperty(name, exception);
 }
 
 void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std::string &name, JSValueRef value,
@@ -282,6 +282,8 @@ void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
     default:
       break;
     }
+  } else {
+    Instance::setProperty(name, value, exception);
   }
 }
 

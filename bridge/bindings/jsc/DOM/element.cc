@@ -361,9 +361,9 @@ void JSElement::ElementInstance::setProperty(std::string &name, JSValueRef value
     default:
       break;
     }
+  } else {
+    NodeInstance::setProperty(name, value, exception);
   }
-
-  NodeInstance::setProperty(name, value, exception);
 }
 
 void JSElement::ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

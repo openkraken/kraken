@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
+import 'package:kraken/dom.dart';
 
 import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
@@ -637,15 +638,32 @@ final Dart_RegisterInitBody _registerInitBody = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterInitBody>>('registerInitBody')
     .asFunction();
 
-Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
-
 void _initBody(int contextId, Pointer<NativeElement> nativePtr) {
-  bodyNativePtrMap[contextId] = nativePtr;
+  ElementManager.bodyNativePtrMap[contextId] = nativePtr;
 }
 
 void registerInitBody() {
   Pointer<NativeFunction<Native_InitBody>> pointer = Pointer.fromFunction(_initBody);
   _registerInitBody(pointer);
+}
+
+typedef Native_InitWindow = Void Function(Int32 contextId, Pointer<NativeWindow> nativePtr);
+typedef Dart_InitWindow = void Function(int contextId, Pointer<NativeWindow> nativePtr);
+
+typedef Native_RegisterInitWindow = Void Function(Pointer<NativeFunction<Native_InitWindow>>);
+typedef Dart_RegisterInitWindow = void Function(Pointer<NativeFunction<Native_InitWindow>>);
+
+final Dart_RegisterInitWindow _registerInitWindow = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterInitWindow>>('registerInitWindow')
+    .asFunction();
+
+void _initWindow(int contextId, Pointer<NativeWindow> nativePtr) {
+  ElementManager.windowNativePtrMap[contextId] = nativePtr;
+}
+
+void registerInitWindow() {
+  Pointer<NativeFunction<Native_InitWindow>> pointer = Pointer.fromFunction(_initWindow);
+  _registerInitWindow(pointer);
 }
 
 void registerDartMethodsToCpp() {
@@ -663,4 +681,5 @@ void registerDartMethodsToCpp() {
   registerToBlob();
   registerRequestUpdateFrame();
   registerInitBody();
+  registerInitWindow();
 }

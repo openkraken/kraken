@@ -23,7 +23,7 @@ JSValueRef JSScreen::getProperty(std::string &name, JSValueRef *exception) {
     return JSValueMakeNumber(context->context(), screen->height);
   }
 
-  return nullptr;
+  return HostObject::getProperty(name, exception);
 }
 
 void JSScreen::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

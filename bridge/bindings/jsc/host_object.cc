@@ -54,11 +54,25 @@ HostObject::~HostObject() {
 }
 
 JSValueRef HostObject::getProperty(std::string &name, JSValueRef *exception) {
+  if (m_propertyMap.contains(name)) {
+    return m_propertyMap[name];
+  }
   return nullptr;
 }
 
-void HostObject::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {}
+void HostObject::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  if (m_propertyMap.contains(name)) {
+    JSValueUnprotect(ctx, m_propertyMap[name]);
+  }
 
-void HostObject::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
+  JSValueProtect(ctx, value);
+  m_propertyMap[name] = value;
+}
+
+void HostObject::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &prop : m_propertyMap) {
+    JSPropertyNameAccumulatorAddName(accumulator, JSStringCreateWithUTF8CString(prop.first.c_str()));
+  }
+}
 
 } // namespace kraken::binding::jsc
