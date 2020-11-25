@@ -13,7 +13,6 @@ namespace kraken::binding::jsc {
 
 class HostClass {
 public:
-  static void proxyInitialize(JSContextRef ctx, JSObjectRef object);
   static void proxyFinalize(JSObjectRef object);
   static bool proxyHasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
                                JSValueRef *exception);
@@ -25,6 +24,7 @@ public:
                                      JSValueRef *exception);
   static JSValueRef proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                              JSValueRef *exception);
+  static JSValueRef proxyPrototypeGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef *exception);
   static bool proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value,
                                        JSValueRef *exception);
   static void proxyInstanceGetPropertyNames(JSContextRef ctx, JSObjectRef object,
@@ -37,6 +37,7 @@ public:
             const JSStaticValue *staticValue);
 
   virtual JSValueRef getProperty(std::string &name, JSValueRef *exception);
+  virtual JSValueRef prototypeGetProperty(std::string &name, JSValueRef *exception);
 
   // Triggered when this HostClass had been finalized by GC.
   virtual ~HostClass();
@@ -62,6 +63,9 @@ public:
     std::unordered_map<std::string, JSValueRef> m_propertyMap;
   };
 
+  static void setProto(JSContextRef ctx, JSObjectRef child, JSObjectRef parent, JSValueRef *exception);
+  static JSObjectRef getProto(JSContextRef ctx, JSObjectRef child, JSValueRef *exception);
+
   std::string _name{""};
   JSContext *context{nullptr};
   int32_t contextId;
@@ -70,10 +74,14 @@ public:
   JSObjectRef classObject{nullptr};
   // The class template of javascript instance objects.
   JSClassRef instanceClass{nullptr};
-
+  // The prototype object of this class.
+  JSObjectRef prototypeObject{nullptr};
   JSObjectRef _call{nullptr};
 
 private:
+
+  void initPrototype() const;
+
   // The class template of javascript constructor function.
   JSClassRef jsClass{nullptr};
   HostClass *_parentHostClass{nullptr};

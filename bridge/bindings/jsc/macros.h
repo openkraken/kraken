@@ -93,7 +93,6 @@
     definition.attributes = kJSClassAttributeNoAutomaticPrototype;                                                     \
     definition.staticFunctions = staticFunction;                                                                       \
     definition.staticValues = staticValue;                                                                             \
-    definition.initialize = HostClass::proxyInitialize;                                                                \
     definition.finalize = HostClass::proxyFinalize;                                                                    \
     definition.hasInstance = HostClass::proxyHasInstance;                                                              \
     definition.callAsConstructor = HostClass::proxyCallAsConstructor;                                                  \

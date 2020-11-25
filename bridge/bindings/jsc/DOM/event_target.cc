@@ -52,8 +52,10 @@ JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef con
     }
   }
 
-  auto instance = new EventTargetInstance(this);
-  return instance->object;
+  auto eventTarget = new JSEventTarget::EventTargetInstance(this);
+  setProto(ctx, constructor, eventTarget->object, exception);
+
+  return constructor;
 }
 
 JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget) : Instance(eventTarget) {
@@ -92,7 +94,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   delete nativeEventTarget;
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx, JSObjectRef function,
+JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef function,
                                                                 JSObjectRef thisObject, size_t argumentCount,
                                                                 const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 2) {
@@ -100,7 +102,7 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
     return nullptr;
   }
 
-  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(function));
+  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
 
   const JSValueRef eventNameValueRef = arguments[0];
   const JSValueRef callback = arguments[1];
@@ -150,6 +152,14 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
   handlers.emplace_back(callbackObjectRef);
 
   return nullptr;
+}
+
+JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *exception) {
+  if (name == "addEventListener") {
+    return m_addEventListener.function();
+  }
+
+  return HostClass::prototypeGetProperty(name, exception);
 }
 
 JSValueRef JSEventTarget::EventTargetInstance::removeEventListener(JSContextRef ctx, JSObjectRef function,
@@ -262,7 +272,8 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
 
     switch (property) {
     case EventTargetProperty::kAddEventListener: {
-      return m_addEventListener.function();
+//      return m_addEventListener.function();x
+return nullptr;
     }
     case EventTargetProperty::kRemoveEventListener: {
       return m_removeEventListener.function();

@@ -20,6 +20,8 @@ HostClass::HostClass(JSContext *context, std::string name)
   JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), HostClass);
   instanceClass = JSClassCreate(&hostInstanceDefinition);
   JSClassRetain(instanceClass);
+
+  initPrototype();
 }
 
 HostClass::HostClass(JSContext *context, HostClass *parentHostClass, std::string name,
@@ -36,17 +38,8 @@ HostClass::HostClass(JSContext *context, HostClass *parentHostClass, std::string
   JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), HostClass);
   instanceClass = JSClassCreate(&hostInstanceDefinition);
   JSClassRetain(instanceClass);
-}
 
-void HostClass::proxyInitialize(JSContextRef ctx, JSObjectRef object) {
-  JSObjectRef global = JSContextGetGlobalObject(ctx);
-  JSStringRef functionString = JSStringCreateWithUTF8CString("Function");
-  JSValueRef value = JSObjectGetProperty(ctx, global, functionString, nullptr);
-  JSObjectRef funcCtor = JSValueToObject(ctx, value, nullptr);
-  JSStringRef prototypeKey = JSStringCreateWithUTF8CString("prototype");
-  JSValueRef prototype = JSObjectGetPrototype(ctx, funcCtor);
-  JSObjectSetProperty(ctx, object, prototypeKey, prototype, kJSPropertyAttributeNone, nullptr);
-  JSStringRelease(functionString);
+  initPrototype();
 }
 
 void HostClass::proxyFinalize(JSObjectRef object) {
@@ -84,25 +77,26 @@ JSValueRef HostClass::proxyCallAsFunction(JSContextRef ctx, JSObjectRef function
 
 namespace {
 
-JSValueRef constructorCall(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+JSValueRef constructorCall(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                           const JSValueRef *arguments, JSValueRef *exception) {
   auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(function));
 
-  const JSValueRef instanceThisObject = arguments[0];
-  JSValueRef *instanceArguments = new JSValueRef[argumentCount - 1];
+  const JSValueRef subInstanceValue = arguments[0];
+  JSObjectRef subInstanceObject = JSValueToObject(ctx, subInstanceValue, exception);
+  auto instanceArguments = new JSValueRef[argumentCount - 1];
 
-  for (int i = 1; i < argumentCount; i ++) {
+  for (int i = 1; i < argumentCount; i++) {
     instanceArguments[i - 1] = arguments[i];
   }
 
   JSObjectRef instanceReturn =
-    hostClass->instanceConstructor(ctx, thisObject, argumentCount - 1, instanceArguments, exception);
+    hostClass->instanceConstructor(ctx, subInstanceObject, argumentCount - 1, instanceArguments, exception);
   delete[] instanceArguments;
 
   return instanceReturn;
 }
 
-}
+} // namespace
 
 JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                        JSValueRef *exception) {
@@ -115,6 +109,8 @@ JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSS
       JSValueProtect(hostClass->ctx, hostClass->_call);
     }
     return hostClass->_call;
+  } else if (name == "prototype") {
+    return JSObjectGetPrototype(ctx, object);
   }
 
   return hostClass->getProperty(name, exception);
@@ -125,7 +121,14 @@ JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef obj
   auto hostClassInstance = reinterpret_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
   std::string &&name = JSStringToStdString(propertyName);
   JSValueRef result = hostClassInstance->getProperty(name, exception);
+  return result;
+}
 
+JSValueRef HostClass::proxyPrototypeGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
+                                                JSValueRef *exception) {
+  auto hostClass = reinterpret_cast<HostClass *>(JSObjectGetPrivate(object));
+  std::string &&name = JSStringToStdString(propertyName);
+  JSValueRef result = hostClass->prototypeGetProperty(name, exception);
   return result;
 }
 
@@ -149,7 +152,7 @@ void HostClass::proxyInstanceFinalize(JSObjectRef object) {
 }
 
 JSObjectRef HostClass::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                         const JSValueRef *arguments, JSValueRef *exception) {
+                                           const JSValueRef *arguments, JSValueRef *exception) {
   return JSObjectMake(ctx, nullptr, nullptr);
 }
 HostClass::~HostClass() {
@@ -166,7 +169,34 @@ JSValueRef HostClass::getProperty(std::string &name, JSValueRef *exception) {
   return nullptr;
 }
 
-HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass), context(_hostClass->context), ctx(_hostClass->ctx) {
+void HostClass::initPrototype() const {
+  JSClassDefinition prototypeDefinition = kJSClassDefinitionEmpty;
+  prototypeDefinition.getProperty = proxyPrototypeGetProperty;
+  JSClassRef prototypeClass = JSClassCreate(&prototypeDefinition);
+  JSObjectRef prototype = JSObjectMake(ctx, prototypeClass, (void*)this);
+  JSStringRef constructorString = JSStringCreateWithUTF8CString("constructor");
+  JSObjectSetProperty(ctx, prototype, constructorString, classObject, kJSClassAttributeNone, nullptr);
+  JSStringRelease(constructorString);
+  JSObjectSetPrototype(ctx, classObject, prototype);
+}
+
+JSValueRef HostClass::prototypeGetProperty(std::string &name, JSValueRef *exception) {
+  return nullptr;
+}
+
+void HostClass::setProto(JSContextRef ctx, JSObjectRef child, JSObjectRef parent, JSValueRef *exception) {
+  static JSStringRef privateKey = JSStringCreateWithUTF8CString("__native_proto__");
+  JSObjectSetProperty(ctx, child, privateKey, parent, kJSClassAttributeNone, exception);
+}
+
+JSObjectRef HostClass::getProto(JSContextRef ctx, JSObjectRef child, JSValueRef *exception) {
+  static JSStringRef privateKey = JSStringCreateWithUTF8CString("__native_proto__");
+  JSValueRef result = JSObjectGetProperty(ctx, child, privateKey, exception);
+  return JSValueToObject(ctx, result, exception);
+}
+
+HostClass::Instance::Instance(HostClass *hostClass)
+  : _hostClass(hostClass), context(_hostClass->context), ctx(_hostClass->ctx) {
   object = JSObjectMake(hostClass->ctx, hostClass->instanceClass, this);
 }
 

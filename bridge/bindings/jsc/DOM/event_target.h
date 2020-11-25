@@ -39,6 +39,11 @@ public:
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) override;
 
+  JSValueRef prototypeGetProperty(std::string &name, JSValueRef *exception) override;
+
+  static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
   class EventTargetInstance : public Instance {
   public:
     enum class EventTargetProperty {
@@ -50,8 +55,6 @@ public:
     static std::vector<JSStringRef> &getEventTargetPropertyNames();
     static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
 
-    static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                       size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -72,10 +75,10 @@ public:
     NativeEventTarget *nativeEventTarget {nullptr};
 
   private:
+    friend JSEventTarget;
     std::unordered_map<JSEvent::EventType, std::deque<JSObjectRef>> _eventHandlers;
     bool internalDispatchEvent(JSEvent::EventInstance *eventInstance);
 
-    JSFunctionHolder m_addEventListener{context, this, "addEventListener", addEventListener};
     JSFunctionHolder m_removeEventListener{context, this, "removeEventListener", removeEventListener};
     JSFunctionHolder m_dispatchEvent{context, this, "dispatchEvent", dispatchEvent};
     JSFunctionHolder m_clearListeners{context, this, "clearListeners", __clearListeners__};
@@ -83,9 +86,11 @@ public:
 
 protected:
   JSEventTarget() = delete;
+  friend EventTargetInstance;
   explicit JSEventTarget(JSContext *context, const char *name);
   explicit JSEventTarget(JSContext *context);
 private:
+  JSFunctionHolder m_addEventListener{context, this, "addEventListener", addEventListener};
   std::vector<std::string> m_jsOnlyEvents;
 };
 
