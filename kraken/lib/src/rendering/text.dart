@@ -63,6 +63,8 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
 
   set maxLines(int value) {
     assert(_renderParagraph != null);
+    // Forcing a break after a set number of lines
+    // https://drafts.csswg.org/css-overflow-3/#max-lines
     _renderParagraph.maxLines = value;
   }
 
