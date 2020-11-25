@@ -61,6 +61,11 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     _renderParagraph.overflow = value;
   }
 
+  set maxLines(int value) {
+    assert(_renderParagraph != null);
+    _renderParagraph.maxLines = value;
+  }
+
   // Box size equals to RenderBox.size to avoid flutter complain when read size property.
   Size _boxSize;
   Size get boxSize {

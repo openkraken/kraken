@@ -159,9 +159,21 @@ class CSSText {
     }
   }
 
+  static int getLineClamp(CSSStyleDeclaration style) {
+    int lineClamp = CSSLength.toInt(style[LINE_CLAMP]);
+    return lineClamp != null && lineClamp >= 0 ? lineClamp : 0;
+  }
+
   static TextOverflow getTextOverflow(CSSStyleDeclaration style) {
     List<CSSOverflowType> overflows = getOverflowTypes(style);
     WhiteSpace whiteSpace = getWhiteSpace(style);
+    int lineClamp = getLineClamp(style);
+
+    // Set line-clamp to number makes text-overflow ellipsis which takes priority over text-overflow
+    if (lineClamp != 0.0) {
+      return TextOverflow.ellipsis;
+    }
+
     //  To make text overflow its container you have to set overflowX hidden and white-space: nowrap.
     if (overflows[0] != CSSOverflowType.hidden || whiteSpace != WhiteSpace.nowrap) {
       return TextOverflow.visible;

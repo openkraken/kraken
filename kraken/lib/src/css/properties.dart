@@ -89,6 +89,7 @@ const String TEXT_SHADOW = 'textShadow';
 const String LETTER_SPACING = 'letterSpacing';
 const String WORD_SPACING = 'wordSpacing';
 const String WHITE_SPACE = 'whiteSpace';
+const String LINE_CLAMP = 'lineClamp';
 
 const String FLEX = 'flex';
 const String FLEX_GROW = 'flexGrow';
