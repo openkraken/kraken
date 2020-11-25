@@ -264,7 +264,7 @@ task('copy-build-libs', (done) => {
 
 task('compile-polyfill', (done) => {
   if (!fs.existsSync(path.join(paths.polyfill, 'node_modules'))) {
-    spawnSync('npm', ['install'], {
+    spawnSync('tnpm', ['install'], {
       cwd: paths.polyfill,
       stdio: 'inherit'
     });

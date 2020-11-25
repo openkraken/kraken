@@ -11,7 +11,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
@@ -370,7 +369,6 @@ class KrakenController {
         rootController: this,
         navigationDelegate: _view.navigationDelegate);
     _view.attachView(parent, previousSibling);
-    SchedulerBinding.instance.scheduleFrame();
   }
 
   // reload current kraken view.
@@ -397,7 +395,6 @@ class KrakenController {
     _view.attachView(parent, previousSibling);
     await loadBundle();
     await run();
-    SchedulerBinding.instance.scheduleFrame();
   }
 
   void reloadWithUrl(String url) async {

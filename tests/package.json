@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "pretest": "npm install",
+    "pretest": "tnpm install",
     "lint": "cd ../ && npm run lint",
     "clean": "rm -rf ./integration/.specs && rm -rf ./integration/snapshots/*.current.png && rm -rf ./integration/snapshots/*.diff.png",
     "compile:ts": "cd integration && tsc --outDir ./.specs",
