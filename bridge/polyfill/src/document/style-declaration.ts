@@ -104,7 +104,8 @@ const builtInCSSProperties = [
   'transition-delay',
   'object-fit',
   'object-position',
-  'filter'
+  'filter',
+  'line-clamp'
 ];
 
 interface ICamelize {
