@@ -160,8 +160,7 @@ class CSSText {
   }
 
   static int getLineClamp(CSSStyleDeclaration style) {
-    int lineClamp = CSSLength.toInt(style[LINE_CLAMP]);
-    return lineClamp != null && lineClamp >= 0 ? lineClamp : 0;
+    return CSSLength.toInt(style[LINE_CLAMP]);
   }
 
   static TextOverflow getTextOverflow(CSSStyleDeclaration style) {
@@ -170,7 +169,7 @@ class CSSText {
     int lineClamp = getLineClamp(style);
 
     // Set line-clamp to number makes text-overflow ellipsis which takes priority over text-overflow
-    if (lineClamp != 0.0) {
+    if (lineClamp != null && lineClamp > 0) {
       return TextOverflow.ellipsis;
     }
 
