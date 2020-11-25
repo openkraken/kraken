@@ -23,7 +23,10 @@ export function krakenModuleListener(message: any) {
     triggerMethodCallHandler(method, args);
   } else if (type === 'WebSocket') {
     const clientId = parsed[1];
-    const event = parsed[2];
+    const eventInfo = parsed[2];
+    const nativeEventAddress = eventInfo.nativeEvent;
+    // @ts-ignore
+    const event = Event.__initWithNativeEvent__(nativeEventAddress);
     dispatchWebSocketEvent(clientId, event);
   }
 }

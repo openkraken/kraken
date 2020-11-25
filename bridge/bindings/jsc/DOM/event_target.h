@@ -85,6 +85,8 @@ protected:
   JSEventTarget() = delete;
   explicit JSEventTarget(JSContext *context, const char *name);
   explicit JSEventTarget(JSContext *context);
+private:
+  std::vector<std::string> m_jsOnlyEvents;
 };
 
 using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);

@@ -35,6 +35,9 @@ public:
   HostClass(JSContext *context, std::string name);
   HostClass(JSContext *context, HostClass *parentHostClass, std::string name, const JSStaticFunction *staticFunction,
             const JSStaticValue *staticValue);
+
+  virtual JSValueRef getProperty(std::string &name, JSValueRef *exception);
+
   // Triggered when this HostClass had been finalized by GC.
   virtual ~HostClass();
 

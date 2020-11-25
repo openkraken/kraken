@@ -124,6 +124,27 @@ const char *JSEvent::getEventNameOfTypeIndex(int8_t typeIndex) {
   return eventTypeKeys[typeIndex];
 }
 
+JSValueRef JSEvent::initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                        size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  if (argumentCount != 1) {
+    JSC_THROW_ERROR(ctx, "Failed to execute Event.initWithNativeEvent(): invalid arguments.", exception);
+    return nullptr;
+  }
+
+  auto Event = reinterpret_cast<JSEvent*>(JSObjectGetPrivate(function));
+  double address = JSValueToNumber(ctx, arguments[0], exception);
+  auto nativeEvent = reinterpret_cast<NativeEvent*>(static_cast<int64_t>(address));
+  auto event = new JSEvent::EventInstance(Event, nativeEvent);
+  return event->object;
+}
+
+JSValueRef JSEvent::getProperty(std::string &name, JSValueRef *exception) {
+  if (name == "__initWithNativeEvent__") {
+    return m_initWithNativeEvent.function();
+  }
+  return nullptr;
+}
+
 JSEvent::EventInstance::EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent)
   : Instance(jsEvent), nativeEvent(nativeEvent) {}
 

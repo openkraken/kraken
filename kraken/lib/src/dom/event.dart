@@ -94,26 +94,17 @@ class Event {
     event.ref.cancelable = cancelable ? 1 : 0;
     event.ref.timeStamp = timeStamp;
     event.ref.defaultPrevented = defaultPrevented ? 1 : 0;
-    if (target != null) {
-      event.ref.target = target.nativeEventTargetPtr;
-    }
-
-    if (currentTarget != null) {
-      event.ref.currentTarget = currentTarget.nativeEventTargetPtr;
-    }
+    event.ref.target = target != null ? target.nativeEventTargetPtr : nullptr;
+    event.ref.currentTarget = currentTarget != null ? currentTarget.nativeEventTargetPtr : nullptr;
 
     return event;
   }
 
   Map toJson() {
+    Pointer<NativeEvent> nativeEvent = toNativeEvent();
     return {
       'type': type.index,
-      'bubbles': bubbles,
-      'cancelable': cancelable,
-      'timeStamp': timeStamp,
-      'defaultPrevented': defaultPrevented,
-      'target': target?.targetId,
-      'currentTarget': currentTarget?.targetId,
+      'nativeEvent': nativeEvent.address
     };
   }
 

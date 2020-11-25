@@ -74,7 +74,7 @@ export class WebSocket extends EventTarget {
 
   constructor(url: string, protocol: string | string[]) {
     // @ts-ignore
-    super(undefined, ['open', 'close', 'message', 'error']);
+    super(['open', 'close', 'message', 'error']);
     // verify url schema
     validateUrl(url);
 

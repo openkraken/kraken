@@ -60,8 +60,15 @@ public:
   static EventType getEventTypeOfName(std::string &name);
   static const char* getEventNameOfTypeIndex(int8_t index);
 
+  // Create an Event Object from an nativeEvent address which allocated by dart side.
+  static JSValueRef initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
+
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
   class EventInstance : public Instance {
   public:
@@ -118,6 +125,8 @@ protected:
   JSEvent() = delete;
   explicit JSEvent(JSContext *context, const char *name);
   explicit JSEvent(JSContext *context);
+private:
+  JSFunctionHolder m_initWithNativeEvent{context, this, "initWithNativeEvent", initWithNativeEvent};
 };
 
 struct NativeEvent {

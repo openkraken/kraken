@@ -92,7 +92,7 @@ JSValueRef constructorCall(JSContextRef ctx, JSObjectRef function, JSObjectRef t
   JSValueRef *instanceArguments = new JSValueRef[argumentCount - 1];
 
   for (int i = 1; i < argumentCount; i ++) {
-    instanceArguments[0] = arguments[i];
+    instanceArguments[i - 1] = arguments[i];
   }
 
   JSObjectRef instanceReturn =
@@ -117,7 +117,7 @@ JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSS
     return hostClass->_call;
   }
 
-  return nullptr;
+  return hostClass->getProperty(name, exception);
 }
 
 JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
@@ -160,6 +160,10 @@ HostClass::~HostClass() {
 
   JSClassRelease(jsClass);
   JSClassRelease(instanceClass);
+}
+
+JSValueRef HostClass::getProperty(std::string &name, JSValueRef *exception) {
+  return nullptr;
 }
 
 HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass), context(_hostClass->context), ctx(_hostClass->ctx) {

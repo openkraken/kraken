@@ -31,6 +31,27 @@ JSEventTarget::JSEventTarget(JSContext *context) : HostClass(context, "EventTarg
 
 JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                                const JSValueRef *arguments, JSValueRef *exception) {
+  if (argumentCount == 1) {
+    const JSValueRef jsOnlyEventsValueRef = arguments[0];
+
+    if (!JSValueIsArray(ctx, jsOnlyEventsValueRef)) {
+      JSC_THROW_ERROR(ctx, "Failed to new Event: jsOnlyEvents is not an array.", exception);
+      return nullptr;
+    }
+
+    JSObjectRef jsOnlyEvents = JSValueToObject(ctx, jsOnlyEventsValueRef, exception);
+    JSStringRef lengthStr = JSStringCreateWithUTF8CString("length");
+    JSValueRef lengthValue = JSObjectGetProperty(ctx, jsOnlyEvents, lengthStr, exception);
+    size_t length = JSValueToNumber(ctx, lengthValue, exception);
+
+    for (size_t i = 0; i < length; i ++) {
+      JSValueRef jsOnlyEvent = JSObjectGetPropertyAtIndex(ctx, jsOnlyEvents, i, exception);
+      JSStringRef e = JSValueToStringCopy(ctx, jsOnlyEvent, exception);
+      std::string event = JSStringToStdString(e);
+      m_jsOnlyEvents.emplace_back(event);
+    }
+  }
+
   auto instance = new EventTargetInstance(this);
   return instance->object;
 }
@@ -116,8 +137,12 @@ JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx
     std::string eventTypeString = std::to_string(eventType);
     auto args = buildUICommandArgs(eventTypeString);
 
-    foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetInstance->eventTargetId,
-                                                                                UI_COMMAND_ADD_EVENT, args, 1, 0x00);
+    auto Event = reinterpret_cast<JSEventTarget*>(eventTargetInstance->_hostClass);
+    auto isJsOnlyEvent = std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), eventName) != Event->m_jsOnlyEvents.end();
+
+    if (!isJsOnlyEvent) {
+      foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetInstance->eventTargetId, UI_COMMAND_ADD_EVENT, args, 1, nullptr);
+    };
   }
 
   std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
@@ -300,8 +325,12 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
   JSValueProtect(_hostClass->ctx, handlerObjectRef);
   _eventHandlers[eventType].emplace_back(handlerObjectRef);
 
-  int32_t contextId = _hostClass->contextId;
+  auto Event = reinterpret_cast<JSEventTarget*>(_hostClass);
+  auto isJsOnlyEvent = std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), name.substr(2)) != Event->m_jsOnlyEvents.end();
 
+  if (isJsOnlyEvent) return;
+
+  int32_t contextId = _hostClass->contextId;
   std::string eventTypeString = std::to_string(eventType);
   auto args = buildUICommandArgs(eventTypeString);
   foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UI_COMMAND_ADD_EVENT,
