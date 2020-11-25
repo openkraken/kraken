@@ -103,6 +103,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   }
 
   auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
   const JSValueRef eventNameValueRef = arguments[0];
   const JSValueRef callback = arguments[1];
@@ -162,7 +163,7 @@ JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *ex
   return HostClass::prototypeGetProperty(name, exception);
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::removeEventListener(JSContextRef ctx, JSObjectRef function,
+JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef function,
                                                                    JSObjectRef thisObject, size_t argumentCount,
                                                                    const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 2) {
@@ -170,7 +171,8 @@ JSValueRef JSEventTarget::EventTargetInstance::removeEventListener(JSContextRef 
     return nullptr;
   }
 
-  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(function));
+  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
   const JSValueRef eventNameValueRef = arguments[0];
   const JSValueRef callback = arguments[1];
@@ -213,7 +215,7 @@ JSValueRef JSEventTarget::EventTargetInstance::removeEventListener(JSContextRef 
   return nullptr;
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, JSObjectRef function,
+JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function,
                                                              JSObjectRef thisObject, size_t argumentCount,
                                                              const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
@@ -221,39 +223,47 @@ JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, J
     return nullptr;
   }
 
-  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(function));
+  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
+
   const JSValueRef eventObjectValueRef = arguments[0];
   JSObjectRef eventObjectRef = JSValueToObject(ctx, eventObjectValueRef, exception);
   auto eventInstance = reinterpret_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(eventObjectRef));
-  auto eventType = static_cast<JSEvent::EventType>(eventInstance->nativeEvent->type);
 
-  if (!eventTargetInstance->_eventHandlers.contains(eventType)) {
-    return nullptr;
+  return JSValueMakeBoolean(ctx, eventTargetInstance->dispatchEvent(eventInstance));
+}
+
+bool JSEventTarget::EventTargetInstance::dispatchEvent(JSEvent::EventInstance *event) {
+  auto eventType = static_cast<JSEvent::EventType>(event->nativeEvent->type);
+
+  if (!_eventHandlers.contains(eventType)) {
+    return false;
   }
 
-  eventInstance->nativeEvent->target = eventInstance->nativeEvent->currentTarget = eventTargetInstance;
+  event->nativeEvent->target = event->nativeEvent->currentTarget = this;
 
   // event has been dispatched, then do not dispatch
-  eventInstance->_dispatchFlag = true;
+  event->_dispatchFlag = true;
   bool cancelled;
 
-  while (eventInstance->nativeEvent->currentTarget != nullptr) {
-    cancelled = eventTargetInstance->internalDispatchEvent(eventInstance);
-    if (eventInstance->nativeEvent->bubbles || cancelled) break;
-    if (eventInstance->nativeEvent->currentTarget != nullptr) {
-      auto node = reinterpret_cast<JSNode::NodeInstance *>(eventInstance->nativeEvent->currentTarget);
-      eventInstance->nativeEvent->currentTarget = node->parentNode;
+  while (event->nativeEvent->currentTarget != nullptr) {
+    cancelled = internalDispatchEvent(event);
+    if (event->nativeEvent->bubbles || cancelled) break;
+    if (event->nativeEvent->currentTarget != nullptr) {
+      auto node = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
+      event->nativeEvent->currentTarget = node->parentNode;
     }
   }
 
-  eventInstance->_dispatchFlag = false;
-  return JSValueMakeBoolean(ctx, !eventInstance->_canceledFlag);
+  event->_dispatchFlag = false;
+  return !event->_canceledFlag;
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::__clearListeners__(JSContextRef ctx, JSObjectRef function,
+JSValueRef JSEventTarget::__clearListeners__(JSContextRef ctx, JSObjectRef function,
                                                                   JSObjectRef thisObject, size_t argumentCount,
                                                                   const JSValueRef *arguments, JSValueRef *exception) {
-  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(function));
+  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
   for (auto &it : eventTargetInstance->_eventHandlers) {
     for (auto &handler : it.second) {
@@ -272,17 +282,16 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
 
     switch (property) {
     case EventTargetProperty::kAddEventListener: {
-//      return m_addEventListener.function();x
-return nullptr;
+      return prototype<JSEventTarget>()->m_addEventListener.function();
     }
     case EventTargetProperty::kRemoveEventListener: {
-      return m_removeEventListener.function();
+      return prototype<JSEventTarget>()->m_removeEventListener.function();
     }
     case EventTargetProperty::kDispatchEvent: {
-      return m_dispatchEvent.function();
+      return prototype<JSEventTarget>()->m_dispatchEvent.function();
     }
     case EventTargetProperty::kClearListeners: {
-      return m_clearListeners.function();
+      return prototype<JSEventTarget>()->m_clearListeners.function();
     }
     case EventTargetProperty::kTargetId: {
       return JSValueMakeNumber(_hostClass->ctx, eventTargetId);
@@ -388,20 +397,12 @@ JSEventTarget::EventTargetInstance::getEventTargetPropertyMap() {
 
 // This function will be called back by dart side when trigger events.
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent) {
+  assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
+
   JSEventTarget::EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
   JSContext *context = eventTargetInstance->context;
-  JSContextRef ctx = eventTargetInstance->_hostClass->ctx;
-
-  JSValueRef exception = nullptr;
   auto eventInstance = new JSEvent::EventInstance(JSEvent::instance(context), nativeEvent);
-  JSStringRef dispatchStringRef = JSStringCreateWithUTF8CString("dispatchEvent");
-  JSValueRef dispatchFunctionValueRef =
-    JSObjectGetProperty(ctx, eventTargetInstance->object, dispatchStringRef, &exception);
-  JSObjectRef dispatchObjectRef = JSValueToObject(ctx, dispatchFunctionValueRef, &exception);
-
-  const JSValueRef dispatchArguments[] = {eventInstance->object};
-  JSObjectCallAsFunction(ctx, dispatchObjectRef, dispatchObjectRef, 1, dispatchArguments, &exception);
-  context->handleException(exception);
+  eventTargetInstance->dispatchEvent(eventInstance);
 }
 
 } // namespace kraken::binding::jsc

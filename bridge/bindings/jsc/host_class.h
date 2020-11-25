@@ -55,6 +55,9 @@ public:
     virtual void setProperty(std::string &name, JSValueRef value, JSValueRef *exception);
     virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
 
+    template<typename T>
+    T* prototype() { return reinterpret_cast<T*>(_hostClass); }
+
     JSObjectRef object{nullptr};
     HostClass *_hostClass{nullptr};
     JSContext *context{nullptr};

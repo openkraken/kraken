@@ -44,6 +44,14 @@ public:
   static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
+  static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                  size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef __clearListeners__(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                       size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
   class EventTargetInstance : public Instance {
   public:
     enum class EventTargetProperty {
@@ -55,12 +63,6 @@ public:
     static std::vector<JSStringRef> &getEventTargetPropertyNames();
     static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
 
-    static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                          size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef __clearListeners__(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
     EventTargetInstance() = delete;
     explicit EventTargetInstance(JSEventTarget *eventTarget);
     explicit EventTargetInstance(JSEventTarget *eventTarget, int64_t targetId);
@@ -70,6 +72,8 @@ public:
     JSValueRef getPropertyHandler(std::string &name, JSValueRef *exception);
     void setPropertyHandler(std::string &name, JSValueRef value, JSValueRef *exception);
 
+    bool dispatchEvent(JSEvent::EventInstance *event);
+
     ~EventTargetInstance() override;
     int64_t eventTargetId;
     NativeEventTarget *nativeEventTarget {nullptr};
@@ -78,10 +82,6 @@ public:
     friend JSEventTarget;
     std::unordered_map<JSEvent::EventType, std::deque<JSObjectRef>> _eventHandlers;
     bool internalDispatchEvent(JSEvent::EventInstance *eventInstance);
-
-    JSFunctionHolder m_removeEventListener{context, this, "removeEventListener", removeEventListener};
-    JSFunctionHolder m_dispatchEvent{context, this, "dispatchEvent", dispatchEvent};
-    JSFunctionHolder m_clearListeners{context, this, "clearListeners", __clearListeners__};
   };
 
 protected:
@@ -90,6 +90,9 @@ protected:
   explicit JSEventTarget(JSContext *context, const char *name);
   explicit JSEventTarget(JSContext *context);
 private:
+  JSFunctionHolder m_removeEventListener{context, this, "removeEventListener", removeEventListener};
+  JSFunctionHolder m_dispatchEvent{context, this, "dispatchEvent", dispatchEvent};
+  JSFunctionHolder m_clearListeners{context, this, "clearListeners", __clearListeners__};
   JSFunctionHolder m_addEventListener{context, this, "addEventListener", addEventListener};
   std::vector<std::string> m_jsOnlyEvents;
 };
