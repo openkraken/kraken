@@ -17,6 +17,8 @@ import 'package:kraken/rendering.dart';
 
 const String INPUT = 'INPUT';
 
+const TextInputType TEXT_INPUT_TYPE_NUMBER = const TextInputType.numberWithOptions(signed: true);
+
 /// https://www.w3.org/TR/css-sizing-3/#intrinsic-sizes
 /// For boxes without a preferred aspect ratio:
 /// If the available space is definite in the appropriate dimension, use the stretch fit into that size in that dimension.
@@ -94,14 +96,16 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   AnimationController _cursorBlinkOpacityController;
   int _obscureShowCharTicksPending = 0;
 
-  TextInputType inputType = TextInputType.text;
   TextAlign textAlign;
   TextDirection textDirection;
   int minLines;
   int maxLines;
 
+  bool _autoFocus = false;
+
   ViewportOffset offset = ViewportOffset.zero();
   bool obscureText = false;
+  bool autoCorrect = false;
   TextSelectionDelegate textSelectionDelegate = EditableTextDelegate();
   TextSpan textSpan;
   RenderEditable renderEditable;
@@ -140,15 +144,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void didAttachRenderer() {
     super.didAttachRenderer();
 
-    textInputConfiguration = TextInputConfiguration(
-      inputType: inputType,
-      obscureText: false,
-      autocorrect: false,
-      inputAction: TextInputAction.done, // newline to multilines
-      textCapitalization: TextCapitalization.none,
-      keyboardAppearance: Brightness.light,
-    );
-
     // Make element listen to click event to trigger focus.
     addEvent(CLICK);
 
@@ -156,6 +151,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
 
     addChild(createRenderObject());
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (_autoFocus) {
+        InputElement.setFocus(this);
+      }
+    });
   }
 
   @override
@@ -163,6 +164,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     super.willDetachRenderer();
     InputElement.clearFocus();
   }
+
   @override
   void didDetachRenderer() {
     super.didDetachRenderer();
@@ -227,6 +229,17 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   void activeTextInput() {
+    if (textInputConfiguration == null) {
+      textInputConfiguration = TextInputConfiguration(
+        inputType: _textInputType,
+        obscureText: obscureText,
+        autocorrect: autoCorrect,
+        inputAction: TextInputAction.done, // newline to multilines
+        textCapitalization: TextCapitalization.none,
+        keyboardAppearance: Brightness.light,
+      );
+    }
+
     if (textInputConnection == null || !textInputConnection.attached) {
       final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
       _lastKnownRemoteTextEditingValue = localValue;
@@ -431,6 +444,54 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     } else if (key == 'placeholder') {
       // Update placeholder text.
       updateTextSpan();
+    } else if (key == 'autofocus') {
+      _autoFocus = value != null;
+    } else if (key == 'type') {
+      _setType(value);
+    }
+  }
+
+  TextInputType _textInputType = TextInputType.text;
+  TextInputType get textInputType => _textInputType;
+  set textInputType(TextInputType value) {
+    if (value != _textInputType) {
+      _textInputType = value;
+      if (textInputConnection != null && textInputConnection.attached) {
+        deactiveTextInput();
+        activeTextInput();
+      }
+    }
+  }
+
+  void _setType(String value) {
+    switch (value) {
+      case 'text':
+        textInputType = TextInputType.text;
+        break;
+      case 'number':
+        textInputType = TEXT_INPUT_TYPE_NUMBER;
+        break;
+      case 'tel':
+        textInputType = TextInputType.number;
+        break;
+      // @TODO: more types.
+    }
+  }
+
+  @override
+  dynamic method(String name, List args) {
+    super.method(name, args);
+    switch (name) {
+      case 'focus':
+        if (isRendererAttached) {
+          focus();
+        }
+        break;
+      case 'blur':
+        if (isRendererAttached) {
+          blur();
+        }
+        break;
     }
   }
 
