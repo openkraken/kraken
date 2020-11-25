@@ -53,7 +53,8 @@ JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef con
   }
 
   auto eventTarget = new JSEventTarget::EventTargetInstance(this);
-  setProto(ctx, constructor, eventTarget->object, exception);
+
+  JSObjectSetPrototype(ctx, constructor, eventTarget->object);
 
   return constructor;
 }
@@ -103,6 +104,10 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   }
 
   auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  if (eventTargetInstance == nullptr) {
+    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance*>(JSObjectGetPrivate(thisObject));
+  }
+
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
   const JSValueRef eventNameValueRef = arguments[0];
@@ -156,8 +161,23 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
 }
 
 JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *exception) {
-  if (name == "addEventListener") {
-    return m_addEventListener.function();
+  auto propertyMap = getEventTargetPropertyMap();
+
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+
+    switch(property) {
+    case EventTargetProperty::kAddEventListener:
+      return m_addEventListener.function();
+    case EventTargetProperty::kRemoveEventListener:
+      return m_removeEventListener.function();
+    case EventTargetProperty::kDispatchEvent:
+      return m_dispatchEvent.function();
+    case EventTargetProperty::kClearListeners:
+      return m_clearListeners.function();
+    default:
+      break;
+    }
   }
 
   return HostClass::prototypeGetProperty(name, exception);
@@ -172,6 +192,9 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
   }
 
   auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  if (eventTargetInstance == nullptr) {
+    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance*>(JSObjectGetPrivate(thisObject));
+  }
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
   const JSValueRef eventNameValueRef = arguments[0];
@@ -224,6 +247,9 @@ JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function,
   }
 
   auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  if (eventTargetInstance == nullptr) {
+    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance*>(JSObjectGetPrivate(thisObject));
+  }
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
   const JSValueRef eventObjectValueRef = arguments[0];
@@ -262,7 +288,7 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(JSEvent::EventInstance *e
 JSValueRef JSEventTarget::__clearListeners__(JSContextRef ctx, JSObjectRef function,
                                                                   JSObjectRef thisObject, size_t argumentCount,
                                                                   const JSValueRef *arguments, JSValueRef *exception) {
-  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
   for (auto &it : eventTargetInstance->_eventHandlers) {
@@ -363,7 +389,7 @@ void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumula
   }
 }
 
-std::vector<JSStringRef> &JSEventTarget::EventTargetInstance::getEventTargetPropertyNames() {
+std::vector<JSStringRef> &JSEventTarget::getEventTargetPropertyNames() {
   static std::vector<JSStringRef> propertyNames{
     JSStringCreateWithUTF8CString("addEventListener"), JSStringCreateWithUTF8CString("removeEventListener"),
     JSStringCreateWithUTF8CString("dispatchEvent"), JSStringCreateWithUTF8CString("__clearListeners__"), JSStringCreateWithUTF8CString("targetId")};
@@ -384,8 +410,8 @@ bool JSEventTarget::EventTargetInstance::internalDispatchEvent(JSEvent::EventIns
   // do not dispatch event when event has been canceled
   return !eventInstance->_canceledFlag;
 }
-const std::unordered_map<std::string, JSEventTarget::EventTargetInstance::EventTargetProperty> &
-JSEventTarget::EventTargetInstance::getEventTargetPropertyMap() {
+const std::unordered_map<std::string, JSEventTarget::EventTargetProperty> &
+JSEventTarget::getEventTargetPropertyMap() {
   static const std::unordered_map<std::string, EventTargetProperty> eventTargetProperty{
     {"addEventListener", EventTargetProperty::kAddEventListener},
     {"removeEventListener", EventTargetProperty::kRemoveEventListener},

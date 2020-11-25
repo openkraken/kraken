@@ -66,7 +66,6 @@ public:
     std::unordered_map<std::string, JSValueRef> m_propertyMap;
   };
 
-  static void setProto(JSContextRef ctx, JSObjectRef child, JSObjectRef parent, JSValueRef *exception);
   static JSObjectRef getProto(JSContextRef ctx, JSObjectRef child, JSValueRef *exception);
 
   std::string _name{""};

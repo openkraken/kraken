@@ -35,6 +35,14 @@ struct NativeEventTarget;
 class JSEventTarget : public HostClass {
 public:
   static JSEventTarget *instance(JSContext *context);
+  enum class EventTargetProperty {
+    kAddEventListener,
+    kRemoveEventListener,
+    kDispatchEvent, kClearListeners,
+    kTargetId
+  };
+  static std::vector<JSStringRef> &getEventTargetPropertyNames();
+  static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) override;
@@ -54,15 +62,6 @@ public:
 
   class EventTargetInstance : public Instance {
   public:
-    enum class EventTargetProperty {
-      kAddEventListener,
-      kRemoveEventListener,
-      kDispatchEvent, kClearListeners,
-      kTargetId
-    };
-    static std::vector<JSStringRef> &getEventTargetPropertyNames();
-    static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
-
     EventTargetInstance() = delete;
     explicit EventTargetInstance(JSEventTarget *eventTarget);
     explicit EventTargetInstance(JSEventTarget *eventTarget, int64_t targetId);

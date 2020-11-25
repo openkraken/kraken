@@ -184,14 +184,8 @@ JSValueRef HostClass::prototypeGetProperty(std::string &name, JSValueRef *except
   return nullptr;
 }
 
-void HostClass::setProto(JSContextRef ctx, JSObjectRef child, JSObjectRef parent, JSValueRef *exception) {
-  static JSStringRef privateKey = JSStringCreateWithUTF8CString("__native_proto__");
-  JSObjectSetProperty(ctx, child, privateKey, parent, kJSClassAttributeNone, exception);
-}
-
 JSObjectRef HostClass::getProto(JSContextRef ctx, JSObjectRef child, JSValueRef *exception) {
-  static JSStringRef privateKey = JSStringCreateWithUTF8CString("__native_proto__");
-  JSValueRef result = JSObjectGetProperty(ctx, child, privateKey, exception);
+  JSValueRef result = JSObjectGetPrototype(ctx, child);
   return JSValueToObject(ctx, result, exception);
 }
 
@@ -218,8 +212,10 @@ void HostClass::Instance::setProperty(std::string &name, JSValueRef value, JSVal
 
 void HostClass::Instance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
 HostClass::Instance::~Instance() {
-  for (auto &prop : m_propertyMap) {
-    JSValueUnprotect(ctx, prop.second);
+  if (context->isValid()) {
+    for (auto &prop : m_propertyMap) {
+      JSValueUnprotect(ctx, prop.second);
+    }
   }
 }
 } // namespace kraken::binding::jsc

@@ -56,6 +56,25 @@ public:
     scroll
   };
 
+  enum class EventProperty {
+    kType,
+    kBubbles,
+    kCancelable,
+    kTimestamp,
+    kDefaultPrevented,
+    kTarget,
+    kSrcElement,
+    kCurrentTarget,
+    kReturnValue,
+    kStopPropagation,
+    kCancelBubble,
+    kStopImmediatePropagation,
+    kPreventDefault
+  };
+
+  static std::vector<JSStringRef> &getEventPropertyNames();
+  const static std::unordered_map<std::string, EventProperty> &getEventPropertyMap();
+
   static JSEvent *instance(JSContext *context);
   static EventType getEventTypeOfName(std::string &name);
   static const char* getEventNameOfTypeIndex(int8_t index);
@@ -64,6 +83,15 @@ public:
   static JSValueRef initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
+  static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                             size_t argumentCount, const JSValueRef arguments[],
+                                             JSValueRef *exception);
+
+  static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                   size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -72,35 +100,7 @@ public:
 
   class EventInstance : public Instance {
   public:
-    enum class EventProperty {
-      kType,
-      kBubbles,
-      kCancelable,
-      kTimestamp,
-      kDefaultPrevented,
-      kTarget,
-      kSrcElement,
-      kCurrentTarget,
-      kReturnValue,
-      kStopPropagation,
-      kCancelBubble,
-      kStopImmediatePropagation,
-      kPreventDefault
-    };
-
-    static std::vector<JSStringRef> &getEventPropertyNames();
-    const static std::unordered_map<std::string, EventProperty> &getEventPropertyMap();
-
     EventInstance() = delete;
-    static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                               size_t argumentCount, const JSValueRef arguments[],
-                                               JSValueRef *exception);
-
-    static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
     explicit EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent);
     explicit EventInstance(JSEvent *jsEvent, EventType eventType);
@@ -117,9 +117,6 @@ public:
     bool _inPassiveListenerFlag{false};
 
   private:
-    JSFunctionHolder m_stopImmediatePropagation{context, this, "stopImmediatePropagation", stopImmediatePropagation};
-    JSFunctionHolder m_stopPropagation{context, this, "stopPropagation", stopPropagation};
-    JSFunctionHolder m_preventDefault{context, this, "preventDefault", preventDefault};
   };
 protected:
   JSEvent() = delete;
@@ -127,6 +124,9 @@ protected:
   explicit JSEvent(JSContext *context);
 private:
   JSFunctionHolder m_initWithNativeEvent{context, this, "initWithNativeEvent", initWithNativeEvent};
+  JSFunctionHolder m_stopImmediatePropagation{context, this, "stopImmediatePropagation", stopImmediatePropagation};
+  JSFunctionHolder m_stopPropagation{context, this, "stopPropagation", stopPropagation};
+  JSFunctionHolder m_preventDefault{context, this, "preventDefault", preventDefault};
 };
 
 struct NativeEvent {

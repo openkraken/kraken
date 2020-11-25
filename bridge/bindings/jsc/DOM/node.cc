@@ -107,14 +107,21 @@ void JSNode::NodeInstance::ensureDetached(JSNode::NodeInstance *node) {
   }
 }
 
-JSValueRef JSNode::NodeInstance::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+JSObjectRef JSNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                        const JSValueRef *arguments, JSValueRef *exception) {
+  JSC_THROW_ERROR(ctx, "Illegal constructor", exception);
+  return nullptr;
+}
+
+JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'appendChild' on 'Node': first argument is required.", exception);
     return nullptr;
   }
 
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(function));
+  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
+  assert_m(selfInstance != nullptr, "this object is not a instance of Node.");
   const JSValueRef nodeValueRef = arguments[0];
 
   if (!JSValueIsObject(ctx, nodeValueRef)) {
@@ -143,9 +150,8 @@ JSValueRef JSNode::NodeInstance::appendChild(JSContextRef ctx, JSObjectRef funct
   return nullptr;
 }
 
-JSValueRef JSNode::NodeInstance::insertBefore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                              size_t argumentCount, const JSValueRef *arguments,
-                                              JSValueRef *exception) {
+JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 2) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'insertBefore' on 'Node': 2 arguments is required.", exception);
     return nullptr;
@@ -161,17 +167,18 @@ JSValueRef JSNode::NodeInstance::insertBefore(JSContextRef ctx, JSObjectRef func
 
   JSObjectRef nodeObjectRef = JSValueToObject(ctx, nodeValueRef, exception);
   JSObjectRef referenceNodeObjectRef = nullptr;
-  JSNode::NodeInstance* referenceInstance = nullptr;
+  JSNode::NodeInstance *referenceInstance = nullptr;
 
   if (JSValueIsObject(ctx, referenceNodeValueRef)) {
     referenceNodeObjectRef = JSValueToObject(ctx, referenceNodeValueRef, exception);
     referenceInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(referenceNodeObjectRef));
   } else if (!JSValueIsNull(ctx, referenceNodeValueRef)) {
-    JSC_THROW_ERROR(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'", exception);
+    JSC_THROW_ERROR(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'",
+                    exception);
     return nullptr;
   }
 
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(function));
+  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
   selfInstance->internalInsertBefore(nodeInstance, referenceInstance, exception);
@@ -179,9 +186,8 @@ JSValueRef JSNode::NodeInstance::insertBefore(JSContextRef ctx, JSObjectRef func
   return nullptr;
 }
 
-JSValueRef JSNode::NodeInstance::replaceChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                              size_t argumentCount, const JSValueRef *arguments,
-                                              JSValueRef *exception) {
+JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef *arguments, JSValueRef *exception) {
 
   if (argumentCount < 2) {
     JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required",
@@ -208,7 +214,7 @@ JSValueRef JSNode::NodeInstance::replaceChild(JSContextRef ctx, JSObjectRef func
 
   JSObjectRef oldChildObjectRef = JSValueToObject(ctx, oldChildValueRef, exception);
 
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(function));
+  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
   auto newChildInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(newChildObjectRef));
   auto oldChildInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(oldChildObjectRef));
 
@@ -257,15 +263,15 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
   }
 }
 
-JSValueRef JSNode::NodeInstance::remove(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                        size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(function));
+JSValueRef JSNode::remove(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                          const JSValueRef *arguments, JSValueRef *exception) {
+  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
   selfInstance->internalRemove(exception);
   return nullptr;
 }
 
-JSValueRef JSNode::NodeInstance::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
     JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1 arguments required",
                     exception);
@@ -288,7 +294,7 @@ JSValueRef JSNode::NodeInstance::removeChild(JSContextRef ctx, JSObjectRef funct
     return nullptr;
   }
 
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(function));
+  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
   if (nodeInstance == nullptr) {
@@ -366,6 +372,32 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   return oldChild;
 }
 
+JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception) {
+  auto propertyMap = getNodePropertyMap();
+
+  if (!propertyMap.contains(name)) {
+    return JSEventTarget::prototypeGetProperty(name, exception);
+  }
+
+  auto property = propertyMap[name];
+  switch (property) {
+  case NodeProperty::kAppendChild:
+    return m_appendChild.function();
+  case NodeProperty::kRemove:
+    return m_remove.function();
+  case NodeProperty::kRemoveChild:
+    return m_removeChild.function();
+  case NodeProperty::kInsertBefore:
+    return m_insertBefore.function();
+  case NodeProperty::kReplaceChild:
+    return m_replaceChild.function();
+  default:
+    break;
+  }
+
+  return nullptr;
+}
+
 JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getNodePropertyMap();
 
@@ -399,19 +431,19 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     return instance != nullptr ? instance->object : nullptr;
   }
   case NodeProperty::kAppendChild: {
-    return m_appendChild.function();
+    return prototype<JSNode>()->m_appendChild.function();
   }
   case NodeProperty::kRemove: {
-    return m_remove.function();
+    return prototype<JSNode>()->m_remove.function();
   }
   case NodeProperty::kRemoveChild: {
-    return m_removeChild.function();
+    return prototype<JSNode>()->m_removeChild.function();
   }
   case NodeProperty::kInsertBefore: {
-    return m_insertBefore.function();
+    return prototype<JSNode>()->m_insertBefore.function();
   }
   case NodeProperty::kReplaceChild: {
-    return m_replaceChild.function();
+    return prototype<JSNode>()->m_replaceChild.function();
   }
   case NodeProperty::kChildNodes: {
     JSValueRef arguments[childNodes.size()];
@@ -457,7 +489,7 @@ void JSNode::NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumul
   }
 }
 
-std::vector<JSStringRef> &JSNode::NodeInstance::getNodePropertyNames() {
+std::vector<JSStringRef> &JSNode::getNodePropertyNames() {
   static std::vector<JSStringRef> propertyNames{
     JSStringCreateWithUTF8CString("isConnected"),     JSStringCreateWithUTF8CString("firstChild"),
     JSStringCreateWithUTF8CString("lastChild"),       JSStringCreateWithUTF8CString("childNodes"),
@@ -473,7 +505,7 @@ std::string JSNode::NodeInstance::internalGetTextContent() {
   return "";
 }
 
-const std::unordered_map<std::string, JSNode::NodeInstance::NodeProperty> &JSNode::NodeInstance::getNodePropertyMap() {
+const std::unordered_map<std::string, JSNode::NodeProperty> &JSNode::getNodePropertyMap() {
   static std::unordered_map<std::string, NodeProperty> propertyMap{{"isConnected", NodeProperty::kIsConnected},
                                                                    {"firstChild", NodeProperty::kFirstChild},
                                                                    {"lastChild", NodeProperty::kLastChild},

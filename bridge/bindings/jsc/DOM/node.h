@@ -31,51 +31,54 @@ class DocumentInstance;
 class JSNode : public JSEventTarget {
 public:
   static JSNode *instance(JSContext *context);
+  enum class NodeProperty {
+    kIsConnected,
+    kFirstChild,
+    kLastChild,
+    kParentNode,
+    kChildNodes,
+    kPreviousSibling,
+    kNextSibling,
+    kAppendChild,
+    kRemove,
+    kRemoveChild,
+    kInsertBefore,
+    kReplaceChild,
+    kNodeType,
+    kTextContent
+  };
+  static std::vector<JSStringRef> &getNodePropertyNames();
+  static const std::unordered_map<std::string, NodeProperty> &getNodePropertyMap();
+
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) override;
+
+  static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef arguments[], JSValueRef *exception);
+  /**
+   * The ChildNode.remove() method removes the object
+   * from the tree it belongs to.
+   * reference: https://dom.spec.whatwg.org/#dom-childnode-remove
+   */
+  static JSValueRef remove(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                           const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef removeChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef insertBefore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef replaceChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef arguments[], JSValueRef *exception);
+
+  JSValueRef prototypeGetProperty(std::string &name, JSValueRef *exception) override;
 
   class NodeInstance : public EventTargetInstance {
   public:
-    enum class NodeProperty {
-      kIsConnected,
-      kFirstChild,
-      kLastChild,
-      kParentNode,
-      kChildNodes,
-      kPreviousSibling,
-      kNextSibling,
-      kAppendChild,
-      kRemove,
-      kRemoveChild,
-      kInsertBefore,
-      kReplaceChild,
-      kNodeType,
-      kTextContent
-    };
-    static std::vector<JSStringRef> &getNodePropertyNames();
-    static const std::unordered_map<std::string, NodeProperty> &getNodePropertyMap();
-
     NodeInstance() = delete;
     NodeInstance(JSNode *node, NodeType nodeType);
     NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId);
     ~NodeInstance() override;
-
-    static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef arguments[], JSValueRef *exception);
-    /**
-     * The ChildNode.remove() method removes the object
-     * from the tree it belongs to.
-     * reference: https://dom.spec.whatwg.org/#dom-childnode-remove
-     */
-    static JSValueRef remove(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef removeChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef insertBefore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef replaceChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
 
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
@@ -111,17 +114,19 @@ public:
 
   private:
     void ensureDetached(JSNode::NodeInstance *node);
-    JSFunctionHolder m_removeChild{context, this, "removeChild", removeChild};
-    JSFunctionHolder m_appendChild{context, this, "appendChild", appendChild};
-    JSFunctionHolder m_remove{context, this, "remove", remove};
-    JSFunctionHolder m_insertBefore{context, this, "insertBefore", insertBefore};
-    JSFunctionHolder m_replaceChild{context, this, "replaceChild", replaceChild};
   };
 
 protected:
   JSNode() = delete;
   explicit JSNode(JSContext *context);
   explicit JSNode(JSContext *context, const char *name);
+
+private:
+  JSFunctionHolder m_removeChild{context, this, "removeChild", removeChild};
+  JSFunctionHolder m_appendChild{context, this, "appendChild", appendChild};
+  JSFunctionHolder m_remove{context, this, "remove", remove};
+  JSFunctionHolder m_insertBefore{context, this, "insertBefore", insertBefore};
+  JSFunctionHolder m_replaceChild{context, this, "replaceChild", replaceChild};
 };
 
 struct NativeNode {

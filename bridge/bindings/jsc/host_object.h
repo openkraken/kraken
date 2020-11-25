@@ -61,11 +61,13 @@ template<typename T>
 class JSHostObjectHolder {
 public:
   JSHostObjectHolder() = delete;
-  explicit JSHostObjectHolder(T *hostObject): m_object(hostObject) {
+  explicit JSHostObjectHolder(JSContext *context, T *hostObject): m_object(hostObject), m_context(context) {
     JSValueProtect(m_object->ctx, m_object->jsObject);
   }
   ~JSHostObjectHolder() {
-    JSValueUnprotect(m_object->ctx, m_object->jsObject);
+    if (m_context->isValid()) {
+      JSValueUnprotect(m_object->ctx, m_object->jsObject);
+    }
   }
   T* operator*() {
     return m_object;
@@ -73,6 +75,7 @@ public:
 
 private:
   T *m_object;
+  JSContext *m_context{nullptr};
 };
 
 } // namespace kraken::binding::jsc

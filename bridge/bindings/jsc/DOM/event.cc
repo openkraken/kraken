@@ -191,39 +191,39 @@ JSValueRef JSEvent::EventInstance::getProperty(std::string &name, JSValueRef *ex
   case EventProperty::kReturnValue:
     return JSValueMakeBoolean(_hostClass->ctx, !_canceledFlag);
   case EventProperty::kStopPropagation:
-    return m_stopPropagation.function();
+    return prototype<JSEvent>()->m_stopPropagation.function();
   case EventProperty::kCancelBubble:
     return JSValueMakeBoolean(_hostClass->ctx, _stopPropagationFlag);
   case EventProperty::kStopImmediatePropagation:
-    return m_stopImmediatePropagation.function();
+    return prototype<JSEvent>()->m_stopImmediatePropagation.function();
   case EventProperty::kPreventDefault:
-    return m_preventDefault.function();
+    return prototype<JSEvent>()->m_preventDefault.function();
   }
 
   return nullptr;
 }
 
-JSValueRef JSEvent::EventInstance::stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEvent::stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                    size_t argumentCount, const JSValueRef *arguments,
                                                    JSValueRef *exception) {
-  auto eventInstance = static_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(function));
+  auto eventInstance = static_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(thisObject));
   eventInstance->_stopPropagationFlag = true;
   return nullptr;
 }
 
-JSValueRef JSEvent::EventInstance::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
+JSValueRef JSEvent::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
                                                             JSObjectRef thisObject, size_t argumentCount,
                                                             const JSValueRef *arguments, JSValueRef *exception) {
-  auto eventInstance = static_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(function));
+  auto eventInstance = static_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(thisObject));
   eventInstance->_stopPropagationFlag = true;
   eventInstance->_stopImmediatePropagationFlag = true;
   return nullptr;
 }
 
-JSValueRef JSEvent::EventInstance::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                   size_t argumentCount, const JSValueRef *arguments,
                                                   JSValueRef *exception) {
-  auto eventInstance = static_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(function));
+  auto eventInstance = static_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(thisObject));
   if (eventInstance->nativeEvent->cancelable && !eventInstance->_inPassiveListenerFlag) {
     eventInstance->_canceledFlag = true;
   }
@@ -255,7 +255,7 @@ void JSEvent::EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accum
   }
 }
 
-std::vector<JSStringRef> &JSEvent::EventInstance::getEventPropertyNames() {
+std::vector<JSStringRef> &JSEvent::getEventPropertyNames() {
   static std::vector<JSStringRef> propertyNames{
     JSStringCreateWithUTF8CString("type"),
     JSStringCreateWithUTF8CString("bubbles"),
@@ -274,8 +274,7 @@ std::vector<JSStringRef> &JSEvent::EventInstance::getEventPropertyNames() {
   return propertyNames;
 }
 
-const std::unordered_map<std::string, JSEvent::EventInstance::EventProperty> &
-JSEvent::EventInstance::getEventPropertyMap() {
+const std::unordered_map<std::string, JSEvent::EventProperty> &JSEvent::getEventPropertyMap() {
   static std::unordered_map<std::string, EventProperty> propertyMap{
     {"type", EventProperty::kType},
     {"bubbles", EventProperty::kBubbles},

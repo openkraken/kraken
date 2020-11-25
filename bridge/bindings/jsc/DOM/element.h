@@ -84,35 +84,36 @@ public:
   };
 
   static JSElement *instance(JSContext *context);
+  static std::vector<JSStringRef> &getElementPropertyNames();
+  static const std::unordered_map<std::string, ElementProperty> &getElementPropertyMap();
+
+  static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                          size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                           const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                          const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                           const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+
+  JSValueRef prototypeGetProperty(std::string &name, JSValueRef *exception) override;
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class ElementInstance : public NodeInstance {
   public:
-    static std::vector<JSStringRef> &getElementPropertyNames();
-    static const std::unordered_map<std::string, ElementProperty> &getElementPropertyMap();
-
-    static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                            const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                               const JSValueRef arguments[], JSValueRef *exception);
-
     ElementInstance() = delete;
     explicit ElementInstance(JSElement *element, const char *tagName, bool sendUICommand);
     explicit ElementInstance(JSElement *element, JSStringRef tagName, double targetId);
@@ -129,6 +130,7 @@ public:
     std::string tagName();
 
   private:
+    friend JSElement;
     CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
     JSStringHolder m_tagName{context, ""};
 
@@ -138,21 +140,23 @@ public:
     void _notifyChildInsert();
     void _didModifyAttribute(std::string &name, std::string &oldId, std::string &newId);
     void _beforeUpdateId(std::string &oldId, std::string &newId);
-    JSFunctionHolder m_getBoundingClientRect{context, this, "getBoundingClientRect", getBoundingClientRect};
-    JSFunctionHolder m_setAttribute{context, this, "setAttribute", setAttribute};
-    JSFunctionHolder m_getAttribute{context, this, "getAttribute", getAttribute};
-    JSFunctionHolder m_hasAttribute{context, this, "hasAttribute", hasAttribute};
-    JSFunctionHolder m_removeAttribute{context, this, "removeAttribute", removeAttribute};
-    JSFunctionHolder m_toBlob{context, this, "toBlob", toBlob};
-    JSFunctionHolder m_click{context, this, "click", click};
-    JSFunctionHolder m_scroll{context, this, "scroll", scroll};
-    JSFunctionHolder m_scrollBy{context, this, "scrollBy", scrollBy};
-    JSHostObjectHolder<JSElementAttributes> m_attributes{new JSElementAttributes(context)};
+    JSHostObjectHolder<JSElementAttributes> m_attributes{context, new JSElementAttributes(context)};
   };
 
 protected:
   JSElement() = delete;
   explicit JSElement(JSContext *context);
+private:
+  friend ElementInstance;
+  JSFunctionHolder m_getBoundingClientRect{context, this, "getBoundingClientRect", getBoundingClientRect};
+  JSFunctionHolder m_setAttribute{context, this, "setAttribute", setAttribute};
+  JSFunctionHolder m_getAttribute{context, this, "getAttribute", getAttribute};
+  JSFunctionHolder m_hasAttribute{context, this, "hasAttribute", hasAttribute};
+  JSFunctionHolder m_removeAttribute{context, this, "removeAttribute", removeAttribute};
+  JSFunctionHolder m_toBlob{context, this, "toBlob", toBlob};
+  JSFunctionHolder m_click{context, this, "click", click};
+  JSFunctionHolder m_scroll{context, this, "scroll", scroll};
+  JSFunctionHolder m_scrollBy{context, this, "scrollBy", scrollBy};
 };
 
 struct NativeBoundingClientRect {
