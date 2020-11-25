@@ -116,7 +116,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
 
     // Make element listen to click event to trigger focus.
-    addEvent('click');
+    addEvent(CLICK);
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
@@ -420,4 +420,20 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   // Abstract class method added after flutter@1.15
   @override
   TextEditingValue get currentTextEditingValue => textSelectionDelegate.textEditingValue;
+
+  @override
+  // TODO: implement currentAutofillScope
+  AutofillScope get currentAutofillScope => throw UnimplementedError();
+
+  @override
+  void performPrivateCommand(String action, Map<String, dynamic> data) {
+    // TODO: implement performPrivateCommand
+    print('PerformPrivateCommand $action $data');
+  }
+
+  @override
+  void showAutocorrectionPromptRect(int start, int end) {
+    // TODO: implement showAutocorrectionPromptRect
+    print('ShowAutocorrectionPromptRect start: $start, end: $end');
+  }
 }

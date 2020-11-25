@@ -61,7 +61,8 @@ class KrakenViewController {
     _elementManager = ElementManager(viewportWidth, viewportHeight,
         showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
 
-    if (kDebugMode && rootController.debugEnableInspector != false) {
+    // Enable DevTool in debug/profile mode, but disable in release.
+    if ((kDebugMode || kProfileMode) && rootController.debugEnableInspector != false) {
       debugStartInspector();
     }
   }

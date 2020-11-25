@@ -5,6 +5,7 @@
 import 'dart:ui';
 import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
 
 const Color _kHighlightedRenderObjectFillColor = Color.fromARGB(128, 128, 128, 255);
 const Color _kHighlightedRenderObjectBorderColor = Color.fromARGB(128, 64, 64, 128);
@@ -13,11 +14,7 @@ class InspectorOverlayLayer extends Layer {
   /// Creates a layer that displays the inspector overlay.
   InspectorOverlayLayer({ @required this.overlayRect })
       : assert(overlayRect != null) {
-    bool inDebugMode = false;
-    assert(() {
-      inDebugMode = true;
-      return true;
-    }());
+    bool inDebugMode = kDebugMode || kProfileMode;
     if (inDebugMode == false) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
