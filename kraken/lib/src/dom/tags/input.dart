@@ -13,10 +13,21 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 const String INPUT = 'INPUT';
 
-const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK, WIDTH: '150px', BORDER: '1px solid #767676'};
+/// https://www.w3.org/TR/css-sizing-3/#intrinsic-sizes
+/// For boxes without a preferred aspect ratio:
+/// If the available space is definite in the appropriate dimension, use the stretch fit into that size in that dimension.
+///
+/// Otherwise, if the box has a <length> as its computed minimum size (min-width/min-height) in that dimension, use that size.
+//
+/// Otherwise, use 300px for the width and/or 150px for the height as needed.
+const Map<String, dynamic> _defaultStyle = {
+  DISPLAY: INLINE_BLOCK,
+  BORDER: '1px solid #767676',
+};
 
 typedef ValueChanged<T> = void Function(T value);
 // The time it takes for the cursor to fade from fully opaque to fully
@@ -60,6 +71,23 @@ class EditableTextDelegate implements TextSelectionDelegate {
 }
 
 class InputElement extends Element implements TextInputClient, TickerProvider {
+  static InputElement focusInputElement;
+
+  static void clearFocus() {
+    if (InputElement.focusInputElement != null) {
+      InputElement.focusInputElement.blur();
+    }
+
+    InputElement.focusInputElement = null;
+  }
+
+  static void setFocus(InputElement inputElement) {
+    assert(inputElement != null);
+    clearFocus();
+    InputElement.focusInputElement = inputElement;
+    inputElement.focus();
+  }
+
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(false);
@@ -77,6 +105,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   TextSelectionDelegate textSelectionDelegate = EditableTextDelegate();
   TextSpan textSpan;
   RenderEditable renderEditable;
+  RenderOffsetBox _renderOffsetBox;
   TextInputConnection textInputConnection;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
@@ -105,7 +134,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  }) : super(targetId, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+
     textInputConfiguration = TextInputConfiguration(
       inputType: inputType,
       obscureText: false,
@@ -120,18 +154,14 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
-  }
 
-  @override
-  void didAttachRenderer() {
-    super.didAttachRenderer();
-    renderEditable = createRenderObject();
-
-    addChild(renderEditable);
+    addChild(createRenderObject());
   }
 
   @override
   void didDetachRenderer() {
+    _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
+    _cursorBlinkOpacityController = null;
     renderEditable = null;
   }
 
@@ -161,13 +191,37 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   get cursorColor => CSSColor.initial;
 
   @override
-  void handleClick(Event event) {
+  void handlePointDown(PointerDownEvent pointEvent) {
+    super.handlePointDown(pointEvent);
+    InputElement.setFocus(this);
+    // @TODO: selection.
+  }
+
+  @override
+  void handlePointMove(PointerMoveEvent pointEvent) {
+    super.handlePointMove(pointEvent);
+
+    // @TODO: selection.
+  }
+
+  @override
+  void handlePointUp(PointerUpEvent pointEvent) {
+    super.handlePointUp(pointEvent);
+    // @TODO: selection.
+  }
+
+  void focus() {
     activeTextInput();
-    super.handleClick(event);
+    dispatchEvent(Event('focus'));
+  }
+
+  void blur() {
+    deactiveTextInput();
+    dispatchEvent(Event('blur'));
   }
 
   void activeTextInput() {
-    if (textInputConnection == null) {
+    if (textInputConnection == null || !textInputConnection.attached) {
       final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
       _lastKnownRemoteTextEditingValue = localValue;
 
@@ -175,6 +229,15 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       textInputConnection.setEditingState(localValue);
     }
     textInputConnection.show();
+    _startCursorTimer();
+  }
+
+  void deactiveTextInput() {
+    _cursorVisibilityNotifier.value = false;
+    if (textInputConnection != null && textInputConnection.attached) {
+      textInputConnection.close();
+    }
+    _stopCursorTimer();
   }
 
   void onSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
@@ -183,14 +246,18 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     updateEditingValue(value);
   }
 
-  RenderEditable createRenderObject() {
+  bool get multiLine => maxLines > 1;
+
+  bool get _hasFocus => InputElement.focusInputElement == this;
+
+  RenderEditable createRenderEditable() {
     TextSpan text = textSpan.toPlainText().length > 0 ? textSpan : placeholderTextSpan;
 
-    return RenderEditable(
+    renderEditable = RenderEditable(
       text: text,
       cursorColor: cursorColor,
       showCursor: _cursorVisibilityNotifier,
-      hasFocus: true,
+      hasFocus: _hasFocus,
       maxLines: maxLines,
       minLines: minLines,
       expands: false,
@@ -213,12 +280,31 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
     );
+    return renderEditable;
+  }
+
+  RenderObject createRenderObject() {
+    assert(renderer is RenderIntrinsic);
+    RenderEditable renderEditable = createRenderEditable();
+    RenderIntrinsic renderIntrinsic = renderer;
+    // Make render editable vertically center.
+    _renderOffsetBox = RenderOffsetBox(
+      offset: Offset(0, (renderIntrinsic.height
+          - renderEditable.preferredLineHeight
+          - renderIntrinsic.borderTop
+          - renderIntrinsic.borderBottom) / 2),
+      child: renderEditable,
+    );
+    return _renderOffsetBox;
   }
 
   @override
   void performAction(TextInputAction action) {
-    if (action == TextInputAction.done) {
-      _triggerChangeEvent();
+    switch (action) {
+      case TextInputAction.done:
+        _triggerChangeEvent();
+        blur();
+        break;
     }
   }
 
@@ -319,7 +405,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         return;
       }
       final Rect newCaretRect = _currentCaretRect;
-      // Enlarge newCaretRect by scrollPadding to ensure that caret is not positioned directly at the edge after scrolling.
+      // Enlarge newCaretRect by scrollPadding to ensure that caret
+      // is not positioned directly at the edge after scrolling.
       final Rect inflatedRect = Rect.fromLTRB(
         newCaretRect.left,
         newCaretRect.top,
@@ -435,5 +522,35 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void showAutocorrectionPromptRect(int start, int end) {
     // TODO: implement showAutocorrectionPromptRect
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
+  }
+}
+
+class RenderOffsetBox extends RenderProxyBox {
+  RenderOffsetBox({
+    RenderBox child,
+    Offset offset
+  }) : assert(offset != null),
+        this._offset = offset,
+        super(child);
+
+  Offset _offset;
+  Offset get offset => _offset;
+  set(Offset value) {
+    if (value != null && value != _offset) {
+      _offset = value;
+      markNeedsLayout();
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_offset == null) {
+      super.paint(context, offset);
+    } else {
+      final Offset transformedOffset = offset.translate(_offset.dx, _offset.dy);
+      if (child != null) {
+        context.paintChild(child, transformedOffset);
+      }
+    }
   }
 }

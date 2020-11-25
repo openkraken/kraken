@@ -16,6 +16,9 @@ import 'package:meta/meta.dart';
 typedef KrakenOnLoad = void Function(KrakenController controller);
 
 class Kraken extends StatelessWidget {
+  // The background color for viewport, default to transparent.
+  final Color background;
+
   // the width of krakenWidget
   final double viewportWidth;
 
@@ -60,6 +63,7 @@ class Kraken extends StatelessWidget {
     this.onLoad,
     this.navigationDelegate,
     this.javaScriptChannel,
+    this.background,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -76,10 +80,10 @@ class Kraken extends StatelessWidget {
     this.debugEnableInspector,
   }) : super(key: key) {
 
-    assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
-    'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
-    assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
-    'viewportHeight must temporarily equal to window.physicalSize.height / window.devicePixelRatio, as a result of vh uint in current version is not relative to viewportHeight.');
+    // assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
+    // 'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
+    // assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
+    // 'viewportHeight must temporarily equal to window.physicalSize.height / window.devicePixelRatio, as a result of vh uint in current version is not relative to viewportHeight.');
   }
 
   @override
@@ -106,6 +110,7 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     KrakenController controller = KrakenController(shortHash(_widget.hashCode), _widget.viewportWidth, _widget.viewportHeight,
+      background: _widget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       bundleURL: _widget.bundleURL,
       bundlePath: _widget.bundlePath,
@@ -119,7 +124,7 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
 
   @override
   void didUnmountRenderObject(covariant RenderObject renderObject) {
-    KrakenController controller = (renderObject as RenderBoxModel).controller;
+    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
     controller.dispose();
   }
 
@@ -135,7 +140,7 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
   @override
   void mount(Element parent, dynamic newSlot) async {
     super.mount(parent, newSlot);
-    KrakenController controller = (renderObject as RenderBoxModel).controller;
+    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
     await controller.loadBundle();
 
     // Execute JavaScript scripts will block the Flutter UI Threads.

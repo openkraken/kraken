@@ -48,6 +48,9 @@ CSSOverflowType _getOverflowType(String definition) {
 typedef ScrollListener = void Function(double scrollTop, AxisDirection axisDirection);
 
 mixin CSSOverflowMixin on Node {
+  // The duration time for element scrolling to a siginificant place.
+  static const _scrollDuration = const Duration(milliseconds: 250);
+
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
@@ -191,6 +194,16 @@ mixin CSSOverflowMixin on Node {
     }
   }
 
+  void scrollBy({ double dx = 0.0, double dy = 0.0, bool withAnimation = true }) {
+    Curve curve = withAnimation ? Curves.easeOut : null;
+    if (dx > 0) {
+      _scroll(getScrollLeft() + dx, curve, isScrollBy: false, isDirectionX: true);
+    }
+    if (dy > 0) {
+      _scroll(getScrollTop() + dy, curve, isScrollBy: false, isDirectionX: false);
+    }
+  }
+
   void _scroll(num aim, Curve curve, {bool isScrollBy = false, bool isDirectionX = false}) {
     Duration duration;
     KrakenScrollable scrollable;
@@ -202,7 +215,7 @@ mixin CSSOverflowMixin on Node {
     if (scrollable != null && aim != null) {
       if (curve != null) {
         double diff = aim - (scrollable.position?.pixels ?? 0);
-        duration = Duration(milliseconds: diff.abs().toInt() * 5);
+        duration = _scrollDuration;
       }
       double distance;
       if (isScrollBy) {
