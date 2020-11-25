@@ -110,7 +110,7 @@ JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSS
   auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));
 
   if (name == "call") {
-    if (hostClass->_call != nullptr) {
+    if (hostClass->_call == nullptr) {
       hostClass->_call = propertyBindingFunction(hostClass->context, hostClass, "call", constructorCall);
       JSValueProtect(hostClass->ctx, hostClass->_call);
     }

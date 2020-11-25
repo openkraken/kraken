@@ -31,7 +31,8 @@ JSEventTarget::JSEventTarget(JSContext *context) : HostClass(context, "EventTarg
 
 JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                                const JSValueRef *arguments, JSValueRef *exception) {
-  return HostClass::instanceConstructor(ctx, constructor, argumentCount, arguments, exception);
+  auto instance = new EventTargetInstance(this);
+  return instance->object;
 }
 
 JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget) : Instance(eventTarget) {
