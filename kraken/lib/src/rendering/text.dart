@@ -135,4 +135,9 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
       context.paintChild(child, offset);
     }
   }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
+    return false;
+  }
 }
