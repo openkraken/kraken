@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
 

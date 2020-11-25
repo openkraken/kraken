@@ -159,7 +159,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   @override
+  void willDetachRenderer() {
+    super.willDetachRenderer();
+    InputElement.clearFocus();
+  }
+  @override
   void didDetachRenderer() {
+    super.didDetachRenderer();
     _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
     _cursorBlinkOpacityController = null;
     renderEditable = null;
@@ -304,6 +310,42 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case TextInputAction.done:
         _triggerChangeEvent();
         blur();
+        break;
+      case TextInputAction.none:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.unspecified:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.go:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.search:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.send:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.next:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.previous:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.continueAction:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.join:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.route:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.emergencyCall:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.newline:
+        // TODO: Handle this case.
         break;
     }
   }
@@ -530,7 +572,7 @@ class RenderOffsetBox extends RenderProxyBox {
     RenderBox child,
     Offset offset
   }) : assert(offset != null),
-        this._offset = offset,
+        _offset = offset,
         super(child);
 
   Offset _offset;

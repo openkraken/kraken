@@ -540,11 +540,17 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   void didHaveMemoryPressure() { }
 
   @override
-  Future<bool> didPopRoute() { }
+  Future<bool> didPopRoute() async {
+    return false;
+  }
 
   @override
-  Future<bool> didPushRoute(String route) { }
+  Future<bool> didPushRoute(String route) async {
+    return false;
+  }
 
   @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) { }
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+    return false;
+  }
 }
