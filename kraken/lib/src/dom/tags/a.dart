@@ -18,7 +18,7 @@ class AnchorElement extends Element {
 
   AnchorElement(int targetId, ElementManager elementManager)
       : super(targetId, elementManager, tagName: ANCHOR, defaultStyle: _defaultStyle) {
-    addEvent('click');
+    addEvent(CLICK);
   }
 
   void handleClick(Event event) {

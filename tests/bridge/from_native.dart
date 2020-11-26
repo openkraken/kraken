@@ -161,7 +161,10 @@ void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int lengt
     data.add(PointerData(
       physicalX: (360 * contextId + x) * window.devicePixelRatio,
       physicalY: (56.0 + y) * window.devicePixelRatio,
-      kind: PointerDeviceKind.mouse,
+      // MouseEvent will trigger [RendererBinding.dispatchEvent] -> [BaseMouseTracker.updateWithEvent]
+      // which handle extra mouse connection phase for [event.kind = PointerDeviceKind.mouse].
+      // Prefer to use touch event.
+      kind: PointerDeviceKind.touch,
       change: _getPointerChange(change)
     ));
   }

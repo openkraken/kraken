@@ -1001,10 +1001,7 @@ class RenderBoxModel extends RenderBox with
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    if (!contentVisibilityHitTest(result, position: position)) {
-      return false;
-    }
-    if (!visibilityHitTest(result, position: position)) {
+    if (!hasSize || !contentVisibilityHitTest(result, position: position) || !visibilityHitTest(result, position: position)) {
       return false;
     }
 
@@ -1062,7 +1059,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   Future<Image> toImage({ double pixelRatio = 1.0 }) {
-    assert(!debugNeedsPaint);
+    assert(layer != null);
     assert(isRepaintBoundary);
     final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
