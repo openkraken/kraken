@@ -303,9 +303,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   RenderObject createRenderObject() {
-    assert(renderer is RenderIntrinsic);
+    assert(renderBoxModel is RenderIntrinsic);
     RenderEditable renderEditable = createRenderEditable();
-    RenderIntrinsic renderIntrinsic = renderer;
+    RenderIntrinsic renderIntrinsic = renderBoxModel;
     // Make render editable vertically center.
     _renderOffsetBox = RenderOffsetBox(
       offset: Offset(0, (renderIntrinsic.height
@@ -435,10 +435,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     if (key == 'value') {
       String text = value?.toString() ?? '';
-
-      TextEditingValue newTextEditingValue = textSelectionDelegate.textEditingValue.copyWith(
+      TextRange composing = textSelectionDelegate.textEditingValue?.composing ?? TextRange.empty;
+      TextSelection selection = TextSelection.collapsed(offset: text.length);
+      TextEditingValue newTextEditingValue = TextEditingValue(
         text: text,
-        selection: TextSelection.collapsed(offset: text.length),
+        selection: selection,
+        composing: composing,
       );
       _formatAndSetValue(newTextEditingValue);
     } else if (key == 'placeholder') {

@@ -136,7 +136,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     }
   }
 
-  void _setdownObserver() {
+  void _teardownObserver() {
     if (ElementsBinding.instance != null) {
       ElementsBinding.instance.removeObserver(this);
     } else if (WidgetsBinding.instance != null) {
@@ -482,7 +482,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void dispose() {
-    _setdownObserver();
+    _teardownObserver();
     debugDOMTreeChanged = null;
     controller.dispose();
     controller = null;
