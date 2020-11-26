@@ -713,12 +713,11 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  /// Get constraint max width from style, use width or max-width exists if exists,
+  /// Get max constraint width from style, use width or max-width exists if exists,
   /// otherwise calculated from its ancestors
-  static double getConstraintMaxWidth(RenderBoxModel renderBoxModel) {
-    double width;
+  static double getMaxConstraintWidth(RenderBoxModel renderBoxModel) {
+    double maxConstraintWidth = double.infinity;
     double cropWidth = 0;
-    CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
 
     void cropMargin(RenderBoxModel renderBoxModel) {
       if (renderBoxModel.margin != null) {
@@ -735,37 +734,46 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    // Get width if width exists and element is not inline
-    if (display != CSSDisplay.inline &&
-      (renderBoxModel.width != null || renderBoxModel.maxWidth != null)) {
-      width = renderBoxModel.width != null ? renderBoxModel.width : renderBoxModel.maxWidth;
-      cropPaddingBorder(renderBoxModel);
-    } else {
-      // Get the nearest width of ancestor with width
-      while (true) {
-        if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
-          cropMargin(renderBoxModel);
-          cropPaddingBorder(renderBoxModel);
-          renderBoxModel = renderBoxModel.parent;
-        } else {
-          break;
-        }
-        if (renderBoxModel is RenderBoxModel) {
-          CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
-          if (renderBoxModel.width != null && display != CSSDisplay.inline) {
-            width = renderBoxModel.width;
-            cropPaddingBorder(renderBoxModel);
+    // Get the nearest width of ancestor with width
+    while (true) {
+      if (renderBoxModel is RenderBoxModel) {
+        CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
+
+        // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
+        // even if parents have width
+        if (renderBoxModel.parent is RenderFlexLayout) {
+          RenderFlexParentData parentData = renderBoxModel.parentData;
+          if (parentData.flexShrink == 0 && renderBoxModel.width == null && renderBoxModel.maxWidth == null) {
             break;
           }
         }
+
+        // Get width if width exists and element is not inline
+        if (display != CSSDisplay.inline && (renderBoxModel.width != null || renderBoxModel.maxWidth != null)) {
+          // Get the min width between width and max-width
+          maxConstraintWidth = math.min(
+            renderBoxModel.width ?? double.infinity,
+            renderBoxModel.maxWidth ?? double.infinity
+          ) ;
+          cropPaddingBorder(renderBoxModel);
+          break;
+        }
+      }
+
+      if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
+        cropMargin(renderBoxModel);
+        cropPaddingBorder(renderBoxModel);
+        renderBoxModel = renderBoxModel.parent;
+      } else {
+        break;
       }
     }
 
-    if (width != null) {
-      return width - cropWidth;
-    } else {
-      return null;
+    if (maxConstraintWidth != double.infinity) {
+      maxConstraintWidth = maxConstraintWidth - cropWidth;
     }
+
+    return maxConstraintWidth;
   }
 
   void setMaxScrollableSize(double width, double height) {
