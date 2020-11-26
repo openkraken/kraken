@@ -713,6 +713,61 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
+  /// Get constraint max width from style, use width or max-width exists if exists,
+  /// otherwise calculated from its ancestors
+  static double getConstraintMaxWidth(RenderBoxModel renderBoxModel) {
+    double width;
+    double cropWidth = 0;
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
+
+    void cropMargin(RenderBoxModel renderBoxModel) {
+      if (renderBoxModel.margin != null) {
+        cropWidth += renderBoxModel.margin.horizontal;
+      }
+    }
+
+    void cropPaddingBorder(RenderBoxModel renderBoxModel) {
+      if (renderBoxModel.borderEdge != null) {
+        cropWidth += renderBoxModel.borderEdge.horizontal;
+      }
+      if (renderBoxModel.padding != null) {
+        cropWidth += renderBoxModel.padding.horizontal;
+      }
+    }
+
+    // Get width if width exists and element is not inline
+    if (display != CSSDisplay.inline &&
+      (renderBoxModel.width != null || renderBoxModel.maxWidth != null)) {
+      width = renderBoxModel.width != null ? renderBoxModel.width : renderBoxModel.maxWidth;
+      cropPaddingBorder(renderBoxModel);
+    } else {
+      // Get the nearest width of ancestor with width
+      while (true) {
+        if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
+          cropMargin(renderBoxModel);
+          cropPaddingBorder(renderBoxModel);
+          renderBoxModel = renderBoxModel.parent;
+        } else {
+          break;
+        }
+        if (renderBoxModel is RenderBoxModel) {
+          CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
+          if (renderBoxModel.width != null && display != CSSDisplay.inline) {
+            width = renderBoxModel.width;
+            cropPaddingBorder(renderBoxModel);
+            break;
+          }
+        }
+      }
+    }
+
+    if (width != null) {
+      return width - cropWidth;
+    } else {
+      return null;
+    }
+  }
+
   void setMaxScrollableSize(double width, double height) {
     assert(width != null);
     assert(height != null);
