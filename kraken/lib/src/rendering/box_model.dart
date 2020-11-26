@@ -1001,10 +1001,7 @@ class RenderBoxModel extends RenderBox with
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    if (!contentVisibilityHitTest(result, position: position)) {
-      return false;
-    }
-    if (!visibilityHitTest(result, position: position)) {
+    if (!hasSize || !contentVisibilityHitTest(result, position: position) || !visibilityHitTest(result, position: position)) {
       return false;
     }
 
