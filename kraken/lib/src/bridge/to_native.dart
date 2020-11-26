@@ -242,6 +242,10 @@ void flushUICommand() {
     Pointer<Pointer<UICommandItem>> nativeCommandItems = _getUICommandItems(controller.view.contextId);
     int commandLength = _getUICommandItemSize(controller.view.contextId);
 
+    if (commandLength > 0) {
+      SchedulerBinding.instance.scheduleFrame();
+    }
+
     // For new ui commands, we needs to tell engine to update frames.
     for (int i = 0; i < commandLength; i++) {
       Pointer<UICommandItem> nativeCommand = nativeCommandItems[i];
