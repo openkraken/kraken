@@ -11,7 +11,10 @@ namespace foundation {
 UICommandTaskMessageQueue::UICommandTaskMessageQueue(int32_t contextId): contextId(contextId) {}
 
 void UICommandTaskMessageQueue::registerCommand(int64_t id, int32_t type, NativeString **args, size_t length, void* nativePtr) {
-  kraken::getDartMethod()->requestBatchUpdate(contextId);
+  if (!update_batched) {
+    kraken::getDartMethod()->requestBatchUpdate(contextId);
+    update_batched = true;
+  }
   auto item = new UICommandItem(id, type, args, length, nativePtr);
   queue.push_back(item);
 }
@@ -44,6 +47,7 @@ void UICommandTaskMessageQueue::clear() {
     delete command;
   }
   queue.clear();
+  update_batched = false;
 }
 
 }

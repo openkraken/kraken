@@ -117,7 +117,7 @@ std::string JSStringToStdString(JSStringRef jsString) {
   return std::string(buffer.data());
 }
 
-JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
+JSObjectRef makeObjectFunctionWithPrivateData(JSContext *context, void *data, const char *name,
                                     JSObjectCallAsFunctionCallback callback) {
   JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;
   functionDefinition.className = name;
@@ -133,7 +133,7 @@ JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFu
     JSObjectGetProperty(context->context(), context->global(), JSStringCreateWithUTF8CString("Promise"), exception);
   JSObjectRef promiseConstructor = JSValueToObject(context->context(), promiseConstructorValueRef, exception);
 
-  JSObjectRef functionArgs = propertyBindingFunction(context, data, "P", callback);
+  JSObjectRef functionArgs = makeObjectFunctionWithPrivateData(context, data, "P", callback);
   const JSValueRef constructorArguments[1]{functionArgs};
 
   return JSObjectCallAsConstructor(context->context(), promiseConstructor, 1, constructorArguments, exception);
@@ -215,13 +215,13 @@ JSFunctionHolder::~JSFunctionHolder() {
 
 JSObjectRef JSFunctionHolder::function() {
   if (m_function == nullptr) {
-    m_function = propertyBindingFunction(context, m_data, m_name.c_str(), m_callback);
+    m_function = makeObjectFunctionWithPrivateData(context, m_data, m_name.c_str(), m_callback);
     JSValueProtect(context->context(), m_function);
   }
   return m_function;
 }
 
-JSStringHolder::JSStringHolder(JSContext *context, const std::string& string)
+JSStringHolder::JSStringHolder(JSContext *context, const std::string &string)
   : m_context(context), m_string(JSStringRetain(JSStringCreateWithUTF8CString(string.c_str()))) {}
 
 JSStringHolder::~JSStringHolder() {

@@ -67,6 +67,7 @@ public:
   };
 
   static JSObjectRef getProto(JSContextRef ctx, JSObjectRef child, JSValueRef *exception);
+  static void setProto(JSContextRef ctx, JSObjectRef prototype, JSObjectRef child, JSValueRef *exception);
 
   std::string _name{""};
   JSContext *context{nullptr};

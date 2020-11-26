@@ -102,7 +102,7 @@ private:
   JSGlobalContextRef ctx_;
 };
 
-JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
+JSObjectRef makeObjectFunctionWithPrivateData(JSContext *context, void *data, const char *name,
                                     JSObjectCallAsFunctionCallback callback);
 
 NativeString **buildUICommandArgs(JSStringRef key);

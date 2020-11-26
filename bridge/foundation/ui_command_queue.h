@@ -30,6 +30,7 @@ public:
 
 private:
   int32_t contextId;
+  std::atomic<bool> update_batched{false};
   std::vector<UICommandItem *> queue;
 };
 

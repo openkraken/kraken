@@ -11,35 +11,31 @@ namespace kraken::binding::jsc {
 HostClass::HostClass(JSContext *context, std::string name)
   : context(context), _name(name), ctx(context->context()), contextId(context->getContextId()) {
   JSClassDefinition hostClassDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), nullptr, nullptr, HostClass);
+  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, nullptr, _name.c_str(), nullptr, nullptr, HostClass);
   jsClass = JSClassCreate(&hostClassDefinition);
   JSClassRetain(jsClass);
   classObject = JSObjectMake(ctx, jsClass, this);
   JSValueProtect(ctx, classObject);
   JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), HostClass);
+  JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), HostClass, nullptr);
   instanceClass = JSClassCreate(&hostInstanceDefinition);
   JSClassRetain(instanceClass);
-
-  initPrototype();
 }
 
 HostClass::HostClass(JSContext *context, HostClass *parentHostClass, std::string name,
                      const JSStaticFunction *staticFunction, const JSStaticValue *staticValue)
   : context(context), _name(name), ctx(context->context()), _parentHostClass(parentHostClass) {
   JSClassDefinition hostClassDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), staticFunction, staticValue, HostClass);
+  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, nullptr, _name.c_str(), staticFunction, staticValue, HostClass);
   hostClassDefinition.attributes = kJSClassAttributeNone;
   jsClass = JSClassCreate(&hostClassDefinition);
   JSClassRetain(jsClass);
   classObject = JSObjectMake(ctx, jsClass, this);
   JSValueProtect(ctx, classObject);
   JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), HostClass);
+  JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), HostClass, nullptr);
   instanceClass = JSClassCreate(&hostInstanceDefinition);
   JSClassRetain(instanceClass);
-
-  initPrototype();
 }
 
 void HostClass::proxyFinalize(JSObjectRef object) {
@@ -105,12 +101,14 @@ JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSS
 
   if (name == "call") {
     if (hostClass->_call == nullptr) {
-      hostClass->_call = propertyBindingFunction(hostClass->context, hostClass, "call", constructorCall);
+      hostClass->_call = makeObjectFunctionWithPrivateData(hostClass->context, hostClass, "call", constructorCall);
       JSValueProtect(hostClass->ctx, hostClass->_call);
     }
     return hostClass->_call;
   } else if (name == "prototype") {
-    return JSObjectGetPrototype(ctx, object);
+    // We return Constructor class as the prototype of Constructor function.
+    // So that a inherit js object can read constructor status function via prototype chain.
+    return hostClass->classObject;
   }
 
   return hostClass->getProperty(name, exception);
@@ -185,8 +183,14 @@ JSValueRef HostClass::prototypeGetProperty(std::string &name, JSValueRef *except
 }
 
 JSObjectRef HostClass::getProto(JSContextRef ctx, JSObjectRef child, JSValueRef *exception) {
-  JSValueRef result = JSObjectGetPrototype(ctx, child);
+  static JSStringRef privateKey = JSStringCreateWithUTF8CString("__private_proto__");
+  JSValueRef result = JSObjectGetProperty(ctx, child, privateKey, exception);
   return JSValueToObject(ctx, result, exception);
+}
+
+void HostClass::setProto(JSContextRef ctx, JSObjectRef prototype, JSObjectRef child, JSValueRef *exception) {
+  static JSStringRef privateKey = JSStringCreateWithUTF8CString("__private_proto__");
+  JSObjectSetProperty(ctx, child, privateKey, prototype, kJSPropertyAttributeReadOnly, exception);
 }
 
 HostClass::Instance::Instance(HostClass *hostClass)

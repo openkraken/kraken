@@ -75,20 +75,22 @@
     definition.getPropertyNames = classObject::proxyGetPropertyNames;                                                  \
   }
 
-#define JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(definition, name, classObject)                                       \
+#define JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(definition, name, classObject, staticFunction)                       \
   {                                                                                                                    \
     definition.version = 0;                                                                                            \
     definition.className = name;                                                                                       \
     definition.attributes = kJSClassAttributeNoAutomaticPrototype;                                                     \
     definition.finalize = classObject::proxyInstanceFinalize;                                                          \
+    definition.staticFunctions = staticFunction;                                                                       \
     definition.getProperty = classObject::proxyInstanceGetProperty;                                                    \
     definition.setProperty = classObject::proxyInstanceSetProperty;                                                    \
     definition.getPropertyNames = classObject::proxyInstanceGetPropertyNames;                                          \
   }
 
-#define JSC_CREATE_HOST_CLASS_DEFINITION(definition, name, staticFunction, staticValue, HostClass)                     \
+#define JSC_CREATE_HOST_CLASS_DEFINITION(definition, parent, name, staticFunction, staticValue, HostClass)             \
   {                                                                                                                    \
     definition.version = 0;                                                                                            \
+    definition.parentClass = parent;                                                                                   \
     definition.className = name;                                                                                       \
     definition.attributes = kJSClassAttributeNoAutomaticPrototype;                                                     \
     definition.staticFunctions = staticFunction;                                                                       \

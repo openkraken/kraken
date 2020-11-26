@@ -39,7 +39,7 @@ public:
     kAddEventListener,
     kRemoveEventListener,
     kDispatchEvent, kClearListeners,
-    kTargetId
+    kEventTargetId
   };
   static std::vector<JSStringRef> &getEventTargetPropertyNames();
   static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
@@ -87,7 +87,7 @@ protected:
   JSEventTarget() = delete;
   friend EventTargetInstance;
   explicit JSEventTarget(JSContext *context, const char *name);
-  explicit JSEventTarget(JSContext *context);
+  explicit JSEventTarget(JSContext *context, const JSStaticFunction *staticFunction, const JSStaticValue *staticValue);
 private:
   JSFunctionHolder m_removeEventListener{context, this, "removeEventListener", removeEventListener};
   JSFunctionHolder m_dispatchEvent{context, this, "dispatchEvent", dispatchEvent};

@@ -291,7 +291,8 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   JSObjectRef executeTestCallbackObject = JSValueToObject(context->context(), executeTestCallback, nullptr);
   JSObjectSetPrivate(executeTestCallbackObject, callbackContext);
 
-  JSObjectRef callback = kraken::binding::jsc::propertyBindingFunction(context.get(), callbackContext, "done", done);
+  JSObjectRef callback =
+    kraken::binding::jsc::makeObjectFunctionWithPrivateData(context.get(), callbackContext, "done", done);
   const JSValueRef arguments[] = {callback};
 
   JSObjectCallAsFunction(context->context(), executeTestCallbackObject, context->global(), 1, arguments, nullptr);
