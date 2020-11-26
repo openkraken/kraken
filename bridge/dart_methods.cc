@@ -13,6 +13,8 @@ std::shared_ptr<DartMethodPointer> methodPointer = std::make_shared<DartMethodPo
 
 std::shared_ptr<DartMethodPointer> getDartMethod() {
   std::__thread_id currentThread = std::this_thread::get_id();
+
+#ifndef NDEBUG
   // Dart methods can only invoked from Flutter UI threads. Javascript Debugger like Safari Debugger can invoke
   // Javascript methods from debugger thread and will crash the app.
   // @TODO: implement task loops for async method call.
@@ -20,6 +22,7 @@ std::shared_ptr<DartMethodPointer> getDartMethod() {
     // return empty struct to stop further behavior.
     return std::make_shared<DartMethodPointer>();
   }
+#endif
 
   return methodPointer;
 }

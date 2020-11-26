@@ -817,6 +817,7 @@ class Element extends Node
     // Text Style
     switch (property) {
       case COLOR:
+      case LINE_CLAMP:
         _updateTextChildNodesStyle();
         // Color change should trigger currentColor update
         _styleBoxChangedListener(property, original, present);

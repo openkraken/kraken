@@ -105,6 +105,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   void _setTextNodeProperties(CSSStyleDeclaration style) {
     _renderTextBox.whiteSpace = CSSText.getWhiteSpace(parentElement.style);
     _renderTextBox.overflow = CSSText.getTextOverflow(parentElement.style);
+    _renderTextBox.maxLines = CSSText.getLineClamp(parentElement.style);
   }
 
   // Attach renderObject of current node to parent
