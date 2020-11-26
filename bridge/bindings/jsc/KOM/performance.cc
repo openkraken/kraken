@@ -18,22 +18,15 @@ JSValueRef JSPerformance::getProperty(std::string &name, JSValueRef *exception) 
 
     switch (property) {
     case PerformanceProperty::kNow: {
-      if (_now == nullptr) {
-        _now = propertyBindingFunction(context, this, "now", now);
-      }
-      return _now;
+      return m_now.function();
     }
     case PerformanceProperty::kTimeOrigin: {
-      if (_timeOrigin == nullptr) {
-        _timeOrigin = propertyBindingFunction(context, this, "timeOrigin", timeOrigin);
-      }
-      return _timeOrigin;
+      double time =
+          std::chrono::duration_cast<std::chrono::milliseconds>(context->timeOrigin.time_since_epoch()).count();
+      return JSValueMakeNumber(ctx, time);
     }
     case PerformanceProperty::ktoJSON: {
-      if (_toJSON == nullptr) {
-        _toJSON = propertyBindingFunction(context, this, "toJSON", toJSON);
-      }
-      return _toJSON;
+      return m_toJSON.function();
     }
     }
   }

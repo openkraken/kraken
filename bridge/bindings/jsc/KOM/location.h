@@ -20,14 +20,16 @@ class JSWindow;
 
 class JSLocation : public HostObject {
 public:
-  JSLocation(JSContext *context) : HostObject(context, JSLocationName) {}
+  static JSValueRef reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                           const JSValueRef arguments[], JSValueRef *exception);
 
+  JSLocation(JSContext *context) : HostObject(context, JSLocationName) {}
   ~JSLocation() override;
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
-//  void instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:
+  JSFunctionHolder m_reload{context, this, "reload", reload};
   std::array<JSStringRef, 2> propertyNames {
     JSStringCreateWithUTF8CString("reload"),
     JSStringCreateWithUTF8CString("href")

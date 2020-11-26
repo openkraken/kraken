@@ -37,11 +37,8 @@ public:
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:
-
-  JSObjectRef _now {nullptr};
-  JSObjectRef _timeOrigin {nullptr};
-  JSObjectRef _toJSON {nullptr};
-
+  JSFunctionHolder m_now{context, this, "now", now};
+  JSFunctionHolder m_toJSON{context, this, "toJSON", toJSON};
   double internalNow();
 };
 

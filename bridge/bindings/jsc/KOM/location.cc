@@ -16,8 +16,25 @@ void updateLocation(std::string url = "") {
   href = url;
 }
 
-JSValueRef reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                  const JSValueRef arguments[], JSValueRef *exception) {
+JSValueRef JSLocation::getProperty(std::string &name, JSValueRef *exception) {
+  if (name == "reload") {
+    return m_reload.function();
+  } else if (name == "href") {
+    JSStringRef hrefRef = JSStringCreateWithUTF8CString(href.c_str());
+    return JSValueMakeString(context->context(), hrefRef);
+  }
+
+  return HostObject::getProperty(name, exception);
+}
+
+JSLocation::~JSLocation() {
+  for (auto &propertyName : propertyNames) {
+    JSStringRelease(propertyName);
+  }
+}
+
+JSValueRef JSLocation::reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                              const JSValueRef *arguments, JSValueRef *exception) {
   auto jsLocation = static_cast<JSLocation *>(JSObjectGetPrivate(function));
 
   if (getDartMethod()->reloadApp == nullptr) {
@@ -29,29 +46,6 @@ JSValueRef reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
   getDartMethod()->reloadApp(jsLocation->context->getContextId());
 
   return nullptr;
-};
-
-JSValueRef JSLocation::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "reload") {
-    return propertyBindingFunction(context, this, "reload", reload);
-  } else if (name == "href") {
-    JSStringRef hrefRef = JSStringCreateWithUTF8CString(href.c_str());
-    return JSValueMakeString(context->context(), hrefRef);
-  }
-
-  return HostObject::getProperty(name, exception);
-}
-
-//void JSLocation::instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-//  for (auto &propertyName : propertyNames) {
-//    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
-//  }
-//}
-
-JSLocation::~JSLocation() {
-  for (auto &propertyName : propertyNames) {
-    JSStringRelease(propertyName);
-  }
 }
 
 } // namespace kraken::binding::jsc
