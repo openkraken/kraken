@@ -473,7 +473,7 @@ class KrakenController {
       module.requestAnimationFrame((_) {
         Event loadEvent = Event(EventType.load);
         EventTarget window = view.getEventTargetById(WINDOW_ID);
-        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, loadEvent.toNativeEvent());
+        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, loadEvent);
       });
     }
   }

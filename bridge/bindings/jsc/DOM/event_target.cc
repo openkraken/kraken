@@ -7,6 +7,7 @@
 #include "dart_methods.h"
 #include "document.h"
 #include "event.h"
+#include "bindings/jsc/DOM/events/input_event.h"
 #include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
@@ -266,12 +267,12 @@ JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, 
 
   const JSValueRef eventObjectValueRef = arguments[0];
   JSObjectRef eventObjectRef = JSValueToObject(ctx, eventObjectValueRef, exception);
-  auto eventInstance = reinterpret_cast<JSEvent::EventInstance *>(JSObjectGetPrivate(eventObjectRef));
+  auto eventInstance = reinterpret_cast<EventInstance *>(JSObjectGetPrivate(eventObjectRef));
 
   return JSValueMakeBoolean(ctx, eventTargetInstance->dispatchEvent(eventInstance));
 }
 
-bool JSEventTarget::EventTargetInstance::dispatchEvent(JSEvent::EventInstance *event) {
+bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
   auto eventType = static_cast<JSEvent::EventType>(event->nativeEvent->type);
 
   if (!_eventHandlers.contains(eventType)) {
@@ -408,7 +409,7 @@ std::vector<JSStringRef> &JSEventTarget::getEventTargetPropertyNames() {
   return propertyNames;
 }
 
-bool JSEventTarget::EventTargetInstance::internalDispatchEvent(JSEvent::EventInstance *eventInstance) {
+bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
   auto eventType = static_cast<JSEvent::EventType>(eventInstance->nativeEvent->type);
   auto stack = _eventHandlers[eventType];
 
@@ -433,12 +434,22 @@ const std::unordered_map<std::string, JSEventTarget::EventTargetProperty> &JSEve
 }
 
 // This function will be called back by dart side when trigger events.
-void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent) {
+void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, int64_t eventType, void *nativeEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
 
   JSEventTarget::EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
   JSContext *context = eventTargetInstance->context;
-  auto eventInstance = new JSEvent::EventInstance(JSEvent::instance(context), nativeEvent);
+
+  auto type = static_cast<JSEvent::EventType>(eventType);
+
+  EventInstance *eventInstance;
+
+  if (type == JSEvent::EventType::input) {
+    eventInstance = new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
+  } else {
+    eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+  }
+
   eventTargetInstance->dispatchEvent(eventInstance);
 }
 

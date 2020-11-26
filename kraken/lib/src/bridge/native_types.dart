@@ -37,6 +37,12 @@ class NativeEvent extends Struct {
   Pointer currentTarget;
 }
 
+class NativeInputEvent extends Struct {
+  Pointer<NativeEvent> nativeEvent;
+  Pointer<NativeString> inputType;
+  Pointer<NativeString> data;
+}
+
 class NativeBoundingClientRect extends Struct {
   @Double()
   double x;
@@ -64,9 +70,9 @@ class NativeBoundingClientRect extends Struct {
 }
 
 typedef Native_DispatchEvent = Void Function(
-    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
+    Pointer<NativeEventTarget> nativeEventTarget, Int64 eventType, Pointer<Void> nativeEvent);
 typedef Dart_DispatchEvent = void Function(
-    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeEvent> nativeEvent);
+    Pointer<NativeEventTarget> nativeEventTarget, int eventType, Pointer<Void> nativeEvent);
 
 class NativeEventTarget extends Struct {
   Pointer<Void> instance;

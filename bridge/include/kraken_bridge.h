@@ -29,6 +29,11 @@ struct NativeString {
     newNativeString->length = length;
     return newNativeString;
   }
+
+  void free() {
+    delete[] string;
+    delete this;
+  }
 };
 
 struct KrakenInfo;

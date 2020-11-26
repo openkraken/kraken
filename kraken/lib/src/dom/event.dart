@@ -87,7 +87,7 @@ class Event {
     bubbles = false;
   }
 
-  Pointer<NativeEvent> toNativeEvent() {
+  Pointer toNativeEvent() {
     Pointer<NativeEvent> event = allocate<NativeEvent>();
     event.ref.type = type.index;
     event.ref.bubbles = bubbles ? 1 : 0;
@@ -97,11 +97,11 @@ class Event {
     event.ref.target = target != null ? target.nativeEventTargetPtr : nullptr;
     event.ref.currentTarget = currentTarget != null ? currentTarget.nativeEventTargetPtr : nullptr;
 
-    return event;
+    return event.cast<Pointer>();
   }
 
   Map toJson() {
-    Pointer<NativeEvent> nativeEvent = toNativeEvent();
+    Pointer<NativeEvent> nativeEvent = toNativeEvent().cast<NativeEvent>();
     return {
       'type': type.index,
       'nativeEvent': nativeEvent.address
@@ -128,11 +128,20 @@ class EventInit {
 }
 
 class InputEvent extends Event {
-  String inputType;
-  dynamic detail;
+  final String inputType;
+  final String data;
+
+  Pointer<NativeInputEvent> toNativeEvent() {
+    Pointer<NativeInputEvent> nativeInputEvent = allocate<NativeInputEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNativeEvent().cast<NativeEvent>();
+    nativeInputEvent.ref.nativeEvent = nativeEvent;
+    nativeInputEvent.ref.inputType = stringToNativeString(inputType);
+    nativeInputEvent.ref.data = stringToNativeString(data);
+    return nativeInputEvent;
+  }
 
   InputEvent(
-    this.detail, {
+    this.data, {
     this.inputType = 'insertText',
   }) : super(EventType.input, EventInit(cancelable: true));
 }

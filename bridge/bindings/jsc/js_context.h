@@ -64,6 +64,7 @@ public:
   bool empty();
 
   void setString(JSStringRef value);
+  void setString(NativeString *value);
 
 private:
   JSContext *m_context;

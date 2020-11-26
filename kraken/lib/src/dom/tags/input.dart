@@ -277,7 +277,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   void _triggerInputEvent(String text) {
-    Event inputEvent = InputEvent(text);
+    InputEvent inputEvent = InputEvent(text);
     dispatchEvent(inputEvent);
   }
 

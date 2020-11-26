@@ -1140,9 +1140,7 @@ class Element extends Node
   }
 
   void _eventResponder(Event event) {
-    Pointer<NativeEvent> nativeEvent = event.toNativeEvent();
-    emitUIEvent(
-        elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, nativeEvent);
+    emitUIEvent(elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, event);
   }
 
   void click() {

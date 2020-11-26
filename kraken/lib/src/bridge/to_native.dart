@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:ui';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'dart:io';
@@ -83,10 +84,11 @@ void invokeEventListener(int contextId, int type, String data) {
 const UI_EVENT = 0;
 const MODULE_EVENT = 1;
 
-void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Pointer<NativeEvent> nativeEvent) {
+void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
-  dispatchEvent(nativeEventTarget, nativeEvent);
+  Pointer<Void> nativeEvent = event.toNativeEvent().cast<Void>();
+  dispatchEvent(nativeEventTarget, event.type.index, nativeEvent);
 }
 
 void emitModuleEvent(int contextId, String data) {
@@ -97,7 +99,7 @@ void invokeOnPlatformBrightnessChangedCallback(int contextId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   Window window = controller.view.getEventTargetById(WINDOW_ID);
   ColorSchemeChangeEvent event = ColorSchemeChangeEvent();
-  emitUIEvent(contextId, window.nativeWindowPtr.ref.nativeEventTarget, event.toNativeEvent());
+  emitUIEvent(contextId, window.nativeWindowPtr.ref.nativeEventTarget, event);
 }
 
 // Register createScreen

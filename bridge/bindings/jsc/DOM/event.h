@@ -16,6 +16,7 @@ namespace kraken::binding::jsc {
 void bindEvent(std::unique_ptr<JSContext> &context);
 
 struct NativeEvent;
+class EventInstance;
 
 class JSEvent : public HostClass {
 public:
@@ -77,56 +78,59 @@ public:
 
   static JSEvent *instance(JSContext *context);
   static EventType getEventTypeOfName(std::string &name);
-  static const char* getEventNameOfTypeIndex(int8_t index);
+  static const char *getEventNameOfTypeIndex(int8_t index);
 
   // Create an Event Object from an nativeEvent address which allocated by dart side.
   static JSValueRef initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                             size_t argumentCount, const JSValueRef arguments[],
-                                             JSValueRef *exception);
+                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
-  static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                   size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
-  class EventInstance : public Instance {
-  public:
-    EventInstance() = delete;
-
-    explicit EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent);
-    explicit EventInstance(JSEvent *jsEvent, EventType eventType);
-    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
-    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-    ~EventInstance() override;
-    NativeEvent *nativeEvent;
-    bool _dispatchFlag{false};
-    bool _canceledFlag{false};
-    bool _initializedFlag{true};
-    bool _stopPropagationFlag{false};
-    bool _stopImmediatePropagationFlag{false};
-    bool _inPassiveListenerFlag{false};
-
-  private:
-  };
 protected:
   JSEvent() = delete;
   explicit JSEvent(JSContext *context, const char *name);
   explicit JSEvent(JSContext *context);
+
 private:
+  friend EventInstance;
   JSFunctionHolder m_initWithNativeEvent{context, this, "initWithNativeEvent", initWithNativeEvent};
   JSFunctionHolder m_stopImmediatePropagation{context, this, "stopImmediatePropagation", stopImmediatePropagation};
   JSFunctionHolder m_stopPropagation{context, this, "stopPropagation", stopPropagation};
   JSFunctionHolder m_preventDefault{context, this, "preventDefault", preventDefault};
+};
+
+class EventInstance : public HostClass::Instance {
+public:
+  EventInstance() = delete;
+
+  explicit EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent);
+  explicit EventInstance(JSEvent *jsEvent, JSEvent::EventType eventType);
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+  void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+  ~EventInstance() override;
+  NativeEvent *nativeEvent;
+  bool _dispatchFlag{false};
+  bool _canceledFlag{false};
+  bool _initializedFlag{true};
+  bool _stopPropagationFlag{false};
+  bool _stopImmediatePropagationFlag{false};
+  bool _inPassiveListenerFlag{false};
+
+private:
+  friend JSEvent;
 };
 
 struct NativeEvent {

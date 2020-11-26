@@ -24,6 +24,7 @@
 #include "bindings/jsc/DOM/comment_node.h"
 #include "bindings/jsc/DOM/element.h"
 #include "bindings/jsc/DOM/event.h"
+#include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/DOM/node.h"
 #include "bindings/jsc/DOM/style_declaration.h"

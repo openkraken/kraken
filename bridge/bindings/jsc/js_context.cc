@@ -244,6 +244,11 @@ void JSStringHolder::setString(JSStringRef value) {
   m_string = JSStringRetain(value);
 }
 
+void JSStringHolder::setString(NativeString *value) {
+  JSStringRef ref = JSStringCreateWithCharacters(value->string, value->length);
+  m_string = JSStringRetain(ref);
+}
+
 size_t JSStringHolder::utf8Size() {
   return JSStringGetMaximumUTF8CStringSize(m_string);
 }

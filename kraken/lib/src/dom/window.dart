@@ -22,11 +22,11 @@ class Window extends EventTarget {
   }
 
   void _handleColorSchemeChange(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event.toNativeEvent());
+    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
   }
 
   void _handleLoad(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event.toNativeEvent());
+    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
   }
 
   @override

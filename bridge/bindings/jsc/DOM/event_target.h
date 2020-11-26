@@ -71,7 +71,7 @@ public:
     JSValueRef getPropertyHandler(std::string &name, JSValueRef *exception);
     void setPropertyHandler(std::string &name, JSValueRef value, JSValueRef *exception);
 
-    bool dispatchEvent(JSEvent::EventInstance *event);
+    bool dispatchEvent(EventInstance *event);
 
     ~EventTargetInstance() override;
     int64_t eventTargetId;
@@ -80,7 +80,7 @@ public:
   private:
     friend JSEventTarget;
     std::unordered_map<JSEvent::EventType, std::deque<JSObjectRef>> _eventHandlers;
-    bool internalDispatchEvent(JSEvent::EventInstance *eventInstance);
+    bool internalDispatchEvent(EventInstance *eventInstance);
   };
 
 protected:
@@ -96,14 +96,14 @@ private:
   std::vector<std::string> m_jsOnlyEvents;
 };
 
-using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);
+using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, int64_t eventType, void *nativeEvent);
 
 struct NativeEventTarget {
   NativeEventTarget() = delete;
   NativeEventTarget(JSEventTarget::EventTargetInstance *_instance)
     : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl) {};
 
-  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeEvent *nativeEvent);
+  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, int64_t eventType, void *nativeEvent);
 
   JSEventTarget::EventTargetInstance *instance;
   NativeDispatchEvent dispatchEvent;
