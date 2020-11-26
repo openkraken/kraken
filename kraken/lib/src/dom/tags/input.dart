@@ -17,7 +17,7 @@ import 'package:kraken/rendering.dart';
 
 const String INPUT = 'INPUT';
 
-const TextInputType TEXT_INPUT_TYPE_NUMBER = const TextInputType.numberWithOptions(signed: true);
+const TextInputType TEXT_INPUT_TYPE_NUMBER = TextInputType.numberWithOptions(signed: true);
 
 /// https://www.w3.org/TR/css-sizing-3/#intrinsic-sizes
 /// For boxes without a preferred aspect ratio:
