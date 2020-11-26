@@ -84,4 +84,15 @@ describe('Event', () => {
     await simulateSwipe(20, 100, 20, 20, 0.1);
     expect(clickCount).toBe(1);
   });
+
+  it('text node can not trigger click', async () => {
+    let clickCount =  0;
+    const text = createText('text');
+    BODY.appendChild(text);
+    text.addEventListener('click', () => {
+      clickCount++;
+    });
+    await simulateClick(10, 10);
+    expect(clickCount).toBe(0);
+  });
 });
