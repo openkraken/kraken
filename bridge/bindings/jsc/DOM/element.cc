@@ -133,7 +133,7 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, const char *tagN
     std::string t = std::string(tagName);
     auto args = buildUICommandArgs(t);
     ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeElement);
+      ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeElement);
   }
 }
 
@@ -155,7 +155,7 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSStringRef tagN
     getDartMethod()->initBody(element->contextId, nativeElement);
   } else {
     ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(targetId, UI_COMMAND_CREATE_ELEMENT, args, argsLength, nativeElement);
+      ->registerCommand(targetId, UICommand::createElement, args, argsLength, nativeElement);
   }
 }
 
@@ -454,7 +454,7 @@ JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   auto args = buildUICommandArgs(name, valueString);
 
   ::foundation::UICommandTaskMessageQueue::instance(elementInstance->_hostClass->contextId)
-    ->registerCommand(elementInstance->eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
+    ->registerCommand(elementInstance->eventTargetId, UICommand::setProperty, args, 2, nullptr);
 
   return nullptr;
 }
@@ -542,7 +542,7 @@ JSValueRef JSElement::removeAttribute(JSContextRef ctx, JSObjectRef function, JS
 
     auto args = buildUICommandArgs(name);
     ::foundation::UICommandTaskMessageQueue::instance(element->_hostClass->contextId)
-      ->registerCommand(element->eventTargetId, UI_COMMAND_REMOVE_PROPERTY, args, 1, nullptr);
+      ->registerCommand(element->eventTargetId, UICommand::removeProperty, args, 1, nullptr);
   }
 
   return nullptr;

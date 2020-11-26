@@ -258,7 +258,7 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       auto args = buildUICommandArgs(nodeEventTargetId, position);
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(referenceNode->eventTargetId, UI_COMMAND_INSERT_ADJACENT_NODE, args, 2, nullptr);
+        ->registerCommand(referenceNode->eventTargetId, UICommand::insertAdjacentNode, args, 2, nullptr);
     }
   }
 }
@@ -320,7 +320,7 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
   auto args = buildUICommandArgs(nodeEventTargetId, position);
 
   foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
-    ->registerCommand(eventTargetId, UI_COMMAND_INSERT_ADJACENT_NODE, args, 2, nullptr);
+    ->registerCommand(eventTargetId, UICommand::insertAdjacentNode, args, 2, nullptr);
 }
 
 void JSNode::NodeInstance::internalRemove(JSValueRef *exception) {
@@ -337,7 +337,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalRemoveChild(JSNode::NodeInst
     node->unrefer();
     node->_notifyNodeRemoved(this);
     foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
-      ->registerCommand(node->eventTargetId, UI_COMMAND_REMOVE_NODE, nullptr, 0, nullptr);
+      ->registerCommand(node->eventTargetId, UICommand::removeNode, nullptr, 0, nullptr);
   }
 
   return node;
@@ -364,10 +364,10 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
 
   auto args = buildUICommandArgs(newChildEventTargetId, position);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(oldChild->eventTargetId, UI_COMMAND_INSERT_ADJACENT_NODE, args, 2, nullptr);
+    ->registerCommand(oldChild->eventTargetId, UICommand::insertAdjacentNode, args, 2, nullptr);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(oldChild->eventTargetId, UI_COMMAND_REMOVE_NODE, nullptr, 0, nullptr);
+    ->registerCommand(oldChild->eventTargetId, UICommand::removeNode, nullptr, 0, nullptr);
 
   return oldChild;
 }

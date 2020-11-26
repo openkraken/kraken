@@ -1,4 +1,5 @@
-import { krakenInvokeModule } from '../bridge';
+import {krakenInvokeModule} from '../bridge';
+import {EventType} from "../dom/events/event";
 
 function validateUrl(url: string) {
   let protocol = url.substring(0, url.indexOf(':'));
@@ -85,8 +86,21 @@ export class WebSocket extends EventTarget {
     wsClientMap[this.id] = this;
   }
 
+  set onopen(callback: any) {
+    this.addEventListener('open', callback);
+  }
+  set onclose(callback: any) {
+    this.addEventListener('close', callback)
+  }
+  set onmessage(callback: any) {
+    this.addEventListener('message', callback);
+  }
+  set onerror(callback: any) {
+    this.addEventListener('error', callback);
+  }
+
   addEventListener(type: string, callback: any) {
-    krakenInvokeModule(`["WebSocket","addEvent",["${this.id}","${type}"]]`);
+    krakenInvokeModule(`["WebSocket","addEvent",["${this.id}",${EventType[type]}]]`);
     super.addEventListener(type, callback);
   }
 

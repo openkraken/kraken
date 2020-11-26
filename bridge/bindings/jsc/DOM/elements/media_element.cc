@@ -128,7 +128,7 @@ void JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValu
 
     auto args = buildUICommandArgs(name, JSStringRetain(_src));
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId,UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
+      ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
   }
 
   ElementInstance::setProperty(name, value, exception);

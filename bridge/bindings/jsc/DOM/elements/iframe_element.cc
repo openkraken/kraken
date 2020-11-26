@@ -28,7 +28,7 @@ JSIframeElement::IframeElementInstance::IframeElementInstance(JSIframeElement *j
 
   auto args = buildUICommandArgs(tagName);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UI_COMMAND_CREATE_ELEMENT, args, 1, nativeIframeElement);
+    ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeIframeElement);
 }
 
 std::vector<JSStringRef> &JSIframeElement::IframeElementInstance::getIframeElementPropertyNames() {
@@ -81,7 +81,7 @@ void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSVa
 
       auto args = buildUICommandArgs(name, widthString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
       break;
     }
     case IframeProperty::kHeight: {
@@ -91,7 +91,7 @@ void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSVa
 
       auto args = buildUICommandArgs(name, heightString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UI_COMMAND_SET_PROPERTY, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
       break;
     }
     default:

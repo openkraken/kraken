@@ -6,6 +6,8 @@
 #include "host_class.h"
 #include "foundation/logging.h"
 
+#define PRIVATE_PROTO_KEY "__private_proto__"
+
 namespace kraken::binding::jsc {
 
 HostClass::HostClass(JSContext *context, std::string name)
@@ -182,14 +184,19 @@ JSValueRef HostClass::prototypeGetProperty(std::string &name, JSValueRef *except
   return nullptr;
 }
 
+bool HostClass::hasProto(JSContextRef ctx, JSObjectRef child, JSValueRef *exception) {
+  static JSStringRef privateKey = JSStringCreateWithUTF8CString(PRIVATE_PROTO_KEY);
+  return JSObjectHasProperty(ctx, child, privateKey);
+}
+
 JSObjectRef HostClass::getProto(JSContextRef ctx, JSObjectRef child, JSValueRef *exception) {
-  static JSStringRef privateKey = JSStringCreateWithUTF8CString("__private_proto__");
+  static JSStringRef privateKey = JSStringCreateWithUTF8CString(PRIVATE_PROTO_KEY);
   JSValueRef result = JSObjectGetProperty(ctx, child, privateKey, exception);
   return JSValueToObject(ctx, result, exception);
 }
 
 void HostClass::setProto(JSContextRef ctx, JSObjectRef prototype, JSObjectRef child, JSValueRef *exception) {
-  static JSStringRef privateKey = JSStringCreateWithUTF8CString("__private_proto__");
+  static JSStringRef privateKey = JSStringCreateWithUTF8CString(PRIVATE_PROTO_KEY);
   JSObjectSetProperty(ctx, child, privateKey, prototype, kJSPropertyAttributeReadOnly, exception);
 }
 

@@ -160,7 +160,7 @@ JSValueRef flushUICommand(JSContextRef ctx, JSObjectRef function, JSObjectRef th
 void bindUIManager(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_module_listener__", krakenModuleListener);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_invoke_module__", krakenInvokeModule);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_flush_ui_command", flushUICommand);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_flush_ui_command__", flushUICommand);
 }
 
 } // namespace kraken::binding::jsc

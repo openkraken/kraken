@@ -47,16 +47,18 @@ struct Screen {
   double height;
 };
 
-#define UI_COMMAND_CREATE_ELEMENT 0
-#define UI_COMMAND_CREATE_TEXT_NODE 1
-#define UI_COMMAND_CREATE_COMMENT 2
-#define UI_COMMAND_DISPOSE_EVENT_TARGET 3
-#define UI_COMMAND_ADD_EVENT 4
-#define UI_COMMAND_REMOVE_NODE 5
-#define UI_COMMAND_INSERT_ADJACENT_NODE 6
-#define UI_COMMAND_SET_STYLE 7
-#define UI_COMMAND_SET_PROPERTY 8
-#define UI_COMMAND_REMOVE_PROPERTY 9
+enum UICommand {
+  createElement,
+  createTextNode,
+  createComment,
+  disposeEventTarget,
+  addEvent,
+  removeNode,
+  insertAdjacentNode,
+  setStyle,
+  setProperty,
+  removeProperty
+};
 
 struct UICommandItem {
   UICommandItem(int64_t id, int32_t type, NativeString **args, size_t length, void* nativePtr)

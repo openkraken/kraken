@@ -57,7 +57,7 @@ public:
 
   static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                   size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef __clearListeners__(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+  static JSValueRef clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   class EventTargetInstance : public Instance {
@@ -91,7 +91,7 @@ protected:
 private:
   JSFunctionHolder m_removeEventListener{context, this, "removeEventListener", removeEventListener};
   JSFunctionHolder m_dispatchEvent{context, this, "dispatchEvent", dispatchEvent};
-  JSFunctionHolder m_clearListeners{context, this, "clearListeners", __clearListeners__};
+  JSFunctionHolder m_clearListeners{context, this, "clearListeners", clearListeners};
   JSFunctionHolder m_addEventListener{context, this, "addEventListener", addEventListener};
   std::vector<std::string> m_jsOnlyEvents;
 };

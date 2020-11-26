@@ -55,10 +55,9 @@ JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef functio
     tagNameValue,
   };
 
-  auto elementInstance = JSObjectCallAsConstructor(ctx, Element->classObject, 1, constructorArgs, exception);
-  auto element = reinterpret_cast<JSElement::ElementInstance *>(JSObjectGetPrivate(elementInstance));
+  auto element = new JSElement::ElementInstance(Element, tagName.c_str(), true);
   element->document = document;
-  return elementInstance;
+  return element->object;
 }
 
 JSValueRef DocumentInstance::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,

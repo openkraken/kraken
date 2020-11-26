@@ -24,7 +24,7 @@ JSEventTarget *JSEventTarget::instance(JSContext *context) {
     const JSStaticFunction staticFunction[]{{"addEventListener", addEventListener, kJSPropertyAttributeReadOnly},
                                             {"removeEventListener", removeEventListener, kJSPropertyAttributeReadOnly},
                                             {"dispatchEvent", dispatchEvent, kJSPropertyAttributeReadOnly},
-                                            {"__clearListeners__", __clearListeners__, kJSPropertyAttributeReadOnly},
+                                            {"__clearListeners__", clearListeners, kJSPropertyAttributeReadOnly},
                                             {nullptr}};
     instanceMap[context] = new JSEventTarget(context, staticFunction, nullptr);
   }
@@ -82,7 +82,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
     foundation::Task disposeTask = [](void *data) {
       auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
       foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
-        ->registerCommand(disposeCallbackData->id, UI_COMMAND_DISPOSE_EVENT_TARGET, nullptr, 0, nullptr);
+        ->registerCommand(disposeCallbackData->id, UICommand::disposeEventTarget, nullptr, 0, nullptr);
       delete disposeCallbackData;
     };
     foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
@@ -103,13 +103,15 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
 JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 2) {
-    JSC_THROW_ERROR(ctx, "Failed to addEventListener: eventName and function parameter are required.", exception);
+    JSC_THROW_ERROR(ctx, "Failed to addEventListener: eventName and function parameter are required.", exception)
     return nullptr;
   }
 
-  auto eventTargetInstance =
-    static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
-  if (eventTargetInstance == nullptr) {
+  JSEventTarget::EventTargetInstance *eventTargetInstance;
+
+  if (hasProto(ctx, thisObject, exception)) {
+    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  } else {
     eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   }
 
@@ -154,7 +156,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     auto isJsOnlyEvent = std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), eventName) != Event->m_jsOnlyEvents.end();
 
     if (!isJsOnlyEvent) {
-      foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetInstance->eventTargetId, UI_COMMAND_ADD_EVENT, args, 1, nullptr);
+      foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetInstance->eventTargetId, UICommand::addEvent, args, 1, nullptr);
     };
   }
 
@@ -196,8 +198,11 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
     return nullptr;
   }
 
-  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
-  if (eventTargetInstance == nullptr) {
+  JSEventTarget::EventTargetInstance *eventTargetInstance;
+
+  if (hasProto(ctx, thisObject, exception)) {
+    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  } else {
     eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   }
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
@@ -250,8 +255,11 @@ JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, 
     return nullptr;
   }
 
-  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
-  if (eventTargetInstance == nullptr) {
+  JSEventTarget::EventTargetInstance *eventTargetInstance;
+
+  if (hasProto(ctx, thisObject, exception)) {
+    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  } else {
     eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   }
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
@@ -289,7 +297,7 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(JSEvent::EventInstance *e
   return !event->_canceledFlag;
 }
 
-JSValueRef JSEventTarget::__clearListeners__(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                              size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
@@ -382,7 +390,7 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
   int32_t contextId = _hostClass->contextId;
   std::string eventTypeString = std::to_string(eventType);
   auto args = buildUICommandArgs(eventTypeString);
-  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UI_COMMAND_ADD_EVENT,
+  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommand::addEvent,
                                                                               args, 1, nullptr);
 }
 
