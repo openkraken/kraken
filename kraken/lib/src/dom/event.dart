@@ -238,12 +238,14 @@ class CloseEvent extends Event {
 
 class IntersectionChangeEvent extends Event {
   IntersectionChangeEvent(this.intersectionRatio) : super(EventType.intersectionchange);
-  double intersectionRatio;
+  final double intersectionRatio;
 
-  Map toJson() {
-    Map eventMap = super.toJson();
-    eventMap['intersectionRatio'] = intersectionRatio;
-    return eventMap;
+  Pointer<NativeIntersectionChangeEvent> toNativeEvent() {
+    Pointer<NativeIntersectionChangeEvent> intersectionChangeEvent = allocate<NativeIntersectionChangeEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNativeEvent().cast<NativeEvent>();
+    intersectionChangeEvent.ref.nativeEvent = nativeEvent;
+    intersectionChangeEvent.ref.intersectionRatio = intersectionRatio;
+    return intersectionChangeEvent;
   }
 }
 

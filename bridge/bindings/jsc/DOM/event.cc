@@ -9,6 +9,7 @@
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
 #include "bindings/jsc/DOM/events/close_event.h"
+#include "bindings/jsc/DOM/events/intersection_change_event.h"
 #include <chrono>
 
 namespace kraken::binding::jsc {
@@ -314,6 +315,10 @@ EventInstance *JSEvent::buildEventInstance(JSEvent::EventType eventType, JSConte
     }
     case JSEvent::EventType::close: {
       eventInstance = new CloseEventInstance(JSCloseEvent::instance(context), reinterpret_cast<NativeCloseEvent*>(nativeEvent));
+      break;
+    }
+    case JSEvent::EventType::intersectionchange: {
+      eventInstance = new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
       break;
     }
     default:

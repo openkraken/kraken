@@ -71,6 +71,13 @@ class NativeCloseEvent extends Struct {
   int wasClean;
 }
 
+class NativeIntersectionChangeEvent extends Struct {
+  Pointer<NativeEvent> nativeEvent;
+
+  @Double()
+  double intersectionRatio;
+}
+
 class NativeBoundingClientRect extends Struct {
   @Double()
   double x;
