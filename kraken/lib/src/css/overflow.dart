@@ -166,11 +166,11 @@ mixin CSSOverflowMixin on Node {
   }
 
   void setScrollTop(double value) {
-    scrollTo(dy: value);
+    scrollTo(y: value);
   }
 
   void setScrollLeft(double value) {
-    scrollTo(dx: value);
+    scrollTo(x: value);
   }
 
   double getScrollLeft() {
@@ -201,27 +201,28 @@ mixin CSSOverflowMixin on Node {
         if (diff) {
           scrollBy(dx: left, dy: top, withAnimation: withAnimation);
         } else {
-          scrollTo(dx: left, dy: top, withAnimation: withAnimation);
+          scrollTo(x: left, y: top, withAnimation: withAnimation);
         }
       }
     }
   }
 
-  void scrollBy({ double dx = 0.0, double dy = 0.0, bool withAnimation }) {
-    if (dx != 0) {
-      _scroll(dx, Axis.horizontal, withAnimation: withAnimation);
-    }
-    if (dy != 0) {
-      _scroll(dy, Axis.vertical, withAnimation: withAnimation);
-    }
-  }
-
-  void scrollTo({ double dx = 0.0, double dy = 0.0, bool withAnimation }) {
+  void scrollBy({ num dx = 0.0, num dy = 0.0, bool withAnimation }) {
     if (dx != 0) {
       _scroll(getScrollLeft() + dx, Axis.horizontal, withAnimation: withAnimation);
     }
     if (dy != 0) {
       _scroll(getScrollTop() + dy, Axis.vertical, withAnimation: withAnimation);
+    }
+  }
+
+  void scrollTo({ num x, num y, bool withAnimation }) {
+    if (x != null) {
+      _scroll(x, Axis.horizontal, withAnimation: withAnimation);
+    }
+
+    if (y != null) {
+      _scroll(y, Axis.vertical, withAnimation: withAnimation);
     }
   }
 
