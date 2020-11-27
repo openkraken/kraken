@@ -35,9 +35,12 @@ class RenderViewportBox extends RenderProxyBox
     }
   }
 
+  @override
   void performLayout() {
     assert(_viewportSize != null);
-    size = constraints.biggest;
+    double maxWidth = window.physicalSize.width / window.devicePixelRatio;
+    double maxHeight = window.physicalSize.height / window.devicePixelRatio;
+    size = constraints.constrain(Size(maxWidth, maxHeight));
     if (child != null) {
       double height = _viewportSize.height - _bottomInset;
       if (height.isNegative || height.isNaN) {
