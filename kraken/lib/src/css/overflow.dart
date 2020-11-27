@@ -212,16 +212,16 @@ mixin CSSOverflowMixin on Node {
       _scroll(dx, Axis.horizontal, withAnimation: withAnimation);
     }
     if (dy != 0) {
-      _scroll(dy, Axis.horizontal, withAnimation: withAnimation);
+      _scroll(dy, Axis.vertical, withAnimation: withAnimation);
     }
   }
 
   void scrollTo({ double dx = 0.0, double dy = 0.0, bool withAnimation }) {
     if (dx != 0) {
-      _scroll(getScrollTop() + dx, Axis.horizontal, withAnimation: withAnimation);
+      _scroll(getScrollLeft() + dx, Axis.horizontal, withAnimation: withAnimation);
     }
     if (dy != 0) {
-      _scroll(getScrollLeft() + dy, Axis.horizontal, withAnimation: withAnimation);
+      _scroll(getScrollTop() + dy, Axis.vertical, withAnimation: withAnimation);
     }
   }
 
