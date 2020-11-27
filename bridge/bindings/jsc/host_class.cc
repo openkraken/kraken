@@ -192,6 +192,7 @@ bool HostClass::hasProto(JSContextRef ctx, JSObjectRef child, JSValueRef *except
 JSObjectRef HostClass::getProto(JSContextRef ctx, JSObjectRef child, JSValueRef *exception) {
   static JSStringRef privateKey = JSStringCreateWithUTF8CString(PRIVATE_PROTO_KEY);
   JSValueRef result = JSObjectGetProperty(ctx, child, privateKey, exception);
+  if (result == nullptr) return nullptr;
   return JSValueToObject(ctx, result, exception);
 }
 

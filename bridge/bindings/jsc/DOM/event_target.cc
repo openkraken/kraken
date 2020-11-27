@@ -109,8 +109,9 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
 
   JSEventTarget::EventTargetInstance *eventTargetInstance;
 
-  if (hasProto(ctx, thisObject, exception)) {
-    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
+  if (prototypeObject != nullptr) {
+    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
   } else {
     eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   }
@@ -200,8 +201,9 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
 
   JSEventTarget::EventTargetInstance *eventTargetInstance;
 
-  if (hasProto(ctx, thisObject, exception)) {
-    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
+  if (prototypeObject != nullptr) {
+    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
   } else {
     eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   }
@@ -257,8 +259,9 @@ JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, 
 
   JSEventTarget::EventTargetInstance *eventTargetInstance;
 
-  if (hasProto(ctx, thisObject, exception)) {
-    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(getProto(ctx, thisObject, exception)));
+  JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
+  if (prototypeObject != nullptr) {
+    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
   } else {
     eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   }
