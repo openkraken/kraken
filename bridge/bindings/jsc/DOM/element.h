@@ -18,6 +18,7 @@ void bindElement(std::unique_ptr<JSContext> &context);
 
 struct NativeElement;
 class JSElement;
+class ElementInstance;
 
 class JSElementAttributes : public HostObject {
 public:
@@ -105,40 +106,10 @@ public:
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
-  class ElementInstance : public NodeInstance {
-  public:
-    ElementInstance() = delete;
-    explicit ElementInstance(JSElement *element, const char *tagName, bool sendUICommand);
-    explicit ElementInstance(JSElement *element, JSStringRef tagName, double targetId);
-    ~ElementInstance();
-
-    JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
-    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-    std::string internalGetTextContent() override;
-    void internalSetTextContent(JSStringRef content, JSValueRef *exception) override;
-
-    NativeElement *nativeElement{nullptr};
-
-    std::string tagName();
-
-  private:
-    friend JSElement;
-    CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
-    JSStringHolder m_tagName{context, ""};
-
-    void _notifyNodeRemoved(JSNode::NodeInstance *node) override;
-    void _notifyChildRemoved();
-    void _notifyNodeInsert(JSNode::NodeInstance *insertNode) override;
-    void _notifyChildInsert();
-    void _didModifyAttribute(std::string &name, std::string &oldId, std::string &newId);
-    void _beforeUpdateId(std::string &oldId, std::string &newId);
-    JSHostObjectHolder<JSElementAttributes> m_attributes{context, new JSElementAttributes(context)};
-  };
-
 protected:
   JSElement() = delete;
   explicit JSElement(JSContext *context);
+
 private:
   friend ElementInstance;
   JSFunctionHolder m_getBoundingClientRect{context, this, "getBoundingClientRect", getBoundingClientRect};
@@ -150,6 +121,37 @@ private:
   JSFunctionHolder m_click{context, this, "click", click};
   JSFunctionHolder m_scroll{context, this, "scroll", scroll};
   JSFunctionHolder m_scrollBy{context, this, "scrollBy", scrollBy};
+};
+
+class ElementInstance : public JSNode::NodeInstance {
+public:
+  ElementInstance() = delete;
+  explicit ElementInstance(JSElement *element, const char *tagName, bool sendUICommand);
+  explicit ElementInstance(JSElement *element, JSStringRef tagName, double targetId);
+  ~ElementInstance();
+
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+  void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+  std::string internalGetTextContent() override;
+  void internalSetTextContent(JSStringRef content, JSValueRef *exception) override;
+
+  NativeElement *nativeElement{nullptr};
+
+  std::string tagName();
+
+private:
+  friend JSElement;
+  CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
+  JSStringHolder m_tagName{context, ""};
+
+  void _notifyNodeRemoved(JSNode::NodeInstance *node) override;
+  void _notifyChildRemoved();
+  void _notifyNodeInsert(JSNode::NodeInstance *insertNode) override;
+  void _notifyChildInsert();
+  void _didModifyAttribute(std::string &name, std::string &oldId, std::string &newId);
+  void _beforeUpdateId(std::string &oldId, std::string &newId);
+  JSHostObjectHolder<JSElementAttributes> m_attributes{context, new JSElementAttributes(context)};
 };
 
 struct NativeBoundingClientRect {
@@ -226,7 +228,7 @@ struct NativeElement {
   SetScrollTop setScrollTop{nullptr};
 };
 
-using TraverseHandler = std::function<bool(JSNode::NodeInstance*)>;
+using TraverseHandler = std::function<bool(JSNode::NodeInstance *)>;
 void traverseNode(JSNode::NodeInstance *node, TraverseHandler handler);
 
 } // namespace kraken::binding::jsc

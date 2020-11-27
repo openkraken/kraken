@@ -89,13 +89,13 @@ public:
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
-  void removeElementById(std::string &id, JSElement::ElementInstance *element);
-  void addElementById(std::string &id, JSElement::ElementInstance *element);
+  void removeElementById(std::string &id, ElementInstance *element);
+  void addElementById(std::string &id, ElementInstance *element);
 
   NativeDocument *nativeDocument;
-  std::unordered_map<std::string, std::vector<JSElement::ElementInstance *>> elementMapById;
+  std::unordered_map<std::string, std::vector<ElementInstance *>> elementMapById;
 
-  JSElement::ElementInstance *body;
+  ElementInstance *body;
 
 private:
   JSFunctionHolder m_createElement{context, this, "createElement", createElement};

@@ -51,11 +51,7 @@ JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef functio
     Element = JSElement::instance(document->context);
   }
 
-  const JSValueRef constructorArgs[]{
-    tagNameValue,
-  };
-
-  auto element = new JSElement::ElementInstance(Element, tagName.c_str(), true);
+  auto element = new ElementInstance(Element, tagName.c_str(), true);
   element->document = document;
   return element->object;
 }
@@ -110,7 +106,7 @@ DocumentInstance::DocumentInstance(JSDocument *document)
     nativeDocument(new NativeDocument(nativeNode)) {
   JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
   auto Element = JSElement::instance(document->context);
-  body = new JSElement::ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
+  body = new ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
   body->document = this;
   JSValueProtect(document->ctx, body->object);
   instanceMap[document->context] = this;
@@ -196,16 +192,16 @@ const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &Docum
   return propertyMap;
 }
 
-void DocumentInstance::removeElementById(std::string &id, JSElement::ElementInstance *element) {
+void DocumentInstance::removeElementById(std::string &id, ElementInstance *element) {
   if (elementMapById.contains(id)) {
     auto &list = elementMapById[id];
     list.erase(std::find(list.begin(), list.end(), element));
   }
 }
 
-void DocumentInstance::addElementById(std::string &id, JSElement::ElementInstance *element) {
+void DocumentInstance::addElementById(std::string &id, ElementInstance *element) {
   if (!elementMapById.contains(id)) {
-    elementMapById[id] = std::vector<JSElement::ElementInstance *>();
+    elementMapById[id] = std::vector<ElementInstance *>();
   }
 
   auto &list = elementMapById[id];
@@ -261,11 +257,11 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
   std::string tagName = JSStringToStdString(tagNameStringRef);
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
 
-  std::vector<JSElement::ElementInstance *> elements;
+  std::vector<ElementInstance *> elements;
 
   traverseNode(document->body, [tagName, &elements](JSNode::NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
-      auto element = reinterpret_cast<JSElement::ElementInstance *>(node);
+      auto element = reinterpret_cast<ElementInstance *>(node);
       if (element->tagName() == tagName) {
         elements.emplace_back(element);
       }
