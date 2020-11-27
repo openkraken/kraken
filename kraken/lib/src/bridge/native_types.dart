@@ -43,6 +43,15 @@ class NativeInputEvent extends Struct {
   Pointer<NativeString> data;
 }
 
+class NativeMediaErrorEvent extends Struct {
+  Pointer<NativeEvent> nativeEvent;
+
+  @Int64()
+  int code;
+
+  Pointer<NativeString> message;
+}
+
 class NativeBoundingClientRect extends Struct {
   @Double()
   double x;

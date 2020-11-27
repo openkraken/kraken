@@ -172,13 +172,22 @@ class MediaErrorCode {
 
 class MediaError extends Event {
   /// A number which represents the general type of error that occurred, as follow
-  int code;
+  final int code;
 
   /// a human-readable string which provides specific diagnostic information to help the reader understand the error condition which occurred;
   /// specifically, it isn't simply a summary of what the error code means, but actual diagnostic information to help in understanding what exactly went wrong.
   /// This text and its format is not defined by the specification and will vary from one user agent to another.
   /// If no diagnostics are available, or no explanation can be provided, this value is an empty string ("").
-  String message;
+  final String message;
+
+  Pointer<NativeMediaErrorEvent> toNativeEvent() {
+    Pointer<NativeMediaErrorEvent> nativeMediaError = allocate<NativeMediaErrorEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNativeEvent().cast<NativeEvent>();
+    nativeMediaError.ref.nativeEvent = nativeEvent;
+    nativeMediaError.ref.code = code;
+    nativeMediaError.ref.message = stringToNativeString(message);
+    return nativeMediaError;
+  }
 
   MediaError(this.code, this.message) : super(EventType.error);
 }
