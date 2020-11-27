@@ -4,6 +4,15 @@
  */
 
 #include "element.h"
+#include "bindings/jsc/DOM/elements/anchor_element.h"
+#include "bindings/jsc/DOM/elements/animation_player_element.h"
+#include "bindings/jsc/DOM/elements/audio_element.h"
+#include "bindings/jsc/DOM/elements/canvas_element.h"
+#include "bindings/jsc/DOM/elements/iframe_element.h"
+#include "bindings/jsc/DOM/elements/image_element.h"
+#include "bindings/jsc/DOM/elements/media_element.h"
+#include "bindings/jsc/DOM/elements/object_element.h"
+#include "bindings/jsc/DOM/elements/video_element.h"
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "event_target.h"
@@ -164,9 +173,8 @@ ElementInstance::~ElementInstance() {
   delete nativeElement;
 }
 
-JSValueRef JSElement::getBoundingClientRect(JSContextRef ctx, JSObjectRef function,
-                                                             JSObjectRef thisObject, size_t argumentCount,
-                                                             const JSValueRef *arguments, JSValueRef *exception) {
+JSValueRef JSElement::getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
   assert_m(elementInstance->nativeElement->getBoundingClientRect != nullptr,
@@ -404,9 +412,8 @@ std::vector<JSStringRef> &JSElement::getElementPropertyNames() {
   return propertyNames;
 }
 
-JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                                    size_t argumentCount, const JSValueRef arguments[],
-                                                    JSValueRef *exception) {
+JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 2) {
     JSC_THROW_ERROR(ctx,
                     ("Failed to execute 'setAttribute' on 'Element': 2 arguments required, but only " +
@@ -459,9 +466,8 @@ JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   return nullptr;
 }
 
-JSValueRef JSElement::getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                                    size_t argumentCount, const JSValueRef *arguments,
-                                                    JSValueRef *exception) {
+JSValueRef JSElement::getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'getAttribute' on 'Element': 1 argument required, but only 0 present",
                     exception);
@@ -487,9 +493,8 @@ JSValueRef JSElement::getAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   return nullptr;
 }
 
-JSValueRef JSElement::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                                    size_t argumentCount, const JSValueRef *arguments,
-                                                    JSValueRef *exception) {
+JSValueRef JSElement::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present",
                     exception);
@@ -512,8 +517,7 @@ JSValueRef JSElement::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObj
 }
 
 JSValueRef JSElement::removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                                       size_t argumentCount, const JSValueRef *arguments,
-                                                       JSValueRef *exception) {
+                                      size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present",
                     exception);
@@ -558,9 +562,8 @@ struct ToBlobPromiseContext {
   JSContext *context;
 };
 
-JSValueRef JSElement::toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                              size_t argumentCount, const JSValueRef *arguments,
-                                              JSValueRef *exception) {
+JSValueRef JSElement::toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef &devicePixelRatioValueRef = arguments[0];
 
   if (!JSValueIsNumber(ctx, devicePixelRatioValueRef)) {
@@ -633,8 +636,8 @@ JSValueRef JSElement::toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef
   return JSObjectMakePromise(context, toBlobPromiseContext, promiseCallback, exception);
 }
 
-JSValueRef JSElement::click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+JSValueRef JSElement::click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                            const JSValueRef *arguments, JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
   assert_m(elementInstance->nativeElement->click != nullptr, "Failed to execute click(): dart method is nullptr.");
@@ -643,9 +646,8 @@ JSValueRef JSElement::click(JSContextRef ctx, JSObjectRef function, JSObjectRef 
   return nullptr;
 }
 
-JSValueRef JSElement::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                              size_t argumentCount, const JSValueRef *arguments,
-                                              JSValueRef *exception) {
+JSValueRef JSElement::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef xValueRef = arguments[0];
   const JSValueRef yValueRef = arguments[1];
 
@@ -668,9 +670,8 @@ JSValueRef JSElement::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef
   return nullptr;
 }
 
-JSValueRef JSElement::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                                size_t argumentCount, const JSValueRef *arguments,
-                                                JSValueRef *exception) {
+JSValueRef JSElement::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef xValueRef = arguments[0];
   const JSValueRef yValueRef = arguments[1];
 
@@ -694,12 +695,57 @@ JSValueRef JSElement::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectR
   return nullptr;
 }
 
+ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string &name) {
+  static std::unordered_map<std::string, ElementTagName> m_elementMaps{
+    {"a", ElementTagName::kAnchor},      {"animation-player", ElementTagName::kAnimationPlayer},
+    {"audio", ElementTagName::kAudio},   {"video", ElementTagName::kVideo},
+    {"canvas", ElementTagName::kCanvas}, {"div", ElementTagName::kDiv},
+    {"span", ElementTagName::kSpan},     {"strong", ElementTagName::kStrong},
+    {"pre", ElementTagName::kPre},       {"p", ElementTagName::kParagraph},
+    {"iframe", ElementTagName::kIframe}, {"object", ElementTagName::kObject},
+    {"img", ElementTagName::kImage}};
+
+  ElementTagName tagName;
+  if (m_elementMaps.contains(name)) {
+    tagName = m_elementMaps[name];
+  } else {
+    tagName = ElementTagName::kDiv;
+  }
+
+  switch (tagName) {
+  case ElementTagName::kAnchor:
+    return new JSAnchorElement::AnchorElementInstance(JSAnchorElement::instance(context));
+  case ElementTagName::kAnimationPlayer:
+    return new JSAnimationPlayerElement::AnimationPlayerElementInstance(JSAnimationPlayerElement::instance(context));
+  case ElementTagName::kAudio:
+    return new JSAudioElement::AudioElementInstance(JSAudioElement::instance(context));
+  case ElementTagName::kVideo:
+    return new JSVideoElement::VideoElementInstance(JSVideoElement::instance(context));
+  case ElementTagName::kIframe:
+    return new JSIframeElement::IframeElementInstance(JSIframeElement::instance(context));
+  case ElementTagName::kObject:
+    return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
+  case ElementTagName::kImage:
+    return new JSImageElement::ImageElementInstance(JSImageElement::instance(context));
+  case ElementTagName::kCanvas:
+    return new JSCanvasElement::CanvasElementInstance(JSCanvasElement::instance(context));
+  case ElementTagName::kSpan:
+  case ElementTagName::kDiv:
+  case ElementTagName::kStrong:
+  case ElementTagName::kPre:
+  case ElementTagName::kParagraph:
+  default:
+    return new ElementInstance(JSElement::instance(context), "div", true);
+  }
+  return nullptr;
+}
+
 JSValueRef JSElement::prototypeGetProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getElementPropertyMap();
   if (!propertyMap.contains(name)) return JSNode::prototypeGetProperty(name, exception);
   auto property = propertyMap[name];
 
-  switch(property) {
+  switch (property) {
   case ElementProperty::kGetBoundingClientRect:
     return m_getBoundingClientRect.function();
   case ElementProperty::kClick:

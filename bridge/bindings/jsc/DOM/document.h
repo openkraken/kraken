@@ -29,20 +29,10 @@ class JSDocument : public JSNode {
 public:
   static JSDocument *instance(JSContext *context);
 
-  JSElement *getElementOfTagName(JSContext *context, std::string &tagName);
-
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
 private:
-  std::unordered_map<std::string, JSElement *> m_elementMaps{
-    {"a", JSAnchorElement::instance(context)},      {"animation-player", JSAnimationPlayerElement::instance(context)},
-    {"audio", JSAudioElement::instance(context)},   {"video", JSVideoElement::instance(context)},
-    {"canvas", JSCanvasElement::instance(context)}, {"div", JSElement::instance(context)},
-    {"span", JSElement::instance(context)},         {"strong", JSElement::instance(context)},
-    {"pre", JSElement::instance(context)},          {"p", JSElement::instance(context)},
-    {"iframe", JSIframeElement::instance(context)}, {"object", JSObjectElement::instance(context)},
-    {"img", JSImageElement::instance(context)}};
 
 protected:
   JSDocument() = delete;

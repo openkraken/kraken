@@ -77,6 +77,22 @@ public:
     kChildren
   };
 
+  enum class ElementTagName {
+    kDiv,
+    kSpan,
+    kAnchor,
+    kAnimationPlayer,
+    kAudio,
+    kVideo,
+    kStrong,
+    kPre,
+    kParagraph,
+    kIframe,
+    kObject,
+    kImage,
+    kCanvas
+  };
+
   static JSElement *instance(JSContext *context);
   static std::vector<JSStringRef> &getElementPropertyNames();
   static const std::unordered_map<std::string, ElementProperty> &getElementPropertyMap();
@@ -100,6 +116,7 @@ public:
                            const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
+  static ElementInstance *buildElementInstance(JSContext *context, std::string &tagName);
 
   JSValueRef prototypeGetProperty(std::string &name, JSValueRef *exception) override;
 

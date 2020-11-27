@@ -44,14 +44,7 @@ JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef functio
   std::string tagName = JSStringToStdString(tagNameStringRef);
 
   auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(function));
-  auto Document = reinterpret_cast<JSDocument *>(document->_hostClass);
-  auto Element = Document->getElementOfTagName(document->context, tagName);
-
-  if (Element == nullptr) {
-    Element = JSElement::instance(document->context);
-  }
-
-  auto element = new ElementInstance(Element, tagName.c_str(), true);
+  auto element = JSElement::buildElementInstance(document->context, tagName);
   element->document = document;
   return element->object;
 }
@@ -89,10 +82,6 @@ JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constr
                                             const JSValueRef *arguments, JSValueRef *exception) {
   auto instance = new DocumentInstance(this);
   return instance->object;
-}
-
-JSElement *JSDocument::getElementOfTagName(JSContext *context, std::string &tagName) {
-  return m_elementMaps[tagName];
 }
 
 static std::unordered_map<JSContext *, DocumentInstance*> instanceMap{};
