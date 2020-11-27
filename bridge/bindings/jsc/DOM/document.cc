@@ -102,7 +102,7 @@ DocumentInstance::DocumentInstance(JSDocument *document)
 }
 
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getPropertyMap();
+  auto propertyMap = getDocumentPropertyMap();
   if (!propertyMap.contains(name)) {
     return JSNode::NodeInstance::getProperty(name, exception);
   }
@@ -119,6 +119,9 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
     });
 
     return all->jsObject;
+  }
+  case DocumentProperty::kCookie: {
+    return m_cookie.makeString();
   }
   case DocumentProperty::kCreateElement: {
     return m_createElement.function();
@@ -164,11 +167,12 @@ std::vector<JSStringRef> &DocumentInstance::getDocumentPropertyNames() {
     JSStringCreateWithUTF8CString("body"),           JSStringCreateWithUTF8CString("createElement"),
     JSStringCreateWithUTF8CString("createTextNode"), JSStringCreateWithUTF8CString("createComment"),
     JSStringCreateWithUTF8CString("getElementById"), JSStringCreateWithUTF8CString("getElementsByTagName"),
-    JSStringCreateWithUTF8CString("documentElement"), JSStringCreateWithUTF8CString("all")};
+    JSStringCreateWithUTF8CString("documentElement"), JSStringCreateWithUTF8CString("all"),
+  JSStringCreateWithUTF8CString("cookie")};
   return propertyNames;
 }
 
-const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &DocumentInstance::getPropertyMap() {
+const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &DocumentInstance::getDocumentPropertyMap() {
   static const std::unordered_map<std::string, DocumentProperty> propertyMap{
     {"body", DocumentProperty::kBody},
     {"createElement", DocumentProperty::kCreateElement},
@@ -177,7 +181,8 @@ const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &Docum
     {"getElementById", DocumentProperty::kGetElementById},
     {"documentElement", DocumentProperty::kDocumentElement},
     {"getElementsByTagName", DocumentProperty::kGetElementsByTagName},
-    {"all", DocumentProperty::kAll}};
+    {"all", DocumentProperty::kAll},
+    {"cookie", DocumentProperty::kCookie}};
   return propertyMap;
 }
 
@@ -266,6 +271,19 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
   }
 
   return JSObjectMakeArray(ctx, elements.size(), elementArguments, exception);
+}
+
+void DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  auto propertyMap = getDocumentPropertyMap();
+  if (propertyMap.contains(name)) {
+    auto property = propertyMap[name];
+
+    if (property == DocumentProperty::kCookie) {
+      m_cookie.setString(JSValueToStringCopy(ctx, value, exception));
+    }
+  } else {
+    NodeInstance::setProperty(name, value, exception);
+  }
 }
 
 } // namespace kraken::binding::jsc

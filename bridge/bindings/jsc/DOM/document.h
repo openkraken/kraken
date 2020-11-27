@@ -50,13 +50,14 @@ public:
     kGetElementById,
     kDocumentElement,
     kGetElementsByTagName,
-    kAll
+    kAll,
+    kCookie
   };
 
   static DocumentInstance *instance(JSContext *context);
 
   static std::vector<JSStringRef> &getDocumentPropertyNames();
-  static const std::unordered_map<std::string, DocumentProperty> &getPropertyMap();
+  static const std::unordered_map<std::string, DocumentProperty> &getDocumentPropertyMap();
 
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
@@ -77,6 +78,7 @@ public:
   explicit DocumentInstance(JSDocument *document);
   ~DocumentInstance();
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+  void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
   void removeElementById(std::string &id, ElementInstance *element);
@@ -88,6 +90,7 @@ public:
   ElementInstance *body;
 
 private:
+  JSStringHolder m_cookie{context, ""};
   JSFunctionHolder m_createElement{context, this, "createElement", createElement};
   JSFunctionHolder m_createTextNode{context, this, "createTextNode", createTextNode};
   JSFunctionHolder m_createComment{context, this, "createComment", createComment};
