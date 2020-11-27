@@ -1027,8 +1027,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     bool isAxisHorizontalDirection = CSSFlex.isHorizontalFlexDirection(flexDirection);
     if (isAxisHorizontalDirection) {
-      double maxContentWidth = CSSSizing.getElementComputedMaxWidth(this, targetId, elementManager);
-      flexLineLimit = contentWidth != null ? contentWidth : maxContentWidth;
+      double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(this);
+      flexLineLimit = contentWidth != null ? contentWidth : maxConstraintWidth;
     } else {
       // Children in vertical direction should not wrap if height no exists
       double maxContentHeight = double.infinity;

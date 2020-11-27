@@ -224,60 +224,6 @@ class CSSEdgeInsets {
 }
 
 class CSSSizing {
-  // Get max width of element, use width if exist,
-  // or find the width of the nearest ancestor with width
-  static double getElementComputedMaxWidth(RenderBoxModel renderBoxModel, int targetId, ElementManager elementManager) {
-    double width;
-    double cropWidth = 0;
-    CSSDisplay display = getElementRealDisplayValue(targetId, elementManager);
-
-    void cropMargin(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.margin != null) {
-        cropWidth += renderBoxModel.margin.horizontal;
-      }
-    }
-
-    void cropPaddingBorder(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.borderEdge != null) {
-        cropWidth += renderBoxModel.borderEdge.horizontal;
-      }
-      if (renderBoxModel.padding != null) {
-        cropWidth += renderBoxModel.padding.horizontal;
-      }
-    }
-
-    // Get width of element if it's not inline
-    if (display != CSSDisplay.inline && renderBoxModel.width != null) {
-      width = renderBoxModel.width;
-      cropPaddingBorder(renderBoxModel);
-    } else {
-      // Get the nearest width of ancestor with width
-      while (true) {
-        if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
-          cropMargin(renderBoxModel);
-          cropPaddingBorder(renderBoxModel);
-          renderBoxModel = renderBoxModel.parent;
-        } else {
-          break;
-        }
-        if (renderBoxModel is RenderBoxModel) {
-          CSSDisplay display = getElementRealDisplayValue(renderBoxModel.targetId, elementManager);
-          if (renderBoxModel.width != null && display != CSSDisplay.inline) {
-            width = renderBoxModel.width;
-            cropPaddingBorder(renderBoxModel);
-            break;
-          }
-        }
-      }
-    }
-
-    if (width != null) {
-      return width - cropWidth;
-    } else {
-      return null;
-    }
-  }
-
   // Whether current node should stretch children's height
   static bool isStretchChildHeight(RenderBoxModel current, RenderBoxModel child) {
     bool isStretch = false;
