@@ -603,15 +603,15 @@ describe('flexbox flex-grow', () => {
 
   it('should work with flex item of margin and not width when flex-direction is row', async () => {
     let containingBlock = createElement('div', {
-        style: {
-          position: 'relative',
-          width: '100px',
-          height: '100px',
-          'background-color': 'red',
-          display: 'flex',
-          'flex-direction': 'row',
-        },
+      style: {
+        position: 'relative',
+        width: '100px',
+        height: '100px',
+        'background-color': 'red',
+        display: 'flex',
+        'flex-direction': 'row',
       },
+    },
       [
         createElement('div', {
           style: {
@@ -637,15 +637,15 @@ describe('flexbox flex-grow', () => {
 
   it('should work with flex item of margin and not width when flex-direction is row-reverse', async () => {
     let containingBlock = createElement('div', {
-        style: {
-          position: 'relative',
-          width: '100px',
-          height: '100px',
-          'background-color': 'red',
-          display: 'flex',
-          'flex-direction': 'row-reverse',
-        },
+      style: {
+        position: 'relative',
+        width: '100px',
+        height: '100px',
+        'background-color': 'red',
+        display: 'flex',
+        'flex-direction': 'row-reverse',
       },
+    },
       [
         createElement('div', {
           style: {
@@ -671,15 +671,15 @@ describe('flexbox flex-grow', () => {
 
   it('should work with flex item of margin and not width when flex-direction is column', async () => {
     let containingBlock = createElement('div', {
-        style: {
-          position: 'relative',
-          width: '100px',
-          height: '100px',
-          'background-color': 'red',
-          display: 'flex',
-          'flex-direction': 'column',
-        },
+      style: {
+        position: 'relative',
+        width: '100px',
+        height: '100px',
+        'background-color': 'red',
+        display: 'flex',
+        'flex-direction': 'column',
       },
+    },
       [
         createElement('div', {
           style: {
@@ -704,15 +704,15 @@ describe('flexbox flex-grow', () => {
 
   it('should work with flex item of margin and not width when flex-direction is column-reverse', async () => {
     let containingBlock = createElement('div', {
-        style: {
-          position: 'relative',
-          width: '100px',
-          height: '100px',
-          'background-color': 'red',
-          display: 'flex',
-          'flex-direction': 'column-reverse',
-        },
+      style: {
+        position: 'relative',
+        width: '100px',
+        height: '100px',
+        'background-color': 'red',
+        display: 'flex',
+        'flex-direction': 'column-reverse',
       },
+    },
       [
         createElement('div', {
           style: {
@@ -732,6 +732,144 @@ describe('flexbox flex-grow', () => {
       ]
     );
     BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it('works with max violation', async () => {
+    let test1;
+    let test2;
+    let test3;
+    let test4;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          height: '100px',
+          width: '300px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (test1 = createElement('div', {
+          id: 'test1',
+          style: {
+            height: '100px',
+            width: '50px',
+            'background-color': 'green',
+            'flex-grow': '1',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test2 = createElement('div', {
+          id: 'test2',
+          style: {
+            height: '100px',
+            width: '50px',
+            maxWidth: '50px',
+            'background-color': 'black',
+            'flex-grow': '1',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test3 = createElement('div', {
+          id: 'test3',
+          style: {
+            height: '100px',
+            width: '50px',
+            maxWidth: '70px',
+            'background-color': 'blue',
+            'flex-grow': '1',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test4 = createElement('div', {
+          id: 'test4',
+          style: {
+            height: '100px',
+            width: '50px',
+            'background-color': 'yellow',
+            'flex-grow': '1',
+            'box-sizing': 'border-box',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(container);
+
+
+    await matchViewportSnapshot();
+  });
+
+  it('works with flex factor sum less than 1', async () => {
+    let test1;
+    let test2;
+    let test3;
+    let test4;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        id: 'container',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          height: '100px',
+          width: '300px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (test1 = createElement('div', {
+          id: 'test1',
+          style: {
+            height: '100px',
+            width: '50px',
+            'background-color': 'green',
+            'flex-grow': '0.1',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test2 = createElement('div', {
+          id: 'test2',
+          style: {
+            height: '100px',
+            width: '50px',
+            'background-color': 'black',
+            'flex-grow': '0.2',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test3 = createElement('div', {
+          id: 'test3',
+          style: {
+            height: '100px',
+            width: '50px',
+            'background-color': 'blue',
+            'flex-grow': '0.2',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test4 = createElement('div', {
+          id: 'test4',
+          style: {
+            height: '100px',
+            width: '50px',
+            'background-color': 'yellow',
+            'flex-grow': '0.1',
+            'box-sizing': 'border-box',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(container);
+
+
     await matchViewportSnapshot();
   });
 });

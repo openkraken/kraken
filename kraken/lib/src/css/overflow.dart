@@ -124,11 +124,24 @@ mixin CSSOverflowMixin on Node {
       renderBoxModel.pointerListener = _pointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
-        RenderObjectWithChildMixin<RenderBox> layoutBoxParent = element.renderBoxModel.parent;
+        RenderObject layoutBoxParent = renderBoxModel.parent;
+
+        // Overflow auto/scroll will create repaint boundary to improve scroll performance
+        // So it needs to transform between layout and its repaint boundary replacement when transform changes
         RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: shouldRepaintSelf, prevRenderLayoutBox: renderBoxModel);
-        element.renderBoxModel = newLayoutBox;
-        if (layoutBoxParent != null) {
+
+        if (newLayoutBox == renderBoxModel) {
+          return;
+        }
+        if (layoutBoxParent is RenderObjectWithChildMixin<RenderBox>) {
+          layoutBoxParent.child = null;
           layoutBoxParent.child = newLayoutBox;
+        } else if (layoutBoxParent is ContainerRenderObjectMixin) {
+          ContainerBoxParentData parentData = renderBoxModel.parentData;
+          RenderObject previousSibling = parentData.previousSibling;
+          layoutBoxParent.remove(renderBoxModel);
+          element.renderBoxModel = newLayoutBox;
+          element.parent.addChildRenderObject(element, after: previousSibling);
         }
       }
     }

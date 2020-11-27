@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('nested-orthogonal', () => {
-  xit('flexbox-relayout-ref', async () => {
+  it('flexbox-relayout-ref', async () => {
     let item;
     let row;
     let column;
@@ -48,7 +48,7 @@ describe('nested-orthogonal', () => {
 
     await matchViewportSnapshot();
   });
-  xit('flexbox-relayout', async () => {
+  it('flexbox-relayout', async () => {
     let item;
     let row;
     let column;

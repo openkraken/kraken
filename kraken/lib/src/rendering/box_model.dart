@@ -711,6 +711,69 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
+  /// Get max constraint width from style, use width or max-width exists if exists,
+  /// otherwise calculated from its ancestors
+  static double getMaxConstraintWidth(RenderBoxModel renderBoxModel) {
+    double maxConstraintWidth = double.infinity;
+    double cropWidth = 0;
+
+    void cropMargin(RenderBoxModel renderBoxModel) {
+      if (renderBoxModel.margin != null) {
+        cropWidth += renderBoxModel.margin.horizontal;
+      }
+    }
+
+    void cropPaddingBorder(RenderBoxModel renderBoxModel) {
+      if (renderBoxModel.borderEdge != null) {
+        cropWidth += renderBoxModel.borderEdge.horizontal;
+      }
+      if (renderBoxModel.padding != null) {
+        cropWidth += renderBoxModel.padding.horizontal;
+      }
+    }
+
+    // Get the nearest width of ancestor with width
+    while (true) {
+      if (renderBoxModel is RenderBoxModel) {
+        CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
+
+        // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
+        // even if parents have width
+        if (renderBoxModel.parent is RenderFlexLayout) {
+          RenderFlexParentData parentData = renderBoxModel.parentData;
+          if (parentData.flexShrink == 0 && renderBoxModel.width == null && renderBoxModel.maxWidth == null) {
+            break;
+          }
+        }
+
+        // Get width if width exists and element is not inline
+        if (display != CSSDisplay.inline && (renderBoxModel.width != null || renderBoxModel.maxWidth != null)) {
+          // Get the min width between width and max-width
+          maxConstraintWidth = math.min(
+            renderBoxModel.width ?? double.infinity,
+            renderBoxModel.maxWidth ?? double.infinity
+          ) ;
+          cropPaddingBorder(renderBoxModel);
+          break;
+        }
+      }
+
+      if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
+        cropMargin(renderBoxModel);
+        cropPaddingBorder(renderBoxModel);
+        renderBoxModel = renderBoxModel.parent;
+      } else {
+        break;
+      }
+    }
+
+    if (maxConstraintWidth != double.infinity) {
+      maxConstraintWidth = maxConstraintWidth - cropWidth;
+    }
+
+    return maxConstraintWidth;
+  }
+
   void setMaxScrollableSize(double width, double height) {
     assert(width != null);
     assert(height != null);
@@ -999,10 +1062,7 @@ class RenderBoxModel extends RenderBox with
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    if (!contentVisibilityHitTest(result, position: position)) {
-      return false;
-    }
-    if (!visibilityHitTest(result, position: position)) {
+    if (!hasSize || !contentVisibilityHitTest(result, position: position) || !visibilityHitTest(result, position: position)) {
       return false;
     }
 
@@ -1060,7 +1120,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   Future<Image> toImage({ double pixelRatio = 1.0 }) {
-    assert(!debugNeedsPaint);
+    assert(layer != null);
     assert(isRepaintBoundary);
     final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);

@@ -153,4 +153,156 @@ describe('max-width', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('should work with flex-shrink 0', async () => {
+    let div;
+    let div_1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'box-sizing': 'border-box',
+          display: 'flex',
+          maxWidth: '50px',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'box-sizing': 'border-box',
+              flex: 'none',
+            },
+          },
+          [
+            createElement(
+              'span',
+              {
+                style: {
+                  'box-sizing': 'border-box',
+                },
+              },
+              [createText(`Hello world Hello world Hello world Hello world Hello world Hello world Hello world Hello world`)]
+            ),
+          ]
+        ),
+      ]
+    );
+    div_1 = createElement(
+      'div',
+      {
+        style: {
+          'box-sizing': 'border-box',
+          'width': '100px',
+          backgroundColor: 'yellow',
+        },
+      },
+    );
+    div_1.appendChild(div);
+    BODY.appendChild(div_1);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex-shrink 1 and parent has width set', async () => {
+    let div;
+    let div_1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'box-sizing': 'border-box',
+          display: 'flex',
+          width: '90px',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            createElement(
+              'span',
+              {
+                style: {
+                  'box-sizing': 'border-box',
+                },
+              },
+              [createText(`Hello world Hello world Hello world Hello world Hello world Hello world Hello world Hello world`)]
+            ),
+          ]
+        ),
+      ]
+    );
+    div_1 = createElement(
+      'div',
+      {
+        style: {
+          'box-sizing': 'border-box',
+          'width': '100px',
+          backgroundColor: 'yellow',
+        },
+      },
+    );
+    div_1.appendChild(div);
+    BODY.appendChild(div_1);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex-shrink 1 and parent has max-width set', async () => {
+    let div;
+    let div_1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'box-sizing': 'border-box',
+          display: 'flex',
+          width: '90px',
+          maxWidth: '50px',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            createElement(
+              'span',
+              {
+                style: {
+                  'box-sizing': 'border-box',
+                },
+              },
+              [createText(`Hello world Hello world Hello world Hello world Hello world Hello world Hello world Hello world`)]
+            ),
+          ]
+        ),
+      ]
+    );
+    div_1 = createElement(
+      'div',
+      {
+        style: {
+          'box-sizing': 'border-box',
+          'width': '100px',
+          backgroundColor: 'yellow',
+        },
+      },
+    );
+    div_1.appendChild(div);
+    BODY.appendChild(div_1);
+
+    await matchViewportSnapshot();
+  });
 });

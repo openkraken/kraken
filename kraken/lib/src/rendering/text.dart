@@ -61,6 +61,13 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     _renderParagraph.overflow = value;
   }
 
+  set maxLines(int value) {
+    assert(_renderParagraph != null);
+    // Forcing a break after a set number of lines
+    // https://drafts.csswg.org/css-overflow-3/#max-lines
+    _renderParagraph.maxLines = value;
+  }
+
   // Box size equals to RenderBox.size to avoid flutter complain when read size property.
   Size _boxSize;
   Size get boxSize {
@@ -95,7 +102,7 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
       BoxConstraints boxConstraints;
       Node hostTextNode = elementManager.getEventTargetByTargetId<EventTarget>(targetId);
       Element parentElement = hostTextNode.parent;
-      final double contentWidth = RenderBoxModel.getContentWidth(parentElement.renderBoxModel);
+      double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentElement.renderBoxModel);
 
       if (parentElement.style[DISPLAY] == NONE) {
         boxConstraints = BoxConstraints(
@@ -104,10 +111,10 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
           minHeight: 0,
           maxHeight: 0,
         );
-      } else if (contentWidth != null && (whiteSpace != WhiteSpace.nowrap || _renderParagraph.overflow == TextOverflow.ellipsis)) {
+      } else if (maxConstraintWidth != null && (whiteSpace != WhiteSpace.nowrap || _renderParagraph.overflow == TextOverflow.ellipsis)) {
         boxConstraints = BoxConstraints(
           minWidth: 0,
-          maxWidth: contentWidth,
+          maxWidth: maxConstraintWidth,
           minHeight: 0,
           maxHeight: double.infinity
         );
@@ -134,5 +141,11 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     if (child != null) {
       context.paintChild(child, offset);
     }
+  }
+
+  // Text node will not trigger event
+  @override
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
+    return false;
   }
 }
