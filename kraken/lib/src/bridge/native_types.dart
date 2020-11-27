@@ -17,19 +17,19 @@ class NativeKrakenInfo extends Struct {
 }
 
 class NativeEvent extends Struct {
-  @Int8()
+  @Int64()
   int type;
 
-  @Int8()
+  @Int64()
   int bubbles;
 
-  @Int8()
+  @Int64()
   int cancelable;
 
   @Int64()
   int timeStamp;
 
-  @Int8()
+  @Int64()
   int defaultPrevented;
 
   Pointer target;
@@ -50,6 +50,13 @@ class NativeMediaErrorEvent extends Struct {
   int code;
 
   Pointer<NativeString> message;
+}
+
+class NativeMessageEvent extends Struct {
+  Pointer<NativeEvent> nativeEvent;
+
+  Pointer<NativeString> data;
+  Pointer<NativeString> origin;
 }
 
 class NativeBoundingClientRect extends Struct {

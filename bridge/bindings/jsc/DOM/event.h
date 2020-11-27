@@ -78,7 +78,7 @@ public:
 
   static JSEvent *instance(JSContext *context);
   static EventType getEventTypeOfName(std::string &name);
-  static const char *getEventNameOfTypeIndex(int8_t index);
+  static const char *getEventNameOfTypeIndex(int64_t index);
 
   // Create an Event Object from an nativeEvent address which allocated by dart side.
   static JSValueRef initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -92,6 +92,8 @@ public:
 
   static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
+
+  static EventInstance* buildEventInstance(EventType eventType, JSContext *context, void *nativeEvent);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -136,11 +138,11 @@ private:
 struct NativeEvent {
   NativeEvent() = delete;
   explicit NativeEvent(JSEvent::EventType eventType) : type(eventType){};
-  int8_t type;
-  int8_t bubbles{0};
-  int8_t cancelable{0};
+  int64_t type;
+  int64_t bubbles{0};
+  int64_t cancelable{0};
   int64_t timeStamp{0};
-  int8_t defaultPrevented{0};
+  int64_t defaultPrevented{0};
   // The pointer address of target EventTargetInstance object.
   void *target{nullptr};
   // The pointer address of current target EventTargetInstance object.

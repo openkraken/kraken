@@ -7,8 +7,6 @@
 #include "dart_methods.h"
 #include "document.h"
 #include "event.h"
-#include "bindings/jsc/DOM/events/input_event.h"
-#include "bindings/jsc/DOM/events/media_error_event.h"
 #include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
@@ -443,20 +441,7 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, 
 
   auto type = static_cast<JSEvent::EventType>(eventType);
 
-  EventInstance *eventInstance;
-
-  switch(type) {
-  case JSEvent::EventType::input: {
-    eventInstance = new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
-    break;
-  }
-  case JSEvent::EventType::error: {
-    eventInstance = new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));
-    break;
-  }
-  default:
-    eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
-  }
+  EventInstance *eventInstance = JSEvent::buildEventInstance(type, context, nativeEvent);
 
   eventTargetInstance->dispatchEvent(eventInstance);
 }

@@ -25,8 +25,9 @@ export function krakenModuleListener(message: any) {
     const clientId = parsed[1];
     const eventInfo = parsed[2];
     const nativeEventAddress = eventInfo.nativeEvent;
+    const eventType = eventInfo.type;
     // @ts-ignore
-    const event = Event.__initWithNativeEvent__(nativeEventAddress);
+    const event = Event.__initWithNativeEvent__(eventType, nativeEventAddress);
     dispatchWebSocketEvent(clientId, event);
   }
 }

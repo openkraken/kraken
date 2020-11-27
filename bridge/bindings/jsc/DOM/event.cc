@@ -5,6 +5,9 @@
 
 #include "event.h"
 #include "event_target.h"
+#include "bindings/jsc/DOM/events/input_event.h"
+#include "bindings/jsc/DOM/events/media_error_event.h"
+#include "bindings/jsc/DOM/events/message_event.h"
 #include <chrono>
 
 namespace kraken::binding::jsc {
@@ -83,7 +86,7 @@ JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef construct
   return event->object;
 }
 
-const char *JSEvent::getEventNameOfTypeIndex(int8_t typeIndex) {
+const char *JSEvent::getEventNameOfTypeIndex(int64_t typeIndex) {
   static const char *eventTypeKeys[]{
     "none",
     "input",
@@ -126,15 +129,16 @@ const char *JSEvent::getEventNameOfTypeIndex(int8_t typeIndex) {
 
 JSValueRef JSEvent::initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                         size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  if (argumentCount != 1) {
+  if (argumentCount != 2) {
     JSC_THROW_ERROR(ctx, "Failed to execute Event.initWithNativeEvent(): invalid arguments.", exception);
     return nullptr;
   }
 
   auto Event = reinterpret_cast<JSEvent*>(JSObjectGetPrivate(function));
-  double address = JSValueToNumber(ctx, arguments[0], exception);
+  double type = JSValueToNumber(ctx, arguments[0], exception);
+  double address = JSValueToNumber(ctx, arguments[1], exception);
   auto nativeEvent = reinterpret_cast<NativeEvent*>(static_cast<int64_t>(address));
-  auto event = new EventInstance(Event, nativeEvent);
+  auto event = JSEvent::buildEventInstance(static_cast<JSEvent::EventType>(type), Event->context, nativeEvent);
   return event->object;
 }
 
@@ -290,6 +294,28 @@ const std::unordered_map<std::string, JSEvent::EventProperty> &JSEvent::getEvent
     {"stopImmediatePropagation", EventProperty::kStopImmediatePropagation},
     {"preventDefault", EventProperty::kPreventDefault}};
   return propertyMap;
+}
+
+EventInstance *JSEvent::buildEventInstance(JSEvent::EventType eventType, JSContext *context, void *nativeEvent) {
+  EventInstance *eventInstance;
+  switch(eventType) {
+    case JSEvent::EventType::input: {
+      eventInstance = new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
+      break;
+    }
+    case JSEvent::EventType::error: {
+      eventInstance = new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));
+      break;
+    }
+    case JSEvent::EventType::message: {
+      eventInstance = new MessageEventInstance(JSMessageEvent::instance(context), reinterpret_cast<NativeMessageEvent*>(nativeEvent));
+      break;
+    }
+    default:
+      eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+  }
+
+  return eventInstance;
 }
 
 } // namespace kraken::binding::jsc

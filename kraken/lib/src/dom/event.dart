@@ -195,12 +195,21 @@ class MediaError extends Event {
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
 class MessageEvent extends Event {
   /// The data sent by the message emitter.
-  String data;
+  final String data;
 
   /// A USVString representing the origin of the message emitter.
-  String origin;
+  final String origin;
 
-  MessageEvent(this.data, {this.origin}) : super(EventType.message);
+  MessageEvent(this.data, {this.origin = ''}) : super(EventType.message);
+
+  Pointer<NativeMessageEvent> toNativeEvent() {
+    Pointer<NativeMessageEvent> messageEvent = allocate<NativeMessageEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNativeEvent().cast<NativeEvent>();
+    messageEvent.ref.nativeEvent = nativeEvent;
+    messageEvent.ref.data = stringToNativeString(data);
+    messageEvent.ref.origin = stringToNativeString(origin);
+    return messageEvent;
+  }
 
   @override
   Map toJson() {
