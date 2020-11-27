@@ -1122,7 +1122,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   Future<Image> toImage({ double pixelRatio = 1.0 }) {
-    assert(!debugNeedsPaint);
+    assert(layer != null);
     assert(isRepaintBoundary);
     final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
