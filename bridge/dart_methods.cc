@@ -71,10 +71,6 @@ void registerPlatformBrightness(PlatformBrightness platformBrightness) {
   methodPointer->platformBrightness = platformBrightness;
 }
 
-void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged) {
-  methodPointer->onPlatformBrightnessChanged = onPlatformBrightnessChanged;
-}
-
 void registerToBlob(ToBlob toBlob) {
   methodPointer->toBlob = toBlob;
 }

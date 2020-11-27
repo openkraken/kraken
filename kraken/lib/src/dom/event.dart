@@ -155,8 +155,8 @@ class DisappearEvent extends Event {
 }
 
 class ColorSchemeChangeEvent extends Event {
-  ColorSchemeChangeEvent() : super(EventType.colorschemechange);
-  String platformBrightness;
+  ColorSchemeChangeEvent(this.platformBrightness) : super(EventType.colorschemechange);
+  final String platformBrightness;
 }
 
 class MediaErrorCode {

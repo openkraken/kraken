@@ -95,13 +95,6 @@ void emitModuleEvent(int contextId, String data) {
   invokeEventListener(contextId, MODULE_EVENT, data);
 }
 
-void invokeOnPlatformBrightnessChangedCallback(int contextId) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  Window window = controller.view.getEventTargetById(WINDOW_ID);
-  ColorSchemeChangeEvent event = ColorSchemeChangeEvent();
-  emitUIEvent(contextId, window.nativeWindowPtr.ref.nativeEventTarget, event);
-}
-
 // Register createScreen
 typedef Native_CreateScreen = Pointer<ScreenSize> Function(Double, Double);
 typedef Dart_CreateScreen = Pointer<ScreenSize> Function(double, double);

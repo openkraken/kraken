@@ -198,10 +198,6 @@ void registerPlatformBrightness(PlatformBrightness platformBrightness) {
   kraken::registerPlatformBrightness(platformBrightness);
 }
 
-void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged) {
-  kraken::registerOnPlatformBrightnessChanged(onPlatformBrightnessChanged);
-}
-
 void registerFlushUICommand(FlushUICommand flushUICommand) {
   kraken::registerFlushUICommand(flushUICommand);
 }

@@ -92,7 +92,6 @@ typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
 typedef Screen *(*GetScreen)(int32_t contextId);
 typedef double (*DevicePixelRatio)(int32_t contextId);
 typedef NativeString *(*PlatformBrightness)(int32_t contextId);
-typedef void (*OnPlatformBrightnessChanged)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
@@ -154,8 +153,6 @@ KRAKEN_EXPORT
 void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
 KRAKEN_EXPORT
 void registerPlatformBrightness(PlatformBrightness platformBrightness);
-KRAKEN_EXPORT
-void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
 KRAKEN_EXPORT

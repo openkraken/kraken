@@ -15,8 +15,7 @@ class Window extends EventTarget {
 
   Window(int targetId, this.nativeWindowPtr, ElementManager elementManager) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
-      ColorSchemeChangeEvent event = ColorSchemeChangeEvent();
-      event.platformBrightness = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
+      ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
       dispatchEvent(event);
     };
   }

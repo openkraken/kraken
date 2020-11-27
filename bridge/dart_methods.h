@@ -26,7 +26,6 @@ struct DartMethodPointer {
   GetScreen getScreen{nullptr};
   DevicePixelRatio devicePixelRatio{nullptr};
   PlatformBrightness platformBrightness{nullptr};
-  OnPlatformBrightnessChanged onPlatformBrightnessChanged{nullptr};
   ToBlob toBlob{nullptr};
   OnJSError onJsError{nullptr};
   RefreshPaint refreshPaint{nullptr};
@@ -49,7 +48,6 @@ void registerCancelAnimationFrame(CancelAnimationFrame callback);
 void registerGetScreen(GetScreen callback);
 void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
 void registerPlatformBrightness(PlatformBrightness platformBrightness);
-void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 void registerToBlob(ToBlob toBlob);
 void registerJSError(OnJSError onJsError);
 void registerFlushUICommand(FlushUICommand flushUiCommand);
