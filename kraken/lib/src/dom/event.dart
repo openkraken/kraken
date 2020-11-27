@@ -210,36 +210,29 @@ class MessageEvent extends Event {
     messageEvent.ref.origin = stringToNativeString(origin);
     return messageEvent;
   }
-
-  @override
-  Map toJson() {
-    Map json = super.toJson();
-    json['data'] = data;
-    json['origin'] = origin;
-    return json;
-  }
 }
 
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/CloseEvent
 class CloseEvent extends Event {
   /// An unsigned short containing the close code sent by the server
-  int code;
+  final int code;
 
   /// Indicating the reason the server closed the connection.
-  String reason;
+  final String reason;
 
   /// Indicates whether or not the connection was cleanly closed
-  bool wasClean;
+  final bool wasClean;
 
   CloseEvent(this.code, this.reason, this.wasClean) : super(EventType.close);
 
-  @override
-  Map toJson() {
-    Map json = super.toJson();
-    json['code'] = code;
-    json['reason'] = reason;
-    json['wasClean'] = wasClean;
-    return json;
+  Pointer<NativeCloseEvent> toNativeEvent() {
+    Pointer<NativeCloseEvent> closeEvent = allocate<NativeCloseEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNativeEvent().cast<NativeEvent>();
+    closeEvent.ref.nativeEvent = nativeEvent;
+    closeEvent.ref.code = code;
+    closeEvent.ref.reason = stringToNativeString(reason);
+    closeEvent.ref.wasClean = wasClean ? 1 : 0;
+    return closeEvent;
   }
 }
 

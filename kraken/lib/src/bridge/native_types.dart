@@ -59,6 +59,18 @@ class NativeMessageEvent extends Struct {
   Pointer<NativeString> origin;
 }
 
+class NativeCloseEvent extends Struct {
+  Pointer<NativeEvent> nativeEvent;
+
+  @Int64()
+  int code;
+
+  Pointer<NativeString> reason;
+
+  @Int64()
+  int wasClean;
+}
+
 class NativeBoundingClientRect extends Struct {
   @Double()
   double x;

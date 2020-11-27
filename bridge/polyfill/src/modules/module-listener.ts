@@ -8,14 +8,22 @@ export function krakenModuleListener(message: any) {
   let parsed = JSON.parse(message);
   const type = parsed[0];
   if (type === 'onConnectivityChanged') {
-    const event = parsed[1];
+    const eventInfo = parsed[1];
+    const nativeEventAddress = eventInfo.nativeEvent;
+    const eventType = eventInfo.type;
+    // @ts-ignore
+    const event = Event.__initWithNativeEvent__(eventType, nativeEventAddress);
     dispatchConnectivityChangeEvent(event);
   } else if (type === 'watchPosition') {
     const event = parsed[1];
     dispatchPositionEvent(event);
   } else if (type === 'MQTT') {
     const clientId = parsed[1];
-    const event = parsed[2];
+    const eventInfo = parsed[2];
+    const nativeEventAddress = eventInfo.nativeEvent;
+    const eventType = eventInfo.type;
+    // @ts-ignore
+    const event = Event.__initWithNativeEvent__(eventType, nativeEventAddress);
     dispatchMQTTEvent(clientId, event);
   } else if (type === 'MethodChannel') {
     const method = parsed[1];

@@ -139,6 +139,8 @@ else()
       bindings/jsc/DOM/events/media_error_event.h
       bindings/jsc/DOM/events/message_event.cc
       bindings/jsc/DOM/events/message_event.h
+      bindings/jsc/DOM/events/close_event.cc
+      bindings/jsc/DOM/events/close_event.h
       bindings/jsc/DOM/event_target.cc
       bindings/jsc/DOM/event_target.h
       bindings/jsc/DOM/node.cc

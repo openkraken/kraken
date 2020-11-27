@@ -40,7 +40,7 @@ protected:
 class InputEventInstance : public EventInstance {
 public:
   InputEventInstance() = delete;
-  explicit InputEventInstance(JSInputEvent *jSInputEvent, NativeInputEvent *nativeInputEvent);
+  explicit InputEventInstance(JSInputEvent *jsInputEvent, NativeInputEvent *nativeInputEvent);
   explicit InputEventInstance(JSInputEvent *jsInputEvent, JSStringRef data);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;

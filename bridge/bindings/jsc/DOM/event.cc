@@ -8,6 +8,7 @@
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
+#include "bindings/jsc/DOM/events/close_event.h"
 #include <chrono>
 
 namespace kraken::binding::jsc {
@@ -309,6 +310,10 @@ EventInstance *JSEvent::buildEventInstance(JSEvent::EventType eventType, JSConte
     }
     case JSEvent::EventType::message: {
       eventInstance = new MessageEventInstance(JSMessageEvent::instance(context), reinterpret_cast<NativeMessageEvent*>(nativeEvent));
+      break;
+    }
+    case JSEvent::EventType::close: {
+      eventInstance = new CloseEventInstance(JSCloseEvent::instance(context), reinterpret_cast<NativeCloseEvent*>(nativeEvent));
       break;
     }
     default:
