@@ -49,7 +49,7 @@ typedef ScrollListener = void Function(double scrollTop, AxisDirection axisDirec
 
 mixin CSSOverflowMixin on Node {
   // The duration time for element scrolling to a significant place.
-  static const _scrollDuration = Duration(milliseconds: 250);
+  static const SCROLL_DURATION = Duration(milliseconds: 250);
 
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
@@ -147,7 +147,7 @@ mixin CSSOverflowMixin on Node {
     }
   }
 
-  void _pointerListener (PointerEvent event) {
+  void _pointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       if (_scrollableX != null) {
         _scrollableX.handlePointerDown(event);
@@ -166,11 +166,11 @@ mixin CSSOverflowMixin on Node {
   }
 
   void setScrollTop(double value) {
-    _scroll(value, null, isScrollBy: false, isDirectionX: false);
+    scrollTo(dy: value);
   }
 
   void setScrollLeft(double value) {
-    _scroll(value, null, isScrollBy: false, isDirectionX: true);
+    scrollTo(dx: value);
   }
 
   double getScrollLeft() {
@@ -190,51 +190,51 @@ mixin CSSOverflowMixin on Node {
     return scrollContainerSize.width;
   }
 
-  void scroll(List args, {bool isScrollBy = false}) {
+  void handleMethodScroll(List args, { bool diff = false }) {
     if (args != null && args.length > 0) {
       dynamic option = args[0];
       if (option is Map) {
         num top = option['top'];
         num left = option['left'];
-        dynamic behavior = option['behavior'];
-        Curve curve;
-        if (behavior == 'smooth') {
-          curve = Curves.linear;
+        bool withAnimation = option['behavior'] == 'smooth';
+
+        if (diff) {
+          scrollBy(dx: left, dy: top, withAnimation: withAnimation);
+        } else {
+          scrollTo(dx: left, dy: top, withAnimation: withAnimation);
         }
-        _scroll(top, curve, isScrollBy: isScrollBy, isDirectionX: false);
-        _scroll(left, curve, isScrollBy: isScrollBy, isDirectionX: true);
       }
     }
   }
 
-  void scrollBy({ double dx = 0.0, double dy = 0.0, bool withAnimation = true }) {
-    Curve curve = withAnimation ? Curves.easeOut : null;
-    if (dx > 0) {
-      _scroll(getScrollLeft() + dx, curve, isScrollBy: false, isDirectionX: true);
+  void scrollBy({ double dx = 0.0, double dy = 0.0, bool withAnimation }) {
+    if (dx != 0) {
+      _scroll(dx, Axis.horizontal, withAnimation: withAnimation);
     }
-    if (dy > 0) {
-      _scroll(getScrollTop() + dy, curve, isScrollBy: false, isDirectionX: false);
+    if (dy != 0) {
+      _scroll(dy, Axis.horizontal, withAnimation: withAnimation);
     }
   }
 
-  void _scroll(num aim, Curve curve, {bool isScrollBy = false, bool isDirectionX = false}) {
-    Duration duration;
+  void scrollTo({ double dx = 0.0, double dy = 0.0, bool withAnimation }) {
+    if (dx != 0) {
+      _scroll(getScrollTop() + dx, Axis.horizontal, withAnimation: withAnimation);
+    }
+    if (dy != 0) {
+      _scroll(getScrollLeft() + dy, Axis.horizontal, withAnimation: withAnimation);
+    }
+  }
+
+  void _scroll(num aim, Axis direction, { bool withAnimation = false }) {
     KrakenScrollable scrollable;
-    if (isDirectionX) {
+    if (direction == Axis.horizontal) {
       scrollable = _scrollableX;
-    } else {
+    } else if (direction == Axis.vertical) {
       scrollable = _scrollableY;
     }
+
     if (scrollable != null && aim != null) {
-      if (curve != null) {
-        duration = _scrollDuration;
-      }
-      double distance;
-      if (isScrollBy) {
-        distance = (scrollable.position?.pixels ?? 0) + aim;
-      } else {
-        distance = aim.toDouble();
-      }
+      double distance = aim.toDouble();
 
       // Apply scroll effect after layout.
       assert(renderer is RenderBox && isRendererAttached, 'Overflow can only be added to a RenderBox.');
@@ -242,7 +242,10 @@ mixin CSSOverflowMixin on Node {
       if (!renderBox.hasSize) {
         renderBox.owner.flushLayout();
       }
-      scrollable.position.moveTo(distance, duration: duration, curve: curve);
+      scrollable.position.moveTo(distance,
+        duration: withAnimation == true ? SCROLL_DURATION : null,
+        curve: withAnimation == true ? Curves.easeOut : null,
+      );
     }
   }
 }
