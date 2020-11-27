@@ -87,7 +87,7 @@ class Event {
     bubbles = false;
   }
 
-  Pointer toNativeEvent() {
+  Pointer toNative() {
     Pointer<NativeEvent> event = allocate<NativeEvent>();
     event.ref.type = type.index;
     event.ref.bubbles = bubbles ? 1 : 0;
@@ -101,7 +101,7 @@ class Event {
   }
 
   Map toJson() {
-    Pointer<NativeEvent> nativeEvent = toNativeEvent().cast<NativeEvent>();
+    Pointer<NativeEvent> nativeEvent = toNative().cast<NativeEvent>();
     return {
       'type': type.index,
       'nativeEvent': nativeEvent.address
@@ -131,9 +131,9 @@ class InputEvent extends Event {
   final String inputType;
   final String data;
 
-  Pointer<NativeInputEvent> toNativeEvent() {
+  Pointer<NativeInputEvent> toNative() {
     Pointer<NativeInputEvent> nativeInputEvent = allocate<NativeInputEvent>();
-    Pointer<NativeEvent> nativeEvent = super.toNativeEvent().cast<NativeEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
     nativeInputEvent.ref.nativeEvent = nativeEvent;
     nativeInputEvent.ref.inputType = stringToNativeString(inputType);
     nativeInputEvent.ref.data = stringToNativeString(data);
@@ -180,9 +180,9 @@ class MediaError extends Event {
   /// If no diagnostics are available, or no explanation can be provided, this value is an empty string ("").
   final String message;
 
-  Pointer<NativeMediaErrorEvent> toNativeEvent() {
+  Pointer<NativeMediaErrorEvent> toNative() {
     Pointer<NativeMediaErrorEvent> nativeMediaError = allocate<NativeMediaErrorEvent>();
-    Pointer<NativeEvent> nativeEvent = super.toNativeEvent().cast<NativeEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
     nativeMediaError.ref.nativeEvent = nativeEvent;
     nativeMediaError.ref.code = code;
     nativeMediaError.ref.message = stringToNativeString(message);
@@ -202,9 +202,9 @@ class MessageEvent extends Event {
 
   MessageEvent(this.data, {this.origin = ''}) : super(EventType.message);
 
-  Pointer<NativeMessageEvent> toNativeEvent() {
+  Pointer<NativeMessageEvent> toNative() {
     Pointer<NativeMessageEvent> messageEvent = allocate<NativeMessageEvent>();
-    Pointer<NativeEvent> nativeEvent = super.toNativeEvent().cast<NativeEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
     messageEvent.ref.nativeEvent = nativeEvent;
     messageEvent.ref.data = stringToNativeString(data);
     messageEvent.ref.origin = stringToNativeString(origin);
@@ -225,9 +225,9 @@ class CloseEvent extends Event {
 
   CloseEvent(this.code, this.reason, this.wasClean) : super(EventType.close);
 
-  Pointer<NativeCloseEvent> toNativeEvent() {
+  Pointer<NativeCloseEvent> toNative() {
     Pointer<NativeCloseEvent> closeEvent = allocate<NativeCloseEvent>();
-    Pointer<NativeEvent> nativeEvent = super.toNativeEvent().cast<NativeEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
     closeEvent.ref.nativeEvent = nativeEvent;
     closeEvent.ref.code = code;
     closeEvent.ref.reason = stringToNativeString(reason);
@@ -240,9 +240,9 @@ class IntersectionChangeEvent extends Event {
   IntersectionChangeEvent(this.intersectionRatio) : super(EventType.intersectionchange);
   final double intersectionRatio;
 
-  Pointer<NativeIntersectionChangeEvent> toNativeEvent() {
+  Pointer<NativeIntersectionChangeEvent> toNative() {
     Pointer<NativeIntersectionChangeEvent> intersectionChangeEvent = allocate<NativeIntersectionChangeEvent>();
-    Pointer<NativeEvent> nativeEvent = super.toNativeEvent().cast<NativeEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
     intersectionChangeEvent.ref.nativeEvent = nativeEvent;
     intersectionChangeEvent.ref.intersectionRatio = intersectionRatio;
     return intersectionChangeEvent;
@@ -262,18 +262,20 @@ class TouchEvent extends Event {
   bool ctrlKey = false;
   bool shiftKey = false;
 
-  Map toJson() {
-    Map eventMap = super.toJson();
-
-    eventMap['touches'] = touches.toJson();
-    eventMap['targetTouches'] = touches.toJson();
-    eventMap['changedTouches'] = touches.toJson();
-    eventMap['altKey'] = altKey;
-    eventMap['metaKey'] = metaKey;
-    eventMap['ctrlKey'] = ctrlKey;
-    eventMap['shiftKey'] = shiftKey;
-
-    return eventMap;
+  Pointer<NativeTouchEvent> toNative() {
+    Pointer<NativeTouchEvent> touchEvent = allocate<NativeTouchEvent>();
+    touchEvent.ref.nativeEvent = super.toNative().cast<NativeEvent>();
+    touchEvent.ref.touches = touches.toNative();
+    touchEvent.ref.touchLength = touches.length;
+    touchEvent.ref.targetTouches = targetTouches.toNative();
+    touchEvent.ref.targetTouchesLength = targetTouches.length;
+    touchEvent.ref.changedTouches = changedTouches.toNative();
+    touchEvent.ref.changedTouchesLength = changedTouches.length;
+    touchEvent.ref.altKey = altKey ? 1 : 0;
+    touchEvent.ref.metaKey = metaKey ? 1 : 0;
+    touchEvent.ref.ctrlKey = ctrlKey ? 1 : 0;
+    touchEvent.ref.shiftKey = shiftKey ? 1 : 0;
+    return touchEvent;
   }
 }
 
@@ -318,25 +320,24 @@ class Touch {
     this.touchType = TouchType.direct,
   });
 
-  Map toJson() {
-    return {
-      'identifier': identifier,
-      // @NOTE: Can not get target in Touch
-      // 'target': target,
-      'clientX': clientX,
-      'clientY': clientY,
-      'screenX': screenX,
-      'screenY': screenY,
-      'pageX': pageX,
-      'pageY': pageY,
-      'radiusX': radiusX,
-      'radiusY': radiusY,
-      'rotationAngle': rotationAngle,
-      'force': force,
-      'altitudeAngle': altitudeAngle,
-      'azimuthAngle': azimuthAngle,
-      'touchType': touchType == TouchType.direct ? 'direct' : 'stylus',
-    };
+  Pointer<NativeTouch> toNative() {
+    Pointer<NativeTouch> nativeTouch = allocate<NativeTouch>();
+    nativeTouch.ref.identifier = identifier;
+    nativeTouch.ref.target = target.nativeEventTargetPtr;
+    nativeTouch.ref.clientX = clientX;
+    nativeTouch.ref.clientY = clientY;
+    nativeTouch.ref.screenX = screenX;
+    nativeTouch.ref.screenY = screenY;
+    nativeTouch.ref.pageX = pageX;
+    nativeTouch.ref.pageY = pageY;
+    nativeTouch.ref.radiusX = radiusX;
+    nativeTouch.ref.radiusY = radiusY;
+    nativeTouch.ref.rotationAngle = rotationAngle;
+    nativeTouch.ref.force = force;
+    nativeTouch.ref.altitudeAngle = altitudeAngle;
+    nativeTouch.ref.azimuthAngle = azimuthAngle;
+    nativeTouch.ref.touchType = touchType.index;
+    return nativeTouch;
   }
 }
 
@@ -349,11 +350,16 @@ class TouchList {
     return items[index];
   }
 
-  List<Map> toJson() {
-    List<Map> ret = [];
-    for (Touch touch in items) {
-      ret.add(touch.toJson());
+  Touch operator[](int index) {
+    return items[index];
+  }
+
+  Pointer<Pointer<NativeTouch>> toNative() {
+    Pointer<Pointer<NativeTouch>> touchList = allocate<NativeTouch>(count: items.length).cast<Pointer<NativeTouch>>();
+    for (int i = 0; i < items.length; i ++) {
+      touchList[i] = items[i].toNative();
     }
-    return ret;
+
+    return touchList;
   }
 }

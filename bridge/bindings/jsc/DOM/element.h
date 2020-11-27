@@ -40,13 +40,6 @@ public:
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:
-
-  static inline bool isNumberIndex(std::string &name) {
-    if (name.empty()) return false;
-    char f = name[0];
-    return f >= '0' && f <= '9';
-  }
-
   std::map<std::string, JSStringRef> m_attributes;
   std::vector<JSStringRef> v_attributes;
 };

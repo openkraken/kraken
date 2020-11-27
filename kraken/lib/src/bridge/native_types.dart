@@ -78,6 +78,82 @@ class NativeIntersectionChangeEvent extends Struct {
   double intersectionRatio;
 }
 
+class NativeTouchEvent extends Struct {
+  Pointer<NativeEvent> nativeEvent;
+
+  Pointer<Pointer<NativeTouch>> touches;
+  @Int64()
+  int touchLength;
+
+  Pointer<Pointer<NativeTouch>> targetTouches;
+
+  @Int64()
+  int targetTouchesLength;
+
+  Pointer<Pointer<NativeTouch>> changedTouches;
+
+  @Int64()
+  int changedTouchesLength;
+
+  @Int64()
+  int altKey;
+
+  @Int64()
+  int metaKey;
+
+  @Int64()
+  int ctrlKey;
+
+  @Int64()
+  int shiftKey;
+}
+
+class NativeTouch extends Struct {
+  @Int64()
+  int identifier;
+
+  Pointer<NativeEventTarget> target;
+
+  @Double()
+  double clientX;
+
+  @Double()
+  double clientY;
+
+  @Double()
+  double screenX;
+
+  @Double()
+  double screenY;
+
+  @Double()
+  double pageX;
+
+  @Double()
+  double pageY;
+
+  @Double()
+  double radiusX;
+
+  @Double()
+  double radiusY;
+
+  @Double()
+  double rotationAngle;
+
+  @Double()
+  double force;
+
+  @Double()
+  double altitudeAngle;
+
+  @Double()
+  double azimuthAngle;
+
+  @Int64()
+  int touchType;
+}
+
 class NativeBoundingClientRect extends Struct {
   @Double()
   double x;

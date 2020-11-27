@@ -87,7 +87,7 @@ const MODULE_EVENT = 1;
 void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
-  Pointer<Void> nativeEvent = event.toNativeEvent().cast<Void>();
+  Pointer<Void> nativeEvent = event.toNative().cast<Void>();
   dispatchEvent(nativeEventTarget, event.type.index, nativeEvent);
 }
 

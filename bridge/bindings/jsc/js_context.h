@@ -52,7 +52,7 @@ private:
 class JSStringHolder {
 public:
   JSStringHolder() = delete;
-  explicit JSStringHolder(JSContext *context, const std::string& string);
+  explicit JSStringHolder(JSContext *context, const std::string &string);
   ~JSStringHolder();
 
   JSValueRef makeString();
@@ -71,6 +71,12 @@ private:
   JSStringRef m_string{nullptr};
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSStringHolder);
 };
+
+static inline bool isNumberIndex(std::string &name) {
+  if (name.empty()) return false;
+  char f = name[0];
+  return f >= '0' && f <= '9';
+}
 
 class JSContext {
 public:
@@ -95,6 +101,7 @@ public:
   void reportError(const char *errmsg);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
+
 private:
   int32_t contextId;
   JSExceptionHandler _handler;
@@ -104,7 +111,7 @@ private:
 };
 
 JSObjectRef makeObjectFunctionWithPrivateData(JSContext *context, void *data, const char *name,
-                                    JSObjectCallAsFunctionCallback callback);
+                                              JSObjectCallAsFunctionCallback callback);
 
 NativeString **buildUICommandArgs(JSStringRef key);
 NativeString **buildUICommandArgs(std::string &key);

@@ -10,6 +10,7 @@
 #include "bindings/jsc/DOM/events/message_event.h"
 #include "bindings/jsc/DOM/events/close_event.h"
 #include "bindings/jsc/DOM/events/intersection_change_event.h"
+#include "bindings/jsc/DOM/events/touch_event.h"
 #include <chrono>
 
 namespace kraken::binding::jsc {
@@ -319,6 +320,13 @@ EventInstance *JSEvent::buildEventInstance(JSEvent::EventType eventType, JSConte
     }
     case JSEvent::EventType::intersectionchange: {
       eventInstance = new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
+      break;
+    }
+    case JSEvent::EventType::touchend:
+    case JSEvent::EventType::touchstart:
+    case JSEvent::EventType::touchmove:
+    case JSEvent::EventType::touchcancel: {
+      eventInstance = new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
       break;
     }
     default:
