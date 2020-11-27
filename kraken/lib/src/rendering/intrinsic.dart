@@ -25,7 +25,7 @@ class RenderIntrinsic extends RenderBoxModel
   // Set clipX and clipY to true for background cannot overflow beyond the boundary of replaced element
   @override
   bool get clipX => true;
-  
+
   @override
   bool get clipY => true;
 

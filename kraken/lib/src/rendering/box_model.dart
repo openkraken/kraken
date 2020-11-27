@@ -367,6 +367,7 @@ class RenderBoxModel extends RenderBox with
   set width(double value) {
     if (_width == value) return;
     _width = value;
+
     markNeedsLayout();
   }
 

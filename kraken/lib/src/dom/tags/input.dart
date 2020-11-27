@@ -28,6 +28,7 @@ const TextInputType TEXT_INPUT_TYPE_NUMBER = TextInputType.numberWithOptions(sig
 /// Otherwise, use 300px for the width and/or 150px for the height as needed.
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
+  WIDTH: '150px',
   BORDER: '1px solid #767676',
 };
 
@@ -307,11 +308,14 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     RenderEditable renderEditable = createRenderEditable();
     RenderIntrinsic renderIntrinsic = renderBoxModel;
     // Make render editable vertically center.
+    double dy = renderIntrinsic.height == null
+        ? 0
+        : (renderIntrinsic.height
+            - renderEditable.preferredLineHeight
+            - renderIntrinsic.borderTop
+            - renderIntrinsic.borderBottom) / 2;
     _renderOffsetBox = RenderOffsetBox(
-      offset: Offset(0, (renderIntrinsic.height
-          - renderEditable.preferredLineHeight
-          - renderIntrinsic.borderTop
-          - renderIntrinsic.borderBottom) / 2),
+      offset: Offset(0, dy),
       child: renderEditable,
     );
     return _renderOffsetBox;
