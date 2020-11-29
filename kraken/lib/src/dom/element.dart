@@ -227,7 +227,7 @@ class Element extends Node
 
   /// https://drafts.csswg.org/cssom-view/#scrolling-events
   void _fireScrollEvent() {
-    dispatchEvent(Event(EventType.scroll));
+    dispatchEvent(Event(EVENT_SCROLL));
   }
 
   // Set sticky child offset according to scroll offset and direction
@@ -1103,7 +1103,7 @@ class Element extends Node
   }
 
   @override
-  void addEvent(EventType eventType) {
+  void addEvent(String eventType) {
     super.addEvent(eventType);
 
     if (eventHandlers.containsKey(eventType)) return; // Only listen once.
@@ -1124,7 +1124,7 @@ class Element extends Node
     }
   }
 
-  void removeEvent(EventType eventType) {
+  void removeEvent(String eventType) {
     if (!eventHandlers.containsKey(eventType)) return; // Only listen once.
     removeEventListener(eventType, _eventResponder);
 
@@ -1144,7 +1144,7 @@ class Element extends Node
   }
 
   void click() {
-    Event clickEvent = Event(EventType.click, EventInit());
+    Event clickEvent = Event(EVENT_CLICK, EventInit());
 
     if (isRendererAttached) {
       final RenderBox box = renderBoxModel;
@@ -1475,8 +1475,8 @@ List<Element> _findStickyChildren(Element element) {
   return result;
 }
 
-bool _isIntersectionObserverEvent(EventType eventType) {
-  return eventType == EventType.appear || eventType == EventType.disappear || eventType == EventType.intersectionchange;
+bool _isIntersectionObserverEvent(String eventType) {
+  return eventType == EVENT_APPEAR || eventType == EVENT_DISAPPEAR || eventType == EVENT_INTERSECTION_CHANGE;
 }
 
 bool _hasIntersectionObserverEvent(Map eventHandlers) {

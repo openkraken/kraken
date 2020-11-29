@@ -119,7 +119,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
 
     // Make element listen to click event to trigger focus.
-    addEvent(EventType.click);
+    addEvent(EVENT_CLICK);
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
@@ -285,7 +285,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _triggerChangeEvent() {
     String currentText = textSelectionDelegate.textEditingValue?.text;
     if (_lastChangedTextString != currentText) {
-      Event changeEvent = Event(EventType.change);
+      Event changeEvent = Event(EVENT_CHANGE);
       dispatchEvent(changeEvent);
       _lastChangedTextString = currentText;
     }

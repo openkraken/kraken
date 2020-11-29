@@ -46,7 +46,7 @@ CloseEventInstance::CloseEventInstance(JSCloseEvent *jsCloseEvent, NativeCloseEv
 }
 
 CloseEventInstance::CloseEventInstance(JSCloseEvent *jsCloseEvent, JSStringRef data)
-  : EventInstance(jsCloseEvent, JSEvent::EventType::input) {
+  : EventInstance(jsCloseEvent, "close") {
   nativeCloseEvent = new NativeCloseEvent(nativeEvent);
 }
 

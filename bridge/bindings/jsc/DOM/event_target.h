@@ -79,7 +79,8 @@ public:
 
   private:
     friend JSEventTarget;
-    std::unordered_map<JSEvent::EventType, std::deque<JSObjectRef>> _eventHandlers;
+    // TODO: use std::u16string for better performance.
+    std::unordered_map<std::string, std::deque<JSObjectRef>> _eventHandlers;
     bool internalDispatchEvent(EventInstance *eventInstance);
   };
 
@@ -96,14 +97,14 @@ private:
   std::vector<std::string> m_jsOnlyEvents;
 };
 
-using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, int64_t eventType, void *nativeEvent);
+using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent);
 
 struct NativeEventTarget {
   NativeEventTarget() = delete;
   NativeEventTarget(JSEventTarget::EventTargetInstance *_instance)
     : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl) {};
 
-  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, int64_t eventType, void *nativeEvent);
+  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent);
 
   JSEventTarget::EventTargetInstance *instance;
   NativeDispatchEvent dispatchEvent;

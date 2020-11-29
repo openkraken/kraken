@@ -9,48 +9,43 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/bridge.dart';
 import 'package:ffi/ffi.dart';
 
-enum EventType {
-  none,
-  input,
-  appear,
-  disappear,
-  error,
-  message,
-  close,
-  open,
-  intersectionchange,
-  touchstart,
-  touchend,
-  touchmove,
-  touchcancel,
-  click,
-  colorschemechange,
-  load,
-  finish,
-  cancel,
-  transitionrun,
-  transitionstart,
-  transitionend,
-  transitioncancel,
-  focus,
-  unload,
-  change,
-  canplay,
-  canplaythrough,
-  ended,
-  play,
-  pause,
-  seeked,
-  seeking,
-  volumechange,
-  scroll
-}
-
-const String CLICK = 'click';
+const String EVENT_CLICK = 'click';
+const String EVENT_INPUT = 'input';
+const String EVENT_APPEAR = 'appear';
+const String EVENT_DISAPPEAR = 'disappear';
+const String EVENT_COLOR_SCHEME_CHANGE = 'colorschemechange';
+const String EVENT_ERROR = 'error';
+const String EVENT_TOUCH_START = 'touchstart';
+const String EVENT_TOUCH_MOVE = 'touchmove';
+const String EVENT_TOUCH_END = 'touchend';
+const String EVENT_TOUCH_CANCEL = 'touchcancel';
+const String EVENT_MESSAGE = 'message';
+const String EVENT_CLOSE = 'close';
+const String EVENT_OPEN = 'open';
+const String EVENT_INTERSECTION_CHANGE = 'intersectionchange';
+const String EVENT_CANCEL = 'cancel';
+const String EVENT_FINISH = 'finish';
+const String EVENT_TRANSITION_RUN = 'transitionrun';
+const String EVENT_TRANSITION_CANCEL = 'transitioncancel';
+const String EVENT_TRANSITION_START = 'transitionstart';
+const String EVENT_TRANSITION_END = 'transitionend';
+const String EVENT_FOCUS = 'focus';
+const String EVENT_LOAD = 'load';
+const String EVENT_UNLOAD = 'unload';
+const String EVENT_CHANGE = 'change';
+const String EVENT_CAN_PLAY = 'canplay';
+const String EVENT_CAN_PLAY_THROUGH = 'canplaythrough';
+const String EVENT_ENDED = 'ended';
+const String EVENT_PAUSE = 'pause';
+const String EVENT_PLAY = 'play';
+const String EVENT_SEEKED = 'seeked';
+const String EVENT_SEEKING = 'seeking';
+const String EVENT_VOLUME_CHANGE = 'volumechange';
+const String EVENT_SCROLL = 'scroll';
 
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
-  EventType type;
+  String type;
   bool bubbles;
   bool cancelable;
   EventTarget currentTarget;
@@ -89,7 +84,7 @@ class Event {
 
   Pointer toNative() {
     Pointer<NativeEvent> event = allocate<NativeEvent>();
-    event.ref.type = type.index;
+    event.ref.type = stringToNativeString(type);
     event.ref.bubbles = bubbles ? 1 : 0;
     event.ref.cancelable = cancelable ? 1 : 0;
     event.ref.timeStamp = timeStamp;
@@ -103,7 +98,7 @@ class Event {
   Map toJson() {
     Pointer<NativeEvent> nativeEvent = toNative().cast<NativeEvent>();
     return {
-      'type': type.index,
+      'type': type,
       'nativeEvent': nativeEvent.address
     };
   }
@@ -143,19 +138,19 @@ class InputEvent extends Event {
   InputEvent(
     this.data, {
     this.inputType = 'insertText',
-  }) : super(EventType.input, EventInit(cancelable: true));
+  }) : super(EVENT_INPUT, EventInit(cancelable: true));
 }
 
 class AppearEvent extends Event {
-  AppearEvent() : super(EventType.appear);
+  AppearEvent() : super(EVENT_APPEAR);
 }
 
 class DisappearEvent extends Event {
-  DisappearEvent() : super(EventType.disappear);
+  DisappearEvent() : super(EVENT_DISAPPEAR);
 }
 
 class ColorSchemeChangeEvent extends Event {
-  ColorSchemeChangeEvent(this.platformBrightness) : super(EventType.colorschemechange);
+  ColorSchemeChangeEvent(this.platformBrightness) : super(EVENT_COLOR_SCHEME_CHANGE);
   final String platformBrightness;
 }
 
@@ -189,7 +184,7 @@ class MediaError extends Event {
     return nativeMediaError;
   }
 
-  MediaError(this.code, this.message) : super(EventType.error);
+  MediaError(this.code, this.message) : super(EVENT_ERROR);
 }
 
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
@@ -200,7 +195,7 @@ class MessageEvent extends Event {
   /// A USVString representing the origin of the message emitter.
   final String origin;
 
-  MessageEvent(this.data, {this.origin = ''}) : super(EventType.message);
+  MessageEvent(this.data, {this.origin = ''}) : super(EVENT_MESSAGE);
 
   Pointer<NativeMessageEvent> toNative() {
     Pointer<NativeMessageEvent> messageEvent = allocate<NativeMessageEvent>();
@@ -223,7 +218,7 @@ class CloseEvent extends Event {
   /// Indicates whether or not the connection was cleanly closed
   final bool wasClean;
 
-  CloseEvent(this.code, this.reason, this.wasClean) : super(EventType.close);
+  CloseEvent(this.code, this.reason, this.wasClean) : super(EVENT_CLOSE);
 
   Pointer<NativeCloseEvent> toNative() {
     Pointer<NativeCloseEvent> closeEvent = allocate<NativeCloseEvent>();
@@ -237,7 +232,7 @@ class CloseEvent extends Event {
 }
 
 class IntersectionChangeEvent extends Event {
-  IntersectionChangeEvent(this.intersectionRatio) : super(EventType.intersectionchange);
+  IntersectionChangeEvent(this.intersectionRatio) : super(EVENT_INTERSECTION_CHANGE);
   final double intersectionRatio;
 
   Pointer<NativeIntersectionChangeEvent> toNative() {
@@ -251,7 +246,7 @@ class IntersectionChangeEvent extends Event {
 
 /// reference: https://w3c.github.io/touch-events/#touchevent-interface
 class TouchEvent extends Event {
-  TouchEvent(EventType type) : super(type, EventInit(bubbles: true, cancelable: true));
+  TouchEvent(String type) : super(type, EventInit(bubbles: true, cancelable: true));
 
   TouchList touches = TouchList();
   TouchList targetTouches = TouchList();

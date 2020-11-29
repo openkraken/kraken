@@ -164,8 +164,8 @@ class KrakenViewController {
     return _elementManager.createComment(id, nativePtr, data);
   }
 
-  void addEvent(int targetId, int eventTypeIndex) {
-    _elementManager.addEvent(targetId, eventTypeIndex);
+  void addEvent(int targetId, String eventType) {
+    _elementManager.addEvent(targetId, eventType);
   }
 
   void insertAdjacentNode(int targetId, String position, int childId) {
@@ -471,7 +471,7 @@ class KrakenController {
       await _bundle.run(_view.contextId);
       // trigger window load event
       module.requestAnimationFrame((_) {
-        Event loadEvent = Event(EventType.load);
+        Event loadEvent = Event(EVENT_LOAD);
         EventTarget window = view.getEventTargetById(WINDOW_ID);
         emitUIEvent(_view.contextId, window.nativeEventTargetPtr, loadEvent);
       });

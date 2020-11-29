@@ -28,49 +28,6 @@ JSEvent *JSEvent::instance(JSContext *context) {
   return instanceMap[context];
 }
 
-JSEvent::EventType JSEvent::getEventTypeOfName(std::string &name) {
-  static std::unordered_map<std::string, EventType> eventTypeMap{
-    {"none", EventType::none},
-    {"input", EventType::input},
-    {"appear", EventType::appear},
-    {"disappear", EventType::disappear},
-    {"error", EventType::error},
-    {"message", EventType::message},
-    {"close", EventType::close},
-    {"open", EventType::open},
-    {"intersectionchange", EventType::intersectionchange},
-    {"touchstart", EventType::touchstart},
-    {"touchend", EventType::touchend},
-    {"touchmove", EventType::touchmove},
-    {"touchcancel", EventType::touchcancel},
-    {"click", EventType::click},
-    {"colorschemechange", EventType::colorschemechange},
-    {"load", EventType::load},
-    {"finish", EventType::finish},
-    {"cancel", EventType::cancel},
-    {"transitionrun", EventType::transitionrun},
-    {"transitionstart", EventType::transitionstart},
-    {"transitionend", EventType::transitionend},
-    {"transitioncancel", EventType::transitioncancel},
-    {"focus", EventType::focus},
-    {"unload", EventType::unload},
-    {"change", EventType::change},
-    {"canplay", EventType::canplay},
-    {"canplaythrough", EventType::canplaythrough},
-    {"ended", EventType::ended},
-    {"play", EventType::play},
-    {"pause", EventType::pause},
-    {"seeked", EventType::seeked},
-    {"seeking", EventType::seeking},
-    {"volumechange", EventType::volumechange},
-    {"scroll", EventType::scroll}
-  };
-
-  if (!eventTypeMap.contains(name)) return EventType::none;
-
-  return eventTypeMap[name];
-}
-
 JSEvent::JSEvent(JSContext *context) : HostClass(context, "Event") {}
 JSEvent::JSEvent(JSContext *context, const char *name) : HostClass(context, name) {}
 
@@ -83,51 +40,9 @@ JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef construct
 
   const JSValueRef eventTypeValueRef = arguments[0];
   JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventTypeValueRef, exception);
-  std::string &&eventTypeName = JSStringToStdString(eventTypeStringRef);
-  EventType eventType = getEventTypeOfName(eventTypeName);
-  auto event = new EventInstance(this, eventType);
+  std::string &&eventType = JSStringToStdString(eventTypeStringRef);
+  auto event = JSEvent::buildEventInstance(eventType, context, nullptr);
   return event->object;
-}
-
-const char *JSEvent::getEventNameOfTypeIndex(int64_t typeIndex) {
-  static const char *eventTypeKeys[]{
-    "none",
-    "input",
-    "appear",
-    "disappear",
-    "error",
-    "message",
-    "close",
-    "open",
-    "intersectionchange",
-    "touchstart",
-    "touchend",
-    "touchmove",
-    "touchcancel",
-    "click",
-    "colorschemechange",
-    "load",
-    "finish",
-    "cancel",
-    "transitionrun",
-    "transitionstart",
-    "transitionend",
-    "transitioncancel",
-    "focus",
-    "unload",
-    "change",
-    "canplay",
-    "canplaythrough",
-    "ended",
-    "play",
-    "pause",
-    "seeked",
-    "seeking",
-    "volumechange",
-    "scroll"
-  };
-
-  return eventTypeKeys[typeIndex];
 }
 
 JSValueRef JSEvent::initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -138,10 +53,11 @@ JSValueRef JSEvent::initWithNativeEvent(JSContextRef ctx, JSObjectRef function, 
   }
 
   auto Event = reinterpret_cast<JSEvent*>(JSObjectGetPrivate(function));
-  double type = JSValueToNumber(ctx, arguments[0], exception);
+  JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
   double address = JSValueToNumber(ctx, arguments[1], exception);
   auto nativeEvent = reinterpret_cast<NativeEvent*>(static_cast<int64_t>(address));
-  auto event = JSEvent::buildEventInstance(static_cast<JSEvent::EventType>(type), Event->context, nativeEvent);
+  std::string eventType = JSStringToStdString(eventTypeStringRef);
+  auto event = JSEvent::buildEventInstance(eventType, Event->context, nativeEvent);
   return event->object;
 }
 
@@ -155,8 +71,8 @@ JSValueRef JSEvent::getProperty(std::string &name, JSValueRef *exception) {
 EventInstance::EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent)
   : Instance(jsEvent), nativeEvent(nativeEvent) {}
 
-EventInstance::EventInstance(JSEvent *jsEvent, JSEvent::EventType eventType) : Instance(jsEvent) {
-  nativeEvent = new NativeEvent(eventType);
+EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType) : Instance(jsEvent) {
+  nativeEvent = new NativeEvent(stringToNativeString(eventType));
   auto ms = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
   nativeEvent->timeStamp = ms.count();
 }
@@ -169,7 +85,7 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
   auto property = propertyMap[name];
   switch (property) {
   case JSEvent::EventProperty::kType: {
-    JSStringRef eventStringRef = JSStringCreateWithUTF8CString(JSEvent::getEventNameOfTypeIndex(nativeEvent->type));
+    JSStringRef eventStringRef = JSStringCreateWithCharacters(nativeEvent->type->string, nativeEvent->type->length);
     return JSValueMakeString(_hostClass->ctx, eventStringRef);
   }
   case JSEvent::EventProperty::kBubbles: {
@@ -299,38 +215,23 @@ const std::unordered_map<std::string, JSEvent::EventProperty> &JSEvent::getEvent
   return propertyMap;
 }
 
-EventInstance *JSEvent::buildEventInstance(JSEvent::EventType eventType, JSContext *context, void *nativeEvent) {
+EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent) {
   EventInstance *eventInstance;
-  switch(eventType) {
-    case JSEvent::EventType::input: {
-      eventInstance = new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
-      break;
-    }
-    case JSEvent::EventType::error: {
-      eventInstance = new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));
-      break;
-    }
-    case JSEvent::EventType::message: {
-      eventInstance = new MessageEventInstance(JSMessageEvent::instance(context), reinterpret_cast<NativeMessageEvent*>(nativeEvent));
-      break;
-    }
-    case JSEvent::EventType::close: {
-      eventInstance = new CloseEventInstance(JSCloseEvent::instance(context), reinterpret_cast<NativeCloseEvent*>(nativeEvent));
-      break;
-    }
-    case JSEvent::EventType::intersectionchange: {
-      eventInstance = new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
-      break;
-    }
-    case JSEvent::EventType::touchend:
-    case JSEvent::EventType::touchstart:
-    case JSEvent::EventType::touchmove:
-    case JSEvent::EventType::touchcancel: {
-      eventInstance = new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
-      break;
-    }
-    default:
-      eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+
+  if (eventType == EVENT_INPUT) {
+    eventInstance = new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
+  } else if (eventType == EVENT_ERROR) {
+    eventInstance = new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));
+  } else if (eventType == EVENT_MESSAGE) {
+    eventInstance = new MessageEventInstance(JSMessageEvent::instance(context), reinterpret_cast<NativeMessageEvent*>(nativeEvent));
+  } else if (eventType == EVENT_CLOSE) {
+    eventInstance = new CloseEventInstance(JSCloseEvent::instance(context), reinterpret_cast<NativeCloseEvent*>(nativeEvent));
+  } else if (eventType == EVENT_INTERSECTION_CHANGE) {
+    eventInstance = new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
+  } else if (eventType == EVENT_TOUCH_START || eventType == EVENT_TOUCH_END || eventType == EVENT_TOUCH_MOVE || eventType == EVENT_TOUCH_CANCEL) {
+    eventInstance = new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+  } else {
+    eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
   }
 
   return eventInstance;

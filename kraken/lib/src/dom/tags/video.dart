@@ -142,17 +142,17 @@ class VideoElement extends MediaElement {
   }
 
   onCanPlay() async {
-    Event event = Event(EventType.canplay, EventInit());
+    Event event = Event(EVENT_CAN_PLAY, EventInit());
     dispatchEvent(event);
   }
 
   onCanPlayThrough() async {
-    Event event = Event(EventType.canplaythrough, EventInit());
+    Event event = Event(EVENT_CAN_PLAY_THROUGH, EventInit());
     dispatchEvent(event);
   }
 
   onEnded() async {
-    Event event = Event(EventType.ended, EventInit());
+    Event event = Event(EVENT_ENDED, EventInit());
     dispatchEvent(event);
   }
 
@@ -162,27 +162,27 @@ class VideoElement extends MediaElement {
   }
 
   onPause() async {
-    Event event = Event(EventType.pause, EventInit());
+    Event event = Event(EVENT_PAUSE, EventInit());
     dispatchEvent(event);
   }
 
   onPlay() async {
-    Event event = Event(EventType.play, EventInit());
+    Event event = Event(EVENT_PLAY, EventInit());
     dispatchEvent(event);
   }
 
   onSeeked() async {
-    Event event = Event(EventType.seeked, EventInit());
+    Event event = Event(EVENT_SEEKED, EventInit());
     dispatchEvent(event);
   }
 
   onSeeking() async {
-    Event event = Event(EventType.seeking, EventInit());
+    Event event = Event(EVENT_SEEKING, EventInit());
     dispatchEvent(event);
   }
 
   onVolumeChange() async {
-    Event event = Event(EventType.volumechange, EventInit());
+    Event event = Event(EVENT_VOLUME_CHANGE, EventInit());
     dispatchEvent(event);
   }
 

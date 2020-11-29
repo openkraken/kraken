@@ -29,15 +29,15 @@ class Window extends EventTarget {
   }
 
   @override
-  void addEvent(EventType eventName) {
+  void addEvent(String eventName) {
     super.addEvent(eventName);
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
 
     switch (eventName) {
-      case EventType.colorschemechange:
-        return addEventListener(EventType.colorschemechange, _handleColorSchemeChange);
-      case EventType.load:
-        return addEventListener(EventType.load, _handleLoad);
+      case EVENT_COLOR_SCHEME_CHANGE:
+        return addEventListener(eventName, _handleColorSchemeChange);
+      case EVENT_LOAD:
+        return addEventListener(eventName, _handleLoad);
       default:
         break;
     }

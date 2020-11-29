@@ -7,6 +7,7 @@
 #include "dart_methods.h"
 #include "document.h"
 #include "event.h"
+#include <codecvt>
 #include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
@@ -137,9 +138,8 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     return nullptr;
   }
 
-  JSStringRef eventNameStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
-  std::string &&eventName = JSStringToStdString(eventNameStringRef);
-  JSEvent::EventType eventType = JSEvent::getEventTypeOfName(eventName);
+  JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
+  std::string &&eventType = JSStringToStdString(eventTypeStringRef);
 
   // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and
   // no one can stop element to trigger event from dart side. this can led to significant performance improvement when
@@ -150,14 +150,15 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
-    std::string eventTypeString = std::to_string(eventType);
-    auto args = buildUICommandArgs(eventTypeString);
+    auto args = buildUICommandArgs(eventType);
 
-    auto Event = reinterpret_cast<JSEventTarget*>(eventTargetInstance->_hostClass);
-    auto isJsOnlyEvent = std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), eventName) != Event->m_jsOnlyEvents.end();
+    auto Event = reinterpret_cast<JSEventTarget *>(eventTargetInstance->_hostClass);
+    auto isJsOnlyEvent =
+      std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), eventType) != Event->m_jsOnlyEvents.end();
 
     if (!isJsOnlyEvent) {
-      foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetInstance->eventTargetId, UICommand::addEvent, args, 1, nullptr);
+      foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(
+        eventTargetInstance->eventTargetId, UICommand::addEvent, args, 1, nullptr);
     };
   }
 
@@ -229,8 +230,7 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
   }
 
   JSStringRef eventNameStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
-  std::string &&eventName = JSStringToStdString(eventNameStringRef);
-  JSEvent::EventType eventType = JSEvent::getEventTypeOfName(eventName);
+  std::string &&eventType = JSStringToStdString(eventNameStringRef);
 
   if (!eventTargetInstance->_eventHandlers.contains(eventType)) {
     return nullptr;
@@ -275,7 +275,9 @@ JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, 
 }
 
 bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
-  auto eventType = static_cast<JSEvent::EventType>(event->nativeEvent->type);
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(event->nativeEvent->type->string),
+                                            event->nativeEvent->type->length);
+  std::string eventType = toUTF8(u16EventType);
 
   if (!_eventHandlers.contains(eventType)) {
     return false;
@@ -301,7 +303,7 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
 }
 
 JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+                                         size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
@@ -353,9 +355,7 @@ void JSEventTarget::EventTargetInstance::setProperty(std::string &name, JSValueR
 }
 
 JSValueRef JSEventTarget::EventTargetInstance::getPropertyHandler(std::string &name, JSValueRef *exception) {
-  std::string subName = name.substr(2);
-
-  JSEvent::EventType eventType = JSEvent::getEventTypeOfName(subName);
+  std::string eventType = name.substr(2);
 
   if (!_eventHandlers.contains(eventType)) {
     return nullptr;
@@ -365,10 +365,7 @@ JSValueRef JSEventTarget::EventTargetInstance::getPropertyHandler(std::string &n
 
 void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value,
                                                             JSValueRef *exception) {
-  std::string subName = name.substr(2);
-  JSEvent::EventType eventType = JSEvent::getEventTypeOfName(subName);
-
-  if (eventType == JSEvent::EventType::none) return;
+  std::string eventType = name.substr(2);
 
   if (_eventHandlers.contains(eventType)) {
     for (auto &it : _eventHandlers) {
@@ -385,16 +382,16 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
   JSValueProtect(_hostClass->ctx, handlerObjectRef);
   _eventHandlers[eventType].emplace_back(handlerObjectRef);
 
-  auto Event = reinterpret_cast<JSEventTarget*>(_hostClass);
-  auto isJsOnlyEvent = std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), name.substr(2)) != Event->m_jsOnlyEvents.end();
+  auto Event = reinterpret_cast<JSEventTarget *>(_hostClass);
+  auto isJsOnlyEvent = std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), name.substr(2)) !=
+                       Event->m_jsOnlyEvents.end();
 
   if (isJsOnlyEvent) return;
 
   int32_t contextId = _hostClass->contextId;
-  std::string eventTypeString = std::to_string(eventType);
-  auto args = buildUICommandArgs(eventTypeString);
-  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommand::addEvent,
-                                                                              args, 1, nullptr);
+  auto args = buildUICommandArgs(eventType);
+  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommand::addEvent, args,
+                                                                              1, nullptr);
 }
 
 void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -412,7 +409,9 @@ std::vector<JSStringRef> &JSEventTarget::getEventTargetPropertyNames() {
 }
 
 bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
-  auto eventType = static_cast<JSEvent::EventType>(eventInstance->nativeEvent->type);
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(eventInstance->nativeEvent->type->string),
+                                               eventInstance->nativeEvent->type->length);
+  std::string eventType = toUTF8(u16EventType);
   auto stack = _eventHandlers[eventType];
 
   for (auto &handler : stack) {
@@ -436,15 +435,17 @@ const std::unordered_map<std::string, JSEventTarget::EventTargetProperty> &JSEve
 }
 
 // This function will be called back by dart side when trigger events.
-void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, int64_t eventType, void *nativeEvent) {
+void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
 
   JSEventTarget::EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
   JSContext *context = eventTargetInstance->context;
 
-  auto type = static_cast<JSEvent::EventType>(eventType);
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(nativeEventType->string),
+                                               nativeEventType->length);
+  std::string eventType = toUTF8(u16EventType);
 
-  EventInstance *eventInstance = JSEvent::buildEventInstance(type, context, nativeEvent);
+  EventInstance *eventInstance = JSEvent::buildEventInstance(eventType, context, nativeEvent);
 
   eventTargetInstance->dispatchEvent(eventInstance);
 }

@@ -50,7 +50,7 @@ IntersectionChangeEventInstance::IntersectionChangeEventInstance(
 
 IntersectionChangeEventInstance::IntersectionChangeEventInstance(JSIntersectionChangeEvent *jsIntersectionChangeEvent,
                                                                  JSStringRef data)
-  : EventInstance(jsIntersectionChangeEvent, JSEvent::EventType::input) {
+  : EventInstance(jsIntersectionChangeEvent, "intersectionchange") {
   nativeIntersectionChangeEvent = new NativeIntersectionChangeEvent(nativeEvent);
 }
 

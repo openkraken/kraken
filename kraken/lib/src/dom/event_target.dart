@@ -21,23 +21,23 @@ class EventTarget {
   ElementManager elementManager;
 
   @protected
-  Map<EventType, List<EventHandler>> eventHandlers = {};
+  Map<String, List<EventHandler>> eventHandlers = {};
 
   EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
     assert(targetId != null);
     assert(elementManager != null);
   }
 
-  void addEvent(EventType eventType) {}
+  void addEvent(String eventType) {}
 
-  void addEventListener(EventType eventType, EventHandler eventHandler) {
+  void addEventListener(String eventType, EventHandler eventHandler) {
     if (!eventHandlers.containsKey(eventHandler)) {
       eventHandlers[eventType] = [];
     }
     eventHandlers[eventType].add(eventHandler);
   }
 
-  void removeEventListener(EventType eventType, EventHandler eventHandler) {
+  void removeEventListener(String eventType, EventHandler eventHandler) {
     if (!eventHandlers.containsKey(eventType)) {
       return;
     }
@@ -75,7 +75,7 @@ class EventTarget {
     elementManager = null;
   }
 
-  List<EventHandler> getEventHandlers(EventType type) {
+  List<EventHandler> getEventHandlers(String type) {
     assert(type != null);
     return eventHandlers[type];
   }

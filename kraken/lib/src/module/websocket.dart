@@ -15,7 +15,7 @@ class _WebSocketState {
 
 class KrakenWebSocket {
   Map<String, IOWebSocketChannel> _clientMap = {};
-  Map<String, Map<EventType, bool>> _listenMap = {};
+  Map<String, Map<String, bool>> _listenMap = {};
   Map<String, _WebSocketState> _stateMap = {};
   int _clientId = 0;
 
@@ -44,16 +44,14 @@ class KrakenWebSocket {
       _clientMap[id] = client;
       // Listen all event
       _listen(id, callback);
-      // Emit open event
-      EventType type = EventType.open;
-      if (_hasListener(id, type)) {
-        Event event = Event(type);
+      if (_hasListener(id, EVENT_OPEN)) {
+        Event event = Event(EVENT_OPEN);
         callback(id, jsonEncode(event));
       }
     }).catchError((e, stack) {
       // print connection error internally and trigger error event.
       print(e);
-      Event event = Event(EventType.error);
+      Event event = Event(EVENT_ERROR);
       callback(id, jsonEncode(event));
     });
 
@@ -87,7 +85,7 @@ class KrakenWebSocket {
     client.sink.close(closeCode, closeReason);
   }
 
-  bool _hasListener(String id, EventType type) {
+  bool _hasListener(String id, String type) {
     var listeners = _listenMap[id];
     return listeners.containsKey(type);
   }
@@ -96,20 +94,17 @@ class KrakenWebSocket {
     IOWebSocketChannel client = _clientMap[id];
 
     client.stream.listen((message) {
-      EventType type = EventType.message;
-      if (!_hasListener(id, type)) return;
+      if (!_hasListener(id, EVENT_MESSAGE)) return;
       MessageEvent event = MessageEvent(message);
       callback(id, jsonEncode(event));
     }, onError: (error) {
-      EventType type = EventType.error;
-      if (!_hasListener(id, type)) return;
+      if (!_hasListener(id, EVENT_ERROR)) return;
       // print error internally and trigger error event;
       print(error);
-      Event event = Event(type);
+      Event event = Event(EVENT_ERROR);
       callback(id, jsonEncode(event));
     }, onDone: () {
-      EventType type = EventType.close;
-      if (_hasListener(id, type)) {
+      if (_hasListener(id, EVENT_CLOSE)) {
         // CloseEvent https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/CloseEvent
         CloseEvent event = CloseEvent(client.closeCode, client.closeReason, false);
         callback(id, jsonEncode(event));
@@ -121,7 +116,7 @@ class KrakenWebSocket {
     });
   }
 
-  void addEvent(String id, EventType type) {
+  void addEvent(String id, String type) {
     if (!_listenMap.containsKey(id)) {
       // Init listener map
       _listenMap[id] = {};

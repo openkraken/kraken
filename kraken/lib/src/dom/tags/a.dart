@@ -20,7 +20,7 @@ class AnchorElement extends Element {
 
   AnchorElement(int targetId, Pointer<NativeAnchorElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: ANCHOR, defaultStyle: _defaultStyle) {
-    addEvent(EventType.click);
+    addEvent(EVENT_CLICK);
   }
 
   void handleClick(Event event) {

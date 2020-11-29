@@ -113,7 +113,7 @@ class ImageElement extends Element {
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
     // img load event should trigger asynchronously to make sure load event had bind.
     Timer.run(() {
-      dispatchEvent(Event(EventType.load));
+      dispatchEvent(Event(EVENT_LOAD));
     });
   }
 

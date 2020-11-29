@@ -38,28 +38,28 @@ mixin EventHandlerMixin on Node {
   }
 
   void handlePointDown(PointerDownEvent pointEvent) {
-    TouchEvent event = _getTouchEvent(EventType.touchstart, pointEvent);
+    TouchEvent event = _getTouchEvent(EVENT_TOUCH_START, pointEvent);
     dispatchEvent(event);
   }
 
   void handlePointMove(PointerMoveEvent pointEvent) {
     _throttler.throttle(() {
-      TouchEvent event = _getTouchEvent(EventType.touchmove, pointEvent);
+      TouchEvent event = _getTouchEvent(EVENT_TOUCH_MOVE, pointEvent);
       dispatchEvent(event);
     });
   }
 
   void handlePointUp(PointerUpEvent pointEvent) {
-    TouchEvent event = _getTouchEvent(EventType.touchend, pointEvent);
+    TouchEvent event = _getTouchEvent(EVENT_TOUCH_END, pointEvent);
     dispatchEvent(event);
   }
 
   void handlePointCancel(PointerCancelEvent pointEvent) {
-    Event event = Event(EventType.touchcancel, EventInit());
+    Event event = Event(EVENT_TOUCH_CANCEL, EventInit());
     dispatchEvent(event);
   }
 
-  TouchEvent _getTouchEvent(EventType type, PointerEvent pointEvent) {
+  TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
     TouchEvent event = TouchEvent(type);
     // Use original event, prevent to be relative coordinate
     if (pointEvent.original != null) pointEvent = pointEvent.original;

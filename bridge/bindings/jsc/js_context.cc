@@ -203,6 +203,15 @@ NativeString **buildUICommandArgs(std::string &key, std::string &value) {
   return args;
 }
 
+NativeString *stringToNativeString(std::string &string) {
+  std::u16string utf16;
+  fromUTF8(string, utf16);
+  NativeString tmp{};
+  tmp.string = reinterpret_cast<const uint16_t *>(utf16.c_str());
+  tmp.length = utf16.size();
+  return tmp.clone();
+}
+
 JSFunctionHolder::JSFunctionHolder(JSContext *context, void *data, std::string name,
                                    JSObjectCallAsFunctionCallback callback)
   : context(context), m_data(data), m_callback(callback), m_name(std::move(name)) {}

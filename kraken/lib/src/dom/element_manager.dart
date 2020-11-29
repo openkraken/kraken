@@ -19,7 +19,7 @@ import 'package:kraken/rendering.dart';
 const String UNKNOWN = 'UNKNOWN';
 
 Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynamic> props,
-    List<EventType> events, ElementManager elementManager) {
+    List<String> events, ElementManager elementManager) {
   Element element;
   switch (type) {
     case BODY:
@@ -83,7 +83,7 @@ Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynam
 
   // Add element event listener
   if (events != null && events.length > 0) {
-    for (EventType eventName in events) {
+    for (String eventName in events) {
       element.addEvent(eventName);
     }
   }
@@ -165,10 +165,10 @@ class ElementManager {
   }
 
   Element createElement(
-      int id, Pointer nativePtr, String type, Map<String, dynamic> props, List<EventType> events) {
+      int id, Pointer nativePtr, String type, Map<String, dynamic> props, List<String> events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
-    List<EventType> eventList;
+    List<String> eventList;
     if (events != null) {
       eventList = [];
       for (var eventName in events) {
@@ -296,10 +296,8 @@ class ElementManager {
     _debugDOMTreeChanged();
   }
 
-  void addEvent(int targetId, int eventTypeIndex) {
-    EventType eventType = EventType.values[eventTypeIndex];
+  void addEvent(int targetId, String eventType) {
     assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
-    if (eventType == EventType.none) return;
 
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId);
     assert(target != null);
@@ -307,7 +305,7 @@ class ElementManager {
     target.addEvent(eventType);
   }
 
-  void removeEvent(int targetId, EventType eventType) {
+  void removeEvent(int targetId, String eventType) {
     assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
 
     Element target = getEventTargetByTargetId<Element>(targetId);

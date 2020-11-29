@@ -11,6 +11,41 @@
 #include <array>
 #include <unordered_map>
 
+#define EVENT_CLICK "click"
+#define EVENT_INPUT "input"
+#define EVENT_APPEAR "appear"
+#define EVENT_DISAPPEAR "disappear"
+#define EVENT_COLOR_SCHEME_CHANGE "colorschemechange"
+#define EVENT_ERROR "error"
+#define EVENT_TOUCH_START "touchstart"
+#define EVENT_TOUCH_MOVE "touchmove"
+#define EVENT_TOUCH_END "touchend"
+#define EVENT_TOUCH_CANCEL "touchcancel"
+#define EVENT_MESSAGE "message"
+#define EVENT_CLOSE "close"
+#define EVENT_OPEN "open"
+#define EVENT_INTERSECTION_CHANGE "intersectionchange"
+#define EVENT_CANCEL "cancel"
+#define EVENT_FINISH "finish"
+#define EVENT_TRANSITION_RUN "transitionrun"
+#define EVENT_TRANSITION_CANCEL "transitioncancel"
+#define EVENT_TRANSITION_START "transitionstart"
+#define EVENT_TRANSITION_END "transitionend"
+#define EVENT_FOCUS "focus"
+#define EVENT_LOAD "load"
+#define EVENT_UNLOAD "unload"
+#define EVENT_CHANGE "change"
+#define EVENT_CAN_PLAY "canplay"
+#define EVENT_CAN_PLAY_THROUGH "canplaythrough"
+#define EVENT_ENDED "ended"
+#define EVENT_PAUSE "pause"
+#define EVENT_PLAY "play"
+#define EVENT_SEEKED "seeked"
+#define EVENT_SEEKING "seeking"
+#define EVENT_VOLUME_CHANGE "volumechange"
+#define EVENT_SCROLL "scroll"
+
+
 namespace kraken::binding::jsc {
 
 void bindEvent(std::unique_ptr<JSContext> &context);
@@ -20,43 +55,6 @@ class EventInstance;
 
 class JSEvent : public HostClass {
 public:
-  enum EventType {
-    none,
-    input,
-    appear,
-    disappear,
-    error,
-    message,
-    close,
-    open,
-    intersectionchange,
-    touchstart,
-    touchend,
-    touchmove,
-    touchcancel,
-    click,
-    colorschemechange,
-    load,
-    finish,
-    cancel,
-    transitionrun,
-    transitionstart,
-    transitionend,
-    transitioncancel,
-    focus,
-    unload,
-    change,
-    canplay,
-    canplaythrough,
-    ended,
-    play,
-    pause,
-    seeked,
-    seeking,
-    volumechange,
-    scroll
-  };
-
   enum class EventProperty {
     kType,
     kBubbles,
@@ -77,8 +75,6 @@ public:
   const static std::unordered_map<std::string, EventProperty> &getEventPropertyMap();
 
   static JSEvent *instance(JSContext *context);
-  static EventType getEventTypeOfName(std::string &name);
-  static const char *getEventNameOfTypeIndex(int64_t index);
 
   // Create an Event Object from an nativeEvent address which allocated by dart side.
   static JSValueRef initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -93,7 +89,7 @@ public:
   static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
 
-  static EventInstance* buildEventInstance(EventType eventType, JSContext *context, void *nativeEvent);
+  static EventInstance* buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -118,7 +114,7 @@ public:
   EventInstance() = delete;
 
   explicit EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent);
-  explicit EventInstance(JSEvent *jsEvent, JSEvent::EventType eventType);
+  explicit EventInstance(JSEvent *jsEvent, std::string eventType);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
@@ -137,8 +133,8 @@ private:
 
 struct NativeEvent {
   NativeEvent() = delete;
-  explicit NativeEvent(JSEvent::EventType eventType) : type(eventType){};
-  int64_t type;
+  explicit NativeEvent(NativeString *eventType) : type(eventType){};
+  NativeString *type;
   int64_t bubbles{0};
   int64_t cancelable{0};
   int64_t timeStamp{0};

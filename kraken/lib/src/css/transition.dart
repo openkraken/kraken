@@ -84,18 +84,18 @@ class CSSTransition {
 
   static void dispatchTransitionEvent(Element target, CSSTransitionEvent status) {
     if (status == CSSTransitionEvent.run) {
-      target.dispatchEvent(Event(EventType.transitionrun));
+      target.dispatchEvent(Event(EVENT_TRANSITION_RUN));
     } else if (status == CSSTransitionEvent.cancel) {
       // An Event fired when a CSS transition has been cancelled.
-      target.dispatchEvent(Event(EventType.transitioncancel));
+      target.dispatchEvent(Event(EVENT_TRANSITION_CANCEL));
     } else if (status == CSSTransitionEvent.start) {
       // An Event fired when a CSS transition is created,
       // when it is added to a set of running transitions,
       // though not necessarily started.
-      target.dispatchEvent(Event(EventType.transitionstart));
+      target.dispatchEvent(Event(EVENT_TRANSITION_START));
     } else if (status == CSSTransitionEvent.end) {
       // An Event fired when a CSS transition has finished playing.
-      target.dispatchEvent(Event(EventType.transitionend));
+      target.dispatchEvent(Event(EVENT_TRANSITION_END));
     }
   }
 }

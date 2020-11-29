@@ -87,7 +87,7 @@ void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event even
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> nativeEvent = event.toNative().cast<Void>();
-  dispatchEvent(nativeEventTarget, event.type.index, nativeEvent);
+  dispatchEvent(nativeEventTarget, stringToNativeString(event.type), nativeEvent);
 }
 
 void emitModuleEvent(int contextId, String data) {
@@ -271,7 +271,7 @@ void flushUICommand() {
             break;
           case UICommandType.addEvent:
             String eventType = nativeStringToString(nativeCommand.ref.args[0]);
-            controller.view.addEvent(id, int.parse(eventType));
+            controller.view.addEvent(id, eventType);
             break;
           case UICommandType.insertAdjacentNode:
             int childId = int.parse(nativeStringToString(nativeCommand.ref.args[0]));

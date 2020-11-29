@@ -45,7 +45,7 @@ InputEventInstance::InputEventInstance(JSInputEvent *jsInputEvent, NativeInputEv
 }
 
 InputEventInstance::InputEventInstance(JSInputEvent *jsInputEvent, JSStringRef data)
-  : EventInstance(jsInputEvent, JSEvent::EventType::input) {
+  : EventInstance(jsInputEvent, "input") {
   nativeInputEvent = new NativeInputEvent(nativeEvent);
 }
 

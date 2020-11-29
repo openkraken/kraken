@@ -263,7 +263,7 @@ String invokeModule(
         });
       } else if (method == 'addEvent') {
         List methodArgs = args[2];
-        controller.module.websocket.addEvent(methodArgs[0], EventType.values[methodArgs[1]]);
+        controller.module.websocket.addEvent(methodArgs[0], methodArgs[1]);
       } else if (method == 'send') {
         List methodArgs = args[2];
         controller.module.websocket.send(methodArgs[0], methodArgs[1]);

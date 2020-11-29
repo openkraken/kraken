@@ -17,8 +17,7 @@ class NativeKrakenInfo extends Struct {
 }
 
 class NativeEvent extends Struct {
-  @Int64()
-  int type;
+  Pointer<NativeString> type;
 
   @Int64()
   int bubbles;
@@ -181,9 +180,9 @@ class NativeBoundingClientRect extends Struct {
 }
 
 typedef Native_DispatchEvent = Void Function(
-    Pointer<NativeEventTarget> nativeEventTarget, Int64 eventType, Pointer<Void> nativeEvent);
+    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent);
 typedef Dart_DispatchEvent = void Function(
-    Pointer<NativeEventTarget> nativeEventTarget, int eventType, Pointer<Void> nativeEvent);
+    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent);
 
 class NativeEventTarget extends Struct {
   Pointer<Void> instance;
