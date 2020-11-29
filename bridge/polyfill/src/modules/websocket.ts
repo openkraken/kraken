@@ -1,5 +1,6 @@
-import {krakenInvokeModule} from '../bridge';
-import {EventType} from "../dom/events/event";
+import { krakenInvokeModule } from '../bridge';
+import { EventType } from "../dom/events/event";
+import { initPropertyHandlersForEventTargets } from "../helpers";
 
 function validateUrl(url: string) {
   let protocol = url.substring(0, url.indexOf(':'));
@@ -60,6 +61,10 @@ export function dispatchWebSocketEvent(clientId: string, event: ErrorEvent) {
   }
 }
 
+const builtInEvents = [
+  'open', 'close', 'message', 'error'
+];
+
 export class WebSocket extends EventTarget {
   private id: string;
   public readyState: ReadyState;
@@ -75,7 +80,7 @@ export class WebSocket extends EventTarget {
 
   constructor(url: string, protocol: string | string[]) {
     // @ts-ignore
-    super(['open', 'close', 'message', 'error']);
+    super(builtInEvents);
     // verify url schema
     validateUrl(url);
 
@@ -84,19 +89,8 @@ export class WebSocket extends EventTarget {
 
     this.id = krakenInvokeModule(JSON.stringify(['WebSocket', 'init', [url]]));
     wsClientMap[this.id] = this;
-  }
 
-  set onopen(callback: any) {
-    this.addEventListener('open', callback);
-  }
-  set onclose(callback: any) {
-    this.addEventListener('close', callback)
-  }
-  set onmessage(callback: any) {
-    this.addEventListener('message', callback);
-  }
-  set onerror(callback: any) {
-    this.addEventListener('error', callback);
+    initPropertyHandlersForEventTargets(this, builtInEvents);
   }
 
   addEventListener(type: string, callback: any) {

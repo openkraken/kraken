@@ -108,13 +108,10 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     return nullptr;
   }
 
-  JSEventTarget::EventTargetInstance *eventTargetInstance;
-
-  JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
-  if (prototypeObject != nullptr) {
+  auto *eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
+  if (eventTargetInstance == nullptr) {
+    JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
     eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
-  } else {
-    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   }
 
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
@@ -152,9 +149,9 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
 
     auto args = buildUICommandArgs(eventType);
 
-    auto Event = reinterpret_cast<JSEventTarget *>(eventTargetInstance->_hostClass);
+    auto EventTarget = reinterpret_cast<JSEventTarget *>(eventTargetInstance->_hostClass);
     auto isJsOnlyEvent =
-      std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), eventType) != Event->m_jsOnlyEvents.end();
+      std::find(EventTarget->m_jsOnlyEvents.begin(), EventTarget->m_jsOnlyEvents.end(), eventType) != EventTarget->m_jsOnlyEvents.end();
 
     if (!isJsOnlyEvent) {
       foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(
@@ -200,13 +197,10 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
     return nullptr;
   }
 
-  JSEventTarget::EventTargetInstance *eventTargetInstance;
-
-  JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
-  if (prototypeObject != nullptr) {
+  auto *eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
+  if (eventTargetInstance == nullptr) {
+    JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
     eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
-  } else {
-    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   }
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
@@ -257,13 +251,10 @@ JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, 
     return nullptr;
   }
 
-  JSEventTarget::EventTargetInstance *eventTargetInstance;
-
-  JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
-  if (prototypeObject != nullptr) {
+  auto *eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
+  if (eventTargetInstance == nullptr) {
+    JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
     eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
-  } else {
-    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   }
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 

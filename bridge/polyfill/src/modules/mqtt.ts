@@ -1,4 +1,5 @@
 import { krakenInvokeModule } from '../bridge';
+import {initPropertyHandlersForEventTargets} from "../helpers";
 
 enum ReadyState {
   CONNECTING = 0,
@@ -24,6 +25,8 @@ export function dispatchMQTTEvent(clientId: string, event: Event) {
   }
 }
 
+const builtInEvents = ['open', 'message', 'close', 'error', 'publish', 'subscribe', 'unsubscribe', 'subscribeerror'];
+
 export class MQTT extends EventTarget {
   CONNECTING = ReadyState.CONNECTING;
   OPEN = ReadyState.OPEN;
@@ -35,10 +38,12 @@ export class MQTT extends EventTarget {
 
   constructor(url: string, clientId: string = '') {
     // @ts-ignore
-    super(undefined, ['open', 'message', 'close', 'error', 'publish', 'subscribe', 'unsubscribe', 'subscribeerror']);
+    super(builtInEvents);
     this.url = url;
     this.id = krakenInvokeModule(JSON.stringify(['MQTT', 'init', [url, clientId]]));
     mqttClientMap[this.id] = this;
+
+    initPropertyHandlersForEventTargets(this, builtInEvents);
   }
 
   addEventListener(type: string, callback: any) {

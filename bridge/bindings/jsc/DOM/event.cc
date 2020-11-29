@@ -41,7 +41,8 @@ JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef construct
   const JSValueRef eventTypeValueRef = arguments[0];
   JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventTypeValueRef, exception);
   std::string &&eventType = JSStringToStdString(eventTypeStringRef);
-  auto event = JSEvent::buildEventInstance(eventType, context, nullptr);
+  auto nativeEvent = new NativeEvent(stringToNativeString(eventType));
+  auto event = JSEvent::buildEventInstance(eventType, context, nativeEvent);
   return event->object;
 }
 

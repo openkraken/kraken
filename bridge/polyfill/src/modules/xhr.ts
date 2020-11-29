@@ -2,9 +2,10 @@
 
 import { URL } from '../kom/url';
 import { navigator } from '../kom/navigator';
+import {initPropertyHandlersForEventTargets} from "../helpers";
 
 // XHR buildin events
-const buildInEvents = [
+const builtInEvents = [
   'readystatechange',
   'load',
   'loadstart',
@@ -93,7 +94,9 @@ export class XMLHttpRequest extends EventTarget {
 
   constructor() {
     // @ts-ignore
-    super(undefined, buildInEvents);
+    super(builtInEvents);
+
+    initPropertyHandlersForEventTargets(this, builtInEvents);
   }
 
   /**
