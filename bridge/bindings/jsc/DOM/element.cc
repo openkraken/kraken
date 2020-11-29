@@ -735,7 +735,7 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
   case ElementTagName::kPre:
   case ElementTagName::kParagraph:
   default:
-    return new ElementInstance(JSElement::instance(context), "div", true);
+    return new ElementInstance(JSElement::instance(context), name.c_str(), true);
   }
   return nullptr;
 }
