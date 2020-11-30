@@ -1016,21 +1016,30 @@ class RenderBoxModel extends RenderBox with
   }
 
   void _chainPaintOpacity(PaintingContext context, Offset offset) {
-//    paintOpacity(context, offset, _chainPaintDecoration);
-    paintOpacity(context, offset, _chainPaintOverflow);
+    paintOpacity(context, offset, _chainPaintDecoration);
+//    paintOpacity(context, offset, _chainPaintOverflow);
   }
 
   void _chainPaintDecoration(PaintingContext context, Offset offset) {
     EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
     paintDecoration(context, offset, resolvedPadding, style);
-//    _chainPaintOverflow(context, offset);
-    _chainPaintContentVisibility(context, offset);
+    _chainPaintOverflow(context, offset);
+//    _chainPaintContentVisibility(context, offset);
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
     EdgeInsets borderEdge = EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft);
 //    paintOverflow(context, offset, borderEdge, decoration, _chainPaintContentVisibility);
-    paintOverflow(context, offset, borderEdge, decoration, _chainPaintDecoration);
+    paintOverflow(context, offset, borderEdge, decoration, _chainPaintBackgroundImage);
+
+//    paintOverflow(context, offset, borderEdge, decoration, _chainPaintDecoration);
+  }
+
+  void _chainPaintBackgroundImage(PaintingContext context, Offset offset) {
+    EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
+    paintBackgroundImage(context, offset, resolvedPadding, style);
+//    _chainPaintOverflow(context, offset);
+    _chainPaintContentVisibility(context, offset);
   }
 
   void _chainPaintContentVisibility(PaintingContext context, Offset offset) {
