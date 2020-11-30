@@ -12,11 +12,11 @@
 #include "include/kraken_bridge.h"
 #include <JavaScriptCore/JavaScript.h>
 #include <chrono>
+#include <codecvt>
 #include <deque>
+#include <locale>
 #include <map>
 #include <string>
-#include <codecvt>
-#include <locale>
 #include <unordered_map>
 
 #ifndef __has_builtin
@@ -137,9 +137,16 @@ template <typename T> std::string toUTF8(const std::basic_string<T, std::char_tr
   return result;
 }
 
-template <typename T> void fromUTF8(const std::string &source, std::basic_string<T, std::char_traits<T>, std::allocator<T>> &result) {
+template <typename T>
+void fromUTF8(const std::string &source, std::basic_string<T, std::char_traits<T>, std::allocator<T>> &result) {
   std::wstring_convert<std::codecvt_utf8_utf16<T>, T> convertor;
   result = convertor.from_bytes(source);
+}
+
+inline std::string trim(std::string &str) {
+  str.erase(0, str.find_first_not_of(' ')); // prefixing spaces
+  str.erase(str.find_last_not_of(' ') + 1); // surfixing spaces
+  return str;
 }
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);

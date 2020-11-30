@@ -8,6 +8,7 @@
 #include "element.h"
 #include "text_node.h"
 #include <mutex>
+#include <regex>
 
 namespace kraken::binding::jsc {
 
@@ -96,6 +97,47 @@ JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 
 static std::unordered_map<JSContext *, DocumentInstance *> instanceMap{};
 
+std::string DocumentCookie::getCookie() {
+  std::string result;
+  for (auto &pair : cookiePairs) {
+    result += pair.first + "=" + pair.second;
+  }
+
+  return result;
+}
+
+void DocumentCookie::setCookie(std::string &cookieStr) {
+  trim(cookieStr);
+
+  std::string key;
+  std::string value;
+
+  const std::regex cookie_regex("^[^=]*=([^;]*)");
+
+  if (!cookieStr.find('=', 0)) {
+    key = "";
+    value = cookieStr;
+  } else {
+    size_t idx = cookieStr.find('=', 0);
+    key = cookieStr.substr(0, idx);
+
+    std::match_results<std::string::const_iterator> match_results;
+    // Only allow to set a single cookie at a time
+    // Find first cookie value if multiple cookie set
+    if (std::regex_match(cookieStr, match_results, cookie_regex)) {
+      if (match_results.size() == 2) {
+        value = match_results[1];
+
+        if (key.empty() && value.empty()) {
+          return;
+        }
+      }
+    }
+  }
+
+  cookiePairs[key] = value;
+}
+
 DocumentInstance *DocumentInstance::instance(JSContext *context) {
   return instanceMap[context];
 }
@@ -131,7 +173,8 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
     return all->jsObject;
   }
   case DocumentProperty::kCookie: {
-    return m_cookie.makeString();
+    std::string cookie = m_cookie.getCookie();
+    return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(cookie.c_str()));
   }
   case DocumentProperty::kCreateElement: {
     return m_createElement.function();
@@ -293,7 +336,9 @@ void DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueR
     auto property = propertyMap[name];
 
     if (property == DocumentProperty::kCookie) {
-      m_cookie.setString(JSValueToStringCopy(ctx, value, exception));
+      JSStringRef str = JSValueToStringCopy(ctx, value, exception);
+      std::string cookie = JSStringToStdString(str);
+      m_cookie.setCookie(cookie);
     }
   } else {
     NodeInstance::setProperty(name, value, exception);

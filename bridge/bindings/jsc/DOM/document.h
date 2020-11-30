@@ -40,6 +40,17 @@ protected:
   ~JSDocument();
 };
 
+class DocumentCookie {
+public:
+  DocumentCookie() = default;
+
+  std::string getCookie();
+  void setCookie(std::string &str);
+
+private:
+  std::unordered_map<std::string, std::string> cookiePairs;
+};
+
 class DocumentInstance : public JSNode::NodeInstance {
 public:
   enum class DocumentProperty {
@@ -91,12 +102,12 @@ public:
   ElementInstance *body;
 
 private:
-  JSStringHolder m_cookie{context, ""};
   JSFunctionHolder m_createElement{context, this, "createElement", createElement};
   JSFunctionHolder m_createTextNode{context, this, "createTextNode", createTextNode};
   JSFunctionHolder m_createComment{context, this, "createComment", createComment};
   JSFunctionHolder m_getElementById{context, this, "getElementById", getElementById};
   JSFunctionHolder m_getElementsByTagName{context, this, "getElementsByTagName", getElementsByTagName};
+  DocumentCookie m_cookie;
 };
 
 struct NativeDocument {
