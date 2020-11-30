@@ -13,6 +13,8 @@ namespace kraken::binding::jsc {
 
 struct NativeImageElement;
 
+void bindImageElement(std::unique_ptr<JSContext> &context);
+
 class JSImageElement : public JSElement {
 public:
   static std::unordered_map<JSContext *, JSImageElement *> &getInstanceMap();
@@ -41,9 +43,6 @@ public:
     NativeImageElement *nativeImageElement;
 
   private:
-    double _width;
-    double _height;
-
     JSStringRef _src{JSStringCreateWithUTF8CString("")};
     JSStringRef _loading{JSStringCreateWithUTF8CString("")};
   };
@@ -53,11 +52,17 @@ protected:
   ~JSImageElement();
 };
 
+using GetImageWidth = double(*)(NativeImageElement *nativeImageElement);
+using GetImageHeight = double(*)(NativeImageElement *nativeImageElement);
+
 struct NativeImageElement {
   NativeImageElement() = delete;
   explicit NativeImageElement(NativeElement *nativeElement) : nativeElement(nativeElement){};
 
   NativeElement *nativeElement;
+
+  GetImageWidth getImageWidth;
+  GetImageHeight getImageHeight;
 };
 
 } // namespace kraken::binding::jsc

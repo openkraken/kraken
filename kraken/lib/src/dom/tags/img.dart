@@ -10,6 +10,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/bridge.dart';
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:collection';
 
 const String IMAGE = 'IMG';
 
@@ -19,6 +20,9 @@ bool _isNumber(String str) {
   RegExp regExp = RegExp(r"^\d+");
   return regExp.hasMatch(str);
 }
+
+final Pointer<NativeFunction<GetImageWidth>> nativeGetImageWidth =  Pointer.fromFunction(ImageElement.getImageWidth, 0.0);
+final Pointer<NativeFunction<GetImageHeight>> nativeGetImageHeight =  Pointer.fromFunction(ImageElement.getImageHeight, 0.0);
 
 class ImageElement extends Element {
   String _source;
@@ -33,15 +37,39 @@ class ImageElement extends Element {
 
   bool _hasLazyLoading = false;
 
-  ImageElement(int targetId, Pointer<NativeImgElement> nativePtr, ElementManager elementManager)
+  static SplayTreeMap<int, ImageElement> _nativeMap = SplayTreeMap();
+
+  static Element getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
+    ImageElement element = _nativeMap[nativeImageElement.address];
+    assert(element != null, 'Can not get element from nativeElement: $nativeImageElement');
+    return element;
+  }
+
+  static double getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
+    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
+    return imageElement._imageInfo.image.width.toDouble();
+  }
+
+  static double getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
+    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
+    return imageElement._imageInfo.image.height.toDouble();
+  }
+
+  final Pointer<NativeImgElement> nativeImgElement;
+
+  ImageElement(int targetId, this.nativeImgElement, ElementManager elementManager)
       : super(
         targetId,
-        nativePtr.ref.nativeElement,
+        nativeImgElement.ref.nativeElement,
         elementManager,
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,
         tagName: IMAGE) {
     _renderStreamListener = ImageStreamListener(_renderMultiFrameImage);
+    _nativeMap[nativeImgElement.address] = this;
+
+    nativeImgElement.ref.getImageWidth = nativeGetImageHeight;
+    nativeImgElement.ref.getImageHeight = nativeGetImageHeight;
   }
 
   @override
@@ -69,6 +97,7 @@ class ImageElement extends Element {
     _image = null;
     _imageBox = null;
     _imageStream = null;
+    _nativeMap.remove(nativeImgElement.address);
   }
 
   void _renderImage() {

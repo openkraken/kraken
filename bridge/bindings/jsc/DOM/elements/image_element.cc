@@ -7,6 +7,11 @@
 
 namespace kraken::binding::jsc {
 
+void bindImageElement(std::unique_ptr<JSContext> &context) {
+  auto ImageElement = JSImageElement::instance(context.get());
+  JSC_GLOBAL_SET_PROPERTY(context, "Image", ImageElement->classObject);
+}
+
 std::unordered_map<JSContext *, JSImageElement *> &JSImageElement::getInstanceMap() {
   static std::unordered_map<JSContext *, JSImageElement *> instanceMap;
   return instanceMap;
@@ -65,9 +70,9 @@ JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, 
     auto property = propertyMap[name];
     switch (property) {
     case ImageProperty::kWidth:
-      return JSValueMakeNumber(_hostClass->ctx, _width);
+      return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageWidth(nativeImageElement));
     case ImageProperty::kHeight:
-      return JSValueMakeNumber(_hostClass->ctx, _height);
+      return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageHeight(nativeImageElement));
     case ImageProperty::kSrc: {
       if (_src == nullptr) return nullptr;
       return JSValueMakeString(_hostClass->ctx, _src);
@@ -89,18 +94,18 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
     auto property = propertyMap[name];
     switch (property) {
     case ImageProperty::kWidth: {
-      _width = JSValueToNumber(_hostClass->ctx, value, exception);
+      double width = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      std::string widthString = std::to_string(_width) + "px";
+      std::string widthString = std::to_string(width) + "px";
       auto args = buildUICommandArgs(name, widthString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
       break;
     }
     case ImageProperty::kHeight: {
-      _height = JSValueToNumber(_hostClass->ctx, value, exception);
+      double height = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      std::string heightString = std::to_string(_height) + "px";
+      std::string heightString = std::to_string(height) + "px";
       auto args = buildUICommandArgs(name, heightString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
