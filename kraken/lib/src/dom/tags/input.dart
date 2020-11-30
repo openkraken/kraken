@@ -121,7 +121,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   TextOverflow get textOverflow {
     assert(style != null);
 
-    switch(style['textOverflow']) {
+    switch(style[TEXT_OVERFLOW]) {
       case 'ellipsis':
         return TextOverflow.ellipsis;
       case 'fade':
