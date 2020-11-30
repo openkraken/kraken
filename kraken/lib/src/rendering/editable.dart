@@ -1899,6 +1899,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     bool showSelection = false;
     bool showCaret = false;
+    bool showCursor = _showCursor?.value ?? false;
 
     if (selection != null && !_floatingCursorOn) {
       if (selection.isCollapsed && _showCursor.value && cursorColor != null)
@@ -1909,19 +1910,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final double availableMaxWidth = math.max(0.0, maxWidth - _caretMargin);
     final double availableMinWidth = math.min(minWidth, availableMaxWidth);
+    // Pass [TextOverflow.clip] by painting clip to save text border.
+    final bool shouldClipWidth = _textOverflow == TextOverflow.ellipsis || _textOverflow == TextOverflow.fade;
 
-    if (_isMultiline || showCaret || showSelection) {
+    if (shouldClipWidth && !_isMultiline && !showCaret && !showSelection && !showCursor) {
+      _textPainter.layout(maxWidth: availableMaxWidth);
+    } else {
       final double textMaxWidth = _isMultiline ? availableMaxWidth : double.infinity;
       final double textMinWidth = forceLine ? availableMaxWidth : availableMinWidth;
 
       _textPainter.layout(
         minWidth: textMinWidth,
         maxWidth: textMaxWidth,
-      );
-    } else {
-      _textPainter.layout(
-        minWidth: 0,
-        maxWidth: availableMaxWidth,
       );
     }
 
