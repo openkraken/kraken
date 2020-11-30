@@ -68,7 +68,7 @@ class ImageElement extends Element {
     _renderStreamListener = ImageStreamListener(_renderMultiFrameImage);
     _nativeMap[nativeImgElement.address] = this;
 
-    nativeImgElement.ref.getImageWidth = nativeGetImageHeight;
+    nativeImgElement.ref.getImageWidth = nativeGetImageWidth;
     nativeImgElement.ref.getImageHeight = nativeGetImageHeight;
   }
 
