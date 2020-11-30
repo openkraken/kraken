@@ -24,7 +24,7 @@ class CanvasPainter extends CustomPainter {
   set scaleX(double value) {
     if (value != null && value != _scaleX) {
       _scaleX = value;
-      reset();
+      _resetPaintingContext();
     }
   }
 
@@ -33,7 +33,7 @@ class CanvasPainter extends CustomPainter {
   set scaleY(double value) {
     if (value != null && value != _scaleY) {
       _scaleY = value;
-      reset();
+      _resetPaintingContext();
     }
   }
 
@@ -74,7 +74,7 @@ class CanvasPainter extends CustomPainter {
     return false;
   }
 
-  void reset() {
+  void _resetPaintingContext() {
     _picture?.dispose();
     _picture = null;
     _shouldRepaint = true;
@@ -88,10 +88,8 @@ class CanvasPainter extends CustomPainter {
       _pictureRecorder = null;
     }
 
-    if (_picture != null) {
-      _picture.dispose();
-      _picture = null;
-      _canvas = null;
-    }
+    _picture?.dispose();
+    _picture = null;
+    _canvas = null;
   }
 }
