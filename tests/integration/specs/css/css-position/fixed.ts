@@ -57,6 +57,10 @@ describe('Position fixed', () => {
         }),
       ]
     );
+
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+
     requestAnimationFrame( () => {
       container.scroll(0, 200);
       setTimeout(async () => {
@@ -64,9 +68,6 @@ describe('Position fixed', () => {
         done();
       }, 100);
     });
-
-    BODY.appendChild(container);
-    await matchViewportSnapshot();
   });
 
   it('hitTest with position fixed elements', async () => {

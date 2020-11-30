@@ -57,12 +57,12 @@ describe('relayout-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
+    await matchViewportSnapshot();
+
     requestAnimationFrame(async () => {
       image.src = 'assets/100x100-green.png';
       await matchViewportSnapshot(0.1);
       done();
     });
-
-    await matchViewportSnapshot();
   });
 });
