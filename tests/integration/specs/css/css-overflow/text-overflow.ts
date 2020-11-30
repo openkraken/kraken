@@ -125,7 +125,7 @@ describe('text-overflow', () => {
     await matchViewportSnapshot();
   });
   
-  fit('ellipsis-editing-input', async () => {
+  it('ellipsis-editing-input', async () => {
     let p;
     let inputElement;
     p = createElement(
