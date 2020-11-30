@@ -9,11 +9,11 @@ import 'package:kraken/painting.dart';
 import 'package:kraken/css.dart';
 
 const String CANVAS = 'CANVAS';
+const double ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300.0;
+const double ELEMENT_DEFAULT_HEIGHT_IN_PIXEL = 150.0;
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
-  WIDTH: ELEMENT_DEFAULT_WIDTH,
-  HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
 class RenderCanvasPaint extends RenderCustomPaint {
@@ -146,7 +146,7 @@ class CanvasElement extends Element {
   }
 
   /// Element attribute width
-  double _attrWidth = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
+  double _attrWidth = ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
   double get attrWidth => _attrWidth;
   set attrWidth(double value) {
     if (value != null && value != _attrWidth) {
@@ -156,7 +156,7 @@ class CanvasElement extends Element {
   }
 
   /// Element attribute height
-  double _attrHeight = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
+  double _attrHeight = ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
   double get attrHeight => _attrHeight;
   set attrHeight(double value) {
     if (value != null && value != _attrHeight) {
