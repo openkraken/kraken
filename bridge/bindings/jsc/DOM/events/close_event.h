@@ -25,6 +25,7 @@ public:
   static std::vector<JSStringRef> &getCloseEventPropertyNames();
   const static std::unordered_map<std::string, CloseEventProperty> &getCloseEventPropertyMap();
 
+  static std::unordered_map<JSContext *, JSCloseEvent *> &getInstanceMap();
   static JSCloseEvent *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -34,6 +35,7 @@ public:
 
 protected:
   JSCloseEvent() = delete;
+  ~JSCloseEvent();
   explicit JSCloseEvent(JSContext *context);
 };
 

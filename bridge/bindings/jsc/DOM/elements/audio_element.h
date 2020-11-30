@@ -23,6 +23,7 @@ struct NativeAudioElement {
 class JSAudioElement : public JSMediaElement {
 public:
   static JSAudioElement *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSAudioElement *> &getInstanceMap();
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
@@ -41,6 +42,7 @@ public:
   };
 protected:
   JSAudioElement() = delete;
+  ~JSAudioElement();
   explicit JSAudioElement(JSContext *context);
 };
 

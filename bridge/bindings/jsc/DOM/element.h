@@ -93,6 +93,7 @@ public:
     kCanvas
   };
 
+  static std::unordered_map<JSContext *, JSElement *> &getInstanceMap();
   static JSElement *instance(JSContext *context);
   static std::vector<JSStringRef> &getElementPropertyNames();
   static const std::unordered_map<std::string, ElementProperty> &getElementPropertyMap();
@@ -126,6 +127,7 @@ public:
 protected:
   JSElement() = delete;
   explicit JSElement(JSContext *context);
+  ~JSElement();
 
 private:
   friend ElementInstance;

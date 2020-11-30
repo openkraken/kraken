@@ -13,12 +13,21 @@ void bindTextNode(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "TextNode", textNode->classObject);
 }
 
+std::unordered_map<JSContext *, JSTextNode *> & JSTextNode::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSTextNode *> instanceMap;
+  return instanceMap;
+}
+
 JSTextNode *JSTextNode::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSTextNode *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSTextNode(context);
   }
   return instanceMap[context];
+}
+JSTextNode::~JSTextNode() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSTextNode::JSTextNode(JSContext *context) : JSNode(context, "TextNode") {}

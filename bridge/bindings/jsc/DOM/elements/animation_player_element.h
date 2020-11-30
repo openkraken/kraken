@@ -50,6 +50,8 @@ public:
   };
 protected:
   JSAnimationPlayerElement() = delete;
+  ~JSAnimationPlayerElement() override;
+  static std::unordered_map<JSContext *, JSAnimationPlayerElement*> &getInstanceMap();
   explicit JSAnimationPlayerElement(JSContext *context);
 };
 

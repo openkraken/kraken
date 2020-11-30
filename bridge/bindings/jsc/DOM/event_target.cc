@@ -19,8 +19,13 @@ void bindEventTarget(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "EventTarget", eventTarget->classObject);
 }
 
+std::unordered_map<JSContext *, JSEventTarget *> &JSEventTarget::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSEventTarget *> instanceMap;
+  return instanceMap;
+}
+
 JSEventTarget *JSEventTarget::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSEventTarget *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     const JSStaticFunction staticFunction[]{{"addEventListener", addEventListener, kJSPropertyAttributeReadOnly},
                                             {"removeEventListener", removeEventListener, kJSPropertyAttributeReadOnly},
@@ -30,6 +35,11 @@ JSEventTarget *JSEventTarget::instance(JSContext *context) {
     instanceMap[context] = new JSEventTarget(context, staticFunction, nullptr);
   }
   return instanceMap[context];
+}
+
+JSEventTarget::~JSEventTarget() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostClass(context, name) {}

@@ -12,12 +12,22 @@ void bindIntersectionChangeEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "IntersectionChangeEvent", event->classObject);
 };
 
+std::unordered_map<JSContext *, JSIntersectionChangeEvent *> & JSIntersectionChangeEvent::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSIntersectionChangeEvent *> instanceMap;
+  return instanceMap;
+}
+
 JSIntersectionChangeEvent *JSIntersectionChangeEvent::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSIntersectionChangeEvent *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSIntersectionChangeEvent(context);
   }
   return instanceMap[context];
+}
+
+JSIntersectionChangeEvent::~JSIntersectionChangeEvent() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSIntersectionChangeEvent::JSIntersectionChangeEvent(JSContext *context)

@@ -117,12 +117,22 @@ void JSElementAttributes::removeAttribute(std::string &name) {
 
 JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
+std::unordered_map<JSContext *, JSElement *> & JSElement::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSElement *> instanceMap;
+  return instanceMap;
+}
+
 JSElement *JSElement::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSElement *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSElement(context);
   }
   return instanceMap[context];
+}
+
+JSElement::~JSElement() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

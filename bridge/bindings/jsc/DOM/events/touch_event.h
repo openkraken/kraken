@@ -30,6 +30,7 @@ public:
   static std::vector<JSStringRef> &getTouchEventPropertyNames();
   const static std::unordered_map<std::string, TouchEventProperty> &getTouchEventPropertyMap();
 
+  static std::unordered_map<JSContext *, JSTouchEvent *> &getInstanceMap();
   static JSTouchEvent *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -39,6 +40,7 @@ public:
 
 protected:
   JSTouchEvent() = delete;
+  ~JSTouchEvent();
   explicit JSTouchEvent(JSContext *context);
 };
 

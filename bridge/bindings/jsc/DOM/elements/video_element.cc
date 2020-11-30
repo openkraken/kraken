@@ -7,12 +7,22 @@
 
 namespace kraken::binding::jsc {
 
+std::unordered_map<JSContext *, JSVideoElement *> &JSVideoElement::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSVideoElement *> instanceMap;
+  return instanceMap;
+}
+
 JSVideoElement *JSVideoElement::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSVideoElement *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSVideoElement(context);
   }
   return instanceMap[context];
+}
+
+JSVideoElement::~JSVideoElement() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSVideoElement::JSVideoElement(JSContext *context) : JSMediaElement(context) {}
@@ -29,7 +39,7 @@ JSVideoElement::VideoElementInstance::VideoElementInstance(JSVideoElement *JSVid
   auto args = buildUICommandArgs(tagName);
 
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeVideoElement);
+    ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeVideoElement);
 }
 
 JSVideoElement::VideoElementInstance::~VideoElementInstance() {

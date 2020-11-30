@@ -25,6 +25,7 @@ public:
   static std::vector<JSStringRef> &getInputEventPropertyNames();
   const static std::unordered_map<std::string, InputEventProperty> &getInputEventPropertyMap();
 
+  static std::unordered_map<JSContext *, JSInputEvent *> &getInstanceMap();
   static JSInputEvent *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -34,6 +35,7 @@ public:
 
 protected:
   JSInputEvent() = delete;
+  ~JSInputEvent();
   explicit JSInputEvent(JSContext *context);
 };
 

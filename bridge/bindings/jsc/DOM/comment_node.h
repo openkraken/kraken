@@ -17,6 +17,7 @@ struct NativeComment;
 
 class JSCommentNode : public JSNode {
 public:
+  static std::unordered_map<JSContext *, JSCommentNode *> &getInstanceMap();
   static JSCommentNode *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -45,6 +46,7 @@ public:
 protected:
   JSCommentNode() = delete;
   explicit JSCommentNode(JSContext *context);
+  ~JSCommentNode();
 };
 
 struct NativeComment {

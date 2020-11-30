@@ -9,11 +9,21 @@
 namespace kraken::binding::jsc {
 
 JSCanvasElement *JSCanvasElement::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSCanvasElement *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSCanvasElement(context);
   }
   return instanceMap[context];
+}
+
+std::unordered_map<JSContext *, JSCanvasElement *> & JSCanvasElement::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSCanvasElement *> instanceMap;
+  return instanceMap;
+}
+
+JSCanvasElement::~JSCanvasElement() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSCanvasElement::JSCanvasElement(JSContext *context) : JSElement(context) {}

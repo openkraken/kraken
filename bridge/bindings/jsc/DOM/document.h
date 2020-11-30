@@ -27,16 +27,17 @@ struct NativeDocument;
 
 class JSDocument : public JSNode {
 public:
+  static std::unordered_map<JSContext *, JSDocument *> &getInstanceMap();
   static JSDocument *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
 private:
-
 protected:
   JSDocument() = delete;
   JSDocument(JSContext *context);
+  ~JSDocument();
 };
 
 class DocumentInstance : public JSNode::NodeInstance {

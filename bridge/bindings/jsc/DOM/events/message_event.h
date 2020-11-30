@@ -25,6 +25,7 @@ public:
   static std::vector<JSStringRef> &getMessageEventPropertyNames();
   const static std::unordered_map<std::string, MessageEventProperty> &getMessageEventPropertyMap();
 
+  static std::unordered_map<JSContext *, JSMessageEvent *> getInstanceMap();
   static JSMessageEvent *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -34,6 +35,7 @@ public:
 
 protected:
   JSMessageEvent() = delete;
+  ~JSMessageEvent();
   explicit JSMessageEvent(JSContext *context);
 };
 

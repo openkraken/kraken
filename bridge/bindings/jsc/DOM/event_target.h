@@ -34,6 +34,7 @@ struct NativeEventTarget;
 
 class JSEventTarget : public HostClass {
 public:
+  static std::unordered_map<JSContext *, JSEventTarget *> &getInstanceMap();
   static JSEventTarget *instance(JSContext *context);
   enum class EventTargetProperty {
     kAddEventListener,
@@ -89,6 +90,7 @@ protected:
   friend EventTargetInstance;
   explicit JSEventTarget(JSContext *context, const char *name);
   explicit JSEventTarget(JSContext *context, const JSStaticFunction *staticFunction, const JSStaticValue *staticValue);
+  ~JSEventTarget();
 private:
   JSFunctionHolder m_removeEventListener{context, this, "removeEventListener", removeEventListener};
   JSFunctionHolder m_dispatchEvent{context, this, "dispatchEvent", dispatchEvent};

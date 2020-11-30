@@ -12,12 +12,22 @@ void bindCloseEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "CloseEvent", event->classObject);
 };
 
+std::unordered_map<JSContext *, JSCloseEvent *> & JSCloseEvent::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSCloseEvent *> instanceMap;
+  return instanceMap;
+}
+
 JSCloseEvent *JSCloseEvent::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSCloseEvent *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSCloseEvent(context);
   }
   return instanceMap[context];
+}
+
+JSCloseEvent::~JSCloseEvent() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSCloseEvent::JSCloseEvent(JSContext *context) : JSEvent(context, "CloseEvent") {}

@@ -15,6 +15,7 @@ struct NativeIframeElement;
 
 class JSIframeElement : public JSElement {
 public:
+  static std::unordered_map<JSContext *, JSIframeElement *> &getInstanceMap();
   static JSIframeElement *instance(JSContext *context);
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -47,6 +48,7 @@ public:
 protected:
   JSIframeElement() = delete;
   explicit JSIframeElement(JSContext *context);
+  ~JSIframeElement();
 };
 
 using IframePostMessage = void (*)(NativeIframeElement *nativePtr, NativeString *message);

@@ -7,12 +7,22 @@
 
 namespace kraken::binding::jsc {
 
+std::unordered_map<JSContext *, JSAnimationPlayerElement *> &JSAnimationPlayerElement::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSAnimationPlayerElement *> instanceMap;
+  return instanceMap;
+}
+
 JSAnimationPlayerElement *JSAnimationPlayerElement::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSAnimationPlayerElement *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSAnimationPlayerElement(context);
   }
   return instanceMap[context];
+}
+
+JSAnimationPlayerElement::~JSAnimationPlayerElement() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSAnimationPlayerElement::JSAnimationPlayerElement(JSContext *context) : JSElement(context) {}
@@ -53,7 +63,8 @@ JSValueRef JSAnimationPlayerElement::play(JSContextRef ctx, JSObjectRef function
     static_cast<JSAnimationPlayerElement::AnimationPlayerElementInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->flushUICommand();
-  assert_m(elementInstance->nativeAnimationPlayerElement->play != nullptr, "Failed to call dart method: play() is nullptr");
+  assert_m(elementInstance->nativeAnimationPlayerElement->play != nullptr,
+           "Failed to call dart method: play() is nullptr");
   elementInstance->nativeAnimationPlayerElement->play(elementInstance->nativeAnimationPlayerElement, &name, mix,
                                                       mixSeconds);
 

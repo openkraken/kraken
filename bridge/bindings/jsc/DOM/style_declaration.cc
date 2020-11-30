@@ -50,12 +50,22 @@ static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
 
 CSSStyleDeclaration::CSSStyleDeclaration(JSContext *context) : HostClass(context, "CSSStyleDeclaration") {}
 
+std::unordered_map<JSContext *, CSSStyleDeclaration *> & CSSStyleDeclaration::getInstanceMap() {
+  static std::unordered_map<JSContext *, CSSStyleDeclaration *> instanceMap;
+  return instanceMap;
+}
+
 CSSStyleDeclaration *CSSStyleDeclaration::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, CSSStyleDeclaration *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new CSSStyleDeclaration(context);
   }
   return instanceMap[context];
+}
+
+CSSStyleDeclaration::~CSSStyleDeclaration() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSObjectRef CSSStyleDeclaration::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

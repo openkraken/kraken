@@ -25,6 +25,7 @@ public:
   static std::vector<JSStringRef> &getMediaErrorEventPropertyNames();
   const static std::unordered_map<std::string, MediaErrorEventProperty> &getMediaErrorEventPropertyMap();
 
+  static std::unordered_map<JSContext *, JSMediaErrorEvent *> &getInstanceMap();
   static JSMediaErrorEvent *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -34,6 +35,7 @@ public:
 
 protected:
   JSMediaErrorEvent() = delete;
+  ~JSMediaErrorEvent();
   explicit JSMediaErrorEvent(JSContext *context);
 };
 

@@ -28,10 +28,8 @@ struct NativeCanvasElement {
 
 class JSCanvasElement : public JSElement {
 public:
+  static std::unordered_map<JSContext *, JSCanvasElement *> &getInstanceMap();
   static JSCanvasElement *instance(JSContext *context);
-
-  JSCanvasElement() = delete;
-  explicit JSCanvasElement(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -61,6 +59,10 @@ public:
 
     JSFunctionHolder m_getContext{context, this, "getContext", getContext};
   };
+private:
+  JSCanvasElement() = delete;
+  ~JSCanvasElement();
+  explicit JSCanvasElement(JSContext *context);
 };
 
 using SetFont = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *font);

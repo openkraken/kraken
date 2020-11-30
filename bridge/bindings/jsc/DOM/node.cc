@@ -17,12 +17,22 @@ void bindNode(std::unique_ptr<JSContext> &context) {
 JSNode::JSNode(JSContext *context) : JSEventTarget(context, "Node") {}
 JSNode::JSNode(JSContext *context, const char *name) : JSEventTarget(context, name) {}
 
+std::unordered_map<JSContext *, JSNode *> & JSNode::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSNode *> instanceMap;
+  return instanceMap;
+}
+
 JSNode *JSNode::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSNode *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSNode(context);
   }
   return instanceMap[context];
+}
+
+JSNode::~JSNode() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSNode::NodeInstance::~NodeInstance() {

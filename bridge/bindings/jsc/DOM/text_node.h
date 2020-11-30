@@ -17,6 +17,7 @@ struct NativeTextNode;
 
 class JSTextNode : public JSNode {
 public:
+  static std::unordered_map<JSContext *, JSTextNode *> &getInstanceMap();
   static JSTextNode *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -50,6 +51,7 @@ public:
 
 protected:
   JSTextNode() = delete;
+  ~JSTextNode();
   explicit JSTextNode(JSContext *context);
 };
 

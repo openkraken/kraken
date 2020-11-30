@@ -15,6 +15,7 @@ struct NativeObjectElement;
 
 class JSObjectElement : public JSElement {
 public:
+  static std::unordered_map<JSContext *, JSObjectElement *> &getInstanceMap();
   static JSObjectElement *instance(JSContext *context);
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -45,6 +46,7 @@ public:
     JSStringRef _type{JSStringCreateWithUTF8CString("")};
   };
 protected:
+  ~JSObjectElement();
   JSObjectElement() = delete;
   explicit JSObjectElement(JSContext *context);
 };

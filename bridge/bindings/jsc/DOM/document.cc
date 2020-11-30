@@ -19,12 +19,22 @@ void bindDocument(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
 }
 
+std::unordered_map<JSContext *, JSDocument *> &JSDocument::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSDocument *> instanceMap;
+  return instanceMap;
+}
+
 JSDocument *JSDocument::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSDocument *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSDocument(context);
   }
   return instanceMap[context];
+}
+
+JSDocument::~JSDocument() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -84,7 +94,7 @@ JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constr
   return instance->object;
 }
 
-static std::unordered_map<JSContext *, DocumentInstance*> instanceMap{};
+static std::unordered_map<JSContext *, DocumentInstance *> instanceMap{};
 
 DocumentInstance *DocumentInstance::instance(JSContext *context) {
   return instanceMap[context];
@@ -152,6 +162,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
 
 DocumentInstance::~DocumentInstance() {
   delete nativeDocument;
+  instanceMap.erase(context);
 }
 
 void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -163,12 +174,15 @@ void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator
 }
 
 std::vector<JSStringRef> &DocumentInstance::getDocumentPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("body"),           JSStringCreateWithUTF8CString("createElement"),
-    JSStringCreateWithUTF8CString("createTextNode"), JSStringCreateWithUTF8CString("createComment"),
-    JSStringCreateWithUTF8CString("getElementById"), JSStringCreateWithUTF8CString("getElementsByTagName"),
-    JSStringCreateWithUTF8CString("documentElement"), JSStringCreateWithUTF8CString("all"),
-  JSStringCreateWithUTF8CString("cookie")};
+  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("body"),
+                                                JSStringCreateWithUTF8CString("createElement"),
+                                                JSStringCreateWithUTF8CString("createTextNode"),
+                                                JSStringCreateWithUTF8CString("createComment"),
+                                                JSStringCreateWithUTF8CString("getElementById"),
+                                                JSStringCreateWithUTF8CString("getElementsByTagName"),
+                                                JSStringCreateWithUTF8CString("documentElement"),
+                                                JSStringCreateWithUTF8CString("all"),
+                                                JSStringCreateWithUTF8CString("cookie")};
   return propertyNames;
 }
 

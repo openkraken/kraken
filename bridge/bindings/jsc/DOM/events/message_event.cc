@@ -14,12 +14,22 @@ void bindMessageEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "MessageEvent", event->classObject);
 };
 
+std::unordered_map<JSContext *, JSMessageEvent *> JSMessageEvent::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSMessageEvent *> instanceMap;
+  return instanceMap;
+}
+
 JSMessageEvent *JSMessageEvent::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSMessageEvent *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSMessageEvent(context);
   }
   return instanceMap[context];
+}
+
+JSMessageEvent::~JSMessageEvent() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSMessageEvent::JSMessageEvent(JSContext *context) : JSEvent(context, "MessageEvent") {}

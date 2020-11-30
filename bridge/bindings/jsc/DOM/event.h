@@ -74,8 +74,8 @@ public:
   static std::vector<JSStringRef> &getEventPropertyNames();
   const static std::unordered_map<std::string, EventProperty> &getEventPropertyMap();
 
+  static std::unordered_map<JSContext *, JSEvent *> &getInstanceMap();
   static JSEvent *instance(JSContext *context);
-
   // Create an Event Object from an nativeEvent address which allocated by dart side.
   static JSValueRef initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
@@ -100,6 +100,7 @@ protected:
   JSEvent() = delete;
   explicit JSEvent(JSContext *context, const char *name);
   explicit JSEvent(JSContext *context);
+  ~JSEvent() override;
 
 private:
   friend EventInstance;

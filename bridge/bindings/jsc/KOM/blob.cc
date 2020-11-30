@@ -80,13 +80,22 @@ std::vector<uint8_t> BlobBuilder::finalize() {
   return std::move(_data);
 }
 
+std::unordered_map<JSContext *, JSBlob *> & JSBlob::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSBlob *> instanceMap;
+  return instanceMap;
+}
+
 JSBlob *JSBlob::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSBlob *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSBlob(context);
-    KRAKEN_LOG(VERBOSE) << "created Blob constructor " << instanceMap[context];
   }
   return instanceMap[context];
+}
+
+JSBlob::~JSBlob() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSObjectRef JSBlob::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

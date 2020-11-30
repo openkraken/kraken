@@ -15,6 +15,7 @@ struct NativeImageElement;
 
 class JSImageElement : public JSElement {
 public:
+  static std::unordered_map<JSContext *, JSImageElement *> &getInstanceMap();
   static JSImageElement *instance(JSContext *context);
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -49,6 +50,7 @@ public:
 protected:
   JSImageElement() = delete;
   explicit JSImageElement(JSContext *context);
+  ~JSImageElement();
 };
 
 struct NativeImageElement {

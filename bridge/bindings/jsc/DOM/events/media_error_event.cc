@@ -12,12 +12,22 @@ void bindMediaErrorEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "MediaErrorEvent", event->classObject);
 };
 
+std::unordered_map<JSContext *, JSMediaErrorEvent *> & JSMediaErrorEvent::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSMediaErrorEvent *> instanceMap;
+  return instanceMap;
+}
+
 JSMediaErrorEvent *JSMediaErrorEvent::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSMediaErrorEvent *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSMediaErrorEvent(context);
   }
   return instanceMap[context];
+}
+
+JSMediaErrorEvent::~JSMediaErrorEvent() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSMediaErrorEvent::JSMediaErrorEvent(JSContext *context) : JSEvent(context, "MediaErrorEvent") {}

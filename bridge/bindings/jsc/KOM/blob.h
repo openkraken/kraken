@@ -23,6 +23,7 @@ class BlobBuilder;
 
 class JSBlob : public HostClass {
 public:
+  static std::unordered_map<JSContext *, JSBlob *> &getInstanceMap();
   static JSBlob *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -84,6 +85,7 @@ public:
 
 protected:
   JSBlob() = delete;
+  ~JSBlob();
   explicit JSBlob(JSContext *context) : HostClass(context, "Blob"){};
 };
 

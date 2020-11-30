@@ -19,6 +19,7 @@ using FastSeek = void (*)(NativeMediaElement *mediaElement, double duration);
 
 class JSMediaElement : public JSElement {
 public:
+  static std::unordered_map<JSContext *, JSMediaElement *> &getInstanceMap();
   static JSMediaElement *instance(JSContext *context);
   class MediaElementInstance : public ElementInstance {
   public:
@@ -56,6 +57,7 @@ public:
 
 protected:
   JSMediaElement() = delete;
+  ~JSMediaElement();
   explicit JSMediaElement(JSContext *context);
 };
 

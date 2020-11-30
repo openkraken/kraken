@@ -7,12 +7,21 @@
 
 namespace kraken::binding::jsc {
 
+std::unordered_map<JSContext *, JSImageElement *> &JSImageElement::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSImageElement *> instanceMap;
+  return instanceMap;
+}
+
 JSImageElement *JSImageElement::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSImageElement *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSImageElement(context);
   }
   return instanceMap[context];
+}
+JSImageElement::~JSImageElement() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSImageElement::JSImageElement(JSContext *context) : JSElement(context) {}
@@ -85,7 +94,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
       std::string widthString = std::to_string(_width) + "px";
       auto args = buildUICommandArgs(name, widthString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
       break;
     }
     case ImageProperty::kHeight: {
@@ -94,7 +103,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
       std::string heightString = std::to_string(_height) + "px";
       auto args = buildUICommandArgs(name, heightString);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
       break;
     }
     case ImageProperty::kSrc: {
@@ -103,7 +112,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
 
       auto args = buildUICommandArgs(name, JSStringRetain(_src));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
       break;
     }
     case ImageProperty::kLoading: {
@@ -112,7 +121,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
 
       auto args = buildUICommandArgs(name, JSStringRetain(_loading));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-          ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
       break;
     }
     default:

@@ -20,12 +20,22 @@ void bindEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "Event", event->classObject);
 };
 
+std::unordered_map<JSContext *, JSEvent *> & JSEvent::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSEvent *> instanceMap;
+  return instanceMap;
+}
+
 JSEvent *JSEvent::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSEvent *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSEvent(context);
   }
   return instanceMap[context];
+}
+
+JSEvent::~JSEvent() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSEvent::JSEvent(JSContext *context) : HostClass(context, "Event") {}

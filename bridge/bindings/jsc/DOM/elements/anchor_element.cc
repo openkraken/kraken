@@ -10,12 +10,22 @@ namespace kraken::binding::jsc {
 
 JSAnchorElement::JSAnchorElement(JSContext *context) : JSElement(context) {}
 
+std::unordered_map<JSContext *, JSAnchorElement *> & JSAnchorElement::getInstanceMap() {
+  static std::unordered_map<JSContext *, JSAnchorElement *> instanceMap;
+  return instanceMap;
+}
+
 JSAnchorElement *JSAnchorElement::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, JSAnchorElement *> instanceMap{};
+  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSAnchorElement(context);
   }
   return instanceMap[context];
+}
+
+JSAnchorElement::~JSAnchorElement() {
+  auto instanceMap = getInstanceMap();
+  instanceMap.erase(context);
 }
 
 JSObjectRef JSAnchorElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

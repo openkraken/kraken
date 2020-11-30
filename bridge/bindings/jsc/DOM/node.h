@@ -30,6 +30,7 @@ class DocumentInstance;
 
 class JSNode : public JSEventTarget {
 public:
+  static std::unordered_map<JSContext *, JSNode *> &getInstanceMap();
   static JSNode *instance(JSContext *context);
   enum class NodeProperty {
     kIsConnected,
@@ -120,6 +121,7 @@ protected:
   JSNode() = delete;
   explicit JSNode(JSContext *context);
   explicit JSNode(JSContext *context, const char *name);
+  ~JSNode();
 
 private:
   JSFunctionHolder m_removeChild{context, this, "removeChild", removeChild};

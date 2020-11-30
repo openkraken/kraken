@@ -17,6 +17,7 @@
 #include <string>
 #include <codecvt>
 #include <locale>
+#include <unordered_map>
 
 #ifndef __has_builtin
 #define __has_builtin(x) 0

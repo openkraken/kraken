@@ -20,6 +20,7 @@ struct NativeVideoElement {
 
 class JSVideoElement : public JSMediaElement {
 public:
+  static std::unordered_map<JSContext *, JSVideoElement *> &getInstanceMap();
   static JSVideoElement *instance(JSContext *context);
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -40,6 +41,7 @@ public:
   };
 protected:
   JSVideoElement() = delete;
+  ~JSVideoElement();
   explicit JSVideoElement(JSContext *context);
 };
 
