@@ -368,14 +368,7 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
                                                             JSValueRef *exception) {
   std::string eventType = name.substr(2);
 
-  if (_eventHandlers.contains(eventType)) {
-    for (auto &it : _eventHandlers) {
-      for (auto &handler : it.second) {
-        JSValueUnprotect(_hostClass->ctx, handler);
-      }
-    }
-    _eventHandlers[eventType].clear();
-  } else {
+  if (!_eventHandlers.contains(eventType)) {
     _eventHandlers[eventType] = std::deque<JSObjectRef>();
   }
 
