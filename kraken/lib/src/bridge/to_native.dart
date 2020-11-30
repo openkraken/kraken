@@ -228,71 +228,104 @@ typedef Dart_ClearUICommandItems = void Function(int contextId);
 final Dart_ClearUICommandItems _clearUICommandItems =
     nativeDynamicLibrary.lookup<NativeFunction<Native_ClearUICommandItems>>('clearUICommandItems').asFunction();
 
+class UICommand {
+  UICommandType type;
+  int id;
+  List<String> args;
+  Pointer nativePtr;
+}
+
+List<UICommand> readNativeUICommandToDart(Pointer<Pointer<UICommandItem>> nativeCommandItems, int commandLength) {
+  List<UICommand> results = List(commandLength);
+
+  for (int i = 0; i < commandLength; i ++) {
+    UICommand command = UICommand();
+    Pointer<UICommandItem> nativeCommand = nativeCommandItems[i];
+    if (nativeCommand == nullptr) continue;
+
+    command.type = UICommandType.values[nativeCommand.ref.type];
+    command.id = nativeCommand.ref.id;
+    int argsLength = nativeCommand.ref.length;
+    command.args = List(argsLength);
+    for (int j = 0; j < argsLength; j ++) {
+      command.args[j] = nativeStringToString(nativeCommand.ref.args[j]);
+    }
+    command.nativePtr = nativeCommand.ref.nativePtr;
+
+    if (kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true') {
+      String printMsg = '${command.type}, id: ${command.id}';
+      for (int i = 0; i < command.args.length; i ++) {
+        printMsg += ' args[$i]: ${command.args[i]}';
+      };
+      printMsg += ' nativePtr: ${command.nativePtr}';
+      print(printMsg);
+    }
+
+    results[i] = command;
+  }
+  return results;
+}
+
 void flushUICommand() {
   Map<int, KrakenController> controllerMap = KrakenController.getControllerMap();
   for (KrakenController controller in controllerMap.values) {
     Pointer<Pointer<UICommandItem>> nativeCommandItems = _getUICommandItems(controller.view.contextId);
     int commandLength = _getUICommandItemSize(controller.view.contextId);
 
-    if (commandLength > 0) {
-      SchedulerBinding.instance.scheduleFrame();
+    if (commandLength == 0) {
+      continue;
     }
+
+    List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength);
+    // Clear native command first.
+    _clearUICommandItems(controller.view.contextId);
+
+    SchedulerBinding.instance.scheduleFrame();
 
     // For new ui commands, we needs to tell engine to update frames.
     for (int i = 0; i < commandLength; i++) {
-      Pointer<UICommandItem> nativeCommand = nativeCommandItems[i];
-      if (nativeCommand == nullptr) continue;
-
-      UICommandType commandType = UICommandType.values[nativeCommand.ref.type];
-      int id = nativeCommand.ref.id;
-
-      if (kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true') {
-        String printMsg = '$commandType, id: $id';
-        for (int i = 0; i < nativeCommand.ref.length; i ++) {
-          printMsg += ' args[$i]: ${nativeStringToString(nativeCommand.ref.args[i])}';
-        };
-        printMsg += ' nativePtr: ${nativeCommand.ref.nativePtr}';
-        print(printMsg);
-      }
+      UICommand command = commands[i];
+      UICommandType commandType = command.type;
+      int id = command.id;
+      Pointer nativePtr = command.nativePtr;
 
       try {
         switch (commandType) {
           case UICommandType.createElement:
-            controller.view.createElement(id, nativeCommand.ref.nativePtr, nativeStringToString(nativeCommand.ref.args[0]));
+            controller.view.createElement(id, nativePtr, command.args[0]);
             break;
           case UICommandType.createTextNode:
-            controller.view.createTextNode(id, nativeCommand.ref.nativePtr.cast<NativeTextNode>(), nativeStringToString(nativeCommand.ref.args[0]));
+            controller.view.createTextNode(id, nativePtr.cast<NativeTextNode>(), command.args[0]);
             break;
           case UICommandType.createComment:
-            controller.view.createComment(id, nativeCommand.ref.nativePtr.cast<NativeCommentNode>(), nativeStringToString(nativeCommand.ref.args[0]));
+            controller.view.createComment(id, nativePtr.cast<NativeCommentNode>(), command.args[0]);
             break;
           case UICommandType.disposeEventTarget:
             ElementManager.disposeEventTarget(controller.view.contextId, id);
             break;
           case UICommandType.addEvent:
-            String eventType = nativeStringToString(nativeCommand.ref.args[0]);
-            controller.view.addEvent(id, eventType);
+            controller.view.addEvent(id, command.args[0]);
             break;
           case UICommandType.insertAdjacentNode:
-            int childId = int.parse(nativeStringToString(nativeCommand.ref.args[0]));
-            String position = nativeStringToString(nativeCommand.ref.args[1]);
+            int childId = int.parse(command.args[0]);
+            String position = command.args[1];
             controller.view.insertAdjacentNode(id, position, childId);
             break;
           case UICommandType.removeNode:
             controller.view.removeNode(id);
             break;
           case UICommandType.setStyle:
-            String key = nativeStringToString(nativeCommand.ref.args[0]);
-            String value = nativeStringToString(nativeCommand.ref.args[1]);
+            String key = command.args[0];
+            String value = command.args[1];
             controller.view.setStyle(id, key, value);
             break;
           case UICommandType.setProperty:
-            String key = nativeStringToString(nativeCommand.ref.args[0]);
-            String value = nativeStringToString(nativeCommand.ref.args[1]);
+            String key = command.args[0];
+            String value = command.args[1];
             controller.view.setProperty(id, key, value);
             break;
           case UICommandType.removeProperty:
-            String key = nativeStringToString(nativeCommand.ref.args[0]);
+            String key = command.args[0];
             controller.view.removeProperty(id, key);
             break;
           default:
@@ -302,6 +335,5 @@ void flushUICommand() {
         print('$e\n$stack');
       }
     }
-    _clearUICommandItems(controller.view.contextId);
   }
 }
