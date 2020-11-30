@@ -208,7 +208,10 @@ mixin CanvasText2D
       } else {
         textPainter.layout();
       }
-      textPainter.paint(canvas, Offset(x, y));
+
+      double offsetToBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+      // Paint text start with baseline.
+      textPainter.paint(canvas, Offset(x, y - offsetToBaseline));
     });
   }
 
@@ -220,7 +223,10 @@ mixin CanvasText2D
       } else {
         textPainter.layout();
       }
-      textPainter.paint(canvas, Offset(x, y));
+
+      double offsetToBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+      // Paint text start with baseline.
+      textPainter.paint(canvas, Offset(x, y - offsetToBaseline));
     });
   }
 
