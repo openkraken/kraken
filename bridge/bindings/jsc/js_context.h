@@ -75,6 +75,21 @@ private:
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSStringHolder);
 };
 
+class JSValueHolder {
+public:
+  JSValueHolder() = delete;
+  explicit JSValueHolder(JSContext *context, JSValueRef value);
+  ~JSValueHolder();
+  JSValueRef value();
+
+  void setValue(JSValueRef value);
+
+private:
+  JSContext *m_context;
+  JSValueRef m_value{nullptr};
+  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSValueHolder);
+};
+
 static inline bool isNumberIndex(std::string &name) {
   if (name.empty()) return false;
   char f = name[0];
@@ -126,7 +141,22 @@ JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFu
 
 std::string JSStringToStdString(JSStringRef jsString);
 
+inline JSValueRef getObjectPropertyValue(JSContextRef ctx, const std::string& key, JSObjectRef object, JSValueRef *exception) {
+  JSStringRef keyRef = JSStringCreateWithUTF8CString(key.c_str());
+  JSValueRef result = JSObjectGetProperty(ctx, object, keyRef, exception);
+  JSStringRelease(keyRef);
+  return result;
+}
+
+inline bool objectHasProperty(JSContextRef ctx, const std::string key, JSObjectRef object) {
+  JSStringRef keyRef = JSStringCreateWithUTF8CString(key.c_str());
+  bool result = JSObjectHasProperty(ctx, object, keyRef);
+  JSStringRelease(keyRef);
+  return result;
+}
+
 NativeString *stringToNativeString(std::string &string);
+NativeString *stringRefToNativeString(JSStringRef string);
 
 template <typename T> std::string toUTF8(const std::basic_string<T, std::char_traits<T>, std::allocator<T>> &source) {
   std::string result;

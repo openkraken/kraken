@@ -212,6 +212,13 @@ NativeString *stringToNativeString(std::string &string) {
   return tmp.clone();
 }
 
+NativeString *stringRefToNativeString(JSStringRef string) {
+  NativeString tmp{};
+  tmp.string = JSStringGetCharactersPtr(string);
+  tmp.length = JSStringGetLength(string);
+  return tmp.clone();
+}
+
 JSFunctionHolder::JSFunctionHolder(JSContext *context, void *data, std::string name,
                                    JSObjectCallAsFunctionCallback callback)
   : context(context), m_data(data), m_callback(callback), m_name(std::move(name)) {}
@@ -276,6 +283,26 @@ const JSChar *JSStringHolder::ptr() {
 
 bool JSStringHolder::empty() {
   return size() == 0;
+}
+
+JSValueHolder::JSValueHolder(JSContext *context, JSValueRef value): m_value(value), m_context(context) {
+  if (m_value != nullptr) {
+    JSValueProtect(context->context(), m_value);
+  }
+}
+JSValueHolder::~JSValueHolder() {
+  if (m_context->isValid() && m_value != nullptr) {
+    JSValueUnprotect(m_context->context(), m_value);
+  }
+}
+
+JSValueRef JSValueHolder::value() {
+  return m_value;
+}
+
+void JSValueHolder::setValue(JSValueRef value) {
+  m_value = value;
+  JSValueProtect(m_context->context(), m_value);
 }
 
 } // namespace kraken::binding::jsc

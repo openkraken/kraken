@@ -43,7 +43,7 @@ JSEvent::JSEvent(JSContext *context, const char *name) : HostClass(context, name
 
 JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                          const JSValueRef *arguments, JSValueRef *exception) {
-  if (argumentCount != 1) {
+  if (argumentCount < 1) {
     JSC_THROW_ERROR(ctx, "Failed to construct 'Event': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
@@ -53,6 +53,7 @@ JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef construct
   std::string &&eventType = JSStringToStdString(eventTypeStringRef);
   auto nativeEvent = new NativeEvent(stringToNativeString(eventType));
   auto event = JSEvent::buildEventInstance(eventType, context, nativeEvent);
+
   return event->object;
 }
 
@@ -82,10 +83,21 @@ JSValueRef JSEvent::getProperty(std::string &name, JSValueRef *exception) {
 EventInstance::EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent)
   : Instance(jsEvent), nativeEvent(nativeEvent) {}
 
-EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType) : Instance(jsEvent) {
+EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType, JSValueRef eventInitValueRef, JSValueRef *exception) : Instance(jsEvent) {
   nativeEvent = new NativeEvent(stringToNativeString(eventType));
   auto ms = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
   nativeEvent->timeStamp = ms.count();
+
+  if (eventInitValueRef != nullptr) {;
+    JSObjectRef eventInit = JSValueToObject(ctx, eventInitValueRef, exception);
+
+    if (objectHasProperty(ctx, "bubbles", eventInit)) {
+      nativeEvent->bubbles = JSValueToBoolean(ctx, getObjectPropertyValue(ctx, "bubbles", eventInit, exception)) ? 1 : 0;
+    }
+    if (objectHasProperty(ctx, "cancelable", eventInit)) {
+      nativeEvent->cancelable = JSValueToBoolean(ctx, getObjectPropertyValue(ctx, "cancelable", eventInit, exception)) ? 1 : 0;
+    }
+  }
 }
 
 JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) {
