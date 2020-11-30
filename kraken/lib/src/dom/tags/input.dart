@@ -8,7 +8,7 @@ import 'dart:ui';
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/rendering.dart' hide RenderEditable;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/dom.dart';
@@ -117,6 +117,21 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
 
+  // Input text-overflow not follow text rules.
+  TextOverflow get textOverflow {
+    assert(style != null);
+
+    switch(style['textOverflow']) {
+      case 'ellipsis':
+        return TextOverflow.ellipsis;
+      case 'fade':
+        return TextOverflow.fade;
+      case 'clip':
+      default:
+        return TextOverflow.clip;
+    }
+  }
+
   String get placeholderText => properties['placeholder'] ?? '';
 
   TextStyle get placeholderTextStyle {
@@ -189,6 +204,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     if (renderEditable != null) {
       renderEditable.text = textSpan.text.length == 0 ? placeholderTextSpan : textSpan;
+      renderEditable.textOverflow = textOverflow;
     }
   }
 
@@ -250,6 +266,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
     textInputConnection.show();
     _startCursorTimer();
+    renderEditable.markNeedsTextLayout();
   }
 
   void deactiveTextInput() {
@@ -258,6 +275,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       textInputConnection.close();
     }
     _stopCursorTimer();
+    renderEditable.markNeedsTextLayout();
   }
 
   void onSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
@@ -299,6 +317,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       devicePixelRatio: window.devicePixelRatio,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
+      textOverflow: textOverflow,
     );
     return renderEditable;
   }
@@ -507,12 +526,14 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (_showCaretOnScreenScheduled) {
       return;
     }
+
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
       if (_currentCaretRect == null) {
         return;
       }
+
       final Rect newCaretRect = _currentCaretRect;
       // Enlarge newCaretRect by scrollPadding to ensure that caret
       // is not positioned directly at the edge after scrolling.
