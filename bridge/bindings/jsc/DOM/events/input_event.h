@@ -43,7 +43,7 @@ class InputEventInstance : public EventInstance {
 public:
   InputEventInstance() = delete;
   explicit InputEventInstance(JSInputEvent *jsInputEvent, NativeInputEvent *nativeInputEvent);
-  explicit InputEventInstance(JSInputEvent *jsInputEvent, JSStringRef data);
+  explicit InputEventInstance(JSInputEvent *jsInputEvent, JSStringRef data, JSValueRef inputEventInit, JSValueRef *exception);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;

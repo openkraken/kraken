@@ -56,7 +56,7 @@ TouchEventInstance::TouchEventInstance(JSTouchEvent *jsTouchEvent, NativeTouchEv
 }
 
 TouchEventInstance::TouchEventInstance(JSTouchEvent *jsTouchEvent, JSStringRef data)
-  : EventInstance(jsTouchEvent, "touch") {
+  : EventInstance(jsTouchEvent, "touch", nullptr, nullptr) {
   nativeTouchEvent = new NativeTouchEvent(nativeEvent);
 }
 

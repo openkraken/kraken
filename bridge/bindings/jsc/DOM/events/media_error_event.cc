@@ -55,7 +55,7 @@ MediaErrorEventInstance::MediaErrorEventInstance(JSMediaErrorEvent *jsMediaError
 }
 
 MediaErrorEventInstance::MediaErrorEventInstance(JSMediaErrorEvent *jsMediaErrorEvent, JSStringRef data)
-  : EventInstance(jsMediaErrorEvent, "error") {
+  : EventInstance(jsMediaErrorEvent, "error", nullptr, nullptr) {
   nativeMediaErrorEvent = new NativeMediaErrorEvent(nativeEvent);
 }
 

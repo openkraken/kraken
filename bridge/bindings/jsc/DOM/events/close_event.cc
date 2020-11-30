@@ -34,13 +34,19 @@ JSCloseEvent::JSCloseEvent(JSContext *context) : JSEvent(context, "CloseEvent") 
 
 JSObjectRef JSCloseEvent::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                               const JSValueRef *arguments, JSValueRef *exception) {
-  if (argumentCount != 1) {
+  if (argumentCount < 1) {
     JSC_THROW_ERROR(ctx, "Failed to construct 'JSCloseEvent': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
   JSStringRef dataStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
-  auto event = new CloseEventInstance(this, dataStringRef);
+  JSValueRef closeEventInit = nullptr;
+  if (argumentCount == 2) {
+    closeEventInit = arguments[1];
+  }
+
+  auto event = new CloseEventInstance(this, dataStringRef, closeEventInit, exception);
+
   return event->object;
 }
 
@@ -55,9 +61,22 @@ CloseEventInstance::CloseEventInstance(JSCloseEvent *jsCloseEvent, NativeCloseEv
   wasClean = nativeCloseEvent->wasClean == 1;
 }
 
-CloseEventInstance::CloseEventInstance(JSCloseEvent *jsCloseEvent, JSStringRef data)
-  : EventInstance(jsCloseEvent, "close") {
+CloseEventInstance::CloseEventInstance(JSCloseEvent *jsCloseEvent, JSStringRef data, JSValueRef closeEventInit, JSValueRef *exception)
+  : EventInstance(jsCloseEvent, "close", closeEventInit, exception) {
   nativeCloseEvent = new NativeCloseEvent(nativeEvent);
+
+  if (closeEventInit != nullptr) {
+    JSObjectRef eventInit = JSValueToObject(ctx, closeEventInit, exception);
+    if (objectHasProperty(ctx, "wasClean", eventInit)) {
+      nativeCloseEvent->wasClean = JSValueToBoolean(ctx, getObjectPropertyValue(ctx, "wasClean", eventInit, exception)) ? 1 : 0;
+    }
+    if (objectHasProperty(ctx, "code", eventInit)) {
+      nativeCloseEvent->code = JSValueToNumber(ctx, getObjectPropertyValue(ctx, "code", eventInit, exception), exception);
+    }
+    if (objectHasProperty(ctx, "reason", eventInit)) {
+      nativeCloseEvent->reason = stringRefToNativeString(JSValueToStringCopy(ctx, getObjectPropertyValue(ctx, "reason", eventInit, exception), exception));
+    }
+  }
 }
 
 JSValueRef CloseEventInstance::getProperty(std::string &name, JSValueRef *exception) {

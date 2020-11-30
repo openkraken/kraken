@@ -33,6 +33,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsc::bindUIManager(context);
   kraken::binding::jsc::bindConsole(context);
   kraken::binding::jsc::bindEvent(context);
+  kraken::binding::jsc::bindCustomEvent(context);
   kraken::binding::jsc::bindCloseEvent(context);
   kraken::binding::jsc::bindMediaErrorEvent(context);
   kraken::binding::jsc::bindTouchEvent(context);

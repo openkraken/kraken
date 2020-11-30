@@ -99,11 +99,16 @@ static std::unordered_map<JSContext *, DocumentInstance *> instanceMap{};
 
 std::string DocumentCookie::getCookie() {
   std::string result;
+  size_t i = 0;
   for (auto &pair : cookiePairs) {
     result += pair.first + "=" + pair.second;
+    i++;
+    if (i < cookiePairs.size()) {
+      result += "; ";
+    }
   }
 
-  return result;
+  return std::move(result);
 }
 
 void DocumentCookie::setCookie(std::string &cookieStr) {

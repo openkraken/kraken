@@ -12,7 +12,7 @@ void bindInputEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "InputEvent", event->classObject);
 };
 
-std::unordered_map<JSContext *, JSInputEvent *> & JSInputEvent::getInstanceMap() {
+std::unordered_map<JSContext *, JSInputEvent *> &JSInputEvent::getInstanceMap() {
   static std::unordered_map<JSContext *, JSInputEvent *> instanceMap;
   return instanceMap;
 }
@@ -34,13 +34,17 @@ JSInputEvent::JSInputEvent(JSContext *context) : JSEvent(context, "InputEvent") 
 
 JSObjectRef JSInputEvent::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                               const JSValueRef *arguments, JSValueRef *exception) {
-  if (argumentCount != 1) {
+  if (argumentCount < 1) {
     JSC_THROW_ERROR(ctx, "Failed to construct 'JSInputEvent': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
   JSStringRef dataStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
-  auto event = new InputEventInstance(this, dataStringRef);
+  JSValueRef inputEventInit = nullptr;
+  if (argumentCount == 2) {
+    inputEventInit = arguments[1];
+  }
+  auto event = new InputEventInstance(this, dataStringRef, inputEventInit, exception);
   return event->object;
 }
 
@@ -54,9 +58,23 @@ InputEventInstance::InputEventInstance(JSInputEvent *jsInputEvent, NativeInputEv
   if (nativeInputEvent->inputType != nullptr) m_inputType.setString(nativeInputEvent->inputType);
 }
 
-InputEventInstance::InputEventInstance(JSInputEvent *jsInputEvent, JSStringRef data)
-  : EventInstance(jsInputEvent, "input") {
+InputEventInstance::InputEventInstance(JSInputEvent *jsInputEvent, JSStringRef data, JSValueRef inputEventInitRef,
+                                       JSValueRef *exception)
+  : EventInstance(jsInputEvent, "input", inputEventInitRef, exception) {
   nativeInputEvent = new NativeInputEvent(nativeEvent);
+
+  if (inputEventInitRef != nullptr) {
+    JSObjectRef inputInit = JSValueToObject(ctx, inputEventInitRef, exception);
+    if (objectHasProperty(ctx, "inputType", inputInit)) {
+      nativeInputEvent->inputType = stringRefToNativeString(
+        JSValueToStringCopy(ctx, getObjectPropertyValue(ctx, "inputType", inputInit, exception), exception));
+    }
+
+    if (objectHasProperty(ctx, "data", inputInit)) {
+      nativeInputEvent->data = stringRefToNativeString(
+        JSValueToStringCopy(ctx, getObjectPropertyValue(ctx, "data", inputInit, exception), exception));
+    }
+  }
 }
 
 JSValueRef InputEventInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -79,7 +97,7 @@ void InputEventInstance::setProperty(std::string &name, JSValueRef value, JSValu
   if (propertyMap.contains(name)) {
     auto property = propertyMap[name];
 
-    switch(property) {
+    switch (property) {
     case JSInputEvent::InputEventProperty::kInputType: {
       JSStringRef str = JSValueToStringCopy(ctx, value, exception);
       m_inputType.setString(str);
@@ -102,7 +120,6 @@ InputEventInstance::~InputEventInstance() {
   delete nativeInputEvent;
 }
 
-
 void InputEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   EventInstance::getPropertyNames(accumulator);
 
@@ -112,18 +129,14 @@ void InputEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulat
 }
 
 std::vector<JSStringRef> &JSInputEvent::getInputEventPropertyNames() {
-  static std::vector<JSStringRef> propertyNames {
-    JSStringCreateWithUTF8CString("data"),
-    JSStringCreateWithUTF8CString("inputType")
-  };
+  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("data"),
+                                                JSStringCreateWithUTF8CString("inputType")};
   return propertyNames;
 }
 
 const std::unordered_map<std::string, JSInputEvent::InputEventProperty> &JSInputEvent::getInputEventPropertyMap() {
-  static std::unordered_map<std::string, InputEventProperty> propertyMap{
-      {"data", InputEventProperty::kData},
-      {"inputType", InputEventProperty::kInputType}
-  };
+  static std::unordered_map<std::string, InputEventProperty> propertyMap{{"data", InputEventProperty::kData},
+                                                                         {"inputType", InputEventProperty::kInputType}};
   return propertyMap;
 }
 

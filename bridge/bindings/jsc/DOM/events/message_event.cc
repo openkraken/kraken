@@ -57,7 +57,7 @@ MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, Nativ
 }
 
 MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, JSStringRef data)
-  : EventInstance(jsMessageEvent, "message") {
+  : EventInstance(jsMessageEvent, "message", nullptr, nullptr) {
   nativeMessageEvent = new NativeMessageEvent(nativeEvent);
 }
 
