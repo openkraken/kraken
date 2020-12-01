@@ -17,6 +17,7 @@
 #define EVENT_DISAPPEAR "disappear"
 #define EVENT_COLOR_SCHEME_CHANGE "colorschemechange"
 #define EVENT_ERROR "error"
+#define EVENT_MEDIA_ERROR "mediaerror"
 #define EVENT_TOUCH_START "touchstart"
 #define EVENT_TOUCH_MOVE "touchmove"
 #define EVENT_TOUCH_END "touchend"

@@ -15,6 +15,7 @@ const String EVENT_APPEAR = 'appear';
 const String EVENT_DISAPPEAR = 'disappear';
 const String EVENT_COLOR_SCHEME_CHANGE = 'colorschemechange';
 const String EVENT_ERROR = 'error';
+const String EVENT_MEDIA_ERROR = 'mediaerror';
 const String EVENT_TOUCH_START = 'touchstart';
 const String EVENT_TOUCH_MOVE = 'touchmove';
 const String EVENT_TOUCH_END = 'touchend';
@@ -184,7 +185,7 @@ class MediaError extends Event {
     return nativeMediaError;
   }
 
-  MediaError(this.code, this.message) : super(EVENT_ERROR);
+  MediaError(this.code, this.message) : super(EVENT_MEDIA_ERROR);
 }
 
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent

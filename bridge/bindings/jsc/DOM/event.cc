@@ -243,7 +243,7 @@ EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *co
 
   if (eventType == EVENT_INPUT) {
     eventInstance = new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
-  } else if (eventType == EVENT_ERROR) {
+  } else if (eventType == EVENT_MEDIA_ERROR) {
     eventInstance = new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));
   } else if (eventType == EVENT_MESSAGE) {
     eventInstance = new MessageEventInstance(JSMessageEvent::instance(context), reinterpret_cast<NativeMessageEvent*>(nativeEvent));

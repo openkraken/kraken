@@ -94,7 +94,7 @@ export class WebSocket extends EventTarget {
   }
 
   addEventListener(type: string, callback: any) {
-    krakenInvokeModule(`["WebSocket","addEvent",["${this.id}",${EventType[type]}]]`);
+    krakenInvokeModule(`["WebSocket","addEvent",["${this.id}","${type}"]]`);
     super.addEventListener(type, callback);
   }
 
