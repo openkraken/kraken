@@ -34,7 +34,11 @@ describe('display sliver', () => {
   it('scroll works', async () => {
     const container = createSliverBasicCase();
 
-    await simulateSwipe(1, 60, 1, 0, 0.1);
+    container.scrollBy(0, 200);
+    await matchViewportSnapshot();
+
+    
+    container.scrollBy(0, -150);
     await matchViewportSnapshot();
   });
 });
