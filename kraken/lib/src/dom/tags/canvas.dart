@@ -87,8 +87,8 @@ class CanvasElement extends Element {
     double width;
     double height;
 
-    double styleWidth = CSSLength.toDisplayPortValue(style['width']);
-    double styleHeight = CSSLength.toDisplayPortValue(style['height']);
+    double styleWidth = renderBoxModel.width;
+    double styleHeight = renderBoxModel.height;
 
     if (styleWidth != null) {
       width = styleWidth;
@@ -123,8 +123,8 @@ class CanvasElement extends Element {
       // to the object-fit CSS property.
       // @TODO: CSS object-fit for canvas.
       // To fill (default value of object-fit) the bitmap content, use scale to get the same performed.
-      double styleWidth = CSSLength.toDisplayPortValue(style['width']);
-      double styleHeight = CSSLength.toDisplayPortValue(style['height']);
+      double styleWidth = renderBoxModel.width;
+      double styleHeight = renderBoxModel.height;
 
       double scaleX;
       double scaleY;
