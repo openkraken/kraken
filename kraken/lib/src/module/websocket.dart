@@ -36,7 +36,7 @@ class KrakenWebSocket {
       if (state != null && state.status == _ConnectionState.closed) {
         dynamic data = state.data;
         webSocket.close(data[0], data[1]);
-        CloseEvent event = CloseEvent(data[0], data[1], true);
+        CloseEvent event = CloseEvent(data[0] ?? 0, data[1] ?? '', true);
         callback(id, jsonEncode(event));
         _stateMap.remove(id);
         return;

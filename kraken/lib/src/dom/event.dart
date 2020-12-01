@@ -139,7 +139,8 @@ class InputEvent extends Event {
   InputEvent(
     this.data, {
     this.inputType = 'insertText',
-  }) : super(EVENT_INPUT, EventInit(cancelable: true));
+  }) :  assert(data != null),
+        super(EVENT_INPUT, EventInit(cancelable: true));
 }
 
 class AppearEvent extends Event {
@@ -185,7 +186,9 @@ class MediaError extends Event {
     return nativeMediaError;
   }
 
-  MediaError(this.code, this.message) : super(EVENT_MEDIA_ERROR);
+  MediaError(this.code, this.message) :
+        assert(message != null),
+        super(EVENT_MEDIA_ERROR);
 }
 
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
@@ -196,7 +199,9 @@ class MessageEvent extends Event {
   /// A USVString representing the origin of the message emitter.
   final String origin;
 
-  MessageEvent(this.data, {this.origin = ''}) : super(EVENT_MESSAGE);
+  MessageEvent(this.data, {this.origin = ''}) :
+        assert(data != null),
+        super(EVENT_MESSAGE);
 
   Pointer<NativeMessageEvent> toNative() {
     Pointer<NativeMessageEvent> messageEvent = allocate<NativeMessageEvent>();
@@ -219,7 +224,9 @@ class CloseEvent extends Event {
   /// Indicates whether or not the connection was cleanly closed
   final bool wasClean;
 
-  CloseEvent(this.code, this.reason, this.wasClean) : super(EVENT_CLOSE);
+  CloseEvent(this.code, this.reason, this.wasClean) :
+        assert(reason != null),
+        super(EVENT_CLOSE);
 
   Pointer<NativeCloseEvent> toNative() {
     Pointer<NativeCloseEvent> closeEvent = allocate<NativeCloseEvent>();
