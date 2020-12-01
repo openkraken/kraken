@@ -226,15 +226,23 @@ mixin CSSOverflowMixin on Node {
     }
   }
 
-  void _scroll(num aim, Axis direction, { bool withAnimation = false }) {
+  KrakenScrollable _getScrollable(Axis direction) {
     KrakenScrollable scrollable;
-    if (direction == Axis.horizontal) {
-      scrollable = _scrollableX;
-    } else if (direction == Axis.vertical) {
-      scrollable = _scrollableY;
+    if (renderer is RenderRecyclerLayout) {
+      scrollable = (renderer as RenderRecyclerLayout).scrollable;
+    } else {
+      if (direction == Axis.horizontal) {
+        scrollable = _scrollableX;
+      } else if (direction == Axis.vertical) {
+        scrollable = _scrollableY;
+      }
     }
+    return scrollable;
+  }
 
-    if (scrollable != null && aim != null) {
+  void _scroll(num aim, Axis direction, { bool withAnimation = false }) {
+    KrakenScrollable scrollable = _getScrollable(direction);
+    if (scrollable != null && aim is num) {
       double distance = aim.toDouble();
 
       // Apply scroll effect after layout.

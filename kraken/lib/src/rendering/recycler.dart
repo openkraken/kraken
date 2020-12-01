@@ -133,6 +133,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   }
 
   KrakenScrollable _scrollable;
+  KrakenScrollable get scrollable => _scrollable;
 
   @protected
   RenderViewport _buildRenderViewport() {
@@ -286,6 +287,9 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     assert(node != null);
     node.willAttachRenderer();
 
+    if (node is Element) {
+      node.style.applyTargetProperties();
+    }
     if (node is Node) {
       child = node.renderer;
     } else {
