@@ -1,6 +1,6 @@
 # Kraken
 
-Web standards based rendering engine.
+A high-performance, web standards-compliant rendering engine based on Flutter.
 
 ## Usage
 

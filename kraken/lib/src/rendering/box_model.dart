@@ -232,7 +232,8 @@ class RenderBoxModel extends RenderBox with
     RenderVisibilityMixin,
     RenderPointerListenerMixin,
     RenderColorFilter,
-    RenderImageFilter{
+    RenderImageFilter,
+    RenderObjectWithControllerMixin {
   RenderBoxModel({
     this.targetId,
     this.style,
@@ -243,11 +244,7 @@ class RenderBoxModel extends RenderBox with
   @override
   bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
 
-
   RenderPositionHolder renderPositionHolder;
-
-  // Kraken controller reference which control all kraken created renderObjects.
-  KrakenController controller;
 
   bool _debugShouldPaintOverlay = false;
   bool get debugShouldPaintOverlay => _debugShouldPaintOverlay;
@@ -370,6 +367,7 @@ class RenderBoxModel extends RenderBox with
   set width(double value) {
     if (_width == value) return;
     _width = value;
+
     markNeedsLayout();
   }
 

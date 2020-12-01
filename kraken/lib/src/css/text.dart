@@ -183,7 +183,7 @@ class CSSText {
       return textOverflow;
     }
 
-    switch(style['textOverflow']) {
+    switch(style[TEXT_OVERFLOW]) {
       case 'ellipsis':
         return TextOverflow.ellipsis;
       case 'fade':

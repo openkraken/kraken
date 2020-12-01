@@ -1054,11 +1054,11 @@ class Element extends Node
   dynamic method(String name, List args) {
     switch (name) {
       case 'click':
-        return click();
+        return handleMethodClick();
       case 'scroll':
-        return scroll(args);
+        return handleMethodScroll(args);
       case 'scrollBy':
-        return scroll(args, isScrollBy: true);
+        return handleMethodScroll(args, diff: true);
     }
   }
 
@@ -1165,7 +1165,7 @@ class Element extends Node
     emitUIEvent(elementManager.controller.view.contextId, json);
   }
 
-  void click() {
+  void handleMethodClick() {
     Event clickEvent = Event('click', EventInit());
 
     if (isRendererAttached) {
