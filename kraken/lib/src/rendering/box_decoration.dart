@@ -339,13 +339,16 @@ class _BoxDecorationPainter extends BoxPainter {
 
     final TextDirection textDirection = configuration.textDirection;
     bool hasLocalAttachment = CSSBackground.hasLocalBackgroundImage(style);
-    offset = hasLocalAttachment ? offset : baseOffset;
 
+    // Rect of background color
+    Rect backgroundColorRect = _getBackgroundClipRect(baseOffset, configuration);
+    _paintBackgroundColor(canvas, backgroundColorRect, textDirection);
+
+    // Background image of background-attachment local scroll with content
+    Offset backgrundImageOffset = hasLocalAttachment ? offset : baseOffset;
     // Rect of background image
-    Rect backgroundClipRect = _getBackgroundClipRect(offset, configuration);
-    _paintBackgroundColor(canvas, backgroundClipRect, textDirection);
-
-    Rect backgroundOriginRect = _getBackgroundOriginRect(offset, configuration);
+    Rect backgroundClipRect = _getBackgroundClipRect(backgrundImageOffset, configuration);
+    Rect backgroundOriginRect = _getBackgroundOriginRect(backgrundImageOffset, configuration);
     Rect backgroundImageRect = backgroundClipRect.intersect(backgroundOriginRect);
     _paintBackgroundImage(canvas, backgroundImageRect, configuration);
   }
