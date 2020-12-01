@@ -1,6 +1,7 @@
 import { Element } from '../element';
 import { method } from '../ui-manager';
 
+const builtInProperties = ['width', 'height'];
 /**
  * Use the HTML <canvas> element with either the canvas
  * scripting API or the WebGL API to draw graphics and
@@ -13,25 +14,8 @@ import { method } from '../ui-manager';
  * Definition: https://html.spec.whatwg.org/multipage/scripting.html#the-canvas-element
  */
 export class CanvasElement extends Element {
-  static DEFAULT_WIDTH = 300;
-  static DEFAULT_HEIGHT = 150;
-
   constructor() {
-    super('canvas');
-  }
-
-  set width(value: number) {
-    this.style['width'] = value + 'px';
-  }
-  get width() {
-    return parseInt(this.style['width']) || CanvasElement.DEFAULT_WIDTH;
-  }
-
-  set height(value: number) {
-    this.style['height'] = value + 'px';
-  }
-  get height() {
-    return parseInt(this.style['height']) || CanvasElement.DEFAULT_HEIGHT;
+    super('canvas', undefined, undefined, builtInProperties);
   }
 
   getContext(contextType: string) {
