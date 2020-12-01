@@ -3,12 +3,15 @@
  * Author: Kraken Team.
  */
 
+import 'dart:async';
 import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui';
-import 'dart:ffi';
 
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
+import 'dart:ffi';
+
 import 'package:kraken/bridge.dart';
 import 'package:kraken/launcher.dart';
 import 'package:flutter/rendering.dart';
@@ -94,7 +97,7 @@ Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynam
 const int BODY_ID = -1;
 const int WINDOW_ID = -2;
 
-class ElementManager {
+class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
@@ -106,6 +109,9 @@ class ElementManager {
   static Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
   static Map<int, Pointer<NativeWindow>> windowNativePtrMap = Map();
 
+  static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
+
+  RenderViewportBox viewport;
   Element _rootElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
@@ -116,18 +122,43 @@ class ElementManager {
 
   final List<VoidCallback> _detachCallbacks = [];
 
-  ElementManager(this.viewportWidth, this.viewportHeight, {int contextId, this.controller, this.showPerformanceOverlayOverride}) {
-    _rootElement =
-        BodyElement(viewportWidth, viewportHeight, BODY_ID, bodyNativePtrMap[contextId], this)
-          ..attachBody();
+  ElementManager(this.viewportWidth, this.viewportHeight,
+      {int contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
+    _rootElement = BodyElement(viewportWidth, viewportHeight, BODY_ID, bodyNativePtrMap[contextId], this)
+      ..attachBody();
 
-    RenderBoxModel root = _rootElement.renderBoxModel;
-    root.controller = controller;
-    _root = root;
+    RenderBoxModel rootRenderBoxModel = _rootElement.renderBoxModel;
+    if (viewport != null) {
+      viewport.controller = controller;
+      viewport.child = rootRenderBoxModel;
+      _root = viewport;
+    } else {
+      rootRenderBoxModel.controller = controller;
+      _root = rootRenderBoxModel;
+    }
+
+    _setupObserver();
+
     setEventTarget(_rootElement);
 
     Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this);
     setEventTarget(window);
+  }
+
+  void _setupObserver() {
+    if (ElementsBinding.instance != null) {
+      ElementsBinding.instance.addObserver(this);
+    } else if (WidgetsBinding.instance != null) {
+      WidgetsBinding.instance.addObserver(this);
+    }
+  }
+
+  void _teardownObserver() {
+    if (ElementsBinding.instance != null) {
+      ElementsBinding.instance.removeObserver(this);
+    } else if (WidgetsBinding.instance != null) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
   }
 
   T getEventTargetByTargetId<T>(int targetId) {
@@ -405,5 +436,78 @@ class ElementManager {
     if (debugDOMTreeChanged != null) {
       debugDOMTreeChanged();
     }
+  }
+
+  void dispose() {
+    _teardownObserver();
+    debugDOMTreeChanged = null;
+    controller.dispose();
+    controller = null;
+  }
+
+  @override
+  void didChangeAccessibilityFeatures() { }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) { }
+
+  @override
+  void didChangeLocales(List<Locale> locale) { }
+
+  WindowPadding _prevViewInsets = window.viewInsets;
+
+  @override
+  void didChangeMetrics() {
+    if (viewport != null) {
+      double bottomInset = window.viewInsets.bottom / window.devicePixelRatio;
+      if (_prevViewInsets.bottom > window.viewInsets.bottom) {
+        // Hide keyboard
+        viewport.bottomInset = bottomInset;
+      } else {
+        bool shouldScrollByToCenter = false;
+        if (InputElement.focusInputElement != null) {
+          RenderBox renderer = InputElement.focusInputElement.renderer;
+          if (renderer.hasSize) {
+            Offset focusOffset = renderer.localToGlobal(Offset.zero);
+            // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
+            if (focusOffset.dy > viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
+              shouldScrollByToCenter = true;
+            }
+          }
+        }
+        // Show keyboard
+        viewport.bottomInset = bottomInset;
+        if (shouldScrollByToCenter) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            _rootElement.scrollBy(dy: bottomInset);
+          });
+        }
+      }
+    }
+    _prevViewInsets = window.viewInsets;
+  }
+
+  @override
+  void didChangePlatformBrightness() { }
+
+  @override
+  void didChangeTextScaleFactor() { }
+
+  @override
+  void didHaveMemoryPressure() { }
+
+  @override
+  Future<bool> didPopRoute() async {
+    return false;
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) async {
+    return false;
+  }
+
+  @override
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+    return false;
   }
 }

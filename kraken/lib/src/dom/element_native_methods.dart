@@ -129,19 +129,19 @@ mixin ElementNativeMethods on Node {
   static void _click(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.renderBoxModel.owner.flushLayout();
-    element.click();
+    element.handleMethodClick();
   }
 
   static void _scroll(Pointer<NativeElement> nativeElement, int x, int y) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.renderBoxModel.owner.flushLayout();
-    element.scroll(x, y);
+    element.handleMethodScroll(x, y);
   }
 
   static void _scrollBy(Pointer<NativeElement> nativeElement, int x, int y) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.renderBoxModel.owner.flushLayout();
-    element.scroll(x, y, isScrollBy: true);
+    element.handleMethodScroll(x, y, diff: true);
   }
 
   void bindNativeMethods(Pointer<NativeElement> nativeElement) {

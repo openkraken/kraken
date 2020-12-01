@@ -124,7 +124,8 @@ describe('text-overflow', () => {
 
     await matchViewportSnapshot();
   });
-  xit('ellipsis-editing-input', async () => {
+  
+  it('ellipsis-editing-input', async () => {
     let p;
     let inputElement;
     p = createElement(
@@ -134,7 +135,7 @@ describe('text-overflow', () => {
           'box-sizing': 'border-box',
         },
       },
-      [createText(`You should not see an ellipsis for the text below.`)]
+      [createText(`You should see an ellipsis for the text below.`)]
     );
     inputElement = createElement('input', {
       id: 'input_element',

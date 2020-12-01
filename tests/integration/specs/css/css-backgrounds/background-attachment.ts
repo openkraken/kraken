@@ -26,7 +26,8 @@ describe('background-attachment', () => {
       'background-image':
         'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
       'background-repeat': 'no-repeat',
-      border: '1px solid blue',
+      'background-color': 'yellow',
+      border: '10px solid rgba(0, 0, 0, 0.3)',
       height: '250px',
       overflow: 'scroll',
       width: '250px',
@@ -38,7 +39,9 @@ describe('background-attachment', () => {
     append(container, text);
     append(BODY, container);
     await sleep(1);
-    await matchElementImageSnapshot(container);
+    await matchViewportSnapshot();
+    container.scrollTo(0, 100);
+    await matchViewportSnapshot(0.1);
   });
 
   it('scroll', async () => {
@@ -47,7 +50,8 @@ describe('background-attachment', () => {
       backgroundRepeat: 'no-repeat',
       'background-image':
         'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
-      border: '1px solid blue',
+      'background-color': 'yellow',
+      border: '10px solid rgba(0, 0, 0, 0.3)',
       height: '250px',
       width: '250px',
       overflow: 'scroll',

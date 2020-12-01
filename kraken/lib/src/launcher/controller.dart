@@ -41,9 +41,14 @@ class KrakenViewController {
   // during a kraken view's process of loading, and completing a navigation request.
   KrakenNavigationDelegate navigationDelegate;
 
+  double viewportWidth;
+  double viewportHeight;
+  Color background;
+
   KrakenViewController(
-    double viewportWidth, double viewportHeight,
+    this.viewportWidth, this.viewportHeight,
     {
+      this.background,
       this.showPerformanceOverlay,
       this.enableDebug = false,
       int contextId,
@@ -59,9 +64,16 @@ class KrakenViewController {
     if (_contextId == null) {
       _contextId = initBridge();
     }
-    _elementManager = ElementManager(viewportWidth, viewportHeight,
-        contextId: _contextId,
-        showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
+
+    createViewport();
+    _elementManager = ElementManager(
+      viewportWidth,
+      viewportHeight,
+      contextId: _contextId,
+      viewport: viewport,
+      showPerformanceOverlayOverride: showPerformanceOverlay,
+      controller: rootController,
+    );
 
     // Enable DevTool in debug/profile mode, but disable in release.
     if ((kDebugMode || kProfileMode) && rootController.debugEnableInspector != false) {
@@ -94,6 +106,15 @@ class KrakenViewController {
 
   bool get disposed => _disposed;
 
+  RenderViewportBox viewport;
+
+  void createViewport() {
+    viewport = RenderViewportBox(
+      background: background,
+      viewportSize: Size(viewportWidth, viewportHeight),
+    );
+  }
+
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
     assert(!_disposed, "Kraken have already disposed");
     evaluateScripts(_contextId, code, source, 0);
@@ -112,13 +133,10 @@ class KrakenViewController {
     detachView();
     disposeBridge(_contextId);
 
-    _elementManager.debugDOMTreeChanged = null;
     _inspector?.dispose();
     _inspector = null;
 
-    // break circle reference
-    _elementManager.getRootElement();
-    _elementManager.controller = null;
+    _elementManager.dispose();
     _elementManager = null;
     _disposed = true;
   }
@@ -308,6 +326,7 @@ class KrakenController {
       String bundleURL,
       String bundlePath,
       String bundleContent,
+      Color background,
       KrakenNavigationDelegate navigationDelegate,
       KrakenMethodChannel methodChannel,
       this.loadErrorHandler,
@@ -317,6 +336,7 @@ class KrakenController {
         _bundleContent = bundleContent {
     _methodChannel = methodChannel;
     _view = KrakenViewController(viewportWidth, viewportHeight,
+        background: background,
         showPerformanceOverlay: showPerformanceOverlay,
         enableDebug: enableDebug,
         rootController: this,
@@ -387,6 +407,7 @@ class KrakenController {
     Inspector.prevInspector = view._elementManager.controller.view.inspector;
 
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
+        background: _view.background,
         showPerformanceOverlay: _view.showPerformanceOverlay,
         enableDebug: _view.enableDebug,
         contextId: _view.contextId,
@@ -477,4 +498,9 @@ class KrakenController {
       });
     }
   }
+}
+
+mixin RenderObjectWithControllerMixin {
+  // Kraken controller reference which control all kraken created renderObjects.
+  KrakenController controller;
 }

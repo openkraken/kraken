@@ -1143,7 +1143,7 @@ class Element extends Node
     emitUIEvent(elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, event);
   }
 
-  void click() {
+  void handleMethodClick() {
     Event clickEvent = Event(EVENT_CLICK, EventInit());
 
     if (isRendererAttached) {

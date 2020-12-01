@@ -10,15 +10,29 @@ import 'dart:ffi';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/rendering.dart' hide RenderEditable;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 const String INPUT = 'INPUT';
 
-const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK, WIDTH: '150px', BORDER: '1px solid #767676'};
+const TextInputType TEXT_INPUT_TYPE_NUMBER = TextInputType.numberWithOptions(signed: true);
+
+/// https://www.w3.org/TR/css-sizing-3/#intrinsic-sizes
+/// For boxes without a preferred aspect ratio:
+/// If the available space is definite in the appropriate dimension, use the stretch fit into that size in that dimension.
+///
+/// Otherwise, if the box has a <length> as its computed minimum size (min-width/min-height) in that dimension, use that size.
+//
+/// Otherwise, use 300px for the width and/or 150px for the height as needed.
+const Map<String, dynamic> _defaultStyle = {
+  DISPLAY: INLINE_BLOCK,
+  WIDTH: '150px',
+  BORDER: '1px solid #767676',
+};
 
 typedef ValueChanged<T> = void Function(T value);
 // The time it takes for the cursor to fade from fully opaque to fully
@@ -62,28 +76,63 @@ class EditableTextDelegate implements TextSelectionDelegate {
 }
 
 class InputElement extends Element implements TextInputClient, TickerProvider {
+  static InputElement focusInputElement;
+
+  static void clearFocus() {
+    if (InputElement.focusInputElement != null) {
+      InputElement.focusInputElement.blur();
+    }
+
+    InputElement.focusInputElement = null;
+  }
+
+  static void setFocus(InputElement inputElement) {
+    assert(inputElement != null);
+    clearFocus();
+    InputElement.focusInputElement = inputElement;
+    inputElement.focus();
+  }
+
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(false);
   AnimationController _cursorBlinkOpacityController;
   int _obscureShowCharTicksPending = 0;
 
-  TextInputType inputType = TextInputType.text;
   TextAlign textAlign;
   TextDirection textDirection;
   int minLines;
   int maxLines;
 
+  bool _autoFocus = false;
+
   ViewportOffset offset = ViewportOffset.zero();
   bool obscureText = false;
+  bool autoCorrect = false;
   TextSelectionDelegate textSelectionDelegate = EditableTextDelegate();
   TextSpan textSpan;
   RenderEditable renderEditable;
+  RenderOffsetBox _renderOffsetBox;
   TextInputConnection textInputConnection;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
+
+  // Input text-overflow not follow text rules.
+  TextOverflow get textOverflow {
+    assert(style != null);
+
+    switch(style[TEXT_OVERFLOW]) {
+      case 'ellipsis':
+        return TextOverflow.ellipsis;
+      case 'fade':
+        return TextOverflow.fade;
+      case 'clip':
+      default:
+        return TextOverflow.clip;
+    }
+  }
 
   String get placeholderText => properties['placeholder'] ?? '';
 
@@ -108,33 +157,38 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativePtr, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
-    textInputConfiguration = TextInputConfiguration(
-      inputType: inputType,
-      obscureText: false,
-      autocorrect: false,
-      inputAction: TextInputAction.done, // newline to multilines
-      textCapitalization: TextCapitalization.none,
-      keyboardAppearance: Brightness.light,
-    );
+  }) : super(targetId, nativePtr, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
 
     // Make element listen to click event to trigger focus.
     addEvent(EVENT_CLICK);
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
+
+    addChild(createRenderObject());
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (_autoFocus) {
+        InputElement.setFocus(this);
+      }
+    });
   }
 
   @override
-  void didAttachRenderer() {
-    super.didAttachRenderer();
-    renderEditable = createRenderObject();
-
-    addChild(renderEditable);
+  void willDetachRenderer() {
+    super.willDetachRenderer();
+    InputElement.clearFocus();
   }
 
   @override
   void didDetachRenderer() {
+    super.didDetachRenderer();
+    _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
+    _cursorBlinkOpacityController = null;
     renderEditable = null;
   }
 
@@ -153,6 +207,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     if (renderEditable != null) {
       renderEditable.text = textSpan.text.length == 0 ? placeholderTextSpan : textSpan;
+      renderEditable.textOverflow = textOverflow;
     }
   }
 
@@ -164,13 +219,48 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   get cursorColor => CSSColor.initial;
 
   @override
-  void handleClick(Event event) {
+  void handlePointDown(PointerDownEvent pointEvent) {
+    super.handlePointDown(pointEvent);
+    InputElement.setFocus(this);
+    // @TODO: selection.
+  }
+
+  @override
+  void handlePointMove(PointerMoveEvent pointEvent) {
+    super.handlePointMove(pointEvent);
+
+    // @TODO: selection.
+  }
+
+  @override
+  void handlePointUp(PointerUpEvent pointEvent) {
+    super.handlePointUp(pointEvent);
+    // @TODO: selection.
+  }
+
+  void focus() {
     activeTextInput();
-    super.handleClick(event);
+    dispatchEvent(Event('focus'));
+  }
+
+  void blur() {
+    deactiveTextInput();
+    dispatchEvent(Event('blur'));
   }
 
   void activeTextInput() {
-    if (textInputConnection == null) {
+    if (textInputConfiguration == null) {
+      textInputConfiguration = TextInputConfiguration(
+        inputType: _textInputType,
+        obscureText: obscureText,
+        autocorrect: autoCorrect,
+        inputAction: TextInputAction.done, // newline to multilines
+        textCapitalization: TextCapitalization.none,
+        keyboardAppearance: Brightness.light,
+      );
+    }
+
+    if (textInputConnection == null || !textInputConnection.attached) {
       final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
       _lastKnownRemoteTextEditingValue = localValue;
 
@@ -178,6 +268,17 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       textInputConnection.setEditingState(localValue);
     }
     textInputConnection.show();
+    _startCursorTimer();
+    renderEditable.markNeedsTextLayout();
+  }
+
+  void deactiveTextInput() {
+    _cursorVisibilityNotifier.value = false;
+    if (textInputConnection != null && textInputConnection.attached) {
+      textInputConnection.close();
+    }
+    _stopCursorTimer();
+    renderEditable.markNeedsTextLayout();
   }
 
   void onSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
@@ -186,14 +287,18 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     updateEditingValue(value);
   }
 
-  RenderEditable createRenderObject() {
+  bool get multiLine => maxLines > 1;
+
+  bool get _hasFocus => InputElement.focusInputElement == this;
+
+  RenderEditable createRenderEditable() {
     TextSpan text = textSpan.toPlainText().length > 0 ? textSpan : placeholderTextSpan;
 
-    return RenderEditable(
+    renderEditable = RenderEditable(
       text: text,
       cursorColor: cursorColor,
       showCursor: _cursorVisibilityNotifier,
-      hasFocus: true,
+      hasFocus: _hasFocus,
       maxLines: maxLines,
       minLines: minLines,
       expands: false,
@@ -215,13 +320,72 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       devicePixelRatio: window.devicePixelRatio,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
+      textOverflow: textOverflow,
     );
+    return renderEditable;
+  }
+
+  RenderObject createRenderObject() {
+    assert(renderBoxModel is RenderIntrinsic);
+    RenderEditable renderEditable = createRenderEditable();
+    RenderIntrinsic renderIntrinsic = renderBoxModel;
+    // Make render editable vertically center.
+    double dy = renderIntrinsic.height == null
+        ? 0
+        : (renderIntrinsic.height
+            - renderEditable.preferredLineHeight
+            - renderIntrinsic.borderTop
+            - renderIntrinsic.borderBottom) / 2;
+    _renderOffsetBox = RenderOffsetBox(
+      offset: Offset(0, dy),
+      child: renderEditable,
+    );
+    return _renderOffsetBox;
   }
 
   @override
   void performAction(TextInputAction action) {
-    if (action == TextInputAction.done) {
-      _triggerChangeEvent();
+    switch (action) {
+      case TextInputAction.done:
+        _triggerChangeEvent();
+        blur();
+        break;
+      case TextInputAction.none:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.unspecified:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.go:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.search:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.send:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.next:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.previous:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.continueAction:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.join:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.route:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.emergencyCall:
+        // TODO: Handle this case.
+        break;
+      case TextInputAction.newline:
+        // TODO: Handle this case.
+        break;
     }
   }
 
@@ -297,17 +461,67 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     if (key == 'value') {
       String text = value?.toString() ?? '';
-
-      TextEditingValue newTextEditingValue = textSelectionDelegate.textEditingValue.copyWith(
+      TextRange composing = textSelectionDelegate.textEditingValue?.composing ?? TextRange.empty;
+      TextSelection selection = TextSelection.collapsed(offset: text.length);
+      TextEditingValue newTextEditingValue = TextEditingValue(
         text: text,
-        selection: TextSelection.collapsed(offset: text.length),
+        selection: selection,
+        composing: composing,
       );
       _formatAndSetValue(newTextEditingValue);
     } else if (key == 'placeholder') {
       // Update placeholder text.
       updateTextSpan();
+    } else if (key == 'autofocus') {
+      _autoFocus = value != null;
+    } else if (key == 'type') {
+      _setType(value);
     }
   }
+
+  TextInputType _textInputType = TextInputType.text;
+  TextInputType get textInputType => _textInputType;
+  set textInputType(TextInputType value) {
+    if (value != _textInputType) {
+      _textInputType = value;
+      if (textInputConnection != null && textInputConnection.attached) {
+        deactiveTextInput();
+        activeTextInput();
+      }
+    }
+  }
+
+  void _setType(String value) {
+    switch (value) {
+      case 'text':
+        textInputType = TextInputType.text;
+        break;
+      case 'number':
+        textInputType = TEXT_INPUT_TYPE_NUMBER;
+        break;
+      case 'tel':
+        textInputType = TextInputType.number;
+        break;
+      // @TODO: more types.
+    }
+  }
+
+  // @override
+  // dynamic method(String name, List args) {
+  //   super.method(name, args);
+  //   switch (name) {
+  //     case 'focus':
+  //       if (isRendererAttached) {
+  //         focus();
+  //       }
+  //       break;
+  //     case 'blur':
+  //       if (isRendererAttached) {
+  //         blur();
+  //       }
+  //       break;
+  //   }
+  // }
 
   bool _showCaretOnScreenScheduled = false;
   Rect _currentCaretRect;
@@ -315,14 +529,17 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (_showCaretOnScreenScheduled) {
       return;
     }
+
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
       if (_currentCaretRect == null) {
         return;
       }
+
       final Rect newCaretRect = _currentCaretRect;
-      // Enlarge newCaretRect by scrollPadding to ensure that caret is not positioned directly at the edge after scrolling.
+      // Enlarge newCaretRect by scrollPadding to ensure that caret
+      // is not positioned directly at the edge after scrolling.
       final Rect inflatedRect = Rect.fromLTRB(
         newCaretRect.left,
         newCaretRect.top,
@@ -438,5 +655,35 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void showAutocorrectionPromptRect(int start, int end) {
     // TODO: implement showAutocorrectionPromptRect
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
+  }
+}
+
+class RenderOffsetBox extends RenderProxyBox {
+  RenderOffsetBox({
+    RenderBox child,
+    Offset offset
+  }) : assert(offset != null),
+        _offset = offset,
+        super(child);
+
+  Offset _offset;
+  Offset get offset => _offset;
+  set(Offset value) {
+    if (value != null && value != _offset) {
+      _offset = value;
+      markNeedsLayout();
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_offset == null) {
+      super.paint(context, offset);
+    } else {
+      final Offset transformedOffset = offset.translate(_offset.dx, _offset.dy);
+      if (child != null) {
+        context.paintChild(child, transformedOffset);
+      }
+    }
   }
 }
