@@ -18,9 +18,9 @@ mixin RenderBoxDecorationMixin on RenderBox {
   DecorationPosition position = DecorationPosition.background;
   ImageConfiguration configuration = ImageConfiguration.empty;
 
-  BoxPainter _painter;
-  BoxPainter get boxPainter => _painter;
-  set boxPainter(BoxPainter painter) {
+  _BoxDecorationPainter _painter;
+  _BoxDecorationPainter get boxPainter => _painter;
+  set boxPainter(_BoxDecorationPainter painter) {
     _painter = painter;
   }
 
@@ -127,15 +127,60 @@ mixin RenderBoxDecorationMixin on RenderBox {
     markNeedsPaint();
   }
 
-  void paintDecoration(PaintingContext context, Offset offset, EdgeInsets padding) {
+  void paintBackground(PaintingContext context, Offset offset, EdgeInsets padding, CSSStyleDeclaration style) {
     if (decoration == null) return;
+    if (_painter == null) {
+      _painter ??= _BoxDecorationPainter(
+        decoration,
+        borderEdge,
+        backgroundClip,
+        backgroundOrigin,
+        padding,
+        style,
+        markNeedsPaint
+      );
+    }
 
+    final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
+    if (position == DecorationPosition.background) {
+      int debugSaveCount;
+      assert(() {
+        debugSaveCount = context.canvas.getSaveCount();
+        return true;
+      }());
+      _painter.paintBackground(context.canvas, offset, filledConfiguration);
+      assert(() {
+        if (debugSaveCount != context.canvas.getSaveCount()) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('${decoration.runtimeType} painter had mismatching save and restore calls.'),
+            ErrorDescription('Before painting the decoration, the canvas save count was $debugSaveCount. '
+              'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
+              'Every call to save() or saveLayer() must be matched by a call to restore().'),
+            DiagnosticsProperty<Decoration>('The decoration was', decoration,
+              style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
+          ]);
+        }
+        return true;
+      }());
+      if (decoration.isComplex) context.setIsComplexHint();
+    }
+
+    if (position == DecorationPosition.foreground) {
+      _painter.paint(context.canvas, offset, filledConfiguration);
+      if (decoration.isComplex) context.setIsComplexHint();
+    }
+  }
+
+  void paintDecoration(PaintingContext context, Offset offset, EdgeInsets padding, CSSStyleDeclaration style) {
+    if (decoration == null) return;
     _painter ??= _BoxDecorationPainter(
       decoration,
       borderEdge,
       backgroundClip,
       backgroundOrigin,
       padding,
+      style,
       markNeedsPaint
     );
 
@@ -146,6 +191,7 @@ mixin RenderBoxDecorationMixin on RenderBox {
         debugSaveCount = context.canvas.getSaveCount();
         return true;
       }());
+
       _painter.paint(context.canvas, offset, filledConfiguration);
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
@@ -195,6 +241,7 @@ class _BoxDecorationPainter extends BoxPainter {
     this.backgroundClip,
     this.backgroundOrigin,
     this.padding,
+    this.style,
     VoidCallback onChanged
   ) : assert(_decoration != null),
       super(onChanged);
@@ -203,6 +250,7 @@ class _BoxDecorationPainter extends BoxPainter {
   BackgroundBoundary backgroundOrigin;
   EdgeInsets borderEdge;
   EdgeInsets padding;
+  CSSStyleDeclaration style;
   final BoxDecoration _decoration;
 
   Paint _cachedBackgroundPaint;
@@ -285,14 +333,58 @@ class _BoxDecorationPainter extends BoxPainter {
     super.dispose();
   }
 
-  /// Paint the box decoration into the given location on the given canvas
-  @override
-  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
+  void paintBackground(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration.size != null);
-    final Rect rect = offset & configuration.size;
-    final TextDirection textDirection = configuration.textDirection;
+    Offset baseOffset = Offset(0, 0);
 
+    final TextDirection textDirection = configuration.textDirection;
+    bool hasLocalAttachment = CSSBackground.hasLocalBackgroundImage(style);
+
+    // Rect of background color
+    Rect backgroundColorRect = _getBackgroundClipRect(baseOffset, configuration);
+    _paintBackgroundColor(canvas, backgroundColorRect, textDirection);
+
+    // Background image of background-attachment local scroll with content
+    Offset backgrundImageOffset = hasLocalAttachment ? offset : baseOffset;
+    // Rect of background image
+    Rect backgroundClipRect = _getBackgroundClipRect(backgrundImageOffset, configuration);
+    Rect backgroundOriginRect = _getBackgroundOriginRect(backgrundImageOffset, configuration);
+    Rect backgroundImageRect = backgroundClipRect.intersect(backgroundOriginRect);
+    _paintBackgroundImage(canvas, backgroundImageRect, configuration);
+  }
+
+  Rect _getBackgroundOriginRect(Offset offset, ImageConfiguration configuration) {
+    Size size = configuration.size;
+    double borderTop = 0;
+    double borderLeft = 0;
+    if (borderEdge != null) {
+      borderTop = borderEdge.top;
+      borderLeft = borderEdge.left;
+    }
+
+    double paddingTop = 0;
+    double paddingLeft = 0;
+    if (padding != null) {
+      paddingTop = padding.top;
+      paddingLeft = padding.left;
+    }
+    // Background origin moves background image from specified origin
+    Rect backgroundOriginRect;
+    switch(backgroundOrigin) {
+      case BackgroundBoundary.borderBox:
+        backgroundOriginRect = offset & size;
+        break;
+      case BackgroundBoundary.contentBox:
+        backgroundOriginRect = offset.translate(borderLeft + paddingLeft, borderTop + paddingTop) & size;
+        break;
+      default:
+        backgroundOriginRect = offset.translate(borderLeft, borderTop) & size;
+        break;
+    }
+    return backgroundOriginRect;
+  }
+
+  Rect _getBackgroundClipRect(Offset offset, ImageConfiguration configuration) {
     Size size = configuration.size;
     double borderTop = 0;
     double borderBottom = 0;
@@ -315,7 +407,6 @@ class _BoxDecorationPainter extends BoxPainter {
       paddingLeft = padding.left;
       paddingRight = padding.right;
     }
-
     Rect backgroundClipRect;
     switch(backgroundClip) {
       case BackgroundBoundary.paddingBox:
@@ -334,26 +425,31 @@ class _BoxDecorationPainter extends BoxPainter {
         backgroundClipRect = offset & size;
         break;
     }
+    return backgroundClipRect;
+  }
 
-    // Background origin moves background image from specified origin
-    Rect backgroundOriginRect;
-    switch(backgroundOrigin) {
-      case BackgroundBoundary.borderBox:
-        backgroundOriginRect = offset & size;
-        break;
-      case BackgroundBoundary.contentBox:
-        backgroundOriginRect = offset.translate(borderLeft + paddingLeft, borderTop + paddingTop) & size;
-        break;
-      default:
-        backgroundOriginRect = offset.translate(borderLeft, borderTop) & size;
-        break;
-    }
-    // Rect of background image
-    Rect backgroundImageRect = backgroundClipRect.intersect(backgroundOriginRect);
+  /// Paint the box decoration into the given location on the given canvas
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    assert(configuration != null);
+    assert(configuration.size != null);
+
+    final Rect rect = offset & configuration.size;
+    final TextDirection textDirection = configuration.textDirection;
 
     _paintShadows(canvas, rect, textDirection);
-    _paintBackgroundColor(canvas, backgroundClipRect, textDirection);
-    _paintBackgroundImage(canvas, backgroundImageRect, configuration);
+
+
+    bool hasLocalAttachment = CSSBackground.hasLocalBackgroundImage(style);
+    if (!hasLocalAttachment) {
+      Rect backgroundClipRect = _getBackgroundClipRect(offset, configuration);
+      _paintBackgroundColor(canvas, backgroundClipRect, textDirection);
+
+      Rect backgroundOriginRect = _getBackgroundOriginRect(offset, configuration);
+      Rect backgroundImageRect = backgroundClipRect.intersect(backgroundOriginRect);
+      _paintBackgroundImage(canvas, backgroundImageRect, configuration);
+    }
+
     _decoration.border?.paint(
       canvas,
       rect,

@@ -987,7 +987,6 @@ class RenderBoxModel extends RenderBox with
   @override
   void paint(PaintingContext context, Offset offset) {
     if (isCSSDisplayNone || isCSSVisibilityHidden) return;
-
     paintBoxModel(context, offset);
   }
 
@@ -1020,13 +1019,25 @@ class RenderBoxModel extends RenderBox with
 
   void _chainPaintDecoration(PaintingContext context, Offset offset) {
     EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
-    paintDecoration(context, offset, resolvedPadding);
+    paintDecoration(context, offset, resolvedPadding, style);
     _chainPaintOverflow(context, offset);
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
     EdgeInsets borderEdge = EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft);
-    paintOverflow(context, offset, borderEdge, decoration, _chainPaintContentVisibility);
+
+    bool hasLocalAttachment = CSSBackground.hasLocalBackgroundImage(style);
+    if (hasLocalAttachment) {
+      paintOverflow(context, offset, borderEdge, decoration, _chainPaintBackground);
+    } else {
+      paintOverflow(context, offset, borderEdge, decoration, _chainPaintContentVisibility);
+    }
+  }
+
+  void _chainPaintBackground(PaintingContext context, Offset offset) {
+    EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
+    paintBackground(context, offset, resolvedPadding, style);
+    _chainPaintContentVisibility(context, offset);
   }
 
   void _chainPaintContentVisibility(PaintingContext context, Offset offset) {
