@@ -475,6 +475,8 @@ class Element extends Node
   // Detach renderObject of current node from parent
   @override
   void detach() {
+    if (renderBoxModel == null) return;
+
     willDetachRenderer();
 
     RenderObject parent = renderBoxModel.parent;
