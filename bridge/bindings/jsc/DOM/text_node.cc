@@ -42,7 +42,6 @@ JSObjectRef JSTextNode::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringRef data)
   : NodeInstance(jsTextNode, NodeType::TEXT_NODE), nativeTextNode(new NativeTextNode(nativeNode)) {
 
-  KRAKEN_LOG(VERBOSE) << "Create Text Node value: " << JSStringToStdString(data);
   m_data.setString(data);
 
   std::string dataString = JSStringToStdString(data);

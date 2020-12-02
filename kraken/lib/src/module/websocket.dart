@@ -86,6 +86,7 @@ class KrakenWebSocket {
   }
 
   bool _hasListener(String id, String type) {
+    if (!_listenMap.containsKey(id)) return false;
     var listeners = _listenMap[id];
     return listeners.containsKey(type);
   }
