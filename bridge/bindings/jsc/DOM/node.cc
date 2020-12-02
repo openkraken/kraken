@@ -427,7 +427,7 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     return JSValueMakeBoolean(_hostClass->ctx, isConnected());
   case NodeProperty::kFirstChild: {
     auto instance = firstChild();
-    return instance != nullptr ? instance->object : nullptr;
+    return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
   case NodeProperty::kParentNode: {
     if (parentNode == nullptr) return nullptr;
@@ -435,15 +435,15 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
   }
   case NodeProperty::kLastChild: {
     auto instance = lastChild();
-    return instance != nullptr ? instance->object : nullptr;
+    return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
   case NodeProperty::kPreviousSibling: {
     auto instance = previousSibling();
-    return instance != nullptr ? instance->object : nullptr;
+    return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
   case NodeProperty::kNextSibling: {
     auto instance = nextSibling();
-    return instance != nullptr ? instance->object : nullptr;
+    return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
   case NodeProperty::kAppendChild: {
     return prototype<JSNode>()->m_appendChild.function();
