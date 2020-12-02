@@ -49,6 +49,32 @@ describe('Node API', () => {
     expect(el.isConnected).toEqual(false);
   });
 
+  it('nextSibling should to null when child is lastChild of one children list', () => {
+    let container = document.createElement('div');
+    let child = document.createElement('div');
+    container.appendChild(child);
+    expect(container.firstChild).toBe(child);
+    expect(container.lastChild).toBe(child);
+    expect(child.parentNode).toBe(container);
+    expect(child.previousSibling).toBe(null);
+    expect(child.nextSibling).toBe(null);
+    expect(child.isConnected).toBe(true);
+  });
+
+  it('next sibling should to null when child is lastChild of multiple children list', () => {
+    let container = document.createElement('div');
+    let child = document.createElement('div');
+    let other = document.createElement('div');
+    container.appendChild(other);
+    container.appendChild(child);
+    expect(container.firstChild).toBe(other);
+    expect(container.lastChild).toBe(child);
+    expect(child.parentNode).toBe(container);
+    expect(child.previousSibling).toBe(other);
+    expect(child.nextSibling).toBe(null);
+    expect(child.isConnected).toBe(true);
+  });
+
   it('set textContent property will clear element childNodes', async () => {
     let container = createElement('div', {}, [
       createText('1234'),

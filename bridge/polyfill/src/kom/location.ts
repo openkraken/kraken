@@ -1,7 +1,8 @@
 import { krakenInvokeModule } from '../bridge';
 import { URL } from './url';
 
-const krakenLocation = window.location;
+// @ts-ignore
+const krakenLocation = window.__location__;
 // Lazy parse url.
 let _url: URL;
 export function getUrl() : URL {

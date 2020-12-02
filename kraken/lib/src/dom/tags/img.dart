@@ -192,10 +192,10 @@ class ImageElement extends Element {
         }
       }
 
-      if (!height.isFinite) {
+      if (height == null || !height.isFinite) {
         height = 0.0;
       }
-      if (!width.isFinite) {
+      if (width == null || !width.isFinite) {
         width = 0.0;
       }
 

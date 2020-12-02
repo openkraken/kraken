@@ -113,7 +113,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
 
 JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
-  if (argumentCount != 2) {
+  if (argumentCount < 2) {
     JSC_THROW_ERROR(ctx, "Failed to addEventListener: eventName and function parameter are required.", exception)
     return nullptr;
   }
