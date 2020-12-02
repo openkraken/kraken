@@ -13,7 +13,7 @@ void bindTextNode(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "TextNode", textNode->classObject);
 }
 
-std::unordered_map<JSContext *, JSTextNode *> & JSTextNode::getInstanceMap() {
+std::unordered_map<JSContext *, JSTextNode *> &JSTextNode::getInstanceMap() {
   static std::unordered_map<JSContext *, JSTextNode *> instanceMap;
   return instanceMap;
 }
@@ -42,6 +42,7 @@ JSObjectRef JSTextNode::instanceConstructor(JSContextRef ctx, JSObjectRef constr
 JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringRef data)
   : NodeInstance(jsTextNode, NodeType::TEXT_NODE), nativeTextNode(new NativeTextNode(nativeNode)) {
 
+  KRAKEN_LOG(VERBOSE) << "Create Text Node value: " << JSStringToStdString(data);
   m_data.setString(data);
 
   std::string dataString = JSStringToStdString(data);
@@ -78,7 +79,7 @@ void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
     std::string dataString = JSStringToStdString(data);
     auto args = buildUICommandArgs(name, dataString);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
   } else {
     JSNode::NodeInstance::setProperty(name, value, exception);
   }
@@ -118,6 +119,11 @@ JSTextNode::TextNodeInstance::~TextNodeInstance() {
 
 void JSTextNode::TextNodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {
   m_data.setString(content);
+
+  std::string key = "data";
+  auto args = buildUICommandArgs(key, content);
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
+    ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
 }
 
 } // namespace kraken::binding::jsc

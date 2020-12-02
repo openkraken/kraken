@@ -54,4 +54,16 @@ describe('TextNode', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('should work with set textContent', async () => {
+    const div = document.createElement('div');
+    const text = document.createTextNode('before modified');
+
+    document.body.appendChild(div);
+    div.appendChild(text);
+
+    text.textContent = 'after modified';
+
+    await matchViewportSnapshot();
+  });
 });
