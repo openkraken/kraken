@@ -9,6 +9,7 @@ void main() {
     home: Kraken(
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio,
+      background: Color(0xffffffff),
     ),
   ));
 }

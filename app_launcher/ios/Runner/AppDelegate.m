@@ -7,7 +7,9 @@
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [GeneratedPluginRegistrant registerWithRegistry:self];
-  Kraken *kraken = [[Kraken alloc] initWithName:@"main"];
+  FlutterViewController* vc = (FlutterViewController*)self.window.rootViewController;
+    
+  Kraken *kraken = [[Kraken alloc] initWithFlutterEngine:vc.engine];
   [kraken loadUrl:@"https://kraken.oss-cn-hangzhou.aliyuncs.com/data/app_bundle.zip"];
   // Override point for customization after application launch.
   return [super application:application didFinishLaunchingWithOptions:launchOptions];

@@ -20,11 +20,13 @@ void launch({
   String bundlePathOverride,
   String bundleContentOverride,
   bool debugEnableInspector,
+  Color background,
 }) async {
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
   KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
+    background: background,
     showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
     methodChannel: KrakenNativeChannel(),
     debugEnableInspector: debugEnableInspector,
