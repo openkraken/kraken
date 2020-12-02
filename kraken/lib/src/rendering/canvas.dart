@@ -9,6 +9,7 @@ import 'package:kraken/painting.dart' show CanvasRenderingContext2D;
 class CanvasPainter extends CustomPainter {
   CanvasRenderingContext2D context;
 
+  bool _shouldRepaint = false;
   PictureRecorder _pictureRecorder;
   Picture _picture;
   Canvas _canvas;
@@ -16,12 +17,36 @@ class CanvasPainter extends CustomPainter {
   bool get _shouldPaintContextActions => context != null && context.actionCount > 0;
   bool get _shouldPaintCustomPicture => _picture != null && _picture.approximateBytesUsed > 0;
 
+  // Notice: Canvas is stateless, change scaleX or scaleY will case dropping drawn content.
+  /// https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-set-bitmap-dimensions
+  double _scaleX = 1.0;
+  double get scaleX => _scaleX;
+  set scaleX(double value) {
+    if (value != null && value != _scaleX) {
+      _scaleX = value;
+      _resetPaintingContext();
+    }
+  }
+
+  double _scaleY = 1.0;
+  double get scaleY => _scaleY;
+  set scaleY(double value) {
+    if (value != null && value != _scaleY) {
+      _scaleY = value;
+      _resetPaintingContext();
+    }
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     if (context != null) {
       if (_shouldPaintContextActions) {
         _pictureRecorder = PictureRecorder();
         _canvas = Canvas(_pictureRecorder);
+
+        if (_scaleX != 1.0 || _scaleY != 1.0) {
+          _canvas.scale(_scaleX, _scaleY);
+        }
       }
 
       if (_shouldPaintCustomPicture) {
@@ -41,5 +66,30 @@ class CanvasPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CanvasPainter oldDelegate) => false;
+  bool shouldRepaint(CanvasPainter oldDelegate) {
+    if (_shouldRepaint) {
+      _shouldRepaint = false;
+      return true;
+    }
+    return false;
+  }
+
+  void _resetPaintingContext() {
+    _picture?.dispose();
+    _picture = null;
+    _shouldRepaint = true;
+  }
+
+  void dispose() {
+    if (_pictureRecorder != null) {
+      if (_pictureRecorder.isRecording) {
+        _pictureRecorder.endRecording().dispose();
+      }
+      _pictureRecorder = null;
+    }
+
+    _picture?.dispose();
+    _picture = null;
+    _canvas = null;
+  }
 }
