@@ -26,7 +26,7 @@ std::unordered_map<std::string, WindowInstance::WindowProperty> &WindowInstance:
   static std::unordered_map<std::string, WindowProperty> propertyMap{
     {"devicePixelRatio", WindowProperty::kDevicePixelRatio},
     {"colorScheme", WindowProperty::kColorScheme},
-    {"location", WindowProperty::kLocation},
+    {"__location__", WindowProperty::kLocation},
     {"window", WindowProperty::kWindow},
     {"history", WindowProperty::kHistory},
     {"parent", WindowProperty::kParent},

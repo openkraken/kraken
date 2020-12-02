@@ -96,6 +96,7 @@ Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynam
 
 const int BODY_ID = -1;
 const int WINDOW_ID = -2;
+const int DOCUMENT_ID = -3;
 
 class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
@@ -328,8 +329,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void addEvent(int targetId, String eventType) {
-    assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
+    // TODO: support bind event listener on document.
+    if (targetId == DOCUMENT_ID) return;
 
+    assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId);
     assert(target != null);
 

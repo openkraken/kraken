@@ -85,8 +85,12 @@ JSNode::NodeInstance *JSNode::NodeInstance::previousSibling() {
   auto &&parentChildNodes = parentNode->childNodes;
   auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), this);
 
-  if (it != parentChildNodes.end()) {
-    return *(--it);
+  if (parentChildNodes.size() < 2) {
+    return nullptr;
+  }
+
+  if ((it - 1) != parentChildNodes.end()) {
+    return *(it - 1);
   }
 
   return nullptr;
@@ -98,8 +102,8 @@ JSNode::NodeInstance *JSNode::NodeInstance::nextSibling() {
   auto &&parentChildNodes = parentNode->childNodes;
   auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), this);
 
-  if (it != parentChildNodes.end()) {
-    return *(++it);
+  if ((it + 1) != parentChildNodes.end()) {
+    return *(it + 1);
   }
 
   return nullptr;
@@ -183,6 +187,7 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
     referenceNodeObjectRef = JSValueToObject(ctx, referenceNodeValueRef, exception);
     referenceInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(referenceNodeObjectRef));
   } else if (!JSValueIsNull(ctx, referenceNodeValueRef)) {
+    assert(false);
     JSC_THROW_ERROR(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'",
                     exception);
     return nullptr;
@@ -422,7 +427,7 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     return JSValueMakeBoolean(_hostClass->ctx, isConnected());
   case NodeProperty::kFirstChild: {
     auto instance = firstChild();
-    return instance != nullptr ? instance->object : nullptr;
+    return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
   case NodeProperty::kParentNode: {
     if (parentNode == nullptr) return nullptr;
@@ -430,15 +435,15 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
   }
   case NodeProperty::kLastChild: {
     auto instance = lastChild();
-    return instance != nullptr ? instance->object : nullptr;
+    return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
   case NodeProperty::kPreviousSibling: {
     auto instance = previousSibling();
-    return instance != nullptr ? instance->object : nullptr;
+    return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
   case NodeProperty::kNextSibling: {
     auto instance = nextSibling();
-    return instance != nullptr ? instance->object : nullptr;
+    return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
   case NodeProperty::kAppendChild: {
     return prototype<JSNode>()->m_appendChild.function();
