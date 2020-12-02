@@ -13,14 +13,14 @@ import 'package:kraken/painting.dart';
 import 'package:kraken/css.dart';
 
 const String CANVAS = 'CANVAS';
+const double ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300.0;
+const double ELEMENT_DEFAULT_HEIGHT_IN_PIXEL = 150.0;
 
 final Pointer<NativeFunction<Native_CanvasGetContext>> nativeGetContext =
     Pointer.fromFunction(CanvasElement._getContext);
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
-  WIDTH: ELEMENT_DEFAULT_WIDTH,
-  HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
 class RenderCanvasPaint extends RenderCustomPaint {
@@ -36,6 +36,12 @@ class RenderCanvasPaint extends RenderCustomPaint {
 }
 
 class CanvasElement extends Element {
+  /// The painter that paints before the children.
+  final CanvasPainter painter = CanvasPainter();
+
+  // The custom paint render object.
+  RenderCustomPaint renderCustomPaint;
+
   static SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
 
   static CanvasElement getCanvasElementOfNativePtr(Pointer<NativeCanvasElement> nativeCanvasElement) {
@@ -78,27 +84,16 @@ class CanvasElement extends Element {
     );
 
     addChild(renderCustomPaint);
-    style.addStyleChangeListener(_propertyChangedListener);
+    style.addStyleChangeListener(_styleChangedListener);
   }
 
   @override
   void didDetachRenderer() {
     super.didDetachRenderer();
-    style.removeStyleChangeListener(_propertyChangedListener);
+    style.removeStyleChangeListener(_styleChangedListener);
+    painter.dispose();
     renderCustomPaint = null;
   }
-
-  /// The painter that paints before the children.
-  final CanvasPainter painter = CanvasPainter();
-
-  /// The size that this [CustomPaint] should aim for, given the layout
-  /// constraints, if there is no child.
-  ///
-  /// If there's a child, this is ignored, and the size of the child is used
-  /// instead.
-  Size get size => Size(width, height);
-
-  RenderCustomPaint renderCustomPaint;
 
   // RenderingContext? getContext(DOMString contextId, optional any options = null);
   CanvasRenderingContext getContext(String contextId, {dynamic options}) {
@@ -113,51 +108,98 @@ class CanvasElement extends Element {
     }
   }
 
-  /// Element attribute width
-  double _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
+  /// The size that this [CustomPaint] should aim for, given the layout
+  /// constraints, if there is no child.
+  ///
+  /// If there's a child, this is ignored, and the size of the child is used
+  /// instead.
+  Size get size {
+    double width;
+    double height;
 
-  double get width => _width;
+    double styleWidth = renderBoxModel.width;
+    double styleHeight = renderBoxModel.height;
 
-  set width(double value) {
-    if (value == null) {
-      return;
+    if (styleWidth != null) {
+      width = styleWidth;
     }
 
-    if (value != _width) {
-      _width = value;
-      if (renderCustomPaint != null) {
-        renderCustomPaint.preferredSize = size;
+    if (styleHeight != null) {
+      height = styleHeight;
+    }
+
+    // [_attrWidth/_attrHeight] has default value, should not be null.
+    if (height == null && width == null) {
+      width = _attrWidth;
+      height = _attrHeight;
+    } else if (width == null && height != null) {
+      width = _attrHeight / height * _attrWidth;
+    } else if (width != null && height == null) {
+      height = _attrWidth / width * _attrHeight;
+    }
+
+    return Size(width, height);
+  }
+
+  void resize() {
+    if (renderCustomPaint != null) {
+      // https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-set-bitmap-dimensions
+      final Size paintingBounding = size;
+      renderCustomPaint.preferredSize = paintingBounding;
+
+      // The intrinsic dimensions of the canvas element when it represents embedded content are
+      // equal to the dimensions of the element’s bitmap.
+      // A canvas element can be sized arbitrarily by a style sheet, its bitmap is then subject
+      // to the object-fit CSS property.
+      // @TODO: CSS object-fit for canvas.
+      // To fill (default value of object-fit) the bitmap content, use scale to get the same performed.
+      double styleWidth = renderBoxModel.width;
+      double styleHeight = renderBoxModel.height;
+
+      double scaleX;
+      double scaleY;
+      if (styleWidth != null) {
+        scaleX = paintingBounding.width / _attrWidth;
       }
+      if (styleHeight != null) {
+        scaleY = paintingBounding.height / _attrHeight;
+      }
+      if (painter.scaleX != scaleX || painter.scaleY != scaleY) {
+        painter
+          ..scaleX = scaleX
+          ..scaleY = scaleY;
+        if (painter.shouldRepaint(painter)) {
+          renderCustomPaint.markNeedsPaint();
+        }
+      }
+    }
+  }
+
+  /// Element attribute width
+  double _attrWidth = ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
+  double get attrWidth => _attrWidth;
+  set attrWidth(double value) {
+    if (value != null && value != _attrWidth) {
+      _attrWidth = value;
+      resize();
     }
   }
 
   /// Element attribute height
-  double _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
-
-  double get height => _height;
-
-  set height(double value) {
-    if (value == null) {
-      return;
-    }
-
-    if (value != _height) {
-      _height = value;
-      if (renderCustomPaint != null) {
-        renderCustomPaint.preferredSize = size;
-      }
+  double _attrHeight = ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
+  double get attrHeight => _attrHeight;
+  set attrHeight(double value) {
+    if (value != null && value != _attrHeight) {
+      _attrHeight = value;
+      resize();
     }
   }
 
-  void _propertyChangedListener(String key, String original, String present, bool inAnimation) {
+  void _styleChangedListener(String key, String original, String present, bool inAnimation) {
     switch (key) {
       case 'width':
-        // Trigger width setter to invoke rerender.
-        width = CSSLength.toDisplayPortValue(present);
-        break;
       case 'height':
-        // Trigger height setter to invoke rerender.
-        height = CSSLength.toDisplayPortValue(present);
+        resize();
         break;
     }
   }
@@ -167,5 +209,18 @@ class CanvasElement extends Element {
     super.dispose();
     _nativeMap.remove(nativeCanvasElement.address);
     painter.context.dispose();
+  }
+
+  @override
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
+    switch (key) {
+      case WIDTH:
+        attrWidth = CSSLength.toDisplayPortValue('$value${CSSLength.PX}');
+        break;
+      case HEIGHT:
+        attrHeight = CSSLength.toDisplayPortValue('$value${CSSLength.PX}');
+        break;
+    }
   }
 }

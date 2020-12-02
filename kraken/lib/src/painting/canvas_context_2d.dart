@@ -321,7 +321,10 @@ implements CanvasText {
       } else {
         textPainter.layout();
       }
-      textPainter.paint(canvas, Offset(x, y));
+
+      double offsetToBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+      // Paint text start with baseline.
+      textPainter.paint(canvas, Offset(x, y - offsetToBaseline));
     });
   }
 
@@ -333,7 +336,10 @@ implements CanvasText {
       } else {
         textPainter.layout();
       }
-      textPainter.paint(canvas, Offset(x, y));
+
+      double offsetToBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+      // Paint text start with baseline.
+      textPainter.paint(canvas, Offset(x, y - offsetToBaseline));
     });
   }
 
