@@ -182,6 +182,16 @@ void flushBridgeTask() {
   _flushBridgeTask();
 }
 
+typedef Native_FlushUICommandCallback = Void Function(Int64 contextId);
+typedef Dart_FlushUICommandCallback = void Function(int contextId);
+
+final Dart_FlushUICommandCallback _flushUICommandCallback =
+nativeDynamicLibrary.lookup<NativeFunction<Native_FlushUICommandCallback>>('flushUICommandCallback').asFunction();
+
+void flushUICommandCallback(int contextId) {
+  _flushUICommandCallback(contextId);
+}
+
 enum UICommandType {
   createElement,
   createTextNode,

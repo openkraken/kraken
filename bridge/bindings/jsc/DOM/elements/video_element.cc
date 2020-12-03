@@ -4,6 +4,7 @@
  */
 
 #include "video_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -43,7 +44,9 @@ JSVideoElement::VideoElementInstance::VideoElementInstance(JSVideoElement *JSVid
 }
 
 JSVideoElement::VideoElementInstance::~VideoElementInstance() {
-  delete nativeVideoElement;
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeVideoElement *>(ptr);
+  }, nativeVideoElement);
 }
 
 std::vector<JSStringRef> &JSVideoElement::VideoElementInstance::getAudioElementPropertyNames() {

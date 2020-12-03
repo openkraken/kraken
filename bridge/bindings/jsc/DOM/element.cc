@@ -16,6 +16,7 @@
 #include "dart_methods.h"
 #include "event_target.h"
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 #include "text_node.h"
 
 namespace kraken::binding::jsc {
@@ -114,15 +115,11 @@ void JSElementAttributes::removeAttribute(std::string &name) {
   m_attributes.erase(name);
 }
 
+std::unordered_map<JSContext *, JSElement *> JSElement::instanceMap = {};
+
 JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
-std::unordered_map<JSContext *, JSElement *> & JSElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSElement *> instanceMap;
-  return instanceMap;
-}
-
 JSElement *JSElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSElement(context);
   }
@@ -130,7 +127,6 @@ JSElement *JSElement::instance(JSContext *context) {
 }
 
 JSElement::~JSElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -179,7 +175,10 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
 
 ElementInstance::~ElementInstance() {
   if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
-  delete nativeElement;
+
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeElement *>(ptr);
+  }, nativeElement);
 }
 
 JSValueRef JSElement::getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,

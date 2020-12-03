@@ -4,6 +4,7 @@
  */
 
 #include "comment_node.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -14,20 +15,15 @@ void bindCommentNode(std::unique_ptr<JSContext> &context) {
 
 JSCommentNode::JSCommentNode(JSContext *context) : JSNode(context, "CommentNode") {}
 
-std::unordered_map<JSContext *, JSCommentNode *> & JSCommentNode::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSCommentNode *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSCommentNode *> JSCommentNode::instanceMap{};
 
 JSCommentNode *JSCommentNode::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSCommentNode(context);
   }
   return instanceMap[context];
 }
 JSCommentNode::~JSCommentNode() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -111,7 +107,9 @@ std::string JSCommentNode::CommentNodeInstance::internalGetTextContent() {
 }
 
 JSCommentNode::CommentNodeInstance::~CommentNodeInstance() {
-  delete nativeComment;
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeComment *>(ptr);
+  }, nativeComment);
 }
 
 void JSCommentNode::CommentNodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {

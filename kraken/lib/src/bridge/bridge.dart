@@ -17,21 +17,27 @@ int initBridge() {
   // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
 
+  int contextId = -1;
   // Port flutter's frame callback into bridge.
   SchedulerBinding.instance.addPersistentFrameCallback((_) {
+    assert(contextId != -1);
+
     flushBridgeTask();
     flushUICommand();
+    flushUICommandCallback(contextId);
   });
 
   if (_firstView) {
     initJSContextPool(kKrakenJSBridgePoolSize);
     _firstView = false;
-    return 0;
+    contextId = 0;
   } else {
-    int contextId = allocateNewContext();
+    contextId = allocateNewContext();
     if (contextId == -1) {
       throw Exception('can\' allocate new kraken js Bridge: bridge count had reach the maximum size.');
     }
     return contextId;
   }
+
+  return contextId;
 }

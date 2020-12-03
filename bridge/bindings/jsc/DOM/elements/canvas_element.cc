@@ -5,6 +5,7 @@
 
 #include "canvas_element.h"
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -45,7 +46,9 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
-  delete nativeCanvasElement;
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeCanvasElement *>(ptr);
+  }, nativeCanvasElement);
 }
 
 std::vector<JSStringRef> &JSCanvasElement::CanvasElementInstance::getCanvasElementPropertyNames() {
@@ -171,7 +174,9 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::CanvasRenderingConte
   : Instance(canvasRenderContext2D), nativeCanvasRenderingContext2D(nativeCanvasRenderingContext2D) {}
 
 CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingContext2DInstance() {
-  delete nativeCanvasRenderingContext2D;
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeCanvasRenderingContext2D *>(ptr);
+  }, nativeCanvasRenderingContext2D);
 }
 
 std::vector<JSStringRef> &

@@ -4,6 +4,7 @@
  */
 
 #include "iframe_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -120,7 +121,9 @@ void JSIframeElement::IframeElementInstance::getPropertyNames(JSPropertyNameAccu
 }
 
 JSIframeElement::IframeElementInstance::~IframeElementInstance() {
-  delete nativeIframeElement;
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeIframeElement *>(ptr);
+  }, nativeIframeElement);
 }
 
 JSValueRef JSIframeElement::IframeElementInstance::postMessage(JSContextRef ctx, JSObjectRef function,

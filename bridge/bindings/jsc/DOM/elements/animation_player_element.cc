@@ -4,6 +4,7 @@
  */
 
 #include "animation_player_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -149,7 +150,9 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::getPropertyNames(
 }
 
 JSAnimationPlayerElement::AnimationPlayerElementInstance::~AnimationPlayerElementInstance() {
-  delete nativeAnimationPlayerElement;
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeAnimationPlayerElement *>(ptr);
+  }, nativeAnimationPlayerElement);
 }
 
 } // namespace kraken::binding::jsc

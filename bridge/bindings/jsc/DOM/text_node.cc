@@ -5,6 +5,7 @@
 
 #include "text_node.h"
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -113,7 +114,9 @@ JSTextNode::TextNodeInstance::getTextNodePropertyMap() {
 }
 
 JSTextNode::TextNodeInstance::~TextNodeInstance() {
-  delete nativeTextNode;
+  foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeTextNode *>(ptr);
+  }, nativeTextNode);
 }
 
 void JSTextNode::TextNodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {

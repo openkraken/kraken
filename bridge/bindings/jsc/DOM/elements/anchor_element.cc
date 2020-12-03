@@ -5,6 +5,7 @@
 
 #include "anchor_element.h"
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -105,7 +106,9 @@ JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyMap() {
 }
 
 JSAnchorElement::AnchorElementInstance::~AnchorElementInstance() {
-  delete nativeAnchorElement;
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeAnchorElement *>(ptr);
+  }, nativeAnchorElement);
   if (_target != nullptr) JSStringRelease(_target);
   if (_href != nullptr) JSStringRelease(_href);
 }

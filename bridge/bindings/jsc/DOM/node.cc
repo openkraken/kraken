@@ -6,6 +6,7 @@
 #include "node.h"
 #include "bindings/jsc/macros.h"
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -44,7 +45,9 @@ JSNode::NodeInstance::~NodeInstance() {
            ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
   }
 
-  delete nativeNode;
+  foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeNode *>(ptr);
+  }, nativeNode);
 }
 
 JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)

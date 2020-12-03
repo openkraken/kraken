@@ -4,6 +4,7 @@
  */
 
 #include "image_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -74,12 +75,10 @@ JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, 
     case ImageProperty::kHeight:
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageHeight(nativeImageElement));
     case ImageProperty::kSrc: {
-      if (_src == nullptr) return nullptr;
-      return JSValueMakeString(_hostClass->ctx, _src);
+      return m_src.makeString();
     }
     case ImageProperty::kLoading: {
-      if (_loading == nullptr) return nullptr;
-      return JSValueMakeString(_hostClass->ctx, _loading);
+      return m_loading.makeString();
     }
     }
   }
@@ -112,19 +111,19 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
       break;
     }
     case ImageProperty::kSrc: {
-      _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
-      JSStringRetain(_src);
+      JSStringRef src = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_src.setString(src);
 
-      auto args = buildUICommandArgs(name, JSStringRetain(_src));
+      auto args = buildUICommandArgs(name, JSStringRetain(src));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
       break;
     }
     case ImageProperty::kLoading: {
-      _loading = JSValueToStringCopy(_hostClass->ctx, value, exception);
-      JSStringRetain(_loading);
+      JSStringRef loading = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_loading.setString(loading);
 
-      auto args = buildUICommandArgs(name, JSStringRetain(_loading));
+      auto args = buildUICommandArgs(name, JSStringRetain(loading));
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
       break;
@@ -146,10 +145,9 @@ void JSImageElement::ImageElementInstance::getPropertyNames(JSPropertyNameAccumu
 }
 
 JSImageElement::ImageElementInstance::~ImageElementInstance() {
-  delete nativeImageElement;
-
-  if (_src != nullptr) JSStringRelease(_src);
-  if (_loading != nullptr) JSStringRelease(_loading);
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeImageElement *>(ptr);
+  }, nativeImageElement);
 }
 
 } // namespace kraken::binding::jsc

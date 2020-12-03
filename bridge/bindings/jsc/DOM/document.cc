@@ -9,6 +9,7 @@
 #include "text_node.h"
 #include <mutex>
 #include <regex>
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -209,7 +210,9 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
 }
 
 DocumentInstance::~DocumentInstance() {
-  delete nativeDocument;
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeDocument *>(ptr);
+  }, nativeDocument);
   instanceMap.erase(context);
 }
 

@@ -4,6 +4,7 @@
  */
 
 #include "audio_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -42,7 +43,9 @@ JSAudioElement::AudioElementInstance::AudioElementInstance(JSAudioElement *jsAud
 }
 
 JSAudioElement::AudioElementInstance::~AudioElementInstance() {
-  delete nativeAudioElement;
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeAudioElement *>(ptr);
+  }, nativeAudioElement);
 }
 
 std::vector<JSStringRef> &JSAudioElement::AudioElementInstance::getAudioElementPropertyNames() {

@@ -4,6 +4,7 @@
  */
 
 #include "media_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -30,9 +31,11 @@ JSMediaElement::MediaElementInstance::MediaElementInstance(JSMediaElement *jsMed
   : ElementInstance(jsMediaElement, tagName, false), nativeMediaElement(new NativeMediaElement(nativeElement)) {}
 
 JSMediaElement::MediaElementInstance::~MediaElementInstance() {
-  delete nativeMediaElement;
-
   if (_src != nullptr) JSStringRelease(_src);
+
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeMediaElement *>(ptr);
+  }, nativeMediaElement);
 }
 
 std::vector<JSStringRef> &JSMediaElement::MediaElementInstance::getMediaElementPropertyNames() {

@@ -123,6 +123,8 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
 
 KRAKEN_EXPORT
 void flushBridgeTask();
+KRAKEN_EXPORT
+void flushUICommandCallback(int64_t contextId);
 
 KRAKEN_EXPORT
 void reloadJsContext(int32_t contextId);

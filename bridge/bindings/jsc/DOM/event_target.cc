@@ -9,6 +9,7 @@
 #include "event.h"
 #include <codecvt>
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -108,7 +109,9 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
     }
   }
 
-  delete nativeEventTarget;
+  foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeEventTarget *>(ptr);
+  }, nativeEventTarget);
 }
 
 JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,

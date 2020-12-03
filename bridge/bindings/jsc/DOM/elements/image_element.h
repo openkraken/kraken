@@ -43,8 +43,8 @@ public:
     NativeImageElement *nativeImageElement;
 
   private:
-    JSStringRef _src{JSStringCreateWithUTF8CString("")};
-    JSStringRef _loading{JSStringCreateWithUTF8CString("")};
+    JSStringHolder m_src{context, ""};
+    JSStringHolder m_loading{context, ""};
   };
 protected:
   JSImageElement() = delete;

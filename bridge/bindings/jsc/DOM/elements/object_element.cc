@@ -4,6 +4,7 @@
  */
 
 #include "object_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -120,7 +121,9 @@ void JSObjectElement::ObjectElementInstance::getPropertyNames(JSPropertyNameAccu
 }
 
 JSObjectElement::ObjectElementInstance::~ObjectElementInstance() {
-  delete nativeObjectElement;
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeObjectElement *>(ptr);
+  }, nativeObjectElement);
 }
 
 } // namespace kraken::binding::jsc
