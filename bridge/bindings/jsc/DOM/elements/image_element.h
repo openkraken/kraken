@@ -17,7 +17,7 @@ void bindImageElement(std::unique_ptr<JSContext> &context);
 
 class JSImageElement : public JSElement {
 public:
-  static std::unordered_map<JSContext *, JSImageElement *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSImageElement *> instanceMap;
   static JSImageElement *instance(JSContext *context);
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;

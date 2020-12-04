@@ -34,7 +34,7 @@ struct NativeEventTarget;
 
 class JSEventTarget : public HostClass {
 public:
-  static std::unordered_map<JSContext *, JSEventTarget *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSEventTarget *> instanceMap;
   static JSEventTarget *instance(JSContext *context);
   enum class EventTargetProperty {
     kAddEventListener,

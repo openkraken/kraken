@@ -8,20 +8,15 @@
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSMediaElement *> & JSMediaElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSMediaElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSMediaElement *> JSMediaElement::instanceMap {};
 
 JSMediaElement *JSMediaElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSMediaElement(context);
   }
   return instanceMap[context];
 }
 JSMediaElement::~JSMediaElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 

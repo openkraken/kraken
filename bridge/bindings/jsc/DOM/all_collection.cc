@@ -55,7 +55,7 @@ JSValueRef JSAllCollection::item(JSContextRef ctx, JSObjectRef function, JSObjec
   }
 
   size_t index = JSValueToNumber(ctx, arguments[0], exception);
-  auto collection = reinterpret_cast<JSAllCollection*>(JSObjectGetPrivate(function));
+  auto collection = reinterpret_cast<JSAllCollection *>(JSObjectGetPrivate(function));
 
   if (index >= collection->m_nodes.size()) {
     return nullptr;
@@ -73,7 +73,8 @@ JSValueRef JSAllCollection::add(JSContextRef ctx, JSObjectRef function, JSObject
   }
 
   if (!JSValueIsObject(ctx, arguments[0])) {
-    JSC_THROW_ERROR(ctx, "Failed to execute add() on HTMLAllCollection: first arguments should be a object.", exception);
+    JSC_THROW_ERROR(ctx, "Failed to execute add() on HTMLAllCollection: first arguments should be a object.",
+                    exception);
     return nullptr;
   }
 
@@ -84,8 +85,8 @@ JSValueRef JSAllCollection::add(JSContextRef ctx, JSObjectRef function, JSObject
     beforeRef = JSValueToObject(ctx, arguments[1], exception);
   }
 
-  auto nodeInstance = reinterpret_cast<JSNode::NodeInstance*>(JSObjectGetPrivate(nodeRef));
-  auto collection = reinterpret_cast<JSAllCollection*>(JSObjectGetPrivate(function));
+  auto nodeInstance = reinterpret_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeRef));
+  auto collection = reinterpret_cast<JSAllCollection *>(JSObjectGetPrivate(function));
   JSNode::NodeInstance *beforeInstance = nullptr;
 
   if (beforeRef != nullptr) {
@@ -105,7 +106,7 @@ JSValueRef JSAllCollection::remove(JSContextRef ctx, JSObjectRef function, JSObj
   }
 
   size_t index = JSValueToNumber(ctx, arguments[0], exception);
-  auto collection = reinterpret_cast<JSAllCollection*>(JSObjectGetPrivate(function));
+  auto collection = reinterpret_cast<JSAllCollection *>(JSObjectGetPrivate(function));
 
   collection->m_nodes.erase(collection->m_nodes.begin() + index);
 
@@ -120,7 +121,6 @@ void JSAllCollection::internalAdd(JSNode::NodeInstance *node, JSNode::NodeInstan
   } else {
     m_nodes.emplace_back(node);
   }
-
 }
 
-}
+} // namespace kraken::binding::jsc

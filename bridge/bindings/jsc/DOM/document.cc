@@ -21,13 +21,9 @@ void bindDocument(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
 }
 
-std::unordered_map<JSContext *, JSDocument *> &JSDocument::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSDocument *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSDocument *> JSDocument::instanceMap{};
 
 JSDocument *JSDocument::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSDocument(context);
   }
@@ -35,7 +31,6 @@ JSDocument *JSDocument::instance(JSContext *context) {
 }
 
 JSDocument::~JSDocument() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 

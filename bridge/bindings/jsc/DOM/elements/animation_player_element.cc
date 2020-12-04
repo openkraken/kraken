@@ -8,13 +8,9 @@
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSAnimationPlayerElement *> &JSAnimationPlayerElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSAnimationPlayerElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSAnimationPlayerElement *> JSAnimationPlayerElement::instanceMap{};
 
 JSAnimationPlayerElement *JSAnimationPlayerElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSAnimationPlayerElement(context);
   }
@@ -22,7 +18,6 @@ JSAnimationPlayerElement *JSAnimationPlayerElement::instance(JSContext *context)
 }
 
 JSAnimationPlayerElement::~JSAnimationPlayerElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 

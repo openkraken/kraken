@@ -12,13 +12,9 @@ void bindTouchEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "TouchEvent", event->classObject);
 };
 
-std::unordered_map<JSContext *, JSTouchEvent *> &JSTouchEvent::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSTouchEvent *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSTouchEvent *> JSTouchEvent::instanceMap {};
 
 JSTouchEvent *JSTouchEvent::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSTouchEvent(context);
   }
@@ -26,7 +22,6 @@ JSTouchEvent *JSTouchEvent::instance(JSContext *context) {
 }
 
 JSTouchEvent::~JSTouchEvent() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 

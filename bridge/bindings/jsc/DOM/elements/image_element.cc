@@ -13,20 +13,15 @@ void bindImageElement(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "Image", ImageElement->classObject);
 }
 
-std::unordered_map<JSContext *, JSImageElement *> &JSImageElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSImageElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSImageElement *> JSImageElement::instanceMap {};
 
 JSImageElement *JSImageElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSImageElement(context);
   }
   return instanceMap[context];
 }
 JSImageElement::~JSImageElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 

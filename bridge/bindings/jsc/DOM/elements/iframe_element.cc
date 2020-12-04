@@ -8,20 +8,15 @@
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSIframeElement *> & JSIframeElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSIframeElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSIframeElement *> JSIframeElement::instanceMap {};
 
 JSIframeElement *JSIframeElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSIframeElement(context);
   }
   return instanceMap[context];
 }
 JSIframeElement::~JSIframeElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 

@@ -15,7 +15,7 @@ struct NativeObjectElement;
 
 class JSObjectElement : public JSElement {
 public:
-  static std::unordered_map<JSContext *, JSObjectElement *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSObjectElement *> instanceMap;
   static JSObjectElement *instance(JSContext *context);
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;

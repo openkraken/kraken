@@ -14,13 +14,9 @@ void bindCustomEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "CustomEvent", CustomEvent->classObject);
 };
 
-std::unordered_map<JSContext *, JSCustomEvent *> &JSCustomEvent::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSCustomEvent *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSCustomEvent *> JSCustomEvent::instanceMap{};
 
 JSCustomEvent *JSCustomEvent::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSCustomEvent(context);
   }
@@ -28,7 +24,6 @@ JSCustomEvent *JSCustomEvent::instance(JSContext *context) {
 }
 
 JSCustomEvent::~JSCustomEvent() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 

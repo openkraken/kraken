@@ -8,13 +8,9 @@
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSVideoElement *> &JSVideoElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSVideoElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSVideoElement *> JSVideoElement::instanceMap{};
 
 JSVideoElement *JSVideoElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSVideoElement(context);
   }
@@ -22,7 +18,6 @@ JSVideoElement *JSVideoElement::instance(JSContext *context) {
 }
 
 JSVideoElement::~JSVideoElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 

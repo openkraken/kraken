@@ -115,7 +115,7 @@ void JSElementAttributes::removeAttribute(std::string &name) {
   m_attributes.erase(name);
 }
 
-std::unordered_map<JSContext *, JSElement *> JSElement::instanceMap = {};
+std::unordered_map<JSContext *, JSElement *> JSElement::instanceMap{};
 
 JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
@@ -132,6 +132,11 @@ JSElement::~JSElement() {
 
 JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                            const JSValueRef *arguments, JSValueRef *exception) {
+  if (argumentCount < 0) {
+    JSC_THROW_ERROR(ctx, "Failed to new Element(): at least 1 parameter required.", exception);
+    return nullptr;
+  }
+
   JSStringRef tagNameStrRef = JSValueToStringCopy(ctx, arguments[0], exception);
   std::string tagName = JSStringToStdString(tagNameStrRef);
   auto instance = new ElementInstance(this, tagName.c_str(), true);
@@ -176,9 +181,8 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
 ElementInstance::~ElementInstance() {
   if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
 
-  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
-    delete reinterpret_cast<NativeElement *>(ptr);
-  }, nativeElement);
+  ::foundation::UICommandCallbackQueue::instance(context->getContextId())
+    ->registerCallback([](void *ptr) { delete reinterpret_cast<NativeElement *>(ptr); }, nativeElement);
 }
 
 JSValueRef JSElement::getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,

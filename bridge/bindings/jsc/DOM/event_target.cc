@@ -20,13 +20,9 @@ void bindEventTarget(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "EventTarget", eventTarget->classObject);
 }
 
-std::unordered_map<JSContext *, JSEventTarget *> &JSEventTarget::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSEventTarget *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSEventTarget *> JSEventTarget::instanceMap{};
 
 JSEventTarget *JSEventTarget::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     const JSStaticFunction staticFunction[]{{"addEventListener", addEventListener, kJSPropertyAttributeReadOnly},
                                             {"removeEventListener", removeEventListener, kJSPropertyAttributeReadOnly},
@@ -39,7 +35,6 @@ JSEventTarget *JSEventTarget::instance(JSContext *context) {
 }
 
 JSEventTarget::~JSEventTarget() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -171,7 +166,6 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
         eventTargetInstance->eventTargetId, UICommand::addEvent, args, 1, nullptr);
     };
   }
-
   std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
   JSValueProtect(ctx, callbackObjectRef);
   handlers.emplace_back(callbackObjectRef);

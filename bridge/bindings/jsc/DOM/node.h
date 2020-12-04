@@ -30,7 +30,7 @@ class DocumentInstance;
 
 class JSNode : public JSEventTarget {
 public:
-  static std::unordered_map<JSContext *, JSNode *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSNode *> instanceMap;
   static JSNode *instance(JSContext *context);
   enum class NodeProperty {
     kIsConnected,

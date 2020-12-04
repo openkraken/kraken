@@ -8,13 +8,9 @@
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSAudioElement *> & JSAudioElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSAudioElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSAudioElement *> JSAudioElement::instanceMap {};
 
 JSAudioElement *JSAudioElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (!instanceMap.contains(context)) {
     instanceMap[context] = new JSAudioElement(context);
   }
@@ -22,7 +18,6 @@ JSAudioElement *JSAudioElement::instance(JSContext *context) {
 }
 
 JSAudioElement::~JSAudioElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
