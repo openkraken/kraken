@@ -1,5 +1,4 @@
 import { krakenInvokeModule } from '../bridge';
-import { EventType } from "../dom/events/event";
 import { initPropertyHandlersForEventTargets } from "../helpers";
 
 function validateUrl(url: string) {
