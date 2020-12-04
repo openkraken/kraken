@@ -610,7 +610,7 @@ final Dart_RegisterFlushUICommand _registerFlushUICommand = nativeDynamicLibrary
     .asFunction();
 
 void _flushUICommand() {
-  // flushUICommand();
+  flushUICommand();
 }
 
 void registerFlushUICommand() {
