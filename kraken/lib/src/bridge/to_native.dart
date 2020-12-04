@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -220,8 +221,8 @@ class UICommandItem extends Struct {
   Pointer nativePtr;
 }
 
-typedef Native_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(Int32 contextId);
-typedef Dart_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(int contextId);
+typedef Native_GetUICommandItems = Pointer<Uint64> Function(Int32 contextId);
+typedef Dart_GetUICommandItems = Pointer<Uint64> Function(int contextId);
 
 final Dart_GetUICommandItems _getUICommandItems =
     nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItems>>('getUICommandItems').asFunction();
@@ -249,22 +250,44 @@ class UICommand {
   }
 }
 
-List<UICommand> readNativeUICommandToDart(Pointer<Pointer<UICommandItem>> nativeCommandItems, int commandLength, int contextId) {
+// Read raw memory from native struct
+/**
+ * struct UICommandItem {
+    int64_t type; // offset: Uint64 * 0
+    NativeString **args; // offset: Uint64 * 1
+    int64_t id; // offset: Uint64 * 2
+    int64_t length; // offset: Uint64 * 3
+    void* nativePtr; // offset: Uint64 * 4
+  };
+ */
+const int nativeCommandSize = 5;
+const int typeMemOffset = 0;
+const int argsMemOffset = 1;
+const int idMemOffset = 2;
+const int argsLengthMemOffset = 3;
+const int nativePtrMemOffset = 4;
+
+List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
   List<UICommand> results = List(commandLength);
+  Uint64List rawMemory = nativeCommandItems.asTypedList(commandLength * 5);
 
-  for (int i = 0; i < commandLength; i ++) {
+  for (int i = 0; i < commandLength * nativeCommandSize; i += nativeCommandSize) {
+    int type = rawMemory[i + typeMemOffset];
+    Pointer<Pointer<NativeString>> args = Pointer.fromAddress(rawMemory[i + argsMemOffset]);
+    int id = rawMemory[i + idMemOffset];
+    int argsLength = rawMemory[i + argsLengthMemOffset];
+    Pointer nativePtr = Pointer.fromAddress(rawMemory[i + nativePtrMemOffset]);
+
     UICommand command = UICommand();
-    Pointer<UICommandItem> nativeCommand = nativeCommandItems[i];
-    if (nativeCommand == nullptr) continue;
-
-    command.type = UICommandType.values[nativeCommand.ref.type];
-    command.id = nativeCommand.ref.id;
-    int argsLength = nativeCommand.ref.length;
+    command.type = UICommandType.values[type];
+    command.id = id;
     command.args = List(argsLength);
+
     for (int j = 0; j < argsLength; j ++) {
-      command.args[j] = nativeStringToString(nativeCommand.ref.args[j]);
+      command.args[j] = nativeStringToString(args[j]);
     }
-    command.nativePtr = nativeCommand.ref.nativePtr;
+
+    command.nativePtr = nativePtr;
 
     if (kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true') {
       String printMsg = '${command.type}, id: ${command.id}';
@@ -275,19 +298,18 @@ List<UICommand> readNativeUICommandToDart(Pointer<Pointer<UICommandItem>> native
       print(printMsg);
     }
 
-    results[i] = command;
+    results[i ~/ nativeCommandSize] = command;
   }
 
   // Clear native command first.
   _clearUICommandItems(contextId);
-
   return results;
 }
 
 void flushUICommand() {
   Map<int, KrakenController> controllerMap = KrakenController.getControllerMap();
   for (KrakenController controller in controllerMap.values) {
-    Pointer<Pointer<UICommandItem>> nativeCommandItems = _getUICommandItems(controller.view.contextId);
+    Pointer<Uint64> nativeCommandItems = _getUICommandItems(controller.view.contextId);
     int commandLength = _getUICommandItemSize(controller.view.contextId);
 
     if (commandLength == 0) {
