@@ -101,7 +101,7 @@ JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyMap() {
 }
 
 JSAnchorElement::AnchorElementInstance::~AnchorElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeAnchorElement *>(ptr);
   }, nativeAnchorElement);
   if (_target != nullptr) JSStringRelease(_target);

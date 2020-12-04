@@ -104,7 +104,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
     }
   }
 
-  foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+  foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeEventTarget *>(ptr);
   }, nativeEventTarget);
 }

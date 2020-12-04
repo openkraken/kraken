@@ -28,7 +28,7 @@ JSMediaElement::MediaElementInstance::MediaElementInstance(JSMediaElement *jsMed
 JSMediaElement::MediaElementInstance::~MediaElementInstance() {
   if (_src != nullptr) JSStringRelease(_src);
 
-  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeMediaElement *>(ptr);
   }, nativeMediaElement);
 }

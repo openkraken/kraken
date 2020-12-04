@@ -40,7 +40,7 @@ JSNode::NodeInstance::~NodeInstance() {
            ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
   }
 
-  foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+  foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeNode *>(ptr);
   }, nativeNode);
 }

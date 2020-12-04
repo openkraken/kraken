@@ -116,7 +116,7 @@ void JSIframeElement::IframeElementInstance::getPropertyNames(JSPropertyNameAccu
 }
 
 JSIframeElement::IframeElementInstance::~IframeElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeIframeElement *>(ptr);
   }, nativeIframeElement);
 }

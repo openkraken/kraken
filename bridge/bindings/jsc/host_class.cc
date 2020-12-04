@@ -202,7 +202,7 @@ void HostClass::setProto(JSContextRef ctx, JSObjectRef prototype, JSObjectRef ch
 }
 
 HostClass::Instance::Instance(HostClass *hostClass)
-  : _hostClass(hostClass), context(_hostClass->context), ctx(_hostClass->ctx) {
+  : _hostClass(hostClass), context(_hostClass->context), ctx(_hostClass->ctx), contextId(_hostClass->contextId) {
   object = JSObjectMake(hostClass->ctx, hostClass->instanceClass, this);
 }
 

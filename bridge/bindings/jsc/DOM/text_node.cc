@@ -109,7 +109,7 @@ JSTextNode::TextNodeInstance::getTextNodePropertyMap() {
 }
 
 JSTextNode::TextNodeInstance::~TextNodeInstance() {
-  foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+  foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeTextNode *>(ptr);
   }, nativeTextNode);
 }

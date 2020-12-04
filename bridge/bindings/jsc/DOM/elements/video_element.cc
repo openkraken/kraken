@@ -39,7 +39,7 @@ JSVideoElement::VideoElementInstance::VideoElementInstance(JSVideoElement *JSVid
 }
 
 JSVideoElement::VideoElementInstance::~VideoElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(context->getContextId())->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeVideoElement *>(ptr);
   }, nativeVideoElement);
 }

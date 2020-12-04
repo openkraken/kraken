@@ -181,7 +181,7 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
 ElementInstance::~ElementInstance() {
   if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
 
-  ::foundation::UICommandCallbackQueue::instance(context->getContextId())
+  ::foundation::UICommandCallbackQueue::instance(contextId)
     ->registerCallback([](void *ptr) { delete reinterpret_cast<NativeElement *>(ptr); }, nativeElement);
 }
 
