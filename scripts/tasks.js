@@ -35,7 +35,6 @@ const paths = {
 
 program
   .description('Kraken Cli Build Scripts')
-  .option('--disable-jsa', 'Disable JSA (JavaScript Abstraction)', true)
   .option('--js-engine <engine>', 'The JavaScript Engine used by Kraken.', 'jsc')
   .parse(process.argv);
 
@@ -155,12 +154,6 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       '-DENABLE_TEST=true'
     ];
 
-    if (program.disableJsa) {
-      cmakeArgs.push('-DKRAKEN_ENABLE_JSA=NO');
-    } else {
-      cmakeArgs.push('-DKRAKEN_ENABLE_JSA=YES');
-    }
-
     const makeFileArgs = [
       ...cmakeArgs,
       '-G',
@@ -195,8 +188,6 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '--target',
       'kraken',
-      'foundation_test',
-      'jsa_test_' + jsEngine,
       '--',
       '-j',
       '4'
@@ -320,12 +311,6 @@ task('macos-upload', (done) => {
     cwd: paths.scripts,
     stdio: 'inherit'
   });
-  done();
-});
-
-task('bridge-test', (done) => {
-  execSync(`${libOutputPath}/jsa_test_jsc`, { stdio: 'inherit' });
-  execSync(`${libOutputPath}/foundation_test`, { stdio: 'inherit' })
   done();
 });
 
