@@ -28,143 +28,102 @@ list(APPEND BRIDGE_SOURCE
     polyfill/dist/polyfill.cc
 )
 
-if (${KRAKEN_ENABLE_JSA})
-  include(./jsa/jsa.cmake)
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+  add_compile_options(-DKRAKEN_JSC_ENGINE=1)
+
+  if (${IS_ANDROID})
+    list(APPEND BRIDGE_INCLUDE
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore-604.1.13/include
+            )
+    add_library(JavaScriptCore SHARED IMPORTED)
+    set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION
+            "${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore-604.1.13/lib/android/${ANDROID_ABI}/libjsc.so"
+            )
+    list(APPEND BRIDGE_LINK_LIBS
+            JavaScriptCore
+            )
+  else ()
+    list(APPEND BRIDGE_LINK_LIBS "-framework JavaScriptCore")
+  endif ()
+
   list(APPEND BRIDGE_SOURCE
-    bindings/jsa/KOM/console.cc
-    bindings/jsa/KOM/screen.cc
-    bindings/jsa/KOM/timer.cc
-    bindings/jsa/KOM/window.cc
-    bindings/jsa/KOM/window.h
-    bindings/jsa/KOM/location.cc
-    bindings/jsa/KOM/location.h
-    bindings/jsa/kraken.cc
-    bindings/jsa/ui_manager.cpp
-    bindings/jsa/ui_manager.h
-    bindings/jsa/KOM/blob.cc
-    bindings/jsa/KOM/blob.h
-    bindings/jsa/DOM/document.cc
-    bindings/jsa/DOM/document.h
-    bindings/jsa/DOM/element.cc
-    bindings/jsa/DOM/element.h
-    bindings/jsa/DOM/node.cc
-    bindings/jsa/DOM/node.h
-    bindings/jsa/DOM/eventTarget.cc
-    bindings/jsa/DOM/eventTarget.h
-    polyfill/dist/dom.cc
-    bridge_jsa.cc
-    bridge_jsa.h
+    bindings/jsc/js_context.h
+    bindings/jsc/js_context.cc
+    bindings/jsc/host_object.cc
+    bindings/jsc/host_object.h
+    bindings/jsc/host_class.cc
+    bindings/jsc/host_class.h
+    bindings/jsc/kraken.h
+    bindings/jsc/kraken.cc
+    bindings/jsc/KOM/blob.cc
+    bindings/jsc/KOM/blob.h
+    bindings/jsc/KOM/location.cc
+    bindings/jsc/KOM/location.h
+    bindings/jsc/KOM/window.cc
+    bindings/jsc/KOM/window.h
+    bindings/jsc/KOM/screen.cc
+    bindings/jsc/KOM/screen.h
+    bindings/jsc/KOM/timer.cc
+    bindings/jsc/KOM/timer.h
+    bindings/jsc/ui_manager.h
+    bindings/jsc/ui_manager.cc
+    bindings/jsc/DOM/document.h
+    bindings/jsc/DOM/document.cc
+    bindings/jsc/DOM/all_collection.cc
+    bindings/jsc/DOM/all_collection.h
+    bindings/jsc/DOM/elements/anchor_element.cc
+    bindings/jsc/DOM/elements/anchor_element.h
+    bindings/jsc/DOM/elements/animation_player_element.cc
+    bindings/jsc/DOM/elements/animation_player_element.h
+    bindings/jsc/DOM/elements/media_element.cc
+    bindings/jsc/DOM/elements/media_element.h
+    bindings/jsc/DOM/elements/audio_element.cc
+    bindings/jsc/DOM/elements/audio_element.h
+    bindings/jsc/DOM/elements/video_element.cc
+    bindings/jsc/DOM/elements/video_element.h
+    bindings/jsc/DOM/elements/canvas_element.cc
+    bindings/jsc/DOM/elements/canvas_element.h
+    bindings/jsc/DOM/elements/iframe_element.cc
+    bindings/jsc/DOM/elements/iframe_element.h
+    bindings/jsc/DOM/elements/image_element.cc
+    bindings/jsc/DOM/elements/image_element.h
+    bindings/jsc/DOM/elements/object_element.cc
+    bindings/jsc/DOM/elements/object_element.h
+    bindings/jsc/KOM/performance.cc
+    bindings/jsc/KOM/performance.h
+    bindings/jsc/DOM/element.cc
+    bindings/jsc/DOM/element.h
+    bindings/jsc/DOM/event.h
+    bindings/jsc/DOM/event.cc
+    bindings/jsc/DOM/custom_event.h
+    bindings/jsc/DOM/custom_event.cc
+    bindings/jsc/DOM/events/input_event.cc
+    bindings/jsc/DOM/events/input_event.h
+    bindings/jsc/DOM/events/media_error_event.cc
+    bindings/jsc/DOM/events/media_error_event.h
+    bindings/jsc/DOM/events/message_event.cc
+    bindings/jsc/DOM/events/message_event.h
+    bindings/jsc/DOM/events/close_event.cc
+    bindings/jsc/DOM/events/close_event.h
+    bindings/jsc/DOM/events/intersection_change_event.cc
+    bindings/jsc/DOM/events/intersection_change_event.h
+    bindings/jsc/DOM/events/touch_event.cc
+    bindings/jsc/DOM/events/touch_event.h
+    bindings/jsc/DOM/event_target.cc
+    bindings/jsc/DOM/event_target.h
+    bindings/jsc/DOM/node.cc
+    bindings/jsc/DOM/node.h
+    bindings/jsc/DOM/text_node.cc
+    bindings/jsc/DOM/text_node.h
+    bindings/jsc/DOM/comment_node.cc
+    bindings/jsc/DOM/comment_node.h
+    bindings/jsc/DOM/style_declaration.cc
+    bindings/jsc/DOM/style_declaration.h
+    bindings/jsc/KOM/console.h
+    bindings/jsc/KOM/console.cc
+    bridge_jsc.cc
+    bridge_jsc.h
   )
-
-  list(APPEND BRIDGE_LINK_LIBS
-          jsa_abstraction
-          jsa_implementation
-          -pthread
-          )
-  list(APPEND BRIDGE_INCLUDE
-          ${JSA_INCLUDE_DIRS}
-          ./jsa/include
-          )
-else()
-  if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
-    add_compile_options(-DKRAKEN_JSC_ENGINE=1)
-
-    if (${IS_ANDROID})
-      list(APPEND BRIDGE_INCLUDE
-              ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore-604.1.13/include
-              )
-      # jsc预编译库
-      add_library(JavaScriptCore SHARED IMPORTED)
-      set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION
-              "${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore-604.1.13/lib/android/${ANDROID_ABI}/libjsc.so"
-              )
-      # 链接jsc
-      list(APPEND BRIDGE_LINK_LIBS
-              JavaScriptCore
-              )
-    else ()
-      list(APPEND BRIDGE_LINK_LIBS "-framework JavaScriptCore")
-    endif ()
-
-    list(APPEND BRIDGE_SOURCE
-      bindings/jsc/js_context.h
-      bindings/jsc/js_context.cc
-      bindings/jsc/host_object.cc
-      bindings/jsc/host_object.h
-      bindings/jsc/host_class.cc
-      bindings/jsc/host_class.h
-      bindings/jsc/kraken.h
-      bindings/jsc/kraken.cc
-      bindings/jsc/KOM/blob.cc
-      bindings/jsc/KOM/blob.h
-      bindings/jsc/KOM/location.cc
-      bindings/jsc/KOM/location.h
-      bindings/jsc/KOM/window.cc
-      bindings/jsc/KOM/window.h
-      bindings/jsc/KOM/screen.cc
-      bindings/jsc/KOM/screen.h
-      bindings/jsc/KOM/timer.cc
-      bindings/jsc/KOM/timer.h
-      bindings/jsc/ui_manager.h
-      bindings/jsc/ui_manager.cc
-      bindings/jsc/DOM/document.h
-      bindings/jsc/DOM/document.cc
-      bindings/jsc/DOM/all_collection.cc
-      bindings/jsc/DOM/all_collection.h
-      bindings/jsc/DOM/elements/anchor_element.cc
-      bindings/jsc/DOM/elements/anchor_element.h
-      bindings/jsc/DOM/elements/animation_player_element.cc
-      bindings/jsc/DOM/elements/animation_player_element.h
-      bindings/jsc/DOM/elements/media_element.cc
-      bindings/jsc/DOM/elements/media_element.h
-      bindings/jsc/DOM/elements/audio_element.cc
-      bindings/jsc/DOM/elements/audio_element.h
-      bindings/jsc/DOM/elements/video_element.cc
-      bindings/jsc/DOM/elements/video_element.h
-      bindings/jsc/DOM/elements/canvas_element.cc
-      bindings/jsc/DOM/elements/canvas_element.h
-      bindings/jsc/DOM/elements/iframe_element.cc
-      bindings/jsc/DOM/elements/iframe_element.h
-      bindings/jsc/DOM/elements/image_element.cc
-      bindings/jsc/DOM/elements/image_element.h
-      bindings/jsc/DOM/elements/object_element.cc
-      bindings/jsc/DOM/elements/object_element.h
-      bindings/jsc/KOM/performance.cc
-      bindings/jsc/KOM/performance.h
-      bindings/jsc/DOM/element.cc
-      bindings/jsc/DOM/element.h
-      bindings/jsc/DOM/event.h
-      bindings/jsc/DOM/event.cc
-      bindings/jsc/DOM/custom_event.h
-      bindings/jsc/DOM/custom_event.cc
-      bindings/jsc/DOM/events/input_event.cc
-      bindings/jsc/DOM/events/input_event.h
-      bindings/jsc/DOM/events/media_error_event.cc
-      bindings/jsc/DOM/events/media_error_event.h
-      bindings/jsc/DOM/events/message_event.cc
-      bindings/jsc/DOM/events/message_event.h
-      bindings/jsc/DOM/events/close_event.cc
-      bindings/jsc/DOM/events/close_event.h
-      bindings/jsc/DOM/events/intersection_change_event.cc
-      bindings/jsc/DOM/events/intersection_change_event.h
-      bindings/jsc/DOM/events/touch_event.cc
-      bindings/jsc/DOM/events/touch_event.h
-      bindings/jsc/DOM/event_target.cc
-      bindings/jsc/DOM/event_target.h
-      bindings/jsc/DOM/node.cc
-      bindings/jsc/DOM/node.h
-      bindings/jsc/DOM/text_node.cc
-      bindings/jsc/DOM/text_node.h
-      bindings/jsc/DOM/comment_node.cc
-      bindings/jsc/DOM/comment_node.h
-      bindings/jsc/DOM/style_declaration.cc
-      bindings/jsc/DOM/style_declaration.h
-      bindings/jsc/KOM/console.h
-      bindings/jsc/KOM/console.cc
-      bridge_jsc.cc
-      bridge_jsc.h
-    )
-  endif()
 endif()
 
 list(APPEND BRIDGE_INCLUDE
