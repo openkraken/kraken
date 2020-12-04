@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -269,25 +268,19 @@ const int nativePtrMemOffset = 4;
 
 List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
   List<UICommand> results = List(commandLength);
-  Uint64List rawMemory = nativeCommandItems.asTypedList(commandLength * 5);
+  List<int> rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize).toList();
 
   for (int i = 0; i < commandLength * nativeCommandSize; i += nativeCommandSize) {
-    int type = rawMemory[i + typeMemOffset];
-    Pointer<Pointer<NativeString>> args = Pointer.fromAddress(rawMemory[i + argsMemOffset]);
-    int id = rawMemory[i + idMemOffset];
-    int argsLength = rawMemory[i + argsLengthMemOffset];
-    Pointer nativePtr = Pointer.fromAddress(rawMemory[i + nativePtrMemOffset]);
-
     UICommand command = UICommand();
-    command.type = UICommandType.values[type];
-    command.id = id;
+    command.type = UICommandType.values[rawMemory[i + typeMemOffset]];
+    command.id = rawMemory[i + idMemOffset];
+    command.nativePtr = Pointer.fromAddress(rawMemory[i + nativePtrMemOffset]);
+    int argsLength = rawMemory[i + argsLengthMemOffset];
     command.args = List(argsLength);
-
+    Pointer<Pointer<NativeString>> nativeArgs = Pointer.fromAddress(rawMemory[i + argsMemOffset]);
     for (int j = 0; j < argsLength; j ++) {
-      command.args[j] = nativeStringToString(args[j]);
+      command.args[j] = nativeStringToString(nativeArgs[j]);
     }
-
-    command.nativePtr = nativePtr;
 
     if (kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true') {
       String printMsg = '${command.type}, id: ${command.id}';
@@ -297,12 +290,12 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
       printMsg += ' nativePtr: ${command.nativePtr}';
       print(printMsg);
     }
-
     results[i ~/ nativeCommandSize] = command;
   }
 
-  // Clear native command first.
+  // Clear native command.
   _clearUICommandItems(contextId);
+
   return results;
 }
 
