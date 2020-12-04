@@ -5,7 +5,6 @@
 
 import 'dart:collection';
 import 'dart:ffi';
-import 'package:ffi/ffi.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flare_flutter/provider/asset_flare.dart';
 import 'package:flare_flutter/flare_controls.dart';
