@@ -206,7 +206,7 @@ enum UICommandType {
 }
 
 class UICommandItem extends Struct {
-  @Int32()
+  @Int64()
   int type;
 
   Pointer<Pointer<NativeString>> args;
@@ -214,7 +214,7 @@ class UICommandItem extends Struct {
   @Int64()
   int id;
 
-  @Int32()
+  @Int64()
   int length;
 
   Pointer nativePtr;
@@ -243,9 +243,13 @@ class UICommand {
   int id;
   List<String> args;
   Pointer nativePtr;
+
+  String toString() {
+    return 'UICommand(type: $type, id: $id, args: $args, nativePtr: $nativePtr)';
+  }
 }
 
-List<UICommand> readNativeUICommandToDart(Pointer<Pointer<UICommandItem>> nativeCommandItems, int commandLength) {
+List<UICommand> readNativeUICommandToDart(Pointer<Pointer<UICommandItem>> nativeCommandItems, int commandLength, int contextId) {
   List<UICommand> results = List(commandLength);
 
   for (int i = 0; i < commandLength; i ++) {
@@ -273,6 +277,10 @@ List<UICommand> readNativeUICommandToDart(Pointer<Pointer<UICommandItem>> native
 
     results[i] = command;
   }
+
+  // Clear native command first.
+  _clearUICommandItems(contextId);
+
   return results;
 }
 
@@ -286,9 +294,7 @@ void flushUICommand() {
       continue;
     }
 
-    List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength);
-    // Clear native command first.
-    _clearUICommandItems(controller.view.contextId);
+    List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength, controller.view.contextId);
 
     SchedulerBinding.instance.scheduleFrame();
 

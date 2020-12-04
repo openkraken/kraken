@@ -66,12 +66,12 @@ enum UICommand {
 };
 
 struct UICommandItem {
-  UICommandItem(int64_t id, int32_t type, NativeString **args, size_t length, void* nativePtr)
+  UICommandItem(int64_t id, int64_t type, NativeString **args, int64_t length, void* nativePtr)
     : type(type), args(args), id(id), length(length), nativePtr(nativePtr) {};
-  int32_t type;
+  int64_t type;
   NativeString **args;
   int64_t id;
-  int32_t length;
+  int64_t length;
   void* nativePtr;
 };
 
@@ -110,7 +110,7 @@ KRAKEN_EXPORT
 KrakenInfo *getKrakenInfo();
 
 KRAKEN_EXPORT
-UICommandItem **getUICommandItems(int32_t contextId);
+UICommandItem *getUICommandItems(int32_t contextId);
 KRAKEN_EXPORT
 int64_t getUICommandItemSize(int32_t contextId);
 KRAKEN_EXPORT
