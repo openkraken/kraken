@@ -188,6 +188,7 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '--target',
       'kraken',
+      'kraken_test',
       '--',
       '-j',
       '4'
