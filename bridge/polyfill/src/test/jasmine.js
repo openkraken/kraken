@@ -4067,14 +4067,10 @@ getJasmineRequireObj().toMatchImageSnapshot = function (j$) {
         }
 
         return blobP.then(blob => {
-          if (!(blob instanceof Blob)) {
-            throw new Error('Expected toMatchImageSnapshot to have Blob as first parameter');
-          }
           const name = `${this.description}.${snapshotName}`;
           return new Promise((resolve, reject) => {
             // @TODO: the C++ HostingObject of Blob, need to removed when jsa support constructor operation.
-            const privateBlob = blob.blob;
-            __kraken_match_image_snapshot__(privateBlob, name, (status) => {
+            __kraken_match_image_snapshot__(blob, name, (status) => {
               // @NOTE: toMatchSnapshot should resolve before spec done.
               const _currentSpec = j$.getEnv().currentRunnable();
               if (_currentSpec.id !== specId) {

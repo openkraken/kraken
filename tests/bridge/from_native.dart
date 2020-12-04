@@ -64,14 +64,14 @@ typedef Dart_RegisterRefreshPaint = void Function(Pointer<NativeFunction<Native_
 final Dart_RegisterRefreshPaint _registerRefreshPaint =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterRefreshPaint>>('registerRefreshPaint').asFunction();
 
-void _refreshPaint(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<Native_RefreshPaintCallback>> pointer) {
+void _refreshPaint(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<Native_RefreshPaintCallback>> pointer) async {
   Dart_RefreshPaintCallback callback = pointer.asFunction();
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   try {
-    controller.view.testRefreshPaint();
+    await controller.testRefreshPaint();
     callback(callbackContext, contextId, nullptr);
-  } catch (e) {
-    print(e);
+  } catch (e, stack) {
+    print('$e\n$stack');
   }
 }
 

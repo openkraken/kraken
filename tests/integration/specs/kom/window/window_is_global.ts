@@ -1,4 +1,4 @@
-describe('window-is-global', () => {
+xdescribe('windowisglobal', () => {
   it('window equal to globalThis', () => {
     expect(window).toBe(globalThis as any);
   });
@@ -12,6 +12,7 @@ describe('window-is-global', () => {
       // @ts-ignore
       expect(this).toBe(window);
     }
+
     f();
   });
 });

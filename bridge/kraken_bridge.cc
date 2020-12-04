@@ -4,10 +4,16 @@
  */
 
 #include "kraken_bridge.h"
-#include "bridge.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
-#include "jsa.h"
+#include "foundation/ui_command_queue.h"
+#include "foundation/ui_task_queue.h"
+
+#ifdef KRAKEN_ENABLE_JSA
+#include "bridge_jsa.h"
+#elif KRAKEN_JSC_ENGINE
+#include "bridge_jsc.h"
+#endif
 
 #include <atomic>
 #include <thread>
@@ -48,11 +54,11 @@ std::__thread_id getUIThreadId() {
   return uiThreadId;
 }
 
-void printError(alibaba::jsa::JSContext &bridge, const alibaba::jsa::JSError &error) {
+void printError(int32_t contextId, const char* errmsg) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
-    kraken::getDartMethod()->onJsError(bridge.getContextId(), error.what());
+    kraken::getDartMethod()->onJsError(contextId, errmsg);
   } else {
-    KRAKEN_LOG(ERROR) << error.what() << std::endl;
+    KRAKEN_LOG(ERROR) << errmsg << std::endl;
   }
 }
 
@@ -124,7 +130,7 @@ bool checkContext(int32_t contextId) {
 
 bool checkContext(int32_t contextId, void *context) {
   auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
-  return bridge->getContext() == context;
+  return bridge->getContext().get() == context;
 }
 
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine) {
@@ -146,10 +152,6 @@ void invokeEventListener(int32_t contextId, int32_t type, NativeString *data) {
   assert(checkContext(contextId) && "invokeEventListener: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->invokeEventListener(type, data);
-}
-
-void registerInvokeUIManager(InvokeUIManager callbacks) {
-  kraken::registerInvokeUIManager(callbacks);
 }
 
 void registerInvokeModule(InvokeModule callbacks) {
@@ -196,8 +198,16 @@ void registerPlatformBrightness(PlatformBrightness platformBrightness) {
   kraken::registerPlatformBrightness(platformBrightness);
 }
 
-void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged) {
-  kraken::registerOnPlatformBrightnessChanged(onPlatformBrightnessChanged);
+void registerFlushUICommand(FlushUICommand flushUICommand) {
+  kraken::registerFlushUICommand(flushUICommand);
+}
+
+void registerInitBody(InitBody initBody) {
+  kraken::registerInitBody(initBody);
+}
+
+void registerInitWindow(InitWindow initWindow) {
+  kraken::registerInitWindow(initWindow);
 }
 
 Screen *createScreen(double width, double height) {
@@ -232,4 +242,20 @@ KrakenInfo *getKrakenInfo() {
   }
 
   return krakenInfo;
+}
+
+void flushBridgeTask() {
+  foundation::UITaskMessageQueue::instance()->flushTaskFromUIThread();
+}
+
+UICommandItem **getUICommandItems(int32_t contextId) {
+  return foundation::UICommandTaskMessageQueue::instance(contextId)->data();
+}
+
+int64_t getUICommandItemSize(int32_t contextId) {
+  return foundation::UICommandTaskMessageQueue::instance(contextId)->size();
+}
+
+void clearUICommandItems(int32_t contextId) {
+  return foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
 }

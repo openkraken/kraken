@@ -4,6 +4,8 @@
  */
 
 import 'package:meta/meta.dart';
+import 'dart:ffi';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 
 typedef EventHandler = void Function(Event event);
@@ -12,31 +14,34 @@ class EventTarget {
   // A unique target identifier.
   int targetId;
 
+  // The Add
+  final Pointer<NativeEventTarget> nativeEventTargetPtr;
+
   // the self reference the ElementManager
   ElementManager elementManager;
 
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(this.targetId, this.elementManager) {
+  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
     assert(targetId != null);
     assert(elementManager != null);
   }
 
-  void addEvent(String eventName) {}
+  void addEvent(String eventType) {}
 
-  void addEventListener(String eventName, EventHandler eventHandler) {
+  void addEventListener(String eventType, EventHandler eventHandler) {
     if (!eventHandlers.containsKey(eventHandler)) {
-      eventHandlers[eventName] = [];
+      eventHandlers[eventType] = [];
     }
-    eventHandlers[eventName].add(eventHandler);
+    eventHandlers[eventType].add(eventHandler);
   }
 
-  void removeEventListener(String eventName, EventHandler eventHandler) {
-    if (!eventHandlers.containsKey(eventName)) {
+  void removeEventListener(String eventType, EventHandler eventHandler) {
+    if (!eventHandlers.containsKey(eventType)) {
       return;
     }
-    List<EventHandler> currentHandlers = eventHandlers[eventName];
+    List<EventHandler> currentHandlers = eventHandlers[eventType];
     currentHandlers.remove(eventHandler);
   }
 
@@ -61,6 +66,13 @@ class EventTarget {
       }
     }
     return false;
+  }
+
+  @mustCallSuper
+  void dispose() {
+    elementManager.removeTarget(this);
+    // @remove reference to elementManager.
+    elementManager = null;
   }
 
   List<EventHandler> getEventHandlers(String type) {

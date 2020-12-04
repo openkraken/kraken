@@ -7,16 +7,22 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/bridge.dart';
 import 'dart:async';
+import 'dart:ffi';
+import 'dart:collection';
 
 const String IMAGE = 'IMG';
 
 const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK};
 
 bool _isNumber(String str) {
-  RegExp regExp = RegExp(r"^\d+$");
+  RegExp regExp = RegExp(r"^\d+");
   return regExp.hasMatch(str);
 }
+
+final Pointer<NativeFunction<GetImageWidth>> nativeGetImageWidth =  Pointer.fromFunction(ImageElement.getImageWidth, 0.0);
+final Pointer<NativeFunction<GetImageHeight>> nativeGetImageHeight =  Pointer.fromFunction(ImageElement.getImageHeight, 0.0);
 
 class ImageElement extends Element {
   String _source;
@@ -31,14 +37,39 @@ class ImageElement extends Element {
 
   bool _hasLazyLoading = false;
 
-  ImageElement(int targetId, ElementManager elementManager)
+  static SplayTreeMap<int, ImageElement> _nativeMap = SplayTreeMap();
+
+  static Element getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
+    ImageElement element = _nativeMap[nativeImageElement.address];
+    assert(element != null, 'Can not get element from nativeElement: $nativeImageElement');
+    return element;
+  }
+
+  static double getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
+    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
+    return imageElement._imageInfo.image.width.toDouble();
+  }
+
+  static double getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
+    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
+    return imageElement._imageInfo.image.height.toDouble();
+  }
+
+  final Pointer<NativeImgElement> nativeImgElement;
+
+  ImageElement(int targetId, this.nativeImgElement, ElementManager elementManager)
       : super(
         targetId,
+        nativeImgElement.ref.nativeElement,
         elementManager,
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,
         tagName: IMAGE) {
     _renderStreamListener = ImageStreamListener(_renderMultiFrameImage);
+    _nativeMap[nativeImgElement.address] = this;
+
+    nativeImgElement.ref.getImageWidth = nativeGetImageWidth;
+    nativeImgElement.ref.getImageHeight = nativeGetImageHeight;
   }
 
   @override
@@ -58,6 +89,15 @@ class ImageElement extends Element {
   void didDetachRenderer() {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_stylePropertyChanged);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _image = null;
+    _imageBox = null;
+    _imageStream = null;
+    _nativeMap.remove(nativeImgElement.address);
   }
 
   void _renderImage() {
@@ -102,7 +142,7 @@ class ImageElement extends Element {
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
     // img load event should trigger asynchronously to make sure load event had bind.
     Timer.run(() {
-      dispatchEvent(Event('load'));
+      dispatchEvent(Event(EVENT_LOAD));
     });
   }
 
@@ -152,10 +192,10 @@ class ImageElement extends Element {
         }
       }
 
-      if (!height.isFinite) {
+      if (height == null || !height.isFinite) {
         height = 0.0;
       }
-      if (!width.isFinite) {
+      if (width == null || !width.isFinite) {
         width = 0.0;
       }
 

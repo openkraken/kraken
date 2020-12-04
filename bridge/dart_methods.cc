@@ -27,10 +27,6 @@ std::shared_ptr<DartMethodPointer> getDartMethod() {
   return methodPointer;
 }
 
-void registerInvokeUIManager(InvokeUIManager callback) {
-  methodPointer->invokeUIManager = callback;
-}
-
 void registerInvokeModule(InvokeModule callback) {
   methodPointer->invokeModule = callback;
 }
@@ -75,10 +71,6 @@ void registerPlatformBrightness(PlatformBrightness platformBrightness) {
   methodPointer->platformBrightness = platformBrightness;
 }
 
-void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged) {
-  methodPointer->onPlatformBrightnessChanged = onPlatformBrightnessChanged;
-}
-
 void registerToBlob(ToBlob toBlob) {
   methodPointer->toBlob = toBlob;
 }
@@ -101,6 +93,18 @@ void registerEnvironment(Environment environment) {
 
 void registerSimulatePointer(SimulatePointer simulatePointer) {
   methodPointer->simulatePointer = simulatePointer;
+}
+
+void registerFlushUICommand(FlushUICommand flushUiCommand){
+  methodPointer->flushUICommand = flushUiCommand;
+};
+
+void registerInitBody(InitBody initBody) {
+  methodPointer->initBody = initBody;
+}
+
+void registerInitWindow(InitWindow initWindow) {
+  methodPointer->initWindow = initWindow;
 }
 
 } // namespace kraken

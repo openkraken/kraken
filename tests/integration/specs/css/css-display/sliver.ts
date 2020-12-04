@@ -37,7 +37,6 @@ describe('display sliver', () => {
     container.scrollBy(0, 200);
     await matchViewportSnapshot();
 
-    
     container.scrollBy(0, -150);
     await matchViewportSnapshot();
   });

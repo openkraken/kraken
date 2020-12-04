@@ -3,11 +3,11 @@
  * Author: Kraken Team.
  */
 
-#ifdef KRAKEN_JSC_ENGINE
+#ifdef KRAKEN_ENABLE_JSA
 
 #include "jsa.h"
 #include "jsc/jsc_implementation.h"
-#include "bindings/KOM/blob.h"
+#include "bindings/jsa/KOM/blob.h"
 #include "gtest/gtest.h"
 #include <memory>
 
@@ -16,8 +16,8 @@ using namespace jsc;
 
 namespace {
 
-void normalPrint(alibaba::jsa::JSContext &context, const jsa::JSError &error) {
-  std::cerr << error.what() << std::endl;
+void normalPrint(int32_t contextId, const char* errmsg) {
+  std::cerr << errmsg << std::endl;
   FAIL();
 }
 
@@ -331,8 +331,8 @@ function fibonacci(num) {
 }
 
 TEST(JSCContext, callFunctionWithException) {
-  auto errorPrint = [](alibaba::jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\n"
                                "Error: 1234\n"
                                "    at throwAnError");
   };
@@ -430,8 +430,8 @@ TEST(JSCContext, hostFunctionWithThis) {
 }
 
 TEST(JSCContext, hostFunctionThrowError) {
-  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\n"
                                "Error: ops !!\n"
                                "    at global code");
   };
@@ -723,7 +723,7 @@ TEST(JSCContext, HostObjectAsArgs) {
       };
   jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
   func.call(*context, {
-    jsa::Value(*context, jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector)))
+    jsa::Value(*context, jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::jsa::JSBlob>(vector)))
   });
 }
 
@@ -736,7 +736,7 @@ TEST(JSCContext, getHostObject) {
          size_t count) -> jsa::Value {
         auto &&object = args[0].getObject(context);
         EXPECT_EQ(object.isHostObject(context), true);
-        std::shared_ptr<kraken::binding::JSBlob> blob = object.getHostObject<kraken::binding::JSBlob>(context);
+        std::shared_ptr<kraken::binding::jsa::JSBlob> blob = object.getHostObject<kraken::binding::jsa::JSBlob>(context);
         jsa::Value size = blob->get(context, jsa::PropNameID::forAscii(context, "size"));
         EXPECT_EQ(size.getNumber(), 5);
 
@@ -744,13 +744,13 @@ TEST(JSCContext, getHostObject) {
       };
   jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
   func.call(*context, {
-      jsa::Value(*context, jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector)))
+      jsa::Value(*context, jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::jsa::JSBlob>(vector)))
   });
 }
 
 TEST(JSCContext, codeSyntaxError) {
-  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\nSyntaxError: Unexpected end of script\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\nSyntaxError: Unexpected end of script\n"
                                "no stack");
   };
   auto context = std::make_unique<JSCContext>(0, errorPrint, nullptr);
@@ -759,8 +759,8 @@ TEST(JSCContext, codeSyntaxError) {
 }
 
 TEST(JSCContext, undefinedError) {
-  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\n"
                                "TypeError: null is not an object (evaluating 'obj.abc')\n"
                                "    at f (internal://:1:21)\n"
                                "    at global code (internal://:1:31)");
@@ -771,8 +771,8 @@ TEST(JSCContext, undefinedError) {
 }
 
 TEST(JSCContext, test) {
-  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\n"
                                "ReferenceError: Can't find variable: setTimeout\n"
                                "    at global code (internal://:1:11)");
   };

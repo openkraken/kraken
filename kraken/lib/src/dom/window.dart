@@ -3,30 +3,29 @@
  * Author: Kraken Team.
  */
 
+import 'dart:ffi';
 import 'dart:ui';
-import 'dart:convert';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 
 const String WINDOW = 'WINDOW';
 
 class Window extends EventTarget {
-  Window(ElementManager elementManager) : super(WINDOW_ID, elementManager) {
+  final Pointer<NativeWindow> nativeWindowPtr;
+
+  Window(int targetId, this.nativeWindowPtr, ElementManager elementManager) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
-      Event event = Event('colorschemechange');
-      event.detail = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
+      ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
       dispatchEvent(event);
     };
   }
 
   void _handleColorSchemeChange(Event event) {
-    String json = jsonEncode([targetId, event]);
-    emitUIEvent(elementManager.controller.view.contextId, json);
+    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
   }
 
   void _handleLoad(Event event) {
-    String json = jsonEncode([targetId, event]);
-    emitUIEvent(elementManager.controller.view.contextId, json);
+    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
   }
 
   @override
@@ -35,10 +34,12 @@ class Window extends EventTarget {
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
 
     switch (eventName) {
-      case 'colorschemechange':
+      case EVENT_COLOR_SCHEME_CHANGE:
         return addEventListener(eventName, _handleColorSchemeChange);
-      case 'load':
+      case EVENT_LOAD:
         return addEventListener(eventName, _handleLoad);
+      default:
+        break;
     }
   }
 }

@@ -27,8 +27,7 @@ mixin ScheduleFrameMixin {
     }
   }
 
-  void requestBatchUpdate(FrameCallback callback) {
-    SchedulerBinding.instance.scheduleFrameCallback(callback);
+  void requestBatchUpdate() {
     SchedulerBinding.instance.scheduleFrame();
   }
 

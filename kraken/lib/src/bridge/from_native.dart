@@ -7,12 +7,15 @@ import 'package:dio/dio.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
+import 'package:kraken/dom.dart';
 
 import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/css.dart';
 import 'package:vibration/vibration.dart';
 import 'platform.dart';
+import 'native_types.dart';
 
 // An native struct can be directly convert to javaScript String without any conversion cost.
 class NativeString extends Struct {
@@ -59,67 +62,14 @@ void freeNativeString(Pointer<NativeString> pointer) {
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call from C.
 
-// Register InvokeUIManager
-typedef Native_InvokeUIManager = Pointer<NativeString> Function(Int32 contextId, Pointer<NativeString>);
-typedef Native_RegisterInvokeUIManager = Void Function(Pointer<NativeFunction<Native_InvokeUIManager>>);
-typedef Dart_RegisterInvokeUIManager = void Function(Pointer<NativeFunction<Native_InvokeUIManager>>);
-
-final Dart_RegisterInvokeUIManager _registerInvokeUIManager =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeUIManager>>('registerInvokeUIManager').asFunction();
-
-const String BATCH_UPDATE = 'batchUpdate';
-const String EMPTY_STRING = '';
-
-String handleAction(int contextId, List directive) {
-  String action = directive[0];
-  List payload = directive[1];
-
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  return controller.view.applyViewAction(action, payload);
-}
-
-String invokeUIManager(int contextId, String json) {
-  dynamic directive = jsonDecode(json);
-
-  if (directive == null) {
-    return EMPTY_STRING;
-  }
-
-  if (directive[0] == BATCH_UPDATE) {
-    List<dynamic> directiveList = directive[1];
-    List<String> result = [];
-    for (dynamic item in directiveList) {
-      result.add(handleAction(contextId, item as List));
-    }
-    return EMPTY_STRING;
-  } else {
-    return handleAction(contextId, directive);
-  }
-}
-
-Pointer<NativeString> _invokeUIManager(int contextId, Pointer<NativeString> json) {
-  try {
-    String result = invokeUIManager(contextId, nativeStringToString(json));
-    return stringToNativeString(result);
-  } catch (e, stack) {
-    String errmsg = 'Error: $e\n$stack';
-    return stringToNativeString(errmsg);
-  }
-}
-
-void registerInvokeUIManager() {
-  Pointer<NativeFunction<Native_InvokeUIManager>> pointer = Pointer.fromFunction(_invokeUIManager);
-  _registerInvokeUIManager(pointer);
-}
-
 // Register InvokeModule
 typedef NativeAsyncModuleCallback = Void Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeString> json);
 typedef DartAsyncModuleCallback = void Function(
     Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeString> json);
 
-typedef Native_InvokeModule = Pointer<NativeString> Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId,
-    Pointer<NativeString>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
+typedef Native_InvokeModule = Pointer<NativeString> Function(Pointer<JSCallbackContext> callbackContext,
+    Int32 contextId, Pointer<NativeString>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
 typedef Native_RegisterInvokeModule = Void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 typedef Dart_RegisterInvokeModule = void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 
@@ -267,13 +217,6 @@ String invokeModule(
         int id = positionArgs[0];
         Geolocation.clearWatch(id);
       }
-    } else if (module == 'Performance') {
-      String method = args[1];
-      if (method == 'now') {
-        return Performance.now().toString();
-      } else if (method == 'getTimeOrigin') {
-        return Performance.getTimeOrigin().toString();
-      }
     } else if (module == 'MethodChannel') {
       String method = args[1];
       assert(controller.methodChannel != null);
@@ -376,8 +319,8 @@ String invokeModule(
   return result;
 }
 
-Pointer<NativeString> _invokeModule(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeString> json,
-    Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
+Pointer<NativeString> _invokeModule(Pointer<JSCallbackContext> callbackContext, int contextId,
+    Pointer<NativeString> json, Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
   String result = invokeModule(callbackContext, contextId, nativeStringToString(json), callback.asFunction());
   return stringToNativeString(result);
 }
@@ -416,11 +359,11 @@ typedef DartAsyncCallback = void Function(
     Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> errmsg);
 typedef NativeRAFAsyncCallback = Void Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Double data, Pointer<Utf8> errmsg);
-typedef DartRAFAsyncCallback = void Function(Pointer<JSCallbackContext>, int contextId, double data, Pointer<Utf8> errmsg);
+typedef DartRAFAsyncCallback = void Function(
+    Pointer<JSCallbackContext>, int contextId, double data, Pointer<Utf8> errmsg);
 
 // Register requestBatchUpdate
-typedef Native_RequestBatchUpdate = Void Function(
-    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeFunction<NativeAsyncCallback>>);
+typedef Native_RequestBatchUpdate = Void Function(Int32 contextId);
 typedef Native_RegisterRequestBatchUpdate = Void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
 typedef Dart_RegisterRequestBatchUpdate = void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
 
@@ -428,17 +371,9 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
     .lookup<NativeFunction<Native_RegisterRequestBatchUpdate>>('registerRequestBatchUpdate')
     .asFunction();
 
-void _requestBatchUpdate(
-    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
+void _requestBatchUpdate(int contextId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  return controller.module.requestBatchUpdate((Duration timeStamp) {
-    DartAsyncCallback func = callback.asFunction();
-    try {
-      func(callbackContext, contextId, nullptr);
-    } catch (e, stack) {
-      func(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
-    }
-  });
+  return controller.module.requestBatchUpdate();
 }
 
 void registerRequestBatchUpdate() {
@@ -664,8 +599,65 @@ void registerToBlob() {
   _registerToBlob(pointer);
 }
 
+typedef Native_FlushUICommand = Void Function();
+typedef Dart_FlushUICommand = void Function();
+
+typedef Native_RegisterFlushUICommand = Void Function(Pointer<NativeFunction<Native_FlushUICommand>>);
+typedef Dart_RegisterFlushUICommand = void Function(Pointer<NativeFunction<Native_FlushUICommand>>);
+
+final Dart_RegisterFlushUICommand _registerFlushUICommand = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterFlushUICommand>>('registerFlushUICommand')
+    .asFunction();
+
+void _flushUICommand() {
+  flushUICommand();
+}
+
+void registerFlushUICommand() {
+  Pointer<NativeFunction<Native_FlushUICommand>> pointer = Pointer.fromFunction(_flushUICommand);
+  _registerFlushUICommand(pointer);
+}
+
+// Body Element are special element which created at initialize time, so we can't use UICommandQueue to init body element.
+typedef Native_InitBody = Void Function(Int32 contextId, Pointer<NativeElement> nativePtr);
+typedef Dart_InitBody = void Function(int contextId, Pointer<NativeElement> nativePtr);
+
+typedef Native_RegisterInitBody = Void Function(Pointer<NativeFunction<Native_InitBody>>);
+typedef Dart_RegisterInitBody = void Function(Pointer<NativeFunction<Native_InitBody>>);
+
+final Dart_RegisterInitBody _registerInitBody = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterInitBody>>('registerInitBody')
+    .asFunction();
+
+void _initBody(int contextId, Pointer<NativeElement> nativePtr) {
+  ElementManager.bodyNativePtrMap[contextId] = nativePtr;
+}
+
+void registerInitBody() {
+  Pointer<NativeFunction<Native_InitBody>> pointer = Pointer.fromFunction(_initBody);
+  _registerInitBody(pointer);
+}
+
+typedef Native_InitWindow = Void Function(Int32 contextId, Pointer<NativeWindow> nativePtr);
+typedef Dart_InitWindow = void Function(int contextId, Pointer<NativeWindow> nativePtr);
+
+typedef Native_RegisterInitWindow = Void Function(Pointer<NativeFunction<Native_InitWindow>>);
+typedef Dart_RegisterInitWindow = void Function(Pointer<NativeFunction<Native_InitWindow>>);
+
+final Dart_RegisterInitWindow _registerInitWindow = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterInitWindow>>('registerInitWindow')
+    .asFunction();
+
+void _initWindow(int contextId, Pointer<NativeWindow> nativePtr) {
+  ElementManager.windowNativePtrMap[contextId] = nativePtr;
+}
+
+void registerInitWindow() {
+  Pointer<NativeFunction<Native_InitWindow>> pointer = Pointer.fromFunction(_initWindow);
+  _registerInitWindow(pointer);
+}
+
 void registerDartMethodsToCpp() {
-  registerInvokeUIManager();
   registerInvokeModule();
   registerRequestBatchUpdate();
   registerReloadApp();
@@ -678,4 +670,7 @@ void registerDartMethodsToCpp() {
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerToBlob();
+  registerFlushUICommand();
+  registerInitBody();
+  registerInitWindow();
 }

@@ -9,19 +9,21 @@
 
 namespace foundation {
 
-void UITaskMessageQueue::registerTask(const fml::closure &task) {
+void UITaskMessageQueue::registerTask(const Task &task, void* data) {
   std::lock_guard<std::mutex> guard(queue_mutex_);
-  queue.emplace_back(task);
+  auto taskData = new TaskData(task, data);
+  queue.emplace_back(taskData);
 }
 
 void UITaskMessageQueue::flushTaskFromUIThread() {
   std::lock_guard<std::mutex> guard(queue_mutex_);
   auto begin = std::begin(queue);
   auto end = std::end(queue);
-  Task task;
+  TaskData *taskData;
   while (begin != end) {
-    task = *begin;
-    task();
+    taskData = *begin;
+    taskData->task(taskData->data);
+    delete taskData;
     ++begin;
   }
   queue.clear();

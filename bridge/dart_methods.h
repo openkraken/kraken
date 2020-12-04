@@ -15,7 +15,6 @@ namespace kraken {
 
 struct DartMethodPointer {
   DartMethodPointer() = default;
-  InvokeUIManager invokeUIManager{nullptr};
   InvokeModule invokeModule{nullptr};
   RequestBatchUpdate requestBatchUpdate{nullptr};
   ReloadApp reloadApp{nullptr};
@@ -27,16 +26,17 @@ struct DartMethodPointer {
   GetScreen getScreen{nullptr};
   DevicePixelRatio devicePixelRatio{nullptr};
   PlatformBrightness platformBrightness{nullptr};
-  OnPlatformBrightnessChanged onPlatformBrightnessChanged{nullptr};
   ToBlob toBlob{nullptr};
   OnJSError onJsError{nullptr};
   RefreshPaint refreshPaint{nullptr};
   MatchImageSnapshot matchImageSnapshot{nullptr};
   Environment environment{nullptr};
   SimulatePointer simulatePointer{nullptr};
+  FlushUICommand flushUICommand{nullptr};
+  InitBody initBody{nullptr};
+  InitWindow initWindow{nullptr};
 };
 
-void registerInvokeUIManager(InvokeUIManager callback);
 void registerInvokeModule(InvokeModule callback);
 void registerRequestBatchUpdate(RequestBatchUpdate callback);
 void registerReloadApp(ReloadApp callback);
@@ -48,9 +48,11 @@ void registerCancelAnimationFrame(CancelAnimationFrame callback);
 void registerGetScreen(GetScreen callback);
 void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
 void registerPlatformBrightness(PlatformBrightness platformBrightness);
-void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 void registerToBlob(ToBlob toBlob);
 void registerJSError(OnJSError onJsError);
+void registerFlushUICommand(FlushUICommand flushUiCommand);
+void registerInitBody(InitBody initBody);
+void registerInitWindow(InitWindow initWindow);
 
 // test only methods
 void registerRefreshPaint(RefreshPaint refreshPaint);

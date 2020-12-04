@@ -1,13 +1,20 @@
 import 'dart:ui';
+import 'dart:ffi';
 
+import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken_audioplayers/kraken_audioplayers.dart';
 
+import 'media.dart';
+
 const String AUDIO = 'AUDIO';
 
-class AudioElement extends Element {
+const Map<String, dynamic> _defaultStyle = {
+};
+
+class AudioElement extends MediaElement {
   AudioPlayer audioPlayer;
   String audioSrc;
   RenderConstrainedBox _sizedBox;
@@ -15,8 +22,8 @@ class AudioElement extends Element {
   static double defaultWidth = 300.0;
   static double defaultHeight = 150.0;
 
-  AudioElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, isIntrinsicBox: true, tagName: AUDIO);
+  AudioElement(int targetId, Pointer<NativeAudioElement> nativePtr, ElementManager elementManager)
+      : super(targetId, nativePtr.ref.nativeMediaElement, elementManager, AUDIO, defaultStyle: _defaultStyle);
 
   @override
   void willAttachRenderer() {
@@ -30,6 +37,14 @@ class AudioElement extends Element {
   void didDetachRenderer() {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_stylePropertyChanged);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    audioPlayer.dispose();
+    audioPlayer = null;
+    _sizedBox = null;
   }
 
   void initAudioPlayer() {
@@ -49,6 +64,21 @@ class AudioElement extends Element {
     addChild(_sizedBox);
   }
 
+  @override
+  void play() {
+    audioPlayer?.play(audioSrc);
+  }
+
+  @override
+  void pause() {
+    audioPlayer.pause();
+  }
+
+  @override
+  void fastSeek(double duration) {
+    audioPlayer.seek(Duration(seconds: duration.toInt()));
+  }
+
   void _stylePropertyChanged(String property, String original, String present, bool inAnimation) {
     switch (property) {
       case WIDTH:
@@ -62,24 +92,6 @@ class AudioElement extends Element {
     double w = style.contains(WIDTH) ? CSSLength.toDisplayPortValue(style[WIDTH]) : null;
     double h = style.contains(HEIGHT) ? CSSLength.toDisplayPortValue(style[HEIGHT]) : null;
     _sizedBox.additionalConstraints = BoxConstraints.tight(Size(w ?? defaultWidth, h ?? defaultHeight));
-  }
-
-  @override
-  void method(String name, List args) {
-    switch (name) {
-      case 'play':
-        audioPlayer?.play(audioSrc);
-        break;
-      case 'pause':
-        audioPlayer?.pause();
-        break;
-      case 'fastSeek':
-        int duration = args[0] * 1000;
-        audioPlayer?.seek(Duration(milliseconds: duration));
-        break;
-      default:
-        super.method(name, args);
-    }
   }
 
   @override

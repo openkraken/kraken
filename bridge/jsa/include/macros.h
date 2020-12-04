@@ -81,6 +81,18 @@
     obj.setProperty(context, _name, alibaba::jsa::Function::createFromHostFunction(context, _name, paramCount, func)); \
   }
 
+#define JSA_BINDING_CLASS(context, obj, name, paramCount, func, prototype)                                             \
+  {                                                                                                                    \
+    auto _name = alibaba::jsa::PropNameID::forUtf8(context, name);                                                     \
+    obj.setProperty(context, _name, alibaba::jsa::Function::createFromHostClass(context, _name, paramCount, func, prototype)); \
+  }
+
+#define HOST_FUNCTION_TO_VALUE(context, name, paramCount, func) \
+  alibaba::jsa::Function::createFromHostFunction(context, alibaba::jsa::PropNameID::forAscii(context, name), paramCount, func)
+
+#define EMPLACE_PROPERTY_NAMES(context, propertyNames, name) \
+  propertyNames.emplace_back(alibaba::jsa::PropNameID::forUtf8(context, name))
+
 #define JSA_CREATE_OBJECT(context) alibaba::jsa::Object(context)
 
 #define JSA_CREATE_HOST_FUNCTION(context, name, paramCount, func)                                                      \

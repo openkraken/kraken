@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:path/path.dart' as path;
 import 'package:image/image.dart';
 
-final Directory snapshots = Directory('./integration/snapshots');
+final Directory snapshots = Directory(Platform.environment['KRAKEN_SPEC_DIR'] + './integration/snapshots');
 
 ///Check if [firstImg] and [secondImg] have the same width and height
 bool haveSameSize(Image firstImg, Image secondImg) {

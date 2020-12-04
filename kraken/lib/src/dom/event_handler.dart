@@ -38,25 +38,24 @@ mixin EventHandlerMixin on Node {
   }
 
   void handlePointDown(PointerDownEvent pointEvent) {
-    TouchEvent event = _getTouchEvent('touchstart', pointEvent);
+    TouchEvent event = _getTouchEvent(EVENT_TOUCH_START, pointEvent);
     dispatchEvent(event);
   }
 
   void handlePointMove(PointerMoveEvent pointEvent) {
     _throttler.throttle(() {
-      TouchEvent event = _getTouchEvent('touchmove', pointEvent);
+      TouchEvent event = _getTouchEvent(EVENT_TOUCH_MOVE, pointEvent);
       dispatchEvent(event);
     });
   }
 
   void handlePointUp(PointerUpEvent pointEvent) {
-    TouchEvent event = _getTouchEvent('touchend', pointEvent);
+    TouchEvent event = _getTouchEvent(EVENT_TOUCH_END, pointEvent);
     dispatchEvent(event);
   }
 
   void handlePointCancel(PointerCancelEvent pointEvent) {
-    Event event = Event('touchcancel', EventInit());
-    event.detail = {};
+    Event event = Event(EVENT_TOUCH_CANCEL, EventInit());
     dispatchEvent(event);
   }
 
@@ -82,7 +81,6 @@ mixin EventHandlerMixin on Node {
     event.changedTouches.items.add(touch);
     event.targetTouches.items.add(touch);
     event.touches.items.add(touch);
-    event.detail = {};
     return event;
   }
 

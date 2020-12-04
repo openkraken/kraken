@@ -15,8 +15,8 @@ import 'custom/custom_object_element.dart';
 String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST FAILED]');
 
-final Directory specsDirectory = Directory('./integration/.specs');
-final Directory snapshotsDirectory = Directory('./integration/snapshots');
+final Directory specsDirectory = Directory(Platform.environment['KRAKEN_SPEC_DIR'] + '/integration/.specs');
+final Directory snapshotsDirectory = Directory(Platform.environment['KRAKEN_SPEC_DIR'] + '/integration/snapshots');
 
 void main() async {
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
