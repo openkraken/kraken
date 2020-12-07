@@ -4,9 +4,11 @@
  */
 
 import 'package:kraken/dom.dart';
+import 'dart:ffi';
+import 'package:kraken/bridge.dart';
 
 const String DIV = 'DIV';
 
 class DivElement extends Element {
-  DivElement(int targetId, ElementManager elementManager) : super(targetId, elementManager, tagName: DIV);
+  DivElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager) : super(targetId, nativePtr, elementManager, tagName: DIV);
 }

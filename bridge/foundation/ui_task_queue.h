@@ -14,30 +14,35 @@
 
 namespace foundation {
 
-using Task = fml::closure;
-using TaskQueue = std::deque<Task>;
+using Task = void(*)(void*);
 
 class UITaskMessageQueue;
 
-static std::mutex creation_mutex_;
+static std::mutex ui_task_creation_mutex_;
 static fml::RefPtr<UITaskMessageQueue> instance_;
 
 class UITaskMessageQueue : public fml::RefCountedThreadSafe<UITaskMessageQueue> {
 public:
   static fml::RefPtr<UITaskMessageQueue> instance() {
-    std::lock_guard<std::mutex> guard(creation_mutex_);
+    std::lock_guard<std::mutex> guard(ui_task_creation_mutex_);
     if (!instance_) {
       instance_ = fml::MakeRefCounted<UITaskMessageQueue>();
     }
     return instance_;
   };
 
-  void registerTask(const fml::closure& task);
+  void registerTask(const Task& task, void* data);
   void flushTaskFromUIThread();
 
 private:
+  struct TaskData {
+    TaskData(const Task &task, void *data): task(task), data(data) {};
+    Task task;
+    void *data;
+  };
+
   mutable std::mutex queue_mutex_;
-  TaskQueue queue;
+  std::deque<TaskData*> queue;
 
   FML_FRIEND_MAKE_REF_COUNTED(UITaskMessageQueue);
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(UITaskMessageQueue);

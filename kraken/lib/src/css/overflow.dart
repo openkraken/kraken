@@ -47,7 +47,7 @@ CSSOverflowType _getOverflowType(String definition) {
 
 typedef ScrollListener = void Function(double scrollTop, AxisDirection axisDirection);
 
-mixin CSSOverflowMixin on Node {
+mixin CSSOverflowMixin on ElementBase {
   // The duration time for element scrolling to a significant place.
   static const SCROLL_DURATION = Duration(milliseconds: 250);
 
@@ -158,61 +158,50 @@ mixin CSSOverflowMixin on Node {
     }
   }
 
-  double getScrollTop() {
+  double get scrollTop {
     if (_scrollableY != null) {
       return _scrollableY.position?.pixels ?? 0;
     }
-    return 0;
+    return 0.0;
   }
-
-  void setScrollTop(double value) {
+  set scrollTop(double value) {
     scrollTo(y: value);
   }
 
-  void setScrollLeft(double value) {
-    scrollTo(x: value);
-  }
-
-  double getScrollLeft() {
+  double get scrollLeft {
     if (_scrollableX != null) {
       return _scrollableX.position?.pixels ?? 0;
     }
-    return 0;
+    return 0.0;
+  }
+  set scrollLeft(double value) {
+    scrollTo(x: value);
   }
 
-  double getScrollHeight(RenderBoxModel renderBoxModel) {
+  get scrollHeight {
     Size scrollContainerSize = renderBoxModel.maxScrollableSize;
     return scrollContainerSize.height;
   }
 
-  double getScrollWidth(RenderBoxModel renderBoxModel) {
+  get scrollWidth {
     Size scrollContainerSize = renderBoxModel.maxScrollableSize;
     return scrollContainerSize.width;
   }
 
-  void handleMethodScroll(List args, { bool diff = false }) {
-    if (args != null && args.length > 0) {
-      dynamic option = args[0];
-      if (option is Map) {
-        num top = option['top'];
-        num left = option['left'];
-        bool withAnimation = option['behavior'] == 'smooth';
-
-        if (diff) {
-          scrollBy(dx: left, dy: top, withAnimation: withAnimation);
-        } else {
-          scrollTo(x: left, y: top, withAnimation: withAnimation);
-        }
-      }
+  void handleMethodScroll(num x, num y, { bool diff = false }) {
+    if (diff) {
+      scrollBy(dx: x, dy: y, withAnimation: false);
+    } else {
+      scrollTo(x: x, y: y, withAnimation: false);
     }
   }
 
   void scrollBy({ num dx = 0.0, num dy = 0.0, bool withAnimation }) {
     if (dx != 0) {
-      _scroll(getScrollLeft() + dx, Axis.horizontal, withAnimation: withAnimation);
+      _scroll(scrollLeft + dx, Axis.horizontal, withAnimation: withAnimation);
     }
     if (dy != 0) {
-      _scroll(getScrollTop() + dy, Axis.vertical, withAnimation: withAnimation);
+      _scroll(scrollTop + dy, Axis.vertical, withAnimation: withAnimation);
     }
   }
 

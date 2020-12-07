@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:convert';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/kraken.dart';
+import 'dart:io';
 
 import 'from_native.dart';
 import 'platform.dart';
+import 'native_types.dart';
 
 // Steps for using dart:ffi to call a C function from Dart:
 // 1. Import dart:ffi.
@@ -15,37 +19,26 @@ import 'platform.dart';
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call the C function.
 
-// representation of JSContext
-class JSCallbackContext extends Struct {}
-
-typedef Native_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
-typedef Dart_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
-
-class NativeKrakenInfo extends Struct {
-  Pointer<Utf8> app_name;
-  Pointer<Utf8> app_version;
-  Pointer<Utf8> app_revision;
-  Pointer<Utf8> system_name;
-  Pointer<NativeFunction<Native_GetUserAgent>> getUserAgent;
-}
-
 class KrakenInfo {
   Pointer<NativeKrakenInfo> _nativeKrakenInfo;
 
-  KrakenInfo(Pointer<NativeKrakenInfo> info): _nativeKrakenInfo = info;
+  KrakenInfo(Pointer<NativeKrakenInfo> info) : _nativeKrakenInfo = info;
 
   String get appName {
     if (_nativeKrakenInfo.ref.app_name == nullptr) return '';
     return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_name);
   }
+
   String get appVersion {
     if (_nativeKrakenInfo.ref.app_version == nullptr) return '';
     return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_version);
   }
+
   String get appRevision {
     if (_nativeKrakenInfo.ref.app_revision == nullptr) return '';
     return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_revision);
   }
+
   String get systemName {
     if (_nativeKrakenInfo.ref.system_name == nullptr) return '';
     return Utf8.fromUtf8(_nativeKrakenInfo.ref.system_name);
@@ -60,7 +53,9 @@ class KrakenInfo {
 
 typedef Native_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
 typedef Dart_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
-final Dart_GetKrakenInfo _getKrakenInfo = nativeDynamicLibrary.lookup<NativeFunction<Native_GetKrakenInfo>>('getKrakenInfo').asFunction();
+
+final Dart_GetKrakenInfo _getKrakenInfo =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetKrakenInfo>>('getKrakenInfo').asFunction();
 
 KrakenInfo _cachedInfo;
 
@@ -88,17 +83,15 @@ void invokeEventListener(int contextId, int type, String data) {
 const UI_EVENT = 0;
 const MODULE_EVENT = 1;
 
-void emitUIEvent(int contextId, String data) {
-  invokeEventListener(contextId, UI_EVENT, data);
+void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
+  Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
+  Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
+  Pointer<Void> nativeEvent = event.toNative().cast<Void>();
+  dispatchEvent(nativeEventTarget, stringToNativeString(event.type), nativeEvent);
 }
 
 void emitModuleEvent(int contextId, String data) {
   invokeEventListener(contextId, MODULE_EVENT, data);
-}
-
-void invokeOnPlatformBrightnessChangedCallback(int contextId) {
-  String json = jsonEncode([WINDOW_ID, Event('colorschemechange')]);
-  emitUIEvent(contextId, json);
 }
 
 // Register createScreen
@@ -113,8 +106,10 @@ Pointer<ScreenSize> createScreen(double width, double height) {
 }
 
 // Register evaluateScripts
-typedef Native_EvaluateScripts = Void Function(Int32 contextId, Pointer<NativeString> code, Pointer<Utf8> url, Int32 startLine);
-typedef Dart_EvaluateScripts = void Function(int contextId, Pointer<NativeString> code, Pointer<Utf8> url, int startLine);
+typedef Native_EvaluateScripts = Void Function(
+    Int32 contextId, Pointer<NativeString> code, Pointer<Utf8> url, Int32 startLine);
+typedef Dart_EvaluateScripts = void Function(
+    int contextId, Pointer<NativeString> code, Pointer<Utf8> url, int startLine);
 
 final Dart_EvaluateScripts _evaluateScripts =
     nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
@@ -175,4 +170,170 @@ void reloadJSContext(int contextId) async {
     completer.complete();
   });
   return completer.future;
+}
+
+typedef Native_FlushBridgeTask = Void Function();
+typedef Dart_FlushBridgeTask = void Function();
+
+final Dart_FlushBridgeTask _flushBridgeTask =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_FlushBridgeTask>>('flushBridgeTask').asFunction();
+
+void flushBridgeTask() {
+  _flushBridgeTask();
+}
+
+enum UICommandType {
+  createElement,
+  createTextNode,
+  createComment,
+  disposeEventTarget,
+  addEvent,
+  removeNode,
+  insertAdjacentNode,
+  setStyle,
+  setProperty,
+  removeProperty
+}
+
+class UICommandItem extends Struct {
+  @Int32()
+  int type;
+
+  Pointer<Pointer<NativeString>> args;
+
+  @Int64()
+  int id;
+
+  @Int32()
+  int length;
+
+  Pointer nativePtr;
+}
+
+typedef Native_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(Int32 contextId);
+typedef Dart_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(int contextId);
+
+final Dart_GetUICommandItems _getUICommandItems =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItems>>('getUICommandItems').asFunction();
+
+typedef Native_GetUICommandItemSize = Int64 Function(Int64 contextId);
+typedef Dart_GetUICommandItemSize = int Function(int contextId);
+
+final Dart_GetUICommandItemSize _getUICommandItemSize =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItemSize>>('getUICommandItemSize').asFunction();
+
+typedef Native_ClearUICommandItems = Void Function(Int32 contextId);
+typedef Dart_ClearUICommandItems = void Function(int contextId);
+
+final Dart_ClearUICommandItems _clearUICommandItems =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_ClearUICommandItems>>('clearUICommandItems').asFunction();
+
+class UICommand {
+  UICommandType type;
+  int id;
+  List<String> args;
+  Pointer nativePtr;
+}
+
+List<UICommand> readNativeUICommandToDart(Pointer<Pointer<UICommandItem>> nativeCommandItems, int commandLength) {
+  List<UICommand> results = List(commandLength);
+
+  for (int i = 0; i < commandLength; i ++) {
+    UICommand command = UICommand();
+    Pointer<UICommandItem> nativeCommand = nativeCommandItems[i];
+    if (nativeCommand == nullptr) continue;
+
+    command.type = UICommandType.values[nativeCommand.ref.type];
+    command.id = nativeCommand.ref.id;
+    int argsLength = nativeCommand.ref.length;
+    command.args = List(argsLength);
+    for (int j = 0; j < argsLength; j ++) {
+      command.args[j] = nativeStringToString(nativeCommand.ref.args[j]);
+    }
+    command.nativePtr = nativeCommand.ref.nativePtr;
+
+    if (kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true') {
+      String printMsg = '${command.type}, id: ${command.id}';
+      for (int i = 0; i < command.args.length; i ++) {
+        printMsg += ' args[$i]: ${command.args[i]}';
+      };
+      printMsg += ' nativePtr: ${command.nativePtr}';
+      print(printMsg);
+    }
+
+    results[i] = command;
+  }
+  return results;
+}
+
+void flushUICommand() {
+  Map<int, KrakenController> controllerMap = KrakenController.getControllerMap();
+  for (KrakenController controller in controllerMap.values) {
+    Pointer<Pointer<UICommandItem>> nativeCommandItems = _getUICommandItems(controller.view.contextId);
+    int commandLength = _getUICommandItemSize(controller.view.contextId);
+
+    if (commandLength == 0) {
+      continue;
+    }
+
+    List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength);
+    // Clear native command first.
+    _clearUICommandItems(controller.view.contextId);
+
+    SchedulerBinding.instance.scheduleFrame();
+
+    // For new ui commands, we needs to tell engine to update frames.
+    for (int i = 0; i < commandLength; i++) {
+      UICommand command = commands[i];
+      UICommandType commandType = command.type;
+      int id = command.id;
+      Pointer nativePtr = command.nativePtr;
+
+      try {
+        switch (commandType) {
+          case UICommandType.createElement:
+            controller.view.createElement(id, nativePtr, command.args[0]);
+            break;
+          case UICommandType.createTextNode:
+            controller.view.createTextNode(id, nativePtr.cast<NativeTextNode>(), command.args[0]);
+            break;
+          case UICommandType.createComment:
+            controller.view.createComment(id, nativePtr.cast<NativeCommentNode>(), command.args[0]);
+            break;
+          case UICommandType.disposeEventTarget:
+            ElementManager.disposeEventTarget(controller.view.contextId, id);
+            break;
+          case UICommandType.addEvent:
+            controller.view.addEvent(id, command.args[0]);
+            break;
+          case UICommandType.insertAdjacentNode:
+            int childId = int.parse(command.args[0]);
+            String position = command.args[1];
+            controller.view.insertAdjacentNode(id, position, childId);
+            break;
+          case UICommandType.removeNode:
+            controller.view.removeNode(id);
+            break;
+          case UICommandType.setStyle:
+            String key = command.args[0];
+            String value = command.args[1];
+            controller.view.setStyle(id, key, value);
+            break;
+          case UICommandType.setProperty:
+            String key = command.args[0];
+            String value = command.args[1];
+            controller.view.setProperty(id, key, value);
+            break;
+          case UICommandType.removeProperty:
+            String key = command.args[0];
+            controller.view.removeProperty(id, key);
+            break;
+          default:
+            break;
+        }
+      } catch (e, stack) {
+        print('$e\n$stack');
+      }
+    }
+  }
 }

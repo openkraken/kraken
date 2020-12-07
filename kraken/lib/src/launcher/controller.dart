@@ -4,7 +4,8 @@
  */
 
 import 'dart:io';
-import 'dart:convert';
+import 'dart:ffi';
+import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:async';
 
@@ -68,6 +69,7 @@ class KrakenViewController {
     _elementManager = ElementManager(
       viewportWidth,
       viewportHeight,
+      contextId: _contextId,
       viewport: viewport,
       showPerformanceOverlayOverride: showPerformanceOverlay,
       controller: rootController,
@@ -111,21 +113,6 @@ class KrakenViewController {
       background: background,
       viewportSize: Size(viewportWidth, viewportHeight),
     );
-  }
-
-  // regenerate generate renderObject created by kraken but not affect jsBridge context.
-  // test used only.
-  void testRefreshPaint() {
-    RenderObject root = _elementManager.getRootRenderObject();
-    RenderObject parent = root.parent;
-    RenderObject previousSibling;
-    if (parent is ContainerRenderObjectMixin) {
-      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
-    }
-    detachView();
-    _elementManager = ElementManager(_elementManager.viewportWidth, _elementManager.viewportHeight,
-        showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
-    attachView(parent, previousSibling);
   }
 
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
@@ -183,22 +170,48 @@ class KrakenViewController {
     return completer.future;
   }
 
-  String applyViewAction(String action, List payload) {
-    var result = _elementManager.applyAction(action, payload);
+  Element createElement(int id, Pointer nativePtr, String tagName) {
+    return _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
+  }
 
-    if (result == null) {
-      return '';
-    }
+  void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
+    return _elementManager.createTextNode(id, nativePtr, data);
+  }
 
-    switch (result.runtimeType) {
-      case String:
-        return result;
-      case Map:
-      case List:
-        return jsonEncode(result);
-      default:
-        return result.toString();
-    }
+  void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
+    return _elementManager.createComment(id, nativePtr, data);
+  }
+
+  void addEvent(int targetId, String eventType) {
+    _elementManager.addEvent(targetId, eventType);
+  }
+
+  void insertAdjacentNode(int targetId, String position, int childId) {
+    _elementManager.insertAdjacentNode(targetId, position, childId);
+  }
+
+  void removeNode(int targetId) {
+    _elementManager.removeNode(targetId);
+  }
+
+  void setStyle(int targetId, String key, String value) {
+    _elementManager.setStyle(targetId, key, value);
+  }
+
+  void setProperty(int targetId, String key, String value) {
+    _elementManager.setProperty(targetId, key, value);
+  }
+
+  void removeProperty(int targetId, String key) {
+    _elementManager.removeProperty(targetId, key);
+  }
+
+  EventTarget getEventTargetById(int id) {
+    return _elementManager.getEventTargetByTargetId<EventTarget>(id);
+  }
+
+  void removeEventTargetById(int id) {
+    _elementManager.removeTarget(getEventTargetById(id));
   }
 
   void handleNavigationAction(String sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
@@ -275,7 +288,7 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
 }
 
 class KrakenController {
-  static Map<int, KrakenController> _controllerMap = Map();
+  static SplayTreeMap<int, KrakenController> _controllerMap = SplayTreeMap();
   static Map<String, int> _nameIdMap = Map();
 
   static KrakenController getControllerOfJSContextId(int contextId) {
@@ -284,6 +297,10 @@ class KrakenController {
     }
 
     return _controllerMap[contextId];
+  }
+
+  static SplayTreeMap<int, KrakenController> getControllerMap() {
+    return _controllerMap;
   }
 
   static KrakenController getControllerOfName(String name) {
@@ -352,6 +369,28 @@ class KrakenController {
     _view.navigationDelegate = delegate;
   }
 
+  // regenerate generate renderObject created by kraken but not affect jsBridge context.
+  // test used only.
+  testRefreshPaint() async {
+    assert(!_view._disposed, "Kraken have already disposed");
+    RenderObject root = _view.getRootRenderObject();
+    RenderObject parent = root.parent;
+    RenderObject previousSibling;
+    if (parent is ContainerRenderObjectMixin) {
+      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
+    }
+    _module.dispose();
+    _view.detachView();
+    Inspector.prevInspector = view._elementManager.controller.view.inspector;
+    _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
+        showPerformanceOverlay: _view.showPerformanceOverlay,
+        enableDebug: _view.enableDebug,
+        contextId: _view.contextId,
+        rootController: this,
+        navigationDelegate: _view.navigationDelegate);
+    _view.attachView(parent, previousSibling);
+  }
+
   // reload current kraken view.
   void reload() async {
     assert(!_view._disposed, "Kraken have already disposed");
@@ -363,6 +402,10 @@ class KrakenController {
     }
     _module.dispose();
     _view.detachView();
+    // Should init JS first
+    await reloadJSContext(_view.contextId);
+    Inspector.prevInspector = view._elementManager.controller.view.inspector;
+
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         background: _view.background,
         showPerformanceOverlay: _view.showPerformanceOverlay,
@@ -371,7 +414,6 @@ class KrakenController {
         rootController: this,
         navigationDelegate: _view.navigationDelegate);
     _view.attachView(parent, previousSibling);
-    await reloadJSContext(_view.contextId);
     await loadBundle();
     await run();
   }
@@ -450,8 +492,9 @@ class KrakenController {
       await _bundle.run(_view.contextId);
       // trigger window load event
       module.requestAnimationFrame((_) {
-        String json = jsonEncode([WINDOW_ID, Event('load')]);
-        emitUIEvent(_view.contextId, json);
+        Event loadEvent = Event(EVENT_LOAD);
+        EventTarget window = view.getEventTargetById(WINDOW_ID);
+        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, loadEvent);
       });
     }
   }

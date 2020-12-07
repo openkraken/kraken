@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:meta/meta.dart';
@@ -177,7 +175,7 @@ class InspectCSSModule extends InspectModule {
     }
 
     // Calc computed size.
-    Map<String, dynamic> boundingClientRect = jsonDecode(element.getBoundingClientRect());
+    Map<String, dynamic> boundingClientRect = element.boundingClientRect.toJSON();
     boundingClientRect.forEach((String name, value) {
       computedStyle.add(CSSComputedStyleProperty(name: name, value: '${value}px'));
     });

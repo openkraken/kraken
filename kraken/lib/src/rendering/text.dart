@@ -143,9 +143,8 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
-  // Text node will not trigger event
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    return false;
+    return size.contains(position);
   }
 }

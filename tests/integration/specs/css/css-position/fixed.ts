@@ -57,14 +57,17 @@ describe('Position fixed', () => {
         }),
       ]
     );
-    requestAnimationFrame(async () => {
-      container.scroll(0, 200);
-      await matchViewportSnapshot();
-      done();
-    });
 
     BODY.appendChild(container);
     await matchViewportSnapshot();
+
+    requestAnimationFrame( () => {
+      container.scroll(0, 200);
+      setTimeout(async () => {
+        await matchViewportSnapshot();
+        done();
+      }, 100);
+    });
   });
 
   it('hitTest with position fixed elements', async () => {

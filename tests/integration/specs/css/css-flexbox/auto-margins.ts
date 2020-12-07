@@ -70,5 +70,6 @@ describe('auto-margins', () => {
       await matchViewportSnapshot();
       done();
     };
+    await matchViewportSnapshot();
   });
 });

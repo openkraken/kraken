@@ -3,10 +3,46 @@
  * Author: Kraken Team.
  */
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:kraken/dom.dart';
+import 'package:kraken/bridge.dart';
+import 'package:ffi/ffi.dart';
 
-const String CLICK = 'click';
+const String EVENT_CLICK = 'click';
+const String EVENT_INPUT = 'input';
+const String EVENT_APPEAR = 'appear';
+const String EVENT_DISAPPEAR = 'disappear';
+const String EVENT_COLOR_SCHEME_CHANGE = 'colorschemechange';
+const String EVENT_ERROR = 'error';
+const String EVENT_MEDIA_ERROR = 'mediaerror';
+const String EVENT_TOUCH_START = 'touchstart';
+const String EVENT_TOUCH_MOVE = 'touchmove';
+const String EVENT_TOUCH_END = 'touchend';
+const String EVENT_TOUCH_CANCEL = 'touchcancel';
+const String EVENT_MESSAGE = 'message';
+const String EVENT_CLOSE = 'close';
+const String EVENT_OPEN = 'open';
+const String EVENT_INTERSECTION_CHANGE = 'intersectionchange';
+const String EVENT_CANCEL = 'cancel';
+const String EVENT_FINISH = 'finish';
+const String EVENT_TRANSITION_RUN = 'transitionrun';
+const String EVENT_TRANSITION_CANCEL = 'transitioncancel';
+const String EVENT_TRANSITION_START = 'transitionstart';
+const String EVENT_TRANSITION_END = 'transitionend';
+const String EVENT_FOCUS = 'focus';
+const String EVENT_LOAD = 'load';
+const String EVENT_UNLOAD = 'unload';
+const String EVENT_CHANGE = 'change';
+const String EVENT_CAN_PLAY = 'canplay';
+const String EVENT_CAN_PLAY_THROUGH = 'canplaythrough';
+const String EVENT_ENDED = 'ended';
+const String EVENT_PAUSE = 'pause';
+const String EVENT_PLAY = 'play';
+const String EVENT_SEEKED = 'seeked';
+const String EVENT_SEEKING = 'seeking';
+const String EVENT_VOLUME_CHANGE = 'volumechange';
+const String EVENT_SCROLL = 'scroll';
 
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
@@ -17,7 +53,6 @@ class Event {
   EventTarget target;
   num timeStamp;
   bool defaultPrevented = false;
-  dynamic detail;
 
   bool _immediateBubble = true;
 
@@ -48,16 +83,24 @@ class Event {
     bubbles = false;
   }
 
+  Pointer toNative() {
+    Pointer<NativeEvent> event = allocate<NativeEvent>();
+    event.ref.type = stringToNativeString(type);
+    event.ref.bubbles = bubbles ? 1 : 0;
+    event.ref.cancelable = cancelable ? 1 : 0;
+    event.ref.timeStamp = timeStamp;
+    event.ref.defaultPrevented = defaultPrevented ? 1 : 0;
+    event.ref.target = target != null ? target.nativeEventTargetPtr : nullptr;
+    event.ref.currentTarget = currentTarget != null ? currentTarget.nativeEventTargetPtr : nullptr;
+
+    return event.cast<Pointer>();
+  }
+
   Map toJson() {
+    Pointer<NativeEvent> nativeEvent = toNative().cast<NativeEvent>();
     return {
       'type': type,
-      'bubbles': bubbles,
-      'cancelable': cancelable,
-      'timeStamp': timeStamp,
-      'defaultPrevented': defaultPrevented,
-      'target': target?.targetId,
-      'currentTarget': currentTarget?.targetId,
-      'detail': detail,
+      'nativeEvent': nativeEvent.address
     };
   }
 
@@ -81,21 +124,36 @@ class EventInit {
 }
 
 class InputEvent extends Event {
-  String inputType;
-  dynamic detail;
+  final String inputType;
+  final String data;
+
+  Pointer<NativeInputEvent> toNative() {
+    Pointer<NativeInputEvent> nativeInputEvent = allocate<NativeInputEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
+    nativeInputEvent.ref.nativeEvent = nativeEvent;
+    nativeInputEvent.ref.inputType = stringToNativeString(inputType);
+    nativeInputEvent.ref.data = stringToNativeString(data);
+    return nativeInputEvent;
+  }
 
   InputEvent(
-    this.detail, {
+    this.data, {
     this.inputType = 'insertText',
-  }) : super('input', EventInit(cancelable: true));
+  }) :  assert(data != null),
+        super(EVENT_INPUT, EventInit(cancelable: true));
 }
 
 class AppearEvent extends Event {
-  AppearEvent() : super('appear');
+  AppearEvent() : super(EVENT_APPEAR);
 }
 
 class DisappearEvent extends Event {
-  DisappearEvent() : super('disappear');
+  DisappearEvent() : super(EVENT_DISAPPEAR);
+}
+
+class ColorSchemeChangeEvent extends Event {
+  ColorSchemeChangeEvent(this.platformBrightness) : super(EVENT_COLOR_SCHEME_CHANGE);
+  final String platformBrightness;
 }
 
 class MediaErrorCode {
@@ -111,67 +169,86 @@ class MediaErrorCode {
 
 class MediaError extends Event {
   /// A number which represents the general type of error that occurred, as follow
-  int code;
+  final int code;
 
   /// a human-readable string which provides specific diagnostic information to help the reader understand the error condition which occurred;
   /// specifically, it isn't simply a summary of what the error code means, but actual diagnostic information to help in understanding what exactly went wrong.
   /// This text and its format is not defined by the specification and will vary from one user agent to another.
   /// If no diagnostics are available, or no explanation can be provided, this value is an empty string ("").
-  String message;
+  final String message;
 
-  MediaError(this.code, this.message) : super('error');
+  Pointer<NativeMediaErrorEvent> toNative() {
+    Pointer<NativeMediaErrorEvent> nativeMediaError = allocate<NativeMediaErrorEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
+    nativeMediaError.ref.nativeEvent = nativeEvent;
+    nativeMediaError.ref.code = code;
+    nativeMediaError.ref.message = stringToNativeString(message);
+    return nativeMediaError;
+  }
+
+  MediaError(this.code, this.message) :
+        assert(message != null),
+        super(EVENT_MEDIA_ERROR);
 }
 
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
 class MessageEvent extends Event {
   /// The data sent by the message emitter.
-  String data;
+  final String data;
 
   /// A USVString representing the origin of the message emitter.
-  String origin;
+  final String origin;
 
-  MessageEvent(this.data, {this.origin}) : super('message');
+  MessageEvent(this.data, {this.origin = ''}) :
+        assert(data != null),
+        super(EVENT_MESSAGE);
 
-  @override
-  Map toJson() {
-    Map json = super.toJson();
-    json['data'] = data;
-    json['origin'] = origin;
-    return json;
+  Pointer<NativeMessageEvent> toNative() {
+    Pointer<NativeMessageEvent> messageEvent = allocate<NativeMessageEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
+    messageEvent.ref.nativeEvent = nativeEvent;
+    messageEvent.ref.data = stringToNativeString(data);
+    messageEvent.ref.origin = stringToNativeString(origin);
+    return messageEvent;
   }
 }
 
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/CloseEvent
 class CloseEvent extends Event {
   /// An unsigned short containing the close code sent by the server
-  int code;
+  final int code;
 
   /// Indicating the reason the server closed the connection.
-  String reason;
+  final String reason;
 
   /// Indicates whether or not the connection was cleanly closed
-  bool wasClean;
+  final bool wasClean;
 
-  CloseEvent(this.code, this.reason, this.wasClean) : super('close');
+  CloseEvent(this.code, this.reason, this.wasClean) :
+        assert(reason != null),
+        super(EVENT_CLOSE);
 
-  @override
-  Map toJson() {
-    Map json = super.toJson();
-    json['code'] = code;
-    json['reason'] = reason;
-    json['wasClean'] = wasClean;
-    return json;
+  Pointer<NativeCloseEvent> toNative() {
+    Pointer<NativeCloseEvent> closeEvent = allocate<NativeCloseEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
+    closeEvent.ref.nativeEvent = nativeEvent;
+    closeEvent.ref.code = code;
+    closeEvent.ref.reason = stringToNativeString(reason);
+    closeEvent.ref.wasClean = wasClean ? 1 : 0;
+    return closeEvent;
   }
 }
 
 class IntersectionChangeEvent extends Event {
-  IntersectionChangeEvent(this.intersectionRatio) : super('intersectionchange');
-  double intersectionRatio;
+  IntersectionChangeEvent(this.intersectionRatio) : super(EVENT_INTERSECTION_CHANGE);
+  final double intersectionRatio;
 
-  Map toJson() {
-    Map eventMap = super.toJson();
-    eventMap['intersectionRatio'] = intersectionRatio;
-    return eventMap;
+  Pointer<NativeIntersectionChangeEvent> toNative() {
+    Pointer<NativeIntersectionChangeEvent> intersectionChangeEvent = allocate<NativeIntersectionChangeEvent>();
+    Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
+    intersectionChangeEvent.ref.nativeEvent = nativeEvent;
+    intersectionChangeEvent.ref.intersectionRatio = intersectionRatio;
+    return intersectionChangeEvent;
   }
 }
 
@@ -188,18 +265,20 @@ class TouchEvent extends Event {
   bool ctrlKey = false;
   bool shiftKey = false;
 
-  Map toJson() {
-    Map eventMap = super.toJson();
-
-    eventMap['touches'] = touches.toJson();
-    eventMap['targetTouches'] = touches.toJson();
-    eventMap['changedTouches'] = touches.toJson();
-    eventMap['altKey'] = altKey;
-    eventMap['metaKey'] = metaKey;
-    eventMap['ctrlKey'] = ctrlKey;
-    eventMap['shiftKey'] = shiftKey;
-
-    return eventMap;
+  Pointer<NativeTouchEvent> toNative() {
+    Pointer<NativeTouchEvent> touchEvent = allocate<NativeTouchEvent>();
+    touchEvent.ref.nativeEvent = super.toNative().cast<NativeEvent>();
+    touchEvent.ref.touches = touches.toNative();
+    touchEvent.ref.touchLength = touches.length;
+    touchEvent.ref.targetTouches = targetTouches.toNative();
+    touchEvent.ref.targetTouchesLength = targetTouches.length;
+    touchEvent.ref.changedTouches = changedTouches.toNative();
+    touchEvent.ref.changedTouchesLength = changedTouches.length;
+    touchEvent.ref.altKey = altKey ? 1 : 0;
+    touchEvent.ref.metaKey = metaKey ? 1 : 0;
+    touchEvent.ref.ctrlKey = ctrlKey ? 1 : 0;
+    touchEvent.ref.shiftKey = shiftKey ? 1 : 0;
+    return touchEvent;
   }
 }
 
@@ -244,25 +323,24 @@ class Touch {
     this.touchType = TouchType.direct,
   });
 
-  Map toJson() {
-    return {
-      'identifier': identifier,
-      // @NOTE: Can not get target in Touch
-      // 'target': target,
-      'clientX': clientX,
-      'clientY': clientY,
-      'screenX': screenX,
-      'screenY': screenY,
-      'pageX': pageX,
-      'pageY': pageY,
-      'radiusX': radiusX,
-      'radiusY': radiusY,
-      'rotationAngle': rotationAngle,
-      'force': force,
-      'altitudeAngle': altitudeAngle,
-      'azimuthAngle': azimuthAngle,
-      'touchType': touchType == TouchType.direct ? 'direct' : 'stylus',
-    };
+  Pointer<NativeTouch> toNative() {
+    Pointer<NativeTouch> nativeTouch = allocate<NativeTouch>();
+    nativeTouch.ref.identifier = identifier;
+    nativeTouch.ref.target = target.nativeEventTargetPtr;
+    nativeTouch.ref.clientX = clientX;
+    nativeTouch.ref.clientY = clientY;
+    nativeTouch.ref.screenX = screenX;
+    nativeTouch.ref.screenY = screenY;
+    nativeTouch.ref.pageX = pageX;
+    nativeTouch.ref.pageY = pageY;
+    nativeTouch.ref.radiusX = radiusX;
+    nativeTouch.ref.radiusY = radiusY;
+    nativeTouch.ref.rotationAngle = rotationAngle;
+    nativeTouch.ref.force = force;
+    nativeTouch.ref.altitudeAngle = altitudeAngle;
+    nativeTouch.ref.azimuthAngle = azimuthAngle;
+    nativeTouch.ref.touchType = touchType.index;
+    return nativeTouch;
   }
 }
 
@@ -275,11 +353,16 @@ class TouchList {
     return items[index];
   }
 
-  List<Map> toJson() {
-    List<Map> ret = [];
-    for (Touch touch in items) {
-      ret.add(touch.toJson());
+  Touch operator[](int index) {
+    return items[index];
+  }
+
+  Pointer<Pointer<NativeTouch>> toNative() {
+    Pointer<Pointer<NativeTouch>> touchList = allocate<NativeTouch>(count: items.length).cast<Pointer<NativeTouch>>();
+    for (int i = 0; i < items.length; i ++) {
+      touchList[i] = items[i].toNative();
     }
-    return ret;
+
+    return touchList;
   }
 }

@@ -15,7 +15,7 @@ describe('Tags audio', () => {
     setAttributes(audio, {
       controls: true,
       src:
-        'https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3',
+        'https://kraken.oss-cn-hangzhou.aliyuncs.com/videos/t-rex-roar.mp3',
     });
 
     container1.appendChild(audio);

@@ -4,6 +4,7 @@ const rimraf = require('rimraf');
 const path = require('path');
 const { readFileSync, writeFileSync, mkdirSync } = require('fs');
 const { spawnSync, execSync, fork } = require('child_process');
+const { program } = require('commander');
 const { join, resolve } = require('path');
 const chalk = require('chalk');
 const fs = require('fs');
@@ -31,6 +32,11 @@ const paths = {
   tests: resolveKraken('tests'),
   sdk: resolveKraken('sdk')
 };
+
+program
+  .description('Kraken Cli Build Scripts')
+  .option('--js-engine <engine>', 'The JavaScript Engine used by Kraken.', 'jsc')
+  .parse(process.argv);
 
 function resolveKraken(submodule) {
   return resolve(KRAKEN_ROOT, submodule);
@@ -143,9 +149,13 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       }
     }
 
-    const makeFileArgs = [
+    let cmakeArgs = [
       '-DCMAKE_BUILD_TYPE=' + buildMode,
-      '-DENABLE_TEST=true',
+      '-DENABLE_TEST=true'
+    ];
+
+    const makeFileArgs = [
+      ...cmakeArgs,
       '-G',
       'CodeBlocks - Unix Makefiles',
       '-B',
@@ -178,8 +188,7 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '--target',
       'kraken',
-      'foundation_test',
-      'jsa_test_' + jsEngine,
+      'kraken_test',
       '--',
       '-j',
       '4'
@@ -303,12 +312,6 @@ task('macos-upload', (done) => {
     cwd: paths.scripts,
     stdio: 'inherit'
   });
-  done();
-});
-
-task('bridge-test', (done) => {
-  execSync(`${libOutputPath}/jsa_test_jsc`, { stdio: 'inherit' });
-  execSync(`${libOutputPath}/foundation_test`, { stdio: 'inherit' })
   done();
 });
 

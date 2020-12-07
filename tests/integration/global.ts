@@ -183,7 +183,7 @@ function append(parent: HTMLElement, child: Node) {
 
 async function matchViewportSnapshot(wait: number = 0.0) {
   await sleep(wait);
-  return await matchElementImageSnapshot(document.body);
+  await matchElementImageSnapshot(document.body);
 }
 
 async function matchElementImageSnapshot(element: HTMLElement) {

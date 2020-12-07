@@ -2,8 +2,10 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+
 import 'from_native.dart';
 import 'to_native.dart';
+import 'package:flutter/scheduler.dart';
 
 /// the Kraken JS Bridge Size
 int kKrakenJSBridgePoolSize = 8;
@@ -14,6 +16,12 @@ bool _firstView = true;
 int initBridge() {
   // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
+
+  // Port flutter's frame callback into bridge.
+  SchedulerBinding.instance.addPersistentFrameCallback((_) {
+    flushBridgeTask();
+    flushUICommand();
+  });
 
   if (_firstView) {
     initJSContextPool(kKrakenJSBridgePoolSize);

@@ -5,7 +5,9 @@
 
 import 'dart:async';
 import 'dart:ui';
+import 'dart:ffi';
 
+import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart' hide RenderEditable;
@@ -149,19 +151,20 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   InputElement(
     int targetId,
+    Pointer<NativeElement> nativePtr,
     ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+  }) : super(targetId, nativePtr, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
 
     // Make element listen to click event to trigger focus.
-    addEvent(CLICK);
+    addEvent(EVENT_CLICK);
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
@@ -438,7 +441,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   void _triggerInputEvent(String text) {
-    Event inputEvent = InputEvent(text);
+    InputEvent inputEvent = InputEvent(text);
     dispatchEvent(inputEvent);
   }
 
@@ -446,7 +449,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _triggerChangeEvent() {
     String currentText = textSelectionDelegate.textEditingValue?.text;
     if (_lastChangedTextString != currentText) {
-      Event changeEvent = Event('change');
+      Event changeEvent = Event(EVENT_CHANGE);
       dispatchEvent(changeEvent);
       _lastChangedTextString = currentText;
     }
@@ -503,22 +506,22 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  @override
-  dynamic method(String name, List args) {
-    super.method(name, args);
-    switch (name) {
-      case 'focus':
-        if (isRendererAttached) {
-          focus();
-        }
-        break;
-      case 'blur':
-        if (isRendererAttached) {
-          blur();
-        }
-        break;
-    }
-  }
+  // @override
+  // dynamic method(String name, List args) {
+  //   super.method(name, args);
+  //   switch (name) {
+  //     case 'focus':
+  //       if (isRendererAttached) {
+  //         focus();
+  //       }
+  //       break;
+  //     case 'blur':
+  //       if (isRendererAttached) {
+  //         blur();
+  //       }
+  //       break;
+  //   }
+  // }
 
   bool _showCaretOnScreenScheduled = false;
   Rect _currentCaretRect;

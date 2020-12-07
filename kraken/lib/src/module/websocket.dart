@@ -36,7 +36,7 @@ class KrakenWebSocket {
       if (state != null && state.status == _ConnectionState.closed) {
         dynamic data = state.data;
         webSocket.close(data[0], data[1]);
-        CloseEvent event = CloseEvent(data[0], data[1], true);
+        CloseEvent event = CloseEvent(data[0] ?? 0, data[1] ?? '', true);
         callback(id, jsonEncode(event));
         _stateMap.remove(id);
         return;
@@ -44,16 +44,14 @@ class KrakenWebSocket {
       _clientMap[id] = client;
       // Listen all event
       _listen(id, callback);
-      // Emit open event
-      String type = 'open';
-      if (_hasListener(id, type)) {
-        Event event = Event(type);
+      if (_hasListener(id, EVENT_OPEN)) {
+        Event event = Event(EVENT_OPEN);
         callback(id, jsonEncode(event));
       }
     }).catchError((e, stack) {
       // print connection error internally and trigger error event.
       print(e);
-      Event event = Event('error');
+      Event event = Event(EVENT_ERROR);
       callback(id, jsonEncode(event));
     });
 
@@ -88,6 +86,7 @@ class KrakenWebSocket {
   }
 
   bool _hasListener(String id, String type) {
+    if (!_listenMap.containsKey(id)) return false;
     var listeners = _listenMap[id];
     return listeners.containsKey(type);
   }
@@ -96,20 +95,17 @@ class KrakenWebSocket {
     IOWebSocketChannel client = _clientMap[id];
 
     client.stream.listen((message) {
-      String type = 'message';
-      if (!_hasListener(id, type)) return;
+      if (!_hasListener(id, EVENT_MESSAGE)) return;
       MessageEvent event = MessageEvent(message);
       callback(id, jsonEncode(event));
     }, onError: (error) {
-      String type = 'error';
-      if (!_hasListener(id, type)) return;
+      if (!_hasListener(id, EVENT_ERROR)) return;
       // print error internally and trigger error event;
       print(error);
-      Event event = Event(type);
+      Event event = Event(EVENT_ERROR);
       callback(id, jsonEncode(event));
     }, onDone: () {
-      String type = 'close';
-      if (_hasListener(id, type)) {
+      if (_hasListener(id, EVENT_CLOSE)) {
         // CloseEvent https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/CloseEvent
         CloseEvent event = CloseEvent(client.closeCode, client.closeReason, false);
         callback(id, jsonEncode(event));
