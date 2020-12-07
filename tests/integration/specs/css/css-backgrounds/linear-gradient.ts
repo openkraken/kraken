@@ -169,4 +169,48 @@ describe('Background linear-gradient', () => {
 
     await matchViewportSnapshot();
   });
+
+  it("linear-gradient to right with color stop not set", async () => {
+    let flexbox;
+    flexbox = createElement(
+      'div',
+      {
+        id: 'flexbox',
+        style: {
+          background:
+          'linear-gradient(to right, blue, blue, red, red, orange, orange)',
+          display: 'flex',
+          'justify-content': 'center',
+          height: '100px',
+          width: '300px',
+          'box-sizing': 'border-box',
+        },
+      },
+    );
+    BODY.appendChild(flexbox);
+
+    await matchViewportSnapshot();
+  });
+
+  it("linear-gradient to bottom with color stop not set", async () => {
+    let flexbox;
+    flexbox = createElement(
+      'div',
+      {
+        id: 'flexbox',
+        style: {
+          background:
+            'linear-gradient(to bottom, blue, blue, red, red, orange, orange)',
+          display: 'flex',
+          'justify-content': 'center',
+          height: '200px',
+          width: '300px',
+          'box-sizing': 'border-box',
+        },
+      },
+    );
+    BODY.appendChild(flexbox);
+
+    await matchViewportSnapshot();
+  });
 });
