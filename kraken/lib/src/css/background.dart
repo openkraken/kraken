@@ -174,7 +174,7 @@ class CSSBackground {
                     begin = Alignment.centerRight;
                     end = Alignment.centerLeft;
                   }
-                  if (style[WIDTH] != null) {
+                  if (style[WIDTH].isNotEmpty) {
                     gradientLength = CSSLength.toDisplayPortValue(style[WIDTH]);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getContentWidth(renderBoxModel);
@@ -193,7 +193,7 @@ class CSSBackground {
                     begin = Alignment.bottomCenter;
                     end = Alignment.topCenter;
                   }
-                  if (style[HEIGHT] != null) {
+                  if (style[HEIGHT].isNotEmpty) {
                     gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT]);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getContentHeight(renderBoxModel);
@@ -213,7 +213,7 @@ class CSSBackground {
                     end = Alignment.centerRight;
                   }
 
-                  if (style[WIDTH] != '') {
+                  if (style[WIDTH].isNotEmpty) {
                     gradientLength = CSSLength.toDisplayPortValue(style[WIDTH]);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getContentWidth(renderBoxModel);
@@ -233,7 +233,7 @@ class CSSBackground {
                     begin = Alignment.topCenter;
                     end = Alignment.bottomCenter;
                   }
-                  if (style[HEIGHT] != null) {
+                  if (style[HEIGHT].isNotEmpty) {
                     gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT]);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getContentHeight(renderBoxModel);

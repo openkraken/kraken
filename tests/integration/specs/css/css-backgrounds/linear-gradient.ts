@@ -5,7 +5,7 @@ describe('Background linear-gradient', () => {
       width: '200px',
       height: '100px',
       backgroundImage:
-        'linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)',
+      'linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)',
     });
 
     append(BODY, div1);
@@ -18,7 +18,7 @@ describe('Background linear-gradient', () => {
       width: '200px',
       height: '100px',
       backgroundImage:
-        'linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)',
+      'linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)',
     });
 
     append(BODY, div1);
@@ -36,7 +36,7 @@ describe('Background linear-gradient', () => {
       width: '200px',
       height: '200px',
       backgroundImage:
-        'conic-gradient(from 0.25turn at 50% 30%,red 20deg, orange 130deg, yellow 90deg, green 180deg, blue 270deg)',
+      'conic-gradient(from 0.25turn at 50% 30%,red 20deg, orange 130deg, yellow 90deg, green 180deg, blue 270deg)',
     });
 
     append(BODY, div2);
@@ -61,9 +61,112 @@ describe('Background linear-gradient', () => {
       width: '200px',
       height: '100px',
       backgroundImage:
-        'linear-gradient(135deg, red, red 10%, blue 75%, yellow 75%)',
+      'linear-gradient(135deg, red, red 10%, blue 75%, yellow 75%)',
     });
     append(BODY, div4);
     await matchElementImageSnapshot(div4);
+  });
+
+  it("linear-gradient to right with color stop of px", async () => {
+
+    let flexbox;
+
+    flexbox = createElement(
+      'div',
+      {
+        id: 'flexbox',
+        style: {
+          background:
+          'linear-gradient(to right, blue 0px, blue 40px, red 40px, red 120px, orange 120px, orange 200px)',
+          display: 'flex',
+          'justify-content': 'center',
+          height: '100px',
+          width: '300px',
+          'box-sizing': 'border-box',
+        },
+      },
+    );
+    BODY.appendChild(flexbox);
+
+    await matchViewportSnapshot();
+  });
+
+  it("linear-gradient to right with color stop of px and width not set", async () => {
+
+    let flexbox;
+
+    flexbox = createElement(
+      'div',
+      {
+        id: 'flexbox',
+        style: {
+          background:
+          'linear-gradient(to right, blue 0px, blue 40px, red 40px, red 120px, orange 120px, orange 200px)',
+          display: 'flex',
+          'justify-content': 'center',
+          height: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+    );
+    BODY.appendChild(flexbox);
+
+    await matchViewportSnapshot();
+  });
+
+  it("linear-gradient to bottom with color stop of px", async () => {
+
+    let flexbox;
+
+    flexbox = createElement(
+      'div',
+      {
+        id: 'flexbox',
+        style: {
+          background:
+          'linear-gradient(to bottom, blue 0px, blue 40px, red 40px, red 120px, orange 120px, orange 200px)',
+          display: 'flex',
+          'justify-content': 'center',
+          height: '200px',
+          width: '300px',
+          'box-sizing': 'border-box',
+        },
+      },
+    );
+    BODY.appendChild(flexbox);
+
+    await matchViewportSnapshot();
+  });
+
+  it("linear-gradient to bottom with color stop of px and height not set", async () => {
+
+    let flexbox;
+    let container = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          height: '300px',
+        }
+      }
+    );
+    flexbox = createElement(
+      'div',
+      {
+        id: 'flexbox',
+        style: {
+          background:
+          'linear-gradient(to bottom, blue 0px, blue 40px, red 40px, red 120px, orange 120px, orange 200px)',
+          width: '300px',
+          'box-sizing': 'border-box',
+        },
+      },
+    );
+
+    container.appendChild(flexbox);
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
   });
 });
