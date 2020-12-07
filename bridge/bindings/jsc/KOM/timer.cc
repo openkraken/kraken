@@ -8,7 +8,7 @@
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
-#include "foundation/ui_command_queue.h"
+#include "bindings/jsc/js_context.h"
 
 namespace kraken::binding::jsc {
 
@@ -99,7 +99,7 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
 
   const JSValueRef &callbackValueRef = arguments[0];
   const JSValueRef &timeoutValueRef = arguments[1];
@@ -156,7 +156,7 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
 
   const JSValueRef &callbackValueRef = arguments[0];
   const JSValueRef &timeoutValueRef = arguments[1];
@@ -213,7 +213,7 @@ JSValueRef clearTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef this
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
 
   const JSValueRef timerIdValueRef = arguments[0];
   if (!JSValueIsNumber(ctx, timerIdValueRef)) {
@@ -240,7 +240,7 @@ JSValueRef cancelAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObject
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
 
   const JSValueRef requestIdValueRef = arguments[0];
   if (!JSValueIsNumber(ctx, requestIdValueRef)) {
@@ -271,7 +271,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
   const JSValueRef &callbackValueRef = arguments[0];
 
   if (!JSValueIsObject(ctx, callbackValueRef)) {
@@ -327,19 +327,27 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
 
 JSValueRef reloadApp(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                      const JSValueRef *arguments, JSValueRef *exception) {
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
   getDartMethod()->reloadApp(context->getContextId());
   return nullptr;
 }
 
-void bindTimer(std::unique_ptr<JSContext> &context) {
-  JSC_GLOBAL_BINDING_FUNCTION(context, "setTimeout", setTimeout);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "setInterval", setInterval);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "requestAnimationFrame", requestAnimationFrame);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "clearTimeout", clearTimeout);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "clearInterval", clearTimeout);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "reload", reloadApp);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "cancelAnimationFrame", cancelAnimationFrame);
+void bindTimer() {
+  const JSStaticFunction _setTimeout = {"setTimeout", setTimeout, kJSPropertyAttributeNone};
+  const JSStaticFunction _setInterval = {"setInterval", setInterval, kJSPropertyAttributeNone};
+  const JSStaticFunction _requestAnimationFrame = {"requestAnimationFrame", requestAnimationFrame, kJSPropertyAttributeNone};
+  const JSStaticFunction _clearTimeout = {"clearTimeout", clearTimeout, kJSPropertyAttributeNone};
+  const JSStaticFunction _clearInterval = {"clearInterval", clearTimeout, kJSPropertyAttributeNone};
+  const JSStaticFunction _reload = {"reload", reloadApp, kJSPropertyAttributeNone};
+  const JSStaticFunction _cancelAnimationFrame = {"cancelAnimationFrame", cancelAnimationFrame, kJSPropertyAttributeNone};
+
+  JSContext::globalFunctions.emplace_back(_setTimeout);
+  JSContext::globalFunctions.emplace_back(_setInterval);
+  JSContext::globalFunctions.emplace_back(_requestAnimationFrame);
+  JSContext::globalFunctions.emplace_back(_clearTimeout);
+  JSContext::globalFunctions.emplace_back(_clearInterval);
+  JSContext::globalFunctions.emplace_back(_reload);
+  JSContext::globalFunctions.emplace_back(_cancelAnimationFrame);
 }
 
 } // namespace kraken::binding::jsc
