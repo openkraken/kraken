@@ -6,5 +6,5 @@
 #include "bindings/jsc/js_context.h"
 
 namespace kraken::binding::jsc {
-void bindKraken(std::unique_ptr<JSContext> &context);
+void bindKraken();
 } // namespace kraken
