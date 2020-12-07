@@ -142,6 +142,13 @@ class RenderLayoutBox extends RenderBoxModel
     children.sort((RenderObject prev, RenderObject next) {
       RenderLayoutParentData prevParentData = prev.parentData;
       RenderLayoutParentData nextParentData = next.parentData;
+      // Place positioned element after non positioned element
+      if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
+        return -1;
+      }
+      if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
+        return 1;
+      }
       // z-index applies to flex-item ignoring position property
       int prevZIndex = prevParentData.zIndex ?? 0;
       int nextZIndex = nextParentData.zIndex ?? 0;
