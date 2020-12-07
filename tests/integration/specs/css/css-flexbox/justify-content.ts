@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('justify-content', () => {
-  xit('001', async () => {
+  it('001', async () => {
     let p;
     let blue;
     let flexbox;
@@ -54,7 +54,7 @@ describe('justify-content', () => {
 
     await matchViewportSnapshot();
   });
-  xit('002', async () => {
+  it('002', async () => {
     let p;
     let flexbox;
     p = createElement(
@@ -106,7 +106,7 @@ describe('justify-content', () => {
 
     await matchViewportSnapshot();
   });
-  xit('003', async () => {
+  it('003', async () => {
     let p;
     let flexbox;
     p = createElement(
@@ -158,7 +158,7 @@ describe('justify-content', () => {
 
     await matchViewportSnapshot();
   });
-  xit('004', async () => {
+  it('004', async () => {
     let p;
     let blue;
     let flexbox;
@@ -212,7 +212,7 @@ describe('justify-content', () => {
 
     await matchViewportSnapshot();
   });
-  xit('005', async () => {
+  it('005', async () => {
     let p;
     let blue;
     let flexbox;

@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
@@ -140,8 +141,9 @@ class CSSBackground {
     return backgroundImage;
   }
 
-  static Gradient getBackgroundGradient(CSSFunctionalNotation method) {
+  static Gradient getBackgroundGradient(RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
     Gradient gradient;
+    CSSStyleDeclaration style = renderBoxModel.style;
 
     if (method.args.length > 1) {
       List<Color> colors = [];
@@ -154,6 +156,7 @@ class CSSBackground {
           Alignment begin = Alignment.topCenter;
           Alignment end = Alignment.bottomCenter;
           String arg0 = method.args[0].trim();
+          double gradientLength;
           if (arg0.startsWith('to ')) {
             List<String> parts = arg0.split(_splitRegExp);
             if (parts.length >= 2) {
@@ -171,6 +174,11 @@ class CSSBackground {
                     begin = Alignment.centerRight;
                     end = Alignment.centerLeft;
                   }
+                  if (style[WIDTH] != null) {
+                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH]);
+                  } else if (renderBoxModel.attached) {
+                    gradientLength = RenderBoxModel.getContentWidth(renderBoxModel);
+                  }
                   break;
                 case TOP:
                   if (parts.length == 3) {
@@ -184,6 +192,11 @@ class CSSBackground {
                   } else {
                     begin = Alignment.bottomCenter;
                     end = Alignment.topCenter;
+                  }
+                  if (style[HEIGHT] != null) {
+                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT]);
+                  } else if (renderBoxModel.attached) {
+                    gradientLength = RenderBoxModel.getContentHeight(renderBoxModel);
                   }
                   break;
                 case RIGHT:
@@ -199,6 +212,13 @@ class CSSBackground {
                     begin = Alignment.centerLeft;
                     end = Alignment.centerRight;
                   }
+
+                  if (style[WIDTH] != '') {
+                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH]);
+                  } else if (renderBoxModel.attached) {
+                    gradientLength = RenderBoxModel.getContentWidth(renderBoxModel);
+                  }
+
                   break;
                 case BOTTOM:
                   if (parts.length == 3) {
@@ -213,6 +233,11 @@ class CSSBackground {
                     begin = Alignment.topCenter;
                     end = Alignment.bottomCenter;
                   }
+                  if (style[HEIGHT] != null) {
+                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT]);
+                  } else if (renderBoxModel.attached) {
+                    gradientLength = RenderBoxModel.getContentHeight(renderBoxModel);
+                  }
                   break;
               }
             }
@@ -222,7 +247,7 @@ class CSSBackground {
             linearAngle = CSSAngle.parseAngle(arg0);
             start = 1;
           }
-          _applyColorAndStops(start, method.args, colors, stops);
+          _applyColorAndStops(renderBoxModel, start, method.args, colors, stops, gradientLength);
           if (colors.length >= 2) {
             gradient = CSSLinearGradient(
                 begin: begin,
@@ -258,7 +283,7 @@ class CSSBackground {
               }
             }
           }
-          _applyColorAndStops(start, method.args, colors, stops);
+          _applyColorAndStops(renderBoxModel, start, method.args, colors, stops);
           if (colors.length >= 2) {
             gradient = CSSRadialGradient(
               center: FractionalOffset(atX, atY),
@@ -290,7 +315,7 @@ class CSSBackground {
             }
             start = 1;
           }
-          _applyColorAndStops(start, method.args, colors, stops);
+          _applyColorAndStops(renderBoxModel, start, method.args, colors, stops);
           if (colors.length >= 2) {
             gradient = CSSConicGradient(
                 center: FractionalOffset(atX, atY),
@@ -305,12 +330,12 @@ class CSSBackground {
     return gradient;
   }
 
-  static void _applyColorAndStops(int start, List<String> args, List<Color> colors, List<double> stops) {
+  static void _applyColorAndStops(RenderBoxModel renderBoxModel, int start, List<String> args, List<Color> colors, List<double> stops, [double gradientLength]) {
     // colors should more than one, otherwise invalid
     if (args.length - start - 1 > 0) {
       double grow = 1.0 / (args.length - start - 1);
       for (int i = start; i < args.length; i++) {
-        List<CSSColorStop> colorGradients = _parseColorAndStop(args[i].trim(), (i - start) * grow);
+        List<CSSColorStop> colorGradients = _parseColorAndStop(renderBoxModel, args[i].trim(), (i - start) * grow, gradientLength);
         for (var colorStop in colorGradients) {
           colors.add(colorStop.color);
           stops.add(colorStop.stop);
@@ -319,7 +344,7 @@ class CSSBackground {
     }
   }
 
-  static List<CSSColorStop> _parseColorAndStop(String src, [double defaultStop]) {
+  static List<CSSColorStop> _parseColorAndStop(RenderBoxModel renderBoxModel, String src, [double defaultStop, double gradientLength]) {
     List<String> strings = [];
     List<CSSColorStop> colorGradients = [];
     // rgba may contain space, color should handle special
@@ -346,6 +371,14 @@ class CSSBackground {
               stop = CSSPercentage.parsePercentage(strings[i]);
             } else if (CSSAngle.isAngle(strings[i])) {
               stop = CSSAngle.parseAngle(strings[i]) / (math.pi * 2);
+            } else if (CSSLength.isLength(strings[i])) {
+              if (gradientLength != null) {
+                stop = CSSLength.toDisplayPortValue(strings[i]) / gradientLength;
+              } else if (!renderBoxModel.attached) {
+                /// When node is not attached and has no width/height, gradient length
+                /// cannot be obtained, so wait for renderBoxModel attached to recalculate gradient length
+                renderBoxModel.recalGradient = true;
+              }
             }
             colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
           }
