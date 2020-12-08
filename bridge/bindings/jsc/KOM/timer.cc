@@ -45,7 +45,7 @@ void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) 
   _context.handleException(exception);
 }
 
-void handleRAFPersistentCallback(void *ptr, int32_t contextId, double result, const char *errmsg) {
+void handleRAFPersistentCallback(void *ptr, int32_t contextId, double highResTimeStamp, const char *errmsg) {
   auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
   JSContext &_context = callbackContext->_context;
   if (!checkContext(contextId, &_context)) return;
@@ -74,7 +74,12 @@ void handleRAFPersistentCallback(void *ptr, int32_t contextId, double result, co
   }
 
   JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->_callback, &exception);
-  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr, &exception);
+
+  const JSValueRef args[1] {
+    JSValueMakeNumber(_context.context(), highResTimeStamp)
+  };
+
+  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 1, args, &exception);
   _context.handleException(exception);
 }
 
