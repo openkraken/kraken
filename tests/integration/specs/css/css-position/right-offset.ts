@@ -304,7 +304,7 @@ describe('right-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.5);
   });
   it('percentage-001-ref', async () => {
     let p;
