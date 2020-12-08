@@ -5,6 +5,7 @@
 
 #include "performance.h"
 #include <chrono>
+#include <cmath>
 
 namespace kraken::binding::jsc {
 
@@ -59,11 +60,8 @@ void JSPerformance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
 
 double JSPerformance::internalNow() {
   auto now = std::chrono::system_clock::now();
-  auto duration = now - context->timeOrigin;
-
-  double resolution = (1000us).count();
-  double reduced = std::floor(duration.count() / resolution) * resolution;
-  return reduced;
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - context->timeOrigin);
+  return std::floor(duration.count() / 1000) * 1000;
 }
 
 JSValueRef JSPerformance::now(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
