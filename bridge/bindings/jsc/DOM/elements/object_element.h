@@ -42,8 +42,8 @@ public:
     NativeObjectElement *nativeObjectElement;
 
   private:
-    JSStringRef _data{JSStringCreateWithUTF8CString("")};
-    JSStringRef _type{JSStringCreateWithUTF8CString("")};
+    JSStringHolder m_data{context, ""};
+    JSStringHolder m_type{context, ""};
   };
 protected:
   ~JSObjectElement();

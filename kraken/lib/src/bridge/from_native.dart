@@ -21,11 +21,11 @@ import 'native_types.dart';
 class NativeString extends Struct {
   Pointer<Uint16> string;
 
-  @Uint32()
+  @Int64()
   int length;
 }
 
-String _uint16ToString(Pointer<Uint16> pointer, int length) {
+String uint16ToString(Pointer<Uint16> pointer, int length) {
   return String.fromCharCodes(Uint16List.view(pointer.asTypedList(length).buffer, 0, length));
 }
 
@@ -45,7 +45,7 @@ Pointer<NativeString> stringToNativeString(String string) {
 }
 
 String nativeStringToString(Pointer<NativeString> pointer) {
-  return _uint16ToString(pointer.ref.string, pointer.ref.length);
+  return uint16ToString(pointer.ref.string, pointer.ref.length);
 }
 
 void freeNativeString(Pointer<NativeString> pointer) {

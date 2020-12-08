@@ -249,37 +249,70 @@ class UICommand {
   }
 }
 
-// Read raw memory from native struct
 /**
  * struct UICommandItem {
-    int64_t type; // offset: Uint64 * 0
-    NativeString **args; // offset: Uint64 * 1
-    int64_t id; // offset: Uint64 * 2
-    int64_t length; // offset: Uint64 * 3
-    void* nativePtr; // offset: Uint64 * 4
+    int32_t type;             // offset: 0 ~ 0.5
+    int32_t id;               // offset: 0.5 ~ 1
+    int32_t args_01_length;   // offset: 1 ~ 1.5
+    int32_t args_02_length;   // offset: 1.5 ~ 2
+    const uint16_t *string_01;// offset: 2
+    const uint16_t *string_02;// offset: 3
+    void* nativePtr;          // offset: 4
   };
  */
 const int nativeCommandSize = 5;
-const int typeMemOffset = 0;
-const int argsMemOffset = 1;
-const int idMemOffset = 2;
-const int argsLengthMemOffset = 3;
+const int typeAndIdMemOffset = 0;
+const int args01And02LengthMemOffset = 1;
+const int args01StringMemOffset = 2;
+const int args02StringMemOffset = 3;
 const int nativePtrMemOffset = 4;
 
+// We found there are performance bottleneck of reading native memory with Dart FFI API.
+// So we align all UI instructions to a whole block of memory, and then convert them into a dart array at one time,
+// To ensure the fastest subsequent random access.
 List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
   List<UICommand> results = List(commandLength);
   List<int> rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize).toList();
 
   for (int i = 0; i < commandLength * nativeCommandSize; i += nativeCommandSize) {
     UICommand command = UICommand();
-    command.type = UICommandType.values[rawMemory[i + typeMemOffset]];
-    command.id = rawMemory[i + idMemOffset];
-    command.nativePtr = Pointer.fromAddress(rawMemory[i + nativePtrMemOffset]);
-    int argsLength = rawMemory[i + argsLengthMemOffset];
-    command.args = List(argsLength);
-    Pointer<Pointer<NativeString>> nativeArgs = Pointer.fromAddress(rawMemory[i + argsMemOffset]);
-    for (int j = 0; j < argsLength; j ++) {
-      command.args[j] = nativeStringToString(nativeArgs[j]);
+
+    int typeIdCombine = rawMemory[i + typeAndIdMemOffset];
+
+    // int32_t  int32_t
+    // +-------+-------+
+    // |  id   | type  |
+    // +-------+-------+
+    int id = typeIdCombine >> 32;
+    int type = typeIdCombine ^ (id << 32);
+
+    command.type = UICommandType.values[type];
+    command.id = id;
+    int nativePtrValue = rawMemory[i + nativePtrMemOffset];
+    command.nativePtr = nativePtrValue != 0 ? Pointer.fromAddress(rawMemory[i + nativePtrMemOffset]) : nullptr;
+    command.args = List(2);
+
+    int args01And02Length = rawMemory[i + args01And02LengthMemOffset];
+    int args01Length;
+    int args02Length;
+
+    if (args01And02Length == 0) {
+      args01Length = args02Length = 0;
+    } else {
+      args02Length = args01And02Length >> 32;
+      args01Length = args01And02Length ^ (args02Length << 32);
+    }
+
+    int args01StringMemory = rawMemory[i + args01StringMemOffset];
+    if (args01StringMemory != 0) {
+      Pointer<Uint16> args_01 = Pointer.fromAddress(args01StringMemory);
+      command.args[0] = uint16ToString(args_01, args01Length);
+
+      int args02StringMemory = rawMemory[i + args02StringMemOffset];
+      if (args02StringMemory != 0) {
+        Pointer<Uint16> args_02 = Pointer.fromAddress(args02StringMemory);
+        command.args[1] = uint16ToString(args_02, args02Length);
+      }
     }
 
     if (kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true') {

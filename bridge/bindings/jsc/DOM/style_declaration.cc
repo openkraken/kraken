@@ -133,9 +133,11 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::str
 
   properties[name] = valueStr;
 
-  auto args = buildUICommandArgs(name, valueStr);
+  NativeString args_01{};
+  NativeString args_02{};
+  buildUICommandArgs(name, valueStr, args_01, args_02);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args, 2, nullptr);
+    ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
 }
 
 void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStringRef nameRef, JSValueRef *exception) {
@@ -150,11 +152,14 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStr
   JSStringRetain(emptyStringRef);
   properties[name] = emptyStringRef;
 
-  auto args = buildUICommandArgs(name, emptyStringRef);
 
-  KRAKEN_LOG(VERBOSE) << "UI_COMMAND: " << UICommand::setStyle;
+  NativeString args_01{};
+  NativeString args_02{};
+
+  buildUICommandArgs(name, emptyStringRef, args_01, args_02);
+
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args, 2, nullptr);
+    ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
 }
 
 JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::internalGetPropertyValue(JSStringRef nameRef,

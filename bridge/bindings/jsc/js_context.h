@@ -131,10 +131,10 @@ private:
 JSObjectRef makeObjectFunctionWithPrivateData(JSContext *context, void *data, const char *name,
                                               JSObjectCallAsFunctionCallback callback);
 
-NativeString **buildUICommandArgs(JSStringRef key);
-NativeString **buildUICommandArgs(std::string &key);
-NativeString **buildUICommandArgs(std::string &key, JSStringRef value);
-NativeString **buildUICommandArgs(std::string &key, std::string &value);
+void buildUICommandArgs(JSStringRef key, NativeString &args_01);
+void buildUICommandArgs(std::string &key, NativeString &args_01);
+void buildUICommandArgs(std::string &key, JSStringRef value, NativeString &args_01, NativeString &args_02);
+void buildUICommandArgs(std::string &key, std::string &value, NativeString &args_01, NativeString &args_02);
 
 JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback,
                                 JSValueRef *exception);
