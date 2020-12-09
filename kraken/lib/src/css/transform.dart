@@ -11,11 +11,11 @@ import 'package:kraken/dom.dart';
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 
-Color _parseColor(String color, Size viewportSize) {
+Color _parseColor(String color, [Size viewportSize]) {
   return CSSColor.parseColor(color);
 }
 
-String _stringifyColor(Color oldColor, Color newColor, double progress, Size viewportSize) {
+String _stringifyColor(Color oldColor, Color newColor, double progress, [Size viewportSize]) {
   int alphaDiff = newColor.alpha - oldColor.alpha;
   int redDiff = newColor.red - oldColor.red;
   int greenDiff = newColor.green - oldColor.green;
@@ -29,35 +29,35 @@ String _stringifyColor(Color oldColor, Color newColor, double progress, Size vie
   return 'rgba(${red}, ${green}, ${blue}, ${alpha})';
 }
 
-double _parseLength(String _length, Size viewportSize) {
+double _parseLength(String _length, [Size viewportSize]) {
   return CSSLength.parseLength(_length, viewportSize);
 }
 
-String _stringifyLength(double oldLength, double newLength, double progress, Size viewportSize) {
+String _stringifyLength(double oldLength, double newLength, double progress, [Size viewportSize]) {
   return _stringifyNumber(oldLength, newLength, progress, viewportSize) + 'px';
 }
 
-FontWeight _parseFontWeight(String fontWeight, Size viewportSize) {
+FontWeight _parseFontWeight(String fontWeight, [Size viewportSize]) {
   return CSSText.parseFontWeight(fontWeight);
 }
 
-String _stringifyFontWeight(FontWeight oldValue, FontWeight newValue, double progress, Size viewportSize) {
+String _stringifyFontWeight(FontWeight oldValue, FontWeight newValue, double progress, [Size viewportSize]) {
   return ((FontWeight.lerp(oldValue, newValue, progress).index + 1) * 100).toString();
 }
 
-double _parseNumber(String number, Size viewportSize) {
+double _parseNumber(String number, [Size viewportSize]) {
   return CSSNumber.parseNumber(number);
 }
 
-String _stringifyNumber(double oldValue, double newValue, double progress, Size viewportSize) {
+String _stringifyNumber(double oldValue, double newValue, double progress, [Size viewportSize]) {
   return (oldValue * (1 - progress) + newValue * progress).toString();
 }
 
-String _parseLineHeight(String lineHeight, Size viewportSize) {
+String _parseLineHeight(String lineHeight, [Size viewportSize]) {
   return lineHeight;
 }
 
-String _stringifyLineHeight(String oldValue, String newValue, double progress, Size viewportSize) {
+String _stringifyLineHeight(String oldValue, String newValue, double progress, [Size viewportSize]) {
   if (CSSLength.isLength(oldValue) && CSSLength.isLength(newValue)) {
     double left = CSSLength.parseLength(oldValue, viewportSize);
     double right = CSSLength.parseLength(newValue, viewportSize);
@@ -71,7 +71,7 @@ String _stringifyLineHeight(String oldValue, String newValue, double progress, S
   }
 }
 
-Matrix4 _parseTransform(String value, Size viewportSize) {
+Matrix4 _parseTransform(String value, [Size viewportSize]) {
   return CSSTransform.parseTransform(value, viewportSize);
 }
 
@@ -87,7 +87,7 @@ List<double> _lerpFloat64List(List<double> begin, List<double> end, t) {
   return r;
 }
 
-String _stringifyTransform(Matrix4 begin, Matrix4 end, double t, Size viewportSize) {
+String _stringifyTransform(Matrix4 begin, Matrix4 end, double t, [Size viewportSize]) {
   Matrix4 newMatrix4;
   if (CSSTransform.isAffine(begin)) {
     List matrixA = CSSTransform.decompose2DMatrix(begin);
@@ -704,7 +704,7 @@ class CSSTransform {
 
   static Matrix4 initial = Matrix4.identity();
 
-  static Matrix4 parseTransform(String value, Size viewportSize) {
+  static Matrix4 parseTransform(String value, [Size viewportSize]) {
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(value);
 
     Matrix4 matrix4;
@@ -743,7 +743,7 @@ class CSSTransform {
   static const String SKEW_Y = 'skewy';
   static const String PERSPECTIVE = 'perspective';
 
-  static Matrix4 _parseTransform(CSSFunctionalNotation method, Size viewportSize) {
+  static Matrix4 _parseTransform(CSSFunctionalNotation method, [Size viewportSize]) {
     switch (method.name) {
       case MATRIX:
         if (method.args.length == 6) {
