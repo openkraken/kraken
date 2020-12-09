@@ -923,7 +923,7 @@ class CSSOrigin {
 
   CSSOrigin(this.offset, this.alignment);
 
-  static CSSOrigin parseOrigin(String origin, ElementManager elementManager) {
+  static CSSOrigin parseOrigin(String origin, Size viewportSize) {
     if (origin != null && origin.isNotEmpty) {
       List<String> originList = origin.trim().split(_spaceRegExp);
       String x, y;
@@ -948,9 +948,6 @@ class CSSOrigin {
         y = tmp;
       }
 
-      double viewportWidth = elementManager.viewportWidth;
-      double viewportHeight = elementManager.viewportHeight;
-      Size viewportSize = Size(viewportWidth, viewportHeight);
       // handle x
       if (CSSLength.isLength(x)) {
         offsetX = CSSLength.toDisplayPortValue(x, viewportSize) ?? offsetX;
@@ -1017,7 +1014,11 @@ mixin CSSTransformMixin on Node {
 
   void updateRenderTransformOrigin(RenderBoxModel renderBoxModel, String present) {
     ElementManager elementManager = renderBoxModel.elementManager;
-    CSSOrigin transformOrigin = CSSOrigin.parseOrigin(present, elementManager);
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
+    CSSOrigin transformOrigin = CSSOrigin.parseOrigin(present, viewportSize);
     if (transformOrigin == null) return;
 
     Offset oldOffset = renderBoxModel.origin;
