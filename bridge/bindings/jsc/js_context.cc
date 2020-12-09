@@ -22,7 +22,6 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
   JSClassDefinition contextDefinition = kJSClassDefinitionEmpty;
 
-  bindKraken();
   bindTimer();
 
   const JSStaticFunction functionEnd = {nullptr};
