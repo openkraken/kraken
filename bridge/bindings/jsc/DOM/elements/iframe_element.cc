@@ -11,7 +11,7 @@ namespace kraken::binding::jsc {
 std::unordered_map<JSContext *, JSIframeElement *> JSIframeElement::instanceMap {};
 
 JSIframeElement *JSIframeElement::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSIframeElement(context);
   }
   return instanceMap[context];
@@ -55,7 +55,7 @@ JSIframeElement::IframeElementInstance::getIframeElementPropertyMap() {
 
 JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getIframeElementPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case IframeProperty::kWidth:
@@ -76,7 +76,7 @@ JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name
 void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getIframeElementPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case IframeProperty::kWidth: {

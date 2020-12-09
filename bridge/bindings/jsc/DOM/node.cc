@@ -21,7 +21,7 @@ JSNode::JSNode(JSContext *context, const char *name) : JSEventTarget(context, na
 std::unordered_map<JSContext *, JSNode *> JSNode::instanceMap{};
 
 JSNode *JSNode::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSNode(context);
   }
   return instanceMap[context];
@@ -388,7 +388,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
 JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getNodePropertyMap();
 
-  if (!propertyMap.contains(name)) {
+  if (propertyMap.count(name) == 0) {
     return JSEventTarget::prototypeGetProperty(name, exception);
   }
 
@@ -414,7 +414,7 @@ JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception
 JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getNodePropertyMap();
 
-  if (!propertyMap.contains(name)) {
+  if (propertyMap.count(name) == 0) {
     return JSEventTarget::EventTargetInstance::getProperty(name, exception);
   }
 
@@ -482,7 +482,7 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
 void JSNode::NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getNodePropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     if (property == NodeProperty::kTextContent) {

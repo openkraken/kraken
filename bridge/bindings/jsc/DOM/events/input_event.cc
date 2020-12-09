@@ -15,7 +15,7 @@ void bindInputEvent(std::unique_ptr<JSContext> &context) {
 std::unordered_map<JSContext *, JSInputEvent *> JSInputEvent::instanceMap{};
 
 JSInputEvent *JSInputEvent::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSInputEvent(context);
   }
   return instanceMap[context];
@@ -75,7 +75,7 @@ InputEventInstance::InputEventInstance(JSInputEvent *jsInputEvent, JSStringRef d
 JSValueRef InputEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSInputEvent::getInputEventPropertyMap();
 
-  if (!propertyMap.contains(name)) return EventInstance::getProperty(name, exception);
+  if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
   auto property = propertyMap[name];
   if (property == JSInputEvent::InputEventProperty::kInputType) {
@@ -89,7 +89,7 @@ JSValueRef InputEventInstance::getProperty(std::string &name, JSValueRef *except
 
 void InputEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSInputEvent::getInputEventPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {

@@ -16,7 +16,7 @@ void bindImageElement(std::unique_ptr<JSContext> &context) {
 std::unordered_map<JSContext *, JSImageElement *> JSImageElement::instanceMap {};
 
 JSImageElement *JSImageElement::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSImageElement(context);
   }
   return instanceMap[context];
@@ -62,7 +62,7 @@ JSImageElement::ImageElementInstance::getImageElementPropertyMap() {
 
 JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getImageElementPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case ImageProperty::kWidth:
@@ -84,7 +84,7 @@ JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, 
 void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getImageElementPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case ImageProperty::kWidth: {

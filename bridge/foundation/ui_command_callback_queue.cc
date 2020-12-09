@@ -10,7 +10,7 @@ namespace foundation {
 UICommandCallbackQueue *UICommandCallbackQueue::instance(int32_t contextId) {
   static std::unordered_map<int32_t, UICommandCallbackQueue *> instanceMap;
 
-  if (!instanceMap.contains(contextId)) {
+  if (instanceMap.count(contextId) == 0) {
     instanceMap[contextId] = new UICommandCallbackQueue();
   }
 

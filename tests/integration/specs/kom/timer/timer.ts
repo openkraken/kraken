@@ -43,3 +43,12 @@ describe('setInterval', function() {
     });
   });
 });
+
+describe('requestAnimationFrame', () => {
+  it('async callback should have timestamp parameter', done => {
+    requestAnimationFrame((timestamp) => {
+      expect(typeof timestamp).toBe('number');
+      done();
+    });
+  });
+});

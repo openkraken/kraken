@@ -20,7 +20,7 @@ namespace {
 static std::string parseJavaScriptCSSPropertyName(std::string &propertyName) {
   static std::unordered_map<std::string, std::string> propertyCache{};
 
-  if (propertyCache.contains(propertyName)) {
+  if (propertyCache.count(propertyName) > 0) {
     return propertyCache[propertyName];
   }
 
@@ -53,7 +53,7 @@ CSSStyleDeclaration::CSSStyleDeclaration(JSContext *context) : HostClass(context
 std::unordered_map<JSContext *, CSSStyleDeclaration *> CSSStyleDeclaration::instanceMap{};
 
 CSSStyleDeclaration *CSSStyleDeclaration::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new CSSStyleDeclaration(context);
   }
   return instanceMap[context];
@@ -91,7 +91,7 @@ CSSStyleDeclaration::StyleDeclarationInstance::~StyleDeclarationInstance() {
 JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getStyleDeclarationPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case CSSStyleDeclarationProperty::kSetProperty: {
@@ -104,7 +104,7 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::strin
       return m_removeProperty.function();
     }
     }
-  } else if (properties.contains(name)) {
+  } else if (properties.count(name) > 0) {
     return JSValueMakeString(_hostClass->ctx, properties[name]);
   }
 
@@ -142,7 +142,7 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStr
   std::string &&name = JSStringToStdString(nameRef);
   name = parseJavaScriptCSSPropertyName(name);
 
-  if (!properties.contains(name)) {
+  if (properties.count(name) == 0) {
     return;
   }
 

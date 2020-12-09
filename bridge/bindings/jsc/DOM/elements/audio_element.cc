@@ -11,7 +11,7 @@ namespace kraken::binding::jsc {
 std::unordered_map<JSContext *, JSAudioElement *> JSAudioElement::instanceMap {};
 
 JSAudioElement *JSAudioElement::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSAudioElement(context);
   }
   return instanceMap[context];

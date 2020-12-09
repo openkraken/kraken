@@ -11,7 +11,7 @@ namespace kraken::binding::jsc {
 std::unordered_map<JSContext *, JSVideoElement *> JSVideoElement::instanceMap{};
 
 JSVideoElement *JSVideoElement::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSVideoElement(context);
   }
   return instanceMap[context];

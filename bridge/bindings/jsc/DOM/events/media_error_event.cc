@@ -15,7 +15,7 @@ void bindMediaErrorEvent(std::unique_ptr<JSContext> &context) {
 std::unordered_map<JSContext *, JSMediaErrorEvent *> JSMediaErrorEvent::instanceMap{};
 
 JSMediaErrorEvent *JSMediaErrorEvent::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSMediaErrorEvent(context);
   }
   return instanceMap[context];
@@ -57,7 +57,7 @@ MediaErrorEventInstance::MediaErrorEventInstance(JSMediaErrorEvent *jsMediaError
 JSValueRef MediaErrorEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSMediaErrorEvent::getMediaErrorEventPropertyMap();
 
-  if (!propertyMap.contains(name)) return EventInstance::getProperty(name, exception);
+  if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
   auto property = propertyMap[name];
 
@@ -72,7 +72,7 @@ JSValueRef MediaErrorEventInstance::getProperty(std::string &name, JSValueRef *e
 
 void MediaErrorEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSMediaErrorEvent::getMediaErrorEventPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {

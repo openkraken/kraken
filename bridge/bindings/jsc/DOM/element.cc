@@ -39,7 +39,7 @@ JSElementAttributes::getAttributePropertyMap() {
 
 JSValueRef JSElementAttributes::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getAttributePropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case AttributeProperty::kLength:
@@ -88,7 +88,7 @@ void JSElementAttributes::setAttribute(std::string &name, JSStringRef value) {
     v_attributes.emplace_back(value);
   }
 
-  if (m_attributes.contains(name)) {
+  if (m_attributes.count(name) > 0) {
     JSStringRelease(m_attributes[name]);
   }
 
@@ -103,7 +103,7 @@ bool JSElementAttributes::hasAttribute(std::string &name) {
     return v_attributes[index] != nullptr;
   }
 
-  return m_attributes.contains(name);
+  return m_attributes.count(name) > 0;
 }
 
 void JSElementAttributes::removeAttribute(std::string &name) {
@@ -120,7 +120,7 @@ std::unordered_map<JSContext *, JSElement *> JSElement::instanceMap{};
 JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
 JSElement *JSElement::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSElement(context);
   }
   return instanceMap[context];
@@ -232,7 +232,7 @@ const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::ge
 JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSElement::getElementPropertyMap();
 
-  if (!propertyMap.contains(name)) {
+  if (propertyMap.count(name) == 0) {
     return JSNode::NodeInstance::getProperty(name, exception);
   }
 
@@ -362,7 +362,7 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
 void ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSElement::getElementPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
@@ -718,7 +718,7 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
     {"img", ElementTagName::kImage}};
 
   ElementTagName tagName;
-  if (m_elementMaps.contains(name)) {
+  if (m_elementMaps.count(name) > 0) {
     tagName = m_elementMaps[name];
   } else {
     tagName = ElementTagName::kDiv;
@@ -754,7 +754,7 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
 
 JSValueRef JSElement::prototypeGetProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getElementPropertyMap();
-  if (!propertyMap.contains(name)) return JSNode::prototypeGetProperty(name, exception);
+  if (propertyMap.count(name) == 0) return JSNode::prototypeGetProperty(name, exception);
   auto property = propertyMap[name];
 
   switch (property) {
@@ -868,7 +868,7 @@ BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientR
 JSValueRef BoundingClientRect::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getPropertyMap();
 
-  if (!propertyMap.contains(name)) return nullptr;
+  if (propertyMap.count(name) == 0) return nullptr;
   auto property = propertyMap[name];
 
   switch (property) {

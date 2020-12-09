@@ -2,12 +2,14 @@ cmake_minimum_required(VERSION 3.2.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.12)
 project(KrakenBridge)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 
 list(APPEND BRIDGE_SOURCE
+    kraken_bridge.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
     foundation/logging.cc
     foundation/logging.h
     foundation/colors.h
@@ -139,24 +141,25 @@ list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h
   )
 
-add_library(bridge STATIC ${BRIDGE_SOURCE})
-add_library(kraken SHARED kraken_bridge.cc ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h)
+add_library(kraken SHARED ${BRIDGE_SOURCE})
+add_library(kraken_static STATIC ${BRIDGE_SOURCE})
 
 if (${IS_ANDROID})
   find_library(log-lib log)
   list(APPEND BRIDGE_LINK_LIBS ${log-lib})
 endif ()
 
-### bridge
-target_link_libraries(bridge PRIVATE ${BRIDGE_LINK_LIBS})
-target_include_directories(bridge PRIVATE ${BRIDGE_INCLUDE})
-target_compile_options(bridge PRIVATE -fvisibility=hidden)
-
 ### Kraken
-target_link_libraries(kraken PRIVATE bridge)
 target_include_directories(kraken PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
+target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
+
+### KrakenStatic
+target_include_directories(kraken_static PRIVATE
+        ${BRIDGE_INCLUDE}
+        ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
+target_link_libraries(kraken_static ${BRIDGE_LINK_LIBS})
 
 execute_process(
   COMMAND grep version: ./pubspec.yaml
@@ -184,8 +187,7 @@ endif ()
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
-elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
-  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_v8)
+  set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_jsc)
 endif()
 
 if (IS_ANDROID)
@@ -196,11 +198,13 @@ else ()
       PROPERTIES
       LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
       )
+    set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
   else ()
     set_target_properties(kraken
       PROPERTIES
       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib"
       )
+    set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib")
   endif ()
 endif ()
 

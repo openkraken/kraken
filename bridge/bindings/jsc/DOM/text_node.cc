@@ -17,7 +17,7 @@ void bindTextNode(std::unique_ptr<JSContext> &context) {
 std::unordered_map<JSContext *, JSTextNode *> JSTextNode::instanceMap{};
 
 JSTextNode *JSTextNode::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSTextNode(context);
   }
   return instanceMap[context];
@@ -49,7 +49,7 @@ JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringR
 JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getTextNodePropertyMap();
 
-  if (!propertyMap.contains(name)) {
+  if (propertyMap.count(name) == 0) {
     return JSNode::NodeInstance::getProperty(name, exception);
   }
 

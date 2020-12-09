@@ -53,7 +53,7 @@ std::vector<JSStringRef> &WindowInstance::getWindowPropertyNames() {
 JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getWindowPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
@@ -188,7 +188,7 @@ JSObjectRef JSWindow::instanceConstructor(JSContextRef ctx, JSObjectRef construc
 std::unordered_map<JSContext *, JSWindow *> JSWindow::instanceMap{};
 
 JSWindow *JSWindow::instance(JSContext *context) {
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSWindow(context);
   }
   return instanceMap[context];
