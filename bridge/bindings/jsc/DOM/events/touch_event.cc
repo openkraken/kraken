@@ -19,7 +19,7 @@ std::unordered_map<JSContext *, JSTouchEvent *> &JSTouchEvent::getInstanceMap() 
 
 JSTouchEvent *JSTouchEvent::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSTouchEvent(context);
   }
   return instanceMap[context];
@@ -63,7 +63,7 @@ TouchEventInstance::TouchEventInstance(JSTouchEvent *jsTouchEvent, JSStringRef d
 JSValueRef TouchEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSTouchEvent::getTouchEventPropertyMap();
 
-  if (!propertyMap.contains(name)) return EventInstance::getProperty(name, exception);
+  if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
   auto property = propertyMap[name];
 
@@ -89,7 +89,7 @@ JSValueRef TouchEventInstance::getProperty(std::string &name, JSValueRef *except
 
 void TouchEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSTouchEvent::getTouchEventPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
    return;
   } else {
     EventInstance::setProperty(name, value, exception);
@@ -175,7 +175,7 @@ JSValueRef kraken::binding::jsc::JSTouchList::getProperty(std::string &name, JSV
   if (isNumberIndex(name)) {
     size_t index = std::stoi(name);
     return m_touchList[index]->jsObject;
-  } else if (propertyMap.contains(name)) {
+  } else if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     if (property == TouchListProperty::kLength) {
@@ -219,7 +219,7 @@ JSTouch::JSTouch(JSContext *context, NativeTouch *touch) : HostObject(context, "
 JSValueRef JSTouch::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getTouchPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch(property) {

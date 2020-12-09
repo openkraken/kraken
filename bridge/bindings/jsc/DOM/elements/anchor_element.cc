@@ -17,7 +17,7 @@ std::unordered_map<JSContext *, JSAnchorElement *> & JSAnchorElement::getInstanc
 
 JSAnchorElement *JSAnchorElement::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSAnchorElement(context);
   }
   return instanceMap[context];
@@ -44,7 +44,7 @@ JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *j
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getAnchorElementPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case AnchorElementProperty::kHref:

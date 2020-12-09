@@ -21,7 +21,7 @@ std::unordered_map<JSContext *, JSCustomEvent *> &JSCustomEvent::getInstanceMap(
 
 JSCustomEvent *JSCustomEvent::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSCustomEvent(context);
   }
   return instanceMap[context];
@@ -69,7 +69,7 @@ CustomEventInstance::CustomEventInstance(JSCustomEvent *jsCustomEvent, std::stri
 JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
 
-  if (!propertyMap.contains(name)) return EventInstance::getProperty(name, exception);
+  if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
   auto property = propertyMap[name];
 
   switch (property) {
@@ -84,7 +84,7 @@ JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *excep
 
 void CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     if (property == JSCustomEvent::CustomEventProperty::kDetail) {
