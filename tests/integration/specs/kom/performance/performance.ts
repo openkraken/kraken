@@ -12,4 +12,8 @@ describe('Performance', () => {
       done();
     }, 300);
   });
+
+  it('init startTime should less than 1000', () => {
+    expect(globalThis.startTime).toBeLessThan(1000);
+  });
 });

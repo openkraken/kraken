@@ -60,8 +60,9 @@ void JSPerformance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
 
 double JSPerformance::internalNow() {
   auto now = std::chrono::system_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - context->timeOrigin);
-  return std::floor(duration.count() / 1000) * 1000;
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now - context->timeOrigin);
+  auto reducedDuration = std::floor(duration / 1000us) * 1000us;
+  return std::chrono::duration_cast<std::chrono::milliseconds>(reducedDuration).count();
 }
 
 JSValueRef JSPerformance::now(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
