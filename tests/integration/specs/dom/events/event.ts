@@ -108,6 +108,7 @@ describe('Event', () => {
     });
     div.addEventListener('click', function listener() {
       clickText = 'red';
+      div.removeEventListener('click', listener);
     });
 
     const div2 = document.createElement('div');
@@ -120,6 +121,7 @@ describe('Event', () => {
     });
     div2.addEventListener('click', function listener() {
       clickText = 'blue';
+      div2.removeEventListener('click', listener);
     });
 
     document.body.appendChild(div);
