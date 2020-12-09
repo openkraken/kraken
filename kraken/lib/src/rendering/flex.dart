@@ -262,7 +262,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       child.parentData = RenderFlexParentData();
     }
     if (child is RenderBoxModel) {
-      child.parentData = CSSPositionedLayout.getPositionParentData(child, child.style, child.parentData);
+      child.parentData = CSSPositionedLayout.getPositionParentData(child, child.parentData);
     }
   }
 

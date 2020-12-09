@@ -323,7 +323,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       child.parentData = RenderLayoutParentData();
     }
     if (child is RenderBoxModel) {
-      child.parentData = CSSPositionedLayout.getPositionParentData(child, child.style, child.parentData);
+      child.parentData = CSSPositionedLayout.getPositionParentData(child, child.parentData);
     }
   }
 

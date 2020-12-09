@@ -1548,8 +1548,7 @@ void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Elemen
   } else {
     parentData = RenderFlexParentData();
   }
-  CSSStyleDeclaration style = child.style;
 
   RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-  childRenderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(childRenderBoxModel, style, parentData);
+  childRenderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(childRenderBoxModel, parentData);
 }

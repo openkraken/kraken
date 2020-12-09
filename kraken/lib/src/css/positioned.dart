@@ -161,7 +161,8 @@ class CSSPositionedLayout {
     return CSSPositionType.static;
   }
 
-  static RenderLayoutParentData getPositionParentData(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, RenderLayoutParentData parentData) {
+  static RenderLayoutParentData getPositionParentData(RenderBoxModel renderBoxModel, RenderLayoutParentData parentData) {
+    CSSStyleDeclaration style = renderBoxModel.style;
     CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
     parentData.position = positionType;
     ElementManager elementManager = renderBoxModel.elementManager;
