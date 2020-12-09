@@ -33,9 +33,10 @@ JSObjectRef JSAnchorElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "a", false), nativeAnchorElement(new NativeAnchorElement(nativeElement)) {
   std::string tagName = "a";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeAnchorElement);
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeAnchorElement);
 }
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -61,18 +62,21 @@ void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSVa
     JSStringRetain(_href);
 
     std::string hrefString = JSStringToStdString(_href);
-    auto args = buildUICommandArgs(name, hrefString);
 
+    NativeString args_01{};
+    NativeString args_02{};
+    buildUICommandArgs(name, hrefString, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
   } else if (property == AnchorElementProperty::kTarget) {
     _target = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_target);
 
-    auto args = buildUICommandArgs(name, _target);
-
+    NativeString args_01{};
+    NativeString args_02{};
+    buildUICommandArgs(name, _target, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
   } else {
     ElementInstance::setProperty(name, value, exception);
   }

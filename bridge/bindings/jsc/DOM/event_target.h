@@ -76,7 +76,7 @@ public:
     bool dispatchEvent(EventInstance *event);
 
     ~EventTargetInstance() override;
-    int64_t eventTargetId;
+    int32_t eventTargetId;
     NativeEventTarget *nativeEventTarget {nullptr};
 
   private:

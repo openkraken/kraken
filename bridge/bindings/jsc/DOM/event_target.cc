@@ -89,7 +89,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
     foundation::Task disposeTask = [](void *data) {
       auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
       foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
-        ->registerCommand(disposeCallbackData->id, UICommand::disposeEventTarget, nullptr, 0, nullptr);
+        ->registerCommand(disposeCallbackData->id, UICommand::disposeEventTarget, nullptr);
       delete disposeCallbackData;
     };
     foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
@@ -155,7 +155,8 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
-    auto args = buildUICommandArgs(eventType);
+    NativeString args_01{};
+    buildUICommandArgs(eventType, args_01);
 
     auto EventTarget = reinterpret_cast<JSEventTarget *>(eventTargetInstance->_hostClass);
     auto isJsOnlyEvent =
@@ -163,7 +164,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
 
     if (!isJsOnlyEvent) {
       foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(
-        eventTargetInstance->eventTargetId, UICommand::addEvent, args, 1, nullptr);
+        eventTargetInstance->eventTargetId, UICommand::addEvent, args_01, nullptr);
     };
   }
   std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
@@ -380,9 +381,9 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
   if (isJsOnlyEvent) return;
 
   int32_t contextId = _hostClass->contextId;
-  auto args = buildUICommandArgs(eventType);
-  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommand::addEvent, args,
-                                                                              1, nullptr);
+  NativeString args_01{};
+  buildUICommandArgs(eventType, args_01);
+  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommand::addEvent, args_01, nullptr);
 }
 
 void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

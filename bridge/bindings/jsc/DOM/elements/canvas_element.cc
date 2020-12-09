@@ -34,10 +34,11 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
   : ElementInstance(jsCanvasElement, "canvas", false), nativeCanvasElement(new NativeCanvasElement(nativeElement)) {
 
   std::string tagName = "canvas";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
 
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeCanvasElement);
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeCanvasElement);
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
@@ -95,19 +96,27 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string widthString = std::to_string(_width) + "px";
-      auto args = buildUICommandArgs(name, widthString);
+
+      NativeString args_01{};
+      NativeString args_02{};
+
+      buildUICommandArgs(name, widthString, args_01, args_02);
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     case CanvasElementProperty::kHeight: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string heightString = std::to_string(_height) + "px";
-      auto args = buildUICommandArgs(name, heightString);
+
+      NativeString args_01{};
+      NativeString args_02{};
+
+      buildUICommandArgs(name, heightString, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     default:

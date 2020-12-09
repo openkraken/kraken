@@ -133,9 +133,12 @@ void JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValu
     _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_src);
 
-    auto args = buildUICommandArgs(name, JSStringRetain(_src));
+    NativeString args_01{};
+    NativeString args_02{};
+
+    buildUICommandArgs(name, _src, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
   }
 
   ElementInstance::setProperty(name, value, exception);
