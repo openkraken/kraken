@@ -207,14 +207,14 @@ HostClass::Instance::Instance(HostClass *hostClass)
 }
 
 JSValueRef HostClass::Instance::getProperty(std::string &name, JSValueRef *exception) {
-  if (m_propertyMap.contains(name)) {
+  if (m_propertyMap.count(name) > 0) {
     return m_propertyMap[name];
   }
   return nullptr;
 }
 
 void HostClass::Instance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  if (m_propertyMap.contains(name)) {
+  if (m_propertyMap.count(name) > 0) {
     JSValueUnprotect(ctx, m_propertyMap[name]);
   }
 

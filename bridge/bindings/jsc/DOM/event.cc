@@ -27,7 +27,7 @@ std::unordered_map<JSContext *, JSEvent *> & JSEvent::getInstanceMap() {
 
 JSEvent *JSEvent::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSEvent(context);
   }
   return instanceMap[context];
@@ -85,7 +85,7 @@ EventInstance::EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent)
 
 EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType, JSValueRef eventInitValueRef, JSValueRef *exception) : Instance(jsEvent) {
   nativeEvent = new NativeEvent(stringToNativeString(eventType));
-  auto ms = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+  auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
   nativeEvent->timeStamp = ms.count();
 
   if (eventInitValueRef != nullptr) {;
@@ -103,7 +103,7 @@ EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType, JSValueRef
 JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
 
-  if (!propertyMap.contains(name)) return Instance::getProperty(name, exception);
+  if (propertyMap.count(name) == 0) return Instance::getProperty(name, exception);
 
   auto property = propertyMap[name];
   switch (property) {
@@ -178,7 +178,7 @@ JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObj
 
 void EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     if (property == JSEvent::EventProperty::kCancelBubble) {

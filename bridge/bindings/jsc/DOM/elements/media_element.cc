@@ -14,7 +14,7 @@ std::unordered_map<JSContext *, JSMediaElement *> & JSMediaElement::getInstanceM
 
 JSMediaElement *JSMediaElement::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSMediaElement(context);
   }
   return instanceMap[context];
@@ -104,7 +104,7 @@ JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSOb
 
 JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getMediaElementPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch(property) {
 

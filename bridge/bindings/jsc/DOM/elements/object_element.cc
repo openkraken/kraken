@@ -14,7 +14,7 @@ std::unordered_map<JSContext *, JSObjectElement *> & JSObjectElement::getInstanc
 
 JSObjectElement *JSObjectElement::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSObjectElement(context);
   }
   return instanceMap[context];
@@ -62,7 +62,7 @@ JSObjectElement::ObjectElementInstance::getObjectElementPropertyMap() {
 
 JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getObjectElementPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case ObjectProperty::kType:
@@ -82,7 +82,7 @@ JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name
 void JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getObjectElementPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case ObjectProperty::kData: {

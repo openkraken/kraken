@@ -10,7 +10,7 @@ namespace kraken::binding::jsc {
 
 JSCanvasElement *JSCanvasElement::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSCanvasElement(context);
   }
   return instanceMap[context];
@@ -69,7 +69,7 @@ JSCanvasElement::CanvasElementInstance::getCanvasElementPropertyMap() {
 JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getCanvasElementPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
@@ -89,7 +89,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
 void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getCanvasElementPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
@@ -157,7 +157,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getContext(JSContextRef ctx, 
 
 CanvasRenderingContext2D *CanvasRenderingContext2D::instance(JSContext *context) {
   static std::unordered_map<JSContext *, CanvasRenderingContext2D *> instanceMap{};
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new CanvasRenderingContext2D(context);
   }
   return instanceMap[context];
@@ -208,7 +208,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
                                                                                    JSValueRef *exception) {
   auto propertyMap = getCanvasRenderingContext2DPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case CanvasRenderingContext2DProperty::kFont: {
@@ -250,7 +250,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
 void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std::string &name, JSValueRef value,
                                                                              JSValueRef *exception) {
   auto propertyMap = getCanvasRenderingContext2DPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     getDartMethod()->flushUICommand();

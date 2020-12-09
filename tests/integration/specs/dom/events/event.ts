@@ -95,4 +95,38 @@ describe('Event', () => {
     await simulateClick(10, 10);
     expect(clickCount).toBe(0);
   });
+
+  it('when the node transforms, the click event triggers the wrong node', async () => {
+    let clickText = '';
+
+    const div = document.createElement('div');
+    setElementStyle(div, {
+      position: 'absolute',
+      width: '80px',
+      height: '30px',
+      backgroundColor: 'red',
+    });
+    div.addEventListener('click', function listener() {
+      clickText = 'red';
+      div.removeEventListener('click', listener);
+    });
+
+    const div2 = document.createElement('div');
+    setElementStyle(div2, {
+      position: 'absolute',
+      width: '80px',
+      height: '30px',
+      backgroundColor: 'blue',
+      transform: 'translate3d(0px, 60px, 0px) scale(1, 1)',
+    });
+    div2.addEventListener('click', function listener() {
+      clickText = 'blue';
+      div2.removeEventListener('click', listener);
+    });
+
+    document.body.appendChild(div);
+    document.body.appendChild(div2);
+    await simulateClick(20, 20);
+    expect(clickText).toBe('red');
+  });
 });

@@ -26,7 +26,7 @@ std::unordered_map<JSContext *, JSEventTarget *> &JSEventTarget::getInstanceMap(
 
 JSEventTarget *JSEventTarget::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     const JSStaticFunction staticFunction[]{{"addEventListener", addEventListener, kJSPropertyAttributeReadOnly},
                                             {"removeEventListener", removeEventListener, kJSPropertyAttributeReadOnly},
                                             {"dispatchEvent", dispatchEvent, kJSPropertyAttributeReadOnly},
@@ -152,7 +152,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   // no one can stop element to trigger event from dart side. this can led to significant performance improvement when
   // using Front-End frameworks such as Rax, or cause some overhead performance issue when some event trigger more
   // frequently.
-  if (!eventTargetInstance->_eventHandlers.contains(eventType) ||
+  if (eventTargetInstance->_eventHandlers.count(eventType) == 0 ||
       eventTargetInstance->eventTargetId == BODY_TARGET_ID) {
     eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
@@ -179,7 +179,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
 JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getEventTargetPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
@@ -236,7 +236,7 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
   JSStringRef eventNameStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
   std::string &&eventType = JSStringToStdString(eventNameStringRef);
 
-  if (!eventTargetInstance->_eventHandlers.contains(eventType)) {
+  if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
     return nullptr;
   }
 
@@ -280,7 +280,7 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
                                             event->nativeEvent->type->length);
   std::string eventType = toUTF8(u16EventType);
 
-  if (!_eventHandlers.contains(eventType)) {
+  if (_eventHandlers.count(eventType) == 0) {
     return false;
   }
 
@@ -320,7 +320,7 @@ JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function,
 
 JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getEventTargetPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
@@ -358,7 +358,7 @@ void JSEventTarget::EventTargetInstance::setProperty(std::string &name, JSValueR
 JSValueRef JSEventTarget::EventTargetInstance::getPropertyHandler(std::string &name, JSValueRef *exception) {
   std::string eventType = name.substr(2);
 
-  if (!_eventHandlers.contains(eventType)) {
+  if (_eventHandlers.count(eventType) == 0) {
     return nullptr;
   }
   return _eventHandlers[eventType].front();
@@ -368,7 +368,7 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
                                                             JSValueRef *exception) {
   std::string eventType = name.substr(2);
 
-  if (!_eventHandlers.contains(eventType)) {
+  if (_eventHandlers.count(eventType) == 0) {
     _eventHandlers[eventType] = std::deque<JSObjectRef>();
   }
 

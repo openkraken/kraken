@@ -14,7 +14,7 @@ std::unordered_map<JSContext *, JSAudioElement *> & JSAudioElement::getInstanceM
 
 JSAudioElement *JSAudioElement::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSAudioElement(context);
   }
   return instanceMap[context];
