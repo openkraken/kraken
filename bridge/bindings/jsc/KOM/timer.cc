@@ -330,20 +330,12 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   return JSValueMakeNumber(ctx, requestId);
 }
 
-JSValueRef reloadApp(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                     const JSValueRef *arguments, JSValueRef *exception) {
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
-  getDartMethod()->reloadApp(context->getContextId());
-  return nullptr;
-}
-
 void bindTimer() {
   const JSStaticFunction _setTimeout = {"setTimeout", setTimeout, kJSPropertyAttributeNone};
   const JSStaticFunction _setInterval = {"setInterval", setInterval, kJSPropertyAttributeNone};
   const JSStaticFunction _requestAnimationFrame = {"requestAnimationFrame", requestAnimationFrame, kJSPropertyAttributeNone};
   const JSStaticFunction _clearTimeout = {"clearTimeout", clearTimeout, kJSPropertyAttributeNone};
   const JSStaticFunction _clearInterval = {"clearInterval", clearTimeout, kJSPropertyAttributeNone};
-  const JSStaticFunction _reload = {"reload", reloadApp, kJSPropertyAttributeNone};
   const JSStaticFunction _cancelAnimationFrame = {"cancelAnimationFrame", cancelAnimationFrame, kJSPropertyAttributeNone};
 
   JSContext::globalFunctions.emplace_back(_setTimeout);
@@ -351,7 +343,6 @@ void bindTimer() {
   JSContext::globalFunctions.emplace_back(_requestAnimationFrame);
   JSContext::globalFunctions.emplace_back(_clearTimeout);
   JSContext::globalFunctions.emplace_back(_clearInterval);
-  JSContext::globalFunctions.emplace_back(_reload);
   JSContext::globalFunctions.emplace_back(_cancelAnimationFrame);
 }
 
