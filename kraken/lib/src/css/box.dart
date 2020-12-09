@@ -430,30 +430,30 @@ class CSSBorderSide {
     return value.isEmpty ? defaultBorderColor : CSSColor.parseColor(value);
   }
 
-//  static EdgeInsets getBorderEdgeInsets(CSSStyleDeclaration style) {
-//    double left = 0.0;
-//    double top = 0.0;
-//    double bottom = 0.0;
-//    double right = 0.0;
-//
-//    if (style[BORDER_LEFT_STYLE].isNotEmpty && style[BORDER_LEFT_STYLE] != NONE) {
-//      left = getBorderWidth(style[BORDER_LEFT_WIDTH]) ?? defaultBorderWidth;
-//    }
-//
-//    if (style[BORDER_TOP_STYLE].isNotEmpty && style[BORDER_TOP_STYLE] != NONE) {
-//      top = getBorderWidth(style[BORDER_TOP_WIDTH]) ?? defaultBorderWidth;
-//    }
-//
-//    if (style[BORDER_RIGHT_STYLE].isNotEmpty && style[BORDER_RIGHT_STYLE] != NONE) {
-//      right = getBorderWidth(style[BORDER_RIGHT_WIDTH]) ?? defaultBorderWidth;
-//    }
-//
-//    if (style[BORDER_BOTTOM_STYLE].isNotEmpty && style[BORDER_BOTTOM_STYLE] != NONE) {
-//      bottom = getBorderWidth(style[BORDER_BOTTOM_WIDTH]) ?? defaultBorderWidth;
-//    }
-//
-//    return EdgeInsets.fromLTRB(left, top, right, bottom);
-//  }
+  static EdgeInsets getBorderEdgeInsets(CSSStyleDeclaration style, Size viewportSize) {
+    double left = 0.0;
+    double top = 0.0;
+    double bottom = 0.0;
+    double right = 0.0;
+
+    if (style[BORDER_LEFT_STYLE].isNotEmpty && style[BORDER_LEFT_STYLE] != NONE) {
+      left = getBorderWidth(style[BORDER_LEFT_WIDTH], viewportSize) ?? defaultBorderWidth;
+    }
+
+    if (style[BORDER_TOP_STYLE].isNotEmpty && style[BORDER_TOP_STYLE] != NONE) {
+      top = getBorderWidth(style[BORDER_TOP_WIDTH], viewportSize) ?? defaultBorderWidth;
+    }
+
+    if (style[BORDER_RIGHT_STYLE].isNotEmpty && style[BORDER_RIGHT_STYLE] != NONE) {
+      right = getBorderWidth(style[BORDER_RIGHT_WIDTH], viewportSize) ?? defaultBorderWidth;
+    }
+
+    if (style[BORDER_BOTTOM_STYLE].isNotEmpty && style[BORDER_BOTTOM_STYLE] != NONE) {
+      bottom = getBorderWidth(style[BORDER_BOTTOM_WIDTH], viewportSize) ?? defaultBorderWidth;
+    }
+
+    return EdgeInsets.fromLTRB(left, top, right, bottom);
+  }
 
   static BorderSide none = BorderSide(color: defaultBorderColor, width: 0.0, style: BorderStyle.none);
 
