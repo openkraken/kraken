@@ -249,7 +249,7 @@ void flushBridgeTask() {
   foundation::UITaskMessageQueue::instance()->flushTaskFromUIThread();
 }
 
-UICommandItem **getUICommandItems(int32_t contextId) {
+UICommandItem *getUICommandItems(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->data();
 }
 

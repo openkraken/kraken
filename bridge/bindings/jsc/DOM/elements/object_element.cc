@@ -31,10 +31,11 @@ JSObjectRef JSObjectElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 JSObjectElement::ObjectElementInstance::ObjectElementInstance(JSObjectElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "object", false), nativeObjectElement(new NativeObjectElement(nativeElement)) {
   std::string tagName = "object";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
 
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeObjectElement);
+      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeObjectElement);
 }
 
 std::vector<JSStringRef> &JSObjectElement::ObjectElementInstance::getObjectElementPropertyNames() {
@@ -63,11 +64,11 @@ JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name
     switch (property) {
     case ObjectProperty::kType:
     case ObjectProperty::kCurrentType: {
-      return JSValueMakeString(_hostClass->ctx, _type);
+      return m_type.makeString();
     }
     case ObjectProperty::kData:
     case ObjectProperty::kCurrentData: {
-      return JSValueMakeString(_hostClass->ctx, _data);
+      return m_data.makeString();
     }
     }
   }
@@ -82,21 +83,28 @@ void JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSVa
     auto property = propertyMap[name];
     switch (property) {
     case ObjectProperty::kData: {
-      _data = JSValueToStringCopy(_hostClass->ctx, value, exception);
-      JSStringRetain(_data);
+      JSStringRef dataStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
 
-      auto args = buildUICommandArgs(name, JSStringRetain(_data));
+      m_data.setString(dataStringRef);
+
+      NativeString args_01{};
+      NativeString args_02{};
+
+      buildUICommandArgs(name, dataStringRef, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     case ObjectProperty::kType: {
-      _type = JSValueToStringCopy(_hostClass->ctx, value, exception);
-      JSStringRetain(_type);
+      JSStringRef typeStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_type.setString(typeStringRef);
 
-      auto args = buildUICommandArgs(name, JSStringRetain(_type));
+      NativeString args_01{};
+      NativeString args_02{};
+
+      buildUICommandArgs(name, typeStringRef, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     default:

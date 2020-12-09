@@ -35,10 +35,11 @@ JSObjectRef JSImageElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 JSImageElement::ImageElementInstance::ImageElementInstance(JSImageElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "img", false), nativeImageElement(new NativeImageElement(nativeElement)) {
   std::string tagName = "img";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
 
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeImageElement);
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeImageElement);
 }
 
 std::vector<JSStringRef> &JSImageElement::ImageElementInstance::getImageElementPropertyNames() {
@@ -91,36 +92,47 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
       double width = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string widthString = std::to_string(width) + "px";
-      auto args = buildUICommandArgs(name, widthString);
+      NativeString args_01{};
+      NativeString args_02{};
+
+      buildUICommandArgs(name, widthString, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     case ImageProperty::kHeight: {
       double height = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string heightString = std::to_string(height) + "px";
-      auto args = buildUICommandArgs(name, heightString);
+
+      NativeString args_01{};
+      NativeString args_02{};
+
+      buildUICommandArgs(name, heightString, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     case ImageProperty::kSrc: {
       JSStringRef src = JSValueToStringCopy(_hostClass->ctx, value, exception);
       m_src.setString(src);
 
-      auto args = buildUICommandArgs(name, JSStringRetain(src));
+      NativeString args_01{};
+      NativeString args_02{};
+      buildUICommandArgs(name, src, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     case ImageProperty::kLoading: {
       JSStringRef loading = JSValueToStringCopy(_hostClass->ctx, value, exception);
       m_loading.setString(loading);
 
-      auto args = buildUICommandArgs(name, JSStringRetain(loading));
+      NativeString args_01{};
+      NativeString args_02{};
+      buildUICommandArgs(name, loading, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     default:

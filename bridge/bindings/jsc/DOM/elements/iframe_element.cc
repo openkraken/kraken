@@ -31,9 +31,10 @@ JSIframeElement::IframeElementInstance::IframeElementInstance(JSIframeElement *j
   : ElementInstance(jsAnchorElement, "iframe", false), nativeIframeElement(new NativeIframeElement(nativeElement)) {
   std::string tagName = "iframe";
 
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeIframeElement);
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeIframeElement);
 }
 
 std::vector<JSStringRef> &JSIframeElement::IframeElementInstance::getIframeElementPropertyNames() {
@@ -83,10 +84,12 @@ void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSVa
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string widthString = std::to_string(_width);
+      NativeString args_01{};
+      NativeString args_02{};
 
-      auto args = buildUICommandArgs(name, widthString);
+      buildUICommandArgs(name, widthString, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     case IframeProperty::kHeight: {
@@ -94,9 +97,11 @@ void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSVa
 
       std::string heightString = std::to_string(_height);
 
-      auto args = buildUICommandArgs(name, heightString);
+      NativeString args_01{};
+      NativeString args_02{};
+      buildUICommandArgs(name, heightString, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     default:

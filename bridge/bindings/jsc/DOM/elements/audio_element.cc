@@ -32,9 +32,10 @@ JSObjectRef JSAudioElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 JSAudioElement::AudioElementInstance::AudioElementInstance(JSAudioElement *jsAudioElement)
   : MediaElementInstance(jsAudioElement, "audio"), nativeAudioElement(new NativeAudioElement(nativeMediaElement)) {
   std::string tagName = "audio";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeAudioElement);
+      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeAudioElement);
 }
 
 JSAudioElement::AudioElementInstance::~AudioElementInstance() {
