@@ -21,7 +21,7 @@ std::unordered_map<JSContext *, JSMessageEvent *> JSMessageEvent::getInstanceMap
 
 JSMessageEvent *JSMessageEvent::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSMessageEvent(context);
   }
   return instanceMap[context];
@@ -64,7 +64,7 @@ MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, JSStr
 JSValueRef MessageEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSMessageEvent::getMessageEventPropertyMap();
 
-  if (!propertyMap.contains(name)) return EventInstance::getProperty(name, exception);
+  if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
   auto property = propertyMap[name];
 
@@ -80,7 +80,7 @@ JSValueRef MessageEventInstance::getProperty(std::string &name, JSValueRef *exce
 
 void MessageEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSMessageEvent::getMessageEventPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch(property) {

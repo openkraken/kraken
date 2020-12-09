@@ -14,7 +14,7 @@ std::unordered_map<JSContext *, JSAnimationPlayerElement *> &JSAnimationPlayerEl
 
 JSAnimationPlayerElement *JSAnimationPlayerElement::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSAnimationPlayerElement(context);
   }
   return instanceMap[context];
@@ -99,7 +99,7 @@ const std::unordered_map<std::string, JSAnimationPlayerElement::AnimationPlayerE
 JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty(std::string &name,
                                                                                  JSValueRef *exception) {
   auto propertyMap = getAnimationPlayerElementPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case AnimationPlayerProperty::kSrc:

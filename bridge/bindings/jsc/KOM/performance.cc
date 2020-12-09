@@ -13,7 +13,7 @@ using namespace std::chrono;
 JSValueRef JSPerformance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getPerformancePropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {

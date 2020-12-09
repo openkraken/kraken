@@ -19,7 +19,7 @@ std::unordered_map<JSContext *, JSCloseEvent *> & JSCloseEvent::getInstanceMap()
 
 JSCloseEvent *JSCloseEvent::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSCloseEvent(context);
   }
   return instanceMap[context];
@@ -82,7 +82,7 @@ CloseEventInstance::CloseEventInstance(JSCloseEvent *jsCloseEvent, JSStringRef d
 JSValueRef CloseEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSCloseEvent::getCloseEventPropertyMap();
 
-  if (!propertyMap.contains(name)) return EventInstance::getProperty(name, exception);
+  if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
   auto property = propertyMap[name];
   switch(property) {
@@ -99,7 +99,7 @@ JSValueRef CloseEventInstance::getProperty(std::string &name, JSValueRef *except
 
 void CloseEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSCloseEvent::getCloseEventPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {

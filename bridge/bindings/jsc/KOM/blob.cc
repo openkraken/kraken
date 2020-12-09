@@ -87,7 +87,7 @@ std::unordered_map<JSContext *, JSBlob *> & JSBlob::getInstanceMap() {
 
 JSBlob *JSBlob::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSBlob(context);
   }
   return instanceMap[context];
@@ -259,7 +259,7 @@ int32_t JSBlob::BlobInstance::size() {
 JSValueRef JSBlob::BlobInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getBlobPropertyMap();
 
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
     case kArrayBuffer:

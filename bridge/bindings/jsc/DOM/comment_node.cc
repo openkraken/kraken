@@ -21,7 +21,7 @@ std::unordered_map<JSContext *, JSCommentNode *> & JSCommentNode::getInstanceMap
 
 JSCommentNode *JSCommentNode::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSCommentNode(context);
   }
   return instanceMap[context];
@@ -64,7 +64,7 @@ void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueR
 JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getPropertyMap();
 
-  if (!propertyMap.contains(name)) return NodeInstance::getProperty(name, exception);
+  if (propertyMap.count(name) == 0) return NodeInstance::getProperty(name, exception);
 
   CommentProperty property = propertyMap[name];
 

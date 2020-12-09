@@ -14,7 +14,7 @@ std::unordered_map<JSContext *, JSVideoElement *> &JSVideoElement::getInstanceMa
 
 JSVideoElement *JSVideoElement::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSVideoElement(context);
   }
   return instanceMap[context];

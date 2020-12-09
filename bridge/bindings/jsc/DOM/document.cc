@@ -27,7 +27,7 @@ std::unordered_map<JSContext *, JSDocument *> &JSDocument::getInstanceMap() {
 
 JSDocument *JSDocument::instance(JSContext *context) {
   auto instanceMap = getInstanceMap();
-  if (!instanceMap.contains(context)) {
+  if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSDocument(context);
   }
   return instanceMap[context];
@@ -160,7 +160,7 @@ DocumentInstance::DocumentInstance(JSDocument *document)
 
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getDocumentPropertyMap();
-  if (!propertyMap.contains(name)) {
+  if (propertyMap.count(name) == 0) {
     return JSNode::NodeInstance::getProperty(name, exception);
   }
 
@@ -249,14 +249,14 @@ const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &Docum
 }
 
 void DocumentInstance::removeElementById(std::string &id, ElementInstance *element) {
-  if (elementMapById.contains(id)) {
+  if (elementMapById.count(id) > 0) {
     auto &list = elementMapById[id];
     list.erase(std::find(list.begin(), list.end(), element));
   }
 }
 
 void DocumentInstance::addElementById(std::string &id, ElementInstance *element) {
-  if (!elementMapById.contains(id)) {
+  if (elementMapById.count(id) == 0) {
     elementMapById[id] = std::vector<ElementInstance *>();
   }
 
@@ -283,7 +283,7 @@ JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef functi
   if (id.empty()) return nullptr;
 
   auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(function));
-  if (!document->elementMapById.contains(id)) {
+  if (document->elementMapById.count(id) == 0) {
     return nullptr;
   }
 
@@ -337,7 +337,7 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
 
 void DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getDocumentPropertyMap();
-  if (propertyMap.contains(name)) {
+  if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     if (property == DocumentProperty::kCookie) {

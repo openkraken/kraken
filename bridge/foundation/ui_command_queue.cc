@@ -22,7 +22,7 @@ void UICommandTaskMessageQueue::registerCommand(int64_t id, int32_t type, Native
 UICommandTaskMessageQueue *UICommandTaskMessageQueue::instance(int32_t contextId) {
   static std::unordered_map<int32_t, UICommandTaskMessageQueue*> instanceMap;
 
-  if (!instanceMap.contains(contextId)) {
+  if (instanceMap.count(contextId) == 0) {
     instanceMap[contextId] = new UICommandTaskMessageQueue(contextId);
   }
 
