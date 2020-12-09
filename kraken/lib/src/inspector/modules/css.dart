@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:meta/meta.dart';
@@ -76,6 +77,9 @@ class InspectCSSModule extends InspectModule {
   void handleSetStyleTexts(int id, Map<String, dynamic> params) {
     List edits = params['edits'];
     List<CSSStyle> styles = [];
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     for (Map<String, dynamic> edit in edits) {
       // Use styleSheetId to identity element.
@@ -90,7 +94,7 @@ class InspectCSSModule extends InspectModule {
           if (_kv.length == 2) {
             String name = _kv[0].trim();
             String value = _kv[1].trim();
-            element.style.setProperty(camelize(name), value);
+            element.style.setProperty(camelize(name), value, viewportSize);
           }
         }
         styles.add(buildInlineStyle(element.style));
@@ -144,13 +148,18 @@ class InspectCSSModule extends InspectModule {
   static List<CSSComputedStyleProperty> buildComputedStyle(Element element) {
     List<CSSComputedStyleProperty> computedStyle = [];
     CSSStyleDeclaration style = element.style;
+    ElementManager elementManager = element.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     for (int i = 0; i < style.length; i++) {
       String propertyName = style.item(i);
       String propertyValue = style.getPropertyValue(propertyName);
       propertyName = kebabize(propertyName);
 
       if (CSSLength.isLength(propertyValue)) {
-        double len = CSSLength.toDisplayPortValue(propertyValue);
+        double len = CSSLength.toDisplayPortValue(propertyValue, viewportSize);
         propertyValue = len == 0 ? '0' : '${len}px';
       }
 

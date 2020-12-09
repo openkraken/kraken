@@ -323,7 +323,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       child.parentData = RenderLayoutParentData();
     }
     if (child is RenderBoxModel) {
-      child.parentData = CSSPositionedLayout.getPositionParentData(child.style, child.parentData);
+      child.parentData = CSSPositionedLayout.getPositionParentData(child, child.style, child.parentData);
     }
   }
 
@@ -486,7 +486,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   double _getCrossAxisExtent(RenderBox child) {
     CSSStyleDeclaration childStyle = _getChildStyle(child);
-    double lineHeight = CSSText.getLineHeight(childStyle);
+    double lineHeight = CSSText.getLineHeight(childStyle, elementManager);
     double marginVertical = 0;
     double marginHorizontal = 0;
 
@@ -739,7 +739,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         Size childSize = _getChildSize(child);
         CSSStyleDeclaration childStyle = _getChildStyle(child);
-        double lineHeight = CSSText.getLineHeight(childStyle);
+        double lineHeight = CSSText.getLineHeight(childStyle, elementManager);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (lineHeight != null) {
@@ -908,7 +908,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
-      double lineBoxHeight = CSSText.getLineHeight(style);
+      double lineBoxHeight = CSSText.getLineHeight(style, elementManager);
       if (lineBoxHeight != null) {
         lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
       }
@@ -959,7 +959,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         Size childSize = _getChildSize(child);
         // Line height of child
-        double childLineHeight = CSSText.getLineHeight(childStyle);
+        double childLineHeight = CSSText.getLineHeight(childStyle, elementManager);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (childLineHeight != null) {

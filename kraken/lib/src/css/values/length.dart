@@ -58,17 +58,20 @@ class CSSLength {
     return value == AUTO;
   }
 
-  static double parseLength(String unitedValue) {
-    return toDisplayPortValue(unitedValue);
+  static double parseLength(String unitedValue, Size viewportSize) {
+    return toDisplayPortValue(unitedValue, viewportSize);
   }
 
-  static double toDisplayPortValue(String unitedValue) {
+  static double toDisplayPortValue(String unitedValue, Size viewportSize) {
     if (unitedValue == null || unitedValue.isEmpty) return null;
 
     unitedValue = unitedValue.trim();
     if (unitedValue == INITIAL) return null;
 
     double displayPortValue;
+    double viewportWidth = viewportSize.width;
+    double viewportHeight = viewportSize.height;
+
     // Only '0' is accepted with no unit.
     if (unitedValue == ZERO) {
       return 0;
@@ -84,11 +87,11 @@ class CSSLength {
           break;
         case VW:
           double currentValue = double.parse(unitedValue.split(VW)[0]);
-          displayPortValue = currentValue / 100.0 * window.physicalSize.width / window.devicePixelRatio;
+          displayPortValue = currentValue / 100.0 * viewportWidth;
           break;
         case VH:
           double currentValue = double.parse(unitedValue.split(VH)[0]);
-          displayPortValue = currentValue / 100.0 * window.physicalSize.height / window.devicePixelRatio;
+          displayPortValue = currentValue / 100.0 * viewportHeight;
           break;
         case IN:
           displayPortValue = double.tryParse(unitedValue.split(IN)[0]) * _1in;

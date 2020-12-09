@@ -6,6 +6,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
@@ -136,13 +137,13 @@ mixin CSSFilterEffectsMixin {
   }
 
   // Get the image filter.
-  static ImageFilter _parseImageFilters(List<CSSFunctionalNotation> functions) {
+  static ImageFilter _parseImageFilters(List<CSSFunctionalNotation> functions, Size viewportSize) {
     if (functions != null && functions.length > 0) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {
           case BLUR:
-            double amount = CSSLength.parseLength(f.args.first);
+            double amount = CSSLength.parseLength(f.args.first, viewportSize);
             return ImageFilter.blur(sigmaX: amount, sigmaY: amount);
         }
       }
@@ -158,7 +159,11 @@ mixin CSSFilterEffectsMixin {
       renderBoxModel.colorFilter = colorFilter;
     }
 
-    ImageFilter imageFilter = _parseImageFilters(functions);
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+    ImageFilter imageFilter = _parseImageFilters(functions, viewportSize);
     if (imageFilter != null) {
       renderBoxModel.imageFilter = imageFilter;
     }

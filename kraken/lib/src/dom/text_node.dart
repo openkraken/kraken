@@ -95,7 +95,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     // parentNode must be an element.
     Element parentElement = parent;
     _renderTextBox.style = parentElement.style;
-    _renderTextBox.text = createTextSpan(data, parentElement.style);
+    _renderTextBox.text = createTextSpan(data, parentElement.style, elementManager);
     _setTextNodeProperties(parentElement.style);
 
     RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
@@ -137,7 +137,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     createRenderer();
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
-    _renderTextBox.text = createTextSpan(data, parent.style);
+    _renderTextBox.text = createTextSpan(data, parent.style, elementManager);
     // TextNode's style is inherited from parent style
     _renderTextBox.style = parent.style;
 
@@ -150,7 +150,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
       return renderer;
     }
 
-    InlineSpan text = createTextSpan(_data, null);
+    InlineSpan text = createTextSpan(_data, null, elementManager);
     _renderTextBox = RenderTextBox(text,
       targetId: targetId,
       style: null,

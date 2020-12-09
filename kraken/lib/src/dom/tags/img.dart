@@ -313,6 +313,9 @@ class ImageElement extends Element {
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     if (key == 'src') {
       _setImage(value);
@@ -324,14 +327,14 @@ class ImageElement extends Element {
         value += 'px';
       }
 
-      _propertyWidth = CSSLength.toDisplayPortValue(value);
+      _propertyWidth = CSSLength.toDisplayPortValue(value, viewportSize);
       _resize();
     } else if (key == HEIGHT) {
       if (value is String && _isNumber(value)) {
         value += 'px';
       }
 
-      _propertyHeight = CSSLength.toDisplayPortValue(value);
+      _propertyHeight = CSSLength.toDisplayPortValue(value, viewportSize);
       _resize();
     }
   }

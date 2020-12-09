@@ -34,7 +34,7 @@ class RenderIntrinsic extends RenderBoxModel
     if (child.parentData is! RenderLayoutParentData) {
       if (child is RenderBoxModel) {
         RenderLayoutParentData parentData = RenderLayoutParentData();
-        child.parentData = CSSPositionedLayout.getPositionParentData(child.style, parentData);;
+        child.parentData = CSSPositionedLayout.getPositionParentData(child, child.style, parentData);;
       } else {
         child.parentData = RenderLayoutParentData();
       }

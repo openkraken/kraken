@@ -34,7 +34,12 @@ mixin CSSSizingMixin {
 
   void updateRenderSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
     assert(renderBoxModel != null, 'RenderBoxModel should not be null');
-    double value = CSSLength.toDisplayPortValue(present);
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
+    double value = CSSLength.toDisplayPortValue(present, viewportSize);
 
     switch (property) {
       case WIDTH:
@@ -104,16 +109,20 @@ mixin CSSSizingMixin {
     return maxHeight;
   }
 
-  static EdgeInsets _getMargin(CSSStyleDeclaration style) {
+  static EdgeInsets _getMargin(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
     double marginLeft;
     double marginTop;
     double marginRight;
     double marginBottom;
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
 
-    if (style.contains(MARGIN_LEFT)) marginLeft = CSSLength.toDisplayPortValue(style[MARGIN_LEFT]);
-    if (style.contains(MARGIN_TOP)) marginTop = CSSLength.toDisplayPortValue(style[MARGIN_TOP]);
-    if (style.contains(MARGIN_RIGHT)) marginRight = CSSLength.toDisplayPortValue(style[MARGIN_RIGHT]);
-    if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSLength.toDisplayPortValue(style[MARGIN_BOTTOM]);
+    if (style.contains(MARGIN_LEFT)) marginLeft = CSSLength.toDisplayPortValue(style[MARGIN_LEFT], viewportSize);
+    if (style.contains(MARGIN_TOP)) marginTop = CSSLength.toDisplayPortValue(style[MARGIN_TOP], viewportSize);
+    if (style.contains(MARGIN_RIGHT)) marginRight = CSSLength.toDisplayPortValue(style[MARGIN_RIGHT], viewportSize);
+    if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSLength.toDisplayPortValue(style[MARGIN_BOTTOM], viewportSize);
 
     return EdgeInsets.only(top: marginTop ?? 0.0, right: marginRight ?? 0.0, bottom: marginBottom ?? 0.0, left: marginLeft ?? 0.0);
   }
@@ -127,8 +136,12 @@ mixin CSSSizingMixin {
       double top = prevMargin.top;
       double right = prevMargin.right;
       double bottom = prevMargin.bottom;
+      ElementManager elementManager = renderBoxModel.elementManager;
+      double viewportWidth = elementManager.viewportWidth;
+      double viewportHeight = elementManager.viewportHeight;
+      Size viewportSize = Size(viewportWidth, viewportHeight);
 
-      double presentValue = CSSLength.toDisplayPortValue(present) ?? 0;
+      double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
 
       // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
       switch (property) {
@@ -153,20 +166,24 @@ mixin CSSSizingMixin {
         bottom: bottom,
       );
     } else {
-      renderBoxModel.margin = _getMargin(style);
+      renderBoxModel.margin = _getMargin(renderBoxModel, style);
     }
   }
 
-  static EdgeInsets _getPadding(CSSStyleDeclaration style) {
+  static EdgeInsets _getPadding(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
     double paddingTop;
     double paddingRight;
     double paddingBottom;
     double paddingLeft;
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
 
-    if (style.contains(PADDING_TOP)) paddingTop = CSSLength.toDisplayPortValue(style[PADDING_TOP]);
-    if (style.contains(PADDING_RIGHT)) paddingRight = CSSLength.toDisplayPortValue(style[PADDING_RIGHT]);
-    if (style.contains(PADDING_BOTTOM)) paddingBottom = CSSLength.toDisplayPortValue(style[PADDING_BOTTOM]);
-    if (style.contains(PADDING_LEFT)) paddingLeft = CSSLength.toDisplayPortValue(style[PADDING_LEFT]);
+    if (style.contains(PADDING_TOP)) paddingTop = CSSLength.toDisplayPortValue(style[PADDING_TOP], viewportSize);
+    if (style.contains(PADDING_RIGHT)) paddingRight = CSSLength.toDisplayPortValue(style[PADDING_RIGHT], viewportSize);
+    if (style.contains(PADDING_BOTTOM)) paddingBottom = CSSLength.toDisplayPortValue(style[PADDING_BOTTOM], viewportSize);
+    if (style.contains(PADDING_LEFT)) paddingLeft = CSSLength.toDisplayPortValue(style[PADDING_LEFT], viewportSize);
 
     return EdgeInsets.only(
       top: paddingTop ?? 0.0,
@@ -184,8 +201,12 @@ mixin CSSSizingMixin {
       double top = prevPadding.top;
       double right = prevPadding.right;
       double bottom = prevPadding.bottom;
+      ElementManager elementManager = renderBoxModel.elementManager;
+      double viewportWidth = elementManager.viewportWidth;
+      double viewportHeight = elementManager.viewportHeight;
+      Size viewportSize = Size(viewportWidth, viewportHeight);
 
-      double presentValue = CSSLength.toDisplayPortValue(present) ?? 0;
+      double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
 
       // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
       switch (property) {
@@ -205,7 +226,7 @@ mixin CSSSizingMixin {
 
       renderBoxModel.padding = EdgeInsets.only(left: left, right: right, bottom: bottom, top: top);
     } else {
-      renderBoxModel.padding = _getPadding(style);
+      renderBoxModel.padding = _getPadding(renderBoxModel, style);
     }
   }
 }
