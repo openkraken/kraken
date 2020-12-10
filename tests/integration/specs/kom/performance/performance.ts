@@ -1,3 +1,5 @@
+const startTime = performance.now();
+
 describe('Performance', () => {
   it('timeOrigin', () => {
     expect(typeof performance.timeOrigin).toEqual('number');
@@ -14,6 +16,6 @@ describe('Performance', () => {
   });
 
   it('init startTime should less than 1000', () => {
-    expect(globalThis.startTime).toBeLessThan(1000);
+    expect(startTime).toBeLessThan(1000);
   });
 });

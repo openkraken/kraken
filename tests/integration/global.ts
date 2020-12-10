@@ -189,5 +189,3 @@ async function matchViewportSnapshot(wait: number = 0.0) {
 async function matchElementImageSnapshot(element: HTMLElement) {
   return await expectAsync(element.toBlob(1.0)).toMatchImageSnapshot();
 }
-
-globalThis.startTime = performance.now();
