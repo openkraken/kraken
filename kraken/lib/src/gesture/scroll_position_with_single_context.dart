@@ -80,6 +80,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     return super.setPixels(newPixels);
   }
 
+  double getPixels() {
+    return pixels;
+  }
+
   @override
   void absorb(ScrollPosition other) {
     super.absorb(other);

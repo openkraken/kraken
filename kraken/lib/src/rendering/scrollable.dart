@@ -60,10 +60,11 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
       switch (axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-              () => VerticalDragGestureRecognizer(),
-              (VerticalDragGestureRecognizer instance) {
+            KrakenVerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<KrakenVerticalDragGestureRecognizer>(
+              () => KrakenVerticalDragGestureRecognizer(),
+              (KrakenVerticalDragGestureRecognizer instance) {
                 instance
+                  ..isAcceptedDrag = _isAcceptedDrag
                   ..onDown = _handleDragDown
                   ..onStart = _handleDragStart
                   ..onUpdate = _handleDragUpdate
@@ -101,6 +102,10 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     _lastCanDrag = canDrag;
     _lastAxisDirection = axis;
     _syncAll(_gestureRecognizers);
+  }
+
+  bool _isAcceptedDrag () {
+    return (_drag as ScrollDragController).getAxisDirection() != AxisDirection.down && (_drag as ScrollDragController).getPixels() == 0.0;
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {
