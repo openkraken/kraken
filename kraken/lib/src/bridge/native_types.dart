@@ -265,12 +265,17 @@ class NativeIframeElement extends Struct {
 
 typedef GetImageWidth = Double Function(Pointer<NativeImgElement> nativePtr);
 typedef GetImageHeight = Double Function(Pointer<NativeImgElement> nativePtr);
+typedef GetImageNaturalWidth = Double Function(Pointer<NativeImgElement> nativePtr);
+typedef GetImageNaturalHeight = Double Function(Pointer<NativeImgElement> nativePtr);
 
 class NativeImgElement extends Struct {
   Pointer<NativeElement> nativeElement;
 
   Pointer<NativeFunction<GetImageWidth>> getImageWidth;
   Pointer<NativeFunction<GetImageHeight>> getImageHeight;
+
+  Pointer<NativeFunction<GetImageNaturalWidth>> getImageNaturalWidth;
+  Pointer<NativeFunction<GetImageNaturalHeight>> getImageNaturalHeight;
 }
 
 class NativeObjectElement extends Struct {
