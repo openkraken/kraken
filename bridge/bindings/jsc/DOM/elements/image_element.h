@@ -26,6 +26,7 @@ public:
   public:
     enum class ImageProperty {
       kWidth, kHeight,
+      kNaturalWidth, kNaturalHeight,
       kSrc,
       kLoading
     };
@@ -54,6 +55,8 @@ protected:
 
 using GetImageWidth = double(*)(NativeImageElement *nativeImageElement);
 using GetImageHeight = double(*)(NativeImageElement *nativeImageElement);
+using GetImageNaturalWidth = double(*)(NativeImageElement *nativeImageElement);
+using GetImageNaturalHeight = double(*)(NativeImageElement *nativeImageElement);
 
 struct NativeImageElement {
   NativeImageElement() = delete;
@@ -63,6 +66,8 @@ struct NativeImageElement {
 
   GetImageWidth getImageWidth;
   GetImageHeight getImageHeight;
+  GetImageNaturalWidth getImageNaturalWidth;
+  GetImageNaturalHeight getImageNaturalHeight;
 };
 
 } // namespace kraken::binding::jsc

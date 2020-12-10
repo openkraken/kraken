@@ -97,7 +97,7 @@ class Element extends Node
     return element;
   }
 
-  Map<String, dynamic> properties = Map<String, dynamic>();
+  final Map<String, dynamic> properties = Map<String, dynamic>();
 
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
@@ -467,6 +467,13 @@ class Element extends Node
       for (Element child in parent.children) {
         child._updateFlexItemStyle();
       }
+    }
+
+    /// Recalculate gradient after node attached when gradient length cannot be obtained from style
+    if (renderBoxModel.recalGradient) {
+      String backgroundImage = style[BACKGROUND_IMAGE];
+      updateRenderDecoratedBox(renderBoxModel, style, BACKGROUND_IMAGE, backgroundImage, backgroundImage);
+      renderBoxModel.recalGradient = false;
     }
 
     didAttachRenderer();

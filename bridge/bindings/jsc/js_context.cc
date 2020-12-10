@@ -4,8 +4,9 @@
  */
 
 #include "js_context.h"
-#include "bindings/jsc/KOM/window.h"
 #include "bindings/jsc/macros.h"
+#include "bindings/jsc/KOM/timer.h"
+#include "bindings/jsc/kraken.h"
 #include "dart_methods.h"
 #include <memory>
 #include <mutex>
@@ -13,12 +14,32 @@
 
 namespace kraken::binding::jsc {
 
+std::vector<JSStaticFunction> JSContext::globalFunctions{};
+std::vector<JSStaticValue> JSContext::globalValue{};
+
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false) {
 
-  ctx_ = JSGlobalContextCreateInGroup(nullptr, nullptr);
+  JSClassDefinition contextDefinition = kJSClassDefinitionEmpty;
+
+  bindTimer();
+
+  const JSStaticFunction functionEnd = {nullptr};
+  const JSStaticValue valueEnd = {nullptr};
+
+  globalFunctions.emplace_back(functionEnd);
+  globalValue.emplace_back(valueEnd);
+
+  contextDefinition.staticFunctions = globalFunctions.data();
+  contextDefinition.staticValues = globalValue.data();
+
+  JSClassRef contextClass = JSClassCreate(&contextDefinition);
+
+  ctx_ = JSGlobalContextCreateInGroup(nullptr, contextClass);
 
   JSObjectRef global = JSContextGetGlobalObject(ctx_);
+  JSObjectSetPrivate(global, this);
+
   JSStringRef windowName = JSStringCreateWithUTF8CString("window");
   JSStringRef globalThis = JSStringCreateWithUTF8CString("globalThis");
   JSObjectSetProperty(ctx_, global, windowName, global, kJSPropertyAttributeNone, nullptr);
@@ -118,7 +139,7 @@ std::string JSStringToStdString(JSStringRef jsString) {
 }
 
 JSObjectRef makeObjectFunctionWithPrivateData(JSContext *context, void *data, const char *name,
-                                    JSObjectCallAsFunctionCallback callback) {
+                                              JSObjectCallAsFunctionCallback callback) {
   JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;
   functionDefinition.className = name;
   functionDefinition.callAsFunction = callback;
@@ -269,7 +290,7 @@ bool JSStringHolder::empty() {
   return size() == 0;
 }
 
-JSValueHolder::JSValueHolder(JSContext *context, JSValueRef value): m_value(value), m_context(context) {
+JSValueHolder::JSValueHolder(JSContext *context, JSValueRef value) : m_value(value), m_context(context) {
   if (m_value != nullptr) {
     JSValueProtect(context->context(), m_value);
   }

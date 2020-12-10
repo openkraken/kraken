@@ -18,6 +18,7 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #ifndef __has_builtin
 #define __has_builtin(x) 0
@@ -98,6 +99,9 @@ static inline bool isNumberIndex(std::string &name) {
 
 class JSContext {
 public:
+  static std::vector<JSStaticFunction> globalFunctions;
+  static std::vector<JSStaticValue> globalValue;
+
   JSContext() = delete;
   JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
   ~JSContext();

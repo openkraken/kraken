@@ -33,7 +33,8 @@ describe('Offset api', () => {
     ];
 
     const div = document.createElement('div');
-    div.style.width = div.style.height = '200px';
+    div.style.width = '150px';
+    div.style.height = '120px';
     div.style.backgroundColor = 'red';
 
     document.body.appendChild(div);

@@ -126,7 +126,7 @@ describe('Tags img', () => {
     img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAIAAAC0tAIdAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAACJJREFUKFNjZGD4z0AKAKomHpGgFOQK4g0eVY01rEZCCAIAC+rSL3tdVQUAAAAASUVORK5CYII=';
     document.body.appendChild(img);
     await matchViewportSnapshot(0.2);
-  })
+  });
 
   it('minwidth and minheight of image is 0', async () => {
     var img = document.createElement('img');
@@ -136,5 +136,29 @@ describe('Tags img', () => {
     img.style.display = 'inline';
     document.body.appendChild(img);
     await matchViewportSnapshot(0.2);
-  })
+  });
+
+  it('image size and image natural size', (done) => {
+    var imageURL = 'https://img.alicdn.com/tfs/TB1RRzFeKL2gK0jSZFmXXc7iXXa-200-200.png?network';
+    var img = document.createElement('img');
+    img.onload = function() {
+      expect(img.naturalWidth).toEqual(200);
+      expect(img.naturalWidth).toEqual(200);
+      done();
+    };
+    img.src = imageURL;
+    Object.assign(img.style, {
+      width: '20px',
+      height: '20px',
+    });
+
+    document.body.style.background = 'green';
+    document.body.appendChild(img);
+
+    expect(img.width).toEqual(20);
+    expect(img.height).toEqual(20);
+    // Image has not been loaded.
+    expect(img.naturalWidth).toEqual(0);
+    expect(img.naturalWidth).toEqual(0);
+  });
 });
