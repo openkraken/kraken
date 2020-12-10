@@ -104,8 +104,9 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     _syncAll(_gestureRecognizers);
   }
 
-  bool _isAcceptedDrag () {
-    return (_drag as ScrollDragController).getAxisDirection() != AxisDirection.down && (_drag as ScrollDragController).getPixels() == 0.0;
+  bool _isAcceptedDrag (AxisDirection direction) {
+    print(direction);
+    return !(direction == AxisDirection.down && (_drag as ScrollDragController).getPixels() == 0.0);
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {

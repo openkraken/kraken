@@ -1,11 +1,11 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 
-typedef isAcceptedDragCallback = bool Function();
+typedef isAcceptedDragCallback = bool Function(AxisDirection direction);
 
 enum _DragState {
   ready,
@@ -466,7 +466,8 @@ class KrakenVerticalDragGestureRecognizer extends KrakenDragGestureRecognizer {
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, Duration timestamp) {
-    return isAcceptedDrag() && _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
+    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind)
+        && isAcceptedDrag(_globalDistanceMoved < 0 ? AxisDirection.up : AxisDirection.down);
   }
 
   @override
