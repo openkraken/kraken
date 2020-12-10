@@ -49,6 +49,8 @@ std::vector<JSStringRef> &JSImageElement::ImageElementInstance::getImageElementP
   static std::vector<JSStringRef> propertyNames{
     JSStringCreateWithUTF8CString("width"),
     JSStringCreateWithUTF8CString("height"),
+    JSStringCreateWithUTF8CString("naturalWidth"),
+    JSStringCreateWithUTF8CString("naturalHeight"),
     JSStringCreateWithUTF8CString("src"),
     JSStringCreateWithUTF8CString("loading"),
   };
@@ -59,6 +61,8 @@ const std::unordered_map<std::string, JSImageElement::ImageElementInstance::Imag
 JSImageElement::ImageElementInstance::getImageElementPropertyMap() {
   static std::unordered_map<std::string, ImageProperty> propertyMap{{"width", ImageProperty::kWidth},
                                                                     {"height", ImageProperty::kHeight},
+                                                                    {"naturalWidth", ImageProperty::kNaturalWidth},
+                                                                    {"naturalHeight", ImageProperty::kNaturalHeight},
                                                                     {"src", ImageProperty::kSrc},
                                                                     {"loading", ImageProperty::kLoading}};
   return propertyMap;
@@ -69,10 +73,22 @@ JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case ImageProperty::kWidth:
+    case ImageProperty::kWidth: {
+      getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageWidth(nativeImageElement));
-    case ImageProperty::kHeight:
+    }
+    case ImageProperty::kHeight: {
+      getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageHeight(nativeImageElement));
+    }
+    case ImageProperty::kNaturalWidth: {
+      getDartMethod()->flushUICommand();
+      return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageNaturalWidth(nativeImageElement));
+    }
+    case ImageProperty::kNaturalHeight: {
+      getDartMethod()->flushUICommand();
+      return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageNaturalHeight(nativeImageElement));
+    }
     case ImageProperty::kSrc: {
       if (_src == nullptr) return nullptr;
       return JSValueMakeString(_hostClass->ctx, _src);
@@ -93,23 +109,13 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case ImageProperty::kWidth: {
-      double width = JSValueToNumber(_hostClass->ctx, value, exception);
-
-      std::string widthString = std::to_string(width) + "px";
-      auto args = buildUICommandArgs(name, widthString);
-      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
-      break;
-    }
+    case ImageProperty::kWidth:
     case ImageProperty::kHeight: {
-      double height = JSValueToNumber(_hostClass->ctx, value, exception);
-
-      std::string heightString = std::to_string(height) + "px";
-      auto args = buildUICommandArgs(name, heightString);
+      JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      std::string string = JSStringToStdString(stringRef);
+      auto args = buildUICommandArgs(name, string);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
         ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
-      break;
     }
     case ImageProperty::kSrc: {
       _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
