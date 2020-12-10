@@ -1844,8 +1844,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       crossAxisContentSize = contentSize.width;
     }
 
-    RenderBox preChild;
-
     /// Set offset of children
     for (int i = 0; i < runMetrics.length; ++i) {
       final _RunMetrics metrics = runMetrics[i];
@@ -2121,19 +2119,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else {
           crossOffset = childCrossPosition + crossAxisOffset;
         }
-
-        // RenderMargin doesn't support negative margin, it needs to substract
-        // negative margin of current child and its pre sibling
-        double negativeMarginTop = computeNegativeMarginTop(preChild, child, elementManager);
-        double negativeMarginLeft = computeNegativeMarginLeft(preChild, child, elementManager);
-        if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-          crossOffset += negativeMarginTop;
-          childMainPosition += negativeMarginLeft;
-        } else {
-          crossOffset += negativeMarginLeft;
-          childMainPosition += negativeMarginTop;
-        }
-
         Offset relativeOffset = _getOffset(
           childMainPosition,
           crossOffset
@@ -2148,8 +2133,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else {
           childMainPosition += _getMainAxisExtent(child) - childMainAxisMargin + betweenSpace;
         }
-
-        preChild = child;
         // Only layout placeholder renderObject child
         child = placeholderChild == null ? childParentData.nextSibling : null;
       }
