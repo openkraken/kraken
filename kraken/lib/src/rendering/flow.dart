@@ -865,6 +865,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     runBetweenSpace += runSpacing;
     double crossAxisOffset = flipCrossAxis ? crossAxisContentSize - runLeadingSpace : runLeadingSpace;
+
     child = firstChild;
 
     /// Set offset of children
@@ -1002,6 +1003,11 @@ class RenderFlowLayout extends RenderLayoutBox {
           childMarginTop = renderBoxModel.marginTop;
         }
 
+        // RenderMargin doesn't support negative margin, it needs to substract
+        // negative margin of current child and its pre sibling
+        crossAxisOffset += computeNegativeMarginTop(preChild, child, elementManager);
+        childMainPosition += computeNegativeMarginLeft(preChild, child, elementManager);
+
         Offset relativeOffset = _getOffset(
           childMainPosition + paddingLeft + borderLeft + childMarginLeft,
           crossAxisOffset + childLineExtent + paddingTop + borderTop + childMarginTop
@@ -1014,6 +1020,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         else
           childMainPosition += childMainAxisExtent + childBetweenSpace;
 
+        preChild = child;
         child = childParentData.nextSibling;
       }
 

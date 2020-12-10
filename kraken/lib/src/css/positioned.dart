@@ -138,6 +138,68 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBox child
   return Offset(x ?? 0, y ?? 0);
 }
 
+// Move negative margin top substract logic in the layout step
+// cause RenderMargin doesn't support negative margin
+double computeNegativeMarginTop(RenderBox preChild, RenderBox child, ElementManager elementManager) {
+  double preSiblingMarginBottom = 0;
+  if (preChild != null && preChild is RenderBoxModel) {
+    CSSStyleDeclaration preChildStyle = preChild.style;
+    CSSDisplay preSiblingRealDisplay = CSSSizing.getElementRealDisplayValue(preChild.targetId, elementManager);
+
+    // Negative margin bottom works on block-level elements
+    if (preSiblingRealDisplay == CSSDisplay.block || preSiblingRealDisplay == CSSDisplay.flex) {
+      String preSiblingMarginBottomStr = preChildStyle[MARGIN_BOTTOM];
+      if (preSiblingMarginBottomStr != '' && preSiblingMarginBottomStr != 'auto') {
+        preSiblingMarginBottom = CSSLength.toDisplayPortValue(preSiblingMarginBottomStr);
+        preSiblingMarginBottom = preSiblingMarginBottom < 0 ? preSiblingMarginBottom : 0;
+      }
+    }
+  }
+
+  double marginTop = 0;
+  if (child != null && child is RenderBoxModel) {
+    CSSStyleDeclaration childStyle = child.style;
+    CSSDisplay childRealDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
+
+    // Negative margin top doesn't work on inline elements
+    if (childRealDisplay != CSSDisplay.inline) {
+      String marginTopStr = childStyle[MARGIN_TOP];
+      if (marginTopStr != '' && marginTopStr != 'auto') {
+        marginTop = CSSLength.toDisplayPortValue(marginTopStr);
+        marginTop = marginTop < 0 ? marginTop: 0;
+      }
+    }
+  }
+
+  return preSiblingMarginBottom + marginTop;
+}
+
+// Move negative margin left substract logic in the layout step
+// cause RenderMargin doesn't support negative margin
+double computeNegativeMarginLeft(RenderBox preChild, RenderBox child, ElementManager elementManager) {
+  double preSiblingMarginRight = 0;
+  if (preChild != null && preChild is RenderBoxModel) {
+    CSSStyleDeclaration preChildStyle = preChild.style;
+    String preSiblingMarginRightStr = preChildStyle[MARGIN_RIGHT];
+    if (preSiblingMarginRightStr != '' && preSiblingMarginRightStr != 'auto') {
+      preSiblingMarginRight = CSSLength.toDisplayPortValue(preSiblingMarginRightStr);
+      preSiblingMarginRight = preSiblingMarginRight < 0 ? preSiblingMarginRight : 0;
+    }
+  }
+
+  double marginLeft = 0;
+  if (child != null && child is RenderBoxModel) {
+    CSSStyleDeclaration childStyle = child.style;
+    String marginLeftStr = childStyle[MARGIN_LEFT];
+    if (marginLeftStr != '' && marginLeftStr != 'auto') {
+      marginLeft = CSSLength.toDisplayPortValue(marginLeftStr);
+      marginLeft = marginLeft < 0 ? marginLeft: 0;
+    }
+  }
+
+  return preSiblingMarginRight + marginLeft;
+}
+
 class CSSPositionedLayout {
   static CSSPositionType parsePositionType(String input) {
     switch (input) {

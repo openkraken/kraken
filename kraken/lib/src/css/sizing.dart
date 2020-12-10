@@ -115,6 +115,12 @@ mixin CSSSizingMixin {
     if (style.contains(MARGIN_RIGHT)) marginRight = CSSLength.toDisplayPortValue(style[MARGIN_RIGHT]);
     if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSLength.toDisplayPortValue(style[MARGIN_BOTTOM]);
 
+    // Set negative margin to 0, adjust offset in setting offset stage of flow layout and flex layout
+    if (marginLeft != null && marginLeft < 0) marginLeft = 0;
+    if (marginTop != null && marginTop < 0) marginTop = 0;
+    if (marginRight != null && marginRight < 0) marginRight = 0;
+    if (marginBottom != null && marginBottom < 0) marginBottom = 0;
+
     return EdgeInsets.only(top: marginTop ?? 0.0, right: marginRight ?? 0.0, bottom: marginBottom ?? 0.0, left: marginLeft ?? 0.0);
   }
 
