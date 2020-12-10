@@ -383,13 +383,13 @@ class ImageElement extends Element {
   dynamic getProperty(String key) {
     switch (key) {
       case WIDTH:
-        if (isRendererAttached) {
-          return renderBoxModel.width;
+        if (_imageBox != null) {
+          return _imageBox.width;
         }
         return 0;
       case HEIGHT:
-        if (isRendererAttached) {
-          return renderBoxModel.height;
+        if (_imageBox != null) {
+          return _imageBox.height;
         }
         return 0;
     }
