@@ -73,14 +73,22 @@ JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case ImageProperty::kWidth:
+    case ImageProperty::kWidth: {
+      getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageWidth(nativeImageElement));
-    case ImageProperty::kHeight:
+    }
+    case ImageProperty::kHeight: {
+      getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageHeight(nativeImageElement));
-    case ImageProperty::kNaturalWidth:
+    }
+    case ImageProperty::kNaturalWidth: {
+      getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageNaturalWidth(nativeImageElement));
-    case ImageProperty::kNaturalHeight:
+    }
+    case ImageProperty::kNaturalHeight: {
+      getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageNaturalHeight(nativeImageElement));
+    }
     case ImageProperty::kSrc: {
       if (_src == nullptr) return nullptr;
       return JSValueMakeString(_hostClass->ctx, _src);

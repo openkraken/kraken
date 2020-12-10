@@ -516,14 +516,6 @@ class Element extends Node
       }
     }
   }
-  
-  dynamic getAttribute(String attributeName) {
-    return properties[attributeName];
-  }
-
-  void setAttribute(String attributeName, attributeValue) {
-    properties[attributeName] = attributeValue;
-  }
 
   @override
   @mustCallSuper

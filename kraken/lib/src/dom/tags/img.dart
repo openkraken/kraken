@@ -50,12 +50,12 @@ class ImageElement extends Element {
   // imgEl.width -> imgEl.getAttribute('width');
   static double getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.getAttribute(WIDTH);
+    return imageElement.getProperty(WIDTH);
   }
 
   static double getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.getAttribute(HEIGHT);
+    return imageElement.getProperty(HEIGHT);
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
@@ -383,9 +383,15 @@ class ImageElement extends Element {
   dynamic getProperty(String key) {
     switch (key) {
       case WIDTH:
-        return _imageInfo != null ? _imageInfo.image.width : 0;
+        if (isRendererAttached) {
+          return renderBoxModel.width;
+        }
+        return 0;
       case HEIGHT:
-        return _imageInfo != null ? _imageInfo.image.height : 0;
+        if (isRendererAttached) {
+          return renderBoxModel.height;
+        }
+        return 0;
     }
 
     return super.getProperty(key);

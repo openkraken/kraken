@@ -273,7 +273,6 @@ class NativeImgElement extends Struct {
 
   Pointer<NativeFunction<GetImageWidth>> getImageWidth;
   Pointer<NativeFunction<GetImageHeight>> getImageHeight;
-
   Pointer<NativeFunction<GetImageNaturalWidth>> getImageNaturalWidth;
   Pointer<NativeFunction<GetImageNaturalHeight>> getImageNaturalHeight;
 }
