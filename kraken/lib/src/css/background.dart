@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -144,6 +145,10 @@ class CSSBackground {
   static Gradient getBackgroundGradient(RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
     Gradient gradient;
     CSSStyleDeclaration style = renderBoxModel.style;
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     if (method.args.length > 1) {
       List<Color> colors = [];
@@ -175,7 +180,7 @@ class CSSBackground {
                     end = Alignment.centerLeft;
                   }
                   if (style[WIDTH].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH]);
+                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH], viewportSize);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getContentWidth(renderBoxModel);
                   }
@@ -194,7 +199,7 @@ class CSSBackground {
                     end = Alignment.topCenter;
                   }
                   if (style[HEIGHT].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT]);
+                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getContentHeight(renderBoxModel);
                   }
@@ -214,7 +219,7 @@ class CSSBackground {
                   }
 
                   if (style[WIDTH].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH]);
+                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH], viewportSize);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getContentWidth(renderBoxModel);
                   }
@@ -234,7 +239,7 @@ class CSSBackground {
                     end = Alignment.bottomCenter;
                   }
                   if (style[HEIGHT].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT]);
+                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getContentHeight(renderBoxModel);
                   }
@@ -362,6 +367,11 @@ class CSSBackground {
       strings = src.split(' ');
     }
 
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     if (strings != null && strings.length >= 1) {
       double stop = defaultStop;
       if (strings.length >= 2) {
@@ -373,7 +383,7 @@ class CSSBackground {
               stop = CSSAngle.parseAngle(strings[i]) / (math.pi * 2);
             } else if (CSSLength.isLength(strings[i])) {
               if (gradientLength != null) {
-                stop = CSSLength.toDisplayPortValue(strings[i]) / gradientLength;
+                stop = CSSLength.toDisplayPortValue(strings[i], viewportSize) / gradientLength;
               } else if (!renderBoxModel.attached) {
                 /// When node is not attached and has no width/height, gradient length
                 /// cannot be obtained, so wait for renderBoxModel attached to recalculate gradient length

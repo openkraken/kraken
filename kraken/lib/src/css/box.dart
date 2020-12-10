@@ -22,10 +22,6 @@ mixin CSSDecoratedBoxMixin {
 
   void updateRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String original, String present) {
     CSSBoxDecoration cssBoxDecoration = renderBoxModel.cssBoxDecoration;
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     if (cssBoxDecoration != null) {
       // Update by property
@@ -51,7 +47,7 @@ mixin CSSDecoratedBoxMixin {
         _updateBoxShadow(renderBoxModel, style, property);
       }
     } else {
-      cssBoxDecoration = getCSSBoxDecoration(style, viewportSize);
+      cssBoxDecoration = getCSSBoxDecoration(renderBoxModel, style);
       renderBoxModel.cssBoxDecoration = cssBoxDecoration;
       if (cssBoxDecoration == null) return;
 
@@ -296,7 +292,11 @@ mixin CSSDecoratedBoxMixin {
   ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
   ///     (PS. Only support solid now.)
   ///   borderColor: <color>
-  CSSBoxDecoration getCSSBoxDecoration(CSSStyleDeclaration style, Size viewportSize) {
+  CSSBoxDecoration getCSSBoxDecoration(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
     // Backgroud color
     Color bgColor = CSSBackground.getBackgroundColor(style);
     // Background image
