@@ -11,7 +11,6 @@ mixin RenderMarginMixin on RenderBox {
     if (_resolvedMargin != null) return;
     if (margin == null) return;
     _resolvedMargin = margin.resolve(TextDirection.ltr);
-    assert(_resolvedMargin.isNonNegative);
   }
 
   void _markNeedResolution() {
@@ -27,7 +26,6 @@ mixin RenderMarginMixin on RenderBox {
   EdgeInsets _margin;
   set margin(EdgeInsets value) {
     if (value == null) return;
-    assert(value.isNonNegative);
     if (_margin == value) return;
     _margin = value;
     _markNeedResolution();
