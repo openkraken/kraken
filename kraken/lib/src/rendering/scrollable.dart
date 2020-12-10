@@ -105,7 +105,6 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
   }
 
   bool _isAcceptedDrag (AxisDirection direction) {
-    print(direction);
     return !(direction == AxisDirection.down && (_drag as ScrollDragController).getPixels() == 0.0);
   }
 

@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:developer' as developer;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
@@ -179,7 +176,10 @@ abstract class KrakenDragGestureRecognizer extends OneSequenceGestureRecognizer 
 
   Offset _getDeltaForDetails(Offset delta);
   double _getPrimaryValueFromOffset(Offset value);
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, Duration timestamp);
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind);
+
+  // Can the swipe gesture win the arena
+  bool _acceptDragGesture(PointerEvent event) => true;
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
@@ -262,7 +262,7 @@ abstract class KrakenDragGestureRecognizer extends OneSequenceGestureRecognizer 
           untransformedDelta: movedLocally,
           untransformedEndPosition: event.localPosition,
         ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
-        if (_hasSufficientGlobalDistanceToAccept(event.kind, event.timeStamp))
+        if (_hasSufficientGlobalDistanceToAccept(event.kind) && _acceptDragGesture(event))
           resolve(GestureDisposition.accepted);
       }
     }
@@ -465,9 +465,13 @@ class KrakenVerticalDragGestureRecognizer extends KrakenDragGestureRecognizer {
   }
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, Duration timestamp) {
-    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind)
-        && isAcceptedDrag(_globalDistanceMoved < 0 ? AxisDirection.up : AxisDirection.down);
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
+  }
+
+  @override
+  bool _acceptDragGesture(PointerEvent event) {
+    return isAcceptedDrag(_globalDistanceMoved < 0 ? AxisDirection.up : AxisDirection.down);
   }
 
   @override
