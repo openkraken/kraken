@@ -46,7 +46,7 @@ mixin CSSDecoratedBoxMixin {
         _updateBoxShadow(renderBoxModel, style, property);
       }
     } else {
-      cssBoxDecoration = getCSSBoxDecoration(style);
+      cssBoxDecoration = getCSSBoxDecoration(renderBoxModel, style);
       renderBoxModel.cssBoxDecoration = cssBoxDecoration;
       if (cssBoxDecoration == null) return;
 
@@ -117,7 +117,7 @@ mixin CSSDecoratedBoxMixin {
       if (method.name == 'url') {
         decorationImage = CSSBackground.getDecorationImage(style, method);
       } else {
-        gradient = CSSBackground.getBackgroundGradient(method);
+        gradient = CSSBackground.getBackgroundGradient(renderBoxModel, method);
       }
     }
 
@@ -277,7 +277,7 @@ mixin CSSDecoratedBoxMixin {
   ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
   ///     (PS. Only support solid now.)
   ///   borderColor: <color>
-  CSSBoxDecoration getCSSBoxDecoration(CSSStyleDeclaration style) {
+  CSSBoxDecoration getCSSBoxDecoration(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
 
     // Backgroud color
     Color bgColor = CSSBackground.getBackgroundColor(style);
@@ -289,7 +289,7 @@ mixin CSSDecoratedBoxMixin {
       if (method.name == 'url') {
         decorationImage = CSSBackground.getDecorationImage(style, method);
       } else {
-        gradient = CSSBackground.getBackgroundGradient(method);
+        gradient = CSSBackground.getBackgroundGradient(renderBoxModel, method);
       }
     }
 
