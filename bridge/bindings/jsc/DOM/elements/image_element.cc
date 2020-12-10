@@ -109,6 +109,14 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
+    case ImageProperty::kWidth:
+    case ImageProperty::kHeight: {
+      JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      std::string string = JSStringToStdString(stringRef);
+      auto args = buildUICommandArgs(name, string);
+      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
+        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+    }
     case ImageProperty::kSrc: {
       _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
       JSStringRetain(_src);
