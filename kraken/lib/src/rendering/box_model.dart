@@ -274,6 +274,18 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
+  /// Whether need to recalculate gradient when setting style used in cases
+  /// when linear-gradient has length specified and layout has no size in gradient direction
+  /// such as 'linear-gradient(to right, red 0px, red 50px, orange 50px, orange 80px)' and style has no width set
+  bool _recalGradient = false;
+  bool get recalGradient => _recalGradient;
+  set recalGradient(bool value) {
+    if (value == null) return;
+    if (_recalGradient != value) {
+      _recalGradient = value;
+    }
+  }
+
   // id of current element
   int targetId;
 

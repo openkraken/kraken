@@ -127,7 +127,7 @@ mixin CSSDecoratedBoxMixin {
       if (method.name == 'url') {
         decorationImage = CSSBackground.getDecorationImage(style, method);
       } else {
-        gradient = CSSBackground.getBackgroundGradient(method);
+        gradient = CSSBackground.getBackgroundGradient(renderBoxModel, method);
       }
     }
 
@@ -297,7 +297,6 @@ mixin CSSDecoratedBoxMixin {
   ///     (PS. Only support solid now.)
   ///   borderColor: <color>
   CSSBoxDecoration getCSSBoxDecoration(CSSStyleDeclaration style, Size viewportSize) {
-
     // Backgroud color
     Color bgColor = CSSBackground.getBackgroundColor(style);
     // Background image
@@ -308,7 +307,7 @@ mixin CSSDecoratedBoxMixin {
       if (method.name == 'url') {
         decorationImage = CSSBackground.getDecorationImage(style, method);
       } else {
-        gradient = CSSBackground.getBackgroundGradient(method);
+        gradient = CSSBackground.getBackgroundGradient(renderBoxModel, method);
       }
     }
 

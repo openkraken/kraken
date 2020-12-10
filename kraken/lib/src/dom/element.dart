@@ -476,6 +476,13 @@ class Element extends Node
       }
     }
 
+    /// Recalculate gradient after node attached when gradient length cannot be obtained from style
+    if (renderBoxModel.recalGradient) {
+      String backgroundImage = style[BACKGROUND_IMAGE];
+      updateRenderDecoratedBox(renderBoxModel, style, BACKGROUND_IMAGE, backgroundImage, backgroundImage);
+      renderBoxModel.recalGradient = false;
+    }
+
     didAttachRenderer();
   }
 

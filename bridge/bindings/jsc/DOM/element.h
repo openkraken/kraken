@@ -237,8 +237,8 @@ struct NativeElement {
   GetClientLeft getClientLeft{nullptr};
   GetScrollTop getScrollTop{nullptr};
   GetScrollLeft getScrollLeft{nullptr};
-  GetScrollHeight getScrollHeight{nullptr};
   GetScrollWidth getScrollWidth{nullptr};
+  GetScrollHeight getScrollHeight{nullptr};
   GetBoundingClientRect getBoundingClientRect{nullptr};
   Click click{nullptr};
   Scroll scroll{nullptr};

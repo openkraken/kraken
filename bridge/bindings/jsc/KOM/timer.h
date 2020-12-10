@@ -11,7 +11,7 @@
 
 namespace kraken::binding::jsc {
 
-void bindTimer(std::unique_ptr<JSContext> &context);
+void bindTimer();
 
 } // namespace kraken
 
