@@ -109,15 +109,11 @@ mixin CSSSizingMixin {
     return maxHeight;
   }
 
-  static EdgeInsets _getMargin(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+  static EdgeInsets _getMargin(CSSStyleDeclaration style, Size viewportSize) {
     double marginLeft;
     double marginTop;
     double marginRight;
     double marginBottom;
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     if (style.contains(MARGIN_LEFT)) marginLeft = CSSLength.toDisplayPortValue(style[MARGIN_LEFT], viewportSize);
     if (style.contains(MARGIN_TOP)) marginTop = CSSLength.toDisplayPortValue(style[MARGIN_TOP], viewportSize);
@@ -129,18 +125,16 @@ mixin CSSSizingMixin {
 
   void updateRenderMargin(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
     EdgeInsets prevMargin = renderBoxModel.margin;
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     if (prevMargin != null) {
-
       double left = prevMargin.left;
       double top = prevMargin.top;
       double right = prevMargin.right;
       double bottom = prevMargin.bottom;
-      ElementManager elementManager = renderBoxModel.elementManager;
-      double viewportWidth = elementManager.viewportWidth;
-      double viewportHeight = elementManager.viewportHeight;
-      Size viewportSize = Size(viewportWidth, viewportHeight);
-
       double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
 
       // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
@@ -166,7 +160,7 @@ mixin CSSSizingMixin {
         bottom: bottom,
       );
     } else {
-      renderBoxModel.margin = _getMargin(renderBoxModel, style);
+      renderBoxModel.margin = _getMargin(style, viewportSize);
     }
   }
 

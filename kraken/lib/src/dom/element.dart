@@ -692,8 +692,12 @@ class Element extends Node
     if (renderBoxModel != null) {
       ParentData childParentData = renderBoxModel.parentData;
       if (childParentData is RenderFlexParentData) {
+        ElementManager elementManager = renderBoxModel.elementManager;
+        double viewportWidth = elementManager.viewportWidth;
+        double viewportHeight = elementManager.viewportHeight;
+        Size viewportSize = Size(viewportWidth, viewportHeight);
         final RenderFlexParentData parentData = childParentData;
-        RenderFlexParentData flexParentData = CSSFlex.getParentData(renderBoxModel, style);
+        RenderFlexParentData flexParentData = CSSFlex.getParentData(style, viewportSize);
         parentData.flexGrow = flexParentData.flexGrow;
         parentData.flexShrink = flexParentData.flexShrink;
         parentData.flexBasis = flexParentData.flexBasis;

@@ -13,16 +13,11 @@ enum CSSPositionType {
   sticky,
 }
 
-Offset _getRelativeOffset(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+Offset _getRelativeOffset(CSSStyleDeclaration style, Size viewportSize) {
   CSSPositionType position = CSSPositionedLayout.parsePositionType(style[POSITION]);
   if (position == CSSPositionType.relative) {
     double dx;
     double dy;
-
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     // @TODO support auto value
     if (style.contains(LEFT) && style[LEFT] != AUTO) {
@@ -203,7 +198,11 @@ class CSSPositionedLayout {
       Offset styleOffset;
       // Text node does not have relative offset
       if (renderBox is RenderBoxModel && style != null) {
-        styleOffset = _getRelativeOffset(renderBox, style);
+        ElementManager elementManager = renderBox.elementManager;
+        double viewportWidth = elementManager.viewportWidth;
+        double viewportHeight = elementManager.viewportHeight;
+        Size viewportSize = Size(viewportWidth, viewportHeight);
+        styleOffset = _getRelativeOffset(style, viewportSize);
       }
 
       if (relativeOffset != null) {

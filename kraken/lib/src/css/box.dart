@@ -22,6 +22,11 @@ mixin CSSDecoratedBoxMixin {
 
   void updateRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String original, String present) {
     CSSBoxDecoration cssBoxDecoration = renderBoxModel.cssBoxDecoration;
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     if (cssBoxDecoration != null) {
       // Update by property
       if (property == BACKGROUND_CLIP) {
@@ -46,7 +51,7 @@ mixin CSSDecoratedBoxMixin {
         _updateBoxShadow(renderBoxModel, style, property);
       }
     } else {
-      cssBoxDecoration = getCSSBoxDecoration(renderBoxModel, style);
+      cssBoxDecoration = getCSSBoxDecoration(style, viewportSize);
       renderBoxModel.cssBoxDecoration = cssBoxDecoration;
       if (cssBoxDecoration == null) return;
 
@@ -62,10 +67,15 @@ mixin CSSDecoratedBoxMixin {
     String property) {
 
     BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     if (prevBoxDecoration != null) {
       renderBoxModel.decoration = BoxDecoration(
           // Only modify boxShadow.
-          boxShadow: getBoxShadow(renderBoxModel, style),
+          boxShadow: getBoxShadow(style, viewportSize),
           color: prevBoxDecoration.color,
           image: prevBoxDecoration.image,
           border: prevBoxDecoration.border,
@@ -75,7 +85,7 @@ mixin CSSDecoratedBoxMixin {
           shape: prevBoxDecoration.shape
       );
     } else {
-      renderBoxModel.decoration = BoxDecoration(boxShadow: getBoxShadow(renderBoxModel, style));
+      renderBoxModel.decoration = BoxDecoration(boxShadow: getBoxShadow(style, viewportSize));
     }
   }
 
@@ -161,8 +171,13 @@ mixin CSSDecoratedBoxMixin {
       // topLeft topRight bottomRight bottomLeft
       int index = _borderRadiusMapping[property];
 
+      ElementManager elementManager = renderBoxModel.elementManager;
+      double viewportWidth = elementManager.viewportWidth;
+      double viewportHeight = elementManager.viewportHeight;
+      Size viewportSize = Size(viewportWidth, viewportHeight);
+
       if (index != null) {
-        Radius newRadius = CSSBorderRadius.getRadius(renderBoxModel, style[property]);
+        Radius newRadius = CSSBorderRadius.getRadius(style[property], viewportSize);
         BorderRadius borderRadius = renderBoxModel.decoration.borderRadius as BorderRadius;
         renderBoxModel.decoration = renderBoxModel.decoration.copyWith(borderRadius: BorderRadius.only(
           topLeft: index == 0 ? newRadius : borderRadius?.topLeft,
@@ -171,7 +186,7 @@ mixin CSSDecoratedBoxMixin {
           bottomLeft: index == 3 ? newRadius : borderRadius?.bottomLeft,
         ));
       } else {
-        List<Radius> borderRadius = _getBorderRadius(renderBoxModel, style);
+        List<Radius> borderRadius = _getBorderRadius(style, viewportSize);
 
         renderBoxModel.decoration = renderBoxModel.decoration.copyWith(borderRadius: BorderRadius.only(
           topLeft: borderRadius[0],
@@ -188,6 +203,11 @@ mixin CSSDecoratedBoxMixin {
       String property) {
 
     Border border = renderBoxModel.decoration.border as Border;
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     if (border != null) {
       BorderSide left =  border.left;
       BorderSide top =  border.top;
@@ -196,13 +216,13 @@ mixin CSSDecoratedBoxMixin {
       bool updateAll = false;
 
       if (property.contains(BORDER_LEFT)) {
-        left = CSSBorderSide.getBorderSide(renderBoxModel, style, CSSBorderSide.LEFT);
+        left = CSSBorderSide.getBorderSide(style, CSSBorderSide.LEFT, viewportSize);
       } else if (property.contains(BORDER_TOP)) {
-        top = CSSBorderSide.getBorderSide(renderBoxModel, style, CSSBorderSide.TOP);
+        top = CSSBorderSide.getBorderSide(style, CSSBorderSide.TOP, viewportSize);
       } else if (property.contains(BORDER_RIGHT)) {
-        right = CSSBorderSide.getBorderSide(renderBoxModel, style, CSSBorderSide.RIGHT);
+        right = CSSBorderSide.getBorderSide(style, CSSBorderSide.RIGHT, viewportSize);
       } else if (property.contains(BORDER_BOTTOM)) {
-        bottom = CSSBorderSide.getBorderSide(renderBoxModel, style, CSSBorderSide.BOTTOM);
+        bottom = CSSBorderSide.getBorderSide(style, CSSBorderSide.BOTTOM, viewportSize);
       } else {
         updateAll = true;
       }
@@ -217,9 +237,8 @@ mixin CSSDecoratedBoxMixin {
         return;
       }
     }
-
     // Update all border
-    List<BorderSide> borderSides = _getBorderSides(renderBoxModel, style);
+    List<BorderSide> borderSides = _getBorderSides(style, viewportSize);
 
     if (borderSides != null) {
       renderBoxModel.decoration = renderBoxModel.decoration.copyWith(border: Border(
@@ -231,11 +250,11 @@ mixin CSSDecoratedBoxMixin {
     }
   }
 
-  List<BorderSide> _getBorderSides(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
-    BorderSide leftSide = CSSBorderSide.getBorderSide(renderBoxModel, style, CSSBorderSide.LEFT);
-    BorderSide topSide = CSSBorderSide.getBorderSide(renderBoxModel, style, CSSBorderSide.TOP);
-    BorderSide rightSide = CSSBorderSide.getBorderSide(renderBoxModel, style, CSSBorderSide.RIGHT);
-    BorderSide bottomSide = CSSBorderSide.getBorderSide(renderBoxModel, style, CSSBorderSide.BOTTOM);
+  List<BorderSide> _getBorderSides(CSSStyleDeclaration style, Size viewportSize) {
+    BorderSide leftSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.LEFT, viewportSize);
+    BorderSide topSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.TOP, viewportSize);
+    BorderSide rightSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.RIGHT, viewportSize);
+    BorderSide bottomSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.BOTTOM, viewportSize);
 
     bool hasBorder = leftSide != null ||
         topSide != null ||
@@ -249,12 +268,12 @@ mixin CSSDecoratedBoxMixin {
       bottomSide ?? CSSBorderSide.none] : null;
   }
 
-  List<Radius> _getBorderRadius(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+  List<Radius> _getBorderRadius(CSSStyleDeclaration style, Size viewportSize) {
     // border radius add border topLeft topRight bottomLeft bottomRight
-    Radius topLeftRadius = CSSBorderRadius.getRadius(renderBoxModel, style[BORDER_TOP_LEFT_RADIUS]);
-    Radius topRightRadius = CSSBorderRadius.getRadius(renderBoxModel, style[BORDER_TOP_RIGHT_RADIUS]);
-    Radius bottomRightRadius = CSSBorderRadius.getRadius(renderBoxModel, style[BORDER_BOTTOM_RIGHT_RADIUS]);
-    Radius bottomLeftRadius = CSSBorderRadius.getRadius(renderBoxModel, style[BORDER_BOTTOM_LEFT_RADIUS]);
+    Radius topLeftRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_LEFT_RADIUS], viewportSize);
+    Radius topRightRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_RIGHT_RADIUS], viewportSize);
+    Radius bottomRightRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_RIGHT_RADIUS], viewportSize);
+    Radius bottomLeftRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_LEFT_RADIUS], viewportSize);
 
     bool hasBorderRadius = topLeftRadius != null ||
         topRightRadius != null ||
@@ -277,7 +296,7 @@ mixin CSSDecoratedBoxMixin {
   ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
   ///     (PS. Only support solid now.)
   ///   borderColor: <color>
-  CSSBoxDecoration getCSSBoxDecoration(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+  CSSBoxDecoration getCSSBoxDecoration(CSSStyleDeclaration style, Size viewportSize) {
 
     // Backgroud color
     Color bgColor = CSSBackground.getBackgroundColor(style);
@@ -293,9 +312,9 @@ mixin CSSDecoratedBoxMixin {
       }
     }
 
-    List<Radius> borderRadius = _getBorderRadius(renderBoxModel, style);
-    List<BoxShadow> boxShadow = getBoxShadow(renderBoxModel, style);
-    List<BorderSide> borderSides = _getBorderSides(renderBoxModel, style);
+    List<Radius> borderRadius = _getBorderRadius(style, viewportSize);
+    List<BoxShadow> boxShadow = getBoxShadow(style, viewportSize);
+    List<BorderSide> borderSides = _getBorderSides(style, viewportSize);
 
     if (bgColor == null &&
         decorationImage == null &&
@@ -306,16 +325,12 @@ mixin CSSDecoratedBoxMixin {
       return null;
     }
 
-    return CSSBoxDecoration(bgColor, decorationImage, gradient, borderSides, borderRadius, getBoxShadow(renderBoxModel, style));
+    return CSSBoxDecoration(bgColor, decorationImage, gradient, borderSides, borderRadius, getBoxShadow(style, viewportSize));
   }
 
   /// Tip: inset not supported.
-  List<BoxShadow> getBoxShadow(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+  List<BoxShadow> getBoxShadow(CSSStyleDeclaration style, Size viewportSize) {
     List<BoxShadow> boxShadow;
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     if (style.contains(BOX_SHADOW)) {
       boxShadow = [];
@@ -457,12 +472,7 @@ class CSSBorderSide {
 
   static BorderSide none = BorderSide(color: defaultBorderColor, width: 0.0, style: BorderStyle.none);
 
-  static BorderSide getBorderSide(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String side) {
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
+  static BorderSide getBorderSide(CSSStyleDeclaration style, String side, Size viewportSize) {
     BorderStyle borderStyle = CSSBorderStyle.getBorderSideStyle(style, side);
     double width = getBorderSideWidth(style, side, viewportSize);
     // Flutter will print border event if width is 0.0. So we needs to set borderStyle to none to prevent this.
@@ -478,15 +488,10 @@ class CSSBorderSide {
 class CSSBorderRadius {
   static Radius none = Radius.zero;
 
-  static Radius getRadius(RenderBoxModel renderBoxModel, String radius) {
+  static Radius getRadius(String radius, Size viewportSize) {
     if (radius.isNotEmpty) {
       // border-top-left-radius: horizontal vertical
       List<String> values = radius.split(_spaceRegExp);
-      ElementManager elementManager = renderBoxModel.elementManager;
-      double viewportWidth = elementManager.viewportWidth;
-      double viewportHeight = elementManager.viewportHeight;
-      Size viewportSize = Size(viewportWidth, viewportHeight);
-
       if (values.length == 1) {
         double circular = CSSLength.toDisplayPortValue(values[0], viewportSize);
         if (circular != null) return Radius.circular(circular);

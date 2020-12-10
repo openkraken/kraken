@@ -4,7 +4,6 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 
 // CSS Flexible Box Layout: https://drafts.csswg.org/css-flexbox-1/
@@ -316,13 +315,8 @@ double _getFlexShrink(String shrink) {
   return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
 }
 
-String _getFlexBasis(String basis, RenderBoxModel renderBoxModel) {
+String _getFlexBasis(String basis, Size viewportSize) {
   String flexBasis = basis;
-  ElementManager elementManager = renderBoxModel.elementManager;
-  double viewportWidth = elementManager.viewportWidth;
-  double viewportHeight = elementManager.viewportHeight;
-  Size viewportSize = Size(viewportWidth, viewportHeight);
-
   if (basis.isNotEmpty && basis != AUTO) {
     if (CSSLength.toDisplayPortValue(basis, viewportSize) < 0) {
       flexBasis = AUTO;
@@ -350,7 +344,7 @@ class CSSFlex {
     return flexDirection == FlexDirection.columnReverse || flexDirection == FlexDirection.column;
   }
 
-  static RenderFlexParentData getParentData(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+  static RenderFlexParentData getParentData(CSSStyleDeclaration style, Size viewportSize) {
     RenderFlexParentData parentData = RenderFlexParentData();
     String grow = style[FLEX_GROW];
     String shrink = style[FLEX_SHRINK];
@@ -359,7 +353,7 @@ class CSSFlex {
 
     parentData.flexGrow = _getFlexGrow(grow);
     parentData.flexShrink = _getFlexShrink(shrink);
-    parentData.flexBasis = _getFlexBasis(basis, renderBoxModel);
+    parentData.flexBasis = _getFlexBasis(basis, viewportSize);
     parentData.alignSelf = _getAlignSelf(alignSelf);
 
     return parentData;
