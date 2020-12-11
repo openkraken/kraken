@@ -10,13 +10,13 @@ enum _DragState {
   accepted,
 }
 
-abstract class KrakenDragGestureRecognizer extends OneSequenceGestureRecognizer {
+abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   ///
   /// [dragStartBehavior] must not be null.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
-  KrakenDragGestureRecognizer({
+  CompetitiveDragGestureRecognizer({
     Object debugOwner,
     PointerDeviceKind kind,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -294,7 +294,6 @@ abstract class KrakenDragGestureRecognizer extends OneSequenceGestureRecognizer 
       _pendingDragOffset = OffsetPair.zero;
       _lastPendingEventTimestamp = null;
       _lastTransform = null;
-      // _checkStart(timestamp);
       if (localUpdateDelta != Offset.zero && onUpdate != null) {
         final Matrix4 localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
         final Offset correctedLocalPosition = _initialPosition.local + localUpdateDelta;
@@ -446,7 +445,7 @@ abstract class KrakenDragGestureRecognizer extends OneSequenceGestureRecognizer 
   }
 }
 
-class KrakenVerticalDragGestureRecognizer extends KrakenDragGestureRecognizer {
+class ScrollVerticalDragGestureRecognizer extends CompetitiveDragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the vertical axis.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
