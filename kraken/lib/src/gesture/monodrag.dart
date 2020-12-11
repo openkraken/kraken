@@ -445,6 +445,9 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   }
 }
 
+/// Recognizes movement in the vertical direction.
+///
+/// Used for vertical scrolling.
 class ScrollVerticalDragGestureRecognizer extends CompetitiveDragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the vertical axis.
   ///
@@ -481,7 +484,50 @@ class ScrollVerticalDragGestureRecognizer extends CompetitiveDragGestureRecogniz
   double _getPrimaryValueFromOffset(Offset value) => value.dy;
 
   @override
-  String get debugDescription => 'kraken vertical drag';
+  String get debugDescription => 'scroll vertical drag';
+}
+
+
+/// Recognizes movement in the horizontal direction.
+///
+/// Used for horizontal scrolling.
+class ScrollHorizontalDragGestureRecognizer extends CompetitiveDragGestureRecognizer {
+  /// Create a gesture recognizer for interactions in the horizontal axis.
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  HorizontalDragGestureRecognizer({
+    Object? debugOwner,
+    PointerDeviceKind? kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
+
+  isAcceptedDragCallback isAcceptedDrag;
+
+  @override
+  bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
+    return estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance;
+  }
+
+  @override
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
+  }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => Offset(delta.dx, 0.0);
+
+  @override
+  double _getPrimaryValueFromOffset(Offset value) => value.dx;
+
+  @override
+  bool _acceptDragGesture(PointerEvent event) {
+    AxisDirection direction = _globalDistanceMoved < 0 ? AxisDirection.left : AxisDirection.right;
+    return isAcceptedDrag(direction);
+  }
+
+  @override
+  String get debugDescription => 'scroll horizontal drag';
 }
 
 

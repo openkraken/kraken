@@ -64,7 +64,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
               () => ScrollVerticalDragGestureRecognizer(),
               (ScrollVerticalDragGestureRecognizer instance) {
                 instance
-                  ..isAcceptedDrag = _isAcceptedDrag
+                  ..isAcceptedDrag = _isAcceptedVerticalDrag
                   ..onDown = _handleDragDown
                   ..onStart = _handleDragStart
                   ..onUpdate = _handleDragUpdate
@@ -80,10 +80,11 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
           break;
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-              () => HorizontalDragGestureRecognizer(),
-              (HorizontalDragGestureRecognizer instance) {
+            ScrollHorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollHorizontalDragGestureRecognizer>(
+              () => ScrollHorizontalDragGestureRecognizer(),
+              (ScrollHorizontalDragGestureRecognizer instance) {
                 instance
+                  ..isAcceptedDrag = _isAcceptedHorizontalDrag
                   ..onDown = _handleDragDown
                   ..onStart = _handleDragStart
                   ..onUpdate = _handleDragUpdate
@@ -104,8 +105,12 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     _syncAll(_gestureRecognizers);
   }
 
-  bool _isAcceptedDrag (AxisDirection direction) {
+  bool _isAcceptedVerticalDrag (AxisDirection direction) {
     return !(direction == AxisDirection.down && (_drag as ScrollDragController).getPixels() == 0.0);
+  }
+
+  bool _isAcceptedHorizontalDrag (AxisDirection direction) {
+    return !(direction == AxisDirection.left && (_drag as ScrollDragController).getPixels() == 0.0);
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {
