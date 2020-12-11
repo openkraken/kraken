@@ -90,7 +90,8 @@ public:
     kIframe,
     kObject,
     kImage,
-    kCanvas
+    kCanvas,
+    kInput,
   };
 
   static std::unordered_map<JSContext *, JSElement *> &getInstanceMap();
@@ -149,6 +150,7 @@ public:
   explicit ElementInstance(JSElement *element, JSStringRef tagName, double targetId);
   ~ElementInstance();
 
+  JSValueRef getStringValueProperty(std::string &name);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
@@ -197,6 +199,7 @@ using GetScrollLeft = double (*)(NativeElement *nativeElement);
 using GetScrollHeight = double (*)(NativeElement *nativeElement);
 using GetScrollWidth = double (*)(NativeElement *nativeElement);
 using GetBoundingClientRect = NativeBoundingClientRect *(*)(NativeElement *nativeElement);
+using GetStringValueProperty = NativeString *(*)(NativeElement *nativeElement, NativeString* property);
 using Click = void (*)(NativeElement *nativeElement);
 using Scroll = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
 using ScrollBy = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
@@ -240,6 +243,7 @@ struct NativeElement {
   GetScrollWidth getScrollWidth{nullptr};
   GetScrollHeight getScrollHeight{nullptr};
   GetBoundingClientRect getBoundingClientRect{nullptr};
+  GetStringValueProperty getStringValueProperty{nullptr};
   Click click{nullptr};
   Scroll scroll{nullptr};
   ScrollBy scrollBy{nullptr};

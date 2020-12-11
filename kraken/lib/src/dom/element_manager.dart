@@ -46,7 +46,7 @@ Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynam
       element = ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager);
       break;
     case INPUT:
-      element = InputElement(id, nativePtr.cast<NativeElement>(), elementManager);
+      element = InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager);
       break;
     case PRE:
       element = PreElement(id, nativePtr.cast<NativeElement>(), elementManager);

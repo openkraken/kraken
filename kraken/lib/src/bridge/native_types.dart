@@ -206,6 +206,7 @@ typedef Native_GetScrollTop = Double Function(Pointer<NativeElement> nativeEleme
 typedef Native_GetScrollWidth = Double Function(Pointer<NativeElement> nativeElement);
 typedef Native_GetScrollHeight = Double Function(Pointer<NativeElement> nativeElement);
 typedef Native_GetBoundingClientRect = Pointer<NativeBoundingClientRect> Function(Pointer<NativeElement> nativeElement);
+typedef Native_GetStringValueProperty = Pointer<NativeString> Function(Pointer<NativeElement> nativeElement, Pointer<NativeString> property);
 typedef Native_Click = Void Function(Pointer<NativeElement> nativeElement);
 typedef Native_Scroll = Void Function(Pointer<NativeElement> nativeElement, Int32 x, Int32 y);
 typedef Native_ScrollBy = Void Function(Pointer<NativeElement> nativeElement, Int32 x, Int32 y);
@@ -228,6 +229,7 @@ class NativeElement extends Struct {
   Pointer<NativeFunction<Native_GetScrollWidth>> getScrollWidth;
   Pointer<NativeFunction<Native_GetScrollHeight>> getScrollHeight;
   Pointer<NativeFunction<Native_GetBoundingClientRect>> getBoundingClientRect;
+  Pointer<NativeFunction<Native_GetStringValueProperty>> getStringValueProperty;
   Pointer<NativeFunction<Native_Click>> click;
   Pointer<NativeFunction<Native_Scroll>> scroll;
   Pointer<NativeFunction<Native_ScrollBy>> scrollBy;
@@ -299,6 +301,10 @@ class NativeAudioElement extends Struct {
 
 class NativeVideoElement extends Struct {
   Pointer<NativeMediaElement> nativeMediaElement;
+}
+
+class NativeInputElement extends Struct {
+  Pointer<NativeElement> nativeElement;
 }
 
 typedef Native_CanvasGetContext = Pointer<NativeCanvasRenderingContext2D> Function(

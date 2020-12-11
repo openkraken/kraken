@@ -427,6 +427,13 @@ class Element extends Node
     _nativeMap.remove(nativeElementPtr.address);
   }
 
+  // Used for force update layout.
+  void flushLayout() {
+    if (isRendererAttached) {
+      renderer.owner.flushLayout();
+    }
+  }
+
   void addChildRenderObject(Element child, {RenderObject after}) {
     CSSPositionType positionType = CSSPositionedLayout.parsePositionType(child.style[POSITION]);
     switch (positionType) {

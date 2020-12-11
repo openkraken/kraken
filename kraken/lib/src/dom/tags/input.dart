@@ -147,17 +147,19 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
   }
 
+  final Pointer<NativeInputElement> nativeInputElement;
+
   TextInputConfiguration textInputConfiguration;
 
   InputElement(
     int targetId,
-    Pointer<NativeElement> nativePtr,
+    this.nativeInputElement,
     ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativePtr, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+  }) : super(targetId, nativeInputElement.ref.nativeElement, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   @override
   void didAttachRenderer() {
@@ -239,13 +241,17 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   void focus() {
-    activeTextInput();
-    dispatchEvent(Event('focus'));
+    if (isRendererAttached) {
+      activeTextInput();
+      dispatchEvent(Event('focus'));
+    }
   }
 
   void blur() {
-    deactiveTextInput();
-    dispatchEvent(Event('blur'));
+    if (isRendererAttached) {
+      deactiveTextInput();
+      dispatchEvent(Event('blur'));
+    }
   }
 
   void activeTextInput() {
@@ -292,6 +298,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   bool get _hasFocus => InputElement.focusInputElement == this;
 
   RenderEditable createRenderEditable() {
+    if (textSpan == null) {
+      textSpan = buildTextSpan();
+    }
     TextSpan text = textSpan.toPlainText().length > 0 ? textSpan : placeholderTextSpan;
 
     renderEditable = RenderEditable(
@@ -505,23 +514,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // @TODO: more types.
     }
   }
-
-  // @override
-  // dynamic method(String name, List args) {
-  //   super.method(name, args);
-  //   switch (name) {
-  //     case 'focus':
-  //       if (isRendererAttached) {
-  //         focus();
-  //       }
-  //       break;
-  //     case 'blur':
-  //       if (isRendererAttached) {
-  //         blur();
-  //       }
-  //       break;
-  //   }
-  // }
 
   bool _showCaretOnScreenScheduled = false;
   Rect _currentCaretRect;
