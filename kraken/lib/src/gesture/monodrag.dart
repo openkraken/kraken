@@ -452,7 +452,7 @@ class ScrollVerticalDragGestureRecognizer extends CompetitiveDragGestureRecogniz
   /// Create a gesture recognizer for interactions in the vertical axis.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
-  KrakenVerticalDragGestureRecognizer({
+  ScrollVerticalDragGestureRecognizer({
     Object debugOwner,
     PointerDeviceKind kind,
   }) : super(debugOwner: debugOwner, kind: kind);
@@ -495,9 +495,9 @@ class ScrollHorizontalDragGestureRecognizer extends CompetitiveDragGestureRecogn
   /// Create a gesture recognizer for interactions in the horizontal axis.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
-  HorizontalDragGestureRecognizer({
-    Object? debugOwner,
-    PointerDeviceKind? kind,
+  ScrollHorizontalDragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
   }) : super(debugOwner: debugOwner, kind: kind);
 
   isAcceptedDragCallback isAcceptedDrag;
