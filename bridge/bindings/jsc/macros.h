@@ -1,3 +1,5 @@
+#include "object_property_macros.h"
+
 #define KRAKEN_BINDING_CONSOLE "__kraken_print__"
 
 #define BODY_TARGET_ID -1
