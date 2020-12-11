@@ -106,11 +106,17 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
   }
 
   bool _isAcceptedVerticalDrag (AxisDirection direction) {
-    return !(direction == AxisDirection.down && (_drag as ScrollDragController).getPixels() == 0.0);
+    double pixels = (_drag as ScrollDragController).getPixels();
+    double maxScrollExtent = (_drag as ScrollDragController).getmaxScrollExtent();
+    double minScrollExtent = (_drag as ScrollDragController).getminScrollExtent();
+    return !((direction == AxisDirection.down && pixels == minScrollExtent) || direction == AxisDirection.up && pixels == maxScrollExtent);
   }
 
   bool _isAcceptedHorizontalDrag (AxisDirection direction) {
-    return !(direction == AxisDirection.left && (_drag as ScrollDragController).getPixels() == 0.0);
+    double pixels = (_drag as ScrollDragController).getPixels();
+    double maxScrollExtent = (_drag as ScrollDragController).getmaxScrollExtent();
+    double minScrollExtent = (_drag as ScrollDragController).getminScrollExtent();
+    return !((direction == AxisDirection.down && pixels == minScrollExtent) || direction == AxisDirection.up && pixels == maxScrollExtent);
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {

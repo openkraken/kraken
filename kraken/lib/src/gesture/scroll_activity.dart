@@ -326,7 +326,15 @@ class ScrollDragController implements Drag {
   }
 
   double getPixels () {
-    return (delegate as ScrollPositionWithSingleContext).getPixels();
+    return (delegate as ScrollPositionWithSingleContext).pixels;
+  }
+
+  double getmaxScrollExtent () {
+    return (delegate as ScrollPositionWithSingleContext).maxScrollExtent;
+  }
+
+  double getminScrollExtent () {
+    return (delegate as ScrollPositionWithSingleContext).minScrollExtent;
   }
 
   AxisDirection getAxisDirection () {
