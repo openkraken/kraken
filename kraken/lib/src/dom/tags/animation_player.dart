@@ -38,13 +38,15 @@ class AnimationPlayerElement extends Element {
     element.play(nativeStringToString(name), mix, mixSeconds);
   }
 
+  final Pointer<NativeAnimationElement> nativeAnimationElement;
+
   RenderObject _animationRenderObject;
   FlareControls _animationController;
 
-  AnimationPlayerElement(int targetId, Pointer<NativeAnimationElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true) {
-    _nativeMap[nativePtr.address] = this;
-    nativePtr.ref.play = nativePlay;
+  AnimationPlayerElement(int targetId, this.nativeAnimationElement, ElementManager elementManager)
+      : super(targetId, nativeAnimationElement.ref.nativeElement, elementManager, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true) {
+    _nativeMap[nativeAnimationElement.address] = this;
+    nativeAnimationElement.ref.play = nativePlay;
   }
 
   String get objectFit => style[OBJECT_FIT];
@@ -62,6 +64,12 @@ class AnimationPlayerElement extends Element {
     if (_animationRenderObject != null) {
       addChild(_animationRenderObject);
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _nativeMap.remove(nativeAnimationElement.address);
   }
 
   @override

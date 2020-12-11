@@ -8,6 +8,7 @@
 #include "foundation/logging.h"
 #include "foundation/ui_command_queue.h"
 #include "foundation/ui_task_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 #ifdef KRAKEN_ENABLE_JSA
 #include "bridge_jsa.h"
@@ -248,7 +249,7 @@ void flushBridgeTask() {
   foundation::UITaskMessageQueue::instance()->flushTaskFromUIThread();
 }
 
-UICommandItem **getUICommandItems(int32_t contextId) {
+UICommandItem *getUICommandItems(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->data();
 }
 
@@ -258,4 +259,8 @@ int64_t getUICommandItemSize(int32_t contextId) {
 
 void clearUICommandItems(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
+}
+
+void flushUICommandCallback(int64_t contextId) {
+  foundation::UICommandCallbackQueue::instance(contextId)->flushCallbacks();
 }

@@ -4,23 +4,19 @@
  */
 
 #include "media_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSMediaElement *> & JSMediaElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSMediaElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSMediaElement *> JSMediaElement::instanceMap {};
 
 JSMediaElement *JSMediaElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSMediaElement(context);
   }
   return instanceMap[context];
 }
 JSMediaElement::~JSMediaElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -30,9 +26,11 @@ JSMediaElement::MediaElementInstance::MediaElementInstance(JSMediaElement *jsMed
   : ElementInstance(jsMediaElement, tagName, false), nativeMediaElement(new NativeMediaElement(nativeElement)) {}
 
 JSMediaElement::MediaElementInstance::~MediaElementInstance() {
-  delete nativeMediaElement;
-
   if (_src != nullptr) JSStringRelease(_src);
+
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeMediaElement *>(ptr);
+  }, nativeMediaElement);
 }
 
 std::vector<JSStringRef> &JSMediaElement::MediaElementInstance::getMediaElementPropertyNames() {
@@ -135,9 +133,12 @@ void JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValu
     _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_src);
 
-    auto args = buildUICommandArgs(name, JSStringRetain(_src));
+    NativeString args_01{};
+    NativeString args_02{};
+
+    buildUICommandArgs(name, _src, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
   }
 
   ElementInstance::setProperty(name, value, exception);

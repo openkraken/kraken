@@ -9,6 +9,7 @@
 #include "event.h"
 #include <codecvt>
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -19,13 +20,9 @@ void bindEventTarget(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "EventTarget", eventTarget->classObject);
 }
 
-std::unordered_map<JSContext *, JSEventTarget *> &JSEventTarget::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSEventTarget *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSEventTarget *> JSEventTarget::instanceMap{};
 
 JSEventTarget *JSEventTarget::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     const JSStaticFunction staticFunction[]{{"addEventListener", addEventListener, kJSPropertyAttributeReadOnly},
                                             {"removeEventListener", removeEventListener, kJSPropertyAttributeReadOnly},
@@ -38,7 +35,6 @@ JSEventTarget *JSEventTarget::instance(JSContext *context) {
 }
 
 JSEventTarget::~JSEventTarget() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -93,7 +89,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
     foundation::Task disposeTask = [](void *data) {
       auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
       foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
-        ->registerCommand(disposeCallbackData->id, UICommand::disposeEventTarget, nullptr, 0, nullptr);
+        ->registerCommand(disposeCallbackData->id, UICommand::disposeEventTarget, nullptr);
       delete disposeCallbackData;
     };
     foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
@@ -108,7 +104,9 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
     }
   }
 
-  delete nativeEventTarget;
+  foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeEventTarget *>(ptr);
+  }, nativeEventTarget);
 }
 
 JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -157,7 +155,8 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
-    auto args = buildUICommandArgs(eventType);
+    NativeString args_01{};
+    buildUICommandArgs(eventType, args_01);
 
     auto EventTarget = reinterpret_cast<JSEventTarget *>(eventTargetInstance->_hostClass);
     auto isJsOnlyEvent =
@@ -165,10 +164,9 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
 
     if (!isJsOnlyEvent) {
       foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(
-        eventTargetInstance->eventTargetId, UICommand::addEvent, args, 1, nullptr);
+        eventTargetInstance->eventTargetId, UICommand::addEvent, args_01, nullptr);
     };
   }
-
   std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
   JSValueProtect(ctx, callbackObjectRef);
   handlers.emplace_back(callbackObjectRef);
@@ -383,9 +381,9 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
   if (isJsOnlyEvent) return;
 
   int32_t contextId = _hostClass->contextId;
-  auto args = buildUICommandArgs(eventType);
-  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommand::addEvent, args,
-                                                                              1, nullptr);
+  NativeString args_01{};
+  buildUICommandArgs(eventType, args_01);
+  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommand::addEvent, args_01, nullptr);
 }
 
 void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

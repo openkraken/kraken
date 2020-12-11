@@ -6,6 +6,7 @@
 #include "node.h"
 #include "bindings/jsc/macros.h"
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -17,13 +18,9 @@ void bindNode(std::unique_ptr<JSContext> &context) {
 JSNode::JSNode(JSContext *context) : JSEventTarget(context, "Node") {}
 JSNode::JSNode(JSContext *context, const char *name) : JSEventTarget(context, name) {}
 
-std::unordered_map<JSContext *, JSNode *> & JSNode::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSNode *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSNode *> JSNode::instanceMap{};
 
 JSNode *JSNode::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSNode(context);
   }
@@ -31,7 +28,6 @@ JSNode *JSNode::instance(JSContext *context) {
 }
 
 JSNode::~JSNode() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -44,7 +40,9 @@ JSNode::NodeInstance::~NodeInstance() {
            ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
   }
 
-  delete nativeNode;
+  foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeNode *>(ptr);
+  }, nativeNode);
 }
 
 JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)
@@ -270,10 +268,13 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
 
       std::string nodeEventTargetId = std::to_string(node->eventTargetId);
       std::string position = std::string("beforebegin");
-      auto args = buildUICommandArgs(nodeEventTargetId, position);
+
+      NativeString args_01{};
+      NativeString args_02{};
+      buildUICommandArgs(nodeEventTargetId, position, args_01, args_02);
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(referenceNode->eventTargetId, UICommand::insertAdjacentNode, args, 2, nullptr);
+        ->registerCommand(referenceNode->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
     }
   }
 }
@@ -332,10 +333,14 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
 
   std::string nodeEventTargetId = std::to_string(node->eventTargetId);
   std::string position = std::string("beforeend");
-  auto args = buildUICommandArgs(nodeEventTargetId, position);
+
+  NativeString args_01{};
+  NativeString args_02{};
+
+  buildUICommandArgs(nodeEventTargetId, position, args_01, args_02);
 
   foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
-    ->registerCommand(eventTargetId, UICommand::insertAdjacentNode, args, 2, nullptr);
+    ->registerCommand(eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
 }
 
 void JSNode::NodeInstance::internalRemove(JSValueRef *exception) {
@@ -352,7 +357,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalRemoveChild(JSNode::NodeInst
     node->unrefer();
     node->_notifyNodeRemoved(this);
     foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
-      ->registerCommand(node->eventTargetId, UICommand::removeNode, nullptr, 0, nullptr);
+      ->registerCommand(node->eventTargetId, UICommand::removeNode, nullptr);
   }
 
   return node;
@@ -377,12 +382,16 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
   std::string newChildEventTargetId = std::to_string(newChild->eventTargetId);
   std::string position = std::string("afterend");
 
-  auto args = buildUICommandArgs(newChildEventTargetId, position);
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(oldChild->eventTargetId, UICommand::insertAdjacentNode, args, 2, nullptr);
+  NativeString args_01{};
+  NativeString args_02{};
+
+  buildUICommandArgs(newChildEventTargetId, position, args_01, args_02);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(oldChild->eventTargetId, UICommand::removeNode, nullptr, 0, nullptr);
+    ->registerCommand(oldChild->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
+
+  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
+    ->registerCommand(oldChild->eventTargetId, UICommand::removeNode, nullptr);
 
   return oldChild;
 }

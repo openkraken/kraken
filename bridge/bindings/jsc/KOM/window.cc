@@ -176,7 +176,6 @@ JSValueRef WindowInstance::scrollBy(JSContextRef ctx, JSObjectRef function, JSOb
 }
 
 JSWindow::~JSWindow() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -186,13 +185,9 @@ JSObjectRef JSWindow::instanceConstructor(JSContextRef ctx, JSObjectRef construc
   return window->object;
 }
 
-std::unordered_map<JSContext *, JSWindow *> & JSWindow::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSWindow *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSWindow *> JSWindow::instanceMap{};
 
 JSWindow *JSWindow::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSWindow(context);
   }

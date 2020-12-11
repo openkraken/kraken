@@ -12,13 +12,9 @@ void bindInputEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "InputEvent", event->classObject);
 };
 
-std::unordered_map<JSContext *, JSInputEvent *> &JSInputEvent::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSInputEvent *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSInputEvent *> JSInputEvent::instanceMap{};
 
 JSInputEvent *JSInputEvent::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSInputEvent(context);
   }
@@ -26,7 +22,6 @@ JSInputEvent *JSInputEvent::instance(JSContext *context) {
 }
 
 JSInputEvent::~JSInputEvent() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 

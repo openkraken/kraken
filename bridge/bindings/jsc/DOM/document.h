@@ -27,7 +27,7 @@ struct NativeDocument;
 
 class JSDocument : public JSNode {
 public:
-  static std::unordered_map<JSContext *, JSDocument *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSDocument *> instanceMap;
   static JSDocument *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

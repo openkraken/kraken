@@ -16,6 +16,7 @@
 #include "dart_methods.h"
 #include "event_target.h"
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 #include "text_node.h"
 
 namespace kraken::binding::jsc {
@@ -114,15 +115,11 @@ void JSElementAttributes::removeAttribute(std::string &name) {
   m_attributes.erase(name);
 }
 
+std::unordered_map<JSContext *, JSElement *> JSElement::instanceMap{};
+
 JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
-std::unordered_map<JSContext *, JSElement *> & JSElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSElement *> instanceMap;
-  return instanceMap;
-}
-
 JSElement *JSElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSElement(context);
   }
@@ -130,12 +127,16 @@ JSElement *JSElement::instance(JSContext *context) {
 }
 
 JSElement::~JSElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
 JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                            const JSValueRef *arguments, JSValueRef *exception) {
+  if (argumentCount < 0) {
+    JSC_THROW_ERROR(ctx, "Failed to new Element(): at least 1 parameter required.", exception);
+    return nullptr;
+  }
+
   JSStringRef tagNameStrRef = JSValueToStringCopy(ctx, arguments[0], exception);
   std::string tagName = JSStringToStdString(tagNameStrRef);
   auto instance = new ElementInstance(this, tagName.c_str(), true);
@@ -149,9 +150,10 @@ ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool s
 
   if (sendUICommand) {
     std::string t = std::string(tagName);
-    auto args = buildUICommandArgs(t);
+    NativeString args_01{};
+    buildUICommandArgs(t, args_01);
     ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeElement);
+      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
   }
 }
 
@@ -159,13 +161,8 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
   : NodeInstance(element, NodeType::ELEMENT_NODE, targetId), nativeElement(new NativeElement(nativeNode)) {
   m_tagName.setString(tagNameStringRef);
 
-  NativeString tagName{};
-  tagName.string = m_tagName.ptr();
-  tagName.length = m_tagName.size();
-
-  const int32_t argsLength = 1;
-  auto **args = new NativeString *[argsLength];
-  args[0] = tagName.clone();
+  NativeString args_01{};
+  buildUICommandArgs(tagNameStringRef, args_01);
 
   // No needs to send create element for BODY element.
   if (targetId == BODY_TARGET_ID) {
@@ -173,13 +170,15 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
     getDartMethod()->initBody(element->contextId, nativeElement);
   } else {
     ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(targetId, UICommand::createElement, args, argsLength, nativeElement);
+      ->registerCommand(targetId, UICommand::createElement, args_01, nativeElement);
   }
 }
 
 ElementInstance::~ElementInstance() {
   if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
-  delete nativeElement;
+
+  ::foundation::UICommandCallbackQueue::instance(contextId)
+    ->registerCallback([](void *ptr) { delete reinterpret_cast<NativeElement *>(ptr); }, nativeElement);
 }
 
 JSValueRef JSElement::getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -467,10 +466,12 @@ JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObj
     elementInstance->_didModifyAttribute(name, empty, valueString);
   }
 
-  auto args = buildUICommandArgs(name, valueString);
+  NativeString args_01{};
+  NativeString args_02{};
+  buildUICommandArgs(name, valueString, args_01, args_02);
 
   ::foundation::UICommandTaskMessageQueue::instance(elementInstance->_hostClass->contextId)
-    ->registerCommand(elementInstance->eventTargetId, UICommand::setProperty, args, 2, nullptr);
+    ->registerCommand(elementInstance->eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
 
   return nullptr;
 }
@@ -553,9 +554,10 @@ JSValueRef JSElement::removeAttribute(JSContextRef ctx, JSObjectRef function, JS
     (*element->m_attributes)->removeAttribute(name);
     element->_didModifyAttribute(name, id, empty);
 
-    auto args = buildUICommandArgs(name);
+    NativeString args_01{};
+    buildUICommandArgs(name, args_01);
     ::foundation::UICommandTaskMessageQueue::instance(element->_hostClass->contextId)
-      ->registerCommand(element->eventTargetId, UICommand::removeProperty, args, 1, nullptr);
+      ->registerCommand(element->eventTargetId, UICommand::removeProperty, args_01, nullptr);
   }
 
   return nullptr;
