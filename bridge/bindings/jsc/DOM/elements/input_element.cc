@@ -39,10 +39,11 @@ JSObjectRef JSInputElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 JSInputElement::InputElementInstance::InputElementInstance(JSInputElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "input", false), nativeInputElement(new NativeInputElement(nativeElement)) {
   std::string tagName = "input";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
 
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeInputElement);
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeInputElement);
 }
 
 std::vector<JSStringRef> &JSInputElement::InputElementInstance::getInputElementPropertyNames() {
@@ -126,9 +127,11 @@ void JSInputElement::InputElementInstance::setProperty(std::string &name, JSValu
   if (propertyMap.count(name) > 0) {
     JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
     std::string string = JSStringToStdString(stringRef);
-    auto args = buildUICommandArgs(name, string);
+    NativeString args_01{};
+    NativeString args_02{};
+    buildUICommandArgs(name, string, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
   } else {
     ElementInstance::setProperty(name, value, exception);
   }
