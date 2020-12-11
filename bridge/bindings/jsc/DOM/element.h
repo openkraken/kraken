@@ -94,7 +94,7 @@ public:
     kInput,
   };
 
-  static std::unordered_map<JSContext *, JSElement *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSElement *> instanceMap;
   static JSElement *instance(JSContext *context);
   static std::vector<JSStringRef> &getElementPropertyNames();
   static const std::unordered_map<std::string, ElementProperty> &getElementPropertyMap();

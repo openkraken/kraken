@@ -4,16 +4,13 @@
  */
 
 #include "animation_player_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSAnimationPlayerElement *> &JSAnimationPlayerElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSAnimationPlayerElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSAnimationPlayerElement *> JSAnimationPlayerElement::instanceMap{};
 
 JSAnimationPlayerElement *JSAnimationPlayerElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSAnimationPlayerElement(context);
   }
@@ -21,7 +18,6 @@ JSAnimationPlayerElement *JSAnimationPlayerElement::instance(JSContext *context)
 }
 
 JSAnimationPlayerElement::~JSAnimationPlayerElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -76,9 +72,10 @@ JSAnimationPlayerElement::AnimationPlayerElementInstance::AnimationPlayerElement
   : ElementInstance(jsAnchorElement, "animation-player", false),
     nativeAnimationPlayerElement(new NativeAnimationPlayerElement(nativeElement)) {
   std::string tagName = "animation-player";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeAnimationPlayerElement);
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeAnimationPlayerElement);
 }
 
 std::vector<JSStringRef> &
@@ -124,16 +121,21 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::
     JSStringRef src = JSValueToStringCopy(_hostClass->ctx, value, exception);
     m_src.setString(src);
 
-    auto args = buildUICommandArgs(name, src);
+    NativeString args_01{};
+    NativeString args_02{};
+    buildUICommandArgs(name, src, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
   } else if (property == AnimationPlayerProperty::kType) {
     JSStringRef type = JSValueToStringCopy(_hostClass->ctx, value, exception);
     m_type.setString(type);
 
-    auto args = buildUICommandArgs(name, type);
+    NativeString args_01{};
+    NativeString args_02{};
+
+    buildUICommandArgs(name, type, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
   } else {
     ElementInstance::setProperty(name, value, exception);
   }
@@ -149,7 +151,9 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::getPropertyNames(
 }
 
 JSAnimationPlayerElement::AnimationPlayerElementInstance::~AnimationPlayerElementInstance() {
-  delete nativeAnimationPlayerElement;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeAnimationPlayerElement *>(ptr);
+  }, nativeAnimationPlayerElement);
 }
 
 } // namespace kraken::binding::jsc

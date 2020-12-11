@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_EVENT_TARGET_H
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
+#include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/host_class.h"
 #include "bindings/jsc/js_context.h"
-#include "bindings/jsc/DOM/event.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
 #include "foundation/ui_command_queue.h"
@@ -16,8 +16,8 @@
 #include "include/kraken_bridge.h"
 #include <array>
 #include <atomic>
-#include <unordered_map>
 #include <condition_variable>
+#include <unordered_map>
 
 namespace kraken::binding::jsc {
 
@@ -34,19 +34,20 @@ struct NativeEventTarget;
 
 class JSEventTarget : public HostClass {
 public:
-  static std::unordered_map<JSContext *, JSEventTarget *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSEventTarget *> instanceMap;
   static JSEventTarget *instance(JSContext *context);
   enum class EventTargetProperty {
     kAddEventListener,
     kRemoveEventListener,
-    kDispatchEvent, kClearListeners,
+    kDispatchEvent,
+    kClearListeners,
     kEventTargetId
   };
   static std::vector<JSStringRef> &getEventTargetPropertyNames();
   static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                const JSValueRef *arguments, JSValueRef *exception) override;
+                                  const JSValueRef *arguments, JSValueRef *exception) override;
 
   JSValueRef prototypeGetProperty(std::string &name, JSValueRef *exception) override;
 
@@ -56,10 +57,10 @@ public:
   static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
-  static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                  size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                       size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
 
   class EventTargetInstance : public Instance {
   public:
@@ -75,7 +76,7 @@ public:
     bool dispatchEvent(EventInstance *event);
 
     ~EventTargetInstance() override;
-    int64_t eventTargetId;
+    int32_t eventTargetId;
     NativeEventTarget *nativeEventTarget {nullptr};
 
   private:
@@ -91,6 +92,7 @@ protected:
   explicit JSEventTarget(JSContext *context, const char *name);
   explicit JSEventTarget(JSContext *context, const JSStaticFunction *staticFunction, const JSStaticValue *staticValue);
   ~JSEventTarget();
+
 private:
   JSFunctionHolder m_removeEventListener{context, this, "removeEventListener", removeEventListener};
   JSFunctionHolder m_dispatchEvent{context, this, "dispatchEvent", dispatchEvent};
@@ -104,7 +106,7 @@ using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, Nativ
 struct NativeEventTarget {
   NativeEventTarget() = delete;
   NativeEventTarget(JSEventTarget::EventTargetInstance *_instance)
-    : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl) {};
+    : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl){};
 
   static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent);
 

@@ -22,8 +22,10 @@ class AudioElement extends MediaElement {
   static double defaultWidth = 300.0;
   static double defaultHeight = 150.0;
 
-  AudioElement(int targetId, Pointer<NativeAudioElement> nativePtr, ElementManager elementManager)
-      : super(targetId, nativePtr.ref.nativeMediaElement, elementManager, AUDIO, defaultStyle: _defaultStyle);
+  final Pointer<NativeAudioElement> nativeAudioElement;
+
+  AudioElement(int targetId, this.nativeAudioElement, ElementManager elementManager)
+      : super(targetId, nativeAudioElement.ref.nativeMediaElement, elementManager, AUDIO, defaultStyle: _defaultStyle);
 
   @override
   void willAttachRenderer() {

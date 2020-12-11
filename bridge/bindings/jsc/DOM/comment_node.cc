@@ -4,6 +4,7 @@
  */
 
 #include "comment_node.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -14,20 +15,15 @@ void bindCommentNode(std::unique_ptr<JSContext> &context) {
 
 JSCommentNode::JSCommentNode(JSContext *context) : JSNode(context, "CommentNode") {}
 
-std::unordered_map<JSContext *, JSCommentNode *> & JSCommentNode::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSCommentNode *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSCommentNode *> JSCommentNode::instanceMap{};
 
 JSCommentNode *JSCommentNode::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSCommentNode(context);
   }
   return instanceMap[context];
 }
 JSCommentNode::~JSCommentNode() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -50,10 +46,11 @@ JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsComment
   }
 
   std::string str = m_data.string();
-  auto args = buildUICommandArgs(str);
+  NativeString args_01{};
+  buildUICommandArgs(str, args_01);
 
   ::foundation::UICommandTaskMessageQueue::instance(jsCommentNode->contextId)
-    ->registerCommand(eventTargetId, UICommand::createComment, args, 1, nativeComment);
+    ->registerCommand(eventTargetId, UICommand::createComment, args_01, nativeComment);
 }
 
 void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
@@ -111,7 +108,9 @@ std::string JSCommentNode::CommentNodeInstance::internalGetTextContent() {
 }
 
 JSCommentNode::CommentNodeInstance::~CommentNodeInstance() {
-  delete nativeComment;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeComment *>(ptr);
+  }, nativeComment);
 }
 
 void JSCommentNode::CommentNodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {

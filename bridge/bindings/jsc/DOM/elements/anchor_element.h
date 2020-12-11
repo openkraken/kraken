@@ -44,7 +44,7 @@ public:
 protected:
   JSAnchorElement() = delete;
   ~JSAnchorElement();
-  static std::unordered_map<JSContext *, JSAnchorElement *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSAnchorElement *> instanceMap;
   explicit JSAnchorElement(JSContext *context);
 };
 

@@ -28,7 +28,7 @@ struct NativeCanvasElement {
 
 class JSCanvasElement : public JSElement {
 public:
-  static std::unordered_map<JSContext *, JSCanvasElement *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSCanvasElement *> instanceMap;
   static JSCanvasElement *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

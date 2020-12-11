@@ -27,7 +27,7 @@ public:
   static std::vector<JSStringRef> &getCustomEventPropertyNames();
   const static std::unordered_map<std::string, CustomEventProperty> &getCustomEventPropertyMap();
 
-  static std::unordered_map<JSContext *, JSCustomEvent *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSCustomEvent *> instanceMap;
   static JSCustomEvent *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

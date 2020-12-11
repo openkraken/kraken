@@ -5,24 +5,20 @@
 
 #include "canvas_element.h"
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
 JSCanvasElement *JSCanvasElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSCanvasElement(context);
   }
   return instanceMap[context];
 }
 
-std::unordered_map<JSContext *, JSCanvasElement *> & JSCanvasElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSCanvasElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSCanvasElement *> JSCanvasElement::instanceMap {};
 
 JSCanvasElement::~JSCanvasElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -38,14 +34,17 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
   : ElementInstance(jsCanvasElement, "canvas", false), nativeCanvasElement(new NativeCanvasElement(nativeElement)) {
 
   std::string tagName = "canvas";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
 
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeCanvasElement);
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeCanvasElement);
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
-  delete nativeCanvasElement;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeCanvasElement *>(ptr);
+  }, nativeCanvasElement);
 }
 
 std::vector<JSStringRef> &JSCanvasElement::CanvasElementInstance::getCanvasElementPropertyNames() {
@@ -97,19 +96,27 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string widthString = std::to_string(_width) + "px";
-      auto args = buildUICommandArgs(name, widthString);
+
+      NativeString args_01{};
+      NativeString args_02{};
+
+      buildUICommandArgs(name, widthString, args_01, args_02);
 
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     case CanvasElementProperty::kHeight: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string heightString = std::to_string(_height) + "px";
-      auto args = buildUICommandArgs(name, heightString);
+
+      NativeString args_01{};
+      NativeString args_02{};
+
+      buildUICommandArgs(name, heightString, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     default:
@@ -171,7 +178,9 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::CanvasRenderingConte
   : Instance(canvasRenderContext2D), nativeCanvasRenderingContext2D(nativeCanvasRenderingContext2D) {}
 
 CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingContext2DInstance() {
-  delete nativeCanvasRenderingContext2D;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeCanvasRenderingContext2D *>(ptr);
+  }, nativeCanvasRenderingContext2D);
 }
 
 std::vector<JSStringRef> &

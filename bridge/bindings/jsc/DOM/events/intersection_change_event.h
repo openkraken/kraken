@@ -25,7 +25,7 @@ public:
   static std::vector<JSStringRef> &getIntersectionChangeEventPropertyNames();
   const static std::unordered_map<std::string, IntersectionChangeEventProperty> &getIntersectionChangeEventPropertyMap();
 
-  static std::unordered_map<JSContext *, JSIntersectionChangeEvent *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSIntersectionChangeEvent *> instanceMap;
   static JSIntersectionChangeEvent *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

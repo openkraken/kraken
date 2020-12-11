@@ -20,7 +20,7 @@ struct NativeWindow;
 
 class JSWindow : public JSEventTarget {
 public:
-  static std::unordered_map<JSContext *, JSWindow *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSWindow *> instanceMap;
   static JSWindow *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,

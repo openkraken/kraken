@@ -4,16 +4,13 @@
  */
 
 #include "audio_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSAudioElement *> & JSAudioElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSAudioElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSAudioElement *> JSAudioElement::instanceMap {};
 
 JSAudioElement *JSAudioElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSAudioElement(context);
   }
@@ -21,7 +18,6 @@ JSAudioElement *JSAudioElement::instance(JSContext *context) {
 }
 
 JSAudioElement::~JSAudioElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -36,13 +32,16 @@ JSObjectRef JSAudioElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 JSAudioElement::AudioElementInstance::AudioElementInstance(JSAudioElement *jsAudioElement)
   : MediaElementInstance(jsAudioElement, "audio"), nativeAudioElement(new NativeAudioElement(nativeMediaElement)) {
   std::string tagName = "audio";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeAudioElement);
+      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeAudioElement);
 }
 
 JSAudioElement::AudioElementInstance::~AudioElementInstance() {
-  delete nativeAudioElement;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeAudioElement *>(ptr);
+  }, nativeAudioElement);
 }
 
 std::vector<JSStringRef> &JSAudioElement::AudioElementInstance::getAudioElementPropertyNames() {

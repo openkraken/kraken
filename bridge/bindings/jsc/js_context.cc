@@ -160,68 +160,52 @@ JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFu
   return JSObjectCallAsConstructor(context->context(), promiseConstructor, 1, constructorArguments, exception);
 }
 
-NativeString **buildUICommandArgs(JSStringRef key) {
-  auto args = new NativeString *[1];
-  NativeString nativeKey{};
-  nativeKey.string = JSStringGetCharactersPtr(key);
-  nativeKey.length = JSStringGetLength(key);
-  args[0] = nativeKey.clone();
-
-  JSStringRelease(key);
-  return args;
+namespace {
+const JSChar *cloneString(const JSChar* string, size_t length) {
+  auto *newString = new JSChar[length];
+  for (size_t i = 0; i < length; i ++) {
+    newString[i] = string[i];
+  }
+  return newString;
+};
 }
-NativeString **buildUICommandArgs(std::string &key) {
-  auto args = new NativeString *[1];
 
+void buildUICommandArgs(JSStringRef key, NativeString &args_01) {
+  args_01.length = JSStringGetLength(key);
+  args_01.string = cloneString(JSStringGetCharactersPtr(key), args_01.length);
+}
+
+void buildUICommandArgs(std::string &key, NativeString &args_01) {
   JSStringRef keyStringRef = JSStringCreateWithUTF8CString(key.c_str());
-  NativeString nativeKey{};
-  nativeKey.string = JSStringGetCharactersPtr(keyStringRef);
-  nativeKey.length = JSStringGetLength(keyStringRef);
-  args[0] = nativeKey.clone();
+  args_01.length = JSStringGetLength(keyStringRef);
+  args_01.string = cloneString(JSStringGetCharactersPtr(keyStringRef), args_01.length);
+  JSStringRelease(keyStringRef);
+}
+
+void buildUICommandArgs(std::string &key, JSStringRef value, NativeString &args_01, NativeString &args_02) {
+  JSStringRef keyStringRef = JSStringCreateWithUTF8CString(key.c_str());
+
+  args_01.length = JSStringGetLength(keyStringRef);
+  args_01.string = cloneString(JSStringGetCharactersPtr(keyStringRef), args_01.length);
+
+  args_02.length = JSStringGetLength(value);
+  args_02.string = cloneString(JSStringGetCharactersPtr(value), args_02.length);
 
   JSStringRelease(keyStringRef);
-  return args;
-}
-NativeString **buildUICommandArgs(std::string &key, JSStringRef value) {
-  auto args = new NativeString *[2];
-  JSStringRef keyStringRef = JSStringCreateWithUTF8CString(key.c_str());
-
-  NativeString nativeKey{};
-  nativeKey.string = JSStringGetCharactersPtr(keyStringRef);
-  nativeKey.length = JSStringGetLength(keyStringRef);
-
-  NativeString nativeValue{};
-  nativeValue.string = JSStringGetCharactersPtr(value);
-  nativeValue.length = JSStringGetLength(value);
-
-  args[0] = nativeKey.clone();
-  args[1] = nativeValue.clone();
-
-  JSStringRelease(keyStringRef);
-  JSStringRelease(value);
-  return args;
 }
 
-NativeString **buildUICommandArgs(std::string &key, std::string &value) {
-  auto args = new NativeString *[2];
+void buildUICommandArgs(std::string &key, std::string &value, NativeString &args_01, NativeString &args_02) {
   JSStringRef keyStringRef = JSStringCreateWithUTF8CString(key.c_str());
   JSStringRef valueStringRef = JSStringCreateWithUTF8CString(value.c_str());
 
-  NativeString nativeKey{};
-  nativeKey.string = JSStringGetCharactersPtr(keyStringRef);
-  nativeKey.length = JSStringGetLength(keyStringRef);
+  args_01.length = JSStringGetLength(keyStringRef);
+  args_01.string = cloneString(JSStringGetCharactersPtr(keyStringRef), args_01.length);
 
-  NativeString nativeValue{};
-  nativeValue.string = JSStringGetCharactersPtr(valueStringRef);
-  nativeValue.length = JSStringGetLength(valueStringRef);
-
-  args[0] = nativeKey.clone();
-  args[1] = nativeValue.clone();
+  args_02.length = JSStringGetLength(valueStringRef);
+  args_02.string = cloneString(JSStringGetCharactersPtr(valueStringRef), args_02.length);
 
   JSStringRelease(keyStringRef);
   JSStringRelease(valueStringRef);
-
-  return args;
 }
 
 NativeString *stringToNativeString(std::string &string) {

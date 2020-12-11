@@ -5,6 +5,7 @@
 
 #include "text_node.h"
 #include "foundation/ui_command_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -13,20 +14,15 @@ void bindTextNode(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "TextNode", textNode->classObject);
 }
 
-std::unordered_map<JSContext *, JSTextNode *> &JSTextNode::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSTextNode *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSTextNode *> JSTextNode::instanceMap{};
 
 JSTextNode *JSTextNode::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSTextNode(context);
   }
   return instanceMap[context];
 }
 JSTextNode::~JSTextNode() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -45,9 +41,10 @@ JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringR
   m_data.setString(data);
 
   std::string dataString = JSStringToStdString(data);
-  auto args = buildUICommandArgs(dataString);
+  NativeString args_01{};
+  buildUICommandArgs(dataString, args_01);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(eventTargetId, UICommand::createTextNode, args, 1, nativeTextNode);
+    ->registerCommand(eventTargetId, UICommand::createTextNode, args_01, nativeTextNode);
 }
 
 JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -76,9 +73,11 @@ void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
     m_data.setString(data);
 
     std::string dataString = JSStringToStdString(data);
-    auto args = buildUICommandArgs(name, dataString);
+    NativeString args_01{};
+    NativeString args_02{};
+    buildUICommandArgs(name, dataString, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+      ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
   } else {
     JSNode::NodeInstance::setProperty(name, value, exception);
   }
@@ -113,16 +112,20 @@ JSTextNode::TextNodeInstance::getTextNodePropertyMap() {
 }
 
 JSTextNode::TextNodeInstance::~TextNodeInstance() {
-  delete nativeTextNode;
+  foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeTextNode *>(ptr);
+  }, nativeTextNode);
 }
 
 void JSTextNode::TextNodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {
   m_data.setString(content);
 
   std::string key = "data";
-  auto args = buildUICommandArgs(key, content);
+  NativeString args_01{};
+  NativeString args_02{};
+  buildUICommandArgs(key, content, args_01, args_02);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+    ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
 }
 
 } // namespace kraken::binding::jsc

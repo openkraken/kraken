@@ -9,6 +9,7 @@
 #include "text_node.h"
 #include <mutex>
 #include <regex>
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -20,13 +21,9 @@ void bindDocument(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
 }
 
-std::unordered_map<JSContext *, JSDocument *> &JSDocument::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSDocument *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSDocument *> JSDocument::instanceMap{};
 
 JSDocument *JSDocument::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSDocument(context);
   }
@@ -34,7 +31,6 @@ JSDocument *JSDocument::instance(JSContext *context) {
 }
 
 JSDocument::~JSDocument() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -209,7 +205,9 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
 }
 
 DocumentInstance::~DocumentInstance() {
-  delete nativeDocument;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeDocument *>(ptr);
+  }, nativeDocument);
   instanceMap.erase(context);
 }
 
