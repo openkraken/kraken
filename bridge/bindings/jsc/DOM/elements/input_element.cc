@@ -36,6 +36,30 @@ JSObjectRef JSInputElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
   return instance->object;
 }
 
+JSValueRef JSInputElement::focus(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef *arguments, JSValueRef *exception) {
+  getDartMethod()->flushUICommand();
+
+  auto elementInstance =
+    static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(function));
+  assert_m(elementInstance->nativeInputElement->focus != nullptr,
+           "Failed to call dart method: focus() is nullptr");
+  elementInstance->nativeInputElement->focus(elementInstance->nativeInputElement);
+  return nullptr;
+}
+
+JSValueRef JSInputElement::blur(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef *arguments, JSValueRef *exception) {
+  getDartMethod()->flushUICommand();
+
+  auto elementInstance =
+    static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(function));
+  assert_m(elementInstance->nativeInputElement->blur != nullptr,
+           "Failed to call dart method: blur() is nullptr");
+  elementInstance->nativeInputElement->blur(elementInstance->nativeInputElement);
+  return nullptr;
+}
+
 JSInputElement::InputElementInstance::InputElementInstance(JSInputElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "input", false), nativeInputElement(new NativeInputElement(nativeElement)) {
   std::string tagName = "input";
@@ -48,6 +72,7 @@ JSInputElement::InputElementInstance::InputElementInstance(JSInputElement *jsAnc
 
 std::vector<JSStringRef> &JSInputElement::InputElementInstance::getInputElementPropertyNames() {
   static std::vector<JSStringRef> propertyNames{
+    // Properties
     JSStringCreateWithUTF8CString("width"),
     JSStringCreateWithUTF8CString("height"),
     JSStringCreateWithUTF8CString("value"),
@@ -69,33 +94,43 @@ std::vector<JSStringRef> &JSInputElement::InputElementInstance::getInputElementP
     JSStringCreateWithUTF8CString("readonly"),
     JSStringCreateWithUTF8CString("placeholder"),
     JSStringCreateWithUTF8CString("type"),
+
+    // Methods
+    JSStringCreateWithUTF8CString("focus"),
+    JSStringCreateWithUTF8CString("blur"),
   };
   return propertyNames;
 }
 
 const std::unordered_map<std::string, JSInputElement::InputElementInstance::InputProperty> &
 JSInputElement::InputElementInstance::getInputElementPropertyMap() {
-  static std::unordered_map<std::string, InputProperty> propertyMap{{"width", InputProperty::kWidth},
-                                                                    {"height", InputProperty::kHeight},
-                                                                    {"value", InputProperty::kValue},
-                                                                    {"accept", InputProperty::kAccept},
-                                                                    {"autocomplete", InputProperty::kAutocomplete},
-                                                                    {"autofocus", InputProperty::kAutofocus},
-                                                                    {"checked", InputProperty::kChecked},
-                                                                    {"disabled", InputProperty::kDisabled},
-                                                                    {"min", InputProperty::kMin},
-                                                                    {"max", InputProperty::kMax},
-                                                                    {"minlength", InputProperty::kMinlength},
-                                                                    {"maxlength", InputProperty::kMaxlength},
-                                                                    {"size", InputProperty::kSize},
-                                                                    {"multiple", InputProperty::kMultiple},
-                                                                    {"name", InputProperty::kName},
-                                                                    {"step", InputProperty::kStep},
-                                                                    {"pattern", InputProperty::kPattern},
-                                                                    {"required", InputProperty::kRequired},
-                                                                    {"readonly", InputProperty::kReadonly},
-                                                                    {"placeholder", InputProperty::kPlaceholder},
-                                                                    {"type", InputProperty::kType},
+  static std::unordered_map<std::string, InputProperty> propertyMap{
+    // Properties
+    {"width", InputProperty::kWidth},
+    {"height", InputProperty::kHeight},
+    {"value", InputProperty::kValue},
+    {"accept", InputProperty::kAccept},
+    {"autocomplete", InputProperty::kAutocomplete},
+    {"autofocus", InputProperty::kAutofocus},
+    {"checked", InputProperty::kChecked},
+    {"disabled", InputProperty::kDisabled},
+    {"min", InputProperty::kMin},
+    {"max", InputProperty::kMax},
+    {"minlength", InputProperty::kMinlength},
+    {"maxlength", InputProperty::kMaxlength},
+    {"size", InputProperty::kSize},
+    {"multiple", InputProperty::kMultiple},
+    {"name", InputProperty::kName},
+    {"step", InputProperty::kStep},
+    {"pattern", InputProperty::kPattern},
+    {"required", InputProperty::kRequired},
+    {"readonly", InputProperty::kReadonly},
+    {"placeholder", InputProperty::kPlaceholder},
+    {"type", InputProperty::kType},
+
+    // Methods
+    {"focus", InputProperty::kFocus},
+    {"blur", InputProperty::kBlur},
   };
   return propertyMap;
 }
@@ -112,6 +147,12 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
     }
     case InputProperty::kHeight: {
       return JSValueMakeNumber(_hostClass->ctx, nativeInputElement->getInputHeight(nativeInputElement));
+    }
+    case InputProperty::kFocus: {
+      return m_focus.function();
+    }
+    case InputProperty::kBlur: {
+      return m_blur.function();
     }
     default: {
       return ElementInstance::getStringValueProperty(name);

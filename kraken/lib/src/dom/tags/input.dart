@@ -4,6 +4,7 @@
  */
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:ui';
 import 'dart:ffi';
 
@@ -20,6 +21,11 @@ import 'package:kraken/rendering.dart';
 const String INPUT = 'INPUT';
 
 const TextInputType TEXT_INPUT_TYPE_NUMBER = TextInputType.numberWithOptions(signed: true);
+
+final Pointer<NativeFunction<GetInputWidth>> nativeGetInputWidth = Pointer.fromFunction(InputElement.getInputWidth, 0.0);
+final Pointer<NativeFunction<GetInputHeight>> nativeGetInputHeight = Pointer.fromFunction(InputElement.getInputHeight, 0.0);
+final Pointer<NativeFunction<InputElementMethodVoidCallback>> nativeInputMethodFocus = Pointer.fromFunction(InputElement.callMethodFocus);
+final Pointer<NativeFunction<InputElementMethodVoidCallback>> nativeInputMethodBlur = Pointer.fromFunction(InputElement.callMethodBlur);
 
 /// https://www.w3.org/TR/css-sizing-3/#intrinsic-sizes
 /// For boxes without a preferred aspect ratio:
@@ -93,6 +99,39 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     inputElement.focus();
   }
 
+  static SplayTreeMap<int, InputElement> _nativeMap = SplayTreeMap();
+
+  static InputElement getInputElementOfNativePtr(Pointer<NativeInputElement> nativePtr) {
+    InputElement element = _nativeMap[nativePtr.address];
+    assert(element != null, 'Can not get element from nativeElement: $nativePtr');
+    return element;
+  }
+
+  // el.width
+  static double getInputWidth(Pointer<NativeInputElement> nativeInputElement) {
+    // @TODO: Apply algorithm of input element property width.
+    return 0.0;
+  }
+
+  // el.height
+  static double getInputHeight(Pointer<NativeInputElement> nativeInputElement) {
+    // @TODO: Apply algorithm of input element property height.
+    return 0.0;
+  }
+
+  static void callMethodFocus(Pointer<NativeInputElement> nativeInputElement) {
+    InputElement inputElement = getInputElementOfNativePtr(nativeInputElement);
+    InputElement.setFocus(inputElement);
+  }
+
+  static void callMethodBlur(Pointer<NativeInputElement> nativeInputElement) {
+    InputElement inputElement = getInputElementOfNativePtr(nativeInputElement);
+    if (inputElement == InputElement.focusInputElement) {
+      InputElement.clearFocus();
+    }
+  }
+
+  final Pointer<NativeInputElement> nativeInputElement;
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(false);
@@ -147,8 +186,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
   }
 
-  final Pointer<NativeInputElement> nativeInputElement;
-
   TextInputConfiguration textInputConfiguration;
 
   InputElement(
@@ -159,7 +196,14 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId, nativeInputElement.ref.nativeElement, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+  }) : super(targetId, nativeInputElement.ref.nativeElement, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+    _nativeMap[nativeInputElement.address] = this;
+
+    nativeInputElement.ref.getInputWidth = nativeGetInputWidth;
+    nativeInputElement.ref.getInputHeight = nativeGetInputHeight;
+    nativeInputElement.ref.focus = nativeInputMethodFocus;
+    nativeInputElement.ref.blur = nativeInputMethodBlur;
+  }
 
   @override
   void didAttachRenderer() {
@@ -184,6 +228,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void willDetachRenderer() {
     super.willDetachRenderer();
     InputElement.clearFocus();
+    _cursorTimer?.cancel();
+    if (textInputConnection != null && textInputConnection.attached) {
+      textInputConnection.close();
+    }
   }
 
   @override
@@ -647,6 +695,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void showAutocorrectionPromptRect(int start, int end) {
     // TODO: implement showAutocorrectionPromptRect
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
+  }
+
+  void dispose() {
+    super.dispose();
+    _nativeMap.remove(nativeInputElement.address);
   }
 }
 

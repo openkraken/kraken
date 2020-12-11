@@ -52,4 +52,9 @@ using SimulatePointer = void (*)(MousePointer**, int32_t length);
 KRAKEN_EXPORT
 void registerSimulatePointer(SimulatePointer simulatePointer);
 
+using SimulateKeyPress = void (*)(NativeString* nativeString);
+
+KRAKEN_EXPORT
+void registerSimulateKeyPress(SimulateKeyPress simulateKeyPress);
+
 #endif

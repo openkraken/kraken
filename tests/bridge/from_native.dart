@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:ui';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
@@ -14,9 +15,9 @@ import 'package:flutter/material.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:test/test.dart';
-import 'dart:ui';
-import 'package:kraken/src/bridge/from_native.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'platform.dart';
 import 'match_snapshots.dart';
@@ -123,12 +124,17 @@ void registerEnvironment() {
 }
 
 typedef Native_SimulatePointer = Void Function(Pointer<Pointer<MousePointer>>,  Int32 length);
+typedef Native_SimulateKeyPress = Void Function(Pointer<NativeString>);
 
 typedef Native_RegisterSimulatePointer = Void Function(Pointer<NativeFunction<Native_SimulatePointer>> function);
+typedef Native_RegisterSimulateKeyPress = Void Function(Pointer<NativeFunction<Native_SimulateKeyPress>> function);
 typedef Dart_RegisterSimulatePointer = void Function(Pointer<NativeFunction<Native_SimulatePointer>> function);
+typedef Dart_RegisterSimulateKeyPress = void Function(Pointer<NativeFunction<Native_SimulateKeyPress>> function);
 
 final Dart_RegisterSimulatePointer _registerSimulatePointer =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSimulatePointer>>('registerSimulatePointer').asFunction();
+final Dart_RegisterSimulateKeyPress _registerSimulateKeyPress =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSimulateKeyPress>>('registerSimulateKeyPress').asFunction();
 
 PointerChange _getPointerChange(double change) {
   return PointerChange.values[change.toInt()];
@@ -147,7 +153,6 @@ class MousePointer extends Struct {
   @Double()
   double change;
 }
-
 
 void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int length) {
   List<PointerData> data = [];
@@ -177,10 +182,78 @@ void registerSimulatePointer() {
   _registerSimulatePointer(pointer);
 }
 
+// Limit: only accept a-z0-9 chars.
+// Enough for testing.
+void _simulateKeyPress(Pointer<NativeString> charsPtr) async {
+  String chars = nativeStringToString(charsPtr);
+  if (chars == null) {
+    print('Warning: simulateKeyPress chars is null.');
+    return;
+  }
+  for (int i = 0; i < chars.length; i++) {
+    String char = chars[i];
+    LogicalKeyboardKey key = getLogicalKeyboardKey(char);
+    if (key != null) {
+      await KeyEventSimulator.simulateKeyDownEvent(key);
+      await KeyEventSimulator.simulateKeyUpEvent(key);
+    }
+  }
+}
+
+void registerSimulateKeyPress() {
+  Pointer<NativeFunction<Native_SimulateKeyPress>> pointer = Pointer.fromFunction(_simulateKeyPress);
+  _registerSimulateKeyPress(pointer);
+}
+
+LogicalKeyboardKey getLogicalKeyboardKey(String char) {
+  char = char.toLowerCase();
+  switch (char) {
+    case 'a': return LogicalKeyboardKey.keyA;
+    case 'b': return LogicalKeyboardKey.keyB;
+    case 'c': return LogicalKeyboardKey.keyC;
+    case 'd': return LogicalKeyboardKey.keyD;
+    case 'e': return LogicalKeyboardKey.keyE;
+    case 'f': return LogicalKeyboardKey.keyF;
+    case 'g': return LogicalKeyboardKey.keyG;
+    case 'h': return LogicalKeyboardKey.keyH;
+    case 'i': return LogicalKeyboardKey.keyI;
+    case 'j': return LogicalKeyboardKey.keyJ;
+    case 'k': return LogicalKeyboardKey.keyK;
+    case 'l': return LogicalKeyboardKey.keyL;
+    case 'm': return LogicalKeyboardKey.keyM;
+    case 'n': return LogicalKeyboardKey.keyN;
+    case 'o': return LogicalKeyboardKey.keyO;
+    case 'p': return LogicalKeyboardKey.keyP;
+    case 'q': return LogicalKeyboardKey.keyQ;
+    case 'r': return LogicalKeyboardKey.keyR;
+    case 's': return LogicalKeyboardKey.keyS;
+    case 't': return LogicalKeyboardKey.keyT;
+    case 'u': return LogicalKeyboardKey.keyU;
+    case 'v': return LogicalKeyboardKey.keyV;
+    case 'w': return LogicalKeyboardKey.keyW;
+    case 'x': return LogicalKeyboardKey.keyX;
+    case 'y': return LogicalKeyboardKey.keyY;
+    case 'z': return LogicalKeyboardKey.keyZ;
+    case '0': return LogicalKeyboardKey.digit0;
+    case '1': return LogicalKeyboardKey.digit1;
+    case '2': return LogicalKeyboardKey.digit2;
+    case '3': return LogicalKeyboardKey.digit3;
+    case '4': return LogicalKeyboardKey.digit4;
+    case '5': return LogicalKeyboardKey.digit5;
+    case '6': return LogicalKeyboardKey.digit6;
+    case '7': return LogicalKeyboardKey.digit7;
+    case '8': return LogicalKeyboardKey.digit8;
+    case '9': return LogicalKeyboardKey.digit9;
+    case '0': return LogicalKeyboardKey.digit0;
+  }
+  return null;
+}
+
 void registerDartTestMethodsToCpp() {
   registerJSError();
   registerRefreshPaint();
   registerMatchImageSnapshot();
   registerEnvironment();
   registerSimulatePointer();
+  registerSimulateKeyPress();
 }

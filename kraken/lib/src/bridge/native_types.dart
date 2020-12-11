@@ -270,6 +270,10 @@ typedef GetImageHeight = Double Function(Pointer<NativeImgElement> nativePtr);
 typedef GetImageNaturalWidth = Double Function(Pointer<NativeImgElement> nativePtr);
 typedef GetImageNaturalHeight = Double Function(Pointer<NativeImgElement> nativePtr);
 
+typedef GetInputWidth = Double Function(Pointer<NativeInputElement> nativePtr);
+typedef GetInputHeight = Double Function(Pointer<NativeInputElement> nativePtr);
+typedef InputElementMethodVoidCallback = Void Function(Pointer<NativeInputElement> nativePtr);
+
 class NativeImgElement extends Struct {
   Pointer<NativeElement> nativeElement;
 
@@ -305,6 +309,11 @@ class NativeVideoElement extends Struct {
 
 class NativeInputElement extends Struct {
   Pointer<NativeElement> nativeElement;
+
+  Pointer<NativeFunction<GetInputWidth>> getInputWidth;
+  Pointer<NativeFunction<GetInputHeight>> getInputHeight;
+  Pointer<NativeFunction<InputElementMethodVoidCallback>> focus;
+  Pointer<NativeFunction<InputElementMethodVoidCallback>> blur;
 }
 
 typedef Native_CanvasGetContext = Pointer<NativeCanvasRenderingContext2D> Function(

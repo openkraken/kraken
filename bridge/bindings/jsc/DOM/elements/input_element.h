@@ -21,10 +21,15 @@ public:
   static JSInputElement *instance(JSContext *context);
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
+  static JSValueRef focus(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                         const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef blur(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                          const JSValueRef arguments[], JSValueRef *exception);
 
   class InputElementInstance : public ElementInstance {
   public:
     enum class InputProperty {
+      // Properties
       kWidth,
       kHeight,
       kValue,
@@ -46,6 +51,10 @@ public:
       kReadonly,
       kPlaceholder,
       kType,
+
+      // Methods
+      kFocus,
+      kBlur,
     };
 
     static std::vector<JSStringRef> &getInputElementPropertyNames();
@@ -59,6 +68,10 @@ public:
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
     NativeInputElement *nativeInputElement;
+
+  private:
+    JSFunctionHolder m_focus{context, this, "focus", focus};
+    JSFunctionHolder m_blur{context, this, "blur", blur};
   };
 protected:
   JSInputElement() = delete;
@@ -68,6 +81,7 @@ protected:
 
 using GetInputWidth = double(*)(NativeInputElement *nativeInputElement);
 using GetInputHeight = double(*)(NativeInputElement *nativeInputElement);
+using InputVoidCallback = void(*)(NativeInputElement *nativeInputElement);
 
 struct NativeInputElement {
   NativeInputElement() = delete;
@@ -77,6 +91,8 @@ struct NativeInputElement {
 
   GetInputWidth getInputWidth;
   GetInputHeight getInputHeight;
+  InputVoidCallback focus;
+  InputVoidCallback blur;
 };
 
 } // namespace kraken::binding::jsc
