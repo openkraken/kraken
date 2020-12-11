@@ -116,7 +116,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     double pixels = (_drag as ScrollDragController).getPixels();
     double maxScrollExtent = (_drag as ScrollDragController).getmaxScrollExtent();
     double minScrollExtent = (_drag as ScrollDragController).getminScrollExtent();
-    return !((direction == AxisDirection.down && pixels == minScrollExtent) || direction == AxisDirection.up && pixels == maxScrollExtent);
+    return !((direction == AxisDirection.right && pixels == minScrollExtent) || direction == AxisDirection.left && pixels == maxScrollExtent);
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {
