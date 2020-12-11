@@ -471,7 +471,8 @@ class KrakenVerticalDragGestureRecognizer extends KrakenDragGestureRecognizer {
 
   @override
   bool _acceptDragGesture(PointerEvent event) {
-    return isAcceptedDrag(_globalDistanceMoved < 0 ? AxisDirection.up : AxisDirection.down);
+    AxisDirection direction = _globalDistanceMoved < 0 ? AxisDirection.up : AxisDirection.down;
+    return isAcceptedDrag(direction);
   }
 
   @override
