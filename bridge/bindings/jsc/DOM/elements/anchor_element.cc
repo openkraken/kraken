@@ -13,13 +13,6 @@ JSAnchorElement::JSAnchorElement(JSContext *context) : JSElement(context) {}
 
 std::unordered_map<JSContext *, JSAnchorElement *> JSAnchorElement::instanceMap {};
 
-JSAnchorElement *JSAnchorElement::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSAnchorElement(context);
-  }
-  return instanceMap[context];
-}
-
 JSAnchorElement::~JSAnchorElement() {
   instanceMap.erase(context);
 }
@@ -44,9 +37,9 @@ JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case AnchorElementProperty::kHref:
+    case AnchorElementProperty::href:
       return JSValueMakeString(_hostClass->ctx, _href);
-    case AnchorElementProperty::kTarget:
+    case AnchorElementProperty::target:
       return JSValueMakeString(_hostClass->ctx, _target);
     }
   }
@@ -57,7 +50,7 @@ JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name
 void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getAnchorElementPropertyMap();
   auto property = propertyMap[name];
-  if (property == AnchorElementProperty::kHref) {
+  if (property == AnchorElementProperty::href) {
     _href = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_href);
 
@@ -68,7 +61,7 @@ void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSVa
     buildUICommandArgs(name, hrefString, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
-  } else if (property == AnchorElementProperty::kTarget) {
+  } else if (property == AnchorElementProperty::target) {
     _target = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_target);
 
@@ -88,20 +81,6 @@ void JSAnchorElement::AnchorElementInstance::getPropertyNames(JSPropertyNameAccu
   for (auto &property : getAnchorElementPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
-}
-
-std::array<JSStringRef, 2> &JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyNames() {
-  static std::array<JSStringRef, 2> propertyNames{
-    JSStringCreateWithUTF8CString("href"),
-    JSStringCreateWithUTF8CString("target"),
-  };
-  return propertyNames;
-}
-const std::unordered_map<std::string, JSAnchorElement::AnchorElementInstance::AnchorElementProperty> &
-JSAnchorElement::AnchorElementInstance::getAnchorElementPropertyMap() {
-  static const std::unordered_map<std::string, AnchorElementProperty> propertyMap{
-    {"href", AnchorElementProperty::kHref}, {"target", AnchorElementProperty::kTarget}};
-  return propertyMap;
 }
 
 JSAnchorElement::AnchorElementInstance::~AnchorElementInstance() {

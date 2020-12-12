@@ -20,13 +20,9 @@ struct NativeMediaErrorEvent;
 
 class JSMediaErrorEvent : public JSEvent {
 public:
-  enum class MediaErrorEventProperty { kCode, kMessage };
-
-  static std::vector<JSStringRef> &getMediaErrorEventPropertyNames();
-  const static std::unordered_map<std::string, MediaErrorEventProperty> &getMediaErrorEventPropertyMap();
-
+  DEFINE_OBJECT_PROPERTY(MediaError, 2, code, message)
   static std::unordered_map<JSContext *, JSMediaErrorEvent *> instanceMap;
-  static JSMediaErrorEvent *instance(JSContext *context);
+  OBJECT_INSTANCE(JSMediaErrorEvent)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;

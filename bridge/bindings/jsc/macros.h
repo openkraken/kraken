@@ -8,6 +8,14 @@
 
 #define assert_m(exp, msg) assert(((void)msg, exp))
 
+#define OBJECT_INSTANCE(NAME)                                                                                          \
+  static NAME *instance(JSContext *context) {                                                                          \
+    if (instanceMap.count(context) == 0) {                                                                             \
+      instanceMap[context] = new NAME(context);                                                             \
+    }                                                                                                                  \
+    return instanceMap[context];                                                                                       \
+  }
+
 #define JSC_GLOBAL_BINDING_FUNCTION(context, nameStr, func)                                                            \
   {                                                                                                                    \
     JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;                                                    \

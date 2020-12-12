@@ -17,15 +17,7 @@ class JSAllCollection : public HostObject {
 public:
   JSAllCollection() = delete;
   explicit JSAllCollection(JSContext *context) : HostObject(context, "HTMLAllCollection") {};
-  enum class AllCollectionProperty {
-    kItem,
-    kAdd,
-    kRemove,
-    kLength
-  };
-
-  static std::vector<JSStringRef> &getAllCollectionPropertyNames();
-  static std::unordered_map<std::string, AllCollectionProperty> &getAllCollectionPropertyMap();
+  DEFINE_OBJECT_PROPERTY(AllCollection, 4, item, add, remove, length)
 
   static JSValueRef item(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
