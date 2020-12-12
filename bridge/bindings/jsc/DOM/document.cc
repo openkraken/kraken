@@ -196,7 +196,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   case DocumentProperty::getElementById: {
     return m_getElementById.function();
   }
-  case DocumentProperty::getElementByTagName: {
+  case DocumentProperty::getElementsByTagName: {
     return m_getElementsByTagName.function();
   }
   }
