@@ -490,11 +490,11 @@ class KrakenController {
     assert(!_view._disposed, "Kraken have already disposed");
     if (_bundle != null) {
       await _bundle.run(_view.contextId);
-      // trigger window load event
+      // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
-        Event loadEvent = Event(EVENT_LOAD);
+        Event event = Event(EVENT_DOM_CONTENT_LOADED);
         EventTarget window = view.getEventTargetById(WINDOW_ID);
-        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, loadEvent);
+        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
       });
     }
   }
