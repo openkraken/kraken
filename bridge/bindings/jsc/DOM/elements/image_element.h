@@ -24,7 +24,7 @@ public:
 
   class ImageElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(ImageElement, 6, width, height, natualWidth, natualHeight, src, loading)
+    DEFINE_OBJECT_PROPERTY(ImageElement, 6, width, height, naturalWidth, naturalHeight, src, loading)
 
     ImageElementInstance() = delete;
     ~ImageElementInstance();
