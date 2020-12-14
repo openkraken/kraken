@@ -32,6 +32,7 @@ describe('setInterval', function() {
       let count = 0;
       let timer = setInterval(() => {
         count++;
+        console.log('js setInterval callback');
         if (count > 5) {
           clearInterval(timer);
           resolve();

@@ -37,7 +37,9 @@ mixin TimerMixin {
   int setInterval(int timeout, Function callback) {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = _timerId++;
+    print('setInterval periodic: $timeoutDurationMS');
     _timerMap[id] = Timer.periodic(timeoutDurationMS, (Timer timer) {
+      print('trigger setInterval');
       callback();
     });
     return id;
