@@ -338,7 +338,6 @@ class ScrollDragController implements Drag {
   }
 
   AxisDirection getAxisDirection () {
-    print(delegate.axisDirection);
     return delegate.axisDirection;
   }
 
