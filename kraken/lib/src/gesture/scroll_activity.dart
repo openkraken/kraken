@@ -337,10 +337,6 @@ class ScrollDragController implements Drag {
     return (delegate as ScrollPositionWithSingleContext).minScrollExtent;
   }
 
-  AxisDirection getAxisDirection () {
-    return delegate.axisDirection;
-  }
-
   @override
   void update(DragUpdateDetails details) {
     assert(details.primaryDelta != null);
