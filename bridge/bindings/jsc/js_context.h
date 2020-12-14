@@ -61,6 +61,7 @@ public:
   ~JSStringHolder();
 
   JSValueRef makeString();
+  JSStringRef getString();
   std::string string();
 
   const JSChar *ptr();

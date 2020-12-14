@@ -263,6 +263,10 @@ JSValueRef JSStringHolder::makeString() {
   return JSValueMakeString(m_context->context(), m_string);
 }
 
+JSStringRef JSStringHolder::getString() {
+  return m_string;
+}
+
 void JSStringHolder::setString(JSStringRef value) {
   assert(value != nullptr);
 
