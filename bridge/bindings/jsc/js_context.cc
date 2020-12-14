@@ -228,6 +228,9 @@ JSFunctionHolder::JSFunctionHolder(JSContext *context, void *data, std::string n
                                    JSObjectCallAsFunctionCallback callback)
   : context(context), m_data(data), m_callback(callback), m_name(std::move(name)) {}
 
+JSFunctionHolder::JSFunctionHolder(JSContext *context, std::string name, JSObjectCallAsFunctionCallback callback)
+  : context(context), m_callback(callback), m_name(std::move(name)) {}
+
 JSFunctionHolder::~JSFunctionHolder() {
   if (context->isValid() && m_function != nullptr) {
     JSValueUnprotect(context->context(), m_function);
@@ -236,8 +239,14 @@ JSFunctionHolder::~JSFunctionHolder() {
 
 JSObjectRef JSFunctionHolder::function() {
   if (m_function == nullptr) {
-    m_function = makeObjectFunctionWithPrivateData(context, m_data, m_name.c_str(), m_callback);
-    JSValueProtect(context->context(), m_function);
+    // If context is nullptr, create normal js function without private data
+    if (m_data == nullptr) {
+      m_function =
+        JSObjectMakeFunctionWithCallback(context->context(), JSStringCreateWithUTF8CString(m_name.c_str()), m_callback);
+    } else {
+      m_function = makeObjectFunctionWithPrivateData(context, m_data, m_name.c_str(), m_callback);
+      JSValueProtect(context->context(), m_function);
+    }
   }
   return m_function;
 }
