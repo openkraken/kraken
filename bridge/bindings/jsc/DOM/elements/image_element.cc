@@ -49,11 +49,11 @@ JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, 
       getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageHeight(nativeImageElement));
     }
-    case ImageElementProperty::natualWidth: {
+    case ImageElementProperty::naturalWidth: {
       getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageNaturalWidth(nativeImageElement));
     }
-    case ImageElementProperty::natualHeight: {
+    case ImageElementProperty::naturalHeight: {
       getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageNaturalHeight(nativeImageElement));
     }
