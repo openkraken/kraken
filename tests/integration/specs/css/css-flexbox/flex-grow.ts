@@ -568,4 +568,61 @@ describe('flex-grow', () => {
 
     await matchViewportSnapshot();
   });
+
+  fit('should work with image load', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flex: '1',
+            height: '50px',
+            background: 'grey',
+          },
+        }, [
+          createElement('img', {
+            src: 'assets/50x50-green.png',
+            style: {
+              width: '4vw',
+              height: '4vw'
+            }
+          }),
+        ]),
+        createElement('div', {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '50px',
+            background: 'blue',
+            flex: '1',
+          },
+        }, [
+          createElement('img', {
+            src: 'assets/60x60-red.png',
+            style: {
+              width: '4vw',
+              height: '4vw'
+            }
+          }),
+        ]),
+      ]
+    );
+    BODY.appendChild(div);
+    await matchViewportSnapshot(0.1);
+  });
 });
