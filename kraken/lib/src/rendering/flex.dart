@@ -672,8 +672,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       double childOriginalWidth = child.size.width;
       double childOriginalHeight = child.size.height;
       return CSSFlex.isHorizontalFlexDirection(flexDirection) ?
-        BoxConstraints(minWidth: childOriginalWidth, maxWidth: childOriginalWidth) :
-        BoxConstraints(minWidth: childOriginalHeight, maxWidth: childOriginalHeight);
+        BoxConstraints.tightFor(width: childOriginalWidth) :
+        BoxConstraints.tightFor(height: childOriginalHeight);
     }
 
     if (child is RenderBoxModel) {

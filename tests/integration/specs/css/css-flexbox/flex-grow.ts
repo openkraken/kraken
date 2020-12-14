@@ -569,7 +569,7 @@ describe('flex-grow', () => {
     await matchViewportSnapshot();
   });
 
-  fit('should work with image load', async () => {
+  it('should work with image load', async () => {
     let div;
     div = createElement(
       'div',
