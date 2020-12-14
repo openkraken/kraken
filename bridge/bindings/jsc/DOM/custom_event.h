@@ -19,16 +19,10 @@ class CustomEventInstance;
 
 class JSCustomEvent : public JSEvent {
 public:
-  enum class CustomEventProperty {
-    kDetail,
-    kInitCustomEvent
-  };
-
-  static std::vector<JSStringRef> &getCustomEventPropertyNames();
-  const static std::unordered_map<std::string, CustomEventProperty> &getCustomEventPropertyMap();
+  DEFINE_OBJECT_PROPERTY(CustomEvent, 2, detail, initCustomEvent)
 
   static std::unordered_map<JSContext *, JSCustomEvent *> instanceMap;
-  static JSCustomEvent *instance(JSContext *context);
+  OBJECT_INSTANCE(JSCustomEvent)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;

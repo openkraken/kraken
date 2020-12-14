@@ -17,12 +17,6 @@ JSCommentNode::JSCommentNode(JSContext *context) : JSNode(context, "CommentNode"
 
 std::unordered_map<JSContext *, JSCommentNode *> JSCommentNode::instanceMap{};
 
-JSCommentNode *JSCommentNode::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSCommentNode(context);
-  }
-  return instanceMap[context];
-}
 JSCommentNode::~JSCommentNode() {
   instanceMap.erase(context);
 }
@@ -59,20 +53,20 @@ void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueR
 }
 
 JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getPropertyMap();
+  auto propertyMap = getCommentNodePropertyMap();
 
   if (propertyMap.count(name) == 0) return NodeInstance::getProperty(name, exception);
 
-  CommentProperty property = propertyMap[name];
+  CommentNodeProperty property = propertyMap[name];
 
   switch (property) {
-  case CommentProperty::kData:
+  case CommentNodeProperty::data:
     return m_data.makeString();
-  case CommentProperty::kNodeName: {
+  case CommentNodeProperty::nodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#comment");
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
-  case CommentProperty::kLength:
+  case CommentNodeProperty::length:
     return JSValueMakeNumber(_hostClass->ctx, m_data.size());
   }
 }
@@ -80,27 +74,9 @@ JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JS
 void JSCommentNode::CommentNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   NodeInstance::getPropertyNames(accumulator);
 
-  for (auto &property : getCommentPropertyNames()) {
+  for (auto &property : getCommentNodePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
-}
-
-std::array<JSStringRef, 2> &JSCommentNode::CommentNodeInstance::getCommentPropertyNames() {
-  static std::array<JSStringRef, 2> propertyNames{
-    JSStringCreateWithUTF8CString("data"),
-    JSStringCreateWithUTF8CString("length"),
-  };
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSCommentNode::CommentNodeInstance::CommentProperty> &
-JSCommentNode::CommentNodeInstance::getPropertyMap() {
-  static std::unordered_map<std::string, CommentProperty> propertyMap{
-    {"data", CommentProperty::kData},
-    {"nodeName", CommentProperty::kNodeName},
-    {"length", CommentProperty::kLength},
-  };
-  return propertyMap;
 }
 
 std::string JSCommentNode::CommentNodeInstance::internalGetTextContent() {

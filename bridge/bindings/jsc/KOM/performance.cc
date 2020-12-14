@@ -18,15 +18,15 @@ JSValueRef JSPerformance::getProperty(std::string &name, JSValueRef *exception) 
     auto property = propertyMap[name];
 
     switch (property) {
-    case PerformanceProperty::kNow: {
+    case PerformanceProperty::now: {
       return m_now.function();
     }
-    case PerformanceProperty::kTimeOrigin: {
+    case PerformanceProperty::timeOrigin: {
       double time =
           std::chrono::duration_cast<std::chrono::milliseconds>(context->timeOrigin.time_since_epoch()).count();
       return JSValueMakeNumber(ctx, time);
     }
-    case PerformanceProperty::ktoJSON: {
+    case PerformanceProperty::toJSON: {
       return m_toJSON.function();
     }
     }
@@ -36,21 +36,6 @@ JSValueRef JSPerformance::getProperty(std::string &name, JSValueRef *exception) 
 }
 
 JSPerformance::~JSPerformance() {}
-
-std::unordered_map<std::string, JSPerformance::PerformanceProperty> &JSPerformance::getPerformancePropertyMap() {
-  static std::unordered_map<std::string, PerformanceProperty> propertyMap{
-    {"now", PerformanceProperty::kNow},
-    {"timeOrigin", PerformanceProperty::kTimeOrigin},
-    {"toJSON", PerformanceProperty::ktoJSON}};
-  return propertyMap;
-}
-
-std::vector<JSStringRef> &JSPerformance::getPerformancePropertyNames() {
-  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("now"),
-                                                JSStringCreateWithUTF8CString("timeOrigin"),
-                                                JSStringCreateWithUTF8CString("toJSON")};
-  return propertyNames;
-}
 
 void JSPerformance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : getPerformancePropertyNames()) {

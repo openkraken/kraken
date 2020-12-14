@@ -10,13 +10,6 @@ namespace kraken::binding::jsc {
 
 std::unordered_map<JSContext *, JSAudioElement *> JSAudioElement::instanceMap {};
 
-JSAudioElement *JSAudioElement::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSAudioElement(context);
-  }
-  return instanceMap[context];
-}
-
 JSAudioElement::~JSAudioElement() {
   instanceMap.erase(context);
 }
@@ -42,17 +35,6 @@ JSAudioElement::AudioElementInstance::~AudioElementInstance() {
   ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeAudioElement *>(ptr);
   }, nativeAudioElement);
-}
-
-std::vector<JSStringRef> &JSAudioElement::AudioElementInstance::getAudioElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSAudioElement::AudioElementInstance::AudioElementProperty> &
-JSAudioElement::AudioElementInstance::getAudioElementPropertyMap() {
-  static std::unordered_map<std::string, AudioElementProperty> propertyMap {};
-  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

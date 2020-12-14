@@ -10,12 +10,6 @@ namespace kraken::binding::jsc {
 
 std::unordered_map<JSContext *, JSMediaElement *> JSMediaElement::instanceMap {};
 
-JSMediaElement *JSMediaElement::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSMediaElement(context);
-  }
-  return instanceMap[context];
-}
 JSMediaElement::~JSMediaElement() {
   instanceMap.erase(context);
 }
@@ -31,29 +25,6 @@ JSMediaElement::MediaElementInstance::~MediaElementInstance() {
   ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeMediaElement *>(ptr);
   }, nativeMediaElement);
-}
-
-std::vector<JSStringRef> &JSMediaElement::MediaElementInstance::getMediaElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("src"),        JSStringCreateWithUTF8CString("autoplay"),
-    JSStringCreateWithUTF8CString("loop"),       JSStringCreateWithUTF8CString("play"),
-    JSStringCreateWithUTF8CString("pause"),      JSStringCreateWithUTF8CString("fastSeek"),
-    JSStringCreateWithUTF8CString("currentSrc"),
-  };
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSMediaElement::MediaElementInstance::MediaElementProperty> &
-JSMediaElement::MediaElementInstance::getMediaElementPropertyMap() {
-  static std::unordered_map<std::string, MediaElementProperty> propertyMap{
-    {"src", MediaElementProperty::kSrc},
-    {"autoplay", MediaElementProperty::kAutoPlay},
-    {"loop", MediaElementProperty::kLoop},
-    {"play", MediaElementProperty::kPlay},
-    {"pause", MediaElementProperty::kPause},
-    {"fastSeek", MediaElementProperty::kFastSeek},
-    {"currentSrc", MediaElementProperty::kCurrentSrc}};
-  return propertyMap;
 }
 
 JSValueRef JSMediaElement::MediaElementInstance::play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -106,18 +77,18 @@ JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, 
     auto property = propertyMap[name];
     switch(property) {
 
-    case MediaElementProperty::kCurrentSrc:
-    case MediaElementProperty::kSrc:
+    case MediaElementProperty::currentSrc:
+    case MediaElementProperty::src:
       return JSValueMakeString(_hostClass->ctx, _src);
-    case MediaElementProperty::kAutoPlay:
+    case MediaElementProperty::autoPlay:
       return JSValueMakeBoolean(_hostClass->ctx, _autoPlay);
-    case MediaElementProperty::kLoop:
+    case MediaElementProperty::loop:
       return JSValueMakeBoolean(_hostClass->ctx, _loop);
-    case MediaElementProperty::kPlay:
+    case MediaElementProperty::play:
       return m_play.function();
-    case MediaElementProperty::kPause:
+    case MediaElementProperty::pause:
       return m_pause.function();
-    case MediaElementProperty::kFastSeek:
+    case MediaElementProperty::fastSeek:
       return m_fastSeek.function();
     }
   }
@@ -129,7 +100,7 @@ void JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValu
   auto propertyMap = getMediaElementPropertyMap();
   auto property = propertyMap[name];
 
-  if (property == MediaElementProperty::kSrc) {
+  if (property == MediaElementProperty::src) {
     _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_src);
 

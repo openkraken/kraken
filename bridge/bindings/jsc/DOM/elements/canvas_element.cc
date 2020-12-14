@@ -4,19 +4,12 @@
  */
 
 #include "canvas_element.h"
-#include "foundation/ui_command_queue.h"
 #include "foundation/ui_command_callback_queue.h"
+#include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
 
-JSCanvasElement *JSCanvasElement::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSCanvasElement(context);
-  }
-  return instanceMap[context];
-}
-
-std::unordered_map<JSContext *, JSCanvasElement *> JSCanvasElement::instanceMap {};
+std::unordered_map<JSContext *, JSCanvasElement *> JSCanvasElement::instanceMap{};
 
 JSCanvasElement::~JSCanvasElement() {
   instanceMap.erase(context);
@@ -42,27 +35,8 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
-    delete reinterpret_cast<NativeCanvasElement *>(ptr);
-  }, nativeCanvasElement);
-}
-
-std::vector<JSStringRef> &JSCanvasElement::CanvasElementInstance::getCanvasElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("width"),
-    JSStringCreateWithUTF8CString("height"),
-    JSStringCreateWithUTF8CString("getContext"),
-  };
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSCanvasElement::CanvasElementInstance::CanvasElementProperty> &
-JSCanvasElement::CanvasElementInstance::getCanvasElementPropertyMap() {
-  static std::unordered_map<std::string, CanvasElementProperty> propertyMap{
-    {"width", CanvasElementProperty::kWidth},
-    {"height", CanvasElementProperty::kHeight},
-    {"getContext", CanvasElementProperty::kGetContext}};
-  return propertyMap;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback(
+    [](void *ptr) { delete reinterpret_cast<NativeCanvasElement *>(ptr); }, nativeCanvasElement);
 }
 
 JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -72,12 +46,12 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
     auto property = propertyMap[name];
 
     switch (property) {
-    case CanvasElementProperty::kWidth: {
+    case CanvasElementProperty::width: {
       return JSValueMakeNumber(_hostClass->ctx, _width);
     }
-    case CanvasElementProperty::kHeight:
+    case CanvasElementProperty::height:
       return JSValueMakeNumber(_hostClass->ctx, _height);
-    case CanvasElementProperty::kGetContext:
+    case CanvasElementProperty::getContext:
       return m_getContext.function();
     }
   }
@@ -92,7 +66,7 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     auto property = propertyMap[name];
 
     switch (property) {
-    case CanvasElementProperty::kWidth: {
+    case CanvasElementProperty::width: {
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string widthString = std::to_string(_width) + "px";
@@ -106,7 +80,7 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
         ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
-    case CanvasElementProperty::kHeight: {
+    case CanvasElementProperty::height: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string heightString = std::to_string(_height) + "px";
@@ -153,7 +127,8 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getContext(JSContextRef ctx, 
   getDartMethod()->flushUICommand();
 
   auto elementInstance = reinterpret_cast<JSCanvasElement::CanvasElementInstance *>(JSObjectGetPrivate(function));
-  assert_m(elementInstance->nativeCanvasElement->getContext != nullptr, "Failed to call getContext(): dart method is nullptr");
+  assert_m(elementInstance->nativeCanvasElement->getContext != nullptr,
+           "Failed to call getContext(): dart method is nullptr");
   NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D =
     elementInstance->nativeCanvasElement->getContext(elementInstance->nativeCanvasElement, &contextId);
   auto canvasRenderContext2d = CanvasRenderingContext2D::instance(elementInstance->context);
@@ -162,13 +137,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getContext(JSContextRef ctx, 
   return canvasRenderContext2dInstance->object;
 }
 
-CanvasRenderingContext2D *CanvasRenderingContext2D::instance(JSContext *context) {
-  static std::unordered_map<JSContext *, CanvasRenderingContext2D *> instanceMap{};
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new CanvasRenderingContext2D(context);
-  }
-  return instanceMap[context];
-}
+std::unordered_map<JSContext *, CanvasRenderingContext2D *> CanvasRenderingContext2D::instanceMap{};
 
 CanvasRenderingContext2D::CanvasRenderingContext2D(JSContext *context)
   : HostClass(context, "CanvasRenderingContext2D") {}
@@ -178,39 +147,8 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::CanvasRenderingConte
   : Instance(canvasRenderContext2D), nativeCanvasRenderingContext2D(nativeCanvasRenderingContext2D) {}
 
 CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingContext2DInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
-    delete reinterpret_cast<NativeCanvasRenderingContext2D *>(ptr);
-  }, nativeCanvasRenderingContext2D);
-}
-
-std::vector<JSStringRef> &
-CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getCanvasRenderingContext2DPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("font"),        JSStringCreateWithUTF8CString("fillStyle"),
-    JSStringCreateWithUTF8CString("strokeStyle"), JSStringCreateWithUTF8CString("fillRect"),
-    JSStringCreateWithUTF8CString("clearRect"),   JSStringCreateWithUTF8CString("fillText"),
-    JSStringCreateWithUTF8CString("strokeText"),  JSStringCreateWithUTF8CString("save"),
-    JSStringCreateWithUTF8CString("restore"),
-  };
-  return propertyNames;
-}
-
-const std::unordered_map<std::string,
-                         CanvasRenderingContext2D::CanvasRenderingContext2DInstance::CanvasRenderingContext2DProperty> &
-CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getCanvasRenderingContext2DPropertyMap() {
-  static const std::unordered_map<std::string, CanvasRenderingContext2DProperty> propertyMap{
-    {"font", CanvasRenderingContext2DProperty::kFont},
-    {"fillStyle", CanvasRenderingContext2DProperty::kFillStyle},
-    {"strokeStyle", CanvasRenderingContext2DProperty::kStrokeStyle},
-    {"fillRect", CanvasRenderingContext2DProperty::kFillRect},
-    {"clearRect", CanvasRenderingContext2DProperty::kClearRect},
-    {"strokeRect", CanvasRenderingContext2DProperty::kStrokeRect},
-    {"fillText", CanvasRenderingContext2DProperty::kFillText},
-    {"strokeText", CanvasRenderingContext2DProperty::kStrokeText},
-    {"save", CanvasRenderingContext2DProperty::kSave},
-    {"restore", CanvasRenderingContext2DProperty::kReStore},
-  };
-  return propertyMap;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback(
+    [](void *ptr) { delete reinterpret_cast<NativeCanvasRenderingContext2D *>(ptr); }, nativeCanvasRenderingContext2D);
 }
 
 JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProperty(std::string &name,
@@ -220,34 +158,34 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case CanvasRenderingContext2DProperty::kFont: {
+    case CanvasRenderingContext2DProperty::font: {
       return m_font.makeString();
     }
-    case CanvasRenderingContext2DProperty::kFillStyle: {
+    case CanvasRenderingContext2DProperty::fillStyle: {
       return m_fillStyle.makeString();
     }
-    case CanvasRenderingContext2DProperty::kStrokeStyle: {
+    case CanvasRenderingContext2DProperty::strokeStyle: {
       return m_strokeStyle.makeString();
     }
-    case CanvasRenderingContext2DProperty::kFillRect: {
+    case CanvasRenderingContext2DProperty::fillRect: {
       return m_fillRect.function();
     }
-    case CanvasRenderingContext2DProperty::kClearRect: {
+    case CanvasRenderingContext2DProperty::clearRect: {
       return m_clearRect.function();
     }
-    case CanvasRenderingContext2DProperty::kStrokeRect: {
+    case CanvasRenderingContext2DProperty::strokeRect: {
       return m_strokeRect.function();
     }
-    case CanvasRenderingContext2DProperty::kFillText: {
+    case CanvasRenderingContext2DProperty::fillText: {
       return m_fillText.function();
     }
-    case CanvasRenderingContext2DProperty::kStrokeText: {
+    case CanvasRenderingContext2DProperty::strokeText: {
       return m_strokeText.function();
     }
-    case CanvasRenderingContext2DProperty::kSave: {
+    case CanvasRenderingContext2DProperty::save: {
       return m_save.function();
     }
-    case CanvasRenderingContext2DProperty::kReStore: {
+    case CanvasRenderingContext2DProperty::restore: {
       return m_restore.function();
     }
     }
@@ -265,36 +203,39 @@ void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
     getDartMethod()->flushUICommand();
 
     switch (property) {
-    case CanvasRenderingContext2DProperty::kFont: {
+    case CanvasRenderingContext2DProperty::font: {
       JSStringRef font = JSValueToStringCopy(_hostClass->ctx, value, exception);
       m_font.setString(font);
 
       NativeString nativeFont{};
       nativeFont.string = m_font.ptr();
       nativeFont.length = m_font.size();
-      assert_m(nativeCanvasRenderingContext2D->setFont != nullptr, "Failed to execute setFont(): dart method is nullptr.");
+      assert_m(nativeCanvasRenderingContext2D->setFont != nullptr,
+               "Failed to execute setFont(): dart method is nullptr.");
       nativeCanvasRenderingContext2D->setFont(nativeCanvasRenderingContext2D, &nativeFont);
       break;
     }
-    case CanvasRenderingContext2DProperty::kFillStyle: {
+    case CanvasRenderingContext2DProperty::fillStyle: {
       JSStringRef fillStyle = JSValueToStringCopy(_hostClass->ctx, value, exception);
       m_fillStyle.setString(fillStyle);
 
       NativeString nativeFillStyle{};
       nativeFillStyle.string = m_fillStyle.ptr();
       nativeFillStyle.length = m_fillStyle.size();
-      assert_m(nativeCanvasRenderingContext2D->setFillStyle != nullptr, "Failed to execute setFillStyle(): dart method is nullptr.");
+      assert_m(nativeCanvasRenderingContext2D->setFillStyle != nullptr,
+               "Failed to execute setFillStyle(): dart method is nullptr.");
       nativeCanvasRenderingContext2D->setFillStyle(nativeCanvasRenderingContext2D, &nativeFillStyle);
       break;
     }
-    case CanvasRenderingContext2DProperty::kStrokeStyle: {
+    case CanvasRenderingContext2DProperty::strokeStyle: {
       JSStringRef strokeStyle = JSValueToStringCopy(_hostClass->ctx, value, exception);
       m_strokeStyle.setString(strokeStyle);
 
       NativeString nativeStrokeStyle{};
       nativeStrokeStyle.string = m_strokeStyle.ptr();
       nativeStrokeStyle.length = m_strokeStyle.size();
-      assert_m(nativeCanvasRenderingContext2D->setStrokeStyle != nullptr, "Failed to execute setStrokeStyle(): dart method is nullptr.");
+      assert_m(nativeCanvasRenderingContext2D->setStrokeStyle != nullptr,
+               "Failed to execute setStrokeStyle(): dart method is nullptr.");
       nativeCanvasRenderingContext2D->setStrokeStyle(nativeCanvasRenderingContext2D, &nativeStrokeStyle);
       break;
     }
@@ -329,7 +270,8 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillRect(
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->flushUICommand();
-  assert_m(instance->nativeCanvasRenderingContext2D->fillRect != nullptr, "Failed to execute fillRect(): dart method is nullptr.");
+  assert_m(instance->nativeCanvasRenderingContext2D->fillRect != nullptr,
+           "Failed to execute fillRect(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->fillRect(instance->nativeCanvasRenderingContext2D, x, y, width, height);
   return nullptr;
 }
@@ -357,7 +299,8 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::clearRect
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->flushUICommand();
-  assert_m(instance->nativeCanvasRenderingContext2D->clearRect != nullptr, "Failed to execute clearRect(): dart method is nullptr.");
+  assert_m(instance->nativeCanvasRenderingContext2D->clearRect != nullptr,
+           "Failed to execute clearRect(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->clearRect(instance->nativeCanvasRenderingContext2D, x, y, width, height);
 
   return nullptr;
@@ -384,7 +327,8 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::strokeRec
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->flushUICommand();
-  assert_m(instance->nativeCanvasRenderingContext2D->strokeRect != nullptr, "Failed to execute strokeRect(): dart method is nullptr.");
+  assert_m(instance->nativeCanvasRenderingContext2D->strokeRect != nullptr,
+           "Failed to execute strokeRect(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->strokeRect(instance->nativeCanvasRenderingContext2D, x, y, width, height);
 
   return nullptr;
@@ -422,7 +366,8 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillText(
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->flushUICommand();
-  assert_m(instance->nativeCanvasRenderingContext2D->fillText != nullptr, "Failed to execute fillText(): dart method is nullptr.");
+  assert_m(instance->nativeCanvasRenderingContext2D->fillText != nullptr,
+           "Failed to execute fillText(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->fillText(instance->nativeCanvasRenderingContext2D, &text, x, y, maxWidth);
   return nullptr;
 }
@@ -457,7 +402,8 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::strokeTex
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->flushUICommand();
-  assert_m(instance->nativeCanvasRenderingContext2D->strokeText != nullptr, "Failed to execute strokeText(): dart method is nullptr.");
+  assert_m(instance->nativeCanvasRenderingContext2D->strokeText != nullptr,
+           "Failed to execute strokeText(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->strokeText(instance->nativeCanvasRenderingContext2D, &text, x, y, maxWidth);
   return nullptr;
 }
@@ -471,7 +417,8 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::save(JSCo
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->flushUICommand();
-  assert_m(instance->nativeCanvasRenderingContext2D->save != nullptr, "Failed to execute save(): dart method is nullptr.");
+  assert_m(instance->nativeCanvasRenderingContext2D->save != nullptr,
+           "Failed to execute save(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->save(instance->nativeCanvasRenderingContext2D);
   return nullptr;
 }
@@ -485,7 +432,8 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::restore(J
     reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
 
   getDartMethod()->flushUICommand();
-  assert_m(instance->nativeCanvasRenderingContext2D->restore != nullptr, "Failed to execute restore(): dart method is nullptr.");
+  assert_m(instance->nativeCanvasRenderingContext2D->restore != nullptr,
+           "Failed to execute restore(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->restore(instance->nativeCanvasRenderingContext2D);
   return nullptr;
 }
