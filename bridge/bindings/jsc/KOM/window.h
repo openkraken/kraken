@@ -33,22 +33,8 @@ private:
 
 class WindowInstance : public JSEventTarget::EventTargetInstance {
 public:
-  enum class WindowProperty {
-    kDevicePixelRatio,
-    kColorScheme,
-    kLocation,
-    kWindow,
-    kHistory,
-    kParent,
-    kScroll,
-    kScrollBy,
-    kScrollTo,
-    kScrollX,
-    kScrollY
-  };
-
-  static std::vector<JSStringRef> &getWindowPropertyNames();
-  static std::unordered_map<std::string, WindowProperty> &getWindowPropertyMap();
+  DEFINE_OBJECT_PROPERTY(Window, 11, devicePixelRatio, colorScheme, __location__, window, history, parent, scroll,
+                         scrollBy, scrollTo, scrollX, scrollY)
 
   WindowInstance() = delete;
   explicit WindowInstance(JSWindow *window);

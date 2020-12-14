@@ -18,21 +18,13 @@ void bindImageElement(std::unique_ptr<JSContext> &context);
 class JSImageElement : public JSElement {
 public:
   static std::unordered_map<JSContext *, JSImageElement *> instanceMap;
-  static JSImageElement *instance(JSContext *context);
+  OBJECT_INSTANCE(JSImageElement)
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class ImageElementInstance : public ElementInstance {
   public:
-    enum class ImageProperty {
-      kWidth, kHeight,
-      kNaturalWidth, kNaturalHeight,
-      kSrc,
-      kLoading
-    };
-
-    static std::vector<JSStringRef> &getImageElementPropertyNames();
-    static const std::unordered_map<std::string, ImageProperty> &getImageElementPropertyMap();
+    DEFINE_OBJECT_PROPERTY(ImageElement, 6, width, height, naturalWidth, naturalHeight, src, loading)
 
     ImageElementInstance() = delete;
     ~ImageElementInstance();

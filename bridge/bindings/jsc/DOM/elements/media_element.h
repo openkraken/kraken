@@ -20,13 +20,10 @@ using FastSeek = void (*)(NativeMediaElement *mediaElement, double duration);
 class JSMediaElement : public JSElement {
 public:
   static std::unordered_map<JSContext *, JSMediaElement *> instanceMap;
-  static JSMediaElement *instance(JSContext *context);
+  OBJECT_INSTANCE(JSMediaElement)
   class MediaElementInstance : public ElementInstance {
   public:
-    enum class MediaElementProperty { kSrc, kAutoPlay, kLoop, kPlay, kPause, kFastSeek, kCurrentSrc };
-
-    static std::vector<JSStringRef> &getMediaElementPropertyNames();
-    static const std::unordered_map<std::string, MediaElementProperty> &getMediaElementPropertyMap();
+    DEFINE_OBJECT_PROPERTY(MediaElement, 7, src, autoPlay, loop, play, pause, fastSeek, currentSrc)
 
     static JSValueRef play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                            const JSValueRef arguments[], JSValueRef *exception);

@@ -34,13 +34,7 @@ public:
 
   class StyleDeclarationInstance : public Instance {
   public:
-    enum class CSSStyleDeclarationProperty {
-      kSetProperty,
-      kRemoveProperty,
-      kGetPropertyValue
-    };
-    static std::array<JSStringRef, 3> &getStyleDeclarationPropertyNames();
-    static const std::unordered_map<std::string, CSSStyleDeclarationProperty> &getStyleDeclarationPropertyMap();
+    DEFINE_OBJECT_PROPERTY(CSSStyleDeclaration, 3, setProperty, removeProperty, getPropertyValue)
 
     StyleDeclarationInstance() = delete;
     StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration,

@@ -14,13 +14,6 @@ void bindTouchEvent(std::unique_ptr<JSContext> &context) {
 
 std::unordered_map<JSContext *, JSTouchEvent *> JSTouchEvent::instanceMap {};
 
-JSTouchEvent *JSTouchEvent::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSTouchEvent(context);
-  }
-  return instanceMap[context];
-}
-
 JSTouchEvent::~JSTouchEvent() {
   instanceMap.erase(context);
 }
@@ -63,19 +56,19 @@ JSValueRef TouchEventInstance::getProperty(std::string &name, JSValueRef *except
   auto property = propertyMap[name];
 
   switch (property) {
-  case JSTouchEvent::TouchEventProperty::kTouches:
+  case JSTouchEvent::TouchEventProperty::touches:
     return m_touches->jsObject;
-  case JSTouchEvent::TouchEventProperty::kTargetTouches:
+  case JSTouchEvent::TouchEventProperty::targetTouches:
     return m_targetTouches->jsObject;
-  case JSTouchEvent::TouchEventProperty::kChangedTouches:
+  case JSTouchEvent::TouchEventProperty::changedTouches:
     return m_changedTouches->jsObject;
-  case JSTouchEvent::TouchEventProperty::kAltKey:
+  case JSTouchEvent::TouchEventProperty::altKey:
     return JSValueMakeBoolean(ctx, nativeTouchEvent->altKey == 1);
-  case JSTouchEvent::TouchEventProperty::kMetaKey:
+  case JSTouchEvent::TouchEventProperty::metaKey:
     return JSValueMakeBoolean(ctx, nativeTouchEvent->metaKey == 1);
-  case JSTouchEvent::TouchEventProperty::kCtrlKey:
+  case JSTouchEvent::TouchEventProperty::ctrlKey:
     return JSValueMakeBoolean(ctx, nativeTouchEvent->ctrlKey == 1);
-  case JSTouchEvent::TouchEventProperty::kShiftKey:
+  case JSTouchEvent::TouchEventProperty::shiftKey:
     return JSValueMakeBoolean(ctx, nativeTouchEvent->shiftKey == 1);
   }
 
@@ -103,65 +96,12 @@ void TouchEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulat
   }
 }
 
-std::vector<JSStringRef> &JSTouchEvent::getTouchEventPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("altKey"),   JSStringCreateWithUTF8CString("changedTouches"),
-    JSStringCreateWithUTF8CString("ctrlKey"),  JSStringCreateWithUTF8CString("metaKey"),
-    JSStringCreateWithUTF8CString("shiftKey"), JSStringCreateWithUTF8CString("targetTouches"),
-    JSStringCreateWithUTF8CString("touches")};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSTouchEvent::TouchEventProperty> &JSTouchEvent::getTouchEventPropertyMap() {
-  static std::unordered_map<std::string, TouchEventProperty> propertyMap{
-    {"altKey", TouchEventProperty::kAltKey},     {"changedTouches", TouchEventProperty::kChangedTouches},
-    {"ctrlKey", TouchEventProperty::kCtrlKey},   {"metaKey", TouchEventProperty::kMetaKey},
-    {"shiftKey", TouchEventProperty::kShiftKey}, {"targetTouches", TouchEventProperty::kTargetTouches},
-    {"touches", TouchEventProperty::kTouches}};
-  return propertyMap;
-}
-
 JSTouchList::JSTouchList(JSContext *context, NativeTouch **touches, int64_t length) : HostObject(context, "TouchList") {
   m_touchList.reserve(length);
   for (size_t i = 0; i < length; i++) {
     auto touch = new JSTouch(context, touches[i]);
     m_touchList.emplace_back(touch);
   }
-}
-
-std::vector<JSStringRef> &JSTouch::getTouchPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("identifier"),    JSStringCreateWithUTF8CString("target"),
-    JSStringCreateWithUTF8CString("clientX"),       JSStringCreateWithUTF8CString("clientY"),
-    JSStringCreateWithUTF8CString("screenX"),       JSStringCreateWithUTF8CString("screenY"),
-    JSStringCreateWithUTF8CString("pageX"),         JSStringCreateWithUTF8CString("pageY"),
-    JSStringCreateWithUTF8CString("radiusX"),       JSStringCreateWithUTF8CString("radiusY"),
-    JSStringCreateWithUTF8CString("rotationAngle"), JSStringCreateWithUTF8CString("force"),
-    JSStringCreateWithUTF8CString("altitudeAngle"), JSStringCreateWithUTF8CString("azimuthAngle"),
-    JSStringCreateWithUTF8CString("touchType"),
-  };
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSTouch::TouchProperty> &JSTouch::getTouchPropertyMap() {
-  static std::unordered_map<std::string, TouchProperty> propertyMap{
-    {"identifier", TouchProperty::kIdentifier},
-    {"target", TouchProperty::kTarget},
-    {"clientX", TouchProperty::kClientX},
-    {"clientY", TouchProperty::kClientY},
-    {"screenX", TouchProperty::kScreenX},
-    {"screenY", TouchProperty::kScreenY},
-    {"pageX", TouchProperty::kPageX},
-    {"pageY", TouchProperty::kPageY},
-    {"radiusX", TouchProperty::kRadiusX},
-    {"radiusY", TouchProperty::kRadiusY},
-    {"rotationAngle", TouchProperty::kRotationAngle},
-    {"force", TouchProperty::kForce},
-    {"altitudeAngle", TouchProperty::kAltitudeAngle},
-    {"azimuthAngle", TouchProperty::kAzimuthAngle},
-    {"touchType", TouchProperty::kTouchType},
-  };
-  return propertyMap;
 }
 
 JSValueRef kraken::binding::jsc::JSTouchList::getProperty(std::string &name, JSValueRef *exception) {
@@ -173,7 +113,7 @@ JSValueRef kraken::binding::jsc::JSTouchList::getProperty(std::string &name, JSV
   } else if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
-    if (property == TouchListProperty::kLength) {
+    if (property == TouchListProperty::length) {
       return JSValueMakeNumber(ctx, m_touchList.size());
     }
   } else {
@@ -195,20 +135,6 @@ void JSTouchList::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   }
 }
 
-std::vector<JSStringRef> &JSTouchList::getTouchListPropertyNames() {
-  static std::vector<JSStringRef> propertyNames {
-    JSStringCreateWithUTF8CString("length")
-  };
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSTouchList::TouchListProperty> &JSTouchList::getTouchListPropertyMap() {
-  static std::unordered_map<std::string, JSTouchList::TouchListProperty> propertyMap {
-      {"length", TouchListProperty::kLength}
-  };
-  return propertyMap;
-}
-
 JSTouch::JSTouch(JSContext *context, NativeTouch *touch) : HostObject(context, "Touch"), m_nativeTouch(touch) {}
 
 JSValueRef JSTouch::getProperty(std::string &name, JSValueRef *exception) {
@@ -218,35 +144,35 @@ JSValueRef JSTouch::getProperty(std::string &name, JSValueRef *exception) {
     auto property = propertyMap[name];
 
     switch(property) {
-    case kIdentifier:
+    case TouchProperty::identifier:
       return JSValueMakeNumber(ctx, m_nativeTouch->identifier);
-    case kTarget:
+    case TouchProperty::target:
       return m_nativeTouch->target->instance->object;
-    case kClientX:
+    case TouchProperty::clientX:
       return JSValueMakeNumber(ctx, m_nativeTouch->clientX);
-    case kClientY:
+    case TouchProperty::clientY:
       return JSValueMakeNumber(ctx, m_nativeTouch->clientY);
-    case kScreenX:
+    case TouchProperty::screenX:
       return JSValueMakeNumber(ctx, m_nativeTouch->screenX);
-    case kScreenY:
+    case TouchProperty::screenY:
       return JSValueMakeNumber(ctx, m_nativeTouch->screenY);
-    case kPageX:
+    case TouchProperty::pageX:
       return JSValueMakeNumber(ctx, m_nativeTouch->pageX);
-    case kPageY:
+    case TouchProperty::pageY:
       return JSValueMakeNumber(ctx, m_nativeTouch->pageY);
-    case kRadiusX:
+    case TouchProperty::radiusX:
       return JSValueMakeNumber(ctx, m_nativeTouch->radiusX);
-    case kRadiusY:
+    case TouchProperty::radiusY:
       return JSValueMakeNumber(ctx, m_nativeTouch->radiusY);
-    case kRotationAngle:
+    case TouchProperty::rotationAngle:
       return JSValueMakeNumber(ctx, m_nativeTouch->rotationAngle);
-    case kForce:
+    case TouchProperty::force:
       return JSValueMakeNumber(ctx, m_nativeTouch->force);
-    case kAltitudeAngle:
+    case TouchProperty::altitudeAngle:
       return JSValueMakeNumber(ctx, m_nativeTouch->altitudeAngle);
-    case kAzimuthAngle:
+    case TouchProperty::azimuthAngle:
       return JSValueMakeNumber(ctx, m_nativeTouch->azimuthAngle);
-    case kTouchType:
+    case TouchProperty::touchType:
       return JSValueMakeNumber(ctx, m_nativeTouch->touchType);
     }
   }
