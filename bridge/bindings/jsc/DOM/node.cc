@@ -405,15 +405,15 @@ JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception
 
   auto property = propertyMap[name];
   switch (property) {
-  case NodeProperty::kAppendChild:
+  case NodeProperty::appendChild:
     return m_appendChild.function();
-  case NodeProperty::kRemove:
+  case NodeProperty::remove:
     return m_remove.function();
-  case NodeProperty::kRemoveChild:
+  case NodeProperty::removeChild:
     return m_removeChild.function();
-  case NodeProperty::kInsertBefore:
+  case NodeProperty::insertBefore:
     return m_insertBefore.function();
-  case NodeProperty::kReplaceChild:
+  case NodeProperty::replaceChild:
     return m_replaceChild.function();
   default:
     break;
@@ -432,44 +432,44 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
   auto property = propertyMap[name];
 
   switch (property) {
-  case NodeProperty::kIsConnected:
+  case NodeProperty::isConnected:
     return JSValueMakeBoolean(_hostClass->ctx, isConnected());
-  case NodeProperty::kFirstChild: {
+  case NodeProperty::firstChild: {
     auto instance = firstChild();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
-  case NodeProperty::kParentNode: {
+  case NodeProperty::parentNode: {
     if (parentNode == nullptr) return nullptr;
     return parentNode->object;
   }
-  case NodeProperty::kLastChild: {
+  case NodeProperty::lastChild: {
     auto instance = lastChild();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
-  case NodeProperty::kPreviousSibling: {
+  case NodeProperty::previousSibling: {
     auto instance = previousSibling();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
-  case NodeProperty::kNextSibling: {
+  case NodeProperty::nextSibling: {
     auto instance = nextSibling();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
-  case NodeProperty::kAppendChild: {
+  case NodeProperty::appendChild: {
     return prototype<JSNode>()->m_appendChild.function();
   }
-  case NodeProperty::kRemove: {
+  case NodeProperty::remove: {
     return prototype<JSNode>()->m_remove.function();
   }
-  case NodeProperty::kRemoveChild: {
+  case NodeProperty::removeChild: {
     return prototype<JSNode>()->m_removeChild.function();
   }
-  case NodeProperty::kInsertBefore: {
+  case NodeProperty::insertBefore: {
     return prototype<JSNode>()->m_insertBefore.function();
   }
-  case NodeProperty::kReplaceChild: {
+  case NodeProperty::replaceChild: {
     return prototype<JSNode>()->m_replaceChild.function();
   }
-  case NodeProperty::kChildNodes: {
+  case NodeProperty::childNodes: {
     JSValueRef arguments[childNodes.size()];
 
     for (int i = 0; i < childNodes.size(); i++) {
@@ -479,9 +479,9 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     JSObjectRef array = JSObjectMakeArray(_hostClass->ctx, childNodes.size(), arguments, nullptr);
     return array;
   }
-  case NodeProperty::kNodeType:
+  case NodeProperty::nodeType:
     return JSValueMakeNumber(_hostClass->ctx, nodeType);
-  case NodeProperty::kTextContent: {
+  case NodeProperty::textContent: {
     std::string textContent = internalGetTextContent();
     return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(textContent.c_str()));
   }
@@ -496,7 +496,7 @@ void JSNode::NodeInstance::setProperty(std::string &name, JSValueRef value, JSVa
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
-    if (property == NodeProperty::kTextContent) {
+    if (property == NodeProperty::textContent) {
       JSStringRef textContent = JSValueToStringCopy(_hostClass->ctx, value, exception);
       internalSetTextContent(textContent, exception);
     }
@@ -513,38 +513,8 @@ void JSNode::NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumul
   }
 }
 
-std::vector<JSStringRef> &JSNode::getNodePropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("isConnected"),     JSStringCreateWithUTF8CString("firstChild"),
-    JSStringCreateWithUTF8CString("lastChild"),       JSStringCreateWithUTF8CString("childNodes"),
-    JSStringCreateWithUTF8CString("previousSibling"), JSStringCreateWithUTF8CString("nextSibling"),
-    JSStringCreateWithUTF8CString("appendChild"),     JSStringCreateWithUTF8CString("remove"),
-    JSStringCreateWithUTF8CString("removeChild"),     JSStringCreateWithUTF8CString("parentNode"),
-    JSStringCreateWithUTF8CString("insertBefore"),    JSStringCreateWithUTF8CString("replaceChild"),
-    JSStringCreateWithUTF8CString("nodeType"),        JSStringCreateWithUTF8CString("textContent")};
-  return propertyNames;
-}
-
 std::string JSNode::NodeInstance::internalGetTextContent() {
   return "";
-}
-
-const std::unordered_map<std::string, JSNode::NodeProperty> &JSNode::getNodePropertyMap() {
-  static std::unordered_map<std::string, NodeProperty> propertyMap{{"isConnected", NodeProperty::kIsConnected},
-                                                                   {"firstChild", NodeProperty::kFirstChild},
-                                                                   {"lastChild", NodeProperty::kLastChild},
-                                                                   {"parentNode", NodeProperty::kParentNode},
-                                                                   {"childNodes", NodeProperty::kChildNodes},
-                                                                   {"previousSibling", NodeProperty::kPreviousSibling},
-                                                                   {"nextSibling", NodeProperty::kNextSibling},
-                                                                   {"appendChild", NodeProperty::kAppendChild},
-                                                                   {"remove", NodeProperty::kRemove},
-                                                                   {"removeChild", NodeProperty::kRemoveChild},
-                                                                   {"insertBefore", NodeProperty::kInsertBefore},
-                                                                   {"replaceChild", NodeProperty::kReplaceChild},
-                                                                   {"nodeType", NodeProperty::kNodeType},
-                                                                   {"textContent", NodeProperty::kTextContent}};
-  return propertyMap;
 }
 
 void JSNode::NodeInstance::refer() {

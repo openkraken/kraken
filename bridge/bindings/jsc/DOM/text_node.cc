@@ -56,11 +56,11 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueR
 
   auto property = propertyMap[name];
   switch (property) {
-  case TextNodeProperty::kTextContent:
-  case TextNodeProperty::kData: {
+  case TextNodeProperty::textContent:
+  case TextNodeProperty::data: {
     return m_data.makeString();
   }
-  case TextNodeProperty::kNodeName: {
+  case TextNodeProperty::nodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#text");
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
@@ -83,13 +83,6 @@ void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
   }
 }
 
-std::array<JSStringRef, 3> &JSTextNode::TextNodeInstance::getTextNodePropertyNames() {
-  static std::array<JSStringRef, 3> propertyNames{JSStringCreateWithUTF8CString("data"),
-                                                  JSStringCreateWithUTF8CString("textContent"),
-                                                  JSStringCreateWithUTF8CString("nodeName")};
-  return propertyNames;
-}
-
 void JSTextNode::TextNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   NodeInstance::getPropertyNames(accumulator);
 
@@ -100,15 +93,6 @@ void JSTextNode::TextNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef
 
 std::string JSTextNode::TextNodeInstance::internalGetTextContent() {
   return m_data.string();
-}
-
-const std::unordered_map<std::string, JSTextNode::TextNodeInstance::TextNodeProperty> &
-JSTextNode::TextNodeInstance::getTextNodePropertyMap() {
-  static const std::unordered_map<std::string, TextNodeProperty> nodeProperty{
-    {"data", TextNodeProperty::kData},
-    {"textContent", TextNodeProperty::kTextContent},
-    {"nodeName", TextNodeProperty::kNodeName}};
-  return nodeProperty;
 }
 
 JSTextNode::TextNodeInstance::~TextNodeInstance() {

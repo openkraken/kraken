@@ -14,38 +14,18 @@ JSValueRef JSAllCollection::getProperty(std::string &name, JSValueRef *exception
     auto property = propertyMap[name];
 
     switch(property) {
-    case AllCollectionProperty::kItem:
+    case AllCollectionProperty::item:
       return m_item.function();
-    case AllCollectionProperty::kAdd:
+    case AllCollectionProperty::add:
       return m_add.function();
-    case AllCollectionProperty::kRemove:
+    case AllCollectionProperty::remove:
       return m_remove.function();
-    case AllCollectionProperty::kLength:
+    case AllCollectionProperty::length:
       return JSValueMakeNumber(ctx, m_nodes.size());
     }
   }
 
   return HostObject::getProperty(name, exception);
-}
-
-std::vector<JSStringRef> &JSAllCollection::getAllCollectionPropertyNames() {
-  static std::vector<JSStringRef> propertyNames {
-    JSStringCreateWithUTF8CString("item"),
-    JSStringCreateWithUTF8CString("add"),
-    JSStringCreateWithUTF8CString("remove"),
-    JSStringCreateWithUTF8CString("length"),
-  };
-  return propertyNames;
-}
-
-std::unordered_map<std::string, JSAllCollection::AllCollectionProperty> &JSAllCollection::getAllCollectionPropertyMap() {
-  static std::unordered_map<std::string, AllCollectionProperty> propertyMap {
-    {"item", AllCollectionProperty::kItem},
-    {"add", AllCollectionProperty::kAdd},
-    {"remove", AllCollectionProperty::kRemove},
-    {"length", AllCollectionProperty::kLength}
-  };
-  return propertyMap;
 }
 
 JSValueRef JSAllCollection::item(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,

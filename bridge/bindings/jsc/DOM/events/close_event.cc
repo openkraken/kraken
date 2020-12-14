@@ -14,13 +14,6 @@ void bindCloseEvent(std::unique_ptr<JSContext> &context) {
 
 std::unordered_map<JSContext *, JSCloseEvent *> JSCloseEvent::instanceMap{};
 
-JSCloseEvent *JSCloseEvent::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSCloseEvent(context);
-  }
-  return instanceMap[context];
-}
-
 JSCloseEvent::~JSCloseEvent() {
   instanceMap.erase(context);
 }
@@ -81,11 +74,11 @@ JSValueRef CloseEventInstance::getProperty(std::string &name, JSValueRef *except
 
   auto property = propertyMap[name];
   switch(property) {
-  case JSCloseEvent::CloseEventProperty::kCode:
+  case JSCloseEvent::CloseEventProperty::code:
     return JSValueMakeNumber(ctx, code);
-  case JSCloseEvent::CloseEventProperty::kReason:
+  case JSCloseEvent::CloseEventProperty::reason:
     return m_reason.makeString();
-  case JSCloseEvent::CloseEventProperty::kWasClean:
+  case JSCloseEvent::CloseEventProperty::wasClean:
     return JSValueMakeBoolean(ctx, wasClean);
   }
 
@@ -99,16 +92,16 @@ void CloseEventInstance::setProperty(std::string &name, JSValueRef value, JSValu
 
     switch (property) {
 
-    case JSCloseEvent::CloseEventProperty::kCode: {
+    case JSCloseEvent::CloseEventProperty::code: {
       code = JSValueToNumber(ctx, value, exception);
       break;
     }
-    case JSCloseEvent::CloseEventProperty::kReason: {
+    case JSCloseEvent::CloseEventProperty::reason: {
       JSStringRef str = JSValueToStringCopy(ctx, value, exception);
       m_reason.setString(str);
       break;
     }
-    case JSCloseEvent::CloseEventProperty::kWasClean: {
+    case JSCloseEvent::CloseEventProperty::wasClean: {
       wasClean = JSValueToBoolean(ctx, value);
       break;
     }
@@ -131,17 +124,4 @@ void CloseEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulat
   }
 }
 
-std::vector<JSStringRef> &JSCloseEvent::getCloseEventPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("code"),
-                                                JSStringCreateWithUTF8CString("reason"),
-                                                JSStringCreateWithUTF8CString("wasClean")};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSCloseEvent::CloseEventProperty> &JSCloseEvent::getCloseEventPropertyMap() {
-  static std::unordered_map<std::string, CloseEventProperty> propertyMap{{"code", CloseEventProperty::kCode},
-                                                                         {"reason", CloseEventProperty::kReason},
-                                                                         {"wasClean", CloseEventProperty::kWasClean}};
-  return propertyMap;
-}
 } // namespace kraken::binding::jsc

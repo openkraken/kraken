@@ -5,6 +5,7 @@
 
 #include "bindings/jsc/host_object.h"
 #include "bindings/jsc/js_context.h"
+#include "bindings/jsc/macros.h"
 #include <unordered_map>
 #include <vector>
 
@@ -52,10 +53,7 @@ public:
 
 class JSPerformance : public HostObject {
 public:
-  enum class PerformanceProperty { kNow, kTimeOrigin, ktoJSON };
-
-  static std::unordered_map<std::string, PerformanceProperty> &getPerformancePropertyMap();
-  static std::vector<JSStringRef> &getPerformancePropertyNames();
+  DEFINE_OBJECT_PROPERTY(Performance, 3, now, timeOrigin, toJSON)
 
   static JSValueRef now(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);

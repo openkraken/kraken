@@ -134,25 +134,6 @@ JSObjectRef JSBlob::instanceConstructor(JSContextRef ctx, JSObjectRef constructo
   return blob->object;
 }
 
-std::unordered_map<std::string, JSBlob::BlobInstance::BlobProperty> &JSBlob::BlobInstance::getBlobPropertyMap() {
-  static std::unordered_map<std::string, BlobProperty> propertyMap{
-    {"arrayBuffer", BlobProperty::kArrayBuffer},
-    {"slice", BlobProperty::kSlice},
-    {"text", BlobProperty::kText},
-    {"type", BlobProperty::kType},
-    {"size", BlobProperty::kSize},
-  };
-  return propertyMap;
-}
-
-std::vector<JSStringRef> &JSBlob::BlobInstance::getBlobPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("arrayBuffer"), JSStringCreateWithUTF8CString("slice"),
-    JSStringCreateWithUTF8CString("text"), JSStringCreateWithUTF8CString("type"),
-    JSStringCreateWithUTF8CString("size")};
-  return propertyNames;
-}
-
 JSValueRef JSBlob::BlobInstance::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                        size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef startValueRef = arguments[0];
@@ -257,19 +238,19 @@ JSValueRef JSBlob::BlobInstance::getProperty(std::string &name, JSValueRef *exce
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case kArrayBuffer:
+    case BlobProperty::arrayBuffer:
       return m_arrayBuffer.function();
-    case kSlice:
+    case BlobProperty::slice:
       return m_slice.function();
-    case kText:
+    case BlobProperty::text:
       return m_text.function();
-    case kStream:
+    case BlobProperty::stream:
       return nullptr;
-    case kType: {
+    case BlobProperty::type: {
       JSStringRef typeStringRef = JSStringCreateWithUTF8CString(mimeType.empty() ? "" : mimeType.c_str());
       return JSValueMakeString(_hostClass->ctx, typeStringRef);
     }
-    case kSize:
+    case BlobProperty::size:
       return JSValueMakeNumber(_hostClass->ctx, _size);
     }
   }

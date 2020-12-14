@@ -36,15 +36,8 @@ class JSEventTarget : public HostClass {
 public:
   static std::unordered_map<JSContext *, JSEventTarget *> instanceMap;
   static JSEventTarget *instance(JSContext *context);
-  enum class EventTargetProperty {
-    kAddEventListener,
-    kRemoveEventListener,
-    kDispatchEvent,
-    kClearListeners,
-    kEventTargetId
-  };
-  static std::vector<JSStringRef> &getEventTargetPropertyNames();
-  static const std::unordered_map<std::string, EventTargetProperty> &getEventTargetPropertyMap();
+  DEFINE_OBJECT_PROPERTY(EventTarget, 5, addEventListener, removeEventListener, dispatchEvent, __clearListeners__,
+                         eventTargetId)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -77,7 +70,7 @@ public:
 
     ~EventTargetInstance() override;
     int32_t eventTargetId;
-    NativeEventTarget *nativeEventTarget {nullptr};
+    NativeEventTarget *nativeEventTarget{nullptr};
 
   private:
     friend JSEventTarget;
