@@ -128,6 +128,9 @@ class Element extends Node
   /// Style declaration from user input.
   CSSStyleDeclaration style;
 
+  /// All the children whose position is sticky to this element
+  List<Element> stickyChildren;
+
   // Placeholder renderObject of positioned element(absolute/fixed)
   // used to get original coordinate before move away from document flow.
   RenderDecoratedBox stickyPlaceholder;
@@ -215,6 +218,10 @@ class Element extends Node
         style.setProperty(property, value);
       });
     }
+  }
+
+  void findStickyChildren() {
+    stickyChildren = _findStickyChildren(this);
   }
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
@@ -372,8 +379,7 @@ class Element extends Node
 
   // Calculate sticky status according to scroll offset and scroll direction
   void layoutStickyChildren(double scrollOffset, AxisDirection axisDirection) {
-    List<Element> stickyElements = _findStickyChildren(this);
-    for (Element el in stickyElements) {
+    for (Element el in stickyChildren) {
       layoutStickyChild(el, scrollOffset, axisDirection);
     }
   }
@@ -645,8 +651,6 @@ class Element extends Node
 
   void _addStickyChild(Element child, RenderObject after) {
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-    // Only layout box can have sticky child.
-    assert(childRenderBoxModel is RenderLayoutBox);
     (renderBoxModel as RenderLayoutBox).insert(childRenderBoxModel, after: after);
 
     // Set sticky element offset
@@ -1462,7 +1466,6 @@ Element _findScrollContainer(Element element) {
 List<Element> _findStickyChildren(Element element) {
   assert(element != null);
   List<Element> result = [];
-
   for (Element child in element.children) {
     List<CSSOverflowType> overflow = getOverflowTypes(child.style);
     CSSOverflowType overflowX = overflow[0];

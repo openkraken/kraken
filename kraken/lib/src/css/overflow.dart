@@ -62,6 +62,20 @@ mixin CSSOverflowMixin on ElementBase {
       CSSOverflowType overflowY = overflow[1];
       bool shouldRepaintSelf = false;
 
+      /// Cache sticky children when axis X starts scroll
+      void scrollXStart() {
+        if(_scrollableX.position.isScrollingNotifier.value) {
+          element.findStickyChildren();
+        }
+      }
+
+      /// Cache sticky children when axis Y starts scroll
+      void scrollYStart() {
+        if(_scrollableY.position.isScrollingNotifier.value) {
+          element.findStickyChildren();
+        }
+      }
+
       switch(overflowX) {
         case CSSOverflowType.hidden:
           _scrollableX = null;
@@ -82,6 +96,9 @@ mixin CSSOverflowMixin on ElementBase {
           renderBoxModel.clipX = true;
           renderBoxModel.enableScrollX = true;
           renderBoxModel.scrollOffsetX = _scrollableX.position;
+
+          _scrollableX.position.isScrollingNotifier.removeListener(scrollXStart);
+          _scrollableX.position.isScrollingNotifier.addListener(scrollXStart);
           break;
         case CSSOverflowType.visible:
         default:
@@ -111,6 +128,9 @@ mixin CSSOverflowMixin on ElementBase {
           renderBoxModel.clipY = true;
           renderBoxModel.enableScrollY = true;
           renderBoxModel.scrollOffsetY = _scrollableY.position;
+
+          _scrollableY.position.isScrollingNotifier.removeListener(scrollYStart);
+          _scrollableY.position.isScrollingNotifier.addListener(scrollYStart);
           break;
         case CSSOverflowType.visible:
         default:
