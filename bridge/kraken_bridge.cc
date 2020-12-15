@@ -130,6 +130,7 @@ bool checkContext(int32_t contextId) {
 }
 
 bool checkContext(int32_t contextId, void *context) {
+  if (contextPool[contextId] == nullptr) return false;
   auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   return bridge->getContext().get() == context;
 }
