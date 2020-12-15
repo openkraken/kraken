@@ -128,9 +128,6 @@ class Element extends Node
   /// Style declaration from user input.
   CSSStyleDeclaration style;
 
-  /// All the children whose position is sticky to this element
-  List<Element> stickyChildren;
-
   // Placeholder renderObject of positioned element(absolute/fixed)
   // used to get original coordinate before move away from document flow.
   RenderDecoratedBox stickyPlaceholder;
@@ -218,10 +215,6 @@ class Element extends Node
         style.setProperty(property, value);
       });
     }
-  }
-
-  void findStickyChildren() {
-    stickyChildren = _findStickyChildren(this);
   }
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
@@ -1461,30 +1454,6 @@ Element _findScrollContainer(Element element) {
     _el = _el.parent;
   }
   return _el;
-}
-
-List<Element> _findStickyChildren(Element element) {
-  assert(element != null);
-  List<Element> result = [];
-  for (Element child in element.children) {
-    List<CSSOverflowType> overflow = getOverflowTypes(child.style);
-    CSSOverflowType overflowX = overflow[0];
-    CSSOverflowType overflowY = overflow[1];
-
-    if (child.isValidSticky) result.add(child);
-
-    // No need to loop scrollable container children
-    if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
-      break;
-    }
-
-    List<Element> mergedChildren = _findStickyChildren(child);
-    for (Element child in mergedChildren) {
-      result.add(child);
-    }
-  }
-
-  return result;
 }
 
 bool _isIntersectionObserverEvent(String eventType) {
