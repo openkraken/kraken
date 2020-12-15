@@ -128,7 +128,7 @@ class KrakenViewController {
   // dispose controller and recycle all resources.
   void dispose() {
     // break circle reference
-    (_elementManager.getRootRenderObject() as RenderBoxModel).controller = null;
+    (_elementManager.getRootRenderObject() as RenderObjectWithControllerMixin).controller = null;
 
     detachView();
     disposeBridge(_contextId);
