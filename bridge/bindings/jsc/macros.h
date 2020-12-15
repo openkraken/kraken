@@ -1,3 +1,5 @@
+#include "object_property_macros.h"
+
 #define KRAKEN_BINDING_CONSOLE "__kraken_print__"
 
 #define BODY_TARGET_ID -1
@@ -5,6 +7,14 @@
 #define DOCUMENT_TARGET_ID -3
 
 #define assert_m(exp, msg) assert(((void)msg, exp))
+
+#define OBJECT_INSTANCE(NAME)                                                                                          \
+  static NAME *instance(JSContext *context) {                                                                          \
+    if (instanceMap.count(context) == 0) {                                                                             \
+      instanceMap[context] = new NAME(context);                                                             \
+    }                                                                                                                  \
+    return instanceMap[context];                                                                                       \
+  }
 
 #define JSC_GLOBAL_BINDING_FUNCTION(context, nameStr, func)                                                            \
   {                                                                                                                    \

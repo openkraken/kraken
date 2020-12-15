@@ -14,13 +14,6 @@ void bindIntersectionChangeEvent(std::unique_ptr<JSContext> &context) {
 
 std::unordered_map<JSContext *, JSIntersectionChangeEvent *> JSIntersectionChangeEvent::instanceMap{};
 
-JSIntersectionChangeEvent *JSIntersectionChangeEvent::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSIntersectionChangeEvent(context);
-  }
-  return instanceMap[context];
-}
-
 JSIntersectionChangeEvent::~JSIntersectionChangeEvent() {
   instanceMap.erase(context);
 }
@@ -60,12 +53,12 @@ IntersectionChangeEventInstance::IntersectionChangeEventInstance(JSIntersectionC
 }
 
 JSValueRef IntersectionChangeEventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSIntersectionChangeEvent::getIntersectionChangeEventPropertyMap();
+  auto propertyMap = JSIntersectionChangeEvent::getIntersectionChangePropertyMap();
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
   auto property = propertyMap[name];
-  if (property == JSIntersectionChangeEvent::IntersectionChangeEventProperty::kIntersectionRatio) {
+  if (property == JSIntersectionChangeEvent::IntersectionChangeProperty::intersectionRatio) {
     return JSValueMakeNumber(ctx, intersectionRatio);
   }
 
@@ -73,11 +66,11 @@ JSValueRef IntersectionChangeEventInstance::getProperty(std::string &name, JSVal
 }
 
 void IntersectionChangeEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSIntersectionChangeEvent::getIntersectionChangeEventPropertyMap();
+  auto propertyMap = JSIntersectionChangeEvent::getIntersectionChangePropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
-    if (property == JSIntersectionChangeEvent::IntersectionChangeEventProperty::kIntersectionRatio) {
+    if (property == JSIntersectionChangeEvent::IntersectionChangeProperty::intersectionRatio) {
       intersectionRatio = JSValueToNumber(ctx, value, exception);
     }
   } else {
@@ -92,21 +85,9 @@ IntersectionChangeEventInstance::~IntersectionChangeEventInstance() {
 void IntersectionChangeEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   EventInstance::getPropertyNames(accumulator);
 
-  for (auto &property : JSIntersectionChangeEvent::getIntersectionChangeEventPropertyNames()) {
+  for (auto &property : JSIntersectionChangeEvent::getIntersectionChangePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
-}
-
-std::vector<JSStringRef> &JSIntersectionChangeEvent::getIntersectionChangeEventPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("intersectionRatio"),};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSIntersectionChangeEvent::IntersectionChangeEventProperty> &
-JSIntersectionChangeEvent::getIntersectionChangeEventPropertyMap() {
-  static std::unordered_map<std::string, IntersectionChangeEventProperty> propertyMap{
-    {"intersectionRatio", IntersectionChangeEventProperty::kIntersectionRatio}};
-  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

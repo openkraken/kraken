@@ -130,6 +130,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/style_declaration.h
     bindings/jsc/KOM/console.h
     bindings/jsc/KOM/console.cc
+    bindings/jsc/KOM/method_channel.cc
+    bindings/jsc/KOM/method_channel.h
     bridge_jsc.cc
     bridge_jsc.h
   )
