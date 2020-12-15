@@ -444,7 +444,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   void dispose() {
     _teardownObserver();
     debugDOMTreeChanged = null;
-    controller.dispose();
     controller = null;
   }
 
