@@ -59,7 +59,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     } else {
       switch (axis) {
         case Axis.vertical:
-        // vertical trag gesture recongnizer to trigger vertical scroll.
+        // Vertical trag gesture recongnizer to trigger vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             ScrollVerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollVerticalDragGestureRecognizer>(
               () => ScrollVerticalDragGestureRecognizer(),
@@ -80,7 +80,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
           };
           break;
         case Axis.horizontal:
-          // horizontal trag gesture recongnizer to horizontal vertical scroll.
+          // Horizontal trag gesture recongnizer to horizontal vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             ScrollHorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollHorizontalDragGestureRecognizer>(
               () => ScrollHorizontalDragGestureRecognizer(),
