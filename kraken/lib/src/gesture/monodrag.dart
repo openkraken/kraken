@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// single finger drag gestures
+// Single finger drag gestures.
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
