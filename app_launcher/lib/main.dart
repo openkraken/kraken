@@ -5,11 +5,41 @@ import 'dart:ui';
 
 void main() {
   runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: Kraken(
+    title: 'Kraken App Demo',
+    home: FirstRoute(),
+  ));
+}
+
+class FirstRoute extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Kraken App Demo'),
+      ),
+      body: Center(
+        child: RaisedButton(
+          child: Text('Open Kraken Page'),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SecondRoute()),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class SecondRoute extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    Kraken kraken = Kraken(
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio,
-      background: Color(0xffffffff),
-    ),
-  ));
+    );
+
+    return kraken;
+  }
 }
