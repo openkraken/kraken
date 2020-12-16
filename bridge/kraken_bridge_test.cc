@@ -54,3 +54,7 @@ void registerEnvironment(Environment environment) {
 void registerSimulatePointer(SimulatePointer simulatePointer) {
   kraken::registerSimulatePointer(simulatePointer);
 }
+
+void registerSimulateKeyPress(SimulateKeyPress simulateKeyPress) {
+  kraken::registerSimulateKeyPress(simulateKeyPress);
+}

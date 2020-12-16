@@ -10,6 +10,7 @@
 #include "bindings/jsc/DOM/elements/canvas_element.h"
 #include "bindings/jsc/DOM/elements/iframe_element.h"
 #include "bindings/jsc/DOM/elements/image_element.h"
+#include "bindings/jsc/DOM/elements/input_element.h"
 #include "bindings/jsc/DOM/elements/object_element.h"
 #include "bindings/jsc/DOM/elements/video_element.h"
 #include "bridge_jsc.h"
@@ -656,7 +657,7 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
     {"span", ElementTagName::kSpan},     {"strong", ElementTagName::kStrong},
     {"pre", ElementTagName::kPre},       {"p", ElementTagName::kParagraph},
     {"iframe", ElementTagName::kIframe}, {"object", ElementTagName::kObject},
-    {"img", ElementTagName::kImage}};
+    {"img", ElementTagName::kImage},     {"input", ElementTagName::kInput}};
 
   ElementTagName tagName;
   if (m_elementMaps.count(name) > 0) {
@@ -666,10 +667,14 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
   }
 
   switch (tagName) {
+  case ElementTagName::kImage:
+    return new JSImageElement::ImageElementInstance(JSImageElement::instance(context));
   case ElementTagName::kAnchor:
     return new JSAnchorElement::AnchorElementInstance(JSAnchorElement::instance(context));
-  case ElementTagName::kAnimationPlayer:
-    return new JSAnimationPlayerElement::AnimationPlayerElementInstance(JSAnimationPlayerElement::instance(context));
+  case ElementTagName::kCanvas:
+    return new JSCanvasElement::CanvasElementInstance(JSCanvasElement::instance(context));
+  case ElementTagName::kInput:
+    return new JSInputElement::InputElementInstance(JSInputElement::instance(context));
   case ElementTagName::kAudio:
     return new JSAudioElement::AudioElementInstance(JSAudioElement::instance(context));
   case ElementTagName::kVideo:
@@ -678,10 +683,8 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
     return new JSIframeElement::IframeElementInstance(JSIframeElement::instance(context));
   case ElementTagName::kObject:
     return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
-  case ElementTagName::kImage:
-    return new JSImageElement::ImageElementInstance(JSImageElement::instance(context));
-  case ElementTagName::kCanvas:
-    return new JSCanvasElement::CanvasElementInstance(JSCanvasElement::instance(context));
+  case ElementTagName::kAnimationPlayer:
+    return new JSAnimationPlayerElement::AnimationPlayerElementInstance(JSAnimationPlayerElement::instance(context));
   case ElementTagName::kSpan:
   case ElementTagName::kDiv:
   case ElementTagName::kStrong:
@@ -805,6 +808,15 @@ void ElementInstance::internalSetTextContent(JSStringRef content, JSValueRef *ex
 
 BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientRect *boundingClientRect)
   : HostObject(context, "BoundingClientRect"), nativeBoundingClientRect(boundingClientRect) {}
+
+JSValueRef ElementInstance::getStringValueProperty(std::string &name) {
+  JSStringRef stringRef = JSStringCreateWithUTF8CString(name.c_str());
+  NativeString* nativeString = stringRefToNativeString(stringRef);
+  NativeString* returnedString = nativeElement->getStringValueProperty(nativeElement, nativeString);
+  JSStringRef returnedStringRef = JSStringCreateWithCharacters(returnedString->string, returnedString->length);
+  JSStringRelease(stringRef);
+  return JSValueMakeString(_hostClass->ctx, returnedStringRef);
+}
 
 JSValueRef BoundingClientRect::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getPropertyMap();
