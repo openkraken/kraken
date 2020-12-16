@@ -17,48 +17,20 @@ void bindInputElement(std::unique_ptr<JSContext> &context);
 
 class JSInputElement : public JSElement {
 public:
-  static std::unordered_map<JSContext *, JSInputElement *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSInputElement *> instanceMap;
   static JSInputElement *instance(JSContext *context);
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
   static JSValueRef focus(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                         const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef blur(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                           const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef blur(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                         const JSValueRef arguments[], JSValueRef *exception);
 
   class InputElementInstance : public ElementInstance {
   public:
-    enum class InputProperty {
-      // Properties
-      kWidth,
-      kHeight,
-      kValue,
-      kAccept,
-      kAutocomplete,
-      kAutofocus,
-      kChecked,
-      kDisabled,
-      kMin,
-      kMax,
-      kMinlength,
-      kMaxlength,
-      kSize,
-      kMultiple,
-      kName,
-      kStep,
-      kPattern,
-      kRequired,
-      kReadonly,
-      kPlaceholder,
-      kType,
-
-      // Methods
-      kFocus,
-      kBlur,
-    };
-
-    static std::vector<JSStringRef> &getInputElementPropertyNames();
-    static const std::unordered_map<std::string, InputProperty> &getInputElementPropertyMap();
+    DEFINE_OBJECT_PROPERTY(InputElement, 23, width, height, value, accept, autocomplete, autofocus, checked, disabled,
+                           min, max, minlength, maxlength, size, multiple, name, step, pattern, required, readonly,
+                           placeholder, type, focus, blur);
 
     InputElementInstance() = delete;
     ~InputElementInstance();
@@ -73,15 +45,16 @@ public:
     JSFunctionHolder m_focus{context, this, "focus", focus};
     JSFunctionHolder m_blur{context, this, "blur", blur};
   };
+
 protected:
   JSInputElement() = delete;
   explicit JSInputElement(JSContext *context);
   ~JSInputElement();
 };
 
-using GetInputWidth = double(*)(NativeInputElement *nativeInputElement);
-using GetInputHeight = double(*)(NativeInputElement *nativeInputElement);
-using InputVoidCallback = void(*)(NativeInputElement *nativeInputElement);
+using GetInputWidth = double (*)(NativeInputElement *nativeInputElement);
+using GetInputHeight = double (*)(NativeInputElement *nativeInputElement);
+using InputVoidCallback = void (*)(NativeInputElement *nativeInputElement);
 
 struct NativeInputElement {
   NativeInputElement() = delete;
