@@ -13,7 +13,7 @@ enum CSSPositionType {
   sticky,
 }
 
-Offset _getRelativeOffset(CSSStyleDeclaration style) {
+Offset _getRelativeOffset(CSSStyleDeclaration style, Size viewportSize) {
   CSSPositionType position = CSSPositionedLayout.parsePositionType(style[POSITION]);
   if (position == CSSPositionType.relative) {
     double dx;
@@ -21,16 +21,16 @@ Offset _getRelativeOffset(CSSStyleDeclaration style) {
 
     // @TODO support auto value
     if (style.contains(LEFT) && style[LEFT] != AUTO) {
-      dx = CSSLength.toDisplayPortValue(style[LEFT]);
+      dx = CSSLength.toDisplayPortValue(style[LEFT], viewportSize);
     } else if (style.contains(RIGHT) && style[RIGHT] != AUTO) {
-      var _dx = CSSLength.toDisplayPortValue(style[RIGHT]);
+      var _dx = CSSLength.toDisplayPortValue(style[RIGHT], viewportSize);
       if (_dx != null) dx = -_dx;
     }
 
     if (style.contains(TOP) && style[TOP] != AUTO) {
-      dy = CSSLength.toDisplayPortValue(style[TOP]);
+      dy = CSSLength.toDisplayPortValue(style[TOP], viewportSize);
     } else if (style.contains(BOTTOM) && style[BOTTOM] != AUTO) {
-      var _dy = CSSLength.toDisplayPortValue(style[BOTTOM]);
+      var _dy = CSSLength.toDisplayPortValue(style[BOTTOM], viewportSize);
       if (_dy != null) dy = -_dy;
     }
 
@@ -87,51 +87,54 @@ Offset _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, RenderO
 // Margin auto has special rules for positioned element
 // which will override the default position rule
 // https://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width
-Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBox child, Size parentSize) {
-  if (child is RenderBoxModel) {
-    CSSStyleDeclaration childStyle = child.style;
-    String marginLeft = childStyle[MARGIN_LEFT];
-    String marginRight = childStyle[MARGIN_RIGHT];
-    String marginTop = childStyle[MARGIN_TOP];
-    String marginBottom = childStyle[MARGIN_BOTTOM];
-    String width = childStyle[WIDTH];
-    String height = childStyle[HEIGHT];
-    String left = childStyle[LEFT];
-    String right = childStyle[RIGHT];
-    String top = childStyle[TOP];
-    String bottom = childStyle[BOTTOM];
+Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel child, Size parentSize) {
+  CSSStyleDeclaration childStyle = child.style;
+  String marginLeft = childStyle[MARGIN_LEFT];
+  String marginRight = childStyle[MARGIN_RIGHT];
+  String marginTop = childStyle[MARGIN_TOP];
+  String marginBottom = childStyle[MARGIN_BOTTOM];
+  String width = childStyle[WIDTH];
+  String height = childStyle[HEIGHT];
+  String left = childStyle[LEFT];
+  String right = childStyle[RIGHT];
+  String top = childStyle[TOP];
+  String bottom = childStyle[BOTTOM];
 
-    // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
-    // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
-    if ((left.isNotEmpty && left != AUTO) &&
-        (right.isNotEmpty && right != AUTO) &&
-        (width.isNotEmpty && width != AUTO)) {
-      if (marginLeft == AUTO) {
-        double leftValue = CSSLength.toDisplayPortValue(left) ?? 0.0;
-        double rightValue = CSSLength.toDisplayPortValue(right) ?? 0.0;
-        double remainingSpace = parentSize.width - child.boxSize.width - leftValue - rightValue;
+  ElementManager elementManager = child.elementManager;
+  double viewportWidth = elementManager.viewportWidth;
+  double viewportHeight = elementManager.viewportHeight;
+  Size viewportSize = Size(viewportWidth, viewportHeight);
 
-        if (marginRight == AUTO) {
-          x = leftValue + remainingSpace / 2;
-        } else {
-          x = leftValue + remainingSpace;
-        }
+  // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
+  // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
+  if ((left.isNotEmpty && left != AUTO) &&
+      (right.isNotEmpty && right != AUTO) &&
+      (width.isNotEmpty && width != AUTO)) {
+    if (marginLeft == AUTO) {
+      double leftValue = CSSLength.toDisplayPortValue(left, viewportSize) ?? 0.0;
+      double rightValue = CSSLength.toDisplayPortValue(right, viewportSize) ?? 0.0;
+      double remainingSpace = parentSize.width - child.boxSize.width - leftValue - rightValue;
+
+      if (marginRight == AUTO) {
+        x = leftValue + remainingSpace / 2;
+      } else {
+        x = leftValue + remainingSpace;
       }
     }
+  }
 
-    if ((top.isNotEmpty && top != AUTO) &&
-        (bottom.isNotEmpty && bottom != AUTO) &&
-        (height.isNotEmpty && height != AUTO)) {
-      if (marginTop == AUTO) {
-        double topValue = CSSLength.toDisplayPortValue(top) ?? 0.0;
-        double bottomValue = CSSLength.toDisplayPortValue(bottom) ?? 0.0;
-        double remainingSpace = parentSize.height - child.boxSize.height - topValue - bottomValue;
+  if ((top.isNotEmpty && top != AUTO) &&
+      (bottom.isNotEmpty && bottom != AUTO) &&
+      (height.isNotEmpty && height != AUTO)) {
+    if (marginTop == AUTO) {
+      double topValue = CSSLength.toDisplayPortValue(top, viewportSize) ?? 0.0;
+      double bottomValue = CSSLength.toDisplayPortValue(bottom, viewportSize) ?? 0.0;
+      double remainingSpace = parentSize.height - child.boxSize.height - topValue - bottomValue;
 
-        if (marginBottom == AUTO) {
-          y = topValue + remainingSpace / 2;
-        } else {
-          y = topValue + remainingSpace;
-        }
+      if (marginBottom == AUTO) {
+        y = topValue + remainingSpace / 2;
+      } else {
+        y = topValue + remainingSpace;
       }
     }
   }
@@ -153,24 +156,29 @@ class CSSPositionedLayout {
     return CSSPositionType.static;
   }
 
-  static RenderLayoutParentData getPositionParentData(CSSStyleDeclaration style, RenderLayoutParentData parentData) {
+  static RenderLayoutParentData getPositionParentData(RenderBoxModel renderBoxModel, RenderLayoutParentData parentData) {
+    CSSStyleDeclaration style = renderBoxModel.style;
     CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
     parentData.position = positionType;
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     if (style.contains(TOP)) {
-      parentData.top = CSSLength.toDisplayPortValue(style[TOP]);
+      parentData.top = CSSLength.toDisplayPortValue(style[TOP], viewportSize);
     }
     if (style.contains(LEFT)) {
-      parentData.left = CSSLength.toDisplayPortValue(style[LEFT]);
+      parentData.left = CSSLength.toDisplayPortValue(style[LEFT], viewportSize);
     }
     if (style.contains(BOTTOM)) {
-      parentData.bottom = CSSLength.toDisplayPortValue(style[BOTTOM]);
+      parentData.bottom = CSSLength.toDisplayPortValue(style[BOTTOM], viewportSize);
     }
     if (style.contains(RIGHT)) {
-      parentData.right = CSSLength.toDisplayPortValue(style[RIGHT]);
+      parentData.right = CSSLength.toDisplayPortValue(style[RIGHT], viewportSize);
     }
-    parentData.width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
-    parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0;
+    parentData.width = CSSLength.toDisplayPortValue(style[WIDTH], viewportSize) ?? 0;
+    parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize) ?? 0;
     parentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
 
     parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
@@ -189,8 +197,12 @@ class CSSPositionedLayout {
     if (boxParentData != null) {
       Offset styleOffset;
       // Text node does not have relative offset
-      if (renderBox is! RenderTextBox && style != null) {
-        styleOffset = _getRelativeOffset(style);
+      if (renderBox is RenderBoxModel && style != null) {
+        ElementManager elementManager = renderBox.elementManager;
+        double viewportWidth = elementManager.viewportWidth;
+        double viewportHeight = elementManager.viewportHeight;
+        Size viewportSize = Size(viewportWidth, viewportHeight);
+        styleOffset = _getRelativeOffset(style, viewportSize);
       }
 
       if (relativeOffset != null) {

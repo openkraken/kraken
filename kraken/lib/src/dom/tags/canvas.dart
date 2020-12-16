@@ -97,9 +97,14 @@ class CanvasElement extends Element {
 
   // RenderingContext? getContext(DOMString contextId, optional any options = null);
   CanvasRenderingContext getContext(String contextId, {dynamic options}) {
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     switch (contextId) {
       case '2d':
         if (painter.context == null) {
+          CanvasRenderingContext2D.viewportSize = viewportSize;
           painter.context = CanvasRenderingContext2D();
         }
         return painter.context;
@@ -214,12 +219,16 @@ class CanvasElement extends Element {
   @override
   void setProperty(String key, value) {
     super.setProperty(key, value);
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     switch (key) {
       case WIDTH:
-        attrWidth = CSSLength.toDisplayPortValue('$value${CSSLength.PX}');
+        attrWidth = CSSLength.toDisplayPortValue('$value${CSSLength.PX}', viewportSize);
         break;
       case HEIGHT:
-        attrHeight = CSSLength.toDisplayPortValue('$value${CSSLength.PX}');
+        attrHeight = CSSLength.toDisplayPortValue('$value${CSSLength.PX}', viewportSize);
         break;
     }
   }

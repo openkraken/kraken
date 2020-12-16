@@ -464,7 +464,13 @@ abstract class WebViewElement extends Element {
   })  : assert(javascriptMode != null),
         assert(initialMediaPlaybackPolicy != null),
         super(targetId, nativePtr, elementManager,
-            tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true);
+            tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true) {
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+    _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH, viewportSize);
+    _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT, viewportSize);
+  }
 
   @override
   void willAttachRenderer() {
@@ -523,10 +529,13 @@ abstract class WebViewElement extends Element {
   }
 
   void _stylePropertyChanged(String property, String prev, String present, bool isAnimation) {
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
     if (property == WIDTH) {
-      width = CSSLength.toDisplayPortValue(present);
+      width = CSSLength.toDisplayPortValue(present, viewportSize);
     } else if (property == HEIGHT) {
-      height = CSSLength.toDisplayPortValue(present);
+      height = CSSLength.toDisplayPortValue(present, viewportSize);
     }
   }
 
@@ -557,7 +566,7 @@ abstract class WebViewElement extends Element {
   Size get size => Size(width, height);
 
   /// Element attribute width
-  double _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
+  double _width;
 
   double get width => _width;
 
@@ -575,7 +584,7 @@ abstract class WebViewElement extends Element {
   }
 
   /// Element attribute height
-  double _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
+  double _height;
 
   double get height => _height;
 

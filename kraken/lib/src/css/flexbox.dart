@@ -2,7 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
+import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -315,10 +315,10 @@ double _getFlexShrink(String shrink) {
   return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
 }
 
-String _getFlexBasis(String basis) {
+String _getFlexBasis(String basis, Size viewportSize) {
   String flexBasis = basis;
   if (basis.isNotEmpty && basis != AUTO) {
-    if (CSSLength.toDisplayPortValue(basis) < 0) {
+    if (CSSLength.toDisplayPortValue(basis, viewportSize) < 0) {
       flexBasis = AUTO;
     }
   } else {
@@ -344,7 +344,7 @@ class CSSFlex {
     return flexDirection == FlexDirection.columnReverse || flexDirection == FlexDirection.column;
   }
 
-  static RenderFlexParentData getParentData(CSSStyleDeclaration style) {
+  static RenderFlexParentData getParentData(CSSStyleDeclaration style, Size viewportSize) {
     RenderFlexParentData parentData = RenderFlexParentData();
     String grow = style[FLEX_GROW];
     String shrink = style[FLEX_SHRINK];
@@ -353,7 +353,7 @@ class CSSFlex {
 
     parentData.flexGrow = _getFlexGrow(grow);
     parentData.flexShrink = _getFlexShrink(shrink);
-    parentData.flexBasis = _getFlexBasis(basis);
+    parentData.flexBasis = _getFlexBasis(basis, viewportSize);
     parentData.alignSelf = _getAlignSelf(alignSelf);
 
     return parentData;
