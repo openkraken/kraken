@@ -68,26 +68,26 @@ enum UICommand {
 struct UICommandItem {
   UICommandItem(int32_t id, int32_t type, NativeString args_01, NativeString args_02, void *nativePtr)
     : type(type),
-      string_01(args_01.string),
+      string_01(reinterpret_cast<int64_t>(args_01.string)),
       args_01_length(args_01.length),
-      string_02(args_02.string),
+      string_02(reinterpret_cast<int64_t>(args_02.string)),
       args_02_length(args_02.length),
       id(id),
-      nativePtr(nativePtr){};
+      nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
   UICommandItem(int32_t id, int32_t type, NativeString args_01, void *nativePtr)
     : type(type),
-      string_01(args_01.string),
+      string_01(reinterpret_cast<int64_t>(args_01.string)),
       args_01_length(args_01.length),
       id(id),
-      nativePtr(nativePtr){};
-  UICommandItem(int32_t id, int32_t type, void *nativePtr) : type(type), id(id), nativePtr(nativePtr){};
+      nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+  UICommandItem(int32_t id, int32_t type, void *nativePtr) : type(type), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
   int32_t type;
   int32_t id;
   int32_t args_01_length{0};
   int32_t args_02_length{0};
-  const uint16_t *string_01{nullptr};
-  const uint16_t *string_02{nullptr};
-  void *nativePtr{nullptr};
+  int64_t string_01{0};
+  int64_t string_02{0};
+  int64_t nativePtr{0};
 };
 
 using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);

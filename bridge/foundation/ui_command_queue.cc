@@ -60,8 +60,8 @@ int64_t UICommandTaskMessageQueue::size() {
 
 void UICommandTaskMessageQueue::clear() {
   for (auto command : queue) {
-    delete[] command.string_01;
-    delete[] command.string_02;
+    delete[] reinterpret_cast<const uint16_t *>(command.string_01);
+    delete[] reinterpret_cast<const uint16_t *>(command.string_02);
   }
   queue.clear();
   update_batched = false;
