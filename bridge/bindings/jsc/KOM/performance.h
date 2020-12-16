@@ -15,62 +15,69 @@ namespace kraken::binding::jsc {
 
 void bindPerformance(std::unique_ptr<JSContext> &context);
 
+struct NativePerformanceEntry {
+  NativePerformanceEntry(const std::string name, const std::string entryType, double startTime, double duration)
+    : startTime(startTime), duration(duration), name(name), entryType(entryType) {};
+  std::string name;
+  std::string entryType;
+  double startTime;
+  double duration;
+};
+
 class JSPerformance;
 
 class JSPerformanceEntry : public HostObject {
 public:
-  enum class PerformanceEntryProperty { kName, kEntryType, kStartTime, kDuration};
-
-  static std::unordered_map<std::string, PerformanceEntryProperty> &getPerformanceEntryPropertyMap();
-  static std::vector<JSStringRef> &getPerformanceEntryPropertyNames();
+  DEFINE_OBJECT_PROPERTY(PerformanceEntry, 4, name, entryType, startTime, duration)
 
   JSPerformanceEntry() = delete;
-  explicit JSPerformanceEntry(JSContext *context, JSStringRef name, JSStringRef entryType, double startTime, double duration);
+  explicit JSPerformanceEntry(JSContext *context, NativePerformanceEntry *nativePerformanceEntry);
 
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:
   friend JSPerformance;
-  JSStringHolder m_name{context, ""};
-  JSStringHolder m_entryType{context, ""};
-  double m_startTime;
-  double m_duration;
+  NativePerformanceEntry *m_nativePerformanceEntry;
 };
 
 class JSPerformanceMark : public JSPerformanceEntry {
 public:
   JSPerformanceMark() = delete;
-  explicit JSPerformanceMark(JSContext *context, JSStringRef name, double startTime);
+  explicit JSPerformanceMark(JSContext *context, std::string &name, double startTime);
+  explicit JSPerformanceMark(JSContext *context, NativePerformanceEntry *nativePerformanceEntry);
+
 private:
 };
 
 class JSPerformanceMeasure : public JSPerformanceEntry {
 public:
   JSPerformanceMeasure() = delete;
-  explicit JSPerformanceMeasure(JSContext *context, JSStringRef name, double startTime, double duration);
+  explicit JSPerformanceMeasure(JSContext *context, std::string &name, double startTime, double duration);
+  explicit JSPerformanceMeasure(JSContext *context, NativePerformanceEntry *nativePerformanceEntry);
 };
 
 class JSPerformance : public HostObject {
 public:
-  DEFINE_OBJECT_PROPERTY(Performance, 3, now, timeOrigin, toJSON)
+  DEFINE_OBJECT_PROPERTY(Performance, 10, now, timeOrigin, toJSON, clearMarks, clearMeasures, getEntries,
+                         getEntriesByName, getEntriesByType, mark, measure)
 
-  static JSValueRef now(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef now(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                        const JSValueRef arguments[], JSValueRef *exception);
 
-  static JSValueRef timeOrigin(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef timeOrigin(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef arguments[], JSValueRef *exception);
 
-  static JSValueRef toJSON(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                               size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef clearMarks(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef toJSON(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                           const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef clearMarks(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef arguments[], JSValueRef *exception);
 
-  static JSValueRef clearMeasures(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                  size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef clearMeasures(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef arguments[], JSValueRef *exception);
 
-  static JSValueRef getEntries(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                               size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef getEntries(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef getEntriesByName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
@@ -78,11 +85,11 @@ public:
   static JSValueRef getEntriesByType(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
-  static JSValueRef mark(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef mark(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                         const JSValueRef arguments[], JSValueRef *exception);
 
-  static JSValueRef measure(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef measure(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                            const JSValueRef arguments[], JSValueRef *exception);
 
   JSPerformance(JSContext *context) : HostObject(context, JSPerformanceName) {}
 
@@ -103,7 +110,7 @@ private:
   JSFunctionHolder m_measure{context, "measure", measure};
   double internalNow();
 
-  std::vector<JSPerformanceEntry*> m_entries;
+  std::vector<NativePerformanceEntry*> m_entries;
 };
 
 } // namespace kraken::binding::jsc
