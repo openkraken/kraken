@@ -11,6 +11,7 @@ namespace kraken::binding::jsc {
 void bindImageElement(std::unique_ptr<JSContext> &context) {
   auto ImageElement = JSImageElement::instance(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Image", ImageElement->classObject);
+  JSC_GLOBAL_SET_PROPERTY(context, "HTMLImageElement", ImageElement->classObject);
 }
 
 std::unordered_map<JSContext *, JSImageElement *> JSImageElement::instanceMap {};

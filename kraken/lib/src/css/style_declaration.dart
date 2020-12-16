@@ -166,7 +166,7 @@ class CSSStyleDeclaration {
     return _propertyRunningTransition[property] != null;
   }
 
-  void _transition(String propertyName, begin, end) {
+  void _transition(String propertyName, begin, end, Size viewportSize) {
     if (_hasRunningTransition(propertyName)) {
       Animation animation = _propertyRunningTransition[propertyName];
       animation.cancel();
@@ -198,7 +198,7 @@ class CSSStyleDeclaration {
       Keyframe(propertyName, begin, 0, LINEAR),
       Keyframe(propertyName, end, 1, LINEAR),
     ];
-    KeyframeEffect effect = KeyframeEffect(this, keyframes, options);
+    KeyframeEffect effect = KeyframeEffect(this, keyframes, options, viewportSize);
     Animation animation = Animation(effect);
     _propertyRunningTransition[propertyName] = animation;
 
@@ -325,7 +325,7 @@ class CSSStyleDeclaration {
     return prevValue;
   }
 
-  void _expandShorthand(String propertyName, String normalizedValue) {
+  void _expandShorthand(String propertyName, String normalizedValue, Size viewportSize) {
     Map<String, String> longhandProperties = {};
     switch(propertyName) {
       case PADDING:
@@ -371,7 +371,10 @@ class CSSStyleDeclaration {
     }
 
     if (longhandProperties.isNotEmpty) {
-      longhandProperties.forEach(setProperty);
+//      longhandProperties.forEach(setProperty);
+      longhandProperties.forEach((String propertyName, String value) {
+        setProperty(propertyName, value, viewportSize);
+      });
     }
   }
 
@@ -448,7 +451,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [bool fromAnimation = false]) {
+  void setProperty(String propertyName, value, [Size viewportSize, bool fromAnimation = false]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -464,7 +467,7 @@ class CSSStyleDeclaration {
     if (normalizedValue == prevValue) return;
 
     if (CSSShorthandProperty[propertyName] != null) {
-      return _expandShorthand(propertyName, normalizedValue);
+      return _expandShorthand(propertyName, normalizedValue, viewportSize);
     }
 
     switch (propertyName) {
@@ -512,7 +515,7 @@ class CSSStyleDeclaration {
         if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
       case TRANSFORM:
-        if (CSSTransform.parseTransform(normalizedValue) == null) {
+        if (CSSTransform.parseTransform(normalizedValue, viewportSize) == null) {
           return;
         }
         break;
@@ -530,7 +533,7 @@ class CSSStyleDeclaration {
     }
 
     if (!fromAnimation && _shouldTransition(propertyName, prevValue, normalizedValue)) {
-      return _transition(propertyName, prevValue, normalizedValue);
+      return _transition(propertyName, prevValue, normalizedValue, viewportSize);
     }
 
     if (fromAnimation) {
@@ -581,8 +584,11 @@ class CSSStyleDeclaration {
     });
   }
 
-  double getLengthByPropertyName(propertyName) {
-    return CSSLength.toDisplayPortValue(getPropertyValue(propertyName));
+  double getLengthByPropertyName(String propertyName, ElementManager elementManager) {
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+    return CSSLength.toDisplayPortValue(getPropertyValue(propertyName), viewportSize);
   }
 
   static bool isNullOrEmptyValue(value) {

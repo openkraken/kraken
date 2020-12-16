@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -13,7 +18,12 @@ mixin CSSOffsetMixin on Node {
       if (property == Z_INDEX) {
         positionParentData.zIndex = int.tryParse(present) ?? 0;
       } else {
-        double value = CSSLength.toDisplayPortValue(present);
+        ElementManager elementManager = renderBoxModel.elementManager;
+        double viewportWidth = elementManager.viewportWidth;
+        double viewportHeight = elementManager.viewportHeight;
+        Size viewportSize = Size(viewportWidth, viewportHeight);
+
+        double value = CSSLength.toDisplayPortValue(present, viewportSize);
         switch (property) {
           case TOP:
             positionParentData.top = value;

@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:core';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/animation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -451,14 +452,16 @@ class KeyframeEffect extends AnimationEffect {
   // Similarly, a playback rate of -1 will cause the animation’s current time to decrease at the same rate as the time values from its timeline increase.
   double _playbackRate = 1;
 
-  KeyframeEffect(this.style, List<Keyframe> keyframes, EffectTiming options) {
+  KeyframeEffect(this.style, List<Keyframe> keyframes, EffectTiming options, this.viewportSize) {
     timing = options == null ? EffectTiming() : options;
 
     if (keyframes != null) {
       _propertySpecificKeyframeGroups = _makePropertySpecificKeyframeGroups(keyframes);
-      _interpolations = _makeInterpolations(_propertySpecificKeyframeGroups);
+      _interpolations = _makeInterpolations(_propertySpecificKeyframeGroups, viewportSize);
     }
   }
+
+  Size viewportSize;
 
   static _defaultParse(value) {
     return value;
@@ -468,7 +471,7 @@ class KeyframeEffect extends AnimationEffect {
     return progress < 0.5 ? start : end;
   }
 
-  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups) {
+  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, Size viewportSize) {
     List<_Interpolation> interpolations = [];
 
     propertySpecificKeyframeGroups.forEach((String property, List<Keyframe> keyframes) {
@@ -507,8 +510,8 @@ class KeyframeEffect extends AnimationEffect {
           startOffset,
           endOffset,
           _parseEasing(keyframes[startIndex].easing),
-          parseProperty(left),
-          parseProperty(right),
+          parseProperty(left, viewportSize),
+          parseProperty(right, viewportSize),
           handlers[1]
         );
 
@@ -555,7 +558,7 @@ class KeyframeEffect extends AnimationEffect {
       _propertySpecificKeyframeGroups.forEach((String propertyName, value) {
         style.removeAnimationProperty(propertyName);
         String value = style.getStylePropertyValue(propertyName);
-        style.setProperty(propertyName, value);
+        style.setProperty(propertyName, value, viewportSize);
       });
 
     } else {
@@ -574,7 +577,7 @@ class KeyframeEffect extends AnimationEffect {
         }
 
         String value = interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime);
-        style.setProperty(property, value, true);
+        style.setProperty(property, value, viewportSize, true);
       }
     }
   }

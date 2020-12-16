@@ -32,6 +32,7 @@ struct DartMethodPointer {
   MatchImageSnapshot matchImageSnapshot{nullptr};
   Environment environment{nullptr};
   SimulatePointer simulatePointer{nullptr};
+  SimulateKeyPress simulateKeyPress{nullptr};
   FlushUICommand flushUICommand{nullptr};
   InitBody initBody{nullptr};
   InitWindow initWindow{nullptr};
@@ -59,6 +60,7 @@ void registerRefreshPaint(RefreshPaint refreshPaint);
 void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot);
 void registerEnvironment(Environment environment);
 void registerSimulatePointer(SimulatePointer simulatePointer);
+void registerSimulateKeyPress(SimulateKeyPress simulateKeyPress);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

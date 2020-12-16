@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'gesture_detector.dart';
+import 'scroll_position_with_single_context.dart';
 
 /// A backend for a [ScrollActivity].
 ///
@@ -323,6 +324,12 @@ class ScrollDragController implements Drag {
       }
     }
   }
+
+  double get pixels => (delegate as ScrollPositionWithSingleContext).pixels;
+
+  double get maxScrollExtent => (delegate as ScrollPositionWithSingleContext).maxScrollExtent;
+
+  double get minScrollExtent => (delegate as ScrollPositionWithSingleContext).minScrollExtent;
 
   @override
   void update(DragUpdateDetails details) {

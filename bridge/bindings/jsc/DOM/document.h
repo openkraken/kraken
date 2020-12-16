@@ -18,6 +18,7 @@
 #include "bindings/jsc/DOM/elements/canvas_element.h"
 #include "bindings/jsc/DOM/elements/iframe_element.h"
 #include "bindings/jsc/DOM/elements/image_element.h"
+#include "bindings/jsc/DOM/elements/input_element.h"
 #include "bindings/jsc/DOM/elements/object_element.h"
 #include "bindings/jsc/DOM/elements/video_element.h"
 

@@ -7,16 +7,18 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:ui';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:kraken/launcher.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:test/test.dart';
-import 'dart:ui';
-import 'package:kraken/src/bridge/from_native.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'platform.dart';
 import 'match_snapshots.dart';
@@ -123,12 +125,17 @@ void registerEnvironment() {
 }
 
 typedef Native_SimulatePointer = Void Function(Pointer<Pointer<MousePointer>>,  Int32 length);
+typedef Native_SimulateKeyPress = Void Function(Pointer<NativeString>);
 
 typedef Native_RegisterSimulatePointer = Void Function(Pointer<NativeFunction<Native_SimulatePointer>> function);
+typedef Native_RegisterSimulateKeyPress = Void Function(Pointer<NativeFunction<Native_SimulateKeyPress>> function);
 typedef Dart_RegisterSimulatePointer = void Function(Pointer<NativeFunction<Native_SimulatePointer>> function);
+typedef Dart_RegisterSimulateKeyPress = void Function(Pointer<NativeFunction<Native_SimulateKeyPress>> function);
 
 final Dart_RegisterSimulatePointer _registerSimulatePointer =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSimulatePointer>>('registerSimulatePointer').asFunction();
+final Dart_RegisterSimulateKeyPress _registerSimulateKeyPress =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSimulateKeyPress>>('registerSimulateKeyPress').asFunction();
 
 PointerChange _getPointerChange(double change) {
   return PointerChange.values[change.toInt()];
@@ -147,7 +154,6 @@ class MousePointer extends Struct {
   @Double()
   double change;
 }
-
 
 void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int length) {
   List<PointerData> data = [];
@@ -177,10 +183,38 @@ void registerSimulatePointer() {
   _registerSimulatePointer(pointer);
 }
 
+void _simulateKeyPress(Pointer<NativeString> nativeChars) {
+  String chars = nativeStringToString(nativeChars);
+  if (chars == null) {
+    print('Warning: simulateKeyPress chars is null.');
+    return;
+  }
+  if (InputElement.focusInputElement != null) {
+    InputElement current = InputElement.focusInputElement;
+    TextEditingValue currentValue = current.textSelectionDelegate.textEditingValue;
+    String updatedText = currentValue.text + chars;
+    int baseOffset = currentValue.selection.baseOffset + chars.length;
+    int extentOffset = currentValue.selection.extentOffset + chars.length;
+    TextEditingValue value = currentValue.copyWith(
+      text: updatedText,
+      selection: currentValue.selection.copyWith(baseOffset: baseOffset, extentOffset: extentOffset),
+    );
+    current.formatAndSetValue(value);
+  } else {
+    print('No focus input element found.');
+  }
+}
+
+void registerSimulateKeyPress() {
+  Pointer<NativeFunction<Native_SimulateKeyPress>> pointer = Pointer.fromFunction(_simulateKeyPress);
+  _registerSimulateKeyPress(pointer);
+}
+
 void registerDartTestMethodsToCpp() {
   registerJSError();
   registerRefreshPaint();
   registerMatchImageSnapshot();
   registerEnvironment();
   registerSimulatePointer();
+  registerSimulateKeyPress();
 }

@@ -21,7 +21,7 @@ import 'native_types.dart';
 class NativeString extends Struct {
   Pointer<Uint16> string;
 
-  @Int64()
+  @Int32()
   int length;
 }
 

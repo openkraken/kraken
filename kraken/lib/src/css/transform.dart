@@ -11,11 +11,11 @@ import 'package:kraken/dom.dart';
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 
-Color _parseColor(String color) {
+Color _parseColor(String color, [Size viewportSize]) {
   return CSSColor.parseColor(color);
 }
 
-String _stringifyColor(Color oldColor, Color newColor, double progress) {
+String _stringifyColor(Color oldColor, Color newColor, double progress, [Size viewportSize]) {
   int alphaDiff = newColor.alpha - oldColor.alpha;
   int redDiff = newColor.red - oldColor.red;
   int greenDiff = newColor.green - oldColor.green;
@@ -29,50 +29,50 @@ String _stringifyColor(Color oldColor, Color newColor, double progress) {
   return 'rgba(${red}, ${green}, ${blue}, ${alpha})';
 }
 
-double _parseLength(String _length) {
-  return CSSLength.parseLength(_length);
+double _parseLength(String _length, [Size viewportSize]) {
+  return CSSLength.parseLength(_length, viewportSize);
 }
 
-String _stringifyLength(double oldLength, double newLength, double progress) {
-  return _stringifyNumber(oldLength, newLength, progress) + 'px';
+String _stringifyLength(double oldLength, double newLength, double progress, [Size viewportSize]) {
+  return _stringifyNumber(oldLength, newLength, progress, viewportSize) + 'px';
 }
 
-FontWeight _parseFontWeight(String fontWeight) {
+FontWeight _parseFontWeight(String fontWeight, [Size viewportSize]) {
   return CSSText.parseFontWeight(fontWeight);
 }
 
-String _stringifyFontWeight(FontWeight oldValue, FontWeight newValue, double progress) {
+String _stringifyFontWeight(FontWeight oldValue, FontWeight newValue, double progress, [Size viewportSize]) {
   return ((FontWeight.lerp(oldValue, newValue, progress).index + 1) * 100).toString();
 }
 
-double _parseNumber(String number) {
+double _parseNumber(String number, [Size viewportSize]) {
   return CSSNumber.parseNumber(number);
 }
 
-String _stringifyNumber(double oldValue, double newValue, double progress) {
+String _stringifyNumber(double oldValue, double newValue, double progress, [Size viewportSize]) {
   return (oldValue * (1 - progress) + newValue * progress).toString();
 }
 
-String _parseLineHeight(String lineHeight) {
+String _parseLineHeight(String lineHeight, [Size viewportSize]) {
   return lineHeight;
 }
 
-String _stringifyLineHeight(String oldValue, String newValue, double progress) {
+String _stringifyLineHeight(String oldValue, String newValue, double progress, [Size viewportSize]) {
   if (CSSLength.isLength(oldValue) && CSSLength.isLength(newValue)) {
-    double left = CSSLength.parseLength(oldValue);
-    double right = CSSLength.parseLength(newValue);
-    return _stringifyNumber(left, right, progress).toString() + 'px';
+    double left = CSSLength.parseLength(oldValue, viewportSize);
+    double right = CSSLength.parseLength(newValue, viewportSize);
+    return _stringifyNumber(left, right, progress, viewportSize).toString() + 'px';
   } else if (CSSNumber.isNumber(oldValue) && CSSNumber.isNumber(newValue)) {
     double left = CSSNumber.parseNumber(oldValue);
     double right = CSSNumber.parseNumber(newValue);
-    return _stringifyNumber(left, right, progress).toString();
+    return _stringifyNumber(left, right, progress, viewportSize).toString();
   } else {
     return newValue;
   }
 }
 
-Matrix4 _parseTransform(String value) {
-  return CSSTransform.parseTransform(value);
+Matrix4 _parseTransform(String value, [Size viewportSize]) {
+  return CSSTransform.parseTransform(value, viewportSize);
 }
 
 double _lerpDouble(double begin, double to, double t) {
@@ -87,7 +87,7 @@ List<double> _lerpFloat64List(List<double> begin, List<double> end, t) {
   return r;
 }
 
-String _stringifyTransform(Matrix4 begin, Matrix4 end, double t) {
+String _stringifyTransform(Matrix4 begin, Matrix4 end, double t, [Size viewportSize]) {
   Matrix4 newMatrix4;
   if (CSSTransform.isAffine(begin)) {
     List matrixA = CSSTransform.decompose2DMatrix(begin);
@@ -704,12 +704,12 @@ class CSSTransform {
 
   static Matrix4 initial = Matrix4.identity();
 
-  static Matrix4 parseTransform(String value) {
+  static Matrix4 parseTransform(String value, [Size viewportSize]) {
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(value);
 
     Matrix4 matrix4;
     for (CSSFunctionalNotation method in methods) {
-      Matrix4 transform = _parseTransform(method);
+      Matrix4 transform = _parseTransform(method, viewportSize);
       if (transform != null) {
         if (matrix4 == null) {
           matrix4 = transform;
@@ -743,7 +743,7 @@ class CSSTransform {
   static const String SKEW_Y = 'skewy';
   static const String PERSPECTIVE = 'perspective';
 
-  static Matrix4 _parseTransform(CSSFunctionalNotation method) {
+  static Matrix4 _parseTransform(CSSFunctionalNotation method, [Size viewportSize]) {
     switch (method.name) {
       case MATRIX:
         if (method.args.length == 6) {
@@ -768,11 +768,11 @@ class CSSTransform {
         if (method.args.length >= 1 && method.args.length <= 2) {
           double y;
           if (method.args.length == 2) {
-            y = CSSLength.toDisplayPortValue(method.args[1].trim()) ?? 0;
+            y = CSSLength.toDisplayPortValue(method.args[1].trim(), viewportSize) ?? 0;
           } else {
             y = 0;
           }
-          double x = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
+          double x = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
           return Matrix4.identity()..translate(x, y);
         }
         break;
@@ -784,31 +784,31 @@ class CSSTransform {
         if (method.args.length >= 1 && method.args.length <= 3) {
           double y = 0, z = 0;
           if (method.args.length == 2) {
-            y = CSSLength.toDisplayPortValue(method.args[1].trim()) ?? 0;
+            y = CSSLength.toDisplayPortValue(method.args[1].trim(), viewportSize) ?? 0;
           }
           if (method.args.length == 3) {
-            y = CSSLength.toDisplayPortValue(method.args[1].trim()) ?? 0;
-            z = CSSLength.toDisplayPortValue(method.args[2].trim()) ?? 0;
+            y = CSSLength.toDisplayPortValue(method.args[1].trim(), viewportSize) ?? 0;
+            z = CSSLength.toDisplayPortValue(method.args[2].trim(), viewportSize) ?? 0;
           }
-          double x = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
+          double x = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
           return Matrix4.identity()..translate(x, y, z);
         }
         break;
       case TRANSLATE_X:
         if (method.args.length == 1) {
-          double x = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
+          double x = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
           return Matrix4.identity()..translate(x);
         }
         break;
       case TRANSLATE_Y:
         if (method.args.length == 1) {
-          double y = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
+          double y = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
           return Matrix4.identity()..translate(0.0, y);
         }
         break;
       case TRANSLATE_Z:
         if (method.args.length == 1) {
-          double z = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
+          double z = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
           return Matrix4.identity()..translate(0.0, 0.0, z);
         }
         break;
@@ -907,7 +907,7 @@ class CSSTransform {
         //   0, 0, 1, perspective,
         //   0, 0, 0, 1]
         if (method.args.length == 1) {
-          double p = CSSLength.toDisplayPortValue(method.args[0].trim()) ?? 0;
+          double p = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
           p = p != null ? (-1 / p) : 0;
           return Matrix4.identity()..storage[11] = p;
         }
@@ -923,7 +923,7 @@ class CSSOrigin {
 
   CSSOrigin(this.offset, this.alignment);
 
-  static CSSOrigin parseOrigin(String origin) {
+  static CSSOrigin parseOrigin(String origin, Size viewportSize) {
     if (origin != null && origin.isNotEmpty) {
       List<String> originList = origin.trim().split(_spaceRegExp);
       String x, y;
@@ -947,9 +947,10 @@ class CSSOrigin {
         x = y;
         y = tmp;
       }
+
       // handle x
       if (CSSLength.isLength(x)) {
-        offsetX = CSSLength.toDisplayPortValue(x) ?? offsetX;
+        offsetX = CSSLength.toDisplayPortValue(x, viewportSize) ?? offsetX;
       } else if (CSSPercentage.isPercentage(x)) {
         alignX = CSSPercentage.parsePercentage(x) * 2 - 1;
       } else if (x == CSSPosition.LEFT) {
@@ -962,7 +963,7 @@ class CSSOrigin {
 
       // handle y
       if (CSSLength.isLength(y)) {
-        offsetY = CSSLength.toDisplayPortValue(y) ?? offsetY;
+        offsetY = CSSLength.toDisplayPortValue(y, viewportSize) ?? offsetY;
       } else if (CSSPercentage.isPercentage(y)) {
         alignY = CSSPercentage.parsePercentage(y) * 2 - 1;
       } else if (y == CSSPosition.TOP) {
@@ -986,7 +987,12 @@ mixin CSSTransformMixin on Node {
       return;
     }
 
-    Matrix4 matrix4 = CSSTransform.parseTransform(value);
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
+    Matrix4 matrix4 = CSSTransform.parseTransform(value, viewportSize);
     // Upgrade this renderObject into repaintSelf mode.
     if (!renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;
@@ -1007,8 +1013,12 @@ mixin CSSTransformMixin on Node {
   }
 
   void updateRenderTransformOrigin(RenderBoxModel renderBoxModel, String present) {
+    ElementManager elementManager = renderBoxModel.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
 
-    CSSOrigin transformOrigin = CSSOrigin.parseOrigin(present);
+    CSSOrigin transformOrigin = CSSOrigin.parseOrigin(present, viewportSize);
     if (transformOrigin == null) return;
 
     Offset oldOffset = renderBoxModel.origin;
