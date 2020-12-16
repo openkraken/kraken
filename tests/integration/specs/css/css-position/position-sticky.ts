@@ -2936,6 +2936,8 @@ describe('position-sticky', () => {
     BODY.appendChild(div);
 
     await matchViewportSnapshot();
+    div.scrollBy(0, 100);
+    await matchViewportSnapshot();
     div.scrollTo(0, 300);
     await matchViewportSnapshot(0.2);
   });

@@ -244,6 +244,8 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void scrollBy({ num dx = 0.0, num dy = 0.0, bool withAnimation }) {
+    stickyChildren = _findStickyChildren(this);
+    
     if (dx != 0) {
       _scroll(scrollLeft + dx, Axis.horizontal, withAnimation: withAnimation);
     }
