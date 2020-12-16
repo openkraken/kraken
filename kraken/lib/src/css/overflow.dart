@@ -159,14 +159,14 @@ mixin CSSOverflowMixin on ElementBase {
   /// Cache sticky children when axis X starts scroll
   void _onScrollXStart() {
     if(_scrollableX.position.isScrollingNotifier.value) {
-      _findStickyChildren(this);
+      stickyChildren = _findStickyChildren(this);
     }
   }
 
   /// Cache sticky children when axis Y starts scroll
   void _onScrollYStart() {
     if(_scrollableY.position.isScrollingNotifier.value) {
-      _findStickyChildren(this);
+      stickyChildren = _findStickyChildren(this);
     }
   }
 
@@ -253,7 +253,7 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void scrollTo({ num x, num y, bool withAnimation }) {
-    _findStickyChildren(this);
+    stickyChildren = _findStickyChildren(this);
     
     if (x != null) {
       _scroll(x, Axis.horizontal, withAnimation: withAnimation);

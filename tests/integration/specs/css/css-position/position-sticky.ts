@@ -2899,4 +2899,44 @@ describe('position-sticky', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('should work with image', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '300px',
+          overflow: 'scroll',
+          background: 'yellow',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '550px',
+            paddingTop: '100px',
+            background: 'grey',
+          },
+        }, [
+          createElement('img', {
+            src: 'assets/200x200-green.png',
+            style: {
+                backgroundColor: 'green',
+                width: '4vw',
+                height: '4vw',
+                position: 'sticky',
+                top: '50px',
+            }
+          }),
+        ]),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+    div.scrollTo(0, 300);
+    await matchViewportSnapshot(0.2);
+  });
 });
