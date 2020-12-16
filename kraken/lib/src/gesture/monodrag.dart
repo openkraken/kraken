@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Single finger drag gestures.
+// Modified from Flutter gesture/monodrag.dart.
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
