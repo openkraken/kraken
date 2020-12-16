@@ -25,13 +25,10 @@ class JSTouchList;
 
 class JSTouchEvent : public JSEvent {
 public:
-  enum class TouchEventProperty { kTouches, kTargetTouches, kChangedTouches, kAltKey, kMetaKey, kCtrlKey, kShiftKey };
+  DEFINE_OBJECT_PROPERTY(TouchEvent, 7, touches, targetTouches, changedTouches, altKey, metaKey, ctrlKey, shiftKey)
 
-  static std::vector<JSStringRef> &getTouchEventPropertyNames();
-  const static std::unordered_map<std::string, TouchEventProperty> &getTouchEventPropertyMap();
-
-  static std::unordered_map<JSContext *, JSTouchEvent *> &getInstanceMap();
-  static JSTouchEvent *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSTouchEvent *> instanceMap;
+  OBJECT_INSTANCE(JSTouchEvent)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -55,6 +52,7 @@ public:
   ~TouchEventInstance() override;
 
   NativeTouchEvent *nativeTouchEvent;
+
 private:
   JSTouchList *m_touches;
   JSTouchList *m_targetTouches;
@@ -63,43 +61,21 @@ private:
 
 class JSTouchList : public HostObject {
 public:
-  enum TouchListProperty {
-    kLength,
-  };
-
-  static std::vector<JSStringRef> &getTouchListPropertyNames();
-  const static std::unordered_map<std::string, TouchListProperty> &getTouchListPropertyMap();
+  DEFINE_OBJECT_PROPERTY(TouchList, 1, length)
 
   JSTouchList() = delete;
   explicit JSTouchList(JSContext *context, NativeTouch **touches, int64_t length);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+
 private:
-  std::vector<JSTouch*> m_touchList;
+  std::vector<JSTouch *> m_touchList;
 };
 
 class JSTouch : public HostObject {
 public:
-  enum TouchProperty {
-    kIdentifier,
-    kTarget,
-    kClientX,
-    kClientY,
-    kScreenX,
-    kScreenY,
-    kPageX,
-    kPageY,
-    kRadiusX,
-    kRadiusY,
-    kRotationAngle,
-    kForce,
-    kAltitudeAngle,
-    kAzimuthAngle,
-    kTouchType,
-  };
-
-  static std::vector<JSStringRef> &getTouchPropertyNames();
-  const static std::unordered_map<std::string, TouchProperty> &getTouchPropertyMap();
+  DEFINE_OBJECT_PROPERTY(Touch, 15, identifier, target, clientX, clientY, screenX, screenY, pageX, pageY, radiusX,
+                         radiusY, rotationAngle, force, altitudeAngle, azimuthAngle, touchType)
 
   JSTouch() = delete;
   explicit JSTouch(JSContext *context, NativeTouch *touch);

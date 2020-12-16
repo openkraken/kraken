@@ -22,17 +22,13 @@ struct NativeAudioElement {
 
 class JSAudioElement : public JSMediaElement {
 public:
-  static JSAudioElement *instance(JSContext *context);
-  static std::unordered_map<JSContext *, JSAudioElement *> &getInstanceMap();
+  OBJECT_INSTANCE(JSAudioElement)
+  static std::unordered_map<JSContext *, JSAudioElement *> instanceMap;
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class AudioElementInstance : public MediaElementInstance {
   public:
-    enum class AudioElementProperty {};
-    static std::vector<JSStringRef> &getAudioElementPropertyNames();
-    static const std::unordered_map<std::string, AudioElementProperty> &getAudioElementPropertyMap();
-
     AudioElementInstance() = delete;
     explicit AudioElementInstance(JSAudioElement *jsAudioElement);
     ~AudioElementInstance();

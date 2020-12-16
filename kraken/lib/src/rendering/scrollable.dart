@@ -59,11 +59,13 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     } else {
       switch (axis) {
         case Axis.vertical:
+        // Vertical trag gesture recongnizer to trigger vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-              () => VerticalDragGestureRecognizer(),
-              (VerticalDragGestureRecognizer instance) {
+            ScrollVerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollVerticalDragGestureRecognizer>(
+              () => ScrollVerticalDragGestureRecognizer(),
+              (ScrollVerticalDragGestureRecognizer instance) {
                 instance
+                  ..isAcceptedDrag = _isAcceptedVerticalDrag
                   ..onDown = _handleDragDown
                   ..onStart = _handleDragStart
                   ..onUpdate = _handleDragUpdate
@@ -78,11 +80,13 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
           };
           break;
         case Axis.horizontal:
+          // Horizontal trag gesture recongnizer to horizontal vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-              () => HorizontalDragGestureRecognizer(),
-              (HorizontalDragGestureRecognizer instance) {
+            ScrollHorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollHorizontalDragGestureRecognizer>(
+              () => ScrollHorizontalDragGestureRecognizer(),
+              (ScrollHorizontalDragGestureRecognizer instance) {
                 instance
+                  ..isAcceptedDrag = _isAcceptedHorizontalDrag
                   ..onDown = _handleDragDown
                   ..onStart = _handleDragStart
                   ..onUpdate = _handleDragUpdate
@@ -101,6 +105,22 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     _lastCanDrag = canDrag;
     _lastAxisDirection = axis;
     _syncAll(_gestureRecognizers);
+  }
+
+  // Used in the Arena to judge whether the vertical trag gesture can trigger the current container to scroll.
+  bool _isAcceptedVerticalDrag (AxisDirection direction) {
+    double pixels = (_drag as ScrollDragController).pixels;
+    double maxScrollExtent = (_drag as ScrollDragController).maxScrollExtent;
+    double minScrollExtent = (_drag as ScrollDragController).minScrollExtent;
+    return !((direction == AxisDirection.down && pixels <= minScrollExtent) || direction == AxisDirection.up && pixels >= maxScrollExtent);
+  }
+
+  // Used in the Arena to judge whether the horizontal trag gesture can trigger the current container to scroll.
+  bool _isAcceptedHorizontalDrag (AxisDirection direction) {
+    double pixels = (_drag as ScrollDragController).pixels;
+    double maxScrollExtent = (_drag as ScrollDragController).maxScrollExtent;
+    double minScrollExtent = (_drag as ScrollDragController).minScrollExtent;
+    return !((direction == AxisDirection.right && pixels <= minScrollExtent) || direction == AxisDirection.left && pixels >= maxScrollExtent);
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {

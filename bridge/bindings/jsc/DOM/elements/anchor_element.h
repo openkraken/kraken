@@ -8,6 +8,7 @@
 
 #include "bindings/jsc/DOM/element.h"
 #include "bindings/jsc/js_context.h"
+#include "bindings/jsc/macros.h"
 
 namespace kraken::binding::jsc {
 
@@ -15,19 +16,13 @@ struct NativeAnchorElement;
 
 class JSAnchorElement : public JSElement {
 public:
-  static JSAnchorElement *instance(JSContext *context);
+  OBJECT_INSTANCE(JSAnchorElement);
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class AnchorElementInstance : public ElementInstance {
   public:
-    enum class AnchorElementProperty {
-      kHref,
-      kTarget
-    };
-
-    static std::array<JSStringRef, 2> &getAnchorElementPropertyNames();
-    static const std::unordered_map<std::string, AnchorElementProperty> &getAnchorElementPropertyMap();
+    DEFINE_OBJECT_PROPERTY(AnchorElement, 2, href, target)
 
     AnchorElementInstance() = delete;
     AnchorElementInstance(JSAnchorElement *jsAnchorElement);
@@ -44,7 +39,7 @@ public:
 protected:
   JSAnchorElement() = delete;
   ~JSAnchorElement();
-  static std::unordered_map<JSContext *, JSAnchorElement *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSAnchorElement *> instanceMap;
   explicit JSAnchorElement(JSContext *context);
 };
 

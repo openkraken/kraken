@@ -21,6 +21,8 @@ list(APPEND BRIDGE_SOURCE
     foundation/ui_task_queue.cpp
     foundation/ui_command_queue.h
     foundation/ui_command_queue.cc
+    foundation/ui_command_callback_queue.cc
+    foundation/ui_command_callback_queue.h
     foundation/closure.h
     foundation/bridge_callback.h
     dart_methods.cc
@@ -128,6 +130,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/style_declaration.h
     bindings/jsc/KOM/console.h
     bindings/jsc/KOM/console.cc
+    bindings/jsc/KOM/method_channel.cc
+    bindings/jsc/KOM/method_channel.h
     bridge_jsc.cc
     bridge_jsc.h
   )

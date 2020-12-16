@@ -8,6 +8,7 @@
 #include "foundation/logging.h"
 #include "foundation/ui_command_queue.h"
 #include "foundation/ui_task_queue.h"
+#include "foundation/ui_command_callback_queue.h"
 
 #ifdef KRAKEN_ENABLE_JSA
 #include "bridge_jsa.h"
@@ -102,6 +103,7 @@ void disposeContext(int32_t contextId) {
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
   contextPool[contextId] = nullptr;
+  foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
 }
 
 int32_t allocateNewContext() {
@@ -129,6 +131,7 @@ bool checkContext(int32_t contextId) {
 }
 
 bool checkContext(int32_t contextId, void *context) {
+  if (contextPool[contextId] == nullptr) return false;
   auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   return bridge->getContext().get() == context;
 }
@@ -248,7 +251,7 @@ void flushBridgeTask() {
   foundation::UITaskMessageQueue::instance()->flushTaskFromUIThread();
 }
 
-UICommandItem **getUICommandItems(int32_t contextId) {
+UICommandItem *getUICommandItems(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->data();
 }
 
@@ -258,4 +261,8 @@ int64_t getUICommandItemSize(int32_t contextId) {
 
 void clearUICommandItems(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
+}
+
+void flushUICommandCallback(int64_t contextId) {
+  foundation::UICommandCallbackQueue::instance(contextId)->flushCallbacks();
 }

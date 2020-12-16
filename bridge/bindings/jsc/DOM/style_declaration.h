@@ -26,7 +26,7 @@ template <typename CharacterType> inline CharacterType toASCIIUpper(CharacterTyp
 class CSSStyleDeclaration : public HostClass {
 public:
 
-  static std::unordered_map<JSContext *, CSSStyleDeclaration *> &getInstanceMap();
+  static std::unordered_map<JSContext *, CSSStyleDeclaration *> instanceMap;
   static CSSStyleDeclaration *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -34,13 +34,7 @@ public:
 
   class StyleDeclarationInstance : public Instance {
   public:
-    enum class CSSStyleDeclarationProperty {
-      kSetProperty,
-      kRemoveProperty,
-      kGetPropertyValue
-    };
-    static std::array<JSStringRef, 3> &getStyleDeclarationPropertyNames();
-    static const std::unordered_map<std::string, CSSStyleDeclarationProperty> &getStyleDeclarationPropertyMap();
+    DEFINE_OBJECT_PROPERTY(CSSStyleDeclaration, 3, setProperty, removeProperty, getPropertyValue)
 
     StyleDeclarationInstance() = delete;
     StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration,

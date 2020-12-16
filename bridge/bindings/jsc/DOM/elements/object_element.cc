@@ -4,24 +4,13 @@
  */
 
 #include "object_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSObjectElement *> & JSObjectElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSObjectElement *> instanceMap;
-  return instanceMap;
-}
-
-JSObjectElement *JSObjectElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSObjectElement(context);
-  }
-  return instanceMap[context];
-}
+std::unordered_map<JSContext *, JSObjectElement *> JSObjectElement::instanceMap{};
 
 JSObjectElement::~JSObjectElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -35,29 +24,11 @@ JSObjectRef JSObjectElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 JSObjectElement::ObjectElementInstance::ObjectElementInstance(JSObjectElement *jsAnchorElement)
   : ElementInstance(jsAnchorElement, "object", false), nativeObjectElement(new NativeObjectElement(nativeElement)) {
   std::string tagName = "object";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
 
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeObjectElement);
-}
-
-std::vector<JSStringRef> &JSObjectElement::ObjectElementInstance::getObjectElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("data"),
-    JSStringCreateWithUTF8CString("currentData"),
-    JSStringCreateWithUTF8CString("type"),
-    JSStringCreateWithUTF8CString("currentType")
-  };
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSObjectElement::ObjectElementInstance::ObjectProperty> &
-JSObjectElement::ObjectElementInstance::getObjectElementPropertyMap() {
-  static std::unordered_map<std::string, ObjectProperty> propertyMap{{"data", ObjectProperty::kData},
-                                                                     {"currentData", ObjectProperty::kCurrentData},
-                                                                     {"currentType", ObjectProperty::kCurrentType},
-                                                                     {"type", ObjectProperty::kType}};
-  return propertyMap;
+      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeObjectElement);
 }
 
 JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -65,13 +36,13 @@ JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case ObjectProperty::kType:
-    case ObjectProperty::kCurrentType: {
-      return JSValueMakeString(_hostClass->ctx, _type);
+    case ObjectElementProperty::type:
+    case ObjectElementProperty::currentType: {
+      return m_type.makeString();
     }
-    case ObjectProperty::kData:
-    case ObjectProperty::kCurrentData: {
-      return JSValueMakeString(_hostClass->ctx, _data);
+    case ObjectElementProperty::data:
+    case ObjectElementProperty::currentData: {
+      return m_data.makeString();
     }
     }
   }
@@ -85,22 +56,29 @@ void JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSVa
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case ObjectProperty::kData: {
-      _data = JSValueToStringCopy(_hostClass->ctx, value, exception);
-      JSStringRetain(_data);
+    case ObjectElementProperty::data: {
+      JSStringRef dataStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
 
-      auto args = buildUICommandArgs(name, JSStringRetain(_data));
+      m_data.setString(dataStringRef);
+
+      NativeString args_01{};
+      NativeString args_02{};
+
+      buildUICommandArgs(name, dataStringRef, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
-    case ObjectProperty::kType: {
-      _type = JSValueToStringCopy(_hostClass->ctx, value, exception);
-      JSStringRetain(_type);
+    case ObjectElementProperty::type: {
+      JSStringRef typeStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_type.setString(typeStringRef);
 
-      auto args = buildUICommandArgs(name, JSStringRetain(_type));
+      NativeString args_01{};
+      NativeString args_02{};
+
+      buildUICommandArgs(name, typeStringRef, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId,UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     default:
@@ -120,7 +98,9 @@ void JSObjectElement::ObjectElementInstance::getPropertyNames(JSPropertyNameAccu
 }
 
 JSObjectElement::ObjectElementInstance::~ObjectElementInstance() {
-  delete nativeObjectElement;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeObjectElement *>(ptr);
+  }, nativeObjectElement);
 }
 
 } // namespace kraken::binding::jsc

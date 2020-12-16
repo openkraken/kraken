@@ -15,17 +15,14 @@ struct NativeIframeElement;
 
 class JSIframeElement : public JSElement {
 public:
-  static std::unordered_map<JSContext *, JSIframeElement *> &getInstanceMap();
-  static JSIframeElement *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSIframeElement *> instanceMap;
+  OBJECT_INSTANCE(JSIframeElement)
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class IframeElementInstance : public ElementInstance {
   public:
-    enum class IframeProperty { kWidth, kHeight, kContentWindow, kPostMessage};
-
-    static std::vector<JSStringRef> &getIframeElementPropertyNames();
-    static const std::unordered_map<std::string, IframeProperty> &getIframeElementPropertyMap();
+    DEFINE_OBJECT_PROPERTY(IFrameElement, 4, width, height, contentWindow, postMessage)
 
     static JSValueRef postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);

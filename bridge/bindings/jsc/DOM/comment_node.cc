@@ -4,6 +4,7 @@
  */
 
 #include "comment_node.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -14,20 +15,9 @@ void bindCommentNode(std::unique_ptr<JSContext> &context) {
 
 JSCommentNode::JSCommentNode(JSContext *context) : JSNode(context, "CommentNode") {}
 
-std::unordered_map<JSContext *, JSCommentNode *> & JSCommentNode::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSCommentNode *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSCommentNode *> JSCommentNode::instanceMap{};
 
-JSCommentNode *JSCommentNode::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSCommentNode(context);
-  }
-  return instanceMap[context];
-}
 JSCommentNode::~JSCommentNode() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -50,10 +40,11 @@ JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsComment
   }
 
   std::string str = m_data.string();
-  auto args = buildUICommandArgs(str);
+  NativeString args_01{};
+  buildUICommandArgs(str, args_01);
 
   ::foundation::UICommandTaskMessageQueue::instance(jsCommentNode->contextId)
-    ->registerCommand(eventTargetId, UICommand::createComment, args, 1, nativeComment);
+    ->registerCommand(eventTargetId, UICommand::createComment, args_01, nativeComment);
 }
 
 void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
@@ -62,20 +53,20 @@ void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueR
 }
 
 JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getPropertyMap();
+  auto propertyMap = getCommentNodePropertyMap();
 
   if (propertyMap.count(name) == 0) return NodeInstance::getProperty(name, exception);
 
-  CommentProperty property = propertyMap[name];
+  CommentNodeProperty property = propertyMap[name];
 
   switch (property) {
-  case CommentProperty::kData:
+  case CommentNodeProperty::data:
     return m_data.makeString();
-  case CommentProperty::kNodeName: {
+  case CommentNodeProperty::nodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#comment");
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
-  case CommentProperty::kLength:
+  case CommentNodeProperty::length:
     return JSValueMakeNumber(_hostClass->ctx, m_data.size());
   }
 }
@@ -83,27 +74,9 @@ JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JS
 void JSCommentNode::CommentNodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   NodeInstance::getPropertyNames(accumulator);
 
-  for (auto &property : getCommentPropertyNames()) {
+  for (auto &property : getCommentNodePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
-}
-
-std::array<JSStringRef, 2> &JSCommentNode::CommentNodeInstance::getCommentPropertyNames() {
-  static std::array<JSStringRef, 2> propertyNames{
-    JSStringCreateWithUTF8CString("data"),
-    JSStringCreateWithUTF8CString("length"),
-  };
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSCommentNode::CommentNodeInstance::CommentProperty> &
-JSCommentNode::CommentNodeInstance::getPropertyMap() {
-  static std::unordered_map<std::string, CommentProperty> propertyMap{
-    {"data", CommentProperty::kData},
-    {"nodeName", CommentProperty::kNodeName},
-    {"length", CommentProperty::kLength},
-  };
-  return propertyMap;
 }
 
 std::string JSCommentNode::CommentNodeInstance::internalGetTextContent() {
@@ -111,7 +84,9 @@ std::string JSCommentNode::CommentNodeInstance::internalGetTextContent() {
 }
 
 JSCommentNode::CommentNodeInstance::~CommentNodeInstance() {
-  delete nativeComment;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeComment *>(ptr);
+  }, nativeComment);
 }
 
 void JSCommentNode::CommentNodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {

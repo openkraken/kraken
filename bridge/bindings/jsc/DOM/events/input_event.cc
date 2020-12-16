@@ -12,21 +12,9 @@ void bindInputEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "InputEvent", event->classObject);
 };
 
-std::unordered_map<JSContext *, JSInputEvent *> &JSInputEvent::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSInputEvent *> instanceMap;
-  return instanceMap;
-}
-
-JSInputEvent *JSInputEvent::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSInputEvent(context);
-  }
-  return instanceMap[context];
-}
+std::unordered_map<JSContext *, JSInputEvent *> JSInputEvent::instanceMap{};
 
 JSInputEvent::~JSInputEvent() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -83,9 +71,9 @@ JSValueRef InputEventInstance::getProperty(std::string &name, JSValueRef *except
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
   auto property = propertyMap[name];
-  if (property == JSInputEvent::InputEventProperty::kInputType) {
+  if (property == JSInputEvent::InputEventProperty::inputType) {
     return m_inputType.makeString();
-  } else if (property == JSInputEvent::InputEventProperty::kData) {
+  } else if (property == JSInputEvent::InputEventProperty::data) {
     return m_data.makeString();
   }
 
@@ -98,12 +86,12 @@ void InputEventInstance::setProperty(std::string &name, JSValueRef value, JSValu
     auto property = propertyMap[name];
 
     switch (property) {
-    case JSInputEvent::InputEventProperty::kInputType: {
+    case JSInputEvent::InputEventProperty::inputType: {
       JSStringRef str = JSValueToStringCopy(ctx, value, exception);
       m_inputType.setString(str);
       break;
     }
-    case JSInputEvent::InputEventProperty::kData: {
+    case JSInputEvent::InputEventProperty::data: {
       JSStringRef str = JSValueToStringCopy(ctx, value, exception);
       m_data.setString(str);
       break;
@@ -126,18 +114,6 @@ void InputEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulat
   for (auto &property : JSInputEvent::getInputEventPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
-}
-
-std::vector<JSStringRef> &JSInputEvent::getInputEventPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("data"),
-                                                JSStringCreateWithUTF8CString("inputType")};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSInputEvent::InputEventProperty> &JSInputEvent::getInputEventPropertyMap() {
-  static std::unordered_map<std::string, InputEventProperty> propertyMap{{"data", InputEventProperty::kData},
-                                                                         {"inputType", InputEventProperty::kInputType}};
-  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

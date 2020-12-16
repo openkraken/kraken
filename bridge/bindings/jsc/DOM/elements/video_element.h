@@ -20,16 +20,13 @@ struct NativeVideoElement {
 
 class JSVideoElement : public JSMediaElement {
 public:
-  static std::unordered_map<JSContext *, JSVideoElement *> &getInstanceMap();
-  static JSVideoElement *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSVideoElement *> instanceMap;
+  OBJECT_INSTANCE(JSVideoElement)
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class VideoElementInstance : public MediaElementInstance {
   public:
-    enum class AudioElementProperty {};
-    static std::vector<JSStringRef> &getAudioElementPropertyNames();
-    static const std::unordered_map<std::string, AudioElementProperty> &getAudioElementPropertyMap();
 
     VideoElementInstance() = delete;
     explicit VideoElementInstance(JSVideoElement *JSVideoElement);

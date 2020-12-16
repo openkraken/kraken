@@ -23,7 +23,7 @@ class BlobBuilder;
 
 class JSBlob : public HostClass {
 public:
-  static std::unordered_map<JSContext *, JSBlob *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSBlob *> instanceMap;
   static JSBlob *instance(JSContext *context);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -31,18 +31,7 @@ public:
 
   class BlobInstance : public Instance {
   public:
-    enum BlobProperty {
-      kArrayBuffer,
-      kSlice,
-      kText,
-      // TODO: not supported
-      kStream,
-      kType,
-      kSize
-    };
-
-    static std::vector<JSStringRef> &getBlobPropertyNames();
-    static std::unordered_map<std::string, BlobProperty> &getBlobPropertyMap();
+    DEFINE_OBJECT_PROPERTY(Blob, 6, arrayBuffer, slice, text, stream, type, size)
 
     static JSValueRef slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef arguments[], JSValueRef *exception);

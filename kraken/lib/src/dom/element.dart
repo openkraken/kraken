@@ -97,7 +97,7 @@ class Element extends Node
     return element;
   }
 
-  Map<String, dynamic> properties = Map<String, dynamic>();
+  final Map<String, dynamic> properties = Map<String, dynamic>();
 
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;

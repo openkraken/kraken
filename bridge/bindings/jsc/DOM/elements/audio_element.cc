@@ -4,24 +4,13 @@
  */
 
 #include "audio_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSAudioElement *> & JSAudioElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSAudioElement *> instanceMap;
-  return instanceMap;
-}
-
-JSAudioElement *JSAudioElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSAudioElement(context);
-  }
-  return instanceMap[context];
-}
+std::unordered_map<JSContext *, JSAudioElement *> JSAudioElement::instanceMap {};
 
 JSAudioElement::~JSAudioElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -36,24 +25,16 @@ JSObjectRef JSAudioElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
 JSAudioElement::AudioElementInstance::AudioElementInstance(JSAudioElement *jsAudioElement)
   : MediaElementInstance(jsAudioElement, "audio"), nativeAudioElement(new NativeAudioElement(nativeMediaElement)) {
   std::string tagName = "audio";
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeAudioElement);
+      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeAudioElement);
 }
 
 JSAudioElement::AudioElementInstance::~AudioElementInstance() {
-  delete nativeAudioElement;
-}
-
-std::vector<JSStringRef> &JSAudioElement::AudioElementInstance::getAudioElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSAudioElement::AudioElementInstance::AudioElementProperty> &
-JSAudioElement::AudioElementInstance::getAudioElementPropertyMap() {
-  static std::unordered_map<std::string, AudioElementProperty> propertyMap {};
-  return propertyMap;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeAudioElement *>(ptr);
+  }, nativeAudioElement);
 }
 
 } // namespace kraken::binding::jsc

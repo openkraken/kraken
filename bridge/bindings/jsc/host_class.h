@@ -62,6 +62,7 @@ public:
     HostClass *_hostClass{nullptr};
     JSContext *context{nullptr};
     JSContextRef ctx{nullptr};
+    int32_t contextId;
   private:
     std::unordered_map<std::string, JSValueRef> m_propertyMap;
   };

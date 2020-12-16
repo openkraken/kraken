@@ -17,17 +17,15 @@ struct NativeComment;
 
 class JSCommentNode : public JSNode {
 public:
-  static std::unordered_map<JSContext *, JSCommentNode *> &getInstanceMap();
-  static JSCommentNode *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSCommentNode *> instanceMap;
+  OBJECT_INSTANCE(JSCommentNode)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class CommentNodeInstance : public NodeInstance {
   public:
-    enum class CommentProperty { kData, kNodeName, kLength };
-    static std::array<JSStringRef, 2> &getCommentPropertyNames();
-    static const std::unordered_map<std::string, CommentProperty> &getPropertyMap();
+    DEFINE_OBJECT_PROPERTY(CommentNode, 3, data, nodeName, length)
 
     CommentNodeInstance() = delete;
     explicit CommentNodeInstance(JSCommentNode *jsCommentNode, JSStringRef data);

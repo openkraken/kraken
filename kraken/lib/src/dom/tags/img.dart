@@ -23,6 +23,8 @@ bool _isNumber(String str) {
 
 final Pointer<NativeFunction<GetImageWidth>> nativeGetImageWidth =  Pointer.fromFunction(ImageElement.getImageWidth, 0.0);
 final Pointer<NativeFunction<GetImageHeight>> nativeGetImageHeight =  Pointer.fromFunction(ImageElement.getImageHeight, 0.0);
+final Pointer<NativeFunction<GetImageWidth>> nativeGetImageNaturalWidth =  Pointer.fromFunction(ImageElement.getImageNaturalWidth, 0.0);
+final Pointer<NativeFunction<GetImageHeight>> nativeGetImageNaturalHeight =  Pointer.fromFunction(ImageElement.getImageNaturalHeight, 0.0);
 
 class ImageElement extends Element {
   String _source;
@@ -45,14 +47,26 @@ class ImageElement extends Element {
     return element;
   }
 
+  // imgEl.width -> imgEl.getAttribute('width');
   static double getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement._imageInfo.image.width.toDouble();
+    return imageElement.getProperty(WIDTH);
   }
 
   static double getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement._imageInfo.image.height.toDouble();
+    return imageElement.getProperty(HEIGHT);
+  }
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
+  static double getImageNaturalWidth(Pointer<NativeImgElement> nativeImageElement) {
+    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
+    return imageElement.naturalWidth;
+  }
+
+  static double getImageNaturalHeight(Pointer<NativeImgElement> nativeImageElement) {
+    ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
+    return imageElement.naturalHeight;
   }
 
   final Pointer<NativeImgElement> nativeImgElement;
@@ -70,6 +84,8 @@ class ImageElement extends Element {
 
     nativeImgElement.ref.getImageWidth = nativeGetImageWidth;
     nativeImgElement.ref.getImageHeight = nativeGetImageHeight;
+    nativeImgElement.ref.getImageNaturalWidth = nativeGetImageNaturalWidth;
+    nativeImgElement.ref.getImageNaturalHeight = nativeGetImageNaturalHeight;
   }
 
   @override
@@ -98,6 +114,20 @@ class ImageElement extends Element {
     _imageBox = null;
     _imageStream = null;
     _nativeMap.remove(nativeImgElement.address);
+  }
+
+  double get naturalWidth {
+    if (_imageInfo != null && _imageInfo.image != null) {
+      return _imageInfo.image.width.toDouble();
+    }
+    return 0.0;
+  }
+
+  double get naturalHeight {
+    if (_imageInfo != null && _imageInfo.image != null) {
+      return _imageInfo.image.height.toDouble();
+    }
+    return 0.0;
   }
 
   void _renderImage() {
@@ -166,8 +196,6 @@ class ImageElement extends Element {
 
   void _resize() {
     if (isRendererAttached) {
-      double naturalWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
-      double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
       double width = 0.0;
       double height = 0.0;
       bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
@@ -358,9 +386,15 @@ class ImageElement extends Element {
   dynamic getProperty(String key) {
     switch (key) {
       case WIDTH:
-        return _imageInfo != null ? _imageInfo.image.width : 0;
+        if (_imageBox != null) {
+          return _imageBox.width;
+        }
+        return 0;
       case HEIGHT:
-        return _imageInfo != null ? _imageInfo.image.height : 0;
+        if (_imageBox != null) {
+          return _imageBox.height;
+        }
+        return 0;
     }
 
     return super.getProperty(key);

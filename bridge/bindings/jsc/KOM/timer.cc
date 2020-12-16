@@ -4,23 +4,18 @@
  */
 
 #include "timer.h"
+#include "bindings/jsc/js_context.h"
 #include "bindings/jsc/macros.h"
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
-#include "bindings/jsc/js_context.h"
 
 namespace kraken::binding::jsc {
 
 using namespace kraken::foundation;
 
-void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) {
-  auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
-  JSContext &_context = callbackContext->_context;
-  if (!checkContext(contextId, &_context)) return;
-
-  if (!_context.isValid()) return;
-
+void handleTimerCallback(BridgeCallback::Context *callbackContext, const char *errmsg) {
+  auto &_context = callbackContext->_context;
   JSValueRef exception = nullptr;
   if (callbackContext->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
@@ -45,7 +40,17 @@ void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) 
   _context.handleException(exception);
 }
 
-void handleRAFPersistentCallback(void *ptr, int32_t contextId, double highResTimeStamp, const char *errmsg) {
+void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) {
+  auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
+  JSContext &_context = callbackContext->_context;
+  if (!checkContext(contextId, &_context)) return;
+
+  if (!_context.isValid()) return;
+
+  handleTimerCallback(callbackContext, errmsg);
+}
+
+void handleRAFTransientCallback(void *ptr, int32_t contextId, double highResTimeStamp, const char *errmsg) {
   auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
   JSContext &_context = callbackContext->_context;
   if (!checkContext(contextId, &_context)) return;
@@ -75,24 +80,21 @@ void handleRAFPersistentCallback(void *ptr, int32_t contextId, double highResTim
 
   JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->_callback, &exception);
 
-  const JSValueRef args[1] {
-    JSValueMakeNumber(_context.context(), highResTimeStamp)
-  };
+  const JSValueRef args[1]{JSValueMakeNumber(_context.context(), highResTimeStamp)};
 
   JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 1, args, &exception);
   _context.handleException(exception);
-}
-
-void handleTransientCallback(void *ptr, int32_t contextId, const char *errmsg) {
-  auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
-  handlePersistentCallback(callbackContext, contextId, errmsg);
   auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
   bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
 }
 
-void handleRAFTransientCallback(void *ptr, int32_t contextId, double result, const char *errmsg) {
-  handleRAFPersistentCallback(ptr, contextId, result, errmsg);
+void handleTransientCallback(void *ptr, int32_t contextId, const char *errmsg) {
   auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
+  JSContext &_context = callbackContext->_context;
+  if (!checkContext(contextId, &_context)) return;
+
+  handleTimerCallback(callbackContext, errmsg);
+
   auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
   bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
 }
@@ -297,9 +299,9 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
 
   if (getDartMethod()->flushUICommand == nullptr) {
-    JSC_THROW_ERROR(
-      ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.",
-      exception);
+    JSC_THROW_ERROR(ctx,
+                    "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.",
+                    exception);
     return nullptr;
   }
   // Flush all pending ui messages.
@@ -333,10 +335,12 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
 void bindTimer() {
   const JSStaticFunction _setTimeout = {"setTimeout", setTimeout, kJSPropertyAttributeNone};
   const JSStaticFunction _setInterval = {"setInterval", setInterval, kJSPropertyAttributeNone};
-  const JSStaticFunction _requestAnimationFrame = {"requestAnimationFrame", requestAnimationFrame, kJSPropertyAttributeNone};
+  const JSStaticFunction _requestAnimationFrame = {"requestAnimationFrame", requestAnimationFrame,
+                                                   kJSPropertyAttributeNone};
   const JSStaticFunction _clearTimeout = {"clearTimeout", clearTimeout, kJSPropertyAttributeNone};
   const JSStaticFunction _clearInterval = {"clearInterval", clearTimeout, kJSPropertyAttributeNone};
-  const JSStaticFunction _cancelAnimationFrame = {"cancelAnimationFrame", cancelAnimationFrame, kJSPropertyAttributeNone};
+  const JSStaticFunction _cancelAnimationFrame = {"cancelAnimationFrame", cancelAnimationFrame,
+                                                  kJSPropertyAttributeNone};
 
   JSContext::globalFunctions.emplace_back(_setTimeout);
   JSContext::globalFunctions.emplace_back(_setInterval);

@@ -182,6 +182,16 @@ void flushBridgeTask() {
   _flushBridgeTask();
 }
 
+typedef Native_FlushUICommandCallback = Void Function(Int64 contextId);
+typedef Dart_FlushUICommandCallback = void Function(int contextId);
+
+final Dart_FlushUICommandCallback _flushUICommandCallback =
+nativeDynamicLibrary.lookup<NativeFunction<Native_FlushUICommandCallback>>('flushUICommandCallback').asFunction();
+
+void flushUICommandCallback(int contextId) {
+  _flushUICommandCallback(contextId);
+}
+
 enum UICommandType {
   createElement,
   createTextNode,
@@ -196,7 +206,7 @@ enum UICommandType {
 }
 
 class UICommandItem extends Struct {
-  @Int32()
+  @Int64()
   int type;
 
   Pointer<Pointer<NativeString>> args;
@@ -204,14 +214,14 @@ class UICommandItem extends Struct {
   @Int64()
   int id;
 
-  @Int32()
+  @Int64()
   int length;
 
   Pointer nativePtr;
 }
 
-typedef Native_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(Int32 contextId);
-typedef Dart_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(int contextId);
+typedef Native_GetUICommandItems = Pointer<Uint64> Function(Int32 contextId);
+typedef Dart_GetUICommandItems = Pointer<Uint64> Function(int contextId);
 
 final Dart_GetUICommandItems _getUICommandItems =
     nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItems>>('getUICommandItems').asFunction();
@@ -233,24 +243,77 @@ class UICommand {
   int id;
   List<String> args;
   Pointer nativePtr;
+
+  String toString() {
+    return 'UICommand(type: $type, id: $id, args: $args, nativePtr: $nativePtr)';
+  }
 }
 
-List<UICommand> readNativeUICommandToDart(Pointer<Pointer<UICommandItem>> nativeCommandItems, int commandLength) {
+/**
+ * struct UICommandItem {
+    int32_t type;             // offset: 0 ~ 0.5
+    int32_t id;               // offset: 0.5 ~ 1
+    int32_t args_01_length;   // offset: 1 ~ 1.5
+    int32_t args_02_length;   // offset: 1.5 ~ 2
+    const uint16_t *string_01;// offset: 2
+    const uint16_t *string_02;// offset: 3
+    void* nativePtr;          // offset: 4
+  };
+ */
+const int nativeCommandSize = 5;
+const int typeAndIdMemOffset = 0;
+const int args01And02LengthMemOffset = 1;
+const int args01StringMemOffset = 2;
+const int args02StringMemOffset = 3;
+const int nativePtrMemOffset = 4;
+
+// We found there are performance bottleneck of reading native memory with Dart FFI API.
+// So we align all UI instructions to a whole block of memory, and then convert them into a dart array at one time,
+// To ensure the fastest subsequent random access.
+List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
   List<UICommand> results = List(commandLength);
+  List<int> rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize).toList();
 
-  for (int i = 0; i < commandLength; i ++) {
+  for (int i = 0; i < commandLength * nativeCommandSize; i += nativeCommandSize) {
     UICommand command = UICommand();
-    Pointer<UICommandItem> nativeCommand = nativeCommandItems[i];
-    if (nativeCommand == nullptr) continue;
 
-    command.type = UICommandType.values[nativeCommand.ref.type];
-    command.id = nativeCommand.ref.id;
-    int argsLength = nativeCommand.ref.length;
-    command.args = List(argsLength);
-    for (int j = 0; j < argsLength; j ++) {
-      command.args[j] = nativeStringToString(nativeCommand.ref.args[j]);
+    int typeIdCombine = rawMemory[i + typeAndIdMemOffset];
+
+    // int32_t  int32_t
+    // +-------+-------+
+    // |  id   | type  |
+    // +-------+-------+
+    int id = typeIdCombine >> 32;
+    int type = typeIdCombine ^ (id << 32);
+
+    command.type = UICommandType.values[type];
+    command.id = id;
+    int nativePtrValue = rawMemory[i + nativePtrMemOffset];
+    command.nativePtr = nativePtrValue != 0 ? Pointer.fromAddress(rawMemory[i + nativePtrMemOffset]) : nullptr;
+    command.args = List(2);
+
+    int args01And02Length = rawMemory[i + args01And02LengthMemOffset];
+    int args01Length;
+    int args02Length;
+
+    if (args01And02Length == 0) {
+      args01Length = args02Length = 0;
+    } else {
+      args02Length = args01And02Length >> 32;
+      args01Length = args01And02Length ^ (args02Length << 32);
     }
-    command.nativePtr = nativeCommand.ref.nativePtr;
+
+    int args01StringMemory = rawMemory[i + args01StringMemOffset];
+    if (args01StringMemory != 0) {
+      Pointer<Uint16> args_01 = Pointer.fromAddress(args01StringMemory);
+      command.args[0] = uint16ToString(args_01, args01Length);
+
+      int args02StringMemory = rawMemory[i + args02StringMemOffset];
+      if (args02StringMemory != 0) {
+        Pointer<Uint16> args_02 = Pointer.fromAddress(args02StringMemory);
+        command.args[1] = uint16ToString(args_02, args02Length);
+      }
+    }
 
     if (kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true') {
       String printMsg = '${command.type}, id: ${command.id}';
@@ -260,25 +323,26 @@ List<UICommand> readNativeUICommandToDart(Pointer<Pointer<UICommandItem>> native
       printMsg += ' nativePtr: ${command.nativePtr}';
       print(printMsg);
     }
-
-    results[i] = command;
+    results[i ~/ nativeCommandSize] = command;
   }
+
+  // Clear native command.
+  _clearUICommandItems(contextId);
+
   return results;
 }
 
 void flushUICommand() {
   Map<int, KrakenController> controllerMap = KrakenController.getControllerMap();
   for (KrakenController controller in controllerMap.values) {
-    Pointer<Pointer<UICommandItem>> nativeCommandItems = _getUICommandItems(controller.view.contextId);
+    Pointer<Uint64> nativeCommandItems = _getUICommandItems(controller.view.contextId);
     int commandLength = _getUICommandItemSize(controller.view.contextId);
 
     if (commandLength == 0) {
       continue;
     }
 
-    List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength);
-    // Clear native command first.
-    _clearUICommandItems(controller.view.contextId);
+    List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength, controller.view.contextId);
 
     SchedulerBinding.instance.scheduleFrame();
 

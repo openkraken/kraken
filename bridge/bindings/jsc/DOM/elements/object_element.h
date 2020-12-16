@@ -15,22 +15,14 @@ struct NativeObjectElement;
 
 class JSObjectElement : public JSElement {
 public:
-  static std::unordered_map<JSContext *, JSObjectElement *> &getInstanceMap();
-  static JSObjectElement *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSObjectElement *> instanceMap;
+  OBJECT_INSTANCE(JSObjectElement)
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class ObjectElementInstance : public ElementInstance {
   public:
-    enum class ObjectProperty {
-      kType,
-      kData,
-      kCurrentData,
-      kCurrentType
-    };
-
-    static std::vector<JSStringRef> &getObjectElementPropertyNames();
-    static const std::unordered_map<std::string, ObjectProperty> &getObjectElementPropertyMap();
+    DEFINE_OBJECT_PROPERTY(ObjectElement, 4, type, data, currentData, currentType)
 
     ObjectElementInstance() = delete;
     ~ObjectElementInstance();
@@ -42,8 +34,8 @@ public:
     NativeObjectElement *nativeObjectElement;
 
   private:
-    JSStringRef _data{JSStringCreateWithUTF8CString("")};
-    JSStringRef _type{JSStringCreateWithUTF8CString("")};
+    JSStringHolder m_data{context, ""};
+    JSStringHolder m_type{context, ""};
   };
 protected:
   ~JSObjectElement();

@@ -17,21 +17,14 @@ void bindImageElement(std::unique_ptr<JSContext> &context);
 
 class JSImageElement : public JSElement {
 public:
-  static std::unordered_map<JSContext *, JSImageElement *> &getInstanceMap();
-  static JSImageElement *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSImageElement *> instanceMap;
+  OBJECT_INSTANCE(JSImageElement)
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class ImageElementInstance : public ElementInstance {
   public:
-    enum class ImageProperty {
-      kWidth, kHeight,
-      kSrc,
-      kLoading
-    };
-
-    static std::vector<JSStringRef> &getImageElementPropertyNames();
-    static const std::unordered_map<std::string, ImageProperty> &getImageElementPropertyMap();
+    DEFINE_OBJECT_PROPERTY(ImageElement, 6, width, height, naturalWidth, naturalHeight, src, loading)
 
     ImageElementInstance() = delete;
     ~ImageElementInstance();
@@ -43,8 +36,8 @@ public:
     NativeImageElement *nativeImageElement;
 
   private:
-    JSStringRef _src{JSStringCreateWithUTF8CString("")};
-    JSStringRef _loading{JSStringCreateWithUTF8CString("")};
+    JSStringHolder m_src{context, ""};
+    JSStringHolder m_loading{context, ""};
   };
 protected:
   JSImageElement() = delete;
@@ -54,6 +47,8 @@ protected:
 
 using GetImageWidth = double(*)(NativeImageElement *nativeImageElement);
 using GetImageHeight = double(*)(NativeImageElement *nativeImageElement);
+using GetImageNaturalWidth = double(*)(NativeImageElement *nativeImageElement);
+using GetImageNaturalHeight = double(*)(NativeImageElement *nativeImageElement);
 
 struct NativeImageElement {
   NativeImageElement() = delete;
@@ -63,6 +58,8 @@ struct NativeImageElement {
 
   GetImageWidth getImageWidth;
   GetImageHeight getImageHeight;
+  GetImageNaturalWidth getImageNaturalWidth;
+  GetImageNaturalHeight getImageNaturalHeight;
 };
 
 } // namespace kraken::binding::jsc

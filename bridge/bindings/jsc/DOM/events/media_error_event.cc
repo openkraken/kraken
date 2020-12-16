@@ -12,21 +12,9 @@ void bindMediaErrorEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "MediaErrorEvent", event->classObject);
 };
 
-std::unordered_map<JSContext *, JSMediaErrorEvent *> & JSMediaErrorEvent::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSMediaErrorEvent *> instanceMap;
-  return instanceMap;
-}
-
-JSMediaErrorEvent *JSMediaErrorEvent::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSMediaErrorEvent(context);
-  }
-  return instanceMap[context];
-}
+std::unordered_map<JSContext *, JSMediaErrorEvent *> JSMediaErrorEvent::instanceMap{};
 
 JSMediaErrorEvent::~JSMediaErrorEvent() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -60,15 +48,15 @@ MediaErrorEventInstance::MediaErrorEventInstance(JSMediaErrorEvent *jsMediaError
 }
 
 JSValueRef MediaErrorEventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSMediaErrorEvent::getMediaErrorEventPropertyMap();
+  auto propertyMap = JSMediaErrorEvent::getMediaErrorPropertyMap();
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
   auto property = propertyMap[name];
 
-  if (property == JSMediaErrorEvent::MediaErrorEventProperty::kCode) {
+  if (property == JSMediaErrorEvent::MediaErrorProperty::code) {
     return JSValueMakeNumber(ctx, code);
-  } else if (property == JSMediaErrorEvent::MediaErrorEventProperty::kMessage) {
+  } else if (property == JSMediaErrorEvent::MediaErrorProperty::message) {
     return m_message.makeString();
   }
 
@@ -76,17 +64,17 @@ JSValueRef MediaErrorEventInstance::getProperty(std::string &name, JSValueRef *e
 }
 
 void MediaErrorEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSMediaErrorEvent::getMediaErrorEventPropertyMap();
+  auto propertyMap = JSMediaErrorEvent::getMediaErrorPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
-    case JSMediaErrorEvent::MediaErrorEventProperty::kMessage: {
+    case JSMediaErrorEvent::MediaErrorProperty::message: {
       JSStringRef str = JSValueToStringCopy(ctx, value, exception);
       m_message.setString(str);
       break;
     }
-    case JSMediaErrorEvent::MediaErrorEventProperty::kCode: {
+    case JSMediaErrorEvent::MediaErrorProperty::code: {
       code = JSValueToNumber(ctx, value, exception);
       break;
     }
@@ -104,21 +92,9 @@ MediaErrorEventInstance::~MediaErrorEventInstance() {
 void MediaErrorEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   EventInstance::getPropertyNames(accumulator);
 
-  for (auto &property : JSMediaErrorEvent::getMediaErrorEventPropertyNames()) {
+  for (auto &property : JSMediaErrorEvent::getMediaErrorPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
-}
-
-std::vector<JSStringRef> &JSMediaErrorEvent::getMediaErrorEventPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("code"),
-                                                JSStringCreateWithUTF8CString("message")};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSMediaErrorEvent::MediaErrorEventProperty> &JSMediaErrorEvent::getMediaErrorEventPropertyMap() {
-  static std::unordered_map<std::string, MediaErrorEventProperty> propertyMap{{"code", MediaErrorEventProperty::kCode},
-                                                                         {"message", MediaErrorEventProperty::kMessage}};
-  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

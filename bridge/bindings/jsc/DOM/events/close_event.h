@@ -20,13 +20,10 @@ struct NativeCloseEvent;
 
 class JSCloseEvent : public JSEvent {
 public:
-  enum class CloseEventProperty { kCode, kReason, kWasClean };
+  DEFINE_OBJECT_PROPERTY(CloseEvent, 3, code, reason, wasClean)
 
-  static std::vector<JSStringRef> &getCloseEventPropertyNames();
-  const static std::unordered_map<std::string, CloseEventProperty> &getCloseEventPropertyMap();
-
-  static std::unordered_map<JSContext *, JSCloseEvent *> &getInstanceMap();
-  static JSCloseEvent *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSCloseEvent *> instanceMap;
+  OBJECT_INSTANCE(JSCloseEvent)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;

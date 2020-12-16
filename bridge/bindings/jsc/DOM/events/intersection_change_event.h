@@ -20,13 +20,10 @@ struct NativeIntersectionChangeEvent;
 
 class JSIntersectionChangeEvent : public JSEvent {
 public:
-  enum class IntersectionChangeEventProperty { kIntersectionRatio };
+  DEFINE_OBJECT_PROPERTY(IntersectionChange, 1, intersectionRatio)
 
-  static std::vector<JSStringRef> &getIntersectionChangeEventPropertyNames();
-  const static std::unordered_map<std::string, IntersectionChangeEventProperty> &getIntersectionChangeEventPropertyMap();
-
-  static std::unordered_map<JSContext *, JSIntersectionChangeEvent *> &getInstanceMap();
-  static JSIntersectionChangeEvent *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSIntersectionChangeEvent *> instanceMap;
+  OBJECT_INSTANCE(JSIntersectionChangeEvent)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;

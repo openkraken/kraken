@@ -14,38 +14,18 @@ JSValueRef JSAllCollection::getProperty(std::string &name, JSValueRef *exception
     auto property = propertyMap[name];
 
     switch(property) {
-    case AllCollectionProperty::kItem:
+    case AllCollectionProperty::item:
       return m_item.function();
-    case AllCollectionProperty::kAdd:
+    case AllCollectionProperty::add:
       return m_add.function();
-    case AllCollectionProperty::kRemove:
+    case AllCollectionProperty::remove:
       return m_remove.function();
-    case AllCollectionProperty::kLength:
+    case AllCollectionProperty::length:
       return JSValueMakeNumber(ctx, m_nodes.size());
     }
   }
 
   return HostObject::getProperty(name, exception);
-}
-
-std::vector<JSStringRef> &JSAllCollection::getAllCollectionPropertyNames() {
-  static std::vector<JSStringRef> propertyNames {
-    JSStringCreateWithUTF8CString("item"),
-    JSStringCreateWithUTF8CString("add"),
-    JSStringCreateWithUTF8CString("remove"),
-    JSStringCreateWithUTF8CString("length"),
-  };
-  return propertyNames;
-}
-
-std::unordered_map<std::string, JSAllCollection::AllCollectionProperty> &JSAllCollection::getAllCollectionPropertyMap() {
-  static std::unordered_map<std::string, AllCollectionProperty> propertyMap {
-    {"item", AllCollectionProperty::kItem},
-    {"add", AllCollectionProperty::kAdd},
-    {"remove", AllCollectionProperty::kRemove},
-    {"length", AllCollectionProperty::kLength}
-  };
-  return propertyMap;
 }
 
 JSValueRef JSAllCollection::item(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -55,7 +35,7 @@ JSValueRef JSAllCollection::item(JSContextRef ctx, JSObjectRef function, JSObjec
   }
 
   size_t index = JSValueToNumber(ctx, arguments[0], exception);
-  auto collection = reinterpret_cast<JSAllCollection*>(JSObjectGetPrivate(function));
+  auto collection = reinterpret_cast<JSAllCollection *>(JSObjectGetPrivate(function));
 
   if (index >= collection->m_nodes.size()) {
     return nullptr;
@@ -73,7 +53,8 @@ JSValueRef JSAllCollection::add(JSContextRef ctx, JSObjectRef function, JSObject
   }
 
   if (!JSValueIsObject(ctx, arguments[0])) {
-    JSC_THROW_ERROR(ctx, "Failed to execute add() on HTMLAllCollection: first arguments should be a object.", exception);
+    JSC_THROW_ERROR(ctx, "Failed to execute add() on HTMLAllCollection: first arguments should be a object.",
+                    exception);
     return nullptr;
   }
 
@@ -84,8 +65,8 @@ JSValueRef JSAllCollection::add(JSContextRef ctx, JSObjectRef function, JSObject
     beforeRef = JSValueToObject(ctx, arguments[1], exception);
   }
 
-  auto nodeInstance = reinterpret_cast<JSNode::NodeInstance*>(JSObjectGetPrivate(nodeRef));
-  auto collection = reinterpret_cast<JSAllCollection*>(JSObjectGetPrivate(function));
+  auto nodeInstance = reinterpret_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeRef));
+  auto collection = reinterpret_cast<JSAllCollection *>(JSObjectGetPrivate(function));
   JSNode::NodeInstance *beforeInstance = nullptr;
 
   if (beforeRef != nullptr) {
@@ -105,7 +86,7 @@ JSValueRef JSAllCollection::remove(JSContextRef ctx, JSObjectRef function, JSObj
   }
 
   size_t index = JSValueToNumber(ctx, arguments[0], exception);
-  auto collection = reinterpret_cast<JSAllCollection*>(JSObjectGetPrivate(function));
+  auto collection = reinterpret_cast<JSAllCollection *>(JSObjectGetPrivate(function));
 
   collection->m_nodes.erase(collection->m_nodes.begin() + index);
 
@@ -120,7 +101,6 @@ void JSAllCollection::internalAdd(JSNode::NodeInstance *node, JSNode::NodeInstan
   } else {
     m_nodes.emplace_back(node);
   }
-
 }
 
-}
+} // namespace kraken::binding::jsc

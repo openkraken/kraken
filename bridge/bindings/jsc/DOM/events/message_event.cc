@@ -14,21 +14,9 @@ void bindMessageEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "MessageEvent", event->classObject);
 };
 
-std::unordered_map<JSContext *, JSMessageEvent *> JSMessageEvent::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSMessageEvent *> instanceMap;
-  return instanceMap;
-}
-
-JSMessageEvent *JSMessageEvent::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSMessageEvent(context);
-  }
-  return instanceMap[context];
-}
+std::unordered_map<JSContext *, JSMessageEvent *> JSMessageEvent::instanceMap{};
 
 JSMessageEvent::~JSMessageEvent() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -69,9 +57,9 @@ JSValueRef MessageEventInstance::getProperty(std::string &name, JSValueRef *exce
   auto property = propertyMap[name];
 
   switch(property) {
-  case JSMessageEvent::MessageEventProperty::kData:
+  case JSMessageEvent::MessageEventProperty::data:
     return m_data.makeString();
-  case JSMessageEvent::MessageEventProperty::kOrigin:
+  case JSMessageEvent::MessageEventProperty::origin:
     return m_origin.makeString();
   }
 
@@ -84,12 +72,12 @@ void MessageEventInstance::setProperty(std::string &name, JSValueRef value, JSVa
     auto property = propertyMap[name];
 
     switch(property) {
-    case JSMessageEvent::MessageEventProperty::kData: {
+    case JSMessageEvent::MessageEventProperty::data: {
       JSStringRef str = JSValueToStringCopy(ctx, value, exception);
       m_data.setString(str);
       break;
     }
-    case JSMessageEvent::MessageEventProperty::kOrigin: {
+    case JSMessageEvent::MessageEventProperty::origin: {
       JSStringRef str = JSValueToStringCopy(ctx, value, exception);
       m_origin.setString(str);
       break;
@@ -112,19 +100,6 @@ void MessageEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumul
   for (auto &property : JSMessageEvent::getMessageEventPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
-}
-
-std::vector<JSStringRef> &JSMessageEvent::getMessageEventPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("data"),
-                                                JSStringCreateWithUTF8CString("origin")};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSMessageEvent::MessageEventProperty> &
-JSMessageEvent::getMessageEventPropertyMap() {
-  static std::unordered_map<std::string, MessageEventProperty> propertyMap{{"data", MessageEventProperty::kData},
-                                                                           {"origin", MessageEventProperty::kOrigin}};
-  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

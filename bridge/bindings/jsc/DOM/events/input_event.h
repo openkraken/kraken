@@ -20,13 +20,10 @@ struct NativeInputEvent;
 
 class JSInputEvent : public JSEvent {
 public:
-  enum class InputEventProperty { kInputType, kData };
+  DEFINE_OBJECT_PROPERTY(InputEvent, 2, inputType, data)
 
-  static std::vector<JSStringRef> &getInputEventPropertyNames();
-  const static std::unordered_map<std::string, InputEventProperty> &getInputEventPropertyMap();
-
-  static std::unordered_map<JSContext *, JSInputEvent *> &getInstanceMap();
-  static JSInputEvent *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSInputEvent *> instanceMap;
+  OBJECT_INSTANCE(JSInputEvent)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;

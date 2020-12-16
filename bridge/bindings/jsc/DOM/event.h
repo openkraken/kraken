@@ -56,27 +56,10 @@ class EventInstance;
 
 class JSEvent : public HostClass {
 public:
-  enum class EventProperty {
-    kType,
-    kBubbles,
-    kCancelable,
-    kTimestamp,
-    kDefaultPrevented,
-    kTarget,
-    kSrcElement,
-    kCurrentTarget,
-    kReturnValue,
-    kStopPropagation,
-    kCancelBubble,
-    kStopImmediatePropagation,
-    kPreventDefault
-  };
+  DEFINE_OBJECT_PROPERTY(Event, 13, type, bubbles, cancelable, timestamp, defaultPrevented, target, srcElement, currentTarget, returnValue, stopPropagation, cancelBubble, stopImmediatePropagation, preventDefault)
 
-  static std::vector<JSStringRef> &getEventPropertyNames();
-  const static std::unordered_map<std::string, EventProperty> &getEventPropertyMap();
-
-  static std::unordered_map<JSContext *, JSEvent *> &getInstanceMap();
-  static JSEvent *instance(JSContext *context);
+  static std::unordered_map<JSContext *, JSEvent *> instanceMap;
+  OBJECT_INSTANCE(JSEvent)
   // Create an Event Object from an nativeEvent address which allocated by dart side.
   static JSValueRef initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);

@@ -14,21 +14,9 @@ void bindCustomEvent(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "CustomEvent", CustomEvent->classObject);
 };
 
-std::unordered_map<JSContext *, JSCustomEvent *> &JSCustomEvent::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSCustomEvent *> instanceMap;
-  return instanceMap;
-}
-
-JSCustomEvent *JSCustomEvent::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSCustomEvent(context);
-  }
-  return instanceMap[context];
-}
+std::unordered_map<JSContext *, JSCustomEvent *> JSCustomEvent::instanceMap{};
 
 JSCustomEvent::~JSCustomEvent() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -73,9 +61,9 @@ JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *excep
   auto property = propertyMap[name];
 
   switch (property) {
-  case JSCustomEvent::CustomEventProperty::kDetail:
+  case JSCustomEvent::CustomEventProperty::detail:
     return m_detail.value();
-  case JSCustomEvent::CustomEventProperty::kInitCustomEvent:
+  case JSCustomEvent::CustomEventProperty::initCustomEvent:
     return m_initCustomEvent.function();
   }
 
@@ -87,7 +75,7 @@ void CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSVal
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
-    if (property == JSCustomEvent::CustomEventProperty::kDetail) {
+    if (property == JSCustomEvent::CustomEventProperty::detail) {
       m_detail.setValue(value);
     }
   } else {
@@ -136,18 +124,6 @@ void CustomEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumula
   for (auto &property : JSCustomEvent::getCustomEventPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
-}
-
-std::vector<JSStringRef> &JSCustomEvent::getCustomEventPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("detail"),
-                                                JSStringCreateWithUTF8CString("initCustomEvent")};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSCustomEvent::CustomEventProperty> &JSCustomEvent::getCustomEventPropertyMap() {
-  static std::unordered_map<std::string, CustomEventProperty> propertyMap{
-    {"detail", CustomEventProperty::kDetail}, {"initCustomEvent", CustomEventProperty::kInitCustomEvent}};
-  return propertyMap;
 }
 
 } // namespace kraken::binding::jsc

@@ -47,35 +47,10 @@ private:
 
 class JSElement : public JSNode {
 public:
-  enum class ElementProperty {
-    kStyle,
-    kNodeName,
-    kTagName,
-    kAttributes,
-    kOffsetLeft,
-    kOffsetTop,
-    kOffsetWidth,
-    kOffsetHeight,
-    kClientWidth,
-    kClientHeight,
-    kClientTop,
-    kClientLeft,
-    kScrollTop,
-    kScrollLeft,
-    kScrollHeight,
-    kScrollWidth,
-    kGetBoundingClientRect,
-    kClick,
-    kScroll,
-    kScrollBy,
-    kScrollTo,
-    kToBlob,
-    kGetAttribute,
-    kSetAttribute,
-    kHasAttribute,
-    kRemoveAttribute,
-    kChildren
-  };
+  DEFINE_OBJECT_PROPERTY(Element, 27, style, nodeName, tagName, attributes, offsetLeft, offsetTop, offsetWidth,
+                         offsetHeight, clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft,
+                         scrollHeight, scrollWidth, getBoundingClientRect, click, scroll, scrollBy, scrollTo, toBlob,
+                         getAttribute, setAttribute, hasAttribute, removeAttribute, children)
 
   enum class ElementTagName {
     kDiv,
@@ -93,10 +68,8 @@ public:
     kCanvas
   };
 
-  static std::unordered_map<JSContext *, JSElement *> &getInstanceMap();
-  static JSElement *instance(JSContext *context);
-  static std::vector<JSStringRef> &getElementPropertyNames();
-  static const std::unordered_map<std::string, ElementProperty> &getElementPropertyMap();
+  static std::unordered_map<JSContext *, JSElement *> instanceMap;
+  OBJECT_INSTANCE(JSElement)
 
   static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);

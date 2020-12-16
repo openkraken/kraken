@@ -4,23 +4,13 @@
  */
 
 #include "iframe_element.h"
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
-std::unordered_map<JSContext *, JSIframeElement *> & JSIframeElement::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSIframeElement *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSIframeElement *> JSIframeElement::instanceMap {};
 
-JSIframeElement *JSIframeElement::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSIframeElement(context);
-  }
-  return instanceMap[context];
-}
 JSIframeElement::~JSIframeElement() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -35,41 +25,25 @@ JSIframeElement::IframeElementInstance::IframeElementInstance(JSIframeElement *j
   : ElementInstance(jsAnchorElement, "iframe", false), nativeIframeElement(new NativeIframeElement(nativeElement)) {
   std::string tagName = "iframe";
 
-  auto args = buildUICommandArgs(tagName);
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
   foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args, 1, nativeIframeElement);
-}
-
-std::vector<JSStringRef> &JSIframeElement::IframeElementInstance::getIframeElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("src"), JSStringCreateWithUTF8CString("type"), JSStringCreateWithUTF8CString("play")};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSIframeElement::IframeElementInstance::IframeProperty> &
-JSIframeElement::IframeElementInstance::getIframeElementPropertyMap() {
-  static std::unordered_map<std::string, IframeProperty> propertyMap{
-    {"width", IframeProperty::kWidth},
-    {"height", IframeProperty::kHeight},
-    {"contentWindow", IframeProperty::kContentWindow},
-    {"postMessage", IframeProperty::kPostMessage},
-  };
-  return propertyMap;
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeIframeElement);
 }
 
 JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getIframeElementPropertyMap();
+  auto propertyMap = getIFrameElementPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case IframeProperty::kWidth:
+    case IFrameElementProperty::width:
       return JSValueMakeNumber(_hostClass->ctx, _width);
-    case IframeProperty::kHeight:
+    case IFrameElementProperty::height:
       return JSValueMakeNumber(_hostClass->ctx, _height);
-    case IframeProperty::kContentWindow:
+    case IFrameElementProperty::contentWindow:
       // TODO: support contentWindow property.
       break;
-    case IframeProperty::kPostMessage:
+    case IFrameElementProperty::postMessage:
       return m_postMessage.function();
     }
   }
@@ -78,29 +52,33 @@ JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name
 }
 
 void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getIframeElementPropertyMap();
+  auto propertyMap = getIFrameElementPropertyMap();
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case IframeProperty::kWidth: {
+    case IFrameElementProperty::width: {
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string widthString = std::to_string(_width);
+      NativeString args_01{};
+      NativeString args_02{};
 
-      auto args = buildUICommandArgs(name, widthString);
+      buildUICommandArgs(name, widthString, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
-    case IframeProperty::kHeight: {
+    case IFrameElementProperty::height: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
       std::string heightString = std::to_string(_height);
 
-      auto args = buildUICommandArgs(name, heightString);
+      NativeString args_01{};
+      NativeString args_02{};
+      buildUICommandArgs(name, heightString, args_01, args_02);
       foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args, 2, nullptr);
+        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     default:
@@ -114,13 +92,15 @@ void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSVa
 void JSIframeElement::IframeElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   ElementInstance::getPropertyNames(accumulator);
 
-  for (auto &property : getIframeElementPropertyNames()) {
+  for (auto &property : getIFrameElementPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
 
 JSIframeElement::IframeElementInstance::~IframeElementInstance() {
-  delete nativeIframeElement;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeIframeElement *>(ptr);
+  }, nativeIframeElement);
 }
 
 JSValueRef JSIframeElement::IframeElementInstance::postMessage(JSContextRef ctx, JSObjectRef function,

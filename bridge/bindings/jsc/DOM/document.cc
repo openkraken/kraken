@@ -9,6 +9,7 @@
 #include "text_node.h"
 #include <mutex>
 #include <regex>
+#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -20,13 +21,9 @@ void bindDocument(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
 }
 
-std::unordered_map<JSContext *, JSDocument *> &JSDocument::getInstanceMap() {
-  static std::unordered_map<JSContext *, JSDocument *> instanceMap;
-  return instanceMap;
-}
+std::unordered_map<JSContext *, JSDocument *> JSDocument::instanceMap{};
 
 JSDocument *JSDocument::instance(JSContext *context) {
-  auto instanceMap = getInstanceMap();
   if (instanceMap.count(context) == 0) {
     instanceMap[context] = new JSDocument(context);
   }
@@ -34,7 +31,6 @@ JSDocument *JSDocument::instance(JSContext *context) {
 }
 
 JSDocument::~JSDocument() {
-  auto instanceMap = getInstanceMap();
   instanceMap.erase(context);
 }
 
@@ -167,7 +163,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   DocumentProperty property = propertyMap[name];
 
   switch (property) {
-  case DocumentProperty::kAll: {
+  case DocumentProperty::all: {
     auto all = new JSAllCollection(context);
 
     traverseNode(body, [&all](JSNode::NodeInstance *node) {
@@ -177,30 +173,30 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
 
     return all->jsObject;
   }
-  case DocumentProperty::kCookie: {
+  case DocumentProperty::cookie: {
     std::string cookie = m_cookie.getCookie();
     return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(cookie.c_str()));
   }
-  case DocumentProperty::kCreateElement: {
+  case DocumentProperty::createElement: {
     return m_createElement.function();
   }
-  case DocumentProperty::kDocumentElement:
-  case DocumentProperty::kBody:
+  case DocumentProperty::documentElement:
+  case DocumentProperty::body:
     return body->object;
-  case DocumentProperty::kCreateTextNode: {
+  case DocumentProperty::createTextNode: {
     return m_createTextNode.function();
   }
-  case DocumentProperty::kCreateComment: {
+  case DocumentProperty::createComment: {
     return m_createComment.function();
   }
-  case DocumentProperty::kNodeName: {
+  case DocumentProperty::nodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#document");
     return JSValueMakeString(_hostClass->ctx, nodeName);
   }
-  case DocumentProperty::kGetElementById: {
+  case DocumentProperty::getElementById: {
     return m_getElementById.function();
   }
-  case DocumentProperty::kGetElementsByTagName: {
+  case DocumentProperty::getElementsByTagName: {
     return m_getElementsByTagName.function();
   }
   }
@@ -209,7 +205,9 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
 }
 
 DocumentInstance::~DocumentInstance() {
-  delete nativeDocument;
+  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+    delete reinterpret_cast<NativeDocument *>(ptr);
+  }, nativeDocument);
   instanceMap.erase(context);
 }
 
@@ -219,33 +217,6 @@ void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator
   for (auto &property : getDocumentPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
-}
-
-std::vector<JSStringRef> &DocumentInstance::getDocumentPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{JSStringCreateWithUTF8CString("body"),
-                                                JSStringCreateWithUTF8CString("createElement"),
-                                                JSStringCreateWithUTF8CString("createTextNode"),
-                                                JSStringCreateWithUTF8CString("createComment"),
-                                                JSStringCreateWithUTF8CString("getElementById"),
-                                                JSStringCreateWithUTF8CString("getElementsByTagName"),
-                                                JSStringCreateWithUTF8CString("documentElement"),
-                                                JSStringCreateWithUTF8CString("all"),
-                                                JSStringCreateWithUTF8CString("cookie")};
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, DocumentInstance::DocumentProperty> &DocumentInstance::getDocumentPropertyMap() {
-  static const std::unordered_map<std::string, DocumentProperty> propertyMap{
-    {"body", DocumentProperty::kBody},
-    {"createElement", DocumentProperty::kCreateElement},
-    {"createTextNode", DocumentProperty::kCreateTextNode},
-    {"createComment", DocumentProperty::kCreateComment},
-    {"getElementById", DocumentProperty::kGetElementById},
-    {"documentElement", DocumentProperty::kDocumentElement},
-    {"getElementsByTagName", DocumentProperty::kGetElementsByTagName},
-    {"all", DocumentProperty::kAll},
-    {"cookie", DocumentProperty::kCookie}};
-  return propertyMap;
 }
 
 void DocumentInstance::removeElementById(std::string &id, ElementInstance *element) {
@@ -340,7 +311,7 @@ void DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueR
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
-    if (property == DocumentProperty::kCookie) {
+    if (property == DocumentProperty::cookie) {
       JSStringRef str = JSValueToStringCopy(ctx, value, exception);
       std::string cookie = JSStringToStdString(str);
       m_cookie.setCookie(cookie);

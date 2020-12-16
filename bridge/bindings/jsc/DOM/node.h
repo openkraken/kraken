@@ -30,28 +30,14 @@ class DocumentInstance;
 
 class JSNode : public JSEventTarget {
 public:
-  static std::unordered_map<JSContext *, JSNode *> &getInstanceMap();
+  static std::unordered_map<JSContext *, JSNode *> instanceMap;
   static JSNode *instance(JSContext *context);
-  enum class NodeProperty {
-    kIsConnected,
-    kFirstChild,
-    kLastChild,
-    kParentNode,
-    kChildNodes,
-    kPreviousSibling,
-    kNextSibling,
-    kAppendChild,
-    kRemove,
-    kRemoveChild,
-    kInsertBefore,
-    kReplaceChild,
-    kNodeType,
-    kTextContent
-  };
-  static std::vector<JSStringRef> &getNodePropertyNames();
-  static const std::unordered_map<std::string, NodeProperty> &getNodePropertyMap();
+  DEFINE_OBJECT_PROPERTY(Node, 14, isConnected, firstChild, lastChild, parentNode, childNodes, previousSibling,
+                         nextSibling, appendChild, remove, removeChild, insertBefore, replaceChild, nodeType,
+                         textContent)
 
-  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) override;
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                  const JSValueRef *arguments, JSValueRef *exception) override;
 
   static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef arguments[], JSValueRef *exception);
@@ -107,7 +93,7 @@ public:
     void refer();
     void unrefer();
 
-    int32_t _referenceCount {0};
+    int32_t _referenceCount{0};
 
     DocumentInstance *document{nullptr};
     virtual void _notifyNodeRemoved(JSNode::NodeInstance *node);
@@ -133,7 +119,7 @@ private:
 
 struct NativeNode {
   NativeNode() = delete;
-  NativeNode(NativeEventTarget *nativeEventTarget) : nativeEventTarget(nativeEventTarget) {};
+  NativeNode(NativeEventTarget *nativeEventTarget) : nativeEventTarget(nativeEventTarget){};
   NativeEventTarget *nativeEventTarget;
 };
 
