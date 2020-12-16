@@ -7,6 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 
+if(${ENABLE_PROFILE})
+  add_definitions(-DENABLE_PROFILE=1)
+else()
+  add_definitions(-DENABLE_PROFILE=0)
+endif()
+
 list(APPEND BRIDGE_SOURCE
     kraken_bridge.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h

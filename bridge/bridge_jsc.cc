@@ -25,9 +25,18 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
     // TODO: trigger oneror event.
   };
 
+#if ENABLE_PROFILE
+  auto nativePerformance = binding::jsc::NativePerformance::instance(contextId);
+  nativePerformance->mark("js_context_start");
+#endif
   bridgeCallback = new foundation::BridgeCallback();
 
   context = binding::jsc::createJSContext(contextId, errorHandler, this);
+
+#if ENABLE_PROFILE
+  nativePerformance->mark("js_context_end");
+  nativePerformance->mark("init_native_method_start");
+#endif
 
   kraken::binding::jsc::bindKraken(context);
   kraken::binding::jsc::bindUIManager(context);
@@ -54,7 +63,17 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsc::bindScreen(context);
   kraken::binding::jsc::bindBlob(context);
 
+#if ENABLE_PROFILE
+  nativePerformance->mark("init_native_method_end");
+  nativePerformance->mark("init_js_polyfill_start");
+#endif
+
   initKrakenPolyFill(this);
+
+#if ENABLE_PROFILE
+  nativePerformance->mark("init_js_polyfill_end");
+#endif
+
 #ifdef KRAKEN_ENABLE_JSA
   Object promiseHandler = context->global().getPropertyAsObject(*context, "__global_unhandled_promise_handler__");
   context->setUnhandledPromiseRejectionHandler(promiseHandler);

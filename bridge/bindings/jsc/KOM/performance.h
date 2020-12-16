@@ -17,7 +17,7 @@ void bindPerformance(std::unique_ptr<JSContext> &context);
 
 struct NativePerformanceEntry {
   NativePerformanceEntry(const std::string name, const std::string entryType, double startTime, double duration)
-    : startTime(startTime), duration(duration), name(name), entryType(entryType) {};
+    : startTime(startTime), duration(duration), name(name), entryType(entryType){};
   std::string name;
   std::string entryType;
   double startTime;
@@ -57,6 +57,16 @@ public:
   explicit JSPerformanceMeasure(JSContext *context, NativePerformanceEntry *nativePerformanceEntry);
 };
 
+class NativePerformance {
+public:
+  static std::unordered_map<int32_t, NativePerformance *> instanceMap;
+  static NativePerformance *instance(int32_t contextId);
+  static void disposeInstance(int32_t contextId);
+
+  void mark(const std::string &markName);
+  std::vector<NativePerformanceEntry *> entries;
+};
+
 class JSPerformance : public HostObject {
 public:
   DEFINE_OBJECT_PROPERTY(Performance, 10, now, timeOrigin, toJSON, clearMarks, clearMeasures, getEntries,
@@ -91,13 +101,12 @@ public:
   static JSValueRef measure(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef arguments[], JSValueRef *exception);
 
-  JSPerformance(JSContext *context) : HostObject(context, JSPerformanceName) {}
-
+  JSPerformance(JSContext *context, NativePerformance *nativePerformance)
+    : HostObject(context, JSPerformanceName), nativePerformance(nativePerformance) {}
   ~JSPerformance() override;
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-  void internalMark(const std::string &markName);
-  void internalMeasure(const std::string &startMark, const std::string &endMark);
+  void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark);
 
 private:
   friend JSPerformanceEntry;
@@ -111,8 +120,7 @@ private:
   JSFunctionHolder m_mark{context, "mark", mark};
   JSFunctionHolder m_measure{context, "measure", measure};
   double internalNow();
-
-  std::vector<NativePerformanceEntry*> m_entries;
+  NativePerformance *nativePerformance{nullptr};
 };
 
 } // namespace kraken::binding::jsc
