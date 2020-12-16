@@ -210,9 +210,12 @@ class Element extends Node
   }
 
   void _setDefaultStyle() {
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
     if (defaultStyle != null && defaultStyle.isNotEmpty) {
       defaultStyle.forEach((property, dynamic value) {
-        style.setProperty(property, value);
+        style.setProperty(property, value, viewportSize);
       });
     }
   }
@@ -281,13 +284,17 @@ class Element extends Node
     double minOffsetX = 0;
     double maxOffsetX = parentContainer.size.width - childWidth;
 
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
       double viewPortHeight = renderBoxModel?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
-        double top = CSSLength.toDisplayPortValue(childStyle[TOP]) + resolvedPadding.top;
+        double top = CSSLength.toDisplayPortValue(childStyle[TOP], viewportSize) + resolvedPadding.top;
         isFixed = offsetTop < top;
         if (isFixed) {
           offsetY += top - offsetTop;
@@ -296,7 +303,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains(BOTTOM)) {
-        double bottom = CSSLength.toDisplayPortValue(childStyle[BOTTOM]) + resolvedPadding.bottom;
+        double bottom = CSSLength.toDisplayPortValue(childStyle[BOTTOM], viewportSize) + resolvedPadding.bottom;
         isFixed = offsetBottom < bottom;
         if (isFixed) {
           offsetY += offsetBottom - bottom;
@@ -323,7 +330,7 @@ class Element extends Node
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
-        double left = CSSLength.toDisplayPortValue(childStyle[LEFT]) + resolvedPadding.left;
+        double left = CSSLength.toDisplayPortValue(childStyle[LEFT], viewportSize) + resolvedPadding.left;
         isFixed = offsetLeft < left;
         if (isFixed) {
           offsetX += left - offsetLeft;
@@ -332,7 +339,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains(RIGHT)) {
-        double right = CSSLength.toDisplayPortValue(childStyle[RIGHT]) + resolvedPadding.right;
+        double right = CSSLength.toDisplayPortValue(childStyle[RIGHT], viewportSize) + resolvedPadding.right;
         isFixed = offsetRight < right;
         if (isFixed) {
           offsetX += offsetRight - right;
@@ -424,6 +431,13 @@ class Element extends Node
     // assert(renderBoxModel != null && renderBoxModel.parent == null);
     // Remove native reference.
     _nativeMap.remove(nativeElementPtr.address);
+  }
+
+  // Used for force update layout.
+  void flushLayout() {
+    if (isRendererAttached) {
+      renderer.owner.flushLayout();
+    }
   }
 
   void addChildRenderObject(Element child, {RenderObject after}) {
@@ -619,12 +633,17 @@ class Element extends Node
       default:
         return;
     }
+
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     Size preferredSize = Size.zero;
     CSSDisplay childDisplay = CSSSizing.getDisplay(child.style[DISPLAY]);
     if (childDisplay != CSSDisplay.inline || (position != CSSPositionType.static)) {
       preferredSize = Size(
-        CSSLength.toDisplayPortValue(child.style[WIDTH]) ?? 0,
-        CSSLength.toDisplayPortValue(child.style[HEIGHT]) ?? 0,
+        CSSLength.toDisplayPortValue(child.style[WIDTH], viewportSize) ?? 0,
+        CSSLength.toDisplayPortValue(child.style[HEIGHT], viewportSize) ?? 0,
       );
     }
 
@@ -684,8 +703,12 @@ class Element extends Node
     if (renderBoxModel != null) {
       ParentData childParentData = renderBoxModel.parentData;
       if (childParentData is RenderFlexParentData) {
+        ElementManager elementManager = renderBoxModel.elementManager;
+        double viewportWidth = elementManager.viewportWidth;
+        double viewportHeight = elementManager.viewportHeight;
+        Size viewportSize = Size(viewportWidth, viewportHeight);
         final RenderFlexParentData parentData = childParentData;
-        RenderFlexParentData flexParentData = CSSFlex.getParentData(style);
+        RenderFlexParentData flexParentData = CSSFlex.getParentData(style, viewportSize);
         parentData.flexGrow = flexParentData.flexGrow;
         parentData.flexShrink = flexParentData.flexShrink;
         parentData.flexBasis = flexParentData.flexBasis;
@@ -991,19 +1014,22 @@ class Element extends Node
   // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, dynamic value) {
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
     // @HACK: delay transition property at next frame to make sure transition trigger after all style had been set.
     // https://github.com/WebKit/webkit/blob/master/Source/WebCore/style/StyleTreeResolver.cpp#L220
     // This it not a good solution between webkit implementation which write all new style property into an RenderStyle object
     // then trigger the animation phase.
     if (key == TRANSITION) {
       SchedulerBinding.instance.addPostFrameCallback((timestamp) {
-        style.setProperty(key, value);
+        style.setProperty(key, value, viewportSize);
       });
       return;
     } else {
       // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
       // [StyleChangeListener] to be invoked in sync.
-      style.setProperty(key, value);
+      style.setProperty(key, value, viewportSize);
     }
   }
 
@@ -1512,8 +1538,7 @@ void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Elemen
   } else {
     parentData = RenderFlexParentData();
   }
-  CSSStyleDeclaration style = child.style;
 
   RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-  childRenderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(style, parentData);
+  childRenderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(childRenderBoxModel, parentData);
 }

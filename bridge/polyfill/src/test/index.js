@@ -161,6 +161,8 @@ global.simulatePointer = function simulatePointer(list) {
   });
 }
 
+global.simulateKeyPress = __kraken_simulate_keypress__;
+
 function clearAllNodes() {
   while (document.body.firstChild) {
     document.body.firstChild.remove();

@@ -44,7 +44,12 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
 
   static void _setFont(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> font) {
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
-    canvasRenderingContext2D.font = nativeStringToString(font);
+
+    List<String> splitVal = nativeStringToString(font).split(_splitRegExp);
+    if (splitVal.length == 2) {
+      canvasRenderingContext2D.fontSize = CSSLength.toDisplayPortValue(splitVal[0], viewportSize) ?? 14.0;
+      canvasRenderingContext2D.fontFamily = splitVal[1];
+    }
   }
 
   static void _setFillStyle(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> fillStyle) {
@@ -120,6 +125,8 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
     nativeCanvasRenderingContext2D.ref.save = nativeSave;
     nativeCanvasRenderingContext2D.ref.restore = nativeRestore;
   }
+
+  static Size viewportSize;
 
   /// Perform canvas drawing.
   void performAction(Canvas _canvas, Size _size) {
@@ -351,20 +358,30 @@ implements CanvasText {
 }
 
 class CanvasTextDrawingStyles2D implements CanvasTextDrawingStyles {
-  double fontSize = 10.0;
-  String fontFamily = 'sans-serif';
+  double _fontSize = 10.0;
+  double get fontSize => _fontSize;
+  set fontSize(double value) {
+    assert(value != null);
+    if (_fontSize != value) {
+      _fontSize = value;
+    }
+  }
 
-  @override
-  String get font => '${fontSize}px $fontFamily';
+  String _fontFamily = 'sans-serif';
+  String get fontFamily => _fontFamily;
+  set fontFamily(String value) {
+    assert(value != null);
+    if (_fontFamily != value) {
+      _fontFamily = value;
+    }
+  }
 
   @override
   set font(String newValue) {
-    List<String> splitVal = newValue.split(_splitRegExp);
-    if (splitVal.length == 2) {
-      fontSize = CSSLength.toDisplayPortValue(splitVal[0]) ?? 14.0;
-      fontFamily = splitVal[1];
-    }
   }
+
+  @override
+  String get font => '${fontSize}px $fontFamily';
 
   @override
   CanvasDirection direction = CanvasDirection.inherit;

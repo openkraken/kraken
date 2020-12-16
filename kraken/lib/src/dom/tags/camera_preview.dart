@@ -52,11 +52,14 @@ class CameraPreviewElement extends Element {
   @override
   void willAttachRenderer() {
     super.willAttachRenderer();
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     sizedBox = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.loose(Size(
-        CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),
-        CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT),
+        CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH, viewportSize),
+        CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT, viewportSize),
       )),
     );
 
@@ -228,30 +231,36 @@ class CameraPreviewElement extends Element {
   }
 
   void _propertyChangedListener(String key, String original, String present, bool inAnimation) {
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
     switch (key) {
       case 'width':
         // Trigger width setter to invoke rerender.
-        width = CSSLength.toDisplayPortValue(present) ?? width;
+        width = CSSLength.toDisplayPortValue(present, viewportSize) ?? width;
         break;
       case 'height':
         // Trigger height setter to invoke rerender.
-        height = CSSLength.toDisplayPortValue(present) ?? height;
+        height = CSSLength.toDisplayPortValue(present, viewportSize) ?? height;
         break;
       default:
     }
   }
 
   void _setProperty(String key, dynamic value) {
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
     if (key == 'resolution-preset') {
       resolutionPreset = getResolutionPreset(value);
     } else if (key == 'width') {
       // <camera-preview width="300" />
       // Width and height is united with pixel.
       value = value.toString() + 'px';
-      width = CSSLength.toDisplayPortValue(value) ?? width;
+      width = CSSLength.toDisplayPortValue(value, viewportSize) ?? width;
     } else if (key == 'height') {
       value = value.toString() + 'px';
-      height = CSSLength.toDisplayPortValue(value) ?? height;
+      height = CSSLength.toDisplayPortValue(value, viewportSize) ?? height;
     } else if (key == 'lens') {
       _initCameraWithLens(value);
     } else if (key == 'sensor-orientation') {
