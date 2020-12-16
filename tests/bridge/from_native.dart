@@ -13,6 +13,7 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:kraken/launcher.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -182,71 +183,31 @@ void registerSimulatePointer() {
   _registerSimulatePointer(pointer);
 }
 
-// Limit: only accept a-z0-9 chars.
-// Enough for testing.
-void _simulateKeyPress(Pointer<NativeString> charsPtr) async {
-  String chars = nativeStringToString(charsPtr);
+void _simulateKeyPress(Pointer<NativeString> nativeChars) {
+  String chars = nativeStringToString(nativeChars);
   if (chars == null) {
     print('Warning: simulateKeyPress chars is null.');
     return;
   }
-  for (int i = 0; i < chars.length; i++) {
-    String char = chars[i];
-    LogicalKeyboardKey key = getLogicalKeyboardKey(char);
-    if (key != null) {
-      await KeyEventSimulator.simulateKeyDownEvent(key);
-      await KeyEventSimulator.simulateKeyUpEvent(key);
-    }
+  if (InputElement.focusInputElement != null) {
+    InputElement current = InputElement.focusInputElement;
+    TextEditingValue currentValue = current.textSelectionDelegate.textEditingValue;
+    String updatedText = currentValue.text + chars;
+    int baseOffset = currentValue.selection.baseOffset + chars.length;
+    int extentOffset = currentValue.selection.extentOffset + chars.length;
+    TextEditingValue value = currentValue.copyWith(
+      text: updatedText,
+      selection: currentValue.selection.copyWith(baseOffset: baseOffset, extentOffset: extentOffset),
+    );
+    current.formatAndSetValue(value);
+  } else {
+    print('No focus input element found.');
   }
 }
 
 void registerSimulateKeyPress() {
   Pointer<NativeFunction<Native_SimulateKeyPress>> pointer = Pointer.fromFunction(_simulateKeyPress);
   _registerSimulateKeyPress(pointer);
-}
-
-LogicalKeyboardKey getLogicalKeyboardKey(String char) {
-  char = char.toLowerCase();
-  switch (char) {
-    case 'a': return LogicalKeyboardKey.keyA;
-    case 'b': return LogicalKeyboardKey.keyB;
-    case 'c': return LogicalKeyboardKey.keyC;
-    case 'd': return LogicalKeyboardKey.keyD;
-    case 'e': return LogicalKeyboardKey.keyE;
-    case 'f': return LogicalKeyboardKey.keyF;
-    case 'g': return LogicalKeyboardKey.keyG;
-    case 'h': return LogicalKeyboardKey.keyH;
-    case 'i': return LogicalKeyboardKey.keyI;
-    case 'j': return LogicalKeyboardKey.keyJ;
-    case 'k': return LogicalKeyboardKey.keyK;
-    case 'l': return LogicalKeyboardKey.keyL;
-    case 'm': return LogicalKeyboardKey.keyM;
-    case 'n': return LogicalKeyboardKey.keyN;
-    case 'o': return LogicalKeyboardKey.keyO;
-    case 'p': return LogicalKeyboardKey.keyP;
-    case 'q': return LogicalKeyboardKey.keyQ;
-    case 'r': return LogicalKeyboardKey.keyR;
-    case 's': return LogicalKeyboardKey.keyS;
-    case 't': return LogicalKeyboardKey.keyT;
-    case 'u': return LogicalKeyboardKey.keyU;
-    case 'v': return LogicalKeyboardKey.keyV;
-    case 'w': return LogicalKeyboardKey.keyW;
-    case 'x': return LogicalKeyboardKey.keyX;
-    case 'y': return LogicalKeyboardKey.keyY;
-    case 'z': return LogicalKeyboardKey.keyZ;
-    case '0': return LogicalKeyboardKey.digit0;
-    case '1': return LogicalKeyboardKey.digit1;
-    case '2': return LogicalKeyboardKey.digit2;
-    case '3': return LogicalKeyboardKey.digit3;
-    case '4': return LogicalKeyboardKey.digit4;
-    case '5': return LogicalKeyboardKey.digit5;
-    case '6': return LogicalKeyboardKey.digit6;
-    case '7': return LogicalKeyboardKey.digit7;
-    case '8': return LogicalKeyboardKey.digit8;
-    case '9': return LogicalKeyboardKey.digit9;
-    case '0': return LogicalKeyboardKey.digit0;
-  }
-  return null;
 }
 
 void registerDartTestMethodsToCpp() {

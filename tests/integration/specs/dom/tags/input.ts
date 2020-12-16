@@ -54,7 +54,7 @@ describe('Tags input', () => {
     
   });
 
-  xit('event input', (done) => {
+  it('event input', (done) => {
     const VALUE = 'HELLO WORLD';
     const input = document.createElement('input');
     input.value = '';
@@ -69,6 +69,7 @@ describe('Tags input', () => {
     });
 
     document.body.appendChild(input);
+    input.focus();
     requestAnimationFrame(() => {
       simulateKeyPress(VALUE);
     });

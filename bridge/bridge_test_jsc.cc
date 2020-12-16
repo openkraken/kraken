@@ -254,8 +254,6 @@ JSValueRef simulateKeyPress(JSContextRef ctx, JSObjectRef function, JSObjectRef 
     return nullptr;
   }
 
-  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
-
   const JSValueRef &firstArgsValueRef = arguments[0];
   if (!JSValueIsString(ctx, firstArgsValueRef)) {
     JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_simulate_keypress__': first arguments should be a string.",
@@ -268,7 +266,6 @@ JSValueRef simulateKeyPress(JSContextRef ctx, JSObjectRef function, JSObjectRef 
   nativeString.length = JSStringGetLength(charsStringRef);
   nativeString.string = JSStringGetCharactersPtr(charsStringRef);
   getDartMethod()->simulateKeyPress(&nativeString);
-
   JSStringRelease(charsStringRef);
   return nullptr;
 }
