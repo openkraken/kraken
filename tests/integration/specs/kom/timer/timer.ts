@@ -39,7 +39,7 @@ describe('setInterval', function() {
       }, 10);
       setTimeout(() => {
         reject('setInterval execute time out!');
-      }, 100);
+      }, 200);
     });
   });
 });
