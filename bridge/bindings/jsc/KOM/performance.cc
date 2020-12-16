@@ -292,9 +292,7 @@ JSValueRef JSPerformance::mark(JSContextRef ctx, JSObjectRef function, JSObjectR
   JSStringRef markNameRef = JSValueToStringCopy(ctx, arguments[0], exception);
   std::string markName = JSStringToStdString(markNameRef);
 
-  double startTime = std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-  auto *nativePerformanceEntry = new NativePerformanceEntry{markName, "mark", startTime, 0};
-  performance->m_entries.emplace_back(nativePerformanceEntry);
+  performance->internalMark(markName);
 
   return nullptr;
 }
@@ -314,9 +312,11 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
   bool isStartMarkUndefined = false;
 
   if (argumentCount > 1) {
-    JSStringRef startMarkStringRef = JSValueToStringCopy(ctx, arguments[1], exception);
-    startMark = JSStringToStdString(startMarkStringRef);
     isStartMarkUndefined = JSValueIsUndefined(ctx, arguments[1]);
+    if (!isStartMarkUndefined) {
+      JSStringRef startMarkStringRef = JSValueToStringCopy(ctx, arguments[1], exception);
+      startMark = JSStringToStdString(startMarkStringRef);
+    }
   }
 
   if (argumentCount > 2) {
@@ -327,10 +327,23 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
   auto entries = performance->m_entries;
 
+  performance->internalMeasure(startMark, endMark);
+
+  return nullptr;
+}
+
+void JSPerformance::internalMark(const std::string &markName) {
+  double startTime = std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+  auto *nativePerformanceEntry = new NativePerformanceEntry{markName, "mark", startTime, 0};
+  m_entries.emplace_back(nativePerformanceEntry);
+}
+
+void JSPerformance::internalMeasure(const std::string &startMark, const std::string &endMark) {
+  auto entries = m_entries;
   double duration;
   auto now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
-  if (!startMark.empty() && !endMark.empty() && !isStartMarkUndefined) {
+  if (!startMark.empty() && !endMark.empty()) {
     auto startEntry = std::find_if(entries.begin(), entries.end(), [&startMark](auto entry) -> bool {
       return startMark == entry->name;
     });
@@ -338,7 +351,7 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
       return endMark == entry->name;
     });
     duration = (*endEntry)->duration - (*startEntry)->duration;
-  } else if (!startMark.empty() && !isStartMarkUndefined) {
+  } else if (!startMark.empty()) {
     auto startEntry = std::find_if(entries.begin(), entries.end(), [&startMark](auto entry) -> bool {
       return startMark == entry->name;
     });
@@ -348,16 +361,14 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
       return endMark == entry->name;
     });
     duration = (*endEntry)->startTime -
-               duration_cast<milliseconds>(performance->context->timeOrigin.time_since_epoch()).count();
+               duration_cast<milliseconds>(context->timeOrigin.time_since_epoch()).count();
   } else {
-    duration = performance->internalNow();
+    duration = internalNow();
   }
 
   double startTime = std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
   auto *nativePerformanceEntry = new NativePerformanceEntry{name, "measure", startTime, duration};
-  performance->m_entries.emplace_back(nativePerformanceEntry);
-
-  return nullptr;
+  m_entries.emplace_back(nativePerformanceEntry);
 }
 
 void bindPerformance(std::unique_ptr<JSContext> &context) {

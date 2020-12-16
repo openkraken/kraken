@@ -96,6 +96,8 @@ public:
   ~JSPerformance() override;
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+  void internalMark(const std::string &markName);
+  void internalMeasure(const std::string &startMark, const std::string &endMark);
 
 private:
   friend JSPerformanceEntry;
