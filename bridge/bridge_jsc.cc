@@ -116,10 +116,10 @@ void JSBridge::evaluateScript(const NativeString *script, const char *url, int s
   context->evaluateJavaScript(script->string, script->length, url, startLine);
 }
 
-void JSBridge::evaluateScript(const char *script, const char *url, int startLine) {
+void JSBridge::evaluateScript(const std::u16string &script, const char *url, int startLine) {
   if (!context->isValid()) return;
   binding::jsc::updateLocation(url);
-  context->evaluateJavaScript(script, url, startLine);
+  context->evaluateJavaScript(script.c_str(), script.size(), url, startLine);
 }
 
 JSBridge::~JSBridge() {

@@ -67,7 +67,7 @@ public:
   void *owner;
   /// evaluate JavaScript source codes in standard mode.
   void evaluateScript(const NativeString *script, const char *url, int startLine);
-  void evaluateScript(const char *script, const char *url, int startLine);
+  void evaluateScript(const std::u16string& script, const char *url, int startLine);
 
   const std::unique_ptr<KRAKEN_JS_CONTEXT> &getContext() const {
     return context;
