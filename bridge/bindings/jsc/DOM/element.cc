@@ -809,6 +809,15 @@ void ElementInstance::internalSetTextContent(JSStringRef content, JSValueRef *ex
 BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientRect *boundingClientRect)
   : HostObject(context, "BoundingClientRect"), nativeBoundingClientRect(boundingClientRect) {}
 
+JSValueRef ElementInstance::getStringValueProperty(std::string &name) {
+  JSStringRef stringRef = JSStringCreateWithUTF8CString(name.c_str());
+  NativeString* nativeString = stringRefToNativeString(stringRef);
+  NativeString* returnedString = nativeElement->getStringValueProperty(nativeElement, nativeString);
+  JSStringRef returnedStringRef = JSStringCreateWithCharacters(returnedString->string, returnedString->length);
+  JSStringRelease(stringRef);
+  return JSValueMakeString(_hostClass->ctx, returnedStringRef);
+}
+
 JSValueRef BoundingClientRect::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getPropertyMap();
 
