@@ -15,12 +15,6 @@ void bindImageElement(std::unique_ptr<JSContext> &context) {
 
 std::unordered_map<JSContext *, JSImageElement *> JSImageElement::instanceMap {};
 
-JSImageElement *JSImageElement::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSImageElement(context);
-  }
-  return instanceMap[context];
-}
 JSImageElement::~JSImageElement() {
   instanceMap.erase(context);
 }
@@ -42,54 +36,31 @@ JSImageElement::ImageElementInstance::ImageElementInstance(JSImageElement *jsAnc
     ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeImageElement);
 }
 
-std::vector<JSStringRef> &JSImageElement::ImageElementInstance::getImageElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("width"),
-    JSStringCreateWithUTF8CString("height"),
-    JSStringCreateWithUTF8CString("naturalWidth"),
-    JSStringCreateWithUTF8CString("naturalHeight"),
-    JSStringCreateWithUTF8CString("src"),
-    JSStringCreateWithUTF8CString("loading"),
-  };
-  return propertyNames;
-}
-
-const std::unordered_map<std::string, JSImageElement::ImageElementInstance::ImageProperty> &
-JSImageElement::ImageElementInstance::getImageElementPropertyMap() {
-  static std::unordered_map<std::string, ImageProperty> propertyMap{{"width", ImageProperty::kWidth},
-                                                                    {"height", ImageProperty::kHeight},
-                                                                    {"naturalWidth", ImageProperty::kNaturalWidth},
-                                                                    {"naturalHeight", ImageProperty::kNaturalHeight},
-                                                                    {"src", ImageProperty::kSrc},
-                                                                    {"loading", ImageProperty::kLoading}};
-  return propertyMap;
-}
-
 JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getImageElementPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case ImageProperty::kWidth: {
+    case ImageElementProperty::width: {
       getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageWidth(nativeImageElement));
     }
-    case ImageProperty::kHeight: {
+    case ImageElementProperty::height: {
       getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageHeight(nativeImageElement));
     }
-    case ImageProperty::kNaturalWidth: {
+    case ImageElementProperty::naturalWidth: {
       getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageNaturalWidth(nativeImageElement));
     }
-    case ImageProperty::kNaturalHeight: {
+    case ImageElementProperty::naturalHeight: {
       getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeImageElement->getImageNaturalHeight(nativeImageElement));
     }
-    case ImageProperty::kSrc: {
+    case ImageElementProperty::src: {
       return m_src.makeString();
     }
-    case ImageProperty::kLoading: {
+    case ImageElementProperty::loading: {
       return m_loading.makeString();
     }
     }
@@ -104,8 +75,8 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case ImageProperty::kWidth:
-    case ImageProperty::kHeight: {
+    case ImageElementProperty::width:
+    case ImageElementProperty::height: {
       JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
       std::string string = JSStringToStdString(stringRef);
       NativeString args_01{};
@@ -115,7 +86,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
         ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
-    case ImageProperty::kSrc: {
+    case ImageElementProperty::src: {
       JSStringRef src = JSValueToStringCopy(_hostClass->ctx, value, exception);
       m_src.setString(src);
 
@@ -126,7 +97,7 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
         ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
-    case ImageProperty::kLoading: {
+    case ImageElementProperty::loading: {
       JSStringRef loading = JSValueToStringCopy(_hostClass->ctx, value, exception);
       m_loading.setString(loading);
 

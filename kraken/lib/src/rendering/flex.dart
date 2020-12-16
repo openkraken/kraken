@@ -660,11 +660,21 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
-  BoxConstraints _getBaseConstraints(RenderObject child) {
+  /// Get constraints of flex item in the main axis
+  BoxConstraints _getBaseConstraints(RenderBox child) {
     double minWidth = 0;
     double maxWidth = double.infinity;
     double minHeight = 0;
     double maxHeight = double.infinity;
+
+    /// Use old size as base size constraints if exists
+    if (child.hasSize) {
+      double childOriginalWidth = child.size.width;
+      double childOriginalHeight = child.size.height;
+      return CSSFlex.isHorizontalFlexDirection(flexDirection) ?
+        BoxConstraints.tightFor(width: childOriginalWidth) :
+        BoxConstraints.tightFor(height: childOriginalHeight);
+    }
 
     if (child is RenderBoxModel) {
 

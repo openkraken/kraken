@@ -22,34 +22,6 @@ WindowInstance::~WindowInstance() {
   delete nativeWindow;
 }
 
-std::unordered_map<std::string, WindowInstance::WindowProperty> &WindowInstance::getWindowPropertyMap() {
-  static std::unordered_map<std::string, WindowProperty> propertyMap{
-    {"devicePixelRatio", WindowProperty::kDevicePixelRatio},
-    {"colorScheme", WindowProperty::kColorScheme},
-    {"__location__", WindowProperty::kLocation},
-    {"window", WindowProperty::kWindow},
-    {"history", WindowProperty::kHistory},
-    {"parent", WindowProperty::kParent},
-    {"scroll", WindowProperty::kScroll},
-    {"scrollBy", WindowProperty::kScrollBy},
-    {"scrollTo", WindowProperty::kScrollTo},
-    {"scrollX", WindowProperty::kScrollX},
-    {"scrollY", WindowProperty::kScrollY}};
-  return propertyMap;
-}
-
-std::vector<JSStringRef> &WindowInstance::getWindowPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("devicePixelRatio"), JSStringCreateWithUTF8CString("colorScheme"),
-    JSStringCreateWithUTF8CString("location"),         JSStringCreateWithUTF8CString("window"),
-    JSStringCreateWithUTF8CString("history"),          JSStringCreateWithUTF8CString("parent"),
-    JSStringCreateWithUTF8CString("scroll"),           JSStringCreateWithUTF8CString("scrollBy"),
-    JSStringCreateWithUTF8CString("scrollTo"),         JSStringCreateWithUTF8CString("scrollX"),
-    JSStringCreateWithUTF8CString("scrollY"),
-  };
-  return propertyNames;
-}
-
 JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getWindowPropertyMap();
 
@@ -57,7 +29,7 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
     auto property = propertyMap[name];
 
     switch (property) {
-    case WindowProperty::kDevicePixelRatio: {
+    case WindowProperty::devicePixelRatio: {
       if (getDartMethod()->devicePixelRatio == nullptr) {
         JSC_THROW_ERROR(context->context(),
                         "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.", exception);
@@ -67,7 +39,7 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
       double devicePixelRatio = getDartMethod()->devicePixelRatio(_hostClass->contextId);
       return JSValueMakeNumber(context->context(), devicePixelRatio);
     }
-    case WindowProperty::kColorScheme: {
+    case WindowProperty::colorScheme: {
       if (getDartMethod()->platformBrightness == nullptr) {
         JSC_THROW_ERROR(context->context(),
                         "Failed to read colorScheme: dart method (platformBrightness) not register.", exception);
@@ -77,30 +49,30 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
       JSStringRef resultRef = JSStringCreateWithCharacters(code->string, code->length);
       return JSValueMakeString(context->context(), resultRef);
     }
-    case WindowProperty::kLocation:
+    case WindowProperty::__location__:
       return location_->jsObject;
-    case WindowProperty::kParent:
-    case WindowProperty::kWindow:
+    case WindowProperty::parent:
+    case WindowProperty::window:
       return this->object;
-    case WindowProperty::kHistory: {
+    case WindowProperty::history: {
       JSStringRef key = JSStringCreateWithUTF8CString("__history__");
       JSValueRef history = JSObjectGetProperty(_hostClass->ctx, _hostClass->context->global(), key, exception);
       JSStringRelease(key);
       return history;
     }
-    case WindowProperty::kScrollTo:
-    case WindowProperty::kScroll:
+    case WindowProperty::scrollTo:
+    case WindowProperty::scroll:
       return m_scroll.function();
-    case WindowProperty::kScrollBy:
+    case WindowProperty::scrollBy:
       return m_scrollBy.function();
-    case WindowProperty::kScrollX: {
+    case WindowProperty::scrollX: {
       getDartMethod()->flushUICommand();
       auto document = DocumentInstance::instance(_hostClass->context);
       assert_m( document->body->nativeElement->getScrollLeft != nullptr, "Failed to execute getScrollLeft(): dart method is nullptr.");
       return JSValueMakeNumber(_hostClass->ctx,
                                document->body->nativeElement->getScrollLeft(document->body->nativeElement));
     }
-    case WindowProperty::kScrollY: {
+    case WindowProperty::scrollY: {
       getDartMethod()->flushUICommand();
       auto document = DocumentInstance::instance(_hostClass->context);
       assert_m( document->body->nativeElement->getScrollTop != nullptr, "Failed to execute getScrollTop(): dart method is nullptr.");

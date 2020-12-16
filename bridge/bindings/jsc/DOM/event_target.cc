@@ -181,13 +181,13 @@ JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *ex
     auto property = propertyMap[name];
 
     switch (property) {
-    case EventTargetProperty::kAddEventListener:
+    case EventTargetProperty::addEventListener:
       return m_addEventListener.function();
-    case EventTargetProperty::kRemoveEventListener:
+    case EventTargetProperty::removeEventListener:
       return m_removeEventListener.function();
-    case EventTargetProperty::kDispatchEvent:
+    case EventTargetProperty::dispatchEvent:
       return m_dispatchEvent.function();
-    case EventTargetProperty::kClearListeners:
+    case EventTargetProperty::__clearListeners__:
       return m_clearListeners.function();
     default:
       break;
@@ -322,19 +322,19 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
     auto property = propertyMap[name];
 
     switch (property) {
-    case EventTargetProperty::kAddEventListener: {
+    case EventTargetProperty::addEventListener: {
       return prototype<JSEventTarget>()->m_addEventListener.function();
     }
-    case EventTargetProperty::kRemoveEventListener: {
+    case EventTargetProperty::removeEventListener: {
       return prototype<JSEventTarget>()->m_removeEventListener.function();
     }
-    case EventTargetProperty::kDispatchEvent: {
+    case EventTargetProperty::dispatchEvent: {
       return prototype<JSEventTarget>()->m_dispatchEvent.function();
     }
-    case EventTargetProperty::kClearListeners: {
+    case EventTargetProperty::__clearListeners__: {
       return prototype<JSEventTarget>()->m_clearListeners.function();
     }
-    case EventTargetProperty::kEventTargetId: {
+    case EventTargetProperty::eventTargetId: {
       return JSValueMakeNumber(_hostClass->ctx, eventTargetId);
     }
     }
@@ -392,14 +392,6 @@ void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumula
   }
 }
 
-std::vector<JSStringRef> &JSEventTarget::getEventTargetPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("addEventListener"), JSStringCreateWithUTF8CString("removeEventListener"),
-    JSStringCreateWithUTF8CString("dispatchEvent"), JSStringCreateWithUTF8CString("__clearListeners__"),
-    JSStringCreateWithUTF8CString("eventTargetId")};
-  return propertyNames;
-}
-
 bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(eventInstance->nativeEvent->type->string),
                                                eventInstance->nativeEvent->type->length);
@@ -415,15 +407,6 @@ bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *ev
 
   // do not dispatch event when event has been canceled
   return !eventInstance->_canceledFlag;
-}
-const std::unordered_map<std::string, JSEventTarget::EventTargetProperty> &JSEventTarget::getEventTargetPropertyMap() {
-  static const std::unordered_map<std::string, EventTargetProperty> eventTargetProperty{
-    {"addEventListener", EventTargetProperty::kAddEventListener},
-    {"removeEventListener", EventTargetProperty::kRemoveEventListener},
-    {"dispatchEvent", EventTargetProperty::kDispatchEvent},
-    {"__clearListeners__", EventTargetProperty::kClearListeners},
-    {"eventTargetId", EventTargetProperty::kEventTargetId}};
-  return eventTargetProperty;
 }
 
 // This function will be called back by dart side when trigger events.

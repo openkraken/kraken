@@ -15,7 +15,7 @@ struct NativeAnimationPlayerElement;
 
 class JSAnimationPlayerElement : public JSElement {
 public:
-  static JSAnimationPlayerElement *instance(JSContext *context);
+  OBJECT_INSTANCE(JSAnimationPlayerElement)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -25,14 +25,7 @@ public:
 
   class AnimationPlayerElementInstance : public ElementInstance {
   public:
-    enum class AnimationPlayerProperty {
-      kSrc,
-      kType,
-      kPlay
-    };
-
-    static std::vector<JSStringRef> &getAnimationPlayerElementPropertyNames();
-    static const std::unordered_map<std::string, AnimationPlayerProperty> &getAnimationPlayerElementPropertyMap();
+    DEFINE_OBJECT_PROPERTY(AnimationPlayer, 3, src, type, play)
 
     AnimationPlayerElementInstance() = delete;
     ~AnimationPlayerElementInstance();

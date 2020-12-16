@@ -20,13 +20,9 @@ struct NativeMessageEvent;
 
 class JSMessageEvent : public JSEvent {
 public:
-  enum class MessageEventProperty { kData, kOrigin };
-
-  static std::vector<JSStringRef> &getMessageEventPropertyNames();
-  const static std::unordered_map<std::string, MessageEventProperty> &getMessageEventPropertyMap();
-
+  DEFINE_OBJECT_PROPERTY(MessageEvent, 2, data, origin)
   static std::unordered_map<JSContext *, JSMessageEvent *> instanceMap;
-  static JSMessageEvent *instance(JSContext *context);
+  OBJECT_INSTANCE(JSMessageEvent)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;

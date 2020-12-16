@@ -6,11 +6,11 @@
 #ifndef KRAKENBRIDGE_DOCUMENT_H
 #define KRAKENBRIDGE_DOCUMENT_H
 
+#include "all_collection.h"
 #include "bindings/jsc/js_context.h"
 #include "bindings/jsc/macros.h"
 #include "element.h"
 #include "node.h"
-#include "all_collection.h"
 
 #include "bindings/jsc/DOM/elements/anchor_element.h"
 #include "bindings/jsc/DOM/elements/animation_player_element.h"
@@ -54,23 +54,10 @@ private:
 
 class DocumentInstance : public JSNode::NodeInstance {
 public:
-  enum class DocumentProperty {
-    kCreateElement,
-    kBody,
-    kCreateTextNode,
-    kCreateComment,
-    kNodeName,
-    kGetElementById,
-    kDocumentElement,
-    kGetElementsByTagName,
-    kAll,
-    kCookie
-  };
+  DEFINE_OBJECT_PROPERTY(Document, 10, createElement, body, createTextNode, createComment, nodeName, getElementById,
+                         documentElement, getElementsByTagName, all, cookie)
 
   static DocumentInstance *instance(JSContext *context);
-
-  static std::vector<JSStringRef> &getDocumentPropertyNames();
-  static const std::unordered_map<std::string, DocumentProperty> &getDocumentPropertyMap();
 
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
@@ -84,8 +71,8 @@ public:
   static JSValueRef getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
 
-  static JSValueRef getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   DocumentInstance() = delete;
   explicit DocumentInstance(JSDocument *document);

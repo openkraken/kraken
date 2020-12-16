@@ -120,13 +120,6 @@ std::unordered_map<JSContext *, JSElement *> JSElement::instanceMap{};
 
 JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
-JSElement *JSElement::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new JSElement(context);
-  }
-  return instanceMap[context];
-}
-
 JSElement::~JSElement() {
   instanceMap.erase(context);
 }
@@ -194,47 +187,6 @@ JSValueRef JSElement::getBoundingClientRect(JSContextRef ctx, JSObjectRef functi
   return boundingClientRect->jsObject;
 }
 
-const std::unordered_map<std::string, JSElement::ElementProperty> &JSElement::getElementPropertyMap() {
-  static const std::unordered_map<std::string, ElementProperty> propertyHandler = {
-    {"style", ElementProperty::kStyle},
-    {"nodeName", ElementProperty::kNodeName},
-    {"tagName", ElementProperty::kTagName},
-    {"offsetLeft", ElementProperty::kOffsetLeft},
-    {"offsetTop", ElementProperty::kOffsetTop},
-    {"offsetWidth", ElementProperty::kOffsetWidth},
-    {"offsetHeight", ElementProperty::kOffsetHeight},
-    {"clientWidth", ElementProperty::kClientWidth},
-    {"clientHeight", ElementProperty::kClientHeight},
-    {"clientTop", ElementProperty::kClientTop},
-    {"clientLeft", ElementProperty::kClientLeft},
-    {"scrollTop", ElementProperty::kScrollTop},
-    {"scrollLeft", ElementProperty::kScrollLeft},
-    {"scrollHeight", ElementProperty::kScrollHeight},
-    {"scrollWidth", ElementProperty::kScrollWidth},
-    {"getBoundingClientRect", ElementProperty::kGetBoundingClientRect},
-    {"click", ElementProperty::kClick},
-    {"scroll", ElementProperty::kScroll},
-    {"scrollBy", ElementProperty::kScrollBy},
-    {"toBlob", ElementProperty::kToBlob},
-    {"getAttribute", ElementProperty::kGetAttribute},
-    {"setAttribute", ElementProperty::kSetAttribute},
-    {"removeAttribute", ElementProperty::kRemoveAttribute},
-    {"children", ElementProperty::kChildren},
-    {"attributes", ElementProperty::kAttributes},
-    {"scrollTo", ElementProperty::kScrollTo},
-    {"hasAttribute", ElementProperty::kHasAttribute}};
-  return propertyHandler;
-}
-
-JSValueRef ElementInstance::getStringValueProperty(std::string &name) {
-  JSStringRef stringRef = JSStringCreateWithUTF8CString(name.c_str());
-  NativeString* nativeString = stringRefToNativeString(stringRef);
-  NativeString* returnedString = nativeElement->getStringValueProperty(nativeElement, nativeString);
-  JSStringRef returnedStringRef = JSStringCreateWithCharacters(returnedString->string, returnedString->length);
-  JSStringRelease(stringRef);
-  return JSValueMakeString(_hostClass->ctx, returnedStringRef);
-}
-
 JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSElement::getElementPropertyMap();
 
@@ -245,7 +197,7 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   JSElement::ElementProperty property = propertyMap[name];
 
   switch (property) {
-  case JSElement::ElementProperty::kStyle: {
+  case JSElement::ElementProperty::style: {
     if (style == nullptr) {
       style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
       JSValueProtect(_hostClass->ctx, style->object);
@@ -253,98 +205,98 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
 
     return style->object;
   }
-  case JSElement::ElementProperty::kNodeName:
-  case JSElement::ElementProperty::kTagName: {
+  case JSElement::ElementProperty::nodeName:
+  case JSElement::ElementProperty::tagName: {
     return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName().c_str()));
   }
-  case JSElement::ElementProperty::kOffsetLeft: {
+  case JSElement::ElementProperty::offsetLeft: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getOffsetLeft != nullptr, "Failed to execute getOffsetLeft(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetLeft(nativeElement));
   }
-  case JSElement::ElementProperty::kOffsetTop: {
+  case JSElement::ElementProperty::offsetTop: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getOffsetTop != nullptr, "Failed to execute getOffsetTop(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetTop(nativeElement));
   }
-  case JSElement::ElementProperty::kOffsetWidth: {
+  case JSElement::ElementProperty::offsetWidth: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getOffsetWidth != nullptr, "Failed to execute getOffsetWidth(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetWidth(nativeElement));
   }
-  case JSElement::ElementProperty::kOffsetHeight: {
+  case JSElement::ElementProperty::offsetHeight: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getOffsetHeight != nullptr, "Failed to execute getOffsetHeight(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getOffsetHeight(nativeElement));
   }
-  case JSElement::ElementProperty::kClientWidth: {
+  case JSElement::ElementProperty::clientWidth: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getClientWidth != nullptr, "Failed to execute getClientWidth(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientWidth(nativeElement));
   }
-  case JSElement::ElementProperty::kClientHeight: {
+  case JSElement::ElementProperty::clientHeight: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getClientHeight != nullptr, "Failed to execute getClientHeight(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientHeight(nativeElement));
   }
-  case JSElement::ElementProperty::kClientTop: {
+  case JSElement::ElementProperty::clientTop: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getClientTop != nullptr, "Failed to execute getClientTop(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientTop(nativeElement));
   }
-  case JSElement::ElementProperty::kClientLeft: {
+  case JSElement::ElementProperty::clientLeft: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getClientLeft != nullptr, "Failed to execute getClientLeft(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getClientLeft(nativeElement));
   }
-  case JSElement::ElementProperty::kScrollTop: {
+  case JSElement::ElementProperty::scrollTop: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getScrollTop != nullptr, "Failed to execute getScrollTop(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollTop(nativeElement));
   }
-  case JSElement::ElementProperty::kScrollLeft: {
+  case JSElement::ElementProperty::scrollLeft: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getScrollLeft != nullptr, "Failed to execute getScrollLeft(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollLeft(nativeElement));
   }
-  case JSElement::ElementProperty::kScrollHeight: {
+  case JSElement::ElementProperty::scrollHeight: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getScrollHeight != nullptr, "Failed to execute getScrollHeight(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollHeight(nativeElement));
   }
-  case JSElement::ElementProperty::kScrollWidth: {
+  case JSElement::ElementProperty::scrollWidth: {
     getDartMethod()->flushUICommand();
     assert_m(nativeElement->getScrollWidth != nullptr, "Failed to execute getScrollWidth(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getScrollWidth(nativeElement));
   }
-  case JSElement::ElementProperty::kGetBoundingClientRect: {
+  case JSElement::ElementProperty::getBoundingClientRect: {
     return prototype<JSElement>()->m_getBoundingClientRect.function();
   }
-  case JSElement::ElementProperty::kClick: {
+  case JSElement::ElementProperty::click: {
     return prototype<JSElement>()->m_click.function();
   }
-  case JSElement::ElementProperty::kScrollTo:
-  case JSElement::ElementProperty::kScroll: {
+  case JSElement::ElementProperty::scrollTo:
+  case JSElement::ElementProperty::scroll: {
     return prototype<JSElement>()->m_scroll.function();
   }
-  case JSElement::ElementProperty::kScrollBy: {
+  case JSElement::ElementProperty::scrollBy: {
     return prototype<JSElement>()->m_scrollBy.function();
   }
-  case JSElement::ElementProperty::kToBlob: {
+  case JSElement::ElementProperty::toBlob: {
     return prototype<JSElement>()->m_toBlob.function();
   }
-  case JSElement::ElementProperty::kGetAttribute: {
+  case JSElement::ElementProperty::getAttribute: {
     return prototype<JSElement>()->m_getAttribute.function();
   }
-  case JSElement::ElementProperty::kSetAttribute: {
+  case JSElement::ElementProperty::setAttribute: {
     return prototype<JSElement>()->m_setAttribute.function();
   }
-  case JSElement::ElementProperty::kRemoveAttribute: {
+  case JSElement::ElementProperty::removeAttribute: {
     return prototype<JSElement>()->m_removeAttribute.function();
   }
-  case JSElement::ElementProperty::kHasAttribute:
+  case JSElement::ElementProperty::hasAttribute:
     return prototype<JSElement>()->m_hasAttribute.function();
-  case JSElement::ElementProperty::kChildren: {
+  case JSElement::ElementProperty::children: {
     JSValueRef arguments[childNodes.size()];
 
     size_t elementCount = 0;
@@ -357,7 +309,7 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
 
     return JSObjectMakeArray(_hostClass->ctx, elementCount, arguments, nullptr);
   }
-  case JSElement::ElementProperty::kAttributes: {
+  case JSElement::ElementProperty::attributes: {
     return (*m_attributes)->jsObject;
   }
   }
@@ -372,13 +324,13 @@ void ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
     auto property = propertyMap[name];
 
     switch (property) {
-    case JSElement::ElementProperty::kScrollTop: {
+    case JSElement::ElementProperty::scrollTop: {
       getDartMethod()->flushUICommand();
       assert_m(nativeElement->setScrollTop != nullptr, "Failed to execute setScrollTop(): dart method is nullptr.");
       nativeElement->setScrollTop(nativeElement, JSValueToNumber(_hostClass->ctx, value, exception));
       break;
     }
-    case JSElement::ElementProperty::kScrollLeft: {
+    case JSElement::ElementProperty::scrollLeft: {
       getDartMethod()->flushUICommand();
       assert_m(nativeElement->setScrollLeft != nullptr, "Failed to execute setScrollLeft(): dart method is nullptr.");
       nativeElement->setScrollLeft(nativeElement, JSValueToNumber(_hostClass->ctx, value, exception));
@@ -409,25 +361,6 @@ std::string ElementInstance::internalGetTextContent() {
   }
 
   return buffer;
-}
-
-std::vector<JSStringRef> &JSElement::getElementPropertyNames() {
-  static std::vector<JSStringRef> propertyNames{
-    JSStringCreateWithUTF8CString("style"),        JSStringCreateWithUTF8CString("getAttribute"),
-    JSStringCreateWithUTF8CString("setAttribute"), JSStringCreateWithUTF8CString("removeAttribute"),
-    JSStringCreateWithUTF8CString("nodeName"),     JSStringCreateWithUTF8CString("offsetLeft"),
-    JSStringCreateWithUTF8CString("offsetTop"),    JSStringCreateWithUTF8CString("offsetWidth"),
-    JSStringCreateWithUTF8CString("offsetHeight"), JSStringCreateWithUTF8CString("clientWidth"),
-    JSStringCreateWithUTF8CString("clientHeight"), JSStringCreateWithUTF8CString("clientTop"),
-    JSStringCreateWithUTF8CString("clientLeft"),   JSStringCreateWithUTF8CString("scrollTop"),
-    JSStringCreateWithUTF8CString("scrollLeft"),   JSStringCreateWithUTF8CString("scrollWidth"),
-    JSStringCreateWithUTF8CString("scrollHeight"), JSStringCreateWithUTF8CString("getBoundingClientRect"),
-    JSStringCreateWithUTF8CString("click"),        JSStringCreateWithUTF8CString("scroll"),
-    JSStringCreateWithUTF8CString("scrollBy"),     JSStringCreateWithUTF8CString("toBlob"),
-    JSStringCreateWithUTF8CString("children"),     JSStringCreateWithUTF8CString("tagName"),
-    JSStringCreateWithUTF8CString("attributes"),   JSStringCreateWithUTF8CString("scrollTo"),
-    JSStringCreateWithUTF8CString("hasAttribute")};
-  return propertyNames;
 }
 
 JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -769,24 +702,24 @@ JSValueRef JSElement::prototypeGetProperty(std::string &name, JSValueRef *except
   auto property = propertyMap[name];
 
   switch (property) {
-  case ElementProperty::kGetBoundingClientRect:
+  case ElementProperty::getBoundingClientRect:
     return m_getBoundingClientRect.function();
-  case ElementProperty::kClick:
+  case ElementProperty::click:
     return m_click.function();
-  case ElementProperty::kScrollTo:
-  case ElementProperty::kScroll:
+  case ElementProperty::scrollTo:
+  case ElementProperty::scroll:
     return m_scroll.function();
-  case ElementProperty::kScrollBy:
+  case ElementProperty::scrollBy:
     return m_scrollBy.function();
-  case ElementProperty::kToBlob:
+  case ElementProperty::toBlob:
     return m_toBlob.function();
-  case ElementProperty::kGetAttribute:
+  case ElementProperty::getAttribute:
     return m_getAttribute.function();
-  case ElementProperty::kSetAttribute:
+  case ElementProperty::setAttribute:
     return m_setAttribute.function();
-  case ElementProperty::kHasAttribute:
+  case ElementProperty::hasAttribute:
     return m_hasAttribute.function();
-  case ElementProperty::kRemoveAttribute:
+  case ElementProperty::removeAttribute:
     return m_removeAttribute.function();
   default:
     break;

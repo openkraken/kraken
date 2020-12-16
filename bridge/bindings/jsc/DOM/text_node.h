@@ -25,14 +25,7 @@ public:
 
   class TextNodeInstance : public NodeInstance {
   public:
-    enum class TextNodeProperty {
-      kData,
-      kTextContent,
-      kNodeName
-    };
-
-    static std::array<JSStringRef, 3> &getTextNodePropertyNames();
-    static const std::unordered_map<std::string, TextNodeProperty> &getTextNodePropertyMap();
+    DEFINE_OBJECT_PROPERTY(TextNode, 3, data, textContent, nodeName)
 
     TextNodeInstance() = delete;
     ~TextNodeInstance();

@@ -29,16 +29,14 @@ struct NativeCanvasElement {
 class JSCanvasElement : public JSElement {
 public:
   static std::unordered_map<JSContext *, JSCanvasElement *> instanceMap;
-  static JSCanvasElement *instance(JSContext *context);
+  OBJECT_INSTANCE(JSCanvasElement)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   class CanvasElementInstance : public ElementInstance {
   public:
-    enum class CanvasElementProperty { kWidth, kHeight, kGetContext };
-    static std::vector<JSStringRef> &getCanvasElementPropertyNames();
-    static const std::unordered_map<std::string, CanvasElementProperty> &getCanvasElementPropertyMap();
+    DEFINE_OBJECT_PROPERTY(CanvasElement, 3, width, height, getContext)
 
     static JSValueRef getContext(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                  const JSValueRef arguments[], JSValueRef *exception);
@@ -59,6 +57,7 @@ public:
 
     JSFunctionHolder m_getContext{context, this, "getContext", getContext};
   };
+
 private:
   JSCanvasElement() = delete;
   ~JSCanvasElement();
@@ -97,25 +96,13 @@ struct NativeCanvasRenderingContext2D {
 
 class CanvasRenderingContext2D : public HostClass {
 public:
-  static CanvasRenderingContext2D *instance(JSContext *context);
+  static std::unordered_map<JSContext *, CanvasRenderingContext2D *> instanceMap;
+  OBJECT_INSTANCE(CanvasRenderingContext2D)
 
   class CanvasRenderingContext2DInstance : public Instance {
   public:
-    enum class CanvasRenderingContext2DProperty {
-      kFont,
-      kFillStyle,
-      kStrokeStyle,
-      kFillRect,
-      kClearRect,
-      kStrokeRect,
-      kFillText,
-      kStrokeText,
-      kSave,
-      kReStore,
-    };
-    static std::vector<JSStringRef> &getCanvasRenderingContext2DPropertyNames();
-    static const std::unordered_map<std::string, CanvasRenderingContext2DProperty> &
-    getCanvasRenderingContext2DPropertyMap();
+    DEFINE_OBJECT_PROPERTY(CanvasRenderingContext2D, 10, font, fillStyle, strokeStyle, fillRect, clearRect, strokeRect,
+                           fillText, strokeText, save, restore)
 
     static JSValueRef fillRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef arguments[], JSValueRef *exception);
@@ -161,6 +148,7 @@ public:
     JSFunctionHolder m_save{context, this, "save", save};
     JSFunctionHolder m_restore{context, this, "restore", restore};
   };
+
 protected:
   CanvasRenderingContext2D() = delete;
   explicit CanvasRenderingContext2D(JSContext *context);
