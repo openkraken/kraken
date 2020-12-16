@@ -1121,22 +1121,16 @@ class RenderBoxModel extends RenderBox with
       transform: transform != null ? getEffectiveTransform() : Matrix4.identity(),
       position: position,
       hitTest: (BoxHitTestResult result, Offset position) {
-        return result.addWithPaintOffset(
-          offset: Offset(-scrollLeft, -scrollTop),
-          position: position,
-          hitTest: (BoxHitTestResult result, Offset position) {
-            CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
-            if (positionType == CSSPositionType.fixed) {
-              position -= getTotalScrollOffset();
-            }
+        CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
+        if (positionType == CSSPositionType.fixed) {
+          position -= getTotalScrollOffset();
+        }
 
-            if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
-              result.add(BoxHitTestEntry(this, position));
-              return true;
-            }
-            return false;
-          }
-        );
+        if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+          result.add(BoxHitTestEntry(this, position));
+          return true;
+        }
+        return false;
       },
     );
 
