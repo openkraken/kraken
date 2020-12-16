@@ -95,6 +95,10 @@ void registerSimulatePointer(SimulatePointer simulatePointer) {
   methodPointer->simulatePointer = simulatePointer;
 }
 
+void registerSimulateKeyPress(SimulateKeyPress simulateKeyPress) {
+  methodPointer->simulateKeyPress = simulateKeyPress;
+}
+
 void registerFlushUICommand(FlushUICommand flushUiCommand){
   methodPointer->flushUICommand = flushUiCommand;
 };

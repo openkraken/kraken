@@ -28,6 +28,8 @@ final Pointer<NativeFunction<Native_GetScrollHeight>> nativeGetScrollHeight =
     Pointer.fromFunction(ElementNativeMethods._getScrollHeight, 0.0);
 final Pointer<NativeFunction<Native_GetBoundingClientRect>> nativeGetBoundingClientRect =
     Pointer.fromFunction(ElementNativeMethods._getBoundingClientRect);
+final Pointer<NativeFunction<Native_GetStringValueProperty>> nativeGetStringValueProperty =
+Pointer.fromFunction(ElementNativeMethods._getStringValueProperty);
 final Pointer<NativeFunction<Native_Click>> nativeClick = Pointer.fromFunction(ElementNativeMethods._click);
 final Pointer<NativeFunction<Native_Scroll>> nativeScroll = Pointer.fromFunction(ElementNativeMethods._scroll);
 final Pointer<NativeFunction<Native_ScrollBy>> nativeScrollBy = Pointer.fromFunction(ElementNativeMethods._scrollBy);
@@ -38,79 +40,79 @@ final Pointer<NativeFunction<Native_SetScrollTop>> nativeSetScrollTop = Pointer.
 mixin ElementNativeMethods on Node {
   static double _getOffsetLeft(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.getOffsetX();
   }
 
   static double _getOffsetTop(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.getOffsetY();
   }
 
   static double _getOffsetWidth(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.renderBoxModel.hasSize ? element.renderBoxModel.size.width : 0;
   }
 
   static double _getOffsetHeight(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.renderBoxModel.hasSize ? element.renderBoxModel.size.height : 0;
   }
 
   static double _getClientWidth(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.renderBoxModel.clientWidth;
   }
 
   static double _getClientHeight(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.renderBoxModel.clientHeight;
   }
 
   static double _getClientLeft(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.renderBoxModel.borderLeft;
   }
 
   static double _getClientTop(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.renderBoxModel.borderTop;
   }
 
   static double _getScrollTop(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.scrollTop;
   }
 
   static double _getScrollLeft(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.scrollLeft;
   }
 
   static void _setScrollTop(Pointer<NativeElement> nativeElement, double top) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     element.scrollTop = top;
   }
 
   static void _setScrollLeft(Pointer<NativeElement> nativeElement, double left) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     element.scrollLeft = left;
   }
 
   static double _getScrollWidth(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.scrollWidth;
   }
 
@@ -122,25 +124,34 @@ mixin ElementNativeMethods on Node {
 
   static Pointer<NativeBoundingClientRect> _getBoundingClientRect(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     return element.boundingClientRect.toNative();
+  }
+
+  static Pointer<NativeString> _getStringValueProperty(Pointer<NativeElement> nativeElement, Pointer<NativeString> property) {
+    Element element = Element.getElementOfNativePtr(nativeElement);
+    element.flushLayout();
+    String key = nativeStringToString(property);
+    var value = element.getProperty(key);
+    String valueInString = value == null ? '' : value.toString();
+    return stringToNativeString(valueInString);
   }
 
   static void _click(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     element.handleMethodClick();
   }
 
   static void _scroll(Pointer<NativeElement> nativeElement, int x, int y) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     element.handleMethodScroll(x, y);
   }
 
   static void _scrollBy(Pointer<NativeElement> nativeElement, int x, int y) {
     Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
+    element.flushLayout();
     element.handleMethodScroll(x, y, diff: true);
   }
 
@@ -161,6 +172,7 @@ mixin ElementNativeMethods on Node {
     nativeElement.ref.getScrollWidth = nativeGetScrollWidth;
     nativeElement.ref.getScrollHeight = nativeGetScrollHeight;
     nativeElement.ref.getBoundingClientRect = nativeGetBoundingClientRect;
+    nativeElement.ref.getStringValueProperty = nativeGetStringValueProperty;
     nativeElement.ref.click = nativeClick;
     nativeElement.ref.scroll = nativeScroll;
     nativeElement.ref.scrollBy = nativeScrollBy;

@@ -262,7 +262,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       child.parentData = RenderFlexParentData();
     }
     if (child is RenderBoxModel) {
-      child.parentData = CSSPositionedLayout.getPositionParentData(child.style, child.parentData);
+      child.parentData = CSSPositionedLayout.getPositionParentData(child, child.parentData);
     }
   }
 
@@ -677,12 +677,15 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     if (child is RenderBoxModel) {
-
+      ElementManager elementManager = child.elementManager;
+      double viewportWidth = elementManager.viewportWidth;
+      double viewportHeight = elementManager.viewportHeight;
+      Size viewportSize = Size(viewportWidth, viewportHeight);
       String flexBasis = _getFlexBasis(child);
       double baseSize;
       // @FIXME when flex-basis is smaller than content width, it will not take effects
       if (flexBasis != AUTO) {
-        baseSize = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
+        baseSize = CSSLength.toDisplayPortValue(flexBasis, viewportSize) ?? 0;
       }
       if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
         minWidth = child.minWidth != null ? child.minWidth : 0;
@@ -737,24 +740,28 @@ class RenderFlexLayout extends RenderLayoutBox {
       return baseSize;
     } else if (child is RenderBoxModel) {
       String flexBasis = _getFlexBasis(child);
+      ElementManager elementManager = child.elementManager;
+      double viewportWidth = elementManager.viewportWidth;
+      double viewportHeight = elementManager.viewportHeight;
+      Size viewportSize = Size(viewportWidth, viewportHeight);
 
       if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
         String width = child.style[WIDTH];
         if (flexBasis == AUTO) {
           if (width != null) {
-            baseSize = CSSLength.toDisplayPortValue(width) ?? 0;
+            baseSize = CSSLength.toDisplayPortValue(width, viewportSize) ?? 0;
           }
         } else {
-          baseSize = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
+          baseSize = CSSLength.toDisplayPortValue(flexBasis, viewportSize) ?? 0;
         }
       } else {
         String height = child.style[HEIGHT];
         if (flexBasis == AUTO) {
           if (height != '') {
-            baseSize = CSSLength.toDisplayPortValue(height) ?? 0;
+            baseSize = CSSLength.toDisplayPortValue(height, viewportSize) ?? 0;
           }
         } else {
-          baseSize = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
+          baseSize = CSSLength.toDisplayPortValue(flexBasis, viewportSize) ?? 0;
         }
       }
     }
@@ -1050,6 +1057,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Infos about each flex item in each flex line
     Map<int, _RunChild> runChildren = {};
 
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Exclude positioned placeholder renderObject when layout non placeholder object
@@ -1089,7 +1100,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         double maxCrossAxisSize;
         // Calculate max height constraints
         if (heightSizeType == BoxSizeType.specified && childStyle[HEIGHT] != '') {
-          maxCrossAxisSize = CSSLength.toDisplayPortValue(childStyle[HEIGHT]);
+          maxCrossAxisSize = CSSLength.toDisplayPortValue(childStyle[HEIGHT], viewportSize);
         } else {
           // Child in flex line expand automatic when height is not specified
           if (flexWrap == FlexWrap.wrap || flexWrap == FlexWrap.wrapReverse) {
@@ -1189,7 +1200,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         // Distance from top to baseline of child
         double childAscent = _getChildAscent(child);
         CSSStyleDeclaration childStyle = _getChildStyle(child);
-        double lineHeight = CSSText.getLineHeight(childStyle);
+        double lineHeight = CSSText.getLineHeight(childStyle, elementManager);
 
         Size childSize = _getChildSize(child);
         // Leading space between content box and virtual box of child
@@ -1963,7 +1974,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
-      double lineBoxHeight = CSSText.getLineHeight(style);
+      double lineBoxHeight = CSSText.getLineHeight(style, elementManager);
       if (lineBoxHeight != null) {
         lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
       }
