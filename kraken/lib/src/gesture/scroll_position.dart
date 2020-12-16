@@ -216,6 +216,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   double setPixels(double newPixels) {
     assert(_pixels != null);
     assert(SchedulerBinding.instance.schedulerPhase.index <= SchedulerPhase.transientCallbacks.index);
+
     if (newPixels != pixels) {
       final double overscroll = applyBoundaryConditions(newPixels);
       assert(() {

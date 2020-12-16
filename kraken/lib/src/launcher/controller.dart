@@ -128,7 +128,7 @@ class KrakenViewController {
   // dispose controller and recycle all resources.
   void dispose() {
     // break circle reference
-    (_elementManager.getRootRenderObject() as RenderBoxModel).controller = null;
+    (_elementManager.getRootRenderObject() as RenderObjectWithControllerMixin).controller = null;
 
     detachView();
     disposeBridge(_contextId);
@@ -490,11 +490,18 @@ class KrakenController {
     assert(!_view._disposed, "Kraken have already disposed");
     if (_bundle != null) {
       await _bundle.run(_view.contextId);
-      // trigger window load event
+      // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
-        Event loadEvent = Event(EVENT_LOAD);
+        Event event = Event(EVENT_DOM_CONTENT_LOADED);
         EventTarget window = view.getEventTargetById(WINDOW_ID);
-        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, loadEvent);
+        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
+
+        // @HACK: window.load should trigger after all image had loaded.
+        // Someone needs to fix this in the future.
+        module.requestAnimationFrame((_) {
+          Event event = Event(EVENT_LOAD);
+          emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
+        });
       });
     }
   }

@@ -103,6 +103,7 @@ void disposeContext(int32_t contextId) {
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
   contextPool[contextId] = nullptr;
+  foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
 }
 
 int32_t allocateNewContext() {
@@ -130,6 +131,7 @@ bool checkContext(int32_t contextId) {
 }
 
 bool checkContext(int32_t contextId, void *context) {
+  if (contextPool[contextId] == nullptr) return false;
   auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   return bridge->getContext().get() == context;
 }
