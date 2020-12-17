@@ -21,16 +21,18 @@ int initBridge() {
 
   // We should schedule addPersistentFrameCallback() to the next frame because of initBridge()
   // will be called from persistent frame callbacks and cause infinity loops.
-  Future.microtask(() {
-    // Port flutter's frame callback into bridge.
-    SchedulerBinding.instance.addPersistentFrameCallback((_) {
-      assert(contextId != -1);
+  if (_firstView) {
+    Future.microtask(() {
+      // Port flutter's frame callback into bridge.
+      SchedulerBinding.instance.addPersistentFrameCallback((_) {
+        assert(contextId != -1);
 
-      flushBridgeTask();
-      flushUICommand();
-      flushUICommandCallback(contextId);
+        flushBridgeTask();
+        flushUICommand();
+        flushUICommandCallback(contextId);
+      });
     });
-  });
+  }
 
   if (_firstView) {
     initJSContextPool(kKrakenJSBridgePoolSize);
