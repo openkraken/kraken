@@ -130,7 +130,7 @@ describe('Event', () => {
     expect(clickText).toBe('red');
   });
 
-  it('scroll to the invisible container range', async () => {
+  fit('scroll to the invisible container range', async () => {
     let clickCount = 0;
 
     const container = document.createElement('div');
@@ -147,7 +147,7 @@ describe('Event', () => {
     container2.style.overflow = 'scroll';
     container2.style.width = '300px';
     container2.style.height = '500px';
-    container2.style.marginTop = '200px';
+    container2.style.marginTop = '50px';
     container2.style.backgroundColor = 'red';
 
     const block1 =document.createElement('div');
@@ -173,8 +173,8 @@ describe('Event', () => {
 
     container2.scrollTo(0, 150);
 
-    await simulateClick(50, 530);
-    await simulateClick(50, 470);
+    await simulateClick(25, 25);
+    await simulateClick(25, 75);
     expect(clickCount).toBe(1);
   })
 });
