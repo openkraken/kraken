@@ -1116,20 +1116,22 @@ class RenderBoxModel extends RenderBox with
       }
       return true;
     }());
+
     bool isHit = result.addWithPaintTransform(
       transform: transform != null ? getEffectiveTransform() : Matrix4.identity(),
       position: position,
-      hitTest: (BoxHitTestResult result, Offset position) {
+      hitTest: (BoxHitTestResult result, Offset trasformPosition) {
         return result.addWithPaintOffset(
           offset: Offset(-scrollLeft, -scrollTop),
-          position: position,
+          position: trasformPosition,
           hitTest: (BoxHitTestResult result, Offset position) {
             CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
             if (positionType == CSSPositionType.fixed) {
               position -= getTotalScrollOffset();
             }
 
-            if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+            // addWithPaintOffset is to add an offset to the child node, the calculation itself does not need to bring an offset.
+            if (hitTestChildren(result, position: position) || hitTestSelf(trasformPosition)) {
               result.add(BoxHitTestEntry(this, position));
               return true;
             }
@@ -1150,8 +1152,7 @@ class RenderBoxModel extends RenderBox with
     while (parentNode is RenderBoxModel) {
       final node =(parentNode as RenderBoxModel);
       if ((node.style[OVERFLOW_Y] != '' && node.style[OVERFLOW_Y] != VISIBLE) || (node.style[OVERFLOW_X] != '' && node.style[OVERFLOW_X] != VISIBLE) || (node.style[OVERFLOW] != '' && node.style[OVERFLOW] != VISIBLE)) {
-        final position =  node.globalToLocal(globalPosition);
-        isContainsPosition &= node.size.contains(position);
+        isContainsPosition &= node.size.contains(node.globalToLocal(globalPosition));
       }
       parentNode = parentNode.parent;
     }
