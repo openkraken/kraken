@@ -3,6 +3,13 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/bridge.dart';
 
+const String PERF_CONTROLLER_INIT_START = 'kraken_controller_init_start';
+const String PERF_CONTROLLER_INIT_END = 'kraken_controller_init_end';
+const String PERF_CONTROLLER_PROPERTY_INIT = 'kraken_controller_properties_init';
+const String PERF_VIEW_CONTROLLER_INIT_START = 'kraken_view_controller_init_start';
+const String PERF_VIEW_CONTROLLER_INIT_END = 'kraken_view_controller_init_end';
+const String PERF_VIEW_CONTROLLER_PROPERTY_INIT = 'kraken_view_controller_property_init';
+
 class PerformanceEntry {
   PerformanceEntry(this.name, this.entryType, this.startTime, this.duration);
 

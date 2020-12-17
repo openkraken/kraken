@@ -26,14 +26,16 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   };
 
 #if ENABLE_PROFILE
-  auto nativePerformance = binding::jsc::NativePerformance::instance(contextId);
-  nativePerformance->mark("js_context_start");
+  double jsContextStartTime =
+    std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
   bridgeCallback = new foundation::BridgeCallback();
 
   context = binding::jsc::createJSContext(contextId, errorHandler, this);
 
 #if ENABLE_PROFILE
+  auto nativePerformance = binding::jsc::NativePerformance::instance(context.get());
+  nativePerformance->mark("js_context_start", jsContextStartTime);
   nativePerformance->mark("js_context_end");
   nativePerformance->mark("init_native_method_start");
 #endif
@@ -103,7 +105,6 @@ void JSBridge::detachDevtools() {
 }
 #endif // ENABLE_DEBUGGER
 
-
 void JSBridge::handleModuleListener(const NativeString *args, JSValueRef *exception) {
   for (const auto &callback : krakenModuleListenerList) {
     JSStringRef argsRef = JSStringCreateWithCharacters(args->string, args->length);
@@ -151,6 +152,8 @@ JSBridge::~JSBridge() {
   krakenModuleListenerList.clear();
 
   delete bridgeCallback;
+
+  binding::jsc::NativePerformance::disposeInstance(context.get());
 }
 
 void JSBridge::reportError(const char *errmsg) {

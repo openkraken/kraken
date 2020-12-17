@@ -130,8 +130,8 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
 
     if (!kReleaseMode) {
       PerformanceTiming.instance(controller.view.contextId)
-          .mark('kraken_controller_init_start', controllerCreateStart.millisecondsSinceEpoch.toDouble());
-      PerformanceTiming.instance(controller.view.contextId).mark('kraken_controller_init_end');
+          .mark(PERF_CONTROLLER_INIT_START, controllerCreateStart.millisecondsSinceEpoch.toDouble());
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_CONTROLLER_INIT_END);
     }
 
     return controller.view.getRootRenderObject();

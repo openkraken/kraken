@@ -46,16 +46,20 @@ class KrakenViewController {
   Color background;
 
   KrakenViewController(
-    this.viewportWidth, this.viewportHeight,
-    {
-      this.background,
-      this.showPerformanceOverlay,
-      this.enableDebug = false,
-      int contextId,
-      this.rootController,
-      this.navigationDelegate,
+    this.viewportWidth,
+    this.viewportHeight, {
+    this.background,
+    this.showPerformanceOverlay,
+    this.enableDebug = false,
+    int contextId,
+    this.rootController,
+    this.navigationDelegate,
+  }) : _contextId = contextId {
+    DateTime viewControllerPropertyInit;
+    if (!kReleaseMode) {
+      viewControllerPropertyInit = DateTime.now();
     }
-  ): _contextId = contextId {
+
     if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
@@ -79,10 +83,15 @@ class KrakenViewController {
     if ((kDebugMode || kProfileMode) && rootController.debugEnableInspector != false) {
       debugStartInspector();
     }
+
+    if (!kReleaseMode) {
+      PerformanceTiming.instance(_contextId).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT, viewControllerPropertyInit.millisecondsSinceEpoch.toDouble());
+    }
   }
 
   /// Used for debugger inspector.
   Inspector _inspector;
+
   Inspector get inspector => _inspector;
 
   // the manager which controller all renderObjects of Kraken
@@ -317,23 +326,33 @@ class KrakenController {
   KrakenMethodChannel get methodChannel => _methodChannel;
 
   final String name;
+
   // Enable debug inspector.
   bool debugEnableInspector;
 
-  KrakenController(this.name, double viewportWidth, double viewportHeight, {
-      bool showPerformanceOverlay = false,
-      enableDebug = false,
-      String bundleURL,
-      String bundlePath,
-      String bundleContent,
-      Color background,
-      KrakenNavigationDelegate navigationDelegate,
-      KrakenMethodChannel methodChannel,
-      this.loadErrorHandler,
-      this.debugEnableInspector,
-    }): _bundleURL = bundleURL,
+  KrakenController(
+    this.name,
+    double viewportWidth,
+    double viewportHeight, {
+    bool showPerformanceOverlay = false,
+    enableDebug = false,
+    String bundleURL,
+    String bundlePath,
+    String bundleContent,
+    Color background,
+    KrakenNavigationDelegate navigationDelegate,
+    KrakenMethodChannel methodChannel,
+    this.loadErrorHandler,
+    this.debugEnableInspector,
+  })  : _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent {
+    DateTime controllerPropertyInit;
+    DateTime viewControllerInit;
+    if (!kReleaseMode) {
+      controllerPropertyInit = viewControllerInit = DateTime.now();
+    }
+
     _methodChannel = methodChannel;
     _view = KrakenViewController(viewportWidth, viewportHeight,
         background: background,
@@ -341,12 +360,23 @@ class KrakenController {
         enableDebug: enableDebug,
         rootController: this,
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate());
+
+    if (!kReleaseMode) {
+      PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_START, viewControllerInit.millisecondsSinceEpoch.toDouble());
+      PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
+    }
+
     _module = KrakenModuleController();
     assert(!_controllerMap.containsKey(_view.contextId),
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
     _controllerMap[_view.contextId] = this;
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
+
+    if (!kReleaseMode) {
+      PerformanceTiming.instance(view.contextId)
+          .mark(PERF_CONTROLLER_PROPERTY_INIT, controllerPropertyInit.millisecondsSinceEpoch.toDouble());
+    }
   }
 
   KrakenViewController _view;
@@ -469,8 +499,7 @@ class KrakenController {
     _bundleContent = _bundleContent ?? bundleContentOverride;
     _bundlePath = _bundlePath ?? bundlePathOverride;
     _bundleURL = _bundleURL ?? bundleURLOverride;
-    String bundleURL =
-        _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
+    String bundleURL = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 
     if (bundleURL == null && methodChannel is KrakenNativeChannel) {
       bundleURL = await (methodChannel as KrakenNativeChannel).getUrl();
@@ -479,7 +508,9 @@ class KrakenController {
     if (loadErrorHandler != null) {
       try {
         _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
-      } catch(e, stack) { loadErrorHandler(FlutterError(e.toString()), stack);}
+      } catch (e, stack) {
+        loadErrorHandler(FlutterError(e.toString()), stack);
+      }
     } else {
       _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
     }
