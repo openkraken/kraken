@@ -4,7 +4,6 @@
  */
 
 #include "performance.h"
-#include "foundation/logging.h"
 #include "dart_methods.h"
 #include <chrono>
 #include <cmath>
@@ -13,21 +12,26 @@ namespace kraken::binding::jsc {
 
 using namespace std::chrono;
 
-std::unordered_map<int32_t, NativePerformance *> NativePerformance::instanceMap{};
-NativePerformance *NativePerformance::instance(int32_t contextId) {
-  if (instanceMap.count(contextId) == 0) {
-    instanceMap[contextId] = new NativePerformance();
+std::unordered_map<JSContext *, NativePerformance *> NativePerformance::instanceMap{};
+NativePerformance *NativePerformance::instance(JSContext *context) {
+  if (instanceMap.count(context) == 0) {
+    instanceMap[context] = new NativePerformance();
   }
 
-  return instanceMap[contextId];
+  return instanceMap[context];
 }
 
-void NativePerformance::disposeInstance(int32_t contextId) {
-  if (instanceMap.count(contextId) > 0) delete instanceMap[contextId];
+void NativePerformance::disposeInstance(JSContext *context) {
+  if (instanceMap.count(context) > 0) delete instanceMap[context];
 }
 
 void NativePerformance::mark(const std::string &markName) {
   double startTime = std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+  auto *nativePerformanceEntry = new NativePerformanceEntry{markName, "mark", startTime, 0};
+  entries.emplace_back(nativePerformanceEntry);
+}
+
+void NativePerformance::mark(const std::string &markName, double startTime) {
   auto *nativePerformanceEntry = new NativePerformanceEntry{markName, "mark", startTime, 0};
   entries.emplace_back(nativePerformanceEntry);
 }
@@ -125,7 +129,6 @@ void JSPerformanceEntry::getPropertyNames(JSPropertyNameAccumulatorRef accumulat
 }
 
 JSPerformance::~JSPerformance() {
-  NativePerformance::disposeInstance(context->getContextId());
 }
 
 void JSPerformance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -239,25 +242,13 @@ JSValueRef JSPerformance::clearMeasures(JSContextRef ctx, JSObjectRef function, 
 JSValueRef JSPerformance::getEntries(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
-  auto entries = performance->nativePerformance->entries;
+  auto entries = performance->getFullEntries();
 
-  auto dartEntryList = getDartMethod()->getPerformanceEntries(performance->context->getContextId());
-  auto dartEntryPtr = reinterpret_cast<NativePerformanceEntry**>(dartEntryList->entries);
-  std::vector<NativePerformanceEntry*> dartEntries{dartEntryPtr, dartEntryPtr + dartEntryList->length};
-
-  std::vector<NativePerformanceEntry *> mergedEntries;
-  mergedEntries.insert(mergedEntries.begin(), entries.begin(), entries.end());
-  mergedEntries.insert(mergedEntries.begin(), dartEntries.begin(), dartEntries.end());
-
-  std::sort(mergedEntries.begin(), mergedEntries.end(), [](NativePerformanceEntry *left, NativePerformanceEntry *right) -> bool {
-    return left->startTime < right->startTime;
-  });
-
-  size_t entriesSize = mergedEntries.size();
+  size_t entriesSize = entries.size();
   JSValueRef args[entriesSize];
 
   for (size_t i = 0; i < entriesSize; i++) {
-    auto &entry = mergedEntries[i];
+    auto &entry = entries[i];
     auto entryType = std::string(entry->entryType);
     args[i] = buildPerformanceEntry(entryType, performance->context, entry);
   }
@@ -280,7 +271,7 @@ JSValueRef JSPerformance::getEntriesByName(JSContextRef ctx, JSObjectRef functio
 
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
   std::vector<JSObjectRef> targetEntries;
-  auto entries = performance->nativePerformance->entries;
+  auto entries = performance->getFullEntries();
 
   for (auto &m_entries : entries) {
     if (m_entries->name == targetName) {
@@ -307,7 +298,7 @@ JSValueRef JSPerformance::getEntriesByType(JSContextRef ctx, JSObjectRef functio
 
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
   std::vector<JSObjectRef> targetEntries;
-  auto entries = performance->nativePerformance->entries;
+  auto entries = performance->getFullEntries();
 
   for (auto &m_entries : entries) {
     if (m_entries->entryType == entryType) {
@@ -364,48 +355,78 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
   }
 
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
-  auto entries = performance->nativePerformance->entries;
+  auto entries = performance->getFullEntries();
 
-  performance->internalMeasure(name, startMark, endMark);
-
-  return nullptr;
-}
-
-void JSPerformance::internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark) {
-  auto entries = nativePerformance->entries;
   double duration;
   auto now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
   if (!startMark.empty() && !endMark.empty()) {
-    auto startEntry = std::find_if(entries.begin(), entries.end(), [&startMark](auto entry) -> bool {
-      return startMark == entry->name;
-    });
-    auto endEntry = std::find_if(entries.begin(), entries.end(), [&endMark](auto entry) -> bool {
-      return endMark == entry->name;
-    });
+    auto startEntry = std::find_if(entries.begin(), entries.end(),
+                                   [&startMark](auto entry) -> bool { return startMark == entry->name; });
+    auto endEntry =
+      std::find_if(entries.begin(), entries.end(), [&endMark](auto entry) -> bool { return endMark == entry->name; });
+    if (startEntry == entries.end()) {
+      JSC_THROW_ERROR(
+        ctx, ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " does not exist.").c_str(),
+        exception);
+      return nullptr;
+    }
+    if (endEntry == entries.end()) {
+      JSC_THROW_ERROR(
+        ctx, ("Failed to execute 'measure' on 'Performance': The mark " + endMark + " does not exist.").c_str(),
+        exception);
+      return nullptr;
+    }
+
     duration = (*endEntry)->startTime - (*startEntry)->startTime;
   } else if (!startMark.empty()) {
-    auto startEntry = std::find_if(entries.begin(), entries.end(), [&startMark](auto entry) -> bool {
-      return startMark == entry->name;
-    });
+    auto startEntry = std::find_if(entries.begin(), entries.end(),
+                                   [&startMark](auto entry) -> bool { return startMark == entry->name; });
+    if (startEntry == entries.end()) {
+      JSC_THROW_ERROR(
+          ctx, ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " does not exist.").c_str(),
+          exception);
+      return nullptr;
+    }
+
+
     duration = now - (*startEntry)->startTime;
   } else if (!endMark.empty()) {
-    auto endEntry = std::find_if(entries.begin(), entries.end(), [&endMark](auto entry) -> bool {
-      return endMark == entry->name;
-    });
-    duration = (*endEntry)->startTime -
-               duration_cast<milliseconds>(context->timeOrigin.time_since_epoch()).count();
+    auto endEntry =
+      std::find_if(entries.begin(), entries.end(), [&endMark](auto entry) -> bool { return endMark == entry->name; });
+    duration =
+      (*endEntry)->startTime - duration_cast<milliseconds>(performance->context->timeOrigin.time_since_epoch()).count();
   } else {
-    duration = internalNow();
+    duration = performance->internalNow();
   }
 
   double startTime = std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
   auto *nativePerformanceEntry = new NativePerformanceEntry{name, "measure", startTime, duration};
-  nativePerformance->entries.emplace_back(nativePerformanceEntry);
+  performance->nativePerformance->entries.emplace_back(nativePerformanceEntry);
+
+  return nullptr;
+}
+
+std::vector<NativePerformanceEntry *> JSPerformance::getFullEntries() {
+  auto bridgeEntries = nativePerformance->entries;
+
+  auto dartEntryList = getDartMethod()->getPerformanceEntries(context->getContextId());
+  auto dartEntryPtr = reinterpret_cast<NativePerformanceEntry **>(dartEntryList->entries);
+  std::vector<NativePerformanceEntry *> dartEntries{dartEntryPtr, dartEntryPtr + dartEntryList->length};
+
+  std::vector<NativePerformanceEntry *> mergedEntries;
+  mergedEntries.insert(mergedEntries.begin(), bridgeEntries.begin(), bridgeEntries.end());
+  mergedEntries.insert(mergedEntries.begin(), dartEntries.begin(), dartEntries.end());
+
+  std::sort(mergedEntries.begin(), mergedEntries.end(),
+            [](NativePerformanceEntry *left, NativePerformanceEntry *right) -> bool {
+              return left->startTime < right->startTime;
+            });
+  return mergedEntries;
 }
 
 void bindPerformance(std::unique_ptr<JSContext> &context) {
-  auto performance = new JSPerformance(context.get(), NativePerformance::instance(context->getContextId()));
+  auto performance = new JSPerformance(context.get(), NativePerformance::instance(context.get()));
   JSC_GLOBAL_BINDING_HOST_OBJECT(context, "performance", performance);
 }
 } // namespace kraken::binding::jsc

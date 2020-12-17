@@ -16,10 +16,10 @@ namespace kraken::binding::jsc {
 void bindPerformance(std::unique_ptr<JSContext> &context);
 
 struct NativePerformanceEntry {
-  NativePerformanceEntry(const std::string name, const std::string entryType, double startTime, double duration)
+  NativePerformanceEntry(const std::string &name, const std::string &entryType, double startTime, double duration)
     : startTime(startTime), duration(duration) {
-    this->name = new char[name.size()];
-    this->entryType = new char[entryType.size()];
+    this->name = new char[name.size() + 1];
+    this->entryType = new char[entryType.size() + 1];
     strcpy(this->name, name.data());
     strcpy(this->entryType, entryType.data());
   };
@@ -64,11 +64,12 @@ public:
 
 class NativePerformance {
 public:
-  static std::unordered_map<int32_t, NativePerformance *> instanceMap;
-  static NativePerformance *instance(int32_t contextId);
-  static void disposeInstance(int32_t contextId);
+  static std::unordered_map<JSContext *, NativePerformance *> instanceMap;
+  static NativePerformance *instance(JSContext *context);
+  static void disposeInstance(JSContext *context);
 
   void mark(const std::string &markName);
+  void mark(const std::string &markName, double startTime);
   std::vector<NativePerformanceEntry *> entries;
 };
 
@@ -111,7 +112,6 @@ public:
   ~JSPerformance() override;
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-  void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark);
 
 private:
   friend JSPerformanceEntry;
@@ -125,6 +125,7 @@ private:
   JSFunctionHolder m_mark{context, "mark", mark};
   JSFunctionHolder m_measure{context, "measure", measure};
   double internalNow();
+  std::vector<NativePerformanceEntry*> getFullEntries();
   NativePerformance *nativePerformance{nullptr};
 };
 
