@@ -130,7 +130,7 @@ describe('Event', () => {
     expect(clickText).toBe('red');
   });
 
-  fit('scroll to the invisible container range', async () => {
+  it('the event cannot be triggered when the element scrolls to the invisible container range', async () => {
     let clickCount = 0;
 
     const container = document.createElement('div');
@@ -176,5 +176,76 @@ describe('Event', () => {
     await simulateClick(25, 25);
     await simulateClick(25, 75);
     expect(clickCount).toBe(1);
+  })
+
+  it('the event cannot be triggered when the element hidden to the invisible container range', async () => {
+    let clickCount = 0;
+
+    const container = document.createElement('div');
+
+    container.style.overflow = 'hidden';
+    container.style.width = '100px';
+    container.style.height = '100px';
+    container.style.backgroundColor = 'blue';
+
+    document.body.appendChild(container);
+
+    const block =document.createElement('div');
+    block.style.width = '300px';
+    block.style.height = '50px';
+    block.style.backgroundColor = 'green';
+    block.addEventListener('click', () => clickCount++); 
+    container.appendChild(block);
+
+    await simulateClick(50, 20);
+    await simulateClick(150, 10);
+    expect(clickCount).toBe(1);
+  })
+
+  it('the event cannot be triggered when the element visibel to the invisible container range', async () => {
+    let clickCount = 0;
+
+    const container = document.createElement('div');
+
+    container.style.overflow = 'visible';
+    container.style.width = '100px';
+    container.style.height = '100px';
+    container.style.backgroundColor = 'blue';
+
+    document.body.appendChild(container);
+
+    const block =document.createElement('div');
+    block.style.width = '300px';
+    block.style.height = '50px';
+    block.style.backgroundColor = 'green';
+    block.addEventListener('click', () => clickCount++); 
+    container.appendChild(block);
+
+    await simulateClick(50, 20);
+    await simulateClick(150, 20);
+    expect(clickCount).toBe(2);
+  })
+
+  it('the event cannot be triggered when the element with not overflow to the invisible container range', async () => {
+    let clickCount = 0;
+
+    const container = document.createElement('div');
+
+    container.style.width = '100px';
+    container.style.height = '100px';
+    container.style.backgroundColor = 'blue';
+
+    document.body.appendChild(container);
+
+    const block =document.createElement('div');
+    block.style.width = '300px';
+    block.style.height = '50px';
+    block.style.backgroundColor = 'green';
+    block.addEventListener('click', () => clickCount++); 
+    container.appendChild(block);
+
+    await simulateClick(50, 20);
+    await simulateClick(150, 30);
+    expect(clickCount).toBe(2);
   })
 });
