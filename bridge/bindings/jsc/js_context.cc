@@ -74,8 +74,8 @@ bool JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, cons
   return handleException(exc);
 }
 
-bool JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
-  JSStringRef sourceRef = JSStringCreateWithUTF8CString(code);
+bool JSContext::evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine) {
+  JSStringRef sourceRef = JSStringCreateWithCharacters(reinterpret_cast<const JSChar *>(code), length);
   JSStringRef sourceURLRef = nullptr;
   if (sourceURL != nullptr) {
     sourceURLRef = JSStringCreateWithUTF8CString(sourceURL);
