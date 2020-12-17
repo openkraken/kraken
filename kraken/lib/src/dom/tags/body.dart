@@ -4,9 +4,11 @@
  */
 
 import 'dart:ffi';
+import 'package:flutter/foundation.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
 
 const String BODY = 'BODY';
 
@@ -24,7 +26,11 @@ class BodyElement extends Element {
             OVERFLOW: AUTO,
             BACKGROUND_COLOR: 'white',
           }
-        );
+        ) {
+    if (!kReleaseMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_BODY_ELEMENT_PROPERTY_INIT);
+    }
+  }
 
   void attachBody() {
     willAttachRenderer();

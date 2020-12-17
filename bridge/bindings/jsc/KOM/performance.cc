@@ -409,14 +409,21 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
 
 std::vector<NativePerformanceEntry *> JSPerformance::getFullEntries() {
   auto bridgeEntries = nativePerformance->entries;
-
+#if ENABLE_PROFILE
   auto dartEntryList = getDartMethod()->getPerformanceEntries(context->getContextId());
   auto dartEntryPtr = reinterpret_cast<NativePerformanceEntry **>(dartEntryList->entries);
   std::vector<NativePerformanceEntry *> dartEntries{dartEntryPtr, dartEntryPtr + dartEntryList->length};
+#endif
 
   std::vector<NativePerformanceEntry *> mergedEntries;
+
   mergedEntries.insert(mergedEntries.begin(), bridgeEntries.begin(), bridgeEntries.end());
+#if ENABLE_PROFILE
   mergedEntries.insert(mergedEntries.begin(), dartEntries.begin(), dartEntries.end());
+#endif
+
+  delete[] dartEntryPtr;
+  delete dartEntryList;
 
   std::sort(mergedEntries.begin(), mergedEntries.end(),
             [](NativePerformanceEntry *left, NativePerformanceEntry *right) -> bool {

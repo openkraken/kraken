@@ -3,6 +3,9 @@
  * Author: Kraken Team.
  */
 
+import 'package:flutter/foundation.dart';
+import 'package:kraken/module.dart';
+
 import 'from_native.dart';
 import 'to_native.dart';
 import 'package:flutter/scheduler.dart';
@@ -14,8 +17,18 @@ bool _firstView = true;
 
 /// Init bridge
 int initBridge() {
+  DateTime registerDartMethodStart;
+  if (!kReleaseMode) {
+    registerDartMethodStart = DateTime.now();
+  }
+
   // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
+
+  DateTime registerDartMethodEnd;
+  if (!kReleaseMode) {
+    registerDartMethodEnd = DateTime.now();
+  }
 
   int contextId = -1;
 
@@ -43,7 +56,11 @@ int initBridge() {
     if (contextId == -1) {
       throw Exception('can\' allocate new kraken js Bridge: bridge count had reach the maximum size.');
     }
-    return contextId;
+  }
+
+  if (!kReleaseMode) {
+    PerformanceTiming.instance(contextId).mark(PERF_BRIDGE_REGISTER_DART_METHOD_START, registerDartMethodStart.millisecondsSinceEpoch.toDouble());
+    PerformanceTiming.instance(contextId).mark(PERF_BRIDGE_REGISTER_DART_METHOD_END, registerDartMethodEnd.millisecondsSinceEpoch.toDouble());
   }
 
   return contextId;

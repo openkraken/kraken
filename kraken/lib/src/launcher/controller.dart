@@ -65,11 +65,31 @@ class KrakenViewController {
       debugPaintSizeEnabled = true;
     }
 
+    DateTime bridgeInitStart;
+    if (!kReleaseMode) {
+      bridgeInitStart = DateTime.now();
+    }
+
     if (_contextId == null) {
       _contextId = initBridge();
     }
 
+    if (!kReleaseMode) {
+      PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_START, bridgeInitStart.millisecondsSinceEpoch.toDouble());
+      PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_END);
+    }
+
+    if (!kReleaseMode) {
+      PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEW_PORT_START);
+    }
+
     createViewport();
+
+    if (!kReleaseMode) {
+      PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEW_PORT_END);
+      PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_START);
+    }
+
     _elementManager = ElementManager(
       viewportWidth,
       viewportHeight,
@@ -78,6 +98,10 @@ class KrakenViewController {
       showPerformanceOverlayOverride: showPerformanceOverlay,
       controller: rootController,
     );
+
+    if (!kReleaseMode) {
+      PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_END);
+    }
 
     // Enable DevTool in debug/profile mode, but disable in release.
     if ((kDebugMode || kProfileMode) && rootController.debugEnableInspector != false) {

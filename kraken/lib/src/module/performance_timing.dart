@@ -9,6 +9,18 @@ const String PERF_CONTROLLER_PROPERTY_INIT = 'kraken_controller_properties_init'
 const String PERF_VIEW_CONTROLLER_INIT_START = 'kraken_view_controller_init_start';
 const String PERF_VIEW_CONTROLLER_INIT_END = 'kraken_view_controller_init_end';
 const String PERF_VIEW_CONTROLLER_PROPERTY_INIT = 'kraken_view_controller_property_init';
+const String PERF_BRIDGE_INIT_START = 'kraken_bridge_init_start';
+const String PERF_BRIDGE_INIT_END = 'kraken_bridge_init_end';
+const String PERF_BRIDGE_REGISTER_DART_METHOD_START = 'kraken_bridge_register_dart_method_start';
+const String PERF_BRIDGE_REGISTER_DART_METHOD_END = 'kraken_bridge_register_dart_method_end';
+const String PERF_CREATE_VIEW_PORT_START = 'kraken_create_view_port_start';
+const String PERF_CREATE_VIEW_PORT_END = 'kraken_create_view_port_end';
+const String PERF_ELEMENT_MANAGER_INIT_START = 'kraken_element_manager_init_start';
+const String PERF_ELEMENT_MANAGER_INIT_END = 'kraken_element_manager_init_end';
+const String PERF_ELEMENT_MANAGER_PROPERTY_INIT = 'kraken_element_manager_property_init';
+const String PERF_BODY_ELEMENT_INIT_START = 'kraken_body_element_init_start';
+const String PERF_BODY_ELEMENT_INIT_END = 'kraken_body_element_init_end';
+const String PERF_BODY_ELEMENT_PROPERTY_INIT = 'kraken_body_element_property_init';
 
 class PerformanceEntry {
   PerformanceEntry(this.name, this.entryType, this.startTime, this.duration);
