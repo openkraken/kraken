@@ -5,7 +5,6 @@
 
 import 'dart:ui';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';

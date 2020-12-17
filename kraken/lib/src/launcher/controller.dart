@@ -80,13 +80,13 @@ class KrakenViewController {
     }
 
     if (!kReleaseMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEW_PORT_START);
+      PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEWPORT_START);
     }
 
     createViewport();
 
     if (!kReleaseMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEW_PORT_END);
+      PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEWPORT_END);
       PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_START);
     }
 

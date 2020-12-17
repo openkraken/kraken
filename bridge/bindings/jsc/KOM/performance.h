@@ -75,8 +75,8 @@ public:
 
 class JSPerformance : public HostObject {
 public:
-  DEFINE_OBJECT_PROPERTY(Performance, 10, now, timeOrigin, toJSON, clearMarks, clearMeasures, getEntries,
-                         getEntriesByName, getEntriesByType, mark, measure)
+  DEFINE_OBJECT_PROPERTY(Performance, 11, now, timeOrigin, toJSON, clearMarks, clearMeasures, getEntries,
+                         getEntriesByName, getEntriesByType, mark, measure, summary)
 
   static JSValueRef now(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                         const JSValueRef arguments[], JSValueRef *exception);
@@ -107,6 +107,11 @@ public:
   static JSValueRef measure(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef arguments[], JSValueRef *exception);
 
+#if ENABLE_PROFILE
+  static JSValueRef summary(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                            const JSValueRef arguments[], JSValueRef *exception);
+#endif
+
   JSPerformance(JSContext *context, NativePerformance *nativePerformance)
     : HostObject(context, JSPerformanceName), nativePerformance(nativePerformance) {}
   ~JSPerformance() override;
@@ -124,6 +129,13 @@ private:
   JSFunctionHolder m_getEntriesByType{context, "getEntriesByType", getEntriesByType};
   JSFunctionHolder m_mark{context, "mark", mark};
   JSFunctionHolder m_measure{context, "measure", measure};
+
+#if ENABLE_PROFILE
+  JSFunctionHolder m_summary{context, "summary", summary};
+  void measureSummary(JSValueRef *exception);
+#endif
+  void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark,
+                       JSValueRef *exception);
   double internalNow();
   std::vector<NativePerformanceEntry*> getFullEntries();
   NativePerformance *nativePerformance{nullptr};

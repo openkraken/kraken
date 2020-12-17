@@ -12,6 +12,46 @@ namespace kraken::binding::jsc {
 
 using namespace std::chrono;
 
+#if ENABLE_PROFILE
+#define PERF_WIDGET_CREATION_COST "widget_creation_cost"
+#define PERF_CONTROLLER_PROPERTIES_INIT_COST "kraken_controller_properties_init_cost"
+#define PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST "kraken_view_controller_properties_init_cost"
+#define PERF_BRIDGE_INIT_COST "kraken_bridge_init_cost"
+#define PERF_BRIDGE_REGISTER_DART_METHOD_COST "kraken_bridge_register_dart_method_cost"
+#define PERF_CREATE_VIEWPORT_COST "kraken_create_viewport"
+#define PERF_ELEMENT_MANAGER_INIT_COST "kraken_element_manager_init_cost"
+#define PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST "kraken_element_manager_property_init_cost"
+#define PERF_BODY_ELEMENT_INIT_COST "kraken_body_element_init_cost"
+#define PERF_BODY_ELEMENT_PROPERTIES_INIT_COST "kraken_body_element_property_init_cost"
+#define PERF_JS_CONTEXT_INIT_COST "js_context_init_cost"
+#define PERF_JS_NATIVE_METHOD_INIT_COST "native_method_init_cost"
+#define PERF_JS_POLYFILL_INIT_COST "polyfill_init_cost"
+
+#define PERF_CONTROLLER_INIT_START "kraken_controller_init_start"
+#define PERF_CONTROLLER_INIT_END "kraken_controller_init_end"
+#define PERF_CONTROLLER_PROPERTY_INIT "kraken_controller_properties_init"
+#define PERF_VIEW_CONTROLLER_INIT_START "kraken_view_controller_init_start"
+#define PERF_VIEW_CONTROLLER_PROPERTY_INIT "kraken_view_controller_property_init"
+#define PERF_BRIDGE_INIT_START "kraken_bridge_init_start"
+#define PERF_BRIDGE_INIT_END "kraken_bridge_init_end"
+#define PERF_BRIDGE_REGISTER_DART_METHOD_START "kraken_bridge_register_dart_method_start"
+#define PERF_BRIDGE_REGISTER_DART_METHOD_END "kraken_bridge_register_dart_method_end"
+#define PERF_CREATE_VIEWPORT_START "kraken_create_viewport_start"
+#define PERF_CREATE_VIEWPORT_END "kraken_create_viewport_end"
+#define PERF_ELEMENT_MANAGER_INIT_START "kraken_element_manager_init_start"
+#define PERF_ELEMENT_MANAGER_INIT_END "kraken_element_manager_init_end"
+#define PERF_ELEMENT_MANAGER_PROPERTY_INIT "kraken_element_manager_property_init"
+#define PERF_BODY_ELEMENT_INIT_START "kraken_body_element_init_start"
+#define PERF_BODY_ELEMENT_INIT_END "kraken_body_element_init_end"
+#define PERF_BODY_ELEMENT_PROPERTY_INIT "kraken_body_element_property_init"
+#define PERF_JS_CONTEXT_INIT_START "js_context_start"
+#define PERF_JS_CONTEXT_INIT_END "js_context_end"
+#define PERF_JS_NATIVE_METHOD_INIT_START "init_native_method_start"
+#define PERF_JS_NATIVE_METHOD_INIT_END "init_native_method_end"
+#define PERF_JS_POLYFILL_INIT_START "init_js_polyfill_start"
+#define PERF_JS_POLYFILL_INIT_END "init_js_polyfill_end"
+#endif
+
 std::unordered_map<JSContext *, NativePerformance *> NativePerformance::instanceMap{};
 NativePerformance *NativePerformance::instance(JSContext *context) {
   if (instanceMap.count(context) == 0) {
@@ -116,6 +156,10 @@ JSValueRef JSPerformance::getProperty(std::string &name, JSValueRef *exception) 
       return m_mark.function();
     case PerformanceProperty::measure:
       return m_measure.function();
+#if ENABLE_PROFILE
+    case PerformanceProperty::summary:
+      return m_summary.function();
+#endif
     }
   }
 
@@ -128,8 +172,7 @@ void JSPerformanceEntry::getPropertyNames(JSPropertyNameAccumulatorRef accumulat
   }
 }
 
-JSPerformance::~JSPerformance() {
-}
+JSPerformance::~JSPerformance() {}
 
 void JSPerformance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : getPerformancePropertyNames()) {
@@ -327,6 +370,32 @@ JSValueRef JSPerformance::mark(JSContextRef ctx, JSObjectRef function, JSObjectR
   return nullptr;
 }
 
+#if ENABLE_PROFILE
+JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef *arguments, JSValueRef *exception) {
+  auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
+  performance->measureSummary(exception);
+  return nullptr;
+}
+
+void JSPerformance::measureSummary(JSValueRef *exception) {
+  internalMeasure(PERF_WIDGET_CREATION_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_INIT_END, exception);
+  internalMeasure(PERF_CONTROLLER_PROPERTIES_INIT_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_PROPERTY_INIT, exception);
+  internalMeasure(PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, PERF_VIEW_CONTROLLER_INIT_START, PERF_VIEW_CONTROLLER_PROPERTY_INIT, exception);
+  internalMeasure(PERF_BRIDGE_INIT_COST, PERF_BRIDGE_INIT_START, PERF_BRIDGE_INIT_END, exception);
+  internalMeasure(PERF_BRIDGE_REGISTER_DART_METHOD_COST, PERF_BRIDGE_REGISTER_DART_METHOD_START, PERF_BRIDGE_REGISTER_DART_METHOD_END, exception);
+  internalMeasure(PERF_CREATE_VIEWPORT_COST, PERF_CREATE_VIEWPORT_START, PERF_CREATE_VIEWPORT_END, exception);
+  internalMeasure(PERF_ELEMENT_MANAGER_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START, PERF_ELEMENT_MANAGER_INIT_END, exception);
+  internalMeasure(PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START, PERF_ELEMENT_MANAGER_PROPERTY_INIT, exception);
+  internalMeasure(PERF_BODY_ELEMENT_INIT_COST, PERF_BODY_ELEMENT_INIT_START, PERF_BODY_ELEMENT_INIT_END, exception);
+  internalMeasure(PERF_BODY_ELEMENT_PROPERTIES_INIT_COST, PERF_BODY_ELEMENT_INIT_START, PERF_BODY_ELEMENT_PROPERTY_INIT, exception);
+  internalMeasure(PERF_JS_CONTEXT_INIT_COST, PERF_JS_CONTEXT_INIT_START, PERF_JS_CONTEXT_INIT_END, exception);
+  internalMeasure(PERF_JS_NATIVE_METHOD_INIT_COST, PERF_JS_NATIVE_METHOD_INIT_START, PERF_JS_NATIVE_METHOD_INIT_END, exception);
+  internalMeasure(PERF_JS_POLYFILL_INIT_COST, PERF_JS_POLYFILL_INIT_START, PERF_JS_POLYFILL_INIT_END, exception);
+}
+
+#endif
+
 JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount == 0) {
@@ -339,10 +408,9 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
   std::string name = JSStringToStdString(nameStrRef);
   std::string startMark;
   std::string endMark;
-  bool isStartMarkUndefined = false;
 
   if (argumentCount > 1) {
-    isStartMarkUndefined = JSValueIsUndefined(ctx, arguments[1]);
+    bool isStartMarkUndefined = JSValueIsUndefined(ctx, arguments[1]);
     if (!isStartMarkUndefined) {
       JSStringRef startMarkStringRef = JSValueToStringCopy(ctx, arguments[1], exception);
       startMark = JSStringToStdString(startMarkStringRef);
@@ -355,54 +423,7 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
   }
 
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
-  auto entries = performance->getFullEntries();
-
-  double duration;
-  auto now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-
-  if (!startMark.empty() && !endMark.empty()) {
-    auto startEntry = std::find_if(entries.begin(), entries.end(),
-                                   [&startMark](auto entry) -> bool { return startMark == entry->name; });
-    auto endEntry =
-      std::find_if(entries.begin(), entries.end(), [&endMark](auto entry) -> bool { return endMark == entry->name; });
-    if (startEntry == entries.end()) {
-      JSC_THROW_ERROR(
-        ctx, ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " does not exist.").c_str(),
-        exception);
-      return nullptr;
-    }
-    if (endEntry == entries.end()) {
-      JSC_THROW_ERROR(
-        ctx, ("Failed to execute 'measure' on 'Performance': The mark " + endMark + " does not exist.").c_str(),
-        exception);
-      return nullptr;
-    }
-
-    duration = (*endEntry)->startTime - (*startEntry)->startTime;
-  } else if (!startMark.empty()) {
-    auto startEntry = std::find_if(entries.begin(), entries.end(),
-                                   [&startMark](auto entry) -> bool { return startMark == entry->name; });
-    if (startEntry == entries.end()) {
-      JSC_THROW_ERROR(
-          ctx, ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " does not exist.").c_str(),
-          exception);
-      return nullptr;
-    }
-
-
-    duration = now - (*startEntry)->startTime;
-  } else if (!endMark.empty()) {
-    auto endEntry =
-      std::find_if(entries.begin(), entries.end(), [&endMark](auto entry) -> bool { return endMark == entry->name; });
-    duration =
-      (*endEntry)->startTime - duration_cast<milliseconds>(performance->context->timeOrigin.time_since_epoch()).count();
-  } else {
-    duration = performance->internalNow();
-  }
-
-  double startTime = std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-  auto *nativePerformanceEntry = new NativePerformanceEntry{name, "measure", startTime, duration};
-  performance->nativePerformance->entries.emplace_back(nativePerformanceEntry);
+  performance->internalMeasure(name, startMark, endMark, exception);
 
   return nullptr;
 }
@@ -420,16 +441,65 @@ std::vector<NativePerformanceEntry *> JSPerformance::getFullEntries() {
   mergedEntries.insert(mergedEntries.begin(), bridgeEntries.begin(), bridgeEntries.end());
 #if ENABLE_PROFILE
   mergedEntries.insert(mergedEntries.begin(), dartEntries.begin(), dartEntries.end());
-#endif
-
   delete[] dartEntryPtr;
   delete dartEntryList;
-
   std::sort(mergedEntries.begin(), mergedEntries.end(),
             [](NativePerformanceEntry *left, NativePerformanceEntry *right) -> bool {
               return left->startTime < right->startTime;
             });
+#endif
+
   return mergedEntries;
+}
+
+void JSPerformance::internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark,
+                                    JSValueRef *exception) {
+  auto entries = getFullEntries();
+
+  double duration;
+  auto now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+
+  if (!startMark.empty() && !endMark.empty()) {
+    auto startEntry = std::find_if(entries.begin(), entries.end(),
+                                   [&startMark](auto entry) -> bool { return startMark == entry->name; });
+    auto endEntry =
+      std::find_if(entries.begin(), entries.end(), [&endMark](auto entry) -> bool { return endMark == entry->name; });
+    if (startEntry == entries.end()) {
+      JSC_THROW_ERROR(
+        ctx, ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " does not exist.").c_str(),
+        exception);
+      return;
+    }
+    if (endEntry == entries.end()) {
+      JSC_THROW_ERROR(
+        ctx, ("Failed to execute 'measure' on 'Performance': The mark " + endMark + " does not exist.").c_str(),
+        exception);
+      return;
+    }
+
+    duration = (*endEntry)->startTime - (*startEntry)->startTime;
+  } else if (!startMark.empty()) {
+    auto startEntry = std::find_if(entries.begin(), entries.end(),
+                                   [&startMark](auto entry) -> bool { return startMark == entry->name; });
+    if (startEntry == entries.end()) {
+      JSC_THROW_ERROR(
+        ctx, ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " does not exist.").c_str(),
+        exception);
+      return;
+    }
+
+    duration = now - (*startEntry)->startTime;
+  } else if (!endMark.empty()) {
+    auto endEntry =
+      std::find_if(entries.begin(), entries.end(), [&endMark](auto entry) -> bool { return endMark == entry->name; });
+    duration = (*endEntry)->startTime - duration_cast<milliseconds>(context->timeOrigin.time_since_epoch()).count();
+  } else {
+    duration = internalNow();
+  }
+
+  double startTime = std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+  auto *nativePerformanceEntry = new NativePerformanceEntry{name, "measure", startTime, duration};
+  nativePerformance->entries.emplace_back(nativePerformanceEntry);
 }
 
 void bindPerformance(std::unique_ptr<JSContext> &context) {
