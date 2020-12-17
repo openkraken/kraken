@@ -26,8 +26,10 @@ class Kraken extends StatelessWidget {
 
   // The initial URL to load.
   final String bundleURL;
+
   // The initial assets path to load.
   final String bundlePath;
+
   // The initial raw javascript content to load.
   final String bundleContent;
 
@@ -78,7 +80,6 @@ class Kraken extends StatelessWidget {
     this.animationController,
     this.debugEnableInspector,
   }) : super(key: key) {
-
     // assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
     // 'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
     // assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
@@ -108,7 +109,15 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    KrakenController controller = KrakenController(shortHash(_widget.hashCode), _widget.viewportWidth, _widget.viewportHeight,
+    DateTime controllerCreateStart;
+    if (!kReleaseMode) {
+      controllerCreateStart = DateTime.now();
+    }
+
+    KrakenController controller = KrakenController(
+      shortHash(_widget.hashCode),
+      _widget.viewportWidth,
+      _widget.viewportHeight,
       background: _widget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       bundleURL: _widget.bundleURL,
@@ -118,6 +127,13 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
       bundleContent: _widget.bundleContent,
       debugEnableInspector: _widget.debugEnableInspector,
     );
+
+    if (!kReleaseMode) {
+      PerformanceTiming.instance(controller.view.contextId)
+          .mark('kraken_controller_init_start', controllerCreateStart.millisecondsSinceEpoch.toDouble());
+      PerformanceTiming.instance(controller.view.contextId).mark('kraken_controller_init_end');
+    }
+
     return controller.view.getRootRenderObject();
   }
 

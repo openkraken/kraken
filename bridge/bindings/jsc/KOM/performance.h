@@ -17,9 +17,14 @@ void bindPerformance(std::unique_ptr<JSContext> &context);
 
 struct NativePerformanceEntry {
   NativePerformanceEntry(const std::string name, const std::string entryType, double startTime, double duration)
-    : startTime(startTime), duration(duration), name(name), entryType(entryType){};
-  std::string name;
-  std::string entryType;
+    : startTime(startTime), duration(duration) {
+    this->name = new char[name.size()];
+    this->entryType = new char[entryType.size()];
+    strcpy(this->name, name.data());
+    strcpy(this->entryType, entryType.data());
+  };
+  char *name;
+  char *entryType;
   double startTime;
   double duration;
 };

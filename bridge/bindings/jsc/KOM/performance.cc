@@ -5,6 +5,7 @@
 
 #include "performance.h"
 #include "foundation/logging.h"
+#include "dart_methods.h"
 #include <chrono>
 #include <cmath>
 
@@ -53,11 +54,11 @@ JSValueRef JSPerformanceEntry::getProperty(std::string &name, JSValueRef *except
     auto property = propertyMap[name];
     switch (property) {
     case PerformanceEntryProperty::name: {
-      JSStringRef nameValue = JSStringCreateWithUTF8CString(m_nativePerformanceEntry->name.c_str());
+      JSStringRef nameValue = JSStringCreateWithUTF8CString(m_nativePerformanceEntry->name);
       return JSValueMakeString(ctx, nameValue);
     }
     case PerformanceEntryProperty::entryType: {
-      JSStringRef entryValue = JSStringCreateWithUTF8CString(m_nativePerformanceEntry->entryType.c_str());
+      JSStringRef entryValue = JSStringCreateWithUTF8CString(m_nativePerformanceEntry->entryType);
       return JSValueMakeString(ctx, entryValue);
     }
     case PerformanceEntryProperty::startTime:
@@ -70,12 +71,12 @@ JSValueRef JSPerformanceEntry::getProperty(std::string &name, JSValueRef *except
 }
 
 JSPerformanceMark::JSPerformanceMark(JSContext *context, std::string &name, double startTime)
-  : JSPerformanceEntry(context, new NativePerformanceEntry(name.c_str(), "mark", startTime, 0)) {}
+  : JSPerformanceEntry(context, new NativePerformanceEntry(name, "mark", startTime, 0)) {}
 JSPerformanceMark::JSPerformanceMark(JSContext *context, NativePerformanceEntry *nativePerformanceEntry)
   : JSPerformanceEntry(context, nativePerformanceEntry) {}
 
 JSPerformanceMeasure::JSPerformanceMeasure(JSContext *context, std::string &name, double startTime, double duration)
-  : JSPerformanceEntry(context, new NativePerformanceEntry(name.c_str(), "measure", startTime, duration)) {}
+  : JSPerformanceEntry(context, new NativePerformanceEntry(name, "measure", startTime, duration)) {}
 JSPerformanceMeasure::JSPerformanceMeasure(JSContext *context, NativePerformanceEntry *nativePerformanceEntry)
   : JSPerformanceEntry(context, nativePerformanceEntry) {}
 
@@ -239,11 +240,24 @@ JSValueRef JSPerformance::getEntries(JSContextRef ctx, JSObjectRef function, JSO
                                      size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
   auto entries = performance->nativePerformance->entries;
-  size_t entriesSize = entries.size();
+
+  auto dartEntryList = getDartMethod()->getPerformanceEntries(performance->context->getContextId());
+  auto dartEntryPtr = reinterpret_cast<NativePerformanceEntry**>(dartEntryList->entries);
+  std::vector<NativePerformanceEntry*> dartEntries{dartEntryPtr, dartEntryPtr + dartEntryList->length};
+
+  std::vector<NativePerformanceEntry *> mergedEntries;
+  mergedEntries.insert(mergedEntries.begin(), entries.begin(), entries.end());
+  mergedEntries.insert(mergedEntries.begin(), dartEntries.begin(), dartEntries.end());
+
+  std::sort(mergedEntries.begin(), mergedEntries.end(), [](NativePerformanceEntry *left, NativePerformanceEntry *right) -> bool {
+    return left->startTime < right->startTime;
+  });
+
+  size_t entriesSize = mergedEntries.size();
   JSValueRef args[entriesSize];
 
   for (size_t i = 0; i < entriesSize; i++) {
-    auto &entry = entries[i];
+    auto &entry = mergedEntries[i];
     auto entryType = std::string(entry->entryType);
     args[i] = buildPerformanceEntry(entryType, performance->context, entry);
   }

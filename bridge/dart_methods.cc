@@ -111,4 +111,8 @@ void registerInitWindow(InitWindow initWindow) {
   methodPointer->initWindow = initWindow;
 }
 
+void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries) {
+  methodPointer->getPerformanceEntries = getPerformanceEntries;
+}
+
 } // namespace kraken

@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:dio/dio.dart';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/dom.dart';
@@ -13,6 +14,7 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/module/performance_timing.dart';
 import 'package:vibration/vibration.dart';
 import 'platform.dart';
 import 'native_types.dart';
@@ -605,9 +607,8 @@ typedef Dart_FlushUICommand = void Function();
 typedef Native_RegisterFlushUICommand = Void Function(Pointer<NativeFunction<Native_FlushUICommand>>);
 typedef Dart_RegisterFlushUICommand = void Function(Pointer<NativeFunction<Native_FlushUICommand>>);
 
-final Dart_RegisterFlushUICommand _registerFlushUICommand = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterFlushUICommand>>('registerFlushUICommand')
-    .asFunction();
+final Dart_RegisterFlushUICommand _registerFlushUICommand =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterFlushUICommand>>('registerFlushUICommand').asFunction();
 
 void _flushUICommand() {
   flushUICommand();
@@ -625,9 +626,8 @@ typedef Dart_InitBody = void Function(int contextId, Pointer<NativeElement> nati
 typedef Native_RegisterInitBody = Void Function(Pointer<NativeFunction<Native_InitBody>>);
 typedef Dart_RegisterInitBody = void Function(Pointer<NativeFunction<Native_InitBody>>);
 
-final Dart_RegisterInitBody _registerInitBody = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterInitBody>>('registerInitBody')
-    .asFunction();
+final Dart_RegisterInitBody _registerInitBody =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInitBody>>('registerInitBody').asFunction();
 
 void _initBody(int contextId, Pointer<NativeElement> nativePtr) {
   ElementManager.bodyNativePtrMap[contextId] = nativePtr;
@@ -644,9 +644,8 @@ typedef Dart_InitWindow = void Function(int contextId, Pointer<NativeWindow> nat
 typedef Native_RegisterInitWindow = Void Function(Pointer<NativeFunction<Native_InitWindow>>);
 typedef Dart_RegisterInitWindow = void Function(Pointer<NativeFunction<Native_InitWindow>>);
 
-final Dart_RegisterInitWindow _registerInitWindow = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterInitWindow>>('registerInitWindow')
-    .asFunction();
+final Dart_RegisterInitWindow _registerInitWindow =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInitWindow>>('registerInitWindow').asFunction();
 
 void _initWindow(int contextId, Pointer<NativeWindow> nativePtr) {
   ElementManager.windowNativePtrMap[contextId] = nativePtr;
@@ -655,6 +654,25 @@ void _initWindow(int contextId, Pointer<NativeWindow> nativePtr) {
 void registerInitWindow() {
   Pointer<NativeFunction<Native_InitWindow>> pointer = Pointer.fromFunction(_initWindow);
   _registerInitWindow(pointer);
+}
+
+typedef Native_Performance_GetEntries = Pointer<NativePerformanceEntryList> Function(Int32 contextId);
+typedef Dart_Performance_GetEntries = Pointer<NativePerformanceEntryList> Function(int contextId);
+
+typedef Native_RegisterPerformance_GetEntries = Void Function(Pointer<NativeFunction<Native_Performance_GetEntries>>);
+typedef Dart_RegisterPerformance_GetEntries = void Function(Pointer<NativeFunction<Native_Performance_GetEntries>>);
+
+Pointer<NativePerformanceEntryList> _performanceGetEntries(int contextId) {
+  return PerformanceTiming.instance(contextId).toNative();
+}
+
+void registerPerformanceGetEntries() {
+  final Dart_RegisterPerformance_GetEntries _registerPerformanceGetEntries = nativeDynamicLibrary
+      .lookup<NativeFunction<Native_RegisterPerformance_GetEntries>>('registerGetPerformanceEntries')
+      .asFunction();
+
+  Pointer<NativeFunction<Native_Performance_GetEntries>> pointer = Pointer.fromFunction(_performanceGetEntries);
+  _registerPerformanceGetEntries(pointer);
 }
 
 void registerDartMethodsToCpp() {
@@ -673,4 +691,6 @@ void registerDartMethodsToCpp() {
   registerFlushUICommand();
   registerInitBody();
   registerInitWindow();
+
+  if (!kReleaseMode) registerPerformanceGetEntries();
 }
