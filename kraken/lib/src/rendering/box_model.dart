@@ -1116,30 +1116,52 @@ class RenderBoxModel extends RenderBox with
       }
       return true;
     }());
-
     bool isHit = result.addWithPaintTransform(
       transform: transform != null ? getEffectiveTransform() : Matrix4.identity(),
       position: position,
       hitTest: (BoxHitTestResult result, Offset position) {
-        CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
-        if (positionType == CSSPositionType.fixed) {
-          position -= getTotalScrollOffset();
-        }
+        return result.addWithPaintOffset(
+          offset: Offset(-scrollLeft, -scrollTop),
+          position: position,
+          hitTest: (BoxHitTestResult result, Offset position) {
+            CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
+            if (positionType == CSSPositionType.fixed) {
+              position -= getTotalScrollOffset();
+            }
 
-        if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
-          result.add(BoxHitTestEntry(this, position));
-          return true;
-        }
-        return false;
+            if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+              result.add(BoxHitTestEntry(this, position));
+              return true;
+            }
+            return false;
+          }
+        );
       },
     );
 
     return isHit;
   }
 
+  // Determine whether the hittest position is within the visible area of the parent node in scroll.
+  bool isParentViewContainsPosition (Offset position) {
+    AbstractNode parentNode = parent;
+    final globalPosition = localToGlobal(position);
+    bool isContainsPosition = true;
+    while (parentNode is RenderBoxModel) {
+      final node =(parentNode as RenderBoxModel);
+      if (node.style[OVERFLOW_Y] == SCROLL || node.style[OVERFLOW_X] == SCROLL || node.style[OVERFLOW] == SCROLL) {
+        final position =  node.globalToLocal(globalPosition);
+        isContainsPosition &= node.size.contains(position);
+      }
+      parentNode = parentNode.parent;
+    }
+    return isContainsPosition;
+  }
+
   @override
   bool hitTestSelf(Offset position) {
-    return size.contains(position);
+    // Prioritize whether position belongs to the current size, so that each node does not need to traverse all its superiors.
+    return size.contains(position) && isParentViewContainsPosition(position);
   }
 
   Future<Image> toImage({ double pixelRatio = 1.0 }) {
