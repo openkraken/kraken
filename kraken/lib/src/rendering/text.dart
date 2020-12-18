@@ -157,7 +157,6 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
       }
       parentNode = parentNode.parent;
     }
-    //print('isContainsPosition=${isContainsPosition}');
     return isContainsPosition;
   }
 
