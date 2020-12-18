@@ -12,17 +12,17 @@ namespace kraken::binding::jsc {
 
 using namespace std::chrono;
 
-std::unordered_map<JSContext *, NativePerformance *> NativePerformance::instanceMap{};
-NativePerformance *NativePerformance::instance(JSContext *context) {
-  if (instanceMap.count(context) == 0) {
-    instanceMap[context] = new NativePerformance();
+std::unordered_map<int32_t, NativePerformance *> NativePerformance::instanceMap{};
+NativePerformance *NativePerformance::instance(int32_t uniqueId) {
+  if (instanceMap.count(uniqueId) == 0) {
+    instanceMap[uniqueId] = new NativePerformance();
   }
 
-  return instanceMap[context];
+  return instanceMap[uniqueId];
 }
 
-void NativePerformance::disposeInstance(JSContext *context) {
-  if (instanceMap.count(context) > 0) delete instanceMap[context];
+void NativePerformance::disposeInstance(int32_t uniqueId) {
+  if (instanceMap.count(uniqueId) > 0) delete instanceMap[uniqueId];
 }
 
 void NativePerformance::mark(const std::string &markName) {
@@ -184,7 +184,7 @@ JSValueRef JSPerformance::clearMarks(JSContextRef ctx, JSObjectRef function, JSO
   }
 
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
-  auto entries = performance->nativePerformance->entries;
+  auto &entries = performance->nativePerformance->entries;
   auto it = std::begin(entries);
 
   while (it != entries.end()) {
@@ -217,7 +217,7 @@ JSValueRef JSPerformance::clearMeasures(JSContextRef ctx, JSObjectRef function, 
   }
 
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
-  auto entries = performance->nativePerformance->entries;
+  auto &entries = performance->nativePerformance->entries;
   auto it = std::begin(entries);
 
   while (it != entries.end()) {
@@ -400,6 +400,7 @@ JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObje
   + %s %.*fms
   + %s %.*fms
   + %s %.*fms
+  + %s %.*fms
     + %s %.*fms
     + %s %.*fms
     + %s %.*fms
@@ -412,6 +413,7 @@ JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObje
           (*bodyElementPropertiesInitCost)->name, 2, (*bodyElementPropertiesInitCost)->duration,
           (*bodyElementInitCost)->name, 2, (*bodyElementInitCost)->duration,
           (*createViewportCost)->name, 2, (*createViewportCost)->duration,
+          (*elementManagerPropertiesInitCost)->name, 2, (*elementManagerPropertiesInitCost)->duration,
           (*bridgeInitCost)->name, 2, (*bridgeInitCost)->duration,
           (*bridgeRegisterDartMethodCost)->name, 2, (*bridgeRegisterDartMethodCost)->duration,
           (*jsContextInitCost)->name, 2, (*jsContextInitCost)->duration,
@@ -481,7 +483,7 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
 }
 
 std::vector<NativePerformanceEntry *> JSPerformance::getFullEntries() {
-  auto bridgeEntries = nativePerformance->entries;
+  auto &bridgeEntries = nativePerformance->entries;
 #if ENABLE_PROFILE
   if (getDartMethod()->getPerformanceEntries == nullptr) {
     return std::vector<NativePerformanceEntry *>();
@@ -558,7 +560,7 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
 }
 
 void bindPerformance(std::unique_ptr<JSContext> &context) {
-  auto performance = new JSPerformance(context.get(), NativePerformance::instance(context.get()));
+  auto performance = new JSPerformance(context.get(), NativePerformance::instance(context->uniqueId));
   JSC_GLOBAL_BINDING_HOST_OBJECT(context, "performance", performance);
 }
 } // namespace kraken::binding::jsc

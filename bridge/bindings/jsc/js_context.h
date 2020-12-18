@@ -126,6 +126,8 @@ public:
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 
+  int32_t uniqueId;
+
 private:
   int32_t contextId;
   JSExceptionHandler _handler;

@@ -104,9 +104,9 @@ public:
 
 class NativePerformance {
 public:
-  static std::unordered_map<JSContext *, NativePerformance *> instanceMap;
-  static NativePerformance *instance(JSContext *context);
-  static void disposeInstance(JSContext *context);
+  static std::unordered_map<int32_t, NativePerformance *> instanceMap;
+  static NativePerformance *instance(int32_t uniqueId);
+  static void disposeInstance(int32_t uniqueId);
 
   void mark(const std::string &markName);
   void mark(const std::string &markName, double startTime);

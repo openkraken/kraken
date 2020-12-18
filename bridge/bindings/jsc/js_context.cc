@@ -17,8 +17,10 @@ namespace kraken::binding::jsc {
 std::vector<JSStaticFunction> JSContext::globalFunctions{};
 std::vector<JSStaticValue> JSContext::globalValue{};
 
+static std::atomic<int32_t> context_unique_id{0};
+
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
-  : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false) {
+  : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
 
   JSClassDefinition contextDefinition = kJSClassDefinitionEmpty;
 

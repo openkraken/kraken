@@ -34,7 +34,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   context = binding::jsc::createJSContext(contextId, errorHandler, this);
 
 #if ENABLE_PROFILE
-  auto nativePerformance = binding::jsc::NativePerformance::instance(context.get());
+  auto nativePerformance = binding::jsc::NativePerformance::instance(context->uniqueId);
   nativePerformance->mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
   nativePerformance->mark(PERF_JS_CONTEXT_INIT_END);
   nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_START);
@@ -153,7 +153,7 @@ JSBridge::~JSBridge() {
 
   delete bridgeCallback;
 
-  binding::jsc::NativePerformance::disposeInstance(context.get());
+  binding::jsc::NativePerformance::disposeInstance(context->uniqueId);
 }
 
 void JSBridge::reportError(const char *errmsg) {

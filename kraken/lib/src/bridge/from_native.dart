@@ -327,9 +327,10 @@ Pointer<NativeString> _invokeModule(Pointer<JSCallbackContext> callbackContext, 
   return stringToNativeString(result);
 }
 
+final Pointer<NativeFunction<Native_InvokeModule>> _nativeInvokeModule = Pointer.fromFunction(_invokeModule);
+
 void registerInvokeModule() {
-  Pointer<NativeFunction<Native_InvokeModule>> pointer = Pointer.fromFunction(_invokeModule);
-  _registerInvokeModule(pointer);
+  _registerInvokeModule(_nativeInvokeModule);
 }
 
 // Register reloadApp
@@ -350,9 +351,10 @@ void _reloadApp(int contextId) {
   }
 }
 
+final Pointer<NativeFunction<Native_ReloadApp>> _nativeReloadApp = Pointer.fromFunction(_reloadApp);
+
 void registerReloadApp() {
-  Pointer<NativeFunction<Native_ReloadApp>> pointer = Pointer.fromFunction(_reloadApp);
-  _registerReloadApp(pointer);
+  _registerReloadApp(_nativeReloadApp);
 }
 
 typedef NativeAsyncCallback = Void Function(
@@ -378,9 +380,10 @@ void _requestBatchUpdate(int contextId) {
   return controller.module.requestBatchUpdate();
 }
 
+final Pointer<NativeFunction<Native_RequestBatchUpdate>> _nativeRequestBatchUpdate = Pointer.fromFunction(_requestBatchUpdate);
+
 void registerRequestBatchUpdate() {
-  Pointer<NativeFunction<Native_RequestBatchUpdate>> pointer = Pointer.fromFunction(_requestBatchUpdate);
-  _registerRequestBatchUpdate(pointer);
+  _registerRequestBatchUpdate(_nativeRequestBatchUpdate);
 }
 
 // Register setTimeout
@@ -407,10 +410,10 @@ int _setTimeout(Pointer<JSCallbackContext> callbackContext, int contextId,
 }
 
 const int SET_TIMEOUT_ERROR = -1;
+final Pointer<NativeFunction<Native_SetTimeout>> _nativeSetTimeout = Pointer.fromFunction(_setTimeout, SET_TIMEOUT_ERROR);
 
 void registerSetTimeout() {
-  Pointer<NativeFunction<Native_SetTimeout>> pointer = Pointer.fromFunction(_setTimeout, SET_TIMEOUT_ERROR);
-  _registerSetTimeout(pointer);
+  _registerSetTimeout(_nativeSetTimeout);
 }
 
 // Register setInterval
@@ -436,10 +439,10 @@ int _setInterval(Pointer<JSCallbackContext> callbackContext, int contextId,
 }
 
 const int SET_INTERVAL_ERROR = -1;
+final Pointer<NativeFunction<Native_SetInterval>> _nativeSetInterval = Pointer.fromFunction(_setInterval, SET_INTERVAL_ERROR);
 
 void registerSetInterval() {
-  Pointer<NativeFunction<Native_SetInterval>> pointer = Pointer.fromFunction(_setInterval, SET_INTERVAL_ERROR);
-  _registerSetInterval(pointer);
+  _registerSetInterval(_nativeSetInterval);
 }
 
 // Register clearTimeout
@@ -455,9 +458,9 @@ void _clearTimeout(int contextId, int timerId) {
   return controller.module.clearTimeout(timerId);
 }
 
+final Pointer<NativeFunction<Native_ClearTimeout>> _nativeClearTimeout = Pointer.fromFunction(_clearTimeout);
 void registerClearTimeout() {
-  Pointer<NativeFunction<Native_ClearTimeout>> pointer = Pointer.fromFunction(_clearTimeout);
-  _registerClearTimeout(pointer);
+  _registerClearTimeout(_nativeClearTimeout);
 }
 
 // Register requestAnimationFrame
@@ -484,11 +487,11 @@ int _requestAnimationFrame(Pointer<JSCallbackContext> callbackContext, int conte
 }
 
 const int RAF_ERROR_CODE = -1;
+final Pointer<NativeFunction<Native_RequestAnimationFrame>> _nativeRequestAnimationFrame = Pointer.fromFunction(_requestAnimationFrame, RAF_ERROR_CODE);
+
 // `-1` represents some error occurred in requestAnimationFrame execution.
 void registerRequestAnimationFrame() {
-  Pointer<NativeFunction<Native_RequestAnimationFrame>> pointer =
-      Pointer.fromFunction(_requestAnimationFrame, RAF_ERROR_CODE);
-  _registerRequestAnimationFrame(pointer);
+  _registerRequestAnimationFrame(_nativeRequestAnimationFrame);
 }
 
 // Register cancelAnimationFrame
@@ -505,9 +508,10 @@ void _cancelAnimationFrame(int contextId, int timerId) {
   controller.module.cancelAnimationFrame(timerId);
 }
 
+final Pointer<NativeFunction<Native_CancelAnimationFrame>> _nativeCancelAnimationFrame = Pointer.fromFunction(_cancelAnimationFrame);
+
 void registerCancelAnimationFrame() {
-  Pointer<NativeFunction<Native_CancelAnimationFrame>> pointer = Pointer.fromFunction(_cancelAnimationFrame);
-  _registerCancelAnimationFrame(pointer);
+  _registerCancelAnimationFrame(_nativeCancelAnimationFrame);
 }
 
 // Register devicePixelRatio
@@ -523,9 +527,10 @@ double _devicePixelRatio() {
   return window.devicePixelRatio;
 }
 
+final Pointer<NativeFunction<Native_DevicePixelRatio>> _nativeDevicePixelRatio = Pointer.fromFunction(_devicePixelRatio, 0.0);
+
 void registerDevicePixelRatio() {
-  Pointer<NativeFunction<Native_DevicePixelRatio>> pointer = Pointer.fromFunction(_devicePixelRatio, 0.0);
-  _registerDevicePixelRatio(pointer);
+  _registerDevicePixelRatio(_nativeDevicePixelRatio);
 }
 
 // Register platformBrightness
@@ -544,9 +549,10 @@ Pointer<NativeString> _platformBrightness() {
   return window.platformBrightness == Brightness.dark ? _dark : _light;
 }
 
+final Pointer<NativeFunction<Native_PlatformBrightness>> _nativePlatformBrightness = Pointer.fromFunction(_platformBrightness);
+
 void registerPlatformBrightness() {
-  Pointer<NativeFunction<Native_PlatformBrightness>> pointer = Pointer.fromFunction(_platformBrightness);
-  _registerPlatformBrightness(pointer);
+  _registerPlatformBrightness(_nativePlatformBrightness);
 }
 
 // Register getScreen
@@ -564,9 +570,10 @@ Pointer<ScreenSize> _getScreen() {
   return createScreen(size.width / window.devicePixelRatio, size.height / window.devicePixelRatio);
 }
 
+final Pointer<NativeFunction<Native_GetScreen>> _nativeGetScreen = Pointer.fromFunction(_getScreen);
+
 void registerGetScreen() {
-  Pointer<NativeFunction<Native_GetScreen>> pointer = Pointer.fromFunction(_getScreen);
-  _registerGetScreen(pointer);
+  _registerGetScreen(_nativeGetScreen);
 }
 
 typedef NativeAsyncBlobCallback = Void Function(
@@ -596,9 +603,10 @@ void _toBlob(Pointer<JSCallbackContext> callbackContext, int contextId,
   });
 }
 
+final Pointer<NativeFunction<Native_ToBlob>> _nativeToBlob = Pointer.fromFunction(_toBlob);
+
 void registerToBlob() {
-  Pointer<NativeFunction<Native_ToBlob>> pointer = Pointer.fromFunction(_toBlob);
-  _registerToBlob(pointer);
+  _registerToBlob(_nativeToBlob);
 }
 
 typedef Native_FlushUICommand = Void Function();
@@ -614,9 +622,10 @@ void _flushUICommand() {
   flushUICommand();
 }
 
+final Pointer<NativeFunction<Native_FlushUICommand>> _nativeFlushUICommand = Pointer.fromFunction(_flushUICommand);
+
 void registerFlushUICommand() {
-  Pointer<NativeFunction<Native_FlushUICommand>> pointer = Pointer.fromFunction(_flushUICommand);
-  _registerFlushUICommand(pointer);
+  _registerFlushUICommand(_nativeFlushUICommand);
 }
 
 // Body Element are special element which created at initialize time, so we can't use UICommandQueue to init body element.
@@ -633,9 +642,10 @@ void _initBody(int contextId, Pointer<NativeElement> nativePtr) {
   ElementManager.bodyNativePtrMap[contextId] = nativePtr;
 }
 
+final Pointer<NativeFunction<Native_InitBody>> _nativeInitBody = Pointer.fromFunction(_initBody);
+
 void registerInitBody() {
-  Pointer<NativeFunction<Native_InitBody>> pointer = Pointer.fromFunction(_initBody);
-  _registerInitBody(pointer);
+  _registerInitBody(_nativeInitBody);
 }
 
 typedef Native_InitWindow = Void Function(Int32 contextId, Pointer<NativeWindow> nativePtr);
@@ -651,9 +661,10 @@ void _initWindow(int contextId, Pointer<NativeWindow> nativePtr) {
   ElementManager.windowNativePtrMap[contextId] = nativePtr;
 }
 
+final Pointer<NativeFunction<Native_InitWindow>> _nativeInitWindow = Pointer.fromFunction(_initWindow);
+
 void registerInitWindow() {
-  Pointer<NativeFunction<Native_InitWindow>> pointer = Pointer.fromFunction(_initWindow);
-  _registerInitWindow(pointer);
+  _registerInitWindow(_nativeInitWindow);
 }
 
 typedef Native_Performance_GetEntries = Pointer<NativePerformanceEntryList> Function(Int32 contextId);
