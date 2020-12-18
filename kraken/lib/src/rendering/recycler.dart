@@ -199,6 +199,9 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     RenderBox child = _renderViewport;
     BoxConstraints childConstraints;
 
+    double width = renderStyle.width;
+    double height = renderStyle.height;
+
     switch (_axis) {
       case Axis.horizontal:
         childConstraints = BoxConstraints(

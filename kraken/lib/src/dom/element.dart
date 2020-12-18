@@ -78,7 +78,6 @@ class Element extends Node
         EventHandlerMixin,
         CSSTextMixin,
         CSSDecoratedBoxMixin,
-        CSSSizingMixin,
         CSSFlexboxMixin,
         CSSFlowMixin,
         CSSOverflowMixin,
@@ -937,19 +936,24 @@ class Element extends Node
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    updateRenderPadding(renderBoxModel, style, property, present);
+    renderBoxModel.renderStyle.updatePadding(property, present);
+    if (original != present) {
+      renderBoxModel.markNeedsLayout();
+    }
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
-    updateRenderSizing(renderBoxModel, style, property, present);
-
+    renderBoxModel.renderStyle.updateSizing(property, present);
+    if (original != present) {
+      renderBoxModel.markNeedsLayout();
+    }
     if (property == WIDTH || property == HEIGHT) {
       updateRenderOffset(renderBoxModel, property, present);
     }
   }
 
   void _styleMarginChangedListener(String property, String original, String present) {
-    updateRenderMargin(renderBoxModel, style, property, present);
+//    updateRenderMargin(renderBoxModel, style, property, present);
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {

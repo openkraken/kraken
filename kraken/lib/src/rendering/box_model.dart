@@ -239,7 +239,14 @@ class RenderBoxModel extends RenderBox with
     this.style,
     this.elementManager,
   }) : assert(targetId != null),
-        super();
+        super() {
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+    renderStyle = RenderStyle(style, viewportSize);
+  }
+
+  RenderStyle renderStyle;
 
   @override
   bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
@@ -295,11 +302,11 @@ class RenderBoxModel extends RenderBox with
   ElementManager elementManager;
 
   BoxSizeType get widthSizeType {
-    bool widthDefined = width != null;
+    bool widthDefined = renderStyle.width != null;
     return widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
   }
   BoxSizeType get heightSizeType {
-    bool heightDefined = height != null;
+    bool heightDefined = renderStyle.height != null;
     return heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
   }
 
@@ -312,15 +319,6 @@ class RenderBoxModel extends RenderBox with
     }
 
     return copiedRenderBoxModel
-
-      // Copy Sizing
-      ..width = width
-      ..height = height
-      ..minWidth = minWidth
-      ..minHeight = minHeight
-      ..maxWidth = maxWidth
-      ..maxHeight = maxHeight
-
       // Copy padding
       ..padding = padding
 
@@ -372,27 +370,6 @@ class RenderBoxModel extends RenderBox with
       ..parentData = parentData;
   }
 
-  double _width;
-  double get width {
-    return _width;
-  }
-  set width(double value) {
-    if (_width == value) return;
-    _width = value;
-
-    markNeedsLayout();
-  }
-
-  double _height;
-  double get height {
-    return _height;
-  }
-  set height(double value) {
-    if (_height == value) return;
-    _height = value;
-    markNeedsLayout();
-  }
-
   // Boxes which have intrinsic ratio
   double _intrinsicWidth;
   double get intrinsicWidth {
@@ -422,46 +399,6 @@ class RenderBoxModel extends RenderBox with
   set intrinsicRatio(double value) {
     if (_intrinsicRatio == value) return;
     _intrinsicRatio = value;
-    markNeedsLayout();
-  }
-
-  double _minWidth;
-  double get minWidth {
-    return _minWidth;
-  }
-  set minWidth(double value) {
-    if (_minWidth == value) return;
-    _minWidth = value;
-    markNeedsLayout();
-  }
-
-  double _maxWidth;
-  double get maxWidth {
-    return _maxWidth;
-  }
-  set maxWidth(double value) {
-    if (_maxWidth == value) return;
-    _maxWidth = value;
-    markNeedsLayout();
-  }
-
-  double _minHeight;
-  double get minHeight {
-    return _minHeight;
-  }
-  set minHeight(double value) {
-    if (_minHeight == value) return;
-    _minHeight = value;
-    markNeedsLayout();
-  }
-
-  double _maxHeight;
-  double get maxHeight {
-    return _maxHeight;
-  }
-  set maxHeight(double value) {
-    if (_maxHeight == value) return;
-    _maxHeight = value;
     markNeedsLayout();
   }
 
@@ -502,9 +439,10 @@ class RenderBoxModel extends RenderBox with
   static double getContentWidth(RenderBoxModel renderBoxModel) {
     double cropWidth = 0;
     CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
-    double width = renderBoxModel.width;
-    double minWidth = renderBoxModel.minWidth;
-    double maxWidth = renderBoxModel.maxWidth;
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    double width = renderStyle.width;
+    double minWidth = renderStyle.minWidth;
+    double maxWidth = renderStyle.maxWidth;
     double intrinsicWidth = renderBoxModel.intrinsicWidth;
     double intrinsicRatio = renderBoxModel.intrinsicRatio;
     BoxSizeType heightSizeType = renderBoxModel.heightSizeType;
@@ -529,7 +467,7 @@ class RenderBoxModel extends RenderBox with
       case CSSDisplay.flex:
       case CSSDisplay.sliver:
         // Get own width if exists else get the width of nearest ancestor width width
-        if (renderBoxModel.width != null) {
+        if (renderStyle.width != null) {
           cropPaddingBorder(renderBoxModel);
         } else {
           while (true) {
@@ -543,12 +481,13 @@ class RenderBoxModel extends RenderBox with
 
             CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
 
+            RenderStyle renderStyle = renderBoxModel.renderStyle;
             // Set width of element according to parent display
             if (display != CSSDisplay.inline) {
               // Skip to find upper parent
-              if (renderBoxModel.width != null) {
+              if (renderStyle.width != null) {
                 // Use style width
-                width = renderBoxModel.width;
+                width = renderStyle.width;
                 cropPaddingBorder(renderBoxModel);
                 break;
               } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex || display == CSSDisplay.sliver) {
@@ -562,8 +501,8 @@ class RenderBoxModel extends RenderBox with
         break;
       case CSSDisplay.inlineBlock:
       case CSSDisplay.inlineFlex:
-        if (renderBoxModel.width != null) {
-          width = renderBoxModel.width;
+        if (renderStyle.width != null) {
+          width = renderStyle.width;
           cropPaddingBorder(renderBoxModel);
         } else {
           width = null;
@@ -625,11 +564,12 @@ class RenderBoxModel extends RenderBox with
   static double getContentHeight(RenderBoxModel renderBoxModel) {
     CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
 
-    double height = renderBoxModel.height;
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    double height = renderStyle.height;
     double cropHeight = 0;
 
-    double maxHeight = renderBoxModel.maxHeight;
-    double minHeight = renderBoxModel.minHeight;
+    double maxHeight = renderStyle.maxHeight;
+    double minHeight = renderStyle.minHeight;
     double intrinsicHeight = renderBoxModel.intrinsicHeight;
     double intrinsicRatio = renderBoxModel.intrinsicRatio;
     BoxSizeType widthSizeType = renderBoxModel.widthSizeType;
@@ -652,7 +592,7 @@ class RenderBoxModel extends RenderBox with
     // Inline element has no height
     if (display == CSSDisplay.inline) {
       return null;
-    } else if (renderBoxModel.height != null) {
+    } else if (renderStyle.height != null) {
       cropPaddingBorder(renderBoxModel);
     } else {
       while (true) {
@@ -665,9 +605,11 @@ class RenderBoxModel extends RenderBox with
         } else {
           break;
         }
+
+        RenderStyle renderStyle = renderBoxModel.renderStyle;
         if (CSSSizing.isStretchChildHeight(renderBoxModel, current)) {
-          if (renderBoxModel.height != null) {
-            height = renderBoxModel.height;
+          if (renderStyle.height != null) {
+            height = renderStyle.height;
             cropPaddingBorder(renderBoxModel);
             break;
           }
@@ -748,22 +690,23 @@ class RenderBoxModel extends RenderBox with
     while (true) {
       if (renderBoxModel is RenderBoxModel) {
         CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
+        RenderStyle renderStyle = renderBoxModel.renderStyle;
 
         // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
         // even if parents have width
         if (renderBoxModel.parent is RenderFlexLayout) {
           RenderFlexParentData parentData = renderBoxModel.parentData;
-          if (parentData.flexShrink == 0 && renderBoxModel.width == null && renderBoxModel.maxWidth == null) {
+          if (parentData.flexShrink == 0 && renderStyle.width == null && renderStyle.maxWidth == null) {
             break;
           }
         }
 
         // Get width if width exists and element is not inline
-        if (display != CSSDisplay.inline && (renderBoxModel.width != null || renderBoxModel.maxWidth != null)) {
+        if (display != CSSDisplay.inline && (renderStyle.width != null || renderStyle.maxWidth != null)) {
           // Get the min width between width and max-width
           maxConstraintWidth = math.min(
-            renderBoxModel.width ?? double.infinity,
-            renderBoxModel.maxWidth ?? double.infinity
+            renderStyle.width ?? double.infinity,
+            renderStyle.maxWidth ?? double.infinity
           ) ;
           cropPaddingBorder(renderBoxModel);
           break;
@@ -892,16 +835,16 @@ class RenderBoxModel extends RenderBox with
 
       // max and min size of intrinsc element should respect intrinsc ratio of each other
       if (intrinsicRatio != null) {
-        if (this.minWidth != null && this.minHeight == null) {
+        if (renderStyle.minWidth != null && renderStyle.minHeight == null) {
           minHeight = minWidth * intrinsicRatio;
         }
-        if (this.maxWidth != null && this.maxHeight == null) {
+        if (renderStyle.maxWidth != null && renderStyle.maxHeight == null) {
           maxHeight = maxWidth * intrinsicRatio;
         }
-        if (this.minWidth == null && this.minHeight != null) {
+        if (renderStyle.minWidth == null && renderStyle.minHeight != null) {
           minWidth = minHeight / intrinsicRatio;
         }
-        if (this.maxWidth == null && this.maxHeight != null) {
+        if (renderStyle.maxWidth == null && renderStyle.maxHeight != null) {
           maxWidth = maxHeight / intrinsicRatio;
         }
       }
@@ -1177,15 +1120,9 @@ class RenderBoxModel extends RenderBox with
 
     if (renderPositionHolder != null) properties.add(DiagnosticsProperty('renderPositionHolder', renderPositionHolder));
     if (padding != null) properties.add(DiagnosticsProperty('padding', padding));
-    if (width != null) properties.add(DiagnosticsProperty('width', width));
-    if (height != null) properties.add(DiagnosticsProperty('height', height));
     if (intrinsicWidth != null) properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
     if (intrinsicHeight != null) properties.add(DiagnosticsProperty('intrinsicHeight', intrinsicHeight));
     if (intrinsicRatio != null) properties.add(DiagnosticsProperty('intrinsicRatio', intrinsicRatio));
-    if (maxWidth != null) properties.add(DiagnosticsProperty('maxWidth', maxWidth));
-    if (minWidth != null) properties.add(DiagnosticsProperty('minWidth', minWidth));
-    if (maxHeight != null) properties.add(DiagnosticsProperty('maxHeight', maxHeight));
-    if (minHeight != null) properties.add(DiagnosticsProperty('minHeight', minHeight));
 
     debugPaddingProperties(properties);
     debugBoxDecorationProperties(properties);

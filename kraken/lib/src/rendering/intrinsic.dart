@@ -14,11 +14,11 @@ class RenderIntrinsic extends RenderBoxModel
       : super(targetId: targetId, style: style, elementManager: elementManager);
 
   BoxSizeType get widthSizeType {
-    bool widthDefined = width != null || (minWidth != null);
+    bool widthDefined = renderStyle.width != null || (renderStyle.minWidth != null);
     return widthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
   BoxSizeType get heightSizeType {
-    bool heightDefined = height != null || (minHeight != null);
+    bool heightDefined = renderStyle.height != null || (renderStyle.minHeight != null);
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
@@ -49,6 +49,14 @@ class RenderIntrinsic extends RenderBoxModel
     }
 
     beforeLayout();
+
+    double width = renderStyle.width;
+    double height = renderStyle.height;
+    double minWidth = renderStyle.minWidth;
+    double minHeight = renderStyle.minHeight;
+    double maxWidth = renderStyle.maxWidth;
+    double maxHeight = renderStyle.maxHeight;
+
     if (child != null) {
       child.layout(contentConstraints, parentUsesSize: true);
       setMaxScrollableSize(child.size.width, child.size.height);

@@ -488,14 +488,14 @@ class RenderFlexLayout extends RenderLayoutBox {
     double maxMainSize;
     if (child is RenderBoxModel) {
       maxMainSize = CSSFlex.isHorizontalFlexDirection(flexDirection) ?
-        child.maxWidth : child.maxHeight;
+        child.renderStyle.maxWidth : child.renderStyle.maxHeight;
     }
     return maxMainSize ?? double.infinity;
   }
 
   /// Calculate automatic minimum size of flex item
   /// Refer to https://www.w3.org/TR/css-flexbox-1/#min-size-auto for detail rules
-  double _getMinMainAxisSize(RenderBox child) {
+  double _getMinMainAxisSize(RenderBoxModel child) {
     double minMainSize;
 
     double contentSize = 0;
@@ -503,9 +503,12 @@ class RenderFlexLayout extends RenderLayoutBox {
     double minWidth = 0;
     // Min height of flex item if min-height is not specified use auto min height instead
     double minHeight = 0;
+
+    RenderStyle childRenderStyle = child.renderStyle;
+
     if (child is RenderBoxModel) {
-      minWidth = child.minWidth != null ? child.minWidth : child.autoMinWidth;
-      minHeight = child.minHeight != null ? child.minHeight : child.autoMinHeight;
+      minWidth = childRenderStyle.minWidth != null ? childRenderStyle.minWidth : child.autoMinWidth;
+      minHeight = childRenderStyle.minHeight != null ? childRenderStyle.minHeight : child.autoMinHeight;
     } else if (child is RenderTextBox) {
       minWidth =  child.autoMinWidth;
       minHeight =  child.autoMinHeight;
@@ -514,16 +517,16 @@ class RenderFlexLayout extends RenderLayoutBox {
       minWidth : minHeight;
 
     if (child is RenderIntrinsic && child.intrinsicRatio != null &&
-      CSSFlex.isHorizontalFlexDirection(flexDirection) && child.width == null
+      CSSFlex.isHorizontalFlexDirection(flexDirection) && childRenderStyle.width == null
     ) {
-      double transferredSize = child.height != null ?
-       child.height * child.intrinsicRatio : child.intrinsicWidth;
+      double transferredSize = childRenderStyle.height != null ?
+       childRenderStyle.height * child.intrinsicRatio : child.intrinsicWidth;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderIntrinsic && child.intrinsicRatio != null &&
-      CSSFlex.isVerticalFlexDirection(flexDirection) && child.height == null
+      CSSFlex.isVerticalFlexDirection(flexDirection) && childRenderStyle.height == null
     ) {
-      double transferredSize = child.width != null ?
-        child.width / child.intrinsicRatio : child.intrinsicHeight;
+      double transferredSize = childRenderStyle.width != null ?
+        childRenderStyle.width / child.intrinsicRatio : child.intrinsicHeight;
       minMainSize = math.min(contentSize, transferredSize);
     } else if (child is RenderBoxModel) {
       double specifiedMainSize = CSSFlex.isHorizontalFlexDirection(flexDirection) ?
@@ -681,6 +684,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       double viewportWidth = elementManager.viewportWidth;
       double viewportHeight = elementManager.viewportHeight;
       Size viewportSize = Size(viewportWidth, viewportHeight);
+      RenderStyle childRenderStyle = child.renderStyle;
       String flexBasis = _getFlexBasis(child);
       double baseSize;
       // @FIXME when flex-basis is smaller than content width, it will not take effects
@@ -688,32 +692,32 @@ class RenderFlexLayout extends RenderLayoutBox {
         baseSize = CSSLength.toDisplayPortValue(flexBasis, viewportSize) ?? 0;
       }
       if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-        minWidth = child.minWidth != null ? child.minWidth : 0;
-        maxWidth = child.maxWidth != null ? child.maxWidth : double.infinity;
+        minWidth = childRenderStyle.minWidth != null ? childRenderStyle.minWidth : 0;
+        maxWidth = childRenderStyle.maxWidth != null ? childRenderStyle.maxWidth : double.infinity;
 
         if (flexBasis == AUTO) {
-          baseSize = child.width;
+          baseSize = childRenderStyle.width;
         }
         if (baseSize != null) {
-          if (child.minWidth != null && baseSize < child.minWidth) {
-            baseSize = child.minWidth;
-          } else if (child.maxWidth != null && baseSize > child.maxWidth) {
-            baseSize = child.maxWidth;
+          if (childRenderStyle.minWidth != null && baseSize < childRenderStyle.minWidth) {
+            baseSize = childRenderStyle.minWidth;
+          } else if (childRenderStyle.maxWidth != null && baseSize > childRenderStyle.maxWidth) {
+            baseSize = childRenderStyle.maxWidth;
           }
           minWidth = maxWidth = baseSize;
         }
       } else {
-        minHeight = child.minHeight != null ? child.minHeight : 0;
-        maxHeight = child.maxHeight != null ? child.maxHeight : double.infinity;
+        minHeight = childRenderStyle.minHeight != null ? childRenderStyle.minHeight : 0;
+        maxHeight = childRenderStyle.maxHeight != null ? childRenderStyle.maxHeight : double.infinity;
 
         if (flexBasis == AUTO) {
-          baseSize = child.height;
+          baseSize = childRenderStyle.height;
         }
         if (baseSize != null) {
-          if (child.minHeight != null && baseSize < child.minHeight) {
-            baseSize = child.minHeight;
-          } else if (child.maxHeight != null && baseSize > child.maxHeight) {
-            baseSize = child.maxHeight;
+          if (childRenderStyle.minHeight != null && baseSize < childRenderStyle.minHeight) {
+            baseSize = childRenderStyle.minHeight;
+          } else if (childRenderStyle.maxHeight != null && baseSize > childRenderStyle.maxHeight) {
+            baseSize = childRenderStyle.maxHeight;
           }
           minHeight = maxHeight = baseSize;
         }
@@ -852,6 +856,13 @@ class RenderFlexLayout extends RenderLayoutBox {
     final double contentHeight = RenderBoxModel.getContentHeight(this);
 
     CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+
+    double width = renderStyle.width;
+    double height = renderStyle.height;
+    double minWidth = renderStyle.minWidth;
+    double minHeight = renderStyle.minHeight;
+    double maxWidth = renderStyle.maxWidth;
+    double maxHeight = renderStyle.maxHeight;
 
     /// If no child exists, stop layout.
     if (childCount == 0) {
@@ -1461,7 +1472,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         bool isStretchSelfValid = false;
         if (child is RenderBoxModel) {
           isStretchSelfValid = CSSFlex.isHorizontalFlexDirection(flexDirection) ?
-            child.height == null : child.width == null;
+            child.renderStyle.height == null : child.renderStyle.width == null;
         }
 
         // Whether child should be stretched
@@ -1742,6 +1753,13 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Get layout width from children's width by flex axis
     double constraintWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? containerSizeMap['main'] : containerSizeMap['cross'];
     bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+
+    double width = renderStyle.width;
+    double height = renderStyle.height;
+    double minWidth = renderStyle.minWidth;
+    double minHeight = renderStyle.minHeight;
+    double maxWidth = renderStyle.maxWidth;
+    double maxHeight = renderStyle.maxHeight;
 
     // Constrain to min-width or max-width if width not exists
     double childrenWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? maxAllocatedMainSize : containerSizeMap['cross'];

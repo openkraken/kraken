@@ -582,6 +582,13 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
 
+    double width = renderStyle.width;
+    double height = renderStyle.height;
+    double minWidth = renderStyle.minWidth;
+    double minHeight = renderStyle.minHeight;
+    double maxWidth = renderStyle.maxWidth;
+    double maxHeight = renderStyle.maxHeight;
+
     // If no child exists, stop layout.
     if (childCount == 0) {
       double constraintWidth = contentWidth ?? 0;

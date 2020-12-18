@@ -386,10 +386,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     assert(renderBoxModel is RenderIntrinsic);
     RenderEditable renderEditable = createRenderEditable();
     RenderIntrinsic renderIntrinsic = renderBoxModel;
+    RenderStyle renderStyle = renderIntrinsic.renderStyle;
     // Make render editable vertically center.
-    double dy = renderIntrinsic.height == null
+    double dy = renderStyle.height == null
         ? 0
-        : (renderIntrinsic.height
+        : (renderStyle.height
             - renderEditable.preferredLineHeight
             - renderIntrinsic.borderTop
             - renderIntrinsic.borderBottom) / 2;
