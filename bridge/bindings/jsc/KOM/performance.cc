@@ -36,7 +36,7 @@ void NativePerformance::mark(const std::string &markName, double startTime) {
   entries.emplace_back(nativePerformanceEntry);
 }
 
-JSObjectRef buildPerformanceEntry(std::string &entryType, JSContext *context,
+JSObjectRef buildPerformanceEntry(const std::string &entryType, JSContext *context,
                                   NativePerformanceEntry *nativePerformanceEntry) {
   if (entryType == "mark") {
     auto *mark = new JSPerformanceMark(context, nativePerformanceEntry);
@@ -335,22 +335,114 @@ JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObje
                                   const JSValueRef *arguments, JSValueRef *exception) {
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
   performance->measureSummary(exception);
-  return nullptr;
+
+  std::vector<NativePerformanceEntry *> entries = performance->getFullEntries();
+  std::vector<NativePerformanceEntry *> measures;
+  for (auto &m_entries : entries) {
+    if (std::string(m_entries->entryType) == "measure") {
+      measures.emplace_back(m_entries);
+    }
+  }
+
+  auto widgetCreationCost = std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+    return std::string(entry->name) == PERF_WIDGET_CREATION_COST;
+  });
+  auto controllerPropertiesInitCost =
+    std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+      return std::string(entry->name) == PERF_CONTROLLER_PROPERTIES_INIT_COST;
+    });
+  auto viewControllerPropertiesInitCost =
+    std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+      return std::string(entry->name) == PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST;
+    });
+  auto bridgeInitCost = std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+    return std::string(entry->name) == PERF_BRIDGE_INIT_COST;
+  });
+  auto bridgeRegisterDartMethodCost =
+    std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+      return std::string(entry->name) == PERF_BRIDGE_REGISTER_DART_METHOD_COST;
+    });
+  auto createViewportCost = std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+    return std::string(entry->name) == PERF_CREATE_VIEWPORT_COST;
+  });
+  auto elementManagerInitCost =
+    std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+      return std::string(entry->name) == PERF_ELEMENT_MANAGER_INIT_COST;
+    });
+  auto elementManagerPropertiesInitCost =
+    std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+      return std::string(entry->name) == PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST;
+    });
+  auto bodyElementInitCost = std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+    return std::string(entry->name) == PERF_BODY_ELEMENT_INIT_COST;
+  });
+  auto bodyElementPropertiesInitCost =
+    std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+      return std::string(entry->name) == PERF_BODY_ELEMENT_PROPERTIES_INIT_COST;
+    });
+  auto jsContextInitCost = std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+    return std::string(entry->name) == PERF_JS_CONTEXT_INIT_COST;
+  });
+  auto jsNativeMethodInitCost =
+    std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+      return std::string(entry->name) == PERF_JS_NATIVE_METHOD_INIT_COST;
+    });
+  auto jsPolyfillInitCost = std::find_if(measures.begin(), measures.end(), [](NativePerformanceEntry *entry) -> bool {
+    return std::string(entry->name) == PERF_JS_POLYFILL_INIT_COST;
+  });
+
+  char buffer[2000];
+  sprintf(buffer, R"(%s %.*fms
+  + %s %.*fms
+  + %s %.*fms
+  + %s %.*fms
+  + %s %.*fms
+  + %s %.*fms
+  + %s %.*fms
+  + %s %.*fms
+    + %s %.*fms
+    + %s %.*fms
+    + %s %.*fms
+    + %s %.*fms
+)",
+          (*widgetCreationCost)->name, 2, (*widgetCreationCost)->duration,
+          (*controllerPropertiesInitCost)->name, 2, (*controllerPropertiesInitCost)->duration,
+          (*viewControllerPropertiesInitCost)->name, 2, (*viewControllerPropertiesInitCost)->duration,
+          (*elementManagerInitCost)->name, 2, (*elementManagerInitCost)->duration,
+          (*bodyElementPropertiesInitCost)->name, 2, (*bodyElementPropertiesInitCost)->duration,
+          (*bodyElementInitCost)->name, 2, (*bodyElementInitCost)->duration,
+          (*createViewportCost)->name, 2, (*createViewportCost)->duration,
+          (*bridgeInitCost)->name, 2, (*bridgeInitCost)->duration,
+          (*bridgeRegisterDartMethodCost)->name, 2, (*bridgeRegisterDartMethodCost)->duration,
+          (*jsContextInitCost)->name, 2, (*jsContextInitCost)->duration,
+          (*jsNativeMethodInitCost)->name, 2, (*jsNativeMethodInitCost)->duration,
+          (*jsPolyfillInitCost)->name, 2, (*jsPolyfillInitCost)->duration
+          );
+
+  JSStringRef resultStringRef = JSStringCreateWithUTF8CString(buffer);
+  return JSValueMakeString(ctx, resultStringRef);
 }
 
 void JSPerformance::measureSummary(JSValueRef *exception) {
   internalMeasure(PERF_WIDGET_CREATION_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_INIT_END, exception);
-  internalMeasure(PERF_CONTROLLER_PROPERTIES_INIT_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_PROPERTY_INIT, exception);
-  internalMeasure(PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, PERF_VIEW_CONTROLLER_INIT_START, PERF_VIEW_CONTROLLER_PROPERTY_INIT, exception);
+  internalMeasure(PERF_CONTROLLER_PROPERTIES_INIT_COST, PERF_CONTROLLER_INIT_START, PERF_CONTROLLER_PROPERTY_INIT,
+                  exception);
+  internalMeasure(PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, PERF_VIEW_CONTROLLER_INIT_START,
+                  PERF_VIEW_CONTROLLER_PROPERTY_INIT, exception);
   internalMeasure(PERF_BRIDGE_INIT_COST, PERF_BRIDGE_INIT_START, PERF_BRIDGE_INIT_END, exception);
-  internalMeasure(PERF_BRIDGE_REGISTER_DART_METHOD_COST, PERF_BRIDGE_REGISTER_DART_METHOD_START, PERF_BRIDGE_REGISTER_DART_METHOD_END, exception);
+  internalMeasure(PERF_BRIDGE_REGISTER_DART_METHOD_COST, PERF_BRIDGE_REGISTER_DART_METHOD_START,
+                  PERF_BRIDGE_REGISTER_DART_METHOD_END, exception);
   internalMeasure(PERF_CREATE_VIEWPORT_COST, PERF_CREATE_VIEWPORT_START, PERF_CREATE_VIEWPORT_END, exception);
-  internalMeasure(PERF_ELEMENT_MANAGER_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START, PERF_ELEMENT_MANAGER_INIT_END, exception);
-  internalMeasure(PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START, PERF_ELEMENT_MANAGER_PROPERTY_INIT, exception);
+  internalMeasure(PERF_ELEMENT_MANAGER_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START, PERF_ELEMENT_MANAGER_INIT_END,
+                  exception);
+  internalMeasure(PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START,
+                  PERF_ELEMENT_MANAGER_PROPERTY_INIT, exception);
   internalMeasure(PERF_BODY_ELEMENT_INIT_COST, PERF_BODY_ELEMENT_INIT_START, PERF_BODY_ELEMENT_INIT_END, exception);
-  internalMeasure(PERF_BODY_ELEMENT_PROPERTIES_INIT_COST, PERF_BODY_ELEMENT_INIT_START, PERF_BODY_ELEMENT_PROPERTY_INIT, exception);
+  internalMeasure(PERF_BODY_ELEMENT_PROPERTIES_INIT_COST, PERF_BODY_ELEMENT_INIT_START, PERF_BODY_ELEMENT_PROPERTY_INIT,
+                  exception);
   internalMeasure(PERF_JS_CONTEXT_INIT_COST, PERF_JS_CONTEXT_INIT_START, PERF_JS_CONTEXT_INIT_END, exception);
-  internalMeasure(PERF_JS_NATIVE_METHOD_INIT_COST, PERF_JS_NATIVE_METHOD_INIT_START, PERF_JS_NATIVE_METHOD_INIT_END, exception);
+  internalMeasure(PERF_JS_NATIVE_METHOD_INIT_COST, PERF_JS_NATIVE_METHOD_INIT_START, PERF_JS_NATIVE_METHOD_INIT_END,
+                  exception);
   internalMeasure(PERF_JS_POLYFILL_INIT_COST, PERF_JS_POLYFILL_INIT_START, PERF_JS_POLYFILL_INIT_END, exception);
 }
 
@@ -391,6 +483,9 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
 std::vector<NativePerformanceEntry *> JSPerformance::getFullEntries() {
   auto bridgeEntries = nativePerformance->entries;
 #if ENABLE_PROFILE
+  if (getDartMethod()->getPerformanceEntries == nullptr) {
+    return std::vector<NativePerformanceEntry *>();
+  }
   auto dartEntryList = getDartMethod()->getPerformanceEntries(context->getContextId());
   auto dartEntryPtr = reinterpret_cast<NativePerformanceEntry **>(dartEntryList->entries);
   std::vector<NativePerformanceEntry *> dartEntries{dartEntryPtr, dartEntryPtr + dartEntryList->length};
