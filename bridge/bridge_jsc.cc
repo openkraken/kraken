@@ -35,9 +35,9 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 
 #if ENABLE_PROFILE
   auto nativePerformance = binding::jsc::NativePerformance::instance(context.get());
-  nativePerformance->mark("js_context_start", jsContextStartTime);
-  nativePerformance->mark("js_context_end");
-  nativePerformance->mark("init_native_method_start");
+  nativePerformance->mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
+  nativePerformance->mark(PERF_JS_CONTEXT_INIT_END);
+  nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_START);
 #endif
 
   kraken::binding::jsc::bindKraken(context);
@@ -66,14 +66,14 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsc::bindBlob(context);
 
 #if ENABLE_PROFILE
-  nativePerformance->mark("init_native_method_end");
-  nativePerformance->mark("init_js_polyfill_start");
+  nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_END);
+  nativePerformance->mark(PERF_JS_POLYFILL_INIT_START);
 #endif
 
   initKrakenPolyFill(this);
 
 #if ENABLE_PROFILE
-  nativePerformance->mark("init_js_polyfill_end");
+  nativePerformance->mark(PERF_JS_POLYFILL_INIT_END);
 #endif
 
 #ifdef KRAKEN_ENABLE_JSA

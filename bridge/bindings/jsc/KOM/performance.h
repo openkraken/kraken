@@ -13,6 +13,46 @@ namespace kraken::binding::jsc {
 
 #define JSPerformanceName "Performance"
 
+#if ENABLE_PROFILE
+#define PERF_WIDGET_CREATION_COST "widget_creation_cost"
+#define PERF_CONTROLLER_PROPERTIES_INIT_COST "kraken_controller_properties_init_cost"
+#define PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST "kraken_view_controller_properties_init_cost"
+#define PERF_BRIDGE_INIT_COST "kraken_bridge_init_cost"
+#define PERF_BRIDGE_REGISTER_DART_METHOD_COST "kraken_bridge_register_dart_method_cost"
+#define PERF_CREATE_VIEWPORT_COST "kraken_create_viewport"
+#define PERF_ELEMENT_MANAGER_INIT_COST "kraken_element_manager_init_cost"
+#define PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST "kraken_element_manager_property_init_cost"
+#define PERF_BODY_ELEMENT_INIT_COST "kraken_body_element_init_cost"
+#define PERF_BODY_ELEMENT_PROPERTIES_INIT_COST "kraken_body_element_property_init_cost"
+#define PERF_JS_CONTEXT_INIT_COST "js_context_init_cost"
+#define PERF_JS_NATIVE_METHOD_INIT_COST "native_method_init_cost"
+#define PERF_JS_POLYFILL_INIT_COST "polyfill_init_cost"
+
+#define PERF_CONTROLLER_INIT_START "kraken_controller_init_start"
+#define PERF_CONTROLLER_INIT_END "kraken_controller_init_end"
+#define PERF_CONTROLLER_PROPERTY_INIT "kraken_controller_properties_init"
+#define PERF_VIEW_CONTROLLER_INIT_START "kraken_view_controller_init_start"
+#define PERF_VIEW_CONTROLLER_PROPERTY_INIT "kraken_view_controller_property_init"
+#define PERF_BRIDGE_INIT_START "kraken_bridge_init_start"
+#define PERF_BRIDGE_INIT_END "kraken_bridge_init_end"
+#define PERF_BRIDGE_REGISTER_DART_METHOD_START "kraken_bridge_register_dart_method_start"
+#define PERF_BRIDGE_REGISTER_DART_METHOD_END "kraken_bridge_register_dart_method_end"
+#define PERF_CREATE_VIEWPORT_START "kraken_create_viewport_start"
+#define PERF_CREATE_VIEWPORT_END "kraken_create_viewport_end"
+#define PERF_ELEMENT_MANAGER_INIT_START "kraken_element_manager_init_start"
+#define PERF_ELEMENT_MANAGER_INIT_END "kraken_element_manager_init_end"
+#define PERF_ELEMENT_MANAGER_PROPERTY_INIT "kraken_element_manager_property_init"
+#define PERF_BODY_ELEMENT_INIT_START "kraken_body_element_init_start"
+#define PERF_BODY_ELEMENT_INIT_END "kraken_body_element_init_end"
+#define PERF_BODY_ELEMENT_PROPERTY_INIT "kraken_body_element_property_init"
+#define PERF_JS_CONTEXT_INIT_START "js_context_start"
+#define PERF_JS_CONTEXT_INIT_END "js_context_end"
+#define PERF_JS_NATIVE_METHOD_INIT_START "init_native_method_start"
+#define PERF_JS_NATIVE_METHOD_INIT_END "init_native_method_end"
+#define PERF_JS_POLYFILL_INIT_START "init_js_polyfill_start"
+#define PERF_JS_POLYFILL_INIT_END "init_js_polyfill_end"
+#endif
+
 void bindPerformance(std::unique_ptr<JSContext> &context);
 
 struct NativePerformanceEntry {

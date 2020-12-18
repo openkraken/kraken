@@ -692,5 +692,5 @@ void registerDartMethodsToCpp() {
   registerInitBody();
   registerInitWindow();
 
-  if (!kReleaseMode) registerPerformanceGetEntries();
+  if (kProfileMode) registerPerformanceGetEntries();
 }

@@ -27,7 +27,7 @@ class BodyElement extends Element {
             BACKGROUND_COLOR: 'white',
           }
         ) {
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_BODY_ELEMENT_PROPERTY_INIT);
     }
   }

@@ -56,7 +56,7 @@ class KrakenViewController {
     this.navigationDelegate,
   }) : _contextId = contextId {
     DateTime viewControllerPropertyInit;
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       viewControllerPropertyInit = DateTime.now();
     }
 
@@ -66,7 +66,7 @@ class KrakenViewController {
     }
 
     DateTime bridgeInitStart;
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       bridgeInitStart = DateTime.now();
     }
 
@@ -74,18 +74,18 @@ class KrakenViewController {
       _contextId = initBridge();
     }
 
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_START, bridgeInitStart.millisecondsSinceEpoch.toDouble());
       PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_END);
     }
 
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEWPORT_START);
     }
 
     createViewport();
 
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEWPORT_END);
       PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_START);
     }
@@ -99,7 +99,7 @@ class KrakenViewController {
       controller: rootController,
     );
 
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_END);
     }
 
@@ -108,7 +108,7 @@ class KrakenViewController {
       debugStartInspector();
     }
 
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       PerformanceTiming.instance(_contextId).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT, viewControllerPropertyInit.millisecondsSinceEpoch.toDouble());
     }
   }
@@ -373,7 +373,7 @@ class KrakenController {
         _bundleContent = bundleContent {
     DateTime controllerPropertyInit;
     DateTime viewControllerInit;
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       controllerPropertyInit = viewControllerInit = DateTime.now();
     }
 
@@ -385,7 +385,7 @@ class KrakenController {
         rootController: this,
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate());
 
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_START, viewControllerInit.millisecondsSinceEpoch.toDouble());
       PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
@@ -397,7 +397,7 @@ class KrakenController {
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
 
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       PerformanceTiming.instance(view.contextId)
           .mark(PERF_CONTROLLER_PROPERTY_INIT, controllerPropertyInit.millisecondsSinceEpoch.toDouble());
     }

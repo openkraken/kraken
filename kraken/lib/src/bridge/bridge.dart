@@ -18,7 +18,7 @@ bool _firstView = true;
 /// Init bridge
 int initBridge() {
   DateTime registerDartMethodStart;
-  if (!kReleaseMode) {
+  if (kProfileMode) {
     registerDartMethodStart = DateTime.now();
   }
 
@@ -26,7 +26,7 @@ int initBridge() {
   registerDartMethodsToCpp();
 
   DateTime registerDartMethodEnd;
-  if (!kReleaseMode) {
+  if (kProfileMode) {
     registerDartMethodEnd = DateTime.now();
   }
 
@@ -58,7 +58,7 @@ int initBridge() {
     }
   }
 
-  if (!kReleaseMode) {
+  if (kProfileMode) {
     PerformanceTiming.instance(contextId).mark(PERF_BRIDGE_REGISTER_DART_METHOD_START, registerDartMethodStart.millisecondsSinceEpoch.toDouble());
     PerformanceTiming.instance(contextId).mark(PERF_BRIDGE_REGISTER_DART_METHOD_END, registerDartMethodEnd.millisecondsSinceEpoch.toDouble());
   }

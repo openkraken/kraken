@@ -130,7 +130,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   ElementManager(this.viewportWidth, this.viewportHeight,
       {this.contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
 
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
       PerformanceTiming.instance(contextId).mark(PERF_BODY_ELEMENT_INIT_START);
     }
@@ -138,7 +138,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     _rootElement = BodyElement(viewportWidth, viewportHeight, BODY_ID, bodyNativePtrMap[contextId], this)
       ..attachBody();
 
-    if (!kReleaseMode) {
+    if (kProfileMode) {
       PerformanceTiming.instance(contextId).mark(PERF_BODY_ELEMENT_INIT_END);
     }
 
