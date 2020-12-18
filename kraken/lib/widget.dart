@@ -130,7 +130,7 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
 
     if (kProfileMode) {
       PerformanceTiming.instance(controller.view.contextId)
-          .mark(PERF_CONTROLLER_INIT_START, controllerCreateStart.millisecondsSinceEpoch.toDouble());
+          .mark(PERF_CONTROLLER_INIT_START, controllerCreateStart.microsecondsSinceEpoch.toDouble());
       PerformanceTiming.instance(controller.view.contextId).mark(PERF_CONTROLLER_INIT_END);
     }
 
@@ -156,7 +156,16 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
   void mount(Element parent, dynamic newSlot) async {
     super.mount(parent, newSlot);
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_JS_BUNDLE_LOAD_START);
+    }
+
     await controller.loadBundle();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_JS_BUNDLE_LOAD_END);
+    }
 
     // Execute JavaScript scripts will block the Flutter UI Threads.
     // Listen for animationController listener to make sure to execute Javascript after route transition had completed.

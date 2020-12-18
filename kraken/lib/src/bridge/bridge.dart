@@ -59,8 +59,8 @@ int initBridge() {
   }
 
   if (kProfileMode) {
-    PerformanceTiming.instance(contextId).mark(PERF_BRIDGE_REGISTER_DART_METHOD_START, registerDartMethodStart.millisecondsSinceEpoch.toDouble());
-    PerformanceTiming.instance(contextId).mark(PERF_BRIDGE_REGISTER_DART_METHOD_END, registerDartMethodEnd.millisecondsSinceEpoch.toDouble());
+    PerformanceTiming.instance(contextId).mark(PERF_BRIDGE_REGISTER_DART_METHOD_START, registerDartMethodStart.microsecondsSinceEpoch.toDouble());
+    PerformanceTiming.instance(contextId).mark(PERF_BRIDGE_REGISTER_DART_METHOD_END, registerDartMethodEnd.microsecondsSinceEpoch.toDouble());
   }
 
   return contextId;

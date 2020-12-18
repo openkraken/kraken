@@ -51,6 +51,17 @@ namespace kraken::binding::jsc {
 #define PERF_JS_NATIVE_METHOD_INIT_END "init_native_method_end"
 #define PERF_JS_POLYFILL_INIT_START "init_js_polyfill_start"
 #define PERF_JS_POLYFILL_INIT_END "init_js_polyfill_end"
+#define PERF_JS_BUNDLE_LOAD_COST "js_bundle_load_cost"
+#define PERF_JS_BUNDLE_EVAL_COST "js_bundle_eval_cost"
+#define PERF_FLUSH_UI_COMMAND_COST "kraken_flush_ui_command_cost"
+
+#define PERF_JS_BUNDLE_LOAD_START "kraken_js_bundle_load_start"
+#define PERF_JS_BUNDLE_LOAD_END "kraken_js_bundle_load_end"
+#define PERF_JS_BUNDLE_EVAL_START "kraken_js_bundle_eval_start"
+#define PERF_JS_BUNDLE_EVAL_END "kraken_js_bundle_eval_end"
+#define PERF_FLUSH_UI_COMMAND_START "kraken_flush_ui_command_start"
+#define PERF_FLUSH_UI_COMMAND_END "kraken_flush_ui_command_end"
+
 #endif
 
 void bindPerformance(std::unique_ptr<JSContext> &context);

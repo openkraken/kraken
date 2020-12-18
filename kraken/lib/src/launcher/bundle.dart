@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:kraken/bridge.dart';
 import 'package:crypto/crypto.dart';
+import 'package:kraken/module.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -97,7 +98,16 @@ abstract class KrakenBundle {
 
   Future<void> run(int contextId) async {
     if (!isResolved) await resolve();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_JS_BUNDLE_EVAL_START);
+    }
+
     evaluateScripts(contextId, content, url.toString(), lineOffset);
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_JS_BUNDLE_EVAL_END);
+    }
   }
 }
 

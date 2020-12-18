@@ -75,7 +75,7 @@ class KrakenViewController {
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_START, bridgeInitStart.millisecondsSinceEpoch.toDouble());
+      PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_START, bridgeInitStart.microsecondsSinceEpoch.toDouble());
       PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_END);
     }
 
@@ -109,7 +109,7 @@ class KrakenViewController {
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT, viewControllerPropertyInit.millisecondsSinceEpoch.toDouble());
+      PerformanceTiming.instance(_contextId).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT, viewControllerPropertyInit.microsecondsSinceEpoch.toDouble());
     }
   }
 
@@ -386,7 +386,7 @@ class KrakenController {
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate());
 
     if (kProfileMode) {
-      PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_START, viewControllerInit.millisecondsSinceEpoch.toDouble());
+      PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_START, viewControllerInit.microsecondsSinceEpoch.toDouble());
       PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
 
@@ -399,7 +399,7 @@ class KrakenController {
 
     if (kProfileMode) {
       PerformanceTiming.instance(view.contextId)
-          .mark(PERF_CONTROLLER_PROPERTY_INIT, controllerPropertyInit.millisecondsSinceEpoch.toDouble());
+          .mark(PERF_CONTROLLER_PROPERTY_INIT, controllerPropertyInit.microsecondsSinceEpoch.toDouble());
     }
   }
 

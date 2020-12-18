@@ -21,6 +21,12 @@ const String PERF_ELEMENT_MANAGER_PROPERTY_INIT = 'kraken_element_manager_proper
 const String PERF_BODY_ELEMENT_INIT_START = 'kraken_body_element_init_start';
 const String PERF_BODY_ELEMENT_INIT_END = 'kraken_body_element_init_end';
 const String PERF_BODY_ELEMENT_PROPERTY_INIT = 'kraken_body_element_property_init';
+const String PERF_JS_BUNDLE_LOAD_START = 'kraken_js_bundle_load_start';
+const String PERF_JS_BUNDLE_LOAD_END = 'kraken_js_bundle_load_end';
+const String PERF_JS_BUNDLE_EVAL_START = 'kraken_js_bundle_eval_start';
+const String PERF_JS_BUNDLE_EVAL_END = 'kraken_js_bundle_eval_end';
+const String PERF_FLUSH_UI_COMMAND_START = 'kraken_flush_ui_command_start';
+const String PERF_FLUSH_UI_COMMAND_END = 'kraken_flush_ui_command_end';
 
 class PerformanceEntry {
   PerformanceEntry(this.name, this.entryType, this.startTime, this.duration);
@@ -43,7 +49,7 @@ class PerformanceTiming {
 
   void mark(String name, [double startTime]) {
     if (startTime == null) {
-      startTime = DateTime.now().millisecondsSinceEpoch.toDouble();
+      startTime = DateTime.now().microsecondsSinceEpoch.toDouble();
     }
 
     PerformanceEntry entry = PerformanceEntry(name, 'mark', startTime, 0);
