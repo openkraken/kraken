@@ -130,7 +130,7 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
 
     if (kProfileMode) {
       PerformanceTiming.instance(controller.view.contextId)
-          .mark(PERF_CONTROLLER_INIT_START, controllerCreateStart.microsecondsSinceEpoch.toDouble());
+          .mark(PERF_CONTROLLER_INIT_START, controllerCreateStart.microsecondsSinceEpoch);
       PerformanceTiming.instance(controller.view.contextId).mark(PERF_CONTROLLER_INIT_END);
     }
 

@@ -54,6 +54,14 @@ namespace kraken::binding::jsc {
 #define PERF_JS_BUNDLE_LOAD_COST "js_bundle_load_cost"
 #define PERF_JS_BUNDLE_EVAL_COST "js_bundle_eval_cost"
 #define PERF_FLUSH_UI_COMMAND_COST "kraken_flush_ui_command_cost"
+#define PERF_CREATE_ELEMENT_COST "kraken_create_element_cost"
+#define PERF_CREATE_TEXT_NODE_COST "kraken_create_text_node_cost"
+#define PERF_CREATE_COMMENT_COST "kraken_create_comment_cost"
+#define PERF_DISPOSE_EVENT_TARGET_COST "kraken_dispose_event_target_cost"
+#define PERF_ADD_EVENT_COST "kraken_add_event_cost"
+#define PERF_INSERT_ADJACENT_NODE_COST "kraken_insert_adjacent_node_cost"
+#define PERF_REMOVE_NODE_COST "kraken_remove_node_cost"
+#define PERF_SET_STYLE_COST "kraken_set_style_cost"
 
 #define PERF_JS_BUNDLE_LOAD_START "kraken_js_bundle_load_start"
 #define PERF_JS_BUNDLE_LOAD_END "kraken_js_bundle_load_end"
@@ -61,13 +69,28 @@ namespace kraken::binding::jsc {
 #define PERF_JS_BUNDLE_EVAL_END "kraken_js_bundle_eval_end"
 #define PERF_FLUSH_UI_COMMAND_START "kraken_flush_ui_command_start"
 #define PERF_FLUSH_UI_COMMAND_END "kraken_flush_ui_command_end"
-
+#define PERF_CREATE_ELEMENT_START "kraken_create_element_start"
+#define PERF_CREATE_ELEMENT_END "kraken_create_element_end"
+#define PERF_CREATE_TEXT_NODE_START "kraken_create_text_node_start"
+#define PERF_CREATE_TEXT_NODE_END "kraken_create_text_node_end"
+#define PERF_CREATE_COMMENT_START "kraken_create_comment_start"
+#define PERF_CREATE_COMMENT_END "kraken_create_comment_end"
+#define PERF_DISPOSE_EVENT_TARGET_START "kraken_dispose_event_target_start"
+#define PERF_DISPOSE_EVENT_TARGET_END "kraken_dispose_event_target_end"
+#define PERF_ADD_EVENT_START "kraken_add_event_start"
+#define PERF_ADD_EVENT_END "kraken_add_event_end"
+#define PERF_INSERT_ADJACENT_NODE_START "kraken_insert_adjacent_node_start"
+#define PERF_INSERT_ADJACENT_NODE_END "kraken_insert_adjacent_node_end"
+#define PERF_REMOVE_NODE_START "kraken_remove_node_start"
+#define PERF_REMOVE_NODE_END "kraken_remove_node_end"
+#define PERF_SET_STYLE_START "kraken_set_style_start"
+#define PERF_SET_STYLE_END "kraken_set_style_end"
 #endif
 
 void bindPerformance(std::unique_ptr<JSContext> &context);
 
 struct NativePerformanceEntry {
-  NativePerformanceEntry(const std::string &name, const std::string &entryType, double startTime, double duration)
+  NativePerformanceEntry(const std::string &name, const std::string &entryType, int64_t startTime, int64_t duration)
     : startTime(startTime), duration(duration) {
     this->name = new char[name.size() + 1];
     this->entryType = new char[entryType.size() + 1];
@@ -76,8 +99,8 @@ struct NativePerformanceEntry {
   };
   char *name;
   char *entryType;
-  double startTime;
-  double duration;
+  int64_t startTime;
+  int64_t duration;
 };
 
 class JSPerformance;
@@ -100,7 +123,7 @@ private:
 class JSPerformanceMark : public JSPerformanceEntry {
 public:
   JSPerformanceMark() = delete;
-  explicit JSPerformanceMark(JSContext *context, std::string &name, double startTime);
+  explicit JSPerformanceMark(JSContext *context, std::string &name, int64_t startTime);
   explicit JSPerformanceMark(JSContext *context, NativePerformanceEntry *nativePerformanceEntry);
 
 private:
@@ -109,7 +132,7 @@ private:
 class JSPerformanceMeasure : public JSPerformanceEntry {
 public:
   JSPerformanceMeasure() = delete;
-  explicit JSPerformanceMeasure(JSContext *context, std::string &name, double startTime, double duration);
+  explicit JSPerformanceMeasure(JSContext *context, std::string &name, int64_t startTime, int64_t duration);
   explicit JSPerformanceMeasure(JSContext *context, NativePerformanceEntry *nativePerformanceEntry);
 };
 
@@ -120,7 +143,7 @@ public:
   static void disposeInstance(int32_t uniqueId);
 
   void mark(const std::string &markName);
-  void mark(const std::string &markName, double startTime);
+  void mark(const std::string &markName, int64_t startTime);
   std::vector<NativePerformanceEntry *> entries;
 };
 
@@ -183,7 +206,7 @@ private:
 
 #if ENABLE_PROFILE
   JSFunctionHolder m_summary{context, "summary", summary};
-  void measureSummary(JSValueRef *exception);
+  void measureSummary();
 #endif
   void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark,
                        JSValueRef *exception);

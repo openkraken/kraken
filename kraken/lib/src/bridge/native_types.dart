@@ -368,7 +368,7 @@ class NativePerformanceEntry extends Struct {
 }
 
 class NativePerformanceEntryList extends Struct {
-  Pointer<Pointer<NativePerformanceEntry>> entries;
+  Pointer<Uint64> entries;
 
   @Int32()
   int length;

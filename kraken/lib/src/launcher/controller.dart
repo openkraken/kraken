@@ -75,7 +75,7 @@ class KrakenViewController {
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_START, bridgeInitStart.microsecondsSinceEpoch.toDouble());
+      PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_START, bridgeInitStart.microsecondsSinceEpoch);
       PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_END);
     }
 
@@ -109,7 +109,7 @@ class KrakenViewController {
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT, viewControllerPropertyInit.microsecondsSinceEpoch.toDouble());
+      PerformanceTiming.instance(_contextId).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT, viewControllerPropertyInit.microsecondsSinceEpoch);
     }
   }
 
@@ -204,31 +204,74 @@ class KrakenViewController {
   }
 
   Element createElement(int id, Pointer nativePtr, String tagName) {
-    return _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_ELEMENT_START);
+    }
+    Element result = _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_ELEMENT_END);
+    }
+    return result;
   }
 
   void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
-    return _elementManager.createTextNode(id, nativePtr, data);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_TEXT_NODE_START);
+    }
+    _elementManager.createTextNode(id, nativePtr, data);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_TEXT_NODE_END);
+    }
   }
 
   void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
-    return _elementManager.createComment(id, nativePtr, data);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_COMMENT_START);
+    }
+    _elementManager.createComment(id, nativePtr, data);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_COMMENT_END);
+    }
   }
 
   void addEvent(int targetId, String eventType) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_ADD_EVENT_START);
+    }
     _elementManager.addEvent(targetId, eventType);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_ADD_EVENT_END);
+    }
   }
 
   void insertAdjacentNode(int targetId, String position, int childId) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_INSERT_ADJACENT_NODE_START);
+    }
     _elementManager.insertAdjacentNode(targetId, position, childId);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_INSERT_ADJACENT_NODE_END);
+    }
   }
 
   void removeNode(int targetId) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_REMOVE_NODE_START);
+    }
     _elementManager.removeNode(targetId);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_REMOVE_NODE_END);
+    }
   }
 
   void setStyle(int targetId, String key, String value) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_START);
+    }
     _elementManager.setStyle(targetId, key, value);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_END);
+    }
   }
 
   void setProperty(int targetId, String key, String value) {
@@ -386,7 +429,7 @@ class KrakenController {
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate());
 
     if (kProfileMode) {
-      PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_START, viewControllerInit.microsecondsSinceEpoch.toDouble());
+      PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_START, viewControllerInit.microsecondsSinceEpoch);
       PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
 
@@ -399,7 +442,7 @@ class KrakenController {
 
     if (kProfileMode) {
       PerformanceTiming.instance(view.contextId)
-          .mark(PERF_CONTROLLER_PROPERTY_INIT, controllerPropertyInit.microsecondsSinceEpoch.toDouble());
+          .mark(PERF_CONTROLLER_PROPERTY_INIT, controllerPropertyInit.microsecondsSinceEpoch);
     }
   }
 

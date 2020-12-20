@@ -103,10 +103,17 @@ const int DOCUMENT_ID = -3;
 class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_DISPOSE_EVENT_TARGET_START);
+    }
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
     EventTarget eventTarget = controller.view.getEventTargetById(id);
     if (eventTarget == null) return;
     eventTarget.dispose();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_DISPOSE_EVENT_TARGET_END);
+    }
   }
 
   static Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();

@@ -116,7 +116,7 @@ typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
 
 #if ENABLE_PROFILE
 struct NativePerformanceEntryList {
-  void **entries;
+  uint64_t *entries;
   int32_t length;
 };
 
