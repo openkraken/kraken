@@ -366,30 +366,35 @@ JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObje
     }
   }
 
-  double widgetCreationCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_WIDGET_CREATION_COST));
-  auto controllerPropertiesInitCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_CONTROLLER_PROPERTIES_INIT_COST));
-  auto viewControllerPropertiesInitCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST));
-  auto bridgeInitCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_BRIDGE_INIT_COST));
-  auto bridgeRegisterDartMethodCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_BRIDGE_REGISTER_DART_METHOD_COST));
-  auto createViewportCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_CREATE_VIEWPORT_COST));
-  auto elementManagerInitCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_ELEMENT_MANAGER_INIT_COST));
-  auto elementManagerPropertiesInitCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST));
-  auto bodyElementInitCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_BODY_ELEMENT_INIT_COST));
-  auto bodyElementPropertiesInitCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_BODY_ELEMENT_PROPERTIES_INIT_COST));
-  auto jsContextInitCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_JS_CONTEXT_INIT_COST));
-  auto jsNativeMethodInitCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_JS_NATIVE_METHOD_INIT_COST));
-  auto jsPolyfillInitCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_JS_POLYFILL_INIT_COST));
-  auto jsBundleLoadCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_JS_BUNDLE_LOAD_COST));
-  auto jsBundleEvalCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_JS_BUNDLE_EVAL_COST));
-  auto flushUiCommandCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_FLUSH_UI_COMMAND_COST));
-  auto createElementCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_CREATE_ELEMENT_COST));
-  auto createTextNodeCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_CREATE_TEXT_NODE_COST));
-  auto createCommentCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_CREATE_COMMENT_COST));
-  auto disposeEventTargetCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_DISPOSE_EVENT_TARGET_COST));
-  auto addEventCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_ADD_EVENT_COST));
-  auto insertAdjacentNodeCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_INSERT_ADJACENT_NODE_COST));
-  auto removeNodeCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_REMOVE_NODE_COST));
-  auto setStyleCost = getMeasureTotalDuration(findAllMeasures(measures, PERF_SET_STYLE_COST));
+#define GET_COST(NAME, MACRO) \
+  auto NAME ## Measures = findAllMeasures(measures, MACRO); \
+  double NAME##Cost = getMeasureTotalDuration(NAME ## Measures); \
+  auto NAME ## Avg = NAME ## Measures.empty() ? 0 : NAME ## Cost / NAME ## Measures.size();
+
+  GET_COST(widgetCreation, PERF_WIDGET_CREATION_COST);
+  GET_COST(controllerPropertiesInit, PERF_CONTROLLER_PROPERTIES_INIT_COST);
+  GET_COST(viewControllerPropertiesInit, PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST);
+  GET_COST(bridgeInit, PERF_BRIDGE_INIT_COST);
+  GET_COST(bridgeRegisterDartMethod, PERF_BRIDGE_REGISTER_DART_METHOD_COST);
+  GET_COST(createViewport, PERF_CREATE_VIEWPORT_COST);
+  GET_COST(elementManagerInit, PERF_ELEMENT_MANAGER_INIT_COST);
+  GET_COST(elementManagerPropertiesInit, PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST);
+  GET_COST(bodyElementInit, PERF_BODY_ELEMENT_INIT_COST);
+  GET_COST(bodyElementPropertiesInit, PERF_BODY_ELEMENT_PROPERTIES_INIT_COST);
+  GET_COST(jsContextInit, PERF_JS_CONTEXT_INIT_COST);
+  GET_COST(jsNativeMethodInit, PERF_JS_NATIVE_METHOD_INIT_COST);
+  GET_COST(jsPolyfillInit, PERF_JS_POLYFILL_INIT_COST);
+  GET_COST(jsBundleLoad, PERF_JS_BUNDLE_LOAD_COST);
+  GET_COST(jsBundleEval, PERF_JS_BUNDLE_EVAL_COST);
+  GET_COST(flushUiCommand, PERF_FLUSH_UI_COMMAND_COST);
+  GET_COST(createElement, PERF_CREATE_ELEMENT_COST);
+  GET_COST(createTextNode, PERF_CREATE_TEXT_NODE_COST);
+  GET_COST(createComment, PERF_CREATE_COMMENT_COST);
+  GET_COST(disposeEventTarget, PERF_DISPOSE_EVENT_TARGET_COST);
+  GET_COST(addEvent, PERF_ADD_EVENT_COST);
+  GET_COST(insertAdjacentNode, PERF_INSERT_ADJACENT_NODE_COST);
+  GET_COST(removeNode, PERF_REMOVE_NODE_COST);
+  GET_COST(setStyle, PERF_SET_STYLE_COST);
 
   char buffer[2000];
   sprintf(buffer, R"(Init:
@@ -410,14 +415,14 @@ First Bundle Load:
   + %s %.*fms
   + %s %.*fms
   + %s %.*fms
-  + %s %.*fms
-  + %s %.*fms
-  + %s %.*fms
-  + %s %.*fms
-  + %s %.*fms
-  + %s %.*fms
-  + %s %.*fms
-  + %s %.*fms
+  + %s %.*fms avg: %.*fms
+  + %s %.*fms avg: %.*fms
+  + %s %.*fms avg: %.*fms
+  + %s %.*fms avg: %.*fms
+  + %s %.*fms avg: %.*fms
+  + %s %.*fms avg: %.*fms
+  + %s %.*fms avg: %.*fms
+  + %s %.*fms avg: %.*fms
 )",
           PERF_WIDGET_CREATION_COST, 2, widgetCreationCost,
           PERF_CONTROLLER_PROPERTIES_INIT_COST, 2, controllerPropertiesInitCost,
@@ -435,14 +440,14 @@ First Bundle Load:
           PERF_JS_BUNDLE_LOAD_COST, 2, jsBundleLoadCost,
           PERF_JS_BUNDLE_EVAL_COST, 2, jsBundleEvalCost,
           PERF_FLUSH_UI_COMMAND_COST, 2, flushUiCommandCost,
-          PERF_CREATE_ELEMENT_COST, 2, createElementCost,
-          PERF_CREATE_TEXT_NODE_COST, 2, createTextNodeCost,
-          PERF_CREATE_COMMENT_COST, 2, createCommentCost,
-          PERF_DISPOSE_EVENT_TARGET_COST, 2, disposeEventTargetCost,
-          PERF_ADD_EVENT_COST, 2, addEventCost,
-          PERF_INSERT_ADJACENT_NODE_COST, 2, insertAdjacentNodeCost,
-          PERF_REMOVE_NODE_COST, 2, removeNodeCost,
-          PERF_SET_STYLE_COST, 2, setStyleCost);
+          PERF_CREATE_ELEMENT_COST, 2, createElementCost, 2, createElementAvg,
+          PERF_CREATE_TEXT_NODE_COST, 2, createTextNodeCost, 2, createTextNodeAvg,
+          PERF_CREATE_COMMENT_COST, 2, createCommentCost, 2, createElementAvg,
+          PERF_DISPOSE_EVENT_TARGET_COST, 2, disposeEventTargetCost, 2, disposeEventTargetAvg,
+          PERF_ADD_EVENT_COST, 2, addEventCost, 2, addEventAvg,
+          PERF_INSERT_ADJACENT_NODE_COST, 2, insertAdjacentNodeCost, 2, insertAdjacentNodeAvg,
+          PERF_REMOVE_NODE_COST, 2, removeNodeCost, 2, removeNodeAvg,
+          PERF_SET_STYLE_COST, 2, setStyleCost, 2, setStyleAvg);
 
   JSStringRef resultStringRef = JSStringCreateWithUTF8CString(buffer);
   return JSValueMakeString(ctx, resultStringRef);
