@@ -2,7 +2,9 @@
  * Copyright (C) 2019 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 
 mixin RenderTransformMixin on RenderBox {
@@ -52,8 +54,12 @@ mixin RenderTransformMixin on RenderBox {
 
   TransformLayer _transformLayer;
 
-  void paintTransform(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+  void paintTransform(PaintingContext context, Offset offset, int contextId, PaintingContextCallback callback) {
     if (_transform != null) {
+      if (kProfileMode) {
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_TRANSFORM_START);
+      }
+
       final Matrix4 transform = getEffectiveTransform();
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null) {
@@ -61,10 +67,18 @@ mixin RenderTransformMixin on RenderBox {
           needsCompositing,
           offset,
           transform,
-          callback,
+          (context, offset) {
+            if (kProfileMode) {
+              PerformanceTiming.instance(contextId).mark(PERF_PAINT_TRANSFORM_END);
+            }
+            callback(context, offset);
+          },
           oldLayer: _transformLayer,
         );
       } else {
+        if (kProfileMode) {
+          PerformanceTiming.instance(contextId).mark(PERF_PAINT_TRANSFORM_END);
+        }
         callback(context, offset + childOffset);
         _transformLayer = null;
       }

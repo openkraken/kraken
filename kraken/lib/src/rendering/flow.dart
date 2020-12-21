@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
 
 /// Infos of each run (line box) in flow layout
 /// https://www.w3.org/TR/css-inline-3/#line-boxes
@@ -536,6 +537,10 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_START);
+    }
+
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       return;
@@ -571,6 +576,10 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     didLayout();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_END);
+    }
   }
 
   void _layoutChildren() {
@@ -1171,6 +1180,10 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_PERFORM_PAINT_START);
+    }
+
     if (needsSortChildren) {
       if (!isChildrenSorted) {
         sortChildrenByZIndex();
@@ -1190,6 +1203,10 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
         child = childParentData.nextSibling;
       }
+    }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_PERFORM_PAINT_END);
     }
   }
 

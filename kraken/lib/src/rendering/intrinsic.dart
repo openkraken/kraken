@@ -3,9 +3,11 @@
  * Author: Kraken Team.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 
 class RenderIntrinsic extends RenderBoxModel
@@ -43,6 +45,10 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   void performLayout() {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_START);
+    }
+
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       return;
@@ -103,18 +109,32 @@ class RenderIntrinsic extends RenderBoxModel
     } else {
       super.performResize();
     }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END);
+    }
   }
 
   /// This class mixin [RenderProxyBoxMixin], which has its' own paint method,
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_START);
+    }
     if (isCSSDisplayNone || isCSSVisibilityHidden) return;
     paintBoxModel(context, offset);
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END);
+    }
   }
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_PERFORM_PAINT_START);
+    }
+
     if (padding != null) {
       offset += Offset(paddingLeft, paddingTop);
     }
@@ -125,6 +145,10 @@ class RenderIntrinsic extends RenderBoxModel
 
     if (child != null) {
       context.paintChild(child, offset);
+    }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_PERFORM_PAINT_END);
     }
   }
 

@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/module.dart';
 
 /// Returns a sequence containing the specified [Layer] and all of its
 /// ancestors.  The returned sequence is in [parent, child] order.
@@ -99,10 +100,14 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     }
   }
 
-  void paintIntersectionObserver(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+  void paintIntersectionObserver(PaintingContext context, Offset offset, int contextId, PaintingContextCallback callback) {
     if (_onIntersectionChange == null) {
       callback(context, offset);
       return;
+    }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_PAINT_INTERSECTION_OBSERVER_START);
     }
 
     if (_intersectionObserverLayer == null) {
@@ -113,7 +118,13 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       _intersectionObserverLayer.paintOffset = offset;
     }
 
-    context.pushLayer(_intersectionObserverLayer, callback, offset);
+    context.pushLayer(_intersectionObserverLayer, (context, offset) {
+      if (kProfileMode) {
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_INTERSECTION_OBSERVER_END);
+      }
+
+      callback(context, offset);
+    }, offset);
   }
 }
 

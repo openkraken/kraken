@@ -4,6 +4,7 @@
  */
 
 import 'dart:ui';
+import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -186,6 +187,10 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   @override
   void performLayout() {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_START);
+    }
+
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       return;
@@ -218,6 +223,10 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     size = getBoxSize(child.size);
 
     didLayout();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_END);
+    }
   }
 
   @override

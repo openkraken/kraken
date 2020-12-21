@@ -4,10 +4,12 @@
  */
 
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/gesture.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'ticker_provider.dart';
 
@@ -328,8 +330,13 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   // @TODO implement RenderSilver protocol to achieve high performance scroll list.
-  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, PaintingContextCallback callback) {
+  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, int contextId, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_START);
+    }
+
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
     final Offset paintOffset = Offset(paintOffsetX, paintOffsetY);
@@ -341,6 +348,10 @@ mixin RenderOverflowMixin on RenderBox {
     if (_shouldClipAtPaintOffset(paintOffset, size)) {
       // ignore: prefer_function_declarations_over_variables
       PaintingContextCallback painter = (PaintingContext context, Offset offset) {
+        if (kProfileMode) {
+          PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_END);
+        }
+
         callback(context, offset + paintOffset);
       };
       if (decoration != null && decoration.borderRadius != null) {
@@ -356,6 +367,10 @@ mixin RenderOverflowMixin on RenderBox {
         context.pushClipRect(needsCompositing, offset, clipRect, painter);
       }
     } else {
+      if (kProfileMode) {
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_END);
+      }
+
       callback(context, offset);
     }
   }

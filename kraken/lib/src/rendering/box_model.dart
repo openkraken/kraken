@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
 
@@ -998,8 +999,14 @@ class RenderBoxModel extends RenderBox with
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_START);
+    }
     if (isCSSDisplayNone || isCSSVisibilityHidden) return;
     paintBoxModel(context, offset);
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END);
+    }
   }
 
   void debugPaintOverlay(PaintingContext context, Offset offset) {
@@ -1010,28 +1017,37 @@ class RenderBoxModel extends RenderBox with
   }
 
   void paintBoxModel(PaintingContext context, Offset offset) {
-    paintColorFilter(context, offset, _chainPaintImageFilter);
+    paintColorFilter(context, offset, elementManager.contextId, _chainPaintImageFilter);
   }
 
   void _chainPaintImageFilter(PaintingContext context, Offset offset) {
-    paintImageFilter(context, offset, _chainPaintIntersectionObserver);
+    paintImageFilter(context, offset, elementManager.contextId, _chainPaintIntersectionObserver);
   }
 
   void _chainPaintIntersectionObserver(PaintingContext context, Offset offset) {
-    paintIntersectionObserver(context, offset, _chainPaintTransform);
+    paintIntersectionObserver(context, offset, elementManager.contextId, _chainPaintTransform);
   }
 
   void _chainPaintTransform(PaintingContext context, Offset offset) {
-    paintTransform(context, offset, _chainPaintOpacity);
+    paintTransform(context, offset, elementManager.contextId, _chainPaintOpacity);
   }
 
   void _chainPaintOpacity(PaintingContext context, Offset offset) {
-    paintOpacity(context, offset, _chainPaintDecoration);
+    paintOpacity(context, offset, elementManager.contextId, _chainPaintDecoration);
   }
 
   void _chainPaintDecoration(PaintingContext context, Offset offset) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_DECORATION_START);
+    }
+
     EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
     paintDecoration(context, offset, resolvedPadding, style);
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_DECORATION_END);
+    }
+
     _chainPaintOverflow(context, offset);
   }
 
@@ -1040,15 +1056,23 @@ class RenderBoxModel extends RenderBox with
 
     bool hasLocalAttachment = CSSBackground.hasLocalBackgroundImage(style);
     if (hasLocalAttachment) {
-      paintOverflow(context, offset, borderEdge, decoration, _chainPaintBackground);
+      paintOverflow(context, offset, borderEdge, decoration, elementManager.contextId, _chainPaintBackground);
     } else {
-      paintOverflow(context, offset, borderEdge, decoration, _chainPaintContentVisibility);
+      paintOverflow(context, offset, borderEdge, decoration, elementManager.contextId, _chainPaintContentVisibility);
     }
   }
 
   void _chainPaintBackground(PaintingContext context, Offset offset) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_BACKGROUND_START);
+    }
     EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
     paintBackground(context, offset, resolvedPadding, style);
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_BACKGROUND_END);
+    }
+
     _chainPaintContentVisibility(context, offset);
   }
 

@@ -275,11 +275,23 @@ class KrakenViewController {
   }
 
   void setProperty(int targetId, String key, String value) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_START);
+    }
     _elementManager.setProperty(targetId, key, value);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_END);
+    }
   }
 
   void removeProperty(int targetId, String key) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_START);
+    }
     _elementManager.removeProperty(targetId, key);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_END);
+    }
   }
 
   EventTarget getEventTargetById(int id) {

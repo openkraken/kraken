@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
@@ -779,6 +780,10 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_START);
+    }
+
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       return;
@@ -816,6 +821,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     didLayout();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_END);
+    }
   }
 
   bool _isChildDisplayNone(RenderObject child) {
@@ -2244,6 +2253,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_START);
+    }
     if (needsSortChildren) {
       if (!isChildrenSorted) {
         sortChildrenByZIndex();
@@ -2265,6 +2277,9 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
         child = childParentData.nextSibling;
       }
+    }
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_END);
     }
   }
 

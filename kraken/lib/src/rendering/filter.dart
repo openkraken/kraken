@@ -1,5 +1,7 @@
 import 'dart:ui' show ImageFilter;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/module.dart';
 
 mixin RenderColorFilter on RenderBox {
   ColorFilter _colorFilter;
@@ -11,9 +13,19 @@ mixin RenderColorFilter on RenderBox {
     }
   }
 
-  void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+  void paintColorFilter(PaintingContext context, Offset offset, int contextId, PaintingContextCallback callback) {
     if (_colorFilter != null) {
-      context.pushColorFilter(offset, _colorFilter, callback);
+      if (kProfileMode) {
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_COLOR_FILTER_START);
+      }
+
+      context.pushColorFilter(offset, _colorFilter, (context, offset) {
+        if (kProfileMode) {
+          PerformanceTiming.instance(contextId).mark(PERF_PAINT_COLOR_FILTER_END);
+        }
+
+        callback(context, offset);
+      });
     } else {
       callback(context, offset);
     }
@@ -32,11 +44,21 @@ mixin RenderImageFilter on RenderBox {
 
   ImageFilterLayer _imageFilterLayer;
 
-  void paintImageFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+  void paintImageFilter(PaintingContext context, Offset offset, int contextId, PaintingContextCallback callback) {
     if (_imageFilter != null) {
+      if (kProfileMode) {
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_IMAGE_FILTER_START);
+      }
+
       _imageFilterLayer ??= ImageFilterLayer();
       _imageFilterLayer.imageFilter = imageFilter;
-      context.pushLayer(_imageFilterLayer, callback, offset);
+
+      context.pushLayer(_imageFilterLayer, (context, offset) {
+        if (kProfileMode) {
+          PerformanceTiming.instance(contextId).mark(PERF_PAINT_IMAGE_FILTER_END);
+        }
+        callback(context, offset);
+      }, offset);
     } else {
       callback(context, offset);
     }

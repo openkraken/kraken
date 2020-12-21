@@ -3,7 +3,9 @@
  * Author: Kraken Team.
  */
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/module.dart';
 
 mixin RenderOpacityMixin on RenderBox {
   /// The fraction to scale the child's alpha value.
@@ -36,7 +38,7 @@ mixin RenderOpacityMixin on RenderBox {
 
   OpacityLayer _opacityLayer;
 
-  void paintOpacity(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+  void paintOpacity(PaintingContext context, Offset offset, int contextId, PaintingContextCallback callback) {
     if (_alpha == 0) {
       // No need to keep the layer. We'll create a new one if necessary.
       _opacityLayer = null;
@@ -50,7 +52,16 @@ mixin RenderOpacityMixin on RenderBox {
       return;
     }
 
-    _opacityLayer = context.pushOpacity(offset, _alpha, callback, oldLayer: _opacityLayer);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_PAINT_OPACITY_START);
+    }
+
+    _opacityLayer = context.pushOpacity(offset, _alpha, (context, offset) {
+      if (kProfileMode) {
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_OPACITY_END);
+      }
+      callback(context, offset);
+    }, oldLayer: _opacityLayer);
   }
 
   void debugOpacityProperties(DiagnosticPropertiesBuilder properties) {

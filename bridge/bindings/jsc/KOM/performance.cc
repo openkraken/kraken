@@ -396,13 +396,32 @@ JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObje
   GET_COST(insertAdjacentNode, PERF_INSERT_ADJACENT_NODE_COST);
   GET_COST(removeNode, PERF_REMOVE_NODE_COST);
   GET_COST(setStyle, PERF_SET_STYLE_COST);
+  GET_COST(setProperties, PERF_SET_PROPERTIES_COST);
+  GET_COST(removeProperties, PERF_REMOVE_PROPERTIES_COST);
+  GET_COST(flexLayout, PERF_FLEX_LAYOUT_COST);
+  GET_COST(flowLayout, PERF_FLOW_LAYOUT_COST);
+  GET_COST(intrinsicLayout, PERF_INTRINSIC_LAYOUT_COST);
+  GET_COST(silverLayout, PERF_SILVER_LAYOUT_COST);
+  GET_COST(paint, PERF_PAINT_COST);
+  GET_COST(paintColorFilter, PERF_PAINT_COLOR_FILTER_COST);
+  GET_COST(paintImageFilter, PERF_PAINT_IMAGE_FILTER_COST);
+  GET_COST(paintIntersectionObserver, PERF_PAINT_INTERSECTION_OBSERVER_COST);
+  GET_COST(paintTransform, PERF_PAINT_TRANSFORM_COST);
+  GET_COST(paintOpacity, PERF_PAINT_OPACITY_COST);
+  GET_COST(paintDecoration, PERF_PAINT_DECORATION_COST);
+  GET_COST(paintOverflow, PERF_PAINT_OVERFLOW_COST);
+  GET_COST(paintBackground, PERF_PAINT_BACKGROUND_COST);
+  GET_COST(flowPerformPaint, PERF_FLOW_PERFORM_PAINT_COST);
+  GET_COST(intrinsicPerformPaint, PERF_INTRINSIC_PERFORM_PAINT_COST);
+  GET_COST(flexPerformPaint, PERF_FLEX_PERFORM_PAINT_COST);
 
   double initBundleCost = jsBundleLoadCost + jsBundleEvalCost + flushUiCommandCost + createElementCost +
                           createTextNodeCost + createCommentCost + disposeEventTargetCost + addEventCost +
-                          insertAdjacentNodeCost + removeNodeCost + setStyleCost;
-  double totalCost = widgetCreationCost + initBundleCost;
+                          insertAdjacentNodeCost + removeNodeCost + setStyleCost + setPropertiesCost + removePropertiesCost;
+  double renderingCost = flexLayoutCost + flowLayoutCost + intrinsicLayoutCost + silverLayoutCost + paintCost;
+  double totalCost = widgetCreationCost + initBundleCost + renderingCost;
 
-  char buffer[2000];
+  char buffer[5000];
   // clang-format off
   sprintf(buffer, R"(
 Total time cost: %.*fms
@@ -423,7 +442,6 @@ Total time cost: %.*fms
 First Bundle Load: %.*fms
   + %s %.*fms
   + %s %.*fms
-  + %s %.*fms
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
@@ -432,33 +450,73 @@ First Bundle Load: %.*fms
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+Rendering: %.*fms
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
+    + %s %.*fms avg: %.*fms count: %zu
 )",
   2, totalCost,
-  PERF_WIDGET_CREATION_COST, 2, widgetCreationCost,
-  PERF_CONTROLLER_PROPERTIES_INIT_COST, 2, controllerPropertiesInitCost,
-  PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, 2, viewControllerPropertiesInitCost,
-  PERF_ELEMENT_MANAGER_INIT_COST, 2, elementManagerInitCost,
-  PERF_ELEMENT_MANAGER_PROPERTY_INIT, 2, elementManagerPropertiesInitCost,
-  PERF_BODY_ELEMENT_PROPERTIES_INIT_COST, 2, bodyElementPropertiesInitCost,
-  PERF_BODY_ELEMENT_INIT_COST, 2, bodyElementInitCost,
-  PERF_CREATE_VIEWPORT_COST, 2, createViewportCost,
-  PERF_BRIDGE_INIT_COST, 2, bridgeInitCost,
-  PERF_BRIDGE_REGISTER_DART_METHOD_COST, 2, bridgeRegisterDartMethodCost,
-  PERF_JS_CONTEXT_INIT_COST, 2, jsContextInitCost,
-  PERF_JS_NATIVE_METHOD_INIT_COST, 2, jsNativeMethodInitCost,
-  PERF_JS_POLYFILL_INIT_COST, 2, jsPolyfillInitCost,
+    PERF_WIDGET_CREATION_COST, 2, widgetCreationCost,
+      PERF_CONTROLLER_PROPERTIES_INIT_COST, 2, controllerPropertiesInitCost,
+      PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, 2, viewControllerPropertiesInitCost,
+      PERF_ELEMENT_MANAGER_INIT_COST, 2, elementManagerInitCost,
+      PERF_ELEMENT_MANAGER_PROPERTY_INIT, 2, elementManagerPropertiesInitCost,
+      PERF_BODY_ELEMENT_PROPERTIES_INIT_COST, 2, bodyElementPropertiesInitCost,
+      PERF_BODY_ELEMENT_INIT_COST, 2, bodyElementInitCost,
+      PERF_CREATE_VIEWPORT_COST, 2, createViewportCost,
+      PERF_BRIDGE_INIT_COST, 2, bridgeInitCost,
+      PERF_BRIDGE_REGISTER_DART_METHOD_COST, 2, bridgeRegisterDartMethodCost,
+      PERF_JS_CONTEXT_INIT_COST, 2, jsContextInitCost,
+      PERF_JS_NATIVE_METHOD_INIT_COST, 2, jsNativeMethodInitCost,
+      PERF_JS_POLYFILL_INIT_COST, 2, jsPolyfillInitCost,
   2, initBundleCost,
-  PERF_JS_BUNDLE_LOAD_COST, 2, jsBundleLoadCost,
-  PERF_JS_BUNDLE_EVAL_COST, 2, jsBundleEvalCost,
-  PERF_FLUSH_UI_COMMAND_COST, 2, flushUiCommandCost,
-  PERF_CREATE_ELEMENT_COST, 2, createElementCost, 2, createElementAvg, createElementCount,
-  PERF_CREATE_TEXT_NODE_COST, 2, createTextNodeCost, 2, createTextNodeAvg, createTextNodeCount,
-  PERF_CREATE_COMMENT_COST, 2, createCommentCost, 2, createCommentAvg, createCommentCount,
-  PERF_DISPOSE_EVENT_TARGET_COST, 2, disposeEventTargetCost, 2, disposeEventTargetAvg, disposeEventTargetCount,
-  PERF_ADD_EVENT_COST, 2, addEventCost, 2, addEventAvg, addEventCount,
-  PERF_INSERT_ADJACENT_NODE_COST, 2, insertAdjacentNodeCost, 2, insertAdjacentNodeAvg, insertAdjacentNodeCount,
-  PERF_REMOVE_NODE_COST, 2, removeNodeCost, 2, removeNodeAvg, removeNodeCount,
-  PERF_SET_STYLE_COST, 2, setStyleCost, 2, setStyleAvg, setStyleCount);
+    PERF_JS_BUNDLE_LOAD_COST, 2, jsBundleLoadCost,
+    PERF_JS_BUNDLE_EVAL_COST, 2, jsBundleEvalCost,
+    PERF_FLUSH_UI_COMMAND_COST, 2, flushUiCommandCost, 2, flushUiCommandAvg, flushUiCommandCount,
+    PERF_CREATE_ELEMENT_COST, 2, createElementCost, 2, createElementAvg, createElementCount,
+    PERF_CREATE_TEXT_NODE_COST, 2, createTextNodeCost, 2, createTextNodeAvg, createTextNodeCount,
+    PERF_CREATE_COMMENT_COST, 2, createCommentCost, 2, createCommentAvg, createCommentCount,
+    PERF_DISPOSE_EVENT_TARGET_COST, 2, disposeEventTargetCost, 2, disposeEventTargetAvg, disposeEventTargetCount,
+    PERF_ADD_EVENT_COST, 2, addEventCost, 2, addEventAvg, addEventCount,
+    PERF_INSERT_ADJACENT_NODE_COST, 2, insertAdjacentNodeCost, 2, insertAdjacentNodeAvg, insertAdjacentNodeCount,
+    PERF_REMOVE_NODE_COST, 2, removeNodeCost, 2, removeNodeAvg, removeNodeCount,
+    PERF_SET_STYLE_COST, 2, setStyleCost, 2, setStyleAvg, setStyleCount,
+    PERF_SET_PROPERTIES_COST, 2, setPropertiesCost, 2, setPropertiesAvg, setPropertiesCount,
+    PERF_REMOVE_PROPERTIES_COST, 2, removePropertiesCost, 2, removePropertiesAvg, removePropertiesCount,
+  2, renderingCost,
+    PERF_FLEX_LAYOUT_COST, 2, flexLayoutCost, 2, flexLayoutAvg, flexLayoutCount,
+    PERF_FLOW_LAYOUT_COST, 2, flowLayoutCost, 2, flowLayoutAvg, flowLayoutCount,
+    PERF_INTRINSIC_LAYOUT_COST, 2, intrinsicLayoutCost, 2, intrinsicLayoutAvg, intrinsicLayoutCount,
+    PERF_SILVER_LAYOUT_COST, 2, silverLayoutCost, 2, silverLayoutAvg, silverLayoutCount,
+    PERF_PAINT_COST, 2, paintCost, 2, paintAvg, paintCount,
+      PERF_PAINT_COLOR_FILTER_COST, 2, paintColorFilterCost, 2, paintColorFilterAvg, paintColorFilterCount,
+      PERF_PAINT_IMAGE_FILTER_COST, 2, paintImageFilterCost, 2, paintImageFilterAvg, paintImageFilterCount,
+      PERF_PAINT_INTERSECTION_OBSERVER_COST, 2, paintIntersectionObserverCost, 2, paintIntersectionObserverAvg, paintIntersectionObserverCount,
+      PERF_PAINT_TRANSFORM_COST, 2, paintTransformCost, 2, paintTransformAvg, paintTransformCount,
+      PERF_PAINT_OPACITY_COST, 2, paintOpacityCost, 2, paintOpacityAvg, paintOpacityCount,
+      PERF_PAINT_DECORATION_COST, 2, paintDecorationCost, 2, paintDecorationAvg, paintDecorationCount,
+      PERF_PAINT_OVERFLOW_COST, 2, paintOverflowCost, 2, paintOverflowAvg, paintOverflowCount,
+      PERF_PAINT_BACKGROUND_COST, 2, paintBackgroundCost, 2, paintBackgroundAvg, paintBackgroundCount,
+      PERF_FLOW_PERFORM_PAINT_COST, 2, flowPerformPaintCost, 2, flowPerformPaintAvg, flowPerformPaintCount,
+      PERF_INTRINSIC_PERFORM_PAINT_COST, 2, intrinsicPerformPaintCost, 2, intrinsicPerformPaintAvg, intrinsicPerformPaintCount,
+      PERF_FLEX_PERFORM_PAINT_COST, 2, flexPerformPaintCost, 2, flexPerformPaintAvg, flexPerformPaintCount
+);
   // clang-format on
 
   JSStringRef resultStringRef = JSStringCreateWithUTF8CString(buffer);
@@ -499,6 +557,24 @@ void JSPerformance::measureSummary() {
                   nullptr);
   internalMeasure(PERF_REMOVE_NODE_COST, PERF_REMOVE_NODE_START, PERF_REMOVE_NODE_END, nullptr);
   internalMeasure(PERF_SET_STYLE_COST, PERF_SET_STYLE_START, PERF_SET_STYLE_END, nullptr);
+  internalMeasure(PERF_SET_PROPERTIES_COST, PERF_SET_PROPERTIES_START, PERF_SET_PROPERTIES_END, nullptr);
+  internalMeasure(PERF_REMOVE_PROPERTIES_COST, PERF_REMOVE_PROPERTIES_START, PERF_REMOVE_PROPERTIES_END, nullptr);
+  internalMeasure(PERF_FLEX_LAYOUT_COST, PERF_FLEX_LAYOUT_START, PERF_FLEX_LAYOUT_END, nullptr);
+  internalMeasure(PERF_FLOW_LAYOUT_COST, PERF_FLOW_LAYOUT_START, PERF_FLOW_LAYOUT_END, nullptr);
+  internalMeasure(PERF_INTRINSIC_LAYOUT_COST, PERF_INTRINSIC_LAYOUT_START, PERF_INTRINSIC_LAYOUT_END, nullptr);
+  internalMeasure(PERF_SILVER_LAYOUT_COST, PERF_SILVER_LAYOUT_START, PERF_SILVER_LAYOUT_END, nullptr);
+  internalMeasure(PERF_PAINT_COST, PERF_PAINT_START, PERF_PAINT_END, nullptr);
+  internalMeasure(PERF_PAINT_COLOR_FILTER_COST, PERF_PAINT_COLOR_FILTER_START, PERF_PAINT_COLOR_FILTER_END, nullptr);
+  internalMeasure(PERF_PAINT_IMAGE_FILTER_COST, PERF_PAINT_IMAGE_FILTER_START, PERF_PAINT_IMAGE_FILTER_END, nullptr);
+  internalMeasure(PERF_PAINT_INTERSECTION_OBSERVER_COST, PERF_PAINT_INTERSECTION_OBSERVER_START, PERF_PAINT_INTERSECTION_OBSERVER_END, nullptr);
+  internalMeasure(PERF_PAINT_TRANSFORM_COST, PERF_PAINT_TRANSFORM_START, PERF_PAINT_TRANSFORM_END, nullptr);
+  internalMeasure(PERF_PAINT_OPACITY_COST, PERF_PAINT_OPACITY_START, PERF_PAINT_OPACITY_END, nullptr);
+  internalMeasure(PERF_PAINT_DECORATION_COST, PERF_PAINT_DECORATION_START, PERF_PAINT_DECORATION_END, nullptr);
+  internalMeasure(PERF_PAINT_OVERFLOW_COST, PERF_PAINT_OVERFLOW_START, PERF_PAINT_OVERFLOW_END, nullptr);
+  internalMeasure(PERF_PAINT_BACKGROUND_COST, PERF_PAINT_BACKGROUND_START, PERF_PAINT_BACKGROUND_END, nullptr);
+  internalMeasure(PERF_FLOW_PERFORM_PAINT_COST, PERF_FLOW_PERFORM_PAINT_START, PERF_FLOW_PERFORM_PAINT_END, nullptr);
+  internalMeasure(PERF_INTRINSIC_PERFORM_PAINT_COST, PERF_INTRINSIC_PERFORM_PAINT_START, PERF_INTRINSIC_PERFORM_PAINT_END, nullptr);
+  internalMeasure(PERF_FLEX_PERFORM_PAINT_COST, PERF_FLEX_PERFORM_PAINT_START, PERF_FLEX_PERFORM_PAINT_END, nullptr);
 }
 
 #endif
