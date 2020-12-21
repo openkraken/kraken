@@ -100,16 +100,16 @@ class InspectDOMModule extends InspectModule {
         border[6] + element.renderBoxModel.borderLeft, border[7] - element.renderBoxModel.borderBottom,
       ];
       List<double> content = [
-        padding[0] + element.renderBoxModel.paddingLeft, padding[1] + element.renderBoxModel.paddingTop,
-        padding[2] - element.renderBoxModel.paddingRight, padding[3] + element.renderBoxModel.paddingTop,
-        padding[4] - element.renderBoxModel.paddingRight, padding[5] - element.renderBoxModel.paddingBottom,
-        padding[6] + element.renderBoxModel.paddingLeft, padding[7] - element.renderBoxModel.paddingBottom,
+        padding[0] + element.renderBoxModel.renderStyle.paddingLeft, padding[1] + element.renderBoxModel.renderStyle.paddingTop,
+        padding[2] - element.renderBoxModel.renderStyle.paddingRight, padding[3] + element.renderBoxModel.renderStyle.paddingTop,
+        padding[4] - element.renderBoxModel.renderStyle.paddingRight, padding[5] - element.renderBoxModel.renderStyle.paddingBottom,
+        padding[6] + element.renderBoxModel.renderStyle.paddingLeft, padding[7] - element.renderBoxModel.renderStyle.paddingBottom,
       ];
       List<double> margin = [
-        border[0] - element.renderBoxModel.marginLeft, border[1] - element.renderBoxModel.marginTop,
-        border[2] + element.renderBoxModel.marginRight, border[3] - element.renderBoxModel.marginTop,
-        border[4] + element.renderBoxModel.marginRight, border[5] + element.renderBoxModel.marginBottom,
-        border[6] - element.renderBoxModel.marginLeft, border[7] + element.renderBoxModel.marginBottom,
+        border[0] - element.renderBoxModel.renderStyle.marginLeft, border[1] - element.renderBoxModel.renderStyle.marginTop,
+        border[2] + element.renderBoxModel.renderStyle.marginRight, border[3] - element.renderBoxModel.renderStyle.marginTop,
+        border[4] + element.renderBoxModel.renderStyle.marginRight, border[5] + element.renderBoxModel.renderStyle.marginBottom,
+        border[6] - element.renderBoxModel.renderStyle.marginLeft, border[7] + element.renderBoxModel.renderStyle.marginBottom,
       ];
 
       BoxModel boxModel = BoxModel(

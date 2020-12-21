@@ -9,9 +9,10 @@ class RenderStyle
   with
     RenderStyleBase,
     CSSSizingMixin,
-    CSSPaddingMixin {
+    CSSPaddingMixin,
+    CSSMarginMixin {
 
-  CSSStyleDeclaration style;
+CSSStyleDeclaration style;
   Size viewportSize;
 
   RenderStyle(

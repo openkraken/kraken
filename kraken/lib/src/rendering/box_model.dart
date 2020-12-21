@@ -14,8 +14,6 @@ import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
 
-import 'padding.dart';
-
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   /// The distance by which the child's top edge is inset from the top of the stack.
   double top;
@@ -221,8 +219,8 @@ class RenderLayoutBox extends RenderBoxModel
 }
 
 class RenderBoxModel extends RenderBox with
-    RenderPaddingMixin,
-    RenderMarginMixin,
+//    RenderPaddingMixin,
+//    RenderMarginMixin,
     RenderBoxDecorationMixin,
     RenderTransformMixin,
     RenderOverflowMixin,
@@ -320,10 +318,10 @@ class RenderBoxModel extends RenderBox with
 
     return copiedRenderBoxModel
       // Copy padding
-      ..padding = padding
+//      ..padding = padding
 
       // Copy margin
-      ..margin = margin
+//      ..margin = margin
 
       // Copy Border
       ..borderEdge = borderEdge
@@ -448,8 +446,8 @@ class RenderBoxModel extends RenderBox with
     BoxSizeType heightSizeType = renderBoxModel.heightSizeType;
 
     void cropMargin(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.margin != null) {
-        cropWidth += renderBoxModel.margin.horizontal;
+      if (renderBoxModel.renderStyle.margin != null) {
+        cropWidth += renderBoxModel.renderStyle.margin.horizontal;
       }
     }
 
@@ -457,8 +455,9 @@ class RenderBoxModel extends RenderBox with
       if (renderBoxModel.borderEdge != null) {
         cropWidth += renderBoxModel.borderEdge.horizontal;
       }
-      if (renderBoxModel.padding != null) {
-        cropWidth += renderBoxModel.padding.horizontal;
+
+      if (renderBoxModel.renderStyle.padding != null) {
+        cropWidth += renderBoxModel.renderStyle.padding.horizontal;
       }
     }
 
@@ -575,8 +574,8 @@ class RenderBoxModel extends RenderBox with
     BoxSizeType widthSizeType = renderBoxModel.widthSizeType;
 
     void cropMargin(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.margin != null) {
-        cropHeight += renderBoxModel.margin.vertical;
+      if (renderBoxModel.renderStyle.margin != null) {
+        cropHeight += renderBoxModel.renderStyle.margin.vertical;
       }
     }
 
@@ -584,8 +583,8 @@ class RenderBoxModel extends RenderBox with
       if (renderBoxModel.borderEdge != null) {
         cropHeight += renderBoxModel.borderEdge.vertical;
       }
-      if (renderBoxModel.padding != null) {
-        cropHeight += renderBoxModel.padding.vertical;
+      if (renderBoxModel.renderStyle.padding != null) {
+        cropHeight += renderBoxModel.renderStyle.padding.vertical;
       }
     }
 
@@ -672,17 +671,18 @@ class RenderBoxModel extends RenderBox with
     double cropWidth = 0;
 
     void cropMargin(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.margin != null) {
-        cropWidth += renderBoxModel.margin.horizontal;
+      if (renderBoxModel.renderStyle.margin != null) {
+        cropWidth += renderBoxModel.renderStyle.margin.horizontal;
       }
     }
 
     void cropPaddingBorder(RenderBoxModel renderBoxModel) {
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
       if (renderBoxModel.borderEdge != null) {
         cropWidth += renderBoxModel.borderEdge.horizontal;
       }
-      if (renderBoxModel.padding != null) {
-        cropWidth += renderBoxModel.padding.horizontal;
+      if (renderStyle.padding != null) {
+        cropWidth += renderStyle.padding.horizontal;
       }
     }
 
@@ -734,8 +734,8 @@ class RenderBoxModel extends RenderBox with
     assert(height != null);
 
     maxScrollableSize = Size(
-      width + paddingLeft + paddingRight,
-      height + paddingTop + paddingBottom
+      width + renderStyle.paddingLeft + renderStyle.paddingRight,
+      height + renderStyle.paddingTop + renderStyle.paddingBottom
     );
   }
 
@@ -755,12 +755,12 @@ class RenderBoxModel extends RenderBox with
     Size boxSize = _contentSize = contentConstraints.constrain(contentSize);
 
     scrollableViewportSize = Size(
-      _contentSize.width + paddingLeft + paddingRight,
-      _contentSize.height + paddingTop + paddingBottom
+      _contentSize.width + renderStyle.paddingLeft + renderStyle.paddingRight,
+      _contentSize.height + renderStyle.paddingTop + renderStyle.paddingBottom
     );
 
-    if (padding != null) {
-      boxSize = wrapPaddingSize(boxSize);
+    if (renderStyle.padding != null) {
+      boxSize = renderStyle.wrapPaddingSize(boxSize);
     }
     if (borderEdge != null) {
       boxSize = wrapBorderSize(boxSize);
@@ -779,16 +779,16 @@ class RenderBoxModel extends RenderBox with
 
   double get clientWidth {
     double width = contentSize.width;
-    if (padding != null) {
-      width += padding.horizontal;
+    if (renderStyle.padding != null) {
+      width += renderStyle.padding.horizontal;
     }
     return width;
   }
 
   double get clientHeight {
     double height = contentSize.height;
-    if (padding != null) {
-      height += padding.vertical;
+    if (renderStyle.padding != null) {
+      height += renderStyle.padding.vertical;
     }
     return height;
   }
@@ -802,7 +802,7 @@ class RenderBoxModel extends RenderBox with
     boxConstraints = deflateBorderConstraints(boxConstraints);
 
     // Deflate padding constraints.
-    boxConstraints = deflatePaddingConstraints(boxConstraints);
+    boxConstraints = renderStyle.deflatePaddingConstraints(boxConstraints);
 
     final double contentWidth = getContentWidth(this);
     final double contentHeight = getContentHeight(this);
@@ -973,7 +973,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   void _chainPaintDecoration(PaintingContext context, Offset offset) {
-    EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
+    EdgeInsets resolvedPadding = renderStyle.padding != null ? renderStyle.padding.resolve(TextDirection.ltr) : null;
     paintDecoration(context, offset, resolvedPadding, style);
     _chainPaintOverflow(context, offset);
   }
@@ -990,7 +990,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   void _chainPaintBackground(PaintingContext context, Offset offset) {
-    EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
+    EdgeInsets resolvedPadding = renderStyle.padding != null ? renderStyle.padding.resolve(TextDirection.ltr) : null;
     paintBackground(context, offset, resolvedPadding, style);
     _chainPaintContentVisibility(context, offset);
   }
@@ -1119,16 +1119,13 @@ class RenderBoxModel extends RenderBox with
     properties.add(DiagnosticsProperty('maxScrollableSize', maxScrollableSize, missingIfNull: true));
 
     if (renderPositionHolder != null) properties.add(DiagnosticsProperty('renderPositionHolder', renderPositionHolder));
-    if (padding != null) properties.add(DiagnosticsProperty('padding', padding));
     if (intrinsicWidth != null) properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
     if (intrinsicHeight != null) properties.add(DiagnosticsProperty('intrinsicHeight', intrinsicHeight));
     if (intrinsicRatio != null) properties.add(DiagnosticsProperty('intrinsicRatio', intrinsicRatio));
 
-    debugPaddingProperties(properties);
     debugBoxDecorationProperties(properties);
     debugVisibilityProperties(properties);
     debugOverflowProperties(properties);
-    debugMarginProperties(properties);
     debugTransformProperties(properties);
     debugOpacityProperties(properties);
   }

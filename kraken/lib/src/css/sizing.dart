@@ -109,62 +109,6 @@ mixin CSSSizingMixin on RenderStyleBase {
     }
     return maxHeight;
   }
-
-  static EdgeInsets _getMargin(CSSStyleDeclaration style, Size viewportSize) {
-    double marginLeft;
-    double marginTop;
-    double marginRight;
-    double marginBottom;
-
-    if (style.contains(MARGIN_LEFT)) marginLeft = CSSLength.toDisplayPortValue(style[MARGIN_LEFT], viewportSize);
-    if (style.contains(MARGIN_TOP)) marginTop = CSSLength.toDisplayPortValue(style[MARGIN_TOP], viewportSize);
-    if (style.contains(MARGIN_RIGHT)) marginRight = CSSLength.toDisplayPortValue(style[MARGIN_RIGHT], viewportSize);
-    if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSLength.toDisplayPortValue(style[MARGIN_BOTTOM], viewportSize);
-
-    return EdgeInsets.only(top: marginTop ?? 0.0, right: marginRight ?? 0.0, bottom: marginBottom ?? 0.0, left: marginLeft ?? 0.0);
-  }
-
-  void updateRenderMargin(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
-    EdgeInsets prevMargin = renderBoxModel.margin;
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
-    if (prevMargin != null) {
-      double left = prevMargin.left;
-      double top = prevMargin.top;
-      double right = prevMargin.right;
-      double bottom = prevMargin.bottom;
-      double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
-
-      // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
-      switch (property) {
-        case MARGIN_LEFT:
-          left = presentValue;
-          break;
-        case MARGIN_TOP:
-          top = presentValue;
-          break;
-        case MARGIN_BOTTOM:
-          bottom = presentValue;
-          break;
-        case MARGIN_RIGHT:
-          right = presentValue;
-          break;
-      }
-
-      renderBoxModel.margin = EdgeInsets.only(
-        left: left,
-        top: top,
-        right: right,
-        bottom: bottom,
-      );
-    } else {
-      renderBoxModel.margin = _getMargin(style, viewportSize);
-    }
-  }
-
 }
 
 class CSSEdgeInsets {

@@ -58,7 +58,9 @@ mixin CSSPaddingMixin on RenderStyleBase {
     return _resolvedPadding.left;
   }
 
-  static EdgeInsets _getPadding(CSSStyleDeclaration style, Size viewportSize) {
+  EdgeInsets _getPadding() {
+    Size viewportSize = this.viewportSize;
+    CSSStyleDeclaration style = this.style;
     double paddingTop;
     double paddingRight;
     double paddingBottom;
@@ -80,7 +82,6 @@ mixin CSSPaddingMixin on RenderStyleBase {
   void updatePadding(String property, String present) {
     RenderStyle renderStyle = this;
     Size viewportSize = this.viewportSize;
-    CSSStyleDeclaration style = this.style;
     EdgeInsets prevPadding = renderStyle.padding;
 
     if (prevPadding != null) {
@@ -109,7 +110,7 @@ mixin CSSPaddingMixin on RenderStyleBase {
 
       renderStyle.padding = EdgeInsets.only(left: left, right: right, bottom: bottom, top: top);
     } else {
-      renderStyle.padding = _getPadding(style, viewportSize);
+      renderStyle.padding = _getPadding();
     }
   }
 

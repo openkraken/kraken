@@ -462,8 +462,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     if (child is RenderBoxModel) {
       RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
-      marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
+      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft + childRenderBoxModel.renderStyle.marginRight;
+      marginVertical = childRenderBoxModel.renderStyle.marginTop + childRenderBoxModel.renderStyle.marginBottom;
     }
 
     Size childSize = _getChildSize(child);
@@ -492,8 +492,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     if (child is RenderBoxModel) {
       RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
-      marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
+      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft + childRenderBoxModel.renderStyle.marginRight;
+      marginVertical = childRenderBoxModel.renderStyle.marginTop + childRenderBoxModel.renderStyle.marginBottom;
     }
     Size childSize = _getChildSize(child);
     switch (direction) {
@@ -740,8 +740,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginBottom = 0;
         if (child is RenderBoxModel) {
           RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-          childMarginTop = childRenderBoxModel.marginTop;
-          childMarginBottom = childRenderBoxModel.marginBottom;
+          childMarginTop = childRenderBoxModel.renderStyle.marginTop;
+          childMarginBottom = childRenderBoxModel.renderStyle.marginBottom;
         }
 
         Size childSize = _getChildSize(child);
@@ -1005,13 +1005,13 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (child is RenderBoxModel) {
           Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
           RenderBoxModel renderBoxModel = childEl.renderBoxModel;
-          childMarginLeft = renderBoxModel.marginLeft;
-          childMarginTop = renderBoxModel.marginTop;
+          childMarginLeft = renderBoxModel.renderStyle.marginLeft;
+          childMarginTop = renderBoxModel.renderStyle.marginTop;
         }
 
         Offset relativeOffset = _getOffset(
-          childMainPosition + paddingLeft + borderLeft + childMarginLeft,
-          crossAxisOffset + childLineExtent + paddingTop + borderTop + childMarginTop
+          childMainPosition + renderStyle.paddingLeft + borderLeft + childMarginLeft,
+          crossAxisOffset + childLineExtent + renderStyle.paddingTop + borderTop + childMarginTop
         );
         /// Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child, childStyle);
@@ -1071,8 +1071,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double childMarginBottom = 0;
     if (child is RenderBoxModel) {
       RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      childMarginTop = childRenderBoxModel.marginTop;
-      childMarginBottom = childRenderBoxModel.marginBottom;
+      childMarginTop = childRenderBoxModel.renderStyle.marginTop;
+      childMarginBottom = childRenderBoxModel.renderStyle.marginBottom;
     }
 
     Size childSize = _getChildSize(child);

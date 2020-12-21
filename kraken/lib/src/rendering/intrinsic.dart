@@ -123,8 +123,8 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (padding != null) {
-      offset += Offset(paddingLeft, paddingTop);
+    if (renderStyle.padding != null) {
+      offset += Offset(renderStyle.paddingLeft, renderStyle.paddingTop);
     }
 
     if (borderEdge != null) {

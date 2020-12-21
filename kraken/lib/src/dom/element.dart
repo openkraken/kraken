@@ -259,7 +259,7 @@ class Element extends Node
     }
 
     // Sticky offset to scroll container must include padding
-    EdgeInsetsGeometry padding = _renderLayoutBox.padding;
+    EdgeInsetsGeometry padding = _renderLayoutBox.renderStyle.padding;
     EdgeInsets resolvedPadding = EdgeInsets.all(0);
     if (padding != null) {
       resolvedPadding = padding.resolve(TextDirection.ltr);
@@ -953,7 +953,10 @@ class Element extends Node
   }
 
   void _styleMarginChangedListener(String property, String original, String present) {
-//    updateRenderMargin(renderBoxModel, style, property, present);
+    renderBoxModel.renderStyle.updateMargin(property, present);
+    if (original != present) {
+      renderBoxModel.markNeedsLayout();
+    }
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
