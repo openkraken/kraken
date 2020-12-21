@@ -1151,7 +1151,7 @@ class RenderBoxModel extends RenderBox with
     bool isContainsPosition = true;
     while (parentNode is RenderBoxModel) {
       final node =(parentNode as RenderBoxModel);
-      if ((node.style[OVERFLOW_Y] != '' && node.style[OVERFLOW_Y] != VISIBLE) || (node.style[OVERFLOW_X] != '' && node.style[OVERFLOW_X] != VISIBLE) || (node.style[OVERFLOW] != '' && node.style[OVERFLOW] != VISIBLE)) {
+      if (node.clipX || node.clipY) {
         isContainsPosition &= node.size.contains(node.globalToLocal(globalPosition));
       }
       parentNode = parentNode.parent;

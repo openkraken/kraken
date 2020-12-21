@@ -151,7 +151,7 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     bool isContainsPosition = true;
     while (parentNode is RenderBoxModel) {
       final node =(parentNode as RenderBoxModel);
-      if ((node.style[OVERFLOW_Y] != '' && node.style[OVERFLOW_Y] != VISIBLE) || (node.style[OVERFLOW_X] != '' && node.style[OVERFLOW_X] != VISIBLE) || (node.style[OVERFLOW] != '' && node.style[OVERFLOW] != VISIBLE)) {
+      if (node.clipX || node.clipY) {
         final position =  node.globalToLocal(globalPosition);
         isContainsPosition &= node.size.contains(position);
       }
