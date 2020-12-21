@@ -366,10 +366,11 @@ JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObje
     }
   }
 
-#define GET_COST(NAME, MACRO) \
-  auto NAME ## Measures = findAllMeasures(measures, MACRO); \
-  double NAME##Cost = getMeasureTotalDuration(NAME ## Measures); \
-  auto NAME ## Avg = NAME ## Measures.empty() ? 0 : NAME ## Cost / NAME ## Measures.size();
+#define GET_COST(NAME, MACRO)                                                                                          \
+  auto NAME##Measures = findAllMeasures(measures, MACRO);                                                              \
+  size_t NAME##Count = NAME##Measures.size();                                                                          \
+  double NAME##Cost = getMeasureTotalDuration(NAME##Measures);                                                         \
+  auto NAME##Avg = NAME##Measures.empty() ? 0 : NAME##Cost / NAME##Measures.size();
 
   GET_COST(widgetCreation, PERF_WIDGET_CREATION_COST);
   GET_COST(controllerPropertiesInit, PERF_CONTROLLER_PROPERTIES_INIT_COST);
@@ -396,8 +397,16 @@ JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObje
   GET_COST(removeNode, PERF_REMOVE_NODE_COST);
   GET_COST(setStyle, PERF_SET_STYLE_COST);
 
+  double initBundleCost = jsBundleLoadCost + jsBundleEvalCost + flushUiCommandCost + createElementCost +
+                          createTextNodeCost + createCommentCost + disposeEventTargetCost + addEventCost +
+                          insertAdjacentNodeCost + removeNodeCost + setStyleCost;
+  double totalCost = widgetCreationCost + initBundleCost;
+
   char buffer[2000];
-  sprintf(buffer, R"(Init:
+  // clang-format off
+  sprintf(buffer, R"(
+Total time cost: %.*fms
+
 + %s %.*fms
   + %s %.*fms
   + %s %.*fms
@@ -411,43 +420,46 @@ JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObje
     + %s %.*fms
     + %s %.*fms
     + %s %.*fms
-First Bundle Load:
+First Bundle Load: %.*fms
   + %s %.*fms
   + %s %.*fms
   + %s %.*fms
-  + %s %.*fms avg: %.*fms
-  + %s %.*fms avg: %.*fms
-  + %s %.*fms avg: %.*fms
-  + %s %.*fms avg: %.*fms
-  + %s %.*fms avg: %.*fms
-  + %s %.*fms avg: %.*fms
-  + %s %.*fms avg: %.*fms
-  + %s %.*fms avg: %.*fms
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
 )",
-          PERF_WIDGET_CREATION_COST, 2, widgetCreationCost,
-          PERF_CONTROLLER_PROPERTIES_INIT_COST, 2, controllerPropertiesInitCost,
-          PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, 2, viewControllerPropertiesInitCost,
-          PERF_ELEMENT_MANAGER_INIT_COST, 2, elementManagerInitCost,
-          PERF_ELEMENT_MANAGER_PROPERTY_INIT, 2, elementManagerPropertiesInitCost,
-          PERF_BODY_ELEMENT_PROPERTIES_INIT_COST, 2, bodyElementPropertiesInitCost,
-          PERF_BODY_ELEMENT_INIT_COST, 2, bodyElementInitCost,
-          PERF_CREATE_VIEWPORT_COST, 2, createViewportCost,
-          PERF_BRIDGE_INIT_COST, 2, bridgeInitCost,
-          PERF_BRIDGE_REGISTER_DART_METHOD_COST, 2, bridgeRegisterDartMethodCost,
-          PERF_JS_CONTEXT_INIT_COST, 2, jsContextInitCost,
-          PERF_JS_NATIVE_METHOD_INIT_COST, 2, jsNativeMethodInitCost,
-          PERF_JS_POLYFILL_INIT_COST, 2, jsPolyfillInitCost,
-          PERF_JS_BUNDLE_LOAD_COST, 2, jsBundleLoadCost,
-          PERF_JS_BUNDLE_EVAL_COST, 2, jsBundleEvalCost,
-          PERF_FLUSH_UI_COMMAND_COST, 2, flushUiCommandCost,
-          PERF_CREATE_ELEMENT_COST, 2, createElementCost, 2, createElementAvg,
-          PERF_CREATE_TEXT_NODE_COST, 2, createTextNodeCost, 2, createTextNodeAvg,
-          PERF_CREATE_COMMENT_COST, 2, createCommentCost, 2, createElementAvg,
-          PERF_DISPOSE_EVENT_TARGET_COST, 2, disposeEventTargetCost, 2, disposeEventTargetAvg,
-          PERF_ADD_EVENT_COST, 2, addEventCost, 2, addEventAvg,
-          PERF_INSERT_ADJACENT_NODE_COST, 2, insertAdjacentNodeCost, 2, insertAdjacentNodeAvg,
-          PERF_REMOVE_NODE_COST, 2, removeNodeCost, 2, removeNodeAvg,
-          PERF_SET_STYLE_COST, 2, setStyleCost, 2, setStyleAvg);
+  2, totalCost,
+  PERF_WIDGET_CREATION_COST, 2, widgetCreationCost,
+  PERF_CONTROLLER_PROPERTIES_INIT_COST, 2, controllerPropertiesInitCost,
+  PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, 2, viewControllerPropertiesInitCost,
+  PERF_ELEMENT_MANAGER_INIT_COST, 2, elementManagerInitCost,
+  PERF_ELEMENT_MANAGER_PROPERTY_INIT, 2, elementManagerPropertiesInitCost,
+  PERF_BODY_ELEMENT_PROPERTIES_INIT_COST, 2, bodyElementPropertiesInitCost,
+  PERF_BODY_ELEMENT_INIT_COST, 2, bodyElementInitCost,
+  PERF_CREATE_VIEWPORT_COST, 2, createViewportCost,
+  PERF_BRIDGE_INIT_COST, 2, bridgeInitCost,
+  PERF_BRIDGE_REGISTER_DART_METHOD_COST, 2, bridgeRegisterDartMethodCost,
+  PERF_JS_CONTEXT_INIT_COST, 2, jsContextInitCost,
+  PERF_JS_NATIVE_METHOD_INIT_COST, 2, jsNativeMethodInitCost,
+  PERF_JS_POLYFILL_INIT_COST, 2, jsPolyfillInitCost,
+  2, initBundleCost,
+  PERF_JS_BUNDLE_LOAD_COST, 2, jsBundleLoadCost,
+  PERF_JS_BUNDLE_EVAL_COST, 2, jsBundleEvalCost,
+  PERF_FLUSH_UI_COMMAND_COST, 2, flushUiCommandCost,
+  PERF_CREATE_ELEMENT_COST, 2, createElementCost, 2, createElementAvg, createElementCount,
+  PERF_CREATE_TEXT_NODE_COST, 2, createTextNodeCost, 2, createTextNodeAvg, createTextNodeCount,
+  PERF_CREATE_COMMENT_COST, 2, createCommentCost, 2, createCommentAvg, createCommentCount,
+  PERF_DISPOSE_EVENT_TARGET_COST, 2, disposeEventTargetCost, 2, disposeEventTargetAvg, disposeEventTargetCount,
+  PERF_ADD_EVENT_COST, 2, addEventCost, 2, addEventAvg, addEventCount,
+  PERF_INSERT_ADJACENT_NODE_COST, 2, insertAdjacentNodeCost, 2, insertAdjacentNodeAvg, insertAdjacentNodeCount,
+  PERF_REMOVE_NODE_COST, 2, removeNodeCost, 2, removeNodeAvg, removeNodeCount,
+  PERF_SET_STYLE_COST, 2, setStyleCost, 2, setStyleAvg, setStyleCount);
+  // clang-format on
 
   JSStringRef resultStringRef = JSStringCreateWithUTF8CString(buffer);
   return JSValueMakeString(ctx, resultStringRef);
@@ -480,9 +492,11 @@ void JSPerformance::measureSummary() {
   internalMeasure(PERF_CREATE_ELEMENT_COST, PERF_CREATE_ELEMENT_START, PERF_CREATE_ELEMENT_END, nullptr);
   internalMeasure(PERF_CREATE_TEXT_NODE_COST, PERF_CREATE_TEXT_NODE_START, PERF_CREATE_TEXT_NODE_END, nullptr);
   internalMeasure(PERF_CREATE_COMMENT_COST, PERF_CREATE_COMMENT_START, PERF_CREATE_COMMENT_END, nullptr);
-  internalMeasure(PERF_DISPOSE_EVENT_TARGET_COST, PERF_DISPOSE_EVENT_TARGET_START, PERF_DISPOSE_EVENT_TARGET_END, nullptr);
+  internalMeasure(PERF_DISPOSE_EVENT_TARGET_COST, PERF_DISPOSE_EVENT_TARGET_START, PERF_DISPOSE_EVENT_TARGET_END,
+                  nullptr);
   internalMeasure(PERF_ADD_EVENT_COST, PERF_ADD_EVENT_START, PERF_ADD_EVENT_END, nullptr);
-  internalMeasure(PERF_INSERT_ADJACENT_NODE_COST, PERF_INSERT_ADJACENT_NODE_START, PERF_INSERT_ADJACENT_NODE_END, nullptr);
+  internalMeasure(PERF_INSERT_ADJACENT_NODE_COST, PERF_INSERT_ADJACENT_NODE_START, PERF_INSERT_ADJACENT_NODE_END,
+                  nullptr);
   internalMeasure(PERF_REMOVE_NODE_COST, PERF_REMOVE_NODE_START, PERF_REMOVE_NODE_END, nullptr);
   internalMeasure(PERF_SET_STYLE_COST, PERF_SET_STYLE_START, PERF_SET_STYLE_END, nullptr);
 }
@@ -529,11 +543,11 @@ std::vector<NativePerformanceEntry *> JSPerformance::getFullEntries() {
   }
   auto dartEntryList = getDartMethod()->getPerformanceEntries(context->getContextId());
   auto dartEntityBytes = dartEntryList->entries;
-  std::vector<NativePerformanceEntry*> dartEntries;
+  std::vector<NativePerformanceEntry *> dartEntries;
   dartEntries.reserve(dartEntryList->length);
 
   for (size_t i = 0; i < dartEntryList->length * 2; i += 2) {
-    const char* name = reinterpret_cast<const char*>(dartEntityBytes[i]);
+    const char *name = reinterpret_cast<const char *>(dartEntityBytes[i]);
     int64_t startTime = dartEntityBytes[i + 1];
     NativePerformanceEntry *nativePerformanceEntry = new NativePerformanceEntry(name, "mark", startTime, 0);
     dartEntries.emplace_back(nativePerformanceEntry);
@@ -568,8 +582,8 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
     if (startMarkCount == 0) {
       if (exception != nullptr) {
         JSC_THROW_ERROR(
-            ctx, ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " does not exist.").c_str(),
-            exception);
+          ctx, ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " does not exist.").c_str(),
+          exception);
       }
       return;
     }
@@ -581,8 +595,8 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
     if (endMarkCount == 0) {
       if (exception != nullptr) {
         JSC_THROW_ERROR(
-            ctx, ("Failed to execute 'measure' on 'Performance': The mark " + endMark + " does not exist.").c_str(),
-            exception);
+          ctx, ("Failed to execute 'measure' on 'Performance': The mark " + endMark + " does not exist.").c_str(),
+          exception);
       }
       return;
     }
@@ -592,7 +606,7 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
         JSC_THROW_ERROR(ctx,
                         ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " and " + endMark +
                          "does not appear the same number of times")
-                            .c_str(),
+                          .c_str(),
                         exception);
       }
       return;
@@ -601,13 +615,12 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
     auto startIt = std::begin(entries);
     auto endIt = std::begin(entries);
 
-    for (size_t i = 0; i < startMarkCount; i ++) {
+    for (size_t i = 0; i < startMarkCount; i++) {
       auto startEntry = std::find_if(startIt, entries.end(), [&startMark](NativePerformanceEntry *entry) -> bool {
         return entry->name == startMark;
       });
-      auto endEntry = std::find_if(endIt, entries.end(), [&endMark](NativePerformanceEntry *entry) -> bool {
-        return entry->name == endMark;
-      });
+      auto endEntry = std::find_if(
+        endIt, entries.end(), [&endMark](NativePerformanceEntry *entry) -> bool { return entry->name == endMark; });
 
       int64_t duration = (*endEntry)->startTime - (*startEntry)->startTime;
       int64_t startTime = std::chrono::duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
