@@ -219,8 +219,6 @@ class RenderLayoutBox extends RenderBoxModel
 }
 
 class RenderBoxModel extends RenderBox with
-//    RenderPaddingMixin,
-//    RenderMarginMixin,
     RenderBoxDecorationMixin,
     RenderTransformMixin,
     RenderOverflowMixin,
@@ -317,11 +315,8 @@ class RenderBoxModel extends RenderBox with
     }
 
     return copiedRenderBoxModel
-      // Copy padding
-//      ..padding = padding
-
-      // Copy margin
-//      ..margin = margin
+      // Copy render style
+      ..renderStyle = renderStyle
 
       // Copy Border
       ..borderEdge = borderEdge
