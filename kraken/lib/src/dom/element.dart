@@ -77,7 +77,7 @@ class Element extends Node
         NodeLifeCycle,
         EventHandlerMixin,
         CSSTextMixin,
-        CSSDecoratedBoxMixin,
+//        CSSDecoratedBoxMixin,
         CSSFlexboxMixin,
         CSSFlowMixin,
         CSSOverflowMixin,
@@ -485,7 +485,7 @@ class Element extends Node
     /// Recalculate gradient after node attached when gradient length cannot be obtained from style
     if (renderBoxModel.recalGradient) {
       String backgroundImage = style[BACKGROUND_IMAGE];
-      updateRenderDecoratedBox(renderBoxModel, style, BACKGROUND_IMAGE, backgroundImage, backgroundImage);
+      renderBoxModel.renderStyle.updateBox(renderBoxModel, BACKGROUND_IMAGE, backgroundImage, backgroundImage);
       renderBoxModel.recalGradient = false;
     }
 
@@ -937,26 +937,14 @@ class Element extends Node
 
   void _stylePaddingChangedListener(String property, String original, String present) {
     renderBoxModel.renderStyle.updatePadding(property, present);
-    if (original != present) {
-      renderBoxModel.markNeedsLayout();
-    }
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
     renderBoxModel.renderStyle.updateSizing(property, present);
-    if (original != present) {
-      renderBoxModel.markNeedsLayout();
-    }
-    if (property == WIDTH || property == HEIGHT) {
-      updateRenderOffset(renderBoxModel, property, present);
-    }
   }
 
   void _styleMarginChangedListener(String property, String original, String present) {
     renderBoxModel.renderStyle.updateMargin(property, present);
-    if (original != present) {
-      renderBoxModel.markNeedsLayout();
-    }
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
@@ -984,8 +972,9 @@ class Element extends Node
   }
 
   void _styleBoxChangedListener(String property, String original, String present) {
-    updateRenderDecoratedBox(renderBoxModel, style, property, original, present);
+    renderBoxModel.renderStyle.updateBox(renderBoxModel, property, original, present);
   }
+
 
   void _styleOpacityChangedListener(String property, String original, String present) {
     // Update opacity.

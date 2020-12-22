@@ -32,12 +32,65 @@ enum CSSDisplay {
 
 mixin CSSSizingMixin on RenderStyleBase {
 
-  double width;
-  double height;
-  double minWidth;
-  double maxWidth;
-  double minHeight;
-  double maxHeight;
+  double _width;
+  double get width {
+    return _width;
+  }
+  set width(double value) {
+    if (_width == value) return;
+    _width = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  double _height;
+  double get height {
+    return _height;
+  }
+  set height(double value) {
+    if (_height == value) return;
+    _height = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  double _minWidth;
+  double get minWidth {
+    return _minWidth;
+  }
+  set minWidth(double value) {
+    if (_minWidth == value) return;
+    _minWidth = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  double _maxWidth;
+  double get maxWidth {
+    return _maxWidth;
+  }
+  set maxWidth(double value) {
+    if (_maxWidth == value) return;
+    _maxWidth = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  double _minHeight;
+  double get minHeight {
+    return _minHeight;
+  }
+  set minHeight(double value) {
+    if (_minHeight == value) return;
+    _minHeight = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  double _maxHeight;
+  double get maxHeight {
+    return _maxHeight;
+  }
+  set maxHeight(double value) {
+    if (_maxHeight == value) return;
+    _maxHeight = value;
+    renderBoxModel.markNeedsLayout();
+  }
 
   void updateSizing(String property, String present) {
     double value = CSSLength.toDisplayPortValue(present, viewportSize);

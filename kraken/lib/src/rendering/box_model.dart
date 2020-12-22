@@ -218,7 +218,12 @@ class RenderLayoutBox extends RenderBoxModel
   }
 }
 
+mixin RenderBoxModelBase on RenderBox {
+  RenderStyle renderStyle;
+}
+
 class RenderBoxModel extends RenderBox with
+    RenderBoxModelBase,
     RenderBoxDecorationMixin,
     RenderTransformMixin,
     RenderOverflowMixin,
@@ -239,7 +244,7 @@ class RenderBoxModel extends RenderBox with
     double viewportWidth = elementManager.viewportWidth;
     double viewportHeight = elementManager.viewportHeight;
     Size viewportSize = Size(viewportWidth, viewportHeight);
-    renderStyle = RenderStyle(style, viewportSize);
+    renderStyle = RenderStyle(this, style, viewportSize);
   }
 
   RenderStyle renderStyle;
@@ -319,16 +324,11 @@ class RenderBoxModel extends RenderBox with
       ..renderStyle = renderStyle
 
       // Copy Border
-      ..borderEdge = borderEdge
       ..decoration = decoration
       ..cssBoxDecoration = cssBoxDecoration
       ..position = position
       ..configuration = configuration
       ..boxPainter = boxPainter
-
-      // Copy background
-      ..backgroundClip = backgroundClip
-      ..backgroundOrigin = backgroundOrigin
 
       // Copy overflow
       ..scrollListener = scrollListener
@@ -447,8 +447,8 @@ class RenderBoxModel extends RenderBox with
     }
 
     void cropPaddingBorder(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.borderEdge != null) {
-        cropWidth += renderBoxModel.borderEdge.horizontal;
+      if (renderBoxModel.renderStyle.borderEdge != null) {
+        cropWidth += renderBoxModel.renderStyle.borderEdge.horizontal;
       }
 
       if (renderBoxModel.renderStyle.padding != null) {
@@ -575,8 +575,8 @@ class RenderBoxModel extends RenderBox with
     }
 
     void cropPaddingBorder(RenderBoxModel renderBoxModel) {
-      if (renderBoxModel.borderEdge != null) {
-        cropHeight += renderBoxModel.borderEdge.vertical;
+      if (renderBoxModel.renderStyle.borderEdge != null) {
+        cropHeight += renderBoxModel.renderStyle.borderEdge.vertical;
       }
       if (renderBoxModel.renderStyle.padding != null) {
         cropHeight += renderBoxModel.renderStyle.padding.vertical;
@@ -673,8 +673,8 @@ class RenderBoxModel extends RenderBox with
 
     void cropPaddingBorder(RenderBoxModel renderBoxModel) {
       RenderStyle renderStyle = renderBoxModel.renderStyle;
-      if (renderBoxModel.borderEdge != null) {
-        cropWidth += renderBoxModel.borderEdge.horizontal;
+      if (renderBoxModel.renderStyle.borderEdge != null) {
+        cropWidth += renderBoxModel.renderStyle.borderEdge.horizontal;
       }
       if (renderStyle.padding != null) {
         cropWidth += renderStyle.padding.horizontal;
@@ -757,8 +757,8 @@ class RenderBoxModel extends RenderBox with
     if (renderStyle.padding != null) {
       boxSize = renderStyle.wrapPaddingSize(boxSize);
     }
-    if (borderEdge != null) {
-      boxSize = wrapBorderSize(boxSize);
+    if (renderStyle.borderEdge != null) {
+      boxSize = renderStyle.wrapBorderSize(boxSize);
     }
     return constraints.constrain(boxSize);
   }
@@ -794,7 +794,7 @@ class RenderBoxModel extends RenderBox with
     _debugHasBoxLayout = true;
     BoxConstraints boxConstraints = constraints;
     // Deflate border constraints.
-    boxConstraints = deflateBorderConstraints(boxConstraints);
+    boxConstraints = renderStyle.deflateBorderConstraints(boxConstraints);
 
     // Deflate padding constraints.
     boxConstraints = renderStyle.deflatePaddingConstraints(boxConstraints);
@@ -895,7 +895,7 @@ class RenderBoxModel extends RenderBox with
       RenderLayoutParentData selfParentData = parentData;
       RenderBoxModel parentBox = parent;
       if (selfParentData.isPositioned && parentBox.hasSize) {
-        CSSPositionedLayout.applyPositionedChildOffset(parentBox, this, parentBox.boxSize, parentBox.borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(parentBox, this, parentBox.boxSize, parentBox.renderStyle.borderEdge);
       }
     }
 
@@ -974,7 +974,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
-    EdgeInsets borderEdge = EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft);
+    EdgeInsets borderEdge = EdgeInsets.fromLTRB(renderStyle.borderLeft, renderStyle.borderTop, renderStyle.borderRight, renderStyle.borderLeft);
 
     bool hasLocalAttachment = CSSBackground.hasLocalBackgroundImage(style);
     if (hasLocalAttachment) {

@@ -18,6 +18,7 @@ mixin CSSMarginMixin on RenderStyleBase {
 
   void _markNeedResolution() {
     _resolvedMargin = null;
+    renderBoxModel.markNeedsLayout();
   }
 
   /// The amount to pad the child in each dimension.

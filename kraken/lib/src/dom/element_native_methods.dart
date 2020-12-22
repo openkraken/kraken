@@ -77,13 +77,13 @@ mixin ElementNativeMethods on Node {
   static double _getClientLeft(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
-    return element.renderBoxModel.borderLeft;
+    return element.renderBoxModel.renderStyle.borderLeft;
   }
 
   static double _getClientTop(Pointer<NativeElement> nativeElement) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
-    return element.renderBoxModel.borderTop;
+    return element.renderBoxModel.renderStyle.borderTop;
   }
 
   static double _getScrollTop(Pointer<NativeElement> nativeElement) {

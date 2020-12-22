@@ -94,10 +94,10 @@ class InspectDOMModule extends InspectModule {
         contentBoxOffset.dx, contentBoxOffset.dy + heightWithinBorder,
       ];
       List<double> padding = [
-        border[0] + element.renderBoxModel.borderLeft, border[1] + element.renderBoxModel.borderTop,
-        border[2] - element.renderBoxModel.borderRight, border[3] + element.renderBoxModel.borderTop,
-        border[4] - element.renderBoxModel.borderRight, border[5] - element.renderBoxModel.borderBottom,
-        border[6] + element.renderBoxModel.borderLeft, border[7] - element.renderBoxModel.borderBottom,
+        border[0] + element.renderBoxModel.renderStyle.borderLeft, border[1] + element.renderBoxModel.renderStyle.borderTop,
+        border[2] - element.renderBoxModel.renderStyle.borderRight, border[3] + element.renderBoxModel.renderStyle.borderTop,
+        border[4] - element.renderBoxModel.renderStyle.borderRight, border[5] - element.renderBoxModel.renderStyle.borderBottom,
+        border[6] + element.renderBoxModel.renderStyle.borderLeft, border[7] - element.renderBoxModel.renderStyle.borderBottom,
       ];
       List<double> content = [
         padding[0] + element.renderBoxModel.renderStyle.paddingLeft, padding[1] + element.renderBoxModel.renderStyle.paddingTop,

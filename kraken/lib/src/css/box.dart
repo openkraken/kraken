@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/foundation.dart';
+import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
@@ -18,17 +19,85 @@ final RegExp _spaceRegExp = RegExp(r'\s+');
 
 /// - background
 /// - border
-mixin CSSDecoratedBoxMixin {
+mixin CSSBoxMixin on RenderStyleBase {
 
-  void updateRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String original, String present) {
+  /// Background-clip
+  BackgroundBoundary get backgroundClip => _backgroundClip;
+  BackgroundBoundary _backgroundClip;
+  set backgroundClip(BackgroundBoundary value) {
+    if (value == null) return;
+    if (value == _backgroundClip) return;
+    _backgroundClip = value;
+  }
+
+  /// Background-origin
+  BackgroundBoundary get backgroundOrigin => _backgroundOrigin;
+  BackgroundBoundary _backgroundOrigin;
+  set backgroundOrigin(BackgroundBoundary value) {
+    if (value == null) return;
+    if (value == _backgroundOrigin) return;
+    _backgroundOrigin = value;
+  }
+
+  /// BorderSize to deflate.
+  EdgeInsets _borderEdge;
+  EdgeInsets get borderEdge => _borderEdge;
+  set borderEdge(EdgeInsets newValue) {
+    _borderEdge = newValue;
+
+    BoxDecoration decoration = renderBoxModel.decoration;
+    if (decoration != null && decoration is BoxDecoration) {
+      Gradient gradient = decoration.gradient;
+      if (gradient is BorderGradientMixin) {
+        gradient.borderEdge = newValue;
+      }
+    }
+    renderBoxModel.markNeedsLayout();
+  }
+
+  double get borderTop {
+    if (borderEdge == null) return 0.0;
+    return borderEdge.top;
+  }
+
+  double get borderBottom {
+    if (borderEdge == null) return 0.0;
+    return borderEdge.bottom;
+  }
+
+  double get borderLeft {
+    if (borderEdge == null) return 0.0;
+    return borderEdge.left;
+  }
+
+  double get borderRight {
+    if (borderEdge == null) return 0.0;
+    return borderEdge.right;
+  }
+
+  Size wrapBorderSize(Size innerSize) {
+    return Size(borderLeft + innerSize.width + borderRight,
+      borderTop + innerSize.height + borderBottom);
+  }
+
+  BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
+    if (borderEdge != null) {
+      return constraints.deflate(borderEdge);
+    }
+    return constraints;
+  }
+
+  void updateBox(RenderBoxModel renderBoxModel, String property, String original, String present) {
     CSSBoxDecoration cssBoxDecoration = renderBoxModel.cssBoxDecoration;
+    RenderStyle renderStyle = this;
+    CSSStyleDeclaration style = this.style;
 
     if (cssBoxDecoration != null) {
       // Update by property
       if (property == BACKGROUND_CLIP) {
-        renderBoxModel.backgroundClip = getBackgroundClip(present);
+        renderStyle.backgroundClip = getBackgroundClip(present);
       } else if (property == BACKGROUND_ORIGIN) {
-        renderBoxModel.backgroundOrigin = getBackgroundOrigin(present);
+        renderStyle.backgroundOrigin = getBackgroundOrigin(present);
       } if (property == BACKGROUND_COLOR) {
         _updateBackgroundColor(renderBoxModel, style, property);
       } else if (property.startsWith(BACKGROUND)) {
@@ -52,8 +121,8 @@ mixin CSSDecoratedBoxMixin {
       if (cssBoxDecoration == null) return;
 
       renderBoxModel.decoration = cssBoxDecoration.toBoxDecoration();
-      renderBoxModel.backgroundClip = getBackgroundClip(present);
-      renderBoxModel.backgroundOrigin = getBackgroundOrigin(present);
+      renderStyle.backgroundClip = getBackgroundClip(present);
+      renderStyle.backgroundOrigin = getBackgroundOrigin(present);
     }
   }
 

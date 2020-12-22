@@ -563,7 +563,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        CSSPositionedLayout.applyPositionedChildOffset(this, child, size, borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(this, child, size, renderStyle.borderEdge);
 
         setMaximumScrollableSizeForPositionedChild(childParentData, child.boxSize);
       }
@@ -1010,8 +1010,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
 
         Offset relativeOffset = _getOffset(
-          childMainPosition + renderStyle.paddingLeft + borderLeft + childMarginLeft,
-          crossAxisOffset + childLineExtent + renderStyle.paddingTop + borderTop + childMarginTop
+          childMainPosition + renderStyle.paddingLeft + renderStyle.borderLeft + childMarginLeft,
+          crossAxisOffset + childLineExtent + renderStyle.paddingTop + renderStyle.borderTop + childMarginTop
         );
         /// Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child, childStyle);

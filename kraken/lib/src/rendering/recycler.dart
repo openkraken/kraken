@@ -229,8 +229,8 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
       offset += Offset(renderStyle.paddingLeft, renderStyle.paddingTop);
     }
 
-    if (borderEdge != null) {
-      offset += Offset(borderLeft, borderTop);
+    if (renderStyle.borderEdge != null) {
+      offset += Offset(renderStyle.borderLeft, renderStyle.borderTop);
     }
 
     if (firstChild != null) {

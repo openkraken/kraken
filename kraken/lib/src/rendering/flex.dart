@@ -367,18 +367,18 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Get start/end border in the main axis according to flex direction
   double flowAwareMainAxisBorder({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-      return isEnd ? borderRight : borderLeft;
+      return isEnd ? renderStyle.borderRight : renderStyle.borderLeft;
     } else {
-      return isEnd ? borderBottom : borderTop;
+      return isEnd ? renderStyle.borderBottom : renderStyle.borderTop;
     }
   }
 
   /// Get start/end border in the cross axis according to flex direction
   double flowAwareCrossAxisBorder({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-      return isEnd ? borderBottom : borderTop;
+      return isEnd ? renderStyle.borderBottom : renderStyle.borderTop;
     } else {
-      return isEnd ? borderRight : borderLeft;
+      return isEnd ? renderStyle.borderRight : renderStyle.borderLeft;
     }
   }
 
@@ -812,7 +812,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        CSSPositionedLayout.applyPositionedChildOffset(this, child, size, borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(this, child, size, renderStyle.borderEdge);
 
         setMaximumScrollableSizeForPositionedChild(childParentData, child.boxSize);
       }
@@ -1493,12 +1493,16 @@ class RenderFlexLayout extends RenderLayoutBox {
           double paddingRight = child.renderStyle.paddingRight;
           double paddingTop = child.renderStyle.paddingTop;
           double paddingBottom = child.renderStyle.paddingBottom;
+          double borderLeft = child.renderStyle.borderLeft;
+          double borderRight = child.renderStyle.borderRight;
+          double borderTop = child.renderStyle.borderTop;
+          double borderBottom = child.renderStyle.borderBottom;
 
           double childLogicalWidth = childContentWidth != null ?
-            childContentWidth + child.borderLeft + child.borderRight + paddingLeft + paddingRight :
+            childContentWidth + borderLeft + borderRight + paddingLeft + paddingRight :
             null;
           double childLogicalHeight = childContentHeight != null ?
-            childContentHeight + child.borderTop + child.borderBottom + paddingTop + paddingBottom :
+            childContentHeight + borderTop + borderBottom + paddingTop + paddingBottom :
             null;
 
           // Cross size calculated from style which not including padding and border

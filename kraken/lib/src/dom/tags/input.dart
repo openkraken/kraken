@@ -392,8 +392,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         ? 0
         : (renderStyle.height
             - renderEditable.preferredLineHeight
-            - renderIntrinsic.borderTop
-            - renderIntrinsic.borderBottom) / 2;
+            - renderIntrinsic.renderStyle.borderTop
+            - renderIntrinsic.renderStyle.borderBottom) / 2;
     _renderOffsetBox = RenderOffsetBox(
       offset: Offset(0, dy),
       child: renderEditable,

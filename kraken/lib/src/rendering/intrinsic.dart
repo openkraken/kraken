@@ -127,8 +127,8 @@ class RenderIntrinsic extends RenderBoxModel
       offset += Offset(renderStyle.paddingLeft, renderStyle.paddingTop);
     }
 
-    if (borderEdge != null) {
-      offset += Offset(borderLeft, borderTop);
+    if (renderStyle.borderEdge != null) {
+      offset += Offset(renderStyle.borderLeft, renderStyle.borderTop);
     }
 
     if (child != null) {
