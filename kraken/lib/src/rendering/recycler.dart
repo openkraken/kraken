@@ -247,7 +247,6 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    print('silver perform paint');
     if (kProfileMode) {
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_PERFORM_PAINT_START, uniqueId: targetId);
     }
@@ -261,11 +260,20 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     }
 
     if (firstChild != null) {
+      DateTime childPaintStart;
+      if (kProfileMode) {
+        childPaintStart = DateTime.now();
+      }
       context.paintChild(firstChild, offset);
+      if (kProfileMode) {
+        DateTime childPaintEnd = DateTime.now();
+        childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
+      }
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_PERFORM_PAINT_END, uniqueId: targetId);
+      int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_PERFORM_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 

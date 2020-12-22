@@ -143,11 +143,20 @@ class RenderIntrinsic extends RenderBoxModel
     }
 
     if (child != null) {
+      DateTime childPaintStart;
+      if (kProfileMode) {
+        childPaintStart = DateTime.now();
+      }
       context.paintChild(child, offset);
+      if (kProfileMode) {
+        DateTime childPaintEnd = DateTime.now();
+        childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
+      }
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_PERFORM_PAINT_END, uniqueId: targetId);
+      int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_PERFORM_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 

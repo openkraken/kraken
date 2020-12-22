@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:ffi';
-import 'dart:math';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/bridge.dart';
@@ -94,7 +93,7 @@ class PerformanceEntry {
   final int uniqueId;
 }
 
-Random _random = Random();
+final int PERFORMANCE_NONE_UNIQUE_ID = -1024;
 
 class PerformanceTiming {
   static SplayTreeMap<int, PerformanceTiming> _instanceMap = SplayTreeMap();
@@ -108,17 +107,13 @@ class PerformanceTiming {
 
   int entriesSize = 0;
 
-  static int randomNumber() {
-    return _random.nextInt(1 << 32 - 1);
-  }
-
   void mark(String name, {int startTime, int uniqueId}) {
     if (startTime == null) {
       startTime = DateTime.now().microsecondsSinceEpoch;
     }
 
     if (uniqueId == null) {
-      uniqueId = -1024;
+      uniqueId = PERFORMANCE_NONE_UNIQUE_ID;
     }
 
     PerformanceEntry entry = PerformanceEntry(name, startTime, uniqueId);

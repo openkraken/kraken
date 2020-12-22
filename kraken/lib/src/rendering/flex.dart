@@ -2278,7 +2278,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   void performPaint(PaintingContext context, Offset offset) {
     if (kProfileMode) {
-      childPaintDuration = 0;
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_START, uniqueId: targetId);
     }
 
@@ -2323,8 +2322,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     if (kProfileMode) {
       DateTime flexLayoutEndTime = DateTime.now();
-      int startTime = flexLayoutEndTime.microsecondsSinceEpoch - childPaintDuration;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_END, uniqueId: targetId, startTime: startTime);
+      int amendEndTime = flexLayoutEndTime.microsecondsSinceEpoch - childPaintDuration;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 

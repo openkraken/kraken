@@ -1037,12 +1037,17 @@ class RenderBoxModel extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (kProfileMode) {
+      childPaintDuration = 0;
       PerformanceTiming.instance(contextId).mark(PERF_PAINT_START, uniqueId: targetId);
     }
-    if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+    if (isCSSDisplayNone || isCSSVisibilityHidden) {
+      PerformanceTiming.instance(contextId).mark(PERF_PAINT_END, uniqueId: targetId);
+      return;
+    };
     paintBoxModel(context, offset);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_END, uniqueId: targetId);
+      int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;
+      PerformanceTiming.instance(contextId).mark(PERF_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 

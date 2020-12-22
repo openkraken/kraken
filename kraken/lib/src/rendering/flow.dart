@@ -1246,8 +1246,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     if (kProfileMode) {
+      int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_PERFORM_PAINT_END,
-          uniqueId: targetId, startTime: DateTime.now().microsecondsSinceEpoch - childPaintDuration);
+          uniqueId: targetId, startTime: amendEndTime);
     }
   }
 
