@@ -109,9 +109,8 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    DateTime controllerCreateStart;
     if (kProfileMode) {
-      controllerCreateStart = DateTime.now();
+      PerformanceTiming.instance(0).mark(PERF_CONTROLLER_INIT_START);
     }
 
     KrakenController controller = KrakenController(
@@ -129,8 +128,6 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
     );
 
     if (kProfileMode) {
-      PerformanceTiming.instance(controller.view.contextId)
-          .mark(PERF_CONTROLLER_INIT_START, controllerCreateStart.microsecondsSinceEpoch);
       PerformanceTiming.instance(controller.view.contextId).mark(PERF_CONTROLLER_INIT_END);
     }
 

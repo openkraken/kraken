@@ -781,11 +781,15 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   void performLayout() {
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_START);
+      childLayoutDuration = 0;
+      PerformanceTiming.instance(contextId).mark(PERF_FLEX_LAYOUT_START, uniqueId: targetId);
     }
 
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
+      if (kProfileMode) {
+        PerformanceTiming.instance(contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId);
+      }
       return;
     }
 
@@ -823,7 +827,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     didLayout();
 
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_END);
+      DateTime flexLayoutEndTime = DateTime.now();
+      int amendEndTime = flexLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
+      PerformanceTiming.instance(contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 
@@ -1157,7 +1163,15 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
       }
       if (isChildNeedsLayout) {
+        DateTime childLayoutStart;
+        if (kProfileMode) {
+          childLayoutStart = DateTime.now();
+        }
         child.layout(childConstraints, parentUsesSize: true);
+        if (kProfileMode) {
+          DateTime childLayoutEnd = DateTime.now();
+          childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
+        }
       }
 
       double childMainAxisExtent = _getMainAxisExtent(child);
@@ -1713,7 +1727,17 @@ class RenderFlexLayout extends RenderLayoutBox {
           }
         }
 
+        DateTime childLayoutStart;
+        if (kProfileMode) {
+          childLayoutStart = DateTime.now();
+        }
+
         child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
+
+        if (kProfileMode) {
+          DateTime childLayoutEnd = DateTime.now();
+          childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
+        }
 
         // update max scrollable size
         if (child is RenderBoxModel) {
@@ -2254,8 +2278,10 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   void performPaint(PaintingContext context, Offset offset) {
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_START);
+      childPaintDuration = 0;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_START, uniqueId: targetId);
     }
+
     if (needsSortChildren) {
       if (!isChildrenSorted) {
         sortChildrenByZIndex();
@@ -2264,7 +2290,15 @@ class RenderFlexLayout extends RenderLayoutBox {
         RenderObject child = sortedChildren[i];
         // Don't paint placeholder of positioned element
         if (child is! RenderPositionHolder) {
+          DateTime childPaintStart;
+          if (kProfileMode) {
+            childPaintStart = DateTime.now();
+          }
           context.paintChild(child, getChildScrollOffset(child, offset));
+          if (kProfileMode) {
+            DateTime childPaintEnd = DateTime.now();
+            childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
+          }
         }
       }
     } else {
@@ -2273,13 +2307,24 @@ class RenderFlexLayout extends RenderLayoutBox {
         final RenderFlexParentData childParentData = child.parentData;
         // Don't paint placeholder of positioned element
         if (child is! RenderPositionHolder) {
+          DateTime childPaintStart;
+          if (kProfileMode) {
+            childPaintStart = DateTime.now();
+          }
           context.paintChild(child, getChildScrollOffset(child, offset));
+          if (kProfileMode) {
+            DateTime childPaintEnd = DateTime.now();
+            childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
+          }
         }
         child = childParentData.nextSibling;
       }
     }
+
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_END);
+      DateTime flexLayoutEndTime = DateTime.now();
+      int startTime = flexLayoutEndTime.microsecondsSinceEpoch - childPaintDuration;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_END, uniqueId: targetId, startTime: startTime);
     }
   }
 

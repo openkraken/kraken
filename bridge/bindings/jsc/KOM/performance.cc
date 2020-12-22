@@ -5,8 +5,11 @@
 
 #include "performance.h"
 #include "dart_methods.h"
+#include "foundation/logging.h"
 #include <chrono>
 #include <cmath>
+
+#define PERFORMANCE_ENTRY_NONE_UNIQUE_ID -1024
 
 namespace kraken::binding::jsc {
 
@@ -27,12 +30,14 @@ void NativePerformance::disposeInstance(int32_t uniqueId) {
 
 void NativePerformance::mark(const std::string &markName) {
   int64_t startTime = std::chrono::duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
-  auto *nativePerformanceEntry = new NativePerformanceEntry{markName, "mark", startTime, 0};
+  auto *nativePerformanceEntry =
+    new NativePerformanceEntry{markName, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
   entries.emplace_back(nativePerformanceEntry);
 }
 
 void NativePerformance::mark(const std::string &markName, int64_t startTime) {
-  auto *nativePerformanceEntry = new NativePerformanceEntry{markName, "mark", startTime, 0};
+  auto *nativePerformanceEntry =
+    new NativePerformanceEntry{markName, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
   entries.emplace_back(nativePerformanceEntry);
 }
 
@@ -75,12 +80,14 @@ JSValueRef JSPerformanceEntry::getProperty(std::string &name, JSValueRef *except
 }
 
 JSPerformanceMark::JSPerformanceMark(JSContext *context, std::string &name, int64_t startTime)
-  : JSPerformanceEntry(context, new NativePerformanceEntry(name, "mark", startTime, 0)) {}
+  : JSPerformanceEntry(context,
+                       new NativePerformanceEntry(name, "mark", startTime, 0, PERFORMANCE_ENTRY_NONE_UNIQUE_ID)) {}
 JSPerformanceMark::JSPerformanceMark(JSContext *context, NativePerformanceEntry *nativePerformanceEntry)
   : JSPerformanceEntry(context, nativePerformanceEntry) {}
 
 JSPerformanceMeasure::JSPerformanceMeasure(JSContext *context, std::string &name, int64_t startTime, int64_t duration)
-  : JSPerformanceEntry(context, new NativePerformanceEntry(name, "measure", startTime, duration)) {}
+  : JSPerformanceEntry(
+      context, new NativePerformanceEntry(name, "measure", startTime, duration, PERFORMANCE_ENTRY_NONE_UNIQUE_ID)) {}
 JSPerformanceMeasure::JSPerformanceMeasure(JSContext *context, NativePerformanceEntry *nativePerformanceEntry)
   : JSPerformanceEntry(context, nativePerformanceEntry) {}
 
@@ -120,6 +127,8 @@ JSValueRef JSPerformance::getProperty(std::string &name, JSValueRef *exception) 
     case PerformanceProperty::summary:
       return m_summary.function();
 #endif
+    default:
+      break;
     }
   }
 
@@ -414,10 +423,13 @@ JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObje
   GET_COST(flowPerformPaint, PERF_FLOW_PERFORM_PAINT_COST);
   GET_COST(intrinsicPerformPaint, PERF_INTRINSIC_PERFORM_PAINT_COST);
   GET_COST(flexPerformPaint, PERF_FLEX_PERFORM_PAINT_COST);
+  GET_COST(silverPerformPaint, PERF_SILVER_PERFORM_PAINT_COST);
+  GET_COST(performPaint, PERF_PERFORM_PAINT_COST);
 
   double initBundleCost = jsBundleLoadCost + jsBundleEvalCost + flushUiCommandCost + createElementCost +
                           createTextNodeCost + createCommentCost + disposeEventTargetCost + addEventCost +
-                          insertAdjacentNodeCost + removeNodeCost + setStyleCost + setPropertiesCost + removePropertiesCost;
+                          insertAdjacentNodeCost + removeNodeCost + setStyleCost + setPropertiesCost +
+                          removePropertiesCost;
   double renderingCost = flexLayoutCost + flowLayoutCost + intrinsicLayoutCost + silverLayoutCost + paintCost;
   double totalCost = widgetCreationCost + initBundleCost + renderingCost;
 
@@ -468,8 +480,10 @@ Rendering: %.*fms
     + %s %.*fms avg: %.*fms count: %zu
     + %s %.*fms avg: %.*fms count: %zu
     + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
+      + %s %.*fms avg: %.*fms count: %zu
+      + %s %.*fms avg: %.*fms count: %zu
+      + %s %.*fms avg: %.*fms count: %zu
+      + %s %.*fms avg: %.*fms count: %zu
 )",
   2, totalCost,
     PERF_WIDGET_CREATION_COST, 2, widgetCreationCost,
@@ -513,9 +527,11 @@ Rendering: %.*fms
       PERF_PAINT_DECORATION_COST, 2, paintDecorationCost, 2, paintDecorationAvg, paintDecorationCount,
       PERF_PAINT_OVERFLOW_COST, 2, paintOverflowCost, 2, paintOverflowAvg, paintOverflowCount,
       PERF_PAINT_BACKGROUND_COST, 2, paintBackgroundCost, 2, paintBackgroundAvg, paintBackgroundCount,
+      PERF_PERFORM_PAINT_COST, 2, performPaintCost, 2, performPaintAvg, performPaintCount,
       PERF_FLOW_PERFORM_PAINT_COST, 2, flowPerformPaintCost, 2, flowPerformPaintAvg, flowPerformPaintCount,
       PERF_INTRINSIC_PERFORM_PAINT_COST, 2, intrinsicPerformPaintCost, 2, intrinsicPerformPaintAvg, intrinsicPerformPaintCount,
-      PERF_FLEX_PERFORM_PAINT_COST, 2, flexPerformPaintCost, 2, flexPerformPaintAvg, flexPerformPaintCount
+      PERF_FLEX_PERFORM_PAINT_COST, 2, flexPerformPaintCost, 2, flexPerformPaintAvg, flexPerformPaintCount,
+      PERF_SILVER_PERFORM_PAINT_COST, 2, silverPerformPaintCost, 2, silverPerformPaintAvg, silverPerformPaintCount
 );
   // clang-format on
 
@@ -566,15 +582,20 @@ void JSPerformance::measureSummary() {
   internalMeasure(PERF_PAINT_COST, PERF_PAINT_START, PERF_PAINT_END, nullptr);
   internalMeasure(PERF_PAINT_COLOR_FILTER_COST, PERF_PAINT_COLOR_FILTER_START, PERF_PAINT_COLOR_FILTER_END, nullptr);
   internalMeasure(PERF_PAINT_IMAGE_FILTER_COST, PERF_PAINT_IMAGE_FILTER_START, PERF_PAINT_IMAGE_FILTER_END, nullptr);
-  internalMeasure(PERF_PAINT_INTERSECTION_OBSERVER_COST, PERF_PAINT_INTERSECTION_OBSERVER_START, PERF_PAINT_INTERSECTION_OBSERVER_END, nullptr);
+  internalMeasure(PERF_PAINT_INTERSECTION_OBSERVER_COST, PERF_PAINT_INTERSECTION_OBSERVER_START,
+                  PERF_PAINT_INTERSECTION_OBSERVER_END, nullptr);
   internalMeasure(PERF_PAINT_TRANSFORM_COST, PERF_PAINT_TRANSFORM_START, PERF_PAINT_TRANSFORM_END, nullptr);
   internalMeasure(PERF_PAINT_OPACITY_COST, PERF_PAINT_OPACITY_START, PERF_PAINT_OPACITY_END, nullptr);
   internalMeasure(PERF_PAINT_DECORATION_COST, PERF_PAINT_DECORATION_START, PERF_PAINT_DECORATION_END, nullptr);
   internalMeasure(PERF_PAINT_OVERFLOW_COST, PERF_PAINT_OVERFLOW_START, PERF_PAINT_OVERFLOW_END, nullptr);
   internalMeasure(PERF_PAINT_BACKGROUND_COST, PERF_PAINT_BACKGROUND_START, PERF_PAINT_BACKGROUND_END, nullptr);
+  internalMeasure(PERF_PERFORM_PAINT_COST, PERF_PERFORM_PAINT_START, PERF_PERFORM_PAINT_END, nullptr);
   internalMeasure(PERF_FLOW_PERFORM_PAINT_COST, PERF_FLOW_PERFORM_PAINT_START, PERF_FLOW_PERFORM_PAINT_END, nullptr);
-  internalMeasure(PERF_INTRINSIC_PERFORM_PAINT_COST, PERF_INTRINSIC_PERFORM_PAINT_START, PERF_INTRINSIC_PERFORM_PAINT_END, nullptr);
+  internalMeasure(PERF_INTRINSIC_PERFORM_PAINT_COST, PERF_INTRINSIC_PERFORM_PAINT_START,
+                  PERF_INTRINSIC_PERFORM_PAINT_END, nullptr);
   internalMeasure(PERF_FLEX_PERFORM_PAINT_COST, PERF_FLEX_PERFORM_PAINT_START, PERF_FLEX_PERFORM_PAINT_END, nullptr);
+  internalMeasure(PERF_SILVER_PERFORM_PAINT_COST, PERF_SILVER_PERFORM_PAINT_START, PERF_SILVER_PERFORM_PAINT_END,
+                  nullptr);
 }
 
 #endif
@@ -622,25 +643,22 @@ std::vector<NativePerformanceEntry *> JSPerformance::getFullEntries() {
   std::vector<NativePerformanceEntry *> dartEntries;
   dartEntries.reserve(dartEntryList->length);
 
-  for (size_t i = 0; i < dartEntryList->length * 2; i += 2) {
+  for (size_t i = 0; i < dartEntryList->length * 3; i += 3) {
     const char *name = reinterpret_cast<const char *>(dartEntityBytes[i]);
     int64_t startTime = dartEntityBytes[i + 1];
-    NativePerformanceEntry *nativePerformanceEntry = new NativePerformanceEntry(name, "mark", startTime, 0);
+    int64_t uniqueId = dartEntityBytes[i + 2];
+    NativePerformanceEntry *nativePerformanceEntry = new NativePerformanceEntry(name, "mark", startTime, 0, uniqueId);
     dartEntries.emplace_back(nativePerformanceEntry);
   }
 #endif
 
   std::vector<NativePerformanceEntry *> mergedEntries;
 
-  mergedEntries.insert(mergedEntries.begin(), bridgeEntries.begin(), bridgeEntries.end());
+  mergedEntries.insert(mergedEntries.end(), bridgeEntries.begin(), bridgeEntries.end());
 #if ENABLE_PROFILE
-  mergedEntries.insert(mergedEntries.begin(), dartEntries.begin(), dartEntries.end());
+  mergedEntries.insert(mergedEntries.end(), dartEntries.begin(), dartEntries.end());
   delete[] dartEntryList->entries;
   delete dartEntryList;
-  std::sort(mergedEntries.begin(), mergedEntries.end(),
-            [](NativePerformanceEntry *left, NativePerformanceEntry *right) -> bool {
-              return left->startTime < right->startTime;
-            });
 #endif
 
   return mergedEntries;
@@ -695,16 +713,31 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
       auto startEntry = std::find_if(startIt, entries.end(), [&startMark](NativePerformanceEntry *entry) -> bool {
         return entry->name == startMark;
       });
-      auto endEntry = std::find_if(
-        endIt, entries.end(), [&endMark](NativePerformanceEntry *entry) -> bool { return entry->name == endMark; });
+
+      bool isStartEntryHasUniqueId = (*startEntry)->uniqueId != PERFORMANCE_ENTRY_NONE_UNIQUE_ID;
+
+      auto endEntryComparator = [&endMark, &startEntry,
+                                 isStartEntryHasUniqueId](NativePerformanceEntry *entry) -> bool {
+        if (isStartEntryHasUniqueId) {
+          return entry->uniqueId == (*startEntry)->uniqueId && entry->name == endMark;
+        }
+        return entry->name == endMark;
+      };
+
+      auto endEntry = std::find_if(startEntry, entries.end(), endEntryComparator);
+
+      if (endEntry == entries.end()) {
+        size_t startIndex = startEntry - entries.begin();
+        assert_m(false, ("Can not get endEntry. startIndex: " + std::to_string(startIndex) + " startMark: " + startMark + " endMark: " + endMark));
+      }
 
       int64_t duration = (*endEntry)->startTime - (*startEntry)->startTime;
       int64_t startTime = std::chrono::duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
-      auto *nativePerformanceEntry = new NativePerformanceEntry{name, "measure", startTime, duration};
+      auto *nativePerformanceEntry =
+        new NativePerformanceEntry{name, "measure", startTime, duration, PERFORMANCE_ENTRY_NONE_UNIQUE_ID};
       nativePerformance->entries.emplace_back(nativePerformanceEntry);
-
-      startIt = startEntry;
-      endIt = endEntry;
+      startIt = ++startEntry;
+      endIt = ++endEntry;
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:ffi';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/bridge.dart';
@@ -74,21 +75,26 @@ final String PERF_PAINT_OVERFLOW_START = 'kraken_paint_overflow_start';
 final String PERF_PAINT_OVERFLOW_END = 'kraken_paint_overflow_end';
 final String PERF_PAINT_BACKGROUND_START = 'kraken_paint_background_start';
 final String PERF_PAINT_BACKGROUND_END = 'kraken_paint_background_end';
+final String PERF_PERFORM_PAINT_START = 'kraken_perform_paint_start';
+final String PERF_PERFORM_PAINT_END = 'kraken_perform_paint_end';
 final String PERF_FLOW_PERFORM_PAINT_START = 'kraken_flow_perform_paint_start';
 final String PERF_FLOW_PERFORM_PAINT_END = 'kraken_flow_perform_paint_end';
 final String PERF_INTRINSIC_PERFORM_PAINT_START = 'kraken_intrinsic_perform_paint_start';
 final String PERF_INTRINSIC_PERFORM_PAINT_END = 'kraken_intrinsic_perform_paint_end';
 final String PERF_FLEX_PERFORM_PAINT_START = 'kraken_flex_perform_paint_start';
 final String PERF_FLEX_PERFORM_PAINT_END = 'kraken_flex_perform_paint_end';
+final String PERF_SILVER_PERFORM_PAINT_START = 'kraken_silver_perform_paint_start';
+final String PERF_SILVER_PERFORM_PAINT_END = 'kraken_silver_perform_paint_end';
 
 class PerformanceEntry {
-  PerformanceEntry(this.name, this.entryType, this.startTime, this.duration);
+  PerformanceEntry(this.name, this.startTime, this.uniqueId);
 
   final String name;
-  final String entryType;
   final int startTime;
-  final int duration;
+  final int uniqueId;
 }
+
+Random _random = Random();
 
 class PerformanceTiming {
   static SplayTreeMap<int, PerformanceTiming> _instanceMap = SplayTreeMap();
@@ -102,27 +108,40 @@ class PerformanceTiming {
 
   int entriesSize = 0;
 
-  void mark(String name, [int startTime]) {
+  static int randomNumber() {
+    return _random.nextInt(1 << 32 - 1);
+  }
+
+  void mark(String name, {int startTime, int uniqueId}) {
     if (startTime == null) {
       startTime = DateTime.now().microsecondsSinceEpoch;
     }
 
-    PerformanceEntry entry = PerformanceEntry(name, 'mark', startTime, 0);
+    if (uniqueId == null) {
+      uniqueId = -1024;
+    }
+
+    PerformanceEntry entry = PerformanceEntry(name, startTime, uniqueId);
     entries[entriesSize++] = entry;
   }
 
   Pointer<NativePerformanceEntryList> toNative() {
     Pointer<NativePerformanceEntryList> list = allocate<NativePerformanceEntryList>();
+    int byteLength = entriesSize * 3;
 
-    Uint64List data = Uint64List(entriesSize * 2);
+    Uint64List data = Uint64List(byteLength);
 
-    for (int i = 0; i < entriesSize * 2; i += 2) {
-      data[i] = Utf8.toUtf8(entries[i ~/ 2].name).address;
-      data[i + 1] = entries[i ~/ 2].startTime.toInt();
+    int dataIndex = 0;
+
+    for (int i = 0; i < byteLength; i += 3) {
+      data[i] = Utf8.toUtf8(entries[dataIndex].name).address;
+      data[i + 1] = entries[dataIndex].startTime;
+      data[i + 2] = entries[dataIndex].uniqueId;
+      dataIndex++;
     }
 
-    final Pointer<Uint64> bytes = allocate<Uint64>(count: entriesSize * 2);
-    final Uint64List buffer = bytes.asTypedList(entriesSize * 2);
+    final Pointer<Uint64> bytes = allocate<Uint64>(count: byteLength);
+    final Uint64List buffer = bytes.asTypedList(byteLength);
     buffer.setAll(0, data);
 
     list.ref.length = entriesSize;

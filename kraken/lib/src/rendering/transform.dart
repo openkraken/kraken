@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 
-mixin RenderTransformMixin on RenderBox {
+mixin RenderTransformMixin on RenderBoxModelBase {
 
   Offset get origin => _origin;
   Offset _origin = Offset(0, 0);
@@ -54,10 +54,10 @@ mixin RenderTransformMixin on RenderBox {
 
   TransformLayer _transformLayer;
 
-  void paintTransform(PaintingContext context, Offset offset, int contextId, PaintingContextCallback callback) {
+  void paintTransform(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_transform != null) {
       if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_PAINT_TRANSFORM_START);
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_TRANSFORM_START, uniqueId: targetId);
       }
 
       final Matrix4 transform = getEffectiveTransform();
@@ -69,7 +69,7 @@ mixin RenderTransformMixin on RenderBox {
           transform,
           (context, offset) {
             if (kProfileMode) {
-              PerformanceTiming.instance(contextId).mark(PERF_PAINT_TRANSFORM_END);
+              PerformanceTiming.instance(contextId).mark(PERF_PAINT_TRANSFORM_END, uniqueId: targetId);
             }
             callback(context, offset);
           },
@@ -77,7 +77,7 @@ mixin RenderTransformMixin on RenderBox {
         );
       } else {
         if (kProfileMode) {
-          PerformanceTiming.instance(contextId).mark(PERF_PAINT_TRANSFORM_END);
+          PerformanceTiming.instance(contextId).mark(PERF_PAINT_TRANSFORM_END, uniqueId: targetId);
         }
         callback(context, offset + childOffset);
         _transformLayer = null;

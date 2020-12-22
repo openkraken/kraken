@@ -201,7 +201,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
   TickerProvider get vsync => this;
 }
 
-mixin RenderOverflowMixin on RenderBox {
+mixin RenderOverflowMixin on RenderBoxModelBase {
   ScrollListener scrollListener;
   PointListener pointerListener;
 
@@ -330,12 +330,15 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   // @TODO implement RenderSilver protocol to achieve high performance scroll list.
-  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, int contextId, PaintingContextCallback callback) {
-    if (clipX == false && clipY == false) return callback(context, offset);
+  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, PaintingContextCallback callback) {
+    if (clipX == false && clipY == false) {
+      if (kProfileMode) {
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_END, uniqueId: targetId);
+      }
 
-    if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_START);
-    }
+      callback(context, offset);
+      return;
+    };
 
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
@@ -349,7 +352,7 @@ mixin RenderOverflowMixin on RenderBox {
       // ignore: prefer_function_declarations_over_variables
       PaintingContextCallback painter = (PaintingContext context, Offset offset) {
         if (kProfileMode) {
-          PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_END);
+          PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_END, uniqueId: targetId);
         }
 
         callback(context, offset + paintOffset);
@@ -368,7 +371,7 @@ mixin RenderOverflowMixin on RenderBox {
       }
     } else {
       if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_END);
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_END, uniqueId: targetId);
       }
 
       callback(context, offset);

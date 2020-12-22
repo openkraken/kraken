@@ -53,9 +53,11 @@ namespace kraken::binding::jsc {
 #define PERF_PAINT_DECORATION_COST "kraken_paint_decoration_cost"
 #define PERF_PAINT_OVERFLOW_COST "kraken_paint_overflow_cost"
 #define PERF_PAINT_BACKGROUND_COST "kraken_paint_background_cost"
+#define PERF_PERFORM_PAINT_COST "kraken_perform_paint_cost"
 #define PERF_FLOW_PERFORM_PAINT_COST "kraken_flow_perform_paint_cost"
 #define PERF_INTRINSIC_PERFORM_PAINT_COST "kraken_intrinsic_perform_paint_cost"
 #define PERF_FLEX_PERFORM_PAINT_COST "kraken_flex_perform_paint_cost"
+#define PERF_SILVER_PERFORM_PAINT_COST "kraken_silver_perform_paint_cost"
 
 #define PERF_CONTROLLER_INIT_START "kraken_controller_init_start"
 #define PERF_CONTROLLER_INIT_END "kraken_controller_init_end"
@@ -132,19 +134,23 @@ namespace kraken::binding::jsc {
 #define PERF_PAINT_OVERFLOW_END "kraken_paint_overflow_end"
 #define PERF_PAINT_BACKGROUND_START "kraken_paint_background_start"
 #define PERF_PAINT_BACKGROUND_END "kraken_paint_background_end"
+#define PERF_PERFORM_PAINT_START "kraken_perform_paint_start"
+#define PERF_PERFORM_PAINT_END "kraken_perform_paint_end"
 #define PERF_FLOW_PERFORM_PAINT_START "kraken_flow_perform_paint_start"
 #define PERF_FLOW_PERFORM_PAINT_END "kraken_flow_perform_paint_end"
 #define PERF_INTRINSIC_PERFORM_PAINT_START "kraken_intrinsic_perform_paint_start"
 #define PERF_INTRINSIC_PERFORM_PAINT_END "kraken_intrinsic_perform_paint_end"
 #define PERF_FLEX_PERFORM_PAINT_START "kraken_flex_perform_paint_start"
 #define PERF_FLEX_PERFORM_PAINT_END "kraken_flex_perform_paint_end"
+#define PERF_SILVER_PERFORM_PAINT_START "kraken_silver_perform_paint_start"
+#define PERF_SILVER_PERFORM_PAINT_END "kraken_silver_perform_paint_end"
 #endif
 
 void bindPerformance(std::unique_ptr<JSContext> &context);
 
 struct NativePerformanceEntry {
-  NativePerformanceEntry(const std::string &name, const std::string &entryType, int64_t startTime, int64_t duration)
-    : startTime(startTime), duration(duration) {
+  NativePerformanceEntry(const std::string &name, const std::string &entryType, int64_t startTime, int64_t duration, int64_t uniqueId)
+    : startTime(startTime), duration(duration), uniqueId(uniqueId) {
     this->name = new char[name.size() + 1];
     this->entryType = new char[entryType.size() + 1];
     strcpy(this->name, name.data());
@@ -154,6 +160,7 @@ struct NativePerformanceEntry {
   char *entryType;
   int64_t startTime;
   int64_t duration;
+  int64_t uniqueId;
 };
 
 class JSPerformance;

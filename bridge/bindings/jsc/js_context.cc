@@ -4,9 +4,9 @@
  */
 
 #include "js_context.h"
-#include "bindings/jsc/macros.h"
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/kraken.h"
+#include "bindings/jsc/macros.h"
 #include "dart_methods.h"
 #include <memory>
 #include <mutex>
@@ -163,14 +163,14 @@ JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFu
 }
 
 namespace {
-const JSChar *cloneString(const JSChar* string, size_t length) {
+const JSChar *cloneString(const JSChar *string, size_t length) {
   auto *newString = new JSChar[length];
-  for (size_t i = 0; i < length; i ++) {
+  for (size_t i = 0; i < length; i++) {
     newString[i] = string[i];
   }
   return newString;
 };
-}
+} // namespace
 
 void buildUICommandArgs(JSStringRef key, NativeString &args_01) {
   args_01.length = JSStringGetLength(key);

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/module.dart';
 
 /// Lays the child out as if it was in the tree, but without painting anything,
 /// without making the child available for hit testing, and without taking any

@@ -6,8 +6,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/rendering.dart';
 
-mixin RenderOpacityMixin on RenderBox {
+mixin RenderOpacityMixin on RenderBoxModelBase {
   /// The fraction to scale the child's alpha value.
   ///
   /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
@@ -38,7 +39,7 @@ mixin RenderOpacityMixin on RenderBox {
 
   OpacityLayer _opacityLayer;
 
-  void paintOpacity(PaintingContext context, Offset offset, int contextId, PaintingContextCallback callback) {
+  void paintOpacity(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_alpha == 0) {
       // No need to keep the layer. We'll create a new one if necessary.
       _opacityLayer = null;
@@ -53,12 +54,12 @@ mixin RenderOpacityMixin on RenderBox {
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_OPACITY_START);
+      PerformanceTiming.instance(contextId).mark(PERF_PAINT_OPACITY_START, uniqueId: targetId);
     }
 
     _opacityLayer = context.pushOpacity(offset, _alpha, (context, offset) {
       if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_PAINT_OPACITY_END);
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_OPACITY_END, uniqueId: targetId);
       }
       callback(context, offset);
     }, oldLayer: _opacityLayer);

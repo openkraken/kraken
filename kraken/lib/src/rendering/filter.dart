@@ -2,8 +2,9 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/rendering.dart';
 
-mixin RenderColorFilter on RenderBox {
+mixin RenderColorFilter on RenderBoxModelBase {
   ColorFilter _colorFilter;
   ColorFilter get colorFilter => _colorFilter;
   set colorFilter(ColorFilter value) {
@@ -13,15 +14,16 @@ mixin RenderColorFilter on RenderBox {
     }
   }
 
-  void paintColorFilter(PaintingContext context, Offset offset, int contextId, PaintingContextCallback callback) {
+  void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_colorFilter != null) {
+      print('paint color filter');
       if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_PAINT_COLOR_FILTER_START);
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_COLOR_FILTER_START, uniqueId: targetId);
       }
 
       context.pushColorFilter(offset, _colorFilter, (context, offset) {
         if (kProfileMode) {
-          PerformanceTiming.instance(contextId).mark(PERF_PAINT_COLOR_FILTER_END);
+          PerformanceTiming.instance(contextId).mark(PERF_PAINT_COLOR_FILTER_END, uniqueId: targetId);
         }
 
         callback(context, offset);
@@ -32,7 +34,7 @@ mixin RenderColorFilter on RenderBox {
   }
 }
 
-mixin RenderImageFilter on RenderBox {
+mixin RenderImageFilter on RenderBoxModelBase {
   ImageFilter _imageFilter;
   ImageFilter get imageFilter => _imageFilter;
   set imageFilter(ImageFilter value) {
@@ -44,10 +46,11 @@ mixin RenderImageFilter on RenderBox {
 
   ImageFilterLayer _imageFilterLayer;
 
-  void paintImageFilter(PaintingContext context, Offset offset, int contextId, PaintingContextCallback callback) {
+  void paintImageFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_imageFilter != null) {
+      print('print image filter');
       if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_PAINT_IMAGE_FILTER_START);
+        PerformanceTiming.instance(contextId).mark(PERF_PAINT_IMAGE_FILTER_START, uniqueId: targetId);
       }
 
       _imageFilterLayer ??= ImageFilterLayer();
@@ -55,7 +58,7 @@ mixin RenderImageFilter on RenderBox {
 
       context.pushLayer(_imageFilterLayer, (context, offset) {
         if (kProfileMode) {
-          PerformanceTiming.instance(contextId).mark(PERF_PAINT_IMAGE_FILTER_END);
+          PerformanceTiming.instance(contextId).mark(PERF_PAINT_IMAGE_FILTER_END, uniqueId: targetId);
         }
         callback(context, offset);
       }, offset);

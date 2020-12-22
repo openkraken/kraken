@@ -17,17 +17,15 @@ bool _firstView = true;
 
 /// Init bridge
 int initBridge() {
-  DateTime registerDartMethodStart;
   if (kProfileMode) {
-    registerDartMethodStart = DateTime.now();
+    PerformanceTiming.instance(0).mark(PERF_BRIDGE_REGISTER_DART_METHOD_START);
   }
 
   // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
 
-  DateTime registerDartMethodEnd;
   if (kProfileMode) {
-    registerDartMethodEnd = DateTime.now();
+    PerformanceTiming.instance(0).mark(PERF_BRIDGE_REGISTER_DART_METHOD_END);
   }
 
   int contextId = -1;
@@ -56,11 +54,6 @@ int initBridge() {
     if (contextId == -1) {
       throw Exception('can\' allocate new kraken js Bridge: bridge count had reach the maximum size.');
     }
-  }
-
-  if (kProfileMode) {
-    PerformanceTiming.instance(contextId).mark(PERF_BRIDGE_REGISTER_DART_METHOD_START, registerDartMethodStart.microsecondsSinceEpoch);
-    PerformanceTiming.instance(contextId).mark(PERF_BRIDGE_REGISTER_DART_METHOD_END, registerDartMethodEnd.microsecondsSinceEpoch);
   }
 
   return contextId;

@@ -55,9 +55,8 @@ class KrakenViewController {
     this.rootController,
     this.navigationDelegate,
   }) : _contextId = contextId {
-    DateTime viewControllerPropertyInit;
     if (kProfileMode) {
-      viewControllerPropertyInit = DateTime.now();
+      PerformanceTiming.instance(0).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
     }
 
     if (enableDebug) {
@@ -65,9 +64,8 @@ class KrakenViewController {
       debugPaintSizeEnabled = true;
     }
 
-    DateTime bridgeInitStart;
     if (kProfileMode) {
-      bridgeInitStart = DateTime.now();
+      PerformanceTiming.instance(0).mark(PERF_BRIDGE_INIT_START);
     }
 
     if (_contextId == null) {
@@ -75,7 +73,6 @@ class KrakenViewController {
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_START, bridgeInitStart.microsecondsSinceEpoch);
       PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_END);
     }
 
@@ -109,7 +106,7 @@ class KrakenViewController {
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT, viewControllerPropertyInit.microsecondsSinceEpoch);
+
     }
   }
 
@@ -205,92 +202,92 @@ class KrakenViewController {
 
   Element createElement(int id, Pointer nativePtr, String tagName) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_ELEMENT_START);
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_ELEMENT_START, uniqueId: id);
     }
     Element result = _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_ELEMENT_END);
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_ELEMENT_END, uniqueId: id);
     }
     return result;
   }
 
   void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_TEXT_NODE_START);
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_TEXT_NODE_START, uniqueId: id);
     }
     _elementManager.createTextNode(id, nativePtr, data);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_TEXT_NODE_END);
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_TEXT_NODE_END, uniqueId: id);
     }
   }
 
   void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_COMMENT_START);
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_COMMENT_START, uniqueId: id);
     }
     _elementManager.createComment(id, nativePtr, data);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_COMMENT_END);
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_COMMENT_END, uniqueId: id);
     }
   }
 
   void addEvent(int targetId, String eventType) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_ADD_EVENT_START);
+      PerformanceTiming.instance(contextId).mark(PERF_ADD_EVENT_START, uniqueId: targetId);
     }
     _elementManager.addEvent(targetId, eventType);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_ADD_EVENT_END);
+      PerformanceTiming.instance(contextId).mark(PERF_ADD_EVENT_END, uniqueId: targetId);
     }
   }
 
   void insertAdjacentNode(int targetId, String position, int childId) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_INSERT_ADJACENT_NODE_START);
+      PerformanceTiming.instance(contextId).mark(PERF_INSERT_ADJACENT_NODE_START, uniqueId: targetId);
     }
     _elementManager.insertAdjacentNode(targetId, position, childId);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_INSERT_ADJACENT_NODE_END);
+      PerformanceTiming.instance(contextId).mark(PERF_INSERT_ADJACENT_NODE_END, uniqueId: targetId);
     }
   }
 
   void removeNode(int targetId) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_REMOVE_NODE_START);
+      PerformanceTiming.instance(contextId).mark(PERF_REMOVE_NODE_START, uniqueId: targetId);
     }
     _elementManager.removeNode(targetId);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_REMOVE_NODE_END);
+      PerformanceTiming.instance(contextId).mark(PERF_REMOVE_NODE_END, uniqueId: targetId);
     }
   }
 
   void setStyle(int targetId, String key, String value) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_START);
+      PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_START, uniqueId: targetId);
     }
     _elementManager.setStyle(targetId, key, value);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_END);
+      PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_END, uniqueId: targetId);
     }
   }
 
   void setProperty(int targetId, String key, String value) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_START);
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
     }
     _elementManager.setProperty(targetId, key, value);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_END);
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
     }
   }
 
   void removeProperty(int targetId, String key) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_START);
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
     }
     _elementManager.removeProperty(targetId, key);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_END);
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
     }
   }
 
@@ -426,10 +423,9 @@ class KrakenController {
   })  : _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent {
-    DateTime controllerPropertyInit;
-    DateTime viewControllerInit;
     if (kProfileMode) {
-      controllerPropertyInit = viewControllerInit = DateTime.now();
+      PerformanceTiming.instance(0).mark(PERF_CONTROLLER_PROPERTY_INIT);
+      PerformanceTiming.instance(0).mark(PERF_VIEW_CONTROLLER_INIT_START);
     }
 
     _methodChannel = methodChannel;
@@ -441,7 +437,6 @@ class KrakenController {
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate());
 
     if (kProfileMode) {
-      PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_START, viewControllerInit.microsecondsSinceEpoch);
       PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
 
@@ -451,11 +446,6 @@ class KrakenController {
     _controllerMap[_view.contextId] = this;
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
-
-    if (kProfileMode) {
-      PerformanceTiming.instance(view.contextId)
-          .mark(PERF_CONTROLLER_PROPERTY_INIT, controllerPropertyInit.microsecondsSinceEpoch);
-    }
   }
 
   KrakenViewController _view;

@@ -11,7 +11,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 
 class RenderIntrinsic extends RenderBoxModel
-    with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
+    with RenderObjectWithChildMixin<RenderBox> {
   RenderIntrinsic(int targetId, CSSStyleDeclaration style, ElementManager elementManager)
       : super(targetId: targetId, style: style, elementManager: elementManager);
 
@@ -46,17 +46,30 @@ class RenderIntrinsic extends RenderBoxModel
   @override
   void performLayout() {
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_START);
+      childLayoutDuration = 0;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: targetId);
     }
 
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
       return;
     }
 
     beforeLayout();
     if (child != null) {
+      DateTime childLayoutStart;
+      if (kProfileMode) {
+        childLayoutStart = DateTime.now();
+      }
+
       child.layout(contentConstraints, parentUsesSize: true);
+
+      if (kProfileMode) {
+        DateTime childLayoutEnd = DateTime.now();
+        childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch) - childLayoutStart.microsecondsSinceEpoch;
+      }
+
       setMaxScrollableSize(child.size.width, child.size.height);
 
       CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
@@ -111,28 +124,14 @@ class RenderIntrinsic extends RenderBoxModel
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END);
-    }
-  }
-
-  /// This class mixin [RenderProxyBoxMixin], which has its' own paint method,
-  /// override it to layout box model paint.
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_START);
-    }
-    if (isCSSDisplayNone || isCSSVisibilityHidden) return;
-    paintBoxModel(context, offset);
-    if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END);
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
     }
   }
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_PERFORM_PAINT_START);
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_PERFORM_PAINT_START, uniqueId: targetId);
     }
 
     if (padding != null) {
@@ -148,7 +147,7 @@ class RenderIntrinsic extends RenderBoxModel
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_PERFORM_PAINT_END);
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_PERFORM_PAINT_END, uniqueId: targetId);
     }
   }
 
