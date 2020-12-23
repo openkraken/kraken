@@ -11,12 +11,14 @@ class Document extends Node {
       : assert(targetId != null),
         super(NodeType.DOCUMENT_NODE, targetId, nativeDocumentPtr.ref.nativeNode, elementManager, '#document');
 
+  void _handleEvent(Event event) {
+    emitUIEvent(elementManager.controller.view.contextId, nativeDocumentPtr.ref.nativeNode.ref.nativeEventTarget, event);
+  }
+
   @override
   void addEvent(String eventName) {
     super.addEvent(eventName);
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
-    addEventListener(eventName, (Event event) {
-      emitUIEvent(elementManager.controller.view.contextId, nativeDocumentPtr.ref.nativeNode.ref.nativeEventTarget, event);
-    });
+    addEventListener(eventName, _handleEvent);
   }
 }
