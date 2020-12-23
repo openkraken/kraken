@@ -782,13 +782,13 @@ class RenderFlexLayout extends RenderLayoutBox {
   void performLayout() {
     if (kProfileMode) {
       childLayoutDuration = 0;
-      PerformanceTiming.instance(contextId).mark(PERF_FLEX_LAYOUT_START, uniqueId: targetId);
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_START, uniqueId: targetId);
     }
 
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId);
+        PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId);
       }
       return;
     }
@@ -829,7 +829,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (kProfileMode) {
       DateTime flexLayoutEndTime = DateTime.now();
       int amendEndTime = flexLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
-      PerformanceTiming.instance(contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 
@@ -2277,10 +2277,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_START, uniqueId: targetId);
-    }
-
     if (needsSortChildren) {
       if (!isChildrenSorted) {
         sortChildrenByZIndex();
@@ -2318,12 +2314,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
         child = childParentData.nextSibling;
       }
-    }
-
-    if (kProfileMode) {
-      DateTime flexLayoutEndTime = DateTime.now();
-      int amendEndTime = flexLayoutEndTime.microsecondsSinceEpoch - childPaintDuration;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_PERFORM_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 

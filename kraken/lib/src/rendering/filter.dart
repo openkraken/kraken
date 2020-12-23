@@ -1,10 +1,7 @@
 import 'dart:ui' show ImageFilter;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/module.dart';
-import 'package:kraken/rendering.dart';
 
-mixin RenderColorFilter on RenderBoxModelBase {
+mixin RenderColorFilter on RenderBox {
   ColorFilter _colorFilter;
   ColorFilter get colorFilter => _colorFilter;
   set colorFilter(ColorFilter value) {
@@ -16,25 +13,14 @@ mixin RenderColorFilter on RenderBoxModelBase {
 
   void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_colorFilter != null) {
-      print('paint color filter');
-      if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_PAINT_COLOR_FILTER_START, uniqueId: targetId);
-      }
-
-      context.pushColorFilter(offset, _colorFilter, (context, offset) {
-        if (kProfileMode) {
-          PerformanceTiming.instance(contextId).mark(PERF_PAINT_COLOR_FILTER_END, uniqueId: targetId);
-        }
-
-        callback(context, offset);
-      });
+      context.pushColorFilter(offset, _colorFilter, callback);
     } else {
       callback(context, offset);
     }
   }
 }
 
-mixin RenderImageFilter on RenderBoxModelBase {
+mixin RenderImageFilter on RenderBox {
   ImageFilter _imageFilter;
   ImageFilter get imageFilter => _imageFilter;
   set imageFilter(ImageFilter value) {
@@ -48,20 +34,10 @@ mixin RenderImageFilter on RenderBoxModelBase {
 
   void paintImageFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_imageFilter != null) {
-      print('print image filter');
-      if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_PAINT_IMAGE_FILTER_START, uniqueId: targetId);
-      }
-
       _imageFilterLayer ??= ImageFilterLayer();
       _imageFilterLayer.imageFilter = imageFilter;
 
-      context.pushLayer(_imageFilterLayer, (context, offset) {
-        if (kProfileMode) {
-          PerformanceTiming.instance(contextId).mark(PERF_PAINT_IMAGE_FILTER_END, uniqueId: targetId);
-        }
-        callback(context, offset);
-      }, offset);
+      context.pushLayer(_imageFilterLayer, callback, offset);
     } else {
       callback(context, offset);
     }

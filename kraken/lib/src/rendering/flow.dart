@@ -555,7 +555,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_FLOW_LAYOUT_END, uniqueId: targetId);
+        PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_END, uniqueId: targetId);
       }
       return;
     }
@@ -1204,10 +1204,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_PERFORM_PAINT_START, uniqueId: targetId);
-    }
-
     if (needsSortChildren) {
       if (!isChildrenSorted) {
         sortChildrenByZIndex();
@@ -1243,12 +1239,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
         child = childParentData.nextSibling;
       }
-    }
-
-    if (kProfileMode) {
-      int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_PERFORM_PAINT_END,
-          uniqueId: targetId, startTime: amendEndTime);
     }
   }
 

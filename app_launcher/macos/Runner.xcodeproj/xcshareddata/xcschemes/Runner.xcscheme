@@ -83,7 +83,7 @@
          <EnvironmentVariable
             key = "ENABLE_KRAKEN_JS_LOG"
             value = "true"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </EnvironmentVariable>
       </EnvironmentVariables>
    </LaunchAction>

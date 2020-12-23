@@ -130,10 +130,6 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_PERFORM_PAINT_START, uniqueId: targetId);
-    }
-
     if (padding != null) {
       offset += Offset(paddingLeft, paddingTop);
     }
@@ -152,11 +148,6 @@ class RenderIntrinsic extends RenderBoxModel
         DateTime childPaintEnd = DateTime.now();
         childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
       }
-    }
-
-    if (kProfileMode) {
-      int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_PERFORM_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 

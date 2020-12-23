@@ -9,7 +9,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/gesture.dart';
-import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'ticker_provider.dart';
 
@@ -201,7 +200,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
   TickerProvider get vsync => this;
 }
 
-mixin RenderOverflowMixin on RenderBoxModelBase {
+mixin RenderOverflowMixin on RenderBox {
   ScrollListener scrollListener;
   PointListener pointerListener;
 
@@ -332,10 +331,6 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
   // @TODO implement RenderSilver protocol to achieve high performance scroll list.
   void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) {
-      if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_END, uniqueId: targetId);
-      }
-
       callback(context, offset);
       return;
     };
@@ -351,10 +346,6 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     if (_shouldClipAtPaintOffset(paintOffset, size)) {
       // ignore: prefer_function_declarations_over_variables
       PaintingContextCallback painter = (PaintingContext context, Offset offset) {
-        if (kProfileMode) {
-          PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_END, uniqueId: targetId);
-        }
-
         callback(context, offset + paintOffset);
       };
       if (decoration != null && decoration.borderRadius != null) {
@@ -370,10 +361,6 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
         context.pushClipRect(needsCompositing, offset, clipRect, painter);
       }
     } else {
-      if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_PAINT_OVERFLOW_END, uniqueId: targetId);
-      }
-
       callback(context, offset);
     }
   }

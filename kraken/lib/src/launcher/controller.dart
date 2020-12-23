@@ -104,10 +104,6 @@ class KrakenViewController {
     if ((kDebugMode || kProfileMode) && rootController.debugEnableInspector != false) {
       debugStartInspector();
     }
-
-    if (kProfileMode) {
-
-    }
   }
 
   /// Used for debugger inspector.

@@ -222,15 +222,8 @@ class RenderLayoutBox extends RenderBoxModel
   }
 }
 
-mixin RenderBoxModelBase on RenderBox {
-  // id of current element
-  int targetId;
-  int contextId;
-}
-
 class RenderBoxModel extends RenderBox
     with
-        RenderBoxModelBase,
         RenderPaddingMixin,
         RenderMarginMixin,
         RenderBoxDecorationMixin,
@@ -245,14 +238,11 @@ class RenderBoxModel extends RenderBox
         RenderImageFilter,
         RenderObjectWithControllerMixin {
   RenderBoxModel({
-    int targetId,
+    this.targetId,
     this.style,
     this.elementManager,
   })  : assert(targetId != null),
-        super() {
-    this.targetId = targetId;
-    contextId = elementManager.contextId;
-  }
+        super();
 
   @override
   bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
@@ -308,6 +298,9 @@ class RenderBoxModel extends RenderBox
       _recalGradient = value;
     }
   }
+
+  // id of current element
+  int targetId;
 
   // Element style;
   CSSStyleDeclaration style;
@@ -1038,16 +1031,16 @@ class RenderBoxModel extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     if (kProfileMode) {
       childPaintDuration = 0;
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_START, uniqueId: targetId);
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_START, uniqueId: targetId);
     }
     if (isCSSDisplayNone || isCSSVisibilityHidden) {
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_END, uniqueId: targetId);
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END, uniqueId: targetId);
       return;
     };
     paintBoxModel(context, offset);
     if (kProfileMode) {
       int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 
@@ -1079,16 +1072,8 @@ class RenderBoxModel extends RenderBox
   }
 
   void _chainPaintDecoration(PaintingContext context, Offset offset) {
-    if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_DECORATION_START, uniqueId: targetId);
-    }
-
     EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
     paintDecoration(context, offset, resolvedPadding, style);
-
-    if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_DECORATION_END, uniqueId: targetId);
-    }
 
     _chainPaintOverflow(context, offset);
   }
@@ -1105,15 +1090,8 @@ class RenderBoxModel extends RenderBox
   }
 
   void _chainPaintBackground(PaintingContext context, Offset offset) {
-    if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_BACKGROUND_START, uniqueId: targetId);
-    }
     EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
     paintBackground(context, offset, resolvedPadding, style);
-
-    if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_BACKGROUND_END, uniqueId: targetId);
-    }
 
     _chainPaintContentVisibility(context, offset);
   }
@@ -1123,16 +1101,7 @@ class RenderBoxModel extends RenderBox
   }
 
   void _chainPaintOverlay(PaintingContext context, Offset offset) {
-    if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_PERFORM_PAINT_START, uniqueId: targetId);
-    }
-
     performPaint(context, offset);
-
-    if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_PERFORM_PAINT_END,
-          uniqueId: targetId, startTime: DateTime.now().microsecondsSinceEpoch - childPaintDuration);
-    }
 
     if (_debugShouldPaintOverlay) {
       debugPaintOverlay(context, offset);

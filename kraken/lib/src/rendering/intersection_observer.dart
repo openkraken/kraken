@@ -4,8 +4,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/module.dart';
-import 'package:kraken/rendering.dart';
 
 /// Returns a sequence containing the specified [Layer] and all of its
 /// ancestors.  The returned sequence is in [parent, child] order.
@@ -49,7 +47,7 @@ Rect _localRectToGlobal(Layer layer, Rect localRect) {
 
 typedef IntersectionChangeCallback = void Function(IntersectionObserverEntry info);
 
-mixin RenderIntersectionObserverMixin on RenderBoxModelBase {
+mixin RenderIntersectionObserverMixin on RenderBox {
 
   IntersectionChangeCallback _onIntersectionChange;
 
@@ -107,10 +105,6 @@ mixin RenderIntersectionObserverMixin on RenderBoxModelBase {
       return;
     }
 
-    if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_PAINT_INTERSECTION_OBSERVER_START, uniqueId: targetId);
-    }
-
     if (_intersectionObserverLayer == null) {
       _intersectionObserverLayer = IntersectionObserverLayer(
         elementSize: size, paintOffset: offset, onIntersectionChange: _onIntersectionChange);
@@ -119,13 +113,7 @@ mixin RenderIntersectionObserverMixin on RenderBoxModelBase {
       _intersectionObserverLayer.paintOffset = offset;
     }
 
-    context.pushLayer(_intersectionObserverLayer, (context, offset) {
-      if (kProfileMode) {
-        PerformanceTiming.instance(contextId).mark(PERF_PAINT_INTERSECTION_OBSERVER_END, uniqueId: targetId);
-      }
-
-      callback(context, offset);
-    }, offset);
+    context.pushLayer(_intersectionObserverLayer, callback, offset);
   }
 }
 
