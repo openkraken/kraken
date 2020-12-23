@@ -647,8 +647,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         RenderBoxModel childRenderBoxModel = positionHolder.realDisplayedBox;
         if (childRenderBoxModel != null) {
           RenderLayoutParentData childParentData = childRenderBoxModel.parentData;
-          if (childParentData.position != CSSPositionType.static &&
-              childParentData.position != CSSPositionType.relative) childMainAxisExtent = childCrossAxisExtent = 0;
+          if (childParentData.isPositioned) {
+            childMainAxisExtent = childCrossAxisExtent = 0;
+          }
         }
       }
 

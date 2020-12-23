@@ -15,34 +15,11 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
 
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
-  /// The distance by which the child's top edge is inset from the top of the stack.
-  double top;
-
-  /// The distance by which the child's right edge is inset from the right of the stack.
-  double right;
-
-  /// The distance by which the child's bottom edge is inset from the bottom of the stack.
-  double bottom;
-
-  /// The distance by which the child's left edge is inset from the left of the stack.
-  double left;
-
-  /// The child's width.
-  ///
-  /// Ignored if both left and right are non-null.
-  double width;
-
-  /// The child's height.
-  ///
-  /// Ignored if both top and bottom are non-null.
-  double height;
-
   bool isPositioned = false;
 
   /// Row index of child when wrapping
   int runIndex = 0;
 
-  int zIndex = 0;
   CSSPositionType position = CSSPositionType.static;
 
   // Whether offset is already set
@@ -50,7 +27,7 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
 
   @override
   String toString() {
-    return 'zIndex=$zIndex; position=$position; isPositioned=$isPositioned; top=$top; left=$left; bottom=$bottom; right=$right; ${super.toString()}; runIndex: $runIndex;';
+    return 'isPositioned=$isPositioned; ${super.toString()}; runIndex: $runIndex;';
   }
 }
 
@@ -138,18 +115,18 @@ class RenderLayoutBox extends RenderBoxModel
   void sortChildrenByZIndex() {
     List<RenderObject> children = getChildrenAsList();
     children.sort((RenderObject prev, RenderObject next) {
-      RenderLayoutParentData prevParentData = prev.parentData;
-      RenderLayoutParentData nextParentData = next.parentData;
+      CSSPositionType prevPosition = prev is RenderBoxModel ? prev.renderStyle.position : CSSPositionType.static;
+      CSSPositionType nextPosition = next is RenderBoxModel ? next.renderStyle.position : CSSPositionType.static;
       // Place positioned element after non positioned element
-      if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
+      if (prevPosition == CSSPositionType.static && nextPosition != CSSPositionType.static) {
         return -1;
       }
-      if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
+      if (prevPosition != CSSPositionType.static && nextPosition == CSSPositionType.static) {
         return 1;
       }
       // z-index applies to flex-item ignoring position property
-      int prevZIndex = prevParentData.zIndex ?? 0;
-      int nextZIndex = nextParentData.zIndex ?? 0;
+      int prevZIndex = prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? 0) : 0;
+      int nextZIndex = next is RenderBoxModel ? (next.renderStyle.zIndex ?? 0) : 0;
       return prevZIndex - nextZIndex;
     });
     sortedChildren = children;
@@ -904,19 +881,19 @@ class RenderBoxModel extends RenderBox with
   void setMaximumScrollableSizeForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
     double maxScrollableX = maxScrollableSize.width;
     double maxScrollableY = maxScrollableSize.height;
-    if (childParentData.left != null) {
-      maxScrollableX = math.max(maxScrollableX, childParentData.left + childSize.width);
+    if (renderStyle.left != null) {
+      maxScrollableX = math.max(maxScrollableX, renderStyle.left + childSize.width);
     }
 
-    if (childParentData.right != null) {
-      maxScrollableX = math.max(maxScrollableX, -childParentData.right + _contentSize.width);
+    if (renderStyle.right != null) {
+      maxScrollableX = math.max(maxScrollableX, -renderStyle.right + _contentSize.width);
     }
 
-    if (childParentData.top != null) {
-      maxScrollableY = math.max(maxScrollableY, childParentData.top + childSize.height);
+    if (renderStyle.top != null) {
+      maxScrollableY = math.max(maxScrollableY, renderStyle.top + childSize.height);
     }
-    if (childParentData.bottom != null) {
-      maxScrollableY = math.max(maxScrollableY, -childParentData.bottom + _contentSize.height);
+    if (renderStyle.bottom != null) {
+      maxScrollableY = math.max(maxScrollableY, -renderStyle.bottom + _contentSize.height);
     }
 
     maxScrollableSize = Size(maxScrollableX, maxScrollableY);
@@ -1062,7 +1039,7 @@ class RenderBoxModel extends RenderBox with
           offset: Offset(-scrollLeft, -scrollTop),
           position: position,
           hitTest: (BoxHitTestResult result, Offset position) {
-            CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
+            CSSPositionType positionType = renderStyle.position;
             if (positionType == CSSPositionType.fixed) {
               position -= getTotalScrollOffset();
             }

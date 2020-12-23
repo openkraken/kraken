@@ -91,11 +91,9 @@ class AudioElement extends MediaElement {
   }
 
   void _updateSizedBox() {
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-    double w = style.contains(WIDTH) ? CSSLength.toDisplayPortValue(style[WIDTH], viewportSize) : null;
-    double h = style.contains(HEIGHT) ? CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize) : null;
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    double w = style.contains(WIDTH) ? renderStyle.width : null;
+    double h = style.contains(HEIGHT) ? renderStyle.height : null;
     _sizedBox.additionalConstraints = BoxConstraints.tight(Size(w ?? defaultWidth, h ?? defaultHeight));
   }
 

@@ -81,7 +81,6 @@ class Element extends Node
         CSSOpacityMixin,
         CSSTransformMixin,
         CSSVisibilityMixin,
-        CSSOffsetMixin,
         CSSContentVisibilityMixin,
         CSSTransitionMixin,
         CSSFilterEffectsMixin {
@@ -233,7 +232,8 @@ class Element extends Node
   void layoutStickyChild(Element child, double scrollOffset, AxisDirection axisDirection) {
     CSSStyleDeclaration childStyle = child.style;
     bool isFixed = false;
-    RenderBox childRenderBoxModel = child.renderBoxModel;
+    RenderBoxModel childRenderBoxModel = child.renderBoxModel;
+    RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
 
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
@@ -280,17 +280,13 @@ class Element extends Node
     double minOffsetX = 0;
     double maxOffsetX = parentContainer.size.width - childWidth;
 
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
       double viewPortHeight = renderBoxModel?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
-        double top = CSSLength.toDisplayPortValue(childStyle[TOP], viewportSize) + resolvedPadding.top;
+        double top = childRenderStyle.top + resolvedPadding.top;
         isFixed = offsetTop < top;
         if (isFixed) {
           offsetY += top - offsetTop;
@@ -299,7 +295,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains(BOTTOM)) {
-        double bottom = CSSLength.toDisplayPortValue(childStyle[BOTTOM], viewportSize) + resolvedPadding.bottom;
+        double bottom = childRenderStyle.bottom + resolvedPadding.bottom;
         isFixed = offsetBottom < bottom;
         if (isFixed) {
           offsetY += offsetBottom - bottom;
@@ -326,7 +322,7 @@ class Element extends Node
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
-        double left = CSSLength.toDisplayPortValue(childStyle[LEFT], viewportSize) + resolvedPadding.left;
+        double left = childRenderStyle.left + resolvedPadding.left;
         isFixed = offsetLeft < left;
         if (isFixed) {
           offsetX += left - offsetLeft;
@@ -335,7 +331,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains(RIGHT)) {
-        double right = CSSLength.toDisplayPortValue(childStyle[RIGHT], viewportSize) + resolvedPadding.right;
+        double right = childRenderStyle.right + resolvedPadding.right;
         isFixed = offsetRight < right;
         if (isFixed) {
           offsetX += offsetRight - right;
@@ -438,7 +434,7 @@ class Element extends Node
   }
 
   void addChildRenderObject(Element child, {RenderObject after}) {
-    CSSPositionType positionType = CSSPositionedLayout.parsePositionType(child.style[POSITION]);
+    CSSPositionType positionType = child.renderBoxModel.renderStyle.position;
     switch (positionType) {
       case CSSPositionType.absolute:
       case CSSPositionType.fixed:
@@ -634,16 +630,13 @@ class Element extends Node
         return;
     }
 
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
     Size preferredSize = Size.zero;
     CSSDisplay childDisplay = CSSSizing.getDisplay(child.style[DISPLAY]);
+    RenderStyle childRenderStyle = child.renderBoxModel.renderStyle;
     if (childDisplay != CSSDisplay.inline || (position != CSSPositionType.static)) {
       preferredSize = Size(
-        CSSLength.toDisplayPortValue(child.style[WIDTH], viewportSize) ?? 0,
-        CSSLength.toDisplayPortValue(child.style[HEIGHT], viewportSize) ?? 0,
+        childRenderStyle.width ?? 0,
+        childRenderStyle.height ?? 0,
       );
     }
 
@@ -878,9 +871,10 @@ class Element extends Node
 
   void _stylePositionChangedListener(String property, String original, String present) {
     /// Update position.
-    CSSPositionType prevPosition = CSSPositionedLayout.parsePositionType(original);
-    CSSPositionType currentPosition = CSSPositionedLayout.parsePositionType(present);
+    CSSPositionType prevPosition = CSSPositionMixin.parsePositionType(original);
+    CSSPositionType currentPosition = CSSPositionMixin.parsePositionType(present);
 
+    renderBoxModel.renderStyle.updatePosition(property, present);
     // Position changed.
     if (prevPosition != currentPosition) {
       _updatePosition(prevPosition, currentPosition);
@@ -888,7 +882,7 @@ class Element extends Node
   }
 
   void _styleOffsetChangedListener(String property, String original, String present) {
-    updateRenderOffset(renderBoxModel, property, present);
+    renderBoxModel.renderStyle.updateOffset(property, present);
   }
 
   void _styleTextAlignChangedListener(String property, String original, String present) {

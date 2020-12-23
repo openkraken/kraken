@@ -5,32 +5,23 @@ import 'package:kraken/css.dart';
 
 // CSS Positioned Layout: https://drafts.csswg.org/css-position/
 
-enum CSSPositionType {
-  static,
-  relative,
-  absolute,
-  fixed,
-  sticky,
-}
-
-Offset _getRelativeOffset(CSSStyleDeclaration style, Size viewportSize) {
-  CSSPositionType position = CSSPositionedLayout.parsePositionType(style[POSITION]);
-  if (position == CSSPositionType.relative) {
+Offset _getRelativeOffset(RenderStyle renderStyle) {
+  CSSStyleDeclaration style = renderStyle.style;
+  if (renderStyle.position == CSSPositionType.relative) {
     double dx;
     double dy;
 
-    // @TODO support auto value
     if (style.contains(LEFT) && style[LEFT] != AUTO) {
-      dx = CSSLength.toDisplayPortValue(style[LEFT], viewportSize);
+      dx = renderStyle.left;
     } else if (style.contains(RIGHT) && style[RIGHT] != AUTO) {
-      var _dx = CSSLength.toDisplayPortValue(style[RIGHT], viewportSize);
+      double _dx = renderStyle.right;
       if (_dx != null) dx = -_dx;
     }
 
     if (style.contains(TOP) && style[TOP] != AUTO) {
-      dy = CSSLength.toDisplayPortValue(style[TOP], viewportSize);
+      dy = renderStyle.top;
     } else if (style.contains(BOTTOM) && style[BOTTOM] != AUTO) {
-      var _dy = CSSLength.toDisplayPortValue(style[BOTTOM], viewportSize);
+      double _dy = renderStyle.bottom;
       if (_dy != null) dy = -_dy;
     }
 
@@ -88,31 +79,24 @@ Offset _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, RenderO
 // which will override the default position rule
 // https://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width
 Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel child, Size parentSize) {
+  RenderStyle childRenderStyle = child.renderStyle;
   CSSStyleDeclaration childStyle = child.style;
   String marginLeft = childStyle[MARGIN_LEFT];
   String marginRight = childStyle[MARGIN_RIGHT];
   String marginTop = childStyle[MARGIN_TOP];
   String marginBottom = childStyle[MARGIN_BOTTOM];
-  String width = childStyle[WIDTH];
-  String height = childStyle[HEIGHT];
   String left = childStyle[LEFT];
   String right = childStyle[RIGHT];
   String top = childStyle[TOP];
   String bottom = childStyle[BOTTOM];
 
-  ElementManager elementManager = child.elementManager;
-  double viewportWidth = elementManager.viewportWidth;
-  double viewportHeight = elementManager.viewportHeight;
-  Size viewportSize = Size(viewportWidth, viewportHeight);
-
   // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
   // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
   if ((left.isNotEmpty && left != AUTO) &&
-      (right.isNotEmpty && right != AUTO) &&
-      (width.isNotEmpty && width != AUTO)) {
+      (right.isNotEmpty && right != AUTO)) {
     if (marginLeft == AUTO) {
-      double leftValue = CSSLength.toDisplayPortValue(left, viewportSize) ?? 0.0;
-      double rightValue = CSSLength.toDisplayPortValue(right, viewportSize) ?? 0.0;
+      double leftValue = childRenderStyle.left ?? 0.0;
+      double rightValue = childRenderStyle.right ?? 0.0;
       double remainingSpace = parentSize.width - child.boxSize.width - leftValue - rightValue;
 
       if (marginRight == AUTO) {
@@ -124,11 +108,10 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   }
 
   if ((top.isNotEmpty && top != AUTO) &&
-      (bottom.isNotEmpty && bottom != AUTO) &&
-      (height.isNotEmpty && height != AUTO)) {
+      (bottom.isNotEmpty && bottom != AUTO)) {
     if (marginTop == AUTO) {
-      double topValue = CSSLength.toDisplayPortValue(top, viewportSize) ?? 0.0;
-      double bottomValue = CSSLength.toDisplayPortValue(bottom, viewportSize) ?? 0.0;
+      double topValue = childRenderStyle.top ?? 0.0;
+      double bottomValue = childRenderStyle.bottom ?? 0.0;
       double remainingSpace = parentSize.height - child.boxSize.height - topValue - bottomValue;
 
       if (marginBottom == AUTO) {
@@ -142,47 +125,9 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
 }
 
 class CSSPositionedLayout {
-  static CSSPositionType parsePositionType(String input) {
-    switch (input) {
-      case RELATIVE:
-        return CSSPositionType.relative;
-      case ABSOLUTE:
-        return CSSPositionType.absolute;
-      case FIXED:
-        return CSSPositionType.fixed;
-      case STICKY:
-        return CSSPositionType.sticky;
-    }
-    return CSSPositionType.static;
-  }
-
   static RenderLayoutParentData getPositionParentData(RenderBoxModel renderBoxModel, RenderLayoutParentData parentData) {
-    CSSStyleDeclaration style = renderBoxModel.style;
-    CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
-    parentData.position = positionType;
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
-    if (style.contains(TOP)) {
-      parentData.top = CSSLength.toDisplayPortValue(style[TOP], viewportSize);
-    }
-    if (style.contains(LEFT)) {
-      parentData.left = CSSLength.toDisplayPortValue(style[LEFT], viewportSize);
-    }
-    if (style.contains(BOTTOM)) {
-      parentData.bottom = CSSLength.toDisplayPortValue(style[BOTTOM], viewportSize);
-    }
-    if (style.contains(RIGHT)) {
-      parentData.right = CSSLength.toDisplayPortValue(style[RIGHT], viewportSize);
-    }
-    parentData.width = CSSLength.toDisplayPortValue(style[WIDTH], viewportSize) ?? 0;
-    parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize) ?? 0;
-    parentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
-
+    CSSPositionType positionType = renderBoxModel.renderStyle.position;
     parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
-
     return parentData;
   }
 
@@ -198,11 +143,7 @@ class CSSPositionedLayout {
       Offset styleOffset;
       // Text node does not have relative offset
       if (renderBox is RenderBoxModel && style != null) {
-        ElementManager elementManager = renderBox.elementManager;
-        double viewportWidth = elementManager.viewportWidth;
-        double viewportHeight = elementManager.viewportHeight;
-        Size viewportSize = Size(viewportWidth, viewportHeight);
-        styleOffset = _getRelativeOffset(style, viewportSize);
+        styleOffset = _getRelativeOffset(renderBox.renderStyle);
       }
 
       if (relativeOffset != null) {
@@ -217,9 +158,8 @@ class CSSPositionedLayout {
     }
   }
 
-  static void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
+  static void layoutPositionedChild(Element parentElement, RenderBoxModel parent, RenderBoxModel child) {
     RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
-    final RenderLayoutParentData childParentData = child.parentData;
 
     // Default to no constraints. (0 - infinite)
     BoxConstraints childConstraints = const BoxConstraints();
@@ -228,22 +168,40 @@ class CSSPositionedLayout {
 
     BoxSizeType widthType = _getChildWidthSizeType(child);
     BoxSizeType heightType = _getChildHeightSizeType(child);
+    RenderStyle childRenderStyle = child.renderStyle;
 
     // If child has no width, calculate width by left and right.
     // Element with intrinsic size such as image will not stretch
-    if (childParentData.width == 0.0 &&
+    if (childRenderStyle.width == null &&
         widthType != BoxSizeType.intrinsic &&
-        childParentData.left != null &&
-        childParentData.right != null) {
-      childConstraints = childConstraints.tighten(width: parentSize.width - childParentData.left - childParentData.right);
+        childRenderStyle.left != null &&
+        childRenderStyle.right != null) {
+      double constraintWidth = parentSize.width - childRenderStyle.left - childRenderStyle.right;
+      double maxWidth = childRenderStyle.maxWidth;
+      double minWidth = childRenderStyle.minWidth;
+      // Constrain to min-width or max-width if width not exists
+      if (maxWidth != null) {
+        constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
+      } else if (minWidth != null) {
+        constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
+      }
+      childConstraints = childConstraints.tighten(width: constraintWidth);
     }
     // If child has not height, should be calculate height by top and bottom
-    if (childParentData.height == 0.0 &&
+    if (childRenderStyle.height == null &&
         heightType != BoxSizeType.intrinsic &&
-        childParentData.top != null &&
-        childParentData.bottom != null) {
-      childConstraints =
-          childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);
+        childRenderStyle.top != null &&
+        childRenderStyle.bottom != null) {
+      double constraintHeight = parentSize.height - childRenderStyle.top - childRenderStyle.bottom;
+      double maxHeight = childRenderStyle.maxHeight;
+      double minHeight = childRenderStyle.minHeight;
+      // Constrain to min-height or max-height if width not exists
+      if (maxHeight != null) {
+        constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
+      } else if (minHeight != null) {
+        constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
+      }
+      childConstraints = childConstraints.tighten(height: constraintHeight);
     }
 
     // Whether child need to layout
@@ -288,7 +246,7 @@ class CSSPositionedLayout {
     childMarginRight = childRenderStyle.marginRight;
 
     // Offset to global coordinate system of base.
-    if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
+    if (childParentData.isPositioned) {
       RenderObject root = parent.elementManager.getRootRenderObject();
       Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childRenderBoxModel.renderPositionHolder, parent) ?? Offset.zero;
 
@@ -299,19 +257,19 @@ class CSSPositionedLayout {
       double borderRight = borderEdge != null ? borderEdge.right : 0;
       double borderTop = borderEdge != null ? borderEdge.top : 0;
       double borderBottom = borderEdge != null ? borderEdge.bottom : 0;
-
-      double top = childParentData.top != null ?
-        childParentData.top + borderTop + childMarginTop : baseOffset.dy + childMarginTop;
-      if (childParentData.top == null && childParentData.bottom != null) {
+      RenderStyle childRenderStyle = child.renderStyle;
+      double top = childRenderStyle.top != null ?
+        childRenderStyle.top + borderTop + childMarginTop : baseOffset.dy + childMarginTop;
+      if (childRenderStyle.top == null && childRenderStyle.bottom != null) {
         top = parentSize.height - child.boxSize.height - borderBottom - childMarginBottom -
-          ((childParentData.bottom) ?? 0);
+          ((childRenderStyle.bottom) ?? 0);
       }
 
-      double left = childParentData.left != null ?
-        childParentData.left + borderLeft + childMarginLeft : baseOffset.dx + childMarginLeft;
-      if (childParentData.left == null && childParentData.right != null) {
+      double left = childRenderStyle.left != null ?
+        childRenderStyle.left + borderLeft + childMarginLeft : baseOffset.dx + childMarginLeft;
+      if (childRenderStyle.left == null && childRenderStyle.right != null) {
         left = parentSize.width - child.boxSize.width - borderRight - childMarginRight -
-          ((childParentData.right) ?? 0);
+          ((childRenderStyle.right) ?? 0);
       }
 
       x = left;

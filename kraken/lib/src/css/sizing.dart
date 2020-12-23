@@ -223,7 +223,8 @@ class CSSSizing {
             ? element.defaultDisplay
             : element.style[DISPLAY]
     );
-    CSSPositionType position = CSSPositionedLayout.parsePositionType(element.style[POSITION]);
+
+    CSSPositionType position = element.renderBoxModel.renderStyle.position;
 
     // Display as inline-block when element is positioned
     if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {

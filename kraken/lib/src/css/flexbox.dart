@@ -248,10 +248,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  String get flexBasis => _flexBasis;
-  String _flexBasis = AUTO;
-  set flexBasis(String value) {
-    assert(value != null);
+  double get flexBasis => _flexBasis;
+  double _flexBasis;
+  set flexBasis(double value) {
     if (_flexBasis == value) return;
     _flexBasis = value;
     if (renderBoxModel.parent is RenderFlexLayout) {
@@ -262,7 +261,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   double get flexGrow => _flexGrow;
   double _flexGrow = 0.0;
   set flexGrow(double value) {
-    assert(value != null);
     if (_flexGrow == value) return;
     _flexGrow = value;
     if (renderBoxModel.parent is RenderFlexLayout) {
@@ -273,7 +271,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   double get flexShrink => _flexShrink;
   double _flexShrink = 1.0;
   set flexShrink(double value) {
-    assert(value != null);
     if (_flexShrink == value) return;
     _flexShrink = value;
     if (renderBoxModel.parent is RenderFlexLayout) {
@@ -429,15 +426,15 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
   }
 
-  String _getFlexBasis(CSSStyleDeclaration style, Size viewportSize) {
-    String basis = style[FLEX_BASIS];
-    String flexBasis = basis;
-    if (basis.isNotEmpty && basis != AUTO) {
-      if (CSSLength.toDisplayPortValue(basis, viewportSize) < 0) {
-        flexBasis = AUTO;
+  double _getFlexBasis(CSSStyleDeclaration style, Size viewportSize) {
+    String basisStr = style[FLEX_BASIS];
+    double flexBasis = CSSLength.toDisplayPortValue(basisStr, viewportSize);
+    if (basisStr.isNotEmpty && basisStr != AUTO) {
+      if (flexBasis < 0) {
+        flexBasis = null;
       }
     } else {
-      flexBasis = AUTO;
+      flexBasis = null;
     }
     return flexBasis;
   }

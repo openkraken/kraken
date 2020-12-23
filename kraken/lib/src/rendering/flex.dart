@@ -385,12 +385,12 @@ class RenderFlexLayout extends RenderLayoutBox {
     return child is RenderBoxModel ? child.renderStyle.flexShrink : 1.0;
   }
 
-  String _getFlexBasis(RenderBox child) {
+  double _getFlexBasis(RenderBox child) {
     // Flex shrink has no effect on placeholder of positioned element
     if (child is RenderPositionHolder) {
-      return AUTO;
+      return null;
     }
-    return child is RenderBoxModel ? child.renderStyle.flexBasis : AUTO;
+    return child is RenderBoxModel ? child.renderStyle.flexBasis : null;
   }
 
   AlignSelf _getAlignSelf(RenderBox child) {
@@ -597,22 +597,18 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     if (child is RenderBoxModel) {
-      ElementManager elementManager = child.elementManager;
-      double viewportWidth = elementManager.viewportWidth;
-      double viewportHeight = elementManager.viewportHeight;
-      Size viewportSize = Size(viewportWidth, viewportHeight);
       RenderStyle childRenderStyle = child.renderStyle;
-      String flexBasis = _getFlexBasis(child);
+      double flexBasis = _getFlexBasis(child);
       double baseSize;
       // @FIXME when flex-basis is smaller than content width, it will not take effects
-      if (flexBasis != AUTO) {
-        baseSize = CSSLength.toDisplayPortValue(flexBasis, viewportSize) ?? 0;
+      if (flexBasis != null) {
+        baseSize = flexBasis ?? 0;
       }
       if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
         minWidth = childRenderStyle.minWidth != null ? childRenderStyle.minWidth : 0;
         maxWidth = childRenderStyle.maxWidth != null ? childRenderStyle.maxWidth : double.infinity;
 
-        if (flexBasis == AUTO) {
+        if (flexBasis == null) {
           baseSize = childRenderStyle.width;
         }
         if (baseSize != null) {
@@ -627,7 +623,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         minHeight = childRenderStyle.minHeight != null ? childRenderStyle.minHeight : 0;
         maxHeight = childRenderStyle.maxHeight != null ? childRenderStyle.maxHeight : double.infinity;
 
-        if (flexBasis == AUTO) {
+        if (flexBasis == null) {
           baseSize = childRenderStyle.height;
         }
         if (baseSize != null) {
@@ -660,29 +656,26 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (child is RenderTextBox) {
       return baseSize;
     } else if (child is RenderBoxModel) {
-      String flexBasis = _getFlexBasis(child);
-      ElementManager elementManager = child.elementManager;
-      double viewportWidth = elementManager.viewportWidth;
-      double viewportHeight = elementManager.viewportHeight;
-      Size viewportSize = Size(viewportWidth, viewportHeight);
+      double flexBasis = _getFlexBasis(child);
+      RenderStyle childRenderStyle = child.renderStyle;
 
       if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
         String width = child.style[WIDTH];
-        if (flexBasis == AUTO) {
+        if (flexBasis == null) {
           if (width != null) {
-            baseSize = CSSLength.toDisplayPortValue(width, viewportSize) ?? 0;
+            baseSize = childRenderStyle.width ?? 0;
           }
         } else {
-          baseSize = CSSLength.toDisplayPortValue(flexBasis, viewportSize) ?? 0;
+          baseSize = childRenderStyle.flexBasis ?? 0;
         }
       } else {
         String height = child.style[HEIGHT];
-        if (flexBasis == AUTO) {
+        if (flexBasis == null) {
           if (height != '') {
-            baseSize = CSSLength.toDisplayPortValue(height, viewportSize) ?? 0;
+            baseSize = childRenderStyle.height ?? 0;
           }
         } else {
-          baseSize = CSSLength.toDisplayPortValue(flexBasis, viewportSize) ?? 0;
+          baseSize = childRenderStyle.flexBasis ?? 0;
         }
       }
     }
@@ -712,7 +705,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
       // Layout placeholder of positioned element(absolute/fixed) in new layer
-      if (childParentData.isPositioned) {
+      if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.layoutPositionedChild(element, this, child);
       } else if (child is RenderPositionHolder && isPlaceholderPositioned(child)) {
         _layoutChildren(child);
@@ -755,8 +748,8 @@ class RenderFlexLayout extends RenderLayoutBox {
   bool isPlaceholderPositioned(RenderObject child) {
     if (child is RenderPositionHolder) {
       RenderBoxModel realDisplayedBox = child.realDisplayedBox;
-      CSSPositionType positionType = CSSPositionedLayout.parsePositionType(realDisplayedBox.style[POSITION]);
-      if (positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed) {
+      RenderLayoutParentData parentData = realDisplayedBox.parentData;
+      if (parentData.isPositioned) {
         return true;
       }
     }
@@ -985,10 +978,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Infos about each flex item in each flex line
     Map<int, _RunChild> runChildren = {};
 
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
       // Exclude positioned placeholder renderObject when layout non placeholder object
@@ -1027,8 +1016,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       } else if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
         double maxCrossAxisSize;
         // Calculate max height constraints
-        if (heightSizeType == BoxSizeType.specified && childStyle[HEIGHT] != '') {
-          maxCrossAxisSize = CSSLength.toDisplayPortValue(childStyle[HEIGHT], viewportSize);
+        if (heightSizeType == BoxSizeType.specified && child is RenderBoxModel && childStyle[HEIGHT] != '') {
+          maxCrossAxisSize = child.renderStyle.height;
         } else {
           // Child in flex line expand automatic when height is not specified
           if (renderStyle.flexWrap == FlexWrap.wrap || renderStyle.flexWrap == FlexWrap.wrapReverse) {
