@@ -32,12 +32,6 @@ import 'match_snapshots.dart';
 // 6. Call from C.
 
 typedef Native_JSError = Void Function(Int32 contextId, Pointer<Utf8>);
-typedef Native_RegisterJSError = Void Function(Pointer<NativeFunction<Native_JSError>>);
-typedef Dart_RegisterJSError = void Function(Pointer<NativeFunction<Native_JSError>>);
-
-final Dart_RegisterJSError _registerOnJSError =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterJSError>>('registerJSError').asFunction();
-
 typedef JSErrorListener = void Function(String);
 
 List<JSErrorListener> _listenerList = List(10);
@@ -52,19 +46,11 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
   _listenerList[contextId](msg);
 }
 
-void registerJSError() {
-  Pointer<NativeFunction<Native_JSError>> pointer = Pointer.fromFunction(_onJSError);
-  _registerOnJSError(pointer);
-}
+final Pointer<NativeFunction<Native_JSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
 typedef Native_RefreshPaintCallback = Void Function(Pointer<JSCallbackContext>, Int32 contextId, Pointer<Utf8>);
 typedef Dart_RefreshPaintCallback = void Function(Pointer<JSCallbackContext>, int contextId, Pointer<Utf8>);
 typedef Native_RefreshPaint = Void Function(Pointer<JSCallbackContext>, Int32 contextId, Pointer<NativeFunction<Native_RefreshPaintCallback>>);
-typedef Native_RegisterRefreshPaint = Void Function(Pointer<NativeFunction<Native_RefreshPaint>>);
-typedef Dart_RegisterRefreshPaint = void Function(Pointer<NativeFunction<Native_RefreshPaint>>);
-
-final Dart_RegisterRefreshPaint _registerRefreshPaint =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterRefreshPaint>>('registerRefreshPaint').asFunction();
 
 void _refreshPaint(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<Native_RefreshPaintCallback>> pointer) async {
   Dart_RefreshPaintCallback callback = pointer.asFunction();
@@ -77,22 +63,13 @@ void _refreshPaint(Pointer<JSCallbackContext> callbackContext, int contextId, Po
   }
 }
 
-void registerRefreshPaint() {
-  Pointer<NativeFunction<Native_RefreshPaint>> pointer = Pointer.fromFunction(_refreshPaint);
-  _registerRefreshPaint(pointer);
-}
+final Pointer<NativeFunction<Native_RefreshPaint>> _nativeRefreshPaint = Pointer.fromFunction(_refreshPaint);
 
 typedef Native_MatchImageSnapshotCallback = Void Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId, Int8);
 typedef Dart_MatchImageSnapshotCallback = void Function(Pointer<JSCallbackContext> callbackContext, int contextId, int);
 typedef Native_MatchImageSnapshot = Void Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId,
     Pointer<Uint8>, Int32, Pointer<NativeString>, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>>);
-typedef Native_RegisterMatchImageSnapshot = Void Function(Pointer<NativeFunction<Native_MatchImageSnapshot>>);
-typedef Dart_RegisterMatchImageSnapshot = void Function(Pointer<NativeFunction<Native_MatchImageSnapshot>>);
-
-final Dart_RegisterMatchImageSnapshot _registerMatchImageSnapshot = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterMatchImageSnapshot>>('registerMatchImageSnapshot')
-    .asFunction();
 
 void _matchImageSnapshot(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Uint8> bytes, int size, Pointer<NativeString> snapshotNamePtr, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>> pointer) {
   Dart_MatchImageSnapshotCallback callback = pointer.asFunction();
@@ -101,41 +78,19 @@ void _matchImageSnapshot(Pointer<JSCallbackContext> callbackContext, int context
   });
 }
 
-void registerMatchImageSnapshot() {
-  Pointer<NativeFunction<Native_MatchImageSnapshot>> pointer = Pointer.fromFunction(_matchImageSnapshot);
-  _registerMatchImageSnapshot(pointer);
-}
+final Pointer<NativeFunction<Native_MatchImageSnapshot>> _nativeMatchImageSnapshot = Pointer.fromFunction(_matchImageSnapshot);
 
 typedef Native_Environment = Pointer<Utf8> Function();
 typedef Dart_Environment = Pointer<Utf8> Function();
-
-typedef Native_RegisterEnvironment = Void Function(Pointer<NativeFunction<Native_Environment>>);
-typedef Dart_RegisterEnvironment = void Function(Pointer<NativeFunction<Native_Environment>>);
-
-final Dart_RegisterEnvironment _registerEnvironment =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterEnvironment>>('registerEnvironment').asFunction();
 
 Pointer<Utf8> _environment() {
   return Utf8.toUtf8(jsonEncode(Platform.environment));
 }
 
-void registerEnvironment() {
-  Pointer<NativeFunction<Native_Environment>> pointer = Pointer.fromFunction(_environment);
-  _registerEnvironment(pointer);
-}
+final Pointer<NativeFunction<Native_Environment>> _nativeEnvironment = Pointer.fromFunction(_environment);
 
 typedef Native_SimulatePointer = Void Function(Pointer<Pointer<MousePointer>>,  Int32 length);
 typedef Native_SimulateKeyPress = Void Function(Pointer<NativeString>);
-
-typedef Native_RegisterSimulatePointer = Void Function(Pointer<NativeFunction<Native_SimulatePointer>> function);
-typedef Native_RegisterSimulateKeyPress = Void Function(Pointer<NativeFunction<Native_SimulateKeyPress>> function);
-typedef Dart_RegisterSimulatePointer = void Function(Pointer<NativeFunction<Native_SimulatePointer>> function);
-typedef Dart_RegisterSimulateKeyPress = void Function(Pointer<NativeFunction<Native_SimulateKeyPress>> function);
-
-final Dart_RegisterSimulatePointer _registerSimulatePointer =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSimulatePointer>>('registerSimulatePointer').asFunction();
-final Dart_RegisterSimulateKeyPress _registerSimulateKeyPress =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSimulateKeyPress>>('registerSimulateKeyPress').asFunction();
 
 PointerChange _getPointerChange(double change) {
   return PointerChange.values[change.toInt()];
@@ -178,10 +133,7 @@ void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int lengt
   window.onPointerDataPacket(dataPacket);
 }
 
-void registerSimulatePointer() {
-  Pointer<NativeFunction<Native_SimulatePointer>> pointer = Pointer.fromFunction(_simulatePointer);
-  _registerSimulatePointer(pointer);
-}
+final Pointer<NativeFunction<Native_SimulatePointer>> _nativeSimulatePointer = Pointer.fromFunction(_simulatePointer);
 
 void _simulateKeyPress(Pointer<NativeString> nativeChars) {
   String chars = nativeStringToString(nativeChars);
@@ -205,16 +157,27 @@ void _simulateKeyPress(Pointer<NativeString> nativeChars) {
   }
 }
 
-void registerSimulateKeyPress() {
-  Pointer<NativeFunction<Native_SimulateKeyPress>> pointer = Pointer.fromFunction(_simulateKeyPress);
-  _registerSimulateKeyPress(pointer);
-}
+final Pointer<NativeFunction<Native_SimulateKeyPress>> _nativeSimulateKeyPress = Pointer.fromFunction(_simulateKeyPress);
+
+final List<int> _dartNativeMethods = [
+  _nativeOnJsError.address,
+  _nativeRefreshPaint.address,
+  _nativeMatchImageSnapshot.address,
+  _nativeEnvironment.address,
+  _nativeSimulatePointer.address,
+  _nativeSimulateKeyPress.address
+];
+
+typedef Native_RegisterTestEnvDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
+typedef Dart_RegisterTestEnvDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
+
+final Dart_RegisterTestEnvDartMethods _registerTestEnvDartMethods =
+nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterTestEnvDartMethods>>('registerTestEnvDartMethods').asFunction();
+
 
 void registerDartTestMethodsToCpp() {
-  registerJSError();
-  registerRefreshPaint();
-  registerMatchImageSnapshot();
-  registerEnvironment();
-  registerSimulatePointer();
-  registerSimulateKeyPress();
+  Pointer<Uint64> bytes = allocate<Uint64>(count: _dartNativeMethods.length);
+  Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
+  nativeMethodList.setAll(0, _dartNativeMethods);
+  _registerTestEnvDartMethods(bytes, _dartNativeMethods.length);
 }

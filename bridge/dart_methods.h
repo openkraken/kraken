@@ -8,11 +8,51 @@
 
 #include "kraken_bridge.h"
 #include "kraken_bridge_test.h"
-#include <thread>
 #include <memory>
+#include <thread>
+
+using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
+using AsyncRAFCallback = void (*)(void *callbackContext, int32_t contextId, double result, const char *errmsg);
+using AsyncModuleCallback = void (*)(void *callbackContext, int32_t contextId, NativeString *json);
+using AsyncBlobCallback = void (*)(void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes,
+                                   int32_t length);
+typedef NativeString *(*InvokeModule)(void *callbackContext, int32_t contextId, NativeString *,
+                                      AsyncModuleCallback callback);
+typedef void (*RequestBatchUpdate)(int32_t contextId);
+typedef void (*ReloadApp)(int32_t contextId);
+typedef int32_t (*SetTimeout)(void *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
+typedef int32_t (*SetInterval)(void *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
+typedef int32_t (*RequestAnimationFrame)(void *callbackContext, int32_t contextId, AsyncRAFCallback callback);
+typedef void (*ClearTimeout)(int32_t contextId, int32_t timerId);
+typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
+typedef Screen *(*GetScreen)(int32_t contextId);
+typedef double (*DevicePixelRatio)(int32_t contextId);
+typedef NativeString *(*PlatformBrightness)(int32_t contextId);
+typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
+                       double devicePixelRatio);
+typedef void (*OnJSError)(int32_t contextId, const char *);
+typedef void (*FlushUICommand)();
+typedef void (*InitBody)(int32_t contextId, void *nativePtr);
+typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
+typedef void (*InitDocument)(int32_t contextId, void *nativePtr);
+
+using RefreshPaintCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
+using RefreshPaint = void (*)(void *callbackContext, int32_t contextId, RefreshPaintCallback callback);
+using MatchImageSnapshotCallback = void (*)(void *callbackContext, int32_t contextId, int8_t);
+using MatchImageSnapshot = void (*)(void *callbackContext, int32_t contextId, uint8_t *bytes, int32_t length,
+                                    NativeString *name, MatchImageSnapshotCallback callback);
+using Environment = const char *(*)();
+
+struct MousePointer {
+  int32_t contextId;
+  double x;
+  double y;
+  double change;
+};
+using SimulatePointer = void (*)(MousePointer **, int32_t length);
+using SimulateKeyPress = void (*)(NativeString *nativeString);
 
 namespace kraken {
-
 struct DartMethodPointer {
   DartMethodPointer() = default;
   InvokeModule invokeModule{nullptr};
@@ -39,30 +79,8 @@ struct DartMethodPointer {
   InitDocument initDocument{nullptr};
 };
 
-void registerInvokeModule(InvokeModule callback);
-void registerRequestBatchUpdate(RequestBatchUpdate callback);
-void registerReloadApp(ReloadApp callback);
-void registerSetTimeout(SetTimeout callback);
-void registerSetInterval(SetInterval callback);
-void registerClearTimeout(ClearTimeout callback);
-void registerRequestAnimationFrame(RequestAnimationFrame callback);
-void registerCancelAnimationFrame(CancelAnimationFrame callback);
-void registerGetScreen(GetScreen callback);
-void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
-void registerPlatformBrightness(PlatformBrightness platformBrightness);
-void registerToBlob(ToBlob toBlob);
-void registerJSError(OnJSError onJsError);
-void registerFlushUICommand(FlushUICommand flushUiCommand);
-void registerInitBody(InitBody initBody);
-void registerInitWindow(InitWindow initWindow);
-void registerInitDocument(InitDocument initDocument);
-
-// test only methods
-void registerRefreshPaint(RefreshPaint refreshPaint);
-void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot);
-void registerEnvironment(Environment environment);
-void registerSimulatePointer(SimulatePointer simulatePointer);
-void registerSimulateKeyPress(SimulateKeyPress simulateKeyPress);
+void registerDartMethods(uint64_t *methodBytes, int32_t length);
+void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 
