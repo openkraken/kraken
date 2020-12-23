@@ -412,19 +412,19 @@ JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObje
   GET_COST(intrinsicLayout, PERF_INTRINSIC_LAYOUT_COST);
   GET_COST(silverLayout, PERF_SILVER_LAYOUT_COST);
   GET_COST(paint, PERF_PAINT_COST);
-  GET_COST(paintColorFilter, PERF_PAINT_COLOR_FILTER_COST);
-  GET_COST(paintImageFilter, PERF_PAINT_IMAGE_FILTER_COST);
-  GET_COST(paintIntersectionObserver, PERF_PAINT_INTERSECTION_OBSERVER_COST);
-  GET_COST(paintTransform, PERF_PAINT_TRANSFORM_COST);
-  GET_COST(paintOpacity, PERF_PAINT_OPACITY_COST);
-  GET_COST(paintDecoration, PERF_PAINT_DECORATION_COST);
-  GET_COST(paintOverflow, PERF_PAINT_OVERFLOW_COST);
-  GET_COST(paintBackground, PERF_PAINT_BACKGROUND_COST);
-  GET_COST(flowPerformPaint, PERF_FLOW_PERFORM_PAINT_COST);
-  GET_COST(intrinsicPerformPaint, PERF_INTRINSIC_PERFORM_PAINT_COST);
-  GET_COST(flexPerformPaint, PERF_FLEX_PERFORM_PAINT_COST);
-  GET_COST(silverPerformPaint, PERF_SILVER_PERFORM_PAINT_COST);
-  GET_COST(performPaint, PERF_PERFORM_PAINT_COST);
+//  GET_COST(paintColorFilter, PERF_PAINT_COLOR_FILTER_COST);
+//  GET_COST(paintImageFilter, PERF_PAINT_IMAGE_FILTER_COST);
+//  GET_COST(paintIntersectionObserver, PERF_PAINT_INTERSECTION_OBSERVER_COST);
+//  GET_COST(paintTransform, PERF_PAINT_TRANSFORM_COST);
+//  GET_COST(paintOpacity, PERF_PAINT_OPACITY_COST);
+//  GET_COST(paintDecoration, PERF_PAINT_DECORATION_COST);
+//  GET_COST(paintOverflow, PERF_PAINT_OVERFLOW_COST);
+//  GET_COST(paintBackground, PERF_PAINT_BACKGROUND_COST);
+//  GET_COST(flowPerformPaint, PERF_FLOW_PERFORM_PAINT_COST);
+//  GET_COST(intrinsicPerformPaint, PERF_INTRINSIC_PERFORM_PAINT_COST);
+//  GET_COST(flexPerformPaint, PERF_FLEX_PERFORM_PAINT_COST);
+//  GET_COST(silverPerformPaint, PERF_SILVER_PERFORM_PAINT_COST);
+//  GET_COST(performPaint, PERF_PERFORM_PAINT_COST);
 
   double initBundleCost = jsBundleLoadCost + jsBundleEvalCost + flushUiCommandCost + createElementCost +
                           createTextNodeCost + createCommentCost + disposeEventTargetCost + addEventCost +
@@ -471,19 +471,6 @@ Rendering: %.*fms
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
-    + %s %.*fms avg: %.*fms count: %zu
-      + %s %.*fms avg: %.*fms count: %zu
-      + %s %.*fms avg: %.*fms count: %zu
-      + %s %.*fms avg: %.*fms count: %zu
-      + %s %.*fms avg: %.*fms count: %zu
 )",
   2, totalCost,
     PERF_WIDGET_CREATION_COST, 2, widgetCreationCost,
@@ -518,20 +505,20 @@ Rendering: %.*fms
     PERF_FLOW_LAYOUT_COST, 2, flowLayoutCost, 2, flowLayoutAvg, flowLayoutCount,
     PERF_INTRINSIC_LAYOUT_COST, 2, intrinsicLayoutCost, 2, intrinsicLayoutAvg, intrinsicLayoutCount,
     PERF_SILVER_LAYOUT_COST, 2, silverLayoutCost, 2, silverLayoutAvg, silverLayoutCount,
-    PERF_PAINT_COST, 2, paintCost, 2, paintAvg, paintCount,
-      PERF_PAINT_COLOR_FILTER_COST, 2, paintColorFilterCost, 2, paintColorFilterAvg, paintColorFilterCount,
-      PERF_PAINT_IMAGE_FILTER_COST, 2, paintImageFilterCost, 2, paintImageFilterAvg, paintImageFilterCount,
-      PERF_PAINT_INTERSECTION_OBSERVER_COST, 2, paintIntersectionObserverCost, 2, paintIntersectionObserverAvg, paintIntersectionObserverCount,
-      PERF_PAINT_TRANSFORM_COST, 2, paintTransformCost, 2, paintTransformAvg, paintTransformCount,
-      PERF_PAINT_OPACITY_COST, 2, paintOpacityCost, 2, paintOpacityAvg, paintOpacityCount,
-      PERF_PAINT_DECORATION_COST, 2, paintDecorationCost, 2, paintDecorationAvg, paintDecorationCount,
-      PERF_PAINT_OVERFLOW_COST, 2, paintOverflowCost, 2, paintOverflowAvg, paintOverflowCount,
-      PERF_PAINT_BACKGROUND_COST, 2, paintBackgroundCost, 2, paintBackgroundAvg, paintBackgroundCount,
-      PERF_PERFORM_PAINT_COST, 2, performPaintCost, 2, performPaintAvg, performPaintCount,
-      PERF_FLOW_PERFORM_PAINT_COST, 2, flowPerformPaintCost, 2, flowPerformPaintAvg, flowPerformPaintCount,
-      PERF_INTRINSIC_PERFORM_PAINT_COST, 2, intrinsicPerformPaintCost, 2, intrinsicPerformPaintAvg, intrinsicPerformPaintCount,
-      PERF_FLEX_PERFORM_PAINT_COST, 2, flexPerformPaintCost, 2, flexPerformPaintAvg, flexPerformPaintCount,
-      PERF_SILVER_PERFORM_PAINT_COST, 2, silverPerformPaintCost, 2, silverPerformPaintAvg, silverPerformPaintCount
+    PERF_PAINT_COST, 2, paintCost, 2, paintAvg, paintCount
+//      PERF_PAINT_COLOR_FILTER_COST, 2, paintColorFilterCost, 2, paintColorFilterAvg, paintColorFilterCount,
+//      PERF_PAINT_IMAGE_FILTER_COST, 2, paintImageFilterCost, 2, paintImageFilterAvg, paintImageFilterCount,
+//      PERF_PAINT_INTERSECTION_OBSERVER_COST, 2, paintIntersectionObserverCost, 2, paintIntersectionObserverAvg, paintIntersectionObserverCount,
+//      PERF_PAINT_TRANSFORM_COST, 2, paintTransformCost, 2, paintTransformAvg, paintTransformCount,
+//      PERF_PAINT_OPACITY_COST, 2, paintOpacityCost, 2, paintOpacityAvg, paintOpacityCount,
+//      PERF_PAINT_DECORATION_COST, 2, paintDecorationCost, 2, paintDecorationAvg, paintDecorationCount,
+//      PERF_PAINT_OVERFLOW_COST, 2, paintOverflowCost, 2, paintOverflowAvg, paintOverflowCount,
+//      PERF_PAINT_BACKGROUND_COST, 2, paintBackgroundCost, 2, paintBackgroundAvg, paintBackgroundCount,
+//      PERF_PERFORM_PAINT_COST, 2, performPaintCost, 2, performPaintAvg, performPaintCount,
+//      PERF_FLOW_PERFORM_PAINT_COST, 2, flowPerformPaintCost, 2, flowPerformPaintAvg, flowPerformPaintCount,
+//      PERF_INTRINSIC_PERFORM_PAINT_COST, 2, intrinsicPerformPaintCost, 2, intrinsicPerformPaintAvg, intrinsicPerformPaintCount,
+//      PERF_FLEX_PERFORM_PAINT_COST, 2, flexPerformPaintCost, 2, flexPerformPaintAvg, flexPerformPaintCount,
+//      PERF_SILVER_PERFORM_PAINT_COST, 2, silverPerformPaintCost, 2, silverPerformPaintAvg, silverPerformPaintCount
 );
   // clang-format on
 
@@ -580,22 +567,22 @@ void JSPerformance::measureSummary() {
   internalMeasure(PERF_INTRINSIC_LAYOUT_COST, PERF_INTRINSIC_LAYOUT_START, PERF_INTRINSIC_LAYOUT_END, nullptr);
   internalMeasure(PERF_SILVER_LAYOUT_COST, PERF_SILVER_LAYOUT_START, PERF_SILVER_LAYOUT_END, nullptr);
   internalMeasure(PERF_PAINT_COST, PERF_PAINT_START, PERF_PAINT_END, nullptr);
-  internalMeasure(PERF_PAINT_COLOR_FILTER_COST, PERF_PAINT_COLOR_FILTER_START, PERF_PAINT_COLOR_FILTER_END, nullptr);
-  internalMeasure(PERF_PAINT_IMAGE_FILTER_COST, PERF_PAINT_IMAGE_FILTER_START, PERF_PAINT_IMAGE_FILTER_END, nullptr);
-  internalMeasure(PERF_PAINT_INTERSECTION_OBSERVER_COST, PERF_PAINT_INTERSECTION_OBSERVER_START,
-                  PERF_PAINT_INTERSECTION_OBSERVER_END, nullptr);
-  internalMeasure(PERF_PAINT_TRANSFORM_COST, PERF_PAINT_TRANSFORM_START, PERF_PAINT_TRANSFORM_END, nullptr);
-  internalMeasure(PERF_PAINT_OPACITY_COST, PERF_PAINT_OPACITY_START, PERF_PAINT_OPACITY_END, nullptr);
-  internalMeasure(PERF_PAINT_DECORATION_COST, PERF_PAINT_DECORATION_START, PERF_PAINT_DECORATION_END, nullptr);
-  internalMeasure(PERF_PAINT_OVERFLOW_COST, PERF_PAINT_OVERFLOW_START, PERF_PAINT_OVERFLOW_END, nullptr);
-  internalMeasure(PERF_PAINT_BACKGROUND_COST, PERF_PAINT_BACKGROUND_START, PERF_PAINT_BACKGROUND_END, nullptr);
-  internalMeasure(PERF_PERFORM_PAINT_COST, PERF_PERFORM_PAINT_START, PERF_PERFORM_PAINT_END, nullptr);
-  internalMeasure(PERF_FLOW_PERFORM_PAINT_COST, PERF_FLOW_PERFORM_PAINT_START, PERF_FLOW_PERFORM_PAINT_END, nullptr);
-  internalMeasure(PERF_INTRINSIC_PERFORM_PAINT_COST, PERF_INTRINSIC_PERFORM_PAINT_START,
-                  PERF_INTRINSIC_PERFORM_PAINT_END, nullptr);
-  internalMeasure(PERF_FLEX_PERFORM_PAINT_COST, PERF_FLEX_PERFORM_PAINT_START, PERF_FLEX_PERFORM_PAINT_END, nullptr);
-  internalMeasure(PERF_SILVER_PERFORM_PAINT_COST, PERF_SILVER_PERFORM_PAINT_START, PERF_SILVER_PERFORM_PAINT_END,
-                  nullptr);
+//  internalMeasure(PERF_PAINT_COLOR_FILTER_COST, PERF_PAINT_COLOR_FILTER_START, PERF_PAINT_COLOR_FILTER_END, nullptr);
+//  internalMeasure(PERF_PAINT_IMAGE_FILTER_COST, PERF_PAINT_IMAGE_FILTER_START, PERF_PAINT_IMAGE_FILTER_END, nullptr);
+//  internalMeasure(PERF_PAINT_INTERSECTION_OBSERVER_COST, PERF_PAINT_INTERSECTION_OBSERVER_START,
+//                  PERF_PAINT_INTERSECTION_OBSERVER_END, nullptr);
+//  internalMeasure(PERF_PAINT_TRANSFORM_COST, PERF_PAINT_TRANSFORM_START, PERF_PAINT_TRANSFORM_END, nullptr);
+//  internalMeasure(PERF_PAINT_OPACITY_COST, PERF_PAINT_OPACITY_START, PERF_PAINT_OPACITY_END, nullptr);
+//  internalMeasure(PERF_PAINT_DECORATION_COST, PERF_PAINT_DECORATION_START, PERF_PAINT_DECORATION_END, nullptr);
+//  internalMeasure(PERF_PAINT_OVERFLOW_COST, PERF_PAINT_OVERFLOW_START, PERF_PAINT_OVERFLOW_END, nullptr);
+//  internalMeasure(PERF_PAINT_BACKGROUND_COST, PERF_PAINT_BACKGROUND_START, PERF_PAINT_BACKGROUND_END, nullptr);
+//  internalMeasure(PERF_PERFORM_PAINT_COST, PERF_PERFORM_PAINT_START, PERF_PERFORM_PAINT_END, nullptr);
+//  internalMeasure(PERF_FLOW_PERFORM_PAINT_COST, PERF_FLOW_PERFORM_PAINT_START, PERF_FLOW_PERFORM_PAINT_END, nullptr);
+//  internalMeasure(PERF_INTRINSIC_PERFORM_PAINT_COST, PERF_INTRINSIC_PERFORM_PAINT_START,
+//                  PERF_INTRINSIC_PERFORM_PAINT_END, nullptr);
+//  internalMeasure(PERF_FLEX_PERFORM_PAINT_COST, PERF_FLEX_PERFORM_PAINT_START, PERF_FLEX_PERFORM_PAINT_END, nullptr);
+//  internalMeasure(PERF_SILVER_PERFORM_PAINT_COST, PERF_SILVER_PERFORM_PAINT_START, PERF_SILVER_PERFORM_PAINT_END,
+//                  nullptr);
 }
 
 #endif
