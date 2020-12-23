@@ -12,7 +12,9 @@ class RenderStyle
     CSSSizingMixin,
     CSSPaddingMixin,
     CSSMarginMixin,
-    CSSBoxMixin {
+    CSSBoxMixin,
+    CSSFlexboxMixin,
+    CSSFlowMixin {
 
   RenderBoxModel renderBoxModel;
   CSSStyleDeclaration style;

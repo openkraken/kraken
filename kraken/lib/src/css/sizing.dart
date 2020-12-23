@@ -191,7 +191,7 @@ class CSSSizing {
     bool isChildStretchSelf = false;
     if (isFlex) {
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
-        (current as RenderFlexLayout).flexDirection
+        (current as RenderFlexLayout).renderStyle.flexDirection
       );
       isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
         style[ALIGN_ITEMS] == STRETCH;

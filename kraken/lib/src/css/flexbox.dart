@@ -172,118 +172,182 @@ enum AlignSelf {
   baseline
 }
 
-mixin CSSFlexboxMixin {
-  static void decorateRenderFlex(RenderFlexLayout renderFlexLayout, CSSStyleDeclaration style) {
-    if (style != null) {
-      String justifyContent = style[JUSTIFY_CONTENT];
-      String alignItems = style[ALIGN_ITEMS];
-      String flexDirection = style[FLEX_DIRECTION];
-      String flexWrap = style[FLEX_WRAP];
-      String alignContent = style[ALIGN_CONTENT];
+mixin CSSFlexboxMixin on RenderStyleBase {
 
-      renderFlexLayout.flexDirection = _getFlexDirection(flexDirection);
-      renderFlexLayout.flexWrap = _getFlexWrap(flexWrap);
-      renderFlexLayout.justifyContent = _getJustifyContent(justifyContent);
-      renderFlexLayout.alignItems = _getAlignItems(alignItems, style, renderFlexLayout.flexDirection);
-      renderFlexLayout.alignContent = _getAlignContent(alignContent);
+  FlexDirection get flexDirection => _flexDirection;
+  FlexDirection _flexDirection = FlexDirection.row;
+
+  set flexDirection(FlexDirection value) {
+    assert(value != null);
+    if (_flexDirection != value) {
+      _flexDirection = value;
+      if (renderBoxModel is RenderFlexLayout) {
+        renderBoxModel.markNeedsLayout();
+      }
     }
   }
-}
 
-FlexDirection _getFlexDirection(String flexDirection) {
-  switch (flexDirection) {
-    case 'row-reverse':
-      return FlexDirection.rowReverse;
-    case 'column':
-      return FlexDirection.column;
-    case 'column-reverse':
-      return FlexDirection.columnReverse;
-    case 'row':
-    default:
-      return FlexDirection.row;
+  FlexWrap get flexWrap => _flexWrap;
+  FlexWrap _flexWrap = FlexWrap.nowrap;
+
+  set flexWrap(FlexWrap value) {
+    assert(value != null);
+    if (_flexWrap != value) {
+      _flexWrap = value;
+      if (renderBoxModel is RenderFlexLayout) {
+        renderBoxModel.markNeedsLayout();
+      }
+    }
   }
-}
 
-FlexWrap _getFlexWrap(String flexWrap) {
-  switch (flexWrap) {
-    case 'wrap':
-      return FlexWrap.wrap;
-    case 'wrap-reverse':
-      return FlexWrap.wrapReverse;
-    case 'nowrap':
-    default:
-      return FlexWrap.nowrap;
+  JustifyContent get justifyContent => _justifyContent;
+  JustifyContent _justifyContent = JustifyContent.flexStart;
+
+  set justifyContent(JustifyContent value) {
+    assert(value != null);
+    if (_justifyContent != value) {
+      _justifyContent = value;
+      if (renderBoxModel is RenderFlexLayout) {
+        renderBoxModel.markNeedsLayout();
+      }
+    }
   }
-}
 
-JustifyContent _getJustifyContent(String justifyContent) {
-  switch (justifyContent) {
-    case 'flex-end':
-    case 'end':
-      return JustifyContent.flexEnd;
-    case 'center':
-      return JustifyContent.center;
-    case 'space-between':
-      return JustifyContent.spaceBetween;
-    case 'space-around':
-      return JustifyContent.spaceAround;
-    case 'space-evenly':
-      return JustifyContent.spaceEvenly;
-    case 'flex-start':
-    case 'start':
-    default:
-      return JustifyContent.flexStart;
+  AlignItems get alignItems => _alignItems;
+  AlignItems _alignItems = AlignItems.stretch;
+
+  set alignItems(AlignItems value) {
+    assert(value != null);
+    if (_alignItems != value) {
+      _alignItems = value;
+      if (renderBoxModel is RenderFlexLayout) {
+        renderBoxModel.markNeedsLayout();
+      }
+    }
   }
-}
 
-AlignItems _getAlignItems(String alignItems, CSSStyleDeclaration style, FlexDirection flexDirection) {
-  if (CSSFlex.isVerticalFlexDirection(flexDirection) && style.contains(TEXT_ALIGN)) {
-    String textAlign = style[TEXT_ALIGN];
-    switch (textAlign) {
-      case 'right':
+  AlignContent get alignContent => _alignContent;
+  AlignContent _alignContent = AlignContent.stretch;
+  set alignContent(AlignContent value) {
+    assert(value != null);
+    if (_alignContent == value) return;
+    _alignContent = value;
+    if (renderBoxModel is RenderFlexLayout) {
+      renderBoxModel.markNeedsLayout();
+    }
+  }
+
+  void updateFlexbox() {
+    CSSStyleDeclaration style = this.style;
+
+    flexDirection = _getFlexDirection(style);
+    flexWrap = _getFlexWrap(style);
+    justifyContent = _getJustifyContent(style);
+    alignItems = _getAlignItems(style);
+    alignContent = _getAlignContent(style);
+  }
+
+  FlexDirection _getFlexDirection(CSSStyleDeclaration style) {
+    String flexDirection = style[FLEX_DIRECTION];
+    switch (flexDirection) {
+      case 'row-reverse':
+        return FlexDirection.rowReverse;
+      case 'column':
+        return FlexDirection.column;
+      case 'column-reverse':
+        return FlexDirection.columnReverse;
+      case 'row':
+      default:
+        return FlexDirection.row;
+    }
+  }
+
+  FlexWrap _getFlexWrap(CSSStyleDeclaration style) {
+    String flexWrap = style[FLEX_WRAP];
+    switch (flexWrap) {
+      case 'wrap':
+        return FlexWrap.wrap;
+      case 'wrap-reverse':
+        return FlexWrap.wrapReverse;
+      case 'nowrap':
+      default:
+        return FlexWrap.nowrap;
+    }
+  }
+
+  JustifyContent _getJustifyContent(CSSStyleDeclaration style) {
+    String justifyContent = style[JUSTIFY_CONTENT];
+    switch (justifyContent) {
+      case 'flex-end':
+      case 'end':
+        return JustifyContent.flexEnd;
+      case 'center':
+        return JustifyContent.center;
+      case 'space-between':
+        return JustifyContent.spaceBetween;
+      case 'space-around':
+        return JustifyContent.spaceAround;
+      case 'space-evenly':
+        return JustifyContent.spaceEvenly;
+      case 'flex-start':
+      case 'start':
+      default:
+        return JustifyContent.flexStart;
+    }
+  }
+
+  AlignItems _getAlignItems(CSSStyleDeclaration style) {
+    String alignItems = style[ALIGN_ITEMS];
+    if (CSSFlex.isVerticalFlexDirection(flexDirection) && style.contains(TEXT_ALIGN)) {
+      String textAlign = style[TEXT_ALIGN];
+      switch (textAlign) {
+        case 'right':
+          return AlignItems.flexEnd;
+        case 'center':
+          return AlignItems.center;
+      }
+    }
+
+    switch (alignItems) {
+      case 'flex-start':
+      case 'start':
+        return AlignItems.flexStart;
+      case 'flex-end':
+      case 'end':
         return AlignItems.flexEnd;
       case 'center':
         return AlignItems.center;
+      case 'baseline':
+        return AlignItems.baseline;
+      case 'stretch':
+      default:
+        return AlignItems.stretch;
     }
   }
 
-  switch (alignItems) {
-    case 'flex-start':
-    case 'start':
-      return AlignItems.flexStart;
-    case 'flex-end':
-    case 'end':
-      return AlignItems.flexEnd;
-    case 'center':
-      return AlignItems.center;
-    case 'baseline':
-      return AlignItems.baseline;
-    case 'stretch':
-    default:
-      return AlignItems.stretch;
+  AlignContent _getAlignContent(CSSStyleDeclaration style) {
+    String alignContent = style[ALIGN_CONTENT];
+    switch (alignContent) {
+      case 'flex-start':
+      case 'start':
+        return AlignContent.flexStart;
+      case 'flex-end':
+      case 'end':
+        return AlignContent.flexEnd;
+      case 'center':
+        return AlignContent.center;
+      case 'space-around':
+        return AlignContent.spaceAround;
+      case 'space-between':
+        return AlignContent.spaceBetween;
+      case 'space-evenly':
+        return AlignContent.spaceEvenly;
+      case 'stretch':
+      default:
+        return AlignContent.stretch;
+    }
   }
-}
 
-AlignContent _getAlignContent(String alignContent) {
-  switch (alignContent) {
-    case 'flex-start':
-    case 'start':
-      return AlignContent.flexStart;
-    case 'flex-end':
-    case 'end':
-      return AlignContent.flexEnd;
-    case 'center':
-      return AlignContent.center;
-    case 'space-around':
-      return AlignContent.spaceAround;
-    case 'space-between':
-      return AlignContent.spaceBetween;
-    case 'space-evenly':
-      return AlignContent.spaceEvenly;
-    case 'stretch':
-    default:
-      return AlignContent.stretch;
-  }
 }
 
 AlignSelf _getAlignSelf(String alignSelf) {

@@ -77,9 +77,6 @@ class Element extends Node
         NodeLifeCycle,
         EventHandlerMixin,
         CSSTextMixin,
-//        CSSDecoratedBoxMixin,
-        CSSFlexboxMixin,
-        CSSFlowMixin,
         CSSOverflowMixin,
         CSSOpacityMixin,
         CSSTransformMixin,
@@ -912,15 +909,7 @@ class Element extends Node
   }
 
   void _styleTextAlignChangedListener(String property, String original, String present) {
-    _updateDecorationRenderLayoutBox();
-  }
-
-  void _updateDecorationRenderLayoutBox() {
-    if (renderBoxModel is RenderFlexLayout) {
-      CSSFlexboxMixin.decorateRenderFlex(renderBoxModel, style);
-    } else if (renderBoxModel is RenderFlowLayout) {
-      CSSFlowMixin.decorateRenderFlow(renderBoxModel, style);
-    }
+    renderBoxModel.renderStyle.updateFlow();
   }
 
   void _styleFilterChangedListener(String property, String original, String present) {
@@ -948,7 +937,7 @@ class Element extends Node
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
-    _updateDecorationRenderLayoutBox();
+    renderBoxModel.renderStyle.updateFlexbox();
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
@@ -1326,7 +1315,7 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
       flexLayout = prevRenderLayoutBox.toFlexLayout();
     }
 
-    CSSFlexboxMixin.decorateRenderFlex(flexLayout, style);
+    flexLayout.renderStyle.updateFlexbox();
     return flexLayout;
   } else if (display == CSSDisplay.block ||
       display == CSSDisplay.none ||
@@ -1384,7 +1373,7 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
       flowLayout = prevRenderLayoutBox.toFlowLayout();
     }
 
-    CSSFlowMixin.decorateRenderFlow(flowLayout, style);
+    flowLayout.renderStyle.updateFlow();
     return flowLayout;
   } else if (display == CSSDisplay.sliver) {
     RenderRecyclerLayout renderRecyclerLayout;
