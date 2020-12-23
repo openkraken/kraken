@@ -330,11 +330,7 @@ mixin RenderOverflowMixin on RenderBox {
 
   // @TODO implement RenderSilver protocol to achieve high performance scroll list.
   void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, PaintingContextCallback callback) {
-    if (clipX == false && clipY == false) {
-      callback(context, offset);
-      return;
-    };
-
+    if (clipX == false && clipY == false) return callback(context, offset);
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
     final Offset paintOffset = Offset(paintOffsetX, paintOffsetY);

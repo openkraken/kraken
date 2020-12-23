@@ -36,7 +36,6 @@ mixin RenderImageFilter on RenderBox {
     if (_imageFilter != null) {
       _imageFilterLayer ??= ImageFilterLayer();
       _imageFilterLayer.imageFilter = imageFilter;
-
       context.pushLayer(_imageFilterLayer, callback, offset);
     } else {
       callback(context, offset);

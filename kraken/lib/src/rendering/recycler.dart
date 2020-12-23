@@ -34,8 +34,9 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     int targetId,
     ElementManager elementManager,
     CSSStyleDeclaration style,
-  })  : assert(axis != null),
+  }) : assert(axis != null),
         super(targetId: targetId, style: style, elementManager: elementManager) {
+
     _element = elementManager.getEventTargetByTargetId<Element>(targetId);
     _axis = resolveAxis(_element.style);
 
@@ -47,9 +48,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   bool get isRepaintBoundary => true;
 
   Axis _axis;
-
   Axis get axis => _axis;
-
   set axis(Axis value) {
     if (_axis != value) {
       _axis = value;
@@ -79,7 +78,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   }
 
   @override
-  void insert(RenderBox child, {RenderBox after}) {
+  void insert(RenderBox child, { RenderBox after }) {
     // Append to last.
     if (after == _renderViewport) {
       return add(child);
@@ -121,7 +120,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     _children.clear();
   }
 
-  void move(RenderBox child, {RenderBox after}) {
+  void move(RenderBox child, { RenderBox after }) {
     assert(_renderSliverList != null);
     remove(child);
     insert(child, after: after);
@@ -135,7 +134,6 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   }
 
   KrakenScrollable _scrollable;
-
   KrakenScrollable get scrollable => _scrollable;
 
   @protected
@@ -196,7 +194,9 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_END, uniqueId: targetId);
+      if (kProfileMode) {
+        PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_END, uniqueId: targetId);
+      }
       return;
     }
 
@@ -271,8 +271,9 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   Offset getChildScrollOffset(RenderObject child, Offset offset) {
     final RenderLayoutParentData childParentData = child.parentData;
     // Fixed elements always paint original offset
-    Offset scrollOffset =
-        childParentData.position == CSSPositionType.fixed ? childParentData.offset : childParentData.offset + offset;
+    Offset scrollOffset = childParentData.position == CSSPositionType.fixed
+        ? childParentData.offset
+        : childParentData.offset + offset;
     return scrollOffset;
   }
 
@@ -305,7 +306,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   }
 
   @override
-  void createChild(int index, {RenderBox after}) {
+  void createChild(int index, { RenderBox after }) {
     if (_didUnderflow) return;
     if (index >= childCount) return;
     _currentIndex = index;
@@ -325,7 +326,8 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     if (node is Node) {
       child = node.renderer;
     } else {
-      if (!kReleaseMode) throw FlutterError('Unsupported type ${node.runtimeType} $node');
+      if (!kReleaseMode)
+        throw FlutterError('Unsupported type ${node.runtimeType} $node');
     }
 
     assert(child != null, 'Child should not be null');
@@ -365,20 +367,25 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   /// Called at the beginning of layout to indicate that layout is about to
   /// occur.
-  void didStartLayout() {}
+  void didStartLayout() { }
 
   /// Called at the end of layout to indicate that layout is now complete.
-  void didFinishLayout() {}
+  void didFinishLayout() { }
 
   @override
-  double estimateMaxScrollOffset(
-    SliverConstraints constraints, {
+  double estimateMaxScrollOffset(SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
     double trailingScrollOffset,
   }) {
-    return _extrapolateMaxScrollOffset(firstIndex, lastIndex, leadingScrollOffset, trailingScrollOffset, childCount);
+    return _extrapolateMaxScrollOffset(
+      firstIndex,
+      lastIndex,
+      leadingScrollOffset,
+      trailingScrollOffset,
+      childCount
+    );
   }
 
   static double _extrapolateMaxScrollOffset(
@@ -410,15 +417,22 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   RenderFlexLayout toFlexLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
-    RenderFlexLayout renderFlexLayout =
-        RenderFlexLayout(children: children, targetId: targetId, style: style, elementManager: elementManager);
+    RenderFlexLayout renderFlexLayout = RenderFlexLayout(
+        children: children,
+        targetId: targetId,
+        style: style,
+        elementManager: elementManager
+    );
     return copyWith(renderFlexLayout);
   }
 
   RenderFlowLayout toFlowLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
-    RenderFlowLayout renderFlowLayout =
-        RenderFlowLayout(targetId: targetId, style: style, elementManager: elementManager);
+    RenderFlowLayout renderFlowLayout = RenderFlowLayout(
+        targetId: targetId,
+        style: style,
+        elementManager: elementManager
+    );
     renderFlowLayout.addAll(children);
     return copyWith(renderFlowLayout);
   }

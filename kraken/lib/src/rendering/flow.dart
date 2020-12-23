@@ -22,13 +22,10 @@ class _RunMetrics {
 
   // Main size extent of the run
   final double mainAxisExtent;
-
   // Cross size extent of the run
   final double crossAxisExtent;
-
   // Max extent above each flex items in the run
   final double baselineExtent;
-
   // All the children RenderBox of layout in the run
   final Map<int, RenderBox> runChildren;
 }
@@ -74,7 +71,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// children are placed in a new run vertically adjacent to the previous run.
   Axis get direction => _direction;
   Axis _direction;
-
   set direction(Axis value) {
     assert(value != null);
     if (_direction == value) return;
@@ -97,7 +93,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   ///    are placed relative to each other in the cross axis.
   MainAxisAlignment get mainAxisAlignment => _mainAxisAlignment;
   MainAxisAlignment _mainAxisAlignment;
-
   set mainAxisAlignment(MainAxisAlignment value) {
     assert(value != null);
     if (_mainAxisAlignment == value) return;
@@ -118,7 +113,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Defaults to 0.0.
   double get spacing => _spacing;
   double _spacing;
-
   set spacing(double value) {
     assert(value != null);
     if (_spacing == value) return;
@@ -142,7 +136,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   ///    are placed relative to each other in the cross axis.
   MainAxisAlignment get runAlignment => _runAlignment;
   MainAxisAlignment _runAlignment;
-
   set runAlignment(MainAxisAlignment value) {
     assert(value != null);
     if (_runAlignment == value) return;
@@ -174,7 +167,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Defaults to 0.0.
   double get runSpacing => _runSpacing;
   double _runSpacing;
-
   set runSpacing(double value) {
     assert(value != null);
     if (_runSpacing == value) return;
@@ -199,7 +191,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   ///    other in the cross axis.
   CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
   CrossAxisAlignment _crossAxisAlignment;
-
   set crossAxisAlignment(CrossAxisAlignment value) {
     assert(value != null);
     if (_crossAxisAlignment == value) return;
@@ -232,7 +223,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// [textDirection] must not be null.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
-
   set textDirection(TextDirection value) {
     if (_textDirection != value) {
       _textDirection = value;
@@ -264,7 +254,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// [verticalDirection] must not be null.
   VerticalDirection get verticalDirection => _verticalDirection;
   VerticalDirection _verticalDirection;
-
   set verticalDirection(VerticalDirection value) {
     if (_verticalDirection != value) {
       _verticalDirection = value;
@@ -489,6 +478,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return 0.0;
   }
 
+
   RenderBoxModel _getChildRenderBoxModel(RenderBoxModel child) {
     Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
     RenderBoxModel renderBoxModel = childEl.renderBoxModel;
@@ -509,9 +499,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     Size childSize = _getChildSize(child);
     switch (direction) {
       case Axis.horizontal:
-        return lineHeight != null
-            ? math.max(lineHeight, childSize.height) + marginVertical
-            : childSize.height + marginVertical;
+        return lineHeight != null ?
+          math.max(lineHeight, childSize.height) + marginVertical :
+          childSize.height + marginVertical;
       case Axis.vertical:
         return childSize.width + marginHorizontal;
     }
@@ -702,9 +692,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         } else {
           Size childOldSize = _getChildSize(child);
           // Need to layout child when width and height of child are both specified and differ from its previous size
-          isChildNeedsLayout = childContentWidth != null &&
-              childContentHeight != null &&
-              (childOldSize.width != childContentWidth || childOldSize.height != childContentHeight);
+          isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
+            (childOldSize.width != childContentWidth ||
+              childOldSize.height != childContentHeight);
         }
       }
 
@@ -756,7 +746,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (runChildren.length > 0) {
         runMainAxisExtent += spacing;
       }
-
       /// Calculate baseline extent of layout box
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
@@ -784,8 +773,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         // When baseline of children not found, use boundary of margin bottom as baseline
         double childAscent = _getChildAscent(child);
         double extentAboveBaseline = childAscent + childLeading / 2;
-        double extentBelowBaseline =
-            childMarginTop + childSize.height + childMarginBottom - childAscent + childLeading / 2;
+        double extentBelowBaseline = childMarginTop + childSize.height + childMarginBottom
+         - childAscent + childLeading / 2;
 
         maxSizeAboveBaseline = math.max(
           extentAboveBaseline,
@@ -1037,9 +1026,10 @@ class RenderFlowLayout extends RenderLayoutBox {
           childMarginTop = renderBoxModel.marginTop;
         }
 
-        Offset relativeOffset = _getOffset(childMainPosition + paddingLeft + borderLeft + childMarginLeft,
-            crossAxisOffset + childLineExtent + paddingTop + borderTop + childMarginTop);
-
+        Offset relativeOffset = _getOffset(
+          childMainPosition + paddingLeft + borderLeft + childMarginLeft,
+          crossAxisOffset + childLineExtent + paddingTop + borderTop + childMarginTop
+        );
         /// Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child, childStyle);
 
@@ -1062,7 +1052,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// https://www.w3.org/TR/css-sizing-3/#automatic-minimum-size
   double _getMainAxisAutoSize(
     List<_RunMetrics> runMetrics,
-  ) {
+    ) {
     double autoMinSize = 0;
 
     if (runMetrics.length != 0) {
@@ -1080,7 +1070,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// https://www.w3.org/TR/css-sizing-3/#automatic-minimum-size
   double _getCrossAxisAutoSize(
     List<_RunMetrics> runMetrics,
-  ) {
+    ) {
     double autoMinSize = 0;
     // Get the sum of lines
     for (_RunMetrics curr in runMetrics) {
@@ -1104,8 +1094,9 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     Size childSize = _getChildSize(child);
     // When baseline of children not found, use boundary of margin bottom as baseline
-    double extentAboveBaseline =
-        childAscent != null ? childMarginTop + childAscent : childMarginTop + childSize.height + childMarginBottom;
+    double extentAboveBaseline = childAscent != null ?
+      childMarginTop + childAscent :
+      childMarginTop + childSize.height + childMarginBottom;
 
     return extentAboveBaseline;
   }
@@ -1197,8 +1188,8 @@ class RenderFlowLayout extends RenderLayoutBox {
   Offset getChildScrollOffset(RenderObject child, Offset offset) {
     final RenderLayoutParentData childParentData = child.parentData;
     // Fixed elements always paint original offset
-    Offset scrollOffset =
-        childParentData.position == CSSPositionType.fixed ? childParentData.offset : childParentData.offset + offset;
+    Offset scrollOffset = childParentData.position == CSSPositionType.fixed ?
+      childParentData.offset : childParentData.offset + offset;
     return scrollOffset;
   }
 
@@ -1208,7 +1199,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (!isChildrenSorted) {
         sortChildrenByZIndex();
       }
-      for (int i = 0; i < sortedChildren.length; i++) {
+      for (int i = 0; i < sortedChildren.length; i ++) {
         RenderObject child = sortedChildren[i];
         if (child is! RenderPositionHolder) {
           DateTime childPaintStart;
@@ -1250,8 +1241,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Convert [RenderFlowLayout] to [RenderRecyclerLayout]
   RenderRecyclerLayout toRenderRecyclerLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
-    RenderRecyclerLayout layout =
-        RenderRecyclerLayout(targetId: targetId, style: style, elementManager: elementManager);
+    RenderRecyclerLayout layout = RenderRecyclerLayout(
+        targetId: targetId,
+        style: style,
+        elementManager: elementManager
+    );
     layout.addAll(children);
     return copyWith(layout);
   }
@@ -1259,8 +1253,12 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Convert [RenderFlowLayout] to [RenderFlexLayout]
   RenderFlexLayout toFlexLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
-    RenderFlexLayout flexLayout =
-        RenderFlexLayout(children: children, targetId: targetId, style: style, elementManager: elementManager);
+    RenderFlexLayout flexLayout = RenderFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
     return copyWith(flexLayout);
   }
 
@@ -1268,7 +1266,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   RenderSelfRepaintFlowLayout toSelfRepaint() {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
-        children: children, targetId: targetId, style: style, elementManager: elementManager);
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
     return copyWith(selfRepaintFlowLayout);
   }
 
@@ -1276,7 +1278,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   RenderSelfRepaintFlexLayout toSelfRepaintFlexLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
-        children: children, targetId: targetId, style: style, elementManager: elementManager);
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
     return copyWith(selfRepaintFlexLayout);
   }
 }
@@ -1288,7 +1294,7 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     int targetId,
     ElementManager elementManager,
     CSSStyleDeclaration style,
-  }) : super(children: children, targetId: targetId, elementManager: elementManager, style: style);
+  }): super(children: children, targetId: targetId, elementManager: elementManager, style: style);
 
   @override
   bool get isRepaintBoundary => true;
@@ -1297,23 +1303,35 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   RenderSelfRepaintFlexLayout toFlexLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
-        children: children, targetId: targetId, style: style, elementManager: elementManager);
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
     return copyWith(selfRepaintFlexLayout);
   }
 
   /// Convert [RenderSelfRepaintFlowLayout] to [RenderFlowLayout]
   RenderFlowLayout toParentRepaint() {
     List<RenderObject> children = getDetachedChildrenAsList();
-    RenderFlowLayout renderFlowLayout =
-        RenderFlowLayout(children: children, targetId: targetId, style: style, elementManager: elementManager);
+    RenderFlowLayout renderFlowLayout = RenderFlowLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
     return copyWith(renderFlowLayout);
   }
 
   /// Convert [RenderSelfRepaintFlowLayout] to [RenderFlowLayout]
   RenderFlexLayout toParentRepaintFlexLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
-    RenderFlexLayout renderFlexLayout =
-        RenderFlexLayout(children: children, targetId: targetId, style: style, elementManager: elementManager);
+    RenderFlexLayout renderFlexLayout = RenderFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
     return copyWith(renderFlexLayout);
   }
 }

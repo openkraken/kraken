@@ -11,7 +11,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 
 class RenderIntrinsic extends RenderBoxModel
-    with RenderObjectWithChildMixin<RenderBox> {
+    with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   RenderIntrinsic(int targetId, CSSStyleDeclaration style, ElementManager elementManager)
       : super(targetId: targetId, style: style, elementManager: elementManager);
 
@@ -52,7 +52,9 @@ class RenderIntrinsic extends RenderBoxModel
 
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
+      if (kProfileMode) {
+        PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
+      }
       return;
     }
 
@@ -126,6 +128,14 @@ class RenderIntrinsic extends RenderBoxModel
     if (kProfileMode) {
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
     }
+  }
+
+  /// This class mixin [RenderProxyBoxMixin], which has its' own paint method,
+  /// override it to layout box model paint.
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+    paintBoxModel(context, offset);
   }
 
   @override
