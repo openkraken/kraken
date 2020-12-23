@@ -151,6 +151,14 @@ class KrakenViewController {
     _elementManager.attach(parent, previousSibling, showPerformanceOverlay: showPerformanceOverlay ?? false);
   }
 
+  Window get window {
+    return getEventTargetById(WINDOW_ID);
+  }
+
+  Document get document {
+    return getEventTargetById(DOCUMENT_ID);
+  }
+
   // dispose controller and recycle all resources.
   void dispose() {
     // break circle reference

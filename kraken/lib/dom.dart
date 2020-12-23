@@ -14,6 +14,7 @@ export 'src/dom/object_element_client.dart';
 export 'src/dom/node.dart';
 export 'src/dom/text_node.dart';
 export 'src/dom/window.dart';
+export 'src/dom/document.dart';
 
 // Tags
 export 'src/dom/tags/a.dart';

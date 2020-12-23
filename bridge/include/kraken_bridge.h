@@ -113,6 +113,7 @@ typedef void (*OnJSError)(int32_t contextId, const char *);
 typedef void (*FlushUICommand)();
 typedef void (*InitBody)(int32_t contextId, void *nativePtr);
 typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
+typedef void (*InitDocument)(int32_t contextId, void *nativePtr);
 
 #if ENABLE_PROFILE
 struct NativePerformanceEntryList {
@@ -187,6 +188,8 @@ KRAKEN_EXPORT
 void registerInitBody(InitBody initBody);
 KRAKEN_EXPORT
 void registerInitWindow(InitWindow initWindow);
+KRAKEN_EXPORT
+void registerInitDocument(InitDocument initDocument);
 
 #if ENABLE_PROFILE
 KRAKEN_EXPORT

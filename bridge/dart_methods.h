@@ -39,6 +39,7 @@ struct DartMethodPointer {
 #endif
   InitBody initBody{nullptr};
   InitWindow initWindow{nullptr};
+  InitDocument initDocument{nullptr};
 };
 
 void registerInvokeModule(InvokeModule callback);
@@ -57,6 +58,7 @@ void registerJSError(OnJSError onJsError);
 void registerFlushUICommand(FlushUICommand flushUiCommand);
 void registerInitBody(InitBody initBody);
 void registerInitWindow(InitWindow initWindow);
+void registerInitDocument(InitDocument initDocument);
 
 #if ENABLE_PROFILE
 void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries);
