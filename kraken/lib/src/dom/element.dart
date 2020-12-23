@@ -475,7 +475,10 @@ class Element extends Node
     /// Update flex siblings.
     if (isParentFlexDisplayType) {
       for (Element child in parent.children) {
-        child._updateFlexItemStyle();
+        if (parent.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
+          child.renderBoxModel.renderStyle.updateFlexItem();
+          child.renderBoxModel.markNeedsLayout();
+        }
       }
     }
 
@@ -696,26 +699,6 @@ class Element extends Node
 
     // Only append childNode when it is not attached.
     if (!child.isRendererAttached) child.attachTo(this, after: after);
-  }
-
-  void _updateFlexItemStyle() {
-    if (renderBoxModel != null) {
-      ParentData childParentData = renderBoxModel.parentData;
-      if (childParentData is RenderFlexParentData) {
-        ElementManager elementManager = renderBoxModel.elementManager;
-        double viewportWidth = elementManager.viewportWidth;
-        double viewportHeight = elementManager.viewportHeight;
-        Size viewportSize = Size(viewportWidth, viewportHeight);
-        final RenderFlexParentData parentData = childParentData;
-        RenderFlexParentData flexParentData = CSSFlex.getParentData(style, viewportSize);
-        parentData.flexGrow = flexParentData.flexGrow;
-        parentData.flexShrink = flexParentData.flexShrink;
-        parentData.flexBasis = flexParentData.flexBasis;
-        parentData.alignSelf = flexParentData.alignSelf;
-
-        renderBoxModel.markNeedsLayout();
-      }
-    }
   }
 
   void _onStyleChanged(String property, String original, String present, bool inAnimation) {
@@ -945,7 +928,10 @@ class Element extends Node
     CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       for (Element child in children) {
-        child._updateFlexItemStyle();
+        if (renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
+          child.renderBoxModel.renderStyle.updateFlexItem();
+          child.renderBoxModel.markNeedsLayout();
+        }
       }
     }
   }
@@ -1545,13 +1531,7 @@ class BoundingClientRect {
 }
 
 void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Element child) {
-  var parentData;
-  if (parentRenderLayoutBox is RenderFlowLayout) {
-    parentData = RenderLayoutParentData();
-  } else {
-    parentData = RenderFlexParentData();
-  }
-
+  RenderLayoutParentData parentData = RenderLayoutParentData();
   RenderBoxModel childRenderBoxModel = child.renderBoxModel;
   childRenderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(childRenderBoxModel, parentData);
 }

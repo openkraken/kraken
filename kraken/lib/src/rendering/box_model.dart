@@ -690,8 +690,7 @@ class RenderBoxModel extends RenderBox with
         // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
         // even if parents have width
         if (renderBoxModel.parent is RenderFlexLayout) {
-          RenderFlexParentData parentData = renderBoxModel.parentData;
-          if (parentData.flexShrink == 0 && renderStyle.width == null && renderStyle.maxWidth == null) {
+          if (renderStyle.flexShrink == 0 && renderStyle.width == null && renderStyle.maxWidth == null) {
             break;
           }
         }

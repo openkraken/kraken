@@ -237,14 +237,63 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  void updateFlexbox() {
-    CSSStyleDeclaration style = this.style;
+  AlignSelf get alignSelf => _alignSelf;
+  AlignSelf _alignSelf = AlignSelf.auto;
+  set alignSelf(AlignSelf value) {
+    assert(value != null);
+    if (_alignSelf == value) return;
+    _alignSelf = value;
+    if (renderBoxModel.parent is RenderFlexLayout) {
+      renderBoxModel.markNeedsLayout();
+    }
+  }
 
+  String get flexBasis => _flexBasis;
+  String _flexBasis = AUTO;
+  set flexBasis(String value) {
+    assert(value != null);
+    if (_flexBasis == value) return;
+    _flexBasis = value;
+    if (renderBoxModel.parent is RenderFlexLayout) {
+      renderBoxModel.markNeedsLayout();
+    }
+  }
+
+  double get flexGrow => _flexGrow;
+  double _flexGrow = 0.0;
+  set flexGrow(double value) {
+    assert(value != null);
+    if (_flexGrow == value) return;
+    _flexGrow = value;
+    if (renderBoxModel.parent is RenderFlexLayout) {
+      renderBoxModel.markNeedsLayout();
+    }
+  }
+
+  double get flexShrink => _flexShrink;
+  double _flexShrink = 1.0;
+  set flexShrink(double value) {
+    assert(value != null);
+    if (_flexShrink == value) return;
+    _flexShrink = value;
+    if (renderBoxModel.parent is RenderFlexLayout) {
+      renderBoxModel.markNeedsLayout();
+    }
+  }
+
+  void updateFlexbox() {
     flexDirection = _getFlexDirection(style);
     flexWrap = _getFlexWrap(style);
     justifyContent = _getJustifyContent(style);
     alignItems = _getAlignItems(style);
     alignContent = _getAlignContent(style);
+  }
+
+  void updateFlexItem() {
+    flexGrow = _getFlexGrow(style);
+    flexShrink = _getFlexShrink(style);
+    flexBasis = _getFlexBasis(style, viewportSize);
+    alignSelf = _getAlignSelf(style);
   }
 
   FlexDirection _getFlexDirection(CSSStyleDeclaration style) {
@@ -348,48 +397,52 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-}
-
-AlignSelf _getAlignSelf(String alignSelf) {
-  switch (alignSelf) {
-    case 'flex-start':
-    case 'start':
-      return AlignSelf.flexStart;
-    case 'flex-end':
-    case 'end':
-      return AlignSelf.flexEnd;
-    case 'center':
-      return AlignSelf.center;
-    case 'stretch':
-      return AlignSelf.stretch;
-    case 'baseline':
-      return AlignSelf.baseline;
-    default:
-      return AlignSelf.auto;
+  AlignSelf _getAlignSelf(CSSStyleDeclaration style) {
+    String alignSelf = style[ALIGN_SELF];
+    switch (alignSelf) {
+      case 'flex-start':
+      case 'start':
+        return AlignSelf.flexStart;
+      case 'flex-end':
+      case 'end':
+        return AlignSelf.flexEnd;
+      case 'center':
+        return AlignSelf.center;
+      case 'stretch':
+        return AlignSelf.stretch;
+      case 'baseline':
+        return AlignSelf.baseline;
+      default:
+        return AlignSelf.auto;
+    }
   }
-}
 
-double _getFlexGrow(String grow) {
-  double flexGrow = CSSLength.toDouble(grow);
-  return flexGrow != null && flexGrow >= 0 ? flexGrow : 0.0;
-}
+  double _getFlexGrow(CSSStyleDeclaration style) {
+    String grow = style[FLEX_GROW];
+    double flexGrow = CSSLength.toDouble(grow);
+    return flexGrow != null && flexGrow >= 0 ? flexGrow : 0.0;
+  }
 
-double _getFlexShrink(String shrink) {
-  double flexShrink = CSSLength.toDouble(shrink);
-  return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
-}
+  double _getFlexShrink(CSSStyleDeclaration style) {
+    String shrink = style[FLEX_SHRINK];
+    double flexShrink = CSSLength.toDouble(shrink);
+    return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
+  }
 
-String _getFlexBasis(String basis, Size viewportSize) {
-  String flexBasis = basis;
-  if (basis.isNotEmpty && basis != AUTO) {
-    if (CSSLength.toDisplayPortValue(basis, viewportSize) < 0) {
+  String _getFlexBasis(CSSStyleDeclaration style, Size viewportSize) {
+    String basis = style[FLEX_BASIS];
+    String flexBasis = basis;
+    if (basis.isNotEmpty && basis != AUTO) {
+      if (CSSLength.toDisplayPortValue(basis, viewportSize) < 0) {
+        flexBasis = AUTO;
+      }
+    } else {
       flexBasis = AUTO;
     }
-  } else {
-    flexBasis = AUTO;
+    return flexBasis;
   }
-  return flexBasis;
 }
+
 
 class CSSFlex {
   static bool isValidFlexWrapValue(String val) {
@@ -408,18 +461,4 @@ class CSSFlex {
     return flexDirection == FlexDirection.columnReverse || flexDirection == FlexDirection.column;
   }
 
-  static RenderFlexParentData getParentData(CSSStyleDeclaration style, Size viewportSize) {
-    RenderFlexParentData parentData = RenderFlexParentData();
-    String grow = style[FLEX_GROW];
-    String shrink = style[FLEX_SHRINK];
-    String basis = style[FLEX_BASIS];
-    String alignSelf = style[ALIGN_SELF];
-
-    parentData.flexGrow = _getFlexGrow(grow);
-    parentData.flexShrink = _getFlexShrink(shrink);
-    parentData.flexBasis = _getFlexBasis(basis, viewportSize);
-    parentData.alignSelf = _getAlignSelf(alignSelf);
-
-    return parentData;
-  }
 }

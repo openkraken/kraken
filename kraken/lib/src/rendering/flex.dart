@@ -115,24 +115,6 @@ class _RunChild {
   }
 }
 
-class RenderFlexParentData extends RenderLayoutParentData {
-  /// Flex grow
-  double flexGrow;
-
-  /// Flex shrink
-  double flexShrink;
-
-  /// Flex basis
-  String flexBasis;
-
-  /// Align self
-  AlignSelf alignSelf = AlignSelf.auto;
-
-  @override
-  String toString() =>
-      '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis; alignSelf=$alignSelf';
-}
-
 bool _startIsTopLeft(FlexDirection direction) {
   assert(direction != null);
 
@@ -188,8 +170,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! RenderFlexParentData) {
-      child.parentData = RenderFlexParentData();
+    if (child.parentData is! RenderLayoutParentData) {
+      child.parentData = RenderLayoutParentData();
     }
     if (child is RenderBoxModel) {
       child.parentData = CSSPositionedLayout.getPositionParentData(child, child.parentData);
@@ -218,7 +200,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else {
           inflexibleSpace += childSize(child, extent);
         }
-        final RenderFlexParentData childParentData = child.parentData;
+        final RenderLayoutParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
       return maxFlexFractionSoFar * totalFlexGrow + inflexibleSpace;
@@ -255,7 +237,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           inflexibleSpace += mainSize;
           maxCrossSize = math.max(maxCrossSize, crossSize);
         }
-        final RenderFlexParentData childParentData = child.parentData;
+        final RenderLayoutParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
 
@@ -268,7 +250,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       while (child != null) {
         final double flex = _getFlexGrow(child);
         if (flex > 0) maxCrossSize = math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
-        final RenderFlexParentData childParentData = child.parentData;
+        final RenderLayoutParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
 
@@ -388,12 +370,11 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   double _getFlexGrow(RenderBox child) {
-    // Flex grow has no effect on placeholder of positioned element
+    // Flex shrink has no effect on placeholder of positioned element
     if (child is RenderPositionHolder) {
       return 0;
     }
-    final RenderFlexParentData childParentData = child.parentData;
-    return childParentData.flexGrow ?? 0;
+    return child is RenderBoxModel ? child.renderStyle.flexGrow : 0.0;
   }
 
   double _getFlexShrink(RenderBox child) {
@@ -401,17 +382,23 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (child is RenderPositionHolder) {
       return 0;
     }
-    final RenderFlexParentData childParentData = child.parentData;
-    return childParentData.flexShrink ?? 1;
+    return child is RenderBoxModel ? child.renderStyle.flexShrink : 1.0;
   }
 
   String _getFlexBasis(RenderBox child) {
-    // Flex basis has no effect on placeholder of positioned element
+    // Flex shrink has no effect on placeholder of positioned element
     if (child is RenderPositionHolder) {
       return AUTO;
     }
-    final RenderFlexParentData childParentData = child.parentData;
-    return childParentData.flexBasis ?? AUTO;
+    return child is RenderBoxModel ? child.renderStyle.flexBasis : AUTO;
+  }
+
+  AlignSelf _getAlignSelf(RenderBox child) {
+    // Flex shrink has no effect on placeholder of positioned element
+    if (child is RenderPositionHolder) {
+      return AlignSelf.auto;
+    }
+    return child is RenderBoxModel ? child.renderStyle.alignSelf : AlignSelf.auto;
   }
 
   double _getMaxMainAxisSize(RenderBox child) {
@@ -723,7 +710,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
     while (child != null) {
-      final RenderFlexParentData childParentData = child.parentData;
+      final RenderLayoutParentData childParentData = child.parentData;
       // Layout placeholder of positioned element(absolute/fixed) in new layer
       if (childParentData.isPositioned) {
         CSSPositionedLayout.layoutPositionedChild(element, this, child);
@@ -1003,7 +990,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     Size viewportSize = Size(viewportWidth, viewportHeight);
 
     while (child != null) {
-      final RenderFlexParentData childParentData = child.parentData;
+      final RenderLayoutParentData childParentData = child.parentData;
       // Exclude positioned placeholder renderObject when layout non placeholder object
       // and positioned renderObject
       if (placeholderChild == null && (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
@@ -1133,7 +1120,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
 
       /// Calculate baseline extent of layout box
-      AlignSelf alignSelf = childParentData.alignSelf;
+      AlignSelf alignSelf = _getAlignSelf(child);
+
       // Vertical align is only valid for inline box
       // Baseline alignment in column direction behave the same as flex-start
       if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) &&
@@ -1244,13 +1232,12 @@ class RenderFlexLayout extends RenderLayoutBox {
         return;
       }
       RenderBox child = runChild.child;
-      RenderFlexParentData childParentData = child.parentData;
       final double mainSize = _getMainSize(child);
 
       double computedSize = mainSize; /// Computed size by flex factor
       double adjustedSize = mainSize; /// Adjusted size after min and max size clamp
-      double flexGrow = childParentData.flexGrow;
-      double flexShrink = childParentData.flexShrink;
+      double flexGrow = _getFlexGrow(child);
+      double flexShrink = _getFlexShrink(child);
 
       int childNodeId;
       if (child is RenderTextBox) {
@@ -1312,15 +1299,17 @@ class RenderFlexLayout extends RenderLayoutBox {
         _RunChild runChild = violations[i];
         runChild.frozen = true;
         RenderBox child = runChild.child;
-        RenderFlexParentData childParentData = child.parentData;
         runMetric.remainingFreeSpace -= runChild.adjustedMainSize - runChild.originalMainSize;
 
+        double flexGrow = _getFlexGrow(child);
+        double flexShrink = _getFlexShrink(child);
+
         /// If total violation is positive, freeze all the items with min violations
-        if (childParentData.flexGrow > 0) {
-          runMetric.totalFlexGrow -= childParentData.flexGrow;
+        if (flexGrow > 0) {
+          runMetric.totalFlexGrow -= flexGrow;
         /// If total violation is negative, freeze all the items with max violations
-        } else if (childParentData.flexShrink > 0) {
-          runMetric.totalFlexShrink -= childParentData.flexShrink;
+        } else if (flexShrink > 0) {
+          runMetric.totalFlexShrink -= flexShrink;
         }
       }
     }
@@ -1394,9 +1383,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
 
       while (child != null) {
-        final RenderFlexParentData childParentData = child.parentData;
+        final RenderLayoutParentData childParentData = child.parentData;
 
-        AlignSelf alignSelf = childParentData.alignSelf;
+        AlignSelf alignSelf = _getAlignSelf(child);
 
         // If size exists in align-items direction, stretch not works
         bool isStretchSelfValid = false;
@@ -1461,15 +1450,17 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (child is RenderBoxModel && child.hasSize) {
           double childContentWidth = RenderBoxModel.getContentWidth(child);
           double childContentHeight = RenderBoxModel.getContentHeight(child);
-          RenderFlexParentData childParentData = child.parentData;
 
           // Always layout child when parent is not laid out yet or child is marked as needsLayout
           if (!hasSize || child.needsLayout) {
             isChildNeedsLayout = true;
           } else {
+            double flexGrow = _getFlexGrow(child);
+            double flexShrink = _getFlexShrink(child);
+
             // Need to relayout child when flex factor exists
-            if ((isFlexGrow && childParentData.flexGrow > 0) ||
-              (isFlexShrink) && childParentData.flexShrink > 0) {
+            if ((isFlexGrow && flexGrow > 0) ||
+              (isFlexShrink) && flexShrink > 0) {
               isChildNeedsLayout = true;
             } else if (isStretchSelf) {
               Size childOldSize = _getChildSize(child);
@@ -1896,7 +1887,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       double mainAxisMarginAutoChildren = 0;
       RenderBox runChild = firstChild;
       while (runChild != null) {
-        final RenderFlexParentData childParentData = runChild.parentData;
+        final RenderLayoutParentData childParentData = runChild.parentData;
         if (childParentData.runIndex != i) break;
         if (runChild is RenderBoxModel) {
           CSSStyleDeclaration childStyle = runChild.style;
@@ -1937,7 +1928,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       while (child != null) {
 
-        final RenderFlexParentData childParentData = child.parentData;
+        final RenderLayoutParentData childParentData = child.parentData;
         // Exclude positioned placeholder renderObject when layout non placeholder object
         // and positioned renderObject
         if (placeholderChild == null && (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
@@ -1956,7 +1947,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         CSSStyleDeclaration childStyle = _getChildStyle(child);
 
-        AlignSelf alignSelf = childParentData.alignSelf;
+        AlignSelf alignSelf = _getAlignSelf(child);
         double crossStartAddedOffset = crossAxisStartPadding + crossAxisStartBorder + childCrossAxisStartMargin;
 
         /// Align flex item by direction returned by align-items or align-self
@@ -2214,7 +2205,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     } else {
       RenderObject child = firstChild;
       while (child != null) {
-        final RenderFlexParentData childParentData = child.parentData;
+        final RenderLayoutParentData childParentData = child.parentData;
         // Don't paint placeholder of positioned element
         if (child is! RenderPositionHolder) {
           context.paintChild(child, getChildScrollOffset(child, offset));
