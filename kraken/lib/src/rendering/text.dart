@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -143,9 +144,26 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
+  // Determine whether the hittest position is within the visible area of the parent node in scroll.
+  bool isParentViewContainsPosition (Offset position) {
+    AbstractNode parentNode = parent;
+    final globalPosition = localToGlobal(position);
+    bool isContainsPosition = true;
+    while (parentNode is RenderBoxModel) {
+      final node =(parentNode as RenderBoxModel);
+      if (node.clipX || node.clipY) {
+        final position =  node.globalToLocal(globalPosition);
+        isContainsPosition &= node.size.contains(position);
+      }
+      parentNode = parentNode.parent;
+    }
+    return isContainsPosition;
+  }
+
   // Text node need hittest self to trigger scroll
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    return size.contains(position);
+    // Prioritize whether position belongs to the current size, so that each node does not need to traverse all its superiors.
+    return size.contains(position) && isParentViewContainsPosition(position);
   }
 }

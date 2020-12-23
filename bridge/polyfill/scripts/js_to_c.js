@@ -34,15 +34,15 @@ const getPolyFillSource = (source, outputName) => `/*
 
 #include "${outputName.toLowerCase()}.h"
 
-static std::string jsCode = std::string(R"(${source})");
+static std::u16string jsCode = std::u16string(uR"(${source})");
 
 void initKraken${outputName}(kraken::JSBridge *bridge) {
-  bridge->evaluateScript(jsCode.c_str(), "internal://", 0);
+  bridge->evaluateScript(jsCode, "internal://", 0);
 }
 `;
 
 function convertJSToCpp(code, outputName) {
-  code = code.replace(/\)\"/g, '))") + std::string(R"("');
+  code = code.replace(/\)\"/g, '))") + std::u16string(uR"("');
   return getPolyFillSource(code, outputName);
 }
 

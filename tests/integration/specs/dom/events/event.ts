@@ -129,4 +129,159 @@ describe('Event', () => {
     await simulateClick(20, 20);
     expect(clickText).toBe('red');
   });
+
+  it('the event cannot be triggered when the element scrolls to the invisible container range', async () => {
+    let clickCount = 0;
+
+    const container = document.createElement('div');
+
+    container.style.overflow = 'hidden';
+    container.style.width = '300px';
+    container.style.height = '500px';
+    container.style.backgroundColor = 'blue';
+
+    document.body.appendChild(container);
+
+    const container2 = document.createElement('div');
+
+    container2.style.overflow = 'scroll';
+    container2.style.width = '300px';
+    container2.style.height = '500px';
+    container2.style.marginTop = '50px';
+    container2.style.backgroundColor = 'red';
+
+    const block1 =document.createElement('div');
+    block1.style.width = '100px';
+    block1.style.height = '100px';
+    block1.style.backgroundColor = 'yellow';
+
+    const block =document.createElement('div');
+    block.style.width = '100px';
+    block.style.height = '100px';
+    block.style.backgroundColor = 'green';
+    block.addEventListener('click', () => clickCount++); 
+
+    const block2 =document.createElement('div');
+    block2.style.width = '100px';
+    block2.style.height = '700px';
+    block2.style.backgroundColor = 'yellow';
+
+    container.appendChild(container2);
+    container2.appendChild(block1);
+    container2.appendChild(block);
+    container2.appendChild(block2);
+
+    container2.scrollTo(0, 150);
+
+    await simulateClick(25, 25);
+    await simulateClick(25, 75);
+    expect(clickCount).toBe(1);
+  })
+
+  it('the event cannot be triggered when the element hidden to the invisible container range', async () => {
+    let clickCount = 0;
+
+    const container = document.createElement('div');
+
+    container.style.overflow = 'hidden';
+    container.style.width = '100px';
+    container.style.height = '100px';
+    container.style.backgroundColor = 'blue';
+
+    document.body.appendChild(container);
+
+    const block =document.createElement('div');
+    block.style.width = '300px';
+    block.style.height = '50px';
+    block.style.backgroundColor = 'green';
+    block.addEventListener('click', () => clickCount++); 
+    container.appendChild(block);
+
+    await simulateClick(50, 20);
+    await simulateClick(150, 10);
+    expect(clickCount).toBe(1);
+  })
+
+  it('the event cannot be triggered when the element visibel to the invisible container range', async () => {
+    let clickCount = 0;
+
+    const container = document.createElement('div');
+
+    container.style.overflow = 'visible';
+    container.style.width = '100px';
+    container.style.height = '100px';
+    container.style.backgroundColor = 'blue';
+
+    document.body.appendChild(container);
+
+    const block =document.createElement('div');
+    block.style.width = '300px';
+    block.style.height = '50px';
+    block.style.backgroundColor = 'green';
+    block.addEventListener('click', () => clickCount++); 
+    container.appendChild(block);
+
+    await simulateClick(50, 20);
+    await simulateClick(150, 20);
+    expect(clickCount).toBe(2);
+  })
+
+  it('the event cannot be triggered when the element with not overflow to the invisible container range', async () => {
+    let clickCount = 0;
+
+    const container = document.createElement('div');
+
+    container.style.width = '100px';
+    container.style.height = '100px';
+    container.style.backgroundColor = 'blue';
+
+    document.body.appendChild(container);
+
+    const block =document.createElement('div');
+    block.style.width = '300px';
+    block.style.height = '50px';
+    block.style.backgroundColor = 'green';
+    block.addEventListener('click', () => clickCount++); 
+    container.appendChild(block);
+
+    await simulateClick(50, 20);
+    await simulateClick(150, 30);
+    expect(clickCount).toBe(2);
+  })
+
+  it('When the scroll element itself scrolls to the invisible container range, the event cannot be triggered', async () => {
+    let clickCount = 0;
+
+    const container = document.createElement('div');
+
+    container.style.overflow = 'hidden';
+    container.style.width = '300px';
+    container.style.height = '500px';
+    container.style.backgroundColor = 'blue';
+
+    document.body.appendChild(container);
+
+    const container2 = document.createElement('div');
+
+    container2.style.overflow = 'scroll';
+    container2.style.width = '300px';
+    container2.style.height = '500px';
+    container2.style.marginTop = '50px';
+    container2.style.backgroundColor = 'red';
+    container2.addEventListener('click', ()=>clickCount++)
+
+    const block1 =document.createElement('div');
+    block1.style.width = '100px';
+    block1.style.height = '1000px';
+    block1.style.backgroundColor = 'yellow';
+
+    container.appendChild(container2);
+    container2.appendChild(block1);
+
+    container2.scrollTo(0, 50);
+
+    await simulateClick(25, 25);
+    await simulateClick(25, 75);
+    expect(clickCount).toBe(1);
+  })
 });
