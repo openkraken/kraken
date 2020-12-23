@@ -131,7 +131,14 @@ class KrakenViewController {
     (_elementManager.getRootRenderObject() as RenderObjectWithControllerMixin).controller = null;
 
     detachView();
+
+    // should clear previous page cached ui commands
+    clearUICommand(_contextId);
+
     disposeBridge(_contextId);
+
+    // DisposeEventTarget command will created when js context disposed, should flush them all.
+    flushUICommand();
 
     _inspector?.dispose();
     _inspector = null;
@@ -402,8 +409,16 @@ class KrakenController {
     }
     _module.dispose();
     _view.detachView();
+
+    // Should clear previous page cached ui commands
+    clearUICommand(_view.contextId);
+
     // Should init JS first
     await reloadJSContext(_view.contextId);
+
+    // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
+    flushUICommand();
+
     Inspector.prevInspector = view._elementManager.controller.view.inspector;
 
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,

@@ -332,6 +332,10 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
   return results;
 }
 
+void clearUICommand(int contextId) {
+  _clearUICommandItems(contextId);
+}
+
 void flushUICommand() {
   Map<int, KrakenController> controllerMap = KrakenController.getControllerMap();
   for (KrakenController controller in controllerMap.values) {
