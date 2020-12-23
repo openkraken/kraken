@@ -40,7 +40,6 @@ class SecondRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Kraken kraken = Kraken(
-      bundleURL: 'http://localhost:3333/kraken/index.js',
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio,
     );
