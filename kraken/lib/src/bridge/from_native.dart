@@ -657,6 +657,25 @@ void registerInitWindow() {
   _registerInitWindow(pointer);
 }
 
+typedef Native_InitDocument = Void Function(Int32 contextId, Pointer<NativeDocument> nativePtr);
+typedef Dart_InitDocument = void Function(int contextId, Pointer<NativeDocument> nativePtr);
+
+typedef Native_RegisterInitDocument = Void Function(Pointer<NativeFunction<Native_InitDocument>>);
+typedef Dart_RegisterInitDocument = void Function(Pointer<NativeFunction<Native_InitDocument>>);
+
+final Dart_RegisterInitDocument _registerInitDocument = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterInitDocument>>('registerInitDocument')
+    .asFunction();
+
+void _initDocument(int contextId, Pointer<NativeDocument> nativePtr) {
+  ElementManager.documentNativePtrMap[contextId] = nativePtr;
+}
+
+void registerInitDocument() {
+  Pointer<NativeFunction<Native_InitDocument>> pointer = Pointer.fromFunction(_initDocument);
+  _registerInitDocument(pointer);
+}
+
 void registerDartMethodsToCpp() {
   registerInvokeModule();
   registerRequestBatchUpdate();
@@ -673,4 +692,5 @@ void registerDartMethodsToCpp() {
   registerFlushUICommand();
   registerInitBody();
   registerInitWindow();
+  registerInitDocument();
 }

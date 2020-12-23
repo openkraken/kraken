@@ -111,4 +111,8 @@ void registerInitWindow(InitWindow initWindow) {
   methodPointer->initWindow = initWindow;
 }
 
+void registerInitDocument(InitDocument initDocument) {
+  methodPointer->initDocument = initDocument;
+}
+
 } // namespace kraken

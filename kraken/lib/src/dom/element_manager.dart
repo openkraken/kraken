@@ -108,6 +108,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   static Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
+  static Map<int, Pointer<NativeDocument>> documentNativePtrMap = Map();
   static Map<int, Pointer<NativeWindow>> windowNativePtrMap = Map();
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
@@ -144,6 +145,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this);
     setEventTarget(window);
+
+    Document document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, _rootElement);
+    setEventTarget(document);
   }
 
   void _setupObserver() {
@@ -329,9 +333,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void addEvent(int targetId, String eventType) {
-    // TODO: support bind event listener on document.
-    if (targetId == DOCUMENT_ID) return;
-
     assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId);
     assert(target != null);
