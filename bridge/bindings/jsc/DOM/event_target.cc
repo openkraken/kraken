@@ -85,7 +85,7 @@ JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarg
 JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::disposeEventTarget, nullptr);
+      ->registerCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
 
   // Release handler callbacks.
   if (context->isValid()) {

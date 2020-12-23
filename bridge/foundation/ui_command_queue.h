@@ -23,6 +23,7 @@ public:
   explicit UICommandTaskMessageQueue(int32_t contextId);
   static UICommandTaskMessageQueue* instance(int32_t contextId);
 
+  void registerCommand(int32_t id, int32_t type, void* nativePtr, bool batchedUpdate);
   void registerCommand(int32_t id, int32_t type, void* nativePtr);
   void registerCommand(int32_t id, int32_t type, NativeString &args_01, NativeString &args_02, void* nativePtr);
   void registerCommand(int32_t id, int32_t type, NativeString &args_01, void* nativePtr);

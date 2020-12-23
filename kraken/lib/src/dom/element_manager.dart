@@ -421,9 +421,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     // Detach renderObjects
     _rootElement.detach();
 
-    // Clears eventTargets map
-    clearTargets();
-
     // run detachCallbacks
     for (var callback in _detachCallbacks) {
       callback();

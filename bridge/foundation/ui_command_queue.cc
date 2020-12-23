@@ -10,6 +10,16 @@ namespace foundation {
 
 UICommandTaskMessageQueue::UICommandTaskMessageQueue(int32_t contextId) : contextId(contextId) {}
 
+void UICommandTaskMessageQueue::registerCommand(int32_t id, int32_t type, void *nativePtr, bool batchedUpdate) {
+  if (batchedUpdate) {
+    kraken::getDartMethod()->requestBatchUpdate(contextId);
+    update_batched = true;
+  }
+
+  UICommandItem item{id, type, nativePtr};
+  queue.emplace_back(item);
+}
+
 void UICommandTaskMessageQueue::registerCommand(int32_t id, int32_t type, void *nativePtr) {
   if (!update_batched) {
     kraken::getDartMethod()->requestBatchUpdate(contextId);
