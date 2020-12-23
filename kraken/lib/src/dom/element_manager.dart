@@ -108,6 +108,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   static Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
+  static Map<int, Pointer<NativeDocument>> documentNativePtrMap = Map();
   static Map<int, Pointer<NativeWindow>> windowNativePtrMap = Map();
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
@@ -144,6 +145,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this);
     setEventTarget(window);
+
+    Document document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, _rootElement);
+    setEventTarget(document);
   }
 
   void _setupObserver() {
