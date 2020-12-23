@@ -133,10 +133,6 @@ class KrakenViewController {
     return getEventTargetById(DOCUMENT_ID);
   }
 
-  void emitEvent(EventTarget eventTarget, Event event) {
-    emitUIEvent(contextId, eventTarget.nativeEventTargetPtr, event);
-  }
-
   // dispose controller and recycle all resources.
   void dispose() {
     // break circle reference

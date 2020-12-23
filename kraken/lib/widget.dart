@@ -155,7 +155,10 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
     }
 
     if (widget._widget.onLoad != null) {
-      widget._widget.onLoad(controller);
+      // DOM element are created at next frame, so we should trigger onload callback in the next frame.
+      controller.module.requestAnimationFrame((_) {
+        widget._widget.onLoad(controller);
+      });
     }
   }
 

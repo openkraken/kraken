@@ -333,9 +333,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void addEvent(int targetId, String eventType) {
-    // TODO: support bind event listener on document.
-    if (targetId == DOCUMENT_ID) return;
-
     assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId);
     assert(target != null);
