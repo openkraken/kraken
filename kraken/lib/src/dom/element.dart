@@ -378,8 +378,8 @@ class Element extends Node
   }
 
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
-    if (renderBoxModel.parentData is RenderLayoutParentData) {
-      (renderBoxModel.parentData as RenderLayoutParentData).position = currentPosition;
+    if (renderBoxModel.parent is RenderLayoutBox) {
+      renderBoxModel.renderStyle.position = currentPosition;
     }
 
     // Move element according to position when it's already attached to render tree.

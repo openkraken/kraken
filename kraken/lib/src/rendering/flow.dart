@@ -1111,8 +1111,10 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   Offset getChildScrollOffset(RenderObject child, Offset offset) {
     final RenderLayoutParentData childParentData = child.parentData;
+    bool isChildFixed = child is RenderBoxModel ?
+      child.renderStyle.position == CSSPositionType.fixed : false;
     // Fixed elements always paint original offset
-    Offset scrollOffset = childParentData.position == CSSPositionType.fixed ?
+    Offset scrollOffset = isChildFixed ?
       childParentData.offset : childParentData.offset + offset;
     return scrollOffset;
   }

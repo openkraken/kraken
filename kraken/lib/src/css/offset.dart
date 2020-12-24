@@ -23,8 +23,8 @@ mixin CSSPositionMixin on RenderStyleBase {
     if (_top == value) return;
     _top = value;
     if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderLayoutParentData parentData = renderBoxModel.parentData;
-      if (parentData.isPositioned) {
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+      if (renderStyle.position != CSSPositionType.static) {
         renderBoxModel.markNeedsLayout();
       }
     }
@@ -38,8 +38,8 @@ mixin CSSPositionMixin on RenderStyleBase {
     if (_bottom == value) return;
     _bottom = value;
     if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderLayoutParentData parentData = renderBoxModel.parentData;
-      if (parentData.isPositioned) {
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+      if (renderStyle.position != CSSPositionType.static) {
         renderBoxModel.markNeedsLayout();
       }
     }
@@ -53,8 +53,8 @@ mixin CSSPositionMixin on RenderStyleBase {
     if (_left == value) return;
     _left = value;
     if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderLayoutParentData parentData = renderBoxModel.parentData;
-      if (parentData.isPositioned) {
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+      if (renderStyle.position != CSSPositionType.static) {
         renderBoxModel.markNeedsLayout();
       }
     }
@@ -68,8 +68,8 @@ mixin CSSPositionMixin on RenderStyleBase {
     if (_right == value) return;
     _right = value;
     if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderLayoutParentData parentData = renderBoxModel.parentData;
-      if (parentData.isPositioned) {
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+      if (renderStyle.position != CSSPositionType.static) {
         renderBoxModel.markNeedsLayout();
       }
     }

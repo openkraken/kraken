@@ -85,6 +85,8 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   String marginRight = childStyle[MARGIN_RIGHT];
   String marginTop = childStyle[MARGIN_TOP];
   String marginBottom = childStyle[MARGIN_BOTTOM];
+  String width = childStyle[WIDTH];
+  String height = childStyle[HEIGHT];
   String left = childStyle[LEFT];
   String right = childStyle[RIGHT];
   String top = childStyle[TOP];
@@ -93,7 +95,8 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
   // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
   if ((left.isNotEmpty && left != AUTO) &&
-      (right.isNotEmpty && right != AUTO)) {
+      (right.isNotEmpty && right != AUTO) &&
+      width.isNotEmpty) {
     if (marginLeft == AUTO) {
       double leftValue = childRenderStyle.left ?? 0.0;
       double rightValue = childRenderStyle.right ?? 0.0;
@@ -108,7 +111,8 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   }
 
   if ((top.isNotEmpty && top != AUTO) &&
-      (bottom.isNotEmpty && bottom != AUTO)) {
+      (bottom.isNotEmpty && bottom != AUTO) &&
+      height.isNotEmpty) {
     if (marginTop == AUTO) {
       double topValue = childRenderStyle.top ?? 0.0;
       double bottomValue = childRenderStyle.bottom ?? 0.0;

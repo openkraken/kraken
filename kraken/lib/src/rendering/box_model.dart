@@ -20,8 +20,6 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   /// Row index of child when wrapping
   int runIndex = 0;
 
-  CSSPositionType position = CSSPositionType.static;
-
   // Whether offset is already set
   bool isOffsetSet = false;
 
