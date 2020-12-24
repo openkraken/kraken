@@ -724,7 +724,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child, size, renderStyle.borderEdge);
 
-        setMaximumScrollableSizeForPositionedChild(childParentData, child.boxSize);
+        setMaximumScrollableSizeForPositionedChild(childParentData, child);
       }
       child = childParentData.nextSibling;
     }

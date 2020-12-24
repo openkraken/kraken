@@ -876,22 +876,24 @@ class RenderBoxModel extends RenderBox with
     needsLayout = false;
   }
 
-  void setMaximumScrollableSizeForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+  void setMaximumScrollableSizeForPositionedChild(RenderLayoutParentData childParentData, RenderBoxModel child) {
+    Size childSize = child.boxSize;
+    RenderStyle childRenderStyle = child.renderStyle;
     double maxScrollableX = maxScrollableSize.width;
     double maxScrollableY = maxScrollableSize.height;
-    if (renderStyle.left != null) {
-      maxScrollableX = math.max(maxScrollableX, renderStyle.left + childSize.width);
+    if (childRenderStyle.left != null) {
+      maxScrollableX = math.max(maxScrollableX, childRenderStyle.left + childSize.width);
     }
 
-    if (renderStyle.right != null) {
-      maxScrollableX = math.max(maxScrollableX, -renderStyle.right + _contentSize.width);
+    if (childRenderStyle.right != null) {
+      maxScrollableX = math.max(maxScrollableX, -childRenderStyle.right + _contentSize.width);
     }
 
-    if (renderStyle.top != null) {
-      maxScrollableY = math.max(maxScrollableY, renderStyle.top + childSize.height);
+    if (childRenderStyle.top != null) {
+      maxScrollableY = math.max(maxScrollableY, childRenderStyle.top + childSize.height);
     }
-    if (renderStyle.bottom != null) {
-      maxScrollableY = math.max(maxScrollableY, -renderStyle.bottom + _contentSize.height);
+    if (childRenderStyle.bottom != null) {
+      maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom + _contentSize.height);
     }
 
     maxScrollableSize = Size(maxScrollableX, maxScrollableY);
