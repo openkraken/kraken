@@ -431,8 +431,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   double _getCrossAxisExtent(RenderBox child) {
-    CSSStyleDeclaration childStyle = _getChildStyle(child);
-    double lineHeight = CSSText.getLineHeight(childStyle, elementManager);
+    double lineHeight = _getLineHeight(child);
     double marginVertical = 0;
     double marginHorizontal = 0;
 
@@ -478,6 +477,18 @@ class RenderFlowLayout extends RenderLayoutBox {
         return 0.0;
     }
     return 0.0;
+  }
+
+  double _getLineHeight(RenderBox child) {
+    double lineHeight;
+    if (child is RenderTextBox) {
+      lineHeight = renderStyle.lineHeight;
+    } else if (child is RenderBoxModel) {
+      lineHeight = child.renderStyle.lineHeight;
+    } else if (child is RenderPositionHolder) {
+      lineHeight = child.realDisplayedBox.renderStyle.lineHeight;
+    }
+    return lineHeight;
   }
 
   @override
@@ -692,8 +703,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
 
         Size childSize = _getChildSize(child);
-        CSSStyleDeclaration childStyle = _getChildStyle(child);
-        double lineHeight = CSSText.getLineHeight(childStyle, elementManager);
+        double lineHeight = _getLineHeight(child);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (lineHeight != null) {
@@ -856,7 +866,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
-      double lineBoxHeight = CSSText.getLineHeight(style, elementManager);
+      double lineBoxHeight = _getLineHeight(this);
       if (lineBoxHeight != null) {
         lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
       }
@@ -907,7 +917,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         Size childSize = _getChildSize(child);
         // Line height of child
-        double childLineHeight = CSSText.getLineHeight(childStyle, elementManager);
+        double childLineHeight = _getLineHeight(child);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (childLineHeight != null) {

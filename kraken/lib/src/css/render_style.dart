@@ -13,6 +13,7 @@ class RenderStyle
     CSSPaddingMixin,
     CSSMarginMixin,
     CSSBoxMixin,
+    CSSTextMixin,
     CSSPositionMixin,
     CSSFlexboxMixin,
     CSSFlowMixin {

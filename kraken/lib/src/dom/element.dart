@@ -76,7 +76,6 @@ class Element extends Node
         ElementNativeMethods,
         NodeLifeCycle,
         EventHandlerMixin,
-        CSSTextMixin,
         CSSOverflowMixin,
         CSSOpacityMixin,
         CSSTransformMixin,
@@ -834,6 +833,7 @@ class Element extends Node
       case FONT_WEIGHT:
       case FONT_STYLE:
       case FONT_SIZE:
+      case LINE_HEIGHT:
       case LETTER_SPACING:
       case WORD_SPACING:
         _updateTextChildNodesStyle();
@@ -972,6 +972,7 @@ class Element extends Node
 
   // Update textNode style when container style changed
   void _updateTextChildNodesStyle() {
+    renderBoxModel.renderStyle.updateTextStyle();
     for (Node node in childNodes) {
       if (node is TextNode) {
         node.updateTextStyle();

@@ -1117,8 +1117,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         (alignSelf == AlignSelf.baseline || renderStyle.alignItems == AlignItems.baseline)) {
         // Distance from top to baseline of child
         double childAscent = _getChildAscent(child);
-        CSSStyleDeclaration childStyle = _getChildStyle(child);
-        double lineHeight = CSSText.getLineHeight(childStyle, elementManager);
+        double lineHeight = _getLineHeight(child);
 
         Size childSize = _getChildSize(child);
         // Leading space between content box and virtual box of child
@@ -1910,7 +1909,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
-      double lineBoxHeight = CSSText.getLineHeight(style, elementManager);
+      double lineBoxHeight = _getLineHeight(this);
       if (lineBoxHeight != null) {
         lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
       }
@@ -2160,6 +2159,18 @@ class RenderFlexLayout extends RenderLayoutBox {
       return contentSize.height;
     }
     return contentSize.width;
+  }
+
+  double _getLineHeight(RenderBox child) {
+    double lineHeight;
+    if (child is RenderTextBox) {
+      lineHeight = renderStyle.lineHeight;
+    } else if (child is RenderBoxModel) {
+      lineHeight = child.renderStyle.lineHeight;
+    } else if (child is RenderPositionHolder) {
+      lineHeight = child.realDisplayedBox.renderStyle.lineHeight;
+    }
+    return lineHeight;
   }
 
   @override
