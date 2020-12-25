@@ -124,7 +124,7 @@ JSValueRef JSPerformance::getProperty(std::string &name, JSValueRef *exception) 
     case PerformanceProperty::measure:
       return m_measure.function();
 #if ENABLE_PROFILE
-    case PerformanceProperty::summary:
+    case PerformanceProperty::__kraken_navigation_summary__:
       return m_summary.function();
 #endif
     default:
@@ -362,8 +362,9 @@ double getMeasureTotalDuration(const std::vector<NativePerformanceEntry *> &meas
   return duration / 1000;
 }
 
-JSValueRef JSPerformance::summary(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef *arguments, JSValueRef *exception) {
+JSValueRef JSPerformance::__kraken_navigation_summary__(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                                        size_t argumentCount, JSValueRef const *arguments,
+                                                        JSValueRef *exception) {
   auto performance = reinterpret_cast<JSPerformance *>(JSObjectGetPrivate(thisObject));
   performance->measureSummary();
 
@@ -673,7 +674,8 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
 
       if (endEntry == entries.end()) {
         size_t startIndex = startEntry - entries.begin();
-        assert_m(false, ("Can not get endEntry. startIndex: " + std::to_string(startIndex) + " startMark: " + startMark + " endMark: " + endMark));
+        assert_m(false, ("Can not get endEntry. startIndex: " + std::to_string(startIndex) +
+                         " startMark: " + startMark + " endMark: " + endMark));
       }
 
       int64_t duration = (*endEntry)->startTime - (*startEntry)->startTime;
