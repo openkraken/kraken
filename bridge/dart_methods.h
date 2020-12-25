@@ -43,6 +43,14 @@ using MatchImageSnapshot = void (*)(void *callbackContext, int32_t contextId, ui
                                     NativeString *name, MatchImageSnapshotCallback callback);
 using Environment = const char *(*)();
 
+#if ENABLE_PROFILE
+struct NativePerformanceEntryList {
+  uint64_t *entries;
+  int32_t length;
+};
+typedef NativePerformanceEntryList* (*GetPerformanceEntries)(int32_t);
+#endif
+
 struct MousePointer {
   int32_t contextId;
   double x;
@@ -74,6 +82,9 @@ struct DartMethodPointer {
   SimulatePointer simulatePointer{nullptr};
   SimulateKeyPress simulateKeyPress{nullptr};
   FlushUICommand flushUICommand{nullptr};
+#if ENABLE_PROFILE
+  GetPerformanceEntries getPerformanceEntries{nullptr};
+#endif
   InitBody initBody{nullptr};
   InitWindow initWindow{nullptr};
   InitDocument initDocument{nullptr};

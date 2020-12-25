@@ -47,6 +47,7 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
   methodPointer->initBody = reinterpret_cast<InitBody>(methodBytes[i++]);
   methodPointer->initWindow = reinterpret_cast<InitWindow>(methodBytes[i++]);
   methodPointer->initDocument = reinterpret_cast<InitDocument>(methodBytes[i++]);
+  methodPointer->getPerformanceEntries = reinterpret_cast<GetPerformanceEntries>(methodBytes[i++]);
 
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }
@@ -63,5 +64,11 @@ void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
 
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }
+
+#if ENABLE_PROFILE
+void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries) {
+  methodPointer->getPerformanceEntries = getPerformanceEntries;
+}
+#endif
 
 } // namespace kraken

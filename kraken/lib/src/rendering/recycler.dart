@@ -4,6 +4,7 @@
  */
 
 import 'dart:ui';
+import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -186,8 +187,16 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   @override
   void performLayout() {
+    if (kProfileMode) {
+      childLayoutDuration = 0;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_START, uniqueId: targetId);
+    }
+
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
+      if (kProfileMode) {
+        PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_END, uniqueId: targetId);
+      }
       return;
     }
 
@@ -214,10 +223,26 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
         break;
     }
 
+    DateTime childLayoutStart;
+    if (kProfileMode) {
+      childLayoutStart = DateTime.now();
+    }
+
     child.layout(childConstraints, parentUsesSize: true);
+
+    if (kProfileMode) {
+      DateTime childLayoutEnd = DateTime.now();
+      childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
+    }
+
     size = getBoxSize(child.size);
 
     didLayout();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_END,
+          uniqueId: targetId, startTime: DateTime.now().microsecondsSinceEpoch - childLayoutDuration);
+    }
   }
 
   @override
@@ -231,7 +256,15 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     }
 
     if (firstChild != null) {
+      DateTime childPaintStart;
+      if (kProfileMode) {
+        childPaintStart = DateTime.now();
+      }
       context.paintChild(firstChild, offset);
+      if (kProfileMode) {
+        DateTime childPaintEnd = DateTime.now();
+        childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
+      }
     }
   }
 

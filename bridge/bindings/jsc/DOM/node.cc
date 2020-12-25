@@ -36,7 +36,7 @@ JSNode::NodeInstance::~NodeInstance() {
   for (auto &node : childNodes) {
     node->parentNode = nullptr;
     node->unrefer();
-    assert(node->_referenceCount == 0 &&
+    assert(node->_referenceCount <= 0 &&
            ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
   }
 

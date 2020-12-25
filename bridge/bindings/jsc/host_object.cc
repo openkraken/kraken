@@ -9,9 +9,9 @@
 namespace kraken::binding::jsc {
 
 HostObject::HostObject(JSContext *context, std::string name)
-  : context(context), name(std::move(name)), ctx(context->context()) {
+  : context(context), name(std::move(name)), ctx(context->context()), contextId(context->getContextId()) {
   JSClassDefinition hostObjectDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_HOST_OBJECT_DEFINITION(hostObjectDefinition, name.c_str(), HostObject);
+  JSC_CREATE_HOST_OBJECT_DEFINITION(hostObjectDefinition, this->name.c_str(), HostObject);
   jsClass = JSClassCreate(&hostObjectDefinition);
   jsObject = JSObjectMake(context->context(), jsClass, this);
 }

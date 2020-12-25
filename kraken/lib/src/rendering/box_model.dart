@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
 
@@ -256,6 +257,9 @@ class RenderBoxModel extends RenderBox with
   }
 
   bool _debugHasBoxLayout = false;
+
+  int childPaintDuration = 0;
+  int childLayoutDuration = 0;
 
   BoxConstraints _contentConstraints;
   BoxConstraints get contentConstraints {
@@ -998,8 +1002,21 @@ class RenderBoxModel extends RenderBox with
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+    if (kProfileMode) {
+      childPaintDuration = 0;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_START, uniqueId: targetId);
+    }
+    if (isCSSDisplayNone || isCSSVisibilityHidden) {
+      if (kProfileMode) {
+        PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END, uniqueId: targetId);
+      }
+      return;
+    }
     paintBoxModel(context, offset);
+    if (kProfileMode) {
+      int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
+    }
   }
 
   void debugPaintOverlay(PaintingContext context, Offset offset) {

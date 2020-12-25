@@ -25,6 +25,7 @@ public:
   std::string name;
 
   JSContext *context;
+  int32_t contextId;
   JSObjectRef jsObject;
   JSContextRef ctx;
   // The C++ object's dtor will be called when the GC finalizes this

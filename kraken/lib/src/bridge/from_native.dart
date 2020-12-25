@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:dio/dio.dart';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/dom.dart';
@@ -13,6 +14,7 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/module/performance_timing.dart';
 import 'package:vibration/vibration.dart';
 import 'platform.dart';
 import 'native_types.dart';
@@ -376,9 +378,7 @@ int _setTimeout(Pointer<JSCallbackContext> callbackContext, int contextId,
 }
 
 const int SET_TIMEOUT_ERROR = -1;
-
-final Pointer<NativeFunction<Native_SetTimeout>> _nativeSetTimeout =
-    Pointer.fromFunction(_setTimeout, SET_TIMEOUT_ERROR);
+final Pointer<NativeFunction<Native_SetTimeout>> _nativeSetTimeout = Pointer.fromFunction(_setTimeout, SET_TIMEOUT_ERROR);
 
 // Register setInterval
 typedef Native_SetInterval = Int32 Function(
@@ -539,6 +539,18 @@ void _initDocument(int contextId, Pointer<NativeDocument> nativePtr) {
 
 final Pointer<NativeFunction<Native_InitDocument>> _nativeInitDocument = Pointer.fromFunction(_initDocument);
 
+typedef Native_Performance_GetEntries = Pointer<NativePerformanceEntryList> Function(Int32 contextId);
+typedef Dart_Performance_GetEntries = Pointer<NativePerformanceEntryList> Function(int contextId);
+
+Pointer<NativePerformanceEntryList> _performanceGetEntries(int contextId) {
+  if (kProfileMode) {
+    return PerformanceTiming.instance(contextId).toNative();
+  }
+  return nullptr;
+}
+
+final Pointer<NativeFunction<Native_Performance_GetEntries>> _nativeGetEntries = Pointer.fromFunction(_performanceGetEntries);
+
 final List<int> _dartNativeMethods = [
   _nativeInvokeModule.address,
   _nativeRequestBatchUpdate.address,
@@ -555,7 +567,8 @@ final List<int> _dartNativeMethods = [
   _nativeFlushUICommand.address,
   _nativeInitBody.address,
   _nativeInitWindow.address,
-  _nativeInitDocument.address
+  _nativeInitDocument.address,
+  _nativeGetEntries.address,
 ];
 
 typedef Native_RegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
