@@ -2,6 +2,7 @@
  * Copyright (C) 2019 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 

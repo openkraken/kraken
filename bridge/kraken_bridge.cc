@@ -271,3 +271,9 @@ void clearUICommandItems(int32_t contextId) {
 void flushUICommandCallback(int64_t contextId) {
   foundation::UICommandCallbackQueue::instance(contextId)->flushCallbacks();
 }
+
+#if ENABLE_PROFILE
+void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries) {
+  kraken::registerGetPerformanceEntries(getPerformanceEntries);
+}
+#endif

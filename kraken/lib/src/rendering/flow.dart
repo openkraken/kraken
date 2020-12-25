@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
 
 /// Infos of each run (line box) in flow layout
 /// https://www.w3.org/TR/css-inline-3/#line-boxes
@@ -536,8 +537,16 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
+    if (kProfileMode) {
+      childLayoutDuration = 0;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_START, uniqueId: targetId);
+    }
+
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
+      if (kProfileMode) {
+        PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_END, uniqueId: targetId);
+      }
       return;
     }
 
@@ -571,6 +580,13 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     didLayout();
+
+    if (kProfileMode) {
+      DateTime flowLayoutEndTime = DateTime.now();
+      int amendEndTime = flowLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
+      PerformanceTiming.instance(elementManager.contextId)
+          .mark(PERF_FLOW_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
+    }
   }
 
   void _layoutChildren() {
@@ -683,7 +699,15 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
 
       if (isChildNeedsLayout) {
+        DateTime childLayoutStart;
+        if (kProfileMode) {
+          childLayoutStart = DateTime.now();
+        }
         child.layout(childConstraints, parentUsesSize: true);
+        if (kProfileMode) {
+          DateTime childLayoutEnd = DateTime.now();
+          childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
+        }
       }
 
       double childMainAxisExtent = _getMainAxisExtent(child);
@@ -1178,7 +1202,15 @@ class RenderFlowLayout extends RenderLayoutBox {
       for (int i = 0; i < sortedChildren.length; i ++) {
         RenderObject child = sortedChildren[i];
         if (child is! RenderPositionHolder) {
+          DateTime childPaintStart;
+          if (kProfileMode) {
+            childPaintStart = DateTime.now();
+          }
           context.paintChild(child, getChildScrollOffset(child, offset));
+          if (kProfileMode) {
+            DateTime childPaintEnd = DateTime.now();
+            childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
+          }
         }
       }
     } else {
@@ -1186,7 +1218,15 @@ class RenderFlowLayout extends RenderLayoutBox {
       while (child != null) {
         final RenderLayoutParentData childParentData = child.parentData;
         if (child is! RenderPositionHolder) {
+          DateTime childPaintStart;
+          if (kProfileMode) {
+            childPaintStart = DateTime.now();
+          }
           context.paintChild(child, getChildScrollOffset(child, offset));
+          if (kProfileMode) {
+            DateTime childPaintEnd = DateTime.now();
+            childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
+          }
         }
         child = childParentData.nextSibling;
       }

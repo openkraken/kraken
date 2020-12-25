@@ -356,3 +356,20 @@ class NativeAnimationElement extends Struct {
 
   Pointer<NativeFunction<Native_PlayAnimation>> play;
 }
+
+class NativePerformanceEntry extends Struct {
+  Pointer<Utf8> name;
+  Pointer<Utf8> entryType;
+
+  @Double()
+  double startTime;
+  @Double()
+  double duration;
+}
+
+class NativePerformanceEntryList extends Struct {
+  Pointer<Uint64> entries;
+
+  @Int32()
+  int length;
+}

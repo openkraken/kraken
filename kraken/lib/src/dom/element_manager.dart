@@ -8,6 +8,7 @@ import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
 import 'dart:ffi';
@@ -16,6 +17,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/launcher.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 
@@ -101,10 +103,17 @@ const int DOCUMENT_ID = -3;
 class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver  {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: id);
+    }
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
     EventTarget eventTarget = controller.view.getEventTargetById(id);
     if (eventTarget == null) return;
     eventTarget.dispose();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: id);
+    }
   }
 
   static Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
@@ -122,12 +131,24 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   final double viewportWidth;
   final double viewportHeight;
 
+  final int contextId;
+
   final List<VoidCallback> _detachCallbacks = [];
 
   ElementManager(this.viewportWidth, this.viewportHeight,
-      {int contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
+      {this.contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
+      PerformanceTiming.instance(contextId).mark(PERF_BODY_ELEMENT_INIT_START);
+    }
+
     _rootElement = BodyElement(viewportWidth, viewportHeight, BODY_ID, bodyNativePtrMap[contextId], this)
       ..attachBody();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_BODY_ELEMENT_INIT_END);
+    }
 
     RenderBoxModel rootRenderBoxModel = _rootElement.renderBoxModel;
     if (viewport != null) {
