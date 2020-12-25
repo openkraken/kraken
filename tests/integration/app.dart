@@ -8,8 +8,8 @@ import 'package:kraken/widget.dart';
 import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart' as path;
-import '../bridge/from_native.dart';
-import '../bridge/to_native.dart';
+import 'bridge/from_native.dart';
+import 'bridge/to_native.dart';
 import 'custom/custom_object_element.dart';
 
 String pass = (AnsiPen()..green())('[TEST PASS]');
