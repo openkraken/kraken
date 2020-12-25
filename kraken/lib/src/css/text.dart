@@ -149,24 +149,46 @@ mixin CSSTextMixin on RenderStyleBase {
   ///   foreground: The paint used to draw the text. If this is specified, color must be null.
   static TextStyle getTextStyle(Element parent) {
     CSSStyleDeclaration parentStyle = parent.style;
-    RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
-    Size viewportSize = parentRenderStyle.viewportSize;
+    RenderBoxModel parentRenderBoxModel = parent.renderBoxModel;
+    ElementManager elementManager = parent.elementManager;
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
+    // Text may be created when parent renderObject not created, get it from style instead
+    Color color = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.color : CSSText.getTextColor(parent.style);
+    TextDecoration textDecorationLine = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.textDecorationLine : CSSText.getTextDecorationLine(parent.style);
+    Color textDecorationColor = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.textDecorationColor : CSSText.getTextDecorationColor(parent.style);
+    TextDecorationStyle textDecorationStyle = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.textDecorationStyle : CSSText.getTextDecorationStyle(parent.style);
+    FontWeight fontWeight = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.fontWeight : CSSText.getFontWeight(parent.style);
+    FontStyle fontStyle = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.fontStyle : CSSText.getFontStyle(parent.style);
+    double letterSpacing = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.letterSpacing : CSSText.getLetterSpacing(parent.style, viewportSize);
+    double wordSpacing = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.wordSpacing : CSSText.getWordSpacing(parent.style, viewportSize);
+    List<Shadow> textShadow = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.textShadow : CSSText.getTextShadow(parent.style, viewportSize);
 
     return TextStyle(
-      color: parentRenderStyle.color,
-      decoration: parentRenderStyle.textDecorationLine,
-      decorationColor: parentRenderStyle.textDecorationColor,
-      decorationStyle: parentRenderStyle.textDecorationStyle,
-      fontWeight: parentRenderStyle.fontWeight,
-      fontStyle: parentRenderStyle.fontStyle,
+      color: color,
+      decoration: textDecorationLine,
+      decorationColor: textDecorationColor,
+      decorationStyle: textDecorationStyle,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
       // To keep compatibility with font-size and font-family custimazition in test,
       // get style from constants if style not defined
       fontFamilyFallback: CSSText.getFontFamilyFallback(parent.style),
       fontSize: CSSText.getFontSize(parent.style, viewportSize),
-
-      letterSpacing: parentRenderStyle.letterSpacing,
-      wordSpacing: parentRenderStyle.wordSpacing,
-      shadows: parentRenderStyle.textShadow,
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
+      shadows: textShadow,
       textBaseline: CSSText.getTextBaseLine(parentStyle),
       package: CSSText.getFontPackage(parentStyle),
       locale: CSSText.getLocale(parentStyle),
