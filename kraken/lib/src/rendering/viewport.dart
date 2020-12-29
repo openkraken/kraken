@@ -3,12 +3,18 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 import 'package:kraken/launcher.dart';
 import 'dart:ui';
 import 'package:meta/meta.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/gesture.dart';
 
-class RenderViewportBox extends RenderProxyBox
-    with RenderObjectWithControllerMixin {
+final MethodChannel _channel = const MethodChannel('aaa');
+
+class RenderViewportBox extends RenderProxyBox with
+    RenderObjectWithControllerMixin,
+    RenderOverflowMixin {
   RenderViewportBox({
     @required Size viewportSize,
     RenderBox child,
@@ -35,6 +41,9 @@ class RenderViewportBox extends RenderProxyBox
     }
   }
 
+  VerticalDragGestureRecognizer _verticalDragGestureRecognizer = VerticalDragGestureRecognizer();
+  HorizontalDragGestureRecognizer _horizontalDragRecognizer = HorizontalDragGestureRecognizer();
+
   @override
   void performLayout() {
     assert(_viewportSize != null);
@@ -50,6 +59,23 @@ class RenderViewportBox extends RenderProxyBox
         width: _viewportSize.width,
         height: height,
       ));
+    }
+
+
+
+    _verticalDragGestureRecognizer.onUpdate = onUpdate;
+    _horizontalDragRecognizer.onUpdate = onUpdate;
+  }
+
+  void onUpdate(DragUpdateDetails details) {
+    print('onUpdate');
+  }
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    super.handleEvent(event, entry);
+    if (event is PointerDownEvent) {
+      _verticalDragGestureRecognizer.addPointer(event);
     }
   }
 
