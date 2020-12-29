@@ -69,7 +69,13 @@ class CustomObjectElement implements ObjectElementClient {
   void _createVideoBox() {
     createVideoPlayer(_src).then((textureId) {
       addVideoBox(textureId);
+      _dispatchCustomEvent();
     });
+  }
+
+  void _dispatchCustomEvent() {
+    CustomEvent event = CustomEvent('customevent', CustomEventInit(detail: 'hello world'));
+    objectElementHost.dispatchEvent(event);
   }
 
   @override

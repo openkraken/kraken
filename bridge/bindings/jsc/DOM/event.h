@@ -73,7 +73,7 @@ public:
   static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
 
-  static EventInstance* buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent);
+  static EventInstance* buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent, bool isCustomEvent);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
