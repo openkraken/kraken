@@ -26,8 +26,10 @@ class Kraken extends StatelessWidget {
 
   // The initial URL to load.
   final String bundleURL;
+
   // The initial assets path to load.
   final String bundlePath;
+
   // The initial raw javascript content to load.
   final String bundleContent;
 
@@ -78,7 +80,6 @@ class Kraken extends StatelessWidget {
     this.animationController,
     this.debugEnableInspector,
   }) : super(key: key) {
-
     // assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
     // 'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
     // assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
@@ -108,6 +109,10 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(0).mark(PERF_CONTROLLER_INIT_START);
+    }
+
     KrakenController controller = KrakenController(shortHash(_krakenWidget.hashCode), _krakenWidget.viewportWidth, _krakenWidget.viewportHeight,
       background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
@@ -118,6 +123,11 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
       bundleContent: _krakenWidget.bundleContent,
       debugEnableInspector: _krakenWidget.debugEnableInspector,
     );
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_CONTROLLER_INIT_END);
+    }
+
     return controller.view.getRootRenderObject();
   }
 
@@ -140,7 +150,16 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
   void mount(Element parent, dynamic newSlot) async {
     super.mount(parent, newSlot);
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_JS_BUNDLE_LOAD_START);
+    }
+
     await controller.loadBundle();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_JS_BUNDLE_LOAD_END);
+    }
 
     // Execute JavaScript scripts will block the Flutter UI Threads.
     // Listen for animationController listener to make sure to execute Javascript after route transition had completed.

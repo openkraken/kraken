@@ -40,16 +40,17 @@ class JSFunctionHolder {
 public:
   JSFunctionHolder() = delete;
   explicit JSFunctionHolder(JSContext *context, void *data, std::string name, JSObjectCallAsFunctionCallback callback);
+  explicit JSFunctionHolder(JSContext *context, std::string name, JSObjectCallAsFunctionCallback callback);
   ~JSFunctionHolder();
 
   JSObjectRef function();
 
 private:
   JSObjectRef m_function{nullptr};
-  JSContext *context;
-  void *m_data;
+  JSContext *context{nullptr};
+  void *m_data{nullptr};
   std::string m_name;
-  JSObjectCallAsFunctionCallback m_callback;
+  JSObjectCallAsFunctionCallback m_callback{nullptr};
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
 };
 
@@ -60,6 +61,7 @@ public:
   ~JSStringHolder();
 
   JSValueRef makeString();
+  JSStringRef getString();
   std::string string();
 
   const JSChar *ptr();
@@ -123,6 +125,8 @@ public:
   void reportError(const char *errmsg);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
+
+  int32_t uniqueId;
 
 private:
   int32_t contextId;

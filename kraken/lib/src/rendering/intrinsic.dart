@@ -3,9 +3,11 @@
  * Author: Kraken Team.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 
 class RenderIntrinsic extends RenderBoxModel
@@ -43,14 +45,33 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   void performLayout() {
+    if (kProfileMode) {
+      childLayoutDuration = 0;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: targetId);
+    }
+
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
+      if (kProfileMode) {
+        PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
+      }
       return;
     }
 
     beforeLayout();
     if (child != null) {
+      DateTime childLayoutStart;
+      if (kProfileMode) {
+        childLayoutStart = DateTime.now();
+      }
+
       child.layout(contentConstraints, parentUsesSize: true);
+
+      if (kProfileMode) {
+        DateTime childLayoutEnd = DateTime.now();
+        childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch) - childLayoutStart.microsecondsSinceEpoch;
+      }
+
       setMaxScrollableSize(child.size.width, child.size.height);
 
       CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
@@ -103,6 +124,10 @@ class RenderIntrinsic extends RenderBoxModel
     } else {
       super.performResize();
     }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
+    }
   }
 
   /// This class mixin [RenderProxyBoxMixin], which has its' own paint method,
@@ -124,7 +149,15 @@ class RenderIntrinsic extends RenderBoxModel
     }
 
     if (child != null) {
+      DateTime childPaintStart;
+      if (kProfileMode) {
+        childPaintStart = DateTime.now();
+      }
       context.paintChild(child, offset);
+      if (kProfileMode) {
+        DateTime childPaintEnd = DateTime.now();
+        childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
+      }
     }
   }
 

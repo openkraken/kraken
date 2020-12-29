@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  archive: ^2.0.11
   path: ^1.6.4
   meta: ^1.1.6
   flare_flutter: ^2.0.1

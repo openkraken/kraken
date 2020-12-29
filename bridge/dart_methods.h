@@ -34,6 +34,9 @@ struct DartMethodPointer {
   SimulatePointer simulatePointer{nullptr};
   SimulateKeyPress simulateKeyPress{nullptr};
   FlushUICommand flushUICommand{nullptr};
+#if ENABLE_PROFILE
+  GetPerformanceEntries getPerformanceEntries{nullptr};
+#endif
   InitBody initBody{nullptr};
   InitWindow initWindow{nullptr};
   InitDocument initDocument{nullptr};
@@ -56,6 +59,10 @@ void registerFlushUICommand(FlushUICommand flushUiCommand);
 void registerInitBody(InitBody initBody);
 void registerInitWindow(InitWindow initWindow);
 void registerInitDocument(InitDocument initDocument);
+
+#if ENABLE_PROFILE
+void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries);
+#endif
 
 // test only methods
 void registerRefreshPaint(RefreshPaint refreshPaint);
