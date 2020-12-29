@@ -99,8 +99,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       } else if (property == BACKGROUND_ORIGIN) {
         renderStyle.backgroundOrigin = getBackgroundOrigin(present);
       } if (property == BACKGROUND_COLOR) {
-        Color bgColor = CSSBackground.getBackgroundColor(style);
-        updateBackgroundColor(bgColor);
+        updateBackgroundColor();
       } else if (property.startsWith(BACKGROUND)) {
         // Including BACKGROUND_REPEAT, BACKGROUND_POSITION, BACKGROUND_IMAGE,
         //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.
@@ -112,9 +111,9 @@ mixin CSSBoxMixin on RenderStyleBase {
       } else if (property == BOX_SHADOW) {
         _updateBoxShadow(renderBoxModel, style, property);
       } else if (property == COLOR) {
-//        updateBackgroundColor(renderBoxModel, style, property);
-//        _updateBorder(renderBoxModel, style, property);
-//        _updateBoxShadow(renderBoxModel, style, property);
+       updateBackgroundColor();
+       updateBorder(property);
+       _updateBoxShadow(renderBoxModel, style, property);
       }
     } else {
       cssBoxDecoration = getCSSBoxDecoration(renderBoxModel, style);
@@ -155,7 +154,8 @@ mixin CSSBoxMixin on RenderStyleBase {
     }
   }
 
-  void updateBackgroundColor(Color bgColor) {
+  void updateBackgroundColor([Color color]) {
+    Color bgColor = color ?? CSSBackground.getBackgroundColor(style);
     BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
 
     // If change bg color from some color to null, which must be explicitly transparent.

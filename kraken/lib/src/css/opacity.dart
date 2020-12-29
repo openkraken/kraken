@@ -3,8 +3,6 @@
  * Author: Kraken Team.
  */
 import 'dart:ui' as ui;
-import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 mixin CSSOpacityMixin on RenderStyleBase {

@@ -177,8 +177,6 @@ mixin CSSTextMixin on RenderStyleBase {
       parentRenderBoxModel.renderStyle.wordSpacing : CSSText.getWordSpacing(parent.style, viewportSize);
     List<Shadow> textShadow = parentRenderBoxModel != null ?
       parentRenderBoxModel.renderStyle.textShadow : CSSText.getTextShadow(parent.style, viewportSize);
-    List<String> fontFamily = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontFamily : CSSText.getFontFamilyFallback(parent.style);
 
     return TextStyle(
       color: color,
@@ -187,11 +185,9 @@ mixin CSSTextMixin on RenderStyleBase {
       decorationStyle: textDecorationStyle,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
-      // To keep compatibility with font-size and font-family custimazition in test,
+      // To keep compatibility with font-family custimazition in test,
       // get style from constants if style not defined
-//      fontFamilyFallback: CSSText.getFontFamilyFallback(parent.style),
-//      fontSize: CSSText.getFontSize(parent.style, viewportSize),
-      fontFamilyFallback: fontFamily,
+      fontFamilyFallback: CSSText.getFontFamilyFallback(parent.style),
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
