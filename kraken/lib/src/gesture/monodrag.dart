@@ -18,13 +18,11 @@ enum _DragState {
 }
 
 abstract class GestureDeleage {
-  @override
+
   void overflowByUpdate(DragUpdateDetails details);
 
-  @override
   void overflowByStart(DragStartDetails details);
 
-  @override
   void overflowByEnd(DragEndDetails details);
 }
 
