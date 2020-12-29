@@ -169,12 +169,16 @@ mixin CSSTextMixin on RenderStyleBase {
       parentRenderBoxModel.renderStyle.fontWeight : CSSText.getFontWeight(parent.style);
     FontStyle fontStyle = parentRenderBoxModel != null ?
       parentRenderBoxModel.renderStyle.fontStyle : CSSText.getFontStyle(parent.style);
+    double fontSize = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.fontSize : CSSText.getFontSize(parent.style, viewportSize);
     double letterSpacing = parentRenderBoxModel != null ?
       parentRenderBoxModel.renderStyle.letterSpacing : CSSText.getLetterSpacing(parent.style, viewportSize);
     double wordSpacing = parentRenderBoxModel != null ?
       parentRenderBoxModel.renderStyle.wordSpacing : CSSText.getWordSpacing(parent.style, viewportSize);
     List<Shadow> textShadow = parentRenderBoxModel != null ?
       parentRenderBoxModel.renderStyle.textShadow : CSSText.getTextShadow(parent.style, viewportSize);
+    List<String> fontFamily = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.fontFamily : CSSText.getFontFamilyFallback(parent.style);
 
     return TextStyle(
       color: color,
@@ -185,8 +189,10 @@ mixin CSSTextMixin on RenderStyleBase {
       fontStyle: fontStyle,
       // To keep compatibility with font-size and font-family custimazition in test,
       // get style from constants if style not defined
-      fontFamilyFallback: CSSText.getFontFamilyFallback(parent.style),
-      fontSize: CSSText.getFontSize(parent.style, viewportSize),
+//      fontFamilyFallback: CSSText.getFontFamilyFallback(parent.style),
+//      fontSize: CSSText.getFontSize(parent.style, viewportSize),
+      fontFamilyFallback: fontFamily,
+      fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       shadows: textShadow,

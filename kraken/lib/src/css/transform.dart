@@ -29,11 +29,13 @@ void _updateColor(Color oldColor, Color newColor, double progress, String proper
   switch (property) {
     case COLOR:
       renderStyle.color = color;
-      // @TODO repaint children text node
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
       break;
     case TEXT_DECORATION_COLOR:
       renderStyle.textDecorationColor = color;
-      // @TODO repaint children text node
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
       break;
     case BACKGROUND_COLOR:
       renderStyle.updateBackgroundColor(color);
@@ -95,11 +97,18 @@ void _updateLength(double oldLength, double newLength, double progress, String p
     case FLEX_BASIS:
     case FONT_SIZE:
       renderStyle.fontSize = length;
-      // @TODO repaint children text node
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
       break;
     case LETTER_SPACING:
       renderStyle.letterSpacing = length;
-      // @TODO repaint children text node
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
+      break;
+    case WORD_SPACING:
+      renderStyle.wordSpacing = length;
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
       break;
     case HEIGHT:
       renderStyle.height = length;
@@ -131,7 +140,8 @@ void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress
   switch (property) {
     case FONT_WEIGHT:
       renderStyle.fontWeight = fontWeight;
-      // @TODO repaint children text node
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
       break;
   }
 }
@@ -226,6 +236,18 @@ void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, Ren
   }
 
   renderStyle.updateTransform(null, newMatrix4);
+}
+
+void _updateChildTextNodes(RenderStyle renderStyle) {
+  RenderBoxModel renderBoxModel = renderStyle.renderBoxModel;
+  ElementManager elementManager = renderBoxModel.elementManager;
+  int targetId = renderBoxModel.targetId;
+  Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
+  for (Node node in element.childNodes) {
+    if (node is TextNode) {
+      node.updateTextStyle();
+    }
+  }
 }
 
 const List<Function> _colorHandler = [_parseColor, _updateColor];
