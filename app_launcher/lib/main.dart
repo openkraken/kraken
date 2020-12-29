@@ -39,8 +39,18 @@ class FirstRoute extends StatelessWidget {
 
 class gestureClient implements GestureDeleage {
   @override
-  void overflowBy(DragUpdateDetails details) {
-    print('coreOverScrollBy=${details}');
+  void overflowByUpdate(DragUpdateDetails details) {
+    print('overflowByUpdate=${details}');
+  }
+
+  @override
+  void overflowByStart(DragStartDetails details) {
+    print('overflowByStart=${details}');
+  }
+
+  @override
+  void overflowByEnd(DragEndDetails details) {
+    print('overflowByEnd=${details}');
   }
 }
 
