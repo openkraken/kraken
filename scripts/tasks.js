@@ -148,6 +148,10 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       '-DENABLE_TEST=true'
     ];
 
+    if (process.env.ENABLE_PROFILE) {
+      cmakeArgs.push('-DENABLE_PROFILE=true');
+    }
+
     const makeFileArgs = [
       ...cmakeArgs,
       '-G',

@@ -25,9 +25,20 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
     // TODO: trigger oneror event.
   };
 
+#if ENABLE_PROFILE
+  double jsContextStartTime =
+    std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+#endif
   bridgeCallback = new foundation::BridgeCallback();
 
   context = binding::jsc::createJSContext(contextId, errorHandler, this);
+
+#if ENABLE_PROFILE
+  auto nativePerformance = binding::jsc::NativePerformance::instance(context->uniqueId);
+  nativePerformance->mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
+  nativePerformance->mark(PERF_JS_CONTEXT_INIT_END);
+  nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_START);
+#endif
 
   kraken::binding::jsc::bindKraken(context);
   kraken::binding::jsc::bindUIManager(context);
@@ -54,7 +65,17 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsc::bindScreen(context);
   kraken::binding::jsc::bindBlob(context);
 
+#if ENABLE_PROFILE
+  nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_END);
+  nativePerformance->mark(PERF_JS_POLYFILL_INIT_START);
+#endif
+
   initKrakenPolyFill(this);
+
+#if ENABLE_PROFILE
+  nativePerformance->mark(PERF_JS_POLYFILL_INIT_END);
+#endif
+
 #ifdef KRAKEN_ENABLE_JSA
   Object promiseHandler = context->global().getPropertyAsObject(*context, "__global_unhandled_promise_handler__");
   context->setUnhandledPromiseRejectionHandler(promiseHandler);
@@ -83,7 +104,6 @@ void JSBridge::detachDevtools() {
   devtools_front_door_->terminate();
 }
 #endif // ENABLE_DEBUGGER
-
 
 void JSBridge::handleModuleListener(const NativeString *args, JSValueRef *exception) {
   for (const auto &callback : krakenModuleListenerList) {
@@ -132,6 +152,8 @@ JSBridge::~JSBridge() {
   krakenModuleListenerList.clear();
 
   delete bridgeCallback;
+
+  binding::jsc::NativePerformance::disposeInstance(context->uniqueId);
 }
 
 void JSBridge::reportError(const char *errmsg) {

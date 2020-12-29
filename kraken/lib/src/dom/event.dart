@@ -111,17 +111,34 @@ class Event {
 }
 
 class EventInit {
-  bool bubbles;
-  bool cancelable;
+  final bool bubbles;
+  final bool cancelable;
 
-  static final Map<String, EventInit> _cache = <String, EventInit>{};
+  EventInit({ this.bubbles = false, this.cancelable = false });
+}
 
-  factory EventInit({bool bubbles = false, bool cancelable = false}) {
-    String key = bubbles.toString() + cancelable.toString();
-    return _cache.putIfAbsent(key, () => EventInit._internal(bubbles: bubbles, cancelable: cancelable));
+class CustomEventInit extends EventInit {
+  final String detail;
+
+  CustomEventInit({bool bubbles = false, bool cancelable = false, this.detail })
+      : super(bubbles: bubbles, cancelable: cancelable);
+}
+
+/// reference: http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html#interface-CustomEvent
+/// Attention: Detail now only can be a string.
+class CustomEvent extends Event {
+  final CustomEventInit _customEventInit;
+  String get detail => _customEventInit?.detail;
+
+  CustomEvent(String type, [CustomEventInit customEventInit])
+      : _customEventInit = customEventInit, super(type, customEventInit);
+
+  Pointer<NativeCustomEvent> toNative() {
+    Pointer<NativeCustomEvent> nativeCustomEventPointer = allocate<NativeCustomEvent>();
+    nativeCustomEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
+    nativeCustomEventPointer.ref.detail = stringToNativeString(detail);
+    return nativeCustomEventPointer;
   }
-
-  EventInit._internal({this.bubbles, this.cancelable});
 }
 
 class InputEvent extends Event {

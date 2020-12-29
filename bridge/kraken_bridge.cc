@@ -213,6 +213,11 @@ void registerInitWindow(InitWindow initWindow) {
   kraken::registerInitWindow(initWindow);
 }
 
+
+void registerInitDocument(InitDocument initDocument) {
+  kraken::registerInitDocument(initDocument);
+}
+
 Screen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;
@@ -266,3 +271,9 @@ void clearUICommandItems(int32_t contextId) {
 void flushUICommandCallback(int64_t contextId) {
   foundation::UICommandCallbackQueue::instance(contextId)->flushCallbacks();
 }
+
+#if ENABLE_PROFILE
+void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries) {
+  kraken::registerGetPerformanceEntries(getPerformanceEntries);
+}
+#endif

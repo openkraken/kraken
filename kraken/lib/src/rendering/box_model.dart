@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
 
@@ -239,6 +240,9 @@ class RenderBoxModel extends RenderBox with
   }
 
   bool _debugHasBoxLayout = false;
+
+  int childPaintDuration = 0;
+  int childLayoutDuration = 0;
 
   BoxConstraints _contentConstraints;
   BoxConstraints get contentConstraints {
@@ -911,8 +915,21 @@ class RenderBoxModel extends RenderBox with
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+    if (kProfileMode) {
+      childPaintDuration = 0;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_START, uniqueId: targetId);
+    }
+    if (isCSSDisplayNone || isCSSVisibilityHidden) {
+      if (kProfileMode) {
+        PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END, uniqueId: targetId);
+      }
+      return;
+    }
     paintBoxModel(context, offset);
+    if (kProfileMode) {
+      int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
+    }
   }
 
   void debugPaintOverlay(PaintingContext context, Offset offset) {
@@ -1033,17 +1050,18 @@ class RenderBoxModel extends RenderBox with
     bool isHit = result.addWithPaintTransform(
       transform: renderStyle.transform != null ? getEffectiveTransform() : Matrix4.identity(),
       position: position,
-      hitTest: (BoxHitTestResult result, Offset position) {
+      hitTest: (BoxHitTestResult result, Offset trasformPosition) {
         return result.addWithPaintOffset(
           offset: Offset(-scrollLeft, -scrollTop),
-          position: position,
+          position: trasformPosition,
           hitTest: (BoxHitTestResult result, Offset position) {
             CSSPositionType positionType = renderStyle.position;
             if (positionType == CSSPositionType.fixed) {
               position -= getTotalScrollOffset();
             }
 
-            if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+            // addWithPaintOffset is to add an offset to the child node, the calculation itself does not need to bring an offset.
+            if (hitTestChildren(result, position: position) || hitTestSelf(trasformPosition)) {
               result.add(BoxHitTestEntry(this, position));
               return true;
             }
@@ -1056,9 +1074,25 @@ class RenderBoxModel extends RenderBox with
     return isHit;
   }
 
+  // Determine whether the hittest position is within the visible area of the parent node in scroll.
+  bool isParentViewContainsPosition (Offset position) {
+    AbstractNode parentNode = parent;
+    final globalPosition = localToGlobal(position);
+    bool isContainsPosition = true;
+    while (parentNode is RenderBoxModel) {
+      final node =(parentNode as RenderBoxModel);
+      if (node.clipX || node.clipY) {
+        isContainsPosition &= node.size.contains(node.globalToLocal(globalPosition));
+      }
+      parentNode = parentNode.parent;
+    }
+    return isContainsPosition;
+  }
+
   @override
   bool hitTestSelf(Offset position) {
-    return size.contains(position);
+    // Prioritize whether position belongs to the current size, so that each node does not need to traverse all its superiors.
+    return size.contains(position) && isParentViewContainsPosition(position);
   }
 
   Future<Image> toImage({ double pixelRatio = 1.0 }) {

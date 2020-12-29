@@ -368,8 +368,7 @@ class Element extends Node
 
   // Calculate sticky status according to scroll offset and scroll direction
   void layoutStickyChildren(double scrollOffset, AxisDirection axisDirection) {
-    List<Element> stickyElements = _findStickyChildren(this);
-    for (Element el in stickyElements) {
+    for (Element el in stickyChildren) {
       layoutStickyChild(el, scrollOffset, axisDirection);
     }
   }
@@ -653,8 +652,6 @@ class Element extends Node
 
   void _addStickyChild(Element child, RenderObject after) {
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-    // Only layout box can have sticky child.
-    assert(childRenderBoxModel is RenderLayoutBox);
     (renderBoxModel as RenderLayoutBox).insert(childRenderBoxModel, after: after);
 
     // Set sticky element offset
@@ -1445,31 +1442,6 @@ Element _findScrollContainer(Element element) {
     _el = _el.parent;
   }
   return _el;
-}
-
-List<Element> _findStickyChildren(Element element) {
-  assert(element != null);
-  List<Element> result = [];
-
-  for (Element child in element.children) {
-    List<CSSOverflowType> overflow = getOverflowTypes(child.style);
-    CSSOverflowType overflowX = overflow[0];
-    CSSOverflowType overflowY = overflow[1];
-
-    if (child.isValidSticky) result.add(child);
-
-    // No need to loop scrollable container children
-    if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
-      break;
-    }
-
-    List<Element> mergedChildren = _findStickyChildren(child);
-    for (Element child in mergedChildren) {
-      result.add(child);
-    }
-  }
-
-  return result;
 }
 
 bool _isIntersectionObserverEvent(String eventType) {

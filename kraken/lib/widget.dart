@@ -26,8 +26,10 @@ class Kraken extends StatelessWidget {
 
   // The initial URL to load.
   final String bundleURL;
+
   // The initial assets path to load.
   final String bundlePath;
+
   // The initial raw javascript content to load.
   final String bundleContent;
 
@@ -78,7 +80,6 @@ class Kraken extends StatelessWidget {
     this.animationController,
     this.debugEnableInspector,
   }) : super(key: key) {
-
     // assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
     // 'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
     // assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
@@ -101,23 +102,32 @@ class Kraken extends StatelessWidget {
 class KrakenRenderWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
   const KrakenRenderWidget(Kraken widget, {Key key})
-      : _widget = widget,
+      : _krakenWidget = widget,
         super(key: key);
 
-  final Kraken _widget;
+  final Kraken _krakenWidget;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    KrakenController controller = KrakenController(shortHash(_widget.hashCode), _widget.viewportWidth, _widget.viewportHeight,
-      background: _widget.background,
+    if (kProfileMode) {
+      PerformanceTiming.instance(0).mark(PERF_CONTROLLER_INIT_START);
+    }
+
+    KrakenController controller = KrakenController(shortHash(_krakenWidget.hashCode), _krakenWidget.viewportWidth, _krakenWidget.viewportHeight,
+      background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-      bundleURL: _widget.bundleURL,
-      bundlePath: _widget.bundlePath,
-      loadErrorHandler: _widget.loadErrorHandler,
-      methodChannel: _widget.javaScriptChannel,
-      bundleContent: _widget.bundleContent,
-      debugEnableInspector: _widget.debugEnableInspector,
+      bundleURL: _krakenWidget.bundleURL,
+      bundlePath: _krakenWidget.bundlePath,
+      loadErrorHandler: _krakenWidget.loadErrorHandler,
+      methodChannel: _krakenWidget.javaScriptChannel,
+      bundleContent: _krakenWidget.bundleContent,
+      debugEnableInspector: _krakenWidget.debugEnableInspector,
     );
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_CONTROLLER_INIT_END);
+    }
+
     return controller.view.getRootRenderObject();
   }
 
@@ -140,12 +150,21 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
   void mount(Element parent, dynamic newSlot) async {
     super.mount(parent, newSlot);
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_JS_BUNDLE_LOAD_START);
+    }
+
     await controller.loadBundle();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_JS_BUNDLE_LOAD_END);
+    }
 
     // Execute JavaScript scripts will block the Flutter UI Threads.
     // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
-    if (controller.bundleURL == null && widget._widget.animationController != null) {
-      widget._widget.animationController.addStatusListener((AnimationStatus status) {
+    if (controller.bundleURL == null && widget._krakenWidget.animationController != null) {
+      widget._krakenWidget.animationController.addStatusListener((AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           controller.run();
         }
@@ -154,8 +173,11 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
       await controller.run();
     }
 
-    if (widget._widget.onLoad != null) {
-      widget._widget.onLoad(controller);
+    if (widget._krakenWidget.onLoad != null) {
+      // DOM element are created at next frame, so we should trigger onload callback in the next frame.
+      controller.module.requestAnimationFrame((_) {
+        widget._krakenWidget.onLoad(controller);
+      });
     }
   }
 

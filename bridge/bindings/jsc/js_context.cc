@@ -4,9 +4,9 @@
  */
 
 #include "js_context.h"
-#include "bindings/jsc/macros.h"
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/kraken.h"
+#include "bindings/jsc/macros.h"
 #include "dart_methods.h"
 #include <memory>
 #include <mutex>
@@ -17,8 +17,10 @@ namespace kraken::binding::jsc {
 std::vector<JSStaticFunction> JSContext::globalFunctions{};
 std::vector<JSStaticValue> JSContext::globalValue{};
 
+static std::atomic<int32_t> context_unique_id{0};
+
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
-  : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false) {
+  : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
 
   JSClassDefinition contextDefinition = kJSClassDefinitionEmpty;
 
@@ -161,14 +163,14 @@ JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFu
 }
 
 namespace {
-const JSChar *cloneString(const JSChar* string, size_t length) {
+const JSChar *cloneString(const JSChar *string, size_t length) {
   auto *newString = new JSChar[length];
-  for (size_t i = 0; i < length; i ++) {
+  for (size_t i = 0; i < length; i++) {
     newString[i] = string[i];
   }
   return newString;
 };
-}
+} // namespace
 
 void buildUICommandArgs(JSStringRef key, NativeString &args_01) {
   args_01.length = JSStringGetLength(key);
@@ -228,6 +230,9 @@ JSFunctionHolder::JSFunctionHolder(JSContext *context, void *data, std::string n
                                    JSObjectCallAsFunctionCallback callback)
   : context(context), m_data(data), m_callback(callback), m_name(std::move(name)) {}
 
+JSFunctionHolder::JSFunctionHolder(JSContext *context, std::string name, JSObjectCallAsFunctionCallback callback)
+  : context(context), m_callback(callback), m_name(std::move(name)) {}
+
 JSFunctionHolder::~JSFunctionHolder() {
   if (context->isValid() && m_function != nullptr) {
     JSValueUnprotect(context->context(), m_function);
@@ -236,8 +241,14 @@ JSFunctionHolder::~JSFunctionHolder() {
 
 JSObjectRef JSFunctionHolder::function() {
   if (m_function == nullptr) {
-    m_function = makeObjectFunctionWithPrivateData(context, m_data, m_name.c_str(), m_callback);
-    JSValueProtect(context->context(), m_function);
+    // If context is nullptr, create normal js function without private data
+    if (m_data == nullptr) {
+      m_function =
+        JSObjectMakeFunctionWithCallback(context->context(), JSStringCreateWithUTF8CString(m_name.c_str()), m_callback);
+    } else {
+      m_function = makeObjectFunctionWithPrivateData(context, m_data, m_name.c_str(), m_callback);
+      JSValueProtect(context->context(), m_function);
+    }
   }
   return m_function;
 }
@@ -252,6 +263,10 @@ JSStringHolder::~JSStringHolder() {
 JSValueRef JSStringHolder::makeString() {
   if (m_string == nullptr) return nullptr;
   return JSValueMakeString(m_context->context(), m_string);
+}
+
+JSStringRef JSStringHolder::getString() {
+  return m_string;
 }
 
 void JSStringHolder::setString(JSStringRef value) {

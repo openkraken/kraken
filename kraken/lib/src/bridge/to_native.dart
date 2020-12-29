@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/module.dart';
 import 'dart:io';
 
 import 'from_native.dart';
@@ -87,7 +88,8 @@ void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event even
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> nativeEvent = event.toNative().cast<Void>();
-  dispatchEvent(nativeEventTarget, stringToNativeString(event.type), nativeEvent);
+  bool isCustomEvent = event is CustomEvent;
+  dispatchEvent(nativeEventTarget, stringToNativeString(event.type), nativeEvent, isCustomEvent ? 1 : 0);
 }
 
 void emitModuleEvent(int contextId, String data) {
@@ -342,9 +344,17 @@ void flushUICommand() {
       continue;
     }
 
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_FLUSH_UI_COMMAND_START);
+    }
+
     List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength, controller.view.contextId);
 
     SchedulerBinding.instance.scheduleFrame();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_FLUSH_UI_COMMAND_END);
+    }
 
     // For new ui commands, we needs to tell engine to update frames.
     for (int i = 0; i < commandLength; i++) {

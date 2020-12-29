@@ -152,6 +152,7 @@ DocumentInstance::DocumentInstance(JSDocument *document)
   body->document = this;
   JSValueProtect(document->ctx, body->object);
   instanceMap[document->context] = this;
+  getDartMethod()->initDocument(contextId, nativeDocument);
 }
 
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
