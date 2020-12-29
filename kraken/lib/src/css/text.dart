@@ -95,6 +95,7 @@ mixin CSSTextMixin on RenderStyleBase {
   set lineHeight(double value) {
     if (_lineHeight == value) return;
     _lineHeight = value;
+    renderBoxModel.markNeedsLayout();
   }
 
   double _letterSpacing;

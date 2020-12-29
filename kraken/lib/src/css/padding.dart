@@ -82,9 +82,7 @@ mixin CSSPaddingMixin on RenderStyleBase {
 
   void updatePadding(String property, String present) {
     RenderStyle renderStyle = this;
-    Size viewportSize = this.viewportSize;
     EdgeInsets prevPadding = renderStyle.padding;
-
     if (prevPadding != null) {
       double left = prevPadding.left;
       double top = prevPadding.top;
@@ -92,7 +90,6 @@ mixin CSSPaddingMixin on RenderStyleBase {
       double bottom = prevPadding.bottom;
 
       double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
-
       // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
       switch (property) {
         case PADDING_LEFT:
@@ -110,6 +107,7 @@ mixin CSSPaddingMixin on RenderStyleBase {
       }
 
       renderStyle.padding = EdgeInsets.only(left: left, right: right, bottom: bottom, top: top);
+//      print('render padding--------------- ${EdgeInsets.only(left: left, right: right, bottom: bottom, top: top)}');
     } else {
       renderStyle.padding = _getPadding();
     }

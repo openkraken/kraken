@@ -322,7 +322,6 @@ class RenderBoxModel extends RenderBox with
       ..onPointerSignal = onPointerSignal
 
       // Copy transform
-      ..transform = transform
       ..origin = origin
       ..alignment = alignment
 
@@ -1032,7 +1031,7 @@ class RenderBoxModel extends RenderBox with
     }());
 
     bool isHit = result.addWithPaintTransform(
-      transform: transform != null ? getEffectiveTransform() : Matrix4.identity(),
+      transform: renderStyle.transform != null ? getEffectiveTransform() : Matrix4.identity(),
       position: position,
       hitTest: (BoxHitTestResult result, Offset position) {
         return result.addWithPaintOffset(

@@ -15,8 +15,10 @@ class RenderStyle
     CSSBoxMixin,
     CSSTextMixin,
     CSSPositionMixin,
+    CSSTransformMixin,
     CSSFlexboxMixin,
-    CSSFlowMixin {
+    CSSFlowMixin,
+    CSSOpacityMixin {
 
   RenderBoxModel renderBoxModel;
   CSSStyleDeclaration style;
@@ -27,6 +29,7 @@ class RenderStyle
     this.style,
     this.viewportSize,
   );
+
 }
 
 mixin RenderStyleBase {

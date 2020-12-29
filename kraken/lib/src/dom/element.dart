@@ -77,8 +77,6 @@ class Element extends Node
         NodeLifeCycle,
         EventHandlerMixin,
         CSSOverflowMixin,
-        CSSOpacityMixin,
-        CSSTransformMixin,
         CSSVisibilityMixin,
         CSSContentVisibilityMixin,
         CSSTransitionMixin,
@@ -480,7 +478,7 @@ class Element extends Node
     /// Recalculate gradient after node attached when gradient length cannot be obtained from style
     if (renderBoxModel.recalGradient) {
       String backgroundImage = style[BACKGROUND_IMAGE];
-      renderBoxModel.renderStyle.updateBox(renderBoxModel, BACKGROUND_IMAGE, backgroundImage, backgroundImage);
+      renderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage);
       renderBoxModel.recalGradient = false;
     }
 
@@ -941,13 +939,11 @@ class Element extends Node
   }
 
   void _styleBoxChangedListener(String property, String original, String present) {
-    renderBoxModel.renderStyle.updateBox(renderBoxModel, property, original, present);
+    renderBoxModel.renderStyle.updateBox(property, original, present);
   }
 
-
   void _styleOpacityChangedListener(String property, String original, String present) {
-    // Update opacity.
-    updateRenderOpacity(renderBoxModel, this, present);
+    renderBoxModel.renderStyle.updateOpacity(present);
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {
@@ -962,12 +958,12 @@ class Element extends Node
 
   void _styleTransformChangedListener(String property, String original, String present) {
     // Update transform.
-    updateRenderTransform(this, renderBoxModel, present);
+    renderBoxModel.renderStyle.updateTransform(present);
   }
 
   void _styleTransformOriginChangedListener(String property, String original, String present) {
     // Update transform.
-    updateRenderTransformOrigin(renderBoxModel, present);
+    renderBoxModel.renderStyle.updateTransformOrigin(present);
   }
 
   // Update textNode style when container style changed
