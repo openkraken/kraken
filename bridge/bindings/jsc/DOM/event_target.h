@@ -94,14 +94,14 @@ private:
   std::vector<std::string> m_jsOnlyEvents;
 };
 
-using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent);
+using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent, int32_t isCustomEvent);
 
 struct NativeEventTarget {
   NativeEventTarget() = delete;
   NativeEventTarget(JSEventTarget::EventTargetInstance *_instance)
     : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl){};
 
-  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent);
+  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent, int32_t isCustomEvent);
 
   JSEventTarget::EventTargetInstance *instance;
   NativeDispatchEvent dispatchEvent;

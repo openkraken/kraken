@@ -410,7 +410,7 @@ bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *ev
 }
 
 // This function will be called back by dart side when trigger events.
-void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent) {
+void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
 
   JSEventTarget::EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
@@ -420,7 +420,7 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, 
                                                nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);
 
-  EventInstance *eventInstance = JSEvent::buildEventInstance(eventType, context, nativeEvent);
+  EventInstance *eventInstance = JSEvent::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
 
   eventTargetInstance->dispatchEvent(eventInstance);
 }

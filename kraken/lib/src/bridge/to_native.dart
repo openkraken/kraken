@@ -87,7 +87,8 @@ void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event even
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> nativeEvent = event.toNative().cast<Void>();
-  dispatchEvent(nativeEventTarget, stringToNativeString(event.type), nativeEvent);
+  bool isCustomEvent = event is CustomEvent;
+  dispatchEvent(nativeEventTarget, stringToNativeString(event.type), nativeEvent, isCustomEvent ? 1 : 0);
 }
 
 void emitModuleEvent(int contextId, String data) {
