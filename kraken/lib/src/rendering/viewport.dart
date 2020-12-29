@@ -10,8 +10,6 @@ import 'package:meta/meta.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
 
-final MethodChannel _channel = const MethodChannel('aaa');
-
 class RenderViewportBox extends RenderProxyBox with
     RenderObjectWithControllerMixin,
     RenderOverflowMixin {
@@ -20,6 +18,16 @@ class RenderViewportBox extends RenderProxyBox with
     RenderBox child,
     this.background,
   }) : _viewportSize = viewportSize, super(child);
+
+  set overScrollBy(GestureDragUpdateCallback value) {
+    _verticalDragGestureRecognizer.onUpdate = value;
+    _horizontalDragRecognizer.onUpdate = value;
+  }
+
+  set gestureDelegate(GestureDeleage gestureDeleage ) {
+    _verticalDragGestureRecognizer.onUpdate = gestureDeleage.overflowBy;
+    _horizontalDragRecognizer.onUpdate = gestureDeleage.overflowBy;
+  }
 
   Color background;
 
@@ -41,8 +49,8 @@ class RenderViewportBox extends RenderProxyBox with
     }
   }
 
-  VerticalDragGestureRecognizer _verticalDragGestureRecognizer = VerticalDragGestureRecognizer();
-  HorizontalDragGestureRecognizer _horizontalDragRecognizer = HorizontalDragGestureRecognizer();
+  final VerticalDragGestureRecognizer _verticalDragGestureRecognizer = VerticalDragGestureRecognizer();
+  final HorizontalDragGestureRecognizer _horizontalDragRecognizer = HorizontalDragGestureRecognizer();
 
   @override
   void performLayout() {
@@ -60,15 +68,6 @@ class RenderViewportBox extends RenderProxyBox with
         height: height,
       ));
     }
-
-
-
-    _verticalDragGestureRecognizer.onUpdate = onUpdate;
-    _horizontalDragRecognizer.onUpdate = onUpdate;
-  }
-
-  void onUpdate(DragUpdateDetails details) {
-    print('onUpdate');
   }
 
   @override

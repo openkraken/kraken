@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/widget.dart';
 import 'dart:ui';
+import 'package:kraken/gesture.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -36,6 +37,13 @@ class FirstRoute extends StatelessWidget {
   }
 }
 
+class gestureClient implements GestureDeleage {
+  @override
+  void overflowBy(DragUpdateDetails details) {
+    print('coreOverScrollBy=${details}');
+  }
+}
+
 class SecondRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -43,6 +51,12 @@ class SecondRoute extends StatelessWidget {
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio,
     );
+
+    const timeout = const Duration(seconds: 1);
+
+    Timer(timeout, (){
+      kraken.controller.view.viewport.gestureDelegate = gestureClient();
+    });
 
     return kraken;
   }

@@ -17,6 +17,11 @@ enum _DragState {
   accepted,
 }
 
+abstract class GestureDeleage {
+  @override
+  void overflowBy(DragUpdateDetails details);
+}
+
 abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   ///
