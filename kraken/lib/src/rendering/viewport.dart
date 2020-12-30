@@ -9,9 +9,8 @@ import 'dart:ui';
 import 'package:meta/meta.dart';
 import 'package:kraken/rendering.dart';
 
-class RenderViewportBox extends RenderProxyBox with
-    RenderObjectWithControllerMixin,
-    RenderOverflowMixin {
+class RenderViewportBox extends RenderProxyBox
+    with RenderObjectWithControllerMixin {
   RenderViewportBox({
     @required Size viewportSize,
     RenderBox child,
