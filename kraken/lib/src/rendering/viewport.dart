@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:kraken/launcher.dart';
 import 'dart:ui';
 import 'package:meta/meta.dart';
-import 'package:kraken/rendering.dart';
 
 class RenderViewportBox extends RenderProxyBox
     with RenderObjectWithControllerMixin {
