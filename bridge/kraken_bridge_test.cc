@@ -30,31 +30,11 @@ int8_t evaluateTestScripts(int32_t contextId, NativeString *code, const char *bu
   return bridgeTest->evaluateTestScripts(code->string, code->length, bundleFilename, startLine);
 }
 
-void registerJSError(OnJSError jsError) {
-  kraken::registerJSError(jsError);
-}
-
 void executeTest(int32_t contextId, ExecuteCallback executeCallback) {
   auto bridgeTest = bridgeTestPool[contextId];
   bridgeTest->invokeExecuteTest(executeCallback);
 }
 
-void registerRefreshPaint(RefreshPaint refreshPaint) {
-  kraken::registerRefreshPaint(refreshPaint);
-}
-
-void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot) {
-  kraken::registerMatchImageSnapshot(matchImageSnapshot);
-}
-
-void registerEnvironment(Environment environment) {
-  kraken::registerEnvironment(environment);
-}
-
-void registerSimulatePointer(SimulatePointer simulatePointer) {
-  kraken::registerSimulatePointer(simulatePointer);
-}
-
-void registerSimulateKeyPress(SimulateKeyPress simulateKeyPress) {
-  kraken::registerSimulateKeyPress(simulateKeyPress);
+void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
+  kraken::registerTestEnvDartMethods(methodBytes, length);
 }

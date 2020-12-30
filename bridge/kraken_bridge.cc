@@ -156,75 +156,14 @@ void invokeEventListener(int32_t contextId, int32_t type, NativeString *data) {
   context->invokeEventListener(type, data);
 }
 
-void registerInvokeModule(InvokeModule callbacks) {
-  kraken::registerInvokeModule(callbacks);
-}
-
-void registerRequestBatchUpdate(RequestBatchUpdate requestBatchUpdate) {
-  kraken::registerRequestBatchUpdate(requestBatchUpdate);
-}
-
-void registerReloadApp(ReloadApp reloadApp) {
-  kraken::registerReloadApp(reloadApp);
-}
-
-void registerSetTimeout(SetTimeout setTimeout) {
-  kraken::registerSetTimeout(setTimeout);
-}
-
-void registerSetInterval(SetInterval setInterval) {
-  kraken::registerSetInterval(setInterval);
-}
-
-void registerClearTimeout(ClearTimeout clearTimeout) {
-  kraken::registerClearTimeout(clearTimeout);
-}
-
-void registerRequestAnimationFrame(RequestAnimationFrame requestAnimationFrame) {
-  kraken::registerRequestAnimationFrame(requestAnimationFrame);
-}
-
-void registerCancelAnimationFrame(CancelAnimationFrame cancelAnimationFrame) {
-  kraken::registerCancelAnimationFrame(cancelAnimationFrame);
-}
-
-void registerGetScreen(GetScreen getScreen) {
-  kraken::registerGetScreen(getScreen);
-}
-
-void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio) {
-  kraken::registerDevicePixelRatio(devicePixelRatio);
-}
-
-void registerPlatformBrightness(PlatformBrightness platformBrightness) {
-  kraken::registerPlatformBrightness(platformBrightness);
-}
-
-void registerFlushUICommand(FlushUICommand flushUICommand) {
-  kraken::registerFlushUICommand(flushUICommand);
-}
-
-void registerInitBody(InitBody initBody) {
-  kraken::registerInitBody(initBody);
-}
-
-void registerInitWindow(InitWindow initWindow) {
-  kraken::registerInitWindow(initWindow);
-}
-
-
-void registerInitDocument(InitDocument initDocument) {
-  kraken::registerInitDocument(initDocument);
+void registerDartMethods(uint64_t *methodBytes, int32_t length) {
+  kraken::registerDartMethods(methodBytes, length);
 }
 
 Screen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;
   return &screen;
-}
-
-void registerToBlob(ToBlob toBlob) {
-  kraken::registerToBlob(toBlob);
 }
 
 static KrakenInfo *krakenInfo{nullptr};
@@ -270,9 +209,3 @@ void clearUICommandItems(int32_t contextId) {
 void flushUICommandCallback(int64_t contextId) {
   foundation::UICommandCallbackQueue::instance(contextId)->flushCallbacks();
 }
-
-#if ENABLE_PROFILE
-void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries) {
-  kraken::registerGetPerformanceEntries(getPerformanceEntries);
-}
-#endif
