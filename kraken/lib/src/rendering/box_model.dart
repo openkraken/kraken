@@ -791,8 +791,8 @@ class RenderBoxModel extends RenderBox with
         minWidth = 0.0;
         maxWidth = contentWidth;
       } else {
-        minWidth = 0.0;
-        maxWidth = constraints.maxWidth;
+        minWidth = boxConstraints.minWidth;
+        maxWidth = boxConstraints.maxWidth;
       }
 
       if (boxConstraints.hasTightHeight) {
@@ -801,7 +801,7 @@ class RenderBoxModel extends RenderBox with
         minHeight = 0.0;
         maxHeight = contentHeight;
       } else {
-        minHeight = 0.0;
+        minHeight = boxConstraints.minHeight;
         maxHeight = boxConstraints.maxHeight;
       }
 
