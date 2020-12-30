@@ -28,7 +28,7 @@ class NativeString extends Struct {
 }
 
 String uint16ToString(Pointer<Uint16> pointer, int length) {
-  return String.fromCharCodes(Uint16List.view(pointer.asTypedList(length).buffer, 0, length));
+  return String.fromCharCodes(pointer.asTypedList(length));
 }
 
 Pointer<Uint16> _stringToUint16(String string) {
