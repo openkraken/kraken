@@ -1,17 +1,20 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/widget.dart';
 import 'dart:ui';
 
 void main() {
-  runApp(MaterialApp(
-    title: 'Kraken App Demo',
-    home: FirstRoute(),
-  ));
+  if (Platform.environment['KRAKEN_MAIN_ENTRY'] == 'cli') {
+    launch();
+  } else {
+    runApp(MaterialApp(
+      title: 'Kraken App Demo',
+      home: FirstRoute(),
+    ));
+  }
 }
 
 class FirstRoute extends StatelessWidget {
