@@ -16,16 +16,17 @@ class RenderViewportBox extends RenderProxyBox with
   RenderViewportBox({
     @required Size viewportSize,
     RenderBox child,
+    gestureClient,
     this.background,
-  }) : _viewportSize = viewportSize, super(child);
-
-  set gestureDelegate(GestureDeleage gestureDeleage) {
-    _verticalDragGestureRecognizer.onUpdate = gestureDeleage.overflowByUpdate;
-    _horizontalDragRecognizer.onUpdate = gestureDeleage.overflowByUpdate;
-    _verticalDragGestureRecognizer.onStart = gestureDeleage.overflowByStart;
-    _horizontalDragRecognizer.onStart = gestureDeleage.overflowByStart;
-    _verticalDragGestureRecognizer.onEnd = gestureDeleage.overflowByEnd;
-    _horizontalDragRecognizer.onEnd = gestureDeleage.overflowByEnd;
+  }) : _viewportSize = viewportSize, super(child) {
+    if (gestureClient != null) {
+      _verticalDragGestureRecognizer.onUpdate = gestureClient.overflowByUpdate;
+      _horizontalDragRecognizer.onUpdate = gestureClient.overflowByUpdate;
+      _verticalDragGestureRecognizer.onStart = gestureClient.overflowByStart;
+      _horizontalDragRecognizer.onStart = gestureClient.overflowByStart;
+      _verticalDragGestureRecognizer.onEnd = gestureClient.overflowByEnd;
+      _horizontalDragRecognizer.onEnd = gestureClient.overflowByEnd;
+    }
   }
 
   Color background;

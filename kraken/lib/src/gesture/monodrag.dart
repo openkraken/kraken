@@ -17,8 +17,8 @@ enum _DragState {
   accepted,
 }
 
-abstract class GestureDeleage {
-
+/// Pass gesture to native
+abstract class GestureClient {
   void overflowByUpdate(DragUpdateDetails details);
 
   void overflowByStart(DragStartDetails details);

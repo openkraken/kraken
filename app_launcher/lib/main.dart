@@ -37,7 +37,7 @@ class FirstRoute extends StatelessWidget {
   }
 }
 
-class gestureClient implements GestureDeleage {
+class NativeGestureClient implements GestureClient {
   @override
   void overflowByUpdate(DragUpdateDetails details) {
     print('overflowByUpdate=${details}');
@@ -60,13 +60,8 @@ class SecondRoute extends StatelessWidget {
     Kraken kraken = Kraken(
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio,
+      gestureClient: NativeGestureClient(),
     );
-
-    const timeout = const Duration(seconds: 1);
-
-    Timer(timeout, (){
-      kraken.controller.view.viewport.gestureDelegate = gestureClient();
-    });
 
     return kraken;
   }

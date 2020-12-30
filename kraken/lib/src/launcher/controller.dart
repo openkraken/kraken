@@ -17,6 +17,7 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
+import 'package:kraken/gesture.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -41,6 +42,8 @@ class KrakenViewController {
   // during a kraken view's process of loading, and completing a navigation request.
   KrakenNavigationDelegate navigationDelegate;
 
+  GestureClient gestureClient;
+
   double viewportWidth;
   double viewportHeight;
   Color background;
@@ -54,6 +57,7 @@ class KrakenViewController {
       int contextId,
       this.rootController,
       this.navigationDelegate,
+      this.gestureClient,
     }
   ): _contextId = contextId {
     if (enableDebug) {
@@ -112,6 +116,7 @@ class KrakenViewController {
     viewport = RenderViewportBox(
       background: background,
       viewportSize: Size(viewportWidth, viewportHeight),
+      gestureClient: gestureClient,
     );
   }
 
@@ -327,6 +332,7 @@ class KrakenController {
   final String name;
   // Enable debug inspector.
   bool debugEnableInspector;
+  GestureClient _gestureClient;
 
   KrakenController(this.name, double viewportWidth, double viewportHeight, {
       bool showPerformanceOverlay = false,
@@ -335,20 +341,23 @@ class KrakenController {
       String bundlePath,
       String bundleContent,
       Color background,
+      GestureClient gestureClient,
       KrakenNavigationDelegate navigationDelegate,
       KrakenMethodChannel methodChannel,
       this.loadErrorHandler,
       this.debugEnableInspector,
     }): _bundleURL = bundleURL,
         _bundlePath = bundlePath,
-        _bundleContent = bundleContent {
+        _bundleContent = bundleContent,
+        _gestureClient = gestureClient {
     _methodChannel = methodChannel;
     _view = KrakenViewController(viewportWidth, viewportHeight,
         background: background,
         showPerformanceOverlay: showPerformanceOverlay,
         enableDebug: enableDebug,
         rootController: this,
-        navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate());
+        navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
+        gestureClient: _gestureClient);
     _module = KrakenModuleController();
     assert(!_controllerMap.containsKey(_view.contextId),
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
