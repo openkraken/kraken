@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/widget.dart';
 import 'dart:ui';
-import 'package:kraken/gesture.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -37,30 +36,12 @@ class FirstRoute extends StatelessWidget {
   }
 }
 
-class NativeGestureClient implements GestureClient {
-  @override
-  void overflowByUpdate(DragUpdateDetails details) {
-    print('overflowByUpdate=${details}');
-  }
-
-  @override
-  void overflowByStart(DragStartDetails details) {
-    print('overflowByStart=${details}');
-  }
-
-  @override
-  void overflowByEnd(DragEndDetails details) {
-    print('overflowByEnd=${details}');
-  }
-}
-
 class SecondRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Kraken kraken = Kraken(
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio,
-      gestureClient: NativeGestureClient(),
     );
 
     return kraken;
