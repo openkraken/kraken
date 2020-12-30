@@ -107,7 +107,6 @@ mixin CSSPaddingMixin on RenderStyleBase {
       }
 
       renderStyle.padding = EdgeInsets.only(left: left, right: right, bottom: bottom, top: top);
-//      print('render padding--------------- ${EdgeInsets.only(left: left, right: right, bottom: bottom, top: top)}');
     } else {
       renderStyle.padding = _getPadding();
     }

@@ -22,12 +22,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   set top(double value) {
     if (_top == value) return;
     _top = value;
-    if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
-      if (renderStyle.position != CSSPositionType.static) {
-        renderBoxModel.markNeedsLayout();
-      }
-    }
+    _markParentNeedsLayout();
   }
 
   double _bottom;
@@ -37,12 +32,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   set bottom(double value) {
     if (_bottom == value) return;
     _bottom = value;
-    if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
-      if (renderStyle.position != CSSPositionType.static) {
-        renderBoxModel.markNeedsLayout();
-      }
-    }
+    _markParentNeedsLayout();
   }
 
   double _left;
@@ -52,12 +42,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   set left(double value) {
     if (_left == value) return;
     _left = value;
-    if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
-      if (renderStyle.position != CSSPositionType.static) {
-        renderBoxModel.markNeedsLayout();
-      }
-    }
+    _markParentNeedsLayout();
   }
 
   double _right;
@@ -67,12 +52,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   set right(double value) {
     if (_right == value) return;
     _right = value;
-    if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
-      if (renderStyle.position != CSSPositionType.static) {
-        renderBoxModel.markNeedsLayout();
-      }
-    }
+    _markParentNeedsLayout();
   }
 
   int _zIndex = 0;
@@ -82,12 +62,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   set zIndex(int value) {
     if (_zIndex == value) return;
     _zIndex = value;
-    if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderLayoutParentData parentData = renderBoxModel.parentData;
-      if (parentData.isPositioned) {
-        renderBoxModel.markNeedsLayout();
-      }
-    }
+    _markParentNeedsLayout();
   }
 
   CSSPositionType _position = CSSPositionType.static;
@@ -97,9 +72,18 @@ mixin CSSPositionMixin on RenderStyleBase {
   set position(CSSPositionType value) {
     if (_position == value) return;
     _position = value;
-    renderBoxModel.markNeedsLayout();
+    _markParentNeedsLayout();
   }
 
+  void _markParentNeedsLayout() {
+    if (renderBoxModel.parentData is RenderLayoutParentData) {
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+      if (renderStyle.position != CSSPositionType.static) {
+        RenderBoxModel parent = renderBoxModel.parent;
+        parent.markNeedsLayout();
+      }
+    }
+  }
 
   void updateOffset(String property, String present) {
     double value = CSSLength.toDisplayPortValue(present, viewportSize);
