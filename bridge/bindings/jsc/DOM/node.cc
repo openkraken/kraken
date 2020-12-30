@@ -159,7 +159,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
 
   selfInstance->internalAppendChild(nodeInstance);
 
-  return nullptr;
+  return nodeValueRef;
 }
 
 JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
