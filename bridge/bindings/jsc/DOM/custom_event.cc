@@ -54,6 +54,14 @@ CustomEventInstance::CustomEventInstance(JSCustomEvent *jsCustomEvent, std::stri
   }
 }
 
+CustomEventInstance::CustomEventInstance(JSCustomEvent *jsCustomEvent, NativeCustomEvent* nativeCustomEvent)
+  : nativeCustomEvent(nativeCustomEvent)
+    , EventInstance(jsCustomEvent, nativeCustomEvent->nativeEvent) {
+  JSStringRef ref = JSStringCreateWithCharacters(nativeCustomEvent->detail->string, nativeCustomEvent->detail->length);
+  nativeCustomEvent->detail->free();
+  m_detail.setValue(JSValueMakeString(context->context(), ref));
+}
+
 JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
 

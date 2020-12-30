@@ -58,6 +58,12 @@ class NativeMessageEvent extends Struct {
   Pointer<NativeString> origin;
 }
 
+class NativeCustomEvent extends Struct {
+  Pointer<NativeEvent> nativeEvent;
+
+  Pointer<NativeString> detail;
+}
+
 class NativeCloseEvent extends Struct {
   Pointer<NativeEvent> nativeEvent;
 
@@ -180,9 +186,9 @@ class NativeBoundingClientRect extends Struct {
 }
 
 typedef Native_DispatchEvent = Void Function(
-    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent);
+    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, Int32 isCustomEvent);
 typedef Dart_DispatchEvent = void Function(
-    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent);
+    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
 class NativeEventTarget extends Struct {
   Pointer<Void> instance;
@@ -355,4 +361,21 @@ class NativeAnimationElement extends Struct {
   Pointer<NativeElement> nativeElement;
 
   Pointer<NativeFunction<Native_PlayAnimation>> play;
+}
+
+class NativePerformanceEntry extends Struct {
+  Pointer<Utf8> name;
+  Pointer<Utf8> entryType;
+
+  @Double()
+  double startTime;
+  @Double()
+  double duration;
+}
+
+class NativePerformanceEntryList extends Struct {
+  Pointer<Uint64> entries;
+
+  @Int32()
+  int length;
 }

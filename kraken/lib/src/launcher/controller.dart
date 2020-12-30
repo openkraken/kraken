@@ -49,27 +49,48 @@ class KrakenViewController {
   Color background;
 
   KrakenViewController(
-    this.viewportWidth, this.viewportHeight,
-    {
-      this.background,
-      this.showPerformanceOverlay,
-      this.enableDebug = false,
-      int contextId,
-      this.rootController,
-      this.navigationDelegate,
-      this.gestureClient,
+    this.viewportWidth,
+    this.viewportHeight, {
+    this.background,
+    this.showPerformanceOverlay,
+    this.enableDebug = false,
+    int contextId,
+    this.rootController,
+    this.navigationDelegate,
+    this.gestureClient,
+  }) : _contextId = contextId {
+    if (kProfileMode) {
+      PerformanceTiming.instance(0).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
     }
-  ): _contextId = contextId {
+
     if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
+    }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(0).mark(PERF_BRIDGE_INIT_START);
     }
 
     if (_contextId == null) {
       _contextId = initBridge();
     }
 
+    if (kProfileMode) {
+      PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_END);
+    }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEWPORT_START);
+    }
+
     createViewport();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEWPORT_END);
+      PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_START);
+    }
+
     _elementManager = ElementManager(
       viewportWidth,
       viewportHeight,
@@ -79,6 +100,10 @@ class KrakenViewController {
       controller: rootController,
     );
 
+    if (kProfileMode) {
+      PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_END);
+    }
+
     // Enable DevTool in debug/profile mode, but disable in release.
     if ((kDebugMode || kProfileMode) && rootController.debugEnableInspector != false) {
       debugStartInspector();
@@ -87,6 +112,7 @@ class KrakenViewController {
 
   /// Used for debugger inspector.
   Inspector _inspector;
+
   Inspector get inspector => _inspector;
 
   // the manager which controller all renderObjects of Kraken
@@ -144,7 +170,14 @@ class KrakenViewController {
     (_elementManager.getRootRenderObject() as RenderObjectWithControllerMixin).controller = null;
 
     detachView();
+
+    // should clear previous page cached ui commands
+    clearUICommand(_contextId);
+
     disposeBridge(_contextId);
+
+    // DisposeEventTarget command will created when js context disposed, should flush them all.
+    flushUICommand();
 
     _inspector?.dispose();
     _inspector = null;
@@ -184,39 +217,94 @@ class KrakenViewController {
   }
 
   Element createElement(int id, Pointer nativePtr, String tagName) {
-    return _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_ELEMENT_START, uniqueId: id);
+    }
+    Element result = _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_ELEMENT_END, uniqueId: id);
+    }
+    return result;
   }
 
   void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
-    return _elementManager.createTextNode(id, nativePtr, data);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_TEXT_NODE_START, uniqueId: id);
+    }
+    _elementManager.createTextNode(id, nativePtr, data);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_TEXT_NODE_END, uniqueId: id);
+    }
   }
 
   void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
-    return _elementManager.createComment(id, nativePtr, data);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_COMMENT_START, uniqueId: id);
+    }
+    _elementManager.createComment(id, nativePtr, data);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_CREATE_COMMENT_END, uniqueId: id);
+    }
   }
 
   void addEvent(int targetId, String eventType) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_ADD_EVENT_START, uniqueId: targetId);
+    }
     _elementManager.addEvent(targetId, eventType);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_ADD_EVENT_END, uniqueId: targetId);
+    }
   }
 
   void insertAdjacentNode(int targetId, String position, int childId) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_INSERT_ADJACENT_NODE_START, uniqueId: targetId);
+    }
     _elementManager.insertAdjacentNode(targetId, position, childId);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_INSERT_ADJACENT_NODE_END, uniqueId: targetId);
+    }
   }
 
   void removeNode(int targetId) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_REMOVE_NODE_START, uniqueId: targetId);
+    }
     _elementManager.removeNode(targetId);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_REMOVE_NODE_END, uniqueId: targetId);
+    }
   }
 
   void setStyle(int targetId, String key, String value) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_START, uniqueId: targetId);
+    }
     _elementManager.setStyle(targetId, key, value);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_END, uniqueId: targetId);
+    }
   }
 
   void setProperty(int targetId, String key, String value) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
+    }
     _elementManager.setProperty(targetId, key, value);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
+    }
   }
 
   void removeProperty(int targetId, String key) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
+    }
     _elementManager.removeProperty(targetId, key);
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
+    }
   }
 
   EventTarget getEventTargetById(int id) {
@@ -330,26 +418,35 @@ class KrakenController {
   KrakenMethodChannel get methodChannel => _methodChannel;
 
   final String name;
+
   // Enable debug inspector.
   bool debugEnableInspector;
   GestureClient _gestureClient;
 
-  KrakenController(this.name, double viewportWidth, double viewportHeight, {
-      bool showPerformanceOverlay = false,
-      enableDebug = false,
-      String bundleURL,
-      String bundlePath,
-      String bundleContent,
-      Color background,
-      GestureClient gestureClient,
-      KrakenNavigationDelegate navigationDelegate,
-      KrakenMethodChannel methodChannel,
-      this.loadErrorHandler,
-      this.debugEnableInspector,
-    }): _bundleURL = bundleURL,
+  KrakenController(
+    this.name,
+    double viewportWidth,
+    double viewportHeight, {
+    bool showPerformanceOverlay = false,
+    enableDebug = false,
+    String bundleURL,
+    String bundlePath,
+    String bundleContent,
+    Color background,
+    GestureClient gestureClient,
+    KrakenNavigationDelegate navigationDelegate,
+    KrakenMethodChannel methodChannel,
+    this.loadErrorHandler,
+    this.debugEnableInspector,
+  })  : _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent,
         _gestureClient = gestureClient {
+    if (kProfileMode) {
+      PerformanceTiming.instance(0).mark(PERF_CONTROLLER_PROPERTY_INIT);
+      PerformanceTiming.instance(0).mark(PERF_VIEW_CONTROLLER_INIT_START);
+    }
+
     _methodChannel = methodChannel;
     _view = KrakenViewController(viewportWidth, viewportHeight,
         background: background,
@@ -358,6 +455,11 @@ class KrakenController {
         rootController: this,
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
         gestureClient: _gestureClient);
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
+    }
+
     _module = KrakenModuleController();
     assert(!_controllerMap.containsKey(_view.contextId),
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
@@ -419,8 +521,16 @@ class KrakenController {
     }
     _module.dispose();
     _view.detachView();
+
+    // Should clear previous page cached ui commands
+    clearUICommand(_view.contextId);
+
     // Should init JS first
     await reloadJSContext(_view.contextId);
+
+    // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
+    flushUICommand();
+
     Inspector.prevInspector = view._elementManager.controller.view.inspector;
 
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
@@ -486,8 +596,7 @@ class KrakenController {
     _bundleContent = _bundleContent ?? bundleContentOverride;
     _bundlePath = _bundlePath ?? bundlePathOverride;
     _bundleURL = _bundleURL ?? bundleURLOverride;
-    String bundleURL =
-        _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
+    String bundleURL = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 
     if (bundleURL == null && methodChannel is KrakenNativeChannel) {
       bundleURL = await (methodChannel as KrakenNativeChannel).getUrl();
@@ -496,7 +605,9 @@ class KrakenController {
     if (loadErrorHandler != null) {
       try {
         _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
-      } catch(e, stack) { loadErrorHandler(FlutterError(e.toString()), stack);}
+      } catch (e, stack) {
+        loadErrorHandler(FlutterError(e.toString()), stack);
+      }
     } else {
       _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
     }

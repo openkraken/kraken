@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -217,7 +218,7 @@ class CSSPositionedLayout {
     }
   }
 
-  static void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
+  static void layoutPositionedChild(Element parentElement, RenderBoxModel parent, RenderBox child) {
     RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
     final RenderLayoutParentData childParentData = child.parentData;
 
@@ -264,8 +265,18 @@ class CSSPositionedLayout {
     }
 
     if (isChildNeedsLayout) {
+      DateTime childLayoutStartTime;
+      if (kProfileMode) {
+        childLayoutStartTime = DateTime.now();
+      }
+
       // Should create relayoutBoundary for positioned child.
       child.layout(childConstraints, parentUsesSize: false);
+
+      if (kProfileMode) {
+        DateTime childLayoutEndTime = DateTime.now();
+        parent.childLayoutDuration += (childLayoutEndTime.microsecondsSinceEpoch - childLayoutStartTime.microsecondsSinceEpoch);
+      }
     }
   }
 

@@ -23,12 +23,6 @@ namespace kraken::binding::jsc {
 
 void bindEventTarget(std::unique_ptr<JSContext> &context);
 
-struct DisposeCallbackData {
-  DisposeCallbackData(int32_t contextId, int64_t id) : contextId(contextId), id(id){};
-  int64_t id;
-  int32_t contextId;
-};
-
 struct NativeEvent;
 struct NativeEventTarget;
 
@@ -94,14 +88,14 @@ private:
   std::vector<std::string> m_jsOnlyEvents;
 };
 
-using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent);
+using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent, int32_t isCustomEvent);
 
 struct NativeEventTarget {
   NativeEventTarget() = delete;
   NativeEventTarget(JSEventTarget::EventTargetInstance *_instance)
     : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl){};
 
-  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent);
+  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent, int32_t isCustomEvent);
 
   JSEventTarget::EventTargetInstance *instance;
   NativeDispatchEvent dispatchEvent;

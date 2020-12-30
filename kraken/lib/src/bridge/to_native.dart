@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/module.dart';
 import 'dart:io';
 
 import 'from_native.dart';
@@ -87,7 +89,8 @@ void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event even
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> nativeEvent = event.toNative().cast<Void>();
-  dispatchEvent(nativeEventTarget, stringToNativeString(event.type), nativeEvent);
+  bool isCustomEvent = event is CustomEvent;
+  dispatchEvent(nativeEventTarget, stringToNativeString(event.type), nativeEvent, isCustomEvent ? 1 : 0);
 }
 
 void emitModuleEvent(int contextId, String data) {
@@ -272,7 +275,7 @@ const int nativePtrMemOffset = 4;
 // To ensure the fastest subsequent random access.
 List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
   List<UICommand> results = List(commandLength);
-  List<int> rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize).toList();
+  Uint64List rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize);
 
   for (int i = 0; i < commandLength * nativeCommandSize; i += nativeCommandSize) {
     UICommand command = UICommand();
@@ -332,6 +335,10 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
   return results;
 }
 
+void clearUICommand(int contextId) {
+  _clearUICommandItems(contextId);
+}
+
 void flushUICommand() {
   Map<int, KrakenController> controllerMap = KrakenController.getControllerMap();
   for (KrakenController controller in controllerMap.values) {
@@ -342,9 +349,17 @@ void flushUICommand() {
       continue;
     }
 
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_FLUSH_UI_COMMAND_START);
+    }
+
     List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength, controller.view.contextId);
 
     SchedulerBinding.instance.scheduleFrame();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(controller.view.contextId).mark(PERF_FLUSH_UI_COMMAND_END);
+    }
 
     // For new ui commands, we needs to tell engine to update frames.
     for (int i = 0; i < commandLength; i++) {

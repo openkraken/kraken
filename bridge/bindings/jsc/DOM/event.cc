@@ -5,6 +5,7 @@
 
 #include "event.h"
 #include "event_target.h"
+#include "bindings/jsc/DOM/custom_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
@@ -40,7 +41,7 @@ JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef construct
   JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventTypeValueRef, exception);
   std::string &&eventType = JSStringToStdString(eventTypeStringRef);
   auto nativeEvent = new NativeEvent(stringToNativeString(eventType));
-  auto event = JSEvent::buildEventInstance(eventType, context, nativeEvent);
+  auto event = JSEvent::buildEventInstance(eventType, context, nativeEvent, false);
 
   return event->object;
 }
@@ -57,7 +58,7 @@ JSValueRef JSEvent::initWithNativeEvent(JSContextRef ctx, JSObjectRef function, 
   double address = JSValueToNumber(ctx, arguments[1], exception);
   auto nativeEvent = reinterpret_cast<NativeEvent*>(static_cast<int64_t>(address));
   std::string eventType = JSStringToStdString(eventTypeStringRef);
-  auto event = JSEvent::buildEventInstance(eventType, Event->context, nativeEvent);
+  auto event = JSEvent::buildEventInstance(eventType, Event->context, nativeEvent, false);
   return event->object;
 }
 
@@ -189,10 +190,11 @@ void EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   }
 }
 
-EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent) {
+EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent, bool isCustomEvent) {
   EventInstance *eventInstance;
-
-  if (eventType == EVENT_INPUT) {
+  if (isCustomEvent) {
+    eventInstance = new CustomEventInstance(JSCustomEvent::instance(context), reinterpret_cast<NativeCustomEvent*>(nativeEvent));
+  } else if (eventType == EVENT_INPUT) {
     eventInstance = new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
   } else if (eventType == EVENT_MEDIA_ERROR) {
     eventInstance = new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));

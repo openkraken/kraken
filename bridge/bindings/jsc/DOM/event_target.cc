@@ -84,16 +84,8 @@ JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarg
 
 JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
-  if (context->isValid()) {
-    auto data = new DisposeCallbackData(_hostClass->contextId, eventTargetId);
-    foundation::Task disposeTask = [](void *data) {
-      auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
-      foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
-        ->registerCommand(disposeCallbackData->id, UICommand::disposeEventTarget, nullptr);
-      delete disposeCallbackData;
-    };
-    foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
-  }
+  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
+      ->registerCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
 
   // Release handler callbacks.
   if (context->isValid()) {
@@ -410,7 +402,7 @@ bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *ev
 }
 
 // This function will be called back by dart side when trigger events.
-void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent) {
+void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
 
   JSEventTarget::EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
@@ -420,7 +412,7 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, 
                                                nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);
 
-  EventInstance *eventInstance = JSEvent::buildEventInstance(eventType, context, nativeEvent);
+  EventInstance *eventInstance = JSEvent::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
 
   eventTargetInstance->dispatchEvent(eventInstance);
 }
