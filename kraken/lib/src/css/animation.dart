@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/animation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 // https://drafts.csswg.org/web-animations/#enumdef-animationplaystate
@@ -576,8 +577,10 @@ class KeyframeEffect extends AnimationEffect {
           scaledLocalTime = 1;
         }
 
-        RenderStyle renderStyle = target.renderBoxModel.renderStyle;
-        interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime, property, renderStyle);
+        RenderBoxModel renderBoxModel = target.renderBoxModel;
+        if (renderBoxModel != null) {
+          interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime, property, renderBoxModel.renderStyle);
+        }
       }
     }
   }
