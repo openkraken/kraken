@@ -43,8 +43,6 @@ enum CSSTransitionEvent {
 }
 
 mixin CSSTransitionMixin on Node {
-  Throttling throttler = Throttling();
-
   void updateTransition(CSSStyleDeclaration style) {
     Map<String, List> transitions = {};
 

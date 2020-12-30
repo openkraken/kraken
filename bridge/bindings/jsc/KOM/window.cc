@@ -68,16 +68,16 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
     case WindowProperty::scrollX: {
       getDartMethod()->flushUICommand();
       auto document = DocumentInstance::instance(_hostClass->context);
-      assert_m( document->body->nativeElement->getScrollLeft != nullptr, "Failed to execute getScrollLeft(): dart method is nullptr.");
+      assert_m(document->body->nativeElement->getViewModuleProperty != nullptr, "Failed to execute getViewModuleProperty(): dart method is nullptr.");
       return JSValueMakeNumber(_hostClass->ctx,
-                               document->body->nativeElement->getScrollLeft(document->body->nativeElement));
+                               document->body->nativeElement->getViewModuleProperty(document->body->nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollLeft)));
     }
     case WindowProperty::scrollY: {
       getDartMethod()->flushUICommand();
       auto document = DocumentInstance::instance(_hostClass->context);
-      assert_m( document->body->nativeElement->getScrollTop != nullptr, "Failed to execute getScrollTop(): dart method is nullptr.");
+      assert_m(document->body->nativeElement->getViewModuleProperty != nullptr, "Failed to execute getViewModuleProperty(): dart method is nullptr.");
       return JSValueMakeNumber(_hostClass->ctx,
-                               document->body->nativeElement->getScrollTop(document->body->nativeElement));
+                               document->body->nativeElement->getViewModuleProperty(document->body->nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollTop)));
     }
     }
   }

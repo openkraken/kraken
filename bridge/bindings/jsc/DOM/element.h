@@ -159,18 +159,21 @@ struct NativeBoundingClientRect {
   double left;
 };
 
-using GetOffsetTop = double (*)(NativeElement *nativeElement);
-using GetOffsetLeft = double (*)(NativeElement *nativeElement);
-using GetOffsetWidth = double (*)(NativeElement *nativeElement);
-using GetOffsetHeight = double (*)(NativeElement *nativeElement);
-using GetClientWidth = double (*)(NativeElement *nativeElement);
-using GetClientHeight = double (*)(NativeElement *nativeElement);
-using GetClientTop = double (*)(NativeElement *nativeElement);
-using GetClientLeft = double (*)(NativeElement *nativeElement);
-using GetScrollTop = double (*)(NativeElement *nativeElement);
-using GetScrollLeft = double (*)(NativeElement *nativeElement);
-using GetScrollHeight = double (*)(NativeElement *nativeElement);
-using GetScrollWidth = double (*)(NativeElement *nativeElement);
+enum class ViewModuleProperty {
+  offsetTop,
+  offsetLeft,
+  offsetWidth,
+  offsetHeight,
+  clientWidth,
+  clientHeight,
+  clientTop,
+  clientLeft,
+  scrollTop,
+  scrollLeft,
+  scrollHeight,
+  scrollWidth
+};
+using GetViewModuleProperty = double (*)(NativeElement *nativeElement, int64_t property);
 using GetBoundingClientRect = NativeBoundingClientRect *(*)(NativeElement *nativeElement);
 using GetStringValueProperty = NativeString *(*)(NativeElement *nativeElement, NativeString* property);
 using Click = void (*)(NativeElement *nativeElement);
@@ -203,18 +206,7 @@ struct NativeElement {
 
   const NativeNode *nativeNode;
 
-  GetOffsetTop getOffsetTop{nullptr};
-  GetOffsetLeft getOffsetLeft{nullptr};
-  GetOffsetWidth getOffsetWidth{nullptr};
-  GetOffsetHeight getOffsetHeight{nullptr};
-  GetClientWidth getClientWidth{nullptr};
-  GetClientHeight getClientHeight{nullptr};
-  GetClientTop getClientTop{nullptr};
-  GetClientLeft getClientLeft{nullptr};
-  GetScrollTop getScrollTop{nullptr};
-  GetScrollLeft getScrollLeft{nullptr};
-  GetScrollWidth getScrollWidth{nullptr};
-  GetScrollHeight getScrollHeight{nullptr};
+  GetViewModuleProperty getViewModuleProperty{nullptr};
   GetBoundingClientRect getBoundingClientRect{nullptr};
   GetStringValueProperty getStringValueProperty{nullptr};
   Click click{nullptr};
