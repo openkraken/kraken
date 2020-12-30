@@ -1157,12 +1157,10 @@ mixin CSSTransformMixin on RenderStyleBase {
         parent.child = repaintSelfBox;
       }
       element.renderBoxModel = repaintSelfBox;
-      renderBoxModel = repaintSelfBox;
       // Update renderBoxModel reference in renderStyle
-      renderBoxModel.renderStyle.renderBoxModel = renderBoxModel;
+      element.renderBoxModel.renderStyle.renderBoxModel = element.renderBoxModel;
     }
-
-    renderBoxModel.renderStyle.transform = matrix4 ?? CSSTransform.initial;
+    element.renderBoxModel.renderStyle.transform = matrix4 ?? CSSTransform.initial;
   }
 
   void updateTransformOrigin(String present, [CSSOrigin newOrigin]) {
