@@ -41,6 +41,7 @@ program
       }
 
       const env = Object.assign({}, process.env);
+
       const shellPath = getShellPath(options.runtimeMode);
       // only linux platform need this
       if (os.platform() === 'linux') {
