@@ -214,15 +214,15 @@ public:
 
 private:
   friend JSPerformanceEntry;
-  JSFunctionHolder m_now{context, "now", now};
-  JSFunctionHolder m_toJSON{context, "toJSON", toJSON};
-  JSFunctionHolder m_clearMarks{context, "clearMarks", clearMarks};
-  JSFunctionHolder m_clearMeasures{context, "clearMeasures", clearMeasures};
-  JSFunctionHolder m_getEntries{context, "getEntries", getEntries};
-  JSFunctionHolder m_getEntriesByName{context, "getEntriesByName", getEntriesByName};
-  JSFunctionHolder m_getEntriesByType{context, "getEntriesByType", getEntriesByType};
-  JSFunctionHolder m_mark{context, "mark", mark};
-  JSFunctionHolder m_measure{context, "measure", measure};
+  JSFunctionHolder m_now{context, this,"now", now};
+  JSFunctionHolder m_toJSON{context, this, "toJSON", toJSON};
+  JSFunctionHolder m_clearMarks{context, this, "clearMarks", clearMarks};
+  JSFunctionHolder m_clearMeasures{context, this, "clearMeasures", clearMeasures};
+  JSFunctionHolder m_getEntries{context, this, "getEntries", getEntries};
+  JSFunctionHolder m_getEntriesByName{context, this, "getEntriesByName", getEntriesByName};
+  JSFunctionHolder m_getEntriesByType{context, this, "getEntriesByType", getEntriesByType};
+  JSFunctionHolder m_mark{context, this, "mark", mark};
+  JSFunctionHolder m_measure{context, this, "measure", measure};
 
 #if ENABLE_PROFILE
   JSFunctionHolder m_summary{context, "__navigation_summary__", __kraken_navigation_summary__};
