@@ -1198,6 +1198,8 @@ class Element extends Node
         this.parent.addChildRenderObject(this, after: previousSibling);
       }
       renderBoxModel = renderReplacedBoxModel;
+      // Update renderBoxModel reference in renderStyle
+      renderBoxModel.renderStyle.renderBoxModel = renderBoxModel;
     }
 
     renderBoxModel.owner.flushLayout();

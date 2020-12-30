@@ -90,7 +90,6 @@ mixin CSSBoxMixin on RenderStyleBase {
   void updateBox(String property, String original, String present) {
     CSSBoxDecoration cssBoxDecoration = renderBoxModel.cssBoxDecoration;
     RenderStyle renderStyle = this;
-    CSSStyleDeclaration style = this.style;
 
     if (cssBoxDecoration != null) {
       // Update by property
@@ -98,25 +97,25 @@ mixin CSSBoxMixin on RenderStyleBase {
         renderStyle.backgroundClip = getBackgroundClip(present);
       } else if (property == BACKGROUND_ORIGIN) {
         renderStyle.backgroundOrigin = getBackgroundOrigin(present);
-      } if (property == BACKGROUND_COLOR) {
+      } else if (property == BACKGROUND_COLOR) {
         updateBackgroundColor();
       } else if (property.startsWith(BACKGROUND)) {
         // Including BACKGROUND_REPEAT, BACKGROUND_POSITION, BACKGROUND_IMAGE,
         //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.
-        _updateBackgroundImage(renderBoxModel, style, property);
+        updateBackgroundImage(property);
       } else if (property.endsWith('Radius')) {
         updateBorderRadius(property);
       } else if (property.startsWith(BORDER)) {
         updateBorder(property);
       } else if (property == BOX_SHADOW) {
-        _updateBoxShadow(renderBoxModel, style, property);
+        updateBoxShadow(property);
       } else if (property == COLOR) {
        updateBackgroundColor();
        updateBorder(property);
-       _updateBoxShadow(renderBoxModel, style, property);
+       updateBoxShadow(property);
       }
     } else {
-      cssBoxDecoration = getCSSBoxDecoration(renderBoxModel, style);
+      cssBoxDecoration = getCSSBoxDecoration();
       renderBoxModel.cssBoxDecoration = cssBoxDecoration;
       if (cssBoxDecoration == null) return;
 
@@ -126,10 +125,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     }
   }
 
-  void _updateBoxShadow(
-    RenderBoxModel renderBoxModel,
-    CSSStyleDeclaration style,
-    String property) {
+  void updateBoxShadow(String property) {
 
     BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
     ElementManager elementManager = renderBoxModel.elementManager;
@@ -179,7 +175,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     }
   }
 
-  void _updateBackgroundImage(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property) {
+  void updateBackgroundImage(String property) {
     BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
 
     DecorationImage decorationImage;
@@ -342,7 +338,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
   ///     (PS. Only support solid now.)
   ///   borderColor: <color>
-  CSSBoxDecoration getCSSBoxDecoration(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+  CSSBoxDecoration getCSSBoxDecoration() {
     // Backgroud color
     Color bgColor = CSSBackground.getBackgroundColor(style);
     // Background image

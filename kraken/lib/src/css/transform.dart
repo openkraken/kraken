@@ -1158,6 +1158,8 @@ mixin CSSTransformMixin on RenderStyleBase {
       }
       element.renderBoxModel = repaintSelfBox;
       renderBoxModel = repaintSelfBox;
+      // Update renderBoxModel reference in renderStyle
+      renderBoxModel.renderStyle.renderBoxModel = renderBoxModel;
     }
 
     renderBoxModel.renderStyle.transform = matrix4 ?? CSSTransform.initial;
