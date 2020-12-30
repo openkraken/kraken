@@ -7,14 +7,10 @@ import 'package:kraken/widget.dart';
 import 'dart:ui';
 
 void main() {
-  if (Platform.environment['KRAKEN_MAIN_ENTRY'] == 'cli') {
-    launch();
-  } else {
-    runApp(MaterialApp(
-      title: 'Kraken App Demo',
-      home: FirstRoute(),
-    ));
-  }
+  runApp(MaterialApp(
+    title: 'Kraken App Demo',
+    home: FirstRoute(),
+  ));
 }
 
 class FirstRoute extends StatelessWidget {
