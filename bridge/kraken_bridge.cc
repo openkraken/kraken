@@ -86,7 +86,11 @@ int32_t searchForAvailableContextId() {
 
 void initJSContextPool(int poolSize) {
   uiThreadId = std::this_thread::get_id();
-  if (inited) disposeAllBridge();
+  // When dart hot restarted, should dispose previous bridge and clear task message queue.
+  if (inited) {
+    disposeAllBridge();
+    foundation::UICommandTaskMessageQueue::instance(0)->clear();
+  };
   contextPool = new kraken::JSBridge *[poolSize];
   for (int i = 1; i < poolSize; i++) {
     contextPool[i] = nullptr;

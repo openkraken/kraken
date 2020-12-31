@@ -43,6 +43,7 @@ function buildKraken(platform, mode) {
   const args = [
     'build',
     platform === 'darwin' ? 'macos' : platform,
+    '--target=lib/cli.dart',
     runtimeMode,
   ];
 
