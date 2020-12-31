@@ -284,4 +284,19 @@ describe('Event', () => {
     await simulateClick(25, 75);
     expect(clickCount).toBe(1);
   })
+
+  xit('when scrolling to the boundary, the native gesture should be triggered', async (done) => {
+    const container = document.createElement('div');
+
+    container.style.overflow = 'scroll';
+    container.style.width = '200px';
+    container.style.height = '200px';
+    container.style.backgroundColor = 'blue';
+
+    document.body.appendChild(container);
+    document.body.addEventListener('NativeGesture', (e) => {
+       done();
+    });
+    await simulateSwipe(20, 20, 20, 100, 0.1);
+  })
 });

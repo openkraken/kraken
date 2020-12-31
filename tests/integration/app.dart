@@ -11,12 +11,32 @@ import 'package:path/path.dart' as path;
 import 'bridge/from_native.dart';
 import 'bridge/to_native.dart';
 import 'custom/custom_object_element.dart';
+import 'package:kraken/gesture.dart';
 
 String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST FAILED]');
 
 final Directory specsDirectory = Directory(Platform.environment['KRAKEN_SPEC_DIR'] + '/integration/.specs');
 final Directory snapshotsDirectory = Directory(Platform.environment['KRAKEN_SPEC_DIR'] + '/integration/snapshots');
+
+Kraken widget;
+
+class NativeGestureClient implements GestureClient {
+  @override
+  void overflowByUpdate(DragUpdateDetails details) {
+  }
+
+  @override
+  void overflowByStart(DragStartDetails details) {
+    print('overflowByUpdate NativeGesture');
+    var event = CustomEvent('NativeGesture', CustomEventInit(detail: 'NativeGesture'));
+    widget.controller.view.document.body.dispatchEvent(event);
+  }
+
+  @override
+  void overflowByEnd(DragEndDetails details) {
+  }
+}
 
 void main() async {
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
@@ -51,7 +71,7 @@ void main() async {
       return 'method: ' + method;
     };
 
-    Kraken widget = Kraken(
+    widget = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
       bundleContent: 'console.log("starting integration test")',
@@ -59,6 +79,7 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       debugEnableInspector: false,
+      gestureClient: NativeGestureClient(),
     );
     widgets.add(widget);
   }
