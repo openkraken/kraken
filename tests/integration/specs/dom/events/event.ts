@@ -294,9 +294,12 @@ describe('Event', () => {
     container.style.backgroundColor = 'blue';
 
     document.body.appendChild(container);
-    document.body.addEventListener('NativeGesture', (e) => {
-       done();
+
+    document.body.addEventListener('nativegesture', async function listener() {
+      document.body.removeEventListener('nativegesture', listener);
+      done();
     });
+
     await simulateSwipe(20, 20, 20, 100, 0.1);
   })
 });

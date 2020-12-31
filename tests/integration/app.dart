@@ -19,7 +19,7 @@ String err = (AnsiPen()..red())('[TEST FAILED]');
 final Directory specsDirectory = Directory(Platform.environment['KRAKEN_SPEC_DIR'] + '/integration/.specs');
 final Directory snapshotsDirectory = Directory(Platform.environment['KRAKEN_SPEC_DIR'] + '/integration/snapshots');
 
-Kraken widget;
+Kraken kraken;
 
 class NativeGestureClient implements GestureClient {
   @override
@@ -28,9 +28,8 @@ class NativeGestureClient implements GestureClient {
 
   @override
   void overflowByStart(DragStartDetails details) {
-    print('overflowByUpdate NativeGesture');
-    var event = CustomEvent('NativeGesture', CustomEventInit(detail: 'NativeGesture'));
-    widget.controller.view.document.body.dispatchEvent(event);
+    var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
+    kraken.controller.view.document.body.dispatchEvent(event);
   }
 
   @override
@@ -71,7 +70,7 @@ void main() async {
       return 'method: ' + method;
     };
 
-    widget = Kraken(
+    kraken = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
       bundleContent: 'console.log("starting integration test")',
@@ -81,7 +80,7 @@ void main() async {
       debugEnableInspector: false,
       gestureClient: NativeGestureClient(),
     );
-    widgets.add(widget);
+    widgets.add(kraken);
   }
 
   runApp(MaterialApp(
