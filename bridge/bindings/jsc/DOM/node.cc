@@ -145,7 +145,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   JSObjectRef nodeObjectRef = JSValueToObject(ctx, nodeValueRef, exception);
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
-  if (nodeInstance == nullptr) {
+  if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.",
                     exception);
     return nullptr;
@@ -164,7 +164,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
 
 JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) {
-  if (argumentCount != 2) {
+  if (argumentCount < 2) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'insertBefore' on 'Node': 2 arguments is required.", exception);
     return nullptr;
   }
@@ -193,6 +193,11 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
 
   auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
+
+  if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
+    JSC_THROW_ERROR(ctx, "Failed to execute 'insertBefore' on 'Node': parameter 1 is not of type 'Node'", exception);
+    return nullptr;
+  }
 
   selfInstance->internalInsertBefore(nodeInstance, referenceInstance, exception);
 
@@ -231,14 +236,19 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
   auto newChildInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(newChildObjectRef));
   auto oldChildInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(oldChildObjectRef));
 
-  if (oldChildInstance == nullptr || oldChildInstance->parentNode == nullptr) {
+  if (oldChildInstance == nullptr || oldChildInstance->parentNode != selfInstance || oldChildInstance->_identify != NODE_IDENTIFY) {
     JSC_THROW_ERROR(ctx,
                     "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.",
                     exception);
     return nullptr;
   }
 
-  selfInstance->internalReplaceChild(newChildInstance, oldChildInstance);
+  if (newChildInstance == nullptr || newChildInstance->_identify != NODE_IDENTIFY) {
+    JSC_THROW_ERROR(ctx, "Failed to execute 'replaceChild' on 'Node': The new node is not a type of node.", exception);
+    return nullptr;
+  }
+
+  selfInstance->internalReplaceChild(newChildInstance, oldChildInstance, exception);
 
   return nullptr;
 }
@@ -261,6 +271,12 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
     if (parent != nullptr) {
       auto &&parentChildNodes = parent->childNodes;
       auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), referenceNode);
+
+      if (it == parentChildNodes.end()) {
+        JSC_THROW_ERROR(_hostClass->ctx, "Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.", exception);
+        return;
+      }
+
       parentChildNodes.insert(it, node);
       node->parentNode = parent;
       node->refer();
@@ -313,7 +329,7 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
-  if (nodeInstance == nullptr) {
+  if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'removeChild' on 'Node': 1st arguments is not a Node object.", exception);
     return nullptr;
   }
@@ -364,13 +380,19 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalRemoveChild(JSNode::NodeInst
 }
 
 JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeInstance *newChild,
-                                                                 JSNode::NodeInstance *oldChild) {
+                                                                 JSNode::NodeInstance *oldChild,
+                                                                 JSValueRef *exception) {
   ensureDetached(newChild);
   auto parent = oldChild->parentNode;
   oldChild->parentNode = nullptr;
   oldChild->unrefer();
 
   auto childIndex = std::find(parent->childNodes.begin(), parent->childNodes.end(), oldChild);
+  if (childIndex == parent->childNodes.end()) {
+    JSC_THROW_ERROR(ctx, "Failed to execute 'replaceChild' on 'Node': old child is not exist on childNodes.", exception);
+    return nullptr;
+  }
+
   newChild->parentNode = parent;
   parent->childNodes.erase(childIndex);
   parent->childNodes.insert(childIndex, newChild);
@@ -439,7 +461,7 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
   case NodeProperty::parentNode: {
-    if (parentNode == nullptr) return nullptr;
+    if (parentNode == nullptr) return JSValueMakeNull(ctx);
     return parentNode->object;
   }
   case NodeProperty::lastChild: {

@@ -1,4 +1,33 @@
 describe('Insert before', () => {
+  it('with node is not a type of node', () => {
+    let container = document.createElement('div');
+    let node = document.createElement('div');
+    container.appendChild(node);
+
+    expect(() => {
+      // @ts-ignore
+      container.insertBefore(new Event('1234'), null);
+    }).toThrowError('Failed to execute \'insertBefore\' on \'Node\': parameter 1 is not of type \'Node\'');
+  });
+  it('with reference node is not a type of node', () => {
+    let container = document.createElement('div');
+    let node = document.createElement('div');
+    container.appendChild(node);
+
+    expect(() => {
+      // @ts-ignore
+      container.insertBefore(node, new Event('1234'), null);
+    }).toThrowError('Uncaught TypeError: Failed to execute \'insertBefore\' on \'Node\': reference node is not a child of this node.');
+  });
+  it('with node is a child of another parent', () => {
+    let container = document.createElement('div');
+    let node = document.createElement('div');
+    container.appendChild(node);
+    let otherContainer = document.createElement('div');
+    otherContainer.insertBefore(node, null);
+    expect(node.parentNode).toBe(otherContainer);
+    expect(container.childNodes.length).toBe(0);
+  });
   it('basic', async () => {
     var div = document.createElement('div');
     var span = document.createElement('span');
