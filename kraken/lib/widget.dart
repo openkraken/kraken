@@ -44,9 +44,11 @@ class Kraken extends StatelessWidget {
   // A method channel for receiving messaged from JavaScript code and sending message to JavaScript.
   final KrakenJavaScriptChannel javaScriptChannel;
 
-  final LoadErrorHandler loadErrorHandler;
+  final LoadErrorHandler onLoadError;
 
   final KrakenOnLoad onLoad;
+
+  final JSErrorHandler onJSError;
 
   final bool debugEnableInspector;
 
@@ -76,9 +78,10 @@ class Kraken extends StatelessWidget {
     // Disable viewportHeight check and no assertion error report.
     bool disableViewportHeightAssertion = false,
     // Callback functions when loading Javascript scripts failed.
-    this.loadErrorHandler,
+    this.onLoadError,
     this.animationController,
     this.debugEnableInspector,
+    this.onJSError
   }) : super(key: key) {
     // assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
     // 'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
@@ -118,7 +121,8 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       bundleURL: _krakenWidget.bundleURL,
       bundlePath: _krakenWidget.bundlePath,
-      loadErrorHandler: _krakenWidget.loadErrorHandler,
+      onLoadError: _krakenWidget.onLoadError,
+      onJSError: _krakenWidget.onJSError,
       methodChannel: _krakenWidget.javaScriptChannel,
       bundleContent: _krakenWidget.bundleContent,
       debugEnableInspector: _krakenWidget.debugEnableInspector,
