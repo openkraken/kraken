@@ -18,10 +18,10 @@ else()
   endif()
 endif()
 
-add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE})
+add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE} ${BRIDGE_SOURCE})
 
 ### kraken_test
-target_link_libraries(kraken_test PRIVATE kraken ${BRIDGE_LINK_LIBS})
+target_link_libraries(kraken_test PRIVATE ${BRIDGE_LINK_LIBS})
 target_include_directories(kraken_test PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
