@@ -205,20 +205,18 @@ typedef Native_GetStringValueProperty = Pointer<NativeString> Function(Pointer<N
 typedef Native_Click = Void Function(Pointer<NativeElement> nativeElement);
 typedef Native_Scroll = Void Function(Pointer<NativeElement> nativeElement, Int32 x, Int32 y);
 typedef Native_ScrollBy = Void Function(Pointer<NativeElement> nativeElement, Int32 x, Int32 y);
-typedef Native_SetScrollLeft = Void Function(Pointer<NativeElement> nativeElement, Double left);
-typedef Native_SetScrollTop = Void Function(Pointer<NativeElement> nativeElement, Double top);
+typedef Native_SetViewModuleProperty = Void Function(Pointer<NativeElement> nativeElement, Int64 property, Double value);
 
 class NativeElement extends Struct {
   Pointer<NativeNode> nativeNode;
 
   Pointer<NativeFunction<Native_GetViewModuleProperty>> getViewModuleProperty;
+  Pointer<NativeFunction<Native_SetViewModuleProperty>> setViewModuleProperty;
   Pointer<NativeFunction<Native_GetBoundingClientRect>> getBoundingClientRect;
   Pointer<NativeFunction<Native_GetStringValueProperty>> getStringValueProperty;
   Pointer<NativeFunction<Native_Click>> click;
   Pointer<NativeFunction<Native_Scroll>> scroll;
   Pointer<NativeFunction<Native_ScrollBy>> scrollBy;
-  Pointer<NativeFunction<Native_SetScrollLeft>> setScrollLeft;
-  Pointer<NativeFunction<Native_SetScrollTop>> setScrollTop;
 }
 
 class NativeWindow extends Struct {

@@ -326,14 +326,14 @@ void ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
     switch (property) {
     case JSElement::ElementProperty::scrollTop: {
       getDartMethod()->flushUICommand();
-      assert_m(nativeElement->setScrollTop != nullptr, "Failed to execute setScrollTop(): dart method is nullptr.");
-      nativeElement->setScrollTop(nativeElement, JSValueToNumber(_hostClass->ctx, value, exception));
+      assert_m(nativeElement->setViewModuleProperty != nullptr, "Failed to execute setScrollTop(): dart method is nullptr.");
+      nativeElement->setViewModuleProperty(nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollTop), JSValueToNumber(_hostClass->ctx, value, exception));
       break;
     }
     case JSElement::ElementProperty::scrollLeft: {
       getDartMethod()->flushUICommand();
-      assert_m(nativeElement->setScrollLeft != nullptr, "Failed to execute setScrollLeft(): dart method is nullptr.");
-      nativeElement->setScrollLeft(nativeElement, JSValueToNumber(_hostClass->ctx, value, exception));
+      assert_m(nativeElement->setViewModuleProperty != nullptr, "Failed to execute setScrollLeft(): dart method is nullptr.");
+      nativeElement->setViewModuleProperty(nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollLeft), JSValueToNumber(_hostClass->ctx, value, exception));
       break;
     }
     default:

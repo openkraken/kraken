@@ -1,6 +1,5 @@
 import 'package:flutter/animation.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/scheduler.dart';
 import 'package:kraken/css.dart';
 
 // CSS Transitions: https://drafts.csswg.org/css-transitions/

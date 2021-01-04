@@ -174,13 +174,12 @@ enum class ViewModuleProperty {
   scrollWidth
 };
 using GetViewModuleProperty = double (*)(NativeElement *nativeElement, int64_t property);
+using SetViewModuleProperty = void (*)(NativeElement *nativeElement, int64_t property, double value);
 using GetBoundingClientRect = NativeBoundingClientRect *(*)(NativeElement *nativeElement);
 using GetStringValueProperty = NativeString *(*)(NativeElement *nativeElement, NativeString* property);
 using Click = void (*)(NativeElement *nativeElement);
 using Scroll = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
 using ScrollBy = void (*)(NativeElement *nativeElement, int32_t x, int32_t y);
-using SetScrollTop = void (*)(NativeElement *nativeElement, double top);
-using SetScrollLeft = double (*)(NativeElement *nativeElement, double left);
 
 class BoundingClientRect : public HostObject {
 public:
@@ -207,13 +206,12 @@ struct NativeElement {
   const NativeNode *nativeNode;
 
   GetViewModuleProperty getViewModuleProperty{nullptr};
+  SetViewModuleProperty setViewModuleProperty{nullptr};
   GetBoundingClientRect getBoundingClientRect{nullptr};
   GetStringValueProperty getStringValueProperty{nullptr};
   Click click{nullptr};
   Scroll scroll{nullptr};
   ScrollBy scrollBy{nullptr};
-  SetScrollLeft setScrollLeft{nullptr};
-  SetScrollTop setScrollTop{nullptr};
 };
 
 using TraverseHandler = std::function<bool(JSNode::NodeInstance *)>;
