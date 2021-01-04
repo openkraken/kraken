@@ -23,7 +23,7 @@ JSInputEvent::JSInputEvent(JSContext *context) : JSEvent(context, "InputEvent") 
 JSObjectRef JSInputEvent::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                               const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to construct 'JSInputEvent': 1 argument required, but only 0 present.", exception);
+    throwJSError(ctx, "Failed to construct 'JSInputEvent': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 

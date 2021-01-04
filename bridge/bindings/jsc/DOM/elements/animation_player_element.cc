@@ -29,7 +29,7 @@ JSValueRef JSAnimationPlayerElement::play(JSContextRef ctx, JSObjectRef function
   double mixSeconds = 0.2;
 
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute play() on AnimationPlayerElement: 1 arguments required but got 0.",
+    throwJSError(ctx, "Failed to execute play() on AnimationPlayerElement: 1 arguments required but got 0.",
                     exception);
     return nullptr;
   }

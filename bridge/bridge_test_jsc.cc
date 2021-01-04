@@ -28,14 +28,14 @@ JSValueRef executeTest(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
 
   auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
   if (!JSValueIsObject(ctx, callback)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.", exception);
+    binding::jsc::throwJSError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.", exception);
     return nullptr;
   }
 
   JSObjectRef callbackObjectRef = JSValueToObject(ctx, callback, exception);
 
   if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.", exception);
+    binding::jsc::throwJSError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.", exception);
     return nullptr;
   }
 
@@ -52,7 +52,7 @@ JSValueRef refreshPaint(JSContextRef ctx, JSObjectRef function, JSObjectRef this
 
   auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
   if (!JSValueIsObject(ctx, callback)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '_kraken_refresh_paint__': parameter 1 (callback) is not an function.",
+    binding::jsc::throwJSError(ctx, "Failed to execute '_kraken_refresh_paint__': parameter 1 (callback) is not an function.",
                     exception);
     return nullptr;
   }
@@ -60,7 +60,7 @@ JSValueRef refreshPaint(JSContextRef ctx, JSObjectRef function, JSObjectRef this
   JSObjectRef callbackObjectRef = JSValueToObject(ctx, callback, exception);
 
   if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '_kraken_refresh_paint__': parameter 1 (callback) is not an function.",
+    binding::jsc::throwJSError(ctx, "Failed to execute '_kraken_refresh_paint__': parameter 1 (callback) is not an function.",
                     exception);
     return nullptr;
   }
@@ -108,7 +108,7 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
 
   auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
   if (!JSValueIsObject(ctx, blobValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.",
+    binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.",
                     exception);
     return nullptr;
   }
@@ -117,19 +117,19 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
   auto blob = static_cast<binding::jsc::JSBlob::BlobInstance *>(JSObjectGetPrivate(blobObjectRef));
 
   if (blob == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.",
+    binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.",
                     exception);
     return nullptr;
   }
 
   if (!JSValueIsString(ctx, screenShotValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 2 (match) must be an string.",
+    binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 2 (match) must be an string.",
                     exception);
     return nullptr;
   }
 
   if (!JSValueIsObject(ctx, callbackValueRef)) {
-    JSC_THROW_ERROR(ctx,
+    binding::jsc::throwJSError(ctx,
                     "Failed to execute '__kraken_match_image_snapshot__': parameter 3 (callback) is not an function.",
                     exception);
     return nullptr;
@@ -138,14 +138,14 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
   JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackValueRef, exception);
 
   if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx,
+    binding::jsc::throwJSError(ctx,
                     "Failed to execute '__kraken_match_image_snapshot__': parameter 3 (callback) is not an function.",
                     exception);
     return nullptr;
   }
 
   if (getDartMethod()->matchImageSnapshot == nullptr) {
-    JSC_THROW_ERROR(
+    binding::jsc::throwJSError(
       ctx, "Failed to execute '__kraken_match_image_snapshot__': dart method (matchImageSnapshot) is not registered.",
       exception);
     return nullptr;
@@ -187,7 +187,7 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
 JSValueRef environment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                        const JSValueRef *arguments, JSValueRef *exception) {
   if (getDartMethod()->environment == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_environment__': dart method (environment) is not registered.",
+    binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_environment__': dart method (environment) is not registered.",
                     exception);
     return nullptr;
   }
@@ -199,7 +199,7 @@ JSValueRef environment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
 JSValueRef simulatePointer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                            const JSValueRef *arguments, JSValueRef *exception) {
   if (getDartMethod()->simulatePointer == nullptr) {
-    JSC_THROW_ERROR(ctx,
+    binding::jsc::throwJSError(ctx,
                     "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.",
                     exception);
     return nullptr;
@@ -209,7 +209,7 @@ JSValueRef simulatePointer(JSContextRef ctx, JSObjectRef function, JSObjectRef t
 
   const JSValueRef &firstArgsValueRef = arguments[0];
   if (!JSValueIsObject(ctx, firstArgsValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_simulate_pointer__': first arguments should be an array.",
+    binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_simulate_pointer__': first arguments should be an array.",
                     exception);
     return nullptr;
   }
@@ -248,7 +248,7 @@ JSValueRef simulatePointer(JSContextRef ctx, JSObjectRef function, JSObjectRef t
 JSValueRef simulateKeyPress(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef *arguments, JSValueRef *exception) {
   if (getDartMethod()->simulateKeyPress == nullptr) {
-    JSC_THROW_ERROR(ctx,
+    binding::jsc::throwJSError(ctx,
                     "Failed to execute '__kraken_simulate_keypress__': dart method(simulateKeyPress) is not registered.",
                     exception);
     return nullptr;
@@ -256,7 +256,7 @@ JSValueRef simulateKeyPress(JSContextRef ctx, JSObjectRef function, JSObjectRef 
 
   const JSValueRef &firstArgsValueRef = arguments[0];
   if (!JSValueIsString(ctx, firstArgsValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_simulate_keypress__': first arguments should be a string.",
+    binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_simulate_keypress__': first arguments should be a string.",
                     exception);
     return nullptr;
   }
@@ -303,7 +303,7 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     auto callbackContext = static_cast<ExecuteCallbackContext *>(JSObjectGetPrivate(function));
 
     if (!JSValueIsString(ctx, statusValueRef)) {
-      JSC_THROW_ERROR(ctx, "failed to execute 'done': parameter 1 (status) is not a string", exception);
+      binding::jsc::throwJSError(ctx, "failed to execute 'done': parameter 1 (status) is not a string", exception);
       return nullptr;
     }
     JSStringRef statusString = JSValueToStringCopy(ctx, statusValueRef, exception);

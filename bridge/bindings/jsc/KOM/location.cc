@@ -38,7 +38,7 @@ JSValueRef JSLocation::reload(JSContextRef ctx, JSObjectRef function, JSObjectRe
   auto jsLocation = static_cast<JSLocation *>(JSObjectGetPrivate(function));
 
   if (getDartMethod()->reloadApp == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'reload': dart method (reloadApp) is not registered.", exception);
+    throwJSError(ctx, "Failed to execute 'reload': dart method (reloadApp) is not registered.", exception);
     return nullptr;
   }
 

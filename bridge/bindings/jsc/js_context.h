@@ -144,6 +144,8 @@ void buildUICommandArgs(std::string &key, NativeString &args_01);
 void buildUICommandArgs(std::string &key, JSStringRef value, NativeString &args_01, NativeString &args_02);
 void buildUICommandArgs(std::string &key, std::string &value, NativeString &args_01, NativeString &args_02);
 
+void throwJSError(JSContextRef ctx, const char* msg, JSValueRef *exception);
+
 JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback,
                                 JSValueRef *exception);
 
