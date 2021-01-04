@@ -49,7 +49,7 @@ JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef con
     const JSValueRef jsOnlyEventsValueRef = arguments[0];
 
     if (!JSValueIsArray(ctx, jsOnlyEventsValueRef)) {
-      JSC_THROW_ERROR(ctx, "Failed to new Event: jsOnlyEvents is not an array.", exception);
+      throwJSError(ctx, "Failed to new Event: jsOnlyEvents is not an array.", exception);
       return nullptr;
     }
 
@@ -104,7 +104,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
 JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount < 2) {
-    JSC_THROW_ERROR(ctx, "Failed to addEventListener: eventName and function parameter are required.", exception)
+    throwJSError(ctx, "Failed to addEventListener: eventName and function parameter are required.", exception);
     return nullptr;
   }
 
@@ -120,18 +120,18 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   const JSValueRef callback = arguments[1];
 
   if (!JSValueIsString(ctx, eventNameValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to addEventListener: eventName should be an string.", exception);
+    throwJSError(ctx, "Failed to addEventListener: eventName should be an string.", exception);
     return nullptr;
   }
 
   if (!JSValueIsObject(ctx, callback)) {
-    JSC_THROW_ERROR(ctx, "Failed to addEventListener: callback should be an function.", exception);
+    throwJSError(ctx, "Failed to addEventListener: callback should be an function.", exception);
     return nullptr;
   }
 
   JSObjectRef callbackObjectRef = JSValueToObject(ctx, callback, exception);
   if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to addEventListener: callback should be an function.", exception);
+    throwJSError(ctx, "Failed to addEventListener: callback should be an function.", exception);
     return nullptr;
   }
 
@@ -193,7 +193,7 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
                                               size_t argumentCount, const JSValueRef *arguments,
                                               JSValueRef *exception) {
   if (argumentCount != 2) {
-    JSC_THROW_ERROR(ctx, "Failed to removeEventListener: eventName and function parameter are required.", exception);
+    throwJSError(ctx, "Failed to removeEventListener: eventName and function parameter are required.", exception);
     return nullptr;
   }
 
@@ -208,18 +208,18 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
   const JSValueRef callback = arguments[1];
 
   if (!JSValueIsString(ctx, eventNameValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to removeEventListener: eventName should be an string.", exception);
+    throwJSError(ctx, "Failed to removeEventListener: eventName should be an string.", exception);
     return nullptr;
   }
 
   if (!JSValueIsObject(ctx, callback)) {
-    JSC_THROW_ERROR(ctx, "Failed to removeEventListener: callback should be an function.", exception);
+    throwJSError(ctx, "Failed to removeEventListener: callback should be an function.", exception);
     return nullptr;
   }
 
   JSObjectRef callbackObjectRef = JSValueToObject(ctx, callback, exception);
   if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to removeEventListener: callback should be an function.", exception);
+    throwJSError(ctx, "Failed to removeEventListener: callback should be an function.", exception);
     return nullptr;
   }
 
@@ -247,7 +247,7 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
 JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                         size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to dispatchEvent: first arguments should be an event object", exception);
+    throwJSError(ctx, "Failed to dispatchEvent: first arguments should be an event object", exception);
     return nullptr;
   }
 

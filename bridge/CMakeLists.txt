@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 
+#set(CMAKE_VERBOSE_MAKEFILE TRUE)
+
 if(${ENABLE_PROFILE})
   add_definitions(-DENABLE_PROFILE=1)
 else()
@@ -171,6 +173,14 @@ target_include_directories(kraken PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "release")
+  ### remove dynamic_cast and exceptions
+  target_compile_options(kraken PRIVATE -fno-rtti -fno-exceptions -fvisibility=hidden)
+else()
+  ### remove dynamic_cast and exceptions
+  target_compile_options(kraken PRIVATE -fno-rtti -fno-exceptions)
+endif()
 
 ### KrakenStatic
 target_include_directories(kraken_static PRIVATE

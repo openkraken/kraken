@@ -25,7 +25,7 @@ JSObjectRef JSIntersectionChangeEvent::instanceConstructor(JSContextRef ctx, JSO
                                                            size_t argumentCount, const JSValueRef *arguments,
                                                            JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to construct 'JSIntersectionChangeEvent': 1 argument required, but only 0 present.",
+    throwJSError(ctx, "Failed to construct 'JSIntersectionChangeEvent': 1 argument required, but only 0 present.",
                     exception);
     return nullptr;
   }

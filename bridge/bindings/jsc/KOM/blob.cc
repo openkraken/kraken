@@ -106,7 +106,7 @@ JSObjectRef JSBlob::instanceConstructor(JSContextRef ctx, JSObjectRef constructo
   const JSValueRef &optionValue = arguments[1];
 
   if (!JSValueIsArray(ctx, arrayValue)) {
-    JSC_THROW_ERROR(ctx, "Failed to construct 'Blob': The provided value cannot be converted to a sequence", exception);
+    throwJSError(ctx, "Failed to construct 'Blob': The provided value cannot be converted to a sequence", exception);
     return nullptr;
   }
 
@@ -117,7 +117,7 @@ JSObjectRef JSBlob::instanceConstructor(JSContextRef ctx, JSObjectRef constructo
   }
 
   if (!JSValueIsObject(ctx, optionValue)) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     "Failed to construct 'Blob': parameter 2 ('options') "
                     "is not an object",
                     exception);

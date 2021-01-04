@@ -16,21 +16,21 @@ using namespace foundation;
 JSValueRef krakenModuleListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_module_listener__': 1 parameter required, but only 0 present.",
+    throwJSError(ctx, "Failed to execute '__kraken_module_listener__': 1 parameter required, but only 0 present.",
                     exception);
     return nullptr;
   }
 
   const JSValueRef &callbackValue = arguments[0];
   if (!JSValueIsObject(ctx, callbackValue)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.",
+    throwJSError(ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.",
                     exception);
     return nullptr;
   }
 
   JSObjectRef callbackObject = JSValueToObject(ctx, callbackValue, exception);
   if (!JSObjectIsFunction(ctx, callbackObject)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.",
+    throwJSError(ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.",
                     exception);
     return nullptr;
   }
@@ -55,7 +55,7 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
   JSValueRef exception = nullptr;
 
   if (obj->_callback == nullptr) {
-    JSC_THROW_ERROR(_context.context(), "Failed to execute '__kraken_invoke_module__': callback is null.", &exception);
+    throwJSError(_context.context(), "Failed to execute '__kraken_invoke_module__': callback is null.", &exception);
     _context.handleException(exception);
     return;
   }
@@ -91,7 +91,7 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
   }
 
   if (getDartMethod()->invokeModule == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.",
+    throwJSError(ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.",
                     exception);
     return nullptr;
   }
@@ -148,7 +148,7 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
 JSValueRef flushUICommand(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                           JSValueRef const *arguments, JSValueRef *exception) {
   if (getDartMethod()->flushUICommand == nullptr) {
-    JSC_THROW_ERROR(
+    throwJSError(
       ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.",
       exception);
     return nullptr;

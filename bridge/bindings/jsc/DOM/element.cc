@@ -127,7 +127,7 @@ JSElement::~JSElement() {
 JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                            const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 0) {
-    JSC_THROW_ERROR(ctx, "Failed to new Element(): at least 1 parameter required.", exception);
+    throwJSError(ctx, "Failed to new Element(): at least 1 parameter required.", exception);
     return nullptr;
   }
 
@@ -366,7 +366,7 @@ std::string ElementInstance::internalGetTextContent() {
 JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 2) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     ("Failed to execute 'setAttribute' on 'Element': 2 arguments required, but only " +
                      std::to_string(argumentCount) + " present")
                       .c_str(),
@@ -378,7 +378,7 @@ JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   const JSValueRef attributeValueRef = arguments[1];
 
   if (!JSValueIsString(ctx, nameValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.", exception);
+    throwJSError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.", exception);
     return nullptr;
   }
 
@@ -422,7 +422,7 @@ JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObj
 JSValueRef JSElement::getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'getAttribute' on 'Element': 1 argument required, but only 0 present",
+    throwJSError(ctx, "Failed to execute 'getAttribute' on 'Element': 1 argument required, but only 0 present",
                     exception);
     return nullptr;
   }
@@ -430,7 +430,7 @@ JSValueRef JSElement::getAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   const JSValueRef nameValueRef = arguments[0];
 
   if (!JSValueIsString(ctx, nameValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.", exception);
+    throwJSError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.", exception);
     return nullptr;
   }
 
@@ -449,7 +449,7 @@ JSValueRef JSElement::getAttribute(JSContextRef ctx, JSObjectRef function, JSObj
 JSValueRef JSElement::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present",
+    throwJSError(ctx, "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present",
                     exception);
     return nullptr;
   }
@@ -457,7 +457,7 @@ JSValueRef JSElement::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   const JSValueRef nameValueRef = arguments[0];
 
   if (!JSValueIsString(ctx, nameValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.", exception);
+    throwJSError(ctx, "Failed to execute 'setAttribute' on 'Element': name attribute is not valid.", exception);
     return nullptr;
   }
 
@@ -472,7 +472,7 @@ JSValueRef JSElement::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObj
 JSValueRef JSElement::removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                       size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present",
+    throwJSError(ctx, "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present",
                     exception);
     return nullptr;
   }
@@ -480,7 +480,7 @@ JSValueRef JSElement::removeAttribute(JSContextRef ctx, JSObjectRef function, JS
   const JSValueRef nameValueRef = arguments[0];
 
   if (!JSValueIsString(ctx, nameValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'removeAttribute' on 'Element': name attribute is not valid.", exception);
+    throwJSError(ctx, "Failed to execute 'removeAttribute' on 'Element': name attribute is not valid.", exception);
     return nullptr;
   }
 
@@ -521,12 +521,12 @@ JSValueRef JSElement::toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef
   const JSValueRef &devicePixelRatioValueRef = arguments[0];
 
   if (!JSValueIsNumber(ctx, devicePixelRatioValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to export blob: parameter 2 (devicePixelRatio) is not an number.", exception);
+    throwJSError(ctx, "Failed to export blob: parameter 2 (devicePixelRatio) is not an number.", exception);
     return nullptr;
   }
 
   if (getDartMethod()->toBlob == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to export blob: dart method (toBlob) is not registered.", exception);
+    throwJSError(ctx, "Failed to export blob: dart method (toBlob) is not registered.", exception);
     return nullptr;
   }
 
