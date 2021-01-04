@@ -551,6 +551,18 @@ Pointer<NativePerformanceEntryList> _performanceGetEntries(int contextId) {
 
 final Pointer<NativeFunction<Native_Performance_GetEntries>> _nativeGetEntries = Pointer.fromFunction(_performanceGetEntries);
 
+typedef Native_JSError = Void Function(Int32 contextId, Pointer<Utf8>);
+
+void _onJSError(int contextId, Pointer<Utf8> charStr) {
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  if (controller.onJSError != null) {
+    String msg = Utf8.fromUtf8(charStr);
+    controller.onJSError(msg);
+  }
+}
+
+final Pointer<NativeFunction<Native_JSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
+
 final List<int> _dartNativeMethods = [
   _nativeInvokeModule.address,
   _nativeRequestBatchUpdate.address,
@@ -569,6 +581,7 @@ final List<int> _dartNativeMethods = [
   _nativeInitWindow.address,
   _nativeInitDocument.address,
   _nativeGetEntries.address,
+  _nativeOnJsError.address,
 ];
 
 typedef Native_RegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);

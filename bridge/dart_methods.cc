@@ -54,6 +54,8 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
   i++;
 #endif
 
+  methodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
+
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }
 
