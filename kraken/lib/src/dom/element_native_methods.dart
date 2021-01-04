@@ -14,6 +14,7 @@ final Pointer<NativeFunction<Native_ScrollBy>> nativeScrollBy = Pointer.fromFunc
 final Pointer<NativeFunction<Native_SetScrollLeft>> nativeSetScrollLeft = Pointer.fromFunction(ElementNativeMethods._setScrollLeft);
 final Pointer<NativeFunction<Native_SetScrollTop>> nativeSetScrollTop = Pointer.fromFunction(ElementNativeMethods._setScrollTop);
 
+// https://www.w3.org/TR/cssom-view-1/
 enum ViewModuleProperty {
   offsetTop,
   offsetLeft,
@@ -60,6 +61,7 @@ mixin ElementNativeMethods on Node {
       case ViewModuleProperty.scrollWidth:
         return element.scrollWidth;
     }
+    return 0.0;
   }
 
   static void _setScrollTop(Pointer<NativeElement> nativeElement, double top) {
@@ -72,18 +74,6 @@ mixin ElementNativeMethods on Node {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
     element.scrollLeft = left;
-  }
-
-  static double _getScrollWidth(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    return element.scrollWidth;
-  }
-
-  static double _getScrollHeight(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
-    return element.scrollHeight;
   }
 
   static Pointer<NativeBoundingClientRect> _getBoundingClientRect(Pointer<NativeElement> nativeElement) {
