@@ -195,7 +195,7 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
   if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'insertBefore' on 'Node': parameter 1 is not of type 'Node'", exception);
+    throwJSError(ctx, "Failed to execute 'insertBefore' on 'Node': parameter 1 is not of type 'Node'", exception);
     return nullptr;
   }
 
@@ -244,7 +244,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
   }
 
   if (newChildInstance == nullptr || newChildInstance->_identify != NODE_IDENTIFY) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'replaceChild' on 'Node': The new node is not a type of node.", exception);
+    throwJSError(ctx, "Failed to execute 'replaceChild' on 'Node': The new node is not a type of node.", exception);
     return nullptr;
   }
 
@@ -273,7 +273,7 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
       auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), referenceNode);
 
       if (it == parentChildNodes.end()) {
-        JSC_THROW_ERROR(_hostClass->ctx, "Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.", exception);
+        throwJSError(_hostClass->ctx, "Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.", exception);
         return;
       }
 
@@ -389,7 +389,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
 
   auto childIndex = std::find(parent->childNodes.begin(), parent->childNodes.end(), oldChild);
   if (childIndex == parent->childNodes.end()) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'replaceChild' on 'Node': old child is not exist on childNodes.", exception);
+    throwJSError(ctx, "Failed to execute 'replaceChild' on 'Node': old child is not exist on childNodes.", exception);
     return nullptr;
   }
 
