@@ -90,40 +90,6 @@ struct UICommandItem {
   int64_t nativePtr{0};
 };
 
-using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
-using AsyncRAFCallback = void (*)(void *callbackContext, int32_t contextId, double result, const char *errmsg);
-using AsyncModuleCallback = void (*)(void *callbackContext, int32_t contextId, NativeString *json);
-using AsyncBlobCallback = void (*)(void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes,
-                                   int32_t length);
-typedef NativeString *(*InvokeModule)(void *callbackContext, int32_t contextId, NativeString *,
-                                      AsyncModuleCallback callback);
-typedef void (*RequestBatchUpdate)(int32_t contextId);
-typedef void (*ReloadApp)(int32_t contextId);
-typedef int32_t (*SetTimeout)(void *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
-typedef int32_t (*SetInterval)(void *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
-typedef int32_t (*RequestAnimationFrame)(void *callbackContext, int32_t contextId, AsyncRAFCallback callback);
-typedef void (*ClearTimeout)(int32_t contextId, int32_t timerId);
-typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
-typedef Screen *(*GetScreen)(int32_t contextId);
-typedef double (*DevicePixelRatio)(int32_t contextId);
-typedef NativeString *(*PlatformBrightness)(int32_t contextId);
-typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
-                       double devicePixelRatio);
-typedef void (*OnJSError)(int32_t contextId, const char *);
-typedef void (*FlushUICommand)();
-typedef void (*InitBody)(int32_t contextId, void *nativePtr);
-typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
-typedef void (*InitDocument)(int32_t contextId, void *nativePtr);
-
-#if ENABLE_PROFILE
-struct NativePerformanceEntryList {
-  uint64_t *entries;
-  int32_t length;
-};
-
-typedef NativePerformanceEntryList* (*GetPerformanceEntries)(int32_t);
-#endif
-
 KRAKEN_EXPORT
 void initJSContextPool(int poolSize);
 KRAKEN_EXPORT
@@ -159,41 +125,6 @@ KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
 
 KRAKEN_EXPORT
-void registerInvokeModule(InvokeModule invokeUIManager);
-KRAKEN_EXPORT
-void registerRequestBatchUpdate(RequestBatchUpdate requestBatchUpdate);
-KRAKEN_EXPORT
-void registerReloadApp(ReloadApp reloadApp);
-KRAKEN_EXPORT
-void registerSetTimeout(SetTimeout setTimeout);
-KRAKEN_EXPORT
-void registerSetInterval(SetInterval setInterval);
-KRAKEN_EXPORT
-void registerClearTimeout(ClearTimeout clearTimeout);
-KRAKEN_EXPORT
-void registerRequestAnimationFrame(RequestAnimationFrame requestAnimationFrame);
-KRAKEN_EXPORT
-void registerCancelAnimationFrame(CancelAnimationFrame cancelAnimationFrame);
-KRAKEN_EXPORT
-void registerGetScreen(GetScreen getScreen);
-KRAKEN_EXPORT
-void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
-KRAKEN_EXPORT
-void registerPlatformBrightness(PlatformBrightness platformBrightness);
-KRAKEN_EXPORT
-void registerToBlob(ToBlob toBlob);
-KRAKEN_EXPORT
-void registerFlushUICommand(FlushUICommand flushUICommand);
-KRAKEN_EXPORT
-void registerInitBody(InitBody initBody);
-KRAKEN_EXPORT
-void registerInitWindow(InitWindow initWindow);
-KRAKEN_EXPORT
-void registerInitDocument(InitDocument initDocument);
-
-#if ENABLE_PROFILE
-KRAKEN_EXPORT
-void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries);
-#endif
+void registerDartMethods(uint64_t *methodBytes, int32_t length);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -274,7 +275,7 @@ const int nativePtrMemOffset = 4;
 // To ensure the fastest subsequent random access.
 List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
   List<UICommand> results = List(commandLength);
-  List<int> rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize).toList();
+  Uint64List rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize);
 
   for (int i = 0; i < commandLength * nativeCommandSize; i += nativeCommandSize) {
     UICommand command = UICommand();
@@ -332,6 +333,10 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
   _clearUICommandItems(contextId);
 
   return results;
+}
+
+void clearUICommand(int contextId) {
+  _clearUICommandItems(contextId);
 }
 
 void flushUICommand() {

@@ -4,6 +4,7 @@
  */
 
 #include "dart_methods.h"
+#include "bindings/jsc/macros.h"
 #include "kraken_bridge.h"
 #include <memory>
 
@@ -27,92 +28,46 @@ std::shared_ptr<DartMethodPointer> getDartMethod() {
   return methodPointer;
 }
 
-void registerInvokeModule(InvokeModule callback) {
-  methodPointer->invokeModule = callback;
+void registerDartMethods(uint64_t *methodBytes, int32_t length) {
+  size_t i = 0;
+
+  methodPointer->invokeModule = reinterpret_cast<InvokeModule>(methodBytes[i++]);
+  methodPointer->requestBatchUpdate = reinterpret_cast<RequestBatchUpdate>(methodBytes[i++]);
+  methodPointer->reloadApp = reinterpret_cast<ReloadApp>(methodBytes[i++]);
+  methodPointer->setTimeout = reinterpret_cast<SetTimeout>(methodBytes[i++]);
+  methodPointer->setInterval = reinterpret_cast<SetInterval>(methodBytes[i++]);
+  methodPointer->clearTimeout = reinterpret_cast<ClearTimeout>(methodBytes[i++]);
+  methodPointer->requestAnimationFrame = reinterpret_cast<RequestAnimationFrame>(methodBytes[i++]);
+  methodPointer->cancelAnimationFrame = reinterpret_cast<CancelAnimationFrame>(methodBytes[i++]);
+  methodPointer->getScreen = reinterpret_cast<GetScreen>(methodBytes[i++]);
+  methodPointer->devicePixelRatio = reinterpret_cast<DevicePixelRatio>(methodBytes[i++]);
+  methodPointer->platformBrightness = reinterpret_cast<PlatformBrightness>(methodBytes[i++]);
+  methodPointer->toBlob = reinterpret_cast<ToBlob>(methodBytes[i++]);
+  methodPointer->flushUICommand = reinterpret_cast<FlushUICommand>(methodBytes[i++]);
+  methodPointer->initBody = reinterpret_cast<InitBody>(methodBytes[i++]);
+  methodPointer->initWindow = reinterpret_cast<InitWindow>(methodBytes[i++]);
+  methodPointer->initDocument = reinterpret_cast<InitDocument>(methodBytes[i++]);
+
+#if ENABLE_PROFILE
+  methodPointer->getPerformanceEntries = reinterpret_cast<GetPerformanceEntries>(methodBytes[i++]);
+#else
+  i++;
+#endif
+
+  assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }
 
-void registerReloadApp(ReloadApp callback) {
-  methodPointer->reloadApp = callback;
-}
+void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
+  size_t i = 0;
 
-void registerSetTimeout(SetTimeout callback) {
-  methodPointer->setTimeout = callback;
-}
+  methodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
+  methodPointer->refreshPaint = reinterpret_cast<RefreshPaint>(methodBytes[i++]);
+  methodPointer->matchImageSnapshot = reinterpret_cast<MatchImageSnapshot>(methodBytes[i++]);
+  methodPointer->environment = reinterpret_cast<Environment>(methodBytes[i++]);
+  methodPointer->simulatePointer = reinterpret_cast<SimulatePointer>(methodBytes[i++]);
+  methodPointer->simulateKeyPress = reinterpret_cast<SimulateKeyPress>(methodBytes[i++]);
 
-void registerSetInterval(SetInterval callback) {
-  methodPointer->setInterval = callback;
-}
-
-void registerClearTimeout(ClearTimeout callback) {
-  methodPointer->clearTimeout = callback;
-}
-
-void registerRequestAnimationFrame(RequestAnimationFrame callback) {
-  methodPointer->requestAnimationFrame = callback;
-}
-
-void registerRequestBatchUpdate(RequestBatchUpdate callback) {
-  methodPointer->requestBatchUpdate = callback;
-}
-
-void registerCancelAnimationFrame(CancelAnimationFrame callback) {
-  methodPointer->cancelAnimationFrame = callback;
-}
-
-void registerGetScreen(GetScreen callback) {
-  methodPointer->getScreen = callback;
-}
-
-void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio) {
-  methodPointer->devicePixelRatio = devicePixelRatio;
-}
-
-void registerPlatformBrightness(PlatformBrightness platformBrightness) {
-  methodPointer->platformBrightness = platformBrightness;
-}
-
-void registerToBlob(ToBlob toBlob) {
-  methodPointer->toBlob = toBlob;
-}
-
-void registerJSError(OnJSError onJsError) {
-  methodPointer->onJsError = onJsError;
-}
-
-void registerRefreshPaint(RefreshPaint refreshPaint) {
-  methodPointer->refreshPaint = refreshPaint;
-}
-
-void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot) {
-  methodPointer->matchImageSnapshot = matchImageSnapshot;
-}
-
-void registerEnvironment(Environment environment) {
-  methodPointer->environment = environment;
-}
-
-void registerSimulatePointer(SimulatePointer simulatePointer) {
-  methodPointer->simulatePointer = simulatePointer;
-}
-
-void registerSimulateKeyPress(SimulateKeyPress simulateKeyPress) {
-  methodPointer->simulateKeyPress = simulateKeyPress;
-}
-
-void registerFlushUICommand(FlushUICommand flushUiCommand){
-  methodPointer->flushUICommand = flushUiCommand;
-};
-
-void registerInitBody(InitBody initBody) {
-  methodPointer->initBody = initBody;
-}
-
-void registerInitWindow(InitWindow initWindow) {
-  methodPointer->initWindow = initWindow;
-}
-
-void registerInitDocument(InitDocument initDocument) {
-  methodPointer->initDocument = initDocument;
+  assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }
 
 #if ENABLE_PROFILE

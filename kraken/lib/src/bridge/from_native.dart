@@ -28,7 +28,7 @@ class NativeString extends Struct {
 }
 
 String uint16ToString(Pointer<Uint16> pointer, int length) {
-  return String.fromCharCodes(Uint16List.view(pointer.asTypedList(length).buffer, 0, length));
+  return String.fromCharCodes(pointer.asTypedList(length));
 }
 
 Pointer<Uint16> _stringToUint16(String string) {
@@ -72,11 +72,6 @@ typedef DartAsyncModuleCallback = void Function(
 
 typedef Native_InvokeModule = Pointer<NativeString> Function(Pointer<JSCallbackContext> callbackContext,
     Int32 contextId, Pointer<NativeString>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
-typedef Native_RegisterInvokeModule = Void Function(Pointer<NativeFunction<Native_InvokeModule>>);
-typedef Dart_RegisterInvokeModule = void Function(Pointer<NativeFunction<Native_InvokeModule>>);
-
-final Dart_RegisterInvokeModule _registerInvokeModule =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeModule>>('registerInvokeModule').asFunction();
 
 String invokeModule(
     Pointer<JSCallbackContext> callbackContext, int contextId, String json, DartAsyncModuleCallback callback) {
@@ -329,17 +324,8 @@ Pointer<NativeString> _invokeModule(Pointer<JSCallbackContext> callbackContext, 
 
 final Pointer<NativeFunction<Native_InvokeModule>> _nativeInvokeModule = Pointer.fromFunction(_invokeModule);
 
-void registerInvokeModule() {
-  _registerInvokeModule(_nativeInvokeModule);
-}
-
 // Register reloadApp
 typedef Native_ReloadApp = Void Function(Int32 contextId);
-typedef Native_RegisterReloadApp = Void Function(Pointer<NativeFunction<Native_ReloadApp>>);
-typedef Dart_RegisterReloadApp = void Function(Pointer<NativeFunction<Native_ReloadApp>>);
-
-final Dart_RegisterReloadApp _registerReloadApp =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
 void _reloadApp(int contextId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
@@ -353,10 +339,6 @@ void _reloadApp(int contextId) {
 
 final Pointer<NativeFunction<Native_ReloadApp>> _nativeReloadApp = Pointer.fromFunction(_reloadApp);
 
-void registerReloadApp() {
-  _registerReloadApp(_nativeReloadApp);
-}
-
 typedef NativeAsyncCallback = Void Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8> errmsg);
 typedef DartAsyncCallback = void Function(
@@ -368,32 +350,18 @@ typedef DartRAFAsyncCallback = void Function(
 
 // Register requestBatchUpdate
 typedef Native_RequestBatchUpdate = Void Function(Int32 contextId);
-typedef Native_RegisterRequestBatchUpdate = Void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
-typedef Dart_RegisterRequestBatchUpdate = void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
-
-final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterRequestBatchUpdate>>('registerRequestBatchUpdate')
-    .asFunction();
 
 void _requestBatchUpdate(int contextId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   return controller.module.requestBatchUpdate();
 }
 
-final Pointer<NativeFunction<Native_RequestBatchUpdate>> _nativeRequestBatchUpdate = Pointer.fromFunction(_requestBatchUpdate);
-
-void registerRequestBatchUpdate() {
-  _registerRequestBatchUpdate(_nativeRequestBatchUpdate);
-}
+final Pointer<NativeFunction<Native_RequestBatchUpdate>> _nativeRequestBatchUpdate =
+    Pointer.fromFunction(_requestBatchUpdate);
 
 // Register setTimeout
 typedef Native_SetTimeout = Int32 Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
-typedef Native_RegisterSetTimeout = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
-typedef Dart_RegisterSetTimeout = void Function(Pointer<NativeFunction<Native_SetTimeout>>);
-
-final Dart_RegisterSetTimeout _registerSetTimeout =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetTimeout').asFunction();
 
 int _setTimeout(Pointer<JSCallbackContext> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
@@ -412,18 +380,9 @@ int _setTimeout(Pointer<JSCallbackContext> callbackContext, int contextId,
 const int SET_TIMEOUT_ERROR = -1;
 final Pointer<NativeFunction<Native_SetTimeout>> _nativeSetTimeout = Pointer.fromFunction(_setTimeout, SET_TIMEOUT_ERROR);
 
-void registerSetTimeout() {
-  _registerSetTimeout(_nativeSetTimeout);
-}
-
 // Register setInterval
 typedef Native_SetInterval = Int32 Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
-typedef Native_RegisterSetInterval = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
-typedef Dart_RegisterSetInterval = void Function(Pointer<NativeFunction<Native_SetTimeout>>);
-
-final Dart_RegisterSetInterval _registerSetInterval =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetInterval').asFunction();
 
 int _setInterval(Pointer<JSCallbackContext> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
@@ -439,19 +398,11 @@ int _setInterval(Pointer<JSCallbackContext> callbackContext, int contextId,
 }
 
 const int SET_INTERVAL_ERROR = -1;
-final Pointer<NativeFunction<Native_SetInterval>> _nativeSetInterval = Pointer.fromFunction(_setInterval, SET_INTERVAL_ERROR);
-
-void registerSetInterval() {
-  _registerSetInterval(_nativeSetInterval);
-}
+final Pointer<NativeFunction<Native_SetInterval>> _nativeSetInterval =
+    Pointer.fromFunction(_setInterval, SET_INTERVAL_ERROR);
 
 // Register clearTimeout
 typedef Native_ClearTimeout = Void Function(Int32 contextId, Int32);
-typedef Native_RegisterClearTimeout = Void Function(Pointer<NativeFunction<Native_ClearTimeout>>);
-typedef Dart_RegisterClearTimeout = void Function(Pointer<NativeFunction<Native_ClearTimeout>>);
-
-final Dart_RegisterClearTimeout _registerClearTimeout =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterClearTimeout>>('registerClearTimeout').asFunction();
 
 void _clearTimeout(int contextId, int timerId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
@@ -459,19 +410,10 @@ void _clearTimeout(int contextId, int timerId) {
 }
 
 final Pointer<NativeFunction<Native_ClearTimeout>> _nativeClearTimeout = Pointer.fromFunction(_clearTimeout);
-void registerClearTimeout() {
-  _registerClearTimeout(_nativeClearTimeout);
-}
 
 // Register requestAnimationFrame
 typedef Native_RequestAnimationFrame = Int32 Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeFunction<NativeRAFAsyncCallback>>);
-typedef Native_RegisterRequestAnimationFrame = Void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
-typedef Dart_RegisterRequestAnimationFrame = void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
-
-final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>('registerRequestAnimationFrame')
-    .asFunction();
 
 int _requestAnimationFrame(Pointer<JSCallbackContext> callbackContext, int contextId,
     Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
@@ -487,60 +429,32 @@ int _requestAnimationFrame(Pointer<JSCallbackContext> callbackContext, int conte
 }
 
 const int RAF_ERROR_CODE = -1;
-final Pointer<NativeFunction<Native_RequestAnimationFrame>> _nativeRequestAnimationFrame = Pointer.fromFunction(_requestAnimationFrame, RAF_ERROR_CODE);
-
-// `-1` represents some error occurred in requestAnimationFrame execution.
-void registerRequestAnimationFrame() {
-  _registerRequestAnimationFrame(_nativeRequestAnimationFrame);
-}
+final Pointer<NativeFunction<Native_RequestAnimationFrame>> _nativeRequestAnimationFrame =
+    Pointer.fromFunction(_requestAnimationFrame, RAF_ERROR_CODE);
 
 // Register cancelAnimationFrame
 typedef Native_CancelAnimationFrame = Void Function(Int32 contextId, Int32 id);
-typedef Native_RegisterCancelAnimationFrame = Void Function(Pointer<NativeFunction<Native_CancelAnimationFrame>>);
-typedef Dart_RegisterCancelAnimationFrame = void Function(Pointer<NativeFunction<Native_CancelAnimationFrame>>);
-
-final Dart_RegisterCancelAnimationFrame _registerCancelAnimationFrame = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterCancelAnimationFrame>>('registerCancelAnimationFrame')
-    .asFunction();
 
 void _cancelAnimationFrame(int contextId, int timerId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   controller.module.cancelAnimationFrame(timerId);
 }
 
-final Pointer<NativeFunction<Native_CancelAnimationFrame>> _nativeCancelAnimationFrame = Pointer.fromFunction(_cancelAnimationFrame);
-
-void registerCancelAnimationFrame() {
-  _registerCancelAnimationFrame(_nativeCancelAnimationFrame);
-}
+final Pointer<NativeFunction<Native_CancelAnimationFrame>> _nativeCancelAnimationFrame =
+    Pointer.fromFunction(_cancelAnimationFrame);
 
 // Register devicePixelRatio
 typedef Native_DevicePixelRatio = Double Function();
-typedef Native_RegisterDevicePixelRatio = Void Function(Pointer<NativeFunction<Native_DevicePixelRatio>>);
-typedef Dart_RegisterDevicePixelRatio = void Function(Pointer<NativeFunction<Native_DevicePixelRatio>>);
-
-final Dart_RegisterDevicePixelRatio _registerDevicePixelRatio = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterDevicePixelRatio>>('registerDevicePixelRatio')
-    .asFunction();
 
 double _devicePixelRatio() {
   return window.devicePixelRatio;
 }
 
-final Pointer<NativeFunction<Native_DevicePixelRatio>> _nativeDevicePixelRatio = Pointer.fromFunction(_devicePixelRatio, 0.0);
-
-void registerDevicePixelRatio() {
-  _registerDevicePixelRatio(_nativeDevicePixelRatio);
-}
+final Pointer<NativeFunction<Native_DevicePixelRatio>> _nativeDevicePixelRatio =
+    Pointer.fromFunction(_devicePixelRatio, 0.0);
 
 // Register platformBrightness
 typedef Native_PlatformBrightness = Pointer<NativeString> Function();
-typedef Native_RegisterPlatformBrightness = Void Function(Pointer<NativeFunction<Native_PlatformBrightness>>);
-typedef Dart_RegisterPlatformBrightness = void Function(Pointer<NativeFunction<Native_PlatformBrightness>>);
-
-final Dart_RegisterPlatformBrightness _registerPlatformBrightness = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterPlatformBrightness>>('registerPlatformBrightness')
-    .asFunction();
 
 final Pointer<NativeString> _dark = stringToNativeString('dark');
 final Pointer<NativeString> _light = stringToNativeString('light');
@@ -549,21 +463,13 @@ Pointer<NativeString> _platformBrightness() {
   return window.platformBrightness == Brightness.dark ? _dark : _light;
 }
 
-final Pointer<NativeFunction<Native_PlatformBrightness>> _nativePlatformBrightness = Pointer.fromFunction(_platformBrightness);
-
-void registerPlatformBrightness() {
-  _registerPlatformBrightness(_nativePlatformBrightness);
-}
+final Pointer<NativeFunction<Native_PlatformBrightness>> _nativePlatformBrightness =
+    Pointer.fromFunction(_platformBrightness);
 
 // Register getScreen
 class ScreenSize extends Struct {}
 
 typedef Native_GetScreen = Pointer<ScreenSize> Function();
-typedef Native_RegisterGetScreen = Void Function(Pointer<NativeFunction<Native_GetScreen>>);
-typedef Dart_RegisterGetScreen = void Function(Pointer<NativeFunction<Native_GetScreen>>);
-
-final Dart_RegisterGetScreen _registerGetScreen =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterGetScreen>>('registerGetScreen').asFunction();
 
 Pointer<ScreenSize> _getScreen() {
   Size size = window.physicalSize;
@@ -572,21 +478,12 @@ Pointer<ScreenSize> _getScreen() {
 
 final Pointer<NativeFunction<Native_GetScreen>> _nativeGetScreen = Pointer.fromFunction(_getScreen);
 
-void registerGetScreen() {
-  _registerGetScreen(_nativeGetScreen);
-}
-
 typedef NativeAsyncBlobCallback = Void Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8>, Pointer<Uint8>, Int32);
 typedef DartAsyncBlobCallback = void Function(
     Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8>, Pointer<Uint8>, int);
 typedef Native_ToBlob = Void Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId,
     Pointer<NativeFunction<NativeAsyncBlobCallback>>, Int32, Double);
-typedef Native_RegisterToBlob = Void Function(Pointer<NativeFunction<Native_ToBlob>>);
-typedef Dart_RegisterToBlob = void Function(Pointer<NativeFunction<Native_ToBlob>>);
-
-final Dart_RegisterToBlob _registerToBlob =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterToBlob>>('registerToBlob').asFunction();
 
 void _toBlob(Pointer<JSCallbackContext> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, int id, double devicePixelRatio) {
@@ -605,18 +502,8 @@ void _toBlob(Pointer<JSCallbackContext> callbackContext, int contextId,
 
 final Pointer<NativeFunction<Native_ToBlob>> _nativeToBlob = Pointer.fromFunction(_toBlob);
 
-void registerToBlob() {
-  _registerToBlob(_nativeToBlob);
-}
-
 typedef Native_FlushUICommand = Void Function();
 typedef Dart_FlushUICommand = void Function();
-
-typedef Native_RegisterFlushUICommand = Void Function(Pointer<NativeFunction<Native_FlushUICommand>>);
-typedef Dart_RegisterFlushUICommand = void Function(Pointer<NativeFunction<Native_FlushUICommand>>);
-
-final Dart_RegisterFlushUICommand _registerFlushUICommand =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterFlushUICommand>>('registerFlushUICommand').asFunction();
 
 void _flushUICommand() {
   flushUICommand();
@@ -624,19 +511,9 @@ void _flushUICommand() {
 
 final Pointer<NativeFunction<Native_FlushUICommand>> _nativeFlushUICommand = Pointer.fromFunction(_flushUICommand);
 
-void registerFlushUICommand() {
-  _registerFlushUICommand(_nativeFlushUICommand);
-}
-
 // Body Element are special element which created at initialize time, so we can't use UICommandQueue to init body element.
 typedef Native_InitBody = Void Function(Int32 contextId, Pointer<NativeElement> nativePtr);
 typedef Dart_InitBody = void Function(int contextId, Pointer<NativeElement> nativePtr);
-
-typedef Native_RegisterInitBody = Void Function(Pointer<NativeFunction<Native_InitBody>>);
-typedef Dart_RegisterInitBody = void Function(Pointer<NativeFunction<Native_InitBody>>);
-
-final Dart_RegisterInitBody _registerInitBody =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInitBody>>('registerInitBody').asFunction();
 
 void _initBody(int contextId, Pointer<NativeElement> nativePtr) {
   ElementManager.bodyNativePtrMap[contextId] = nativePtr;
@@ -644,18 +521,8 @@ void _initBody(int contextId, Pointer<NativeElement> nativePtr) {
 
 final Pointer<NativeFunction<Native_InitBody>> _nativeInitBody = Pointer.fromFunction(_initBody);
 
-void registerInitBody() {
-  _registerInitBody(_nativeInitBody);
-}
-
 typedef Native_InitWindow = Void Function(Int32 contextId, Pointer<NativeWindow> nativePtr);
 typedef Dart_InitWindow = void Function(int contextId, Pointer<NativeWindow> nativePtr);
-
-typedef Native_RegisterInitWindow = Void Function(Pointer<NativeFunction<Native_InitWindow>>);
-typedef Dart_RegisterInitWindow = void Function(Pointer<NativeFunction<Native_InitWindow>>);
-
-final Dart_RegisterInitWindow _registerInitWindow =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInitWindow>>('registerInitWindow').asFunction();
 
 void _initWindow(int contextId, Pointer<NativeWindow> nativePtr) {
   ElementManager.windowNativePtrMap[contextId] = nativePtr;
@@ -663,65 +530,56 @@ void _initWindow(int contextId, Pointer<NativeWindow> nativePtr) {
 
 final Pointer<NativeFunction<Native_InitWindow>> _nativeInitWindow = Pointer.fromFunction(_initWindow);
 
-void registerInitWindow() {
-  _registerInitWindow(_nativeInitWindow);
-}
-
-typedef Native_Performance_GetEntries = Pointer<NativePerformanceEntryList> Function(Int32 contextId);
-typedef Dart_Performance_GetEntries = Pointer<NativePerformanceEntryList> Function(int contextId);
-
-typedef Native_RegisterPerformance_GetEntries = Void Function(Pointer<NativeFunction<Native_Performance_GetEntries>>);
-typedef Dart_RegisterPerformance_GetEntries = void Function(Pointer<NativeFunction<Native_Performance_GetEntries>>);
-
-Pointer<NativePerformanceEntryList> _performanceGetEntries(int contextId) {
-  return PerformanceTiming.instance(contextId).toNative();
-}
-
-void registerPerformanceGetEntries() {
-  final Dart_RegisterPerformance_GetEntries _registerPerformanceGetEntries = nativeDynamicLibrary
-      .lookup<NativeFunction<Native_RegisterPerformance_GetEntries>>('registerGetPerformanceEntries')
-      .asFunction();
-
-  Pointer<NativeFunction<Native_Performance_GetEntries>> pointer = Pointer.fromFunction(_performanceGetEntries);
-  _registerPerformanceGetEntries(pointer);
-}
-
 typedef Native_InitDocument = Void Function(Int32 contextId, Pointer<NativeDocument> nativePtr);
 typedef Dart_InitDocument = void Function(int contextId, Pointer<NativeDocument> nativePtr);
-
-typedef Native_RegisterInitDocument = Void Function(Pointer<NativeFunction<Native_InitDocument>>);
-typedef Dart_RegisterInitDocument = void Function(Pointer<NativeFunction<Native_InitDocument>>);
-
-final Dart_RegisterInitDocument _registerInitDocument = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterInitDocument>>('registerInitDocument')
-    .asFunction();
 
 void _initDocument(int contextId, Pointer<NativeDocument> nativePtr) {
   ElementManager.documentNativePtrMap[contextId] = nativePtr;
 }
 
-void registerInitDocument() {
-  Pointer<NativeFunction<Native_InitDocument>> pointer = Pointer.fromFunction(_initDocument);
-  _registerInitDocument(pointer);
+final Pointer<NativeFunction<Native_InitDocument>> _nativeInitDocument = Pointer.fromFunction(_initDocument);
+
+typedef Native_Performance_GetEntries = Pointer<NativePerformanceEntryList> Function(Int32 contextId);
+typedef Dart_Performance_GetEntries = Pointer<NativePerformanceEntryList> Function(int contextId);
+
+Pointer<NativePerformanceEntryList> _performanceGetEntries(int contextId) {
+  if (kProfileMode) {
+    return PerformanceTiming.instance(contextId).toNative();
+  }
+  return nullptr;
 }
 
-void registerDartMethodsToCpp() {
-  registerInvokeModule();
-  registerRequestBatchUpdate();
-  registerReloadApp();
-  registerSetTimeout();
-  registerSetInterval();
-  registerClearTimeout();
-  registerRequestAnimationFrame();
-  registerCancelAnimationFrame();
-  registerGetScreen();
-  registerDevicePixelRatio();
-  registerPlatformBrightness();
-  registerToBlob();
-  registerFlushUICommand();
-  registerInitBody();
-  registerInitWindow();
-  registerInitDocument();
+final Pointer<NativeFunction<Native_Performance_GetEntries>> _nativeGetEntries = Pointer.fromFunction(_performanceGetEntries);
 
-  if (kProfileMode) registerPerformanceGetEntries();
+final List<int> _dartNativeMethods = [
+  _nativeInvokeModule.address,
+  _nativeRequestBatchUpdate.address,
+  _nativeReloadApp.address,
+  _nativeSetTimeout.address,
+  _nativeSetInterval.address,
+  _nativeClearTimeout.address,
+  _nativeRequestAnimationFrame.address,
+  _nativeCancelAnimationFrame.address,
+  _nativeGetScreen.address,
+  _nativeDevicePixelRatio.address,
+  _nativePlatformBrightness.address,
+  _nativeToBlob.address,
+  _nativeFlushUICommand.address,
+  _nativeInitBody.address,
+  _nativeInitWindow.address,
+  _nativeInitDocument.address,
+  _nativeGetEntries.address,
+];
+
+typedef Native_RegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
+typedef Dart_RegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
+
+final Dart_RegisterDartMethods _registerDartMethods =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterDartMethods>>('registerDartMethods').asFunction();
+
+void registerDartMethodsToCpp() {
+  Pointer<Uint64> bytes = allocate<Uint64>(count: _dartNativeMethods.length);
+  Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
+  nativeMethodList.setAll(0, _dartNativeMethods);
+  _registerDartMethods(bytes, _dartNativeMethods.length);
 }

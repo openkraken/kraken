@@ -23,12 +23,6 @@ namespace kraken::binding::jsc {
 
 void bindEventTarget(std::unique_ptr<JSContext> &context);
 
-struct DisposeCallbackData {
-  DisposeCallbackData(int32_t contextId, int64_t id) : contextId(contextId), id(id){};
-  int64_t id;
-  int32_t contextId;
-};
-
 struct NativeEvent;
 struct NativeEventTarget;
 

@@ -162,4 +162,12 @@ describe('Append child', () => {
 
     await matchViewportSnapshot();
   });
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild
+  it('appendChild should return aChild', () => {
+    const container = document.createElement('div');
+    const child = document.createElement('span');
+
+    expect(container.appendChild(child)).toEqual(child);
+  });
 });
