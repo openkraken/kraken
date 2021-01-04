@@ -383,7 +383,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (child is RenderPositionHolder) {
       return 0;
     }
-    return child is RenderBoxModel ? child.renderStyle.flexShrink : 1.0;
+    return child is RenderBoxModel ? child.renderStyle.flexShrink : 0.0;
   }
 
   double _getFlexBasis(RenderBox child) {
