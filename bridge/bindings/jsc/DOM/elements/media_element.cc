@@ -51,12 +51,12 @@ JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSOb
                                                           JSObjectRef thisObject, size_t argumentCount,
                                                           const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute fastSeek() on MediaElement: 1 arguments is required but got 0.", exception);
+    throwJSError(ctx, "Failed to execute fastSeek() on MediaElement: 1 arguments is required but got 0.", exception);
     return nullptr;
   }
 
   if (!JSValueIsNumber(ctx, arguments[0])) {
-    JSC_THROW_ERROR(ctx, "Failed to execute fastSeek() on MediaElement: duration must be an number.", exception);
+    throwJSError(ctx, "Failed to execute fastSeek() on MediaElement: duration must be an number.", exception);
     return nullptr;
   }
 

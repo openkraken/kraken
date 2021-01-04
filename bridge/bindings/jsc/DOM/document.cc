@@ -37,13 +37,13 @@ JSDocument::~JSDocument() {
 JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to createElement: only accept 1 parameter.", exception)
+    throwJSError(ctx, "Failed to createElement: only accept 1 parameter.", exception);
     return nullptr;
   }
 
   const JSValueRef tagNameValue = arguments[0];
   if (!JSValueIsString(ctx, tagNameValue)) {
-    JSC_THROW_ERROR(ctx, "Failed to createElement: tagName should be a string.", exception);
+    throwJSError(ctx, "Failed to createElement: tagName should be a string.", exception);
     return nullptr;
   }
 
@@ -59,7 +59,7 @@ JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef functio
 JSValueRef DocumentInstance::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.",
+    throwJSError(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.",
                     exception);
     return nullptr;
   }
@@ -243,7 +243,7 @@ void DocumentInstance::addElementById(std::string &id, ElementInstance *element)
 JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(
+    throwJSError(
       ctx,
       "Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only 0 present.",
       exception);
@@ -273,7 +273,7 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
                                                   size_t argumentCount, const JSValueRef *arguments,
                                                   JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     "Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, "
                     "but only 0 present.",
                     exception);

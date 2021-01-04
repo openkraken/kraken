@@ -129,6 +129,13 @@ void JSContext::reportError(const char *errmsg) {
   _handler(contextId, errmsg);
 }
 
+void throwJSError(JSContextRef ctx, const char *msg, JSValueRef *exception) {
+  JSStringRef _errmsg = JSStringCreateWithUTF8CString(msg);
+  const JSValueRef args[] = {JSValueMakeString(ctx, _errmsg), nullptr};
+  *exception = JSObjectMakeError(ctx, 1, args, nullptr);
+  JSStringRelease(_errmsg);
+}
+
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
   return std::make_unique<JSContext>(contextId, handler, owner);
 }

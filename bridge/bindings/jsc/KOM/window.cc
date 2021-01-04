@@ -31,7 +31,7 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
     switch (property) {
     case WindowProperty::devicePixelRatio: {
       if (getDartMethod()->devicePixelRatio == nullptr) {
-        JSC_THROW_ERROR(context->context(),
+        throwJSError(context->context(),
                         "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.", exception);
         return nullptr;
       }
@@ -41,7 +41,7 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
     }
     case WindowProperty::colorScheme: {
       if (getDartMethod()->platformBrightness == nullptr) {
-        JSC_THROW_ERROR(context->context(),
+        throwJSError(context->context(),
                         "Failed to read colorScheme: dart method (platformBrightness) not register.", exception);
         return nullptr;
       }

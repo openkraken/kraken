@@ -107,12 +107,12 @@ JSValueRef JSIframeElement::IframeElementInstance::postMessage(JSContextRef ctx,
                                                                JSObjectRef thisObject, size_t argumentCount,
                                                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'postMessage' on 'IframeElement: 1 arguments required.'", exception);
+    throwJSError(ctx, "Failed to execute 'postMessage' on 'IframeElement: 1 arguments required.'", exception);
     return nullptr;
   }
 
   if (!JSValueIsString(ctx, arguments[0])) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'postMessage' on 'IframeElement: first arguments should be string'",
+    throwJSError(ctx, "Failed to execute 'postMessage' on 'IframeElement: first arguments should be string'",
                     exception);
     return nullptr;
   }

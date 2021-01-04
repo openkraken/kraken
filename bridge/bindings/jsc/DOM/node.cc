@@ -121,14 +121,14 @@ void JSNode::NodeInstance::ensureDetached(JSNode::NodeInstance *node) {
 
 JSObjectRef JSNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                         const JSValueRef *arguments, JSValueRef *exception) {
-  JSC_THROW_ERROR(ctx, "Illegal constructor", exception);
+  throwJSError(ctx, "Illegal constructor", exception);
   return nullptr;
 }
 
 JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'appendChild' on 'Node': first argument is required.", exception);
+    throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': first argument is required.", exception);
     return nullptr;
   }
 
@@ -137,7 +137,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   const JSValueRef nodeValueRef = arguments[0];
 
   if (!JSValueIsObject(ctx, nodeValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.",
+    throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.",
                     exception);
     return nullptr;
   }
@@ -146,13 +146,13 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
   if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.",
+    throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.",
                     exception);
     return nullptr;
   }
 
   if (nodeInstance->eventTargetId == BODY_TARGET_ID || nodeInstance == selfInstance) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.",
+    throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.",
                     exception);
     return nullptr;
   }
@@ -165,7 +165,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
 JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 2) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'insertBefore' on 'Node': 2 arguments is required.", exception);
+    throwJSError(ctx, "Failed to execute 'insertBefore' on 'Node': 2 arguments is required.", exception);
     return nullptr;
   }
 
@@ -173,7 +173,7 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
   const JSValueRef referenceNodeValueRef = arguments[1];
 
   if (!JSValueIsObject(ctx, nodeValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'insertBefore' on 'Node': the node element is not object.", exception);
+    throwJSError(ctx, "Failed to execute 'insertBefore' on 'Node': the node element is not object.", exception);
     return nullptr;
   }
 
@@ -186,7 +186,7 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
     referenceInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(referenceNodeObjectRef));
   } else if (!JSValueIsNull(ctx, referenceNodeValueRef)) {
     assert(false);
-    JSC_THROW_ERROR(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'",
+    throwJSError(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'",
                     exception);
     return nullptr;
   }
@@ -208,7 +208,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
                                 const JSValueRef *arguments, JSValueRef *exception) {
 
   if (argumentCount < 2) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required",
+    throwJSError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required",
                     exception);
     return nullptr;
   }
@@ -217,7 +217,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
   const JSValueRef oldChildValueRef = arguments[1];
 
   if (!JSValueIsObject(ctx, newChildValueRef)) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 1 arguments is not object",
+    throwJSError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 1 arguments is not object",
                     exception);
     return nullptr;
   }
@@ -225,7 +225,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
   JSObjectRef newChildObjectRef = JSValueToObject(ctx, newChildValueRef, exception);
 
   if (!JSValueIsObject(ctx, oldChildValueRef)) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments is not object.",
+    throwJSError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments is not object.",
                     exception);
     return nullptr;
   }
@@ -237,7 +237,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
   auto oldChildInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(oldChildObjectRef));
 
   if (oldChildInstance == nullptr || oldChildInstance->parentNode != selfInstance || oldChildInstance->_identify != NODE_IDENTIFY) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.",
                     exception);
     return nullptr;
@@ -259,7 +259,7 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
     internalAppendChild(node);
   } else {
     if (referenceNode->parentNode != this) {
-      JSC_THROW_ERROR(
+      throwJSError(
         _hostClass->ctx,
         "Uncaught TypeError: Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.",
         exception);
@@ -305,7 +305,7 @@ JSValueRef JSNode::remove(JSContextRef ctx, JSObjectRef function, JSObjectRef th
 JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1 arguments required",
+    throwJSError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1 arguments required",
                     exception);
     return nullptr;
   }
@@ -313,7 +313,7 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   const JSValueRef nodeValueRef = arguments[0];
 
   if (!JSValueIsObject(ctx, nodeValueRef)) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object",
+    throwJSError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object",
                     exception);
     return nullptr;
   }
@@ -321,7 +321,7 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   JSObjectRef nodeObjectRef = JSValueToObject(ctx, nodeValueRef, exception);
 
   if (!JSValueIsObject(ctx, nodeObjectRef)) {
-    JSC_THROW_ERROR(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object.",
+    throwJSError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object.",
                     exception);
     return nullptr;
   }
@@ -330,7 +330,7 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
   if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'removeChild' on 'Node': 1st arguments is not a Node object.", exception);
+    throwJSError(ctx, "Failed to execute 'removeChild' on 'Node': 1st arguments is not a Node object.", exception);
     return nullptr;
   }
 

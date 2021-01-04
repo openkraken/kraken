@@ -113,7 +113,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getContext(JSContextRef ctx, 
                                                               JSObjectRef thisObject, size_t argumentCount,
                                                               const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'getContext' on 'CanvasElement': 1 argument required, but only 0 present",
+    throwJSError(ctx, "Failed to execute 'getContext' on 'CanvasElement': 1 argument required, but only 0 present",
                     exception);
     return nullptr;
   }
@@ -253,7 +253,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillRect(
                                                                                 const JSValueRef *arguments,
                                                                                 JSValueRef *exception) {
   if (argumentCount != 4) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     ("Failed to execute 'fillRect' on 'CanvasRenderingContext2D': 4 arguments required, but only " +
                      std::to_string(argumentCount) + " present.")
                       .c_str(),
@@ -282,7 +282,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::clearRect
                                                                                  const JSValueRef *arguments,
                                                                                  JSValueRef *exception) {
   if (argumentCount != 4) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     ("Failed to execute 'clearRect' on 'CanvasRenderingContext2D': 4 arguments required, but only " +
                      std::to_string(argumentCount) + " present.")
                       .c_str(),
@@ -310,7 +310,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::strokeRec
   JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef *arguments,
   JSValueRef *exception) {
   if (argumentCount != 4) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     ("Failed to execute 'strokeRect' on 'CanvasRenderingContext2D': 4 arguments required, but only " +
                      std::to_string(argumentCount) + " present.")
                       .c_str(),
@@ -340,7 +340,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillText(
                                                                                 const JSValueRef *arguments,
                                                                                 JSValueRef *exception) {
   if (argumentCount < 3) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     ("Failed to execute 'fillText' on 'CanvasRenderingContext2D': 3 arguments required, but only " +
                      std::to_string(argumentCount) + " present.")
                       .c_str(),
@@ -376,7 +376,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::strokeTex
   JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef *arguments,
   JSValueRef *exception) {
   if (argumentCount < 3) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     ("Failed to execute 'strokeText' on 'CanvasRenderingContext2D': 3 arguments required, but only " +
                      std::to_string(argumentCount) + " present.")
                       .c_str(),
