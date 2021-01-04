@@ -175,6 +175,7 @@ target_include_directories(kraken PRIVATE
 target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "release")
+  ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
   ### remove dynamic_cast and exceptions
   target_compile_options(kraken PRIVATE -fno-rtti -fno-exceptions -fvisibility=hidden)
 else()
