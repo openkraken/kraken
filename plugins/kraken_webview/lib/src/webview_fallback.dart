@@ -37,6 +37,7 @@ class FallbackWebView implements WebViewPlatform {
     return RenderFallbackViewBox(
       child: RenderParagraph(
         TextSpan(text: description, style: textStyle),
+        textDirection: TextDirection.ltr,
       ),
     );
   }
