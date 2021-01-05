@@ -17,12 +17,12 @@ class RenderViewportBox extends RenderProxyBox
     this.background,
   }) : _viewportSize = viewportSize, super(child) {
     if (gestureClient != null) {
-      _verticalDragGestureRecognizer.onUpdate = gestureClient.overflowByUpdate;
-      _horizontalDragRecognizer.onUpdate = gestureClient.overflowByUpdate;
-      _verticalDragGestureRecognizer.onStart = gestureClient.overflowByStart;
-      _horizontalDragRecognizer.onStart = gestureClient.overflowByStart;
-      _verticalDragGestureRecognizer.onEnd = gestureClient.overflowByEnd;
-      _horizontalDragRecognizer.onEnd = gestureClient.overflowByEnd;
+      _verticalDragGestureRecognizer.onUpdate = gestureClient.gestureDragUpdateCallback;
+      _horizontalDragRecognizer.onUpdate = gestureClient.gestureDragUpdateCallback;
+      _verticalDragGestureRecognizer.onStart = gestureClient.gestureDragStartCallback;
+      _horizontalDragRecognizer.onStart = gestureClient.gestureDragStartCallback;
+      _verticalDragGestureRecognizer.onEnd = gestureClient.gestureDragEndCallback;
+      _horizontalDragRecognizer.onEnd = gestureClient.gestureDragEndCallback;
     }
   }
 

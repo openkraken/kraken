@@ -23,17 +23,17 @@ Kraken kraken;
 
 class NativeGestureClient implements GestureClient {
   @override
-  void overflowByUpdate(DragUpdateDetails details) {
+  void gestureDragUpdateCallback(DragUpdateDetails details) {
   }
 
   @override
-  void overflowByStart(DragStartDetails details) {
+  void gestureDragStartCallback(DragStartDetails details) {
     var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
     kraken.controller.view.document.body.dispatchEvent(event);
   }
 
   @override
-  void overflowByEnd(DragEndDetails details) {
+  void gestureDragEndCallback(DragEndDetails details) {
   }
 }
 

@@ -19,11 +19,11 @@ enum _DragState {
 
 /// Pass gesture to native
 abstract class GestureClient {
-  void overflowByUpdate(DragUpdateDetails details);
+  void gestureDragUpdateCallback(DragUpdateDetails details);
 
-  void overflowByStart(DragStartDetails details);
+  void gestureDragStartCallback(DragStartDetails details);
 
-  void overflowByEnd(DragEndDetails details);
+  void gestureDragEndCallback(DragEndDetails details);
 }
 
 abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecognizer {
