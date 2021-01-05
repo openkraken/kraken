@@ -1135,11 +1135,11 @@ class RenderBoxModel extends RenderBox with
     }());
 
     bool isHit = result.addWithPaintTransform(
-      transform: transform != null ? getEffectiveTransform() : Matrix4.identity(),
+      transform: transform != null ? getEffectiveTransform() : null,
       position: position,
       hitTest: (BoxHitTestResult result, Offset trasformPosition) {
         return result.addWithPaintOffset(
-          offset: Offset(-scrollLeft, -scrollTop),
+          offset: (scrollLeft != 0.0 || scrollTop != 0.0) ? Offset(-scrollLeft, -scrollTop) : null,
           position: trasformPosition,
           hitTest: (BoxHitTestResult result, Offset position) {
             CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
@@ -1148,7 +1148,7 @@ class RenderBoxModel extends RenderBox with
             }
 
             // Determine whether the hittest position is within the visible area of the node in scroll.
-            if ((clipX || clipY) && !size.contains(position)) {
+            if ((clipX || clipY) && !size.contains(trasformPosition)) {
               return false;
             }
 
