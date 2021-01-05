@@ -668,8 +668,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     double minHeight = 0;
     double maxHeight = double.infinity;
 
-    /// Use old size as base size constraints if exists
-    if (child.hasSize) {
+    /// Use old size as base size constraints if exists except replaced element
+    /// cause its content size may differ from its initial size after content loaded
+    if (child.hasSize && child is !RenderIntrinsic) {
       double childOriginalWidth = child.size.width;
       double childOriginalHeight = child.size.height;
       return CSSFlex.isHorizontalFlexDirection(flexDirection) ?
