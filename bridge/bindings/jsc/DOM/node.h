@@ -22,6 +22,8 @@ enum NodeType {
   DOCUMENT_FRAGMENT_NODE = 11
 };
 
+#define NODE_IDENTIFY 1
+
 void bindNode(std::unique_ptr<JSContext> &context);
 
 struct NativeNode;
@@ -82,7 +84,7 @@ public:
     void internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode, JSValueRef *exception);
     virtual std::string internalGetTextContent();
     virtual void internalSetTextContent(JSStringRef content, JSValueRef *exception);
-    JSNode::NodeInstance *internalReplaceChild(JSNode::NodeInstance *newChild, JSNode::NodeInstance *oldChild);
+    JSNode::NodeInstance *internalReplaceChild(JSNode::NodeInstance *newChild, JSNode::NodeInstance *oldChild, JSValueRef *exception);
 
     NodeType nodeType;
     JSNode::NodeInstance *parentNode{nullptr};
@@ -94,6 +96,7 @@ public:
     void unrefer();
 
     int32_t _referenceCount{0};
+    int32_t _identify{NODE_IDENTIFY};
 
     DocumentInstance *document{nullptr};
     virtual void _notifyNodeRemoved(JSNode::NodeInstance *node);
