@@ -48,9 +48,9 @@ mixin ElementNativeMethods on Node {
       case ViewModuleProperty.clientHeight:
         return element.renderBoxModel.clientHeight;
       case ViewModuleProperty.clientTop:
-        return element.renderBoxModel.borderTop;
+        return element.renderBoxModel.renderStyle.borderTop;
       case ViewModuleProperty.clientLeft:
-        return element.renderBoxModel.borderLeft;
+        return element.renderBoxModel.renderStyle.borderLeft;
       case ViewModuleProperty.scrollTop:
         return element.scrollTop;
       case ViewModuleProperty.scrollLeft:
