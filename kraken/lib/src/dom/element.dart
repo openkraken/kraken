@@ -102,8 +102,6 @@ class Element extends Node
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
 
-  bool shouldBlockStretch = true;
-
   // Position of sticky element changes between relative and fixed of scroll container
   StickyPositionType stickyStatus = StickyPositionType.relative;
 
@@ -130,7 +128,6 @@ class Element extends Node
 
   // Placeholder renderObject of positioned element(absolute/fixed)
   // used to get original coordinate before move away from document flow.
-  RenderDecoratedBox stickyPlaceholder;
   RenderObject renderPositionedPlaceholder;
 
   bool get isValidSticky => style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
