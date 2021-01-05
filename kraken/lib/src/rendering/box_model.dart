@@ -1147,8 +1147,9 @@ class RenderBoxModel extends RenderBox with
               position -= getTotalScrollOffset();
             }
 
-            if (clipX || clipY) {
-              return size.contains(position);
+            // Determine whether the hittest position is within the visible area of the node in scroll.
+            if ((clipX || clipY) && !size.contains(position)) {
+              return false;
             }
 
             // addWithPaintOffset is to add an offset to the child node, the calculation itself does not need to bring an offset.
@@ -1165,24 +1166,8 @@ class RenderBoxModel extends RenderBox with
     return isHit;
   }
 
-  // Determine whether the hittest position is within the visible area of the parent node in scroll.
-  bool isParentViewContainsPosition (Offset position) {
-    AbstractNode parentNode = parent;
-    final globalPosition = localToGlobal(position);
-    bool isContainsPosition = true;
-    while (parentNode is RenderBoxModel) {
-      final node =(parentNode as RenderBoxModel);
-      if (node.clipX || node.clipY) {
-        isContainsPosition &= node.size.contains(node.globalToLocal(globalPosition));
-      }
-      parentNode = parentNode.parent;
-    }
-    return isContainsPosition;
-  }
-
   @override
   bool hitTestSelf(Offset position) {
-    // Prioritize whether position belongs to the current size, so that each node does not need to traverse all its superiors.
     return size.contains(position);
   }
 
