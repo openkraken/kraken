@@ -205,4 +205,32 @@ describe('css-image', () => {
       done();
     };
   });
+
+  it('should work with image of no width in flex layout', async (done) => {
+    let div;
+    let image;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+        },
+      },
+      [
+        image = createElement('img', {
+            src: 'https://gw.alicdn.com/tfs/TB1Fejan7cx_u4jSZFlXXXnUFXa-200-200.png',
+            style: {
+                height: '100px'
+            }
+        }),
+      ]
+    );
+    BODY.appendChild(div);
+    image.src = 'https://gw.alicdn.com/tfs/TB1Fejan7cx_u4jSZFlXXXnUFXa-200-200.png';
+
+    image.onload = async () => {
+      await matchViewportSnapshot();
+      done();
+    };
+  });
 });
