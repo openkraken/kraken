@@ -182,13 +182,20 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
   });
 
   task('build-kraken-lib-' + jsEngine, (done) => {
+    const krakenTarget = [
+      'kraken',
+      'kraken_static',
+    ];
+
+    if (buildMode == 'Debug') {
+      krakenTarget.push('kraken_test')
+    }
+
     const args = [
       '--build',
       resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '--target',
-      'kraken',
-      'kraken_static',
-      'kraken_test',
+      ...krakenTarget,
       '--',
       '-j',
       '4'
