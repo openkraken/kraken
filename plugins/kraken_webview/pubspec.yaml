@@ -1,6 +1,6 @@
 name: kraken_webview
 description: A Flutter plugin that provides a WebView Element for Kraken on Android and iOS.
-version: 0.1.3
+version: 0.1.5
 homepage: http://rax.alibaba-inc.com/kraken
 
 environment:
