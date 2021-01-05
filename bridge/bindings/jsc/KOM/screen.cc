@@ -11,7 +11,7 @@ namespace kraken::binding::jsc {
 
 JSValueRef JSScreen::getProperty(std::string &name, JSValueRef *exception) {
   if (getDartMethod()->getScreen == nullptr) {
-    JSC_THROW_ERROR(context->context(), "Failed to read screen: dart method (getScreen) is not registered.", exception);
+    throwJSError(context->context(), "Failed to read screen: dart method (getScreen) is not registered.", exception);
     return nullptr;
   }
 

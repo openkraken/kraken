@@ -2,30 +2,8 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/bridge.dart';
 import 'dart:ffi';
 
-final Pointer<NativeFunction<Native_GetOffsetLeft>> nativeGetOffsetLeft =
-    Pointer.fromFunction(ElementNativeMethods._getOffsetLeft, 0.0);
-final Pointer<NativeFunction<Native_GetOffsetTop>> nativeGetOffsetTop =
-    Pointer.fromFunction(ElementNativeMethods._getOffsetTop, 0.0);
-final Pointer<NativeFunction<Native_GetOffsetWidth>> nativeGetOffsetWidth =
-    Pointer.fromFunction(ElementNativeMethods._getOffsetWidth, 0.0);
-final Pointer<NativeFunction<Native_GetOffsetHeight>> nativeGetOffsetHeight =
-    Pointer.fromFunction(ElementNativeMethods._getOffsetHeight, 0.0);
-final Pointer<NativeFunction<Native_GetClientWidth>> nativeGetClientWidth =
-    Pointer.fromFunction(ElementNativeMethods._getClientWidth, 0.0);
-final Pointer<NativeFunction<Native_GetClientHeight>> nativeGetClientHeight =
-    Pointer.fromFunction(ElementNativeMethods._getClientHeight, 0.0);
-final Pointer<NativeFunction<Native_GetClientTop>> nativeGetClientTop =
-    Pointer.fromFunction(ElementNativeMethods._getClientTop, 0.0);
-final Pointer<NativeFunction<Native_GetClientLeft>> nativeGetClientLeft =
-    Pointer.fromFunction(ElementNativeMethods._getClientLeft, 0.0);
-final Pointer<NativeFunction<Native_GetScrollTop>> nativeGetScrollTop =
-    Pointer.fromFunction(ElementNativeMethods._getScrollTop, 0.0);
-final Pointer<NativeFunction<Native_GetScrollLeft>> nativeGetScrollLeft =
-    Pointer.fromFunction(ElementNativeMethods._getScrollLeft, 0.0);
-final Pointer<NativeFunction<Native_GetScrollWidth>> nativeGetScrollWidth =
-    Pointer.fromFunction(ElementNativeMethods._getScrollWidth, 0.0);
-final Pointer<NativeFunction<Native_GetScrollHeight>> nativeGetScrollHeight =
-    Pointer.fromFunction(ElementNativeMethods._getScrollHeight, 0.0);
+final Pointer<NativeFunction<Native_GetViewModuleProperty>> nativeGetViewModuleProperty = Pointer.fromFunction(ElementNativeMethods._getViewModuleProperty, 0.0);
+final Pointer<NativeFunction<Native_SetViewModuleProperty>> nativeSetViewModuleProperty = Pointer.fromFunction(ElementNativeMethods._setViewModuleProperty);
 final Pointer<NativeFunction<Native_GetBoundingClientRect>> nativeGetBoundingClientRect =
     Pointer.fromFunction(ElementNativeMethods._getBoundingClientRect);
 final Pointer<NativeFunction<Native_GetStringValueProperty>> nativeGetStringValueProperty =
@@ -34,92 +12,73 @@ final Pointer<NativeFunction<Native_Click>> nativeClick = Pointer.fromFunction(E
 final Pointer<NativeFunction<Native_Scroll>> nativeScroll = Pointer.fromFunction(ElementNativeMethods._scroll);
 final Pointer<NativeFunction<Native_ScrollBy>> nativeScrollBy = Pointer.fromFunction(ElementNativeMethods._scrollBy);
 
-final Pointer<NativeFunction<Native_SetScrollLeft>> nativeSetScrollLeft = Pointer.fromFunction(ElementNativeMethods._setScrollLeft);
-final Pointer<NativeFunction<Native_SetScrollTop>> nativeSetScrollTop = Pointer.fromFunction(ElementNativeMethods._setScrollTop);
+// https://www.w3.org/TR/cssom-view-1/
+enum ViewModuleProperty {
+  offsetTop,
+  offsetLeft,
+  offsetWidth,
+  offsetHeight,
+  clientWidth,
+  clientHeight,
+  clientTop,
+  clientLeft,
+  scrollTop,
+  scrollLeft,
+  scrollHeight,
+  scrollWidth
+}
 
 mixin ElementNativeMethods on Node {
-  static double _getOffsetLeft(Pointer<NativeElement> nativeElement) {
+
+  static double _getViewModuleProperty(Pointer<NativeElement> nativeElement, int property) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
-    return element.getOffsetX();
+    ViewModuleProperty kind = ViewModuleProperty.values[property];
+    switch(kind) {
+      case ViewModuleProperty.offsetTop:
+        return element.getOffsetY();
+      case ViewModuleProperty.offsetLeft:
+        return element.getOffsetX();
+      case ViewModuleProperty.offsetWidth:
+        return element.renderBoxModel.hasSize ? element.renderBoxModel.size.width : 0;
+      case ViewModuleProperty.offsetHeight:
+        return element.renderBoxModel.hasSize ? element.renderBoxModel.size.height : 0;
+      case ViewModuleProperty.clientWidth:
+        return element.renderBoxModel.clientWidth;
+      case ViewModuleProperty.clientHeight:
+        return element.renderBoxModel.clientHeight;
+      case ViewModuleProperty.clientTop:
+        return element.renderBoxModel.borderTop;
+      case ViewModuleProperty.clientLeft:
+        return element.renderBoxModel.borderLeft;
+      case ViewModuleProperty.scrollTop:
+        return element.scrollTop;
+      case ViewModuleProperty.scrollLeft:
+        return element.scrollLeft;
+      case ViewModuleProperty.scrollHeight:
+        return element.scrollHeight;
+      case ViewModuleProperty.scrollWidth:
+        return element.scrollWidth;
+    }
+    return 0.0;
   }
 
-  static double _getOffsetTop(Pointer<NativeElement> nativeElement) {
+  static void _setViewModuleProperty(Pointer<NativeElement> nativeElement, int property, double value) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
-    return element.getOffsetY();
-  }
 
-  static double _getOffsetWidth(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    return element.renderBoxModel.hasSize ? element.renderBoxModel.size.width : 0;
-  }
+    ViewModuleProperty kind = ViewModuleProperty.values[property];
 
-  static double _getOffsetHeight(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    return element.renderBoxModel.hasSize ? element.renderBoxModel.size.height : 0;
-  }
-
-  static double _getClientWidth(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    return element.renderBoxModel.clientWidth;
-  }
-
-  static double _getClientHeight(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    return element.renderBoxModel.clientHeight;
-  }
-
-  static double _getClientLeft(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    return element.renderBoxModel.renderStyle.borderLeft;
-  }
-
-  static double _getClientTop(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    return element.renderBoxModel.renderStyle.borderTop;
-  }
-
-  static double _getScrollTop(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    return element.scrollTop;
-  }
-
-  static double _getScrollLeft(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    return element.scrollLeft;
-  }
-
-  static void _setScrollTop(Pointer<NativeElement> nativeElement, double top) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    element.scrollTop = top;
-  }
-
-  static void _setScrollLeft(Pointer<NativeElement> nativeElement, double left) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    element.scrollLeft = left;
-  }
-
-  static double _getScrollWidth(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.flushLayout();
-    return element.scrollWidth;
-  }
-
-  static double _getScrollHeight(Pointer<NativeElement> nativeElement) {
-    Element element = Element.getElementOfNativePtr(nativeElement);
-    element.renderBoxModel.owner.flushLayout();
-    return element.scrollHeight;
+    switch(kind) {
+      case ViewModuleProperty.scrollTop:
+        element.scrollTop = value;
+        break;
+      case ViewModuleProperty.scrollLeft:
+        element.scrollLeft = value;
+        break;
+      default:
+        break;
+    }
   }
 
   static Pointer<NativeBoundingClientRect> _getBoundingClientRect(Pointer<NativeElement> nativeElement) {
@@ -157,20 +116,8 @@ mixin ElementNativeMethods on Node {
 
   void bindNativeMethods(Pointer<NativeElement> nativeElement) {
     if (nativeElement == nullptr) return;
-    nativeElement.ref.getOffsetLeft = nativeGetOffsetLeft;
-    nativeElement.ref.getOffsetTop = nativeGetOffsetTop;
-    nativeElement.ref.getOffsetWidth = nativeGetOffsetWidth;
-    nativeElement.ref.getOffsetHeight = nativeGetOffsetHeight;
-    nativeElement.ref.getClientWidth = nativeGetClientWidth;
-    nativeElement.ref.getClientHeight = nativeGetClientHeight;
-    nativeElement.ref.getClientTop = nativeGetClientTop;
-    nativeElement.ref.getClientLeft = nativeGetClientLeft;
-    nativeElement.ref.getScrollTop = nativeGetScrollTop;
-    nativeElement.ref.setScrollTop = nativeSetScrollTop;
-    nativeElement.ref.getScrollLeft = nativeGetScrollLeft;
-    nativeElement.ref.setScrollLeft = nativeSetScrollLeft;
-    nativeElement.ref.getScrollWidth = nativeGetScrollWidth;
-    nativeElement.ref.getScrollHeight = nativeGetScrollHeight;
+    nativeElement.ref.getViewModuleProperty = nativeGetViewModuleProperty;
+    nativeElement.ref.setViewModuleProperty = nativeSetViewModuleProperty;
     nativeElement.ref.getBoundingClientRect = nativeGetBoundingClientRect;
     nativeElement.ref.getStringValueProperty = nativeGetStringValueProperty;
     nativeElement.ref.click = nativeClick;

@@ -33,7 +33,7 @@ JSEvent::JSEvent(JSContext *context, const char *name) : HostClass(context, name
 JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                          const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to construct 'Event': 1 argument required, but only 0 present.", exception);
+    throwJSError(ctx, "Failed to construct 'Event': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
@@ -49,7 +49,7 @@ JSObjectRef JSEvent::instanceConstructor(JSContextRef ctx, JSObjectRef construct
 JSValueRef JSEvent::initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                         size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 2) {
-    JSC_THROW_ERROR(ctx, "Failed to execute Event.initWithNativeEvent(): invalid arguments.", exception);
+    throwJSError(ctx, "Failed to execute Event.initWithNativeEvent(): invalid arguments.", exception);
     return nullptr;
   }
 
