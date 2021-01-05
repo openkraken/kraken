@@ -9,8 +9,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart' hide Gradient;
-import 'package:kraken/rendering.dart';
-import 'package:kraken/css.dart';
+import 'fallback_view.dart';
 
 import '../platform_interface.dart';
 
@@ -18,7 +17,7 @@ import '../platform_interface.dart';
 ///
 /// This is used as the default implementation for [WebViewElement.platform]. It uses
 /// an [RenderParagraph] to show basic information of webview settings, only for developers.
-class FallbackWebView with CSSTextMixin implements WebViewPlatform {
+class FallbackWebView implements WebViewPlatform {
   // Do nothing.
   void dispose() {}
 
@@ -38,7 +37,6 @@ class FallbackWebView with CSSTextMixin implements WebViewPlatform {
     return RenderFallbackViewBox(
       child: RenderParagraph(
         TextSpan(text: description, style: textStyle),
-        textDirection: TextDirection.ltr,
       ),
     );
   }
