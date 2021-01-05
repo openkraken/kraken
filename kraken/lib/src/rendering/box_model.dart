@@ -1147,6 +1147,10 @@ class RenderBoxModel extends RenderBox with
               position -= getTotalScrollOffset();
             }
 
+            if (clipX || clipY) {
+              return size.contains(position);
+            }
+
             // addWithPaintOffset is to add an offset to the child node, the calculation itself does not need to bring an offset.
             if (hitTestChildren(result, position: position) || hitTestSelf(trasformPosition)) {
               result.add(BoxHitTestEntry(this, position));
@@ -1179,7 +1183,7 @@ class RenderBoxModel extends RenderBox with
   @override
   bool hitTestSelf(Offset position) {
     // Prioritize whether position belongs to the current size, so that each node does not need to traverse all its superiors.
-    return size.contains(position) && isParentViewContainsPosition(position);
+    return size.contains(position);
   }
 
   Future<Image> toImage({ double pixelRatio = 1.0 }) {
