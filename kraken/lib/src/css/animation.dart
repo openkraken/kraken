@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/animation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 // https://drafts.csswg.org/web-animations/#enumdef-animationplaystate
@@ -441,6 +442,7 @@ class _Interpolation {
 
 class KeyframeEffect extends AnimationEffect {
   CSSStyleDeclaration style;
+  Element target;
   List<_Interpolation> _interpolations;
   double _progress;
   double _activeTime;
@@ -452,7 +454,7 @@ class KeyframeEffect extends AnimationEffect {
   // Similarly, a playback rate of -1 will cause the animation’s current time to decrease at the same rate as the time values from its timeline increase.
   double _playbackRate = 1;
 
-  KeyframeEffect(this.style, List<Keyframe> keyframes, EffectTiming options, this.viewportSize) {
+  KeyframeEffect(this.style, this.target, List<Keyframe> keyframes, EffectTiming options, this.viewportSize) {
     timing = options == null ? EffectTiming() : options;
 
     if (keyframes != null) {
@@ -491,7 +493,6 @@ class KeyframeEffect extends AnimationEffect {
 
         String left = keyframes[startIndex].value;
         String right = keyframes[endIndex].value;
-
         if (left == INITIAL)
           left = CSSInitialValues[property];
         if (right == INITIAL)
@@ -576,8 +577,10 @@ class KeyframeEffect extends AnimationEffect {
           scaledLocalTime = 1;
         }
 
-        String value = interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime);
-        style.setProperty(property, value, viewportSize, true);
+        RenderBoxModel renderBoxModel = target.renderBoxModel;
+        if (renderBoxModel != null) {
+          interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime, property, renderBoxModel.renderStyle);
+        }
       }
     }
   }

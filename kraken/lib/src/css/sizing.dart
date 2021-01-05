@@ -30,45 +30,99 @@ enum CSSDisplay {
 /// - min-width
 /// - min-height
 
-mixin CSSSizingMixin {
+mixin CSSSizingMixin on RenderStyleBase {
 
-  void updateRenderSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
-    assert(renderBoxModel != null, 'RenderBoxModel should not be null');
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
+  double _width;
+  double get width {
+    return _width;
+  }
+  set width(double value) {
+    if (_width == value) return;
+    _width = value;
+    renderBoxModel.markNeedsLayout();
+  }
 
+  double _height;
+  double get height {
+    return _height;
+  }
+  set height(double value) {
+    if (_height == value) return;
+    _height = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  double _minWidth;
+  double get minWidth {
+    return _minWidth;
+  }
+  set minWidth(double value) {
+    if (_minWidth == value) return;
+    _minWidth = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  double _maxWidth;
+  double get maxWidth {
+    return _maxWidth;
+  }
+  set maxWidth(double value) {
+    if (_maxWidth == value) return;
+    _maxWidth = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  double _minHeight;
+  double get minHeight {
+    return _minHeight;
+  }
+  set minHeight(double value) {
+    if (_minHeight == value) return;
+    _minHeight = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  double _maxHeight;
+  double get maxHeight {
+    return _maxHeight;
+  }
+  set maxHeight(double value) {
+    if (_maxHeight == value) return;
+    _maxHeight = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  void updateSizing(String property, String present) {
     double value = CSSLength.toDisplayPortValue(present, viewportSize);
-
+    RenderStyle renderStyle = this;
     switch (property) {
       case WIDTH:
-        renderBoxModel.width = value;
+        renderStyle.width = value;
         break;
       case HEIGHT:
-        renderBoxModel.height = value;
+        renderStyle.height = value;
         break;
       case MIN_HEIGHT:
-        renderBoxModel.minHeight = getMinHeight(value);
+        renderStyle.minHeight = getMinHeight(value);
         // max-height should not exceed min-height
-        double maxHeight = renderBoxModel.maxHeight;
+        double maxHeight = renderStyle.maxHeight;
         if (maxHeight != null) {
-          renderBoxModel.maxHeight = getMaxHeight(maxHeight, value);
+          renderStyle.maxHeight = getMaxHeight(maxHeight, value);
         }
         break;
       case MAX_HEIGHT:
-        renderBoxModel.maxHeight = getMaxHeight(value, renderBoxModel.minHeight);
+        renderStyle.maxHeight = getMaxHeight(value, renderStyle.minHeight);
         break;
       case MIN_WIDTH:
-        renderBoxModel.minWidth = getMinWidth(value);
+        renderStyle.minWidth = getMinWidth(value);
         // max-width should not exceed min-midth
-        double maxWidth = renderBoxModel.maxWidth;
+        double maxWidth = renderStyle.maxWidth;
         if (maxWidth != null) {
-          renderBoxModel.maxWidth = getMaxWidth(maxWidth, value);
+          renderStyle.maxWidth = getMaxWidth(maxWidth, value);
         }
         break;
       case MAX_WIDTH:
-        renderBoxModel.maxWidth = getMaxWidth(value, renderBoxModel.minWidth);
+        renderStyle.maxWidth = getMaxWidth(value, renderStyle.minWidth);
         break;
     }
   }
@@ -108,121 +162,6 @@ mixin CSSSizingMixin {
     }
     return maxHeight;
   }
-
-  static EdgeInsets _getMargin(CSSStyleDeclaration style, Size viewportSize) {
-    double marginLeft;
-    double marginTop;
-    double marginRight;
-    double marginBottom;
-
-    if (style.contains(MARGIN_LEFT)) marginLeft = CSSLength.toDisplayPortValue(style[MARGIN_LEFT], viewportSize);
-    if (style.contains(MARGIN_TOP)) marginTop = CSSLength.toDisplayPortValue(style[MARGIN_TOP], viewportSize);
-    if (style.contains(MARGIN_RIGHT)) marginRight = CSSLength.toDisplayPortValue(style[MARGIN_RIGHT], viewportSize);
-    if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSLength.toDisplayPortValue(style[MARGIN_BOTTOM], viewportSize);
-
-    return EdgeInsets.only(top: marginTop ?? 0.0, right: marginRight ?? 0.0, bottom: marginBottom ?? 0.0, left: marginLeft ?? 0.0);
-  }
-
-  void updateRenderMargin(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
-    EdgeInsets prevMargin = renderBoxModel.margin;
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
-    if (prevMargin != null) {
-      double left = prevMargin.left;
-      double top = prevMargin.top;
-      double right = prevMargin.right;
-      double bottom = prevMargin.bottom;
-      double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
-
-      // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
-      switch (property) {
-        case MARGIN_LEFT:
-          left = presentValue;
-          break;
-        case MARGIN_TOP:
-          top = presentValue;
-          break;
-        case MARGIN_BOTTOM:
-          bottom = presentValue;
-          break;
-        case MARGIN_RIGHT:
-          right = presentValue;
-          break;
-      }
-
-      renderBoxModel.margin = EdgeInsets.only(
-        left: left,
-        top: top,
-        right: right,
-        bottom: bottom,
-      );
-    } else {
-      renderBoxModel.margin = _getMargin(style, viewportSize);
-    }
-  }
-
-  static EdgeInsets _getPadding(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
-    double paddingTop;
-    double paddingRight;
-    double paddingBottom;
-    double paddingLeft;
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
-    if (style.contains(PADDING_TOP)) paddingTop = CSSLength.toDisplayPortValue(style[PADDING_TOP], viewportSize);
-    if (style.contains(PADDING_RIGHT)) paddingRight = CSSLength.toDisplayPortValue(style[PADDING_RIGHT], viewportSize);
-    if (style.contains(PADDING_BOTTOM)) paddingBottom = CSSLength.toDisplayPortValue(style[PADDING_BOTTOM], viewportSize);
-    if (style.contains(PADDING_LEFT)) paddingLeft = CSSLength.toDisplayPortValue(style[PADDING_LEFT], viewportSize);
-
-    return EdgeInsets.only(
-      top: paddingTop ?? 0.0,
-      right: paddingRight ?? 0.0,
-      bottom: paddingBottom ?? 0.0,
-      left: paddingLeft ?? 0.0
-    );
-  }
-
-  void updateRenderPadding(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
-    EdgeInsets prevPadding = renderBoxModel.padding;
-
-    if (prevPadding != null) {
-      double left = prevPadding.left;
-      double top = prevPadding.top;
-      double right = prevPadding.right;
-      double bottom = prevPadding.bottom;
-      ElementManager elementManager = renderBoxModel.elementManager;
-      double viewportWidth = elementManager.viewportWidth;
-      double viewportHeight = elementManager.viewportHeight;
-      Size viewportSize = Size(viewportWidth, viewportHeight);
-
-      double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
-
-      // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
-      switch (property) {
-        case PADDING_LEFT:
-          left = presentValue;
-          break;
-        case PADDING_TOP:
-          top = presentValue;
-          break;
-        case PADDING_BOTTOM:
-          bottom = presentValue;
-          break;
-        case PADDING_RIGHT:
-          right = presentValue;
-          break;
-      }
-
-      renderBoxModel.padding = EdgeInsets.only(left: left, right: right, bottom: bottom, top: top);
-    } else {
-      renderBoxModel.padding = _getPadding(renderBoxModel, style);
-    }
-  }
 }
 
 class CSSEdgeInsets {
@@ -252,7 +191,7 @@ class CSSSizing {
     bool isChildStretchSelf = false;
     if (isFlex) {
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
-        (current as RenderFlexLayout).flexDirection
+        (current as RenderFlexLayout).renderStyle.flexDirection
       );
       isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
         style[ALIGN_ITEMS] == STRETCH;
@@ -284,7 +223,8 @@ class CSSSizing {
             ? element.defaultDisplay
             : element.style[DISPLAY]
     );
-    CSSPositionType position = CSSPositionedLayout.parsePositionType(element.style[POSITION]);
+
+    CSSPositionType position = element.renderBoxModel.renderStyle.position;
 
     // Display as inline-block when element is positioned
     if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {
