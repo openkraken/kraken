@@ -1,11 +1,16 @@
-const {spawn, fork, spawnSync} = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 const path = require('path');
-const {startWsServer} = require('./ws_server');
+const { startWsServer } = require('./ws_server');
 const isPortReachable = require('is-port-reachable');
 
 function startIntegrationTest() {
-  console.log('Building macos application...');
-  spawnSync('flutter', ['build', 'macos', '--debug', '--target=integration/app.dart']);
+  const isSkipBuild = /skip\-build/.test(process.argv);
+  if (!isSkipBuild) {
+    console.log('Build Test App from integration/app.dart, waiting...');
+    spawnSync('flutter', ['build', 'macos', '--debug', '--target=integration/app.dart'], {
+      stdio: 'inherit'
+    });
+  }
 
   const testExecutable = path.join(__dirname, '../build/macos/Build/Products/Debug/tests.app/Contents/MacOS/tests');
   const tester = spawn(testExecutable, [], {

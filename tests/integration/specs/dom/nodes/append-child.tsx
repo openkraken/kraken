@@ -1,14 +1,11 @@
 describe('Append child', () => {
   it('with orphan element', async () => {
-    let n1;
-    n1 = createElementWithStyle(
-      'div',
-      {
-        width: '300px',
-        height: '300px',
-        backgroundColor: 'gray',
-      }
-    );
+    const style = {
+      width: '300px',
+      height: '300px',
+      backgroundColor: 'gray',
+    };
+    let n1 = <div style={style} />;
     BODY.appendChild(n1);
 
     await matchViewportSnapshot();

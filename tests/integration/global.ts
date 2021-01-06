@@ -7,8 +7,8 @@
  * - create: create element.
  * - matchViewportSnapshot: match snapshot of body's image.
  */
-
-let BODY = document.body;
+// Needed for the generator functions which are transpiled from your async await keywords
+const BODY = document.body;
 
 function setElementStyle(dom: HTMLElement, object: any) {
   if (object == null) return;
@@ -189,3 +189,22 @@ async function matchViewportSnapshot(wait: number = 0.0) {
 async function matchElementImageSnapshot(element: HTMLElement) {
   return await expectAsync(element.toBlob(1.0)).toMatchImageSnapshot();
 }
+
+// Compatible to tests that use global variables.
+Object.assign(global, {
+  Cubic,
+  BODY,
+  append,
+  setAttributes,
+  createElement, 
+  createElementWithStyle,
+  createText,
+  createViewElement,
+  setElementStyle,
+  matchElementImageSnapshot,
+  matchViewportSnapshot,
+  setElementProps,
+  simulateSwipe,
+  simulateClick,
+  sleep,
+});
