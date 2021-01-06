@@ -58,9 +58,8 @@ std::__thread_id getUIThreadId() {
 void printError(int32_t contextId, const char* errmsg) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
     kraken::getDartMethod()->onJsError(contextId, errmsg);
-  } else {
-    KRAKEN_LOG(ERROR) << errmsg << std::endl;
   }
+  KRAKEN_LOG(ERROR) << errmsg << std::endl;
 }
 
 namespace {
