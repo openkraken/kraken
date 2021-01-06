@@ -17,6 +17,15 @@ enum _DragState {
   accepted,
 }
 
+/// Pass gesture to native
+abstract class GestureClient {
+  void dragUpdateCallback(DragUpdateDetails details);
+
+  void dragStartCallback(DragStartDetails details);
+
+  void dragEndCallback(DragEndDetails details);
+}
+
 abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   ///

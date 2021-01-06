@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 import 'package:kraken/launcher.dart';
 import 'dart:ui';
 import 'package:meta/meta.dart';
@@ -12,8 +13,15 @@ class RenderViewportBox extends RenderProxyBox
   RenderViewportBox({
     @required Size viewportSize,
     RenderBox child,
+    gestureClient,
     this.background,
-  }) : _viewportSize = viewportSize, super(child);
+  }) : _viewportSize = viewportSize, super(child) {
+    if (gestureClient != null) {
+      _verticalDragGestureRecognizer.onUpdate = _horizontalDragRecognizer.onUpdate = gestureClient.dragUpdateCallback;
+      _verticalDragGestureRecognizer.onStart = _horizontalDragRecognizer.onStart = gestureClient.dragStartCallback;
+      _verticalDragGestureRecognizer.onEnd = _horizontalDragRecognizer.onEnd = gestureClient.dragEndCallback;
+    }
+  }
 
   Color background;
 
@@ -35,6 +43,9 @@ class RenderViewportBox extends RenderProxyBox
     }
   }
 
+  final VerticalDragGestureRecognizer _verticalDragGestureRecognizer = VerticalDragGestureRecognizer();
+  final HorizontalDragGestureRecognizer _horizontalDragRecognizer = HorizontalDragGestureRecognizer();
+
   @override
   void performLayout() {
     assert(_viewportSize != null);
@@ -50,6 +61,14 @@ class RenderViewportBox extends RenderProxyBox
         width: _viewportSize.width,
         height: height,
       ));
+    }
+  }
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    super.handleEvent(event, entry);
+    if (event is PointerDownEvent) {
+      _verticalDragGestureRecognizer.addPointer(event);
     }
   }
 
