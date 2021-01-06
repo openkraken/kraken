@@ -2,52 +2,124 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
 
-mixin CSSOffsetMixin on Node {
+enum CSSPositionType {
+  static,
+  relative,
+  absolute,
+  fixed,
+  sticky,
+}
 
-  void updateRenderOffset(RenderBoxModel renderBoxModel, String property, String present) {
-    assert(renderBoxModel != null, 'RenderBoxModel should not be null');
+mixin CSSPositionMixin on RenderStyleBase {
 
+  double _top;
+  double get top {
+    return _top;
+  }
+  set top(double value) {
+    if (_top == value) return;
+    _top = value;
+    _markParentNeedsLayout();
+  }
+
+  double _bottom;
+  double get bottom {
+    return _bottom;
+  }
+  set bottom(double value) {
+    if (_bottom == value) return;
+    _bottom = value;
+    _markParentNeedsLayout();
+  }
+
+  double _left;
+  double get left {
+    return _left;
+  }
+  set left(double value) {
+    if (_left == value) return;
+    _left = value;
+    _markParentNeedsLayout();
+  }
+
+  double _right;
+  double get right {
+    return _right;
+  }
+  set right(double value) {
+    if (_right == value) return;
+    _right = value;
+    _markParentNeedsLayout();
+  }
+
+  int _zIndex = 0;
+  int get zIndex {
+    return _zIndex;
+  }
+  set zIndex(int value) {
+    if (_zIndex == value) return;
+    _zIndex = value;
+    _markParentNeedsLayout();
+  }
+
+  CSSPositionType _position = CSSPositionType.static;
+  CSSPositionType get position {
+    return _position;
+  }
+  set position(CSSPositionType value) {
+    if (_position == value) return;
+    _position = value;
+    _markParentNeedsLayout();
+  }
+
+  void _markParentNeedsLayout() {
     if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderLayoutParentData positionParentData = renderBoxModel.parentData;
-
-      if (property == Z_INDEX) {
-        positionParentData.zIndex = int.tryParse(present) ?? 0;
-      } else {
-        ElementManager elementManager = renderBoxModel.elementManager;
-        double viewportWidth = elementManager.viewportWidth;
-        double viewportHeight = elementManager.viewportHeight;
-        Size viewportSize = Size(viewportWidth, viewportHeight);
-
-        double value = CSSLength.toDisplayPortValue(present, viewportSize);
-        switch (property) {
-          case TOP:
-            positionParentData.top = value;
-            break;
-          case LEFT:
-            positionParentData.left = value;
-            break;
-          case RIGHT:
-            positionParentData.right = value;
-            break;
-          case BOTTOM:
-            positionParentData.bottom = value;
-            break;
-          case WIDTH:
-            positionParentData.width = value;
-            break;
-          case HEIGHT:
-            positionParentData.height = value;
-            break;
-        }
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+      if (renderStyle.position != CSSPositionType.static) {
+        RenderBoxModel parent = renderBoxModel.parent;
+        parent.markNeedsLayout();
       }
-
-      renderBoxModel.parentData = positionParentData;
-      renderBoxModel.markNeedsLayout();
     }
   }
+
+  void updateOffset(String property, String present) {
+    double value = CSSLength.toDisplayPortValue(present, viewportSize);
+    switch (property) {
+      case TOP:
+        top = value;
+        break;
+      case LEFT:
+        left = value;
+        break;
+      case RIGHT:
+        right = value;
+        break;
+      case BOTTOM:
+        bottom = value;
+        break;
+    }
+  }
+
+  void updatePosition(String property, String present) {
+    position = CSSPositionMixin.parsePositionType(style[POSITION]);
+    zIndex = int.tryParse(present) ?? 0;
+  }
+
+  static CSSPositionType parsePositionType(String input) {
+    switch (input) {
+      case RELATIVE:
+        return CSSPositionType.relative;
+      case ABSOLUTE:
+        return CSSPositionType.absolute;
+      case FIXED:
+        return CSSPositionType.fixed;
+      case STICKY:
+        return CSSPositionType.sticky;
+    }
+    return CSSPositionType.static;
+  }
+
 }

@@ -21,6 +21,7 @@ import 'bundle.dart';
 
 // Error handler when load bundle failed.
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
+typedef JSErrorHandler = void Function(String message);
 
 // See http://github.com/flutter/flutter/wiki/Desktop-shells
 /// If the current platform is a desktop platform that isn't yet supported by
@@ -406,7 +407,10 @@ class KrakenController {
   }
 
   // Error handler when load bundle failed.
-  LoadErrorHandler loadErrorHandler;
+  LoadErrorHandler onLoadError;
+
+  // Error handler when got javascript error when evaluate javascript codes.
+  JSErrorHandler onJSError;
 
   KrakenMethodChannel _methodChannel;
 
@@ -429,7 +433,8 @@ class KrakenController {
     Color background,
     KrakenNavigationDelegate navigationDelegate,
     KrakenMethodChannel methodChannel,
-    this.loadErrorHandler,
+    this.onLoadError,
+    this.onJSError,
     this.debugEnableInspector,
   })  : _bundleURL = bundleURL,
         _bundlePath = bundlePath,
@@ -593,11 +598,11 @@ class KrakenController {
       bundleURL = await (methodChannel as KrakenNativeChannel).getUrl();
     }
 
-    if (loadErrorHandler != null) {
+    if (onLoadError != null) {
       try {
         _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
       } catch (e, stack) {
-        loadErrorHandler(FlutterError(e.toString()), stack);
+        onLoadError(FlutterError(e.toString()), stack);
       }
     } else {
       _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);

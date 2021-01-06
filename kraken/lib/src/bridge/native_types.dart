@@ -199,48 +199,24 @@ class NativeNode extends Struct {
   Pointer<NativeEventTarget> nativeEventTarget;
 }
 
-typedef Native_GetOffsetTop = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetOffsetLeft = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetOffsetWidth = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetOffsetHeight = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetClientWidth = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetClientHeight = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetClientTop = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetClientLeft = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetScrollLeft = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetScrollTop = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetScrollWidth = Double Function(Pointer<NativeElement> nativeElement);
-typedef Native_GetScrollHeight = Double Function(Pointer<NativeElement> nativeElement);
+typedef Native_GetViewModuleProperty = Double Function(Pointer<NativeElement> nativeElement, Int64 property);
 typedef Native_GetBoundingClientRect = Pointer<NativeBoundingClientRect> Function(Pointer<NativeElement> nativeElement);
 typedef Native_GetStringValueProperty = Pointer<NativeString> Function(Pointer<NativeElement> nativeElement, Pointer<NativeString> property);
 typedef Native_Click = Void Function(Pointer<NativeElement> nativeElement);
 typedef Native_Scroll = Void Function(Pointer<NativeElement> nativeElement, Int32 x, Int32 y);
 typedef Native_ScrollBy = Void Function(Pointer<NativeElement> nativeElement, Int32 x, Int32 y);
-typedef Native_SetScrollLeft = Void Function(Pointer<NativeElement> nativeElement, Double left);
-typedef Native_SetScrollTop = Void Function(Pointer<NativeElement> nativeElement, Double top);
+typedef Native_SetViewModuleProperty = Void Function(Pointer<NativeElement> nativeElement, Int64 property, Double value);
 
 class NativeElement extends Struct {
   Pointer<NativeNode> nativeNode;
 
-  Pointer<NativeFunction<Native_GetOffsetTop>> getOffsetTop;
-  Pointer<NativeFunction<Native_GetOffsetLeft>> getOffsetLeft;
-  Pointer<NativeFunction<Native_GetOffsetWidth>> getOffsetWidth;
-  Pointer<NativeFunction<Native_GetOffsetHeight>> getOffsetHeight;
-  Pointer<NativeFunction<Native_GetOffsetWidth>> getClientWidth;
-  Pointer<NativeFunction<Native_GetOffsetHeight>> getClientHeight;
-  Pointer<NativeFunction<Native_GetClientTop>> getClientTop;
-  Pointer<NativeFunction<Native_GetClientLeft>> getClientLeft;
-  Pointer<NativeFunction<Native_GetScrollTop>> getScrollTop;
-  Pointer<NativeFunction<Native_GetScrollLeft>> getScrollLeft;
-  Pointer<NativeFunction<Native_GetScrollWidth>> getScrollWidth;
-  Pointer<NativeFunction<Native_GetScrollHeight>> getScrollHeight;
+  Pointer<NativeFunction<Native_GetViewModuleProperty>> getViewModuleProperty;
+  Pointer<NativeFunction<Native_SetViewModuleProperty>> setViewModuleProperty;
   Pointer<NativeFunction<Native_GetBoundingClientRect>> getBoundingClientRect;
   Pointer<NativeFunction<Native_GetStringValueProperty>> getStringValueProperty;
   Pointer<NativeFunction<Native_Click>> click;
   Pointer<NativeFunction<Native_Scroll>> scroll;
   Pointer<NativeFunction<Native_ScrollBy>> scrollBy;
-  Pointer<NativeFunction<Native_SetScrollLeft>> setScrollLeft;
-  Pointer<NativeFunction<Native_SetScrollTop>> setScrollTop;
 }
 
 class NativeWindow extends Struct {

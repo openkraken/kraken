@@ -66,7 +66,7 @@ CSSStyleDeclaration::~CSSStyleDeclaration() {
 JSObjectRef CSSStyleDeclaration::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                                      const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Illegal constructor", exception);
+    throwJSError(ctx, "Illegal constructor", exception);
   }
 
   const JSValueRef eventTargetValueRef = arguments[0];
@@ -175,7 +175,7 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::setProperty(JSContextR
                                                                       const JSValueRef *arguments,
                                                                       JSValueRef *exception) {
   if (argumentCount != 2) {
-    JSC_THROW_ERROR(ctx, "Failed to execute setProperty: 2 arguments is required.", exception);
+    throwJSError(ctx, "Failed to execute setProperty: 2 arguments is required.", exception);
     return nullptr;
   }
 
@@ -183,14 +183,14 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::setProperty(JSContextR
   const JSValueRef valueValueRef = arguments[1];
 
   if (!JSValueIsString(ctx, propertyValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute setProperty: property value type is not a string.", exception);
+    throwJSError(ctx, "Failed to execute setProperty: property value type is not a string.", exception);
     return nullptr;
   }
 
   JSStringRef propertyStringRef = JSValueToStringCopy(ctx, propertyValueRef, exception);
 
   if (!JSValueIsString(ctx, valueValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute setProperty: value type is not a string.", exception);
+    throwJSError(ctx, "Failed to execute setProperty: value type is not a string.", exception);
     return nullptr;
   }
 
@@ -206,14 +206,14 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::removeProperty(JSConte
                                                                          const JSValueRef *arguments,
                                                                          JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute removeProperty: 1 arguments is required.", exception);
+    throwJSError(ctx, "Failed to execute removeProperty: 1 arguments is required.", exception);
     return nullptr;
   }
 
   const JSValueRef propertyValueRef = arguments[0];
 
   if (!JSValueIsString(ctx, propertyValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute removeProperty: property value type is not a string.", exception);
+    throwJSError(ctx, "Failed to execute removeProperty: property value type is not a string.", exception);
     return nullptr;
   }
 
@@ -228,14 +228,14 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getPropertyValue(JSCon
                                                                            const JSValueRef *arguments,
                                                                            JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute getPropertyValue: 1 arguments is required.", exception);
+    throwJSError(ctx, "Failed to execute getPropertyValue: 1 arguments is required.", exception);
     return nullptr;
   }
 
   const JSValueRef propertyValueRef = arguments[0];
 
   if (!JSValueIsString(ctx, propertyValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute getPropertyValue: property value type is not a string.", exception);
+    throwJSError(ctx, "Failed to execute getPropertyValue: property value type is not a string.", exception);
     return nullptr;
   }
 

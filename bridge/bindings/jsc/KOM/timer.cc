@@ -20,7 +20,7 @@ void handleTimerCallback(BridgeCallback::Context *callbackContext, const char *e
   if (callbackContext->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
-    JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: timer callback is null.", &exception);
+    throwJSError(_context.context(), "Failed to trigger callback: timer callback is null.", &exception);
     _context.handleException(exception);
     return;
   }
@@ -30,7 +30,7 @@ void handleTimerCallback(BridgeCallback::Context *callbackContext, const char *e
   }
 
   if (errmsg != nullptr) {
-    JSC_THROW_ERROR(_context.context(), errmsg, &exception);
+    throwJSError(_context.context(), errmsg, &exception);
     _context.handleException(exception);
     return;
   }
@@ -62,7 +62,7 @@ void handleRAFTransientCallback(void *ptr, int32_t contextId, double highResTime
   if (callbackContext->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
-    JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: requestAnimationFrame callback is null.",
+    throwJSError(_context.context(), "Failed to trigger callback: requestAnimationFrame callback is null.",
                     &exception);
     _context.handleException(exception);
     return;
@@ -73,7 +73,7 @@ void handleRAFTransientCallback(void *ptr, int32_t contextId, double highResTime
   }
 
   if (errmsg != nullptr) {
-    JSC_THROW_ERROR(_context.context(), errmsg, &exception);
+    throwJSError(_context.context(), errmsg, &exception);
     _context.handleException(exception);
     return;
   }
@@ -102,7 +102,7 @@ void handleTransientCallback(void *ptr, int32_t contextId, const char *errmsg) {
 JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                       const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setTimeout': 1 argument required, but only 0 present.", exception);
+    throwJSError(ctx, "Failed to execute 'setTimeout': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
@@ -112,14 +112,14 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
   const JSValueRef &timeoutValueRef = arguments[1];
 
   if (!JSValueIsObject(ctx, callbackValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setTimeout': parameter 1 (callback) must be a function.", exception);
+    throwJSError(ctx, "Failed to execute 'setTimeout': parameter 1 (callback) must be a function.", exception);
     return nullptr;
   }
 
   JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackValueRef, exception);
 
   if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setTimeout': parameter 1 (callback) must be a function.", exception);
+    throwJSError(ctx, "Failed to execute 'setTimeout': parameter 1 (callback) must be a function.", exception);
     return nullptr;
   }
 
@@ -130,13 +130,13 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
   } else if (JSValueIsNumber(ctx, timeoutValueRef)) {
     timeout = JSValueToNumber(ctx, timeoutValueRef, exception);
   } else {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.",
+    throwJSError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.",
                     exception);
     return nullptr;
   }
 
   if (getDartMethod()->setTimeout == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.", exception);
+    throwJSError(ctx, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.", exception);
     return nullptr;
   }
 
@@ -149,7 +149,7 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
 
   // `-1` represents ffi error occurred.
   if (timerId == -1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setTimeout': dart method (setTimeout) execute failed", exception);
+    throwJSError(ctx, "Failed to execute 'setTimeout': dart method (setTimeout) execute failed", exception);
     return nullptr;
   }
 
@@ -159,7 +159,7 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
 JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                        const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setInterval': 1 argument required, but only 0 present.", exception);
+    throwJSError(ctx, "Failed to execute 'setInterval': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
@@ -169,14 +169,14 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
   const JSValueRef &timeoutValueRef = arguments[1];
 
   if (!JSValueIsObject(ctx, callbackValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setInterval': parameter 1 (callback) must be a function.", exception);
+    throwJSError(ctx, "Failed to execute 'setInterval': parameter 1 (callback) must be a function.", exception);
     return nullptr;
   }
 
   JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackValueRef, exception);
 
   if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setInterval': parameter 1 (callback) must be a function.", exception);
+    throwJSError(ctx, "Failed to execute 'setInterval': parameter 1 (callback) must be a function.", exception);
     return nullptr;
   }
 
@@ -187,13 +187,13 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
   } else if (JSValueIsNumber(ctx, timeoutValueRef)) {
     timeout = JSValueToNumber(ctx, timeoutValueRef, exception);
   } else {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.",
+    throwJSError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.",
                     exception);
     return nullptr;
   }
 
   if (getDartMethod()->setInterval == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setInterval': dart method (setInterval) is not registered.", exception);
+    throwJSError(ctx, "Failed to execute 'setInterval': dart method (setInterval) is not registered.", exception);
     return nullptr;
   }
 
@@ -206,7 +206,7 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
     });
 
   if (timerId == -1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'setInterval': dart method (setInterval) got unexpected error.", exception);
+    throwJSError(ctx, "Failed to execute 'setInterval': dart method (setInterval) got unexpected error.", exception);
     return nullptr;
   }
 
@@ -216,7 +216,7 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
 JSValueRef clearTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                         const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount <= 0) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'clearTimeout': 1 argument required, but only 0 present.", exception);
+    throwJSError(ctx, "Failed to execute 'clearTimeout': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
@@ -224,14 +224,14 @@ JSValueRef clearTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef this
 
   const JSValueRef timerIdValueRef = arguments[0];
   if (!JSValueIsNumber(ctx, timerIdValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'clearTimeout': parameter 1  is not an timer kind.", exception);
+    throwJSError(ctx, "Failed to execute 'clearTimeout': parameter 1  is not an timer kind.", exception);
     return nullptr;
   }
 
   auto id = static_cast<int32_t>(JSValueToNumber(ctx, timerIdValueRef, exception));
 
   if (getDartMethod()->clearTimeout == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.", exception);
+    throwJSError(ctx, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.", exception);
     return nullptr;
   }
 
@@ -242,7 +242,7 @@ JSValueRef clearTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef this
 JSValueRef cancelAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount <= 0) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.",
+    throwJSError(ctx, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.",
                     exception);
     return nullptr;
   }
@@ -251,7 +251,7 @@ JSValueRef cancelAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObject
 
   const JSValueRef requestIdValueRef = arguments[0];
   if (!JSValueIsNumber(ctx, requestIdValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'cancelAnimationFrame': parameter 1 (timer) is not a timer kind.",
+    throwJSError(ctx, "Failed to execute 'cancelAnimationFrame': parameter 1 (timer) is not a timer kind.",
                     exception);
     return nullptr;
   }
@@ -259,7 +259,7 @@ JSValueRef cancelAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObject
   auto id = static_cast<int32_t>(JSValueToNumber(ctx, requestIdValueRef, exception));
 
   if (getDartMethod()->cancelAnimationFrame == nullptr) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.",
                     exception);
     return nullptr;
@@ -273,7 +273,7 @@ JSValueRef cancelAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObject
 JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                  const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount <= 0) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.",
+    throwJSError(ctx, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.",
                     exception);
     return nullptr;
   }
@@ -282,7 +282,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   const JSValueRef &callbackValueRef = arguments[0];
 
   if (!JSValueIsObject(ctx, callbackValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.",
+    throwJSError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.",
                     exception);
     return nullptr;
   }
@@ -290,7 +290,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackValueRef, exception);
 
   if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.",
+    throwJSError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.",
                     exception);
     return nullptr;
   }
@@ -299,7 +299,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
 
   if (getDartMethod()->flushUICommand == nullptr) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.",
                     exception);
     return nullptr;
@@ -308,7 +308,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   getDartMethod()->flushUICommand();
 
   if (getDartMethod()->requestAnimationFrame == nullptr) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.",
                     exception);
     return nullptr;
@@ -322,7 +322,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
 
   // `-1` represents some error occurred.
   if (requestId == -1) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) executed "
                     "with unexpected error.",
                     exception);

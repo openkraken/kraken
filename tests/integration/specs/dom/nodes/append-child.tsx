@@ -1,4 +1,15 @@
 describe('Append child', () => {
+  it('with node is not type of node', () => {
+    let container = document.createElement('div');
+    expect(() => {
+      // @ts-ignore
+      container.appendChild({name: 1});
+    }).toThrowError('Failed to execute \'appendChild\' on \'Node\': first arguments should be an Node type.');
+    expect(() => {
+      // @ts-ignore
+      container.appendChild(new Event('1234'));
+    }).toThrowError('Failed to execute \'appendChild\' on \'Node\': first arguments should be an Node type.');
+  });
   it('with orphan element', async () => {
     const style = {
       width: '300px',

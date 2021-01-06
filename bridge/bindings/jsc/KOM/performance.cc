@@ -272,7 +272,7 @@ JSValueRef JSPerformance::getEntries(JSContextRef ctx, JSObjectRef function, JSO
 JSValueRef JSPerformance::getEntriesByName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount == 0) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     "Failed to execute 'getEntriesByName' on 'Performance': 1 argument required, but only 0 present.",
                     exception);
     return nullptr;
@@ -299,7 +299,7 @@ JSValueRef JSPerformance::getEntriesByName(JSContextRef ctx, JSObjectRef functio
 JSValueRef JSPerformance::getEntriesByType(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount == 0) {
-    JSC_THROW_ERROR(ctx,
+    throwJSError(ctx,
                     "Failed to execute 'getEntriesByName' on 'Performance': 1 argument required, but only 0 present.",
                     exception);
     return nullptr;
@@ -325,7 +325,7 @@ JSValueRef JSPerformance::getEntriesByType(JSContextRef ctx, JSObjectRef functio
 JSValueRef JSPerformance::mark(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'mark' on 'Performance': 1 argument required, but only 0 present.",
+    throwJSError(ctx, "Failed to execute 'mark' on 'Performance': 1 argument required, but only 0 present.",
                     exception);
     return nullptr;
   }
@@ -549,7 +549,7 @@ void JSPerformance::measureSummary() {
 JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount == 0) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'measure' on 'Performance': 1 argument required, but only 0 present.",
+    throwJSError(ctx, "Failed to execute 'measure' on 'Performance': 1 argument required, but only 0 present.",
                     exception);
     return nullptr;
   }
@@ -621,7 +621,7 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
 
     if (startMarkCount == 0) {
       if (exception != nullptr) {
-        JSC_THROW_ERROR(
+        throwJSError(
           ctx, ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " does not exist.").c_str(),
           exception);
       }
@@ -634,7 +634,7 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
 
     if (endMarkCount == 0) {
       if (exception != nullptr) {
-        JSC_THROW_ERROR(
+        throwJSError(
           ctx, ("Failed to execute 'measure' on 'Performance': The mark " + endMark + " does not exist.").c_str(),
           exception);
       }
@@ -643,7 +643,7 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
 
     if (startMarkCount != endMarkCount) {
       if (exception != nullptr) {
-        JSC_THROW_ERROR(ctx,
+        throwJSError(ctx,
                         ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " and " + endMark +
                          "does not appear the same number of times")
                           .c_str(),

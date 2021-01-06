@@ -16,11 +16,11 @@ class RenderIntrinsic extends RenderBoxModel
       : super(targetId: targetId, style: style, elementManager: elementManager);
 
   BoxSizeType get widthSizeType {
-    bool widthDefined = width != null || (minWidth != null);
+    bool widthDefined = renderStyle.width != null || (renderStyle.minWidth != null);
     return widthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
   BoxSizeType get heightSizeType {
-    bool heightDefined = height != null || (minHeight != null);
+    bool heightDefined = renderStyle.height != null || (renderStyle.minHeight != null);
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
@@ -59,6 +59,14 @@ class RenderIntrinsic extends RenderBoxModel
     }
 
     beforeLayout();
+
+    double width = renderStyle.width;
+    double height = renderStyle.height;
+    double minWidth = renderStyle.minWidth;
+    double minHeight = renderStyle.minHeight;
+    double maxWidth = renderStyle.maxWidth;
+    double maxHeight = renderStyle.maxHeight;
+
     if (child != null) {
       DateTime childLayoutStart;
       if (kProfileMode) {
@@ -140,12 +148,12 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (padding != null) {
-      offset += Offset(paddingLeft, paddingTop);
+    if (renderStyle.padding != null) {
+      offset += Offset(renderStyle.paddingLeft, renderStyle.paddingTop);
     }
 
-    if (borderEdge != null) {
-      offset += Offset(borderLeft, borderTop);
+    if (renderStyle.borderEdge != null) {
+      offset += Offset(renderStyle.borderLeft, renderStyle.borderTop);
     }
 
     if (child != null) {
@@ -171,7 +179,7 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
-    if (transform != null) {
+    if (renderStyle.transform != null) {
       return hitTestIntrinsicChild(result, child, position);
     }
     return super.hitTestChildren(result, position: position);

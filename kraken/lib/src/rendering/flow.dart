@@ -34,32 +34,10 @@ class _RunMetrics {
 class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout(
       {List<RenderBox> children,
-      MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
-      TextDirection textDirection = TextDirection.ltr,
-      Axis direction = Axis.horizontal,
-      double spacing = 0.0,
-      MainAxisAlignment runAlignment = MainAxisAlignment.start,
-      double runSpacing = 0.0,
-      CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.end,
-      VerticalDirection verticalDirection = VerticalDirection.down,
       CSSStyleDeclaration style,
       int targetId,
       ElementManager elementManager})
-      : assert(direction != null),
-        assert(mainAxisAlignment != null),
-        assert(spacing != null),
-        assert(runAlignment != null),
-        assert(runSpacing != null),
-        assert(crossAxisAlignment != null),
-        _direction = direction,
-        _mainAxisAlignment = mainAxisAlignment,
-        _spacing = spacing,
-        _runAlignment = runAlignment,
-        _runSpacing = runSpacing,
-        _crossAxisAlignment = crossAxisAlignment,
-        _textDirection = textDirection,
-        _verticalDirection = verticalDirection,
-        super(targetId: targetId, style: style, elementManager: elementManager) {
+      : super(targetId: targetId, style: style, elementManager: elementManager) {
     addAll(children);
   }
 
@@ -70,33 +48,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// available horizontal space is consumed, at which point a subsequent
   /// children are placed in a new run vertically adjacent to the previous run.
   Axis get direction => _direction;
-  Axis _direction;
+  Axis _direction = Axis.horizontal;
   set direction(Axis value) {
     assert(value != null);
     if (_direction == value) return;
     _direction = value;
-    markNeedsLayout();
-  }
-
-  /// How the children within a run should be placed in the main axis.
-  ///
-  /// For example, if [mainAxisAlignment] is [MainAxisAlignment.center], the children in
-  /// each run are grouped together in the center of their run in the main axis.
-  ///
-  /// Defaults to [MainAxisAlignment.start].
-  ///
-  /// See also:
-  ///
-  ///  * [runAlignment], which controls how the runs are placed relative to each
-  ///    other in the cross axis.
-  ///  * [crossAxisAlignment], which controls how the children within each run
-  ///    are placed relative to each other in the cross axis.
-  MainAxisAlignment get mainAxisAlignment => _mainAxisAlignment;
-  MainAxisAlignment _mainAxisAlignment;
-  set mainAxisAlignment(MainAxisAlignment value) {
-    assert(value != null);
-    if (_mainAxisAlignment == value) return;
-    _mainAxisAlignment = value;
     markNeedsLayout();
   }
 
@@ -108,11 +64,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// If there is additional free space in a run (e.g., because the wrap has a
   /// minimum size that is not filled or because some runs are longer than
   /// others), the additional free space will be allocated according to the
-  /// [mainAxisAlignment].
+  /// textAlign style.
   ///
   /// Defaults to 0.0.
   double get spacing => _spacing;
-  double _spacing;
+  double _spacing = 0.0;
   set spacing(double value) {
     assert(value != null);
     if (_spacing == value) return;
@@ -128,14 +84,8 @@ class RenderFlowLayout extends RenderLayoutBox {
   ///
   /// Defaults to [MainAxisAlignment.start].
   ///
-  /// See also:
-  ///
-  ///  * [mainAxisAlignment], which controls how the children within each run are placed
-  ///    relative to each other in the main axis.
-  ///  * [crossAxisAlignment], which controls how the children within each run
-  ///    are placed relative to each other in the cross axis.
   MainAxisAlignment get runAlignment => _runAlignment;
-  MainAxisAlignment _runAlignment;
+  MainAxisAlignment _runAlignment = MainAxisAlignment.start;
   set runAlignment(MainAxisAlignment value) {
     assert(value != null);
     if (_runAlignment == value) return;
@@ -166,7 +116,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   ///
   /// Defaults to 0.0.
   double get runSpacing => _runSpacing;
-  double _runSpacing;
+  double _runSpacing = 0.0;
   set runSpacing(double value) {
     assert(value != null);
     if (_runSpacing == value) return;
@@ -181,16 +131,10 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// [direction] is [Axis.horizontal], then the children within each
   /// run will have their bottom edges aligned to the bottom edge of the run.
   ///
-  /// Defaults to [CrossAxisAlignment.start].
+  /// Defaults to [CrossAxisAlignment.end].
   ///
-  /// See also:
-  ///
-  ///  * [mainAxisAlignment], which controls how the children within each run are placed
-  ///    relative to each other in the main axis.
-  ///  * [runAlignment], which controls how the runs are placed relative to each
-  ///    other in the cross axis.
   CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
-  CrossAxisAlignment _crossAxisAlignment;
+  CrossAxisAlignment _crossAxisAlignment = CrossAxisAlignment.end;
   set crossAxisAlignment(CrossAxisAlignment value) {
     assert(value != null);
     if (_crossAxisAlignment == value) return;
@@ -203,16 +147,16 @@ class RenderFlowLayout extends RenderLayoutBox {
   ///
   /// If the [direction] is [Axis.horizontal], this controls the order in which
   /// children are positioned (left-to-right or right-to-left), and the meaning
-  /// of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
-  /// [MainAxisAlignment.end] values.
+  /// of the textAlign style's [TextAlign.start] and
+  /// [TextAlign.end] values.
   ///
   /// If the [direction] is [Axis.horizontal], and either the
-  /// [mainAxisAlignment] is either [MainAxisAlignment.start] or [MainAxisAlignment.end], or
+  /// textAlign style is either [TextAlign.start] or [TextAlign.end], or
   /// there's more than one child, then the [textDirection] must not be null.
   ///
   /// If the [direction] is [Axis.vertical], this controls the order in
   /// which runs are positioned, the meaning of the [runAlignment] property's
-  /// [MainAxisAlignment.start] and [MainAxisAlignment.end] values, as well as the
+  /// [TextAlign.start] and [TextAlign.end] values, as well as the
   /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
   /// [CrossAxisAlignment.end] values.
   ///
@@ -222,7 +166,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// [CrossAxisAlignment.end], or there's more than one child, then the
   /// [textDirection] must not be null.
   TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
+  TextDirection _textDirection = TextDirection.ltr;
   set textDirection(TextDirection value) {
     if (_textDirection != value) {
       _textDirection = value;
@@ -234,11 +178,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// `start` and `end` in the vertical direction.
   ///
   /// If the [direction] is [Axis.vertical], this controls which order children
-  /// are painted in (down or up), the meaning of the [mainAxisAlignment] property's
-  /// [MainAxisAlignment.start] and [MainAxisAlignment.end] values.
+  /// are painted in (down or up), the meaning of the textAlign style's
+  /// [TextAlign.start] and [TextAlign.end] values.
   ///
-  /// If the [direction] is [Axis.vertical], and either the [mainAxisAlignment]
-  /// is either [MainAxisAlignment.start] or [MainAxisAlignment.end], or there's
+  /// If the [direction] is [Axis.vertical], and either the textAlign
+  /// is either [TextAlign.start] or [TextAlign.end], or there's
   /// more than one child, then the [verticalDirection] must not be null.
   ///
   /// If the [direction] is [Axis.horizontal], this controls the order in which
@@ -253,7 +197,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// [CrossAxisAlignment.end], or there's more than one child, then the
   /// [verticalDirection] must not be null.
   VerticalDirection get verticalDirection => _verticalDirection;
-  VerticalDirection _verticalDirection;
+  VerticalDirection _verticalDirection = VerticalDirection.down;
   set verticalDirection(VerticalDirection value) {
     if (_verticalDirection != value) {
       _verticalDirection = value;
@@ -263,7 +207,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   bool get _debugHasNecessaryDirections {
     assert(direction != null);
-    assert(mainAxisAlignment != null);
     assert(runAlignment != null);
     assert(crossAxisAlignment != null);
     if (firstChild != null && lastChild != firstChild) {
@@ -279,15 +222,18 @@ class RenderFlowLayout extends RenderLayoutBox {
           break;
       }
     }
-    if (mainAxisAlignment == MainAxisAlignment.start || mainAxisAlignment == MainAxisAlignment.end) {
+
+    TextAlign textAlign = renderStyle.textAlign;
+
+    if (textAlign == TextAlign.start || textAlign == TextAlign.end) {
       switch (direction) {
         case Axis.horizontal:
           assert(textDirection != null,
-              'Horizontal $runtimeType with mainAxisAlignment $mainAxisAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
+              'Horizontal $runtimeType with textAlign $textAlign has a null textDirection, so the textAlign cannot be resolved.');
           break;
         case Axis.vertical:
           assert(verticalDirection != null,
-              'Vertical $runtimeType with mainAxisAlignment $mainAxisAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
+              'Vertical $runtimeType with textAlign $textAlign has a null verticalDirection, so the textAlign cannot be resolved.');
           break;
       }
     }
@@ -295,11 +241,11 @@ class RenderFlowLayout extends RenderLayoutBox {
       switch (direction) {
         case Axis.horizontal:
           assert(verticalDirection != null,
-              'Horizontal $runtimeType with runAlignment $runAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
+              'Horizontal $runtimeType with runAlignment $runAlignment has a null verticalDirection, so the textAlign cannot be resolved.');
           break;
         case Axis.vertical:
           assert(textDirection != null,
-              'Vertical $runtimeType with runAlignment $runAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
+              'Vertical $runtimeType with runAlignment $runAlignment has a null textDirection, so the textAlign cannot be resolved.');
           break;
       }
     }
@@ -307,11 +253,11 @@ class RenderFlowLayout extends RenderLayoutBox {
       switch (direction) {
         case Axis.horizontal:
           assert(verticalDirection != null,
-              'Horizontal $runtimeType with crossAxisAlignment $crossAxisAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
+              'Horizontal $runtimeType with crossAxisAlignment $crossAxisAlignment has a null verticalDirection, so the textAlign cannot be resolved.');
           break;
         case Axis.vertical:
           assert(textDirection != null,
-              'Vertical $runtimeType with crossAxisAlignment $crossAxisAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
+              'Vertical $runtimeType with crossAxisAlignment $crossAxisAlignment has a null textDirection, so the textAlign cannot be resolved.');
           break;
       }
     }
@@ -463,8 +409,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     if (child is RenderBoxModel) {
       RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
-      marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
+      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft + childRenderBoxModel.renderStyle.marginRight;
+      marginVertical = childRenderBoxModel.renderStyle.marginTop + childRenderBoxModel.renderStyle.marginBottom;
     }
 
     Size childSize = _getChildSize(child);
@@ -486,15 +432,14 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   double _getCrossAxisExtent(RenderBox child) {
-    CSSStyleDeclaration childStyle = _getChildStyle(child);
-    double lineHeight = CSSText.getLineHeight(childStyle, elementManager);
+    double lineHeight = _getLineHeight(child);
     double marginVertical = 0;
     double marginHorizontal = 0;
 
     if (child is RenderBoxModel) {
       RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
-      marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
+      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft + childRenderBoxModel.renderStyle.marginRight;
+      marginVertical = childRenderBoxModel.renderStyle.marginTop + childRenderBoxModel.renderStyle.marginBottom;
     }
     Size childSize = _getChildSize(child);
     switch (direction) {
@@ -535,6 +480,18 @@ class RenderFlowLayout extends RenderLayoutBox {
     return 0.0;
   }
 
+  double _getLineHeight(RenderBox child) {
+    double lineHeight;
+    if (child is RenderTextBox) {
+      lineHeight = renderStyle.lineHeight;
+    } else if (child is RenderBoxModel) {
+      lineHeight = child.renderStyle.lineHeight;
+    } else if (child is RenderPositionHolder) {
+      lineHeight = child.realDisplayedBox.renderStyle.lineHeight;
+    }
+    return lineHeight;
+  }
+
   @override
   void performLayout() {
     if (kProfileMode) {
@@ -572,9 +529,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        CSSPositionedLayout.applyPositionedChildOffset(this, child, size, borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(this, child, size, renderStyle.borderEdge);
 
-        setMaximumScrollableSizeForPositionedChild(childParentData, child.boxSize);
+        setMaximumScrollableSizeForPositionedChild(childParentData, child);
       }
       child = childParentData.nextSibling;
     }
@@ -597,6 +554,13 @@ class RenderFlowLayout extends RenderLayoutBox {
     final double contentHeight = RenderBoxModel.getContentHeight(this);
 
     CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+
+    double width = renderStyle.width;
+    double height = renderStyle.height;
+    double minWidth = renderStyle.minWidth;
+    double minHeight = renderStyle.minHeight;
+    double maxWidth = renderStyle.maxWidth;
+    double maxHeight = renderStyle.maxHeight;
 
     // If no child exists, stop layout.
     if (childCount == 0) {
@@ -718,8 +682,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         RenderBoxModel childRenderBoxModel = positionHolder.realDisplayedBox;
         if (childRenderBoxModel != null) {
           RenderLayoutParentData childParentData = childRenderBoxModel.parentData;
-          if (childParentData.position != CSSPositionType.static &&
-              childParentData.position != CSSPositionType.relative) childMainAxisExtent = childCrossAxisExtent = 0;
+          if (childParentData.isPositioned) {
+            childMainAxisExtent = childCrossAxisExtent = 0;
+          }
         }
       }
 
@@ -757,13 +722,12 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginBottom = 0;
         if (child is RenderBoxModel) {
           RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-          childMarginTop = childRenderBoxModel.marginTop;
-          childMarginBottom = childRenderBoxModel.marginBottom;
+          childMarginTop = childRenderBoxModel.renderStyle.marginTop;
+          childMarginBottom = childRenderBoxModel.renderStyle.marginBottom;
         }
 
         Size childSize = _getChildSize(child);
-        CSSStyleDeclaration childStyle = _getChildStyle(child);
-        double lineHeight = CSSText.getLineHeight(childStyle, elementManager);
+        double lineHeight = _getLineHeight(child);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (lineHeight != null) {
@@ -903,25 +867,19 @@ class RenderFlowLayout extends RenderLayoutBox {
       double childLeadingSpace = 0.0;
       double childBetweenSpace = 0.0;
 
-      switch (mainAxisAlignment) {
-        case MainAxisAlignment.start:
+      switch (renderStyle.textAlign) {
+        case TextAlign.left:
+        case TextAlign.start:
           break;
-        case MainAxisAlignment.end:
+        case TextAlign.right:
+        case TextAlign.end:
           childLeadingSpace = mainAxisFreeSpace;
           break;
-        case MainAxisAlignment.center:
+        case TextAlign.center:
           childLeadingSpace = mainAxisFreeSpace / 2.0;
           break;
-        case MainAxisAlignment.spaceBetween:
+        case TextAlign.justify:
           childBetweenSpace = runChildrenCount > 1 ? mainAxisFreeSpace / (runChildrenCount - 1) : 0.0;
-          break;
-        case MainAxisAlignment.spaceAround:
-          childBetweenSpace = mainAxisFreeSpace / runChildrenCount;
-          childLeadingSpace = childBetweenSpace / 2.0;
-          break;
-        case MainAxisAlignment.spaceEvenly:
-          childBetweenSpace = mainAxisFreeSpace / (runChildrenCount + 1);
-          childLeadingSpace = childBetweenSpace;
           break;
       }
 
@@ -932,7 +890,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
-      double lineBoxHeight = CSSText.getLineHeight(style, elementManager);
+      double lineBoxHeight = _getLineHeight(this);
       if (lineBoxHeight != null) {
         lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
       }
@@ -983,7 +941,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         Size childSize = _getChildSize(child);
         // Line height of child
-        double childLineHeight = CSSText.getLineHeight(childStyle, elementManager);
+        double childLineHeight = _getLineHeight(child);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (childLineHeight != null) {
@@ -1022,13 +980,13 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (child is RenderBoxModel) {
           Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
           RenderBoxModel renderBoxModel = childEl.renderBoxModel;
-          childMarginLeft = renderBoxModel.marginLeft;
-          childMarginTop = renderBoxModel.marginTop;
+          childMarginLeft = renderBoxModel.renderStyle.marginLeft;
+          childMarginTop = renderBoxModel.renderStyle.marginTop;
         }
 
         Offset relativeOffset = _getOffset(
-          childMainPosition + paddingLeft + borderLeft + childMarginLeft,
-          crossAxisOffset + childLineExtent + paddingTop + borderTop + childMarginTop
+          childMainPosition + renderStyle.paddingLeft + renderStyle.borderLeft + childMarginLeft,
+          crossAxisOffset + childLineExtent + renderStyle.paddingTop + renderStyle.borderTop + childMarginTop
         );
         /// Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child, childStyle);
@@ -1088,8 +1046,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double childMarginBottom = 0;
     if (child is RenderBoxModel) {
       RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      childMarginTop = childRenderBoxModel.marginTop;
-      childMarginBottom = childRenderBoxModel.marginBottom;
+      childMarginTop = childRenderBoxModel.renderStyle.marginTop;
+      childMarginBottom = childRenderBoxModel.renderStyle.marginBottom;
     }
 
     Size childSize = _getChildSize(child);
@@ -1179,7 +1137,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
-    if (transform != null) {
+    if (renderStyle.transform != null) {
       return hitTestLayoutChildren(result, lastChild, position);
     }
     return defaultHitTestChildren(result, position: position);
@@ -1187,8 +1145,10 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   Offset getChildScrollOffset(RenderObject child, Offset offset) {
     final RenderLayoutParentData childParentData = child.parentData;
+    bool isChildFixed = child is RenderBoxModel ?
+      child.renderStyle.position == CSSPositionType.fixed : false;
     // Fixed elements always paint original offset
-    Offset scrollOffset = childParentData.position == CSSPositionType.fixed ?
+    Offset scrollOffset = isChildFixed ?
       childParentData.offset : childParentData.offset + offset;
     return scrollOffset;
   }

@@ -15,7 +15,7 @@ Color _parseColor(String color, [Size viewportSize]) {
   return CSSColor.parseColor(color);
 }
 
-String _stringifyColor(Color oldColor, Color newColor, double progress, [Size viewportSize]) {
+void _updateColor(Color oldColor, Color newColor, double progress, String property, RenderStyle renderStyle) {
   int alphaDiff = newColor.alpha - oldColor.alpha;
   int redDiff = newColor.red - oldColor.red;
   int greenDiff = newColor.green - oldColor.green;
@@ -25,49 +25,175 @@ String _stringifyColor(Color oldColor, Color newColor, double progress, [Size vi
   int red = (redDiff * progress).toInt() + oldColor.red;
   int blue = (blueDiff * progress).toInt() + oldColor.blue;
   int green = (greenDiff * progress).toInt() + oldColor.green;
-
-  return 'rgba(${red}, ${green}, ${blue}, ${alpha})';
+  Color color = Color.fromARGB(alpha, red, green, blue);
+  switch (property) {
+    case COLOR:
+      renderStyle.color = color;
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
+      break;
+    case TEXT_DECORATION_COLOR:
+      renderStyle.textDecorationColor = color;
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
+      break;
+    case BACKGROUND_COLOR:
+      renderStyle.updateBackgroundColor(color);
+      break;
+    case BORDER_BOTTOM_COLOR:
+    case BORDER_LEFT_COLOR:
+    case BORDER_RIGHT_COLOR:
+    case BORDER_TOP_COLOR:
+    case BORDER_COLOR:
+      renderStyle.updateBorder(property, color);
+      break;
+  }
 }
 
 double _parseLength(String _length, [Size viewportSize]) {
   return CSSLength.parseLength(_length, viewportSize);
 }
 
-String _stringifyLength(double oldLength, double newLength, double progress, [Size viewportSize]) {
-  return _stringifyNumber(oldLength, newLength, progress, viewportSize) + 'px';
+void _updateLength(double oldLength, double newLength, double progress, String property, RenderStyle renderStyle) {
+  double length = oldLength * (1 - progress) + newLength * progress;
+
+  switch (property) {
+    case RIGHT:
+      renderStyle.right = length;
+      break;
+    case TOP:
+      renderStyle.top = length;
+      break;
+    case BOTTOM:
+      renderStyle.bottom = length;
+      break;
+    case LEFT:
+      renderStyle.left = length;
+      break;
+    case MARGIN_BOTTOM:
+    case MARGIN_LEFT:
+    case MARGIN_RIGHT:
+    case MARGIN_TOP:
+      renderStyle.updateMargin(property, length.toString() + 'px');
+      break;
+    case PADDING_BOTTOM:
+    case PADDING_LEFT:
+    case PADDING_RIGHT:
+    case PADDING_TOP:
+      renderStyle.updatePadding(property, length.toString() + 'px');
+      break;
+    case BORDER_BOTTOM_WIDTH:
+    case BORDER_LEFT_WIDTH:
+    case BORDER_RIGHT_WIDTH:
+    case BORDER_TOP_WIDTH:
+      renderStyle.updateBorder(property, null, length);
+      break;
+    case BORDER_BOTTOM_LEFT_RADIUS:
+    case BORDER_BOTTOM_RIGHT_RADIUS:
+    case BORDER_TOP_LEFT_RADIUS:
+    case BORDER_TOP_RIGHT_RADIUS:
+      renderStyle.updateBorderRadius(property, length);
+      break;
+    case FLEX_BASIS:
+    case FONT_SIZE:
+      renderStyle.fontSize = length;
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
+      break;
+    case LETTER_SPACING:
+      renderStyle.letterSpacing = length;
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
+      break;
+    case WORD_SPACING:
+      renderStyle.wordSpacing = length;
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
+      break;
+    case HEIGHT:
+      renderStyle.height = length;
+      break;
+    case WIDTH:
+      renderStyle.width = length;
+      break;
+    case MAX_HEIGHT:
+      renderStyle.maxHeight = length;
+      break;
+    case MAX_WIDTH:
+      renderStyle.maxWidth = length;
+      break;
+    case MIN_HEIGHT:
+      renderStyle.minHeight = length;
+      break;
+    case MIN_WIDTH:
+      renderStyle.minWidth = length;
+      break;
+  }
 }
 
 FontWeight _parseFontWeight(String fontWeight, [Size viewportSize]) {
   return CSSText.parseFontWeight(fontWeight);
 }
 
-String _stringifyFontWeight(FontWeight oldValue, FontWeight newValue, double progress, [Size viewportSize]) {
-  return ((FontWeight.lerp(oldValue, newValue, progress).index + 1) * 100).toString();
+void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress, String property, RenderStyle renderStyle) {
+  FontWeight fontWeight = FontWeight.lerp(oldValue, newValue, progress);
+  switch (property) {
+    case FONT_WEIGHT:
+      renderStyle.fontWeight = fontWeight;
+      // Update style of children text nodes
+      _updateChildTextNodes(renderStyle);
+      break;
+  }
 }
 
 double _parseNumber(String number, [Size viewportSize]) {
   return CSSNumber.parseNumber(number);
 }
 
-String _stringifyNumber(double oldValue, double newValue, double progress, [Size viewportSize]) {
-  return (oldValue * (1 - progress) + newValue * progress).toString();
+double _getNumber(double oldValue, double newValue, double progress) {
+   return oldValue * (1 - progress) + newValue * progress;
+}
+
+void _updateNumber(double oldValue, double newValue, double progress, String property, RenderStyle renderStyle) {
+  double number = _getNumber(oldValue, newValue, progress);
+  switch (property) {
+    case OPACITY:
+      renderStyle.opacity = number;
+      break;
+    case Z_INDEX:
+      renderStyle.zIndex = int.parse(number.toString());
+      break;
+    case FLEX_GROW:
+      renderStyle.flexGrow = number;
+      break;
+    case FLEX_SHRINK:
+      renderStyle.flexShrink = number;
+      break;
+  }
 }
 
 String _parseLineHeight(String lineHeight, [Size viewportSize]) {
   return lineHeight;
 }
 
-String _stringifyLineHeight(String oldValue, String newValue, double progress, [Size viewportSize]) {
+void _updateLineHeight(String oldValue, String newValue, double progress, String property, RenderStyle renderStyle) {
+  Size viewportSize = renderStyle.viewportSize;
+  double lineHeight;
+
   if (CSSLength.isLength(oldValue) && CSSLength.isLength(newValue)) {
     double left = CSSLength.parseLength(oldValue, viewportSize);
     double right = CSSLength.parseLength(newValue, viewportSize);
-    return _stringifyNumber(left, right, progress, viewportSize).toString() + 'px';
+    lineHeight = _getNumber(left, right, progress);
   } else if (CSSNumber.isNumber(oldValue) && CSSNumber.isNumber(newValue)) {
     double left = CSSNumber.parseNumber(oldValue);
     double right = CSSNumber.parseNumber(newValue);
-    return _stringifyNumber(left, right, progress, viewportSize).toString();
-  } else {
-    return newValue;
+    lineHeight = _getNumber(left, right, progress);
+  }
+
+  switch (property) {
+    case LINE_HEIGHT:
+      renderStyle.lineHeight = lineHeight;
+      break;
   }
 }
 
@@ -87,7 +213,7 @@ List<double> _lerpFloat64List(List<double> begin, List<double> end, t) {
   return r;
 }
 
-String _stringifyTransform(Matrix4 begin, Matrix4 end, double t, [Size viewportSize]) {
+void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, RenderStyle renderStyle) {
   Matrix4 newMatrix4;
   if (CSSTransform.isAffine(begin)) {
     List matrixA = CSSTransform.decompose2DMatrix(begin);
@@ -109,16 +235,27 @@ String _stringifyTransform(Matrix4 begin, Matrix4 end, double t, [Size viewportS
     );
   }
 
-  Float64List m4storage = newMatrix4.storage;
-  return 'matrix3d(${m4storage.join(',')})';
+  renderStyle.updateTransform(null, newMatrix4);
 }
 
-const List<Function> _colorHandler = [_parseColor, _stringifyColor];
-const List<Function> _lengthHandler = [_parseLength, _stringifyLength];
-const List<Function> _fontWeightHandler = [_parseFontWeight, _stringifyFontWeight];
-const List<Function> _numberHandler = [_parseNumber, _stringifyNumber];
-const List<Function> _lineHeightHandler = [_parseLineHeight, _stringifyLineHeight];
-const List<Function> _transformHandler = [_parseTransform, _stringifyTransform];
+void _updateChildTextNodes(RenderStyle renderStyle) {
+  RenderBoxModel renderBoxModel = renderStyle.renderBoxModel;
+  ElementManager elementManager = renderBoxModel.elementManager;
+  int targetId = renderBoxModel.targetId;
+  Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
+  for (Node node in element.childNodes) {
+    if (node is TextNode) {
+      node.updateTextStyle();
+    }
+  }
+}
+
+const List<Function> _colorHandler = [_parseColor, _updateColor];
+const List<Function> _lengthHandler = [_parseLength, _updateLength];
+const List<Function> _fontWeightHandler = [_parseFontWeight, _updateFontWeight];
+const List<Function> _numberHandler = [_parseNumber, _updateNumber];
+const List<Function> _lineHeightHandler = [_parseLineHeight, _updateLineHeight];
+const List<Function> _transformHandler = [_parseTransform, _updateTransform];
 
 Map<String, List<Function>> CSSTransformHandlers = {
   COLOR: _colorHandler,
@@ -979,20 +1116,34 @@ class CSSOrigin {
   }
 }
 
-mixin CSSTransformMixin on Node {
+mixin CSSTransformMixin on RenderStyleBase {
 
-  void updateRenderTransform(Element element, RenderBoxModel renderBoxModel, String value) {
+  Matrix4 get transform => _transform;
+  Matrix4 _transform;
+  set transform(Matrix4 value) {
+    if (_transform == value) return;
+    _transform = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  CSSOrigin get transformOrigin => _transformOrigin;
+  CSSOrigin _transformOrigin;
+  set transformOrigin(CSSOrigin value) {
+    if (_transformOrigin == value) return;
+    _transformOrigin = value;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  void updateTransform(String value, [Matrix4 newMatrix4]) {
     // If render box model was not creared yet, then exit.
     if (renderBoxModel == null) {
       return;
     }
-
     ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
+    int targetId = renderBoxModel.targetId;
+    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
 
-    Matrix4 matrix4 = CSSTransform.parseTransform(value, viewportSize);
+    Matrix4 matrix4 = newMatrix4 ?? CSSTransform.parseTransform(value, viewportSize);
     // Upgrade this renderObject into repaintSelf mode.
     if (!renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;
@@ -1001,40 +1152,34 @@ mixin CSSTransformMixin on Node {
         RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
         parent.remove(renderBoxModel);
         element.renderBoxModel = repaintSelfBox;
-        element.parent.addChildRenderObject(this, after: previousSibling);
+        element.parent.addChildRenderObject(element, after: previousSibling);
       } else if (parent is RenderObjectWithChildMixin) {
         parent.child = repaintSelfBox;
       }
       element.renderBoxModel = repaintSelfBox;
-      renderBoxModel = repaintSelfBox;
+      // Update renderBoxModel reference in renderStyle
+      element.renderBoxModel.renderStyle.renderBoxModel = element.renderBoxModel;
     }
-
-    renderBoxModel.transform = matrix4 ?? CSSTransform.initial;
+    element.renderBoxModel.renderStyle.transform = matrix4 ?? CSSTransform.initial;
   }
 
-  void updateRenderTransformOrigin(RenderBoxModel renderBoxModel, String present) {
-    ElementManager elementManager = renderBoxModel.elementManager;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
-    CSSOrigin transformOrigin = CSSOrigin.parseOrigin(present, viewportSize);
-    if (transformOrigin == null) return;
+  void updateTransformOrigin(String present, [CSSOrigin newOrigin]) {
+    CSSOrigin transformOriginValue = newOrigin ?? CSSOrigin.parseOrigin(present, viewportSize);
+    if (transformOriginValue == null) return;
 
     Offset oldOffset = renderBoxModel.origin;
-    Offset offset = transformOrigin.offset;
+    Offset offset = transformOriginValue.offset;
     // Transform origin transition by offset
     if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
       renderBoxModel.origin = offset;
     }
 
-    Alignment alignment = transformOrigin.alignment;
+    Alignment alignment = transformOriginValue.alignment;
     Alignment oldAlignment = renderBoxModel.alignment;
     // Transform origin transition by alignment
     if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {
       renderBoxModel.alignment = alignment;
     }
   }
-
 }
 

@@ -263,7 +263,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextSpan buildTextSpan({String text = ''}) {
     text ??= properties['value'];
-    return createTextSpan(text, style, elementManager);
+    return CSSTextMixin.createTextSpan(text, this);
   }
 
   get cursorColor => CSSColor.initial;
@@ -386,13 +386,14 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     assert(renderBoxModel is RenderIntrinsic);
     RenderEditable renderEditable = createRenderEditable();
     RenderIntrinsic renderIntrinsic = renderBoxModel;
+    RenderStyle renderStyle = renderIntrinsic.renderStyle;
     // Make render editable vertically center.
-    double dy = renderIntrinsic.height == null
+    double dy = renderStyle.height == null
         ? 0
-        : (renderIntrinsic.height
+        : (renderStyle.height
             - renderEditable.preferredLineHeight
-            - renderIntrinsic.borderTop
-            - renderIntrinsic.borderBottom) / 2;
+            - renderIntrinsic.renderStyle.borderTop
+            - renderIntrinsic.renderStyle.borderBottom) / 2;
     _renderOffsetBox = RenderOffsetBox(
       offset: Offset(0, dy),
       child: renderEditable,

@@ -25,7 +25,7 @@ JSCustomEvent::JSCustomEvent(JSContext *context) : JSEvent(context, "CustomEvent
 JSObjectRef JSCustomEvent::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to construct 'CustomEvent': 1 argument required, but only 0 present.", exception);
+    throwJSError(ctx, "Failed to construct 'CustomEvent': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
@@ -95,7 +95,7 @@ JSValueRef CustomEventInstance::initCustomEvent(JSContextRef ctx, JSObjectRef fu
                                                 size_t argumentCount, const JSValueRef *arguments,
                                                 JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'initCustomEvent' on 'CustomEvent': 1 argument required, but only 0 present", exception);
+    throwJSError(ctx, "Failed to execute 'initCustomEvent' on 'CustomEvent': 1 argument required, but only 0 present", exception);
     return nullptr;
   }
   auto eventInstance = static_cast<CustomEventInstance *>(JSObjectGetPrivate(thisObject));

@@ -208,6 +208,9 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     RenderBox child = _renderViewport;
     BoxConstraints childConstraints;
 
+    double width = renderStyle.width;
+    double height = renderStyle.height;
+
     switch (_axis) {
       case Axis.horizontal:
         childConstraints = BoxConstraints(
@@ -247,12 +250,12 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (padding != null) {
-      offset += Offset(paddingLeft, paddingTop);
+    if (renderStyle.padding != null) {
+      offset += Offset(renderStyle.paddingLeft, renderStyle.paddingTop);
     }
 
-    if (borderEdge != null) {
-      offset += Offset(borderLeft, borderTop);
+    if (renderStyle.borderEdge != null) {
+      offset += Offset(renderStyle.borderLeft, renderStyle.borderTop);
     }
 
     if (firstChild != null) {
@@ -270,8 +273,10 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   Offset getChildScrollOffset(RenderObject child, Offset offset) {
     final RenderLayoutParentData childParentData = child.parentData;
+    bool isChildFixed = child is RenderBoxModel ?
+      child.renderStyle.position == CSSPositionType.fixed : false;
     // Fixed elements always paint original offset
-    Offset scrollOffset = childParentData.position == CSSPositionType.fixed
+    Offset scrollOffset = isChildFixed
         ? childParentData.offset
         : childParentData.offset + offset;
     return scrollOffset;

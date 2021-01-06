@@ -48,12 +48,12 @@ JSValueRef JSAllCollection::item(JSContextRef ctx, JSObjectRef function, JSObjec
 JSValueRef JSAllCollection::add(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute add() on HTMLAllCollection: 1 arguments required.", exception);
+    throwJSError(ctx, "Failed to execute add() on HTMLAllCollection: 1 arguments required.", exception);
     return nullptr;
   }
 
   if (!JSValueIsObject(ctx, arguments[0])) {
-    JSC_THROW_ERROR(ctx, "Failed to execute add() on HTMLAllCollection: first arguments should be a object.",
+    throwJSError(ctx, "Failed to execute add() on HTMLAllCollection: first arguments should be a object.",
                     exception);
     return nullptr;
   }
@@ -81,7 +81,7 @@ JSValueRef JSAllCollection::add(JSContextRef ctx, JSObjectRef function, JSObject
 JSValueRef JSAllCollection::remove(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute remove() on HTMLAllCollection: 1 arguments required.", exception);
+    throwJSError(ctx, "Failed to execute remove() on HTMLAllCollection: 1 arguments required.", exception);
     return nullptr;
   }
 

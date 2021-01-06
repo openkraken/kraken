@@ -46,7 +46,7 @@ describe('dynamic-change', () => {
 
     await matchViewportSnapshot();
   });
-  it('simplified-layout', async () => {
+  xit('simplified-layout', async () => {
     let child;
     let it1;
     let it2;

@@ -200,20 +200,21 @@ class ImageElement extends Element {
       double height = 0.0;
       bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
       bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
       if (!containWidth && !containHeight) {
         width = naturalWidth;
         height = naturalHeight;
       } else {
         if (containWidth && containHeight) {
-          width = renderBoxModel.width ?? _propertyWidth;
-          height = renderBoxModel.height ?? _propertyHeight;
+          width = renderStyle.width ?? _propertyWidth;
+          height = renderStyle.height ?? _propertyHeight;
         } else if (containWidth) {
-          width = renderBoxModel.width ?? _propertyWidth;
+          width = renderStyle.width ?? _propertyWidth;
           if (naturalWidth != 0) {
             height = width * naturalHeight / naturalWidth;
           }
         } else if (containHeight) {
-          height = renderBoxModel.height ?? _propertyHeight;
+          height = renderStyle.height ?? _propertyHeight;
           if (naturalHeight != 0) {
             width = height * naturalWidth / naturalHeight;
           }

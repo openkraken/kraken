@@ -11,7 +11,8 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
+class TextNode extends Node with
+  NodeLifeCycle {
   final Pointer<NativeTextNode> nativeTextNodePtr;
 
   static SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
@@ -79,6 +80,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   @override
   RenderObject get renderer => _renderTextBox;
 
+
   void updateTextStyle() {
     if (isRendererAttached) {
       _updateTextStyle();
@@ -95,7 +97,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     // parentNode must be an element.
     Element parentElement = parent;
     _renderTextBox.style = parentElement.style;
-    _renderTextBox.text = createTextSpan(data, parentElement.style, elementManager);
+    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
     _setTextNodeProperties(parentElement.style);
 
     RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
@@ -137,7 +139,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     createRenderer();
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
-    _renderTextBox.text = createTextSpan(data, parent.style, elementManager);
+    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parent);
     // TextNode's style is inherited from parent style
     _renderTextBox.style = parent.style;
 
@@ -150,7 +152,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
       return renderer;
     }
 
-    InlineSpan text = createTextSpan(_data, null, elementManager);
+    InlineSpan text = CSSTextMixin.createTextSpan(_data, null);
     _renderTextBox = RenderTextBox(text,
       targetId: targetId,
       style: null,
