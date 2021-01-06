@@ -29,6 +29,11 @@ function startIntegrationTest() {
     console.error(error);
     process.exit(1);
   });
+  tester.on('exit', (code) => {
+    if (code != 0) {
+      process.exit(code);
+    }
+  });
 }
 
 (async () => {
