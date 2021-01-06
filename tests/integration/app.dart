@@ -19,9 +19,16 @@ String err = (AnsiPen()..red())('[TEST FAILED]');
 final Directory specsDirectory = Directory(Platform.environment['KRAKEN_SPEC_DIR'] + '/integration/.specs');
 final Directory snapshotsDirectory = Directory(Platform.environment['KRAKEN_SPEC_DIR'] + '/integration/snapshots');
 
-Kraken kraken;
+const int KRAKEN_NUM = 1;
+List<Kraken> kraken = List<Kraken>(KRAKEN_NUM);
 
 class NativeGestureClient implements GestureClient {
+  NativeGestureClient({
+    this.gestureClientID
+  }) {}
+
+  int gestureClientID;
+
   @override
   void dragUpdateCallback(DragUpdateDetails details) {
   }
@@ -29,7 +36,7 @@ class NativeGestureClient implements GestureClient {
   @override
   void dragStartCallback(DragStartDetails details) {
     var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
-    kraken.controller.view.document.body.dispatchEvent(event);
+    kraken[gestureClientID].controller.view.document.body.dispatchEvent(event);
   }
 
   @override
@@ -63,14 +70,14 @@ void main() async {
   ];
   List<Kraken> widgets = [];
 
-  for (int i = 0; i < 1; i ++) {
+  for (int i = 0; i < KRAKEN_NUM; i ++) {
     KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
     javaScriptChannel.onMethodCall = (String method, dynamic arguments) async {
       javaScriptChannel.invokeMethod(method, arguments);
       return 'method: ' + method;
     };
 
-    kraken = Kraken(
+    kraken[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
       bundleContent: 'console.log("starting integration test")',
@@ -78,9 +85,9 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       debugEnableInspector: false,
-      gestureClient: NativeGestureClient(),
+      gestureClient: NativeGestureClient(gestureClientID:i),
     );
-    widgets.add(kraken);
+    widgets.add(kraken[i]);
   }
 
   runApp(MaterialApp(
@@ -134,3 +141,4 @@ void main() async {
     exit(0);
   });
 }
+
