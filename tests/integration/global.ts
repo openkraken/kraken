@@ -7,7 +7,6 @@
  * - create: create element.
  * - matchViewportSnapshot: match snapshot of body's image.
  */
-// Needed for the generator functions which are transpiled from your async await keywords
 const BODY = document.body;
 
 function setElementStyle(dom: HTMLElement, object: any) {
