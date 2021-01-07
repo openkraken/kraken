@@ -4,8 +4,8 @@ const { startWsServer } = require('./ws_server');
 const isPortReachable = require('is-port-reachable');
 
 function startIntegrationTest() {
-  const isSkipBuild = /skip\-build/.test(process.argv);
-  if (!isSkipBuild) {
+  const shouldSkipBuild = /skip\-build/.test(process.argv);
+  if (!shouldSkipBuild) {
     console.log('Build Test App from integration/app.dart, waiting...');
     spawnSync('flutter', ['build', 'macos', '--debug', '--target=integration/app.dart'], {
       stdio: 'inherit'
