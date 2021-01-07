@@ -146,7 +146,6 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
   // Text node need hittest self to trigger scroll
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    // Prioritize whether position belongs to the current size, so that each node does not need to traverse all its superiors.
     return size.contains(position);
   }
 }
