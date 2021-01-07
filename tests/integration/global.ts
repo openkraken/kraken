@@ -191,7 +191,6 @@ async function matchElementImageSnapshot(element: HTMLElement) {
 
 // Compatible to tests that use global variables.
 Object.assign(global, {
-  Cubic,
   BODY,
   append,
   setAttributes,
