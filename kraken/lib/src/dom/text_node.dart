@@ -126,8 +126,10 @@ class TextNode extends Node {
   void detach() {
     willDetachRenderer();
 
-    ContainerRenderObjectMixin parent = _renderTextBox.parent;
-    parent.remove(_renderTextBox);
+    if (isRendererAttached) {
+      ContainerRenderObjectMixin parent = _renderTextBox.parent;
+      parent.remove(_renderTextBox);
+    }
 
     didDetachRenderer();
     _renderTextBox = null;
