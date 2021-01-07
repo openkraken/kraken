@@ -136,7 +136,6 @@ class CSSStyleDeclaration {
     if ((prevValue == null && CSSLength.isAuto(CSSInitialValues[property])) || CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
       return false;
     }
-
     return CSSTransformHandlers[property] != null &&
       (_transitions.containsKey(property) || _transitions.containsKey(ALL));
   }
@@ -198,7 +197,7 @@ class CSSStyleDeclaration {
       Keyframe(propertyName, begin, 0, LINEAR),
       Keyframe(propertyName, end, 1, LINEAR),
     ];
-    KeyframeEffect effect = KeyframeEffect(this, keyframes, options, viewportSize);
+    KeyframeEffect effect = KeyframeEffect(this, target, keyframes, options, viewportSize);
     Animation animation = Animation(effect);
     _propertyRunningTransition[propertyName] = animation;
 
@@ -459,6 +458,7 @@ class CSSStyleDeclaration {
     }
 
     String normalizedValue = _normalizeValue(value);
+
 
     // Illegal value like '   ' after trim is '' should do nothing.
     if (normalizedValue.isEmpty) return;

@@ -172,160 +172,274 @@ enum AlignSelf {
   baseline
 }
 
-mixin CSSFlexboxMixin {
-  static void decorateRenderFlex(RenderFlexLayout renderFlexLayout, CSSStyleDeclaration style) {
-    if (style != null) {
-      String justifyContent = style[JUSTIFY_CONTENT];
-      String alignItems = style[ALIGN_ITEMS];
-      String flexDirection = style[FLEX_DIRECTION];
-      String flexWrap = style[FLEX_WRAP];
-      String alignContent = style[ALIGN_CONTENT];
+mixin CSSFlexboxMixin on RenderStyleBase {
 
-      renderFlexLayout.flexDirection = _getFlexDirection(flexDirection);
-      renderFlexLayout.flexWrap = _getFlexWrap(flexWrap);
-      renderFlexLayout.justifyContent = _getJustifyContent(justifyContent);
-      renderFlexLayout.alignItems = _getAlignItems(alignItems, style, renderFlexLayout.flexDirection);
-      renderFlexLayout.alignContent = _getAlignContent(alignContent);
+  FlexDirection get flexDirection => _flexDirection;
+  FlexDirection _flexDirection = FlexDirection.row;
+
+  set flexDirection(FlexDirection value) {
+    assert(value != null);
+    if (_flexDirection != value) {
+      _flexDirection = value;
+      if (renderBoxModel is RenderFlexLayout) {
+        renderBoxModel.markNeedsLayout();
+      }
     }
   }
-}
 
-FlexDirection _getFlexDirection(String flexDirection) {
-  switch (flexDirection) {
-    case 'row-reverse':
-      return FlexDirection.rowReverse;
-    case 'column':
-      return FlexDirection.column;
-    case 'column-reverse':
-      return FlexDirection.columnReverse;
-    case 'row':
-    default:
-      return FlexDirection.row;
+  FlexWrap get flexWrap => _flexWrap;
+  FlexWrap _flexWrap = FlexWrap.nowrap;
+
+  set flexWrap(FlexWrap value) {
+    assert(value != null);
+    if (_flexWrap != value) {
+      _flexWrap = value;
+      if (renderBoxModel is RenderFlexLayout) {
+        renderBoxModel.markNeedsLayout();
+      }
+    }
   }
-}
 
-FlexWrap _getFlexWrap(String flexWrap) {
-  switch (flexWrap) {
-    case 'wrap':
-      return FlexWrap.wrap;
-    case 'wrap-reverse':
-      return FlexWrap.wrapReverse;
-    case 'nowrap':
-    default:
-      return FlexWrap.nowrap;
+  JustifyContent get justifyContent => _justifyContent;
+  JustifyContent _justifyContent = JustifyContent.flexStart;
+
+  set justifyContent(JustifyContent value) {
+    assert(value != null);
+    if (_justifyContent != value) {
+      _justifyContent = value;
+      if (renderBoxModel is RenderFlexLayout) {
+        renderBoxModel.markNeedsLayout();
+      }
+    }
   }
-}
 
-JustifyContent _getJustifyContent(String justifyContent) {
-  switch (justifyContent) {
-    case 'flex-end':
-    case 'end':
-      return JustifyContent.flexEnd;
-    case 'center':
-      return JustifyContent.center;
-    case 'space-between':
-      return JustifyContent.spaceBetween;
-    case 'space-around':
-      return JustifyContent.spaceAround;
-    case 'space-evenly':
-      return JustifyContent.spaceEvenly;
-    case 'flex-start':
-    case 'start':
-    default:
-      return JustifyContent.flexStart;
+  AlignItems get alignItems => _alignItems;
+  AlignItems _alignItems = AlignItems.stretch;
+
+  set alignItems(AlignItems value) {
+    assert(value != null);
+    if (_alignItems != value) {
+      _alignItems = value;
+      if (renderBoxModel is RenderFlexLayout) {
+        renderBoxModel.markNeedsLayout();
+      }
+    }
   }
-}
 
-AlignItems _getAlignItems(String alignItems, CSSStyleDeclaration style, FlexDirection flexDirection) {
-  if (CSSFlex.isVerticalFlexDirection(flexDirection) && style.contains(TEXT_ALIGN)) {
-    String textAlign = style[TEXT_ALIGN];
-    switch (textAlign) {
-      case 'right':
+  AlignContent get alignContent => _alignContent;
+  AlignContent _alignContent = AlignContent.stretch;
+  set alignContent(AlignContent value) {
+    assert(value != null);
+    if (_alignContent == value) return;
+    _alignContent = value;
+    if (renderBoxModel is RenderFlexLayout) {
+      renderBoxModel.markNeedsLayout();
+    }
+  }
+
+  AlignSelf get alignSelf => _alignSelf;
+  AlignSelf _alignSelf = AlignSelf.auto;
+  set alignSelf(AlignSelf value) {
+    assert(value != null);
+    if (_alignSelf == value) return;
+    _alignSelf = value;
+    if (renderBoxModel.parent is RenderFlexLayout) {
+      renderBoxModel.markNeedsLayout();
+    }
+  }
+
+  double get flexBasis => _flexBasis;
+  double _flexBasis;
+  set flexBasis(double value) {
+    if (_flexBasis == value) return;
+    _flexBasis = value;
+    if (renderBoxModel.parent is RenderFlexLayout) {
+      renderBoxModel.markNeedsLayout();
+    }
+  }
+
+  double get flexGrow => _flexGrow;
+  double _flexGrow = 0.0;
+  set flexGrow(double value) {
+    if (_flexGrow == value) return;
+    _flexGrow = value;
+    if (renderBoxModel.parent is RenderFlexLayout) {
+      renderBoxModel.markNeedsLayout();
+    }
+  }
+
+  double get flexShrink => _flexShrink;
+  double _flexShrink = 1.0;
+  set flexShrink(double value) {
+    if (_flexShrink == value) return;
+    _flexShrink = value;
+    if (renderBoxModel.parent is RenderFlexLayout) {
+      renderBoxModel.markNeedsLayout();
+    }
+  }
+
+  void updateFlexbox() {
+    flexDirection = _getFlexDirection(style);
+    flexWrap = _getFlexWrap(style);
+    justifyContent = _getJustifyContent(style);
+    alignItems = _getAlignItems(style);
+    alignContent = _getAlignContent(style);
+  }
+
+  void updateFlexItem() {
+    flexGrow = _getFlexGrow(style);
+    flexShrink = _getFlexShrink(style);
+    flexBasis = _getFlexBasis(style, viewportSize);
+    alignSelf = _getAlignSelf(style);
+  }
+
+  FlexDirection _getFlexDirection(CSSStyleDeclaration style) {
+    String flexDirection = style[FLEX_DIRECTION];
+    switch (flexDirection) {
+      case 'row-reverse':
+        return FlexDirection.rowReverse;
+      case 'column':
+        return FlexDirection.column;
+      case 'column-reverse':
+        return FlexDirection.columnReverse;
+      case 'row':
+      default:
+        return FlexDirection.row;
+    }
+  }
+
+  FlexWrap _getFlexWrap(CSSStyleDeclaration style) {
+    String flexWrap = style[FLEX_WRAP];
+    switch (flexWrap) {
+      case 'wrap':
+        return FlexWrap.wrap;
+      case 'wrap-reverse':
+        return FlexWrap.wrapReverse;
+      case 'nowrap':
+      default:
+        return FlexWrap.nowrap;
+    }
+  }
+
+  JustifyContent _getJustifyContent(CSSStyleDeclaration style) {
+    String justifyContent = style[JUSTIFY_CONTENT];
+    switch (justifyContent) {
+      case 'flex-end':
+      case 'end':
+        return JustifyContent.flexEnd;
+      case 'center':
+        return JustifyContent.center;
+      case 'space-between':
+        return JustifyContent.spaceBetween;
+      case 'space-around':
+        return JustifyContent.spaceAround;
+      case 'space-evenly':
+        return JustifyContent.spaceEvenly;
+      case 'flex-start':
+      case 'start':
+      default:
+        return JustifyContent.flexStart;
+    }
+  }
+
+  AlignItems _getAlignItems(CSSStyleDeclaration style) {
+    String alignItems = style[ALIGN_ITEMS];
+    if (CSSFlex.isVerticalFlexDirection(flexDirection) && style.contains(TEXT_ALIGN)) {
+      String textAlign = style[TEXT_ALIGN];
+      switch (textAlign) {
+        case 'right':
+          return AlignItems.flexEnd;
+        case 'center':
+          return AlignItems.center;
+      }
+    }
+
+    switch (alignItems) {
+      case 'flex-start':
+      case 'start':
+        return AlignItems.flexStart;
+      case 'flex-end':
+      case 'end':
         return AlignItems.flexEnd;
       case 'center':
         return AlignItems.center;
+      case 'baseline':
+        return AlignItems.baseline;
+      case 'stretch':
+      default:
+        return AlignItems.stretch;
     }
   }
 
-  switch (alignItems) {
-    case 'flex-start':
-    case 'start':
-      return AlignItems.flexStart;
-    case 'flex-end':
-    case 'end':
-      return AlignItems.flexEnd;
-    case 'center':
-      return AlignItems.center;
-    case 'baseline':
-      return AlignItems.baseline;
-    case 'stretch':
-    default:
-      return AlignItems.stretch;
-  }
-}
-
-AlignContent _getAlignContent(String alignContent) {
-  switch (alignContent) {
-    case 'flex-start':
-    case 'start':
-      return AlignContent.flexStart;
-    case 'flex-end':
-    case 'end':
-      return AlignContent.flexEnd;
-    case 'center':
-      return AlignContent.center;
-    case 'space-around':
-      return AlignContent.spaceAround;
-    case 'space-between':
-      return AlignContent.spaceBetween;
-    case 'space-evenly':
-      return AlignContent.spaceEvenly;
-    case 'stretch':
-    default:
-      return AlignContent.stretch;
-  }
-}
-
-AlignSelf _getAlignSelf(String alignSelf) {
-  switch (alignSelf) {
-    case 'flex-start':
-    case 'start':
-      return AlignSelf.flexStart;
-    case 'flex-end':
-    case 'end':
-      return AlignSelf.flexEnd;
-    case 'center':
-      return AlignSelf.center;
-    case 'stretch':
-      return AlignSelf.stretch;
-    case 'baseline':
-      return AlignSelf.baseline;
-    default:
-      return AlignSelf.auto;
-  }
-}
-
-double _getFlexGrow(String grow) {
-  double flexGrow = CSSLength.toDouble(grow);
-  return flexGrow != null && flexGrow >= 0 ? flexGrow : 0.0;
-}
-
-double _getFlexShrink(String shrink) {
-  double flexShrink = CSSLength.toDouble(shrink);
-  return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
-}
-
-String _getFlexBasis(String basis, Size viewportSize) {
-  String flexBasis = basis;
-  if (basis.isNotEmpty && basis != AUTO) {
-    if (CSSLength.toDisplayPortValue(basis, viewportSize) < 0) {
-      flexBasis = AUTO;
+  AlignContent _getAlignContent(CSSStyleDeclaration style) {
+    String alignContent = style[ALIGN_CONTENT];
+    switch (alignContent) {
+      case 'flex-start':
+      case 'start':
+        return AlignContent.flexStart;
+      case 'flex-end':
+      case 'end':
+        return AlignContent.flexEnd;
+      case 'center':
+        return AlignContent.center;
+      case 'space-around':
+        return AlignContent.spaceAround;
+      case 'space-between':
+        return AlignContent.spaceBetween;
+      case 'space-evenly':
+        return AlignContent.spaceEvenly;
+      case 'stretch':
+      default:
+        return AlignContent.stretch;
     }
-  } else {
-    flexBasis = AUTO;
   }
-  return flexBasis;
+
+  AlignSelf _getAlignSelf(CSSStyleDeclaration style) {
+    String alignSelf = style[ALIGN_SELF];
+    switch (alignSelf) {
+      case 'flex-start':
+      case 'start':
+        return AlignSelf.flexStart;
+      case 'flex-end':
+      case 'end':
+        return AlignSelf.flexEnd;
+      case 'center':
+        return AlignSelf.center;
+      case 'stretch':
+        return AlignSelf.stretch;
+      case 'baseline':
+        return AlignSelf.baseline;
+      default:
+        return AlignSelf.auto;
+    }
+  }
+
+  double _getFlexGrow(CSSStyleDeclaration style) {
+    String grow = style[FLEX_GROW];
+    double flexGrow = CSSLength.toDouble(grow);
+    return flexGrow != null && flexGrow >= 0 ? flexGrow : 0.0;
+  }
+
+  double _getFlexShrink(CSSStyleDeclaration style) {
+    String shrink = style[FLEX_SHRINK];
+    double flexShrink = CSSLength.toDouble(shrink);
+    return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
+  }
+
+  double _getFlexBasis(CSSStyleDeclaration style, Size viewportSize) {
+    String basisStr = style[FLEX_BASIS];
+    double flexBasis = CSSLength.toDisplayPortValue(basisStr, viewportSize);
+    if (basisStr.isNotEmpty && basisStr != AUTO) {
+      if (flexBasis < 0) {
+        flexBasis = null;
+      }
+    } else {
+      flexBasis = null;
+    }
+    return flexBasis;
+  }
 }
+
 
 class CSSFlex {
   static bool isValidFlexWrapValue(String val) {
@@ -344,18 +458,4 @@ class CSSFlex {
     return flexDirection == FlexDirection.columnReverse || flexDirection == FlexDirection.column;
   }
 
-  static RenderFlexParentData getParentData(CSSStyleDeclaration style, Size viewportSize) {
-    RenderFlexParentData parentData = RenderFlexParentData();
-    String grow = style[FLEX_GROW];
-    String shrink = style[FLEX_SHRINK];
-    String basis = style[FLEX_BASIS];
-    String alignSelf = style[ALIGN_SELF];
-
-    parentData.flexGrow = _getFlexGrow(grow);
-    parentData.flexShrink = _getFlexShrink(shrink);
-    parentData.flexBasis = _getFlexBasis(basis, viewportSize);
-    parentData.alignSelf = _getAlignSelf(alignSelf);
-
-    return parentData;
-  }
 }

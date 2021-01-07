@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 
-mixin RenderTransformMixin on RenderBox {
+mixin RenderTransformMixin on RenderBoxModelBase {
 
   Offset get origin => _origin;
   Offset _origin = Offset(0, 0);
@@ -24,14 +24,6 @@ mixin RenderTransformMixin on RenderBox {
     markNeedsPaint();
   }
 
-  Matrix4 get transform => _transform;
-  Matrix4 _transform;
-  set transform(Matrix4 value) {
-    if (_transform == value) return;
-    _transform = value;
-    markNeedsPaint();
-  }
-
   // Copy from flutter [RenderTransform._effectiveTransform]
   Matrix4 getEffectiveTransform() {
     final Matrix4 result = Matrix4.identity();
@@ -44,7 +36,7 @@ mixin RenderTransformMixin on RenderBox {
       result.translate(translation.dx, translation.dy);
     }
 
-    result.multiply(_transform);
+    result.multiply(renderStyle.transform);
 
     if (alignment != null && alignment != Alignment.topLeft) result.translate(-translation.dx, -translation.dy);
     if (origin != null) result.translate(-origin.dx, -origin.dy);
@@ -54,7 +46,7 @@ mixin RenderTransformMixin on RenderBox {
   TransformLayer _transformLayer;
 
   void paintTransform(PaintingContext context, Offset offset, PaintingContextCallback callback) {
-    if (_transform != null) {
+    if (renderStyle.transform != null) {
       final Matrix4 transform = getEffectiveTransform();
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null) {
@@ -75,7 +67,7 @@ mixin RenderTransformMixin on RenderBox {
   }
 
   void applyEffectiveTransform(RenderBox child, Matrix4 transform) {
-    if (_transform != null) {
+    if (renderStyle.transform != null) {
       transform.multiply(getEffectiveTransform());
     }
   }
@@ -120,6 +112,5 @@ mixin RenderTransformMixin on RenderBox {
   void debugTransformProperties(DiagnosticPropertiesBuilder properties) {
     if (origin != null) properties.add(DiagnosticsProperty('transformOrigin', origin));
     if (alignment != null) properties.add(DiagnosticsProperty('transformAlignment', alignment));
-    if (transform != null) properties.add(DiagnosticsProperty('transform', transform));
   }
 }

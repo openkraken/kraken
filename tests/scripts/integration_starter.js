@@ -6,7 +6,6 @@ const isPortReachable = require('is-port-reachable');
 function startIntegrationTest() {
   console.log('Building macos application...');
   spawnSync('flutter', ['build', 'macos', '--debug', '--target=integration/app.dart']);
-
   const testExecutable = path.join(__dirname, '../build/macos/Build/Products/Debug/tests.app/Contents/MacOS/tests');
   const tester = spawn(testExecutable, [], {
     env: {
@@ -23,6 +22,11 @@ function startIntegrationTest() {
   tester.on('error', (error) => {
     console.error(error);
     process.exit(1);
+  });
+  tester.on('exit', (code) => {
+    if (code != 0) {
+      process.exit(code);
+    }
   });
 }
 

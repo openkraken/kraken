@@ -1,11 +1,11 @@
 name: kraken
-description: Kraken Framework
-version: 0.6.2
-homepage: http://rax.alibaba-inc.com/kraken
+description: A high-performance, web standards-compliant rendering engine.
+version: 0.6.2+2
+homepage: https://rax.js.org/docs/guide/kraken-startup
 
 environment:
   sdk: ">=2.8.0 <3.0.0"
-  flutter: ">=1.17.0 <1.23.0"
+  flutter: ">=1.17.0 <2.0.0"
 
 dependencies:
   flutter:
@@ -21,18 +21,14 @@ dependencies:
   device_info: ^0.4.1 # Only support iOS and Android.
   path_provider: ^1.1.0
   dio: ^3.0.9
-  vector_math: ^ 2.0.8
+  vector_math: ^2.0.8
+  characters: ^1.0.0
   vibration: ^1.4.0
-  kraken_video_player:
-    path: ../plugins/kraken_video_player
-  kraken_camera:
-    path: ../plugins/kraken_camera
-  kraken_webview:
-    path: ../plugins/kraken_webview
-  kraken_audioplayers:
-    path: ../plugins/kraken_audioplayers
-  kraken_geolocation:
-    path: ../plugins/kraken_geolocation
+  kraken_video_player: ^0.1.0
+  kraken_camera: ^0.1.0
+  kraken_webview: ^0.1.5
+  kraken_audioplayers: ^0.1.0
+  kraken_geolocation: ^0.1.0
 
 dev_dependencies:
   effective_dart: ^1.2.1

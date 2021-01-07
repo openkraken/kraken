@@ -5,7 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/painting.dart';
+import 'package:kraken/rendering.dart';
 
 enum BackgroundBoundary {
   borderBox,
@@ -13,7 +13,7 @@ enum BackgroundBoundary {
   contentBox,
 }
 
-mixin RenderBoxDecorationMixin on RenderBox {
+mixin RenderBoxDecorationMixin on RenderBoxModelBase {
   CSSBoxDecoration cssBoxDecoration;
   DecorationPosition position = DecorationPosition.background;
   ImageConfiguration configuration = ImageConfiguration.empty;
@@ -22,40 +22,6 @@ mixin RenderBoxDecorationMixin on RenderBox {
   _BoxDecorationPainter get boxPainter => _painter;
   set boxPainter(_BoxDecorationPainter painter) {
     _painter = painter;
-  }
-
-  /// Background-clip
-  BackgroundBoundary get backgroundClip => _backgroundClip;
-  BackgroundBoundary _backgroundClip;
-  set backgroundClip(BackgroundBoundary value) {
-    if (value == null) return;
-    if (value == _backgroundClip) return;
-    _backgroundClip = value;
-    markNeedsPaint();
-  }
-
-  /// Background-origin
-  BackgroundBoundary get backgroundOrigin => _backgroundOrigin;
-  BackgroundBoundary _backgroundOrigin;
-  set backgroundOrigin(BackgroundBoundary value) {
-    if (value == null) return;
-    if (value == _backgroundOrigin) return;
-    _backgroundOrigin = value;
-    markNeedsPaint();
-  }
-
-  /// BorderSize to deflate.
-  EdgeInsets _borderEdge;
-  EdgeInsets get borderEdge => _borderEdge;
-  set borderEdge(EdgeInsets newValue) {
-    _borderEdge = newValue;
-    if (_decoration != null && _decoration is BoxDecoration) {
-      Gradient gradient = _decoration.gradient;
-      if (gradient is BorderGradientMixin) {
-        gradient.borderEdge = newValue;
-      }
-    }
-    markNeedsLayout();
   }
 
   /// What decoration to paint.
@@ -69,11 +35,10 @@ mixin RenderBoxDecorationMixin on RenderBox {
     _painter?.dispose();
     _painter = null;
     _decoration = value;
-
     // If has border, render padding should subtracting the edge of the border
     if (value.border != null) {
       Border border = value.border;
-      borderEdge = EdgeInsets.fromLTRB(
+      renderStyle.borderEdge = EdgeInsets.fromLTRB(
         border.left.width,
         border.top.width,
         border.right.width,
@@ -82,38 +47,6 @@ mixin RenderBoxDecorationMixin on RenderBox {
     }
 
     markNeedsPaint();
-  }
-
-  BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
-    if (borderEdge != null) {
-      return constraints.deflate(borderEdge);
-    }
-    return constraints;
-  }
-
-  double get borderTop {
-    if (borderEdge == null) return 0.0;
-    return borderEdge.top;
-  }
-
-  double get borderBottom {
-    if (borderEdge == null) return 0.0;
-    return borderEdge.bottom;
-  }
-
-  double get borderLeft {
-    if (borderEdge == null) return 0.0;
-    return borderEdge.left;
-  }
-
-  double get borderRight {
-    if (borderEdge == null) return 0.0;
-    return borderEdge.right;
-  }
-
-  Size wrapBorderSize(Size innerSize) {
-    return Size(borderLeft + innerSize.width + borderRight,
-      borderTop + innerSize.height + borderBottom);
   }
 
   void disposePainter() {
@@ -132,9 +65,9 @@ mixin RenderBoxDecorationMixin on RenderBox {
     if (_painter == null) {
       _painter ??= _BoxDecorationPainter(
         decoration,
-        borderEdge,
-        backgroundClip,
-        backgroundOrigin,
+        renderStyle.borderEdge,
+        renderStyle.backgroundClip,
+        renderStyle.backgroundOrigin,
         padding,
         style,
         markNeedsPaint
@@ -176,9 +109,9 @@ mixin RenderBoxDecorationMixin on RenderBox {
     if (decoration == null) return;
     _painter ??= _BoxDecorationPainter(
       decoration,
-      borderEdge,
-      backgroundClip,
-      backgroundOrigin,
+      renderStyle.borderEdge,
+      renderStyle.backgroundClip,
+      renderStyle.backgroundOrigin,
       padding,
       style,
       markNeedsPaint
@@ -210,6 +143,7 @@ mixin RenderBoxDecorationMixin on RenderBox {
       if (decoration.isComplex) context.setIsComplexHint();
     }
     Offset contentOffset;
+    EdgeInsets borderEdge = renderStyle.borderEdge;
     if (borderEdge == null) {
       contentOffset = Offset(0, 0);
     } else {
@@ -223,9 +157,9 @@ mixin RenderBoxDecorationMixin on RenderBox {
   }
 
   void debugBoxDecorationProperties(DiagnosticPropertiesBuilder properties) {
-    if (borderEdge != null) properties.add(DiagnosticsProperty('borderEdge', borderEdge));
-    if (backgroundClip != null) properties.add(DiagnosticsProperty('backgroundClip', backgroundClip));
-    if (backgroundOrigin != null) properties.add(DiagnosticsProperty('backgroundOrigin', backgroundOrigin));
+    if (renderStyle.borderEdge != null) properties.add(DiagnosticsProperty('borderEdge', renderStyle.borderEdge));
+    if (renderStyle.backgroundClip != null) properties.add(DiagnosticsProperty('backgroundClip', renderStyle.backgroundClip));
+    if (renderStyle.backgroundOrigin != null) properties.add(DiagnosticsProperty('backgroundOrigin', renderStyle.backgroundOrigin));
     if (_decoration != null && _decoration.borderRadius != null) properties.add(DiagnosticsProperty('borderRadius', _decoration.borderRadius));
     if (_decoration != null && _decoration.image != null) properties.add(DiagnosticsProperty('backgroundImage', _decoration.image));
     if (_decoration != null && _decoration.boxShadow != null) properties.add(DiagnosticsProperty('boxShadow', _decoration.boxShadow));

@@ -53,7 +53,7 @@ mixin CSSOverflowMixin on ElementBase {
 
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
-  
+
   /// All the children whose position is sticky to this element
   List<Element> stickyChildren = [];
 
@@ -151,6 +151,8 @@ mixin CSSOverflowMixin on ElementBase {
           layoutBoxParent.remove(renderBoxModel);
           element.renderBoxModel = newLayoutBox;
           element.parent.addChildRenderObject(element, after: previousSibling);
+          // Update renderBoxModel reference in renderStyle
+          element.renderBoxModel.renderStyle.renderBoxModel = element.renderBoxModel;
         }
       }
     }
@@ -193,7 +195,7 @@ mixin CSSOverflowMixin on ElementBase {
     }
     return result;
   }
-  
+
   void _pointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       if (_scrollableX != null) {
@@ -245,7 +247,7 @@ mixin CSSOverflowMixin on ElementBase {
 
   void scrollBy({ num dx = 0.0, num dy = 0.0, bool withAnimation }) {
     stickyChildren = _findStickyChildren(this);
-    
+
     if (dx != 0) {
       _scroll(scrollLeft + dx, Axis.horizontal, withAnimation: withAnimation);
     }
@@ -256,7 +258,7 @@ mixin CSSOverflowMixin on ElementBase {
 
   void scrollTo({ num x, num y, bool withAnimation }) {
     stickyChildren = _findStickyChildren(this);
-    
+
     if (x != null) {
       _scroll(x, Axis.horizontal, withAnimation: withAnimation);
     }

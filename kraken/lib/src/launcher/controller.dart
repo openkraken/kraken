@@ -17,6 +17,7 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
+import 'package:kraken/gesture.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -42,6 +43,8 @@ class KrakenViewController {
   // during a kraken view's process of loading, and completing a navigation request.
   KrakenNavigationDelegate navigationDelegate;
 
+  GestureClient gestureClient;
+
   double viewportWidth;
   double viewportHeight;
   Color background;
@@ -55,6 +58,7 @@ class KrakenViewController {
     int contextId,
     this.rootController,
     this.navigationDelegate,
+    this.gestureClient,
   }) : _contextId = contextId {
     if (kProfileMode) {
       PerformanceTiming.instance(0).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
@@ -139,6 +143,7 @@ class KrakenViewController {
     viewport = RenderViewportBox(
       background: background,
       viewportSize: Size(viewportWidth, viewportHeight),
+      gestureClient: gestureClient,
     );
   }
 
@@ -420,6 +425,7 @@ class KrakenController {
 
   // Enable debug inspector.
   bool debugEnableInspector;
+  GestureClient _gestureClient;
 
   KrakenController(
     this.name,
@@ -431,6 +437,7 @@ class KrakenController {
     String bundlePath,
     String bundleContent,
     Color background,
+    GestureClient gestureClient,
     KrakenNavigationDelegate navigationDelegate,
     KrakenMethodChannel methodChannel,
     this.onLoadError,
@@ -438,7 +445,8 @@ class KrakenController {
     this.debugEnableInspector,
   })  : _bundleURL = bundleURL,
         _bundlePath = bundlePath,
-        _bundleContent = bundleContent {
+        _bundleContent = bundleContent,
+        _gestureClient = gestureClient {
     if (kProfileMode) {
       PerformanceTiming.instance(0).mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance(0).mark(PERF_VIEW_CONTROLLER_INIT_START);
@@ -450,7 +458,8 @@ class KrakenController {
         showPerformanceOverlay: showPerformanceOverlay,
         enableDebug: enableDebug,
         rootController: this,
-        navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate());
+        navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
+        gestureClient: _gestureClient);
 
     if (kProfileMode) {
       PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
