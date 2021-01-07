@@ -30,6 +30,7 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
+/// Modified from Flutter rendering/box.dart.
 /// A mixin that provides useful default behaviors for boxes with children
 /// managed by the [ContainerRenderObjectMixin] mixin.
 ///
