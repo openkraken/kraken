@@ -11,15 +11,12 @@ describe('Append child', () => {
     }).toThrowError('Failed to execute \'appendChild\' on \'Node\': first arguments should be an Node type.');
   });
   it('with orphan element', async () => {
-    let n1;
-    n1 = createElementWithStyle(
-      'div',
-      {
-        width: '300px',
-        height: '300px',
-        backgroundColor: 'gray',
-      }
-    );
+    const style = {
+      width: '300px',
+      height: '300px',
+      backgroundColor: 'gray',
+    };
+    let n1 = <div style={style} />;
     BODY.appendChild(n1);
 
     await matchViewportSnapshot();
