@@ -74,7 +74,6 @@ class Element extends Node
     with
         ElementBase,
         ElementNativeMethods,
-        NodeLifeCycle,
         EventHandlerMixin,
         CSSOverflowMixin,
         CSSVisibilityMixin,
@@ -524,19 +523,12 @@ class Element extends Node
   Node appendChild(Node child) {
     super.appendChild(child);
 
-    // ignore: prefer_function_declarations_over_variables
-    VoidCallback doAppendChild = () {
-      // Only append node types which is visible in RenderObject tree
-      if (child is NodeLifeCycle) {
-        _append(child, after: _renderLayoutBox.lastChild);
-        child.fireAfterConnected();
+    _debugCheckNestedInline(child);
+    if (isRendererAttached) {
+      // Only append child renderer when which is not attached.
+      if (!child.isRendererAttached) {
+        child.attachTo(this, after: _renderLayoutBox.lastChild);
       }
-    };
-
-    if (isConnected) {
-      doAppendChild();
-    } else {
-      queueAfterConnected(doAppendChild);
     }
 
     return child;
@@ -548,12 +540,19 @@ class Element extends Node
     // Not remove node type which is not present in RenderObject tree such as Comment
     // Only append node types which is visible in RenderObject tree
     // Only remove childNode when it has parent
-    if (child is NodeLifeCycle && child.isRendererAttached) {
+    if (child.isRendererAttached) {
       child.detach();
     }
 
     super.removeChild(child);
     return child;
+  }
+
+  void _debugCheckNestedInline(Node child) {
+    // @NOTE: Make sure inline-box only have inline children, or print warning.
+    if ((child is Element) && !child.isInlineBox && isInlineContent) {
+      print('[WARN]: Can not nest non-inline element into non-inline parent element.');
+    }
   }
 
   @override
@@ -564,31 +563,28 @@ class Element extends Node
     // Node.insertBefore will change element tree structure,
     // so get the referenceIndex before calling it.
     Node node = super.insertBefore(child, referenceNode);
-    // ignore: prefer_function_declarations_over_variables
-    VoidCallback doInsertBefore = () {
-      if (referenceIndex != -1) {
-        Node after;
-        RenderObject afterRenderObject;
-        if (referenceIndex == 0) {
-          after = null;
-        } else {
-          do {
-            after = childNodes[--referenceIndex];
-          } while (after is! Element && referenceIndex > 0);
-          if (after is Element) {
-            afterRenderObject = after?.renderBoxModel;
-          }
-        }
-        _append(child, after: afterRenderObject);
-        if (child is NodeLifeCycle) child.fireAfterConnected();
-      }
-    };
 
-    if (isConnected) {
-      doInsertBefore();
-    } else {
-      queueAfterConnected(doInsertBefore);
+    if (isRendererAttached && referenceIndex != -1) {
+      Node after;
+      RenderObject afterRenderObject;
+      if (referenceIndex == 0) {
+        after = null;
+      } else {
+        do {
+          after = childNodes[--referenceIndex];
+        } while (after is! Element && referenceIndex > 0);
+        if (after is Element) {
+          afterRenderObject = after?.renderBoxModel;
+        }
+      }
+
+      _debugCheckNestedInline(child);
+      // Only append child renderer when which is not attached.
+      if (!child.isRendererAttached) {
+        child.attachTo(this, after: _renderLayoutBox.lastChild);
+      }
     }
+
     return node;
   }
 
@@ -672,17 +668,6 @@ class Element extends Node
   bool get isInlineContent {
     String displayValue = style[DISPLAY];
     return displayValue == INLINE;
-  }
-
-  /// Append a child to childList, if after is null, insert into first.
-  void _append(Node child, {RenderBox after}) {
-    // @NOTE: Make sure inline-box only have inline children, or print warning.
-    if ((child is Element) && !child.isInlineBox) {
-      if (isInlineContent) print('[WARN]: Can not nest non-inline element into non-inline parent element.');
-    }
-
-    // Only append childNode when it is not attached.
-    if (!child.isRendererAttached) child.attachTo(this, after: after);
   }
 
   void _onStyleChanged(String property, String original, String present, bool inAnimation) {

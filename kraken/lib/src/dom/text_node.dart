@@ -11,8 +11,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-class TextNode extends Node with
-  NodeLifeCycle {
+class TextNode extends Node {
   final Pointer<NativeTextNode> nativeTextNodePtr;
 
   static SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
