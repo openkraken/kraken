@@ -16,7 +16,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
@@ -558,30 +557,21 @@ class Element extends Node
   @override
   @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
-    int referenceIndex = childNodes.indexOf(referenceNode);
+    _debugCheckNestedInline(child);
 
+    int referenceIndex = childNodes.indexOf(referenceNode);
     // Node.insertBefore will change element tree structure,
     // so get the referenceIndex before calling it.
     Node node = super.insertBefore(child, referenceNode);
-
-    if (isRendererAttached && referenceIndex != -1) {
-      Node after;
-      RenderObject afterRenderObject;
-      if (referenceIndex == 0) {
-        after = null;
-      } else {
-        do {
-          after = childNodes[--referenceIndex];
-        } while (after is! Element && referenceIndex > 0);
-        if (after is Element) {
-          afterRenderObject = after?.renderBoxModel;
-        }
-      }
-
-      _debugCheckNestedInline(child);
+    if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
-        child.attachTo(this, after: _renderLayoutBox.lastChild);
+        RenderObject afterRenderObject;
+        // `referenceNode` should not be null, or `referenceIndex` can only be -1.
+        if (referenceIndex != -1 && referenceNode.isRendererAttached) {
+          afterRenderObject = (referenceNode.renderer.parentData as ContainerBoxParentData).previousSibling;
+        }
+        child.attachTo(this, after: afterRenderObject);
       }
     }
 
