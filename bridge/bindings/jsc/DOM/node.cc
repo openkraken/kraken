@@ -33,11 +33,13 @@ JSNode::~JSNode() {
 
 JSNode::NodeInstance::~NodeInstance() {
   // The this node is finalized, should tell all children this parent will no longer protecting them.
-  for (auto &node : childNodes) {
-    node->parentNode = nullptr;
-    node->unrefer();
-    assert(node->_referenceCount <= 0 &&
-           ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
+  if (context->isValid()) {
+    for (auto &node : childNodes) {
+      node->parentNode = nullptr;
+      node->unrefer();
+      assert(node->_referenceCount <= 0 &&
+             ("Node recycled with a dangling node " + std::to_string(node->eventTargetId)).c_str());
+    }
   }
 
   foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
@@ -383,23 +385,23 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeIns
                                                                  JSNode::NodeInstance *oldChild,
                                                                  JSValueRef *exception) {
   ensureDetached(newChild);
-  auto parent = oldChild->parentNode;
+  assert_m(newChild->parentNode == nullptr, "ReplaceChild Error: newChild was not detached.");
   oldChild->parentNode = nullptr;
   oldChild->unrefer();
 
-  auto childIndex = std::find(parent->childNodes.begin(), parent->childNodes.end(), oldChild);
-  if (childIndex == parent->childNodes.end()) {
+  auto childIndex = std::find(childNodes.begin(), childNodes.end(), oldChild);
+  if (childIndex == childNodes.end()) {
     throwJSError(ctx, "Failed to execute 'replaceChild' on 'Node': old child is not exist on childNodes.", exception);
     return nullptr;
   }
 
-  newChild->parentNode = parent;
-  parent->childNodes.erase(childIndex);
-  parent->childNodes.insert(childIndex, newChild);
+  newChild->parentNode = this;
+  childNodes.erase(childIndex);
+  childNodes.insert(childIndex, newChild);
   newChild->refer();
 
-  oldChild->_notifyNodeRemoved(parent);
-  newChild->_notifyNodeInsert(parent);
+  oldChild->_notifyNodeRemoved(this);
+  newChild->_notifyNodeInsert(this);
 
   std::string newChildEventTargetId = std::to_string(newChild->eventTargetId);
   std::string position = std::string("afterend");
