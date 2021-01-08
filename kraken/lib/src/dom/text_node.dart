@@ -11,8 +11,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-class TextNode extends Node with
-  NodeLifeCycle {
+class TextNode extends Node {
   final Pointer<NativeTextNode> nativeTextNodePtr;
 
   static SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
@@ -127,8 +126,10 @@ class TextNode extends Node with
   void detach() {
     willDetachRenderer();
 
-    ContainerRenderObjectMixin parent = _renderTextBox.parent;
-    parent.remove(_renderTextBox);
+    if (isRendererAttached) {
+      ContainerRenderObjectMixin parent = _renderTextBox.parent;
+      parent.remove(_renderTextBox);
+    }
 
     didDetachRenderer();
     _renderTextBox = null;
