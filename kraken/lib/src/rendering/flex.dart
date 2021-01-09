@@ -921,15 +921,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
     }
 
-    _setContainerSize(
-      runMetrics,
-      containerSizeMap,
-      contentWidth,
-      contentHeight,
-      maxScrollableWidthMap,
-      maxScrollableHeightMap,
-    );
-
     /// Stage 2: Layout flex item second time based on flex factor and actual size
     _relayoutByFlexFactor(
       runMetrics,
