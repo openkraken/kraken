@@ -827,8 +827,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         break;
     }
 
-    bool needsRelayout = !doRelayout ? _relayoutPercentageChild() : false;
-
+    bool needsRelayout = !doRelayout ? _resolvePercentageStyle() : false;
 
     autoMinWidth = _getMainAxisAutoSize(runMetrics);
     autoMinHeight = _getCrossAxisAutoSize(runMetrics);
@@ -1055,15 +1054,13 @@ class RenderFlowLayout extends RenderLayoutBox {
     );
   }
 
-
-  bool _relayoutPercentageChild() {
-    RenderBox child = firstChild;
+  /// Resolve all percentage style based on parent size
+  bool _resolvePercentageStyle() {
     bool isNeedsRelayout = false;
+    RenderBox child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
       if (child is RenderBoxModel) {
-        BoxConstraints childConstraints = BoxConstraints();
-
         if (CSSLength.isPercentage(child.style['width'])) {
           double percentage = double.tryParse(child.style['width'].split('%')[0]) / 100;
           child.renderStyle.width = size.width * percentage;
