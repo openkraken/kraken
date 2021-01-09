@@ -39,7 +39,6 @@ mixin CSSSizingMixin on RenderStyleBase {
   set width(double value) {
     if (_width == value) return;
     _width = value;
-    renderBoxModel.markNeedsLayout();
   }
 
   double _height;
@@ -49,7 +48,6 @@ mixin CSSSizingMixin on RenderStyleBase {
   set height(double value) {
     if (_height == value) return;
     _height = value;
-    renderBoxModel.markNeedsLayout();
   }
 
   double _minWidth;
@@ -59,7 +57,6 @@ mixin CSSSizingMixin on RenderStyleBase {
   set minWidth(double value) {
     if (_minWidth == value) return;
     _minWidth = value;
-    renderBoxModel.markNeedsLayout();
   }
 
   double _maxWidth;
@@ -69,7 +66,6 @@ mixin CSSSizingMixin on RenderStyleBase {
   set maxWidth(double value) {
     if (_maxWidth == value) return;
     _maxWidth = value;
-    renderBoxModel.markNeedsLayout();
   }
 
   double _minHeight;
@@ -79,7 +75,6 @@ mixin CSSSizingMixin on RenderStyleBase {
   set minHeight(double value) {
     if (_minHeight == value) return;
     _minHeight = value;
-    renderBoxModel.markNeedsLayout();
   }
 
   double _maxHeight;
@@ -89,18 +84,21 @@ mixin CSSSizingMixin on RenderStyleBase {
   set maxHeight(double value) {
     if (_maxHeight == value) return;
     _maxHeight = value;
-    renderBoxModel.markNeedsLayout();
   }
 
   void updateSizing(String property, String present) {
+    if (CSSLength.isPercentage(present)) return;
     double value = CSSLength.toDisplayPortValue(present, viewportSize);
+
     RenderStyle renderStyle = this;
     switch (property) {
       case WIDTH:
         renderStyle.width = value;
+        renderBoxModel.markNeedsLayout();
         break;
       case HEIGHT:
         renderStyle.height = value;
+        renderBoxModel.markNeedsLayout();
         break;
       case MIN_HEIGHT:
         renderStyle.minHeight = getMinHeight(value);
@@ -109,9 +107,11 @@ mixin CSSSizingMixin on RenderStyleBase {
         if (maxHeight != null) {
           renderStyle.maxHeight = getMaxHeight(maxHeight, value);
         }
+        renderBoxModel.markNeedsLayout();
         break;
       case MAX_HEIGHT:
         renderStyle.maxHeight = getMaxHeight(value, renderStyle.minHeight);
+        renderBoxModel.markNeedsLayout();
         break;
       case MIN_WIDTH:
         renderStyle.minWidth = getMinWidth(value);
@@ -120,9 +120,11 @@ mixin CSSSizingMixin on RenderStyleBase {
         if (maxWidth != null) {
           renderStyle.maxWidth = getMaxWidth(maxWidth, value);
         }
+        renderBoxModel.markNeedsLayout();
         break;
       case MAX_WIDTH:
         renderStyle.maxWidth = getMaxWidth(value, renderStyle.minWidth);
+        renderBoxModel.markNeedsLayout();
         break;
     }
   }

@@ -482,7 +482,12 @@ class CSSStyleDeclaration {
       case MARGIN_RIGHT:
       case MARGIN_BOTTOM:
         // Validation length type
-        if (!CSSLength.isLength(normalizedValue) && !CSSLength.isAuto(normalizedValue)) return;
+        if (!CSSLength.isLength(normalizedValue) &&
+          !CSSLength.isAuto(normalizedValue) &&
+          !CSSLength.isPercentage(normalizedValue)
+        ) {
+          return;
+        }
         break;
       case MIN_WIDTH:
       case MIN_HEIGHT:
@@ -496,7 +501,11 @@ class CSSStyleDeclaration {
       case PADDING_LEFT:
       case PADDING_BOTTOM:
       case PADDING_RIGHT:
-        if (!CSSLength.isLength(normalizedValue)) return;
+        if (!CSSLength.isLength(normalizedValue) &&
+          !CSSLength.isPercentage(normalizedValue)
+        ) {
+          return;
+        }
         break;
       case COLOR:
       case BACKGROUND_COLOR:
