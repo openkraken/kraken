@@ -1860,9 +1860,13 @@ class RenderFlexLayout extends RenderLayoutBox {
         RenderBox child = runChild.child;
         // Decendants with percentage main size should not include in auto main size
         if (child is RenderBoxModel) {
-          String mainAxisSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
-          child.style['width'] : child.style['height'];
-          if (CSSLength.isPercentage(mainAxisSize)) {
+          String mainSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
+            child.style[WIDTH] : child.style[HEIGHT];
+          String mainMinSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
+            child.style[MIN_WIDTH] : child.style[MIN_HEIGHT];
+          if (CSSLength.isPercentage(mainSize) ||
+            (mainSize.isEmpty && CSSLength.isPercentage(mainMinSize))
+          ) {
             runChildMainSize = 0;
           }
         }

@@ -1075,13 +1075,36 @@ class RenderFlowLayout extends RenderLayoutBox {
     ) {
     double autoMinSize = 0;
 
-    if (runMetrics.length != 0) {
-      // Get the line of which has the max main size
-      _RunMetrics maxMainSizeMetrics = runMetrics.reduce((_RunMetrics curr, _RunMetrics next) {
-        return curr.mainAxisExtent > next.mainAxisExtent ? curr : next;
-      });
-      autoMinSize = maxMainSizeMetrics.mainAxisExtent;
+    // Main size of each run
+    List<double> runMainSize = [];
+
+    void iterateRunMetrics(_RunMetrics runMetrics) {
+      Map<int, RenderBox> runChildren = runMetrics.runChildren;
+      double runMainExtent = 0;
+      void iterateRunChildren(int targetId, RenderBox runChild) {
+        double runChildMainSize = runChild.size.width;
+        // Decendants with percentage main size should not include in auto main size
+        if (runChild is RenderBoxModel) {
+          String mainSize = runChild.style[WIDTH];
+          String mainMinSize = runChild.style[MIN_WIDTH];
+          if (CSSLength.isPercentage(mainSize) ||
+            (mainSize.isEmpty && CSSLength.isPercentage(mainMinSize))
+          ) {
+            runChildMainSize = 0;
+          }
+        }
+        runMainExtent += runChildMainSize;
+      }
+      runChildren.forEach(iterateRunChildren);
+      runMainSize.add(runMainExtent);
     }
+
+    // Calculate the max main size of all runs
+    runMetrics.forEach(iterateRunMetrics);
+
+    autoMinSize = runMainSize.reduce((double curr, double next) {
+      return curr > next ? curr : next;
+    });
 
     return autoMinSize;
   }
