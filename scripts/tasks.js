@@ -474,7 +474,7 @@ task(`build-ios-kraken-lib-release`, (done) => {
     'utf-8'
   );
 
-  execSync(`dsymutil ${frameworkPath}/kraken_bridge`, {stdio: 'inherit', cwd: targetDynamicSDKPath});
+  execSync(`dsymutil ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
   execSync(`mv ${frameworkPath}/kraken_bridge.dSYM ${targetDynamicSDKPath}`)
   execSync(`strip -S -X -x ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
 
@@ -487,10 +487,6 @@ task(`build-ios-kraken-lib-release`, (done) => {
   execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_jsc.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
   execSync(`pod ipc spec KrakenSDK.podspec > KrakenSDK.podspec.json`, { cwd: targetDynamicSDKPath });
   done();
-});
-
-task('publish-kraken-sdk', done => {
-  execSync(``, {stdio: 'inherit'});
 });
 
 task(`build-ios-kraken-lib-profile`, done => {
@@ -524,6 +520,57 @@ task('build-android-app', (done) => {
     stdio: 'inherit'
   });
   done();
+});
+
+task('build-android-kraken-lib-release', (done) => {
+  if (!process.env['ANDROID_HOME']) {
+    throw new Error('Please download Android SDK and configure PATH env. \n export ANDROID_HOME=/path/to/sdk');
+  }
+
+  const androidHome = process.env.ANDROID_HOME;
+  const ndkVersion = '20.0.5594570';
+  const archs = ['arm64-v8a', 'armeabi-v7a'];
+
+  archs.forEach(arch => {
+    const soBinaryDirectory = path.join(paths.sdk, `build/android/lib/${arch}`);
+
+    // generate project
+    execSync(`cmake -DCMAKE_BUILD_TYPE=relwithdebinfo \
+    -DCMAKE_TOOLCHAIN_FILE=${androidHome}/ndk/${ndkVersion}/build/cmake/android.toolchain.cmake \
+    -DANDROID_NDK=${androidHome}/ndk/${ndkVersion} \
+    -DIS_ANDROID=TRUE \
+    -DANDROID_ABI="${arch}" \
+    -DANDROID_PLATFORM="android-16" \
+    -G "Ninja" \
+    -B ${paths.bridge}/cmake-build-android-${arch} -S ${paths.bridge}`,
+      {
+        cwd: paths.bridge,
+        stdio: 'inherit',
+        env: {
+          ...process.env,
+          KRAKEN_JS_ENGINE: 'jsc',
+          LIBRARY_OUTPUT_DIR: soBinaryDirectory
+        }
+      });
+
+    // build
+    execSync(`cmake --build ${paths.bridge}/cmake-build-android-${arch} --target kraken -- -j 4`, {
+      stdio: 'inherit'
+    });
+
+    let toolchainPath = '';
+    if (arch == 'arm64-v8a') {
+      toolchainPath = `${androidHome}/ndk/${ndkVersion}/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64/aarch64-linux-android/bin`;
+    } else if (arch == 'armeabi-v7a') {
+      toolchainPath = `${androidHome}/ndk/${ndkVersion}/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/arm-linux-androideabi/bin`;
+    }
+
+    // strip binary and debug symbols.
+    execSync(`${toolchainPath}/objcopy \
+    --only-keep-debug ${soBinaryDirectory}/libkraken_jsc.so ${soBinaryDirectory}/libkraken_jsc.debug`, { stdio: 'inherit' });
+
+    execSync(`${toolchainPath}/strip -S -x -X ${soBinaryDirectory}/libkraken_jsc.so`, { stdio: 'inherit' });
+  });
 });
 
 task('build-android-sdk', (done) => {

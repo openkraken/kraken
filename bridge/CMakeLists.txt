@@ -174,7 +174,7 @@ target_include_directories(kraken PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "release")
+if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
   ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
   ### remove dynamic_cast and exceptions
   target_compile_options(kraken PRIVATE -fno-rtti -fno-exceptions -fvisibility=hidden)
@@ -218,22 +218,20 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_jsc)
 endif()
 
-if (IS_ANDROID)
-  # DONOT set output dir for android gradle.
-else ()
-  if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
-    set_target_properties(kraken
-      PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
-      )
-    set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
-  else ()
-    set_target_properties(kraken
-      PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib"
-      )
-    set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib")
-  endif ()
+if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
+  set_target_properties(kraken
+          PROPERTIES
+          LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+          )
+  set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
+elseif (IS_ANDROID)
+  # android do nothing
+else()
+  set_target_properties(kraken
+          PROPERTIES
+          LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib"
+          )
+  set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib")
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
