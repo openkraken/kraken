@@ -11,7 +11,7 @@ const buildMode = process.env.KRAKEN_BUILD || 'Debug';
 
 let buildAppTasks = series(
   'compile-polyfill',
-  'build-ios-kraken-lib-' + buildMode.toLowerCase(),
+  'build-ios-kraken-lib-release'
 );
 
 // Run tasks

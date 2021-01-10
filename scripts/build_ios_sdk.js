@@ -14,9 +14,7 @@ const args = minimist(process.argv.slice(3));
 let buildAppTasks = series(
   'compile-polyfill',
   'build-ios-frameworks',
-  'build-ios-kraken-lib-debug',
   'build-ios-kraken-lib-release',
-  'build-ios-kraken-lib-profile',
 );
 
 // Run tasks

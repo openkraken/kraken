@@ -4,18 +4,19 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'kraken'
-  s.version          = '0.0.1'
-  s.summary          = 'Expose SDK API from kraken.'
+  s.version          = '0.6.2'
+  s.summary          = 'A high-performance, web standards-compliant rendering engine.'
   s.description      = <<-DESC
-Expose SDK API from kraken.
+A high-performance, web standards-compliant rendering engine.
                        DESC
-  s.homepage         = 'https://rax.js.org'
+  s.homepage         = 'https://openkraken.com'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'KrakenTeam' => 'rax-public@alibaba-inc.com' }
+  s.author           = { 'KrakenTeam' => 'openkraken@alibaba-inc.com' }
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'FlutterMacOS'
+  s.vendored_frameworks = 'libkraken.dylib'
 
   s.platform = :osx, '10.11'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }

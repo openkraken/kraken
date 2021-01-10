@@ -396,95 +396,101 @@ task('ios-clean', (done) => {
   done();
 });
 
-['Debug', 'Release'].forEach(mode => {
-  task(`build-ios-kraken-lib-${mode.toLowerCase()}`, (done) => {
-    // generate build scripts for simulator
-    execSync(`cmake -DCMAKE_BUILD_TYPE=${mode} \
-      -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
-      -DPLATFORM=SIMULATOR64 \
-      -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
-      cwd: paths.bridge,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        KRAKEN_JS_ENGINE: 'jsc',
-        LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/x86_64')
-      }
-    });
-
-    // build for simulator
-    execSync(`cmake --build ${paths.bridge}/cmake-build-ios-x64 --target kraken kraken_static -- -j 4`, {
-      stdio: 'inherit'
-    });
-
-    // geneate builds scripts for ARMV7, ARMV7S
-    execSync(`cmake -DCMAKE_BUILD_TYPE=${mode} \
-      -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
-      -DPLATFORM=OS \
-      -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
-      cwd: paths.bridge,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        KRAKEN_JS_ENGINE: 'jsc',
-        LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/arm')
-      }
-    });
-
-    // build for ARMV7, ARMV7S
-    execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 4`, {
-      stdio: 'inherit'
-    });
-
-    // geneate builds scripts for ARM64
-    execSync(`cmake -DCMAKE_BUILD_TYPE=${mode} \
-       -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
-       -DPLATFORM=OS64 \
-       -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
-      cwd: paths.bridge,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        KRAKEN_JS_ENGINE: 'jsc',
-        LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/arm64')
-      }
-    });
-
-    // build for ARMV64
-    execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target kraken kraken_static -- -j 4`, {
-      stdio: 'inherit'
-    });
-
-    const armDynamicSDKPath = path.join(paths.sdk, 'build/ios/lib/arm/kraken_bridge.framework/kraken_bridge');
-    const arm64DynamicSDKPath = path.join(paths.sdk, 'build/ios/lib/arm64/kraken_bridge.framework/kraken_bridge');
-    const x64DynamicSDKPath = path.join(paths.sdk, 'build/ios/lib/x86_64/kraken_bridge.framework/kraken_bridge');
-
-    const targetDynamicSDKPath = `${paths.sdk}/build/ios/framework/${mode}`;
-    const frameworkPath = `${targetDynamicSDKPath}/kraken_bridge.framework`;
-    const plistPath = path.join(paths.scripts, 'support/kraken_bridge.plist');
-    mkdirp.sync(frameworkPath);
-    execSync(`lipo -create ${armDynamicSDKPath} ${x64DynamicSDKPath} ${arm64DynamicSDKPath} -output ${frameworkPath}/kraken_bridge`, {
-      stdio: 'inherit'
-    });
-    execSync(`cp ${plistPath} ${frameworkPath}/Info.plist`);
-    const podspecContent = readFileSync(path.join(paths.scripts, 'support/KrakenSDK.podspec'), 'utf-8');
-    const pkgVersion = readFileSync(path.join(paths.kraken, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
-    writeFileSync(
-      `${targetDynamicSDKPath}/KrakenSDK.podspec`,
-      podspecContent.replace('@VERSION@', `${pkgVersion}-${mode.toLowerCase()}`),
-      'utf-8'
-    );
-
-    const armStaticSDKPath = path.join(paths.sdk, 'build/ios/lib/arm/libkraken_jsc.a');
-    const arm64StaticSDKPath = path.join(paths.sdk, 'build/ios/lib/arm64/libkraken_jsc.a');
-    const x64StaticSDKPath = path.join(paths.sdk, 'build/ios/lib/x86_64/libkraken_jsc.a');
-
-    const targetStaticSDKPath = `${paths.sdk}/build/ios/framework/${mode}`;
-
-    execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_jsc.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
-    execSync(`pod ipc spec KrakenSDK.podspec > KrakenSDK.podspec.json`, { cwd: targetDynamicSDKPath });
-    done();
+task(`build-ios-kraken-lib-release`, (done) => {
+  // generate build scripts for simulator
+  execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
+    -DPLATFORM=SIMULATOR64 \
+    -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
+    cwd: paths.bridge,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      KRAKEN_JS_ENGINE: 'jsc',
+      LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/x86_64')
+    }
   });
+
+  // build for simulator
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-x64 --target kraken kraken_static -- -j 4`, {
+    stdio: 'inherit'
+  });
+
+  // geneate builds scripts for ARMV7, ARMV7S
+  execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
+    -DPLATFORM=OS \
+    -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
+    cwd: paths.bridge,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      KRAKEN_JS_ENGINE: 'jsc',
+      LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/arm')
+    }
+  });
+
+  // build for ARMV7, ARMV7S
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 4`, {
+    stdio: 'inherit'
+  });
+
+  // geneate builds scripts for ARM64
+  execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
+     -DPLATFORM=OS64 \
+     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
+    cwd: paths.bridge,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      KRAKEN_JS_ENGINE: 'jsc',
+      LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/arm64')
+    }
+  });
+
+  // build for ARMV64
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target kraken kraken_static -- -j 4`, {
+    stdio: 'inherit'
+  });
+
+  const armDynamicSDKPath = path.join(paths.sdk, 'build/ios/lib/arm/kraken_bridge.framework/kraken_bridge');
+  const arm64DynamicSDKPath = path.join(paths.sdk, 'build/ios/lib/arm64/kraken_bridge.framework/kraken_bridge');
+  const x64DynamicSDKPath = path.join(paths.sdk, 'build/ios/lib/x86_64/kraken_bridge.framework/kraken_bridge');
+
+  const targetDynamicSDKPath = `${paths.sdk}/build/ios/framework`;
+  const frameworkPath = `${targetDynamicSDKPath}/kraken_bridge.framework`;
+  const plistPath = path.join(paths.scripts, 'support/kraken_bridge.plist');
+  mkdirp.sync(frameworkPath);
+  execSync(`lipo -create ${armDynamicSDKPath} ${x64DynamicSDKPath} ${arm64DynamicSDKPath} -output ${frameworkPath}/kraken_bridge`, {
+    stdio: 'inherit'
+  });
+  execSync(`cp ${plistPath} ${frameworkPath}/Info.plist`, { stdio: 'inherit' });
+  const podspecContent = readFileSync(path.join(paths.scripts, 'support/KrakenSDK.podspec'), 'utf-8');
+  const pkgVersion = readFileSync(path.join(paths.kraken, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
+  writeFileSync(
+    `${targetDynamicSDKPath}/KrakenSDK.podspec`,
+    podspecContent.replace('@VERSION@', `${pkgVersion}-release`),
+    'utf-8'
+  );
+
+  execSync(`dsymutil ${frameworkPath}/kraken_bridge`, {stdio: 'inherit', cwd: targetDynamicSDKPath});
+  execSync(`mv ${frameworkPath}/kraken_bridge.dSYM ${targetDynamicSDKPath}`)
+  execSync(`strip -S -X -x ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
+
+  const armStaticSDKPath = path.join(paths.sdk, 'build/ios/lib/arm/libkraken_jsc.a');
+  const arm64StaticSDKPath = path.join(paths.sdk, 'build/ios/lib/arm64/libkraken_jsc.a');
+  const x64StaticSDKPath = path.join(paths.sdk, 'build/ios/lib/x86_64/libkraken_jsc.a');
+
+  const targetStaticSDKPath = `${paths.sdk}/build/ios/framework`;
+
+  execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_jsc.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
+  execSync(`pod ipc spec KrakenSDK.podspec > KrakenSDK.podspec.json`, { cwd: targetDynamicSDKPath });
+  done();
+});
+
+task('publish-kraken-sdk', done => {
+  execSync(``, {stdio: 'inherit'});
 });
 
 task(`build-ios-kraken-lib-profile`, done => {
