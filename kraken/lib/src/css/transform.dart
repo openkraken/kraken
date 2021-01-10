@@ -59,16 +59,10 @@ void _updateLength(double oldLength, double newLength, double progress, String p
 
   switch (property) {
     case RIGHT:
-      renderStyle.right = length;
-      break;
     case TOP:
-      renderStyle.top = length;
-      break;
     case BOTTOM:
-      renderStyle.bottom = length;
-      break;
     case LEFT:
-      renderStyle.left = length;
+      renderStyle.updateOffset(property, length);
       break;
     case MARGIN_BOTTOM:
     case MARGIN_LEFT:
@@ -111,22 +105,12 @@ void _updateLength(double oldLength, double newLength, double progress, String p
       _updateChildTextNodes(renderStyle);
       break;
     case HEIGHT:
-      renderStyle.height = length;
-      break;
     case WIDTH:
-      renderStyle.width = length;
-      break;
     case MAX_HEIGHT:
-      renderStyle.maxHeight = length;
-      break;
     case MAX_WIDTH:
-      renderStyle.maxWidth = length;
-      break;
     case MIN_HEIGHT:
-      renderStyle.minHeight = length;
-      break;
     case MIN_WIDTH:
-      renderStyle.minWidth = length;
+      renderStyle.updateSizing(property, length);
       break;
   }
 }

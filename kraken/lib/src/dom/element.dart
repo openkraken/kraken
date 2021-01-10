@@ -876,7 +876,11 @@ class Element extends Node
   }
 
   void _styleOffsetChangedListener(String property, String original, String present) {
-    renderBoxModel.renderStyle.updateOffset(property, present);
+    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
+    if (CSSLength.isPercentage(present)) return;
+
+    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
+    renderBoxModel.renderStyle.updateOffset(property, presentValue);
   }
 
   void _styleTextAlignChangedListener(String property, String original, String present) {

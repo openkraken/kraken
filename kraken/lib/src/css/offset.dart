@@ -22,7 +22,6 @@ mixin CSSPositionMixin on RenderStyleBase {
   set top(double value) {
     if (_top == value) return;
     _top = value;
-    _markParentNeedsLayout();
   }
 
   double _bottom;
@@ -32,7 +31,6 @@ mixin CSSPositionMixin on RenderStyleBase {
   set bottom(double value) {
     if (_bottom == value) return;
     _bottom = value;
-    _markParentNeedsLayout();
   }
 
   double _left;
@@ -42,7 +40,6 @@ mixin CSSPositionMixin on RenderStyleBase {
   set left(double value) {
     if (_left == value) return;
     _left = value;
-    _markParentNeedsLayout();
   }
 
   double _right;
@@ -52,7 +49,6 @@ mixin CSSPositionMixin on RenderStyleBase {
   set right(double value) {
     if (_right == value) return;
     _right = value;
-    _markParentNeedsLayout();
   }
 
   int _zIndex = 0;
@@ -85,8 +81,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     }
   }
 
-  void updateOffset(String property, String present) {
-    double value = CSSLength.toDisplayPortValue(present, viewportSize);
+  void updateOffset(String property, double value, {bool markNeedsLayout = true}) {
     switch (property) {
       case TOP:
         top = value;
@@ -100,6 +95,11 @@ mixin CSSPositionMixin on RenderStyleBase {
       case BOTTOM:
         bottom = value;
         break;
+    }
+    /// Should mark parent needsLayout directly cause positioned element is rendered as relayoutBoundary
+    /// the parent will not be marked as markNeedsLayout
+    if (markNeedsLayout) {
+      _markParentNeedsLayout();
     }
   }
 

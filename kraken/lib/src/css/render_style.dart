@@ -167,6 +167,43 @@ class RenderStyle
       isPercentageExist = true;
     }
 
+    /// Update offset
+    if (CSSLength.isPercentage(style[TOP])) {
+      updateOffset(
+        TOP,
+        parentSize.height * CSSLength.parsePercentage(style[TOP]),
+        markNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
+
+    if (CSSLength.isPercentage(style[RIGHT])) {
+      updateOffset(
+        RIGHT,
+        parentSize.width * CSSLength.parsePercentage(style[RIGHT]),
+        markNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
+
+    if (CSSLength.isPercentage(style[BOTTOM])) {
+      updateOffset(
+        BOTTOM,
+        parentSize.height * CSSLength.parsePercentage(style[BOTTOM]),
+        markNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
+
+    if (CSSLength.isPercentage(style[LEFT])) {
+      updateOffset(
+        LEFT,
+        parentSize.width * CSSLength.parsePercentage(style[LEFT]),
+        markNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
+
     return isPercentageExist;
   }
 
