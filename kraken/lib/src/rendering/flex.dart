@@ -582,7 +582,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   /// Get constraints of flex item in the main axis
-  BoxConstraints _getBaseConstraints(RenderBox child, bool doRelayout) {
+  BoxConstraints _getBaseConstraints(RenderBox child, bool needsRelayout) {
     double minWidth = 0;
     double maxWidth = double.infinity;
     double minHeight = 0;
@@ -709,22 +709,22 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     beforeLayout();
+
     RenderBox child = firstChild;
-    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
       // Layout placeholder of positioned element(absolute/fixed) in new layer
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        CSSPositionedLayout.layoutPositionedChild(element, this, child);
+        CSSPositionedLayout.layoutPositionedChild(this, child);
       } else if (child is RenderPositionHolder && isPlaceholderPositioned(child)) {
-        _layoutChildren(child, false);
+        _layoutChildren(child);
       }
 
       child = childParentData.nextSibling;
     }
     // Layout non positioned element and its placeholder
-    _layoutChildren(null, false);
+    _layoutChildren(null);
 
     // Set offset of positioned element
     child = firstChild;
@@ -732,12 +732,14 @@ class RenderFlexLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        CSSPositionedLayout.applyPositionedChildOffset(this, child, size, renderStyle.borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(this, child);
 
         setMaximumScrollableSizeForPositionedChild(childParentData, child);
       }
       child = childParentData.nextSibling;
     }
+
+    _relayoutPositionedChildren();
 
     didLayout();
 
@@ -745,6 +747,25 @@ class RenderFlexLayout extends RenderLayoutBox {
       DateTime flexLayoutEndTime = DateTime.now();
       int amendEndTime = flexLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
+    }
+  }
+
+  /// Relayout positioned child if percentage size exists
+  void _relayoutPositionedChildren() {
+    RenderBox child = firstChild;
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+
+      if (child is RenderBoxModel && childParentData.isPositioned) {
+        bool percentageFound = child.renderStyle.resolvePercentageSize(this);
+        /// Relayout after percentage size is resolved
+        if (percentageFound) {
+          CSSPositionedLayout.layoutPositionedChild(this, child, needsRelayout: true);
+          CSSPositionedLayout.applyPositionedChildOffset(this, child);
+          setMaximumScrollableSizeForPositionedChild(childParentData, child);
+        }
+      }
+      child = childParentData.nextSibling;
     }
   }
 
@@ -777,7 +798,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// 2. Relayout children according to flex-grow and flex-shrink factor
   /// 3. Set flex container size according to children size
   /// 4. Align children according to justify-content, align-items and align-self properties
-  void _layoutChildren(RenderPositionHolder placeholderChild, bool doRelayout) {
+  void _layoutChildren(RenderPositionHolder placeholderChild, {bool needsRelayout = false}) {
     final double contentWidth = RenderBoxModel.getContentWidth(this);
     final double contentHeight = RenderBoxModel.getContentHeight(this);
 
@@ -846,7 +867,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       contentHeight,
       maxScrollableWidthMap,
       maxScrollableHeightMap,
-      doRelayout,
+      needsRelayout,
     );
 
     /// If no non positioned child exists, stop layout
@@ -943,10 +964,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       maxScrollableHeightMap,
     );
 
-    bool needsRelayout = !doRelayout ? _resolvePercentageSize(
-      placeholderChild,
-    ) : false;
-
     /// Stage 4: Set children offset based on flex alignment properties
     _alignChildren(
       runMetrics,
@@ -958,54 +975,19 @@ class RenderFlexLayout extends RenderLayoutBox {
       maxScrollableHeightMap,
     );
 
-    if (needsRelayout) {
-      _layoutChildren(placeholderChild, true);
+    /// Resolve percentage size of child after parent size is calculated
+    bool percentageFound = !needsRelayout ? _resolveChildPercentageSize(placeholderChild) : false;
+    /// Relayout after percentage size is resolved
+    if (percentageFound) {
+      _layoutChildren(placeholderChild, needsRelayout: true);
     }
-  }
-
-  BoxConstraints _getChildConstraints(RenderBoxModel child) {
-    double width = child.renderStyle.width;
-    double height = child.renderStyle.height;
-    double minWidth = child.renderStyle.minWidth;
-    double minHeight = child.renderStyle.minHeight;
-    double maxWidth = child.renderStyle.maxWidth;
-    double maxHeight = child.renderStyle.maxHeight;
-
-    double constraintWidth = width ?? double.infinity;
-    double constraintHeight = height ?? double.infinity;
-    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    bool isInline = realDisplay == CSSDisplay.inline;
-    bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
-
-    if (!isInline) {
-      // Base width when width no exists, inline-block has width of 0
-      double baseWidth = isInlineBlock ? 0 : constraintWidth;
-      if (maxWidth != null && width == null) {
-        constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
-      } else if (minWidth != null && width == null) {
-        constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
-      }
-      // Base height always equals to 0 no matter
-      double baseHeight = 0;
-      if (maxHeight != null && height == null) {
-        constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
-      } else if (minHeight != null && height == null) {
-        constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
-      }
-    }
-    return BoxConstraints(
-      minWidth: 0,
-      maxWidth: constraintWidth,
-      minHeight: 0,
-      maxHeight: constraintHeight,
-    );
   }
 
   /// Resolve all percentage size of child based on size its containing block
-  bool _resolvePercentageSize(
+  bool _resolveChildPercentageSize(
     RenderPositionHolder placeholderChild,
   ) {
-    bool isNeedsRelayout = false;
+    bool percentageFound = false;
     RenderBox child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
@@ -1016,11 +998,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        isNeedsRelayout = child.renderStyle.resolvePercentageSize(this);
+        percentageFound = child.renderStyle.resolvePercentageSize(this);
       }
       child = childParentData.nextSibling;
     }
-    return isNeedsRelayout;
+    return percentageFound;
   }
 
   /// 1. Layout children in flow order to calculate flex lines according to its constaints and flex-wrap property
@@ -1032,7 +1014,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     double contentHeight,
     Map<int, double> maxScrollableWidthMap,
     Map<int, double> maxScrollableHeightMap,
-    bool doRelayout,
+    bool needsRelayout,
   ) {
     double mainAxisExtent = 0.0;
     double crossAxisExtent = 0.0;
@@ -1085,7 +1067,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       BoxSizeType heightSizeType = _getChildHeightSizeType(child);
-      BoxConstraints baseConstraints = _getBaseConstraints(child, doRelayout);
+      BoxConstraints baseConstraints = _getBaseConstraints(child, needsRelayout);
 
       if (child is RenderPositionHolder) {
         RenderBoxModel realDisplayedBox = child.realDisplayedBox;
@@ -1140,7 +1122,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         double childContentWidth = RenderBoxModel.getContentWidth(child);
         double childContentHeight = RenderBoxModel.getContentHeight(child);
         // Always layout child when parent is not laid out yet or child is marked as needsLayout
-        if (!hasSize || child.needsLayout || doRelayout) {
+        if (!hasSize || child.needsLayout || needsRelayout) {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = _getChildSize(child);
@@ -1156,9 +1138,9 @@ class RenderFlexLayout extends RenderLayoutBox {
           childLayoutStart = DateTime.now();
         }
 
-        // Relayout children after percentage length is calculated
-        if (doRelayout && child is RenderBoxModel) {
-          childConstraints = _getChildConstraints(child);
+        // Relayout child after percentage size is resolved
+        if (needsRelayout && child is RenderBoxModel) {
+          childConstraints = child.renderStyle.getConstraints();
         }
 
         child.layout(childConstraints, parentUsesSize: true);

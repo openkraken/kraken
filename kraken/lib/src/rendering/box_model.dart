@@ -872,7 +872,7 @@ class RenderBoxModel extends RenderBox with
       RenderLayoutParentData selfParentData = parentData;
       RenderBoxModel parentBox = parent;
       if (selfParentData.isPositioned && parentBox.hasSize) {
-        CSSPositionedLayout.applyPositionedChildOffset(parentBox, this, parentBox.boxSize, parentBox.renderStyle.borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(parentBox, this);
       }
     }
 

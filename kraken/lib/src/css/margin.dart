@@ -75,7 +75,6 @@ mixin CSSMarginMixin on RenderStyleBase {
 
   void updateMargin(String property, double value, {bool markNeedsLayout = true}) {
     RenderStyle renderStyle = this;
-    Size viewportSize = this.viewportSize;
     EdgeInsets prevMargin = renderStyle.margin;
 
     if (prevMargin != null) {

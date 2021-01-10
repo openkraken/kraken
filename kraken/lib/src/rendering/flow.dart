@@ -511,18 +511,17 @@ class RenderFlowLayout extends RenderLayoutBox {
     beforeLayout();
     RenderBox child = firstChild;
 
-    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
       if (childParentData.isPositioned) {
-        CSSPositionedLayout.layoutPositionedChild(element, this, child);
+        CSSPositionedLayout.layoutPositionedChild(this, child);
       }
       child = childParentData.nextSibling;
     }
 
     // Layout non positioned element
-    _layoutChildren(false);
+    _layoutChildren();
 
     // Set offset of positioned element
     child = firstChild;
@@ -530,12 +529,14 @@ class RenderFlowLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        CSSPositionedLayout.applyPositionedChildOffset(this, child, size, renderStyle.borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(this, child);
 
         setMaximumScrollableSizeForPositionedChild(childParentData, child);
       }
       child = childParentData.nextSibling;
     }
+
+    _relayoutPositionedChildren();
 
     didLayout();
 
@@ -547,7 +548,26 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
   }
 
-  void _layoutChildren(bool doRelayout) {
+  /// Relayout positioned child if percentage size exists
+  void _relayoutPositionedChildren() {
+    RenderBox child = firstChild;
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+
+      if (child is RenderBoxModel && childParentData.isPositioned) {
+        bool percentageFound = child.renderStyle.resolvePercentageSize(this);
+        /// Relayout after percentage size is resolved
+        if (percentageFound) {
+          CSSPositionedLayout.layoutPositionedChild(this, child, needsRelayout: true);
+          CSSPositionedLayout.applyPositionedChildOffset(this, child);
+          setMaximumScrollableSizeForPositionedChild(childParentData, child);
+        }
+      }
+      child = childParentData.nextSibling;
+    }
+  }
+
+  void _layoutChildren({bool needsRelayout = false}) {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
@@ -651,7 +671,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childContentWidth = RenderBoxModel.getContentWidth(child);
         double childContentHeight = RenderBoxModel.getContentHeight(child);
         // Always layout child when parent is not laid out yet or child is marked as needsLayout
-        if (!hasSize || child.needsLayout || doRelayout) {
+        if (!hasSize || child.needsLayout || needsRelayout) {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = _getChildSize(child);
@@ -667,9 +687,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
-        // Relayout children after percentage length is calculated
-        if (doRelayout && child is RenderBoxModel) {
-          childConstraints = _getChildConstraints(child);
+        // Relayout child after percentage size is resolved
+        if (needsRelayout && child is RenderBoxModel) {
+          childConstraints = child.renderStyle.getConstraints();
         }
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
@@ -826,8 +846,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         crossAxisContentSize = contentSize.width;
         break;
     }
-
-    bool needsRelayout = !doRelayout ? _resolvePercentageSize() : false;
 
     autoMinWidth = _getMainAxisAutoSize(runMetrics);
     autoMinHeight = _getCrossAxisAutoSize(runMetrics);
@@ -1011,61 +1029,31 @@ class RenderFlowLayout extends RenderLayoutBox {
         crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
 
-    if (needsRelayout) {
-      _layoutChildren(true);
+    /// Resolve percentage size of child after parent size is calculated
+    bool percentageFound = !needsRelayout ? _resolveChildPercentageSize() : false;
+    /// Relayout after percentage size is resolved
+    if (percentageFound) {
+      _layoutChildren(needsRelayout: true);
     }
-  }
-
-  BoxConstraints _getChildConstraints(RenderBoxModel child) {
-    double width = child.renderStyle.width;
-    double height = child.renderStyle.height;
-    double minWidth = child.renderStyle.minWidth;
-    double minHeight = child.renderStyle.minHeight;
-    double maxWidth = child.renderStyle.maxWidth;
-    double maxHeight = child.renderStyle.maxHeight;
-
-    double constraintWidth = width ?? double.infinity;
-    double constraintHeight = height ?? double.infinity;
-    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    bool isInline = realDisplay == CSSDisplay.inline;
-    bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
-
-    if (!isInline) {
-      // Base width when width no exists, inline-block has width of 0
-      double baseWidth = isInlineBlock ? 0 : constraintWidth;
-      if (maxWidth != null && width == null) {
-        constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
-      } else if (minWidth != null && width == null) {
-        constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
-      }
-      // Base height always equals to 0 no matter
-      double baseHeight = 0;
-      if (maxHeight != null && height == null) {
-        constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
-      } else if (minHeight != null && height == null) {
-        constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
-      }
-    }
-    return BoxConstraints(
-      minWidth: 0,
-      maxWidth: constraintWidth,
-      minHeight: 0,
-      maxHeight: constraintHeight,
-    );
   }
 
   /// Resolve all percentage size of child based on size its containing block
-  bool _resolvePercentageSize() {
-    bool isNeedsRelayout = false;
+  bool _resolveChildPercentageSize() {
+    bool percentageFound = false;
     RenderBox child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
+      // Exclude positioned child
+      if (childParentData.isPositioned) {
+        child = childParentData.nextSibling;
+        continue;
+      }
       if (child is RenderBoxModel) {
-        isNeedsRelayout = child.renderStyle.resolvePercentageSize(this);
+        percentageFound = child.renderStyle.resolvePercentageSize(this);
       }
       child = childParentData.nextSibling;
     }
-    return isNeedsRelayout;
+    return percentageFound;
   }
 
   /// Get auto min size in the main axis which equals the main axis size of its contents

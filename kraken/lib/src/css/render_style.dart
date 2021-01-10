@@ -3,8 +3,10 @@
  * Author: Kraken Team.
  */
 import 'dart:ui';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/dom.dart';
 
 class RenderStyle
   with
@@ -168,6 +170,38 @@ class RenderStyle
     return isPercentageExist;
   }
 
+  BoxConstraints getConstraints() {
+    double constraintWidth = width ?? double.infinity;
+    double constraintHeight = height ?? double.infinity;
+    int targetId = renderBoxModel.targetId;
+    ElementManager elementManager = renderBoxModel.elementManager;
+    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    bool isInline = realDisplay == CSSDisplay.inline;
+    bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+
+    if (!isInline) {
+      // Base width when width no exists, inline-block has width of 0
+      double baseWidth = isInlineBlock ? 0 : constraintWidth;
+      if (maxWidth != null && width == null) {
+        constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
+      } else if (minWidth != null && width == null) {
+        constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
+      }
+      // Base height always equals to 0 no matter
+      double baseHeight = 0;
+      if (maxHeight != null && height == null) {
+        constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
+      } else if (minHeight != null && height == null) {
+        constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
+      }
+    }
+    return BoxConstraints(
+      minWidth: 0,
+      maxWidth: constraintWidth,
+      minHeight: 0,
+      maxHeight: constraintHeight,
+    );
+  }
 }
 
 mixin RenderStyleBase {

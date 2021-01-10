@@ -163,13 +163,15 @@ class CSSPositionedLayout {
     }
   }
 
-  static void layoutPositionedChild(Element parentElement, RenderBoxModel parent, RenderBoxModel child) {
-    RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
-
+  static void layoutPositionedChild(
+    RenderBoxModel parent,
+    RenderBoxModel child,
+    {bool needsRelayout = false}
+  ) {
     // Default to no constraints. (0 - infinite)
     BoxConstraints childConstraints = const BoxConstraints();
-    Size trySize = parentRenderBoxModel.contentConstraints.biggest;
-    Size parentSize = trySize.isInfinite ? parentRenderBoxModel.contentConstraints.smallest : trySize;
+    Size trySize = parent.contentConstraints.biggest;
+    Size parentSize = trySize.isInfinite ? parent.contentConstraints.smallest : trySize;
 
     BoxSizeType widthType = _getChildWidthSizeType(child);
     BoxSizeType heightType = _getChildHeightSizeType(child);
@@ -215,7 +217,7 @@ class CSSPositionedLayout {
       double childContentWidth = RenderBoxModel.getContentWidth(child);
       double childContentHeight = RenderBoxModel.getContentHeight(child);
       // Always layout child when parent is not laid out yet or child is marked as needsLayout
-      if (!parent.hasSize || child.needsLayout) {
+      if (!parent.hasSize || child.needsLayout || needsRelayout) {
         isChildNeedsLayout = true;
       } else {
         Size childOldSize = _getChildSize(child);
@@ -232,6 +234,10 @@ class CSSPositionedLayout {
         childLayoutStartTime = DateTime.now();
       }
 
+      // Relayout child after percentage size is resolved
+      if (needsRelayout) {
+        childConstraints = child.renderStyle.getConstraints();
+      }
       // Should create relayoutBoundary for positioned child.
       child.layout(childConstraints, parentUsesSize: false);
 
@@ -242,8 +248,12 @@ class CSSPositionedLayout {
     }
   }
 
-  static void applyPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size parentSize, EdgeInsets borderEdge) {
+  static void applyPositionedChildOffset(
+    RenderBoxModel parent,
+    RenderBoxModel child,
+  ) {
     final RenderLayoutParentData childParentData = child.parentData;
+    Size parentSize = parent.size;
     // Calc x,y by parentData.
     double x, y;
 
@@ -268,6 +278,7 @@ class CSSPositionedLayout {
       Offset baseOffset = (childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
         parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root));
 
+      EdgeInsets borderEdge = parent.renderStyle.borderEdge;
       double borderLeft = borderEdge != null ? borderEdge.left : 0;
       double borderRight = borderEdge != null ? borderEdge.right : 0;
       double borderTop = borderEdge != null ? borderEdge.top : 0;
