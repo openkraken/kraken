@@ -127,6 +127,33 @@ task('clean', () => {
 });
 
 const libOutputPath = join(TARGET_PATH, platform, 'lib');
+
+task('build-darwin-kraken-lib-release', done => {
+  // geneate builds scripts for ARM64
+  execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-macos-x86_64 -S ${paths.bridge}`, {
+    cwd: paths.bridge,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      KRAKEN_JS_ENGINE: 'jsc',
+      LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/macos/lib/x86_64')
+    }
+  });
+
+  // build for ARMV64
+  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target kraken -- -j 4`, {
+    stdio: 'inherit'
+  });
+
+  const binaryPath = path.join(paths.sdk, 'build/macos/lib/x86_64/libkraken_jsc.dylib');
+
+  execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
+  execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit'});
+
+  done();
+});
+
 for (let jsEngine of SUPPORTED_JS_ENGINES) {
   task('generate-cmake-files-' + jsEngine, (done) => {
     function generateCmake(args) {
@@ -571,6 +598,8 @@ task('build-android-kraken-lib-release', (done) => {
 
     execSync(`${toolchainPath}/strip -S -x -X ${soBinaryDirectory}/libkraken_jsc.so`, { stdio: 'inherit' });
   });
+
+  done();
 });
 
 task('build-android-sdk', (done) => {
