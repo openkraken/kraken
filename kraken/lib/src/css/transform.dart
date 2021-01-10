@@ -45,7 +45,7 @@ void _updateColor(Color oldColor, Color newColor, double progress, String proper
     case BORDER_RIGHT_COLOR:
     case BORDER_TOP_COLOR:
     case BORDER_COLOR:
-      renderStyle.updateBorder(property, color);
+      renderStyle.updateBorder(property, borderColor: color);
       break;
   }
 }
@@ -74,19 +74,19 @@ void _updateLength(double oldLength, double newLength, double progress, String p
     case MARGIN_LEFT:
     case MARGIN_RIGHT:
     case MARGIN_TOP:
-      renderStyle.updateMargin(property, length.toString() + 'px');
+      renderStyle.updateMargin(property, length);
       break;
     case PADDING_BOTTOM:
     case PADDING_LEFT:
     case PADDING_RIGHT:
     case PADDING_TOP:
-      renderStyle.updatePadding(property, length.toString() + 'px');
+      renderStyle.updatePadding(property, length);
       break;
     case BORDER_BOTTOM_WIDTH:
     case BORDER_LEFT_WIDTH:
     case BORDER_RIGHT_WIDTH:
     case BORDER_TOP_WIDTH:
-      renderStyle.updateBorder(property, null, length);
+      renderStyle.updateBorder(property, borderWidth: length);
       break;
     case BORDER_BOTTOM_LEFT_RADIUS:
     case BORDER_BOTTOM_RIGHT_RADIUS:

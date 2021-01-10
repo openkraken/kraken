@@ -18,7 +18,6 @@ mixin CSSMarginMixin on RenderStyleBase {
 
   void _markNeedResolution() {
     _resolvedMargin = null;
-    renderBoxModel.markNeedsLayout();
   }
 
   /// The amount to pad the child in each dimension.
@@ -74,7 +73,7 @@ mixin CSSMarginMixin on RenderStyleBase {
     return EdgeInsets.only(top: marginTop ?? 0.0, right: marginRight ?? 0.0, bottom: marginBottom ?? 0.0, left: marginLeft ?? 0.0);
   }
 
-  void updateMargin(String property, String present) {
+  void updateMargin(String property, double value, {bool markNeedsLayout = true}) {
     RenderStyle renderStyle = this;
     Size viewportSize = this.viewportSize;
     EdgeInsets prevMargin = renderStyle.margin;
@@ -84,21 +83,20 @@ mixin CSSMarginMixin on RenderStyleBase {
       double top = prevMargin.top;
       double right = prevMargin.right;
       double bottom = prevMargin.bottom;
-      double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
 
       // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
       switch (property) {
         case MARGIN_LEFT:
-          left = presentValue;
+          left = value;
           break;
         case MARGIN_TOP:
-          top = presentValue;
+          top = value;
           break;
         case MARGIN_BOTTOM:
-          bottom = presentValue;
+          bottom = value;
           break;
         case MARGIN_RIGHT:
-          right = presentValue;
+          right = value;
           break;
       }
 
@@ -110,6 +108,10 @@ mixin CSSMarginMixin on RenderStyleBase {
       );
     } else {
       renderStyle.margin = _getMargin();
+    }
+
+    if (markNeedsLayout) {
+      renderBoxModel.markNeedsLayout();
     }
   }
   void debugMarginProperties(DiagnosticPropertiesBuilder properties) {

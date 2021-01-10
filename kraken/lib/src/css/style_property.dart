@@ -79,7 +79,7 @@ class CSSStyleProperty {
   }
 
   static void setShorthandMargin(Map<String, String> properties, String shorthandValue) {
-    List<String> values = _getEdgeValues(shorthandValue, isLength: false);
+    List<String> values = _getEdgeValues(shorthandValue, isLengthOrPercentage: false);
     if (values == null) return;
 
     properties[MARGIN_TOP] = values[0];
@@ -276,7 +276,7 @@ class CSSStyleProperty {
       borderLeftWidth = values[3];
     } else if (property == BORDER_STYLE) {
       // @TODO: validate value
-      List<String> values = _getEdgeValues(shorthandValue, isLength: false);
+      List<String> values = _getEdgeValues(shorthandValue, isLengthOrPercentage: false);
       if (values == null) return;
 
       borderTopStyle = values[0];
@@ -285,7 +285,7 @@ class CSSStyleProperty {
       borderLeftStyle = values[3];
     } else if (property == BORDER_COLOR) {
       // @TODO: validate value
-      List<String> values = _getEdgeValues(shorthandValue, isLength: false);
+      List<String> values = _getEdgeValues(shorthandValue, isLengthOrPercentage: false);
       if (values == null) return;
 
       borderTopColor = values[0];
@@ -689,7 +689,7 @@ class CSSStyleProperty {
     return [width, style, color];
   }
 
-  static List<String> _getEdgeValues(String shorthandProperty, {bool isLength = true}) {
+  static List<String> _getEdgeValues(String shorthandProperty, {bool isLengthOrPercentage = true}) {
     var properties = shorthandProperty.split(_spaceRegExp);
 
     String topValue;
@@ -713,11 +713,11 @@ class CSSStyleProperty {
       leftValue = properties[3];
     }
 
-    if (isLength) {
-      if (!CSSLength.isLength(topValue) ||
-          !CSSLength.isLength(rightValue) ||
-          !CSSLength.isLength(bottomValue) ||
-          !CSSLength.isLength(leftValue)) {
+    if (isLengthOrPercentage) {
+      if ((!CSSLength.isLength(topValue) && !CSSLength.isPercentage(topValue)) ||
+          (!CSSLength.isLength(rightValue) && !CSSLength.isPercentage(rightValue)) ||
+          (!CSSLength.isLength(bottomValue) && !CSSLength.isPercentage(bottomValue))||
+          (!CSSLength.isLength(leftValue) && !CSSLength.isPercentage(leftValue))) {
         return null;
       }
     }

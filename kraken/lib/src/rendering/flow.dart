@@ -827,7 +827,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         break;
     }
 
-    bool needsRelayout = !doRelayout ? _resolvePercentageStyle() : false;
+    bool needsRelayout = !doRelayout ? _resolvePercentageSize() : false;
 
     autoMinWidth = _getMainAxisAutoSize(runMetrics);
     autoMinHeight = _getCrossAxisAutoSize(runMetrics);
@@ -1054,48 +1054,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     );
   }
 
-  /// Resolve all percentage style based on parent size
-  bool _resolvePercentageStyle() {
+  /// Resolve all percentage size of child based on size its containing block
+  bool _resolvePercentageSize() {
     bool isNeedsRelayout = false;
     RenderBox child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
       if (child is RenderBoxModel) {
-        if (CSSLength.isPercentage(child.style['width'])) {
-          double percentage = double.tryParse(child.style['width'].split('%')[0]) / 100;
-          child.renderStyle.width = size.width * percentage;
-          isNeedsRelayout = true;
-        }
-
-        if (CSSLength.isPercentage(child.style['minWidth'])) {
-          double percentage = double.tryParse(child.style['minWidth'].split('%')[0]) / 100;
-          child.renderStyle.minWidth = size.width * percentage;
-          isNeedsRelayout = true;
-        }
-
-        if (CSSLength.isPercentage(child.style['maxWidth'])) {
-          double percentage = double.tryParse(child.style['maxWidth'].split('%')[0]) / 100;
-          child.renderStyle.maxWidth = size.width * percentage;
-          isNeedsRelayout = true;
-        }
-
-        if (CSSLength.isPercentage(child.style['height'])) {
-          double percentage = double.tryParse(child.style['height'].split('%')[0]) / 100;
-          child.renderStyle.height = size.height * percentage;
-          isNeedsRelayout = true;
-        }
-
-        if (CSSLength.isPercentage(child.style['minHeight'])) {
-          double percentage = double.tryParse(child.style['minHeight'].split('%')[0]) / 100;
-          child.renderStyle.minHeight = size.height * percentage;
-          isNeedsRelayout = true;
-        }
-
-        if (CSSLength.isPercentage(child.style['maxHeight'])) {
-          double percentage = double.tryParse(child.style['maxHeight'].split('%')[0]) / 100;
-          child.renderStyle.maxHeight = size.height * percentage;
-          isNeedsRelayout = true;
-        }
+        isNeedsRelayout = child.renderStyle.resolvePercentageSize(this);
       }
       child = childParentData.nextSibling;
     }

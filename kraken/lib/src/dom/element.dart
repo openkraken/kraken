@@ -124,6 +124,8 @@ class Element extends Node
 
   bool get isValidSticky => style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
 
+  Size get viewportSize => Size(elementManager.viewportWidth, elementManager.viewportHeight);
+
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
       {this.tagName,
         this.defaultStyle = const <String, dynamic>{},
@@ -894,15 +896,27 @@ class Element extends Node
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    renderBoxModel.renderStyle.updatePadding(property, present);
+    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
+    if (CSSLength.isPercentage(present)) return;
+
+    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
+    renderBoxModel.renderStyle.updatePadding(property, presentValue);
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
-    renderBoxModel.renderStyle.updateSizing(property, present);
+    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
+    if (CSSLength.isPercentage(present)) return;
+
+    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
+    renderBoxModel.renderStyle.updateSizing(property, presentValue);
   }
 
   void _styleMarginChangedListener(String property, String original, String present) {
-    renderBoxModel.renderStyle.updateMargin(property, present);
+    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
+    if (CSSLength.isPercentage(present)) return;
+
+    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
+    renderBoxModel.renderStyle.updateMargin(property, presentValue);
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {

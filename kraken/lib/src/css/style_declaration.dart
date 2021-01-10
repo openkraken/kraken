@@ -493,10 +493,6 @@ class CSSStyleDeclaration {
       case MIN_HEIGHT:
       case MAX_WIDTH:
       case MAX_HEIGHT:
-      case BORDER_BOTTOM_WIDTH:
-      case BORDER_TOP_WIDTH:
-      case BORDER_LEFT_WIDTH:
-      case BORDER_RIGHT_WIDTH:
       case PADDING_TOP:
       case PADDING_LEFT:
       case PADDING_BOTTOM:
@@ -504,6 +500,14 @@ class CSSStyleDeclaration {
         if (!CSSLength.isLength(normalizedValue) &&
           !CSSLength.isPercentage(normalizedValue)
         ) {
+          return;
+        }
+        break;
+      case BORDER_BOTTOM_WIDTH:
+      case BORDER_TOP_WIDTH:
+      case BORDER_LEFT_WIDTH:
+      case BORDER_RIGHT_WIDTH:
+        if (!CSSLength.isLength(normalizedValue)) {
           return;
         }
         break;

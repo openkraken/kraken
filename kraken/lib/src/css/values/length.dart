@@ -63,6 +63,10 @@ class CSSLength {
     return value != null && _percentageRegExp.hasMatch(value);
   }
 
+  static double parsePercentage(String percentage) {
+    return double.tryParse(percentage.split('%')[0]) / 100;
+  }
+
   static double parseLength(String unitedValue, Size viewportSize) {
     return toDisplayPortValue(unitedValue, viewportSize);
   }

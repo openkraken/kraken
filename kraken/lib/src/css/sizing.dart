@@ -86,19 +86,14 @@ mixin CSSSizingMixin on RenderStyleBase {
     _maxHeight = value;
   }
 
-  void updateSizing(String property, String present) {
-    if (CSSLength.isPercentage(present)) return;
-    double value = CSSLength.toDisplayPortValue(present, viewportSize);
-
+  void updateSizing(String property, double value, {bool markNeedsLayout = true}) {
     RenderStyle renderStyle = this;
     switch (property) {
       case WIDTH:
         renderStyle.width = value;
-        renderBoxModel.markNeedsLayout();
         break;
       case HEIGHT:
         renderStyle.height = value;
-        renderBoxModel.markNeedsLayout();
         break;
       case MIN_HEIGHT:
         renderStyle.minHeight = getMinHeight(value);
@@ -107,11 +102,9 @@ mixin CSSSizingMixin on RenderStyleBase {
         if (maxHeight != null) {
           renderStyle.maxHeight = getMaxHeight(maxHeight, value);
         }
-        renderBoxModel.markNeedsLayout();
         break;
       case MAX_HEIGHT:
         renderStyle.maxHeight = getMaxHeight(value, renderStyle.minHeight);
-        renderBoxModel.markNeedsLayout();
         break;
       case MIN_WIDTH:
         renderStyle.minWidth = getMinWidth(value);
@@ -120,12 +113,13 @@ mixin CSSSizingMixin on RenderStyleBase {
         if (maxWidth != null) {
           renderStyle.maxWidth = getMaxWidth(maxWidth, value);
         }
-        renderBoxModel.markNeedsLayout();
         break;
       case MAX_WIDTH:
         renderStyle.maxWidth = getMaxWidth(value, renderStyle.minWidth);
-        renderBoxModel.markNeedsLayout();
         break;
+    }
+    if (markNeedsLayout) {
+      renderBoxModel.markNeedsLayout();
     }
   }
 

@@ -247,7 +247,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     }
   }
 
-  void updateBorder(String property, [Color borderColor, double borderWidth]) {
+  void updateBorder(String property, {Color borderColor, double borderWidth}) {
     Border border = renderBoxModel.decoration.border as Border;
 
     if (border != null) {

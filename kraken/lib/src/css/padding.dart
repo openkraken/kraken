@@ -18,7 +18,6 @@ mixin CSSPaddingMixin on RenderStyleBase {
 
   void _markNeedResolution() {
     _resolvedPadding = null;
-    renderBoxModel.markNeedsLayout();
   }
 
   /// The amount to pad the child in each dimension.
@@ -80,7 +79,7 @@ mixin CSSPaddingMixin on RenderStyleBase {
     );
   }
 
-  void updatePadding(String property, String present) {
+  void updatePadding(String property, double value, {bool markNeedsLayout = true}) {
     RenderStyle renderStyle = this;
     EdgeInsets prevPadding = renderStyle.padding;
     if (prevPadding != null) {
@@ -89,26 +88,34 @@ mixin CSSPaddingMixin on RenderStyleBase {
       double right = prevPadding.right;
       double bottom = prevPadding.bottom;
 
-      double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
       // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
       switch (property) {
         case PADDING_LEFT:
-          left = presentValue;
+          left = value;
           break;
         case PADDING_TOP:
-          top = presentValue;
+          top = value;
           break;
         case PADDING_BOTTOM:
-          bottom = presentValue;
+          bottom = value;
           break;
         case PADDING_RIGHT:
-          right = presentValue;
+          right = value;
           break;
       }
 
-      renderStyle.padding = EdgeInsets.only(left: left, right: right, bottom: bottom, top: top);
+      renderStyle.padding = EdgeInsets.only(
+        left: left,
+        right: right,
+        bottom: bottom,
+        top: top
+      );
     } else {
       renderStyle.padding = _getPadding();
+    }
+
+    if (markNeedsLayout) {
+      renderBoxModel.markNeedsLayout();
     }
   }
 
