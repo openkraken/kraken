@@ -907,7 +907,7 @@ class Element extends Node
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
     if (CSSLength.isPercentage(present)) return;
 
-    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
+    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
     renderBoxModel.renderStyle.updateSizing(property, presentValue);
   }
 
