@@ -1,6 +1,6 @@
 name: kraken
 description: A high-performance, web standards-compliant rendering engine.
-version: 0.6.2+10
+version: 0.6.3
 homepage: https://rax.js.org/docs/guide/kraken-startup
 
 environment:
