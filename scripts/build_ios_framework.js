@@ -16,7 +16,7 @@ let buildAppTasks = series(
 
 // Run tasks
 series(
-  'ios-clean',
+  'sdk-clean',
   buildAppTasks,
 )((err) => {
   if (err) {

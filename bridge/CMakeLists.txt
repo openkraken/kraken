@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2.0)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.12)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
 project(KrakenBridge)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -196,7 +196,6 @@ execute_process(
 )
 string(SUBSTRING ${APP_VER} 9 30 APP_VER)
 string(REGEX REPLACE "\n$" "" APP_VER "${APP_VER}")
-set_target_properties(kraken PROPERTIES VERSION "${APP_VER}")
 
 string(REPLACE \n "" APP_VER ${APP_VER}) # Remove last \n
 add_definitions(-DAPP_VERSION="${APP_VER}") # Read from dartfm version

@@ -129,7 +129,6 @@ task('clean', () => {
 const libOutputPath = join(TARGET_PATH, platform, 'lib');
 
 task('build-darwin-kraken-lib-release', done => {
-  // geneate builds scripts for ARM64
   execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-macos-x86_64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
@@ -141,8 +140,7 @@ task('build-darwin-kraken-lib-release', done => {
     }
   });
 
-  // build for ARMV64
-  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target kraken -- -j 4`, {
+  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target kraken -- -j 12`, {
     stdio: 'inherit'
   });
 
@@ -418,7 +416,7 @@ task('build-embedded-assets', (done) => {
   done();
 });
 
-task('ios-clean', (done) => {
+task('sdk-clean', (done) => {
   execSync(`rm -rf ${paths.sdk}/build`, { stdio: 'inherit' });
   done();
 });
@@ -439,7 +437,7 @@ task(`build-ios-kraken-lib-release`, (done) => {
   });
 
   // build for simulator
-  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-x64 --target kraken kraken_static -- -j 4`, {
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-x64 --target kraken kraken_static -- -j 12`, {
     stdio: 'inherit'
   });
 
@@ -458,7 +456,7 @@ task(`build-ios-kraken-lib-release`, (done) => {
   });
 
   // build for ARMV7, ARMV7S
-  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 4`, {
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 12`, {
     stdio: 'inherit'
   });
 
@@ -477,7 +475,7 @@ task(`build-ios-kraken-lib-release`, (done) => {
   });
 
   // build for ARMV64
-  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target kraken kraken_static -- -j 4`, {
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target kraken kraken_static -- -j 12`, {
     stdio: 'inherit'
   });
 
@@ -581,7 +579,7 @@ task('build-android-kraken-lib-release', (done) => {
       });
 
     // build
-    execSync(`cmake --build ${paths.bridge}/cmake-build-android-${arch} --target kraken -- -j 4`, {
+    execSync(`cmake --build ${paths.bridge}/cmake-build-android-${arch} --target kraken -- -j 12`, {
       stdio: 'inherit'
     });
 
