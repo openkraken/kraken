@@ -86,7 +86,7 @@ void _updateLength(double oldLength, double newLength, double progress, String p
     case BORDER_BOTTOM_RIGHT_RADIUS:
     case BORDER_TOP_LEFT_RADIUS:
     case BORDER_TOP_RIGHT_RADIUS:
-      renderStyle.updateBorderRadius(property, length);
+      renderStyle.updateBorderRadius(property, length.toString() + 'px');
       break;
     case FLEX_BASIS:
     case FONT_SIZE:

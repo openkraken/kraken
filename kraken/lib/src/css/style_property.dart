@@ -118,6 +118,7 @@ class CSSStyleProperty {
 
   static void setShorthandBorderRadius(Map<String, String> properties, String shorthandValue) {
     List<String> values = _getBorderRaidusValues(shorthandValue);
+
     if (values == null) return;
 
     properties[BORDER_TOP_LEFT_RADIUS] = values[0];

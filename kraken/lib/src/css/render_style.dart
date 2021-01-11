@@ -37,6 +37,7 @@ class RenderStyle
   bool resolvePercentageSize(RenderBoxModel parent) {
     bool isPercentageExist = false;
     Size parentSize = parent.size;
+    Size size = renderBoxModel.boxSize;
 
     /// Update sizing
     if (CSSLength.isPercentage(style[WIDTH])) {
@@ -204,7 +205,81 @@ class RenderStyle
       isPercentageExist = true;
     }
 
+    /// border-radius
+    String parsedTopLeftRadius = parsePercentageBorderRadius(style[BORDER_TOP_LEFT_RADIUS], size);
+    if (parsedTopLeftRadius != null) {
+      updateBorderRadius(
+        BORDER_TOP_LEFT_RADIUS,
+        parsedTopLeftRadius,
+      );
+      isPercentageExist = true;
+    }
+
+    String parsedTopRightRadius = parsePercentageBorderRadius(style[BORDER_TOP_RIGHT_RADIUS], size);
+    if (parsedTopRightRadius != null) {
+      updateBorderRadius(
+        BORDER_TOP_RIGHT_RADIUS,
+        parsedTopRightRadius,
+      );
+      isPercentageExist = true;
+    }
+
+    String parsedBottomLeftRadius = parsePercentageBorderRadius(style[BORDER_BOTTOM_LEFT_RADIUS], size);
+    if (parsedBottomLeftRadius != null) {
+      updateBorderRadius(
+        BORDER_BOTTOM_LEFT_RADIUS,
+        parsedBottomLeftRadius,
+      );
+      isPercentageExist = true;
+    }
+
+    String parsedBottomRightRadius = parsePercentageBorderRadius(style[BORDER_BOTTOM_RIGHT_RADIUS], size);
+    if (parsedBottomRightRadius != null) {
+      updateBorderRadius(
+        BORDER_BOTTOM_RIGHT_RADIUS,
+        parsedBottomRightRadius,
+      );
+      isPercentageExist = true;
+    }
+
+
     return isPercentageExist;
+  }
+
+  /// Parse percentage border radius
+  /// Returns the parsed result if percentage found, otherwise returns null
+  static String parsePercentageBorderRadius(String radiusStr, Size size) {
+    bool isPercentageExist = false;
+    final RegExp _spaceRegExp = RegExp(r'\s+');
+    List<String> values = radiusStr.split(_spaceRegExp);
+    String parsedRadius = '';
+    if (values.length == 1) {
+      if (CSSLength.isPercentage(values[0])) {
+        double percentage = CSSLength.parsePercentage(values[0]);
+        parsedRadius += (size.width * percentage).toString() + 'px' + ' ' +
+          (size.height * percentage).toString() + 'px';
+        isPercentageExist = true;
+      } else {
+        parsedRadius += values[0];
+      }
+    } else if (values.length == 2) {
+      if (CSSLength.isPercentage(values[0])) {
+        double percentage = CSSLength.parsePercentage(values[0]);
+        parsedRadius += (size.width * percentage).toString() + 'px';
+        isPercentageExist = true;
+      } else {
+        parsedRadius += values[0];
+      }
+      if (CSSLength.isPercentage(values[1])) {
+        double percentage = CSSLength.parsePercentage(values[1]);
+        parsedRadius += ' ' + (size.height * percentage).toString() + 'px';
+        isPercentageExist = true;
+      } else {
+        parsedRadius += ' ' + values[1];
+      }
+    }
+
+    return isPercentageExist ? parsedRadius : null;
   }
 
   BoxConstraints getConstraints() {

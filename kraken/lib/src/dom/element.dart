@@ -761,10 +761,6 @@ class Element extends Node
       case BORDER_TOP_WIDTH:
       case BORDER_RIGHT_WIDTH:
       case BORDER_BOTTOM_WIDTH:
-      case BORDER_TOP_LEFT_RADIUS:
-      case BORDER_TOP_RIGHT_RADIUS:
-      case BORDER_BOTTOM_LEFT_RADIUS:
-      case BORDER_BOTTOM_RIGHT_RADIUS:
       case BORDER_LEFT_STYLE:
       case BORDER_TOP_STYLE:
       case BORDER_RIGHT_STYLE:
@@ -775,6 +771,13 @@ class Element extends Node
       case BORDER_BOTTOM_COLOR:
       case BOX_SHADOW:
         _styleBoxChangedListener(property, original, present);
+        break;
+
+      case BORDER_TOP_LEFT_RADIUS:
+      case BORDER_TOP_RIGHT_RADIUS:
+      case BORDER_BOTTOM_LEFT_RADIUS:
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+        _styleBorderRadiusChangedListener(property, original, present);
         break;
 
       case MARGIN_LEFT:
@@ -952,6 +955,14 @@ class Element extends Node
 
   void _styleBoxChangedListener(String property, String original, String present) {
     renderBoxModel.renderStyle.updateBox(property, original, present);
+  }
+
+  void _styleBorderRadiusChangedListener(String property, String original, String present) {
+    /// @FIXME need consider two values
+    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
+    if (CSSLength.isPercentage(present)) return;
+
+    renderBoxModel.renderStyle.updateBorderRadius(property, present);
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {
