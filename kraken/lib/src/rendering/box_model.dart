@@ -273,6 +273,17 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
+  /// Used when setting percentage font-size style, it needs to be calculated when node attached
+  /// where it can access the style of parent element
+  bool _parseFontSize = false;
+  bool get parseFontSize => _parseFontSize;
+  set parseFontSize(bool value) {
+    if (value == null) return;
+    if (_parseFontSize != value) {
+      _parseFontSize = value;
+    }
+  }
+
   // id of current element
   int targetId;
 

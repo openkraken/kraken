@@ -480,6 +480,20 @@ class Element extends Node
       renderBoxModel.recalGradient = false;
     }
 
+    /// Calculate font-size which is percentage when node attached when it can access parent's style
+    if (renderBoxModel.parseFontSize) {
+      RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
+      double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
+      double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
+      renderBoxModel.renderStyle.fontSize = parsedFontSize;
+      for (Node node in childNodes) {
+        if (node is TextNode) {
+          node.updateTextStyle();
+        }
+      }
+      renderBoxModel.parseFontSize = false;
+    }
+
     didAttachRenderer();
   }
 
@@ -818,7 +832,7 @@ class Element extends Node
     switch (property) {
       case COLOR:
       case LINE_CLAMP:
-        _updateTextChildNodesStyle();
+        _updateTextChildNodesStyle(property);
         // Color change should trigger currentColor update
         _styleBoxChangedListener(property, original, present);
         break;
@@ -833,7 +847,7 @@ class Element extends Node
       case LINE_HEIGHT:
       case LETTER_SPACING:
       case WORD_SPACING:
-        _updateTextChildNodesStyle();
+        _updateTextChildNodesStyle(property);
         break;
     }
   }
@@ -990,7 +1004,12 @@ class Element extends Node
   }
 
   // Update textNode style when container style changed
-  void _updateTextChildNodesStyle() {
+  void _updateTextChildNodesStyle(String property) {
+    if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
+      renderBoxModel.parseFontSize = true;
+      return;
+    }
+
     renderBoxModel.renderStyle.updateTextStyle();
     for (Node node in childNodes) {
       if (node is TextNode) {

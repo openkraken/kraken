@@ -242,7 +242,6 @@ class RenderStyle
       isPercentageExist = true;
     }
 
-
     return isPercentageExist;
   }
 
