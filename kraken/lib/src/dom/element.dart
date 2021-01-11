@@ -480,7 +480,8 @@ class Element extends Node
       renderBoxModel.recalGradient = false;
     }
 
-    /// Calculate font-size which is percentage when node attached when it can access parent's style
+    /// Calculate font-size which is percentage when node attached
+    /// where it can access the font-size of its parent element
     if (renderBoxModel.parseFontSize) {
       RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
       double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
@@ -492,6 +493,21 @@ class Element extends Node
         }
       }
       renderBoxModel.parseFontSize = false;
+    }
+
+    /// Calculate line-height which is percentage when node attached
+    /// where it can access the font-size of its own element
+    if (renderBoxModel.parseLineHeight) {
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+      double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
+      double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
+      renderBoxModel.renderStyle.lineHeight = parsedLineHeight;
+      for (Node node in childNodes) {
+        if (node is TextNode) {
+          node.updateTextStyle();
+        }
+      }
+      renderBoxModel.parseLineHeight = false;
     }
 
     didAttachRenderer();
@@ -1005,8 +1021,17 @@ class Element extends Node
 
   // Update textNode style when container style changed
   void _updateTextChildNodesStyle(String property) {
+    /// Percentage font-size should be resolved when node attached
+    /// cause it needs to know its parents style
     if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
       renderBoxModel.parseFontSize = true;
+      return;
+    }
+
+    /// Percentage line-height should be resolved when node attached
+    /// cause it needs to know other style in its own element
+    if (property == LINE_HEIGHT && CSSLength.isPercentage(style[LINE_HEIGHT])) {
+      renderBoxModel.parseLineHeight = true;
       return;
     }
 
