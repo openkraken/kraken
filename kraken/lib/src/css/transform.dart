@@ -219,7 +219,7 @@ void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, Ren
     );
   }
 
-  renderStyle.updateTransform(null, newMatrix4);
+  renderStyle.updateTransform(newMatrix4);
 }
 
 void _updateChildTextNodes(RenderStyle renderStyle) {
@@ -1118,7 +1118,7 @@ mixin CSSTransformMixin on RenderStyleBase {
     renderBoxModel.markNeedsLayout();
   }
 
-  void updateTransform(String value, [Matrix4 newMatrix4]) {
+  void updateTransform(Matrix4 matrix4) {
     // If render box model was not creared yet, then exit.
     if (renderBoxModel == null) {
       return;
@@ -1127,7 +1127,6 @@ mixin CSSTransformMixin on RenderStyleBase {
     int targetId = renderBoxModel.targetId;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
 
-    Matrix4 matrix4 = newMatrix4 ?? CSSTransform.parseTransform(value, viewportSize);
     // Upgrade this renderObject into repaintSelf mode.
     if (!renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;

@@ -281,6 +281,77 @@ class RenderStyle
     return isPercentageExist ? parsedRadius : null;
   }
 
+  /// Check whether percentage exist in border-radius
+  static bool isBorderRadiusPercentage(String radiusStr) {
+    bool isPercentageExist = false;
+    final RegExp _spaceRegExp = RegExp(r'\s+');
+    List<String> values = radiusStr.split(_spaceRegExp);
+    if ((values.length == 1 && CSSLength.isPercentage(values[0])) ||
+      (values.length == 2 && (CSSLength.isPercentage(values[0]) || CSSLength.isPercentage(values[1])))
+    ) {
+      isPercentageExist = true;
+    }
+
+    return isPercentageExist;
+  }
+
+  /// Parse percentage transform translate value
+  /// Returns the parsed result if percentage found, otherwise returns null
+  static Matrix4 parsePercentageTransformTranslate(String transformStr, Size size, Size viewportSize) {
+    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
+    final String TRANSLATE = 'translate';
+
+    Matrix4 matrix4;
+    for (CSSFunctionalNotation method in methods) {
+      Matrix4 transform;
+      if (method.name == TRANSLATE && method.args.length >= 1 && method.args.length <= 2) {
+        double y;
+        double x;
+        if (method.args.length == 2) {
+          String translateY = method.args[1].trim();
+          if (CSSLength.isPercentage(translateY)) {
+            double percentage = CSSLength.parsePercentage(translateY);
+            translateY = (size.height * percentage).toString() + 'px';
+          }
+          y = CSSLength.toDisplayPortValue(translateY, viewportSize) ?? 0;
+        } else {
+          y = 0;
+        }
+        String translateX = method.args[0].trim();
+        if (CSSLength.isPercentage(translateX)) {
+          double percentage = CSSLength.parsePercentage(translateX);
+          translateX = (size.width * percentage).toString() + 'px';
+        }
+        x = CSSLength.toDisplayPortValue(translateX, viewportSize) ?? 0;
+        transform = Matrix4.identity()..translate(x, y);
+      }
+      if (transform != null) {
+        if (matrix4 == null) {
+          matrix4 = transform;
+        } else {
+          matrix4.multiply(transform);
+        }
+      }
+    }
+    return matrix4;
+  }
+
+  /// Check whether percentage exist in transform translate
+  static bool isTransformTranslatePercentage(String transformStr) {
+    bool isPercentageExist = false;
+    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
+    final String TRANSLATE = 'translate';
+    for (CSSFunctionalNotation method in methods) {
+      if (method.name == TRANSLATE && ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
+        (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))))
+      ) {
+        isPercentageExist = true;
+      }
+    }
+    return isPercentageExist;
+  }
+
+  /// Calculate renderBoxModel constraints based on style
   BoxConstraints getConstraints() {
     double constraintWidth = width ?? double.infinity;
     double constraintHeight = height ?? double.infinity;

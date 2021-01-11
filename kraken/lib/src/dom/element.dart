@@ -502,12 +502,26 @@ class Element extends Node
       double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
       double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
       renderBoxModel.renderStyle.lineHeight = parsedLineHeight;
-      for (Node node in childNodes) {
-        if (node is TextNode) {
-          node.updateTextStyle();
-        }
-      }
       renderBoxModel.parseLineHeight = false;
+    }
+
+    /// Calculate transform translate which is percentage when node attached
+    /// where it can access the size of its own element
+    if (renderBoxModel.parseTransformTranslate) {
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+      String transformStr = style[TRANSFORM];
+      /// @FIXME: More complicate case that will affect element size such as flex-grow/flex-shrink may not work
+      /// cause currently getContentWidth/Height not consider this case.
+      /// Sadly this logic cannot move to layout stage like sizing and offset style either cause updating transform
+      /// involves repaintBoundary node drop and insert which will break flutter's restriction too.
+      final double contentWidth = RenderBoxModel.getContentWidth(renderBoxModel) +
+        renderStyle.borderEdge.horizontal;
+      final double contentHeight = RenderBoxModel.getContentHeight(renderBoxModel) +
+        renderStyle.borderEdge.vertical;
+      Size size = Size(contentWidth, contentHeight);
+      renderBoxModel.renderStyle.transform =
+        RenderStyle.parsePercentageTransformTranslate(transformStr, size, viewportSize);
+      renderBoxModel.parseTransformTranslate = false;
     }
 
     didAttachRenderer();
@@ -988,9 +1002,8 @@ class Element extends Node
   }
 
   void _styleBorderRadiusChangedListener(String property, String original, String present) {
-    /// @FIXME need consider two values
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) return;
+    if (RenderStyle.isBorderRadiusPercentage(present)) return;
 
     renderBoxModel.renderStyle.updateBorderRadius(property, present);
   }
@@ -1010,8 +1023,15 @@ class Element extends Node
   }
 
   void _styleTransformChangedListener(String property, String original, String present) {
-    // Update transform.
-    renderBoxModel.renderStyle.updateTransform(present);
+    /// Transform translate of percentage should be resolved in layout stage
+    /// cause it will be calculated relative to its own size
+    if (RenderStyle.isTransformTranslatePercentage(present)) {
+      renderBoxModel.parseTransformTranslate = true;
+      return;
+    }
+
+    Matrix4 matrix4 = CSSTransform.parseTransform(present, viewportSize);
+    renderBoxModel.renderStyle.updateTransform(matrix4);
   }
 
   void _styleTransformOriginChangedListener(String property, String original, String present) {
