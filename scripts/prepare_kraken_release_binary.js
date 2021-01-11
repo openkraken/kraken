@@ -4,6 +4,7 @@ const minimist = require('minimist');
 const { series, parallel } = require('gulp');
 
 series(
+  'sdk-clean',
   'compile-polyfill',
   'build-darwin-kraken-lib-release',
   'build-ios-kraken-lib-release',
