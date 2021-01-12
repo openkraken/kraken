@@ -129,7 +129,7 @@ task('clean', () => {
 const libOutputPath = join(TARGET_PATH, platform, 'lib');
 
 task('build-darwin-kraken-lib-release', done => {
-  execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_TEST=true \
     -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-macos-x86_64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
@@ -140,7 +140,7 @@ task('build-darwin-kraken-lib-release', done => {
     }
   });
 
-  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target kraken -- -j 12`, {
+  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target kraken kraken_test -- -j 12`, {
     stdio: 'inherit'
   });
 
