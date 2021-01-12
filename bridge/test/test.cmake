@@ -18,10 +18,10 @@ else()
   endif()
 endif()
 
-add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE})
+add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE} ${BRIDGE_SOURCE})
 
 ### kraken_test
-target_link_libraries(kraken_test PRIVATE kraken ${BRIDGE_LINK_LIBS})
+target_link_libraries(kraken_test PRIVATE ${BRIDGE_LINK_LIBS})
 target_include_directories(kraken_test PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
@@ -37,12 +37,7 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
     )
-else ()
-  set_target_properties(kraken_test
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib"
-    )
-endif ()
+endif()
 
 add_subdirectory(./third_party/googletest)
 

@@ -140,7 +140,7 @@ task('build-darwin-kraken-lib-release', done => {
     }
   });
 
-  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target kraken -- -j 12`, {
+  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target kraken kraken_test -- -j 12`, {
     stdio: 'inherit'
   });
 
