@@ -4,6 +4,7 @@ const chalk = require('chalk');
 
 // Run tasks
 series(
+  'sdk-clean',
   'compile-polyfill',
   'build-android-kraken-lib-release'
 )((err) => {
