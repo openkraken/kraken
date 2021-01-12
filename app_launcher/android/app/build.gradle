@@ -44,17 +44,6 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        ndk {
-            abiFilters "armeabi-v7a"
-        }
-
-        externalNativeBuild {
-            cmake {
-                arguments "-DKRAKEN_JS_ENGINE=jsc"
-                abiFilters 'armeabi-v7a', 'arm64-v8a'
-            }
-        }
     }
 
     buildTypes {
@@ -62,12 +51,6 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
-        }
-    }
-
-    externalNativeBuild {
-        cmake {
-            path file('CMakeLists.txt')
         }
     }
 }
