@@ -35,6 +35,9 @@ class RenderStyle
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
   bool resolvePercentageSize(RenderBoxModel parent) {
+    if (!renderBoxModel.hasSize) {
+      return false;
+    }
     bool isPercentageExist = false;
     Size parentSize = parent.size;
     Size size = renderBoxModel.boxSize;
@@ -207,6 +210,7 @@ class RenderStyle
 
     /// border-radius
     String parsedTopLeftRadius = parsePercentageBorderRadius(style[BORDER_TOP_LEFT_RADIUS], size);
+
     if (parsedTopLeftRadius != null) {
       updateBorderRadius(
         BORDER_TOP_LEFT_RADIUS,

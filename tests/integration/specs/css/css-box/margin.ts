@@ -80,4 +80,47 @@ describe('Box margin', () => {
     container1.style.margin = '';
     await matchViewportSnapshot();
   });
+
+  it('should work with percentage', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100%',
+            width: '100%',
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              height: '50px',
+              width: '50px',
+              backgroundColor: 'red',
+            }
+          }),
+          createElement('div', {
+            style: {
+              height: '50px',
+              width: '50px',
+              margin: '20%',
+              backgroundColor: 'green',
+            }
+          })
+        ]),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
 });

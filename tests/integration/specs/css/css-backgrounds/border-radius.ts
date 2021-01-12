@@ -42,4 +42,60 @@ describe('border_radius', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('should work with percentage of one value', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            borderRadius: '100%',
+            backgroundColor: 'green',
+          }
+        })
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage of two values', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            borderRadius: '100% 50%',
+            backgroundColor: 'green',
+          }
+        })
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
 });

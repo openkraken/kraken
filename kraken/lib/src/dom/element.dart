@@ -510,14 +510,16 @@ class Element extends Node
     if (renderBoxModel.parseTransformTranslate) {
       RenderStyle renderStyle = renderBoxModel.renderStyle;
       String transformStr = style[TRANSFORM];
+      double horizontalBorderWidth = renderStyle.borderEdge != null ?
+        renderStyle.borderEdge.horizontal : 0;
+      double verticalBorderWidth = renderStyle.borderEdge != null ?
+        renderStyle.borderEdge.vertical : 0;
       /// @FIXME: More complicate case that will affect element size such as flex-grow/flex-shrink may not work
       /// cause currently getContentWidth/Height not consider this case.
       /// Sadly this logic cannot move to layout stage like sizing and offset style either cause updating transform
       /// involves repaintBoundary node drop and insert which will break flutter's restriction too.
-      final double contentWidth = RenderBoxModel.getContentWidth(renderBoxModel) +
-        renderStyle.borderEdge.horizontal;
-      final double contentHeight = RenderBoxModel.getContentHeight(renderBoxModel) +
-        renderStyle.borderEdge.vertical;
+      final double contentWidth = RenderBoxModel.getContentWidth(renderBoxModel) + horizontalBorderWidth;
+      final double contentHeight = RenderBoxModel.getContentHeight(renderBoxModel) + verticalBorderWidth;
       Size size = Size(contentWidth, contentHeight);
       renderBoxModel.renderStyle.transform =
         RenderStyle.parsePercentageTransformTranslate(transformStr, size, viewportSize);
