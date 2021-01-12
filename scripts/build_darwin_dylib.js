@@ -5,17 +5,11 @@ require('./tasks');
 const { series } = require('gulp');
 const chalk = require('chalk');
 
-const SUPPORTED_JS_ENGINES = ['jsc'];
-const libKrakenSeries = SUPPORTED_JS_ENGINES.map(jsEngine => [
-  'generate-cmake-files-' + jsEngine,
-  'build-kraken-lib-' + jsEngine
-]);
-
 // Run tasks
 series(
+  'sdk-clean',
   'compile-polyfill',
-  libKrakenSeries,
-  'copy-build-libs'
+  'build-darwin-kraken-lib-release',
 )((err) => {
   if (err) {
     console.log(err);
