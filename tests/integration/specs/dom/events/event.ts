@@ -302,4 +302,30 @@ describe('Event', () => {
 
     await simulateSwipe(20, 20, 20, 100, 0.1);
   })
+
+  it('when the node is transformed, hittest triggers the correct node', async () => {
+    let clickText;
+    const container = document.createElement('div');
+    container.style.transform = 'translate3d(-33px, 0vw, 0vw)';
+    container.style.width = '100px';
+    container.style.height = '100px';
+    container.style.backgroundColor = 'red';
+
+    document.body.appendChild(container);
+
+    for(let i = 0; i < 3; i++) {
+        const child = document.createElement('div');
+        child.style.width = '33px';
+        child.style.height = '100px';
+        child.style.display='inline-block'
+        child.style.backgroundColor = ['yellow','black','blue'][i];
+        child.onclick = () => {
+          clickText = i;
+        }
+        container.appendChild(child);
+    }
+
+    await simulateClick(10, 10);
+    expect(clickText).toBe(1);
+  })
 });
