@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
+import 'package:kraken/gesture.dart';
 
 typedef KrakenOnLoad = void Function(KrakenController controller);
 
@@ -52,6 +53,8 @@ class Kraken extends StatelessWidget {
 
   final bool debugEnableInspector;
 
+  final GestureClient gestureClient;
+
   KrakenController get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
@@ -67,6 +70,7 @@ class Kraken extends StatelessWidget {
     this.navigationDelegate,
     this.javaScriptChannel,
     this.background,
+    this.gestureClient,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -126,6 +130,7 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
       methodChannel: _krakenWidget.javaScriptChannel,
       bundleContent: _krakenWidget.bundleContent,
       debugEnableInspector: _krakenWidget.debugEnableInspector,
+      gestureClient: _krakenWidget.gestureClient,
     );
 
     if (kProfileMode) {

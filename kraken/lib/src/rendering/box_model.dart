@@ -30,6 +30,117 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
+/// Modified from Flutter rendering/box.dart.
+/// A mixin that provides useful default behaviors for boxes with children
+/// managed by the [ContainerRenderObjectMixin] mixin.
+///
+/// By convention, this class doesn't override any members of the superclass.
+/// Instead, it provides helpful functions that subclasses can call as
+/// appropriate.
+mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentData<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
+  /// Returns the baseline of the first child with a baseline.
+  ///
+  /// Useful when the children are displayed vertically in the same order they
+  /// appear in the child list.
+  double defaultComputeDistanceToFirstActualBaseline(TextBaseline baseline) {
+    assert(!debugNeedsLayout);
+    ChildType child = firstChild;
+    while (child != null) {
+      final ParentDataType childParentData = child.parentData as ParentDataType;
+      // ignore: INVALID_USE_OF_PROTECTED_MEMBER
+      final double result = child.getDistanceToActualBaseline(baseline);
+      if (result != null)
+        return result + childParentData.offset.dy;
+      child = childParentData.nextSibling;
+    }
+    return null;
+  }
+
+  /// Returns the minimum baseline value among every child.
+  ///
+  /// Useful when the vertical position of the children isn't determined by the
+  /// order in the child list.
+  double defaultComputeDistanceToHighestActualBaseline(TextBaseline baseline) {
+    assert(!debugNeedsLayout);
+    double result;
+    ChildType child = firstChild;
+    while (child != null) {
+      final ParentDataType childParentData = child.parentData as ParentDataType;
+      // ignore: INVALID_USE_OF_PROTECTED_MEMBER
+      double candidate = child.getDistanceToActualBaseline(baseline);
+      if (candidate != null) {
+        candidate += childParentData.offset.dy;
+        if (result != null)
+          result = math.min(result, candidate);
+        else
+          result = candidate;
+      }
+      child = childParentData.nextSibling;
+    }
+    return result;
+  }
+
+  /// Performs a hit test on each child by walking the child list backwards.
+  ///
+  /// Stops walking once after the first child reports that it contains the
+  /// given point. Returns whether any children contain the given point.
+  ///
+  /// See also:
+  ///
+  ///  * [defaultPaint], which paints the children appropriate for this
+  ///    hit-testing strategy.
+  bool defaultHitTestChildren(BoxHitTestResult result, { Offset position }) {
+    // The x, y parameters have the top left of the node's box as the origin.
+    ChildType child = lastChild;
+    while (child != null) {
+      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset == Offset.zero ? null : childParentData.offset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - childParentData.offset);
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit)
+        return true;
+      child = childParentData.previousSibling;
+    }
+    return false;
+  }
+
+  /// Paints each child by walking the child list forwards.
+  ///
+  /// See also:
+  ///
+  ///  * [defaultHitTestChildren], which implements hit-testing of the children
+  ///    in a manner appropriate for this painting strategy.
+  void defaultPaint(PaintingContext context, Offset offset) {
+    ChildType child = firstChild;
+    while (child != null) {
+      final ParentDataType childParentData = child.parentData as ParentDataType;
+      context.paintChild(child, childParentData.offset + offset);
+      child = childParentData.nextSibling;
+    }
+  }
+
+  /// Returns a list containing the children of this render object.
+  ///
+  /// This function is useful when you need random-access to the children of
+  /// this render object. If you're accessing the children in order, consider
+  /// walking the child list directly.
+  List<ChildType> getChildrenAsList() {
+    final List<ChildType> result = <ChildType>[];
+    RenderBox child = firstChild;
+    while (child != null) {
+      final ParentDataType childParentData = child.parentData as ParentDataType;
+      result.add(child as ChildType);
+      child = childParentData.nextSibling;
+    }
+    return result;
+  }
+}
+
 class RenderLayoutBox extends RenderBoxModel
     with
         ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
@@ -1081,16 +1192,21 @@ class RenderBoxModel extends RenderBox with
     }());
 
     bool isHit = result.addWithPaintTransform(
-      transform: renderStyle.transform != null ? getEffectiveTransform() : Matrix4.identity(),
+      transform: renderStyle.transform != null ? getEffectiveTransform() : null,
       position: position,
       hitTest: (BoxHitTestResult result, Offset trasformPosition) {
         return result.addWithPaintOffset(
-          offset: Offset(-scrollLeft, -scrollTop),
+          offset: (scrollLeft != 0.0 || scrollTop != 0.0) ? Offset(-scrollLeft, -scrollTop) : null,
           position: trasformPosition,
           hitTest: (BoxHitTestResult result, Offset position) {
             CSSPositionType positionType = renderStyle.position;
             if (positionType == CSSPositionType.fixed) {
               position -= getTotalScrollOffset();
+            }
+
+            // Determine whether the hittest position is within the visible area of the node in scroll.
+            if ((clipX || clipY) && !size.contains(trasformPosition)) {
+              return false;
             }
 
             // addWithPaintOffset is to add an offset to the child node, the calculation itself does not need to bring an offset.
@@ -1107,25 +1223,9 @@ class RenderBoxModel extends RenderBox with
     return isHit;
   }
 
-  // Determine whether the hittest position is within the visible area of the parent node in scroll.
-  bool isParentViewContainsPosition (Offset position) {
-    AbstractNode parentNode = parent;
-    final globalPosition = localToGlobal(position);
-    bool isContainsPosition = true;
-    while (parentNode is RenderBoxModel) {
-      final node =(parentNode as RenderBoxModel);
-      if (node.clipX || node.clipY) {
-        isContainsPosition &= node.size.contains(node.globalToLocal(globalPosition));
-      }
-      parentNode = parentNode.parent;
-    }
-    return isContainsPosition;
-  }
-
   @override
   bool hitTestSelf(Offset position) {
-    // Prioritize whether position belongs to the current size, so that each node does not need to traverse all its superiors.
-    return size.contains(position) && isParentViewContainsPosition(position);
+    return size.contains(position);
   }
 
   Future<Image> toImage({ double pixelRatio = 1.0 }) {

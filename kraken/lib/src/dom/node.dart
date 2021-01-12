@@ -28,9 +28,6 @@ class Comment extends Node {
   String data;
 }
 
-// TODO: remove it.
-mixin NodeLifeCycle on Node {}
-
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
 /// rendering of the application.
@@ -68,9 +65,6 @@ abstract class RenderObjectNode {
 }
 
 abstract class Node extends EventTarget implements RenderObjectNode {
-  List<VoidCallback> _afterConnected = [];
-  List<VoidCallback> _beforeDisconnected = [];
-
   RenderObject _renderer;
 
   final Pointer<NativeNode> nativeNodePtr;
@@ -133,28 +127,6 @@ abstract class Node extends EventTarget implements RenderObjectNode {
 
   // Is child renderObject attached.
   bool get isRendererAttached => renderer != null && renderer.attached;
-
-  void fireAfterConnected() {
-    for (VoidCallback callback in _afterConnected) {
-      callback();
-    }
-    _afterConnected = [];
-  }
-
-  void queueAfterConnected(VoidCallback callback) {
-    _afterConnected.add(callback);
-  }
-
-  void fireBeforeDisconnected() {
-    for (VoidCallback callback in _beforeDisconnected) {
-      callback();
-    }
-    _beforeDisconnected = [];
-  }
-
-  void queueBeforeDisconnected(VoidCallback callback) {
-    _beforeDisconnected.add(callback);
-  }
 
   /// Attach a renderObject to parent.
   void attachTo(Element parent, {RenderObject after}) {}

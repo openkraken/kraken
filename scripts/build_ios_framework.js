@@ -9,15 +9,11 @@ const minimist = require('minimist');
 const { series, parallel } = require('gulp');
 const buildMode = process.env.KRAKEN_BUILD || 'Debug';
 
-let buildAppTasks = series(
-  'compile-polyfill',
-  'build-ios-kraken-lib-' + buildMode.toLowerCase(),
-);
-
 // Run tasks
 series(
-  'ios-clean',
-  buildAppTasks,
+  'sdk-clean',
+  'compile-polyfill',
+  'build-ios-kraken-lib-release'
 )((err) => {
   if (err) {
     console.log(err);

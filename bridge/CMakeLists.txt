@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2.0)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.12)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
 project(KrakenBridge)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -174,7 +174,7 @@ target_include_directories(kraken PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "release")
+if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
   ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
   ### remove dynamic_cast and exceptions
   target_compile_options(kraken PRIVATE -fno-rtti -fno-exceptions -fvisibility=hidden)
@@ -196,7 +196,6 @@ execute_process(
 )
 string(SUBSTRING ${APP_VER} 9 30 APP_VER)
 string(REGEX REPLACE "\n$" "" APP_VER "${APP_VER}")
-set_target_properties(kraken PROPERTIES VERSION "${APP_VER}")
 
 string(REPLACE \n "" APP_VER ${APP_VER}) # Remove last \n
 add_definitions(-DAPP_VERSION="${APP_VER}") # Read from dartfm version
@@ -218,22 +217,20 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_jsc)
 endif()
 
-if (IS_ANDROID)
-  # DONOT set output dir for android gradle.
-else ()
-  if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
-    set_target_properties(kraken
-      PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
-      )
-    set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
-  else ()
-    set_target_properties(kraken
-      PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib"
-      )
-    set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib")
-  endif ()
+if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
+  set_target_properties(kraken
+          PROPERTIES
+          LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+          )
+  set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
+elseif (IS_ANDROID)
+  # android do nothing
+else()
+  set_target_properties(kraken
+          PROPERTIES
+          LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib"
+          )
+  set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib")
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
