@@ -172,10 +172,20 @@ class RenderStyle
     }
 
     /// Update offset
+
+    /// Offset of positioned element starts from content other than border,
+    /// it needs to substract border width
+    double parentHorizontalBorderWidth = parent.renderStyle.borderEdge != null ?
+      parent.renderStyle.borderEdge.horizontal : 0;
+    double parentVerticalBorderWidth = parent.renderStyle.borderEdge != null ?
+      parent.renderStyle.borderEdge.vertical : 0;
+    double parentContentWidth = parentSize.width - parentHorizontalBorderWidth;
+    double parentContentHeight = parentSize.height - parentVerticalBorderWidth;
+
     if (CSSLength.isPercentage(style[TOP])) {
       updateOffset(
         TOP,
-        parentSize.height * CSSLength.parsePercentage(style[TOP]),
+        parentContentHeight * CSSLength.parsePercentage(style[TOP]),
         markNeedsLayout: false
       );
       isPercentageExist = true;
@@ -184,7 +194,7 @@ class RenderStyle
     if (CSSLength.isPercentage(style[RIGHT])) {
       updateOffset(
         RIGHT,
-        parentSize.width * CSSLength.parsePercentage(style[RIGHT]),
+        parentContentWidth * CSSLength.parsePercentage(style[RIGHT]),
         markNeedsLayout: false
       );
       isPercentageExist = true;
@@ -193,7 +203,7 @@ class RenderStyle
     if (CSSLength.isPercentage(style[BOTTOM])) {
       updateOffset(
         BOTTOM,
-        parentSize.height * CSSLength.parsePercentage(style[BOTTOM]),
+        parentContentHeight * CSSLength.parsePercentage(style[BOTTOM]),
         markNeedsLayout: false
       );
       isPercentageExist = true;
@@ -202,7 +212,7 @@ class RenderStyle
     if (CSSLength.isPercentage(style[LEFT])) {
       updateOffset(
         LEFT,
-        parentSize.width * CSSLength.parsePercentage(style[LEFT]),
+        parentContentWidth * CSSLength.parsePercentage(style[LEFT]),
         markNeedsLayout: false
       );
       isPercentageExist = true;
