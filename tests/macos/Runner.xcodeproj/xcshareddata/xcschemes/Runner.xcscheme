@@ -73,6 +73,11 @@
          <EnvironmentVariable
             key = "KRAKEN_LIBRARY_PATH"
             value = "${PROJECT_DIR}/../../targets/darwin/lib"
+            isEnabled = "NO">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "KRAKEN_ENABLE_TEST"
+            value = "true"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable

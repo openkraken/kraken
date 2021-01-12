@@ -225,13 +225,7 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
 elseif (IS_ANDROID)
   # android do nothing
-else()
-  set_target_properties(kraken
-          PROPERTIES
-          LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib"
-          )
-  set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib")
-endif ()
+endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
