@@ -40,6 +40,6 @@ describe('border_radius', () => {
     );
     BODY.appendChild(image);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
 });
