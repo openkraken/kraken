@@ -220,6 +220,15 @@ mixin CSSBoxMixin on RenderStyleBase {
   // Add border radius transition listener
   void updateBorderRadius(String property, String present) {
     if (renderBoxModel.decoration == null) return;
+
+    CSSBoxDecoration cssBoxDecoration = renderBoxModel.cssBoxDecoration;
+    if (cssBoxDecoration == null) {
+      cssBoxDecoration = getCSSBoxDecoration();
+      renderBoxModel.cssBoxDecoration = cssBoxDecoration;
+      if (cssBoxDecoration == null) return;
+      renderBoxModel.decoration = cssBoxDecoration.toBoxDecoration();
+    }
+
     // topLeft topRight bottomRight bottomLeft
     int index = _borderRadiusMapping[property];
 
