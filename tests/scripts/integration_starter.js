@@ -16,7 +16,7 @@ function startIntegrationTest() {
   const tester = spawn(testExecutable, [], {
     env: {
       ...process.env,
-      KRAKEN_LIBRARY_PATH: path.join(__dirname, '../../targets/darwin/lib'),
+      KRAKEN_ENABLE_TEST: 'true',
       KRAKEN_SPEC_DIR: path.join(__dirname, '../')
     },
     cwd: process.cwd(),
