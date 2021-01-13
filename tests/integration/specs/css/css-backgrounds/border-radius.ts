@@ -40,7 +40,7 @@ describe('border_radius', () => {
     );
     BODY.appendChild(image);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
 
   it('should work with percentage of one value', async () => {

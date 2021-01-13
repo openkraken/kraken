@@ -52,3 +52,25 @@ describe('requestAnimationFrame', () => {
     });
   });
 });
+
+describe('clearTimeout', () => {
+  it('should clear timeout', (done) => {
+    const timer = setTimeout(() => {
+      done.fail('clearTimeout not works.');
+    }, 200);
+    
+    clearTimeout(timer);
+    setTimeout(done, 250);
+  });
+
+  it('should accept non-numberic value', () => {
+    var timer;
+    clearTimeout(timer);
+    
+    timer = 'foo';
+    clearTimeout(timer);
+
+    timer = null;
+    clearTimeout(timer);
+  });
+});

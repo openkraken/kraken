@@ -224,7 +224,6 @@ JSValueRef clearTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef this
 
   const JSValueRef timerIdValueRef = arguments[0];
   if (!JSValueIsNumber(ctx, timerIdValueRef)) {
-    throwJSError(ctx, "Failed to execute 'clearTimeout': parameter 1  is not an timer kind.", exception);
     return nullptr;
   }
 
