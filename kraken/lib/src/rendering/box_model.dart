@@ -406,17 +406,6 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  /// Used when setting percentage transform translate style, it needs to be calculated when node attached
-  /// where it needs to know the size of its own element
-  bool _parseTransformTranslate = false;
-  bool get parseTransformTranslate => _parseTransformTranslate;
-  set parseTransformTranslate(bool value) {
-    if (value == null) return;
-    if (_parseTransformTranslate != value) {
-      _parseTransformTranslate = value;
-    }
-  }
-
   // id of current element
   int targetId;
 

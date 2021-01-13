@@ -757,7 +757,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        bool percentageFound = child.renderStyle.resolvePercentageSize(this);
+        bool percentageFound = child.renderStyle.resolvePercentageSize();
         /// Relayout after percentage size is resolved
         if (percentageFound) {
           CSSPositionedLayout.layoutPositionedChild(this, child, needsRelayout: true);
@@ -998,7 +998,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.resolvePercentageSize(this);
+        percentageFound = child.renderStyle.resolvePercentageSize();
       }
       child = childParentData.nextSibling;
     }

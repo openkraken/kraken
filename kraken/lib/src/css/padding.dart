@@ -58,7 +58,7 @@ mixin CSSPaddingMixin on RenderStyleBase {
     return _resolvedPadding.left;
   }
 
-  void updatePadding(String property, double value, {bool markNeedsLayout = true}) {
+  void updatePadding(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     RenderStyle renderStyle = this;
     EdgeInsets prevPadding = renderStyle.padding ?? EdgeInsets.only(
       top: 0.0,
@@ -95,7 +95,7 @@ mixin CSSPaddingMixin on RenderStyleBase {
       top: top
     );
 
-    if (markNeedsLayout) {
+    if (shouldMarkNeedsLayout) {
       renderBoxModel.markNeedsLayout();
     }
   }

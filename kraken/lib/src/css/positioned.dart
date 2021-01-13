@@ -253,7 +253,7 @@ class CSSPositionedLayout {
     RenderBoxModel child,
   ) {
     final RenderLayoutParentData childParentData = child.parentData;
-    Size parentSize = parent.size;
+    Size parentSize = parent.boxSize;
     // Calc x,y by parentData.
     double x, y;
 

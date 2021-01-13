@@ -81,7 +81,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     }
   }
 
-  void updateOffset(String property, double value, {bool markNeedsLayout = true}) {
+  void updateOffset(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     switch (property) {
       case TOP:
         top = value;
@@ -98,7 +98,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     }
     /// Should mark parent needsLayout directly cause positioned element is rendered as relayoutBoundary
     /// the parent will not be marked as markNeedsLayout
-    if (markNeedsLayout) {
+    if (shouldMarkNeedsLayout) {
       _markParentNeedsLayout();
     }
   }

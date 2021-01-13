@@ -218,7 +218,6 @@ void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, Ren
       quaternion
     );
   }
-
   renderStyle.updateTransform(newMatrix4);
 }
 
@@ -1107,7 +1106,6 @@ mixin CSSTransformMixin on RenderStyleBase {
   set transform(Matrix4 value) {
     if (_transform == value) return;
     _transform = value;
-    renderBoxModel.markNeedsLayout();
   }
 
   CSSOrigin get transformOrigin => _transformOrigin;
@@ -1118,17 +1116,19 @@ mixin CSSTransformMixin on RenderStyleBase {
     renderBoxModel.markNeedsLayout();
   }
 
-  void updateTransform(Matrix4 matrix4) {
-    // If render box model was not creared yet, then exit.
-    if (renderBoxModel == null) {
-      return;
+  void updateTransform(
+    Matrix4 matrix4,
+    {
+      bool shouldConvertToRepaintBoundary = true,
+      bool shouldMarkNeedsLayout = true
     }
+  ) {
     ElementManager elementManager = renderBoxModel.elementManager;
     int targetId = renderBoxModel.targetId;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
 
     // Upgrade this renderObject into repaintSelf mode.
-    if (!renderBoxModel.isRepaintBoundary) {
+    if (shouldConvertToRepaintBoundary && !renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;
       RenderBoxModel repaintSelfBox = createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
       if (parent is ContainerRenderObjectMixin) {
@@ -1144,6 +1144,10 @@ mixin CSSTransformMixin on RenderStyleBase {
       element.renderBoxModel.renderStyle.renderBoxModel = element.renderBoxModel;
     }
     element.renderBoxModel.renderStyle.transform = matrix4 ?? CSSTransform.initial;
+
+    if (shouldMarkNeedsLayout) {
+      element.renderBoxModel.markNeedsLayout();
+    }
   }
 
   void updateTransformOrigin(String present, [CSSOrigin newOrigin]) {

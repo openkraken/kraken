@@ -34,7 +34,8 @@ class RenderStyle
 
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
-  bool resolvePercentageSize(RenderBoxModel parent) {
+  bool resolvePercentageSize() {
+    RenderBoxModel parent = renderBoxModel.parent;
     if (!renderBoxModel.hasSize) {
       return false;
     }
@@ -47,7 +48,7 @@ class RenderStyle
       updateSizing(
         WIDTH,
         parentSize.width * CSSLength.parsePercentage(style[WIDTH]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -56,7 +57,7 @@ class RenderStyle
       updateSizing(
         MIN_WIDTH,
         parentSize.width * CSSLength.parsePercentage(style[MIN_WIDTH]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -65,7 +66,7 @@ class RenderStyle
       updateSizing(
         MAX_WIDTH,
         parentSize.width * CSSLength.parsePercentage(style[MAX_WIDTH]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -74,7 +75,7 @@ class RenderStyle
       updateSizing(
         HEIGHT,
         parentSize.height * CSSLength.parsePercentage(style[HEIGHT]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -83,7 +84,7 @@ class RenderStyle
       updateSizing(
         MIN_HEIGHT,
         parentSize.height * CSSLength.parsePercentage(style[MIN_HEIGHT]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -92,7 +93,7 @@ class RenderStyle
       updateSizing(
         MAX_HEIGHT,
         parentSize.height * CSSLength.parsePercentage(style[MAX_HEIGHT]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -102,7 +103,7 @@ class RenderStyle
       updatePadding(
         PADDING_TOP,
         parentSize.height * CSSLength.parsePercentage(style[PADDING_TOP]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -111,7 +112,7 @@ class RenderStyle
       updatePadding(
         PADDING_RIGHT,
         parentSize.width * CSSLength.parsePercentage(style[PADDING_RIGHT]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -120,7 +121,7 @@ class RenderStyle
       updatePadding(
         PADDING_BOTTOM,
         parentSize.height * CSSLength.parsePercentage(style[PADDING_BOTTOM]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -129,7 +130,7 @@ class RenderStyle
       updatePadding(
         PADDING_LEFT,
         parentSize.width * CSSLength.parsePercentage(style[PADDING_LEFT]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -139,7 +140,7 @@ class RenderStyle
       updateMargin(
         MARGIN_TOP,
         parentSize.height * CSSLength.parsePercentage(style[MARGIN_TOP]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -148,7 +149,7 @@ class RenderStyle
       updateMargin(
         MARGIN_RIGHT,
         parentSize.width * CSSLength.parsePercentage(style[MARGIN_RIGHT]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -157,7 +158,7 @@ class RenderStyle
       updateMargin(
         MARGIN_BOTTOM,
         parentSize.height * CSSLength.parsePercentage(style[MARGIN_BOTTOM]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -166,7 +167,7 @@ class RenderStyle
       updateMargin(
         MARGIN_LEFT,
         parentSize.width * CSSLength.parsePercentage(style[MARGIN_LEFT]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -186,7 +187,7 @@ class RenderStyle
       updateOffset(
         TOP,
         parentContentHeight * CSSLength.parsePercentage(style[TOP]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -195,7 +196,7 @@ class RenderStyle
       updateOffset(
         RIGHT,
         parentContentWidth * CSSLength.parsePercentage(style[RIGHT]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -204,7 +205,7 @@ class RenderStyle
       updateOffset(
         BOTTOM,
         parentContentHeight * CSSLength.parsePercentage(style[BOTTOM]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -213,7 +214,7 @@ class RenderStyle
       updateOffset(
         LEFT,
         parentContentWidth * CSSLength.parsePercentage(style[LEFT]),
-        markNeedsLayout: false
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -252,6 +253,17 @@ class RenderStyle
       updateBorderRadius(
         BORDER_BOTTOM_RIGHT_RADIUS,
         parsedBottomRightRadius,
+      );
+      isPercentageExist = true;
+    }
+
+    /// Transform translate
+    Matrix4 transformValue = parsePercentageTransformTranslate(style[TRANSFORM], size, viewportSize);
+    if (transform != null) {
+      updateTransform(
+        transformValue,
+        shouldConvertToRepaintBoundary: false,
+        shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
     }
@@ -314,6 +326,7 @@ class RenderStyle
   static Matrix4 parsePercentageTransformTranslate(String transformStr, Size size, Size viewportSize) {
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
     final String TRANSLATE = 'translate';
+    bool isPercentageExist = false;
 
     Matrix4 matrix4;
     for (CSSFunctionalNotation method in methods) {
@@ -326,6 +339,7 @@ class RenderStyle
           if (CSSLength.isPercentage(translateY)) {
             double percentage = CSSLength.parsePercentage(translateY);
             translateY = (size.height * percentage).toString() + 'px';
+            isPercentageExist = true;
           }
           y = CSSLength.toDisplayPortValue(translateY, viewportSize) ?? 0;
         } else {
@@ -335,6 +349,7 @@ class RenderStyle
         if (CSSLength.isPercentage(translateX)) {
           double percentage = CSSLength.parsePercentage(translateX);
           translateX = (size.width * percentage).toString() + 'px';
+          isPercentageExist = true;
         }
         x = CSSLength.toDisplayPortValue(translateX, viewportSize) ?? 0;
         transform = Matrix4.identity()..translate(x, y);
@@ -347,23 +362,23 @@ class RenderStyle
         }
       }
     }
-    return matrix4;
+    return isPercentageExist ? matrix4 : null;
   }
 
-  /// Check whether percentage exist in transform translate
-  static bool isTransformTranslatePercentage(String transformStr) {
-    bool isPercentageExist = false;
-    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
-    final String TRANSLATE = 'translate';
-    for (CSSFunctionalNotation method in methods) {
-      if (method.name == TRANSLATE && ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
-        (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))))
-      ) {
-        isPercentageExist = true;
-      }
-    }
-    return isPercentageExist;
-  }
+//  /// Check whether percentage exist in transform translate
+//  static bool isTransformTranslatePercentage(String transformStr) {
+//    bool isPercentageExist = false;
+//    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
+//    final String TRANSLATE = 'translate';
+//    for (CSSFunctionalNotation method in methods) {
+//      if (method.name == TRANSLATE && ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
+//        (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))))
+//      ) {
+//        isPercentageExist = true;
+//      }
+//    }
+//    return isPercentageExist;
+//  }
 
   /// Calculate renderBoxModel constraints based on style
   BoxConstraints getConstraints() {

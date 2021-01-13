@@ -73,7 +73,7 @@ mixin CSSMarginMixin on RenderStyleBase {
     return EdgeInsets.only(top: marginTop ?? 0.0, right: marginRight ?? 0.0, bottom: marginBottom ?? 0.0, left: marginLeft ?? 0.0);
   }
 
-  void updateMargin(String property, double value, {bool markNeedsLayout = true}) {
+  void updateMargin(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     RenderStyle renderStyle = this;
     EdgeInsets prevMargin = renderStyle.margin;
 
@@ -109,7 +109,7 @@ mixin CSSMarginMixin on RenderStyleBase {
       renderStyle.margin = _getMargin();
     }
 
-    if (markNeedsLayout) {
+    if (shouldMarkNeedsLayout) {
       renderBoxModel.markNeedsLayout();
     }
   }

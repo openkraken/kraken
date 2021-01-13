@@ -86,7 +86,7 @@ mixin CSSSizingMixin on RenderStyleBase {
     _maxHeight = value;
   }
 
-  void updateSizing(String property, double value, {bool markNeedsLayout = true}) {
+  void updateSizing(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     RenderStyle renderStyle = this;
     switch (property) {
       case WIDTH:
@@ -118,7 +118,7 @@ mixin CSSSizingMixin on RenderStyleBase {
         renderStyle.maxWidth = getMaxWidth(value, renderStyle.minWidth);
         break;
     }
-    if (markNeedsLayout) {
+    if (shouldMarkNeedsLayout) {
       renderBoxModel.markNeedsLayout();
     }
   }

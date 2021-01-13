@@ -503,27 +503,6 @@ class Element extends Node
       renderBoxModel.parseLineHeight = false;
     }
 
-    /// Calculate transform translate which is percentage when node attached
-    /// where it can access the size of its own element
-    if (renderBoxModel.parseTransformTranslate) {
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
-      String transformStr = style[TRANSFORM];
-      double horizontalBorderWidth = renderStyle.borderEdge != null ?
-        renderStyle.borderEdge.horizontal : 0;
-      double verticalBorderWidth = renderStyle.borderEdge != null ?
-        renderStyle.borderEdge.vertical : 0;
-      /// @FIXME: More complicate case that will affect element size such as flex-grow/flex-shrink may not work
-      /// cause currently getContentWidth/Height not consider this case.
-      /// Sadly this logic cannot move to layout stage like sizing and offset style either cause updating transform
-      /// involves repaintBoundary node drop and insert which will break flutter's restriction too.
-      final double contentWidth = RenderBoxModel.getContentWidth(renderBoxModel) + horizontalBorderWidth;
-      final double contentHeight = RenderBoxModel.getContentHeight(renderBoxModel) + verticalBorderWidth;
-      Size size = Size(contentWidth, contentHeight);
-      renderBoxModel.renderStyle.transform =
-        RenderStyle.parsePercentageTransformTranslate(transformStr, size, viewportSize);
-      renderBoxModel.parseTransformTranslate = false;
-    }
-
     didAttachRenderer();
   }
 
@@ -1000,12 +979,22 @@ class Element extends Node
   }
 
   void _styleTransformChangedListener(String property, String original, String present) {
-    /// Transform translate of percentage should be resolved in layout stage
-    /// cause it will be calculated relative to its own size
-    if (RenderStyle.isTransformTranslatePercentage(present)) {
-      renderBoxModel.parseTransformTranslate = true;
-      return;
-    }
+    // Upgrade this renderObject into repaintSelf mode.
+//    if (!renderBoxModel.isRepaintBoundary) {
+//      RenderObject parent = renderBoxModel.parent;
+//      RenderBoxModel repaintSelfBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
+//      if (parent is ContainerRenderObjectMixin) {
+//        RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
+//        parent.remove(renderBoxModel);
+//        renderBoxModel = repaintSelfBox;
+//        this.parent.addChildRenderObject(this, after: previousSibling);
+//      } else if (parent is RenderObjectWithChildMixin) {
+//        parent.child = repaintSelfBox;
+//      }
+//      renderBoxModel = repaintSelfBox;
+//      // Update renderBoxModel reference in renderStyle
+//      renderBoxModel.renderStyle.renderBoxModel = renderBoxModel;
+//    }
 
     Matrix4 matrix4 = CSSTransform.parseTransform(present, viewportSize);
     renderBoxModel.renderStyle.updateTransform(matrix4);
