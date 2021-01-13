@@ -757,16 +757,30 @@ class RenderFlexLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        bool percentageFound = child.renderStyle.resolvePercentageSize();
-        /// Relayout after percentage size is resolved
-        if (percentageFound) {
-          CSSPositionedLayout.layoutPositionedChild(this, child, needsRelayout: true);
-          CSSPositionedLayout.applyPositionedChildOffset(this, child);
-          setMaximumScrollableSizeForPositionedChild(childParentData, child);
+        bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist();
+        bool percentageToOwnFound = child.renderStyle.isPercentageToOwnExist();
+        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock();
+
+        /// When percentage exists in sizing styles(width/height) and styles relies on its own size,
+        /// it needs to relayout twice cause the latter relies on the size calculated in the first relayout
+        if (percentageOfSizingFound == true && percentageToOwnFound == true) {
+          /// Relayout first time to calculate percentage styles such as width/height
+          _layoutPositionedChild(child);
+          child.renderStyle.resolvePercentageToOwn();
+          /// Relayout second time to calculate percentage styles such as transform: translate/border-radius
+          _layoutPositionedChild(child);
+        } else if (percentageToContainingBlockFound == true || percentageToOwnFound == true ) {
+          _layoutPositionedChild(child);
         }
+        setMaximumScrollableSizeForPositionedChild(childParentData, child);
       }
       child = childParentData.nextSibling;
     }
+  }
+
+  void _layoutPositionedChild(RenderBoxModel child) {
+    CSSPositionedLayout.layoutPositionedChild(this, child, needsRelayout: true);
+    CSSPositionedLayout.applyPositionedChildOffset(this, child);
   }
 
   bool _isChildDisplayNone(RenderObject child) {
@@ -975,18 +989,28 @@ class RenderFlexLayout extends RenderLayoutBox {
       maxScrollableHeightMap,
     );
 
-    /// Resolve percentage size of child after parent size is calculated
-    bool percentageFound = !needsRelayout ? _resolveChildPercentageSize(placeholderChild) : false;
-    /// Relayout after percentage size is resolved
-    if (percentageFound) {
-      _layoutChildren(placeholderChild, needsRelayout: true);
+    /// Make sure it will not trigger relayout again when in relayout stage
+    if (!needsRelayout) {
+      bool percentageOfSizingFound = isChildrenPercentageOfSizingExist(placeholderChild);
+      bool percentageToOwnFound = _isChildrenPercentageToOwnExist(placeholderChild);
+      bool percentageToContainingBlockFound = _resolveChildrenPercentageToContainingBlock(placeholderChild);
+
+      /// When percentage exists in sizing styles(width/height) and styles relies on its own size,
+      /// it needs to relayout twice cause the latter relies on the size calculated in the first relayout
+      if (percentageOfSizingFound == true && percentageToOwnFound == true) {
+        /// Relayout first time to calculate percentage styles such as width/height
+        _layoutChildren(placeholderChild, needsRelayout: true);
+        _resolveChildrenPercentageToOwn(placeholderChild);
+        /// Relayout second time to calculate percentage styles such as transform: translate/border-radius
+        _layoutChildren(placeholderChild, needsRelayout: true);
+      } else if (percentageToContainingBlockFound == true || percentageToOwnFound == true ) {
+        _layoutChildren(placeholderChild, needsRelayout: true);
+      }
     }
   }
 
   /// Resolve all percentage size of child based on size its containing block
-  bool _resolveChildPercentageSize(
-    RenderPositionHolder placeholderChild,
-  ) {
+  bool _resolveChildrenPercentageToContainingBlock(RenderPositionHolder placeholderChild) {
     bool percentageFound = false;
     RenderBox child = firstChild;
     while (child != null) {
@@ -998,7 +1022,67 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.resolvePercentageSize();
+        percentageFound = child.renderStyle.resolvePercentageToContainingBlock();
+      }
+      child = childParentData.nextSibling;
+    }
+    return percentageFound;
+  }
+
+  /// Resolve all percentage size of child based on size its own
+  bool _resolveChildrenPercentageToOwn(RenderPositionHolder placeholderChild) {
+    bool percentageFound = false;
+    RenderBox child = firstChild;
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+      // Exclude positioned placeholder renderObject when layout non placeholder object
+      // and positioned renderObject
+      if (placeholderChild == null && (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+      if (child is RenderBoxModel) {
+        percentageFound = child.renderStyle.resolvePercentageToOwn();
+      }
+      child = childParentData.nextSibling;
+    }
+    return percentageFound;
+  }
+
+  /// Check whether percentage sizing styles of child exists
+  bool isChildrenPercentageOfSizingExist(RenderPositionHolder placeholderChild) {
+    bool percentageFound = false;
+    RenderBox child = firstChild;
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+      // Exclude positioned placeholder renderObject when layout non placeholder object
+      // and positioned renderObject
+      if (placeholderChild == null && (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+      if (child is RenderBoxModel) {
+        percentageFound = child.renderStyle.isPercentageOfSizingExist();
+      }
+      child = childParentData.nextSibling;
+    }
+    return percentageFound;
+  }
+
+  /// Check whether percentage size of child based on size its own exist
+  bool _isChildrenPercentageToOwnExist(RenderPositionHolder placeholderChild) {
+    bool percentageFound = false;
+    RenderBox child = firstChild;
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+      // Exclude positioned placeholder renderObject when layout non placeholder object
+      // and positioned renderObject
+      if (placeholderChild == null && (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+      if (child is RenderBoxModel) {
+        percentageFound = child.renderStyle.isPercentageToOwnExist();
       }
       child = childParentData.nextSibling;
     }

@@ -34,11 +34,11 @@ class RenderStyle
 
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
-  bool resolvePercentageSize() {
-    RenderBoxModel parent = renderBoxModel.parent;
+  bool resolvePercentageToContainingBlock() {
     if (!renderBoxModel.hasSize) {
       return false;
     }
+    RenderBoxModel parent = renderBoxModel.parent;
     bool isPercentageExist = false;
     Size parentSize = parent.size;
     Size size = renderBoxModel.boxSize;
@@ -269,6 +269,92 @@ class RenderStyle
     }
 
     return isPercentageExist;
+  }
+
+  /// Resolve percentage size to px base on size of its own
+  /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
+  bool resolvePercentageToOwn() {
+    if (!renderBoxModel.hasSize) {
+      return false;
+    }
+    bool isPercentageExist = false;
+    Size size = renderBoxModel.boxSize;
+
+    /// border-radius
+    String parsedTopLeftRadius = parsePercentageBorderRadius(style[BORDER_TOP_LEFT_RADIUS], size);
+
+    if (parsedTopLeftRadius != null) {
+      updateBorderRadius(
+        BORDER_TOP_LEFT_RADIUS,
+        parsedTopLeftRadius,
+      );
+      isPercentageExist = true;
+    }
+
+    String parsedTopRightRadius = parsePercentageBorderRadius(style[BORDER_TOP_RIGHT_RADIUS], size);
+    if (parsedTopRightRadius != null) {
+      updateBorderRadius(
+        BORDER_TOP_RIGHT_RADIUS,
+        parsedTopRightRadius,
+      );
+      isPercentageExist = true;
+    }
+
+    String parsedBottomLeftRadius = parsePercentageBorderRadius(style[BORDER_BOTTOM_LEFT_RADIUS], size);
+    if (parsedBottomLeftRadius != null) {
+      updateBorderRadius(
+        BORDER_BOTTOM_LEFT_RADIUS,
+        parsedBottomLeftRadius,
+      );
+      isPercentageExist = true;
+    }
+
+    String parsedBottomRightRadius = parsePercentageBorderRadius(style[BORDER_BOTTOM_RIGHT_RADIUS], size);
+    if (parsedBottomRightRadius != null) {
+      updateBorderRadius(
+        BORDER_BOTTOM_RIGHT_RADIUS,
+        parsedBottomRightRadius,
+      );
+      isPercentageExist = true;
+    }
+
+    /// Transform translate
+    Matrix4 transformValue = parsePercentageTransformTranslate(style[TRANSFORM], size, viewportSize);
+    if (transformValue != null) {
+      updateTransform(
+        transformValue,
+        shouldConvertToRepaintBoundary: false,
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
+
+    return isPercentageExist;
+  }
+
+  bool isPercentageOfSizingExist() {
+    if (CSSLength.isPercentage(style[WIDTH]) ||
+      CSSLength.isPercentage(style[MIN_WIDTH]) ||
+      CSSLength.isPercentage(style[MAX_WIDTH]) ||
+      CSSLength.isPercentage(style[HEIGHT]) ||
+      CSSLength.isPercentage(style[MIN_HEIGHT]) ||
+      CSSLength.isPercentage(style[MAX_HEIGHT])
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  bool isPercentageToOwnExist() {
+    if (isBorderRadiusPercentage(style[BORDER_TOP_LEFT_RADIUS]) ||
+      isBorderRadiusPercentage(style[BORDER_TOP_RIGHT_RADIUS]) ||
+      isBorderRadiusPercentage(style[BORDER_BOTTOM_LEFT_RADIUS]) ||
+      isBorderRadiusPercentage(style[BORDER_BOTTOM_RIGHT_RADIUS]) ||
+      isTransformTranslatePercentage(style[TRANSFORM])
+    ) {
+      return true;
+    }
+    return false;
   }
 
   /// Parse percentage border radius
