@@ -309,7 +309,6 @@ describe('Event', () => {
     container.style.transform = 'translate3d(-33px, 0vw, 0vw)';
     container.style.width = '100px';
     container.style.height = '100px';
-    container.style.backgroundColor = 'red';
 
     document.body.appendChild(container);
 
