@@ -259,7 +259,7 @@ class RenderStyle
 
     /// Transform translate
     Matrix4 transformValue = parsePercentageTransformTranslate(style[TRANSFORM], size, viewportSize);
-    if (transform != null) {
+    if (transformValue != null) {
       updateTransform(
         transformValue,
         shouldConvertToRepaintBoundary: false,
@@ -365,20 +365,20 @@ class RenderStyle
     return isPercentageExist ? matrix4 : null;
   }
 
-//  /// Check whether percentage exist in transform translate
-//  static bool isTransformTranslatePercentage(String transformStr) {
-//    bool isPercentageExist = false;
-//    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
-//    final String TRANSLATE = 'translate';
-//    for (CSSFunctionalNotation method in methods) {
-//      if (method.name == TRANSLATE && ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
-//        (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))))
-//      ) {
-//        isPercentageExist = true;
-//      }
-//    }
-//    return isPercentageExist;
-//  }
+  /// Check whether percentage exist in transform translate
+  static bool isTransformTranslatePercentage(String transformStr) {
+    bool isPercentageExist = false;
+    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(transformStr);
+    final String TRANSLATE = 'translate';
+    for (CSSFunctionalNotation method in methods) {
+      if (method.name == TRANSLATE && ((method.args.length == 1 && CSSLength.isPercentage(method.args[0])) ||
+        (method.args.length == 2 && (CSSLength.isPercentage(method.args[0]) || CSSLength.isPercentage(method.args[1]))))
+      ) {
+        isPercentageExist = true;
+      }
+    }
+    return isPercentageExist;
+  }
 
   /// Calculate renderBoxModel constraints based on style
   BoxConstraints getConstraints() {

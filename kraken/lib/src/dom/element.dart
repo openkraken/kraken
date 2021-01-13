@@ -958,7 +958,7 @@ class Element extends Node
   }
 
   void _styleBorderRadiusChangedListener(String property, String original, String present) {
-    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
+    /// Percentage size should be resolved in layout stage cause it needs to know its own element's size
     if (RenderStyle.isBorderRadiusPercentage(present)) return;
 
     renderBoxModel.renderStyle.updateBorderRadius(property, present);
@@ -979,22 +979,8 @@ class Element extends Node
   }
 
   void _styleTransformChangedListener(String property, String original, String present) {
-    // Upgrade this renderObject into repaintSelf mode.
-//    if (!renderBoxModel.isRepaintBoundary) {
-//      RenderObject parent = renderBoxModel.parent;
-//      RenderBoxModel repaintSelfBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
-//      if (parent is ContainerRenderObjectMixin) {
-//        RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
-//        parent.remove(renderBoxModel);
-//        renderBoxModel = repaintSelfBox;
-//        this.parent.addChildRenderObject(this, after: previousSibling);
-//      } else if (parent is RenderObjectWithChildMixin) {
-//        parent.child = repaintSelfBox;
-//      }
-//      renderBoxModel = repaintSelfBox;
-//      // Update renderBoxModel reference in renderStyle
-//      renderBoxModel.renderStyle.renderBoxModel = renderBoxModel;
-//    }
+    /// Percentage transform translate should be resolved in layout stage cause it needs to know its own element's size
+    if (RenderStyle.isTransformTranslatePercentage(present)) return;
 
     Matrix4 matrix4 = CSSTransform.parseTransform(present, viewportSize);
     renderBoxModel.renderStyle.updateTransform(matrix4);

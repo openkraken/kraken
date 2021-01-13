@@ -1123,6 +1123,11 @@ mixin CSSTransformMixin on RenderStyleBase {
       bool shouldMarkNeedsLayout = true
     }
   ) {
+    // If render box model was not creared yet, then exit.
+    if (renderBoxModel == null) {
+      return;
+    }
+
     ElementManager elementManager = renderBoxModel.elementManager;
     int targetId = renderBoxModel.targetId;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
