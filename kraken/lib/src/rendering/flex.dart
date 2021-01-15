@@ -1474,7 +1474,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
             // Need to relayout child when flex factor exists
             if ((isFlexGrow && flexGrow > 0) ||
-              (isFlexShrink && flexShrink) > 0) {
+              (isFlexShrink && flexShrink > 0)) {
               isChildNeedsLayout = true;
             } else if (isStretchSelf) {
               Size childOldSize = _getChildSize(child);
