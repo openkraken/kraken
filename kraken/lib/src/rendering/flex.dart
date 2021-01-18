@@ -588,16 +588,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     double minHeight = 0;
     double maxHeight = double.infinity;
 
-    /// Use old size as base size constraints if exists except replaced element
-    /// cause its content size may differ from its initial size after content loaded
-    if (child.hasSize && child is !RenderIntrinsic && child is RenderBoxModel) {
-      double childOriginalWidth = child.size.width;
-      double childOriginalHeight = child.size.height;
-      return CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
-        BoxConstraints.tightFor(width: childOriginalWidth) :
-        BoxConstraints.tightFor(height: childOriginalHeight);
-    }
-
     if (child is RenderBoxModel) {
       RenderStyle childRenderStyle = child.renderStyle;
       double flexBasis = _getFlexBasis(child);
@@ -1205,8 +1195,18 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && child.hasSize) {
         double childContentWidth = RenderBoxModel.getContentWidth(child);
         double childContentHeight = RenderBoxModel.getContentHeight(child);
-        // Always layout child when parent is not laid out yet or child is marked as needsLayout
-        if (!hasSize || child.needsLayout || needsRelayout) {
+        bool hasFlexFactor = false;
+        if (child is RenderBoxModel) {
+          hasFlexFactor = child.renderStyle.flexGrow != 0 ||
+            child.renderStyle.flexShrink != 0;
+        }
+
+        // Always layout child in following cases
+        // 1. Parent is not laid out yet
+        // 2. Child is marked as needsLayout
+        // 3. Child has flex-grow or flex-shrink
+        // 4. Needs relayout when percentage sizing is parsed
+        if (!hasSize || child.needsLayout || hasFlexFactor || needsRelayout) {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = _getChildSize(child);
@@ -1216,6 +1216,7 @@ class RenderFlexLayout extends RenderLayoutBox {
               childOldSize.height != childContentHeight);
         }
       }
+
       if (isChildNeedsLayout) {
         DateTime childLayoutStart;
         if (kProfileMode) {
