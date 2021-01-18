@@ -23,6 +23,7 @@ class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
     this.acceptSlopTolerance = kTouchSlop,
     Object debugOwner,
     PointerDeviceKind kind,
+    this.onClick,
   }) : assert(
   acceptSlopTolerance == null || acceptSlopTolerance >= 0,
   'The acceptSlopTolerance must be positive or null',
