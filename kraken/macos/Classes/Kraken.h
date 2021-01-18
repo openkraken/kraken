@@ -1,6 +1,6 @@
 #import <FlutterMacOS/FlutterMacOS.h>
 #import "Kraken.h"
-#import "KrakenSDKPlugin.h"
+#import "KrakenPlugin.h"
 
 typedef void(^MethodHandler)(FlutterMethodCall* _Nonnull , FlutterResult _Nonnull);
 

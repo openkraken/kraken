@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "Kraken.h"
-#import "KrakenSDKPlugin.h"
+#import "KrakenPlugin.h"
 
 static NSMutableArray *engineList = nil;
 static NSMutableArray<Kraken*> *instanceList = nil;
@@ -18,7 +18,7 @@ static NSMutableArray<Kraken*> *instanceList = nil;
 - (instancetype)initWithFlutterEngine: (FlutterEngine*) engine {
   self.flutterEngine = engine;
 
-  FlutterMethodChannel *channel = [KrakenSDKPlugin getMethodChannel];
+  FlutterMethodChannel *channel = [KrakenPlugin getMethodChannel];
 
   if (channel == nil) {
     NSException* exception = [NSException
