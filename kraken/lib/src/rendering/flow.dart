@@ -714,7 +714,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       /// Calculate baseline extent of layout box
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
-      bool isLineHeightValid = _isLineHeightValid(child);
+      bool isLineHeightValid = _isVerticalAlignValid(child);
 
       // Vertical align is only valid for inline box
       if (verticalAlign == VerticalAlign.baseline && isLineHeightValid) {
@@ -950,7 +950,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         // Child line extent caculated according to vertical align
         double childLineExtent = childCrossAxisOffset;
 
-        bool isLineHeightValid = _isLineHeightValid(child);
+        bool isLineHeightValid = _isVerticalAlignValid(child);
         if (isLineHeightValid) {
           // Distance from top to baseline of child
           double childAscent = _getChildAscent(child);
@@ -1071,16 +1071,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     return null;
   }
 
-  bool _isLineHeightValid(RenderBox child) {
-    if (child is RenderPositionHolder) {
-      return false;
-    } else if (child is RenderTextBox) {
-      return true;
-    } else {
+  /// Vertical-align only works for inline level box
+  bool _isVerticalAlignValid(RenderBox child) {
+    if (child is RenderBoxModel) {
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       String childDisplay = childStyle['display'];
       return childDisplay.startsWith('inline');
     }
+    return false;
   }
 
   CSSStyleDeclaration _getChildStyle(RenderBox child) {

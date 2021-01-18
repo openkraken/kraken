@@ -58,19 +58,19 @@ describe('line-height', () => {
       },
       [
         createElement(
-        'div',
-        {
+          'div',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'blue',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'blue',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ])
+          ])
       ]
     );
     BODY.appendChild(div);
@@ -93,19 +93,19 @@ describe('line-height', () => {
       },
       [
         createElement(
-        'span',
-        {
+          'span',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'blue',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'blue',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ])
+          ])
       ]
     );
     BODY.appendChild(div);
@@ -118,8 +118,8 @@ describe('line-height', () => {
       'div',
       {
         style: {
-            display: 'flex',
-            flexDirection: 'column',
+          display: 'flex',
+          flexDirection: 'column',
           'line-height': '100px',
           'box-sizing': 'border-box',
           'backgroundColor': 'green',
@@ -130,33 +130,33 @@ describe('line-height', () => {
       },
       [
         createElement(
-        'div',
-        {
+          'div',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'blue',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'blue',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ]),
+          ]),
         createElement(
-        'div',
-        {
+          'div',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'red',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'red',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ])
+          ])
       ]
     );
     BODY.appendChild(div);
@@ -179,37 +179,58 @@ describe('line-height', () => {
       },
       [
         createElement(
-        'div',
-        {
+          'div',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'blue',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'blue',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ]),
+          ]),
         createElement(
-        'div',
-        {
+          'div',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'red',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'red',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ])
+          ])
       ]
     );
     BODY.appendChild(div);
 
+    await matchViewportSnapshot();
+  });
+
+  it('works with text of multiple lines', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          fontFamily: 'Songti SC',
+          fontSize: '16px',
+          backgroundColor: 'green',
+          lineHeight: '30px',
+        },
+      },
+      [
+        createText('The line-height CSS property sets the height of a line box. Its commonly used to set the distance between lines of text. On block-level elements, it specifies the minimum height of line boxes within the element. On non-replaced inline elements, it specifies the height that is used to calculate line box height.')
+      ]
+    );
+    BODY.appendChild(div);
     await matchViewportSnapshot();
   });
 });
