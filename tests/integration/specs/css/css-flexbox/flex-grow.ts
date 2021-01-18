@@ -625,4 +625,44 @@ describe('flex-grow', () => {
     BODY.appendChild(div);
     await matchViewportSnapshot(0.1);
   });
+
+  it('should work with flex-item content change', async (done) => {
+    let div;
+    let text;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('span', {
+          style: {
+          },
+        }, [
+          text = createText('0')
+        ]),
+
+        createElement('img', {
+          src: 'assets/60x60-red.png',
+          style: {
+            width: '24vw',
+            height: '24vw'
+          }
+        }),
+      ]
+    );
+
+    requestAnimationFrame(async () => {
+      text.data = 6000;
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+
+    BODY.appendChild(div);
+  });
 });
