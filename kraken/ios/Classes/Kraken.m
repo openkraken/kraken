@@ -21,7 +21,7 @@ static NSMutableArray<Kraken*> *instanceList = nil;
 - (instancetype)initWithFlutterEngine: (FlutterEngine*) engine {
   self.flutterEngine = engine;
 
-  FlutterMethodChannel *channel = [KrakenSDKPlugin getMethodChannel];
+  FlutterMethodChannel *channel = [KrakenPlugin getMethodChannel];
 
   if (channel == nil) {
     NSException* exception = [NSException

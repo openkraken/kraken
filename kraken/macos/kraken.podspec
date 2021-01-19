@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'kraken'
-  s.version          = '0.6.2'
+  s.version          = '0.6.3'
   s.summary          = 'A high-performance, web standards-compliant rendering engine.'
   s.description      = <<-DESC
 A high-performance, web standards-compliant rendering engine.
@@ -17,6 +17,7 @@ A high-performance, web standards-compliant rendering engine.
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'FlutterMacOS'
   s.vendored_libraries = 'libkraken_jsc.dylib'
+  s.prepare_command = 'zsh prepare.sh'
 
   s.platform = :osx, '10.11'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
