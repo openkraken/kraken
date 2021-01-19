@@ -162,7 +162,7 @@ class CSSStyleDeclaration {
   Map<String, Animation> _propertyRunningTransition = {};
 
   bool _hasRunningTransition(String property) {
-    return _propertyRunningTransition[property] != null;
+    return _propertyRunningTransition.containsKey(property);
   }
 
   void _transition(String propertyName, begin, end, Size viewportSize) {
