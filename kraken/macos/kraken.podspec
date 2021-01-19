@@ -17,7 +17,7 @@ A high-performance, web standards-compliant rendering engine.
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'FlutterMacOS'
   s.vendored_libraries = 'libkraken_jsc.dylib'
-  s.prepare_command = 'zsh prepare.sh'
+  s.prepare_command = 'bash prepare.sh'
 
   s.platform = :osx, '10.11'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
