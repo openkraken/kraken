@@ -1,7 +1,8 @@
 import 'dart:async';
-
+import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/src/module/module_manager.dart';
 
 typedef MethodCallCallback = Future<dynamic> Function(String method, dynamic arguments);
 
@@ -13,8 +14,40 @@ void onJSMethodCall(KrakenController controller, MethodCallCallback value) {
   controller.methodChannel._onJSMethodCall = value;
 }
 
+class KrakenMethodChannelModule extends BaseModule {
+  KrakenMethodChannelModule(ModuleManager moduleManager) : super(moduleManager);
+
+  @override
+  void dispose() {}
+
+  @override
+  String invoke(List<dynamic> params, callback) {
+    String method = params[1];
+    if (method == 'invokeMethod') {
+      List methodArgs = params[2];
+      invokeMethodFromJavaScript(moduleManager.controller, methodArgs[0], methodArgs[1]).then((result) {
+        String ret;
+        if (result is String) {
+          ret = result;
+        } else {
+          ret = jsonEncode(result);
+        }
+        callback(ret);
+      }).catchError((e, stack) {
+        callback('Error: $e\n$stack');
+      });
+    } else if (method == 'setMethodCallHandler') {
+      onJSMethodCall(moduleManager.controller, (String method, dynamic arguments) async {
+        moduleManager.emitModuleEvent(jsonEncode(['MethodChannel', method, arguments]));
+      });
+    }
+    return '';
+  }
+}
+
 class KrakenMethodChannel {
   MethodCallCallback _onJSMethodCallCallback;
+
   set _onJSMethodCall(MethodCallCallback value) {
     assert(value != null);
     _onJSMethodCallCallback = value;
@@ -32,7 +65,9 @@ class KrakenJavaScriptChannel extends KrakenMethodChannel {
   }
 
   MethodCallCallback _methodCallCallback;
+
   MethodCallCallback get methodCallCallback => _methodCallCallback;
+
   set onMethodCall(MethodCallCallback value) {
     assert(value != null);
     _methodCallCallback = value;

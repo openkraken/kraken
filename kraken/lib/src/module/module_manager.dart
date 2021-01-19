@@ -1,4 +1,5 @@
 import 'package:kraken/bridge.dart' as bridge;
+import 'package:kraken/kraken.dart';
 
 abstract class BaseModule {
   final ModuleManager moduleManager;
@@ -11,8 +12,9 @@ typedef InvokeModuleCallback = void Function(String);
 
 class ModuleManager {
   final int contextId;
+  final KrakenController controller;
 
-  ModuleManager(this.contextId);
+  ModuleManager(this.controller, this.contextId);
   static Map<String, BaseModule> _moduleMap = Map();
 
   void defineNewModule(String type, BaseModule module) {
