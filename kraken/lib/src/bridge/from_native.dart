@@ -12,7 +12,6 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken/css.dart';
 import 'package:kraken/src/module/performance_timing.dart';
 import 'platform.dart';
 import 'native_types.dart';

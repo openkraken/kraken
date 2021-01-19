@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'package:connectivity/connectivity.dart';
 import 'module_manager.dart';
