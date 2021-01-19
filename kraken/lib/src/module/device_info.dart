@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
+import 'package:kraken/src/module/module_manager.dart';
 
 DeviceInfoPlugin _deviceInfoPlugin;
 
@@ -11,7 +13,7 @@ void _initDeviceInfoPlugin() {
   }
 }
 
-class DeviceInfo {
+class DeviceInfo extends BaseModule {
   static Future<String> getDeviceInfo() async {
     _initDeviceInfoPlugin();
     Map<String, dynamic> deviceData;
@@ -48,6 +50,25 @@ class DeviceInfo {
 
   static int getHardwareConcurrency() {
     return Platform.numberOfProcessors;
+  }
+
+  DeviceInfo(ModuleManager moduleManager) : super(moduleManager);
+
+  @override
+  void dispose() {
+  }
+
+  @override
+  String invoke(List params, InvokeModuleCallback callback) {
+    String method = params[1];
+    if (method == 'getDeviceInfo') {
+      DeviceInfo.getDeviceInfo().then((String json) {
+        callback(json);
+      });
+    } else if (method == 'getHardwareConcurrency') {
+      callback(DeviceInfo.getHardwareConcurrency().toString());
+    }
+    return '';
   }
 }
 

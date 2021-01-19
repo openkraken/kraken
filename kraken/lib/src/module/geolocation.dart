@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:kraken/src/module/module_manager.dart';
 import 'package:kraken_geolocation/kraken_geolocation.dart';
 
 // getCurrentPosition relative
@@ -22,7 +23,9 @@ LocationData _watchCachedLocation;
 typedef Callback = void Function(String json);
 typedef WatchPositionCallback = void Function(String result);
 
-class Geolocation {
+class Geolocation extends BaseModule {
+  Geolocation(ModuleManager moduleManager) : super(moduleManager);
+
   static void getCurrentPosition(Map<String, dynamic> options, Callback callback) async {
     Location location = await _getLocation();
     if (location == null) {
@@ -103,6 +106,40 @@ class Geolocation {
       _streamSubscription.cancel();
       _streamSubscription = null;
     }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+  }
+
+  @override
+  String invoke(List params, callback) {
+    String method = params[1];
+    if (method == 'getCurrentPosition') {
+      List positionArgs = params[2];
+      Map<String, dynamic> options;
+      if (positionArgs.length > 0) {
+        options = positionArgs[0];
+      }
+      Geolocation.getCurrentPosition(options, (json) {
+        callback(json);
+      });
+    } else if (method == 'watchPosition') {
+      List positionArgs = params[2];
+      Map<String, dynamic> options;
+      if (positionArgs.length > 0) {
+        options = positionArgs[0];
+      }
+      return Geolocation.watchPosition(options, (String result) {
+        moduleManager.emitModuleEvent('["watchPosition", $result]');
+      }).toString();
+    } else if (method == 'clearWatch') {
+      List positionArgs = params[2];
+      int id = positionArgs[0];
+      Geolocation.clearWatch(id);
+    }
+    return '';
   }
 }
 

@@ -18,6 +18,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
 import 'package:kraken/gesture.dart';
+import 'package:kraken/src/module/module_manager.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -354,38 +355,13 @@ class KrakenViewController {
 
 // An controller designed to control kraken's functional modules.
 class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
-  // the websocket instance
-  KrakenWebSocket _websocket;
-
-  KrakenWebSocket get websocket {
-    if (_websocket == null) {
-      _websocket = KrakenWebSocket();
-    }
-
-    return _websocket;
-  }
-
-  // the MQTT instance
-  MQTT _mqtt;
-
-  MQTT get mqtt {
-    if (_mqtt == null) {
-      _mqtt = MQTT();
-    }
-    return _mqtt;
-  }
+  ModuleManager _moduleManager;
+  ModuleManager get moduleManager => _moduleManager;
 
   void dispose() {
     clearTimer();
     clearAnimationFrame();
-
-    if (_websocket != null) {
-      websocket.dispose();
-    }
-
-    if (_mqtt != null) {
-      mqtt.dispose();
-    }
+    _moduleManager.dispose();
   }
 }
 

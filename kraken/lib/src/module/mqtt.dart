@@ -5,18 +5,56 @@ import 'dart:io';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
+import 'module_manager.dart';
+
 enum ReadyState { CONNECTING, OPEN, CLOSING, CLOSED }
 typedef MQTTEventCallback = void Function(String id, String event);
 
-class MQTT {
+class MQTT extends BaseModule {
   Map<String, MqttClient> _clientMap = {};
   int _clientId = 0;
+
+  MQTT(ModuleManager moduleManager) : super(moduleManager);
 
   void dispose() {
     _clientMap.forEach((key, client) {
       client.disconnect();
     });
     _clientMap.clear();
+  }
+
+  @override
+  String invoke(List args, InvokeModuleCallback callback) {
+    String method = args[1];
+    if (method == 'init') {
+      List methodArgs = args[2];
+      return init(methodArgs[0], methodArgs[1]);
+    } else if (method == 'open') {
+      List methodArgs = args[2];
+      open(methodArgs[0], methodArgs[1]);
+    } else if (method == 'close') {
+      List methodArgs = args[2];
+      close(methodArgs[0]);
+    } else if (method == 'publish') {
+      List methodArgs = args[2];
+      publish(methodArgs[0], methodArgs[1], methodArgs[2], methodArgs[3], methodArgs[4]);
+    } else if (method == 'subscribe') {
+      List methodArgs = args[2];
+      subscribe(methodArgs[0], methodArgs[1], methodArgs[2]);
+    } else if (method == 'unsubscribe') {
+      List methodArgs = args[2];
+      unsubscribe(methodArgs[0], methodArgs[1]);
+    } else if (method == 'getReadyState') {
+      List methodArgs = args[2];
+      return getReadyState(methodArgs[0]);
+    } else if (method == 'addEvent') {
+      List methodArgs = args[2];
+      addEvent(methodArgs[0], methodArgs[1], (String id, String event) {
+        moduleManager.emitModuleEvent('["MQTT", $id, $event]');
+      });
+    }
+
+    return '';
   }
 
   String init(String url, String clientId) {
@@ -181,4 +219,5 @@ class MQTT {
       };
     }
   }
+
 }
