@@ -99,7 +99,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position - childParentData.offset);
-          return child.hasSize && child.hitTest(result, position: transformed);
+          return child.hitTest(result, position: transformed);
         },
       );
       if (isHit)
