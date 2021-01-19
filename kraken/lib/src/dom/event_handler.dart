@@ -19,6 +19,7 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerUp = handlePointUp;
     renderBoxModel.onPointerCancel = handlePointCancel;
     renderBoxModel.onClick = handleClick;
+    renderBoxModel.onSwipe = handleSwipe;
     renderBoxModel.initGestureRecognizer(eventHandlers);
   }
 
@@ -86,6 +87,10 @@ mixin EventHandlerMixin on Node {
 
   void handleClick(Event event) {
     dispatchEvent(event);
+  }
+
+  void handleSwipe(Event event) {
+    print('handleSwipe');
   }
 
   void handleAppear() {
