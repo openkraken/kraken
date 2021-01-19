@@ -47,6 +47,7 @@ class _MyHomePageState extends State<MyBrowser> {
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData queryData = MediaQuery.of(context);
 
     AppBar appBar = AppBar(
         backgroundColor: Colors.black87,
@@ -76,17 +77,16 @@ class _MyHomePageState extends State<MyBrowser> {
 
     Kraken kraken = Kraken(
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
-      viewportHeight: window.physicalSize.height / window.devicePixelRatio - appBar.preferredSize.height,
+      viewportHeight: window.physicalSize.height / window.devicePixelRatio - appBar.preferredSize.height - queryData.padding.top,
       bundleURL: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/go-rax/kraken.js',
     );
 
     return Scaffold(
-      appBar: appBar,
-      body: Center(
+        appBar: appBar,
+        body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: kraken
-      ),
-    );
+    ));
   }
 }
