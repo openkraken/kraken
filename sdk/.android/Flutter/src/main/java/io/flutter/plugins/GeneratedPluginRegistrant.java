@@ -17,7 +17,7 @@ public final class GeneratedPluginRegistrant {
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
     flutterEngine.getPlugins().add(new io.flutter.plugins.connectivity.ConnectivityPlugin());
     flutterEngine.getPlugins().add(new io.flutter.plugins.deviceinfo.DeviceInfoPlugin());
-    flutterEngine.getPlugins().add(new com.taobao.kraken.KrakenPlugin());
+    flutterEngine.getPlugins().add(new com.openkraken.kraken.KrakenPlugin());
       xyz.luan.audioplayers.AudioplayersPlugin.registerWith(shimPluginRegistry.registrarFor("xyz.luan.audioplayers.AudioplayersPlugin"));
     flutterEngine.getPlugins().add(new io.flutter.plugins.camera.CameraPlugin());
     flutterEngine.getPlugins().add(new com.lyokone.location.LocationPlugin());
