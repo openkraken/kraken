@@ -207,7 +207,7 @@ class CSSStyleDeclaration {
 
     animation.onfinish = (AnimationPlaybackEvent event) {
       _setTransitionEndProperty(propertyName, end);
-      _propertyRunningTransition[propertyName] = null;
+      _propertyRunningTransition.remove(propertyName);
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.end);
     };
 
