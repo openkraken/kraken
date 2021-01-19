@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyBrowser> {
   OutlineInputBorder outlineBorder = OutlineInputBorder(
     borderSide: BorderSide(color: Colors.transparent, width: 0.0),
     borderRadius: const BorderRadius.all(
-      const Radius.circular(20.0),
+      Radius.circular(20.0),
     ),
   );
 
