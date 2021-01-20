@@ -6,7 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
-import 'dart:ui' as ui show LineMetrics;
 
 final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 
@@ -178,8 +177,6 @@ mixin CSSTextMixin on RenderStyleBase {
       parentRenderBoxModel.renderStyle.wordSpacing : CSSText.getWordSpacing(parent.style, viewportSize);
     List<Shadow> textShadow = parentRenderBoxModel != null ?
       parentRenderBoxModel.renderStyle.textShadow : CSSText.getTextShadow(parent.style, viewportSize);
-    double lineHeight = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.lineHeight : CSSText.getLineHeight(parent.style, viewportSize);
 
     return TextStyle(
       color: color,
@@ -451,46 +448,6 @@ class CSSText {
   static String BUILTIN_FONT_PACKAGE;
   static String getFontPackage(CSSStyleDeclaration style) {
     return BUILTIN_FONT_PACKAGE;
-  }
-
-  /// Flutter text line-height behaviour is inconsistent with web
-  /// Emulate web line-height rule by setting the leading property of strutStyle
-  /// Line-height rule of flutter: https://api.flutter.dev/flutter/painting/StrutStyle-class.html
-  /// Line-height rule of web: https://www.w3cplus.com/css/css-font-metrics-line-height-and-vertical-align.html
-  static double getLeading(CSSStyleDeclaration style, Size viewportSize) {
-    double fontSize = CSSText.getFontSize(style, viewportSize);
-    double lineHeight = CSSText.getLineHeight(style, viewportSize);
-    List<String> fontFamilyFallback = CSSText.getFontFamilyFallback(style);
-
-    /// Layout a test text to find the original ascent and descent of specific font family and font size
-    final textStyle = TextStyle(
-      color: Color.fromRGBO(255, 255, 255, 0),
-    );
-    final textSpan = TextSpan(
-      text: 'Aa',
-      style: textStyle,
-    );
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-      strutStyle: StrutStyle(
-        fontSize: fontSize,
-        fontFamilyFallback: fontFamilyFallback,
-      )
-    );
-    textPainter.layout(
-      minWidth: 0,
-      maxWidth: double.infinity,
-    );
-    List<ui.LineMetrics> lines = textPainter.computeLineMetrics();
-    double ascent;
-    double descent;
-    for (ui.LineMetrics line in lines) {
-      ascent = line.ascent;
-      descent = line.descent;
-    }
-    double leading = (lineHeight - (ascent + descent)) / fontSize;
-    return leading;
   }
 
   static List<String> DEFAULT_FONT_FAMILY_FALLBACK;

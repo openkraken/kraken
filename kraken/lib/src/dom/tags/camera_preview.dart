@@ -174,7 +174,7 @@ class CameraPreviewElement extends Element {
       backgroundColor: Color(0xFFFFFFFF)
     );
     return RenderFallbackViewBox(
-      child: RenderParagraph(
+      child: RenderKrakenParagraph(
         TextSpan(text: description, style: textStyle),
         textDirection: TextDirection.ltr,
       ),

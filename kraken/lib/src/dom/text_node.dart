@@ -144,21 +144,9 @@ class TextNode extends Node {
     _renderTextBox.text = CSSTextMixin.createTextSpan(data, parent);
     // TextNode's style is inherited from parent style
     _renderTextBox.style = parentStyle;
-    RenderParagraph renderParagraph = _renderTextBox.child;
+    RenderKrakenParagraph renderParagraph = _renderTextBox.child;
+    renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
 
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-    double leading = CSSText.getLeading(parentStyle, viewportSize);
-    double fontSize = CSSText.getFontSize(parentStyle, viewportSize);
-    List<String> fontFamilyFallback = CSSText.getFontFamilyFallback(parentStyle);
-    /// Emulate web line-height rule by setting the leading property of 
-    renderParagraph.strutStyle = StrutStyle(
-      leading: leading,
-      fontSize: fontSize,
-      fontFamilyFallback: fontFamilyFallback,
-    );
-    
     _setTextNodeProperties(parent.style);
   }
 
