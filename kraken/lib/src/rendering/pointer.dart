@@ -37,7 +37,9 @@ mixin RenderPointerListenerMixin on RenderBox {
     if (eventHandlers.containsKey('click')) {
       gestures[ClickGestureRecognizer] = ClickGestureRecognizer(onClick: onClick);
     }
-    gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer(onSwipe: onSwipe);
+    if (eventHandlers.containsKey('swipe')) {
+      gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer(onSwipe: onSwipe);
+    }
   }
 
   final Map<Type, GestureRecognizer> gestures = <Type, GestureRecognizer>{};

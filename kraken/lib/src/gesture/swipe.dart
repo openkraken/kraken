@@ -17,6 +17,13 @@ enum _DragState {
   accepted,
 }
 
+enum _OffsetDirection {
+  up,
+  left,
+  down,
+  right,
+}
+
 /// A tap with a primary button has occurred.
 typedef GestureSwipeCallback = void Function(Event);
 
@@ -60,47 +67,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   DragStartBehavior dragStartBehavior;
 
   GestureSwipeCallback onSwipe;
-
-  /// A pointer has contacted the screen with a primary button and might begin
-  /// to move.
-  ///
-  /// The position of the pointer is provided in the callback's `details`
-  /// argument, which is a [DragDownDetails] object.
-  ///
-  /// See also:
-  ///
-  ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [DragDownDetails], which is passed as an argument to this callback.
-  GestureDragDownCallback onDown;
-
-  /// A pointer has contacted the screen with a primary button and has begun to
-  /// move.
-  ///
-  /// The position of the pointer is provided in the callback's `details`
-  /// argument, which is a [DragStartDetails] object.
-  ///
-  /// Depending on the value of [dragStartBehavior], this function will be
-  /// called on the initial touch down, if set to [DragStartBehavior.down] or
-  /// when the drag gesture is first detected, if set to
-  /// [DragStartBehavior.start].
-  ///
-  /// See also:
-  ///
-  ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [DragStartDetails], which is passed as an argument to this callback.
-  GestureDragStartCallback onStart;
-
-  /// A pointer that is in contact with the screen with a primary button and
-  /// moving has moved again.
-  ///
-  /// The distance traveled by the pointer since the last update is provided in
-  /// the callback's `details` argument, which is a [DragUpdateDetails] object.
-  ///
-  /// See also:
-  ///
-  ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [DragUpdateDetails], which is passed as an argument to this callback.
-  GestureDragUpdateCallback onUpdate;
 
   /// A pointer that was previously in contact with the screen with a primary
   /// button and moving is no longer in contact with the screen and was moving
@@ -173,31 +139,30 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   // different set of buttons, the gesture is canceled.
   int _initialButtons;
   Matrix4 _lastTransform;
+  _OffsetDirection _direction = _OffsetDirection.left;
 
   /// Distance moved in the global coordinate space of the screen in drag direction.
   ///
   /// If drag is only allowed along a defined axis, this value may be negative to
   /// differentiate the direction of the drag.
-  double _globalDistanceMoved;
+  double _globalVerticalDistanceMoved;
+  double _globalHorizontalDistanceMoved;
 
-  /// Determines if a gesture is a fling or not based on velocity.
-  ///
-  /// A fling calls its gesture end callback with a velocity, allowing the
-  /// provider of the callback to respond by carrying the gesture forward with
-  /// inertia, for example.
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
-    return true;
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
+    if (_direction == _OffsetDirection.left || _direction == _OffsetDirection.right) {
+      return estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance;
+    } else {
+      return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
+    }
   }
 
-  Offset _getDeltaForDetails(Offset delta) {
-    return Offset.zero;
-  }
-  double _getPrimaryValueFromOffset(Offset value) {
-    return 0.0;
-  }
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return true;
+    return _globalVerticalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind) || _globalHorizontalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
   }
+
+  Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
@@ -206,9 +171,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_initialButtons == null) {
       switch (event.buttons) {
         case kPrimaryButton:
-          if (onDown == null &&
-              onStart == null &&
-              onUpdate == null &&
+          if (
               onEnd == null &&
               onCancel == null &&
               onSwipe == null)
@@ -235,10 +198,10 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
       _initialButtons = event.buttons;
       _pendingDragOffset = OffsetPair.zero;
-      _globalDistanceMoved = 0.0;
+      _globalVerticalDistanceMoved = 0.0;
+      _globalHorizontalDistanceMoved = 0.0;
       _lastPendingEventTimestamp = event.timeStamp;
       _lastTransform = event.transform;
-      _checkDown();
     } else if (_state == _DragState.accepted) {
       resolve(GestureDisposition.accepted);
     }
@@ -253,35 +216,37 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       assert(tracker != null);
       tracker.addPosition(event.timeStamp, event.localPosition);
     }
-    if (event is PointerDownEvent) {
-      final Duration timestamp = _lastPendingEventTimestamp;
-      _checkStart(timestamp);
-    }
     if (event is PointerMoveEvent) {
       if (event.buttons != _initialButtons) {
         _giveUpPointer(event.pointer);
         return;
       }
-      if (_state == _DragState.accepted) {
-        _checkUpdate(
-          sourceTimeStamp: event.timeStamp,
-          delta: _getDeltaForDetails(event.localDelta),
-          primaryDelta: _getPrimaryValueFromOffset(event.localDelta),
-          globalPosition: event.position,
-          localPosition: event.localPosition,
-        );
-      } else {
+      if (_state != _DragState.accepted) {
         _pendingDragOffset += OffsetPair(local: event.localDelta, global: event.delta);
         _lastPendingEventTimestamp = event.timeStamp;
         _lastTransform = event.transform;
-        final Offset movedLocally = _getDeltaForDetails(event.localDelta);
+
         final Matrix4 localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform);
-        _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
+
+        final Offset movedVerticalLocally = Offset(0.0, event.localDelta.dx);
+        _globalVerticalDistanceMoved += PointerEvent.transformDeltaViaPositions(
           transform: localToGlobalTransform,
-          untransformedDelta: movedLocally,
+          untransformedDelta: movedVerticalLocally,
           untransformedEndPosition: event.localPosition,
-        ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
+        ).distance * (movedVerticalLocally.dy ?? 1).sign;
+
+        final Offset movedHorizontallLocally = Offset(0.0, event.localDelta.dy);
+        _globalHorizontalDistanceMoved += PointerEvent.transformDeltaViaPositions(
+          transform: localToGlobalTransform,
+          untransformedDelta: movedHorizontallLocally,
+          untransformedEndPosition: event.localPosition,
+        ).distance * (movedHorizontallLocally.dx ?? 1).sign;
         if (_hasSufficientGlobalDistanceToAccept(event.kind))
+          if (_globalVerticalDistanceMoved.abs() > computeHitSlop(event.kind)) {
+            _direction = (_globalVerticalDistanceMoved > 0) ? _OffsetDirection.up : _OffsetDirection.down;
+          } else {
+            _direction = (_globalHorizontalDistanceMoved > 0) ? _OffsetDirection.left : _OffsetDirection.right;
+          }
           resolve(GestureDisposition.accepted);
       }
     }
@@ -313,24 +278,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       _pendingDragOffset = OffsetPair.zero;
       _lastPendingEventTimestamp = null;
       _lastTransform = null;
-      if (localUpdateDelta != Offset.zero && onUpdate != null) {
-        final Matrix4 localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
-        final Offset correctedLocalPosition = _initialPosition.local + localUpdateDelta;
-        final Offset globalUpdateDelta = PointerEvent.transformDeltaViaPositions(
-          untransformedEndPosition: correctedLocalPosition,
-          untransformedDelta: localUpdateDelta,
-          transform: localToGlobal,
-        );
-        final OffsetPair updateDelta = OffsetPair(local: localUpdateDelta, global: globalUpdateDelta);
-        final OffsetPair correctedPosition = _initialPosition + updateDelta; // Only adds delta for down behaviour
-        _checkUpdate(
-          sourceTimeStamp: timestamp,
-          delta: localUpdateDelta,
-          primaryDelta: _getPrimaryValueFromOffset(localUpdateDelta),
-          globalPosition: correctedPosition.global,
-          localPosition: correctedPosition.local,
-        );
-      }
     }
   }
 
@@ -370,49 +317,9 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  void _checkDown() {
-    assert(_initialButtons == kPrimaryButton);
-    final DragDownDetails details = DragDownDetails(
-      globalPosition: _initialPosition.global,
-      localPosition: _initialPosition.local,
-    );
-    if (onDown != null)
-      invokeCallback<void>('onDown', () => onDown(details));
-  }
-
-  void _checkStart(Duration timestamp) {
-    assert(_initialButtons == kPrimaryButton);
-    final DragStartDetails details = DragStartDetails(
-      sourceTimeStamp: timestamp,
-      globalPosition: _initialPosition.global,
-      localPosition: _initialPosition.local,
-    );
-    if (onStart != null)
-      invokeCallback<void>('onStart', () => onStart(details));
-  }
-
-  void _checkUpdate({
-    Duration sourceTimeStamp,
-    Offset delta,
-    double primaryDelta,
-    Offset globalPosition,
-    Offset localPosition,
-  }) {
-    assert(_initialButtons == kPrimaryButton);
-    final DragUpdateDetails details = DragUpdateDetails(
-      sourceTimeStamp: sourceTimeStamp,
-      delta: delta,
-      primaryDelta: primaryDelta,
-      globalPosition: globalPosition,
-      localPosition: localPosition,
-    );
-    if (onUpdate != null)
-      invokeCallback<void>('onUpdate', () => onUpdate(details));
-  }
-
   void _checkEnd(int pointer) {
     assert(_initialButtons == kPrimaryButton);
-    if (onEnd == null)
+    if (onSwipe == null)
       return;
 
     final VelocityTracker tracker = _velocityTrackers[pointer];
@@ -427,7 +334,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
           .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
       details = DragEndDetails(
         velocity: velocity,
-        primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
+        primaryVelocity: (_direction == _OffsetDirection.left || _direction == _OffsetDirection.right) ? velocity.pixelsPerSecond.dx : velocity.pixelsPerSecond.dy,
       );
       debugReport = () {
         return '$estimate; fling at $velocity.';
@@ -443,7 +350,9 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
         return '$estimate; judged to not be a fling.';
       };
     }
-    invokeCallback<void>('onEnd', () => onEnd(details), debugReport: debugReport);
+    print('_direction=${_direction}');
+    print('details=${details.primaryVelocity}');
+    invokeCallback<void>('onSwipe', () => onSwipe(Event(EVENT_SWIPE, EventInit())), debugReport: debugReport);
   }
 
   void _checkCancel() {

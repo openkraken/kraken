@@ -10,6 +10,7 @@ import 'package:kraken/bridge.dart';
 import 'package:ffi/ffi.dart';
 
 const String EVENT_CLICK = 'click';
+const String EVENT_SWIPE = 'swipe';
 const String EVENT_INPUT = 'input';
 const String EVENT_APPEAR = 'appear';
 const String EVENT_DISAPPEAR = 'disappear';
