@@ -48,7 +48,7 @@ class ModuleManager {
     bridge.emitModuleEvent(contextId, json);
   }
 
-  String invokeModule(String type, List<String> params, InvokeModuleCallback callback) {
+  String invokeModule(String type, List<dynamic> params, InvokeModuleCallback callback) {
     if (!_moduleMap.containsKey(type)) {
       throw Exception('ModuleManager: Can not find module of type: $type');
     }
