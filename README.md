@@ -4,7 +4,6 @@ A high-performance, web standards-compliant rendering engine based on Flutter.
 
 ## Usage
 
-
 - Install Desktop CLI globally in development
   - npm i
 
