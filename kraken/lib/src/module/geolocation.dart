@@ -23,8 +23,8 @@ LocationData _watchCachedLocation;
 typedef Callback = void Function(String json);
 typedef WatchPositionCallback = void Function(String result);
 
-class Geolocation extends BaseModule {
-  Geolocation(ModuleManager moduleManager) : super(moduleManager);
+class GeolocationModule extends BaseModule {
+  GeolocationModule(ModuleManager moduleManager) : super(moduleManager);
 
   static void getCurrentPosition(Map<String, dynamic> options, Callback callback) async {
     Location location = await _getLocation();
@@ -122,7 +122,7 @@ class Geolocation extends BaseModule {
       if (positionArgs.length > 0) {
         options = positionArgs[0];
       }
-      Geolocation.getCurrentPosition(options, (json) {
+      GeolocationModule.getCurrentPosition(options, (json) {
         callback(json);
       });
     } else if (method == 'watchPosition') {
@@ -131,13 +131,13 @@ class Geolocation extends BaseModule {
       if (positionArgs.length > 0) {
         options = positionArgs[0];
       }
-      return Geolocation.watchPosition(options, (String result) {
+      return GeolocationModule.watchPosition(options, (String result) {
         moduleManager.emitModuleEvent('["watchPosition", $result]');
       }).toString();
     } else if (method == 'clearWatch') {
       List positionArgs = params[2];
       int id = positionArgs[0];
-      Geolocation.clearWatch(id);
+      GeolocationModule.clearWatch(id);
     }
     return '';
   }

@@ -1,5 +1,7 @@
 import 'package:kraken/bridge.dart' as bridge;
 import 'package:kraken/kraken.dart';
+import 'package:kraken/module.dart';
+import 'package:kraken/src/module/navigator.dart';
 
 abstract class BaseModule {
   final ModuleManager moduleManager;
@@ -9,15 +11,32 @@ abstract class BaseModule {
 }
 
 typedef InvokeModuleCallback = void Function(String);
+typedef NewModuleCreator = BaseModule Function(ModuleManager);
 
 class ModuleManager {
   final int contextId;
   final KrakenController controller;
 
-  ModuleManager(this.controller, this.contextId);
   static Map<String, BaseModule> _moduleMap = Map();
+  static bool inited = false;
 
-  void defineNewModule(String type, BaseModule module) {
+  ModuleManager(this.controller, this.contextId) {
+    if (!inited) {
+      defineNewModule('AsyncStorage', AsyncStorageModule(this));
+      defineNewModule('Clipboard', ClipBoardModule(this));
+      defineNewModule('Connection', ConnectionModule(this));
+      defineNewModule('DeviceInfo', DeviceInfoModule(this));
+      defineNewModule('fetch', FetchModule(this));
+      defineNewModule('Geolocation', GeolocationModule(this));
+      defineNewModule('MethodChannel', MethodChannelModule(this));
+      defineNewModule('MQTT', MQTTModule(this));
+      defineNewModule('Navigation', NavigationModule(this));
+      defineNewModule('Navigator', NavigatorModule(this));
+      defineNewModule('WebSocket', WebSocketModule(this));
+    }
+  }
+
+  static void defineNewModule(String type, BaseModule module) {
     if (_moduleMap.containsKey(type)) {
       throw Exception('ModuleManager: redefined module of type: $type');
     }

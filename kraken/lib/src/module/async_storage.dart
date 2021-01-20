@@ -4,10 +4,10 @@ import 'dart:convert';
 import 'package:kraken/src/module/module_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AsyncStorage extends BaseModule {
+class AsyncStorageModule extends BaseModule {
   static Future<SharedPreferences> _prefs;
 
-  AsyncStorage(ModuleManager moduleManager) : super(moduleManager);
+  AsyncStorageModule(ModuleManager moduleManager) : super(moduleManager);
 
   /// Loads and parses the [SharedPreferences] for this app from disk.
   ///
@@ -55,7 +55,7 @@ class AsyncStorage extends BaseModule {
       case 'getItem':
         List methodArgs = args[2];
         String key = methodArgs[0];
-        AsyncStorage.getItem(key).then((String value) {
+        AsyncStorageModule.getItem(key).then((String value) {
           callback(value ?? '');
         }).catchError((e, stack) {
           callback('$e\n$stack');
@@ -65,7 +65,7 @@ class AsyncStorage extends BaseModule {
         List methodArgs = args[2];
         String key = methodArgs[0];
         String value = methodArgs[1];
-        AsyncStorage.setItem(key, value).then((bool isSuccess) {
+        AsyncStorageModule.setItem(key, value).then((bool isSuccess) {
           callback(isSuccess.toString());
         }).catchError((e, stack) {
           callback('Error: $e\n$stack');
@@ -74,7 +74,7 @@ class AsyncStorage extends BaseModule {
       case 'removeItem':
         List methodArgs = args[2];
         String key = methodArgs[0];
-        AsyncStorage.removeItem(key).then((bool isSuccess) {
+        AsyncStorageModule.removeItem(key).then((bool isSuccess) {
           callback(isSuccess.toString());
         }).catchError((e, stack) {
           callback('Error: $e\n$stack');
@@ -82,7 +82,7 @@ class AsyncStorage extends BaseModule {
         break;
       case 'getAllKeys':
         // @TODO: catch error case
-        AsyncStorage.getAllKeys().then((Set<String> set) {
+        AsyncStorageModule.getAllKeys().then((Set<String> set) {
           List<String> list = List.from(set);
           callback(jsonEncode(list));
         }).catchError((e, stack) {
@@ -90,7 +90,7 @@ class AsyncStorage extends BaseModule {
         });
         break;
       case 'clear':
-        AsyncStorage.clear().then((bool isSuccess) {
+        AsyncStorageModule.clear().then((bool isSuccess) {
           callback(isSuccess.toString());
         }).catchError((e, stack) {
           callback('Error: $e\n$stack');

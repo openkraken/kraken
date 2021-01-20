@@ -22,8 +22,8 @@ enum KrakenNavigationType {
   other
 }
 
-class KrakenNavigationModule extends BaseModule {
-  KrakenNavigationModule(ModuleManager moduleManager) : super(moduleManager);
+class NavigationModule extends BaseModule {
+  NavigationModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override
   void dispose() {}

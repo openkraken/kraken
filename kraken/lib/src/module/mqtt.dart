@@ -10,11 +10,11 @@ import 'module_manager.dart';
 enum ReadyState { CONNECTING, OPEN, CLOSING, CLOSED }
 typedef MQTTEventCallback = void Function(String id, String event);
 
-class MQTT extends BaseModule {
+class MQTTModule extends BaseModule {
   Map<String, MqttClient> _clientMap = {};
   int _clientId = 0;
 
-  MQTT(ModuleManager moduleManager) : super(moduleManager);
+  MQTTModule(ModuleManager moduleManager) : super(moduleManager);
 
   void dispose() {
     _clientMap.forEach((key, client) {

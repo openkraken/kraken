@@ -14,8 +14,8 @@ void onJSMethodCall(KrakenController controller, MethodCallCallback value) {
   controller.methodChannel._onJSMethodCall = value;
 }
 
-class KrakenMethodChannelModule extends BaseModule {
-  KrakenMethodChannelModule(ModuleManager moduleManager) : super(moduleManager);
+class MethodChannelModule extends BaseModule {
+  MethodChannelModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override
   void dispose() {}

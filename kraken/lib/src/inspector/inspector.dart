@@ -63,7 +63,7 @@ class Inspector {
   void onServerStart() async {
     String remoteAddress = await Inspector.getConnectedLocalNetworkAddress();
     String inspectorURL = '$INSPECTOR_URL?ws=$remoteAddress:$port';
-    await KrakenClipboard.writeText(inspectorURL);
+    await ClipBoardModule.writeText(inspectorURL);
 
     print('Kraken DevTool listening at ws://$remoteAddress:$port');
     print('Open Chrome/Edge and paste following url to your navigator:');

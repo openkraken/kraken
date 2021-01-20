@@ -17,13 +17,13 @@ class _WebSocketState {
   _WebSocketState(this.status);
 }
 
-class KrakenWebSocket extends BaseModule {
+class WebSocketModule extends BaseModule {
   Map<String, IOWebSocketChannel> _clientMap = {};
   Map<String, Map<String, bool>> _listenMap = {};
   Map<String, _WebSocketState> _stateMap = {};
   int _clientId = 0;
 
-  KrakenWebSocket(ModuleManager moduleManager) : super(moduleManager);
+  WebSocketModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override
   String invoke(List<dynamic> params, callback) {

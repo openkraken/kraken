@@ -358,6 +358,10 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
   ModuleManager _moduleManager;
   ModuleManager get moduleManager => _moduleManager;
 
+  KrakenModuleController(KrakenController controller, int contextId) {
+    _moduleManager = ModuleManager(controller, contextId);
+  }
+
   void dispose() {
     clearTimer();
     clearAnimationFrame();
@@ -441,7 +445,7 @@ class KrakenController {
       PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
 
-    _module = KrakenModuleController();
+    _module = KrakenModuleController(this, _view.contextId);
     assert(!_controllerMap.containsKey(_view.contextId),
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
     _controllerMap[_view.contextId] = this;
