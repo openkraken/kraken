@@ -228,26 +228,32 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
 
         final Matrix4 localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform);
 
-        final Offset movedVerticalLocally = Offset(0.0, event.localDelta.dx);
+        final Offset movedVerticalLocally = Offset(event.localDelta.dx, 0.0);
         _globalVerticalDistanceMoved += PointerEvent.transformDeltaViaPositions(
           transform: localToGlobalTransform,
           untransformedDelta: movedVerticalLocally,
           untransformedEndPosition: event.localPosition,
         ).distance * (movedVerticalLocally.dy ?? 1).sign;
 
-        final Offset movedHorizontallLocally = Offset(0.0, event.localDelta.dy);
+        final Offset movedHorizontalLocally = Offset(0.0, event.localDelta.dy);
+        print('movedHorizontallLocally=${movedHorizontalLocally}');
         _globalHorizontalDistanceMoved += PointerEvent.transformDeltaViaPositions(
           transform: localToGlobalTransform,
-          untransformedDelta: movedHorizontallLocally,
+          untransformedDelta: movedHorizontalLocally,
           untransformedEndPosition: event.localPosition,
-        ).distance * (movedHorizontallLocally.dx ?? 1).sign;
-        if (_hasSufficientGlobalDistanceToAccept(event.kind))
+        ).distance * (movedHorizontalLocally.dx ?? 1).sign;
+
+        print('_globalVerticalDistanceMoved = ${_globalVerticalDistanceMoved}');
+        print('_globalHorizontalDistanceMoved = ${_globalHorizontalDistanceMoved}');
+
+        if (_hasSufficientGlobalDistanceToAccept(event.kind)) {
           if (_globalVerticalDistanceMoved.abs() > computeHitSlop(event.kind)) {
             _direction = (_globalVerticalDistanceMoved > 0) ? _OffsetDirection.up : _OffsetDirection.down;
           } else {
             _direction = (_globalHorizontalDistanceMoved > 0) ? _OffsetDirection.left : _OffsetDirection.right;
           }
           resolve(GestureDisposition.accepted);
+        }
       }
     }
     if (event is PointerUpEvent || event is PointerCancelEvent) {
@@ -350,8 +356,8 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
         return '$estimate; judged to not be a fling.';
       };
     }
-    print('_direction=${_direction}');
-    print('details=${details.primaryVelocity}');
+    // print('_direction=${_direction}');
+    //print('details=${details.primaryVelocity}');
     invokeCallback<void>('onSwipe', () => onSwipe(Event(EVENT_SWIPE, EventInit())), debugReport: debugReport);
   }
 
