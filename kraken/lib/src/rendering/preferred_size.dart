@@ -59,6 +59,11 @@ class RenderPositionHolder extends RenderPreferredSize {
     _boxSize = value;
     super.size = value;
   }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
+    return false;
+  }
 }
 
 bool isPositionHolder(RenderBox box) {

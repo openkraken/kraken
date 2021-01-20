@@ -1,4 +1,4 @@
-package com.taobao.kraken.host;
+package com.openkraken.kraken.host;
 
 import android.os.Bundle;
 import androidx.annotation.NonNull;

@@ -52,7 +52,7 @@ static bool isTraceEnabled(JNIEnv* env) {
   if (!env)
     return true;
   jboolean enabled = false;
-  jTraceClass = (env)->FindClass("com/taobao/weex/utils/Trace");
+  jTraceClass = (env)->FindClass("com/openkraken/kraken/utils/Trace");
   jmethodID mid = (env)->GetStaticMethodID(jTraceClass, "getTraceEnabled", "()Z");
   enabled = (env)->CallStaticBooleanMethod(jTraceClass, mid);
   return enabled;

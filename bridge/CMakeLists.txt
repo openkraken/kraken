@@ -235,7 +235,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
     OUTPUT_NAME kraken_bridge
     FRAMEWORK TRUE
     FRAMEWORK_VERSION C
-    MACOSX_FRAMEWORK_IDENTIFIER com.taobao.kraken_bridge
+    MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.kraken_bridge
     PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
     )
 
