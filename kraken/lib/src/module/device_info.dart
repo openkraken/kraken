@@ -66,7 +66,7 @@ class DeviceInfoModule extends BaseModule {
         callback(json);
       });
     } else if (method == 'getHardwareConcurrency') {
-      callback(getHardwareConcurrency().toString());
+      return getHardwareConcurrency().toString();
     }
     return '';
   }
