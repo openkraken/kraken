@@ -6,7 +6,7 @@ const isPortReachable = require('is-port-reachable');
 function startIntegrationTest() {
   const shouldSkipBuild = /skip\-build/.test(process.argv);
   if (!shouldSkipBuild) {
-    console.log('Build Test App from lib/app.dart, waiting...');
+    console.log('Building integration tests macOS application from "lib/main.dart"...');
     spawnSync('flutter', ['build', 'macos', '--debug'], {
       stdio: 'inherit'
     });

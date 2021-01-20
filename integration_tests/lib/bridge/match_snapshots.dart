@@ -4,10 +4,9 @@ import 'dart:async';
 import 'package:path/path.dart' as path;
 import 'package:image/image.dart';
 
-
 final String __dirname = path.dirname(Platform.script.path);
 final String testDirectory = Platform.environment['KRAKEN_TEST_DIR'] ?? __dirname;
-final Directory snapshots = Directory(path.join(testDirectory, '/snapshots'));
+final Directory snapshots = Directory(path.join(testDirectory, 'snapshots'));
 
 ///Check if [firstImg] and [secondImg] have the same width and height
 bool haveSameSize(Image firstImg, Image secondImg) {
