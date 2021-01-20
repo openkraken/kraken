@@ -714,7 +714,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       /// Calculate baseline extent of layout box
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
-      bool isLineHeightValid = _isVerticalAlignValid(child);
+      bool isLineHeightValid = _isLineHeightValid(child);
 
       // Vertical align is only valid for inline box
       if (verticalAlign == VerticalAlign.baseline && isLineHeightValid) {
@@ -730,7 +730,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         double lineHeight = _getLineHeight(child);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
-        if (lineHeight != null) {
+        if (child is! RenderTextBox && lineHeight != null) {
           childLeading = lineHeight - childSize.height;
         }
 
@@ -888,13 +888,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
 
-      // Leading between height of line box's content area and line height of line box
-      double lineBoxLeading = 0;
-      double lineBoxHeight = _getLineHeight(this);
-      if (lineBoxHeight != null) {
-        lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
-      }
-
       while (child != null) {
         final RenderLayoutParentData childParentData = child.parentData;
 
@@ -950,12 +943,19 @@ class RenderFlowLayout extends RenderLayoutBox {
         // Child line extent caculated according to vertical align
         double childLineExtent = childCrossAxisOffset;
 
-        bool isLineHeightValid = _isVerticalAlignValid(child);
+        bool isLineHeightValid = _isLineHeightValid(child);
         if (isLineHeightValid) {
           // Distance from top to baseline of child
           double childAscent = _getChildAscent(child);
 
           VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
+
+          // Leading between height of line box's content area and line height of line box
+          double lineBoxLeading = 0;
+          double lineBoxHeight = _getLineHeight(this);
+          if (child is! RenderTextBox && lineBoxHeight != null) {
+            lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
+          }
 
           switch (verticalAlign) {
             case VerticalAlign.baseline:
@@ -1041,7 +1041,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   double _getChildAscent(RenderBox child) {
     // Distance from top to baseline of child
     double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
-
     double childMarginTop = 0;
     double childMarginBottom = 0;
     if (child is RenderBoxModel) {
@@ -1071,9 +1070,10 @@ class RenderFlowLayout extends RenderLayoutBox {
     return null;
   }
 
-  /// Vertical-align only works for inline level box
-  bool _isVerticalAlignValid(RenderBox child) {
-    if (child is RenderBoxModel) {
+  bool _isLineHeightValid(RenderBox child) {
+    if (child is RenderTextBox) {
+      return true;
+    } else if (child is RenderBoxModel) {
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       String childDisplay = childStyle['display'];
       return childDisplay.startsWith('inline');

@@ -77,7 +77,7 @@ class RenderKrakenParagraph extends RenderBox
 
   final TextPainter _textPainter;
 
-  List<TextPainter> _lineTextPainters = [];
+  List<TextPainter> _lineTextPainters;
 
   List<ui.LineMetrics> _lineMetrics = [];
 
@@ -305,13 +305,12 @@ class RenderKrakenParagraph extends RenderBox
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
-    // TODO(garyq): Since our metric for ideographic baseline is currently
-    // inaccurate and the non-alphabetic baselines are based off of the
-    // alphabetic baseline, we use the alphabetic for now to produce correct
-    // layouts. We should eventually change this back to pass the `baseline`
-    // property when the ideographic baseline is properly implemented
-    // (https://github.com/flutter/flutter/issues/22625).
-    return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    
+    double lastLineOffset = _lineOffset[_lineOffset.length - 1];
+    ui.LineMetrics lastLineMetrics = _lineMetrics[_lineMetrics.length - 1];
+
+    // Use the baseline of the last line as paragraph baseline
+    return lastLineOffset + lastLineMetrics.ascent;
   }
 
   // Intrinsics cannot be calculated without a full layout for
@@ -589,21 +588,23 @@ class RenderKrakenParagraph extends RenderBox
     // Height of paragraph
     double paragraphHeight = 0;
 
-    _lineMetrics.forEach((lineMetric) {
-      int index = _lineMetrics.indexOf(lineMetric);
+    for (int i = 0; i < _lineMetrics.length; i++) {
+      ui.LineMetrics lineMetric = _lineMetrics[i];
       double leading = lineHeight != null ? lineHeight - lineMetric.height : 0;
       double height = lineHeight != null ? lineHeight : lineMetric.height;
       _lineLeading.add(leading);
       paragraphHeight += height;
       // Offset of previous line
-      double preLineBottom = index > 0 ?
-        _lineOffset[index - 1] + _lineMetrics[index - 1].height + _lineLeading[index - 1] / 2 :  0;
+      double preLineBottom = i > 0 ?
+      _lineOffset[i - 1] + _lineMetrics[i - 1].height + _lineLeading[i - 1] / 2 :  0;
       double offset = preLineBottom + leading / 2;
       _lineOffset.add(offset);
-    });
-
+    }
+    _lineTextPainters = [];
+    
     // Create text painter of each line and layout
-    lineTexts.forEach((lineText) {
+    for (int i = 0; i < lineTexts.length; i++) {
+      String lineText = lineTexts[i];
       final TextSpan textSpan = TextSpan(
         text: lineText,
         style: text.style,
@@ -627,7 +628,7 @@ class RenderKrakenParagraph extends RenderBox
         minWidth: constraints.minWidth,
         maxWidth: widthMatters ? constraints.maxWidth : double.infinity,
       );
-    });
+    }
     
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
     // assigning to `size` will trigger us to validate our intrinsic sizes,
@@ -705,14 +706,11 @@ class RenderKrakenParagraph extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     // Paint line painters
-    _lineTextPainters.forEach((_lineTextPainter) {
-      int index = _lineTextPainters.indexOf(_lineTextPainter);
-      ui.LineMetrics lineMetrics = _lineMetrics[index];
-      double ascent = lineMetrics.ascent;
-      double descent = lineMetrics.descent;
-      Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[index]);
+    for (int i = 0; i < _lineTextPainters.length; i++) {
+      TextPainter _lineTextPainter  = _lineTextPainters[i];
+      Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
       _lineTextPainter.paint(context.canvas, lineOffset);
-    });
+    }
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
