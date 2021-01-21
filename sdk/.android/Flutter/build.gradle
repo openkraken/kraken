@@ -26,38 +26,20 @@ if (flutterVersionName == null) {
 apply plugin: 'com.android.library'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
-group 'com.taobao.kraken'
+group 'com.openkraken.kraken'
 version '1.0'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a"
-        }
-        externalNativeBuild {
-            cmake {
-                arguments "-DKRAKEN_JS_ENGINE=jsc"
-            }
-        }
-    }
-    externalNativeBuild {
-        cmake {
-            path file('CMakeLists.txt')
-        }
     }
 }
 
 flutter {
     source '../..'
-}
-
-dependencies {
-    testImplementation 'junit:junit:4.12'
 }

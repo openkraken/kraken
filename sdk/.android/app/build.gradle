@@ -3,7 +3,7 @@ def flutterPluginVersion = 'managed'
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     compileOptions {
         sourceCompatibility 1.8
@@ -11,15 +11,11 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.taobao.kraken.host"
-        minSdkVersion 21
-        targetSdkVersion 28
+        applicationId "com.openkraken.kraken.host"
+        minSdkVersion 16
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        ndk {
-            abiFilters "armeabi-v7a"
-        }
     }
 
     buildTypes {
@@ -34,12 +30,10 @@ android {
     }
 
 }
+buildDir = new File(rootProject.projectDir, "../build/host")
 dependencies {
     implementation project(':flutter')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
-    testImplementation 'junit:junit:4.12'
 }
