@@ -58,8 +58,6 @@ class RenderKrakenParagraph extends RenderBox
         textAlign: textAlign,
         textDirection: textDirection,
         textScaleFactor: textScaleFactor,
-        maxLines: maxLines,
-        ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
         locale: locale,
         strutStyle: strutStyle,
         textWidthBasis: textWidthBasis,
@@ -77,12 +75,16 @@ class RenderKrakenParagraph extends RenderBox
 
   final TextPainter _textPainter;
 
+  /// The text painter of each line
   List<TextPainter> _lineTextPainters;
 
-  List<ui.LineMetrics> _lineMetrics = [];
+  /// The line mertics of paragraph
+  List<ui.LineMetrics> _lineMetrics;
 
-  List<double> _lineOffset = [];
+  /// The vertical offset of each line
+  List<double> _lineOffset;
 
+  /// The line height of paragraph
   double lineHeight;
 
   /// The text to display.
@@ -577,6 +579,7 @@ class RenderKrakenParagraph extends RenderBox
     // Leading of each line
     List<double> _lineLeading = [];
 
+    _lineOffset = [];
     for (int i = 0; i < _lineMetrics.length; i++) {
       ui.LineMetrics lineMetric = _lineMetrics[i];
       double leading = lineHeight != null ? lineHeight - lineMetric.height : 0;
@@ -588,10 +591,10 @@ class RenderKrakenParagraph extends RenderBox
       _lineOffset.add(offset);
     }
     _lineTextPainters = [];
-
     // Create text painter of each line and layout
     for (int i = 0; i < lineTexts.length; i++) {
       String lineText = lineTexts[i];
+
       final TextSpan textSpan = TextSpan(
         text: lineText,
         style: text.style,
@@ -601,7 +604,6 @@ class RenderKrakenParagraph extends RenderBox
         textAlign: textAlign,
         textDirection: textDirection,
         textScaleFactor: textScaleFactor,
-        maxLines: maxLines,
         ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
         locale: locale,
         strutStyle: strutStyle,
