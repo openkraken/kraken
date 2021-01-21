@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>kraken_bridge</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.taobao.kraken.bridge</string>
+	<string>com.openkraken.kraken.bridge</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>

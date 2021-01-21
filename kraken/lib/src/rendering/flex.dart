@@ -588,16 +588,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     double minHeight = 0;
     double maxHeight = double.infinity;
 
-    /// Use old size as base size constraints if exists except replaced element
-    /// cause its content size may differ from its initial size after content loaded
-    if (child.hasSize && child is !RenderIntrinsic) {
-      double childOriginalWidth = child.size.width;
-      double childOriginalHeight = child.size.height;
-      return CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
-        BoxConstraints.tightFor(width: childOriginalWidth) :
-        BoxConstraints.tightFor(height: childOriginalHeight);
-    }
-
     if (child is RenderBoxModel) {
       RenderStyle childRenderStyle = child.renderStyle;
       double flexBasis = _getFlexBasis(child);
@@ -1069,17 +1059,29 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && child.hasSize) {
         double childContentWidth = RenderBoxModel.getContentWidth(child);
         double childContentHeight = RenderBoxModel.getContentHeight(child);
-        // Always layout child when parent is not laid out yet or child is marked as needsLayout
-        if (!hasSize || child.needsLayout) {
+        bool hasFlexFactor = false;
+        if (child is RenderBoxModel) {
+          hasFlexFactor = child.renderStyle.flexGrow != 0 ||
+            child.renderStyle.flexShrink != 0;
+        }
+
+        // Always layout child in following cases
+        // 1. Parent is not laid out yet
+        // 2. Child is marked as needsLayout
+        // 3. Child has flex-grow or flex-shrink
+        if (!hasSize || child.needsLayout || hasFlexFactor) {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = _getChildSize(child);
-          // Need to layout child when width and height of child are both specified and differ from its previous size
-          isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
-            (childOldSize.width != childContentWidth ||
-              childOldSize.height != childContentHeight);
+          /// No need to layout child when both width and height of child can be calculated from style
+          /// and be the same as old size, in other cases always relayout.
+          bool childSizeCalculatedSame = childContentWidth != null && childContentHeight != null &&
+            (childOldSize.width == childContentWidth ||
+              childOldSize.height == childContentHeight);
+          isChildNeedsLayout = !childSizeCalculatedSame;
         }
       }
+
       if (isChildNeedsLayout) {
         DateTime childLayoutStart;
         if (kProfileMode) {
@@ -1472,14 +1474,18 @@ class RenderFlexLayout extends RenderLayoutBox {
 
             // Need to relayout child when flex factor exists
             if ((isFlexGrow && flexGrow > 0) ||
-              (isFlexShrink) && flexShrink > 0) {
+              (isFlexShrink && flexShrink > 0)) {
               isChildNeedsLayout = true;
             } else if (isStretchSelf) {
               Size childOldSize = _getChildSize(child);
-              // Need to layout child when width and height of child are both specified and differ from its previous size
-              isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
-                (childOldSize.width != childContentWidth ||
-                  childOldSize.height != childContentHeight);
+              /// No need to layout child when both width and height of child can be calculated from style
+              /// and be the same as old size, in other cases always relayout.
+              /// In some cases such as flex-wrap: wrap, child cross size depends on remaining spaces of flex lines
+              /// which also depends on the size of its siblings so it cannot be calculated from style without layout.
+              bool childSizeCalculatedSame = childContentWidth != null && childContentHeight != null &&
+                (childOldSize.width == childContentWidth ||
+                  childOldSize.height == childContentHeight);
+              isChildNeedsLayout = !childSizeCalculatedSame;
             }
           }
         }

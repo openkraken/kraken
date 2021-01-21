@@ -219,10 +219,12 @@ class CSSPositionedLayout {
         isChildNeedsLayout = true;
       } else {
         Size childOldSize = _getChildSize(child);
-        // Need to layout child when width and height of child are both specified and differ from its previous size
-        isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
-          (childOldSize.width != childContentWidth ||
-            childOldSize.height != childContentHeight);
+        /// No need to layout child when both width and height of child can be calculated from style
+        /// and be the same as old size, in other cases always relayout.
+        bool childSizeCalculatedSame = childContentWidth != null && childContentHeight != null &&
+          (childOldSize.width == childContentWidth ||
+            childOldSize.height == childContentHeight);
+        isChildNeedsLayout = !childSizeCalculatedSame;
       }
     }
 
