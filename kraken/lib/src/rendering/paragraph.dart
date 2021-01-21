@@ -94,15 +94,11 @@ class RenderKrakenParagraph extends RenderBox
       case RenderComparison.metadata:
         return;
       case RenderComparison.paint:
-        _textPainter.text = value;
-        _extractPlaceholderSpans(value);
-        markNeedsPaint();
-        markNeedsSemanticsUpdate();
-        break;
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
         _extractPlaceholderSpans(value);
+        // Always needs layout cause it needs to create line text painters when text changed
         markNeedsLayout();
         break;
     }
@@ -305,7 +301,7 @@ class RenderKrakenParagraph extends RenderBox
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
-    
+
     double lastLineOffset = _lineOffset[_lineOffset.length - 1];
     ui.LineMetrics lastLineMetrics = _lineMetrics[_lineMetrics.length - 1];
 
@@ -546,7 +542,7 @@ class RenderKrakenParagraph extends RenderBox
   }
 
   /// Get text of each line in the paragraph
-  static List<String> _getLineTexts(TextPainter textPainter, TextSpan textSpan) {
+  List<String> _getLineTexts(TextPainter textPainter, TextSpan textSpan) {
     TextSelection selection = TextSelection(baseOffset: 0, extentOffset: textSpan.text.length);
     List<TextBox> boxes = textPainter.getBoxesForSelection(selection);
     List<String> lineTexts = [];
@@ -573,27 +569,18 @@ class RenderKrakenParagraph extends RenderBox
     return lineTexts;
   }
 
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-    _layoutChildren(constraints);
-    _layoutTextWithConstraints(constraints);
-    _setParentData();
-
+  // Create and layout line text painters according to text lines in the paragraph
+  void _layoutMultiLineTextWithConstraints(BoxConstraints constraints) {
     // Get text of each line
     List<String> lineTexts = _getLineTexts(_textPainter, _textPainter.text);
     _lineMetrics = _textPainter.computeLineMetrics();
     // Leading of each line
     List<double> _lineLeading = [];
-    // Height of paragraph
-    double paragraphHeight = 0;
 
     for (int i = 0; i < _lineMetrics.length; i++) {
       ui.LineMetrics lineMetric = _lineMetrics[i];
       double leading = lineHeight != null ? lineHeight - lineMetric.height : 0;
-      double height = lineHeight != null ? lineHeight : lineMetric.height;
       _lineLeading.add(leading);
-      paragraphHeight += height;
       // Offset of previous line
       double preLineBottom = i > 0 ?
       _lineOffset[i - 1] + _lineMetrics[i - 1].height + _lineLeading[i - 1] / 2 :  0;
@@ -601,7 +588,7 @@ class RenderKrakenParagraph extends RenderBox
       _lineOffset.add(offset);
     }
     _lineTextPainters = [];
-    
+
     // Create text painter of each line and layout
     for (int i = 0; i < lineTexts.length; i++) {
       String lineText = lineTexts[i];
@@ -629,6 +616,24 @@ class RenderKrakenParagraph extends RenderBox
         maxWidth: widthMatters ? constraints.maxWidth : double.infinity,
       );
     }
+  }
+  
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    _layoutChildren(constraints);
+    _layoutTextWithConstraints(constraints);
+    _setParentData();
+    _layoutMultiLineTextWithConstraints(constraints);
+
+    // Height of paragraph
+    double paragraphHeight = 0;
+
+    for (int i = 0; i < _lineMetrics.length; i++) {
+      ui.LineMetrics lineMetric = _lineMetrics[i];
+      double height = lineHeight != null ? lineHeight : lineMetric.height;
+      paragraphHeight += height;
+    }
     
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
     // assigning to `size` will trigger us to validate our intrinsic sizes,
@@ -637,7 +642,7 @@ class RenderKrakenParagraph extends RenderBox
     // affected. See also RenderEditable which has a similar issue.
     final Size textSize = _textPainter.size;
     final bool textDidExceedMaxLines = _textPainter.didExceedMaxLines;
-    
+
     Size paragraphSize = Size(_textPainter.size.width, paragraphHeight);
     size = constraints.constrain(paragraphSize);
 
@@ -711,7 +716,7 @@ class RenderKrakenParagraph extends RenderBox
       Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
       _lineTextPainter.paint(context.canvas, lineOffset);
     }
-
+    
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
         final Paint paint = Paint()
