@@ -228,23 +228,19 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
 
         final Matrix4 localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform);
 
-        final Offset movedVerticalLocally = Offset(event.localDelta.dx, 0.0);
+        final Offset movedVerticalLocally = Offset(0.0, event.localDelta.dy);
         _globalVerticalDistanceMoved += PointerEvent.transformDeltaViaPositions(
           transform: localToGlobalTransform,
           untransformedDelta: movedVerticalLocally,
           untransformedEndPosition: event.localPosition,
         ).distance * (movedVerticalLocally.dy ?? 1).sign;
 
-        final Offset movedHorizontalLocally = Offset(0.0, event.localDelta.dy);
-        print('movedHorizontallLocally=${movedHorizontalLocally}');
+        final Offset movedHorizontalLocally = Offset(event.localDelta.dx, 0.0);
         _globalHorizontalDistanceMoved += PointerEvent.transformDeltaViaPositions(
           transform: localToGlobalTransform,
           untransformedDelta: movedHorizontalLocally,
           untransformedEndPosition: event.localPosition,
         ).distance * (movedHorizontalLocally.dx ?? 1).sign;
-
-        print('_globalVerticalDistanceMoved = ${_globalVerticalDistanceMoved}');
-        print('_globalHorizontalDistanceMoved = ${_globalHorizontalDistanceMoved}');
 
         if (_hasSufficientGlobalDistanceToAccept(event.kind)) {
           if (_globalVerticalDistanceMoved.abs() > computeHitSlop(event.kind)) {
@@ -356,8 +352,8 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
         return '$estimate; judged to not be a fling.';
       };
     }
-    // print('_direction=${_direction}');
-    //print('details=${details.primaryVelocity}');
+    print('_direction=${_direction}');
+    print('details=${details.primaryVelocity}');
     invokeCallback<void>('onSwipe', () => onSwipe(Event(EVENT_SWIPE, EventInit())), debugReport: debugReport);
   }
 
