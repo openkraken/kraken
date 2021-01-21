@@ -55,6 +55,10 @@ class Event {
   EventTarget target;
   num timeStamp;
   bool defaultPrevented = false;
+  double deltaX = 0.0;
+  double deltaY = 0.0;
+
+
 
   bool _immediateBubble = true;
 

@@ -4,8 +4,6 @@
  */
 
 import 'dart:async';
-
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
@@ -67,19 +65,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   DragStartBehavior dragStartBehavior;
 
   GestureSwipeCallback onSwipe;
-
-  /// A pointer that was previously in contact with the screen with a primary
-  /// button and moving is no longer in contact with the screen and was moving
-  /// at a specific velocity when it stopped contacting the screen.
-  ///
-  /// The velocity is provided in the callback's `details` argument, which is a
-  /// [DragEndDetails] object.
-  ///
-  /// See also:
-  ///
-  ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [DragEndDetails], which is passed as an argument to this callback.
-  GestureDragEndCallback onEnd;
 
   /// The pointer that previously triggered [onDown] did not complete.
   ///
@@ -171,10 +156,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_initialButtons == null) {
       switch (event.buttons) {
         case kPrimaryButton:
-          if (
-              onEnd == null &&
-              onCancel == null &&
-              onSwipe == null)
+          if (onCancel == null && onSwipe == null)
             return false;
           break;
         default:

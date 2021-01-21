@@ -90,7 +90,7 @@ mixin EventHandlerMixin on Node {
   }
 
   void handleSwipe(Event event) {
-    print('handleSwipe');
+    dispatchEvent(event);
   }
 
   void handleAppear() {
