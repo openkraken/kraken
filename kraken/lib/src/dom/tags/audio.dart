@@ -5,7 +5,7 @@ import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken_audioplayers/kraken_audioplayers.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import 'media.dart';
 

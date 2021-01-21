@@ -1,7 +1,7 @@
 name: kraken
 description: A high-performance, web standards-compliant rendering engine.
 version: 0.6.3
-homepage: https://rax.js.org/docs/guide/kraken-startup
+homepage: https://openkraken.com
 
 environment:
   sdk: ">=2.8.0 <3.0.0"
@@ -27,7 +27,7 @@ dependencies:
   kraken_video_player: ^0.1.0
   kraken_camera: ^0.1.0
   kraken_webview: ^0.1.5
-  kraken_audioplayers: ^0.1.0
+  audioplayers: ^0.17.2
   kraken_geolocation: ^0.1.0
 
 dev_dependencies:
@@ -48,9 +48,9 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.taobao.kraken
-        pluginClass: KrakenSDKPlugin
+        package: com.openkraken.kraken
+        pluginClass: KrakenPlugin
       ios:
-        pluginClass: KrakenSDKPlugin
+        pluginClass: KrakenPlugin
       macos:
-        pluginClass: KrakenSDKPlugin
+        pluginClass: KrakenPlugin

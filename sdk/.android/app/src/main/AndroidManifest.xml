@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.taobao.kraken.host">
+          package="com.openkraken.kraken.host">
 
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application
