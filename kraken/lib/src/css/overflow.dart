@@ -133,28 +133,71 @@ mixin CSSOverflowMixin on ElementBase {
       renderBoxModel.pointerListener = _pointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
-        RenderObject layoutBoxParent = renderBoxModel.parent;
-
-        // Overflow auto/scroll will create repaint boundary to improve scroll performance
-        // So it needs to transform between layout and its repaint boundary replacement when transform changes
-        RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: shouldRepaintSelf, prevRenderLayoutBox: renderBoxModel);
-
-        if (newLayoutBox == renderBoxModel) {
-          return;
+        if (shouldRepaintSelf) {
+          _upgradeToSelfRepaint(element, renderBoxModel);
+        } else {
+          _downgradeToParentRepaint(element, renderBoxModel);
         }
-        if (layoutBoxParent is RenderObjectWithChildMixin<RenderBox>) {
-          layoutBoxParent.child = null;
-          layoutBoxParent.child = newLayoutBox;
-        } else if (layoutBoxParent is ContainerRenderObjectMixin) {
-          ContainerBoxParentData parentData = renderBoxModel.parentData;
-          RenderObject previousSibling = parentData.previousSibling;
-          layoutBoxParent.remove(renderBoxModel);
-          element.renderBoxModel = newLayoutBox;
-          element.parent.addChildRenderObject(element, after: previousSibling);
-          // Update renderBoxModel reference in renderStyle
-          element.renderBoxModel.renderStyle.renderBoxModel = element.renderBoxModel;
-        }
+
+        // // Overflow auto/scroll will create repaint boundary to improve scroll performance
+        // // So it needs to transform between layout and its repaint boundary replacement when transform changes
+        // RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: shouldRepaintSelf, prevRenderLayoutBox: renderBoxModel);
+        //
+        // if (newLayoutBox == renderBoxModel) {
+        //   return;
+        // }
+        //
+        // element.renderBoxModel = newLayoutBox;
+        //
+        // if (shouldRepaintSelf) {
+        //
+        // } else {
+        //
+        // }
+        //
+        // if (layoutBoxParent is RenderObjectWithChildMixin<RenderBox>) {
+        //   layoutBoxParent.child = null;
+        //   layoutBoxParent.child = newLayoutBox;
+        // } else if (layoutBoxParent is ContainerRenderObjectMixin) {
+        //   ContainerBoxParentData parentData = renderBoxModel.parentData;
+        //   RenderObject previousSibling = parentData.previousSibling;
+        //   layoutBoxParent.remove(renderBoxModel);
+        //   element.parent.addChildRenderObject(element, after: previousSibling);
+        //   // Update renderBoxModel reference in renderStyle
+        //   element.renderBoxModel.renderStyle.renderBoxModel = element.renderBoxModel;
+        // }
       }
+    }
+  }
+
+  void _upgradeToSelfRepaint(Element element, RenderBoxModel renderBoxModel) {
+    if (renderBoxModel.isRepaintBoundary) return;
+    RenderObject layoutBoxParent = renderBoxModel.parent;
+
+    RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
+    element.renderBoxModel = newLayoutBox;
+    _attachRenderObject(element, layoutBoxParent, renderBoxModel, newLayoutBox);
+  }
+
+  void _downgradeToParentRepaint(Element element, RenderBoxModel renderBoxModel) {
+    if (!renderBoxModel.isRepaintBoundary) return;
+    RenderObject layoutBoxParent = renderBoxModel.parent;
+    RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
+    element.renderBoxModel = newLayoutBox;
+    _attachRenderObject(element, layoutBoxParent, renderBoxModel, newLayoutBox);
+  }
+
+  void _attachRenderObject(Element element, RenderObject parent, RenderObject previousRenderObject, RenderObject newRenderObject) {
+    if (parent is RenderObjectWithChildMixin<RenderBox>) {
+      parent.child = null;
+      parent.child = newRenderObject;
+    } else if (parent is ContainerRenderObjectMixin) {
+      ContainerBoxParentData parentData = previousRenderObject.parentData;
+      RenderObject previousSibling = parentData.previousSibling;
+      parent.remove(previousRenderObject);
+      element.parent.addChildRenderObject(element, after: previousSibling);
+      // Update renderBoxModel reference in renderStyle
+      element.renderBoxModel.renderStyle.renderBoxModel = newRenderObject;
     }
   }
 
