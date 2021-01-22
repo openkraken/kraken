@@ -57,7 +57,7 @@ mixin CSSOverflowMixin on ElementBase {
   /// All the children whose position is sticky to this element
   List<Element> stickyChildren = [];
 
-  RenderLayoutBox overflowInnerRepaintBoundary;
+  RenderLayoutBox scrollingLayoutBox;
 
   void updateRenderOverflow(RenderBoxModel renderBoxModel, Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
@@ -147,7 +147,7 @@ mixin CSSOverflowMixin on ElementBase {
   void _createInnerRepaintBoundary(Element element) {
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(element);
     repaintBoundaryStyle.setProperty('overflow', 'visible');
-    overflowInnerRepaintBoundary = createRenderLayout(element, repaintSelf: true, style: repaintBoundaryStyle);
+    scrollingLayoutBox = createRenderLayout(element, repaintSelf: true, style: repaintBoundaryStyle);
   }
 
   // Create two repaintBoundary for an overflow scroll container.
@@ -161,7 +161,7 @@ mixin CSSOverflowMixin on ElementBase {
     RenderLayoutBox outerLayoutBox = createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
 
     _createInnerRepaintBoundary(element);
-    outerLayoutBox.add(overflowInnerRepaintBoundary);
+    outerLayoutBox.add(scrollingLayoutBox);
     element.renderBoxModel = outerLayoutBox;
     _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
   }

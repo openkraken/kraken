@@ -114,7 +114,13 @@ class TextNode extends Node {
   void attachTo(Element parent, { RenderObject after }) {
     willAttachRenderer();
 
-    RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel;
+    RenderLayoutBox parentRenderLayoutBox;
+    if (parent.scrollingLayoutBox != null) {
+      parentRenderLayoutBox = parent.scrollingLayoutBox;
+    } else {
+      parentRenderLayoutBox = parent.renderBoxModel;
+    }
+
     parentRenderLayoutBox.insert(_renderTextBox, after: after);
     _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
 

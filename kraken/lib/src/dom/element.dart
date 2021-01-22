@@ -438,8 +438,8 @@ class Element extends Node
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
-        if (overflowInnerRepaintBoundary != null) {
-          overflowInnerRepaintBoundary.insert(child.renderBoxModel, after: after);
+        if (scrollingLayoutBox != null) {
+          scrollingLayoutBox.insert(child.renderBoxModel, after: after);
         } else {
           _renderLayoutBox.insert(child.renderBoxModel, after: after);
         }
@@ -512,8 +512,8 @@ class Element extends Node
       for (Node child in childNodes) {
         if (_renderLayoutBox != null && !child.isRendererAttached) {
           RenderObject after;
-          if (overflowInnerRepaintBoundary != null) {
-            after = overflowInnerRepaintBoundary.lastChild;
+          if (scrollingLayoutBox != null) {
+            after = scrollingLayoutBox.lastChild;
           } else {
             after = _renderLayoutBox.lastChild;
           }
@@ -535,8 +535,8 @@ class Element extends Node
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
-        if (overflowInnerRepaintBoundary != null) {
-          child.attachTo(this, after: overflowInnerRepaintBoundary.lastChild);
+        if (scrollingLayoutBox != null) {
+          child.attachTo(this, after: scrollingLayoutBox.lastChild);
         } else {
           child.attachTo(this, after: _renderLayoutBox.lastChild);
         }
@@ -606,8 +606,8 @@ class Element extends Node
       case CSSPositionType.absolute:
         Element containingBlockElement = _findContainingBlock(child);
 
-        if (containingBlockElement.overflowInnerRepaintBoundary != null) {
-          parentRenderLayoutBox = containingBlockElement.overflowInnerRepaintBoundary;
+        if (containingBlockElement.scrollingLayoutBox != null) {
+          parentRenderLayoutBox = containingBlockElement.scrollingLayoutBox;
         } else {
           parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
         }
@@ -617,8 +617,8 @@ class Element extends Node
       case CSSPositionType.fixed:
         final Element rootEl = elementManager.getRootElement();
 
-        if (rootEl.overflowInnerRepaintBoundary != null) {
-          parentRenderLayoutBox = rootEl.overflowInnerRepaintBoundary;
+        if (rootEl.scrollingLayoutBox != null) {
+          parentRenderLayoutBox = rootEl.scrollingLayoutBox;
         } else {
           parentRenderLayoutBox = rootEl._renderLayoutBox;
         }
@@ -627,8 +627,8 @@ class Element extends Node
       case CSSPositionType.sticky:
         Element containingBlockElement = _findContainingBlock(child);
 
-        if (containingBlockElement.overflowInnerRepaintBoundary != null) {
-          parentRenderLayoutBox = containingBlockElement.overflowInnerRepaintBoundary;
+        if (containingBlockElement.scrollingLayoutBox != null) {
+          parentRenderLayoutBox = containingBlockElement.scrollingLayoutBox;
         } else {
           parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
         }
@@ -666,8 +666,8 @@ class Element extends Node
   void _addStickyChild(Element child, RenderObject after) {
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
 
-    if (overflowInnerRepaintBoundary != null) {
-      overflowInnerRepaintBoundary.insert(childRenderBoxModel, after: after);
+    if (scrollingLayoutBox != null) {
+      scrollingLayoutBox.insert(childRenderBoxModel, after: after);
     } else {
       (renderBoxModel as RenderLayoutBox).insert(childRenderBoxModel, after: after);
     }
