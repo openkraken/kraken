@@ -103,8 +103,6 @@ mixin CSSBoxMixin on RenderStyleBase {
         // Including BACKGROUND_REPEAT, BACKGROUND_POSITION, BACKGROUND_IMAGE,
         //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.
         updateBackgroundImage(property);
-      } else if (property.endsWith('Radius')) {
-        updateBorderRadius(property);
       } else if (property.startsWith(BORDER)) {
         updateBorder(property);
       } else if (property == BOX_SHADOW) {
@@ -220,34 +218,32 @@ mixin CSSBoxMixin on RenderStyleBase {
   };
 
   // Add border radius transition listener
-  void updateBorderRadius(String property, [double radiusWidth]) {
+  void updateBorderRadius(String property, String present) {
+    CSSBoxDecoration cssBoxDecoration = renderBoxModel.cssBoxDecoration;
+    if (cssBoxDecoration == null) {
+      cssBoxDecoration = getCSSBoxDecoration();
+      renderBoxModel.cssBoxDecoration = cssBoxDecoration;
+      if (cssBoxDecoration == null) return;
+      renderBoxModel.decoration = cssBoxDecoration.toBoxDecoration();
+    }
     if (renderBoxModel.decoration == null) return;
 
     // topLeft topRight bottomRight bottomLeft
     int index = _borderRadiusMapping[property];
 
     if (index != null) {
-      Radius newRadius = CSSBorderRadius.getRadius(style[property], viewportSize, radiusWidth);
+      Radius newRadius = CSSBorderRadius.getRadius(present, viewportSize);
       BorderRadius borderRadius = renderBoxModel.decoration.borderRadius as BorderRadius;
       renderBoxModel.decoration = renderBoxModel.decoration.copyWith(borderRadius: BorderRadius.only(
-        topLeft: index == 0 ? newRadius : borderRadius?.topLeft,
-        topRight: index == 1 ? newRadius : borderRadius?.topRight,
-        bottomRight: index == 2 ? newRadius : borderRadius?.bottomRight,
-        bottomLeft: index == 3 ? newRadius : borderRadius?.bottomLeft,
-      ));
-    } else {
-      List<Radius> borderRadius = _getBorderRadius(radiusWidth);
-
-      renderBoxModel.decoration = renderBoxModel.decoration.copyWith(borderRadius: BorderRadius.only(
-        topLeft: borderRadius[0],
-        topRight: borderRadius[1],
-        bottomRight: borderRadius[2],
-        bottomLeft: borderRadius[3],
+        topLeft: index == 0 ? newRadius : borderRadius?.topLeft ?? Radius.zero,
+        topRight: index == 1 ? newRadius : borderRadius?.topRight ?? Radius.zero,
+        bottomRight: index == 2 ? newRadius : borderRadius?.bottomRight ?? Radius.zero,
+        bottomLeft: index == 3 ? newRadius : borderRadius?.bottomLeft ?? Radius.zero,
       ));
     }
   }
 
-  void updateBorder(String property, [Color borderColor, double borderWidth]) {
+  void updateBorder(String property, {Color borderColor, double borderWidth}) {
     Border border = renderBoxModel.decoration.border as Border;
 
     if (border != null) {
@@ -310,12 +306,12 @@ mixin CSSBoxMixin on RenderStyleBase {
       bottomSide ?? CSSBorderSide.none] : null;
   }
 
-  List<Radius> _getBorderRadius([double radiusWidth]) {
+  List<Radius> _getBorderRadius() {
     // border radius add border topLeft topRight bottomLeft bottomRight
-    Radius topLeftRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_LEFT_RADIUS], viewportSize, radiusWidth);
-    Radius topRightRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_RIGHT_RADIUS], viewportSize, radiusWidth);
-    Radius bottomRightRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_RIGHT_RADIUS], viewportSize, radiusWidth);
-    Radius bottomLeftRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_LEFT_RADIUS], viewportSize, radiusWidth);
+    Radius topLeftRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_LEFT_RADIUS], viewportSize);
+    Radius topRightRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_RIGHT_RADIUS], viewportSize);
+    Radius bottomRightRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_RIGHT_RADIUS], viewportSize);
+    Radius bottomLeftRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_LEFT_RADIUS], viewportSize);
 
     bool hasBorderRadius = topLeftRadius != null ||
         topRightRadius != null ||
@@ -533,10 +529,7 @@ class CSSBorderSide {
 class CSSBorderRadius {
   static Radius none = Radius.zero;
 
-  static Radius getRadius(String radius, Size viewportSize, [double radiusWidth]) {
-    if (radiusWidth != null) {
-      return Radius.circular(radiusWidth);
-    }
+  static Radius getRadius(String radius, Size viewportSize) {
     if (radius.isNotEmpty) {
       // border-top-left-radius: horizontal vertical
       List<String> values = radius.split(_spaceRegExp);

@@ -26,7 +26,7 @@ describe('block-fit', () => {
 
     await matchViewportSnapshot();
   });
-  it('content-as-initial', async () => {
+  xit('content-as-initial', async () => {
     let child;
     let parent;
     parent = createElement(

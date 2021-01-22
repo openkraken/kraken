@@ -45,7 +45,7 @@ void _updateColor(Color oldColor, Color newColor, double progress, String proper
     case BORDER_RIGHT_COLOR:
     case BORDER_TOP_COLOR:
     case BORDER_COLOR:
-      renderStyle.updateBorder(property, color);
+      renderStyle.updateBorder(property, borderColor: color);
       break;
   }
 }
@@ -59,40 +59,34 @@ void _updateLength(double oldLength, double newLength, double progress, String p
 
   switch (property) {
     case RIGHT:
-      renderStyle.right = length;
-      break;
     case TOP:
-      renderStyle.top = length;
-      break;
     case BOTTOM:
-      renderStyle.bottom = length;
-      break;
     case LEFT:
-      renderStyle.left = length;
+      renderStyle.updateOffset(property, length);
       break;
     case MARGIN_BOTTOM:
     case MARGIN_LEFT:
     case MARGIN_RIGHT:
     case MARGIN_TOP:
-      renderStyle.updateMargin(property, length.toString() + 'px');
+      renderStyle.updateMargin(property, length);
       break;
     case PADDING_BOTTOM:
     case PADDING_LEFT:
     case PADDING_RIGHT:
     case PADDING_TOP:
-      renderStyle.updatePadding(property, length.toString() + 'px');
+      renderStyle.updatePadding(property, length);
       break;
     case BORDER_BOTTOM_WIDTH:
     case BORDER_LEFT_WIDTH:
     case BORDER_RIGHT_WIDTH:
     case BORDER_TOP_WIDTH:
-      renderStyle.updateBorder(property, null, length);
+      renderStyle.updateBorder(property, borderWidth: length);
       break;
     case BORDER_BOTTOM_LEFT_RADIUS:
     case BORDER_BOTTOM_RIGHT_RADIUS:
     case BORDER_TOP_LEFT_RADIUS:
     case BORDER_TOP_RIGHT_RADIUS:
-      renderStyle.updateBorderRadius(property, length);
+      renderStyle.updateBorderRadius(property, length.toString() + 'px');
       break;
     case FLEX_BASIS:
     case FONT_SIZE:
@@ -111,22 +105,12 @@ void _updateLength(double oldLength, double newLength, double progress, String p
       _updateChildTextNodes(renderStyle);
       break;
     case HEIGHT:
-      renderStyle.height = length;
-      break;
     case WIDTH:
-      renderStyle.width = length;
-      break;
     case MAX_HEIGHT:
-      renderStyle.maxHeight = length;
-      break;
     case MAX_WIDTH:
-      renderStyle.maxWidth = length;
-      break;
     case MIN_HEIGHT:
-      renderStyle.minHeight = length;
-      break;
     case MIN_WIDTH:
-      renderStyle.minWidth = length;
+      renderStyle.updateSizing(property, length);
       break;
   }
 }
@@ -234,8 +218,7 @@ void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, Ren
       quaternion
     );
   }
-
-  renderStyle.updateTransform(null, newMatrix4);
+  renderStyle.updateTransform(newMatrix4);
 }
 
 void _updateChildTextNodes(RenderStyle renderStyle) {
@@ -1123,7 +1106,6 @@ mixin CSSTransformMixin on RenderStyleBase {
   set transform(Matrix4 value) {
     if (_transform == value) return;
     _transform = value;
-    renderBoxModel.markNeedsLayout();
   }
 
   CSSOrigin get transformOrigin => _transformOrigin;
@@ -1134,18 +1116,24 @@ mixin CSSTransformMixin on RenderStyleBase {
     renderBoxModel.markNeedsLayout();
   }
 
-  void updateTransform(String value, [Matrix4 newMatrix4]) {
+  void updateTransform(
+    Matrix4 matrix4,
+    {
+      bool shouldConvertToRepaintBoundary = true,
+      bool shouldMarkNeedsLayout = true
+    }
+  ) {
     // If render box model was not creared yet, then exit.
     if (renderBoxModel == null) {
       return;
     }
+
     ElementManager elementManager = renderBoxModel.elementManager;
     int targetId = renderBoxModel.targetId;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
 
-    Matrix4 matrix4 = newMatrix4 ?? CSSTransform.parseTransform(value, viewportSize);
     // Upgrade this renderObject into repaintSelf mode.
-    if (!renderBoxModel.isRepaintBoundary) {
+    if (shouldConvertToRepaintBoundary && !renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;
       RenderBoxModel repaintSelfBox = createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
       if (parent is ContainerRenderObjectMixin) {
@@ -1161,6 +1149,10 @@ mixin CSSTransformMixin on RenderStyleBase {
       element.renderBoxModel.renderStyle.renderBoxModel = element.renderBoxModel;
     }
     element.renderBoxModel.renderStyle.transform = matrix4 ?? CSSTransform.initial;
+
+    if (shouldMarkNeedsLayout) {
+      element.renderBoxModel.markNeedsLayout();
+    }
   }
 
   void updateTransformOrigin(String present, [CSSOrigin newOrigin]) {

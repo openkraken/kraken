@@ -16,6 +16,7 @@ const _1pc = _1in / 6; // 1pc = 1/6th of 1in
 const _1pt = _1in / 72; // 1pt = 1/72th of 1in
 
 final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|in|cm|mm|pc|pt$', caseSensitive: false);
+final _percentageRegExp = RegExp(r'^\d+\%$', caseSensitive: false);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength {
@@ -56,6 +57,14 @@ class CSSLength {
 
   static bool isAuto(String value) {
     return value == AUTO;
+  }
+
+  static bool isPercentage(String value) {
+    return value != null && _percentageRegExp.hasMatch(value);
+  }
+
+  static double parsePercentage(String percentage) {
+    return double.tryParse(percentage.split('%')[0]) / 100;
   }
 
   static double parseLength(String unitedValue, Size viewportSize) {

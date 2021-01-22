@@ -18,7 +18,6 @@ mixin CSSPaddingMixin on RenderStyleBase {
 
   void _markNeedResolution() {
     _resolvedPadding = null;
-    renderBoxModel.markNeedsLayout();
   }
 
   /// The amount to pad the child in each dimension.
@@ -59,56 +58,45 @@ mixin CSSPaddingMixin on RenderStyleBase {
     return _resolvedPadding.left;
   }
 
-  EdgeInsets _getPadding() {
-    Size viewportSize = this.viewportSize;
-    CSSStyleDeclaration style = this.style;
-    double paddingTop;
-    double paddingRight;
-    double paddingBottom;
-    double paddingLeft;
-
-    if (style.contains(PADDING_TOP)) paddingTop = CSSLength.toDisplayPortValue(style[PADDING_TOP], viewportSize);
-    if (style.contains(PADDING_RIGHT)) paddingRight = CSSLength.toDisplayPortValue(style[PADDING_RIGHT], viewportSize);
-    if (style.contains(PADDING_BOTTOM)) paddingBottom = CSSLength.toDisplayPortValue(style[PADDING_BOTTOM], viewportSize);
-    if (style.contains(PADDING_LEFT)) paddingLeft = CSSLength.toDisplayPortValue(style[PADDING_LEFT], viewportSize);
-
-    return EdgeInsets.only(
-      top: paddingTop ?? 0.0,
-      right: paddingRight ?? 0.0,
-      bottom: paddingBottom ?? 0.0,
-      left: paddingLeft ?? 0.0
-    );
-  }
-
-  void updatePadding(String property, String present) {
+  void updatePadding(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     RenderStyle renderStyle = this;
-    EdgeInsets prevPadding = renderStyle.padding;
-    if (prevPadding != null) {
-      double left = prevPadding.left;
-      double top = prevPadding.top;
-      double right = prevPadding.right;
-      double bottom = prevPadding.bottom;
+    EdgeInsets prevPadding = renderStyle.padding ?? EdgeInsets.only(
+      top: 0.0,
+      right: 0.0,
+      bottom: 0.0,
+      left: 0.0
+    );
 
-      double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
-      // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
-      switch (property) {
-        case PADDING_LEFT:
-          left = presentValue;
-          break;
-        case PADDING_TOP:
-          top = presentValue;
-          break;
-        case PADDING_BOTTOM:
-          bottom = presentValue;
-          break;
-        case PADDING_RIGHT:
-          right = presentValue;
-          break;
-      }
+    double left = prevPadding.left;
+    double top = prevPadding.top;
+    double right = prevPadding.right;
+    double bottom = prevPadding.bottom;
 
-      renderStyle.padding = EdgeInsets.only(left: left, right: right, bottom: bottom, top: top);
-    } else {
-      renderStyle.padding = _getPadding();
+    // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
+    switch (property) {
+      case PADDING_LEFT:
+        left = value;
+        break;
+      case PADDING_TOP:
+        top = value;
+        break;
+      case PADDING_BOTTOM:
+        bottom = value;
+        break;
+      case PADDING_RIGHT:
+        right = value;
+        break;
+    }
+
+    renderStyle.padding = EdgeInsets.only(
+      left: left,
+      right: right,
+      bottom: bottom,
+      top: top
+    );
+
+    if (shouldMarkNeedsLayout) {
+      renderBoxModel.markNeedsLayout();
     }
   }
 

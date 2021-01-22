@@ -205,13 +205,13 @@ describe('min-width', () => {
       },
       [
         createElement('img', {
-            src: 'assets/100x100-green.png',
-            style: {
-              'background-color': 'green',
-              minWidth: '50px',
-              'box-sizing': 'border-box',
-            },
+          src: 'assets/100x100-green.png',
+          style: {
+            'background-color': 'green',
+            minWidth: '50px',
+            'box-sizing': 'border-box',
           },
+        },
         )
       ]
     );
@@ -234,18 +234,135 @@ describe('min-width', () => {
       },
       [
         createElement('img', {
-            src: 'assets/100x100-green.png',
-            style: {
-              'background-color': 'green',
-              minWidth: '200px',
-              'box-sizing': 'border-box',
-            },
+          src: 'assets/100x100-green.png',
+          style: {
+            'background-color': 'green',
+            minWidth: '200px',
+            'box-sizing': 'border-box',
           },
+        },
         )
       ]
     );
     BODY.appendChild(flexbox);
 
     await matchViewportSnapshot(0.1);
+  });
+
+  it('should work with percentage in flow layout', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            display: 'inline-block',
+            height: '100px',
+            minWidth: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'inline-block',
+            height: '100px',
+            minWidth: '50%',
+            backgroundColor: 'blue',
+          }
+        }
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage in flex layout in row direction', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            display: 'inline-block',
+            height: '100px',
+            minWidth: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'inline-block',
+            height: '100px',
+            minWidth: '50%',
+            backgroundColor: 'blue',
+          }
+        }
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage in flex layout in column direction', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            display: 'inline-block',
+            height: '100px',
+            minWidth: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'inline-block',
+            height: '100px',
+            minWidth: '50%',
+            backgroundColor: 'blue',
+          }
+        }
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
   });
 });

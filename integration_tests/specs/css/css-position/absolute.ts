@@ -456,39 +456,39 @@ describe('Position absolute', () => {
   it('works with nested children' , async () => {
     let n1;
     n1 = createElementWithStyle(
-       'div',
-       {
-         display: 'flex',
-         position: 'relative',
-         flexDirection: 'column',
-         justifyContent: 'center',
-         alignItems: 'center',
-         width: '300px',
-         height: '300px',
-         backgroundColor: 'gray',
-       },
-       [
+      'div',
+      {
+        display: 'flex',
+        position: 'relative',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '300px',
+        height: '300px',
+        backgroundColor: 'gray',
+      },
+      [
         (createElementWithStyle(
           'div',
-           {
-             backgroundColor: 'blue',
-             width: '200px',
-             height: '200px',
-           },
+          {
+            backgroundColor: 'blue',
+            width: '200px',
+            height: '200px',
+          },
         )),
         (createElementWithStyle(
           'div',
-           {
-             position: 'absolute',
-             top: '20px',
-             left: '20px',
-             width: '100px',
-             height: '100px',
-             backgroundColor: 'green',
-           },
+          {
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+          },
         ))
-       ]
-     );
+      ]
+    );
     BODY.appendChild(n1);
 
     await matchViewportSnapshot();
@@ -603,6 +603,126 @@ describe('Position absolute', () => {
     ]);
 
     append(BODY, div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage size in flow layout', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            position: 'absolute',
+            height: '50%',
+            width: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            height: '200px',
+            width: '50%',
+            backgroundColor: 'blue',
+          }
+        },
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage size in flex layout', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            position: 'absolute',
+            height: '50%',
+            width: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            height: '200px',
+            width: '50%',
+            backgroundColor: 'blue',
+          }
+        },
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage offset', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100%',
+            width: '100%',
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              height: '50px',
+              width: '50px',
+              backgroundColor: 'red',
+            }
+          }),
+          createElement('div', {
+            style: {
+              position: 'absolute',
+              width: '40%',
+              height: '40%',
+              top: '10%',
+              left: '10%',
+              right: '10%',
+              bottom: '20%',
+              backgroundColor: 'green',
+            }
+          })
+        ]),
+      ]
+    );
+
+    BODY.appendChild(div);
     await matchViewportSnapshot();
   });
 });
