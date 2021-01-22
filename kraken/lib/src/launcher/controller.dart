@@ -18,6 +18,7 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
 import 'package:kraken/gesture.dart';
+import 'package:kraken/src/module/module_manager.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -354,38 +355,17 @@ class KrakenViewController {
 
 // An controller designed to control kraken's functional modules.
 class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
-  // the websocket instance
-  KrakenWebSocket _websocket;
+  ModuleManager _moduleManager;
+  ModuleManager get moduleManager => _moduleManager;
 
-  KrakenWebSocket get websocket {
-    if (_websocket == null) {
-      _websocket = KrakenWebSocket();
-    }
-
-    return _websocket;
-  }
-
-  // the MQTT instance
-  MQTT _mqtt;
-
-  MQTT get mqtt {
-    if (_mqtt == null) {
-      _mqtt = MQTT();
-    }
-    return _mqtt;
+  KrakenModuleController(KrakenController controller, int contextId) {
+    _moduleManager = ModuleManager(controller, contextId);
   }
 
   void dispose() {
     clearTimer();
     clearAnimationFrame();
-
-    if (_websocket != null) {
-      websocket.dispose();
-    }
-
-    if (_mqtt != null) {
-      mqtt.dispose();
-    }
+    _moduleManager.dispose();
   }
 }
 
@@ -465,7 +445,7 @@ class KrakenController {
       PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
 
-    _module = KrakenModuleController();
+    _module = KrakenModuleController(this, _view.contextId);
     assert(!_controllerMap.containsKey(_view.contextId),
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
     _controllerMap[_view.contextId] = this;
