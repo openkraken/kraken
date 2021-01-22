@@ -57,6 +57,7 @@ mixin CSSOverflowMixin on ElementBase {
   /// All the children whose position is sticky to this element
   List<Element> stickyChildren = [];
 
+  // House content which can be scrolled.
   RenderLayoutBox scrollingLayoutBox;
 
   void updateRenderOverflow(RenderBoxModel renderBoxModel, Element element, ScrollListener scrollListener) {
@@ -144,7 +145,7 @@ mixin CSSOverflowMixin on ElementBase {
     }
   }
 
-  void _createInnerRepaintBoundary(Element element) {
+  void _createScrollingLayoutBox(Element element) {
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(element);
     repaintBoundaryStyle.setProperty('overflow', 'visible');
     scrollingLayoutBox = createRenderLayout(element, repaintSelf: true, style: repaintBoundaryStyle);
@@ -160,7 +161,7 @@ mixin CSSOverflowMixin on ElementBase {
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
     RenderLayoutBox outerLayoutBox = createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
 
-    _createInnerRepaintBoundary(element);
+    _createScrollingLayoutBox(element);
     outerLayoutBox.add(scrollingLayoutBox);
     element.renderBoxModel = outerLayoutBox;
     _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
