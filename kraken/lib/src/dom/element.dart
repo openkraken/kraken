@@ -438,7 +438,11 @@ class Element extends Node
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
-        _renderLayoutBox.insert(child.renderBoxModel, after: after);
+        if (overflowInnerRepaintBoundary != null) {
+          overflowInnerRepaintBoundary.insert(child.renderBoxModel, after: after);
+        } else {
+          _renderLayoutBox.insert(child.renderBoxModel, after: after);
+        }
         break;
     }
   }
@@ -507,8 +511,13 @@ class Element extends Node
     if (isRendererAttached) {
       for (Node child in childNodes) {
         if (_renderLayoutBox != null && !child.isRendererAttached) {
-          RenderObject after = _renderLayoutBox.lastChild;
-          ;
+          RenderObject after;
+          if (overflowInnerRepaintBoundary != null) {
+            after = overflowInnerRepaintBoundary.lastChild;
+          } else {
+            after = _renderLayoutBox.lastChild;
+          }
+
           child.attachTo(this, after: after);
 
           child.ensureChildAttached();
@@ -526,7 +535,11 @@ class Element extends Node
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
-        child.attachTo(this, after: _renderLayoutBox.lastChild);
+        if (overflowInnerRepaintBoundary != null) {
+          child.attachTo(this, after: overflowInnerRepaintBoundary.lastChild);
+        } else {
+          child.attachTo(this, after: _renderLayoutBox.lastChild);
+        }
       }
     }
 
@@ -592,17 +605,34 @@ class Element extends Node
     switch (position) {
       case CSSPositionType.absolute:
         Element containingBlockElement = _findContainingBlock(child);
-        parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
+
+        if (containingBlockElement.overflowInnerRepaintBoundary != null) {
+          parentRenderLayoutBox = containingBlockElement.overflowInnerRepaintBoundary;
+        } else {
+          parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
+        }
+
         break;
 
       case CSSPositionType.fixed:
         final Element rootEl = elementManager.getRootElement();
-        parentRenderLayoutBox = rootEl._renderLayoutBox;
+
+        if (rootEl.overflowInnerRepaintBoundary != null) {
+          parentRenderLayoutBox = rootEl.overflowInnerRepaintBoundary;
+        } else {
+          parentRenderLayoutBox = rootEl._renderLayoutBox;
+        }
         break;
 
       case CSSPositionType.sticky:
         Element containingBlockElement = _findContainingBlock(child);
-        parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
+
+        if (containingBlockElement.overflowInnerRepaintBoundary != null) {
+          parentRenderLayoutBox = containingBlockElement.overflowInnerRepaintBoundary;
+        } else {
+          parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
+        }
+
         break;
 
       default:
@@ -635,7 +665,12 @@ class Element extends Node
 
   void _addStickyChild(Element child, RenderObject after) {
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-    (renderBoxModel as RenderLayoutBox).insert(childRenderBoxModel, after: after);
+
+    if (overflowInnerRepaintBoundary != null) {
+      overflowInnerRepaintBoundary.insert(childRenderBoxModel, after: after);
+    } else {
+      (renderBoxModel as RenderLayoutBox).insert(childRenderBoxModel, after: after);
+    }
 
     // Set sticky element offset
     Element scrollContainer = _findScrollContainer(child);
@@ -1207,8 +1242,8 @@ class Element extends Node
   }
 }
 
-RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
-  CSSStyleDeclaration style = element.style;
+RenderLayoutBox createRenderLayout(Element element, {CSSStyleDeclaration style, RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
+  style = style ?? element.style;
   CSSDisplay display = CSSSizing.getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]);
   if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {

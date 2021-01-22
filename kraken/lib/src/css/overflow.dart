@@ -57,6 +57,8 @@ mixin CSSOverflowMixin on ElementBase {
   /// All the children whose position is sticky to this element
   List<Element> stickyChildren = [];
 
+  RenderLayoutBox overflowInnerRepaintBoundary;
+
   void updateRenderOverflow(RenderBoxModel renderBoxModel, Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
     if (style != null) {
@@ -142,6 +144,12 @@ mixin CSSOverflowMixin on ElementBase {
     }
   }
 
+  void _createInnerRepaintBoundary(Element element) {
+    CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(element);
+    repaintBoundaryStyle.setProperty('overflow', 'visible');
+    overflowInnerRepaintBoundary = createRenderLayout(element, repaintSelf: true, style: repaintBoundaryStyle);
+  }
+
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
   // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.
@@ -149,27 +157,41 @@ mixin CSSOverflowMixin on ElementBase {
     if (renderBoxModel.isRepaintBoundary) return;
     RenderObject layoutBoxParent = renderBoxModel.parent;
 
-    RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
-    element.renderBoxModel = newLayoutBox;
-    _attachRenderObject(element, layoutBoxParent, renderBoxModel, newLayoutBox);
+    RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
+    RenderLayoutBox outerLayoutBox = createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
+
+    _createInnerRepaintBoundary(element);
+    outerLayoutBox.add(overflowInnerRepaintBoundary);
+    element.renderBoxModel = outerLayoutBox;
+    _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
   }
 
   void _downgradeToParentRepaint(Element element, RenderBoxModel renderBoxModel) {
     if (!renderBoxModel.isRepaintBoundary) return;
     RenderObject layoutBoxParent = renderBoxModel.parent;
+    RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
     RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
     element.renderBoxModel = newLayoutBox;
-    _attachRenderObject(element, layoutBoxParent, renderBoxModel, newLayoutBox);
+    _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
   }
 
-  void _attachRenderObject(Element element, RenderObject parent, RenderObject previousRenderObject, RenderObject newRenderObject) {
+  RenderObject _detachRenderObject(Element element, RenderObject parent, RenderObject renderObject) {
     if (parent is RenderObjectWithChildMixin<RenderBox>) {
       parent.child = null;
+    } else if (parent is ContainerRenderObjectMixin) {
+      ContainerBoxParentData parentData = renderObject.parentData;
+      RenderObject previousSibling = parentData.previousSibling;
+      parent.remove(renderObject);
+      return previousSibling;
+    }
+
+    return null;
+  }
+
+  void _attachRenderObject(Element element, RenderObject parent, RenderObject previousSibling, RenderObject newRenderObject) {
+    if (parent is RenderObjectWithChildMixin<RenderBox>) {
       parent.child = newRenderObject;
     } else if (parent is ContainerRenderObjectMixin) {
-      ContainerBoxParentData parentData = previousRenderObject.parentData;
-      RenderObject previousSibling = parentData.previousSibling;
-      parent.remove(previousRenderObject);
       element.parent.addChildRenderObject(element, after: previousSibling);
       // Update renderBoxModel reference in renderStyle
       element.renderBoxModel.renderStyle.renderBoxModel = newRenderObject;

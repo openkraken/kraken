@@ -122,6 +122,14 @@ class CSSStyleDeclaration {
 
   Map<String, List> _transitions = {};
 
+  CSSStyleDeclaration clone(Element target) {
+    CSSStyleDeclaration newStyle = CSSStyleDeclaration(target);
+    _properties.forEach((key, value) {
+      newStyle._properties[key] = value;
+    });
+    return newStyle;
+  }
+
   String getCurrentColor() {
     String currentColor = _properties[COLOR];
     return currentColor ?? CSSColor.INITIAL_COLOR;
