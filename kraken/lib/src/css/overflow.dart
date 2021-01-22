@@ -138,38 +138,13 @@ mixin CSSOverflowMixin on ElementBase {
         } else {
           _downgradeToParentRepaint(element, renderBoxModel);
         }
-
-        // // Overflow auto/scroll will create repaint boundary to improve scroll performance
-        // // So it needs to transform between layout and its repaint boundary replacement when transform changes
-        // RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: shouldRepaintSelf, prevRenderLayoutBox: renderBoxModel);
-        //
-        // if (newLayoutBox == renderBoxModel) {
-        //   return;
-        // }
-        //
-        // element.renderBoxModel = newLayoutBox;
-        //
-        // if (shouldRepaintSelf) {
-        //
-        // } else {
-        //
-        // }
-        //
-        // if (layoutBoxParent is RenderObjectWithChildMixin<RenderBox>) {
-        //   layoutBoxParent.child = null;
-        //   layoutBoxParent.child = newLayoutBox;
-        // } else if (layoutBoxParent is ContainerRenderObjectMixin) {
-        //   ContainerBoxParentData parentData = renderBoxModel.parentData;
-        //   RenderObject previousSibling = parentData.previousSibling;
-        //   layoutBoxParent.remove(renderBoxModel);
-        //   element.parent.addChildRenderObject(element, after: previousSibling);
-        //   // Update renderBoxModel reference in renderStyle
-        //   element.renderBoxModel.renderStyle.renderBoxModel = element.renderBoxModel;
-        // }
       }
     }
   }
 
+  // Create two repaintBoundary for an overflow scroll container.
+  // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
+  // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.
   void _upgradeToSelfRepaint(Element element, RenderBoxModel renderBoxModel) {
     if (renderBoxModel.isRepaintBoundary) return;
     RenderObject layoutBoxParent = renderBoxModel.parent;
