@@ -144,7 +144,7 @@ class TextNode extends Node {
     _renderTextBox.text = CSSTextMixin.createTextSpan(data, parent);
     // TextNode's style is inherited from parent style
     _renderTextBox.style = parentStyle;
-    RenderKrakenParagraph renderParagraph = _renderTextBox.child;
+    KrakenRenderParagraph renderParagraph = _renderTextBox.child;
     renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
 
     _setTextNodeProperties(parent.style);

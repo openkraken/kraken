@@ -25,7 +25,7 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     this.style,
     this.elementManager,
   }) : assert(text != null) {
-    _renderParagraph = RenderKrakenParagraph(
+    _renderParagraph = KrakenRenderParagraph(
       text,
       textDirection: TextDirection.ltr,
     );
@@ -33,7 +33,7 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     child = _renderParagraph;
   }
 
-  RenderKrakenParagraph _renderParagraph;
+  KrakenRenderParagraph _renderParagraph;
   int targetId;
   CSSStyleDeclaration style;
   ElementManager elementManager;

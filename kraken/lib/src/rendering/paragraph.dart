@@ -19,7 +19,7 @@ import 'package:vector_math/vector_math_64.dart';
 const String _kEllipsis = '\u2026';
 
 /// A render object that displays a paragraph of text.
-class RenderKrakenParagraph extends RenderBox
+class KrakenRenderParagraph extends RenderBox
   with ContainerRenderObjectMixin<RenderBox, TextParentData>,
     RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
     RelayoutWhenSystemFontsChangeMixin {
@@ -30,7 +30,7 @@ class RenderKrakenParagraph extends RenderBox
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
-  RenderKrakenParagraph(InlineSpan text, {
+  KrakenRenderParagraph(InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
     @required TextDirection textDirection,
     bool softWrap = true,
@@ -619,7 +619,7 @@ class RenderKrakenParagraph extends RenderBox
       );
     }
   }
-  
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
@@ -636,7 +636,7 @@ class RenderKrakenParagraph extends RenderBox
       double height = lineHeight != null ? lineHeight : lineMetric.height;
       paragraphHeight += height;
     }
-    
+
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
     // assigning to `size` will trigger us to validate our intrinsic sizes,
     // which will change _textPainter's layout because the intrinsic size
@@ -718,7 +718,7 @@ class RenderKrakenParagraph extends RenderBox
       Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
       _lineTextPainter.paint(context.canvas, lineOffset);
     }
-    
+
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
         final Paint paint = Paint()
