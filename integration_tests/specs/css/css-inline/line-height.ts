@@ -58,19 +58,19 @@ describe('line-height', () => {
       },
       [
         createElement(
-        'div',
-        {
+          'div',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'blue',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'blue',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ])
+          ])
       ]
     );
     BODY.appendChild(div);
@@ -93,19 +93,19 @@ describe('line-height', () => {
       },
       [
         createElement(
-        'span',
-        {
+          'span',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'blue',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'blue',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ])
+          ])
       ]
     );
     BODY.appendChild(div);
@@ -118,8 +118,8 @@ describe('line-height', () => {
       'div',
       {
         style: {
-            display: 'flex',
-            flexDirection: 'column',
+          display: 'flex',
+          flexDirection: 'column',
           'line-height': '100px',
           'box-sizing': 'border-box',
           'backgroundColor': 'green',
@@ -130,33 +130,33 @@ describe('line-height', () => {
       },
       [
         createElement(
-        'div',
-        {
+          'div',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'blue',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'blue',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ]),
+          ]),
         createElement(
-        'div',
-        {
+          'div',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'red',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'red',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ])
+          ])
       ]
     );
     BODY.appendChild(div);
@@ -179,37 +179,68 @@ describe('line-height', () => {
       },
       [
         createElement(
-        'div',
-        {
+          'div',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'blue',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'blue',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ]),
+          ]),
         createElement(
-        'div',
-        {
+          'div',
+          {
             style: {
-            lineHeight: '2',
-            'box-sizing': 'border-box',
-            'backgroundColor': 'red',
-            fontSize: '16px',
-            width: '200px',
-            height: '50px',
+              lineHeight: '2',
+              'box-sizing': 'border-box',
+              'backgroundColor': 'red',
+              fontSize: '16px',
+              width: '200px',
+              height: '50px',
             },
-        },[
+          },[
             createText(`line height 2`),
-        ])
+          ])
       ]
     );
     BODY.appendChild(div);
 
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+            fontSize: '20px',
+            lineHeight: '500%',
+          }
+        }, [
+          createText('Kraken')
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
     await matchViewportSnapshot();
   });
 });

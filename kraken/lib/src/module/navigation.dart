@@ -1,3 +1,5 @@
+import 'module_manager.dart';
+
 typedef KrakenNavigationDecisionHandler = Future<KrakenNavigationActionPolicy> Function(KrakenNavigationAction action);
 typedef KrakenNavigationErrorHandler = void Function(Object error, Object stack);
 
@@ -20,13 +22,45 @@ enum KrakenNavigationType {
   other
 }
 
+class NavigationModule extends BaseModule {
+  NavigationModule(ModuleManager moduleManager) : super(moduleManager);
+
+  @override
+  void dispose() {}
+
+  @override
+  String invoke(List<dynamic> params, callback) {
+    String method = params[1];
+    List navigationArgs = params[2];
+    if (method == 'goTo') {
+      String url = navigationArgs[0];
+      String sourceUrl = moduleManager.controller.bundleURL;
+
+      Uri targetUri = Uri.parse(url);
+      Uri sourceUri = Uri.parse(sourceUrl);
+
+      if (targetUri.scheme != sourceUri.scheme ||
+          targetUri.host != sourceUri.host ||
+          targetUri.port != sourceUri.port ||
+          targetUri.path != sourceUri.path ||
+          targetUri.query != sourceUri.query) {
+        moduleManager.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
+      }
+    }
+
+    return '';
+  }
+}
+
 class KrakenNavigationAction {
   KrakenNavigationAction(this.source, this.target, this.navigationType);
 
   // The current source url.
   String source;
+
   // The target source url.
   String target;
+
   // The navigation type.
   KrakenNavigationType navigationType;
 
@@ -43,6 +77,7 @@ class KrakenNavigationDelegate {
   KrakenNavigationErrorHandler errorHandler;
 
   KrakenNavigationDecisionHandler _decisionHandler = defaultDecisionHandler;
+
   void setDecisionHandler(KrakenNavigationDecisionHandler handler) {
     _decisionHandler = handler;
   }

@@ -490,21 +490,34 @@ class CSSStyleDeclaration {
       case MARGIN_RIGHT:
       case MARGIN_BOTTOM:
         // Validation length type
-        if (!CSSLength.isLength(normalizedValue) && !CSSLength.isAuto(normalizedValue)) return;
+        if (!CSSLength.isLength(normalizedValue) &&
+          !CSSLength.isAuto(normalizedValue) &&
+          !CSSLength.isPercentage(normalizedValue)
+        ) {
+          return;
+        }
         break;
       case MIN_WIDTH:
       case MIN_HEIGHT:
       case MAX_WIDTH:
       case MAX_HEIGHT:
-      case BORDER_BOTTOM_WIDTH:
-      case BORDER_TOP_WIDTH:
-      case BORDER_LEFT_WIDTH:
-      case BORDER_RIGHT_WIDTH:
       case PADDING_TOP:
       case PADDING_LEFT:
       case PADDING_BOTTOM:
       case PADDING_RIGHT:
-        if (!CSSLength.isLength(normalizedValue)) return;
+        if (!CSSLength.isLength(normalizedValue) &&
+          !CSSLength.isPercentage(normalizedValue)
+        ) {
+          return;
+        }
+        break;
+      case BORDER_BOTTOM_WIDTH:
+      case BORDER_TOP_WIDTH:
+      case BORDER_LEFT_WIDTH:
+      case BORDER_RIGHT_WIDTH:
+        if (!CSSLength.isLength(normalizedValue)) {
+          return;
+        }
         break;
       case COLOR:
       case BACKGROUND_COLOR:

@@ -249,4 +249,116 @@ describe('min-height', () => {
     await matchViewportSnapshot(0.1);
   });
 
+  it('should work with percentage in flow layout', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+          createElement('div', {
+            style: {
+                minHeight: '50%',
+                width: '100px',
+                backgroundColor: 'yellow',
+            }
+          }),
+          createElement('div', {
+            style: {
+                minHeight: '50%',
+                width: '100%',
+                backgroundColor: 'blue',
+            }
+          }
+         )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage in flex layout in row direction', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+          createElement('div', {
+            style: {
+                minHeight: '50%',
+                width: '100px',
+                backgroundColor: 'yellow',
+            }
+          }),
+          createElement('div', {
+            style: {
+                minHeight: '50%',
+                width: '100%',
+                backgroundColor: 'blue',
+            }
+          }
+         )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage in flex layout in column direction', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+          createElement('div', {
+            style: {
+                minHeight: '50%',
+                width: '100px',
+                backgroundColor: 'yellow',
+            }
+          }),
+          createElement('div', {
+            style: {
+                minHeight: '50%',
+                width: '100%',
+                backgroundColor: 'blue',
+            }
+          }
+         )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
 });

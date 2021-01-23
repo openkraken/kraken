@@ -122,6 +122,8 @@ class Element extends Node
 
   bool get isValidSticky => style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
 
+  Size get viewportSize => Size(elementManager.viewportWidth, elementManager.viewportHeight);
+
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
       {this.tagName,
         this.defaultStyle = const <String, dynamic>{},
@@ -480,6 +482,31 @@ class Element extends Node
       renderBoxModel.recalGradient = false;
     }
 
+    /// Calculate font-size which is percentage when node attached
+    /// where it can access the font-size of its parent element
+    if (renderBoxModel.parseFontSize) {
+      RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
+      double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
+      double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
+      renderBoxModel.renderStyle.fontSize = parsedFontSize;
+      for (Node node in childNodes) {
+        if (node is TextNode) {
+          node.updateTextStyle();
+        }
+      }
+      renderBoxModel.parseFontSize = false;
+    }
+
+    /// Calculate line-height which is percentage when node attached
+    /// where it can access the font-size of its own element
+    if (renderBoxModel.parseLineHeight) {
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+      double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
+      double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
+      renderBoxModel.renderStyle.lineHeight = parsedLineHeight;
+      renderBoxModel.parseLineHeight = false;
+    }
+
     didAttachRenderer();
   }
 
@@ -769,10 +796,6 @@ class Element extends Node
       case BORDER_TOP_WIDTH:
       case BORDER_RIGHT_WIDTH:
       case BORDER_BOTTOM_WIDTH:
-      case BORDER_TOP_LEFT_RADIUS:
-      case BORDER_TOP_RIGHT_RADIUS:
-      case BORDER_BOTTOM_LEFT_RADIUS:
-      case BORDER_BOTTOM_RIGHT_RADIUS:
       case BORDER_LEFT_STYLE:
       case BORDER_TOP_STYLE:
       case BORDER_RIGHT_STYLE:
@@ -783,6 +806,13 @@ class Element extends Node
       case BORDER_BOTTOM_COLOR:
       case BOX_SHADOW:
         _styleBoxChangedListener(property, original, present);
+        break;
+
+      case BORDER_TOP_LEFT_RADIUS:
+      case BORDER_TOP_RIGHT_RADIUS:
+      case BORDER_BOTTOM_LEFT_RADIUS:
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+        _styleBorderRadiusChangedListener(property, original, present);
         break;
 
       case MARGIN_LEFT:
@@ -823,7 +853,7 @@ class Element extends Node
     switch (property) {
       case COLOR:
       case LINE_CLAMP:
-        _updateTextChildNodesStyle();
+        _updateTextChildNodesStyle(property);
         // Color change should trigger currentColor update
         _styleBoxChangedListener(property, original, present);
         break;
@@ -838,7 +868,7 @@ class Element extends Node
       case LINE_HEIGHT:
       case LETTER_SPACING:
       case WORD_SPACING:
-        _updateTextChildNodesStyle();
+        _updateTextChildNodesStyle(property);
         break;
     }
   }
@@ -884,7 +914,11 @@ class Element extends Node
   }
 
   void _styleOffsetChangedListener(String property, String original, String present) {
-    renderBoxModel.renderStyle.updateOffset(property, present);
+    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
+    if (CSSLength.isPercentage(present)) return;
+
+    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
+    renderBoxModel.renderStyle.updateOffset(property, presentValue);
   }
 
   void _styleTextAlignChangedListener(String property, String original, String present) {
@@ -904,15 +938,27 @@ class Element extends Node
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    renderBoxModel.renderStyle.updatePadding(property, present);
+    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
+    if (CSSLength.isPercentage(present)) return;
+
+    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
+    renderBoxModel.renderStyle.updatePadding(property, presentValue);
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
-    renderBoxModel.renderStyle.updateSizing(property, present);
+    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
+    if (CSSLength.isPercentage(present)) return;
+
+    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
+    renderBoxModel.renderStyle.updateSizing(property, presentValue);
   }
 
   void _styleMarginChangedListener(String property, String original, String present) {
-    renderBoxModel.renderStyle.updateMargin(property, present);
+    /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
+    if (CSSLength.isPercentage(present)) return;
+
+    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
+    renderBoxModel.renderStyle.updateMargin(property, presentValue);
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
@@ -946,6 +992,13 @@ class Element extends Node
     renderBoxModel.renderStyle.updateBox(property, original, present);
   }
 
+  void _styleBorderRadiusChangedListener(String property, String original, String present) {
+    /// Percentage size should be resolved in layout stage cause it needs to know its own element's size
+    if (RenderStyle.isBorderRadiusPercentage(present)) return;
+
+    renderBoxModel.renderStyle.updateBorderRadius(property, present);
+  }
+
   void _styleOpacityChangedListener(String property, String original, String present) {
     renderBoxModel.renderStyle.updateOpacity(present);
   }
@@ -961,8 +1014,11 @@ class Element extends Node
   }
 
   void _styleTransformChangedListener(String property, String original, String present) {
-    // Update transform.
-    renderBoxModel.renderStyle.updateTransform(present);
+    /// Percentage transform translate should be resolved in layout stage cause it needs to know its own element's size
+    if (RenderStyle.isTransformTranslatePercentage(present)) return;
+
+    Matrix4 matrix4 = CSSTransform.parseTransform(present, viewportSize);
+    renderBoxModel.renderStyle.updateTransform(matrix4);
   }
 
   void _styleTransformOriginChangedListener(String property, String original, String present) {
@@ -971,7 +1027,21 @@ class Element extends Node
   }
 
   // Update textNode style when container style changed
-  void _updateTextChildNodesStyle() {
+  void _updateTextChildNodesStyle(String property) {
+    /// Percentage font-size should be resolved when node attached
+    /// cause it needs to know its parents style
+    if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
+      renderBoxModel.parseFontSize = true;
+      return;
+    }
+
+    /// Percentage line-height should be resolved when node attached
+    /// cause it needs to know other style in its own element
+    if (property == LINE_HEIGHT && CSSLength.isPercentage(style[LINE_HEIGHT])) {
+      renderBoxModel.parseLineHeight = true;
+      return;
+    }
+
     renderBoxModel.renderStyle.updateTextStyle();
     for (Node node in childNodes) {
       if (node is TextNode) {
