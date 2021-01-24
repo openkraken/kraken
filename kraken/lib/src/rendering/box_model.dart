@@ -1101,6 +1101,20 @@ class RenderBoxModel extends RenderBox with
     _chainPaintOverflow(context, offset);
   }
 
+  void ensureScrollableSizeLargerThanBoxSize() {
+    double newBoxWidth = size.width;
+    double newBoxHeight = size.height;
+
+    if (maxScrollableSize.width > newBoxWidth) {
+      newBoxWidth = maxScrollableSize.width;
+    }
+    if (maxScrollableSize.height > newBoxHeight) {
+      newBoxHeight = maxScrollableSize.height;
+    }
+
+    size = Size(newBoxWidth, newBoxHeight);
+  }
+
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
     EdgeInsets borderEdge = EdgeInsets.fromLTRB(renderStyle.borderLeft, renderStyle.borderTop, renderStyle.borderRight, renderStyle.borderLeft);
 

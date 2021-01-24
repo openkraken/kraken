@@ -532,6 +532,11 @@ class RenderFlowLayout extends RenderLayoutBox {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
 
         setMaximumScrollableSizeForPositionedChild(childParentData, child);
+
+        // For scrolling box, the minimum width and height should not less than scrollableSize
+        if (isScrollingBox) {
+          ensureScrollableSizeLargerThanBoxSize();
+        }
       }
       child = childParentData.nextSibling;
     }

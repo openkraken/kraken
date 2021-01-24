@@ -129,7 +129,10 @@ class Element extends Node
         this.defaultStyle = const <String, dynamic>{},
         // Whether element allows children.
         bool isIntrinsicBox = false,
-        this.repaintSelf = false})
+        this.repaintSelf = false,
+        // @HACK: overflow scroll needs to create an shadow element to create an scrolling renderBox for better scrolling performance.
+        // we needs to prevent this shadow element override real element in nativeMap.
+        bool isScrollingElement = false})
       : assert(targetId != null),
         assert(tagName != null),
         _isIntrinsicBox = isIntrinsicBox,
@@ -137,7 +140,9 @@ class Element extends Node
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
 
-    _nativeMap[nativeElementPtr.address] = this;
+    if (!isScrollingElement) {
+      _nativeMap[nativeElementPtr.address] = this;
+    }
 
     bindNativeMethods(nativeElementPtr);
     _setDefaultStyle();
@@ -399,7 +404,11 @@ class Element extends Node
 
   void addChild(RenderObject child) {
     if (_renderLayoutBox != null) {
-      _renderLayoutBox.add(child);
+      if (scrollingLayoutBox != null) {
+        scrollingLayoutBox.add(child);
+      } else {
+        _renderLayoutBox.add(child);
+      }
     } else if (_renderIntrinsic != null) {
       _renderIntrinsic.child = child;
     }
