@@ -171,6 +171,9 @@ mixin CSSOverflowMixin on ElementBase {
     _createScrollingLayoutBox(element);
     outerLayoutBox.add(scrollingLayoutBox);
     element.renderBoxModel = outerLayoutBox;
+    // Update renderBoxModel reference in renderStyle
+    element.renderBoxModel.renderStyle.renderBoxModel = outerLayoutBox;
+
     _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
   }
 
@@ -201,8 +204,6 @@ mixin CSSOverflowMixin on ElementBase {
       parent.child = newRenderObject;
     } else if (parent is ContainerRenderObjectMixin) {
       element.parent.addChildRenderObject(element, after: previousSibling);
-      // Update renderBoxModel reference in renderStyle
-      element.renderBoxModel.renderStyle.renderBoxModel = newRenderObject;
     }
   }
 
