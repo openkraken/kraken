@@ -146,9 +146,16 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void _createScrollingLayoutBox(Element element) {
-    CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(element);
+    // @HACK: create shadow element for scrollingLayoutBox
+    // @TODO: remove this after rendering phase are working without element and targetId required
+    Element scrollingElement = Element(0 - element.targetId, element.nativeElementPtr, element.elementManager,
+        defaultStyle: element.defaultStyle, isIntrinsicBox: element.isInlineBox, tagName: element.tagName);
+    elementManager.setEventTarget(scrollingElement);
+    CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
     repaintBoundaryStyle.setProperty('overflow', 'visible');
-    scrollingLayoutBox = createRenderLayout(element, repaintSelf: true, style: repaintBoundaryStyle);
+    scrollingLayoutBox = createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
+    scrollingLayoutBox.isScrollingBox = true;
+    scrollingElement.renderBoxModel = scrollingLayoutBox;
   }
 
   // Create two repaintBoundary for an overflow scroll container.

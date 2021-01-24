@@ -414,6 +414,9 @@ class RenderBoxModel extends RenderBox with
 
   ElementManager elementManager;
 
+  // When RenderBoxModel is scrolling box, contentConstraints are always equal to BoxConstraints();
+  bool isScrollingBox = false;
+
   BoxSizeType get widthSizeType {
     bool widthDefined = renderStyle.width != null;
     return widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
@@ -912,7 +915,7 @@ class RenderBoxModel extends RenderBox with
     final double contentWidth = getContentWidth(this);
     final double contentHeight = getContentHeight(this);
 
-    if (contentWidth != null || contentHeight != null) {
+    if (!isScrollingBox && (contentWidth != null || contentHeight != null)) {
       double minWidth;
       double maxWidth;
       double minHeight;
