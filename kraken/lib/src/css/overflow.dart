@@ -183,6 +183,10 @@ mixin CSSOverflowMixin on ElementBase {
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
     RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
     element.renderBoxModel = newLayoutBox;
+    // Update renderBoxModel reference in renderStyle
+    element.renderBoxModel.renderStyle.renderBoxModel = newLayoutBox;
+    scrollingLayoutBox = null;
+
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
   }
 
