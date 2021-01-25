@@ -233,4 +233,35 @@ describe('line-height', () => {
     BODY.appendChild(div);
     await matchViewportSnapshot();
   });
+
+  it('should work with percentage', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+            fontSize: '20px',
+            lineHeight: '500%',
+          }
+        }, [
+          createText('Kraken')
+        ])
+      ]
+    );
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
 });

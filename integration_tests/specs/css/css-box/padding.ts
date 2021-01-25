@@ -56,4 +56,40 @@ describe('Box padding', () => {
     container1.style.padding = '';
     await matchViewportSnapshot();
   });
+
+  it('should work with percentage', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100%',
+            width: '100%',
+            padding: '30%',
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              height: '50px',
+              width: '50px',
+              backgroundColor: 'red',
+            }
+          })
+        ]),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
 });

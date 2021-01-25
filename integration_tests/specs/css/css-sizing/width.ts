@@ -183,4 +183,139 @@ describe('Width', function() {
       await matchViewportSnapshot();
     });
   });
+
+  it('should work with percentage in flow layout', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '100%',
+            backgroundColor: 'blue',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              height: '100px',
+              width: '50%',
+              backgroundColor: 'red',
+            }
+          }),
+        ]
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage in flex layout in row direction', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '100%',
+            backgroundColor: 'blue',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              height: '100px',
+              width: '50%',
+              backgroundColor: 'red',
+            }
+          }),
+        ]
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage in flex layout in column direction', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '100%',
+            backgroundColor: 'blue',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              height: '100px',
+              width: '50%',
+              backgroundColor: 'red',
+            }
+          }),
+        ]
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
 });

@@ -384,6 +384,28 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
+  /// Used when setting percentage font-size style, it needs to be calculated when node attached
+  /// where it needs to know the font-size of its parent element
+  bool _parseFontSize = false;
+  bool get parseFontSize => _parseFontSize;
+  set parseFontSize(bool value) {
+    if (value == null) return;
+    if (_parseFontSize != value) {
+      _parseFontSize = value;
+    }
+  }
+
+  /// Used when setting percentage line-height style, it needs to be calculated when node attached
+  /// where it needs to know the font-size of its own element
+  bool _parseLineHeight = false;
+  bool get parseLineHeight => _parseLineHeight;
+  set parseLineHeight(bool value) {
+    if (value == null) return;
+    if (_parseLineHeight != value) {
+      _parseLineHeight = value;
+    }
+  }
+
   // id of current element
   int targetId;
 
@@ -983,7 +1005,7 @@ class RenderBoxModel extends RenderBox with
       RenderLayoutParentData selfParentData = parentData;
       RenderBoxModel parentBox = parent;
       if (selfParentData.isPositioned && parentBox.hasSize) {
-        CSSPositionedLayout.applyPositionedChildOffset(parentBox, this, parentBox.boxSize, parentBox.renderStyle.borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(parentBox, this);
       }
     }
 
