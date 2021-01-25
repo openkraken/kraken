@@ -18,6 +18,9 @@ import 'package:vector_math/vector_math_64.dart';
 
 const String _kEllipsis = '\u2026';
 
+/// Forked from Flutter RenderParagraph
+/// Flutter's paragraph line-height calculation logic differs from web's
+/// Use multiple line text painters to controll the leading of font in paint stage
 /// A render object that displays a paragraph of text.
 class KrakenRenderParagraph extends RenderBox
   with ContainerRenderObjectMixin<RenderBox, TextParentData>,
