@@ -30,11 +30,9 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   GestureClickCallback onClick;
 
-  GestureSwipeCallback onSwipe;
+  GestureCallback onSwipe;
 
-  void onEnd(DragEndDetails details) {
-    //print('onEnd=${details}');
-  }
+  GestureCallback onPan;
 
   /// Called when a click pointer signal this object.
   void initGestureRecognizer(Map<String, List<EventHandler>> eventHandlers) {
@@ -42,9 +40,12 @@ mixin RenderPointerListenerMixin on RenderBox {
       gestures[ClickGestureRecognizer] = ClickGestureRecognizer(onClick: onClick);
     }
     if (eventHandlers.containsKey('swipe')) {
-      gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer(onSwipe: onSwipe);
+      gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer();
+      (gestures[SwipeGestureRecognizer] as SwipeGestureRecognizer).onSwipe = onSwipe;
+    }
+    if (eventHandlers.containsKey('pan')) {
       // gestures[PanGestureRecognizer] = PanGestureRecognizer();
-      // (gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = onEnd;
+      // (gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = onPan;
     }
   }
 

@@ -5,11 +5,15 @@
 // Single finger drag gestures.
 // Modified from Flutter gesture/monodrag.dart.
 
+import 'package:kraken/dom.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
 
 typedef isAcceptedDragCallback = bool Function(AxisDirection direction);
+
+/// A general gesture callback function.
+typedef GestureCallback = void Function(Event);
 
 enum _DragState {
   ready,
@@ -17,7 +21,7 @@ enum _DragState {
   accepted,
 }
 
-/// Pass gesture to native
+/// Pass gesture to native.
 abstract class GestureClient {
   void dragUpdateCallback(DragUpdateDetails details);
 
@@ -125,6 +129,8 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   ///  * [kPrimaryButton], the button this callback responds to.
   GestureDragCancelCallback onCancel;
 
+  GestureCallback onGesture;
+
   /// The minimum distance an input pointer drag must have moved to
   /// to be considered a fling gesture.
   ///
@@ -208,7 +214,8 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
               onStart == null &&
               onUpdate == null &&
               onEnd == null &&
-              onCancel == null)
+              onCancel == null &&
+              onGesture == null)
             return false;
           break;
         default:
@@ -409,7 +416,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
 
   void _checkEnd(int pointer) {
     assert(_initialButtons == kPrimaryButton);
-    if (onEnd == null)
+    if (onEnd == null && onGesture == null)
       return;
 
     final VelocityTracker tracker = _velocityTrackers[pointer];
@@ -440,6 +447,9 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
         return '$estimate; judged to not be a fling.';
       };
     }
+
+    // print('details=${details.primaryVelocity}');
+    //invokeCallback<void>('onGesture', () => onGesture(Event(EVENT_SWIPE, EventInit())), debugReport: debugReport);
     invokeCallback<void>('onEnd', () => onEnd(details), debugReport: debugReport);
   }
 
@@ -546,3 +556,44 @@ class ScrollHorizontalDragGestureRecognizer extends CompetitiveDragGestureRecogn
   String get debugDescription => 'scroll horizontal drag';
 }
 
+/// Recognizes movement in the vertical direction.
+///
+/// Used for vertical scrolling.
+class SwipeDragGestureRecognizer extends CompetitiveDragGestureRecognizer {
+  /// Create a gesture recognizer for interactions in the vertical axis.
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  SwipeDragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
+
+  isAcceptedDragCallback isAcceptedDrag;
+
+  @override
+  bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
+    return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
+  }
+
+  @override
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
+  }
+
+  @override
+  bool _acceptDragGesture(PointerEvent event) {
+    AxisDirection direction = _globalDistanceMoved < 0 ? AxisDirection.up : AxisDirection.down;
+    return isAcceptedDrag(direction);
+  }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
+
+  @override
+  double _getPrimaryValueFromOffset(Offset value) => value.dy;
+
+  @override
+  String get debugDescription => 'swipe gesture';
+}

@@ -20,6 +20,7 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerCancel = handlePointCancel;
     renderBoxModel.onClick = handleClick;
     renderBoxModel.onSwipe = handleSwipe;
+    renderBoxModel.onPan = handlePan;
     renderBoxModel.initGestureRecognizer(eventHandlers);
   }
 
@@ -28,6 +29,9 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerMove = null;
     renderBoxModel.onPointerUp = null;
     renderBoxModel.onPointerCancel = null;
+    renderBoxModel.onClick = null;
+    renderBoxModel.onSwipe = null;
+    renderBoxModel.onPan = null;
   }
 
   bool hasPointerEvent() {
@@ -90,6 +94,10 @@ mixin EventHandlerMixin on Node {
   }
 
   void handleSwipe(Event event) {
+    dispatchEvent(event);
+  }
+
+  void handlePan(Event event) {
     dispatchEvent(event);
   }
 

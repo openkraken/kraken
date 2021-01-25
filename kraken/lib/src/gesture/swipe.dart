@@ -143,8 +143,19 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalVerticalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind) || _globalHorizontalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
+  bool _hasSufficientGlobalDistanceAndVelocityToAccept(PointerEvent event) {
+    final VelocityEstimate estimate = _velocityTrackers[event.pointer].getVelocityEstimate();
+    final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
+    return (_globalVerticalDistanceMoved.abs() > 20 && velocity.pixelsPerSecond.dy.abs() > 300) || (_globalHorizontalDistanceMoved.abs() > 20 && velocity.pixelsPerSecond.dx.abs() > 300);
+  }
+
+  bool _hasSufficientVelocityToAccept(PointerEvent event) {
+    final VelocityEstimate estimate = _velocityTrackers[event.pointer].getVelocityEstimate();
+    print('estimate=${estimate.pixelsPerSecond}');
+    final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
+        .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
+    print(velocity);
+    return true;
   }
 
   Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
@@ -224,8 +235,8 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
           untransformedEndPosition: event.localPosition,
         ).distance * (movedHorizontalLocally.dx ?? 1).sign;
 
-        if (_hasSufficientGlobalDistanceToAccept(event.kind)) {
-          if (_globalVerticalDistanceMoved.abs() > computeHitSlop(event.kind)) {
+        if (_hasSufficientGlobalDistanceAndVelocityToAccept(event)) {
+          if (_globalVerticalDistanceMoved.abs() > 20) {
             _direction = (_globalVerticalDistanceMoved > 0) ? _OffsetDirection.up : _OffsetDirection.down;
           } else {
             _direction = (_globalHorizontalDistanceMoved > 0) ? _OffsetDirection.left : _OffsetDirection.right;
@@ -334,8 +345,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
         return '$estimate; judged to not be a fling.';
       };
     }
-    print('_direction=${_direction}');
-    print('details=${details.primaryVelocity}');
+    
     invokeCallback<void>('onSwipe', () => onSwipe(Event(EVENT_SWIPE, EventInit())), debugReport: debugReport);
   }
 
