@@ -4,21 +4,49 @@ import 'dart:io';
 import 'package:kraken/dom.dart';
 import 'package:web_socket_channel/io.dart';
 
+import 'module_manager.dart';
+
 enum _ConnectionState { closed }
+
 typedef WebSocketEventCallback = void Function(String id, String event);
 
 class _WebSocketState {
   _ConnectionState status;
   dynamic data;
+
   _WebSocketState(this.status);
 }
 
-class KrakenWebSocket {
+class WebSocketModule extends BaseModule {
   Map<String, IOWebSocketChannel> _clientMap = {};
   Map<String, Map<String, bool>> _listenMap = {};
   Map<String, _WebSocketState> _stateMap = {};
   int _clientId = 0;
 
+  WebSocketModule(ModuleManager moduleManager) : super(moduleManager);
+
+  @override
+  String invoke(List<dynamic> params, callback) {
+    String method = params[1];
+    if (method == 'init') {
+      List methodArgs = params[2];
+      return init(methodArgs[0], (String id, String event) {
+        moduleManager.emitModuleEvent('["WebSocket", $id, $event]');
+      });
+    } else if (method == 'addEvent') {
+      List methodArgs = params[2];
+      addEvent(methodArgs[0], methodArgs[1]);
+    } else if (method == 'send') {
+      List methodArgs = params[2];
+      send(methodArgs[0], methodArgs[1]);
+    } else if (method == 'close') {
+      List methodArgs = params[2];
+      close(methodArgs[0], methodArgs[1], methodArgs[2]);
+    }
+    return '';
+  }
+
+  @override
   void dispose() {
     _clientMap.forEach((id, socket) {
       socket.sink.close();

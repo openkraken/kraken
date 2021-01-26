@@ -28,7 +28,7 @@ const paths = {
   polyfill: resolveKraken('bridge/polyfill'),
   thirdParty: resolveKraken('third_party'),
   devtools: resolveKraken('devtools'),
-  tests: resolveKraken('tests'),
+  tests: resolveKraken('integration_tests'),
   sdk: resolveKraken('sdk')
 };
 
