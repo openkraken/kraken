@@ -129,6 +129,8 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   ///  * [kPrimaryButton], the button this callback responds to.
   GestureDragCancelCallback onCancel;
 
+  String gestureType = '';
+
   GestureCallback onGesture;
 
   /// The minimum distance an input pointer drag must have moved to
@@ -200,7 +202,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   double _getPrimaryValueFromOffset(Offset value);
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind);
 
-  // Can the swipe gesture win the arena
+  // Can the gesture win the arena
   bool _acceptDragGesture(PointerEvent event) => true;
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
@@ -448,9 +450,12 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       };
     }
 
-    // print('details=${details.primaryVelocity}');
-    //invokeCallback<void>('onGesture', () => onGesture(Event(EVENT_SWIPE, EventInit())), debugReport: debugReport);
-    invokeCallback<void>('onEnd', () => onEnd(details), debugReport: debugReport);
+    if (onGesture != null) {
+      invokeCallback<void>('onGesture', () => onGesture(Event(gestureType, EventInit())), debugReport: debugReport);
+    }
+    if (onEnd != null) {
+      invokeCallback<void>('onEnd', () => onEnd(details), debugReport: debugReport);
+    }
   }
 
   void _checkCancel() {
@@ -556,14 +561,14 @@ class ScrollHorizontalDragGestureRecognizer extends CompetitiveDragGestureRecogn
   String get debugDescription => 'scroll horizontal drag';
 }
 
-/// Recognizes movement in the vertical direction.
+/// Recognizes movement in the vertical swipe.
 ///
-/// Used for vertical scrolling.
-class SwipeDragGestureRecognizer extends CompetitiveDragGestureRecognizer {
+/// Used for vertical swipe.
+class VerticalSwipeDragGestureRecognizer extends CompetitiveDragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the vertical axis.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
-  SwipeDragGestureRecognizer({
+  VerticalSwipeDragGestureRecognizer({
     Object debugOwner,
     PointerDeviceKind kind,
   }) : super(debugOwner: debugOwner, kind: kind);
@@ -579,13 +584,58 @@ class SwipeDragGestureRecognizer extends CompetitiveDragGestureRecognizer {
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
+    return _globalDistanceMoved.abs() > 20;
   }
 
   @override
   bool _acceptDragGesture(PointerEvent event) {
-    AxisDirection direction = _globalDistanceMoved < 0 ? AxisDirection.up : AxisDirection.down;
-    return isAcceptedDrag(direction);
+    final VelocityEstimate estimate = _velocityTrackers[event.pointer].getVelocityEstimate();
+    final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
+    return velocity.pixelsPerSecond.dy.abs() > 300;
+  }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
+
+  @override
+  double _getPrimaryValueFromOffset(Offset value) => value.dy;
+
+  @override
+  String get debugDescription => 'swipe gesture';
+}
+
+
+/// Recognizes movement in the vertical swipe.
+///
+/// Used for vertical swipe.
+class HorizontalSwipeDragGestureRecognizer extends CompetitiveDragGestureRecognizer {
+  /// Create a gesture recognizer for interactions in the vertical axis.
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  HorizontalSwipeDragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
+
+  isAcceptedDragCallback isAcceptedDrag;
+
+  @override
+  bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
+    return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
+  }
+
+  @override
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() > 20;
+  }
+
+  @override
+  bool _acceptDragGesture(PointerEvent event) {
+    final VelocityEstimate estimate = _velocityTrackers[event.pointer].getVelocityEstimate();
+    final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
+    return velocity.pixelsPerSecond.dy.abs() > 300;
   }
 
   @override

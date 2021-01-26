@@ -149,15 +149,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     return (_globalVerticalDistanceMoved.abs() > 20 && velocity.pixelsPerSecond.dy.abs() > 300) || (_globalHorizontalDistanceMoved.abs() > 20 && velocity.pixelsPerSecond.dx.abs() > 300);
   }
 
-  bool _hasSufficientVelocityToAccept(PointerEvent event) {
-    final VelocityEstimate estimate = _velocityTrackers[event.pointer].getVelocityEstimate();
-    print('estimate=${estimate.pixelsPerSecond}');
-    final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
-        .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
-    print(velocity);
-    return true;
-  }
-
   Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
@@ -345,7 +336,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
         return '$estimate; judged to not be a fling.';
       };
     }
-    
+
     invokeCallback<void>('onSwipe', () => onSwipe(Event(EVENT_SWIPE, EventInit())), debugReport: debugReport);
   }
 

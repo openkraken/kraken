@@ -8,6 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 
+typedef GestureCallback = void Function(Event);
+
 mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -34,18 +36,36 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   GestureCallback onPan;
 
-  /// Called when a click pointer signal this object.
+  GestureCallback onPinch;
+
+  void onPanEnd(DragEndDetails details) {
+    print('onPanEnd=${details}');
+  }
+
+  void onPinchEnd(ScaleEndDetails details) {
+    print('onPinchEnd=${details}');
+  }
+
+  /// Called when a pointer signal this object.
   void initGestureRecognizer(Map<String, List<EventHandler>> eventHandlers) {
     if (eventHandlers.containsKey('click')) {
-      gestures[ClickGestureRecognizer] = ClickGestureRecognizer(onClick: onClick);
+      gestures[ClickGestureRecognizer] = ClickGestureRecognizer();
+      (gestures[ClickGestureRecognizer] as ClickGestureRecognizer).onClick = onClick;
     }
     if (eventHandlers.containsKey('swipe')) {
       gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer();
       (gestures[SwipeGestureRecognizer] as SwipeGestureRecognizer).onSwipe = onSwipe;
+      // gestures[VerticalSwipeDragGestureRecognizer] = VerticalSwipeDragGestureRecognizer();
+      // (gestures[VerticalSwipeDragGestureRecognizer] as VerticalSwipeDragGestureRecognizer).gestureType = 'swipe';
+      // (gestures[VerticalSwipeDragGestureRecognizer] as VerticalSwipeDragGestureRecognizer).onGesture = onSwipe;
     }
     if (eventHandlers.containsKey('pan')) {
-      // gestures[PanGestureRecognizer] = PanGestureRecognizer();
-      // (gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = onPan;
+      gestures[PanGestureRecognizer] = PanGestureRecognizer();
+      (gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = onPanEnd;
+    }
+    if (eventHandlers.containsKey('pinch')) {
+      gestures[ScaleGestureRecognizer] = ScaleGestureRecognizer();
+      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onEnd = onPinchEnd;
     }
   }
 
