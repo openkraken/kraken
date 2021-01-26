@@ -88,14 +88,14 @@ class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
         stopTrackingPointer(primaryPointer);
       } else {
         if (event is PointerUpEvent) {
-          DateTime endTime = new DateTime.now();
+          DateTime endTime = DateTime.now();
           bool isPress = endTime.difference(_startTime) > kLongPressTimeout;
           if (onClick != null) {
             onClick(Event(isPress ? EVENT_PRESS : EVENT_CLICK, EventInit()));
           }
           _reset();
         } else if (event is PointerDownEvent) {
-          _startTime = new DateTime.now();
+          _startTime = DateTime.now();
         } else if (event is PointerCancelEvent) {
           _reset();
         } else if (event.buttons != _down.buttons) {

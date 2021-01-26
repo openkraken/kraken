@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
@@ -144,9 +143,11 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   bool _hasSufficientGlobalDistanceAndVelocityToAccept(PointerEvent event) {
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? computeHitSlop(event.kind);
     final VelocityEstimate estimate = _velocityTrackers[event.pointer].getVelocityEstimate();
-    final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
-    return (_globalVerticalDistanceMoved.abs() > 20 && velocity.pixelsPerSecond.dy.abs() > 300) || (_globalHorizontalDistanceMoved.abs() > 20 && velocity.pixelsPerSecond.dx.abs() > 300);
+    bool isFling = estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
+    return isFling && (_globalVerticalDistanceMoved.abs() > kTouchSlop  || _globalHorizontalDistanceMoved.abs() > kTouchSlop);
   }
 
   Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
@@ -227,7 +228,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
         ).distance * (movedHorizontalLocally.dx ?? 1).sign;
 
         if (_hasSufficientGlobalDistanceAndVelocityToAccept(event)) {
-          if (_globalVerticalDistanceMoved.abs() > 20) {
+          if (_globalVerticalDistanceMoved.abs() > kTouchSlop) {
             _direction = (_globalVerticalDistanceMoved > 0) ? _OffsetDirection.up : _OffsetDirection.down;
           } else {
             _direction = (_globalHorizontalDistanceMoved > 0) ? _OffsetDirection.left : _OffsetDirection.right;
@@ -249,16 +250,11 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
       final OffsetPair delta = _pendingDragOffset;
-      final Duration timestamp = _lastPendingEventTimestamp;
-      final Matrix4 transform = _lastTransform;
-      Offset localUpdateDelta;
       switch (dragStartBehavior) {
         case DragStartBehavior.start:
           _initialPosition = _initialPosition + delta;
-          localUpdateDelta = Offset.zero;
           break;
         case DragStartBehavior.down:
-          localUpdateDelta = _getDeltaForDetails(delta.local);
           break;
       }
       _pendingDragOffset = OffsetPair.zero;
