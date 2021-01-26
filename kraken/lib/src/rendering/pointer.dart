@@ -48,7 +48,7 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   /// Called when a pointer signal this object.
   void initGestureRecognizer(Map<String, List<EventHandler>> eventHandlers) {
-    if (eventHandlers.containsKey('click')) {
+    if (eventHandlers.containsKey('click') || eventHandlers.containsKey('press')) {
       gestures[ClickGestureRecognizer] = ClickGestureRecognizer();
       (gestures[ClickGestureRecognizer] as ClickGestureRecognizer).onClick = onClick;
     }
