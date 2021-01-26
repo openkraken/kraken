@@ -169,6 +169,9 @@ class RenderFlexLayout extends RenderLayoutBox {
   // are treated as not overflowing.
   bool get _hasOverflow => _overflow > precisionErrorTolerance;
 
+  /// Flex line boxs of flex layout
+  List<_RunMetrics> flexLineBoxMetrics = <_RunMetrics>[];
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
@@ -852,7 +855,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     assert(contentConstraints != null);
 
     // Metrics of each flex line
-    final List<_RunMetrics> runMetrics = <_RunMetrics>[];
+    List<_RunMetrics> runMetrics = <_RunMetrics>[];
     // Max size of scrollable area
     Map<int, double> maxScrollableWidthMap = Map();
     Map<int, double> maxScrollableHeightMap = Map();
@@ -861,6 +864,10 @@ class RenderFlexLayout extends RenderLayoutBox {
       'main': 0.0,
       'cross': 0.0,
     };
+
+    if (placeholderChild == null) {
+      flexLineBoxMetrics = runMetrics;
+    }
 
     /// Stage 1: Layout children in flow order to calculate flex lines
     _layoutByFlexLine(
@@ -2307,6 +2314,33 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
+  }
+
+  /// Compute distance to baseline of flex layout
+  @override
+  double computeDistanceToBaseline() {
+    double lineDistance = 0;
+    // Use height as baseline if layout has no children
+    if (flexLineBoxMetrics.length == 0) {
+      lineDistance = boxSize.height;
+      return lineDistance;
+    }
+    // Always use the baseline of the first child as the baseline in flex layout
+    _RunMetrics firstLineMetrics = flexLineBoxMetrics[0];
+    List<_RunChild> firstRunChildren = firstLineMetrics.runChildren.values.toList();
+    _RunChild firstRunChild = firstRunChildren[0];
+    RenderBox child = firstRunChild.child;
+    
+    final RenderLayoutParentData childParentData = child.parentData;
+    double childBaseLineDistance;
+    if (child is RenderBoxModel) {
+      childBaseLineDistance = child.computeDistanceToBaseline();
+    } else if (child is RenderTextBox) {
+      childBaseLineDistance = child.computeDistanceToFirstLineBaseline();
+    }
+
+    lineDistance = childBaseLineDistance + childParentData.offset.dy;
+    return lineDistance;
   }
 
   /// Get child size through boxSize to avoid flutter error when parentUsesSize is set to false

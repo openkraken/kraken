@@ -300,13 +300,17 @@ class KrakenRenderParagraph extends RenderBox
     return _computeIntrinsicHeight(width);
   }
 
-  @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout);
-    assert(constraints != null);
-    assert(constraints.debugAssertIsValid());
-    _layoutTextWithConstraints(constraints);
+  /// Compute distance to baseline of first text line
+  double computeDistanceToFirstLineBaseline() {
+    double firstLineOffset = _lineOffset[0];
+    ui.LineMetrics firstLineMetrics = _lineMetrics[0];
 
+    // Use the baseline of the last line as paragraph baseline
+    return firstLineOffset + firstLineMetrics.ascent;
+  }
+
+  /// Compute distance to baseline of last text line
+  double computeDistanceToLastLineBaseline() {
     double lastLineOffset = _lineOffset[_lineOffset.length - 1];
     ui.LineMetrics lastLineMetrics = _lineMetrics[_lineMetrics.length - 1];
 

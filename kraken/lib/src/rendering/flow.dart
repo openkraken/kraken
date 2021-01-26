@@ -264,6 +264,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     return true;
   }
 
+  /// Line boxes of flow layout
+  List<_RunMetrics> lineBoxMetrics = <_RunMetrics>[];
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
@@ -654,7 +657,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     assert(mainAxisLimit != null);
     final double spacing = this.spacing;
     final double runSpacing = this.runSpacing;
-    final List<_RunMetrics> runMetrics = <_RunMetrics>[];
+    List<_RunMetrics> runMetrics = <_RunMetrics>[];
     double mainAxisExtent = 0.0;
     double crossAxisExtent = 0.0;
     double runMainAxisExtent = 0.0;
@@ -663,6 +666,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double maxSizeAboveBaseline = 0;
     double maxSizeBelowBaseline = 0;
     Map<int, RenderBox> runChildren = {};
+
+    lineBoxMetrics = runMetrics;
 
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
@@ -1063,6 +1068,47 @@ class RenderFlowLayout extends RenderLayoutBox {
         _layoutChildren(needsRelayout: true);
       }
     }
+  }
+
+  /// Compute distance to baseline of flow layout
+  @override
+  double computeDistanceToBaseline() {
+    double lineDistance = 0;
+    // Use height as baseline if layout has no children
+    if (lineBoxMetrics.length == 0) {
+      lineDistance = boxSize.height;
+      return lineDistance;
+    }
+
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    bool isDisplayInlineBlock = display == CSSDisplay.inlineBlock;
+    // Use baseline of last line in flow layout and layout is inline-level
+    // otherwise use baseline of first line
+    bool isParentFlowLayout = parent is RenderFlowLayout;
+    bool isLastLineBaseline = isParentFlowLayout && isDisplayInlineBlock;
+    
+    _RunMetrics lineMetrics = isLastLineBaseline ?
+      lineBoxMetrics[lineBoxMetrics.length - 1] : lineBoxMetrics[0];
+    // Use the max baseline of the children as the baseline in flow layout
+    lineMetrics.runChildren.forEach((int targetId, RenderBox child) {
+      final RenderLayoutParentData childParentData = child.parentData;
+      double childBaseLineDistance;
+      if (child is RenderBoxModel) {
+        childBaseLineDistance = child.computeDistanceToBaseline();
+      } else if (child is RenderTextBox) {
+        // Text baseline not depends on its own parent but its grand parents
+        childBaseLineDistance = isLastLineBaseline ?
+          child.computeDistanceToLastLineBaseline() :
+          child.computeDistanceToFirstLineBaseline();
+      }
+
+      childBaseLineDistance += childParentData.offset.dy;
+      if (lineDistance != null)
+        lineDistance = math.max(lineDistance, childBaseLineDistance);
+      else
+        lineDistance = childBaseLineDistance;
+    });
+    return lineDistance;
   }
 
   /// Resolve all percentage size of child based on size its containing block
