@@ -1032,7 +1032,15 @@ class RenderBoxModel extends RenderBox with
       maxScrollableY = math.max(maxScrollableY, childRenderStyle.top + childSize.height);
     }
     if (childRenderStyle.bottom != null) {
-      maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom + _contentSize.height);
+      if (isScrollingBox && (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
+        RenderBoxModel overflowContainerBox = parent;
+        maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom + overflowContainerBox.renderStyle.height
+            - overflowContainerBox.renderStyle.paddingTop - overflowContainerBox.renderStyle.paddingBottom
+            - overflowContainerBox.renderStyle.borderTop - overflowContainerBox.renderStyle.borderBottom);
+      } else {
+        maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom + _contentSize.height);
+      }
+
     }
 
     maxScrollableSize = Size(maxScrollableX, maxScrollableY);
