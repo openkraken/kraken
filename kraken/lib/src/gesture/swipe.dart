@@ -148,8 +148,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     return isFling && (_globalVerticalDistanceMoved.abs() > kTouchSlop  || _globalHorizontalDistanceMoved.abs() > kTouchSlop);
   }
 
-  Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
-
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   @override
