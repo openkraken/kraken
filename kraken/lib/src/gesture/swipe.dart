@@ -118,11 +118,9 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   _DragState _state = _DragState.ready;
   OffsetPair _initialPosition;
   OffsetPair _pendingDragOffset;
-  Duration _lastPendingEventTimestamp;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int _initialButtons;
-  Matrix4 _lastTransform;
   _OffsetDirection _direction = _OffsetDirection.left;
 
   /// Distance moved in the global coordinate space of the screen in drag direction.
@@ -185,8 +183,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       _pendingDragOffset = OffsetPair.zero;
       _globalVerticalDistanceMoved = 0.0;
       _globalHorizontalDistanceMoved = 0.0;
-      _lastPendingEventTimestamp = event.timeStamp;
-      _lastTransform = event.transform;
     } else if (_state == _DragState.accepted) {
       resolve(GestureDisposition.accepted);
     }
@@ -208,8 +204,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       }
       if (_state != _DragState.accepted) {
         _pendingDragOffset += OffsetPair(local: event.localDelta, global: event.delta);
-        _lastPendingEventTimestamp = event.timeStamp;
-        _lastTransform = event.transform;
 
         final Matrix4 localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform);
 
@@ -258,8 +252,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
           break;
       }
       _pendingDragOffset = OffsetPair.zero;
-      _lastPendingEventTimestamp = null;
-      _lastTransform = null;
     }
   }
 
@@ -333,6 +325,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       };
     }
 
+    print('details=${details}');
     invokeCallback<void>('onSwipe', () => onSwipe(Event(EVENT_SWIPE, EventInit())), debugReport: debugReport);
   }
 
