@@ -253,6 +253,57 @@ class RenderLayoutBox extends RenderBoxModel
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     return computeDistanceToBaseline();
   }
+
+  /// Baseline rule is as follows:
+  /// 1. Loop children to find baseline, if child is block-level find the nearest non block-level children's height
+  /// as baseline
+  /// 2. If child is text-box, use text's baseline
+  double computeDistanceToHighestActualBaseline(TextBaseline baseline) {
+    double result;
+    RenderBox child = firstChild;
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+
+      // Whether child is inline-level including text box
+      bool isChildInline = true;
+      if (child is RenderBoxModel) {
+        CSSDisplay childDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
+        if (childDisplay == CSSDisplay.block || childDisplay == CSSDisplay.flex) {
+          isChildInline = false;
+        }
+      }
+
+      // Block level and positioned element doesn't involve in baseline alignment
+      if (childParentData.isPositioned) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+
+      double childDistance = child.getDistanceToActualBaseline(baseline);
+      // Use child's height if child has no baseline and not block-level
+      // Text box always has baseline
+      if (childDistance == null &&
+        isChildInline &&
+        child is RenderBoxModel && child.contentSize != null
+      ) {
+        // Flutter only allow access size of direct children, so cannot use child.size
+        Size childSize = child.getBoxSize(child.contentSize);
+        childDistance = childSize.height;
+      }
+
+
+      if (childDistance != null) {
+        childDistance += childParentData.offset.dy;
+        if (result != null)
+          result = math.min(result, childDistance);
+        else
+          result = childDistance;
+      }
+      child = childParentData.nextSibling;
+    }
+    return result;
+  }
+
 }
 
 mixin RenderBoxModelBase on RenderBox {
@@ -260,8 +311,8 @@ mixin RenderBoxModelBase on RenderBox {
 }
 
 class RenderBoxModel extends RenderBox with
-    RenderBoxModelBase,
-    RenderBoxDecorationMixin,
+  RenderBoxModelBase,
+  RenderBoxDecorationMixin,
     RenderTransformMixin,
     RenderOverflowMixin,
     RenderOpacityMixin,
@@ -1078,7 +1129,9 @@ class RenderBoxModel extends RenderBox with
   }
 
   /// Compute distance to baseline
-  double computeDistanceToBaseline() {}
+  double computeDistanceToBaseline() {
+    return null;
+  }
 
   @override
   void detach() {

@@ -1074,25 +1074,41 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   double computeDistanceToBaseline() {
     double lineDistance = 0;
-    // Use height as baseline if layout has no children
+    double marginTop = renderStyle.marginTop;
+    double marginBottom = renderStyle.marginBottom;
+    bool isParentFlowLayout = parent is RenderFlowLayout;
+    // Use margin bottom as baseline if layout has no children
     if (lineBoxMetrics.length == 0) {
-      lineDistance = boxSize.height;
+      // Flex item baseline does not includes margin-bottom
+      lineDistance = isParentFlowLayout ?
+        marginTop + boxSize.height + marginBottom :
+        marginTop + boxSize.height;
       return lineDistance;
     }
 
     CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    bool isDisplayInlineBlock = display == CSSDisplay.inlineBlock;
+    bool isDisplayInline = display != CSSDisplay.block && display != CSSDisplay.flex;
     // Use baseline of last line in flow layout and layout is inline-level
     // otherwise use baseline of first line
-    bool isParentFlowLayout = parent is RenderFlowLayout;
-    bool isLastLineBaseline = isParentFlowLayout && isDisplayInlineBlock;
-    
+    bool isLastLineBaseline = isParentFlowLayout && isDisplayInline;
     _RunMetrics lineMetrics = isLastLineBaseline ?
       lineBoxMetrics[lineBoxMetrics.length - 1] : lineBoxMetrics[0];
     // Use the max baseline of the children as the baseline in flow layout
     lineMetrics.runChildren.forEach((int targetId, RenderBox child) {
+      double childMarginTop = 0;
+      // Whether child is inline-level including text box
+      bool isChildDisplayInline = true;
+      if (child is RenderBoxModel) {
+        childMarginTop = child.renderStyle.marginTop;
+        CSSDisplay childDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
+        isChildDisplayInline = childDisplay != CSSDisplay.block && childDisplay != CSSDisplay.flex;
+      }
+      if (!isChildDisplayInline) {
+        return;
+      }
+
       final RenderLayoutParentData childParentData = child.parentData;
-      double childBaseLineDistance;
+      double childBaseLineDistance = 0;
       if (child is RenderBoxModel) {
         childBaseLineDistance = child.computeDistanceToBaseline();
       } else if (child is RenderTextBox) {
@@ -1102,12 +1118,22 @@ class RenderFlowLayout extends RenderLayoutBox {
           child.computeDistanceToFirstLineBaseline();
       }
 
-      childBaseLineDistance += childParentData.offset.dy;
+      // It needs to substract margin-top cause offset already includes margin-top
+      childBaseLineDistance += childParentData.offset.dy - childMarginTop;
       if (lineDistance != null)
         lineDistance = math.max(lineDistance, childBaseLineDistance);
       else
         lineDistance = childBaseLineDistance;
     });
+
+    // If no inline child found, use margin-bottom as baseline
+    if (lineDistance != 0) {
+      lineDistance += marginTop;
+    } else {
+      lineDistance = isParentFlowLayout ?
+        marginTop + boxSize.height + marginBottom :
+        marginTop + boxSize.height;
+    }
     return lineDistance;
   }
 
@@ -1245,21 +1271,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   double _getChildAscent(RenderBox child) {
     // Distance from top to baseline of child
     double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
-    double childMarginTop = 0;
-    double childMarginBottom = 0;
-    if (child is RenderBoxModel) {
-      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      childMarginTop = childRenderBoxModel.renderStyle.marginTop;
-      childMarginBottom = childRenderBoxModel.renderStyle.marginBottom;
-    }
-
-    Size childSize = _getChildSize(child);
-    // When baseline of children not found, use boundary of margin bottom as baseline
-    double extentAboveBaseline = childAscent != null ?
-      childMarginTop + childAscent :
-      childMarginTop + childSize.height + childMarginBottom;
-
-    return extentAboveBaseline;
+    return childAscent;
   }
 
   /// Get child size through boxSize to avoid flutter error when parentUsesSize is set to false
