@@ -64,7 +64,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   static Map<String, ElementCreator> _elementCreator = Map();
   static bool inited = false;
 
-  static void defineNewElement(String type, ElementCreator creator) {
+  static void defineElement(String type, ElementCreator creator) {
     type = type.toLowerCase();
     if (_elementCreator.containsKey(type)) {
       throw Exception('ElementManager: redefined element of type: $type');
@@ -123,21 +123,22 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(document);
 
     if (!inited) {
-      defineNewElement(DIV, (id, nativePtr, elementManager) => DivElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineNewElement(SPAN, (id, nativePtr, elementManager) => SpanElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineNewElement(ANCHOR, (id, nativePtr, elementManager) => AnchorElement(id, nativePtr.cast<NativeAnchorElement>(), elementManager));
-      defineNewElement(STRONG, (id, nativePtr, elementManager) => StrongElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineNewElement(IMAGE, (id, nativePtr, elementManager) => ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager));
-      defineNewElement(PARAGRAPH, (id, nativePtr, elementManager) => ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineNewElement(INPUT, (id, nativePtr, elementManager) => InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager));
-      defineNewElement(PRE, (id, nativePtr, elementManager) => PreElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineNewElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager));
-      defineNewElement(ANIMATION_PLAYER, (id, nativePtr, elementManager) => AnimationPlayerElement(id, nativePtr.cast<NativeAnimationElement>(), elementManager));
-      defineNewElement(VIDEO, (id, nativePtr, elementManager) => VideoElement(id, nativePtr.cast<NativeVideoElement>(), elementManager));
-      defineNewElement(CAMERA_PREVIEW, (id, nativePtr, elementManager) => CameraPreviewElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineNewElement(IFRAME, (id, nativePtr, elementManager) => IFrameElement(id, nativePtr.cast<NativeIframeElement>(), elementManager));
-      defineNewElement(AUDIO, (id, nativePtr, elementManager) => AudioElement(id, nativePtr.cast<NativeAudioElement>(), elementManager));
-      defineNewElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager));
+      defineElement(DIV, (id, nativePtr, elementManager) => DivElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(SPAN, (id, nativePtr, elementManager) => SpanElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(ANCHOR, (id, nativePtr, elementManager) => AnchorElement(id, nativePtr.cast<NativeAnchorElement>(), elementManager));
+      defineElement(STRONG, (id, nativePtr, elementManager) => StrongElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(IMAGE, (id, nativePtr, elementManager) => ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager));
+      defineElement(PARAGRAPH, (id, nativePtr, elementManager) => ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(INPUT, (id, nativePtr, elementManager) => InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager));
+      defineElement(PRE, (id, nativePtr, elementManager) => PreElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager));
+      defineElement(ANIMATION_PLAYER, (id, nativePtr, elementManager) => AnimationPlayerElement(id, nativePtr.cast<NativeAnimationElement>(), elementManager));
+      defineElement(VIDEO, (id, nativePtr, elementManager) => VideoElement(id, nativePtr.cast<NativeVideoElement>(), elementManager));
+      defineElement(CAMERA_PREVIEW, (id, nativePtr, elementManager) => CameraPreviewElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(IFRAME, (id, nativePtr, elementManager) => IFrameElement(id, nativePtr.cast<NativeIframeElement>(), elementManager));
+      defineElement(AUDIO, (id, nativePtr, elementManager) => AudioElement(id, nativePtr.cast<NativeAudioElement>(), elementManager));
+      defineElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager));
+      inited = true;
     }
   }
 
