@@ -65,7 +65,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   static bool inited = false;
 
   static void defineElement(String type, ElementCreator creator) {
-    type = type.toLowerCase();
     if (_elementCreator.containsKey(type)) {
       throw Exception('ElementManager: redefined element of type: $type');
     }
