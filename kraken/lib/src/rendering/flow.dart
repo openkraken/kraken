@@ -1112,8 +1112,18 @@ class RenderFlowLayout extends RenderLayoutBox {
           child.computeDistanceToFirstLineBaseline();
       }
       if (childBaseLineDistance != null) {
+        // Baseline of relative positioned element equals its originial position
+        // so it needs to substract its vertical offset
+        Offset relativeOffset;
+        double childOffsetY = childParentData.offset.dy - childMarginTop;
+        if (child is RenderBoxModel) {
+          relativeOffset = CSSPositionedLayout.getRelativeOffset(child.renderStyle);
+        }
+        if (relativeOffset != null) {
+          childOffsetY -= relativeOffset.dy;
+        }
         // It needs to substract margin-top cause offset already includes margin-top
-        childBaseLineDistance += childParentData.offset.dy - childMarginTop;
+        childBaseLineDistance += childOffsetY;
         if (lineDistance != null)
           lineDistance = math.max(lineDistance, childBaseLineDistance);
         else

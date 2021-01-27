@@ -2353,8 +2353,18 @@ class RenderFlexLayout extends RenderLayoutBox {
       childBaseLineDistance = child.computeDistanceToFirstLineBaseline();
     }
 
+    // Baseline of relative positioned element equals its originial position
+    // so it needs to substract its vertical offset
+    Offset relativeOffset;
+    double childOffsetY = childParentData.offset.dy - childMarginTop;
+    if (child is RenderBoxModel) {
+      relativeOffset = CSSPositionedLayout.getRelativeOffset(child.renderStyle);
+    }
+    if (relativeOffset != null) {
+      childOffsetY -= relativeOffset.dy;
+    }
     // It needs to substract margin-top cause offset already includes margin-top
-    lineDistance = childBaseLineDistance + childParentData.offset.dy - childMarginTop;
+    lineDistance = childBaseLineDistance + childOffsetY;
     lineDistance += marginTop;
     return lineDistance;
   }
