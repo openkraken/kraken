@@ -58,7 +58,7 @@ mixin CSSOverflowMixin on ElementBase {
   List<Element> stickyChildren = [];
 
   // House content which can be scrolled.
-  RenderLayoutBox scrollingLayoutBox;
+  RenderLayoutBox scrollingContentLayoutBox;
 
   void updateRenderOverflow(RenderBoxModel renderBoxModel, Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
@@ -153,9 +153,9 @@ mixin CSSOverflowMixin on ElementBase {
     elementManager.setEventTarget(scrollingElement);
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
     repaintBoundaryStyle.setProperty('overflow', 'visible');
-    scrollingLayoutBox = createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
-    scrollingLayoutBox.isScrollingBox = true;
-    scrollingElement.renderBoxModel = scrollingLayoutBox;
+    scrollingContentLayoutBox = createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
+    scrollingContentLayoutBox.isScrollingContentBox = true;
+    scrollingElement.renderBoxModel = scrollingContentLayoutBox;
   }
 
   // Create two repaintBoundary for an overflow scroll container.
@@ -169,7 +169,7 @@ mixin CSSOverflowMixin on ElementBase {
     RenderLayoutBox outerLayoutBox = createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
 
     _createScrollingLayoutBox(element);
-    outerLayoutBox.add(scrollingLayoutBox);
+    outerLayoutBox.add(scrollingContentLayoutBox);
     element.renderBoxModel = outerLayoutBox;
     // Update renderBoxModel reference in renderStyle
     element.renderBoxModel.renderStyle.renderBoxModel = outerLayoutBox;
@@ -185,7 +185,7 @@ mixin CSSOverflowMixin on ElementBase {
     element.renderBoxModel = newLayoutBox;
     // Update renderBoxModel reference in renderStyle
     element.renderBoxModel.renderStyle.renderBoxModel = newLayoutBox;
-    scrollingLayoutBox = null;
+    scrollingContentLayoutBox = null;
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
   }
@@ -281,12 +281,12 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   get scrollHeight {
-    Size scrollContainerSize = renderBoxModel.maxScrollableSize;
+    Size scrollContainerSize = renderBoxModel.scrollableSize;
     return scrollContainerSize.height;
   }
 
   get scrollWidth {
-    Size scrollContainerSize = renderBoxModel.maxScrollableSize;
+    Size scrollContainerSize = renderBoxModel.scrollableSize;
     return scrollContainerSize.width;
   }
 

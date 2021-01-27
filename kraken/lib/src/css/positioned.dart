@@ -257,7 +257,7 @@ class CSSPositionedLayout {
     final RenderLayoutParentData childParentData = child.parentData;
     Size parentSize = parent.boxSize;
 
-    if (parent.isScrollingBox) {
+    if (parent.isScrollingContentBox) {
       RenderLayoutBox overflowContainerBox = parent.parent;
 
       if(overflowContainerBox.widthSizeType == BoxSizeType.specified && overflowContainerBox.heightSizeType == BoxSizeType.specified) {

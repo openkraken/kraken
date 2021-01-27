@@ -115,8 +115,8 @@ class TextNode extends Node {
     willAttachRenderer();
 
     RenderLayoutBox parentRenderLayoutBox;
-    if (parent.scrollingLayoutBox != null) {
-      parentRenderLayoutBox = parent.scrollingLayoutBox;
+    if (parent.scrollingContentLayoutBox != null) {
+      parentRenderLayoutBox = parent.scrollingContentLayoutBox;
     } else {
       parentRenderLayoutBox = parent.renderBoxModel;
     }

@@ -404,8 +404,8 @@ class Element extends Node
 
   void addChild(RenderObject child) {
     if (_renderLayoutBox != null) {
-      if (scrollingLayoutBox != null) {
-        scrollingLayoutBox.add(child);
+      if (scrollingContentLayoutBox != null) {
+        scrollingContentLayoutBox.add(child);
       } else {
         _renderLayoutBox.add(child);
       }
@@ -449,8 +449,8 @@ class Element extends Node
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
-        if (scrollingLayoutBox != null) {
-          scrollingLayoutBox.insert(child.renderBoxModel, after: after);
+        if (scrollingContentLayoutBox != null) {
+          scrollingContentLayoutBox.insert(child.renderBoxModel, after: after);
         } else {
           _renderLayoutBox.insert(child.renderBoxModel, after: after);
         }
@@ -548,8 +548,8 @@ class Element extends Node
       for (Node child in childNodes) {
         if (_renderLayoutBox != null && !child.isRendererAttached) {
           RenderObject after;
-          if (scrollingLayoutBox != null) {
-            after = scrollingLayoutBox.lastChild;
+          if (scrollingContentLayoutBox != null) {
+            after = scrollingContentLayoutBox.lastChild;
           } else {
             after = _renderLayoutBox.lastChild;
           }
@@ -571,8 +571,8 @@ class Element extends Node
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
-        if (scrollingLayoutBox != null) {
-          child.attachTo(this, after: scrollingLayoutBox.lastChild);
+        if (scrollingContentLayoutBox != null) {
+          child.attachTo(this, after: scrollingContentLayoutBox.lastChild);
         } else {
           child.attachTo(this, after: _renderLayoutBox.lastChild);
         }
@@ -642,8 +642,8 @@ class Element extends Node
       case CSSPositionType.absolute:
         Element containingBlockElement = _findContainingBlock(child);
 
-        if (containingBlockElement.scrollingLayoutBox != null) {
-          parentRenderLayoutBox = containingBlockElement.scrollingLayoutBox;
+        if (containingBlockElement.scrollingContentLayoutBox != null) {
+          parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox;
         } else {
           parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
         }
@@ -653,8 +653,8 @@ class Element extends Node
       case CSSPositionType.fixed:
         final Element rootEl = elementManager.getRootElement();
 
-        if (rootEl.scrollingLayoutBox != null) {
-          parentRenderLayoutBox = rootEl.scrollingLayoutBox;
+        if (rootEl.scrollingContentLayoutBox != null) {
+          parentRenderLayoutBox = rootEl.scrollingContentLayoutBox;
         } else {
           parentRenderLayoutBox = rootEl._renderLayoutBox;
         }
@@ -663,8 +663,8 @@ class Element extends Node
       case CSSPositionType.sticky:
         Element containingBlockElement = _findContainingBlock(child);
 
-        if (containingBlockElement.scrollingLayoutBox != null) {
-          parentRenderLayoutBox = containingBlockElement.scrollingLayoutBox;
+        if (containingBlockElement.scrollingContentLayoutBox != null) {
+          parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox;
         } else {
           parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
         }
@@ -702,8 +702,8 @@ class Element extends Node
   void _addStickyChild(Element child, RenderObject after) {
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
 
-    if (scrollingLayoutBox != null) {
-      scrollingLayoutBox.insert(childRenderBoxModel, after: after);
+    if (scrollingContentLayoutBox != null) {
+      scrollingContentLayoutBox.insert(childRenderBoxModel, after: after);
     } else {
       (renderBoxModel as RenderLayoutBox).insert(childRenderBoxModel, after: after);
     }
