@@ -12,7 +12,7 @@ import 'package:kraken/dom.dart';
 import 'package:flutter/gestures.dart';
 
 /// A tap with a primary button has occurred.
-typedef GestureClickCallback = void Function(Event);
+typedef GestureCallback = void Function(Event);
 
 class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initializes the [deadline] field during construction of subclasses.
@@ -60,7 +60,7 @@ class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
 
   PointerDownEvent _down;
 
-  GestureClickCallback onClick;
+  GestureCallback onClick;
 
   DateTime _startTime;
 

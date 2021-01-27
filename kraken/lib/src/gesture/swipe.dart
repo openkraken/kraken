@@ -21,9 +21,6 @@ enum _OffsetDirection {
   right,
 }
 
-/// A tap with a primary button has occurred.
-typedef GestureSwipeCallback = void Function(Event);
-
 class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   ///
@@ -63,7 +60,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   /// at (510.0, 500.0).
   DragStartBehavior dragStartBehavior;
 
-  GestureSwipeCallback onSwipe;
+  GestureCallback onSwipe;
 
   /// The pointer that previously triggered [onDown] did not complete.
   ///

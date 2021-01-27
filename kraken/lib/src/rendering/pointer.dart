@@ -30,7 +30,7 @@ mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener onPointerSignal;
 
-  GestureClickCallback onClick;
+  GestureCallback onClick;
 
   GestureCallback onSwipe;
 
@@ -55,9 +55,6 @@ mixin RenderPointerListenerMixin on RenderBox {
     if (eventHandlers.containsKey('swipe')) {
       gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer();
       (gestures[SwipeGestureRecognizer] as SwipeGestureRecognizer).onSwipe = onSwipe;
-      // gestures[VerticalSwipeDragGestureRecognizer] = VerticalSwipeDragGestureRecognizer();
-      // (gestures[VerticalSwipeDragGestureRecognizer] as VerticalSwipeDragGestureRecognizer).gestureType = 'swipe';
-      // (gestures[VerticalSwipeDragGestureRecognizer] as VerticalSwipeDragGestureRecognizer).onGesture = onSwipe;
     }
     if (eventHandlers.containsKey('pan')) {
       gestures[PanGestureRecognizer] = PanGestureRecognizer();

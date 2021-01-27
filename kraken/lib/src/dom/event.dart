@@ -59,8 +59,6 @@ class Event {
   double deltaX = 0.0;
   double deltaY = 0.0;
 
-
-
   bool _immediateBubble = true;
 
   Event(this.type, [EventInit init]) {
@@ -72,6 +70,8 @@ class Event {
 
     bubbles = init.bubbles;
     cancelable = init.cancelable;
+    deltaX = init.deltaX;
+    deltaY = init.deltaY;
     timeStamp = DateTime.now().millisecondsSinceEpoch;
   }
 
@@ -119,8 +119,10 @@ class Event {
 class EventInit {
   final bool bubbles;
   final bool cancelable;
+  final double deltaX;
+  final double deltaY;
 
-  EventInit({ this.bubbles = false, this.cancelable = false });
+  EventInit({ this.bubbles = false, this.cancelable = false, this.deltaX = 0.0, this.deltaY = 0.0 });
 }
 
 class CustomEventInit extends EventInit {
