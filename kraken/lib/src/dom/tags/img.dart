@@ -188,10 +188,6 @@ class ImageElement extends Element {
     _imageInfo = imageInfo;
     _imageBox?.image = _imageInfo?.image;
     _resize();
-
-    // // Image size may affect parent layout,
-    // // make parent relayout after image init.
-    // _imageBox?.markNeedsLayoutForSizedByParentChange();
   }
 
   void _resize() {
