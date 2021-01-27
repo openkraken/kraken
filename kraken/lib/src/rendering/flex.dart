@@ -2323,26 +2323,29 @@ class RenderFlexLayout extends RenderLayoutBox {
     double marginTop = renderStyle.marginTop;
     double marginBottom = renderStyle.marginBottom;
     bool isParentFlowLayout = parent is RenderFlowLayout;
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    bool isDisplayInline = display != CSSDisplay.block && display != CSSDisplay.flex;
     // Use margin bottom as baseline if layout has no children
     if (flexLineBoxMetrics.length == 0) {
-      // Flex item baseline does not includes margin-bottom
-      lineDistance = isParentFlowLayout ?
-        marginTop + boxSize.height + marginBottom :
-        marginTop + boxSize.height;
-      return lineDistance;
+      if (isDisplayInline) {
+        // Flex item baseline does not includes margin-bottom
+        lineDistance = isParentFlowLayout ?
+          marginTop + boxSize.height + marginBottom :
+          marginTop + boxSize.height;
+        return lineDistance;
+      } else {
+        return null;
+      }
     }
-    
+
     // Always use the baseline of the first child as the baseline in flex layout
     _RunMetrics firstLineMetrics = flexLineBoxMetrics[0];
     List<_RunChild> firstRunChildren = firstLineMetrics.runChildren.values.toList();
     _RunChild firstRunChild = firstRunChildren[0];
     RenderBox child = firstRunChild.child;
-    
-    double childMarginTop = 0;
-    if (child is RenderBoxModel) {
-      childMarginTop = child.renderStyle.marginTop;
-    }
-    final RenderLayoutParentData childParentData = child.parentData;
+
+    double childMarginTop = child is RenderBoxModel ? child.renderStyle.marginTop : 0;
+    RenderLayoutParentData childParentData = child.parentData;
     double childBaseLineDistance = 0;
     if (child is RenderBoxModel) {
       childBaseLineDistance = child.computeDistanceToBaseline();
@@ -2372,7 +2375,21 @@ class RenderFlexLayout extends RenderLayoutBox {
   double _getChildAscent(RenderBox child) {
     // Distance from top to baseline of child
     double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
-    return childAscent;
+    double childMarginTop = 0;
+    double childMarginBottom = 0;
+    if (child is RenderBoxModel) {
+      childMarginTop = child.renderStyle.marginTop;
+      childMarginBottom = child.renderStyle.marginBottom;
+    }
+
+    Size childSize = _getChildSize(child);
+
+    double baseline = parent is RenderFlowLayout ? childMarginTop + childSize.height + childMarginBottom :
+      childMarginTop + childSize.height;
+    // When baseline of children not found, use boundary of margin bottom as baseline
+    double extentAboveBaseline = childAscent != null ? childAscent : baseline;
+
+    return extentAboveBaseline;
   }
 
   CSSStyleDeclaration _getChildStyle(RenderBox child) {
