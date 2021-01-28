@@ -56,9 +56,6 @@ class Event {
   EventTarget target;
   num timeStamp;
   bool defaultPrevented = false;
-  double deltaX = 0.0;
-  double deltaY = 0.0;
-  int direction = 0;
 
   bool _immediateBubble = true;
 
@@ -71,9 +68,6 @@ class Event {
 
     bubbles = init.bubbles;
     cancelable = init.cancelable;
-    deltaX = init.deltaX;
-    deltaY = init.deltaY;
-    direction = init.direction;
     timeStamp = DateTime.now().millisecondsSinceEpoch;
   }
 
@@ -121,19 +115,48 @@ class Event {
 class EventInit {
   final bool bubbles;
   final bool cancelable;
-  final double deltaX;
-  final double deltaY;
-  final int direction;
-  final double velocity;
 
   EventInit({
     this.bubbles = false,
     this.cancelable = false,
+  });
+}
+
+
+class GestureEventInit extends EventInit {
+  final double rotation;
+  final double deltaX;
+  final double deltaY;
+  final int direction;
+  final double velocityX;
+  final double velocityY;
+
+  GestureEventInit({
+    bool bubbles = false,
+    bool cancelable = false,
+    this.rotation = 0.0,
     this.deltaX = 0.0,
     this.deltaY = 0.0,
     this.direction = 0,
-    this.velocity = 0,
-  });
+    this.velocityX = 0.0,
+    this.velocityY = 0.0,
+  })
+      : super(bubbles: bubbles, cancelable: cancelable);
+}
+
+/// reference: https://developer.mozilla.org/en-US/docs/Web/API/GestureEvent
+class GestureEvent extends Event {
+  final GestureEventInit _gestureEventInit;
+
+  double get rotation => _gestureEventInit?.rotation;
+  double get deltaX => _gestureEventInit?.deltaX;
+  double get deltaY => _gestureEventInit?.deltaY;
+  int get direction => _gestureEventInit?.direction;
+  double get velocityX => _gestureEventInit?.velocityX;
+  double get velocityY => _gestureEventInit?.velocityY;
+
+  GestureEvent(String type, [GestureEventInit gestureEventInit])
+      : _gestureEventInit = gestureEventInit, super(type, gestureEventInit);
 }
 
 class CustomEventInit extends EventInit {

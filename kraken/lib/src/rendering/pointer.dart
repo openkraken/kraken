@@ -39,12 +39,12 @@ mixin RenderPointerListenerMixin on RenderBox {
   GestureCallback onPinch;
 
   void onPanEnd(DragEndDetails details) {
-    onSwipe(Event(EVENT_SWIPE, EventInit()));
+    onSwipe(GestureEvent(EVENT_SWIPE, GestureEventInit()));
   }
 
   void onPinchEnd(ScaleEndDetails details) {
     if (details.velocity != Velocity.zero) {
-      onSwipe(Event(EVENT_SWIPE, EventInit( velocity: details.velocity.pixelsPerSecond.dx )));
+      onSwipe(GestureEvent(EVENT_SWIPE, GestureEventInit( velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy )));
     }
   }
 

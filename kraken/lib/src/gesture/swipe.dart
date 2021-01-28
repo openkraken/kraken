@@ -294,14 +294,13 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     final VelocityTracker tracker = _velocityTrackers[pointer];
     assert(tracker != null);
 
-    DragEndDetails details;
     String Function() debugReport;
 
     final VelocityEstimate estimate = tracker.getVelocityEstimate();
     final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond).clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
 
-    EventInit e = EventInit(deltaX: velocity.pixelsPerSecond.dx, deltaY: velocity.pixelsPerSecond.dy, direction: 0 );
-    invokeCallback<void>('onSwipe', () => onSwipe(Event(EVENT_SWIPE, e)), debugReport: debugReport);
+    GestureEventInit e = GestureEventInit(deltaX: velocity.pixelsPerSecond.dx, deltaY: velocity.pixelsPerSecond.dy, direction: 0 );
+    invokeCallback<void>('onSwipe', () => onSwipe(GestureEvent(EVENT_SWIPE, e)), debugReport: debugReport);
   }
 
   void _checkCancel() {
