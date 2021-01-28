@@ -1185,7 +1185,7 @@ class Element extends Node
   }
 
   void handleMethodClick() {
-    Event clickEvent = Event(EVENT_CLICK, EventInit());
+    Event clickEvent = Event(EVENT_CLICK, EventInit(bubbles: true, cancelable: true));
 
     if (isRendererAttached) {
       final RenderBox box = renderBoxModel;

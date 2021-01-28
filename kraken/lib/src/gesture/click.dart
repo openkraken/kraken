@@ -86,7 +86,7 @@ class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
       } else {
         if (event is PointerUpEvent) {
           if (onClick != null)
-            onClick(Event(EVENT_CLICK, EventInit()));
+            onClick(Event(EVENT_CLICK, EventInit(bubbles: true, cancelable: true)));
           _reset();
         } else if (event is PointerCancelEvent) {
           _reset();

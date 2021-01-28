@@ -2,7 +2,7 @@
  * Copyright (C) 2020 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
+#include <stdio.h>
 #include "event_target.h"
 #include "dart_methods.h"
 #include "document.h"
@@ -281,9 +281,8 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
   bool cancelled;
 
   while (event->nativeEvent->currentTarget != nullptr) {
-    if (event->_stopPropagationFlag) break;
     cancelled = internalDispatchEvent(event);
-    if (!event->nativeEvent->bubbles || cancelled || event->_stopImmediatePropagationFlag) break;
+    if (event->nativeEvent->bubbles == 0 || cancelled || event->_stopImmediatePropagationFlag) break;
 
     if (event->nativeEvent->currentTarget != nullptr) {
       auto node = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
@@ -400,22 +399,19 @@ bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *ev
   }
 
   // do not dispatch event when event has been canceled
-  return !eventInstance->_canceledFlag;
+  // true is prevented.
+  return eventInstance->_canceledFlag;
 }
 
 // This function will be called back by dart side when trigger events.
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
-
   JSEventTarget::EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
   JSContext *context = eventTargetInstance->context;
-
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(nativeEventType->string),
                                                nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);
-
   EventInstance *eventInstance = JSEvent::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
-
   eventTargetInstance->dispatchEvent(eventInstance);
 }
 
