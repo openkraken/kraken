@@ -16,9 +16,9 @@ import 'bundle.dart';
 typedef ConnectedCallback = void Function();
 
 void launch({
-  String bundleURLOverride,
-  String bundlePathOverride,
-  String bundleContentOverride,
+  String bundleURL,
+  String bundlePath,
+  String bundleContent,
   bool debugEnableInspector,
   Color background,
 }) async {
@@ -35,9 +35,9 @@ void launch({
   controller.view.attachView(RendererBinding.instance.renderView);
 
   await controller.loadBundle(
-      bundleURLOverride: bundleURLOverride,
-      bundlePathOverride: bundlePathOverride,
-      bundleContentOverride: bundleContentOverride);
+      bundleURL: bundleURL,
+      bundlePath: bundlePath,
+      bundleContent: bundleContent);
 
-  await controller.run();
+  await controller.evalBundle();
 }

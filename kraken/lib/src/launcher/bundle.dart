@@ -70,7 +70,7 @@ abstract class KrakenBundle {
     return bundle;
   }
 
-  Future<void> run(int contextId) async {
+  Future<void> eval(int contextId) async {
     if (!isResolved) await resolve();
 
     if (kProfileMode) {

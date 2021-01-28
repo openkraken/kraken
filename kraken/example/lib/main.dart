@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyBrowser> {
             controller: textEditingController,
             onSubmitted: (value) {
               textEditingController.text = value;
-              kraken.controller.reloadWithUrl(value);
+              kraken.loadURL(value);
             },
             decoration: InputDecoration(
               hintText: 'Enter a app url',
@@ -83,7 +83,6 @@ class _MyHomePageState extends State<MyBrowser> {
     kraken = Kraken(
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio - appBar.preferredSize.height - queryData.padding.top,
-      bundleURL: textEditingController.text,
     );
 
     return Scaffold(
