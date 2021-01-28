@@ -22,7 +22,7 @@ const paths = {
   cli: resolveKraken('cli'),
   targets: resolveKraken('targets'),
   scripts: resolveKraken('scripts'),
-  app_launcher: resolveKraken('app_launcher'),
+  example: resolveKraken('kraken/example'),
   kraken: resolveKraken('kraken'),
   bridge: resolveKraken('bridge'),
   polyfill: resolveKraken('bridge/polyfill'),
@@ -49,7 +49,7 @@ function buildKraken(platform, mode) {
 
   console.log(`${chalk.green('[BUILD]')} flutter ${args.join(' ')}`);
   const handle = spawnSync('flutter', args, {
-    cwd: paths.app_launcher,
+    cwd: paths.example,
     env: process.env,
     stdio: 'inherit',
   });
@@ -80,12 +80,12 @@ task('copy-kraken-debug', (done) => {
   execSync(`mkdir -p ${targetDist}`);
   if (platform === 'darwin') {
     // There is a problem that `cp -r` will drop symbolic, which will make app fails.
-    execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Debug/app_launcher.app')} ${targetDist}`);
+    execSync(`mv ${path.join(paths.example, 'build/macos/Build/Products/Debug/kraken_example.app')} ${targetDist}`);
     return done();
   }
 
   if (platform === 'linux') {
-    execSync(`cp -r ${path.join(paths.app_launcher, 'build/linux/debug/*')} ${targetDist}`);
+    execSync(`cp -r ${path.join(paths.example, 'build/linux/debug/*')} ${targetDist}`);
     return done();
   }
 
@@ -98,14 +98,14 @@ task('copy-kraken-release', (done) => {
   execSync(`mkdir -p ${targetDist}`);
 
   if (platform === 'darwin') {
-    execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Release/app_launcher.app')} ${targetDist}`);
+    execSync(`mv ${path.join(paths.example, 'build/macos/Build/Products/Release/kraken_example.app')} ${targetDist}`);
     // Add a empty file to keep flutter_assets folder, or flutter crashed.
-    writeFileSync(join(targetDist, 'app_launcher.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
+    writeFileSync(join(targetDist, 'kraken_example.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
     return done();
   }
 
   if (platform === 'linux') {
-    execSync(`mv ${path.join(paths.app_launcher, 'build/linux/release/')} ${targetDist}`);
+    execSync(`mv ${path.join(paths.example, 'build/linux/release/')} ${targetDist}`);
     return done();
   }
 
@@ -114,7 +114,7 @@ task('copy-kraken-release', (done) => {
 
 task('clean', () => {
   execSync('git clean -xfd', {
-    cwd: paths.app_launcher,
+    cwd: paths.example,
     env: process.env,
     stdio: 'inherit'
   });
@@ -309,7 +309,7 @@ task('compile-polyfill', (done) => {
 
 task('pub-get', (done) => {
   execSync('flutter pub get', {
-    cwd: paths.app_launcher,
+    cwd: paths.example,
     env: process.env,
     stdio: 'inherit'
   });
@@ -367,7 +367,7 @@ task('build-embedded-assets', (done) => {
   }
   let copySource = [
     {
-      src: paths.app_launcher + '/linux/flutter/generated_plugin_registrant.h',
+      src: paths.example + '/linux/flutter/generated_plugin_registrant.h',
       dest: distInclude + '/generated_plugin_registrant.h'
     },
     {
@@ -379,19 +379,19 @@ task('build-embedded-assets', (done) => {
       dest: distInclude + '/kraken_embbeder.h'
     },
     {
-      src: paths.app_launcher + '/linux/flutter/ephemeral/flutter_export.h',
+      src: paths.example + '/linux/flutter/ephemeral/flutter_export.h',
       dest: distInclude + '/flutter_export.h'
     },
     {
-      src: paths.app_launcher + '/linux/flutter/ephemeral/flutter_glfw.h',
+      src: paths.example + '/linux/flutter/ephemeral/flutter_glfw.h',
       dest: distInclude + '/flutter_glfw.h'
     },
     {
-      src: paths.app_launcher + '/linux/flutter/ephemeral/flutter_messenger.h',
+      src: paths.example + '/linux/flutter/ephemeral/flutter_messenger.h',
       dest: distInclude + '/flutter_messenger.h'
     },
     {
-      src: paths.app_launcher + '/linux/flutter/ephemeral/flutter_plugin_registrar.h',
+      src: paths.example + '/linux/flutter/ephemeral/flutter_plugin_registrar.h',
       dest: distInclude + '/flutter_plugin_registrar.h'
     }
   ];
@@ -400,7 +400,7 @@ task('build-embedded-assets', (done) => {
     fs.copyFileSync(source.src, source.dest);
   }
 
-  execSync(`cp -r ${paths.app_launcher}/linux/flutter/ephemeral/cpp_client_wrapper_glfw/include/flutter ${distInclude}`);
+  execSync(`cp -r ${paths.example}/linux/flutter/ephemeral/cpp_client_wrapper_glfw/include/flutter ${distInclude}`);
   execSync(`ln -s ../app/lib/libflutter_linux_glfw.so ./`, {
     cwd: libOutputPath,
     stdio: 'inherit'
@@ -541,7 +541,7 @@ task('build-android-app', (done) => {
 
   execSync(cmd, {
     eng: process.env,
-    cwd: paths.app_launcher,
+    cwd: paths.example,
     stdio: 'inherit'
   });
   done();
