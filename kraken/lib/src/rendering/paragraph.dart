@@ -719,8 +719,10 @@ class KrakenRenderParagraph extends RenderBox
     // Paint line painters
     for (int i = 0; i < _lineTextPainters.length; i++) {
       TextPainter _lineTextPainter  = _lineTextPainters[i];
-      Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
-      _lineTextPainter.paint(context.canvas, lineOffset);
+      if (i < _lineOffset.length) {
+        Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
+        _lineTextPainter.paint(context.canvas, lineOffset);
+      }
     }
 
     assert(() {
