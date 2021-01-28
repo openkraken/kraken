@@ -132,4 +132,44 @@ describe('DOM EventTarget', () => {
     div.click();
     expect(count).toBe(2);
   });
+
+  fit('stop propagation', () => {
+    let count1 = 0, count2 = 0;
+
+    const div = (
+      <div onClick={(event: any) => {
+        count1++;
+      }}>
+        <div id="counter" onClick={(event: any) => {
+          count2++;
+          event.stopPropagation();
+        }}></div>
+      </div>
+    );
+    document.body.appendChild(div);
+
+    const counter = document.getElementById('counter');
+    counter.click();
+    counter.click();
+    
+    expect(count1).toBe(0);
+    expect(count2).toBe(2);
+  });
+
+  fit('stop immediately propagation', () => {
+    const div = document.createElement('div');
+    document.body.appendChild(div);
+
+    let shouldNotBeTrue = false;
+
+    div.addEventListener('click', (event: Event) => {
+      event.stopImmediatePropagation();
+    });
+    div.addEventListener('click', () => {
+      // Unreach code.
+      shouldNotBeTrue = true;
+    });
+    expect(shouldNotBeTrue).toEqual(false);
+  });
+
 });

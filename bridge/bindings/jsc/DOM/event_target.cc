@@ -281,9 +281,9 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
   bool cancelled;
 
   while (event->nativeEvent->currentTarget != nullptr) {
-    if (event._stopPropagationFlag) break;
+    if (event->_stopPropagationFlag) break;
     cancelled = internalDispatchEvent(event);
-    if (!event->nativeEvent->bubbles || cancelled || event._stopImmediatePropagationFlag) break;
+    if (!event->nativeEvent->bubbles || cancelled || event->_stopImmediatePropagationFlag) break;
 
     if (event->nativeEvent->currentTarget != nullptr) {
       auto node = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
