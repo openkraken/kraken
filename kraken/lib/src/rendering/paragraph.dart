@@ -557,6 +557,13 @@ class KrakenRenderParagraph extends RenderBox
     int index = -1;
     // Loop through each text box
     for (TextBox box in boxes) {
+      // Text include ideographic characters such as Chinese may be counted as seperated text box
+      // if font-family not specified, it needs to filter text box not started from 0 such as following:
+      // TextBox.fromLTRBD(14.0, 1.7, 39.1, 18.2, TextDirection.ltr)
+      if (box.left != 0) {
+        continue;
+      }
+
       index += 1;
       if (index == 0)
         continue;
@@ -719,10 +726,8 @@ class KrakenRenderParagraph extends RenderBox
     // Paint line painters
     for (int i = 0; i < _lineTextPainters.length; i++) {
       TextPainter _lineTextPainter  = _lineTextPainters[i];
-      if (i < _lineOffset.length) {
-        Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
-        _lineTextPainter.paint(context.canvas, lineOffset);
-      }
+      Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
+      _lineTextPainter.paint(context.canvas, lineOffset);
     }
 
     assert(() {
