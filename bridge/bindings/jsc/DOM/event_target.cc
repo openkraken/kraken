@@ -2,7 +2,6 @@
  * Copyright (C) 2020 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-#include <stdio.h>
 #include "event_target.h"
 #include "dart_methods.h"
 #include "document.h"
