@@ -277,20 +277,20 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
 
   // event has been dispatched, then do not dispatch
   event->_dispatchFlag = true;
-  bool cancelled;
+  bool cancelled = internalDispatchEvent(event);
 
-  while (event->nativeEvent->currentTarget != nullptr) {
-    cancelled = internalDispatchEvent(event);
-    if (event->nativeEvent->bubbles == 0 || cancelled || event->_stopImmediatePropagationFlag) break;
+  if (event->nativeEvent->bubbles == 1 && !cancelled && !event->_stopImmediatePropagationFlag) {
+    auto node = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
+    event->nativeEvent->currentTarget = node->parentNode;
 
-    if (event->nativeEvent->currentTarget != nullptr) {
-      auto node = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
-      event->nativeEvent->currentTarget = node->parentNode;
+    auto parent = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
+    if (parent != nullptr) {
+      parent->dispatchEvent(event);
     }
   }
 
   event->_dispatchFlag = false;
-  return !event->_canceledFlag;
+  return event->_canceledFlag;
 }
 
 JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,

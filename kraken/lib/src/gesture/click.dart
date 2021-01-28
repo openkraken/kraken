@@ -76,6 +76,10 @@ class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
+    // If down event is not triggered, it should never trigger click.
+    if (_down == null) {
+      return;
+    }
     assert(state != GestureRecognizerState.ready);
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
       final bool isAcceptSlopPastTolerance = acceptSlopTolerance != null &&

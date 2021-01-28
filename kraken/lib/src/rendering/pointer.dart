@@ -58,6 +58,5 @@ mixin RenderPointerListenerMixin on RenderBox {
       return onPointerCancel(event);
     if (onPointerSignal != null && event is PointerSignalEvent)
       return onPointerSignal(event);
-
   }
 }
