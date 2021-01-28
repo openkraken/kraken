@@ -50,6 +50,7 @@ class _MyHomePageState extends State<MyBrowser> {
     MediaQueryData queryData = MediaQuery.of(context);
 
     Kraken kraken;
+    final TextEditingController textEditingController = TextEditingController(text: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/go-rax/kraken.js');
 
     AppBar appBar = AppBar(
         backgroundColor: Colors.black87,
@@ -57,7 +58,9 @@ class _MyHomePageState extends State<MyBrowser> {
         title: Container(
           height: 40.0,
           child: TextField(
+            controller: textEditingController,
             onSubmitted: (value) {
+              textEditingController.text = value;
               kraken.controller.reloadWithUrl(value);
             },
             decoration: InputDecoration(
@@ -80,7 +83,7 @@ class _MyHomePageState extends State<MyBrowser> {
     kraken = Kraken(
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio - appBar.preferredSize.height - queryData.padding.top,
-      bundleURL: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/go-rax/kraken.js',
+      bundleURL: textEditingController.text,
     );
 
     return Scaffold(
