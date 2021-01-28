@@ -298,30 +298,10 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     String Function() debugReport;
 
     final VelocityEstimate estimate = tracker.getVelocityEstimate();
-    if (estimate != null && isFlingGesture(estimate, tracker.kind)) {
-      final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
-          .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
-      details = DragEndDetails(
-        velocity: velocity,
-        primaryVelocity: (_direction == _OffsetDirection.left || _direction == _OffsetDirection.right) ? velocity.pixelsPerSecond.dx : velocity.pixelsPerSecond.dy,
-      );
-      debugReport = () {
-        return '$estimate; fling at $velocity.';
-      };
-    } else {
-      details = DragEndDetails(
-        velocity: Velocity.zero,
-        primaryVelocity: 0.0,
-      );
-      debugReport = () {
-        if (estimate == null)
-          return 'Could not estimate velocity.';
-        return '$estimate; judged to not be a fling.';
-      };
-    }
+    final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond).clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
 
-    print('details=${details}');
-    invokeCallback<void>('onSwipe', () => onSwipe(Event(EVENT_SWIPE, EventInit())), debugReport: debugReport);
+    EventInit e = EventInit(deltaX: velocity.pixelsPerSecond.dx, deltaY: velocity.pixelsPerSecond.dy, direction: 0 );
+    invokeCallback<void>('onSwipe', () => onSwipe(Event(EVENT_SWIPE, e)), debugReport: debugReport);
   }
 
   void _checkCancel() {

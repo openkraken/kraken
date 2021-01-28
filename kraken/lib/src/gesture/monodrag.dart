@@ -441,9 +441,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       };
     }
 
-    if (onEnd != null) {
-      invokeCallback<void>('onEnd', () => onEnd(details), debugReport: debugReport);
-    }
+    invokeCallback<void>('onEnd', () => onEnd(details), debugReport: debugReport);
   }
 
   void _checkCancel() {

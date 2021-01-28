@@ -58,6 +58,7 @@ class Event {
   bool defaultPrevented = false;
   double deltaX = 0.0;
   double deltaY = 0.0;
+  int direction = 0;
 
   bool _immediateBubble = true;
 
@@ -72,6 +73,7 @@ class Event {
     cancelable = init.cancelable;
     deltaX = init.deltaX;
     deltaY = init.deltaY;
+    direction = init.direction;
     timeStamp = DateTime.now().millisecondsSinceEpoch;
   }
 
@@ -121,8 +123,17 @@ class EventInit {
   final bool cancelable;
   final double deltaX;
   final double deltaY;
+  final int direction;
+  final double velocity;
 
-  EventInit({ this.bubbles = false, this.cancelable = false, this.deltaX = 0.0, this.deltaY = 0.0 });
+  EventInit({
+    this.bubbles = false,
+    this.cancelable = false,
+    this.deltaX = 0.0,
+    this.deltaY = 0.0,
+    this.direction = 0,
+    this.velocity = 0,
+  });
 }
 
 class CustomEventInit extends EventInit {

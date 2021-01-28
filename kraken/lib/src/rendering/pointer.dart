@@ -39,11 +39,13 @@ mixin RenderPointerListenerMixin on RenderBox {
   GestureCallback onPinch;
 
   void onPanEnd(DragEndDetails details) {
-    print('onPanEnd=${details}');
+    onSwipe(Event(EVENT_SWIPE, EventInit()));
   }
 
   void onPinchEnd(ScaleEndDetails details) {
-    print('onPinchEnd=${details}');
+    if (details.velocity != Velocity.zero) {
+      onSwipe(Event(EVENT_SWIPE, EventInit( velocity: details.velocity.pixelsPerSecond.dx )));
+    }
   }
 
   /// Called when a pointer signal this object.
