@@ -37,17 +37,12 @@ if (buildMode === 'Release') {
   );
 }
 
-const libKrakenSeries = SUPPORTED_JS_ENGINES.map(jsEngine => [
-  'generate-cmake-files-' + jsEngine,
-  'build-kraken-lib-' + jsEngine
-]);
-
 // Run tasks
 series(
   'clean',
   'pub-get',
   'compile-polyfill',
-  libKrakenSeries,
+  'build-darwin-kraken-lib-release',
   'copy-build-libs',
   buildAppTasks,
   uploadToOSS ? ['pack', 'upload'] : []
