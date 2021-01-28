@@ -133,30 +133,30 @@ describe('DOM EventTarget', () => {
     expect(count).toBe(2);
   });
 
-  fit('stop propagation', () => {
+  it('stop propagation', () => {
     let count1 = 0, count2 = 0;
 
-    const div = (
-      <div onClick={(event: any) => {
-        count1++;
-      }}>
-        <div id="counter" onClick={(event: any) => {
-          count2++;
-          event.stopPropagation();
-        }}></div>
-      </div>
-    );
-    document.body.appendChild(div);
+    const div1 = document.createElement('div');
+    const div2 = document.createElement('div');
+    div1.appendChild(div2);
+    div1.addEventListener('click', (event) => {
+      console.log('count1++;');
+      count1++;
+    });
+    div2.addEventListener('click', (event) => {
+      console.log('count2++;');
+      count2++;
+    });
+    document.body.appendChild(div1);
 
-    const counter = document.getElementById('counter');
-    counter.click();
-    counter.click();
+    div2.click();
+    div2.click();
     
     expect(count1).toBe(0);
     expect(count2).toBe(2);
   });
 
-  fit('stop immediately propagation', () => {
+  it('stop immediately propagation', () => {
     const div = document.createElement('div');
     document.body.appendChild(div);
 
