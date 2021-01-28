@@ -144,6 +144,7 @@ describe('DOM EventTarget', () => {
       count1++;
     });
     div2.addEventListener('click', (event) => {
+      event.stopPropagation();
       console.log('count2++;');
       count2++;
     });
