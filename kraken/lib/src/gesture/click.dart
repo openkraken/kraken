@@ -86,7 +86,6 @@ class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
       } else {
         if (event is PointerUpEvent) {
           if (onClick != null)
-            onClick(Event(EVENT_CLICK, EventInit(bubbles: true, cancelable: true)));
           _reset();
         } else if (event is PointerCancelEvent) {
           _reset();
@@ -96,6 +95,18 @@ class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
       }
     }
     stopTrackingIfPointerNoLongerDown(event);
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    super.acceptGesture(pointer);
+    onClick(Event(EVENT_CLICK, EventInit(bubbles: true, cancelable: true)));
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    super.rejectGesture(pointer);
+    _reset();
   }
 
   void _reset() {
