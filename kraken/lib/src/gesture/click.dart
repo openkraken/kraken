@@ -86,14 +86,17 @@ class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
           _getGlobalDistance(event) > acceptSlopTolerance;
 
       if (event is PointerMoveEvent && isAcceptSlopPastTolerance) {
+        resolve(GestureDisposition.rejected);
         stopTrackingPointer(primaryPointer);
       } else {
         if (event is PointerUpEvent) {
-          if (onClick != null)
+          resolve(GestureDisposition.accepted);
           _reset();
         } else if (event is PointerCancelEvent) {
+          resolve(GestureDisposition.rejected);
           _reset();
         } else if (event.buttons != _down.buttons) {
+          resolve(GestureDisposition.rejected);
           stopTrackingPointer(primaryPointer);
         }
       }
@@ -104,7 +107,8 @@ class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void acceptGesture(int pointer) {
     super.acceptGesture(pointer);
-    onClick(Event(EVENT_CLICK, EventInit(bubbles: true, cancelable: true)));
+    if (onClick != null)
+      onClick(Event(EVENT_CLICK, EventInit(bubbles: true, cancelable: true)));
   }
 
   @override
