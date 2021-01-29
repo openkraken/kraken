@@ -140,12 +140,11 @@ describe('DOM EventTarget', () => {
     const div2 = document.createElement('div');
     div1.appendChild(div2);
     div1.addEventListener('click', (event) => {
-      console.log('count1++;');
       count1++;
     });
     div2.addEventListener('click', (event) => {
-      console.log('count2++;');
       count2++;
+      event.stopPropagation();
     });
     document.body.appendChild(div1);
 

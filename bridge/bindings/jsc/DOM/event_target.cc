@@ -279,7 +279,7 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
   event->_dispatchFlag = true;
   bool cancelled = internalDispatchEvent(event);
 
-  if (event->nativeEvent->bubbles == 1 && !cancelled && !event->_stopImmediatePropagationFlag) {
+  if (event->nativeEvent->bubbles == 1 && !cancelled && !event->_stopPropagationFlag) {
     auto node = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
     event->nativeEvent->currentTarget = node->parentNode;
 
@@ -391,6 +391,8 @@ bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *ev
   auto stack = _eventHandlers[eventType];
 
   for (auto &handler : stack) {
+    if (eventInstance->_stopImmediatePropagationFlag) break;
+
     JSValueRef exception = nullptr;
     const JSValueRef arguments[] = {eventInstance->object};
     JSObjectCallAsFunction(_hostClass->ctx, handler, handler, 1, arguments, &exception);
