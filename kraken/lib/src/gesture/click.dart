@@ -32,9 +32,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// If this recognizer doesn't win the arena, [handleTapCancel] is called next.
   /// Otherwise, [handleTapUp] is called next.
-  void handleTapDown(PointerDownEvent down) {
-    print('handleTapDown');
-  }
+  void handleTapDown(PointerDownEvent down) {}
 
   /// A pointer has stopped contacting the screen, which is recognized as a tap.
   ///
