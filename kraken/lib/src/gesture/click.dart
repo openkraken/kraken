@@ -3,9 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:async';
-
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 
@@ -70,7 +67,8 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// If this recognizer wins the arena, [handleTapUp] is called instead.
   void handleTapCancel( PointerDownEvent down, PointerCancelEvent cancel, String reason ) {
-    print('handleTapCancel');
+    if (onClick != null)
+      onClick(Event(EVENT_CANCEL, EventInit(bubbles: true, cancelable: true)));
   }
 
   @override
