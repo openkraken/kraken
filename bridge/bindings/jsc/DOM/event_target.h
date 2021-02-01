@@ -59,7 +59,6 @@ public:
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     JSValueRef getPropertyHandler(std::string &name, JSValueRef *exception);
     void setPropertyHandler(std::string &name, JSValueRef value, JSValueRef *exception);
-
     bool dispatchEvent(EventInstance *event);
 
     ~EventTargetInstance() override;

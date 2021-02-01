@@ -4,6 +4,7 @@
  */
 
 import 'package:kraken/gesture.dart';
+import 'package:kraken/dom.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -31,11 +32,14 @@ mixin RenderPointerListenerMixin on RenderBox {
   GestureClickCallback onClick;
 
   /// Called when a click pointer signal this object.
-  void initPointerCallback() {
-    _recognizer.onClick = onClick;
+  void initGestureRecognizer(Map<String, List<EventHandler>> eventHandlers) {
+    if (eventHandlers.containsKey('click')) {
+      gestures[ClickGestureRecognizer] = ClickGestureRecognizer();
+      (gestures[ClickGestureRecognizer] as ClickGestureRecognizer).onClick = onClick;
+    }
   }
 
-  ClickGestureRecognizer _recognizer = ClickGestureRecognizer();
+  final Map<Type, GestureRecognizer> gestures = <Type, GestureRecognizer>{};
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
@@ -45,7 +49,9 @@ mixin RenderPointerListenerMixin on RenderBox {
     /// pointers), or has its button pressed (for mouse pointers) at this widget's
     /// location.
     if (event is PointerDownEvent) {
-      _recognizer.addPointer(event);
+      gestures.forEach((key, gesture) {
+        gesture.addPointer(event);
+      });
     }
 
     if (onPointerDown != null && event is PointerDownEvent)
@@ -58,6 +64,5 @@ mixin RenderPointerListenerMixin on RenderBox {
       return onPointerCancel(event);
     if (onPointerSignal != null && event is PointerSignalEvent)
       return onPointerSignal(event);
-
   }
 }

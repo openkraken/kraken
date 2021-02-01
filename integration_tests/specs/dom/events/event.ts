@@ -2,7 +2,7 @@ describe('Event', () => {
   it('should work with order', async () => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    setElementStyle(container1, {
+    Object.assign(container1.style, {
       padding: '20px',
       backgroundColor: '#999',
       margin: '40px',
@@ -10,7 +10,7 @@ describe('Event', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     const container2 = document.createElement('div');
-    setElementStyle(container2, {
+    Object.assign(container2.style, {
       padding: '20px',
       height: '100px',
       backgroundColor: '#f40',
@@ -20,14 +20,14 @@ describe('Event', () => {
 
     container1.appendChild(container2);
 
-    document.body.addEventListener('click', function listener() {
+    document.body.addEventListener('click', function listener(e) {
       wrapper.appendChild(document.createTextNode('BODY clicked, '));
       document.body.removeEventListener('click', listener);
     });
-    container1.addEventListener('click', () => {
+    container1.addEventListener('click', (e) => {
       wrapper.appendChild(document.createTextNode('DIV 1 clicked, '));
     });
-    container2.addEventListener('click', () => {
+    container2.addEventListener('click', (e) => {
       wrapper.appendChild(document.createTextNode('DIV 2 clicked, '));
     });
 

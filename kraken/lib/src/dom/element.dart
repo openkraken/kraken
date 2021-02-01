@@ -1185,7 +1185,7 @@ class Element extends Node
   }
 
   void handleMethodClick() {
-    Event clickEvent = Event(EVENT_CLICK, EventInit());
+    Event clickEvent = Event(EVENT_CLICK, EventInit(bubbles: true, cancelable: true));
 
     if (isRendererAttached) {
       final RenderBox box = renderBoxModel;
@@ -1201,21 +1201,10 @@ class Element extends Node
       Offset position = box.localToGlobal(box.size.center(Offset.zero), ancestor: elementManager.getRootRenderObject());
       final BoxHitTestResult boxHitTestResult = BoxHitTestResult();
       GestureBinding.instance.hitTest(boxHitTestResult, position);
-      bool hitTest = true;
-      Element currentElement = this;
-      while (hitTest) {
-        currentElement.handleClick(clickEvent);
-        if (currentElement.parent != null) {
-          currentElement = currentElement.parent;
-          hitTest = currentElement.renderBoxModel.hitTest(boxHitTestResult, position: position);
-        } else {
-          hitTest = false;
-        }
-      }
-    } else {
-      // If element not in tree, click is fired and only response to itself.
-      handleClick(clickEvent);
     }
+
+    // If element not in tree, click is fired and only response to itself.
+    handleClick(clickEvent);
   }
 
   Future<Uint8List> toBlob({double devicePixelRatio}) {
