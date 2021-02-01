@@ -22,21 +22,21 @@ class ModuleManager {
 
   ModuleManager(this.controller, this.contextId) {
     if (!inited) {
-      defineNewModule('AsyncStorage', AsyncStorageModule(this));
-      defineNewModule('Clipboard', ClipBoardModule(this));
-      defineNewModule('Connection', ConnectionModule(this));
-      defineNewModule('DeviceInfo', DeviceInfoModule(this));
-      defineNewModule('fetch', FetchModule(this));
-      defineNewModule('Geolocation', GeolocationModule(this));
-      defineNewModule('MethodChannel', MethodChannelModule(this));
-      defineNewModule('MQTT', MQTTModule(this));
-      defineNewModule('Navigation', NavigationModule(this));
-      defineNewModule('Navigator', NavigatorModule(this));
-      defineNewModule('WebSocket', WebSocketModule(this));
+      defineModule('AsyncStorage', AsyncStorageModule(this));
+      defineModule('Clipboard', ClipBoardModule(this));
+      defineModule('Connection', ConnectionModule(this));
+      defineModule('DeviceInfo', DeviceInfoModule(this));
+      defineModule('fetch', FetchModule(this));
+      defineModule('Geolocation', GeolocationModule(this));
+      defineModule('MethodChannel', MethodChannelModule(this));
+      defineModule('MQTT', MQTTModule(this));
+      defineModule('Navigation', NavigationModule(this));
+      defineModule('Navigator', NavigatorModule(this));
+      defineModule('WebSocket', WebSocketModule(this));
     }
   }
 
-  static void defineNewModule(String type, BaseModule module) {
+  static void defineModule(String type, BaseModule module) {
     if (_moduleMap.containsKey(type)) {
       throw Exception('ModuleManager: redefined module of type: $type');
     }
