@@ -19,7 +19,7 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerUp = handlePointUp;
     renderBoxModel.onPointerCancel = handlePointCancel;
     renderBoxModel.onClick = handleClick;
-    renderBoxModel.initPointerCallback();
+    renderBoxModel.initGestureRecognizer(eventHandlers);
   }
 
   void removeEventResponder(RenderBoxModel renderBoxModel) {
