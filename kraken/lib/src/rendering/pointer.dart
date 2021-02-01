@@ -8,8 +8,6 @@ import 'package:kraken/dom.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/gesture.dart';
 
 typedef GestureCallback = void Function(Event);
 
