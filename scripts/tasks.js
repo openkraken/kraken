@@ -566,6 +566,7 @@ task('build-android-kraken-lib-release', (done) => {
     -DIS_ANDROID=TRUE \
     -DANDROID_ABI="${arch}" \
     -DANDROID_PLATFORM="android-16" \
+    -DANDROID_STL=c++_shared \
     -G "Ninja" \
     -B ${paths.bridge}/cmake-build-android-${arch} -S ${paths.bridge}`,
       {
