@@ -2,7 +2,6 @@
  * Copyright (C) 2020 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
 #include "event_target.h"
 #include "dart_methods.h"
 #include "document.h"
@@ -278,19 +277,20 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
 
   // event has been dispatched, then do not dispatch
   event->_dispatchFlag = true;
-  bool cancelled;
+  bool cancelled = internalDispatchEvent(event);
 
-  while (event->nativeEvent->currentTarget != nullptr) {
-    cancelled = internalDispatchEvent(event);
-    if (event->nativeEvent->bubbles || cancelled) break;
-    if (event->nativeEvent->currentTarget != nullptr) {
-      auto node = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
-      event->nativeEvent->currentTarget = node->parentNode;
+  if (event->nativeEvent->bubbles == 1 && !cancelled && !event->_stopPropagationFlag) {
+    auto node = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
+    event->nativeEvent->currentTarget = node->parentNode;
+
+    auto parent = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
+    if (parent != nullptr) {
+      parent->dispatchEvent(event);
     }
   }
 
   event->_dispatchFlag = false;
-  return !event->_canceledFlag;
+  return event->_canceledFlag;
 }
 
 JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -391,6 +391,8 @@ bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *ev
   auto stack = _eventHandlers[eventType];
 
   for (auto &handler : stack) {
+    if (eventInstance->_stopImmediatePropagationFlag) break;
+
     JSValueRef exception = nullptr;
     const JSValueRef arguments[] = {eventInstance->object};
     JSObjectCallAsFunction(_hostClass->ctx, handler, handler, 1, arguments, &exception);
@@ -398,22 +400,19 @@ bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *ev
   }
 
   // do not dispatch event when event has been canceled
-  return !eventInstance->_canceledFlag;
+  // true is prevented.
+  return eventInstance->_canceledFlag;
 }
 
 // This function will be called back by dart side when trigger events.
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
-
   JSEventTarget::EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
   JSContext *context = eventTargetInstance->context;
-
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(nativeEventType->string),
                                                nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);
-
   EventInstance *eventInstance = JSEvent::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
-
   eventTargetInstance->dispatchEvent(eventInstance);
 }
 

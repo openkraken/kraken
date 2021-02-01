@@ -49,14 +49,19 @@ class _MyHomePageState extends State<MyBrowser> {
   Widget build(BuildContext context) {
     MediaQueryData queryData = MediaQuery.of(context);
 
+    Kraken kraken;
+    final TextEditingController textEditingController = TextEditingController(text: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/go-rax/kraken.js');
+
     AppBar appBar = AppBar(
         backgroundColor: Colors.black87,
         titleSpacing: 10.0,
         title: Container(
           height: 40.0,
           child: TextField(
+            controller: textEditingController,
             onSubmitted: (value) {
-              print(value);
+              textEditingController.text = value;
+              kraken.controller.reloadWithUrl(value);
             },
             decoration: InputDecoration(
               hintText: 'Enter a app url',
@@ -75,10 +80,10 @@ class _MyHomePageState extends State<MyBrowser> {
         // the App.build method, and use it to set our appbar title.
       );
 
-    Kraken kraken = Kraken(
+    kraken = Kraken(
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio - appBar.preferredSize.height - queryData.padding.top,
-      bundleURL: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/go-rax/kraken.js',
+      bundleURL: textEditingController.text,
     );
 
     return Scaffold(
