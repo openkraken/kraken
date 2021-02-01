@@ -23,76 +23,17 @@ import 'package:kraken/rendering.dart';
 
 const String UNKNOWN = 'UNKNOWN';
 
-Element _createElement(int id, Pointer nativePtr, String type, Map<String, dynamic> props,
-    List<String> events, ElementManager elementManager) {
-  Element element;
-  switch (type) {
-    case BODY:
-      break;
-    case DIV:
-      element = DivElement(id, nativePtr.cast<NativeElement>(), elementManager);
-      break;
-    case SPAN:
-      element = SpanElement(id, nativePtr.cast<NativeElement>(), elementManager);
-      break;
-    case ANCHOR:
-      element = AnchorElement(id, nativePtr.cast<NativeAnchorElement>(), elementManager);
-      break;
-    case STRONG:
-      element = StrongElement(id, nativePtr.cast<NativeElement>(), elementManager);
-      break;
-    case IMAGE:
-      element = ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager);
-      break;
-    case PARAGRAPH:
-      element = ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager);
-      break;
-    case INPUT:
-      element = InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager);
-      break;
-    case PRE:
-      element = PreElement(id, nativePtr.cast<NativeElement>(), elementManager);
-      break;
-    case CANVAS:
-      element = CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager);
-      break;
-    case ANIMATION_PLAYER:
-      element = AnimationPlayerElement(id, nativePtr.cast<NativeAnimationElement>(), elementManager);
-      break;
-    case VIDEO:
-      element = VideoElement(id, nativePtr.cast<NativeVideoElement>(), elementManager);
-      break;
-    case CAMERA_PREVIEW:
-      element = CameraPreviewElement(id, nativePtr.cast<NativeElement>(), elementManager);
-      break;
-    case IFRAME:
-      element = IFrameElement(id, nativePtr.cast<NativeIframeElement>(), elementManager);
-      break;
-    case AUDIO:
-      element = AudioElement(id, nativePtr.cast<NativeAudioElement>(), elementManager);
-      break;
-    case OBJECT:
-      element = ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager);
-      break;
-    default:
-      element = Element(id, nativePtr.cast<NativeElement>(), elementManager, tagName: UNKNOWN);
-      print('ERROR: unexpected element type "$type"');
+typedef ElementCreator = Element Function(int id, Pointer nativePtr, ElementManager elementManager);
+
+Element _createElement(int id, Pointer nativePtr, String type, ElementManager elementManager) {
+  if (type == BODY) return null;
+
+  if (!ElementManager._elementCreator.containsKey(type)) {
+    print('ERROR: unexpected element type "$type"');
+    return Element(id, nativePtr.cast<NativeElement>(), elementManager, tagName: UNKNOWN);
   }
 
-  // Add element properties.
-  if (props != null && props.length > 0) {
-    props.forEach((String key, value) {
-      element.setProperty(key, value);
-    });
-  }
-
-  // Add element event listener
-  if (events != null && events.length > 0) {
-    for (String eventName in events) {
-      element.addEvent(eventName);
-    }
-  }
-
+  Element element = ElementManager._elementCreator[type](id, nativePtr, elementManager);
   return element;
 }
 
@@ -119,6 +60,16 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   static Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
   static Map<int, Pointer<NativeDocument>> documentNativePtrMap = Map();
   static Map<int, Pointer<NativeWindow>> windowNativePtrMap = Map();
+
+  static Map<String, ElementCreator> _elementCreator = Map();
+  static bool inited = false;
+
+  static void defineElement(String type, ElementCreator creator) {
+    if (_elementCreator.containsKey(type)) {
+      throw Exception('ElementManager: redefined element of type: $type');
+    }
+    _elementCreator[type] = creator;
+  }
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
 
@@ -169,6 +120,25 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     Document document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, _rootElement);
     setEventTarget(document);
+
+    if (!inited) {
+      defineElement(DIV, (id, nativePtr, elementManager) => DivElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(SPAN, (id, nativePtr, elementManager) => SpanElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(ANCHOR, (id, nativePtr, elementManager) => AnchorElement(id, nativePtr.cast<NativeAnchorElement>(), elementManager));
+      defineElement(STRONG, (id, nativePtr, elementManager) => StrongElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(IMAGE, (id, nativePtr, elementManager) => ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager));
+      defineElement(PARAGRAPH, (id, nativePtr, elementManager) => ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(INPUT, (id, nativePtr, elementManager) => InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager));
+      defineElement(PRE, (id, nativePtr, elementManager) => PreElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager));
+      defineElement(ANIMATION_PLAYER, (id, nativePtr, elementManager) => AnimationPlayerElement(id, nativePtr.cast<NativeAnimationElement>(), elementManager));
+      defineElement(VIDEO, (id, nativePtr, elementManager) => VideoElement(id, nativePtr.cast<NativeVideoElement>(), elementManager));
+      defineElement(CAMERA_PREVIEW, (id, nativePtr, elementManager) => CameraPreviewElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(IFRAME, (id, nativePtr, elementManager) => IFrameElement(id, nativePtr.cast<NativeIframeElement>(), elementManager));
+      defineElement(AUDIO, (id, nativePtr, elementManager) => AudioElement(id, nativePtr.cast<NativeAudioElement>(), elementManager));
+      defineElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager));
+      inited = true;
+    }
   }
 
   void _setupObserver() {
@@ -233,7 +203,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       }
     }
 
-    Element element = _createElement(id, nativePtr, type, props, eventList, this);
+    Element element = _createElement(id, nativePtr, type, this);
     setEventTarget(element);
     return element;
   }
