@@ -27,21 +27,8 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// This triggers after the down event, once a short timeout ([deadline]) has
   /// elapsed, or once the gesture has won the arena, whichever comes first.
   ///
-  /// {@macro flutter.gestures.gestureRecognizer.kind}
-  ClickGestureRecognizer({
-    this.deadline,
-    this.acceptSlopTolerance = kTouchSlop,
-    Object debugOwner,
-    PointerDeviceKind kind,
-    this.onClick,
-  }) : assert(
-  acceptSlopTolerance == null || acceptSlopTolerance >= 0,
-  'The acceptSlopTolerance must be positive or null',
-  ),
-        super(debugOwner: debugOwner, kind: kind);
-
-  /// If non-null, the recognizer will call [didExceedDeadline] after this
-  /// amount of time has elapsed since starting to track the primary pointer.
+  /// The parameter `down` is the down event of the primary pointer that started
+  /// the tap sequence.
   ///
   /// If this recognizer doesn't win the arena, [handleTapCancel] is called next.
   /// Otherwise, [handleTapUp] is called next.
@@ -63,8 +50,6 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   GestureCallback onClick;
-
-  DateTime _startTime;
 
   /// A pointer that previously triggered [handleTapDown] will not end up
   /// causing a tap.
@@ -104,29 +89,22 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  void handleEvent(PointerEvent event) {
-    assert(state != GestureRecognizerState.ready);
-    if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
-      final bool isAcceptSlopPastTolerance = acceptSlopTolerance != null &&
-          _getGlobalDistance(event) > acceptSlopTolerance;
+  void startTrackingPointer(int pointer, [Matrix4 transform]) {
+    // The recognizer should never track any pointers when `_down` is null,
+    // because calling `_checkDown` in this state will throw exception.
+    assert(_down != null);
+    super.startTrackingPointer(pointer, transform);
+  }
 
-      if (event is PointerMoveEvent && isAcceptSlopPastTolerance) {
-        stopTrackingPointer(primaryPointer);
-      } else {
-        if (event is PointerUpEvent) {
-          DateTime endTime = DateTime.now();
-          bool isPress = endTime.difference(_startTime) > kLongPressTimeout;
-          if (onClick != null) {
-            onClick(Event(isPress ? EVENT_PRESS : EVENT_CLICK, EventInit()));
-          }
-          _reset();
-        } else if (event is PointerDownEvent) {
-          _startTime = DateTime.now();
-        } else if (event is PointerCancelEvent) {
-          _reset();
-        } else if (event.buttons != _down.buttons) {
-          stopTrackingPointer(primaryPointer);
-        }
+  @override
+  void handlePrimaryPointer(PointerEvent event) {
+    if (event is PointerUpEvent) {
+      _up = event;
+      _checkUp();
+    } else if (event is PointerCancelEvent) {
+      resolve(GestureDisposition.rejected);
+      if (_sentTapDown) {
+        _checkCancel(event, '');
       }
       _reset();
     } else if (event.buttons != _down.buttons) {
