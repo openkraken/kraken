@@ -500,6 +500,11 @@ class Element extends Node
       double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
       double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
       renderBoxModel.renderStyle.lineHeight = parsedLineHeight;
+      for (Node node in childNodes) {
+        if (node is TextNode) {
+          node.updateTextStyle();
+        }
+      }
       renderBoxModel.parseLineHeight = false;
     }
 
