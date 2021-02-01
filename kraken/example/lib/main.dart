@@ -83,6 +83,7 @@ class _MyHomePageState extends State<MyBrowser> {
     kraken = Kraken(
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio - appBar.preferredSize.height - queryData.padding.top,
+      bundlePath: 'assets/bundle.js',
     );
 
     return Scaffold(
