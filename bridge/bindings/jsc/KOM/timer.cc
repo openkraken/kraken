@@ -4,7 +4,7 @@
  */
 
 #include "timer.h"
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 #include "bindings/jsc/macros.h"
 #include "bridge_jsc.h"
 #include "dart_methods.h"

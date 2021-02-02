@@ -10,7 +10,7 @@
 #include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/host_class.h"
 #include "bindings/jsc/host_object.h"
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 #include <unordered_map>
 #include <vector>
 

@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "js_context.h"
+#include "js_context_internal.h"
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/kraken.h"
 #include "bindings/jsc/macros.h"

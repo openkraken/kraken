@@ -4,7 +4,7 @@
  */
 
 #include "bindings/jsc/host_object.h"
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 #include "bindings/jsc/macros.h"
 #include <unordered_map>
 #include <vector>

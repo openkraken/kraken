@@ -3,13 +3,12 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_JS_CONTEXT_H
-#define KRAKENBRIDGE_JS_CONTEXT_H
+#ifndef KRAKENBRIDGE_JS_CONTEXT_INTERNAL_H
+#define KRAKENBRIDGE_JS_CONTEXT_INTERNAL_H
 
 #include "bindings/jsc/macros.h"
 #include "foundation/macros.h"
 #include "include/kraken_bridge.h"
-#include <JavaScriptCore/JavaScript.h>
 #include <chrono>
 #include <codecvt>
 #include <deque>
@@ -30,8 +29,6 @@
 #define JSC_LIKELY(EXPR) (EXPR)
 #define JSC_UNLIKELY(EXPR) (EXPR)
 #endif
-
-using JSExceptionHandler = std::function<void(int32_t contextId, const char* errmsg)>;
 
 namespace kraken::binding::jsc {
 
@@ -100,42 +97,6 @@ static inline bool isNumberIndex(std::string &name) {
   return f >= '0' && f <= '9';
 }
 
-class JSContext {
-public:
-  static std::vector<JSStaticFunction> globalFunctions;
-  static std::vector<JSStaticValue> globalValue;
-
-  JSContext() = delete;
-  JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
-  ~JSContext();
-
-  bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
-  bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
-
-  bool isValid();
-
-  JSObjectRef global();
-  JSGlobalContextRef context();
-
-  int32_t getContextId();
-
-  void *getOwner();
-
-  bool handleException(JSValueRef exc);
-
-  void reportError(const char *errmsg);
-
-  std::chrono::time_point<std::chrono::system_clock> timeOrigin;
-
-  int32_t uniqueId;
-
-private:
-  int32_t contextId;
-  JSExceptionHandler _handler;
-  void *owner;
-  std::atomic<bool> ctxInvalid_{false};
-  JSGlobalContextRef ctx_;
-};
 
 JSObjectRef makeObjectFunctionWithPrivateData(JSContext *context, void *data, const char *name,
                                               JSObjectCallAsFunctionCallback callback);
@@ -194,4 +155,4 @@ std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionH
 
 } // namespace kraken::binding::jsc
 
-#endif // KRAKENBRIDGE_JS_CONTEXT_H
+#endif // KRAKENBRIDGE_JS_CONTEXT_INTERNAL_H

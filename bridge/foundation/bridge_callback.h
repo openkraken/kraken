@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_BRIDGE_CALLBACK_H
 
 #ifdef KRAKEN_JSC_ENGINE
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 #endif
 
 #include <atomic>

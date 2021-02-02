@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_DOCUMENT_H
 
 #include "all_collection.h"
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 #include "bindings/jsc/macros.h"
 #include "element.h"
 #include "node.h"

@@ -8,9 +8,9 @@
 
 #include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/host_class.h"
-#include "bindings/jsc/js_context.h"
-#include <vector>
+#include "bindings/jsc/js_context_internal.h"
 #include <unordered_map>
+#include <vector>
 
 namespace kraken::binding::jsc {
 

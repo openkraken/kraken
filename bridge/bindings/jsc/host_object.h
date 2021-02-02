@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_HOST_OBJECT_H
 #define KRAKENBRIDGE_HOST_OBJECT_H
 
-#include "js_context.h"
+#include "js_context_internal.h"
 #include <unordered_map>
 
 namespace kraken::binding::jsc {

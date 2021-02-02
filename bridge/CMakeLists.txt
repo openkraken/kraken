@@ -64,8 +64,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   endif ()
 
   list(APPEND BRIDGE_SOURCE
-    bindings/jsc/js_context.h
-    bindings/jsc/js_context.cc
+          bindings/jsc/js_context_internal.h
+          bindings/jsc/js_context_internal.cc
     bindings/jsc/host_object.cc
     bindings/jsc/host_object.h
     bindings/jsc/host_class.cc
