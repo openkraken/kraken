@@ -213,6 +213,27 @@ describe('line-height', () => {
     await matchViewportSnapshot();
   });
 
+  it('works with text of multiple lines', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          fontFamily: 'Songti SC',
+          fontSize: '16px',
+          backgroundColor: 'green',
+          lineHeight: '30px',
+        },
+      },
+      [
+        createText('The line-height CSS property sets the height of a line box. Its commonly used to set the distance between lines of text. On block-level elements, it specifies the minimum height of line boxes within the element. On non-replaced inline elements, it specifies the height that is used to calculate line box height.')
+      ]
+    );
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
   it('should work with percentage', async () => {
     let div;
     div = createElement(
@@ -239,8 +260,8 @@ describe('line-height', () => {
         ])
       ]
     );
-
     BODY.appendChild(div);
     await matchViewportSnapshot();
   });
+
 });

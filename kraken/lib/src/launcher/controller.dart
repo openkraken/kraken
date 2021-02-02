@@ -401,14 +401,23 @@ class KrakenController {
 
   KrakenMethodChannel get methodChannel => _methodChannel;
 
-  final String name;
+  String _name;
+  String get name => _name;
+  set name(String value) {
+    if (_name != null) {
+      int contextId = _nameIdMap[_name];
+      _nameIdMap.remove(_name);
+      _nameIdMap[value] = contextId;
+    }
+    _name = value;
+  }
 
   // Enable debug inspector.
   bool debugEnableInspector;
   GestureClient _gestureClient;
 
   KrakenController(
-    this.name,
+    String name,
     double viewportWidth,
     double viewportHeight, {
     bool showPerformanceOverlay = false,
@@ -423,7 +432,8 @@ class KrakenController {
     this.onLoadError,
     this.onJSError,
     this.debugEnableInspector,
-  })  : _bundleURL = bundleURL,
+  })  : _name = name,
+        _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent,
         _gestureClient = gestureClient {

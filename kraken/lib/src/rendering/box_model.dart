@@ -14,6 +14,7 @@ import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
+import 'package:kraken/gesture.dart';
 
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   bool isPositioned = false;
@@ -307,6 +308,7 @@ class RenderLayoutBox extends RenderBoxModel
 
 mixin RenderBoxModelBase on RenderBox {
   RenderStyle renderStyle;
+  Size boxSize;
 }
 
 class RenderBoxModel extends RenderBox with

@@ -132,4 +132,43 @@ describe('DOM EventTarget', () => {
     div.click();
     expect(count).toBe(2);
   });
+
+  it('stop propagation', () => {
+    let count1 = 0, count2 = 0;
+
+    const div1 = document.createElement('div');
+    const div2 = document.createElement('div');
+    div1.appendChild(div2);
+    div1.addEventListener('click', (event) => {
+      count1++;
+    });
+    div2.addEventListener('click', (event) => {
+      count2++;
+      event.stopPropagation();
+    });
+    document.body.appendChild(div1);
+
+    div2.click();
+    div2.click();
+    
+    expect(count1).toBe(0);
+    expect(count2).toBe(2);
+  });
+
+  it('stop immediately propagation', () => {
+    const div = document.createElement('div');
+    document.body.appendChild(div);
+
+    let shouldNotBeTrue = false;
+
+    div.addEventListener('click', (event: Event) => {
+      event.stopImmediatePropagation();
+    });
+    div.addEventListener('click', () => {
+      // Unreach code.
+      shouldNotBeTrue = true;
+    });
+    expect(shouldNotBeTrue).toEqual(false);
+  });
+
 });

@@ -86,12 +86,7 @@ class Kraken extends StatelessWidget {
     this.animationController,
     this.debugEnableInspector,
     this.onJSError
-  }) : super(key: key) {
-    // assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
-    // 'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
-    // assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
-    // 'viewportHeight must temporarily equal to window.physicalSize.height / window.devicePixelRatio, as a result of vh uint in current version is not relative to viewportHeight.');
-  }
+  }) : super(key: key);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -138,6 +133,13 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
     }
 
     return controller.view.getRootRenderObject();
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
+    super.updateRenderObject(context, renderObject);
+    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
+    controller.name = shortHash(_krakenWidget.hashCode);
   }
 
   @override

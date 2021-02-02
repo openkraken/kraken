@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/gesture.dart';
 
 // CSS Overflow: https://drafts.csswg.org/css-overflow-3/
 
