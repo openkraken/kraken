@@ -1,7 +1,5 @@
 const fs = require('fs');
 const chalk = require('chalk');
-const { execSync } = require('child_process');
-const os = require('os');
 const path = require('path');
 const program = require('commander');
 const OSS = require('ali-oss');
