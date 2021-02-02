@@ -204,7 +204,8 @@ describe('Overflow', () => {
           height: '200px',
           'overflow-x': 'auto',
           'overflow-y': 'auto',
-          border: '1px solid #000'
+          border: '5px solid #000',
+          padding: '5px'
         }
       }, [
         createElement('div', {
