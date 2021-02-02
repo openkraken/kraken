@@ -9,7 +9,6 @@
 #ifndef  KRAKEN_ENABLE_JSA
 
 #include "foundation/bridge_callback.h"
-#include "foundation/js_engine_adaptor.h"
 #include "foundation/thread_safe_array.h"
 #include "include/kraken_bridge.h"
 
@@ -69,7 +68,7 @@ public:
   void evaluateScript(const NativeString *script, const char *url, int startLine);
   void evaluateScript(const std::u16string& script, const char *url, int startLine);
 
-  const std::unique_ptr<KRAKEN_JS_CONTEXT> &getContext() const {
+  const std::unique_ptr<kraken::binding::jsc::JSContext> &getContext() const {
     return context;
   }
 

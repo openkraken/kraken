@@ -7,7 +7,6 @@
 #define KRAKENBRIDGE_JS_CONTEXT_H
 
 #include "bindings/jsc/macros.h"
-#include "foundation/js_engine_adaptor.h"
 #include "foundation/macros.h"
 #include "include/kraken_bridge.h"
 #include <JavaScriptCore/JavaScript.h>
@@ -31,6 +30,8 @@
 #define JSC_LIKELY(EXPR) (EXPR)
 #define JSC_UNLIKELY(EXPR) (EXPR)
 #endif
+
+using JSExceptionHandler = std::function<void(int32_t contextId, const char* errmsg)>;
 
 namespace kraken::binding::jsc {
 

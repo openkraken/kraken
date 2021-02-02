@@ -6,23 +6,16 @@
 #ifndef KRAKENBRIDGE_BRIDGE_CALLBACK_H
 #define KRAKENBRIDGE_BRIDGE_CALLBACK_H
 
-#ifdef KRAKEN_ENABLE_JSA
-#include "jsa.h"
-#elif KRAKEN_JSC_ENGINE
+#ifdef KRAKEN_JSC_ENGINE
 #include "bindings/jsc/js_context.h"
 #endif
 
-#include "js_engine_adaptor.h"
 #include <atomic>
 #include <cstdint>
 #include <memory>
 #include <vector>
 
 namespace kraken::foundation {
-
-#ifdef KRAKEN_ENABLE_JSA
-using namespace alibaba::jsa;
-#endif
 
 /// An global standalone BridgeCallback register and collector used to register an callback which will call back from
 /// outside of bridge.

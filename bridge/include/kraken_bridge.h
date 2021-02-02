@@ -8,6 +8,11 @@
 
 #include <cstdint>
 #include <thread>
+
+#if KRAKEN_JSC_ENGINE
+#include "kraken_bridge_jsc.h"
+#endif
+
 #define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
 void *getJSContext(int32_t contextId);
@@ -17,23 +22,8 @@ struct NativeString {
   const uint16_t *string;
   int32_t length;
 
-  NativeString *clone() {
-    NativeString *newNativeString = new NativeString();
-    uint16_t *newString = new uint16_t[length];
-
-    for (size_t i = 0; i < length; i++) {
-      newString[i] = string[i];
-    }
-
-    newNativeString->string = newString;
-    newNativeString->length = length;
-    return newNativeString;
-  }
-
-  void free() {
-    delete[] string;
-    delete this;
-  }
+  NativeString *clone();
+  void free();
 };
 
 struct KrakenInfo;
@@ -67,20 +57,14 @@ enum UICommand {
 
 struct UICommandItem {
   UICommandItem(int32_t id, int32_t type, NativeString args_01, NativeString args_02, void *nativePtr)
-    : type(type),
-      string_01(reinterpret_cast<int64_t>(args_01.string)),
-      args_01_length(args_01.length),
-      string_02(reinterpret_cast<int64_t>(args_02.string)),
-      args_02_length(args_02.length),
-      id(id),
+    : type(type), string_01(reinterpret_cast<int64_t>(args_01.string)), args_01_length(args_01.length),
+      string_02(reinterpret_cast<int64_t>(args_02.string)), args_02_length(args_02.length), id(id),
       nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
   UICommandItem(int32_t id, int32_t type, NativeString args_01, void *nativePtr)
-    : type(type),
-      string_01(reinterpret_cast<int64_t>(args_01.string)),
-      args_01_length(args_01.length),
-      id(id),
+    : type(type), string_01(reinterpret_cast<int64_t>(args_01.string)), args_01_length(args_01.length), id(id),
       nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
-  UICommandItem(int32_t id, int32_t type, void *nativePtr) : type(type), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+  UICommandItem(int32_t id, int32_t type, void *nativePtr)
+    : type(type), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
   int32_t type;
   int32_t id;
   int32_t args_01_length{0};
