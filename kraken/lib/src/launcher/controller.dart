@@ -22,6 +22,7 @@ import 'package:kraken/src/module/module_manager.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
+typedef LoadHandler = void Function(KrakenController controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
 typedef JSErrorHandler = void Function(String message);
 
@@ -326,7 +327,7 @@ class KrakenViewController {
 
       switch (action.navigationType) {
         case KrakenNavigationType.reload:
-          rootController.reloadWithUrl(action.target);
+          rootController.reloadUrl(action.target);
           break;
         default:
         // for linkActivated and other type, we choose to do nothing.
@@ -391,6 +392,8 @@ class KrakenController {
     return getControllerOfJSContextId(contextId);
   }
 
+  LoadHandler onLoad;
+
   // Error handler when load bundle failed.
   LoadErrorHandler onLoadError;
 
@@ -429,6 +432,7 @@ class KrakenController {
     GestureClient gestureClient,
     KrakenNavigationDelegate navigationDelegate,
     KrakenMethodChannel methodChannel,
+    this.onLoad,
     this.onLoadError,
     this.onJSError,
     this.debugEnableInspector,
@@ -505,8 +509,7 @@ class KrakenController {
     _view.attachView(parent, previousSibling);
   }
 
-  // reload current kraken view.
-  void reload() async {
+  void unload() async {
     assert(!_view._disposed, "Kraken have already disposed");
     RenderObject root = _view.getRootRenderObject();
     RenderObject parent = root.parent;
@@ -536,11 +539,16 @@ class KrakenController {
         rootController: this,
         navigationDelegate: _view.navigationDelegate);
     _view.attachView(parent, previousSibling);
+  } 
+
+  // reload current kraken view.
+  void reload() async {
+    await unload();
     await loadBundle();
-    await run();
+    await evalBundle();
   }
 
-  void reloadWithUrl(String url) async {
+  void reloadUrl(String url) async {
     assert(!_view._disposed, "Kraken have already disposed");
     _bundleURL = url;
     await reload();
@@ -583,36 +591,45 @@ class KrakenController {
 
   // preload javascript source and cache it.
   void loadBundle({
-    String bundleContentOverride,
-    String bundlePathOverride,
-    String bundleURLOverride,
+    String bundleContent,
+    String bundlePath,
+    String bundleURL
   }) async {
     assert(!_view._disposed, "Kraken have already disposed");
-    _bundleContent = _bundleContent ?? bundleContentOverride;
-    _bundlePath = _bundlePath ?? bundlePathOverride;
-    _bundleURL = _bundleURL ?? bundleURLOverride;
-    String bundleURL = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 
-    if (bundleURL == null && methodChannel is KrakenNativeChannel) {
-      bundleURL = await (methodChannel as KrakenNativeChannel).getUrl();
+    if (kProfileMode) {
+      PerformanceTiming.instance(view.contextId).mark(PERF_JS_BUNDLE_LOAD_START);
+    }
+
+    _bundleContent = _bundleContent ?? bundleContent;
+    _bundlePath = _bundlePath ?? bundlePath;
+    _bundleURL = _bundleURL ?? bundleURL;
+    String url = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
+
+    if (url == null && methodChannel is KrakenNativeChannel) {
+      url = await (methodChannel as KrakenNativeChannel).getUrl();
     }
 
     if (onLoadError != null) {
       try {
-        _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
+        _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent);
       } catch (e, stack) {
         onLoadError(FlutterError(e.toString()), stack);
       }
     } else {
-      _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
+      _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent);
+    }
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(view.contextId).mark(PERF_JS_BUNDLE_LOAD_END);
     }
   }
 
   // execute preloaded javascript source
-  void run() async {
+  void evalBundle() async {
     assert(!_view._disposed, "Kraken have already disposed");
     if (_bundle != null) {
-      await _bundle.run(_view.contextId);
+      await _bundle.eval(_view.contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
@@ -626,6 +643,14 @@ class KrakenController {
           emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
         });
       });
+
+      if (onLoad != null) {
+        // DOM element are created at next frame, so we should trigger onload callback in the next frame.
+        module.requestAnimationFrame((_) {
+          onLoad(this);
+        });
+      }
+
     }
   }
 }
