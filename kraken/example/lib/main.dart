@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyBrowser> {
     MediaQueryData queryData = MediaQuery.of(context);
 
     Kraken kraken;
-    final TextEditingController textEditingController = TextEditingController(text: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/go-rax/kraken.js');
+    final TextEditingController textEditingController = TextEditingController();
 
     AppBar appBar = AppBar(
         backgroundColor: Colors.black87,
