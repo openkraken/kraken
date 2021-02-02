@@ -8,7 +8,6 @@
 
 #include "bindings/jsc/DOM/element.h"
 #include "bindings/jsc/js_context_internal.h"
-#include "bindings/jsc/macros.h"
 
 namespace kraken::binding::jsc {
 

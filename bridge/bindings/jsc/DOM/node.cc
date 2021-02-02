@@ -4,7 +4,6 @@
  */
 
 #include "node.h"
-#include "bindings/jsc/macros.h"
 #include "foundation/ui_command_queue.h"
 #include "foundation/ui_command_callback_queue.h"
 

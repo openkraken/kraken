@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_ELEMENT_H
 #define KRAKENBRIDGE_ELEMENT_H
 
-#include "bindings/jsc/host_object.h"
+#include "bindings/jsc/host_object_internal.h"
 #include "include/kraken_bridge.h"
 #include "node.h"
 #include "style_declaration.h"

@@ -6,7 +6,6 @@
 #include "js_context_internal.h"
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/kraken.h"
-#include "bindings/jsc/macros.h"
 #include "dart_methods.h"
 #include <memory>
 #include <mutex>

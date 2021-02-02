@@ -6,7 +6,6 @@
 #ifndef KRAKENBRIDGE_JS_CONTEXT_INTERNAL_H
 #define KRAKENBRIDGE_JS_CONTEXT_INTERNAL_H
 
-#include "bindings/jsc/macros.h"
 #include "include/kraken_bridge.h"
 #include <chrono>
 #include <codecvt>

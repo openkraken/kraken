@@ -4,7 +4,6 @@
  */
 
 #include "screen.h"
-#include "bindings/jsc/macros.h"
 #include "dart_methods.h"
 
 namespace kraken::binding::jsc {

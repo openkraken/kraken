@@ -5,7 +5,6 @@
 
 #include "kraken.h"
 #include "bindings/jsc/js_context_internal.h"
-#include "bindings/jsc/macros.h"
 #include "kraken_bridge.h"
 #include <unordered_map>
 

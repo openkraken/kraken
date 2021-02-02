@@ -5,7 +5,6 @@
 
 #include "window.h"
 #include "bindings/jsc/DOM/document.h"
-#include "bindings/jsc/macros.h"
 #include "dart_methods.h"
 #include "foundation/ui_command_queue.h"
 
