@@ -21,6 +21,7 @@ class RenderStyle
     CSSFlexboxMixin,
     CSSFlowMixin,
     CSSDisplayMixin,
+    CSSInlineMixin,
     CSSOpacityMixin {
 
   RenderBoxModel renderBoxModel;

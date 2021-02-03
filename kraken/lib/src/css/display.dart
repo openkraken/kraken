@@ -43,7 +43,6 @@ mixin CSSDisplayMixin on RenderStyleBase {
     );
     display = presentDisplay;
     transformedDisplay = getTransformedDisplay(element);
-
     if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox prevRenderLayoutBox = renderBoxModel;
       renderBoxModel = element.createRenderLayout(element, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: element.repaintSelf);
@@ -82,9 +81,10 @@ mixin CSSDisplayMixin on RenderStyleBase {
     }
   }
 
-  // Element tree hierarchy can cause element display behavior to change,
-  // for example element which is flex-item can display like inline-block or block
-  CSSDisplay getTransformedDisplay(Element element) {
+  /// Element tree hierarchy can cause element display behavior to change,
+  /// for example element which is flex-item can display like inline-block or block
+  /// https://www.w3.org/TR/css-display-3/#transformations
+  static CSSDisplay getTransformedDisplay(Element element) {
     Element parentNode = element.parentNode;
     CSSDisplay display = element.renderBoxModel.renderStyle.display;
 

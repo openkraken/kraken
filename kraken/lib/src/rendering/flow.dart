@@ -721,8 +721,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
 
       if (runChildren.length > 0 &&
-          (_isBlockElement(child) ||
-              _isBlockElement(preChild) ||
+          (_isChildBlockLevel(child) ||
+              _isChildBlockLevel(preChild) ||
               (runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit))) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
@@ -744,8 +744,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         runMainAxisExtent += spacing;
       }
       /// Calculate baseline extent of layout box
-      CSSStyleDeclaration childStyle = _getChildStyle(child);
-      VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
+      RenderStyle childRenderStyle = _getChildRenderStyle(child);
+      VerticalAlign verticalAlign = childRenderStyle.verticalAlign;
+
       bool isLineHeightValid = _isLineHeightValid(child);
 
       // Vertical align is only valid for inline box
@@ -961,7 +962,6 @@ class RenderFlowLayout extends RenderLayoutBox {
             ? 0
             : _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
-        CSSStyleDeclaration childStyle = _getChildStyle(child);
 
         Size childSize = _getChildSize(child);
         // Line height of child
@@ -979,7 +979,8 @@ class RenderFlowLayout extends RenderLayoutBox {
           // Distance from top to baseline of child
           double childAscent = _getChildAscent(child);
 
-          VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
+          RenderStyle childRenderStyle = _getChildRenderStyle(child);
+          VerticalAlign verticalAlign = childRenderStyle.verticalAlign;
 
           // Leading between height of line box's content area and line height of line box
           double lineBoxLeading = 0;
@@ -1009,10 +1010,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginLeft = 0;
         double childMarginTop = 0;
         if (child is RenderBoxModel) {
-          Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
-          RenderBoxModel renderBoxModel = childEl.renderBoxModel;
-          childMarginLeft = renderBoxModel.renderStyle.marginLeft;
-          childMarginTop = renderBoxModel.renderStyle.marginTop;
+          childMarginLeft = child.renderStyle.marginLeft;
+          childMarginTop = child.renderStyle.marginTop;
         }
 
         Offset relativeOffset = _getOffset(
@@ -1020,7 +1019,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           crossAxisOffset + childLineExtent + renderStyle.paddingTop + renderStyle.borderTop + childMarginTop
         );
         /// Apply position relative offset change.
-        CSSPositionedLayout.applyRelativeOffset(relativeOffset, child, childStyle);
+        CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
 
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
@@ -1222,63 +1221,35 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (child is RenderTextBox) {
       return true;
     } else if (child is RenderBoxModel) {
-      CSSStyleDeclaration childStyle = _getChildStyle(child);
-      String childDisplay = childStyle['display'];
-      return childDisplay.startsWith('inline');
+      CSSDisplay childDisplay = child.renderStyle.display;
+      return childDisplay == CSSDisplay.inline ||
+        childDisplay == CSSDisplay.inlineBlock ||
+        childDisplay == CSSDisplay.inlineFlex;
     }
     return false;
   }
 
-  CSSStyleDeclaration _getChildStyle(RenderBox child) {
-    CSSStyleDeclaration childStyle;
-    int childNodeId;
+  RenderStyle _getChildRenderStyle(RenderBox child) {
+    RenderStyle childRenderStyle;
     if (child is RenderTextBox) {
-      childNodeId = targetId;
+      childRenderStyle = renderStyle;
     } else if (child is RenderBoxModel) {
-      childNodeId = child.targetId;
+      childRenderStyle = child.renderStyle;
     } else if (child is RenderPositionHolder) {
-      childNodeId = child.realDisplayedBox?.targetId;
+      childRenderStyle = child.realDisplayedBox.renderStyle;
     }
-    childStyle = elementManager.getEventTargetByTargetId<Element>(childNodeId)?.style;
-    return childStyle;
+    return childRenderStyle;
   }
 
-  String _getChildDisplayFromRenderBox(RenderBox child) {
-    String display = 'inline'; // Default value.
-    int targetId;
-    if (child is RenderFlowLayout) targetId = child.targetId;
-    if (child is RenderBoxModel) targetId = child.targetId;
-    if (child is RenderPositionHolder) targetId = child.realDisplayedBox?.targetId;
-
-    if (targetId != null) {
-      // @TODO: need to remove this after RenderObject merge have completed.
-      Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
-      if (element != null) {
-        String elementDisplayDeclaration = element.style['display'];
-        display = CSSStyleDeclaration.isNullOrEmptyValue(elementDisplayDeclaration)
-            ? element.defaultDisplay
-            : element.style['display'];
-
-        // @HACK: Use inline to impl flexWrap in with flex layout.
-        // @TODO: need to remove this after RenderObject merge have completed.
-        Element currentElement = elementManager.getEventTargetByTargetId<Element>(this.targetId);
-        String currentElementDisplay =
-            CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? currentElement.defaultDisplay : style['display'];
-        if (currentElementDisplay.endsWith('flex') && style['flexWrap'] == 'wrap') {
-          display = 'inline';
-        }
-      }
+  bool _isChildBlockLevel(RenderBox child) {
+    if (child is RenderTextBox) {
+      return false;
+    } else {
+      RenderStyle childRenderStyle = _getChildRenderStyle(child);
+      CSSDisplay childDisplay = childRenderStyle.display;
+      return childDisplay == CSSDisplay.block ||
+        childDisplay == CSSDisplay.flex;
     }
-
-    return display;
-  }
-
-  bool _isBlockElement(RenderBox child) {
-    List<String> blockTypes = [
-      'block',
-      'flex',
-    ];
-    return blockTypes.contains(_getChildDisplayFromRenderBox(child));
   }
 
   @override

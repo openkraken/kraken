@@ -136,7 +136,7 @@ class CSSPositionedLayout {
     return parentData;
   }
 
-  static void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox, CSSStyleDeclaration style) {
+  static void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox) {
     RenderLayoutParentData boxParentData = renderBox?.parentData;
 
     // Don't set offset if it was already set
@@ -147,7 +147,7 @@ class CSSPositionedLayout {
     if (boxParentData != null) {
       Offset styleOffset;
       // Text node does not have relative offset
-      if (renderBox is RenderBoxModel && style != null) {
+      if (renderBox is RenderBoxModel) {
         styleOffset = _getRelativeOffset(renderBox.renderStyle);
       }
 

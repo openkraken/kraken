@@ -152,12 +152,21 @@ class Element extends Node
       return renderer;
     }
 
+    RenderStyle renderStyle;
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
       _renderIntrinsic = createRenderIntrinsic(this, repaintSelf: repaintSelf);
+      renderStyle = _renderIntrinsic.renderStyle;
     } else {
       _renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
+      renderStyle = _renderLayoutBox.renderStyle;
     }
+
+    /// Set display and transformedDisplay when display is not set in style
+    renderStyle.display = CSSDisplayMixin.getDisplay(
+      CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]
+    );
+    renderStyle.transformedDisplay = CSSDisplayMixin.getTransformedDisplay(this);
 
     return renderer;
   }
@@ -697,6 +706,10 @@ class Element extends Node
         _styleDisplayChangedListener(property, original, present);
         break;
 
+      case VERTICAL_ALIGN:
+        _styleVerticalAlignChangedListener(property, original, present);
+        break;
+
       case POSITION:
       case Z_INDEX:
         _stylePositionChangedListener(property, original, present);
@@ -847,6 +860,10 @@ class Element extends Node
     _styleSizeChangedListener(property, original, present);
 
     renderBoxModel.renderStyle.updateDisplay(present, this);
+  }
+
+  void _styleVerticalAlignChangedListener(String property, String original, String present) {
+    renderBoxModel.renderStyle.updateVerticalAlign(present);
   }
 
   void _stylePositionChangedListener(String property, String original, String present) {
@@ -1269,10 +1286,9 @@ class Element extends Node
 
   RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
     CSSStyleDeclaration style = element.style;
-    CSSDisplay display;
-      display = CSSDisplayMixin.getDisplay(
-        CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]
-      );
+    CSSDisplay display = CSSDisplayMixin.getDisplay(
+      CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]
+    );
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       RenderFlexLayout flexLayout;
 

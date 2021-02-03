@@ -1134,7 +1134,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         childNodeId = child.targetId;
       }
 
-      CSSStyleDeclaration childStyle = _getChildStyle(child);
       BoxSizeType heightSizeType = _getChildHeightSizeType(child);
       BoxConstraints baseConstraints = _getBaseConstraints(child, needsRelayout);
 
@@ -1153,7 +1152,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       } else if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
         double maxCrossAxisSize;
         // Calculate max height constraints
-        if (heightSizeType == BoxSizeType.specified && child is RenderBoxModel && childStyle[HEIGHT] != '') {
+        if (heightSizeType == BoxSizeType.specified && child is RenderBoxModel && child.renderStyle.height != '') {
           maxCrossAxisSize = child.renderStyle.height;
         } else {
           // Child in flex line expand automatic when height is not specified
@@ -2136,8 +2135,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         double childCrossPosition;
 
-        CSSStyleDeclaration childStyle = _getChildStyle(child);
-
         AlignSelf alignSelf = _getAlignSelf(child);
         double crossStartAddedOffset = crossAxisStartPadding + crossAxisStartBorder + childCrossAxisStartMargin;
 
@@ -2284,7 +2281,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         );
 
         /// Apply position relative offset change
-        CSSPositionedLayout.applyRelativeOffset(relativeOffset, child, childStyle);
+        CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
 
         // Need to substract start margin of main axis when calculating next child's start position
         if (flipMainAxis) {
@@ -2331,20 +2328,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     childMarginTop + childSize.height + childMarginBottom;
 
     return extentAboveBaseline;
-  }
-
-  CSSStyleDeclaration _getChildStyle(RenderBox child) {
-    CSSStyleDeclaration childStyle;
-    int childNodeId;
-    if (child is RenderTextBox) {
-      childNodeId = targetId;
-    } else if (child is RenderBoxModel) {
-      childNodeId = child.targetId;
-    } else if (child is RenderPositionHolder) {
-      childNodeId = child.realDisplayedBox?.targetId;
-    }
-    childStyle = elementManager.getEventTargetByTargetId<Element>(childNodeId)?.style;
-    return childStyle;
   }
 
   Offset _getOffset(double mainAxisOffset, double crossAxisOffset) {
