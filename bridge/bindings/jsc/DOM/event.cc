@@ -113,13 +113,13 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
   case JSEvent::EventProperty::target:
   case JSEvent::EventProperty::srcElement:
     if (nativeEvent->target != nullptr) {
-      auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->target);
+      auto instance = reinterpret_cast<EventTargetInstance *>(nativeEvent->target);
       return instance->object;
     }
     return JSValueMakeNull(_hostClass->ctx);
   case JSEvent::EventProperty::currentTarget:
     if (nativeEvent->currentTarget != nullptr) {
-      auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->currentTarget);
+      auto instance = reinterpret_cast<EventTargetInstance *>(nativeEvent->currentTarget);
       return instance->object;
     }
     return JSValueMakeNull(_hostClass->ctx);

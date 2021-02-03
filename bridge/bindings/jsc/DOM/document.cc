@@ -158,7 +158,7 @@ DocumentInstance::DocumentInstance(JSDocument *document)
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getDocumentPropertyMap();
   if (propertyMap.count(name) == 0) {
-    return JSNode::NodeInstance::getProperty(name, exception);
+    return NodeInstance::getProperty(name, exception);
   }
 
   DocumentProperty property = propertyMap[name];
@@ -167,7 +167,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   case DocumentProperty::all: {
     auto all = new JSAllCollection(context);
 
-    traverseNode(body, [&all](JSNode::NodeInstance *node) {
+    traverseNode(body, [&all](NodeInstance *node) {
       all->internalAdd(node, nullptr);
       return false;
     });
@@ -213,7 +213,7 @@ DocumentInstance::~DocumentInstance() {
 }
 
 void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-  JSNode::NodeInstance::getPropertyNames(accumulator);
+  NodeInstance::getPropertyNames(accumulator);
 
   for (auto &property : getDocumentPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
@@ -287,7 +287,7 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
 
   std::vector<ElementInstance *> elements;
 
-  traverseNode(document->body, [tagName, &elements](JSNode::NodeInstance *node) {
+  traverseNode(document->body, [tagName, &elements](NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = reinterpret_cast<ElementInstance *>(node);
       if (element->tagName() == tagName) {

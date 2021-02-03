@@ -30,7 +30,7 @@ JSNode::~JSNode() {
   instanceMap.erase(context);
 }
 
-JSNode::NodeInstance::~NodeInstance() {
+NodeInstance::~NodeInstance() {
   // The this node is finalized, should tell all children this parent will no longer protecting them.
   if (context->isValid()) {
     for (auto &node : childNodes) {
@@ -46,13 +46,13 @@ JSNode::NodeInstance::~NodeInstance() {
   }, nativeNode);
 }
 
-JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)
+NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)
   : EventTargetInstance(node), nativeNode(new NativeNode(nativeEventTarget)), nodeType(nodeType) {}
 
-JSNode::NodeInstance::NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId)
+NodeInstance::NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId)
   : EventTargetInstance(node, targetId), nativeNode(new NativeNode(nativeEventTarget)), nodeType(nodeType) {}
 
-bool JSNode::NodeInstance::isConnected() {
+bool NodeInstance::isConnected() {
   bool _isConnected = eventTargetId == BODY_TARGET_ID;
   auto parent = parentNode;
 
@@ -64,21 +64,21 @@ bool JSNode::NodeInstance::isConnected() {
   return _isConnected;
 }
 
-JSNode::NodeInstance *JSNode::NodeInstance::firstChild() {
+NodeInstance *NodeInstance::firstChild() {
   if (childNodes.empty()) {
     return nullptr;
   }
   return childNodes.front();
 }
 
-JSNode::NodeInstance *JSNode::NodeInstance::lastChild() {
+NodeInstance *NodeInstance::lastChild() {
   if (childNodes.empty()) {
     return nullptr;
   }
   return childNodes.back();
 }
 
-JSNode::NodeInstance *JSNode::NodeInstance::previousSibling() {
+NodeInstance *NodeInstance::previousSibling() {
   if (parentNode == nullptr) return nullptr;
 
   auto &&parentChildNodes = parentNode->childNodes;
@@ -95,7 +95,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::previousSibling() {
   return nullptr;
 }
 
-JSNode::NodeInstance *JSNode::NodeInstance::nextSibling() {
+NodeInstance *NodeInstance::nextSibling() {
   if (parentNode == nullptr) return nullptr;
 
   auto &&parentChildNodes = parentNode->childNodes;
@@ -108,7 +108,7 @@ JSNode::NodeInstance *JSNode::NodeInstance::nextSibling() {
   return nullptr;
 }
 
-void JSNode::NodeInstance::ensureDetached(JSNode::NodeInstance *node) {
+void NodeInstance::ensureDetached(NodeInstance *node) {
   if (node->parentNode != nullptr) {
     auto it = std::find(node->parentNode->childNodes.begin(), node->parentNode->childNodes.end(), node);
     if (it != node->parentNode->childNodes.end()) {
@@ -133,7 +133,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
     return nullptr;
   }
 
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
+  auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(selfInstance != nullptr, "this object is not a instance of Node.");
   const JSValueRef nodeValueRef = arguments[0];
 
@@ -144,7 +144,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   }
 
   JSObjectRef nodeObjectRef = JSValueToObject(ctx, nodeValueRef, exception);
-  auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
+  auto nodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
   if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
     throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.",
@@ -180,11 +180,11 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
 
   JSObjectRef nodeObjectRef = JSValueToObject(ctx, nodeValueRef, exception);
   JSObjectRef referenceNodeObjectRef = nullptr;
-  JSNode::NodeInstance *referenceInstance = nullptr;
+  NodeInstance *referenceInstance = nullptr;
 
   if (JSValueIsObject(ctx, referenceNodeValueRef)) {
     referenceNodeObjectRef = JSValueToObject(ctx, referenceNodeValueRef, exception);
-    referenceInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(referenceNodeObjectRef));
+    referenceInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(referenceNodeObjectRef));
   } else if (!JSValueIsNull(ctx, referenceNodeValueRef)) {
     assert(false);
     throwJSError(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'",
@@ -192,8 +192,8 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
     return nullptr;
   }
 
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
-  auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
+  auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
+  auto nodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
   if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
     throwJSError(ctx, "Failed to execute 'insertBefore' on 'Node': parameter 1 is not of type 'Node'", exception);
@@ -233,9 +233,9 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
 
   JSObjectRef oldChildObjectRef = JSValueToObject(ctx, oldChildValueRef, exception);
 
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
-  auto newChildInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(newChildObjectRef));
-  auto oldChildInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(oldChildObjectRef));
+  auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
+  auto newChildInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newChildObjectRef));
+  auto oldChildInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(oldChildObjectRef));
 
   if (oldChildInstance == nullptr || oldChildInstance->parentNode != selfInstance || oldChildInstance->_identify != NODE_IDENTIFY) {
     throwJSError(ctx,
@@ -254,7 +254,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
   return nullptr;
 }
 
-void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNode::NodeInstance *referenceNode,
+void NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *referenceNode,
                                                 JSValueRef *exception) {
   if (referenceNode == nullptr) {
     internalAppendChild(node);
@@ -298,7 +298,7 @@ void JSNode::NodeInstance::internalInsertBefore(JSNode::NodeInstance *node, JSNo
 
 JSValueRef JSNode::remove(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                           const JSValueRef *arguments, JSValueRef *exception) {
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
+  auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
   selfInstance->internalRemove(exception);
   return nullptr;
 }
@@ -327,8 +327,8 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
     return nullptr;
   }
 
-  auto selfInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(thisObject));
-  auto nodeInstance = static_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
+  auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
+  auto nodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
   if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
     throwJSError(ctx, "Failed to execute 'removeChild' on 'Node': 1st arguments is not a Node object.", exception);
@@ -340,7 +340,7 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   return removedNode->object;
 }
 
-void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
+void NodeInstance::internalAppendChild(NodeInstance *node) {
   ensureDetached(node);
   childNodes.emplace_back(node);
   node->parentNode = this;
@@ -360,12 +360,12 @@ void JSNode::NodeInstance::internalAppendChild(JSNode::NodeInstance *node) {
     ->registerCommand(eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
 }
 
-void JSNode::NodeInstance::internalRemove(JSValueRef *exception) {
+void NodeInstance::internalRemove(JSValueRef *exception) {
   if (parentNode == nullptr) return;
   parentNode->internalRemoveChild(this, exception);
 }
 
-JSNode::NodeInstance *JSNode::NodeInstance::internalRemoveChild(JSNode::NodeInstance *node, JSValueRef *exception) {
+NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node, JSValueRef *exception) {
   auto it = std::find(childNodes.begin(), childNodes.end(), node);
 
   if (it != childNodes.end()) {
@@ -380,8 +380,8 @@ JSNode::NodeInstance *JSNode::NodeInstance::internalRemoveChild(JSNode::NodeInst
   return node;
 }
 
-JSNode::NodeInstance *JSNode::NodeInstance::internalReplaceChild(JSNode::NodeInstance *newChild,
-                                                                 JSNode::NodeInstance *oldChild,
+NodeInstance *NodeInstance::internalReplaceChild(NodeInstance *newChild,
+                                                                 NodeInstance *oldChild,
                                                                  JSValueRef *exception) {
   ensureDetached(newChild);
   assert_m(newChild->parentNode == nullptr, "ReplaceChild Error: newChild was not detached.");
@@ -445,54 +445,54 @@ JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception
   return nullptr;
 }
 
-JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getNodePropertyMap();
+JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
+  auto propertyMap = JSNode::getNodePropertyMap();
 
   if (propertyMap.count(name) == 0) {
-    return JSEventTarget::EventTargetInstance::getProperty(name, exception);
+    return EventTargetInstance::getProperty(name, exception);
   }
 
   auto property = propertyMap[name];
 
   switch (property) {
-  case NodeProperty::isConnected:
+  case JSNode::NodeProperty::isConnected:
     return JSValueMakeBoolean(_hostClass->ctx, isConnected());
-  case NodeProperty::firstChild: {
+  case JSNode::NodeProperty::firstChild: {
     auto instance = firstChild();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
-  case NodeProperty::parentNode: {
+  case JSNode::NodeProperty::parentNode: {
     if (parentNode == nullptr) return JSValueMakeNull(ctx);
     return parentNode->object;
   }
-  case NodeProperty::lastChild: {
+  case JSNode::NodeProperty::lastChild: {
     auto instance = lastChild();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
-  case NodeProperty::previousSibling: {
+  case JSNode::NodeProperty::previousSibling: {
     auto instance = previousSibling();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
-  case NodeProperty::nextSibling: {
+  case JSNode::NodeProperty::nextSibling: {
     auto instance = nextSibling();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
-  case NodeProperty::appendChild: {
+  case JSNode::NodeProperty::appendChild: {
     return prototype<JSNode>()->m_appendChild.function();
   }
-  case NodeProperty::remove: {
+  case JSNode::NodeProperty::remove: {
     return prototype<JSNode>()->m_remove.function();
   }
-  case NodeProperty::removeChild: {
+  case JSNode::NodeProperty::removeChild: {
     return prototype<JSNode>()->m_removeChild.function();
   }
-  case NodeProperty::insertBefore: {
+  case JSNode::NodeProperty::insertBefore: {
     return prototype<JSNode>()->m_insertBefore.function();
   }
-  case NodeProperty::replaceChild: {
+  case JSNode::NodeProperty::replaceChild: {
     return prototype<JSNode>()->m_replaceChild.function();
   }
-  case NodeProperty::childNodes: {
+  case JSNode::NodeProperty::childNodes: {
     JSValueRef arguments[childNodes.size()];
 
     for (int i = 0; i < childNodes.size(); i++) {
@@ -502,9 +502,9 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     JSObjectRef array = JSObjectMakeArray(_hostClass->ctx, childNodes.size(), arguments, nullptr);
     return array;
   }
-  case NodeProperty::nodeType:
+  case JSNode::NodeProperty::nodeType:
     return JSValueMakeNumber(_hostClass->ctx, nodeType);
-  case NodeProperty::textContent: {
+  case JSNode::NodeProperty::textContent: {
     std::string textContent = internalGetTextContent();
     return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(textContent.c_str()));
   }
@@ -513,49 +513,49 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
   return nullptr;
 }
 
-void JSNode::NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getNodePropertyMap();
+void NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  auto propertyMap = JSNode::getNodePropertyMap();
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
-    if (property == NodeProperty::textContent) {
+    if (property == JSNode::NodeProperty::textContent) {
       JSStringRef textContent = JSValueToStringCopy(_hostClass->ctx, value, exception);
       internalSetTextContent(textContent, exception);
     }
   } else {
-    JSEventTarget::EventTargetInstance::setProperty(name, value, exception);
+    EventTargetInstance::setProperty(name, value, exception);
   }
 }
 
-void JSNode::NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+void NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   EventTargetInstance::getPropertyNames(accumulator);
 
-  for (auto &property : getNodePropertyNames()) {
+  for (auto &property : JSNode::getNodePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
 
-std::string JSNode::NodeInstance::internalGetTextContent() {
+std::string NodeInstance::internalGetTextContent() {
   return "";
 }
 
-void JSNode::NodeInstance::refer() {
+void NodeInstance::refer() {
   if (_referenceCount == 0) {
     JSValueProtect(_hostClass->ctx, this->object);
   }
   _referenceCount++;
 }
 
-void JSNode::NodeInstance::unrefer() {
+void NodeInstance::unrefer() {
   _referenceCount--;
   if (_referenceCount == 0 && context->isValid()) {
     JSValueUnprotect(_hostClass->ctx, this->object);
   }
 }
 
-void JSNode::NodeInstance::_notifyNodeRemoved(JSNode::NodeInstance *node) {}
-void JSNode::NodeInstance::_notifyNodeInsert(JSNode::NodeInstance *node) {}
-void JSNode::NodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {}
+void NodeInstance::_notifyNodeRemoved(NodeInstance *node) {}
+void NodeInstance::_notifyNodeInsert(NodeInstance *node) {}
+void NodeInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {}
 
 } // namespace kraken::binding::jsc

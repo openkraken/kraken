@@ -51,9 +51,6 @@ namespace kraken::binding::jsc {
 
 void bindEvent(std::unique_ptr<JSContext> &context);
 
-struct NativeEvent;
-class EventInstance;
-
 } // namespace kraken::binding::jsc
 
 #endif // KRAKENBRIDGE_EVENT_H

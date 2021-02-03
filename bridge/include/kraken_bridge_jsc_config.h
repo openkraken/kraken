@@ -1,4 +1,4 @@
-#define EXPORT __attribute__((__visibility__("default")))
+#define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
 #define KRAKEN_DISALLOW_COPY(TypeName) TypeName(const TypeName &) = delete
 

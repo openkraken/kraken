@@ -191,7 +191,7 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   auto propertyMap = JSElement::getElementPropertyMap();
 
   if (propertyMap.count(name) == 0) {
-    return JSNode::NodeInstance::getProperty(name, exception);
+    return NodeInstance::getProperty(name, exception);
   }
 
   JSElement::ElementProperty property = propertyMap[name];
@@ -727,9 +727,9 @@ JSValueRef JSElement::prototypeGetProperty(std::string &name, JSValueRef *except
   return nullptr;
 }
 
-void ElementInstance::_notifyNodeRemoved(JSNode::NodeInstance *insertionNode) {
+void ElementInstance::_notifyNodeRemoved(NodeInstance *insertionNode) {
   if (insertionNode->isConnected()) {
-    traverseNode(this, [](JSNode::NodeInstance *node) {
+    traverseNode(this, [](NodeInstance *node) {
       auto Element = JSElement::instance(node->context);
       if (node->_hostClass == Element) {
         auto element = reinterpret_cast<ElementInstance *>(node);
@@ -749,9 +749,9 @@ void ElementInstance::_notifyChildRemoved() {
     document->removeElementById(id, this);
   }
 }
-void ElementInstance::_notifyNodeInsert(JSNode::NodeInstance *insertNode) {
+void ElementInstance::_notifyNodeInsert(NodeInstance *insertNode) {
   if (insertNode->isConnected()) {
-    traverseNode(this, [](JSNode::NodeInstance *node) {
+    traverseNode(this, [](NodeInstance *node) {
       auto Element = JSElement::instance(node->context);
       if (node->_hostClass == Element) {
         auto element = reinterpret_cast<ElementInstance *>(node);
@@ -876,7 +876,7 @@ BoundingClientRect::~BoundingClientRect() {
   delete nativeBoundingClientRect;
 }
 
-void traverseNode(JSNode::NodeInstance *node, TraverseHandler handler) {
+void traverseNode(NodeInstance *node, TraverseHandler handler) {
   bool shouldExit = handler(node);
   if (shouldExit) return;
 

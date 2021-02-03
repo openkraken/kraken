@@ -31,7 +31,7 @@ private:
   ~JSWindow();
 };
 
-class WindowInstance : public JSEventTarget::EventTargetInstance {
+class WindowInstance : public EventTargetInstance {
 public:
   DEFINE_OBJECT_PROPERTY(Window, 11, devicePixelRatio, colorScheme, __location__, window, history, parent, scroll,
                          scrollBy, scrollTo, scrollX, scrollY)

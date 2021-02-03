@@ -73,13 +73,13 @@ JSObjectRef CSSStyleDeclaration::instanceConstructor(JSContextRef ctx, JSObjectR
   JSObjectRef eventTargetObjectRef = JSValueToObject(ctx, eventTargetValueRef, exception);
 
   auto eventTargetInstance =
-    static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(eventTargetObjectRef));
+    static_cast<EventTargetInstance *>(JSObjectGetPrivate(eventTargetObjectRef));
   auto style = new StyleDeclarationInstance(this, eventTargetInstance);
   return style->object;
 }
 
 CSSStyleDeclaration::StyleDeclarationInstance::StyleDeclarationInstance(
-  CSSStyleDeclaration *cssStyleDeclaration, JSEventTarget::EventTargetInstance *ownerEventTarget)
+  CSSStyleDeclaration *cssStyleDeclaration, EventTargetInstance *ownerEventTarget)
   : Instance(cssStyleDeclaration), ownerEventTarget(ownerEventTarget) {}
 
 CSSStyleDeclaration::StyleDeclarationInstance::~StyleDeclarationInstance() {

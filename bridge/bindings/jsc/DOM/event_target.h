@@ -23,7 +23,6 @@ namespace kraken::binding::jsc {
 
 void bindEventTarget(std::unique_ptr<JSContext> &context);
 
-
 } // namespace kraken::binding::jsc
 
 #endif // KRAKENBRIDGE_EVENT_TARGET_H

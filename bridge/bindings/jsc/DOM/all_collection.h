@@ -30,10 +30,10 @@ public:
 
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
-  void internalAdd(JSNode::NodeInstance *node, JSNode::NodeInstance *before);
+  void internalAdd(NodeInstance *node, NodeInstance *before);
 
 private:
-  std::vector<JSNode::NodeInstance *> m_nodes;
+  std::vector<NodeInstance *> m_nodes;
   JSFunctionHolder m_item{context, this, "item", item};
   JSFunctionHolder m_add{context, this, "add", add};
   JSFunctionHolder m_remove{context, this, "remove", remove};
