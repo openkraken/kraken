@@ -78,17 +78,17 @@ JSObjectRef CSSStyleDeclaration::instanceConstructor(JSContextRef ctx, JSObjectR
   return style->object;
 }
 
-CSSStyleDeclaration::StyleDeclarationInstance::StyleDeclarationInstance(
+StyleDeclarationInstance::StyleDeclarationInstance(
   CSSStyleDeclaration *cssStyleDeclaration, EventTargetInstance *ownerEventTarget)
   : Instance(cssStyleDeclaration), ownerEventTarget(ownerEventTarget) {}
 
-CSSStyleDeclaration::StyleDeclarationInstance::~StyleDeclarationInstance() {
+StyleDeclarationInstance::~StyleDeclarationInstance() {
   for (auto &string : properties) {
     JSStringRelease(string.second);
   }
 }
 
-JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
+JSValueRef StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getCSSStyleDeclarationPropertyMap();
 
   if (propertyMap.count(name) > 0) {
@@ -111,12 +111,12 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::strin
   return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(""));
 }
 
-void CSSStyleDeclaration::StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value,
+void StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value,
                                                                 JSValueRef *exception) {
   internalSetProperty(name, value, exception);
 }
 
-void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value,
+void StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value,
                                                                         JSValueRef *exception) {
   if (name == "setProperty" || name == "removeProperty" || name == "getPropertyValue") return;
 
@@ -140,7 +140,7 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::str
     ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
 }
 
-void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStringRef nameRef, JSValueRef *exception) {
+void StyleDeclarationInstance::internalRemoveProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string &&name = JSStringToStdString(nameRef);
   name = parseJavaScriptCSSPropertyName(name);
 
@@ -162,7 +162,7 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStr
     ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
 }
 
-JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::internalGetPropertyValue(JSStringRef nameRef,
+JSValueRef StyleDeclarationInstance::internalGetPropertyValue(JSStringRef nameRef,
                                                                                    JSValueRef *exception) {
   std::string &&name = JSStringToStdString(nameRef);
   name = parseJavaScriptCSSPropertyName(name);
@@ -170,7 +170,7 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::internalGetPropertyVal
   return JSValueMakeString(_hostClass->ctx, properties[name]);
 }
 
-JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::setProperty(JSContextRef ctx, JSObjectRef function,
+JSValueRef StyleDeclarationInstance::setProperty(JSContextRef ctx, JSObjectRef function,
                                                                       JSObjectRef thisObject, size_t argumentCount,
                                                                       const JSValueRef *arguments,
                                                                       JSValueRef *exception) {
@@ -194,14 +194,14 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::setProperty(JSContextR
     return nullptr;
   }
 
-  auto styleInstance = static_cast<CSSStyleDeclaration::StyleDeclarationInstance *>(JSObjectGetPrivate(function));
+  auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(function));
   std::string name = JSStringToStdString(propertyStringRef);
   styleInstance->internalSetProperty(name, valueValueRef, exception);
 
   return nullptr;
 }
 
-JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::removeProperty(JSContextRef ctx, JSObjectRef function,
+JSValueRef StyleDeclarationInstance::removeProperty(JSContextRef ctx, JSObjectRef function,
                                                                          JSObjectRef thisObject, size_t argumentCount,
                                                                          const JSValueRef *arguments,
                                                                          JSValueRef *exception) {
@@ -218,12 +218,12 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::removeProperty(JSConte
   }
 
   JSStringRef propertyStringRef = JSValueToStringCopy(ctx, propertyValueRef, exception);
-  auto styleInstance = static_cast<CSSStyleDeclaration::StyleDeclarationInstance *>(JSObjectGetPrivate(function));
+  auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(function));
   styleInstance->internalRemoveProperty(propertyStringRef, exception);
   return nullptr;
 }
 
-JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getPropertyValue(JSContextRef ctx, JSObjectRef function,
+JSValueRef StyleDeclarationInstance::getPropertyValue(JSContextRef ctx, JSObjectRef function,
                                                                            JSObjectRef thisObject, size_t argumentCount,
                                                                            const JSValueRef *arguments,
                                                                            JSValueRef *exception) {
@@ -240,11 +240,11 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getPropertyValue(JSCon
   }
 
   JSStringRef propertyStringRef = JSValueToStringCopy(ctx, propertyValueRef, exception);
-  auto styleInstance = static_cast<CSSStyleDeclaration::StyleDeclarationInstance *>(JSObjectGetPrivate(function));
+  auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(function));
   return styleInstance->internalGetPropertyValue(propertyStringRef, exception);
 }
 
-void CSSStyleDeclaration::StyleDeclarationInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+void StyleDeclarationInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &prop : properties) {
     JSPropertyNameAccumulatorAddName(accumulator, JSStringCreateWithUTF8CString(prop.first.c_str()));
   }

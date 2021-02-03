@@ -199,7 +199,7 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   switch (property) {
   case JSElement::ElementProperty::style: {
     if (style == nullptr) {
-      style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
+      style = new StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
       JSValueProtect(_hostClass->ctx, style->object);
     }
 
