@@ -267,8 +267,8 @@ class RenderLayoutBox extends RenderBoxModel
       // Whether child is inline-level including text box
       bool isChildInline = true;
       if (child is RenderBoxModel) {
-        CSSDisplay childDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
-        if (childDisplay == CSSDisplay.block || childDisplay == CSSDisplay.flex) {
+        CSSDisplay childTransformedDisplay = child.renderStyle.transformedDisplay;
+        if (childTransformedDisplay == CSSDisplay.block || childTransformedDisplay == CSSDisplay.flex) {
           isChildInline = false;
         }
       }
@@ -362,16 +362,6 @@ class RenderBoxModel extends RenderBox with
     return _contentConstraints;
   }
 
-  CSSDisplay _display;
-  CSSDisplay get display => _display;
-  set display(CSSDisplay value) {
-    if (value == null) return;
-    if (_display != value) {
-      markNeedsLayout();
-      _display = value;
-    }
-  }
-
   /// Whether need to recalculate gradient when setting style used in cases
   /// when linear-gradient has length specified and layout has no size in gradient direction
   /// such as 'linear-gradient(to right, red 0px, red 50px, orange 50px, orange 80px)' and style has no width set
@@ -462,9 +452,6 @@ class RenderBoxModel extends RenderBox with
       ..origin = origin
       ..alignment = alignment
 
-      // Copy display
-      ..display = display
-
       // Copy ContentVisibility
       ..contentVisibility = contentVisibility
 
@@ -542,7 +529,7 @@ class RenderBoxModel extends RenderBox with
   /// Width of render box model calcaluted from style
   static double getContentWidth(RenderBoxModel renderBoxModel) {
     double cropWidth = 0;
-    CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
+    CSSDisplay display = renderBoxModel.renderStyle.transformedDisplay;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
     double width = renderStyle.width;
     double minWidth = renderStyle.minWidth;
@@ -584,7 +571,7 @@ class RenderBoxModel extends RenderBox with
               break;
             }
 
-            CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
+            CSSDisplay display = renderBoxModel.renderStyle.transformedDisplay;
 
             RenderStyle renderStyle = renderBoxModel.renderStyle;
             // Set width of element according to parent display
@@ -667,8 +654,7 @@ class RenderBoxModel extends RenderBox with
 
   /// Height of render box model calcaluted from style
   static double getContentHeight(RenderBoxModel renderBoxModel) {
-    CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
-
+    CSSDisplay display = renderBoxModel.renderStyle.transformedDisplay;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
     double height = renderStyle.height;
     double cropHeight = 0;
@@ -712,7 +698,7 @@ class RenderBoxModel extends RenderBox with
         }
 
         RenderStyle renderStyle = renderBoxModel.renderStyle;
-        if (CSSSizing.isStretchChildHeight(renderBoxModel, current)) {
+        if (CSSSizingMixin.isStretchChildHeight(renderBoxModel, current)) {
           if (renderStyle.height != null) {
             height = renderStyle.height;
             cropPaddingBorder(renderBoxModel);
@@ -795,7 +781,7 @@ class RenderBoxModel extends RenderBox with
     // Get the nearest width of ancestor with width
     while (true) {
       if (renderBoxModel is RenderBoxModel) {
-        CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
+        CSSDisplay display = renderBoxModel.renderStyle.transformedDisplay;
         RenderStyle renderStyle = renderBoxModel.renderStyle;
 
         // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
@@ -1036,6 +1022,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   bool get isCSSDisplayNone {
+    CSSDisplay display = renderStyle.display;
     return display != null && display == CSSDisplay.none;
   }
 
@@ -1237,7 +1224,6 @@ class RenderBoxModel extends RenderBox with
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty('targetId', targetId, missingIfNull: true));
     properties.add(DiagnosticsProperty('style', style, tooltip: style.toString(), missingIfNull: true));
-    properties.add(DiagnosticsProperty('display', display, missingIfNull: true));
     properties.add(DiagnosticsProperty('contentSize', _contentSize));
     properties.add(DiagnosticsProperty('contentConstraints', _contentConstraints, missingIfNull: true));
     properties.add(DiagnosticsProperty('widthSizeType', widthSizeType, missingIfNull: true));

@@ -20,6 +20,7 @@ class RenderStyle
     CSSTransformMixin,
     CSSFlexboxMixin,
     CSSFlowMixin,
+    CSSDisplayMixin,
     CSSOpacityMixin {
 
   RenderBoxModel renderBoxModel;
@@ -472,9 +473,9 @@ class RenderStyle
     double constraintHeight = height ?? double.infinity;
     int targetId = renderBoxModel.targetId;
     ElementManager elementManager = renderBoxModel.elementManager;
-    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    bool isInline = realDisplay == CSSDisplay.inline;
-    bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+    CSSDisplay transformedDisplay = renderBoxModel.renderStyle.transformedDisplay;
+    bool isInline = transformedDisplay == CSSDisplay.inline;
+    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
 
     if (!isInline) {
       // Base width when width no exists, inline-block has width of 0

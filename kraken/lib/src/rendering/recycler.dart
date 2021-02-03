@@ -192,6 +192,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_START, uniqueId: targetId);
     }
 
+    CSSDisplay display = renderStyle.display;
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {

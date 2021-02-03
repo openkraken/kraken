@@ -1135,7 +1135,7 @@ mixin CSSTransformMixin on RenderStyleBase {
     // Upgrade this renderObject into repaintSelf mode.
     if (shouldConvertToRepaintBoundary && !renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;
-      RenderBoxModel repaintSelfBox = createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
+      RenderBoxModel repaintSelfBox = element.createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
       if (parent is ContainerRenderObjectMixin) {
         RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
         parent.remove(renderBoxModel);

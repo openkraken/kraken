@@ -10,19 +10,6 @@ import 'package:kraken/dom.dart';
 
 // CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
 
-enum CSSDisplay {
-  inline,
-  block,
-  inlineBlock,
-
-  flex,
-  inlineFlex,
-
-  sliver, // @TODO temp name.
-
-  none
-}
-
 /// - width
 /// - height
 /// - max-width
@@ -158,22 +145,7 @@ mixin CSSSizingMixin on RenderStyleBase {
     }
     return maxHeight;
   }
-}
 
-class CSSEdgeInsets {
-  double left;
-  double top;
-  double right;
-  double bottom;
-
-  CSSEdgeInsets(this.top, this.right, this.bottom, this.left);
-
-  EdgeInsets toEdgeInsets() {
-    return EdgeInsets.fromLTRB(left, top, right, bottom);
-  }
-}
-
-class CSSSizing {
   // Whether current node should stretch children's height
   static bool isStretchChildHeight(RenderBoxModel current, RenderBoxModel child) {
     bool isStretch = false;
@@ -208,64 +180,18 @@ class CSSSizing {
 
     return isStretch;
   }
+}
 
-  // Element tree hierarchy can cause element display behavior to change,
-  // for example element which is flex-item can display like inline-block or block
-  static CSSDisplay getElementRealDisplayValue(int targetId, ElementManager elementManager) {
-    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
-    Element parentNode = element.parentNode;
-    CSSDisplay display = CSSSizing.getDisplay(
-        CSSStyleDeclaration.isNullOrEmptyValue(element.style[DISPLAY])
-            ? element.defaultDisplay
-            : element.style[DISPLAY]
-    );
+class CSSEdgeInsets {
+  double left;
+  double top;
+  double right;
+  double bottom;
 
-    CSSPositionType position = element.renderBoxModel.renderStyle.position;
+  CSSEdgeInsets(this.top, this.right, this.bottom, this.left);
 
-    // Display as inline-block when element is positioned
-    if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {
-      display = CSSDisplay.inlineBlock;
-    } else if (parentNode != null) {
-      CSSStyleDeclaration style = parentNode.style;
-
-      if (style[DISPLAY].endsWith(FLEX)) {
-        // Display as inline-block if parent node is flex
-        display = CSSDisplay.inlineBlock;
-
-        String marginLeft = element.style[MARGIN_LEFT];
-        String marginRight = element.style[MARGIN_RIGHT];
-
-        bool isVerticalDirection = style[FLEX_DIRECTION] == COLUMN || style[FLEX_DIRECTION] == COLUMN_REVERSE;
-        // Flex item will not stretch in stretch alignment when flex wrap is set to wrap or wrap-reverse
-        bool isFlexNoWrap = !style.contains(FLEX_WRAP) || (style.contains(FLEX_WRAP) && style[FLEX_WRAP] == NO_WRAP);
-        // Display as block if flex vertical layout children and stretch children
-        if (marginLeft != AUTO && marginRight != AUTO && isVerticalDirection && isFlexNoWrap &&
-        (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
-          display = CSSDisplay.block;
-        }
-      }
-    }
-
-    return display;
-  }
-
-  static CSSDisplay getDisplay(String displayString) {
-    switch (displayString) {
-      case 'none':
-        return CSSDisplay.none;
-      case 'sliver':
-        return CSSDisplay.sliver;
-      case 'block':
-        return CSSDisplay.block;
-      case 'inline-block':
-        return CSSDisplay.inlineBlock;
-      case 'flex':
-        return CSSDisplay.flex;
-      case 'inline-flex':
-        return CSSDisplay.inlineFlex;
-      case 'inline':
-      default:
-        return CSSDisplay.inline;
-    }
+  EdgeInsets toEdgeInsets() {
+    return EdgeInsets.fromLTRB(left, top, right, bottom);
   }
 }
+

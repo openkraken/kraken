@@ -408,9 +408,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double marginVertical = 0;
 
     if (child is RenderBoxModel) {
-      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft + childRenderBoxModel.renderStyle.marginRight;
-      marginVertical = childRenderBoxModel.renderStyle.marginTop + childRenderBoxModel.renderStyle.marginBottom;
+      marginHorizontal = child.renderStyle.marginLeft + child.renderStyle.marginRight;
+      marginVertical = child.renderStyle.marginTop + child.renderStyle.marginBottom;
     }
 
     Size childSize = _getChildSize(child);
@@ -424,22 +423,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     return 0.0;
   }
 
-
-  RenderBoxModel _getChildRenderBoxModel(RenderBoxModel child) {
-    Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
-    RenderBoxModel renderBoxModel = childEl.renderBoxModel;
-    return renderBoxModel;
-  }
-
   double _getCrossAxisExtent(RenderBox child) {
     double lineHeight = _getLineHeight(child);
     double marginVertical = 0;
     double marginHorizontal = 0;
 
     if (child is RenderBoxModel) {
-      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft + childRenderBoxModel.renderStyle.marginRight;
-      marginVertical = childRenderBoxModel.renderStyle.marginTop + childRenderBoxModel.renderStyle.marginBottom;
+      marginHorizontal = child.renderStyle.marginLeft + child.renderStyle.marginRight;
+      marginVertical = child.renderStyle.marginTop + child.renderStyle.marginBottom;
     }
     Size childSize = _getChildSize(child);
     switch (direction) {
@@ -500,6 +491,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_START, uniqueId: targetId);
     }
 
+    CSSDisplay display = renderStyle.display;
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {
@@ -588,7 +580,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     final double contentWidth = RenderBoxModel.getContentWidth(this);
     final double contentHeight = RenderBoxModel.getContentHeight(this);
 
-    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
 
     double width = renderStyle.width;
     double height = renderStyle.height;
@@ -601,8 +593,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (childCount == 0) {
       double constraintWidth = contentWidth ?? 0;
       double constraintHeight = contentHeight ?? 0;
-      bool isInline = realDisplay == CSSDisplay.inline;
-      bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+      bool isInline = transformedDisplay == CSSDisplay.inline;
+      bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
 
       if (!isInline) {
         // Base width when width no exists, inline-block has width of 0
@@ -761,9 +753,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginTop = 0;
         double childMarginBottom = 0;
         if (child is RenderBoxModel) {
-          RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-          childMarginTop = childRenderBoxModel.renderStyle.marginTop;
-          childMarginBottom = childRenderBoxModel.renderStyle.marginBottom;
+          childMarginTop = child.renderStyle.marginTop;
+          childMarginBottom = child.renderStyle.marginBottom;
         }
 
         Size childSize = _getChildSize(child);
@@ -816,7 +807,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Default to children's width
     double constraintWidth = mainAxisExtent;
-    bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
 
     // Constrain to min-width or max-width if width not exists
     if (isInlineBlock && maxWidth != null && width == null) {
@@ -829,7 +820,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Default to children's height
     double constraintHeight = crossAxisExtent;
-    bool isNotInline = realDisplay != CSSDisplay.inline;
+    bool isNotInline = transformedDisplay != CSSDisplay.inline;
 
     // Constrain to min-height or max-height if width not exists
     if (isNotInline && maxHeight != null && height == null) {
@@ -945,14 +936,14 @@ class RenderFlowLayout extends RenderLayoutBox {
         // between element and its containing block on block-level element
         // which is not positioned and computed to 0px in other cases
         if (child is RenderBoxModel) {
-          CSSDisplay childRealDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
+          CSSDisplay childTransformedDisplay = child.renderStyle.transformedDisplay;
           CSSStyleDeclaration childStyle = child.style;
           String marginLeft = childStyle[MARGIN_LEFT];
           String marginRight = childStyle[MARGIN_RIGHT];
 
           // 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' +
           // 'border-right-width' + 'margin-right' = width of containing block
-          if (childRealDisplay == CSSDisplay.block || childRealDisplay == CSSDisplay.flex) {
+          if (childTransformedDisplay == CSSDisplay.block || childTransformedDisplay == CSSDisplay.flex) {
             if (marginLeft == AUTO) {
               double remainingSpace = mainAxisContentSize - childMainAxisExtent;
               if (marginRight == AUTO) {
@@ -1202,9 +1193,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double childMarginTop = 0;
     double childMarginBottom = 0;
     if (child is RenderBoxModel) {
-      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      childMarginTop = childRenderBoxModel.renderStyle.marginTop;
-      childMarginBottom = childRenderBoxModel.renderStyle.marginBottom;
+      childMarginTop = child.renderStyle.marginTop;
+      childMarginBottom = child.renderStyle.marginBottom;
     }
 
     Size childSize = _getChildSize(child);

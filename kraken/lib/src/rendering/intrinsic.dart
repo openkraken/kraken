@@ -50,6 +50,7 @@ class RenderIntrinsic extends RenderBoxModel
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: targetId);
     }
 
+    CSSDisplay display = renderStyle.display;
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {
@@ -82,8 +83,8 @@ class RenderIntrinsic extends RenderBoxModel
 
       setMaxScrollableSize(child.size.width, child.size.height);
 
-      CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-      bool isInlineLevel = realDisplay == CSSDisplay.inlineBlock || realDisplay == CSSDisplay.inlineFlex;
+      CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
+      bool isInlineLevel = transformedDisplay == CSSDisplay.inlineBlock || transformedDisplay == CSSDisplay.inlineFlex;
 
       double constraintWidth = child.size.width;
       double constraintHeight = child.size.height;

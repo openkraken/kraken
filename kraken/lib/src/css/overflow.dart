@@ -137,7 +137,7 @@ mixin CSSOverflowMixin on ElementBase {
 
         // Overflow auto/scroll will create repaint boundary to improve scroll performance
         // So it needs to transform between layout and its repaint boundary replacement when transform changes
-        RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: shouldRepaintSelf, prevRenderLayoutBox: renderBoxModel);
+        RenderLayoutBox newLayoutBox = element.createRenderLayout(element, repaintSelf: shouldRepaintSelf, prevRenderLayoutBox: renderBoxModel);
 
         if (newLayoutBox == renderBoxModel) {
           return;
