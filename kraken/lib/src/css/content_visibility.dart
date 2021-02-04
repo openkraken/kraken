@@ -14,7 +14,27 @@ enum ContentVisibility {
   visible
 }
 
-mixin CSSContentVisibilityMixin on ElementBase {
+mixin CSSContentVisibilityMixin on RenderStyleBase {
+
+  /// Whether the child is hidden from the rest of the tree.
+  ///
+  /// If ContentVisibility.hidden, the child is laid out as if it was in the tree, but without
+  /// painting anything, without making the child available for hit testing, and
+  /// without taking any room in the parent.
+  ///
+  /// If ContentVisibility.visible, the child is included in the tree as normal.
+  ///
+  /// If ContentVisibility.auto, the framework will compute the intersection bounds and not to paint when child renderObject
+  /// are no longer intersection with this renderObject.
+  ContentVisibility _contentVisibility;
+  ContentVisibility get contentVisibility => _contentVisibility;
+  set contentVisibility(ContentVisibility value) {
+    if (value == null) return;
+    if (value == _contentVisibility) return;
+    _contentVisibility = value;
+    renderBoxModel.markNeedsPaint();
+  }
+
   bool _hasIntersectionObserver = false;
 
   void setContentVisibilityIntersectionObserver(
@@ -43,14 +63,14 @@ mixin CSSContentVisibilityMixin on ElementBase {
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     assert(renderBoxModel != null);
-    renderBoxModel.contentVisibility = entry.isIntersecting
+    contentVisibility = entry.isIntersecting
         ? ContentVisibility.auto
         : ContentVisibility.hidden;
   }
 
-  void updateRenderContentVisibility(ContentVisibility contentVisibility) {
+  void updateRenderContentVisibility(String value) {
     if (renderBoxModel != null) {
-      renderBoxModel.contentVisibility = contentVisibility;
+      contentVisibility = CSSContentVisibilityMixin.getContentVisibility(value);
       if (contentVisibility != ContentVisibility.auto && _hasIntersectionObserver) {
         renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);
         _hasIntersectionObserver = false;

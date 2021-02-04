@@ -6,7 +6,6 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/dom.dart';
 
 class RenderStyle
   with
@@ -18,6 +17,7 @@ class RenderStyle
     CSSTextMixin,
     CSSPositionMixin,
     CSSTransformMixin,
+    CSSContentVisibilityMixin,
     CSSFlexboxMixin,
     CSSFlowMixin,
     CSSDisplayMixin,

@@ -316,7 +316,7 @@ class RenderBoxModel extends RenderBox with
     RenderOverflowMixin,
     RenderOpacityMixin,
     RenderIntersectionObserverMixin,
-    RenderContentVisibility,
+    RenderContentVisibilityMixin,
     RenderVisibilityMixin,
     RenderPointerListenerMixin,
     RenderColorFilter,
@@ -425,11 +425,7 @@ class RenderBoxModel extends RenderBox with
       // Copy render style
       ..renderStyle = renderStyle
 
-      // Copy Border
-      ..decoration = decoration
-      ..cssBoxDecoration = cssBoxDecoration
-      ..position = position
-      ..configuration = configuration
+      // Copy box decoration
       ..boxPainter = boxPainter
 
       // Copy overflow
@@ -448,15 +444,9 @@ class RenderBoxModel extends RenderBox with
       ..onPointerMove = onPointerMove
       ..onPointerSignal = onPointerSignal
 
-      // Copy transform
-      ..origin = origin
-      ..alignment = alignment
-
-      // Copy ContentVisibility
-      ..contentVisibility = contentVisibility
-
       // Copy renderPositionHolder
       ..renderPositionHolder = renderPositionHolder
+
       // Copy parentData
       ..parentData = parentData;
   }
@@ -1085,6 +1075,7 @@ class RenderBoxModel extends RenderBox with
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
     EdgeInsets borderEdge = EdgeInsets.fromLTRB(renderStyle.borderLeft, renderStyle.borderTop, renderStyle.borderRight, renderStyle.borderLeft);
+    BoxDecoration decoration = renderStyle.decoration;
 
     bool hasLocalAttachment = CSSBackground.hasLocalBackgroundImage(style);
     if (hasLocalAttachment) {

@@ -1108,13 +1108,29 @@ mixin CSSTransformMixin on RenderStyleBase {
     _transform = value;
   }
 
-  CSSOrigin get transformOrigin => _transformOrigin;
-  CSSOrigin _transformOrigin;
-  set transformOrigin(CSSOrigin value) {
-    if (_transformOrigin == value) return;
-    _transformOrigin = value;
-    renderBoxModel.markNeedsLayout();
+  Offset get transformOffset => _transformOffset;
+  Offset _transformOffset = Offset(0, 0);
+  set transformOffset(Offset value) {
+    if (_transformOffset == value) return;
+    _transformOffset = value;
+    renderBoxModel.markNeedsPaint();
   }
+
+  Alignment get transformAlignment => _transformAlignment;
+  Alignment _transformAlignment = Alignment.center;
+  set transformAlignment(Alignment value) {
+    if (_transformAlignment == value) return;
+    _transformAlignment = value;
+    renderBoxModel.markNeedsPaint();
+  }
+
+//  CSSOrigin get transformOrigin => _transformOrigin;
+//  CSSOrigin _transformOrigin;
+//  set transformOrigin(CSSOrigin value) {
+//    if (_transformOrigin == value) return;
+//    _transformOrigin = value;
+//    renderBoxModel.markNeedsLayout();
+//  }
 
   void updateTransform(
     Matrix4 matrix4,
@@ -1159,18 +1175,18 @@ mixin CSSTransformMixin on RenderStyleBase {
     CSSOrigin transformOriginValue = newOrigin ?? CSSOrigin.parseOrigin(present, viewportSize);
     if (transformOriginValue == null) return;
 
-    Offset oldOffset = renderBoxModel.origin;
+    Offset oldOffset = transformOffset;
     Offset offset = transformOriginValue.offset;
     // Transform origin transition by offset
     if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
-      renderBoxModel.origin = offset;
+      transformOffset = offset;
     }
 
     Alignment alignment = transformOriginValue.alignment;
-    Alignment oldAlignment = renderBoxModel.alignment;
+    Alignment oldAlignment = transformAlignment;
     // Transform origin transition by alignment
     if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {
-      renderBoxModel.alignment = alignment;
+      transformAlignment = alignment;
     }
   }
 }

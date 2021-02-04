@@ -76,7 +76,6 @@ class Element extends Node
         EventHandlerMixin,
         CSSOverflowMixin,
         CSSVisibilityMixin,
-        CSSContentVisibilityMixin,
         CSSTransitionMixin,
         CSSFilterEffectsMixin {
   static SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
@@ -972,7 +971,7 @@ class Element extends Node
 
   void _styleContentVisibilityChangedListener(String property, String original, String present) {
     // Update content visibility.
-    updateRenderContentVisibility(CSSContentVisibilityMixin.getContentVisibility(present));
+    renderBoxModel.renderStyle.updateRenderContentVisibility(present);
   }
 
   void _styleTransformChangedListener(String property, String original, String present) {

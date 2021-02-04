@@ -14,39 +14,11 @@ enum BackgroundBoundary {
 }
 
 mixin RenderBoxDecorationMixin on RenderBoxModelBase {
-  CSSBoxDecoration cssBoxDecoration;
-  DecorationPosition position = DecorationPosition.background;
-  ImageConfiguration configuration = ImageConfiguration.empty;
 
-  _BoxDecorationPainter _painter;
-  _BoxDecorationPainter get boxPainter => _painter;
-  set boxPainter(_BoxDecorationPainter painter) {
+  BoxDecorationPainter _painter;
+  BoxDecorationPainter get boxPainter => _painter;
+  set boxPainter(BoxDecorationPainter painter) {
     _painter = painter;
-  }
-
-  /// What decoration to paint.
-  ///
-  /// Commonly a [BoxDecoration].
-  BoxDecoration get decoration => _decoration;
-  BoxDecoration _decoration;
-  set decoration(BoxDecoration value) {
-    if (value == null) return;
-    if (value == _decoration) return;
-    _painter?.dispose();
-    _painter = null;
-    _decoration = value;
-    // If has border, render padding should subtracting the edge of the border
-    if (value.border != null) {
-      Border border = value.border;
-      renderStyle.borderEdge = EdgeInsets.fromLTRB(
-        border.left.width,
-        border.top.width,
-        border.right.width,
-        border.bottom.width
-      );
-    }
-
-    markNeedsPaint();
   }
 
   void disposePainter() {
@@ -61,9 +33,13 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
   }
 
   void paintBackground(PaintingContext context, Offset offset, EdgeInsets padding, CSSStyleDeclaration style) {
+    BoxDecoration decoration = renderStyle.decoration;
+    DecorationPosition decorationPosition = renderStyle.decorationPosition;
+    ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
+
     if (decoration == null) return;
     if (_painter == null) {
-      _painter ??= _BoxDecorationPainter(
+      _painter ??= BoxDecorationPainter(
         decoration,
         renderStyle.borderEdge,
         renderStyle.backgroundClip,
@@ -74,8 +50,8 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       );
     }
 
-    final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
-    if (position == DecorationPosition.background) {
+    final ImageConfiguration filledConfiguration = imageConfiguration.copyWith(size: size);
+    if (decorationPosition == DecorationPosition.background) {
       int debugSaveCount;
       assert(() {
         debugSaveCount = context.canvas.getSaveCount();
@@ -99,15 +75,18 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       if (decoration.isComplex) context.setIsComplexHint();
     }
 
-    if (position == DecorationPosition.foreground) {
+    if (decorationPosition == DecorationPosition.foreground) {
       _painter.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
     }
   }
 
   void paintDecoration(PaintingContext context, Offset offset, EdgeInsets padding, CSSStyleDeclaration style) {
+    BoxDecoration decoration = renderStyle.decoration;
+    DecorationPosition decorationPosition = renderStyle.decorationPosition;
+    ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
     if (decoration == null) return;
-    _painter ??= _BoxDecorationPainter(
+    _painter ??= BoxDecorationPainter(
       decoration,
       renderStyle.borderEdge,
       renderStyle.backgroundClip,
@@ -117,8 +96,8 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       markNeedsPaint
     );
 
-    final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
-    if (position == DecorationPosition.background) {
+    final ImageConfiguration filledConfiguration = imageConfiguration.copyWith(size: size);
+    if (decorationPosition == DecorationPosition.background) {
       int debugSaveCount;
       assert(() {
         debugSaveCount = context.canvas.getSaveCount();
@@ -150,7 +129,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       contentOffset = offset.translate(borderEdge.left, borderEdge.top);
     }
     super.paint(context, contentOffset);
-    if (position == DecorationPosition.foreground) {
+    if (decorationPosition == DecorationPosition.foreground) {
       _painter.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
     }
@@ -160,6 +139,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     if (renderStyle.borderEdge != null) properties.add(DiagnosticsProperty('borderEdge', renderStyle.borderEdge));
     if (renderStyle.backgroundClip != null) properties.add(DiagnosticsProperty('backgroundClip', renderStyle.backgroundClip));
     if (renderStyle.backgroundOrigin != null) properties.add(DiagnosticsProperty('backgroundOrigin', renderStyle.backgroundOrigin));
+    BoxDecoration _decoration = renderStyle.decoration;
     if (_decoration != null && _decoration.borderRadius != null) properties.add(DiagnosticsProperty('borderRadius', _decoration.borderRadius));
     if (_decoration != null && _decoration.image != null) properties.add(DiagnosticsProperty('backgroundImage', _decoration.image));
     if (_decoration != null && _decoration.boxShadow != null) properties.add(DiagnosticsProperty('boxShadow', _decoration.boxShadow));
@@ -168,8 +148,8 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 }
 
 /// An object that paints a [BoxDecoration] into a canvas.
-class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(
+class BoxDecorationPainter extends BoxPainter {
+  BoxDecorationPainter(
     this._decoration,
     this.borderEdge,
     this.backgroundClip,
