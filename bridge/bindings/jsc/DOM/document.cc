@@ -83,7 +83,39 @@ JSValueRef DocumentInstance::createComment(JSContextRef ctx, JSObjectRef functio
   return commentNodeInstance;
 }
 
-JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {}
+JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
+
+  if (!event_registered) {
+    event_registered = true;
+    JSEvent::defineEvent(EVENT_INPUT, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_MEDIA_ERROR, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_MESSAGE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new MessageEventInstance(JSMessageEvent::instance(context), reinterpret_cast<NativeMessageEvent*>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_CLOSE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new CloseEventInstance(JSCloseEvent::instance(context), reinterpret_cast<NativeCloseEvent*>(nativeEvent));;
+    });
+    JSEvent::defineEvent(EVENT_INTERSECTION_CHANGE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_TOUCH_START, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_TOUCH_END, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_TOUCH_MOVE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_TOUCH_CANCEL, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+    });
+  }
+}
 
 JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                             const JSValueRef *arguments, JSValueRef *exception) {

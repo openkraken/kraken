@@ -41,6 +41,8 @@ class ElementInstance;
 struct NativeBoundingClientRect;
 class BoundingClientRect;
 struct NativeElement;
+class JSEvent;
+struct NativeEvent;
 
 class JSContext {
 public:
@@ -301,6 +303,8 @@ private:
   HostClass *_parentHostClass{nullptr};
 };
 
+using EventCreator = EventInstance*(*)(JSContext *context, void *nativeEvent);
+
 class JSEvent : public HostClass {
 public:
   DEFINE_OBJECT_PROPERTY(Event, 13, type, bubbles, cancelable, timestamp, defaultPrevented, target, srcElement,
@@ -308,7 +312,8 @@ public:
                          preventDefault)
 
   static std::unordered_map<JSContext *, JSEvent *> instanceMap;
-  OBJECT_INSTANCE(JSEvent)
+  static std::unordered_map<std::string, EventCreator> eventCreatorMap;
+  OBJECT_INSTANCE(JSEvent);
   // Create an Event Object from an nativeEvent address which allocated by dart side.
   static KRAKEN_EXPORT JSValueRef initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                       size_t argumentCount, const JSValueRef arguments[],
@@ -325,6 +330,8 @@ public:
 
   static EventInstance *buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent,
                                            bool isCustomEvent);
+
+  static void defineEvent(std::string eventType, EventCreator creator);
 
   KRAKEN_EXPORT JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                                 const JSValueRef *arguments, JSValueRef *exception) override;
@@ -577,6 +584,9 @@ public:
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
 private:
+
+  std::atomic<bool> event_registered{false};
+
 protected:
   JSDocument() = delete;
   JSDocument(JSContext *context);

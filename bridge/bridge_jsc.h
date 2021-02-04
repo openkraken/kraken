@@ -51,7 +51,7 @@ namespace kraken {
 class JSBridge final {
 public:
   JSBridge() = delete;
-  JSBridge(int32_t contextId, const JSExceptionHandler &handler);
+  JSBridge(int32_t jsContext, const JSExceptionHandler &handler);
   ~JSBridge();
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
@@ -75,6 +75,9 @@ public:
   void invokeEventListener(int32_t type, const NativeString *args);
   void handleModuleListener(const NativeString *args, JSValueRef *exception);
   void reportError(const char *errmsg);
+
+  std::atomic<bool> event_registered = false;
+
   //#ifdef ENABLE_DEBUGGER
   //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;
   //#endif // ENABLE_DEBUGGER
