@@ -408,8 +408,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double marginVertical = 0;
 
     if (child is RenderBoxModel) {
-      marginHorizontal = child.renderStyle.marginLeft + child.renderStyle.marginRight;
-      marginVertical = child.renderStyle.marginTop + child.renderStyle.marginBottom;
+      marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
+      marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
     }
 
     Size childSize = _getChildSize(child);
@@ -429,8 +429,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double marginHorizontal = 0;
 
     if (child is RenderBoxModel) {
-      marginHorizontal = child.renderStyle.marginLeft + child.renderStyle.marginRight;
-      marginVertical = child.renderStyle.marginTop + child.renderStyle.marginBottom;
+      marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
+      marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
     }
     Size childSize = _getChildSize(child);
     switch (direction) {
@@ -754,8 +754,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginTop = 0;
         double childMarginBottom = 0;
         if (child is RenderBoxModel) {
-          childMarginTop = child.renderStyle.marginTop;
-          childMarginBottom = child.renderStyle.marginBottom;
+          childMarginTop = child.renderStyle.marginTop.length;
+          childMarginBottom = child.renderStyle.marginBottom.length;
         }
 
         Size childSize = _getChildSize(child);
@@ -937,17 +937,17 @@ class RenderFlowLayout extends RenderLayoutBox {
         // between element and its containing block on block-level element
         // which is not positioned and computed to 0px in other cases
         if (child is RenderBoxModel) {
-          CSSDisplay childTransformedDisplay = child.renderStyle.transformedDisplay;
-          CSSStyleDeclaration childStyle = child.style;
-          String marginLeft = childStyle[MARGIN_LEFT];
-          String marginRight = childStyle[MARGIN_RIGHT];
+          RenderStyle childRenderStyle = child.renderStyle;
+          CSSDisplay childTransformedDisplay = childRenderStyle.transformedDisplay;
+          CSSMargin marginLeft = childRenderStyle.marginLeft;
+          CSSMargin marginRight = childRenderStyle.marginRight;
 
           // 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' +
           // 'border-right-width' + 'margin-right' = width of containing block
           if (childTransformedDisplay == CSSDisplay.block || childTransformedDisplay == CSSDisplay.flex) {
-            if (marginLeft == AUTO) {
+            if (marginLeft.isAuto) {
               double remainingSpace = mainAxisContentSize - childMainAxisExtent;
-              if (marginRight == AUTO) {
+              if (marginRight.isAuto) {
                 childMainPosition = remainingSpace / 2;
               } else {
                 childMainPosition = remainingSpace;
@@ -1010,8 +1010,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginLeft = 0;
         double childMarginTop = 0;
         if (child is RenderBoxModel) {
-          childMarginLeft = child.renderStyle.marginLeft;
-          childMarginTop = child.renderStyle.marginTop;
+          childMarginLeft = child.renderStyle.marginLeft.length;
+          childMarginTop = child.renderStyle.marginTop.length;
         }
 
         Offset relativeOffset = _getOffset(
@@ -1192,8 +1192,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double childMarginTop = 0;
     double childMarginBottom = 0;
     if (child is RenderBoxModel) {
-      childMarginTop = child.renderStyle.marginTop;
-      childMarginBottom = child.renderStyle.marginBottom;
+      childMarginTop = child.renderStyle.marginTop.length;
+      childMarginBottom = child.renderStyle.marginBottom.length;
     }
 
     Size childSize = _getChildSize(child);

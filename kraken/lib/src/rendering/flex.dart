@@ -306,9 +306,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-      return isEnd ? childRenderBoxModel.renderStyle.marginRight : childRenderBoxModel.renderStyle.marginLeft;
+      return isEnd ? childRenderBoxModel.renderStyle.marginRight.length : childRenderBoxModel.renderStyle.marginLeft.length;
     } else {
-      return isEnd ? childRenderBoxModel.renderStyle.marginBottom : childRenderBoxModel.renderStyle.marginTop;
+      return isEnd ? childRenderBoxModel.renderStyle.marginBottom.length : childRenderBoxModel.renderStyle.marginTop.length;
     }
   }
 
@@ -322,9 +322,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       return 0;
     }
     if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-      return isEnd ? childRenderBoxModel.renderStyle.marginBottom : childRenderBoxModel.renderStyle.marginTop;
+      return isEnd ? childRenderBoxModel.renderStyle.marginBottom.length : childRenderBoxModel.renderStyle.marginTop.length;
     } else {
-      return isEnd ? childRenderBoxModel.renderStyle.marginRight : childRenderBoxModel.renderStyle.marginLeft;
+      return isEnd ? childRenderBoxModel.renderStyle.marginRight.length : childRenderBoxModel.renderStyle.marginLeft.length;
     }
   }
 
@@ -526,8 +526,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     if (childRenderBoxModel != null) {
-      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft + childRenderBoxModel.renderStyle.marginRight;
-      marginVertical = childRenderBoxModel.renderStyle.marginTop + childRenderBoxModel.renderStyle.marginBottom;
+      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft.length + childRenderBoxModel.renderStyle.marginRight.length;
+      marginVertical = childRenderBoxModel.renderStyle.marginTop.length + childRenderBoxModel.renderStyle.marginBottom.length;
     }
 
     Size childSize = _getChildSize(child);
@@ -563,8 +563,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     if (childRenderBoxModel != null) {
-      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft + childRenderBoxModel.renderStyle.marginRight;
-      marginVertical = childRenderBoxModel.renderStyle.marginTop + childRenderBoxModel.renderStyle.marginBottom;
+      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft.length + childRenderBoxModel.renderStyle.marginRight.length;
+      marginVertical = childRenderBoxModel.renderStyle.marginTop.length + childRenderBoxModel.renderStyle.marginBottom.length;
     }
 
     double baseSize = _getMainSize(child);
@@ -769,16 +769,14 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   bool _isChildDisplayNone(RenderObject child) {
-    CSSStyleDeclaration style;
     if (child is RenderTextBox) {
-      style = child.style;
-    } else if (child is RenderBoxModel) {
-      style = child.style;
+      return false;
     }
 
-    if (style == null) return false;
-
-    return style[DISPLAY] == NONE;
+    if (child is RenderBoxModel) {
+      return child.renderStyle.display == CSSDisplay.none;
+    }
+    return false;
   }
 
   bool isPlaceholderPositioned(RenderObject child) {
@@ -1164,7 +1162,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             // Should substract margin when layout child
             double marginVertical = 0;
             if (child is RenderBoxModel) {
-              marginVertical = child.renderStyle.marginTop + child.renderStyle.marginBottom;
+              marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
             }
             maxCrossAxisSize = contentHeight != null ? contentHeight - marginVertical : double.infinity;
           }
@@ -1291,8 +1289,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         double childMarginTop = 0;
         double childMarginBottom = 0;
         if (child is RenderBoxModel) {
-          childMarginTop = child.renderStyle.marginTop;
-          childMarginBottom = child.renderStyle.marginBottom;
+          childMarginTop = child.renderStyle.marginTop.length;
+          childMarginBottom = child.renderStyle.marginBottom.length;
         }
         maxSizeAboveBaseline = math.max(
           childAscent + childLeading / 2,
@@ -1682,16 +1680,16 @@ class RenderFlexLayout extends RenderLayoutBox {
                   maxCrossAxisSize = contentConstraints.maxHeight;
                 }
               } else if (child is! RenderTextBox) {
-                String marginTop;
-                String marginBottom;
+                CSSMargin marginTop;
+                CSSMargin marginBottom;
                 if (child is RenderBoxModel) {
-                  CSSStyleDeclaration childStyle = child.style;
-                  marginTop = childStyle[MARGIN_TOP];
-                  marginBottom = childStyle[MARGIN_BOTTOM];
+                  RenderStyle childRenderStyle = child.renderStyle;
+                  marginTop = childRenderStyle.marginTop;
+                  marginBottom = childRenderStyle.marginBottom;
                 }
                 // Margin auto alignment takes priority over align-items stretch,
                 // it will not stretch child in vertical direction
-                if (marginTop == AUTO || marginBottom == AUTO) {
+                if (marginTop.isAuto || marginBottom.isAuto) {
                   minCrossAxisSize = childSize.height;
                   maxCrossAxisSize = double.infinity;
                 } else {
@@ -1699,7 +1697,7 @@ class RenderFlexLayout extends RenderLayoutBox {
                   // Should substract margin when layout child
                   double marginVertical = 0;
                   if (child is RenderBoxModel) {
-                    marginVertical = child.renderStyle.marginTop + child.renderStyle.marginBottom;
+                    marginVertical = marginTop.length + marginBottom.length;
                   }
                   minCrossAxisSize = flexLineHeight - marginVertical;
                   maxCrossAxisSize = double.infinity;
@@ -1741,16 +1739,16 @@ class RenderFlexLayout extends RenderLayoutBox {
                   maxCrossAxisSize = contentConstraints.maxWidth;
                 }
               } else if (child is! RenderTextBox) {
-                String marginLeft;
-                String marginRight;
+                CSSMargin marginLeft;
+                CSSMargin marginRight;
                 if (child is RenderBoxModel) {
-                  CSSStyleDeclaration childStyle = child.style;
-                  marginLeft = childStyle[MARGIN_LEFT];
-                  marginRight = childStyle[MARGIN_RIGHT];
+                  RenderStyle childRenderStyle = child.renderStyle;
+                  marginLeft = childRenderStyle.marginLeft;
+                  marginRight = childRenderStyle.marginRight;
                 }
                 // Margin auto alignment takes priority over align-items stretch,
                 // it will not stretch child in horizontal direction
-                if (marginLeft == AUTO || marginRight == AUTO) {
+                if (marginLeft.isAuto || marginRight.isAuto) {
                   minCrossAxisSize = childSize.width;
                   maxCrossAxisSize = double.infinity;
                 } else {
@@ -1758,7 +1756,7 @@ class RenderFlexLayout extends RenderLayoutBox {
                   // Should substract margin when layout child
                   double marginHorizontal = 0;
                   if (child is RenderBoxModel) {
-                    marginHorizontal = child.renderStyle.marginLeft + child.renderStyle.marginRight;
+                    marginHorizontal = marginLeft.length + marginRight.length;
                   }
 
                   minCrossAxisSize = flexLineHeight - marginHorizontal;
@@ -2080,12 +2078,12 @@ class RenderFlexLayout extends RenderLayoutBox {
         final RenderLayoutParentData childParentData = runChild.parentData;
         if (childParentData.runIndex != i) break;
         if (runChild is RenderBoxModel) {
-          CSSStyleDeclaration childStyle = runChild.style;
-          String marginLeft = childStyle[MARGIN_LEFT];
-          String marginTop = childStyle[MARGIN_TOP];
+          RenderStyle childRenderStyle = runChild.renderStyle;
+          CSSMargin marginLeft = childRenderStyle.marginLeft;
+          CSSMargin marginTop = childRenderStyle.marginTop;
 
-          if ((CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) && marginLeft == AUTO) ||
-            (CSSFlex.isVerticalFlexDirection(renderStyle.flexDirection) && marginTop == AUTO)) {
+          if ((CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) && marginLeft.isAuto) ||
+            (CSSFlex.isVerticalFlexDirection(renderStyle.flexDirection) && marginTop.isAuto)) {
             mainAxisMarginAutoChildren++;
           }
         }
@@ -2214,11 +2212,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         // margin auto takes up available space in the remaining space
         // between flex items and flex container
         if (child is RenderBoxModel) {
-          CSSStyleDeclaration childStyle = child.style;
-          String marginLeft = childStyle[MARGIN_LEFT];
-          String marginRight = childStyle[MARGIN_RIGHT];
-          String marginTop = childStyle[MARGIN_TOP];
-          String marginBottom = childStyle[MARGIN_BOTTOM];
+          RenderStyle childRenderStyle = child.renderStyle;
+          CSSMargin marginLeft = childRenderStyle.marginLeft;
+          CSSMargin marginRight = childRenderStyle.marginRight;
+          CSSMargin marginTop = childRenderStyle.marginTop;
+          CSSMargin marginBottom = childRenderStyle.marginBottom;
 
           double horizontalRemainingSpace;
           double verticalRemainingSpace;
@@ -2229,8 +2227,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
             horizontalRemainingSpace = mainAxisRemainingSpace;
             verticalRemainingSpace = crossAxisRemainingSpace;
-            if (totalFlexGrow == 0 && marginLeft == AUTO) {
-              if (marginRight == AUTO) {
+            if (totalFlexGrow == 0 && marginLeft.isAuto) {
+              if (marginRight.isAuto) {
                 childMainPosition += (horizontalRemainingSpace / mainAxisMarginAutoChildren) / 2;
                 betweenSpace = (horizontalRemainingSpace / mainAxisMarginAutoChildren) / 2;
               } else {
@@ -2238,8 +2236,8 @@ class RenderFlexLayout extends RenderLayoutBox {
               }
             }
 
-            if (marginTop == AUTO) {
-              if (marginBottom == AUTO) {
+            if (marginTop.isAuto) {
+              if (marginBottom.isAuto) {
                 childCrossPosition += verticalRemainingSpace / 2;
               } else {
                 childCrossPosition += verticalRemainingSpace;
@@ -2248,8 +2246,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           } else {
             horizontalRemainingSpace = crossAxisRemainingSpace;
             verticalRemainingSpace = mainAxisRemainingSpace;
-            if (totalFlexGrow == 0 && marginTop == AUTO) {
-              if (marginBottom == AUTO) {
+            if (totalFlexGrow == 0 && marginTop.isAuto) {
+              if (marginBottom.isAuto) {
                 childMainPosition += (verticalRemainingSpace / mainAxisMarginAutoChildren) / 2;
                 betweenSpace = (verticalRemainingSpace / mainAxisMarginAutoChildren) / 2;
               } else {
@@ -2257,8 +2255,8 @@ class RenderFlexLayout extends RenderLayoutBox {
               }
             }
 
-            if (marginLeft == AUTO) {
-              if (marginRight == AUTO) {
+            if (marginLeft.isAuto) {
+              if (marginRight.isAuto) {
                 childCrossPosition += horizontalRemainingSpace / 2;
               } else {
                 childCrossPosition += horizontalRemainingSpace;
@@ -2317,8 +2315,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     double childMarginTop = 0;
     double childMarginBottom = 0;
     if (child is RenderBoxModel) {
-      childMarginTop = child.renderStyle.marginTop;
-      childMarginBottom = child.renderStyle.marginBottom;
+      childMarginTop = child.renderStyle.marginTop.length;
+      childMarginBottom = child.renderStyle.marginBottom.length;
     }
 
     Size childSize = _getChildSize(child);

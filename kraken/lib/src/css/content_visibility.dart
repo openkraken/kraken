@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
 // CSS Content Visibility: https://www.w3.org/TR/css-contain-2/#content-visibility

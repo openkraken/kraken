@@ -945,7 +945,7 @@ class Element extends Node
     if (display == CSSDisplay.sliver) {
       assert(renderBoxModel is RenderRecyclerLayout);
       RenderRecyclerLayout renderRecyclerLayout = renderBoxModel;
-      renderRecyclerLayout.axis = RenderRecyclerLayout.resolveAxis(style);
+      renderBoxModel.renderStyle.updateSliver(present);
     }
   }
 

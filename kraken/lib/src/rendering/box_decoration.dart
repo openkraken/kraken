@@ -32,7 +32,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     markNeedsPaint();
   }
 
-  void paintBackground(PaintingContext context, Offset offset, EdgeInsets padding, CSSStyleDeclaration style) {
+  void paintBackground(PaintingContext context, Offset offset, EdgeInsets padding) {
     BoxDecoration decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
@@ -41,11 +41,8 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     if (_painter == null) {
       _painter ??= BoxDecorationPainter(
         decoration,
-        renderStyle.borderEdge,
-        renderStyle.backgroundClip,
-        renderStyle.backgroundOrigin,
         padding,
-        style,
+        renderStyle,
         markNeedsPaint
       );
     }
@@ -81,18 +78,15 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     }
   }
 
-  void paintDecoration(PaintingContext context, Offset offset, EdgeInsets padding, CSSStyleDeclaration style) {
+  void paintDecoration(PaintingContext context, Offset offset, EdgeInsets padding) {
     BoxDecoration decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
     if (decoration == null) return;
     _painter ??= BoxDecorationPainter(
       decoration,
-      renderStyle.borderEdge,
-      renderStyle.backgroundClip,
-      renderStyle.backgroundOrigin,
       padding,
-      style,
+      renderStyle,
       markNeedsPaint
     );
 
@@ -151,20 +145,14 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 class BoxDecorationPainter extends BoxPainter {
   BoxDecorationPainter(
     this._decoration,
-    this.borderEdge,
-    this.backgroundClip,
-    this.backgroundOrigin,
     this.padding,
-    this.style,
+    this.renderStyle,
     VoidCallback onChanged
   ) : assert(_decoration != null),
       super(onChanged);
 
-  BackgroundBoundary backgroundClip;
-  BackgroundBoundary backgroundOrigin;
-  EdgeInsets borderEdge;
   EdgeInsets padding;
-  CSSStyleDeclaration style;
+  RenderStyle renderStyle;
   final BoxDecoration _decoration;
 
   Paint _cachedBackgroundPaint;
@@ -247,12 +235,17 @@ class BoxDecorationPainter extends BoxPainter {
     super.dispose();
   }
 
+  bool hasLocalBackgroundImage(RenderStyle renderStyle) {
+    return renderStyle.backgroundImage != null &&
+      renderStyle.backgroundAttachment == LOCAL;
+  }
+
   void paintBackground(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration.size != null);
     Offset baseOffset = Offset(0, 0);
 
     final TextDirection textDirection = configuration.textDirection;
-    bool hasLocalAttachment = CSSBackground.hasLocalBackgroundImage(style);
+    bool hasLocalAttachment = hasLocalBackgroundImage(renderStyle);
 
     // Rect of background color
     Rect backgroundColorRect = _getBackgroundClipRect(baseOffset, configuration);
@@ -269,6 +262,8 @@ class BoxDecorationPainter extends BoxPainter {
 
   Rect _getBackgroundOriginRect(Offset offset, ImageConfiguration configuration) {
     Size size = configuration.size;
+
+    EdgeInsets borderEdge = renderStyle.borderEdge;
     double borderTop = 0;
     double borderLeft = 0;
     if (borderEdge != null) {
@@ -284,6 +279,7 @@ class BoxDecorationPainter extends BoxPainter {
     }
     // Background origin moves background image from specified origin
     Rect backgroundOriginRect;
+    BackgroundBoundary backgroundOrigin = renderStyle.backgroundOrigin;
     switch(backgroundOrigin) {
       case BackgroundBoundary.borderBox:
         backgroundOriginRect = offset & size;
@@ -304,6 +300,7 @@ class BoxDecorationPainter extends BoxPainter {
     double borderBottom = 0;
     double borderLeft = 0;
     double borderRight = 0;
+    EdgeInsets borderEdge = renderStyle.borderEdge;
     if (borderEdge != null) {
       borderTop = borderEdge.top;
       borderBottom = borderEdge.bottom;
@@ -322,6 +319,7 @@ class BoxDecorationPainter extends BoxPainter {
       paddingRight = padding.right;
     }
     Rect backgroundClipRect;
+    BackgroundBoundary backgroundClip = renderStyle.backgroundClip;
     switch(backgroundClip) {
       case BackgroundBoundary.paddingBox:
         backgroundClipRect = offset.translate(borderLeft, borderTop) & Size(
@@ -353,8 +351,7 @@ class BoxDecorationPainter extends BoxPainter {
 
     _paintShadows(canvas, rect, textDirection);
 
-
-    bool hasLocalAttachment = CSSBackground.hasLocalBackgroundImage(style);
+    bool hasLocalAttachment = hasLocalBackgroundImage(renderStyle);
     if (!hasLocalAttachment) {
       Rect backgroundClipRect = _getBackgroundClipRect(offset, configuration);
       _paintBackgroundColor(canvas, backgroundClipRect, textDirection);

@@ -267,10 +267,10 @@ class CSSPositionedLayout {
     Element childEl = parent.elementManager.getEventTargetByTargetId<Element>(child.targetId);
     RenderBoxModel childRenderBoxModel = childEl.renderBoxModel;
     RenderStyle childRenderStyle = child.renderStyle;
-    childMarginTop = childRenderStyle.marginTop;
-    childMarginBottom = childRenderStyle.marginBottom;
-    childMarginLeft = childRenderStyle.marginLeft;
-    childMarginRight = childRenderStyle.marginRight;
+    childMarginTop = childRenderStyle.marginTop.length;
+    childMarginBottom = childRenderStyle.marginBottom.length;
+    childMarginLeft = childRenderStyle.marginLeft.length;
+    childMarginRight = childRenderStyle.marginRight.length;
 
     // Offset to global coordinate system of base.
     if (childParentData.isPositioned) {

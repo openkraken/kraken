@@ -1069,7 +1069,7 @@ class RenderBoxModel extends RenderBox with
 
   void _chainPaintDecoration(PaintingContext context, Offset offset) {
     EdgeInsets resolvedPadding = renderStyle.padding != null ? renderStyle.padding.resolve(TextDirection.ltr) : null;
-    paintDecoration(context, offset, resolvedPadding, style);
+    paintDecoration(context, offset, resolvedPadding);
     _chainPaintOverflow(context, offset);
   }
 
@@ -1077,7 +1077,7 @@ class RenderBoxModel extends RenderBox with
     EdgeInsets borderEdge = EdgeInsets.fromLTRB(renderStyle.borderLeft, renderStyle.borderTop, renderStyle.borderRight, renderStyle.borderLeft);
     BoxDecoration decoration = renderStyle.decoration;
 
-    bool hasLocalAttachment = CSSBackground.hasLocalBackgroundImage(style);
+    bool hasLocalAttachment = _hasLocalBackgroundImage(renderStyle);
     if (hasLocalAttachment) {
       paintOverflow(context, offset, borderEdge, decoration, _chainPaintBackground);
     } else {
@@ -1087,7 +1087,7 @@ class RenderBoxModel extends RenderBox with
 
   void _chainPaintBackground(PaintingContext context, Offset offset) {
     EdgeInsets resolvedPadding = renderStyle.padding != null ? renderStyle.padding.resolve(TextDirection.ltr) : null;
-    paintBackground(context, offset, resolvedPadding, style);
+    paintBackground(context, offset, resolvedPadding);
     _chainPaintContentVisibility(context, offset);
   }
 
@@ -1101,6 +1101,11 @@ class RenderBoxModel extends RenderBox with
     if (_debugShouldPaintOverlay) {
       debugPaintOverlay(context, offset);
     }
+  }
+
+  bool _hasLocalBackgroundImage(RenderStyle renderStyle) {
+    return renderStyle.backgroundImage != null &&
+      renderStyle.backgroundAttachment == LOCAL;
   }
 
   @override

@@ -6,6 +6,17 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
+class CSSMargin {
+  CSSMargin({
+    this.length,
+    this.isAuto,
+  }) {}
+  /// length if margin value is length type
+  double length;
+  /// Whether value is auto
+  bool isAuto;
+}
+
 mixin CSSMarginMixin on RenderStyleBase {
 
   EdgeInsets _resolvedMargin;
@@ -33,28 +44,32 @@ mixin CSSMarginMixin on RenderStyleBase {
     _markNeedResolution();
   }
 
-  double get marginTop {
+  CSSMargin get marginTop {
     _resolve();
-    if (_resolvedMargin == null) return 0;
-    return _resolvedMargin.top;
+    double length = _resolvedMargin != null ? _resolvedMargin.top : 0;
+    bool isAuto = style[MARGIN_TOP] == AUTO;
+    return CSSMargin(length: length, isAuto: isAuto);
   }
 
-  double get marginRight {
+  CSSMargin get marginRight {
     _resolve();
-    if (_resolvedMargin == null) return 0;
-    return _resolvedMargin.right;
+    double length = _resolvedMargin != null ? _resolvedMargin.right : 0;
+    bool isAuto = style[MARGIN_RIGHT] == AUTO;
+    return CSSMargin(length: length, isAuto: isAuto);
   }
 
-  double get marginBottom {
+  CSSMargin get marginBottom {
     _resolve();
-    if (_resolvedMargin == null) return 0;
-    return _resolvedMargin.bottom;
+    double length = _resolvedMargin != null ? _resolvedMargin.bottom : 0;
+    bool isAuto = style[MARGIN_BOTTOM] == AUTO;
+    return CSSMargin(length: length, isAuto: isAuto);
   }
 
-  double get marginLeft {
+  CSSMargin get marginLeft {
     _resolve();
-    if (_resolvedMargin == null) return 0;
-    return _resolvedMargin.left;
+    double length = _resolvedMargin != null ? _resolvedMargin.left : 0;
+    bool isAuto = style[MARGIN_LEFT] == AUTO;
+    return CSSMargin(length: length, isAuto: isAuto);
   }
 
   EdgeInsets _getMargin() {

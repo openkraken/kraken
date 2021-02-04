@@ -39,6 +39,24 @@ mixin CSSBoxMixin on RenderStyleBase {
     _backgroundOrigin = value;
   }
 
+  /// Background-image
+  String get backgroundImage => _backgroundImage;
+  String _backgroundImage;
+  set backgroundImage(String value) {
+    if (value == null) return;
+    if (value == _backgroundImage) return;
+    _backgroundImage = value;
+  }
+
+  /// Background-attachment
+  String get backgroundAttachment => _backgroundAttachment;
+  String _backgroundAttachment;
+  set backgroundAttachment(String value) {
+    if (value == null) return;
+    if (value == _backgroundAttachment) return;
+    _backgroundAttachment = value;
+  }
+
   /// BorderSize to deflate.
   EdgeInsets _borderEdge;
   EdgeInsets get borderEdge => _borderEdge;
@@ -133,7 +151,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       } else if (property.startsWith(BACKGROUND)) {
         // Including BACKGROUND_REPEAT, BACKGROUND_POSITION, BACKGROUND_IMAGE,
         //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.
-        updateBackgroundImage(property);
+        updateBackgroundImage(property, present);
       } else if (property.startsWith(BORDER)) {
         updateBorder(property);
       } else if (property == BOX_SHADOW) {
@@ -203,7 +221,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     }
   }
 
-  void updateBackgroundImage(String property) {
+  void updateBackgroundImage(String property, String present) {
     BoxDecoration prevBoxDecoration = decoration;
 
     DecorationImage decorationImage;
@@ -228,6 +246,12 @@ mixin CSSBoxMixin on RenderStyleBase {
       backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
       shape: prevBoxDecoration.shape,
     );
+
+    if (property == BACKGROUND_IMAGE) {
+      backgroundImage = present;
+    } else if (property == BACKGROUND_ATTACHMENT) {
+      backgroundAttachment = present;
+    }
 
     if (CSSBackground.hasScrollBackgroundImage(style)) {
       decoration = updateBoxDecoration;
