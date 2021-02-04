@@ -614,8 +614,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    CSSStyleDeclaration style = renderBoxModel.style;
-    bool isInline = style[DISPLAY] == INLINE;
+    bool isInline = renderBoxModel.renderStyle.display == CSSDisplay.inline;
 
     // min-width and max-width doesn't work on inline element
     if (!isInline) {
@@ -717,8 +716,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    CSSStyleDeclaration style = renderBoxModel.style;
-    bool isInline = style[DISPLAY] == INLINE;
+    bool isInline = renderBoxModel.renderStyle.display == CSSDisplay.inline;
 
     // max-height and min-height doesn't work on inline element
     if (!isInline) {

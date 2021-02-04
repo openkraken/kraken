@@ -472,8 +472,6 @@ class RenderStyle
   BoxConstraints getConstraints() {
     double constraintWidth = width ?? double.infinity;
     double constraintHeight = height ?? double.infinity;
-    int targetId = renderBoxModel.targetId;
-    ElementManager elementManager = renderBoxModel.elementManager;
     CSSDisplay transformedDisplay = renderBoxModel.renderStyle.transformedDisplay;
     bool isInline = transformedDisplay == CSSDisplay.inline;
     bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;

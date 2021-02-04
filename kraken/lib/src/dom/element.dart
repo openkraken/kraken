@@ -460,7 +460,6 @@ class Element extends Node
     willAttachRenderer();
     style.applyTargetProperties();
 
-    CSSStyleDeclaration parentStyle = parent.style;
     CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
     // InlineFlex or Flex
     bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
