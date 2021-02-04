@@ -83,6 +83,9 @@ JSValueRef DocumentInstance::createComment(JSContextRef ctx, JSObjectRef functio
   return commentNodeInstance;
 }
 
+static std::atomic<bool> event_registered = false;
+static std::atomic<bool> document_registered = false;
+
 JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
 
   if (!event_registered) {
@@ -113,6 +116,52 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     });
     JSEvent::defineEvent(EVENT_TOUCH_CANCEL, [](JSContext *context, void *nativeEvent) -> EventInstance* {
       return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+    });
+  }
+  if (!document_registered) {
+    document_registered = true;
+
+    JSElement::defineElement("img", [](JSContext *context) -> ElementInstance* {
+      return new JSImageElement::ImageElementInstance(JSImageElement::instance(context));
+    });
+    JSElement::defineElement("a", [](JSContext *context) -> ElementInstance* {
+      return new JSAnchorElement::AnchorElementInstance(JSAnchorElement::instance(context));
+    });
+    JSElement::defineElement("canvas", [](JSContext *context) -> ElementInstance* {
+      return new JSCanvasElement::CanvasElementInstance(JSCanvasElement::instance(context));
+    });
+    JSElement::defineElement("input", [](JSContext *context) -> ElementInstance* {
+      return new JSInputElement::InputElementInstance(JSInputElement::instance(context));
+    });
+    JSElement::defineElement("audio", [](JSContext *context) -> ElementInstance* {
+      return new JSAudioElement::AudioElementInstance(JSAudioElement::instance(context));
+    });
+    JSElement::defineElement("video", [](JSContext *context) -> ElementInstance* {
+      return new JSVideoElement::VideoElementInstance(JSVideoElement::instance(context));
+    });
+    JSElement::defineElement("iframe", [](JSContext *context) -> ElementInstance* {
+      return new JSIframeElement::IframeElementInstance(JSIframeElement::instance(context));
+    });
+    JSElement::defineElement("object", [](JSContext *context) -> ElementInstance* {
+      return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
+    });
+    JSElement::defineElement("animation-player", [](JSContext *context) -> ElementInstance* {
+      return new JSAnimationPlayerElement::AnimationPlayerElementInstance(JSAnimationPlayerElement::instance(context));
+    });
+    JSElement::defineElement("span", [](JSContext *context) -> ElementInstance* {
+      return new ElementInstance(JSElement::instance(context), "span", true);
+    });
+    JSElement::defineElement("div", [](JSContext *context) -> ElementInstance* {
+      return new ElementInstance(JSElement::instance(context), "div", true);
+    });
+    JSElement::defineElement("strong", [](JSContext *context) -> ElementInstance* {
+      return new ElementInstance(JSElement::instance(context), "strong", true);
+    });
+    JSElement::defineElement("pre", [](JSContext *context) -> ElementInstance* {
+      return new ElementInstance(JSElement::instance(context), "pre", true);
+    });
+    JSElement::defineElement("p", [](JSContext *context) -> ElementInstance* {
+      return new ElementInstance(JSElement::instance(context), "p", true);
     });
   }
 }

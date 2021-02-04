@@ -584,9 +584,6 @@ public:
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
 private:
-
-  std::atomic<bool> event_registered{false};
-
 protected:
   JSDocument() = delete;
   JSDocument(JSContext *context);
@@ -727,6 +724,8 @@ private:
   JSFunctionHolder m_removeProperty{context, this, "removeProperty", removeProperty};
 };
 
+using ElementCreator = ElementInstance* (*)(JSContext *context);
+
 class JSElement : public JSNode {
 public:
   DEFINE_OBJECT_PROPERTY(Element, 27, style, nodeName, tagName, attributes, offsetLeft, offsetTop, offsetWidth,
@@ -752,6 +751,7 @@ public:
   };
 
   static std::unordered_map<JSContext *, JSElement *> instanceMap;
+  static std::unordered_map<std::string, ElementCreator> elementCreatorMap;
   OBJECT_INSTANCE(JSElement)
 
   static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -774,6 +774,8 @@ public:
   static JSValueRef scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
   static ElementInstance *buildElementInstance(JSContext *context, std::string &tagName);
+
+  static void defineElement(std::string tagName, ElementCreator creator);
 
   JSValueRef prototypeGetProperty(std::string &name, JSValueRef *exception) override;
 
