@@ -13,8 +13,6 @@ import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
 import 'package:kraken/gesture.dart';
 
-typedef KrakenOnLoad = void Function(KrakenController controller);
-
 class Kraken extends StatelessWidget {
   // The background color for viewport, default to transparent.
   final Color background;
@@ -47,7 +45,7 @@ class Kraken extends StatelessWidget {
 
   final LoadErrorHandler onLoadError;
 
-  final KrakenOnLoad onLoad;
+  final LoadHandler onLoad;
 
   final JSErrorHandler onJSError;
 
@@ -57,6 +55,37 @@ class Kraken extends StatelessWidget {
 
   KrakenController get controller {
     return KrakenController.getControllerOfName(shortHash(this));
+  }
+
+  loadContent(String bundleContent) async {
+    if (bundleContent == null) return;
+    await controller.unload();
+    await controller.loadBundle(
+      bundleContent: bundleContent
+    );
+    _evalBundle(controller, animationController);
+  }
+
+  loadURL(String bundleURL) async {
+    if (bundleURL == null) return;
+    await controller.unload();
+    await controller.loadBundle(
+      bundleURL: bundleURL
+    );
+    _evalBundle(controller, animationController);
+  }
+
+  loadPath(String bundlePath) async {
+    if (bundlePath == null) return;
+    await controller.unload();
+    await controller.loadBundle(
+      bundlePath: bundlePath
+    );
+    _evalBundle(controller, animationController);
+  }
+
+  reload() async {
+    await controller.reload();
   }
 
   Kraken({
@@ -97,13 +126,13 @@ class Kraken extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return KrakenRenderWidget(this);
+    return _KrakenRenderObjectWidget(this);
   }
 }
 
-class KrakenRenderWidget extends SingleChildRenderObjectWidget {
+class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  const KrakenRenderWidget(Kraken widget, {Key key})
+  const _KrakenRenderObjectWidget(Kraken widget, {Key key})
       : _krakenWidget = widget,
         super(key: key);
 
@@ -118,12 +147,13 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
     KrakenController controller = KrakenController(shortHash(_krakenWidget.hashCode), _krakenWidget.viewportWidth, _krakenWidget.viewportHeight,
       background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      bundleContent: _krakenWidget.bundleContent,
       bundleURL: _krakenWidget.bundleURL,
       bundlePath: _krakenWidget.bundlePath,
+      onLoad: _krakenWidget.onLoad,
       onLoadError: _krakenWidget.onLoadError,
       onJSError: _krakenWidget.onJSError,
       methodChannel: _krakenWidget.javaScriptChannel,
-      bundleContent: _krakenWidget.bundleContent,
       debugEnableInspector: _krakenWidget.debugEnableInspector,
       gestureClient: _krakenWidget.gestureClient,
     );
@@ -149,49 +179,44 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
   }
 
   @override
-  _KrakenRenderElement createElement() {
-    return _KrakenRenderElement(this);
+  _KrakenRenderObjectElement createElement() {
+    return _KrakenRenderObjectElement(this);
   }
 }
 
-class _KrakenRenderElement extends SingleChildRenderObjectElement {
-  _KrakenRenderElement(KrakenRenderWidget widget) : super(widget);
+class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
+  _KrakenRenderObjectElement(_KrakenRenderObjectWidget widget) : super(widget);
 
   @override
   void mount(Element parent, dynamic newSlot) async {
     super.mount(parent, newSlot);
+
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
 
-    if (kProfileMode) {
-      PerformanceTiming.instance(controller.view.contextId).mark(PERF_JS_BUNDLE_LOAD_START);
+    if (controller.bundleContent == null && controller.bundlePath == null && controller.bundleURL == null) {
+      return;
     }
 
     await controller.loadBundle();
 
-    if (kProfileMode) {
-      PerformanceTiming.instance(controller.view.contextId).mark(PERF_JS_BUNDLE_LOAD_END);
-    }
-
-    // Execute JavaScript scripts will block the Flutter UI Threads.
-    // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
-    if (controller.bundleURL == null && widget._krakenWidget.animationController != null) {
-      widget._krakenWidget.animationController.addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.completed) {
-          controller.run();
-        }
-      });
-    } else {
-      await controller.run();
-    }
-
-    if (widget._krakenWidget.onLoad != null) {
-      // DOM element are created at next frame, so we should trigger onload callback in the next frame.
-      controller.module.requestAnimationFrame((_) {
-        widget._krakenWidget.onLoad(controller);
-      });
-    }
+    _evalBundle(controller, widget._krakenWidget.animationController);
   }
 
   @override
-  KrakenRenderWidget get widget => super.widget as KrakenRenderWidget;
+  _KrakenRenderObjectWidget get widget => super.widget as _KrakenRenderObjectWidget;
 }
+
+void _evalBundle(KrakenController controller, AnimationController animationController) async {
+  // Execute JavaScript scripts will block the Flutter UI Threads.
+  // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
+  if (animationController != null) {
+    animationController.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        controller.evalBundle();
+      }
+    });
+  } else {
+    await controller.evalBundle();
+  }
+}
+
