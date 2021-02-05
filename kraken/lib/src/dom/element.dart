@@ -129,7 +129,10 @@ class Element extends Node
         this.defaultStyle = const <String, dynamic>{},
         // Whether element allows children.
         bool isIntrinsicBox = false,
-        this.repaintSelf = false})
+        this.repaintSelf = false,
+        // @HACK: overflow scroll needs to create an shadow element to create an scrolling renderBox for better scrolling performance.
+        // we needs to prevent this shadow element override real element in nativeMap.
+        bool isScrollingElement = false})
       : assert(targetId != null),
         assert(tagName != null),
         _isIntrinsicBox = isIntrinsicBox,
@@ -137,7 +140,9 @@ class Element extends Node
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
 
-    _nativeMap[nativeElementPtr.address] = this;
+    if (!isScrollingElement) {
+      _nativeMap[nativeElementPtr.address] = this;
+    }
 
     bindNativeMethods(nativeElementPtr);
     _setDefaultStyle();
@@ -399,7 +404,11 @@ class Element extends Node
 
   void addChild(RenderObject child) {
     if (_renderLayoutBox != null) {
-      _renderLayoutBox.add(child);
+      if (scrollingContentLayoutBox != null) {
+        scrollingContentLayoutBox.add(child);
+      } else {
+        _renderLayoutBox.add(child);
+      }
     } else if (_renderIntrinsic != null) {
       _renderIntrinsic.child = child;
     }
@@ -440,7 +449,11 @@ class Element extends Node
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
-        _renderLayoutBox.insert(child.renderBoxModel, after: after);
+        if (scrollingContentLayoutBox != null) {
+          scrollingContentLayoutBox.insert(child.renderBoxModel, after: after);
+        } else {
+          _renderLayoutBox.insert(child.renderBoxModel, after: after);
+        }
         break;
     }
   }
@@ -539,8 +552,13 @@ class Element extends Node
     if (isRendererAttached) {
       for (Node child in childNodes) {
         if (_renderLayoutBox != null && !child.isRendererAttached) {
-          RenderObject after = _renderLayoutBox.lastChild;
-          ;
+          RenderObject after;
+          if (scrollingContentLayoutBox != null) {
+            after = scrollingContentLayoutBox.lastChild;
+          } else {
+            after = _renderLayoutBox.lastChild;
+          }
+
           child.attachTo(this, after: after);
 
           child.ensureChildAttached();
@@ -558,7 +576,11 @@ class Element extends Node
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
       if (!child.isRendererAttached) {
-        child.attachTo(this, after: _renderLayoutBox.lastChild);
+        if (scrollingContentLayoutBox != null) {
+          child.attachTo(this, after: scrollingContentLayoutBox.lastChild);
+        } else {
+          child.attachTo(this, after: _renderLayoutBox.lastChild);
+        }
       }
     }
 
@@ -624,17 +646,34 @@ class Element extends Node
     switch (position) {
       case CSSPositionType.absolute:
         Element containingBlockElement = _findContainingBlock(child);
-        parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
+
+        if (containingBlockElement.scrollingContentLayoutBox != null) {
+          parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox;
+        } else {
+          parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
+        }
+
         break;
 
       case CSSPositionType.fixed:
         final Element rootEl = elementManager.getRootElement();
-        parentRenderLayoutBox = rootEl._renderLayoutBox;
+
+        if (rootEl.scrollingContentLayoutBox != null) {
+          parentRenderLayoutBox = rootEl.scrollingContentLayoutBox;
+        } else {
+          parentRenderLayoutBox = rootEl._renderLayoutBox;
+        }
         break;
 
       case CSSPositionType.sticky:
         Element containingBlockElement = _findContainingBlock(child);
-        parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
+
+        if (containingBlockElement.scrollingContentLayoutBox != null) {
+          parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox;
+        } else {
+          parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
+        }
+
         break;
 
       default:
@@ -667,7 +706,12 @@ class Element extends Node
 
   void _addStickyChild(Element child, RenderObject after) {
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-    (renderBoxModel as RenderLayoutBox).insert(childRenderBoxModel, after: after);
+
+    if (scrollingContentLayoutBox != null) {
+      scrollingContentLayoutBox.insert(childRenderBoxModel, after: after);
+    } else {
+      (renderBoxModel as RenderLayoutBox).insert(childRenderBoxModel, after: after);
+    }
 
     // Set sticky element offset
     Element scrollContainer = _findScrollContainer(child);
@@ -1271,8 +1315,8 @@ class Element extends Node
   }
 }
 
-RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
-  CSSStyleDeclaration style = element.style;
+RenderLayoutBox createRenderLayout(Element element, {CSSStyleDeclaration style, RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
+  style = style ?? element.style;
   CSSDisplay display = CSSSizing.getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]);
   if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {

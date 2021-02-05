@@ -256,6 +256,22 @@ class CSSPositionedLayout {
   ) {
     final RenderLayoutParentData childParentData = child.parentData;
     Size parentSize = parent.boxSize;
+
+    if (parent.isScrollingContentBox) {
+      RenderLayoutBox overflowContainerBox = parent.parent;
+
+      if(overflowContainerBox.widthSizeType == BoxSizeType.specified && overflowContainerBox.heightSizeType == BoxSizeType.specified) {
+        parentSize = Size(
+            overflowContainerBox.renderStyle.width,
+            overflowContainerBox.renderStyle.height
+        );
+      } else {
+        parentSize = parent.boxSize;
+      }
+    } else {
+      parentSize = parent.boxSize;
+    }
+
     // Calc x,y by parentData.
     double x, y;
 
@@ -291,6 +307,12 @@ class CSSPositionedLayout {
       if (childRenderStyle.top == null && childRenderStyle.bottom != null) {
         top = parentSize.height - child.boxSize.height - borderBottom - childMarginBottom -
           ((childRenderStyle.bottom) ?? 0);
+
+        if (parent.isScrollingContentBox) {
+          RenderLayoutBox overflowContainingBox = parent.parent;
+          top -= (overflowContainingBox.renderStyle.borderTop + overflowContainingBox.renderStyle.borderBottom
+              + overflowContainingBox.renderStyle.paddingTop);
+        }
       }
 
       double left = childRenderStyle.left != null ?
@@ -298,6 +320,12 @@ class CSSPositionedLayout {
       if (childRenderStyle.left == null && childRenderStyle.right != null) {
         left = parentSize.width - child.boxSize.width - borderRight - childMarginRight -
           ((childRenderStyle.right) ?? 0);
+
+        if (parent.isScrollingContentBox) {
+          RenderLayoutBox overflowContainingBox = parent.parent;
+          left -= (overflowContainingBox.renderStyle.borderLeft + overflowContainingBox.renderStyle.borderRight
+              + overflowContainingBox.renderStyle.paddingLeft);
+        }
       }
 
       x = left;
