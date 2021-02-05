@@ -1,4 +1,4 @@
-import { krakenInvokeModule } from '../bridge';
+import {kraken} from "../kom/kraken";
 
 const positionWatcherMap = new Map<string, any>();
 
@@ -18,8 +18,8 @@ export default {
     if (options != null) {
       optionsStr = JSON.stringify(options);
     }
-    krakenInvokeModule(`["Geolocation","getCurrentPosition",[${optionsStr}]]`, (json) => {
-      let result = JSON.parse(json);
+    kraken.invokeModule('Geolocation', 'getCurrentPosition', optionsStr, (e, result) => {
+      if (e && error) return error(e);
       if (result['coords'] != null) {
         success(result);
       } else if (error != null) {
@@ -32,14 +32,14 @@ export default {
     if (options != null) {
       optionsStr = JSON.stringify(options);
     }
-    const watchId = krakenInvokeModule(`["Geolocation","watchPosition",[${optionsStr}]]`);
-    positionWatcherMap.set(watchId, { success: success, error: error });
+    const watchId = kraken.invokeModule('Geolocation', 'watchPosition', optionsStr);
+    positionWatcherMap.set(watchId, {success: success, error: error});
     return parseInt(watchId);
   },
   clearWatch(id: number) {
     positionWatcherMap.delete(id.toString());
     if (positionWatcherMap.size === 0) {
-      krakenInvokeModule(`["Geolocation","clearWatch"]`);
+      kraken.invokeModule('Geolocation', 'clearWatch');
     }
   }
 }

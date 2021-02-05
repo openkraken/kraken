@@ -1,4 +1,4 @@
-import { krakenInvokeModule } from '../bridge';
+import {kraken} from "../kom/kraken";
 
 function normalizeName(name: any) {
   if (typeof name !== 'string') {
@@ -138,6 +138,7 @@ class Body {
 }
 
 let methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT'];
+
 function normalizeMethod(method: string) {
   let upcased = method.toUpperCase();
   return methods.indexOf(upcased) > -1 ? upcased : method;
@@ -205,6 +206,7 @@ export class Request extends Body {
 }
 
 let redirectStatuses = [301, 302, 303, 307, 308];
+
 export class Response extends Body {
   static error(): Response {
     let response = new Response(null, {status: 0, statusText: ''});
@@ -260,31 +262,34 @@ export class Response extends Body {
 
 export function fetch(input: Request | string, init?: RequestInit) {
   return new Promise((resolve, reject) => {
-    let url = typeof input === 'string' ? input : input.url;
-    init = init || {method: 'GET'};
-    let headers = init.headers || new Headers();
+      let url = typeof input === 'string' ? input : input.url;
+      init = init || {method: 'GET'};
+      let headers = init.headers || new Headers();
 
-    if (!(headers instanceof Headers)) {
-      headers = new Headers(headers);
-    }
-    krakenInvokeModule(JSON.stringify(['fetch', [url, {
-      ...init,
-      headers: (headers as Headers).map
-    }]]), function(json) {
-      var [err, statusCode, body] = JSON.parse(json);
-      // network error didn't have statusCode
-      if (err && !statusCode) {
-        reject(new Error(err));
-        return;
+      if (!(headers instanceof Headers)) {
+        headers = new Headers(headers);
       }
 
-      let res = new Response(body, {
-        status: statusCode
+      kraken.invokeModule('fetch', url, ({
+        ...init,
+        headers: (headers as Headers).map
+      }), (e, data) => {
+        if (e) return reject(e);
+        let [err, statusCode, body] = data;
+        // network error didn't have statusCode
+        if (err && !statusCode) {
+          reject(new Error(err));
+          return;
+        }
+
+        let res = new Response(body, {
+          status: statusCode
+        });
+
+        res.url = url;
+
+        return resolve(res);
       });
-
-      res.url = url;
-
-      return resolve(res);
-    });
-  });
+    }
+  );
 }

@@ -70,20 +70,18 @@ KrakenInfo getKrakenInfo() {
 }
 
 // Register invokeEventListener
-typedef Native_InvokeEventListener = Void Function(Int32 contextId, Int32 type, Pointer<NativeString>);
-typedef Dart_InvokeEventListener = void Function(int contextId, int type, Pointer<NativeString>);
+typedef Native_InvokeEventListener = Void Function(Int32 contextId, Pointer<NativeString>, Pointer<Void> nativeEvent, Pointer<NativeString>);
+typedef Dart_InvokeEventListener = void Function(int contextId, Pointer<NativeString>, Pointer<Void> nativeEvent, Pointer<NativeString>);
 
-final Dart_InvokeEventListener _invokeEventListener =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
+final Dart_InvokeEventListener _invokeModuleEvent =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeModuleEvent').asFunction();
 
-void invokeEventListener(int contextId, int type, String data) {
-  Pointer<NativeString> nativeString = stringToNativeString(data);
-  _invokeEventListener(contextId, type, nativeString);
-  freeNativeString(nativeString);
+void invokeModuleEvent(int contextId, String moduleName, Event event, String extra) {
+  assert(moduleName != null);
+  Pointer<NativeString> nativeModuleName = stringToNativeString(moduleName);
+  _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : event.toNative().cast<Void>(), stringToNativeString(extra ?? ''));
+  freeNativeString(nativeModuleName);
 }
-
-const UI_EVENT = 0;
-const MODULE_EVENT = 1;
 
 void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;
@@ -93,8 +91,8 @@ void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event even
   dispatchEvent(nativeEventTarget, stringToNativeString(event.type), nativeEvent, isCustomEvent ? 1 : 0);
 }
 
-void emitModuleEvent(int contextId, String data) {
-  invokeEventListener(contextId, MODULE_EVENT, data);
+void emitModuleEvent(int contextId, String moduleName, Event event, String extra) {
+  invokeModuleEvent(contextId, moduleName, event, extra);
 }
 
 // Register createScreen

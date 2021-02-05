@@ -59,11 +59,10 @@ class DeviceInfoModule extends BaseModule {
   }
 
   @override
-  String invoke(List params, InvokeModuleCallback callback) {
-    String method = params[1];
+  String invoke(String method, dynamic params, InvokeModuleCallback callback) {
     if (method == 'getDeviceInfo') {
       getDeviceInfo().then((String json) {
-        callback(json);
+        callback(data: json);
       });
     } else if (method == 'getHardwareConcurrency') {
       return getHardwareConcurrency().toString();

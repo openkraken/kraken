@@ -1,16 +1,18 @@
+import 'dart:convert';
 import 'package:kraken/bridge.dart' as bridge;
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/src/module/navigator.dart';
 
 abstract class BaseModule {
   final ModuleManager moduleManager;
   BaseModule(this.moduleManager);
-  String invoke(List<dynamic> params, InvokeModuleCallback callback);
+  String invoke(String method, dynamic params, InvokeModuleCallback callback);
   void dispose();
 }
 
-typedef InvokeModuleCallback = void Function(String);
+typedef InvokeModuleCallback = void Function({String errmsg, String data});
 typedef NewModuleCreator = BaseModule Function(ModuleManager);
 
 class ModuleManager {
@@ -44,17 +46,17 @@ class ModuleManager {
     _moduleMap[type] = module;
   }
 
-  void emitModuleEvent(String json) {
-    bridge.emitModuleEvent(contextId, json);
+  void emitModuleEvent(String moduleName, {Event event, Object data}) {
+    bridge.emitModuleEvent(contextId, moduleName, event, jsonEncode(data));
   }
 
-  String invokeModule(String type, List<dynamic> params, InvokeModuleCallback callback) {
-    if (!_moduleMap.containsKey(type)) {
-      throw Exception('ModuleManager: Can not find module of type: $type');
+  String invokeModule(String moduleName, String method, dynamic params, InvokeModuleCallback callback) {
+    if (!_moduleMap.containsKey(moduleName)) {
+      throw Exception('ModuleManager: Can not find module of name: $moduleName');
     }
 
-    BaseModule module = _moduleMap[type];
-    return module.invoke(params, callback);
+    BaseModule module = _moduleMap[moduleName];
+    return module.invoke(method, params, callback);
   }
 
   void dispose() {

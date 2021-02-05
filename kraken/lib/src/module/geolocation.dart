@@ -114,8 +114,7 @@ class GeolocationModule extends BaseModule {
   }
 
   @override
-  String invoke(List params, callback) {
-    String method = params[1];
+  String invoke(String method, dynamic params, callback) {
     if (method == 'getCurrentPosition') {
       List positionArgs = params[2];
       Map<String, dynamic> options;
@@ -123,7 +122,7 @@ class GeolocationModule extends BaseModule {
         options = positionArgs[0];
       }
       GeolocationModule.getCurrentPosition(options, (json) {
-        callback(json);
+        callback(data: json);
       });
     } else if (method == 'watchPosition') {
       List positionArgs = params[2];
@@ -132,7 +131,7 @@ class GeolocationModule extends BaseModule {
         options = positionArgs[0];
       }
       return GeolocationModule.watchPosition(options, (String result) {
-        moduleManager.emitModuleEvent('["watchPosition", $result]');
+        moduleManager.emitModuleEvent('geolocation', data: '["watchPosition", $result]');
       }).toString();
     } else if (method == 'clearWatch') {
       List positionArgs = params[2];

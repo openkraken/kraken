@@ -1,5 +1,4 @@
-import { krakenInvokeModule } from '../bridge';
-
+import { kraken } from '../kom/kraken';
 let connectivityChangeListener: (data: Object) => any;
 
 export function dispatchConnectivityChangeEvent(event: any) {
@@ -11,8 +10,8 @@ export function dispatchConnectivityChangeEvent(event: any) {
 export default {
   getConnectivity() {
     return new Promise((resolve) => {
-      krakenInvokeModule('["Connection","getConnectivity"]', (json) => {
-        resolve(JSON.parse(json));
+      kraken.invokeModule('Connection', 'getConnectivity', '', (json) => {
+        resolve(json);
       });
     });
   },
@@ -20,7 +19,7 @@ export default {
     if (typeof listener === 'function') {
       connectivityChangeListener = listener;
       // TODO: should remove old listener when onchange reset with a null listener
-      krakenInvokeModule('["Connection","onConnectivityChanged"]');
+      kraken.invokeModule('Connection', 'onConnectivityChanged');
     }
   }
 }

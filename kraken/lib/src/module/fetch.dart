@@ -20,14 +20,13 @@ class FetchModule extends BaseModule {
   void dispose() {}
 
   @override
-  String invoke(List<dynamic> params, InvokeModuleCallback callback) {
-    List fetchArgs = params[1];
-    String url = fetchArgs[0];
-    Map<String, dynamic> options = fetchArgs[1];
+  String invoke(String method, dynamic params, InvokeModuleCallback callback) {
+    String url = method;
+    Map<String, dynamic> options = params;
 
     _fetch(url, options).then((Response response) {
       String json = jsonEncode(['', response.statusCode, response.data]);
-      callback(json);
+      callback(data: json);
     }).catchError((e, stack) {
       String errorMessage = e.toString();
       String json;
@@ -36,7 +35,7 @@ class FetchModule extends BaseModule {
       } else {
         json = jsonEncode(['$errorMessage\n$stack', null, EMPTY_STRING]);
       }
-      callback(json);
+      callback(errmsg: json);
     });
 
     return '';

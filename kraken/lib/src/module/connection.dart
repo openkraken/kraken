@@ -53,19 +53,17 @@ class ConnectionModule extends BaseModule {
   void dispose() {}
 
   @override
-  String invoke(List<dynamic> params, InvokeModuleCallback callback) {
-    String method = params[1];
-
+  String invoke(String method, dynamic params, InvokeModuleCallback callback) {
     switch (method) {
       case 'getConnectivity': {
         getConnectivity((String json) {
-          callback(json);
+          callback(data: json);
         });
         break;
       }
       case 'onConnectivityChanged': {
         onConnectivityChanged((String json) {
-          moduleManager.emitModuleEvent('["onConnectivityChanged", $json]');
+          moduleManager.emitModuleEvent('connection', data: '["onConnectivityChanged", $json]');
         });
         break;
       }

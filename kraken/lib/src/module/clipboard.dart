@@ -17,20 +17,19 @@ class ClipBoardModule extends BaseModule {
   void dispose() {}
 
   @override
-  String invoke(List params, callback) {
-    String method = params[1];
+  String invoke(String method, dynamic params, callback) {
     if (method == 'readText') {
       ClipBoardModule.readText().then((String value) {
-        callback(value ?? '');
+        callback(data: value ?? '');
       }).catchError((e, stack) {
-        callback('Error: $e\n$stack');
+        callback(errmsg: '$e\n$stack');
       });
     } else if (method == 'writeText') {
       List methodArgs = params[2];
       ClipBoardModule.writeText(methodArgs[0]).then((_) {
-        callback('');
+        callback();
       }).catchError((e, stack) {
-        callback('Error: $e\n$stack');
+        callback(errmsg: '');
       });
     }
     return '';

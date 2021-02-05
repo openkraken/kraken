@@ -24,33 +24,24 @@ class MQTTModule extends BaseModule {
   }
 
   @override
-  String invoke(List args, InvokeModuleCallback callback) {
-    String method = args[1];
+  String invoke(String method, dynamic args, InvokeModuleCallback callback) {
     if (method == 'init') {
-      List methodArgs = args[2];
-      return init(methodArgs[0], methodArgs[1]);
+      return init(args[0], args[1]);
     } else if (method == 'open') {
-      List methodArgs = args[2];
-      open(methodArgs[0], methodArgs[1]);
+      open(args[0], args[1]);
     } else if (method == 'close') {
-      List methodArgs = args[2];
-      close(methodArgs[0]);
+      close(args[0]);
     } else if (method == 'publish') {
-      List methodArgs = args[2];
-      publish(methodArgs[0], methodArgs[1], methodArgs[2], methodArgs[3], methodArgs[4]);
+      publish(args[0], args[1], args[2], args[3], args[4]);
     } else if (method == 'subscribe') {
-      List methodArgs = args[2];
-      subscribe(methodArgs[0], methodArgs[1], methodArgs[2]);
+      subscribe(args[0], args[1], args[2]);
     } else if (method == 'unsubscribe') {
-      List methodArgs = args[2];
-      unsubscribe(methodArgs[0], methodArgs[1]);
+      unsubscribe(args[0], args[1]);
     } else if (method == 'getReadyState') {
-      List methodArgs = args[2];
-      return getReadyState(methodArgs[0]);
+      return getReadyState(args[0]);
     } else if (method == 'addEvent') {
-      List methodArgs = args[2];
-      addEvent(methodArgs[0], methodArgs[1], (String id, String event) {
-        moduleManager.emitModuleEvent('["MQTT", $id, $event]');
+      addEvent(args[0], args[1], (String id, String event) {
+        moduleManager.emitModuleEvent('MQTT', data: '[$id, $event]');
       });
     }
 

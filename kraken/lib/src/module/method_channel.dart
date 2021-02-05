@@ -21,24 +21,22 @@ class MethodChannelModule extends BaseModule {
   void dispose() {}
 
   @override
-  String invoke(List<dynamic> params, callback) {
-    String method = params[1];
+  String invoke(String method, dynamic params, callback) {
     if (method == 'invokeMethod') {
-      List methodArgs = params[2];
-      invokeMethodFromJavaScript(moduleManager.controller, methodArgs[0], methodArgs[1]).then((result) {
+      invokeMethodFromJavaScript(moduleManager.controller, params[0], params[1]).then((result) {
         String ret;
         if (result is String) {
           ret = result;
         } else {
           ret = jsonEncode(result);
         }
-        callback(ret);
+        callback(data: ret);
       }).catchError((e, stack) {
-        callback('Error: $e\n$stack');
+        callback(errmsg: '$e\n$stack');
       });
     } else if (method == 'setMethodCallHandler') {
       onJSMethodCall(moduleManager.controller, (String method, dynamic arguments) async {
-        moduleManager.emitModuleEvent(jsonEncode(['MethodChannel', method, arguments]));
+        moduleManager.emitModuleEvent('methodChannel', data: jsonEncode([method, arguments]));
       });
     }
     return '';
