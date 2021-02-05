@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_VIDEO_ELEMENT_H
 
 #include "bindings/jsc/DOM/elements/media_element.h"
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 
 namespace kraken::binding::jsc {
 

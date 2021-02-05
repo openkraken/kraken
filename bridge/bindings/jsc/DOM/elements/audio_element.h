@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_AUDIO_ELEMENT_H
 
 #include "bindings/jsc/DOM/element.h"
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 
 #include "media_element.h"
 

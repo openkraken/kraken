@@ -6,8 +6,8 @@
 #ifndef BRIDGE_TIMER_H
 #define BRIDGE_TIMER_H
 
+#include "bindings/jsc/js_context_internal.h"
 #include <memory>
-#include "bindings/jsc/js_context.h"
 
 namespace kraken::binding::jsc {
 

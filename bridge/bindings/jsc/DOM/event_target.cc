@@ -65,23 +65,23 @@ JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef con
     }
   }
 
-  auto eventTarget = new JSEventTarget::EventTargetInstance(this);
+  auto eventTarget = new EventTargetInstance(this);
   setProto(ctx, eventTarget->object, constructor, exception);
   return constructor;
 }
 
-JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget) : Instance(eventTarget) {
+EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget) : Instance(eventTarget) {
   eventTargetId = globalEventTargetId;
   globalEventTargetId++;
   nativeEventTarget = new NativeEventTarget(this);
 }
 
-JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, int64_t id)
+EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, int64_t id)
   : Instance(eventTarget), eventTargetId(id) {
   nativeEventTarget = new NativeEventTarget(this);
 }
 
-JSEventTarget::EventTargetInstance::~EventTargetInstance() {
+EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
@@ -107,10 +107,10 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     return nullptr;
   }
 
-  auto *eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   if (eventTargetInstance == nullptr) {
     JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
-    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
+    eventTargetInstance = static_cast<EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
   }
 
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
@@ -196,10 +196,10 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
     return nullptr;
   }
 
-  auto *eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   if (eventTargetInstance == nullptr) {
     JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
-    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
+    eventTargetInstance = static_cast<EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
   }
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
@@ -250,10 +250,10 @@ JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, 
     return nullptr;
   }
 
-  auto *eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
+  auto *eventTargetInstance = static_cast<EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   if (eventTargetInstance == nullptr) {
     JSObjectRef prototypeObject = getProto(ctx, thisObject, exception);
-    eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
+    eventTargetInstance = static_cast<EventTargetInstance *>(JSObjectGetPrivate(prototypeObject));
   }
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
@@ -264,7 +264,7 @@ JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, 
   return JSValueMakeBoolean(ctx, eventTargetInstance->dispatchEvent(eventInstance));
 }
 
-bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
+bool EventTargetInstance::dispatchEvent(EventInstance *event) {
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(event->nativeEvent->type->string),
                                             event->nativeEvent->type->length);
   std::string eventType = toUTF8(u16EventType);
@@ -280,10 +280,10 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
   bool cancelled = internalDispatchEvent(event);
 
   if (event->nativeEvent->bubbles == 1 && !cancelled && !event->_stopPropagationFlag) {
-    auto node = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
+    auto node = reinterpret_cast<NodeInstance *>(event->nativeEvent->currentTarget);
     event->nativeEvent->currentTarget = node->parentNode;
 
-    auto parent = reinterpret_cast<JSNode::NodeInstance *>(event->nativeEvent->currentTarget);
+    auto parent = reinterpret_cast<NodeInstance *>(event->nativeEvent->currentTarget);
     if (parent != nullptr) {
       parent->dispatchEvent(event);
     }
@@ -295,7 +295,7 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
 
 JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                          size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
+  auto eventTargetInstance = static_cast<EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
 
   for (auto &it : eventTargetInstance->_eventHandlers) {
@@ -308,25 +308,25 @@ JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function,
   return nullptr;
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getEventTargetPropertyMap();
+JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
+  auto propertyMap = JSEventTarget::getEventTargetPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
-    case EventTargetProperty::addEventListener: {
+    case JSEventTarget::EventTargetProperty::addEventListener: {
       return prototype<JSEventTarget>()->m_addEventListener.function();
     }
-    case EventTargetProperty::removeEventListener: {
+    case JSEventTarget::EventTargetProperty::removeEventListener: {
       return prototype<JSEventTarget>()->m_removeEventListener.function();
     }
-    case EventTargetProperty::dispatchEvent: {
+    case JSEventTarget::EventTargetProperty::dispatchEvent: {
       return prototype<JSEventTarget>()->m_dispatchEvent.function();
     }
-    case EventTargetProperty::__clearListeners__: {
+    case JSEventTarget::EventTargetProperty::__clearListeners__: {
       return prototype<JSEventTarget>()->m_clearListeners.function();
     }
-    case EventTargetProperty::eventTargetId: {
+    case JSEventTarget::EventTargetProperty::eventTargetId: {
       return JSValueMakeNumber(_hostClass->ctx, eventTargetId);
     }
     }
@@ -337,7 +337,7 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
   return Instance::getProperty(name, exception);
 }
 
-void JSEventTarget::EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+void EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name.substr(0, 2) == "on") {
     setPropertyHandler(name, value, exception);
   } else {
@@ -345,7 +345,7 @@ void JSEventTarget::EventTargetInstance::setProperty(std::string &name, JSValueR
   }
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::getPropertyHandler(std::string &name, JSValueRef *exception) {
+JSValueRef EventTargetInstance::getPropertyHandler(std::string &name, JSValueRef *exception) {
   std::string eventType = name.substr(2);
 
   if (_eventHandlers.count(eventType) == 0) {
@@ -354,7 +354,7 @@ JSValueRef JSEventTarget::EventTargetInstance::getPropertyHandler(std::string &n
   return _eventHandlers[eventType].front();
 }
 
-void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value,
+void EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value,
                                                             JSValueRef *exception) {
   std::string eventType = name.substr(2);
 
@@ -378,13 +378,13 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
   foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommand::addEvent, args_01, nullptr);
 }
 
-void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-  for (auto &propertyName : getEventTargetPropertyNames()) {
+void EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &propertyName : JSEventTarget::getEventTargetPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, propertyName);
   }
 }
 
-bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
+bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(eventInstance->nativeEvent->type->string),
                                                eventInstance->nativeEvent->type->length);
   std::string eventType = toUTF8(u16EventType);
@@ -407,7 +407,7 @@ bool JSEventTarget::EventTargetInstance::internalDispatchEvent(EventInstance *ev
 // This function will be called back by dart side when trigger events.
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
-  JSEventTarget::EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
+  EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
   JSContext *context = eventTargetInstance->context;
   std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t *>(nativeEventType->string),
                                                nativeEventType->length);

@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_ALL_COLLECTION_H
 #define KRAKENBRIDGE_ALL_COLLECTION_H
 
-#include "bindings/jsc/js_context.h"
-#include "bindings/jsc/host_object.h"
 #include "bindings/jsc/DOM/node.h"
+#include "bindings/jsc/host_object_internal.h"
+#include "bindings/jsc/js_context_internal.h"
 #include <vector>
 
 namespace kraken::binding::jsc {
@@ -30,10 +30,10 @@ public:
 
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
 
-  void internalAdd(JSNode::NodeInstance *node, JSNode::NodeInstance *before);
+  void internalAdd(NodeInstance *node, NodeInstance *before);
 
 private:
-  std::vector<JSNode::NodeInstance *> m_nodes;
+  std::vector<NodeInstance *> m_nodes;
   JSFunctionHolder m_item{context, this, "item", item};
   JSFunctionHolder m_add{context, this, "add", add};
   JSFunctionHolder m_remove{context, this, "remove", remove};
