@@ -288,7 +288,7 @@ class Element extends Node
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
-        double top = childRenderStyle.top + resolvedPadding.top;
+        double top = childRenderStyle.top.length + resolvedPadding.top;
         isFixed = offsetTop < top;
         if (isFixed) {
           offsetY += top - offsetTop;
@@ -297,7 +297,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains(BOTTOM)) {
-        double bottom = childRenderStyle.bottom + resolvedPadding.bottom;
+        double bottom = childRenderStyle.bottom.length + resolvedPadding.bottom;
         isFixed = offsetBottom < bottom;
         if (isFixed) {
           offsetY += offsetBottom - bottom;
@@ -324,7 +324,7 @@ class Element extends Node
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
-        double left = childRenderStyle.left + resolvedPadding.left;
+        double left = childRenderStyle.left.length + resolvedPadding.left;
         isFixed = offsetLeft < left;
         if (isFixed) {
           offsetX += left - offsetLeft;
@@ -333,7 +333,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains(RIGHT)) {
-        double right = childRenderStyle.right + resolvedPadding.right;
+        double right = childRenderStyle.right.length + resolvedPadding.right;
         isFixed = offsetRight < right;
         if (isFixed) {
           offsetX += offsetRight - right;
@@ -944,7 +944,6 @@ class Element extends Node
     CSSDisplay display = renderBoxModel.renderStyle.display;
     if (display == CSSDisplay.sliver) {
       assert(renderBoxModel is RenderRecyclerLayout);
-      RenderRecyclerLayout renderRecyclerLayout = renderBoxModel;
       renderBoxModel.renderStyle.updateSliver(present);
     }
   }
@@ -1287,15 +1286,18 @@ class Element extends Node
     CSSDisplay display = CSSDisplayMixin.getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]
     );
+    RenderStyle renderStyle = RenderStyle(style: style, viewportSize: viewportSize);
+
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       RenderFlexLayout flexLayout;
 
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
-            style: style, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         } else {
-          flexLayout = RenderFlexLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+          flexLayout = RenderFlexLayout(
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
@@ -1350,9 +1352,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
-            style: style, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         } else {
-          flowLayout = RenderFlowLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+          flowLayout = RenderFlowLayout(
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
@@ -1403,8 +1406,8 @@ class Element extends Node
       RenderRecyclerLayout renderRecyclerLayout;
 
       if (prevRenderLayoutBox == null) {
-        renderRecyclerLayout =
-          RenderRecyclerLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+        renderRecyclerLayout = RenderRecyclerLayout(
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
       } else if (prevRenderLayoutBox is RenderFlexLayout) {
@@ -1422,12 +1425,15 @@ class Element extends Node
   RenderIntrinsic createRenderIntrinsic(Element element,
     {RenderIntrinsic prevRenderIntrinsic, bool repaintSelf = false}) {
     RenderIntrinsic intrinsic;
+    RenderStyle renderStyle = RenderStyle(style: style, viewportSize: viewportSize);
 
     if (prevRenderIntrinsic == null) {
       if (repaintSelf) {
-        intrinsic = RenderSelfRepaintIntrinsic(element.targetId, element.style, element.elementManager);
+        intrinsic = RenderSelfRepaintIntrinsic(
+          element.targetId, renderStyle, element.elementManager);
       } else {
-        intrinsic = RenderIntrinsic(element.targetId, element.style, element.elementManager);
+        intrinsic = RenderIntrinsic(
+          element.targetId, renderStyle, element.elementManager);
       }
     } else {
       if (prevRenderIntrinsic is RenderSelfRepaintIntrinsic) {

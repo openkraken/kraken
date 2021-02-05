@@ -10,7 +10,7 @@ class CSSMargin {
   CSSMargin({
     this.length,
     this.isAuto,
-  }) {}
+  });
   /// length if margin value is length type
   double length;
   /// Whether value is auto

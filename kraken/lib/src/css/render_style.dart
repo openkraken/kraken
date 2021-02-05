@@ -30,9 +30,11 @@ class RenderStyle
   Size viewportSize;
 
   RenderStyle(
-    this.renderBoxModel,
-    this.style,
-    this.viewportSize,
+    {
+      this.renderBoxModel,
+      this.style,
+      this.viewportSize,
+    }
   );
 
   /// Resolve percentage size to px base on size of its containing block

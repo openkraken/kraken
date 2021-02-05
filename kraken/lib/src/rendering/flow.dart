@@ -34,10 +34,10 @@ class _RunMetrics {
 class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout(
       {List<RenderBox> children,
-      CSSStyleDeclaration style,
+      RenderStyle renderStyle,
       int targetId,
       ElementManager elementManager})
-      : super(targetId: targetId, style: style, elementManager: elementManager) {
+      : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager) {
     addAll(children);
   }
 
@@ -768,6 +768,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         // When baseline of children not found, use boundary of margin bottom as baseline
         double childAscent = _getChildAscent(child);
+
         double extentAboveBaseline = childAscent + childLeading / 2;
         double extentBelowBaseline = childMarginTop + childSize.height + childMarginBottom
          - childAscent + childLeading / 2;
@@ -1147,15 +1148,15 @@ class RenderFlowLayout extends RenderLayoutBox {
       void iterateRunChildren(int targetId, RenderBox runChild) {
         double runChildMainSize = runChild.size.width;
         // Decendants with percentage main size should not include in auto main size
-        if (runChild is RenderBoxModel) {
-          String mainSize = runChild.style[WIDTH];
-          String mainMinSize = runChild.style[MIN_WIDTH];
-          if (CSSLength.isPercentage(mainSize) ||
-            (mainSize.isEmpty && CSSLength.isPercentage(mainMinSize))
-          ) {
-            runChildMainSize = 0;
-          }
-        }
+//        if (runChild is RenderBoxModel) {
+//          String mainSize = runChild.style[WIDTH];
+//          String mainMinSize = runChild.style[MIN_WIDTH];
+//          if (CSSLength.isPercentage(mainSize) ||
+//            (mainSize.isEmpty && CSSLength.isPercentage(mainMinSize))
+//          ) {
+//            runChildMainSize = 0;
+//          }
+//        }
         runMainExtent += runChildMainSize;
       }
       runChildren.forEach(iterateRunChildren);
@@ -1317,7 +1318,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderRecyclerLayout layout = RenderRecyclerLayout(
         targetId: targetId,
-        style: style,
+        renderStyle: renderStyle,
         elementManager: elementManager
     );
     layout.addAll(children);
@@ -1330,7 +1331,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderFlexLayout flexLayout = RenderFlexLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(flexLayout);
@@ -1342,7 +1343,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(selfRepaintFlowLayout);
@@ -1354,7 +1355,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(selfRepaintFlexLayout);
@@ -1367,8 +1368,8 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     List<RenderBox> children,
     int targetId,
     ElementManager elementManager,
-    CSSStyleDeclaration style,
-  }): super(children: children, targetId: targetId, elementManager: elementManager, style: style);
+    RenderStyle renderStyle,
+  }): super(children: children, targetId: targetId, elementManager: elementManager, renderStyle: renderStyle);
 
   @override
   bool get isRepaintBoundary => true;
@@ -1379,7 +1380,7 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(selfRepaintFlexLayout);
@@ -1391,7 +1392,7 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(renderFlowLayout);
@@ -1403,7 +1404,7 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(renderFlexLayout);

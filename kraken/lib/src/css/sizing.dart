@@ -148,8 +148,8 @@ mixin CSSSizingMixin on RenderStyleBase {
   // Whether current node should stretch children's height
   static bool isStretchChildHeight(RenderBoxModel current, RenderBoxModel child) {
     bool isStretch = false;
-    CSSStyleDeclaration style = current.style;
-    CSSStyleDeclaration childStyle = child.style;
+    RenderStyle renderStyle = current.renderStyle;
+    RenderStyle childRenderStyle = child.renderStyle;
     bool isFlex = current is RenderFlexLayout;
     bool isHorizontalDirection = false;
     bool isAlignItemsStretch = false;
@@ -160,19 +160,19 @@ mixin CSSSizingMixin on RenderStyleBase {
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
         (current as RenderFlexLayout).renderStyle.flexDirection
       );
-      isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
-        style[ALIGN_ITEMS] == STRETCH;
-      isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
-        style[FLEX_WRAP] != WRAP_REVERSE;
-      isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
-      isChildStretchSelf = childStyle[ALIGN_SELF].isNotEmpty && childStyle[ALIGN_SELF] != AUTO ? isChildAlignSelfStretch : isAlignItemsStretch;
+      isAlignItemsStretch = renderStyle.alignItems == AlignItems.stretch;
+      isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap &&
+        childRenderStyle.flexWrap != FlexWrap.wrapReverse;
+      isChildAlignSelfStretch = childRenderStyle.alignSelf == AlignSelf.stretch;
+      isChildStretchSelf = childRenderStyle.alignSelf != AlignSelf.auto ?
+        isChildAlignSelfStretch : isAlignItemsStretch;
     }
 
-    String marginTop = child.style[MARGIN_TOP];
-    String marginBottom = child.style[MARGIN_BOTTOM];
+    CSSMargin marginTop = childRenderStyle.marginTop;
+    CSSMargin marginBottom = childRenderStyle.marginBottom;
 
     // Display as block if flex vertical layout children and stretch children
-    if (marginTop != AUTO && marginBottom != AUTO &&
+    if (!marginTop.isAuto && !marginBottom.isAuto &&
       isFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
       isStretch = true;
     }

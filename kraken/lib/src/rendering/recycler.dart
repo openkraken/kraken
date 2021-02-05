@@ -32,8 +32,8 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   RenderRecyclerLayout({
     int targetId,
     ElementManager elementManager,
-    CSSStyleDeclaration style,
-  }) : super(targetId: targetId, style: style, elementManager: elementManager) {
+    RenderStyle renderStyle,
+  }) : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager) {
     _buildRenderViewport();
     super.insert(renderViewport);
   }
@@ -405,7 +405,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
         children: children,
         targetId: targetId,
-        style: style,
+        renderStyle: renderStyle,
         elementManager: elementManager
     );
     return copyWith(renderFlexLayout);
@@ -415,7 +415,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
         targetId: targetId,
-        style: style,
+        renderStyle: renderStyle,
         elementManager: elementManager
     );
     renderFlowLayout.addAll(children);

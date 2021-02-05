@@ -157,8 +157,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<RenderBox> children,
     int targetId,
     ElementManager elementManager,
-    CSSStyleDeclaration style,
-  }) : super(targetId: targetId, style: style, elementManager: elementManager) {
+    RenderStyle renderStyle,
+  }) : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager) {
     addAll(children);
   }
 
@@ -646,19 +646,19 @@ class RenderFlexLayout extends RenderLayoutBox {
       RenderStyle childRenderStyle = child.renderStyle;
 
       if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-        String width = child.style[WIDTH];
+        double width = childRenderStyle.width;
         if (flexBasis == null) {
           if (width != null) {
-            baseSize = childRenderStyle.width ?? 0;
+            baseSize = width ?? 0;
           }
         } else {
           baseSize = childRenderStyle.flexBasis ?? 0;
         }
       } else {
-        String height = child.style[HEIGHT];
+        double height = childRenderStyle.height;
         if (flexBasis == null) {
           if (height != '') {
-            baseSize = childRenderStyle.height ?? 0;
+            baseSize = height ?? 0;
           }
         } else {
           baseSize = childRenderStyle.flexBasis ?? 0;
@@ -1921,15 +1921,15 @@ class RenderFlexLayout extends RenderLayoutBox {
         RenderBox child = runChild.child;
         // Decendants with percentage main size should not include in auto main size
         if (child is RenderBoxModel) {
-          String mainSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
-            child.style[WIDTH] : child.style[HEIGHT];
-          String mainMinSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
-            child.style[MIN_WIDTH] : child.style[MIN_HEIGHT];
-          if (CSSLength.isPercentage(mainSize) ||
-            (mainSize.isEmpty && CSSLength.isPercentage(mainMinSize))
-          ) {
-            runChildMainSize = 0;
-          }
+//          String mainSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
+//            child.style[WIDTH] : child.style[HEIGHT];
+//          String mainMinSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
+//            child.style[MIN_WIDTH] : child.style[MIN_HEIGHT];
+//          if (CSSLength.isPercentage(mainSize) ||
+//            (mainSize.isEmpty && CSSLength.isPercentage(mainMinSize))
+//          ) {
+//            runChildMainSize = 0;
+//          }
         }
         runMainExtent += runChildMainSize;
       }
@@ -2436,7 +2436,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<RenderBox> children = getDetachedChildrenAsList();
     RenderRecyclerLayout renderRecyclerLayout = RenderRecyclerLayout(
         targetId: targetId,
-        style: style,
+        renderStyle: renderStyle,
         elementManager: elementManager
     );
     renderRecyclerLayout.addAll(children);
@@ -2449,7 +2449,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderFlowLayout flowLayout = RenderFlowLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(flowLayout);
@@ -2461,7 +2461,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(selfRepaintFlexLayout);
@@ -2473,7 +2473,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(selfRepaintFlowLayout);
@@ -2486,8 +2486,8 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
     List<RenderBox> children,
     int targetId,
     ElementManager elementManager,
-    CSSStyleDeclaration style,
-  }) : super(children: children, targetId: targetId, elementManager: elementManager, style: style);
+    RenderStyle renderStyle,
+  }) : super(children: children, targetId: targetId, elementManager: elementManager, renderStyle: renderStyle);
 
   @override
   bool get isRepaintBoundary => true;
@@ -2498,7 +2498,7 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(selfRepaintFlowLayout);
@@ -2510,7 +2510,7 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
     RenderFlexLayout flexLayout = RenderFlexLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(flexLayout);
@@ -2522,7 +2522,7 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
     RenderFlowLayout flowLayout = RenderFlowLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(flowLayout);

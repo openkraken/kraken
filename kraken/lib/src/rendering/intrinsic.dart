@@ -12,8 +12,8 @@ import 'package:kraken/rendering.dart';
 
 class RenderIntrinsic extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
-  RenderIntrinsic(int targetId, CSSStyleDeclaration style, ElementManager elementManager)
-      : super(targetId: targetId, style: style, elementManager: elementManager);
+  RenderIntrinsic(int targetId, RenderStyle renderStyle, ElementManager elementManager)
+      : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager);
 
   BoxSizeType get widthSizeType {
     bool widthDefined = renderStyle.width != null || (renderStyle.minWidth != null);
@@ -173,7 +173,7 @@ class RenderIntrinsic extends RenderBoxModel
   RenderSelfRepaintIntrinsic toSelfRepaint() {
     RenderObject childRenderObject = child;
     child = null;
-    RenderSelfRepaintIntrinsic newChild = RenderSelfRepaintIntrinsic(targetId, style, elementManager);
+    RenderSelfRepaintIntrinsic newChild = RenderSelfRepaintIntrinsic(targetId, renderStyle, elementManager);
     newChild.child = childRenderObject;
     return copyWith(newChild);
   }
@@ -188,8 +188,8 @@ class RenderIntrinsic extends RenderBoxModel
 }
 
 class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
-  RenderSelfRepaintIntrinsic(int targetId, CSSStyleDeclaration style, ElementManager elementManager):
-        super(targetId, style, elementManager);
+  RenderSelfRepaintIntrinsic(int targetId, RenderStyle renderStyle, ElementManager elementManager):
+        super(targetId, renderStyle, elementManager);
 
   @override
   bool get isRepaintBoundary => true;
@@ -197,7 +197,7 @@ class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
   RenderIntrinsic toParentRepaint() {
     RenderObject childRenderObject = child;
     child = null;
-    RenderIntrinsic newChild = RenderIntrinsic(targetId, style, elementManager);
+    RenderIntrinsic newChild = RenderIntrinsic(targetId, renderStyle, elementManager);
     newChild.child = childRenderObject;
     return copyWith(newChild);
   }

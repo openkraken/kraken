@@ -140,6 +140,12 @@ mixin CSSBoxMixin on RenderStyleBase {
   void updateBox(String property, String original, String present) {
     RenderStyle renderStyle = this;
 
+    if (property == BACKGROUND_IMAGE) {
+      backgroundImage = present;
+    } else if (property == BACKGROUND_ATTACHMENT) {
+      backgroundAttachment = present;
+    }
+
     if (cssBoxDecoration != null) {
       // Update by property
       if (property == BACKGROUND_CLIP) {
@@ -232,7 +238,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       if (method.name == 'url') {
         decorationImage = CSSBackground.getDecorationImage(style, method);
       } else {
-        gradient = CSSBackground.getBackgroundGradient(renderBoxModel, method);
+        gradient = CSSBackground.getBackgroundGradient(style, renderBoxModel, method);
       }
     }
 
@@ -246,12 +252,6 @@ mixin CSSBoxMixin on RenderStyleBase {
       backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
       shape: prevBoxDecoration.shape,
     );
-
-    if (property == BACKGROUND_IMAGE) {
-      backgroundImage = present;
-    } else if (property == BACKGROUND_ATTACHMENT) {
-      backgroundAttachment = present;
-    }
 
     if (CSSBackground.hasScrollBackgroundImage(style)) {
       decoration = updateBoxDecoration;
@@ -397,7 +397,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       if (method.name == 'url') {
         decorationImage = CSSBackground.getDecorationImage(style, method);
       } else {
-        gradient = CSSBackground.getBackgroundGradient(renderBoxModel, method);
+        gradient = CSSBackground.getBackgroundGradient(style, renderBoxModel, method);
       }
     }
 

@@ -145,8 +145,8 @@ class RenderLayoutBox extends RenderBoxModel
     with
         ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
-  RenderLayoutBox({int targetId, CSSStyleDeclaration style, ElementManager elementManager})
-      : super(targetId: targetId, style: style, elementManager: elementManager);
+  RenderLayoutBox({int targetId, RenderStyle renderStyle, ElementManager elementManager})
+      : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager);
 
   @override
   void markNeedsLayout() {
@@ -324,14 +324,11 @@ class RenderBoxModel extends RenderBox with
     RenderObjectWithControllerMixin {
   RenderBoxModel({
     this.targetId,
-    this.style,
+    this.renderStyle,
     this.elementManager,
   }) : assert(targetId != null),
         super() {
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-    renderStyle = RenderStyle(this, style, viewportSize);
+    renderStyle.renderBoxModel = this;
   }
 
   RenderStyle renderStyle;
@@ -991,19 +988,19 @@ class RenderBoxModel extends RenderBox with
     RenderStyle childRenderStyle = child.renderStyle;
     double maxScrollableX = maxScrollableSize.width;
     double maxScrollableY = maxScrollableSize.height;
-    if (childRenderStyle.left != null) {
-      maxScrollableX = math.max(maxScrollableX, childRenderStyle.left + childSize.width);
+    if (childRenderStyle.left != null && !childRenderStyle.left.isAuto) {
+      maxScrollableX = math.max(maxScrollableX, childRenderStyle.left.length + childSize.width);
     }
 
-    if (childRenderStyle.right != null) {
-      maxScrollableX = math.max(maxScrollableX, -childRenderStyle.right + _contentSize.width);
+    if (childRenderStyle.right != null && !childRenderStyle.right.isAuto) {
+      maxScrollableX = math.max(maxScrollableX, -childRenderStyle.right.length + _contentSize.width);
     }
 
-    if (childRenderStyle.top != null) {
-      maxScrollableY = math.max(maxScrollableY, childRenderStyle.top + childSize.height);
+    if (childRenderStyle.top != null && !childRenderStyle.top.isAuto) {
+      maxScrollableY = math.max(maxScrollableY, childRenderStyle.top.length + childSize.height);
     }
-    if (childRenderStyle.bottom != null) {
-      maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom + _contentSize.height);
+    if (childRenderStyle.bottom != null && !childRenderStyle.bottom.isAuto) {
+      maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom.length + _contentSize.height);
     }
 
     maxScrollableSize = Size(maxScrollableX, maxScrollableY);
