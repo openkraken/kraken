@@ -165,7 +165,7 @@ class Element extends Node
     renderStyle.display = CSSDisplayMixin.getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]
     );
-    renderStyle.transformedDisplay = CSSDisplayMixin.getTransformedDisplay(this);
+    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
 
     return renderer;
   }

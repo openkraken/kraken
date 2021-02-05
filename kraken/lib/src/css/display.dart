@@ -41,7 +41,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
       CSSStyleDeclaration.isNullOrEmptyValue(value) ? element.defaultDisplay : value
     );
     display = presentDisplay;
-    transformedDisplay = getTransformedDisplay(element);
+    transformedDisplay = getTransformedDisplay();
     if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox prevRenderLayoutBox = renderBoxModel;
       renderBoxModel = element.createRenderLayout(element, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: element.repaintSelf);
@@ -83,34 +83,34 @@ mixin CSSDisplayMixin on RenderStyleBase {
   /// Element tree hierarchy can cause element display behavior to change,
   /// for example element which is flex-item can display like inline-block or block
   /// https://www.w3.org/TR/css-display-3/#transformations
-  static CSSDisplay getTransformedDisplay(Element element) {
-    Element parentNode = element.parentNode;
-    CSSDisplay display = element.renderBoxModel.renderStyle.display;
+  CSSDisplay getTransformedDisplay() {
+    RenderStyle renderStyle = this;
+    RenderBoxModel parent = renderBoxModel.parent;
+    CSSDisplay display = renderStyle.display;
 
-    CSSPositionType position = element.renderBoxModel.renderStyle.position;
+    CSSPositionType position = renderStyle.position;
 
     // Display as inline-block when element is positioned
     if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {
       display = CSSDisplay.inlineBlock;
-    } else if (parentNode != null) {
-      CSSStyleDeclaration style = parentNode.style;
-
-      if (style[DISPLAY].endsWith(FLEX)) {
+    } else if (parent != null && parent is RenderFlexLayout) {
         // Display as inline-block if parent node is flex
         display = CSSDisplay.inlineBlock;
+        RenderStyle parentRenderStyle = parent.renderStyle;
 
-        String marginLeft = element.style[MARGIN_LEFT];
-        String marginRight = element.style[MARGIN_RIGHT];
+        CSSMargin marginLeft = renderStyle.marginLeft;
+        CSSMargin marginRight = renderStyle.marginRight;
 
-        bool isVerticalDirection = style[FLEX_DIRECTION] == COLUMN || style[FLEX_DIRECTION] == COLUMN_REVERSE;
+        bool isVerticalDirection = parentRenderStyle.flexDirection == FlexDirection.column ||
+          parentRenderStyle.flexDirection == FlexDirection.columnReverse;
         // Flex item will not stretch in stretch alignment when flex wrap is set to wrap or wrap-reverse
-        bool isFlexNoWrap = !style.contains(FLEX_WRAP) || (style.contains(FLEX_WRAP) && style[FLEX_WRAP] == NO_WRAP);
+        bool isFlexNoWrap = parentRenderStyle.flexWrap == FlexWrap.nowrap;
+        bool isAlignItemsStretch = parentRenderStyle.alignItems == AlignItems.stretch;
+
         // Display as block if flex vertical layout children and stretch children
-        if (marginLeft != AUTO && marginRight != AUTO && isVerticalDirection && isFlexNoWrap &&
-          (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
+        if (!marginLeft.isAuto && !marginRight.isAuto && isVerticalDirection && isFlexNoWrap && isAlignItemsStretch) {
           display = CSSDisplay.block;
         }
-      }
     }
 
     return display;
