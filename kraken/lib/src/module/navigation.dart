@@ -23,6 +23,9 @@ enum KrakenNavigationType {
 }
 
 class NavigationModule extends BaseModule {
+  @override
+  String get name => 'Navigation';
+
   NavigationModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override

@@ -1,45 +1,32 @@
-// import { dispatchMQTTEvent } from './mqtt';
-// import { dispatchPositionEvent } from './geolocation';
-// import { triggerMethodCallHandler } from './method-channel';
-// import { dispatchWebSocketEvent } from './websocket';
+import {dispatchConnectivityChangeEvent} from "./connection";
+import {dispatchPositionEvent} from "./geolocation";
+import {dispatchMQTTEvent} from "./mqtt";
+import {triggerMethodCallHandler} from "./method-channel";
+import {dispatchWebSocketEvent} from "./websocket";
 
-export function krakenModuleListener(moduleName: string, event: Event, extra: string) {
-  console.log(moduleName);
-  // switch (moduleName) {
-  //   case 'connection': {
-  //     break;
-  //   }
-  // }
-
-  // if (type === 'onConnectivityChanged') {
-  //   const eventInfo = parsed[1];
-  //   const nativeEventAddress = eventInfo.nativeEvent;
-  //   const eventType = eventInfo.type;
-  //   // @ts-ignore
-  //   const event = Event.__initWithNativeEvent__(eventType, nativeEventAddress);
-  //   dispatchConnectivityChangeEvent(event);
-  // } else if (type === 'watchPosition') {
-  //   const event = parsed[1];
-  //   dispatchPositionEvent(event);
-  // } else if (type === 'MQTT') {
-  //   const clientId = parsed[1];
-  //   const eventInfo = parsed[2];
-  //   const nativeEventAddress = eventInfo.nativeEvent;
-  //   const eventType = eventInfo.type;
-  //   // @ts-ignore
-  //   const event = Event.__initWithNativeEvent__(eventType, nativeEventAddress);
-  //   dispatchMQTTEvent(clientId, event);
-  // } else if (type === 'MethodChannel') {
-  //   const method = parsed[1];
-  //   const args = parsed[2];
-  //   triggerMethodCallHandler(method, args);
-  // } else if (type === 'WebSocket') {
-  //   const clientId = parsed[1];
-  //   const eventInfo = parsed[2];
-  //   const nativeEventAddress = eventInfo.nativeEvent;
-  //   const eventType = eventInfo.type;
-  //   // @ts-ignore
-  //   const event = Event.__initWithNativeEvent__(eventType, nativeEventAddress);
-  //   dispatchWebSocketEvent(clientId, event);
-  // }
+export function krakenModuleListener(moduleName: string, event: Event, data: any) {
+  switch (moduleName) {
+    case 'Connection': {
+      dispatchConnectivityChangeEvent(event);
+      break;
+    }
+    case 'Geolocation': {
+      dispatchPositionEvent(data);
+      break;
+    }
+    case 'MQTT': {
+      dispatchMQTTEvent(data, event)
+      break;
+    }
+    case 'MethodChannel': {
+      const method = data[0];
+      const args = data[1];
+      triggerMethodCallHandler(method, args);
+      break;
+    }
+    case 'WebSocket': {
+      dispatchWebSocketEvent(data, event as ErrorEvent);
+      break;
+    }
+  }
 }

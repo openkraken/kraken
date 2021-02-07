@@ -14,6 +14,9 @@ void _initDeviceInfoPlugin() {
 }
 
 class DeviceInfoModule extends BaseModule {
+  @override
+  String get name => 'DeviceInfo';
+
   static Future<String> getDeviceInfo() async {
     _initDeviceInfoPlugin();
     Map<String, dynamic> deviceData;

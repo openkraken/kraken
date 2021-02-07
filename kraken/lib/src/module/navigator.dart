@@ -2,6 +2,9 @@ import 'package:kraken/src/module/module_manager.dart';
 import 'package:vibration/vibration.dart';
 
 class NavigatorModule extends BaseModule {
+  @override
+  String get name => 'Navigator';
+
   NavigatorModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override

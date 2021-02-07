@@ -5,6 +5,9 @@ import 'package:kraken/src/module/module_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AsyncStorageModule extends BaseModule {
+  @override
+  String get name => 'AsyncStorage';
+
   static Future<SharedPreferences> _prefs;
 
   AsyncStorageModule(ModuleManager moduleManager) : super(moduleManager);

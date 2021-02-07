@@ -2,6 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:kraken/src/module/module_manager.dart';
 
 class ClipBoardModule extends BaseModule {
+  @override
+  String get name => 'Clipboard';
   ClipBoardModule(ModuleManager moduleManager) : super(moduleManager);
 
   static Future<String> readText() async {

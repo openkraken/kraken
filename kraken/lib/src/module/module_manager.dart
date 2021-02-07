@@ -6,6 +6,7 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/src/module/navigator.dart';
 
 abstract class BaseModule {
+  String get name;
   final ModuleManager moduleManager;
   BaseModule(this.moduleManager);
   String invoke(String method, dynamic params, InvokeModuleCallback callback);
@@ -24,26 +25,26 @@ class ModuleManager {
 
   ModuleManager(this.controller, this.contextId) {
     if (!inited) {
-      defineModule('AsyncStorage', AsyncStorageModule(this));
-      defineModule('Clipboard', ClipBoardModule(this));
-      defineModule('Connection', ConnectionModule(this));
-      defineModule('DeviceInfo', DeviceInfoModule(this));
-      defineModule('fetch', FetchModule(this));
-      defineModule('Geolocation', GeolocationModule(this));
-      defineModule('MethodChannel', MethodChannelModule(this));
-      defineModule('MQTT', MQTTModule(this));
-      defineModule('Navigation', NavigationModule(this));
-      defineModule('Navigator', NavigatorModule(this));
-      defineModule('WebSocket', WebSocketModule(this));
+      defineModule(AsyncStorageModule(this));
+      defineModule(ClipBoardModule(this));
+      defineModule(ConnectionModule(this));
+      defineModule(DeviceInfoModule(this));
+      defineModule(FetchModule(this));
+      defineModule(GeolocationModule(this));
+      defineModule(MethodChannelModule(this));
+      defineModule(MQTTModule(this));
+      defineModule(NavigationModule(this));
+      defineModule(NavigatorModule(this));
+      defineModule(WebSocketModule(this));
     }
   }
 
-  static void defineModule(String type, BaseModule module) {
-    if (_moduleMap.containsKey(type)) {
-      throw Exception('ModuleManager: redefined module of type: $type');
+  static void defineModule(BaseModule module) {
+    if (_moduleMap.containsKey(module.name)) {
+      throw Exception('ModuleManager: redefined module of type: ${module.name}');
     }
 
-    _moduleMap[type] = module;
+    _moduleMap[module.name] = module;
   }
 
   void emitModuleEvent(String moduleName, {Event event, Object data}) {

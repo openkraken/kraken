@@ -14,6 +14,9 @@ import 'package:kraken/src/module/module_manager.dart';
 String EMPTY_STRING = '';
 
 class FetchModule extends BaseModule {
+  @override
+  String get name => 'Fetch';
+
   FetchModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override

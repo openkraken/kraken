@@ -134,7 +134,7 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, NativeEvent *event, N
     const JSValueRef args[] = {
       JSValueMakeString(context->context(), moduleNameStringRef),
       eventObjectRef == nullptr ? JSValueMakeNull(context->context()) : eventObjectRef,
-      JSValueMakeString(context->context(), moduleExtraDataRef)
+      JSValueMakeFromJSONString(context->context(), moduleExtraDataRef)
     };
     JSObjectCallAsFunction(context->context(), callback, context->global(), 3, args, &exception);
   }

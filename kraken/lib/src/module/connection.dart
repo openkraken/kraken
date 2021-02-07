@@ -24,6 +24,9 @@ String _parseConnectivityResult(ConnectivityResult state) {
 typedef OnConnectivityChangedCallback = void Function(String json);
 
 class ConnectionModule extends BaseModule {
+  @override
+  String get name => 'Connection';
+
   static Connectivity _connectivity;
 
   static void _initConnectivity() {

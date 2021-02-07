@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:kraken/dom.dart';
@@ -18,6 +17,9 @@ class _WebSocketState {
 }
 
 class WebSocketModule extends BaseModule {
+  @override
+  String get name => 'WebSocket';
+
   Map<String, IOWebSocketChannel> _clientMap = {};
   Map<String, Map<String, bool>> _listenMap = {};
   Map<String, _WebSocketState> _stateMap = {};

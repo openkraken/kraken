@@ -24,6 +24,8 @@ typedef Callback = void Function(String json);
 typedef WatchPositionCallback = void Function(String result);
 
 class GeolocationModule extends BaseModule {
+  @override
+  String get name => 'Geolocation';
   GeolocationModule(ModuleManager moduleManager) : super(moduleManager);
 
   static void getCurrentPosition(Map<String, dynamic> options, Callback callback) async {
