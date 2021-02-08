@@ -85,6 +85,9 @@ mixin CSSDisplayMixin on RenderStyleBase {
   /// https://www.w3.org/TR/css-display-3/#transformations
   CSSDisplay getTransformedDisplay() {
     RenderStyle renderStyle = this;
+    if (renderBoxModel.parent is! RenderBoxModel) {
+      return renderStyle.display;
+    }
     RenderBoxModel parent = renderBoxModel.parent;
     CSSDisplay display = renderStyle.display;
 

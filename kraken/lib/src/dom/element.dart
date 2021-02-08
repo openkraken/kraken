@@ -151,21 +151,12 @@ class Element extends Node
       return renderer;
     }
 
-    RenderStyle renderStyle;
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
       _renderIntrinsic = createRenderIntrinsic(this, repaintSelf: repaintSelf);
-      renderStyle = _renderIntrinsic.renderStyle;
     } else {
       _renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
-      renderStyle = _renderLayoutBox.renderStyle;
     }
-
-    /// Set display and transformedDisplay when display is not set in style
-    renderStyle.display = CSSDisplayMixin.getDisplay(
-      CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]
-    );
-    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
 
     return renderer;
   }
@@ -513,6 +504,14 @@ class Element extends Node
       }
       renderBoxModel.parseLineHeight = false;
     }
+
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+
+    /// Set display and transformedDisplay when display is not set in style
+    renderStyle.display = CSSDisplayMixin.getDisplay(
+      CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]
+    );
+    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
 
     didAttachRenderer();
   }
@@ -921,11 +920,19 @@ class Element extends Node
     if (CSSLength.isPercentage(present)) return;
 
     double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
-    renderBoxModel.renderStyle.updateMargin(property, presentValue);
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    renderStyle.updateMargin(property, presentValue);
+    // Margin change in flex layout may affect transformed display
+    // https://www.w3.org/TR/css-display-3/#transformations
+    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
-    renderBoxModel.renderStyle.updateFlexbox();
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    renderStyle.updateFlexbox();
+    // Flex properties change may affect transformed display
+    // https://www.w3.org/TR/css-display-3/#transformations
+    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
