@@ -523,7 +523,12 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
 
-        setMaximumScrollableSizeForPositionedChild(childParentData, child);
+        setScrollableSize(childParentData, child);
+
+        // For scrolling box, the minimum width and height should not less than scrollableSize
+        if (isScrollingContentBox) {
+          ensureBoxSizeLargerThanScrollableSize();
+        }
       }
       child = childParentData.nextSibling;
     }
@@ -562,7 +567,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         } else if (percentageToContainingBlockFound == true || percentageToOwnFound == true ) {
           _layoutPositionedChild(child);
         }
-        setMaximumScrollableSizeForPositionedChild(childParentData, child);
+        setScrollableSize(childParentData, child);
       }
       child = childParentData.nextSibling;
     }

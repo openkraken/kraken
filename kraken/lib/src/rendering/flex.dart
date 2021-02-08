@@ -719,7 +719,12 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
 
-        setMaximumScrollableSizeForPositionedChild(childParentData, child);
+        setScrollableSize(childParentData, child);
+
+        // For scrolling box, the minimum width and height should not less than scrollableSize
+        if (isScrollingContentBox) {
+          ensureBoxSizeLargerThanScrollableSize();
+        }
       }
       child = childParentData.nextSibling;
     }
@@ -757,7 +762,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else if (percentageToContainingBlockFound == true || percentageToOwnFound == true ) {
           _layoutPositionedChild(child);
         }
-        setMaximumScrollableSizeForPositionedChild(childParentData, child);
+        setScrollableSize(childParentData, child);
       }
       child = childParentData.nextSibling;
     }
@@ -1234,8 +1239,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       Size childSize = _getChildSize(child);
       // update max scrollable size
       if (child is RenderBoxModel) {
-        maxScrollableWidthMap[child.targetId] = math.max(child.maxScrollableSize.width, childSize.width);
-        maxScrollableHeightMap[child.targetId] = math.max(child.maxScrollableSize.height, childSize.height);
+        maxScrollableWidthMap[child.targetId] = math.max(child.scrollableSize.width, childSize.width);
+        maxScrollableHeightMap[child.targetId] = math.max(child.scrollableSize.height, childSize.height);
       }
 
       bool isExceedFlexLineLimit = runMainAxisExtent + childMainAxisExtent > flexLineLimit;
@@ -1807,8 +1812,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         // update max scrollable size
         if (child is RenderBoxModel) {
-          maxScrollableWidthMap[child.targetId] = math.max(child.maxScrollableSize.width, childSize.width);
-          maxScrollableHeightMap[child.targetId] = math.max(child.maxScrollableSize.height, childSize.height);
+          maxScrollableWidthMap[child.targetId] = math.max(child.scrollableSize.width, childSize.width);
+          maxScrollableHeightMap[child.targetId] = math.max(child.scrollableSize.height, childSize.height);
         }
 
         containerSizeMap['cross'] = math.max(containerSizeMap['cross'], _getCrossAxisExtent(child));

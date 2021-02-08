@@ -14,6 +14,7 @@ import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/inspector.dart';
+import 'package:kraken/gesture.dart';
 
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   bool isPositioned = false;
@@ -307,6 +308,7 @@ class RenderLayoutBox extends RenderBoxModel
 
 mixin RenderBoxModelBase on RenderBox {
   RenderStyle renderStyle;
+  Size boxSize;
 }
 
 class RenderBoxModel extends RenderBox with
@@ -400,6 +402,9 @@ class RenderBoxModel extends RenderBox with
   CSSStyleDeclaration style;
 
   ElementManager elementManager;
+
+  // When RenderBoxModel is scrolling box, contentConstraints are always equal to BoxConstraints();
+  bool isScrollingContentBox = false;
 
   BoxSizeType get widthSizeType {
     bool widthDefined = renderStyle.width != null;
@@ -809,7 +814,7 @@ class RenderBoxModel extends RenderBox with
     assert(width != null);
     assert(height != null);
 
-    maxScrollableSize = Size(
+    scrollableSize = Size(
       width + renderStyle.paddingLeft + renderStyle.paddingRight,
       height + renderStyle.paddingTop + renderStyle.paddingBottom
     );
@@ -883,7 +888,7 @@ class RenderBoxModel extends RenderBox with
     final double contentWidth = getContentWidth(this);
     final double contentHeight = getContentHeight(this);
 
-    if (contentWidth != null || contentHeight != null) {
+    if (!isScrollingContentBox && (contentWidth != null || contentHeight != null)) {
       double minWidth;
       double maxWidth;
       double minHeight;
@@ -947,8 +952,8 @@ class RenderBoxModel extends RenderBox with
 
   // The max scrollable size.
   Size _maxScrollableSize = Size.zero;
-  Size get maxScrollableSize => _maxScrollableSize;
-  set maxScrollableSize(Size value) {
+  Size get scrollableSize => _maxScrollableSize;
+  set scrollableSize(Size value) {
     assert(value != null);
     _maxScrollableSize = value;
   }
@@ -963,7 +968,7 @@ class RenderBoxModel extends RenderBox with
   // hooks when content box had layout.
   void didLayout() {
     if (clipX || clipY) {
-      setUpOverflowScroller(maxScrollableSize, scrollableViewportSize);
+      setUpOverflowScroller(scrollableSize, scrollableViewportSize);
     }
 
     if (positionedHolder != null) {
@@ -983,11 +988,11 @@ class RenderBoxModel extends RenderBox with
     needsLayout = false;
   }
 
-  void setMaximumScrollableSizeForPositionedChild(RenderLayoutParentData childParentData, RenderBoxModel child) {
+  void setScrollableSize(RenderLayoutParentData childParentData, RenderBoxModel child) {
     Size childSize = child.boxSize;
     RenderStyle childRenderStyle = child.renderStyle;
-    double maxScrollableX = maxScrollableSize.width;
-    double maxScrollableY = maxScrollableSize.height;
+    double maxScrollableX = scrollableSize.width;
+    double maxScrollableY = scrollableSize.height;
     if (childRenderStyle.left != null && !childRenderStyle.left.isAuto) {
       maxScrollableX = math.max(maxScrollableX, childRenderStyle.left.length + childSize.width);
     }
@@ -1000,10 +1005,18 @@ class RenderBoxModel extends RenderBox with
       maxScrollableY = math.max(maxScrollableY, childRenderStyle.top.length + childSize.height);
     }
     if (childRenderStyle.bottom != null && !childRenderStyle.bottom.isAuto) {
-      maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom.length + _contentSize.height);
+      if (isScrollingContentBox && (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
+        RenderBoxModel overflowContainerBox = parent;
+        maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom.length + overflowContainerBox.renderStyle.height
+            - overflowContainerBox.renderStyle.paddingTop - overflowContainerBox.renderStyle.paddingBottom
+            - overflowContainerBox.renderStyle.borderTop - overflowContainerBox.renderStyle.borderBottom);
+      } else {
+        maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom.length + _contentSize.height);
+      }
+
     }
 
-    maxScrollableSize = Size(maxScrollableX, maxScrollableY);
+    scrollableSize = Size(maxScrollableX, maxScrollableY);
   }
 
   bool get isCSSDisplayNone {
@@ -1068,6 +1081,20 @@ class RenderBoxModel extends RenderBox with
     EdgeInsets resolvedPadding = renderStyle.padding != null ? renderStyle.padding.resolve(TextDirection.ltr) : null;
     paintDecoration(context, offset, resolvedPadding);
     _chainPaintOverflow(context, offset);
+  }
+
+  void ensureBoxSizeLargerThanScrollableSize() {
+    double newBoxWidth = size.width;
+    double newBoxHeight = size.height;
+
+    if (scrollableSize.width > newBoxWidth) {
+      newBoxWidth = scrollableSize.width;
+    }
+    if (scrollableSize.height > newBoxHeight) {
+      newBoxHeight = scrollableSize.height;
+    }
+
+    size = Size(newBoxWidth, newBoxHeight);
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
@@ -1219,7 +1246,7 @@ class RenderBoxModel extends RenderBox with
     properties.add(DiagnosticsProperty('contentConstraints', _contentConstraints, missingIfNull: true));
     properties.add(DiagnosticsProperty('widthSizeType', widthSizeType, missingIfNull: true));
     properties.add(DiagnosticsProperty('heightSizeType', heightSizeType, missingIfNull: true));
-    properties.add(DiagnosticsProperty('maxScrollableSize', maxScrollableSize, missingIfNull: true));
+    properties.add(DiagnosticsProperty('maxScrollableSize', scrollableSize, missingIfNull: true));
 
     if (renderPositionHolder != null) properties.add(DiagnosticsProperty('renderPositionHolder', renderPositionHolder));
     if (intrinsicWidth != null) properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));

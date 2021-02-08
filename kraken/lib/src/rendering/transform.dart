@@ -18,7 +18,8 @@ mixin RenderTransformMixin on RenderBoxModelBase {
     }
     Offset translation;
     if (transformAlignment != null && transformAlignment != Alignment.topLeft) {
-      translation = hasSize ? transformAlignment.alongSize(size) : Offset.zero;
+      // Use boxSize instead of size to avoid Flutter cannot access size beyond parent access warning
+      translation = hasSize ? transformAlignment.alongSize(boxSize) : Offset.zero;
       result.translate(translation.dx, translation.dy);
     }
 

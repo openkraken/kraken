@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/gesture.dart';
 
 // CSS Overflow: https://drafts.csswg.org/css-overflow-3/
 
@@ -56,6 +57,9 @@ mixin CSSOverflowMixin on ElementBase {
 
   /// All the children whose position is sticky to this element
   List<Element> stickyChildren = [];
+
+  // House content which can be scrolled.
+  RenderLayoutBox scrollingContentLayoutBox;
 
   void updateRenderOverflow(RenderBoxModel renderBoxModel, Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
@@ -133,28 +137,78 @@ mixin CSSOverflowMixin on ElementBase {
       renderBoxModel.pointerListener = _pointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
-        RenderObject layoutBoxParent = renderBoxModel.parent;
-
-        // Overflow auto/scroll will create repaint boundary to improve scroll performance
-        // So it needs to transform between layout and its repaint boundary replacement when transform changes
-        RenderLayoutBox newLayoutBox = element.createRenderLayout(element, repaintSelf: shouldRepaintSelf, prevRenderLayoutBox: renderBoxModel);
-
-        if (newLayoutBox == renderBoxModel) {
-          return;
-        }
-        if (layoutBoxParent is RenderObjectWithChildMixin<RenderBox>) {
-          layoutBoxParent.child = null;
-          layoutBoxParent.child = newLayoutBox;
-        } else if (layoutBoxParent is ContainerRenderObjectMixin) {
-          ContainerBoxParentData parentData = renderBoxModel.parentData;
-          RenderObject previousSibling = parentData.previousSibling;
-          layoutBoxParent.remove(renderBoxModel);
-          element.renderBoxModel = newLayoutBox;
-          element.parent.addChildRenderObject(element, after: previousSibling);
-          // Update renderBoxModel reference in renderStyle
-          element.renderBoxModel.renderStyle.renderBoxModel = element.renderBoxModel;
+        if (shouldRepaintSelf) {
+          _upgradeToSelfRepaint(element, renderBoxModel);
+        } else {
+          _downgradeToParentRepaint(element, renderBoxModel);
         }
       }
+    }
+  }
+
+  void _createScrollingLayoutBox(Element element) {
+    // @HACK: create shadow element for scrollingLayoutBox
+    // @TODO: remove this after rendering phase are working without element and targetId required
+    Element scrollingElement = Element(0 - element.targetId, element.nativeElementPtr, element.elementManager,
+        defaultStyle: element.defaultStyle, isIntrinsicBox: element.isInlineBox, tagName: element.tagName, isScrollingElement: true);
+    elementManager.setEventTarget(scrollingElement);
+    CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
+    repaintBoundaryStyle.setProperty('overflow', 'visible');
+    scrollingContentLayoutBox = element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
+    scrollingContentLayoutBox.isScrollingContentBox = true;
+    scrollingElement.renderBoxModel = scrollingContentLayoutBox;
+  }
+
+  // Create two repaintBoundary for an overflow scroll container.
+  // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
+  // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.
+  void _upgradeToSelfRepaint(Element element, RenderBoxModel renderBoxModel) {
+    if (renderBoxModel.isRepaintBoundary) return;
+    RenderObject layoutBoxParent = renderBoxModel.parent;
+
+    RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
+    RenderLayoutBox outerLayoutBox = element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
+
+    _createScrollingLayoutBox(element);
+    outerLayoutBox.add(scrollingContentLayoutBox);
+    element.renderBoxModel = outerLayoutBox;
+    // Update renderBoxModel reference in renderStyle
+    element.renderBoxModel.renderStyle.renderBoxModel = outerLayoutBox;
+
+    _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
+  }
+
+  void _downgradeToParentRepaint(Element element, RenderBoxModel renderBoxModel) {
+    if (!renderBoxModel.isRepaintBoundary) return;
+    RenderObject layoutBoxParent = renderBoxModel.parent;
+    RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
+    RenderLayoutBox newLayoutBox = element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
+    element.renderBoxModel = newLayoutBox;
+    // Update renderBoxModel reference in renderStyle
+    element.renderBoxModel.renderStyle.renderBoxModel = newLayoutBox;
+    scrollingContentLayoutBox = null;
+
+    _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
+  }
+
+  RenderObject _detachRenderObject(Element element, RenderObject parent, RenderObject renderObject) {
+    if (parent is RenderObjectWithChildMixin<RenderBox>) {
+      parent.child = null;
+    } else if (parent is ContainerRenderObjectMixin) {
+      ContainerBoxParentData parentData = renderObject.parentData;
+      RenderObject previousSibling = parentData.previousSibling;
+      parent.remove(renderObject);
+      return previousSibling;
+    }
+
+    return null;
+  }
+
+  void _attachRenderObject(Element element, RenderObject parent, RenderObject previousSibling, RenderObject newRenderObject) {
+    if (parent is RenderObjectWithChildMixin<RenderBox>) {
+      parent.child = newRenderObject;
+    } else if (parent is ContainerRenderObjectMixin) {
+      element.parent.addChildRenderObject(element, after: previousSibling);
     }
   }
 
@@ -228,12 +282,12 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   get scrollHeight {
-    Size scrollContainerSize = renderBoxModel.maxScrollableSize;
+    Size scrollContainerSize = renderBoxModel.scrollableSize;
     return scrollContainerSize.height;
   }
 
   get scrollWidth {
-    Size scrollContainerSize = renderBoxModel.maxScrollableSize;
+    Size scrollContainerSize = renderBoxModel.scrollableSize;
     return scrollContainerSize.width;
   }
 

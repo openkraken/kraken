@@ -3,9 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:async';
-
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 
@@ -14,129 +11,183 @@ import 'package:flutter/gestures.dart';
 /// A tap with a primary button has occurred.
 typedef GestureClickCallback = void Function(Event);
 
-class ClickGestureRecognizer extends OneSequenceGestureRecognizer {
-  /// Initializes the [deadline] field during construction of subclasses.
-  ///
-  /// {@macro flutter.gestures.gestureRecognizer.kind}
-  ClickGestureRecognizer({
-    this.deadline,
-    this.acceptSlopTolerance = kTouchSlop,
-    Object debugOwner,
-    PointerDeviceKind kind,
-  }) : assert(
-  acceptSlopTolerance == null || acceptSlopTolerance >= 0,
-  'The acceptSlopTolerance must be positive or null',
-  ),
-        super(debugOwner: debugOwner, kind: kind);
+class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
+  /// Creates a tap gesture recognizer.
+  ClickGestureRecognizer({ Object debugOwner })
+      : super(deadline: kPressTimeout , debugOwner: debugOwner);
 
-  /// If non-null, the recognizer will call [didExceedDeadline] after this
-  /// amount of time has elapsed since starting to track the primary pointer.
-  ///
-  /// The [didExceedDeadline] will not be called if the primary pointer is
-  /// accepted, rejected, or all pointers are up or canceled before [deadline].
-  final Duration deadline;
-
-  /// The maximum distance in logical pixels the gesture is allowed to drift
-  /// from the initial touch down position before the gesture is accepted.
-  ///
-  /// Drifting past the allowed slop amount causes the gesture to be rejected.
-  ///
-  /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to 18 logical pixels.
-  final double acceptSlopTolerance;
-
-  /// The current state of the recognizer.
-  ///
-  /// See [GestureRecognizerState] for a description of the states.
-  GestureRecognizerState state = GestureRecognizerState.ready;
-
-  /// The ID of the primary pointer this recognizer is tracking.
-  int primaryPointer;
-
-  /// The location at which the primary pointer contacted the screen.
-  OffsetPair initialPosition;
-  Timer _timer;
+  bool _sentTapDown = false;
+  bool _wonArenaForPrimaryPointer = false;
 
   PointerDownEvent _down;
+  PointerUpEvent _up;
+
+  /// A pointer has contacted the screen, which might be the start of a tap.
+  ///
+  /// This triggers after the down event, once a short timeout ([deadline]) has
+  /// elapsed, or once the gesture has won the arena, whichever comes first.
+  ///
+  /// The parameter `down` is the down event of the primary pointer that started
+  /// the tap sequence.
+  ///
+  /// If this recognizer doesn't win the arena, [handleTapCancel] is called next.
+  /// Otherwise, [handleTapUp] is called next.
+  void handleTapDown(PointerDownEvent down) {}
+
+  /// A pointer has stopped contacting the screen, which is recognized as a tap.
+  ///
+  /// This triggers on the up event if the recognizer wins the arena with it
+  /// or has previously won.
+  ///
+  /// The parameter `down` is the down event of the primary pointer that started
+  /// the tap sequence, and `up` is the up event that ended the tap sequence.
+  ///
+  /// If this recognizer doesn't win the arena, [handleTapCancel] is called
+  /// instead.
+  void handleTapUp( PointerDownEvent down, PointerUpEvent up ) {
+    if (onClick != null)
+      onClick(Event(EVENT_CLICK, EventInit(bubbles: true, cancelable: true)));
+  }
 
   GestureClickCallback onClick;
 
+  /// A pointer that previously triggered [handleTapDown] will not end up
+  /// causing a tap.
+  ///
+  /// This triggers once the gesture loses the arena if [handleTapDown] has
+  /// been previously triggered.
+  ///
+  /// The parameter `down` is the down event of the primary pointer that started
+  /// the tap sequence; `cancel` is the cancel event, which might be null;
+  /// `reason` is a short description of the cause if `cancel` is null, which
+  /// can be "forced" if other gestures won the arena, or "spontaneous"
+  /// otherwise.
+  ///
+  /// If this recognizer wins the arena, [handleTapUp] is called instead.
+  void handleTapCancel( PointerDownEvent down, PointerCancelEvent cancel, String reason ) {
+    if (onClick != null)
+      onClick(Event(EVENT_CANCEL, EventInit(bubbles: true, cancelable: true)));
+  }
+
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    assert(event != null);
     if (state == GestureRecognizerState.ready) {
+      // `_down` must be assigned in this method instead of `handlePrimaryPointer`,
+      // because `acceptGesture` might be called before `handlePrimaryPointer`,
+      // which relies on `_down` to call `handleTapDown`.
       _down = event;
-      startTrackingPointer(event.pointer, event.transform);
-      state = GestureRecognizerState.possible;
-      primaryPointer = event.pointer;
-      initialPosition = OffsetPair(local: event.localPosition, global: event.position);
-      if (deadline != null)
-        _timer = Timer(deadline, () => didExceedDeadlineWithEvent(event));
+    }
+    if (_down != null) {
+      // This happens when this tap gesture has been rejected while the pointer
+      // is down (i.e. due to movement), when another allowed pointer is added,
+      // in which case all pointers are simply ignored. The `_down` being null
+      // means that _reset() has been called, since it is always set at the
+      // first allowed down event and will not be cleared except for reset(),
+      super.addAllowedPointer(event);
     }
   }
 
   @override
-  void handleEvent(PointerEvent event) {
-    assert(state != GestureRecognizerState.ready);
-    if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
-      final bool isAcceptSlopPastTolerance = acceptSlopTolerance != null &&
-          _getGlobalDistance(event) > acceptSlopTolerance;
+  void startTrackingPointer(int pointer, [Matrix4 transform]) {
+    // The recognizer should never track any pointers when `_down` is null,
+    // because calling `_checkDown` in this state will throw exception.
+    assert(_down != null);
+    super.startTrackingPointer(pointer, transform);
+  }
 
-      if (event is PointerMoveEvent && isAcceptSlopPastTolerance) {
-        stopTrackingPointer(primaryPointer);
-      } else {
-        if (event is PointerUpEvent) {
-          if (onClick != null)
-            onClick(Event(EVENT_CLICK, EventInit()));
-          _reset();
-        } else if (event is PointerCancelEvent) {
-          _reset();
-        } else if (event.buttons != _down.buttons) {
-          stopTrackingPointer(primaryPointer);
-        }
+  @override
+  void handlePrimaryPointer(PointerEvent event) {
+    if (event is PointerUpEvent) {
+      _up = event;
+      _checkUp();
+    } else if (event is PointerCancelEvent) {
+      resolve(GestureDisposition.rejected);
+      if (_sentTapDown) {
+        _checkCancel(event, '');
       }
+      _reset();
+    } else if (event.buttons != _down.buttons) {
+      resolve(GestureDisposition.rejected);
+      stopTrackingPointer(primaryPointer);
     }
-    stopTrackingIfPointerNoLongerDown(event);
   }
 
-  void _reset() {
-    _down = null;
+  @override
+  void resolve(GestureDisposition disposition) {
+    if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
+      // This can happen if the gesture has been canceled. For example, when
+      // the pointer has exceeded the touch slop, the buttons have been changed,
+      // or if the recognizer is disposed.
+      assert(_sentTapDown);
+      _checkCancel(null, 'spontaneous');
+      _reset();
+    }
+    super.resolve(disposition);
   }
 
-  void didExceedDeadlineWithEvent(PointerEvent event) {
-    assert(state != GestureRecognizerState.ready);
-    state = GestureRecognizerState.ready;
+  @override
+  void didExceedDeadline() {
+    _checkDown();
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    super.acceptGesture(pointer);
+    if (pointer == primaryPointer) {
+      _checkDown();
+      _wonArenaForPrimaryPointer = true;
+      _checkUp();
+    }
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    super.rejectGesture(pointer);
+    if (pointer == primaryPointer) {
+      // Another gesture won the arena.
+      assert(state != GestureRecognizerState.possible);
+      if (_sentTapDown)
+        _checkCancel(null, 'forced');
+      _reset();
+    }
+  }
+
+  void _checkDown() {
+    if (_sentTapDown) {
+      return;
+    }
+    handleTapDown(_down);
+    _sentTapDown = true;
+  }
+
+  void _checkUp() {
+    if (!_wonArenaForPrimaryPointer || _up == null) {
+      return;
+    }
+    handleTapUp(_down, _up);
     _reset();
   }
 
-  @override
-  void didStopTrackingLastPointer(int pointer) {
-    assert(state != GestureRecognizerState.ready);
-    _stopTimer();
-    state = GestureRecognizerState.ready;
+  void _checkCancel(PointerCancelEvent event, String note) {
+    handleTapCancel(_down, event, note);
   }
 
-  @override
-  void dispose() {
-    _stopTimer();
-    super.dispose();
-  }
-
-  void _stopTimer() {
-    if (_timer != null) {
-      _timer.cancel();
-      _timer = null;
-    }
-  }
-
-  double _getGlobalDistance(PointerEvent event) {
-    final Offset offset = event.position - initialPosition.global;
-    return offset.distance;
+  void _reset() {
+    _sentTapDown = false;
+    _wonArenaForPrimaryPointer = false;
+    _up = null;
+    _down = null;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<GestureRecognizerState>('state', state));
+    properties.add(FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
+    properties.add(DiagnosticsProperty<Offset>('finalPosition', _up?.position, defaultValue: null));
+    properties.add(DiagnosticsProperty<Offset>('finalLocalPosition', _up?.localPosition, defaultValue: _up?.position));
+    properties.add(DiagnosticsProperty<int>('button', _down?.buttons, defaultValue: null));
+    properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
   }
 
   String get debugDescription => 'click gesture';

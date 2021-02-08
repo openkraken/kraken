@@ -4,6 +4,7 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 
 mixin CSSSliverMixin on RenderStyleBase {
