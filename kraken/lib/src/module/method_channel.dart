@@ -7,6 +7,7 @@ import 'package:kraken/src/module/module_manager.dart';
 typedef MethodCallCallback = Future<dynamic> Function(String method, dynamic arguments);
 
 Future<dynamic> invokeMethodFromJavaScript(KrakenController controller, String method, List args) {
+  if (controller.methodChannel == null) return null;
   return controller.methodChannel._invokeMethodFromJavaScript(method, args);
 }
 
@@ -26,13 +27,7 @@ class MethodChannelModule extends BaseModule {
   String invoke(String method, dynamic params, callback) {
     if (method == 'invokeMethod') {
       invokeMethodFromJavaScript(moduleManager.controller, params[0], params[1]).then((result) {
-        String ret;
-        if (result is String) {
-          ret = result;
-        } else {
-          ret = jsonEncode(result);
-        }
-        callback(data: ret);
+        callback(data: jsonEncode(result));
       }).catchError((e, stack) {
         callback(errmsg: '$e\n$stack');
       });

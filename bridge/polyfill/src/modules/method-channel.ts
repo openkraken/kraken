@@ -12,7 +12,7 @@ export const methodChannel = {
   },
   invokeMethod(method: string, ...args: any[]): Promise<string> {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('MethodChannel', 'invokeMethod', ([method, args]), (e, data) => {
+      kraken.invokeModule('MethodChannel', 'invokeMethod', [method, args], (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });
