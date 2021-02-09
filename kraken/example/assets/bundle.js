@@ -1,5 +1,4 @@
-var text = document.createTextNode('Hello World!');
-var p = document.createElement('p');
-p.style.textAlign = 'center';
-p.appendChild(text);
-document.body.appendChild(p);
+ kraken.methodChannel.setMethodCallHandler((method, args) => {
+    console.log(args);
+    });
+    kraken.methodChannel.invokeMethod('helloworld', 'abc', 1234, null, undefined, [], true, false, {name: 1});

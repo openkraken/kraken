@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'package:connectivity/connectivity.dart';
 import 'module_manager.dart';
 
 Map _getResult(ConnectivityResult connectivityResult) {
-  String isConnected = jsonEncode(ConnectivityResult.none != connectivityResult);
   String type = _parseConnectivityResult(connectivityResult);
-
-  return {"isConnected": isConnected, "type": type};
+  return {"isConnected": ConnectivityResult.none != connectivityResult, "type": type};
 }
 
 String _parseConnectivityResult(ConnectivityResult state) {
