@@ -5,7 +5,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:kraken/bridge.dart';
@@ -30,14 +29,11 @@ class FetchModule extends BaseModule {
     _fetch(url, options).then((Response response) {
       callback(data: ['', response.statusCode, response.data]);
     }).catchError((e, stack) {
-      String errorMessage = e.toString();
-      String json;
       if (e is DioError && e.type == DioErrorType.RESPONSE) {
-        json = jsonEncode([errorMessage, e.response.statusCode, EMPTY_STRING]);
+        callback(data: [e.toString(), e.response.statusCode, EMPTY_STRING]);
       } else {
-        json = jsonEncode(['$errorMessage\n$stack', null, EMPTY_STRING]);
+        callback(errmsg: '$e\n$stack');
       }
-      callback(errmsg: json);
     });
 
     return '';
