@@ -31,7 +31,7 @@ class WebSocketModule extends BaseModule {
   String invoke(String method, dynamic params, callback) {
     if (method == 'init') {
       return init(params, (String id, Event event) {
-        moduleManager.emitModuleEvent('WebSocket', event: event, data: id);
+        moduleManager.emitModuleEvent(name, event: event, data: id);
       });
     } else if (method == 'addEvent') {
       addEvent(params[0], params[1]);

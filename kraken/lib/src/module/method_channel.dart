@@ -32,7 +32,7 @@ class MethodChannelModule extends BaseModule {
       });
     } else if (method == 'setMethodCallHandler') {
       onJSMethodCall(moduleManager.controller, (String method, dynamic arguments) async {
-        moduleManager.emitModuleEvent('methodChannel', data: [method, arguments]);
+        moduleManager.emitModuleEvent(name, data: [method, arguments]);
       });
     }
     return '';

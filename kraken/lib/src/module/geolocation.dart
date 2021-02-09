@@ -131,7 +131,7 @@ class GeolocationModule extends BaseModule {
         options = positionArgs[0];
       }
       return GeolocationModule.watchPosition(options, (dynamic result) {
-        moduleManager.emitModuleEvent('geolocation', data: ["watchPosition", result]);
+        moduleManager.emitModuleEvent(name, data: ["watchPosition", result]);
       }).toString();
     } else if (method == 'clearWatch') {
       List positionArgs = params[2];

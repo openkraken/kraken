@@ -45,7 +45,7 @@ class MQTTModule extends BaseModule {
       return getReadyState(args[0]);
     } else if (method == 'addEvent') {
       addEvent(args[0], args[1], (String id, Event event) {
-        moduleManager.emitModuleEvent('MQTT', data: id, event: event);
+        moduleManager.emitModuleEvent(name, data: id, event: event);
       });
     }
 
