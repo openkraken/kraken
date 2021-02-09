@@ -72,7 +72,7 @@ public:
     return context;
   }
 
-  void invokeModuleEvent(NativeString *moduleName, kraken::binding::jsc::NativeEvent *event, NativeString *extra);
+  void invokeModuleEvent(NativeString *moduleName, const char* eventType, void *event, NativeString *extra);
   void reportError(const char *errmsg);
 
   std::atomic<bool> event_registered = false;

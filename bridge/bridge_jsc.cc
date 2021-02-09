@@ -108,7 +108,7 @@ void JSBridge::detachDevtools() {
 }
 #endif // ENABLE_DEBUGGER
 
-void JSBridge::invokeModuleEvent(NativeString *moduleName, NativeEvent *event, NativeString *extra) {
+void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *event, NativeString *extra) {
   if (!context->isValid()) return;
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
@@ -125,7 +125,8 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, NativeEvent *event, N
 
     JSObjectRef eventObjectRef = nullptr;
     if (event != nullptr) {
-      auto eventInstance = new EventInstance(JSEvent::instance(context.get()), event);
+      std::string type = std::string(eventType);
+      EventInstance *eventInstance = JSEvent::buildEventInstance(type, context.get(), event, false);
       eventObjectRef = eventInstance->object;
     }
 

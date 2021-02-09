@@ -14,11 +14,7 @@ export function dispatchPositionEvent(event: any) {
 
 export default {
   getCurrentPosition(success: (data: any) => void, error?: (error: any) => void, options?: any) {
-    let optionsStr = '';
-    if (options != null) {
-      optionsStr = JSON.stringify(options);
-    }
-    kraken.invokeModule('Geolocation', 'getCurrentPosition', optionsStr, (e, result) => {
+    kraken.invokeModule('Geolocation', 'getCurrentPosition', options, (e, result) => {
       if (e && error) return error(e);
       if (result['coords'] != null) {
         success(result);
@@ -28,11 +24,7 @@ export default {
     });
   },
   watchPosition(success: (data: any) => void, error?: (error: any) => void, options?: any) {
-    let optionsStr = '';
-    if (options != null) {
-      optionsStr = JSON.stringify(options);
-    }
-    const watchId = kraken.invokeModule('Geolocation', 'watchPosition', optionsStr);
+    const watchId = kraken.invokeModule('Geolocation', 'watchPosition', options);
     positionWatcherMap.set(watchId, {success: success, error: error});
     return parseInt(watchId);
   },

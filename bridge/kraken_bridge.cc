@@ -153,10 +153,10 @@ void reloadJsContext(int32_t contextId) {
   contextPool[contextId] = newContext;
 }
 
-void invokeModuleEvent(int32_t contextId, NativeString *moduleName, void *event, NativeString *extra) {
+void invokeModuleEvent(int32_t contextId, NativeString *moduleName, const char *eventType, void *event, NativeString *extra) {
   assert(checkContext(contextId) && "invokeEventListener: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
-  context->invokeModuleEvent(moduleName, reinterpret_cast<kraken::binding::jsc::NativeEvent*>(event), extra);
+  context->invokeModuleEvent(moduleName, eventType, event, extra);
 }
 
 void registerDartMethods(uint64_t *methodBytes, int32_t length) {

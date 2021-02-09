@@ -70,8 +70,8 @@ KrakenInfo getKrakenInfo() {
 }
 
 // Register invokeEventListener
-typedef Native_InvokeEventListener = Void Function(Int32 contextId, Pointer<NativeString>, Pointer<Void> nativeEvent, Pointer<NativeString>);
-typedef Dart_InvokeEventListener = void Function(int contextId, Pointer<NativeString>, Pointer<Void> nativeEvent, Pointer<NativeString>);
+typedef Native_InvokeEventListener = Void Function(Int32 contextId, Pointer<NativeString>, Pointer<Utf8> eventType,  Pointer<Void> nativeEvent, Pointer<NativeString>);
+typedef Dart_InvokeEventListener = void Function(int contextId, Pointer<NativeString>, Pointer<Utf8> eventType, Pointer<Void> nativeEvent, Pointer<NativeString>);
 
 final Dart_InvokeEventListener _invokeModuleEvent =
     nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeModuleEvent').asFunction();
@@ -79,7 +79,8 @@ final Dart_InvokeEventListener _invokeModuleEvent =
 void invokeModuleEvent(int contextId, String moduleName, Event event, String extra) {
   assert(moduleName != null);
   Pointer<NativeString> nativeModuleName = stringToNativeString(moduleName);
-  _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : event.toNative().cast<Void>(), stringToNativeString(extra ?? ''));
+  Pointer<Void> nativeEvent = event == null ? nullptr : event.toNative().cast<Void>();
+  _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : Utf8.toUtf8(event.type), nativeEvent, stringToNativeString(extra ?? ''));
   freeNativeString(nativeModuleName);
 }
 
