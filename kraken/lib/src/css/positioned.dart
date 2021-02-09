@@ -89,8 +89,6 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   CSSMargin marginRight = childRenderStyle.marginRight;
   CSSMargin marginTop = childRenderStyle.marginTop;
   CSSMargin marginBottom = childRenderStyle.marginBottom;
-  double width = childRenderStyle.width;
-  double height = childRenderStyle.height;
   CSSOffset left = childRenderStyle.left;
   CSSOffset right = childRenderStyle.right;
   CSSOffset top = childRenderStyle.top;
@@ -99,8 +97,7 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
   // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
   if ((left != null && !left.isAuto) &&
-      (right != null && !right.isAuto) &&
-      width != null) {
+      (right != null && !right.isAuto)) {
     if (marginLeft.isAuto) {
       double leftValue = left.length ?? 0.0;
       double rightValue = right.length ?? 0.0;
@@ -115,8 +112,7 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   }
 
   if ((top != null && !top.isAuto) &&
-    (bottom != null && !bottom.isAuto) &&
-    height != null) {
+    (bottom != null && !bottom.isAuto)) {
     if (marginTop.isAuto) {
       double topValue = top.length ?? 0.0;
       double bottomValue = bottom.length ?? 0.0;
@@ -184,8 +180,8 @@ class CSSPositionedLayout {
     // Element with intrinsic size such as image will not stretch
     if (childRenderStyle.width == null &&
         widthType != BoxSizeType.intrinsic &&
-        childRenderStyle.left != null &&
-        childRenderStyle.right != null) {
+        childRenderStyle.left != null && childRenderStyle.left.length != null &&
+        childRenderStyle.right != null && childRenderStyle.right.length != null) {
       double constraintWidth = parentSize.width - childRenderStyle.left.length - childRenderStyle.right.length;
       double maxWidth = childRenderStyle.maxWidth;
       double minWidth = childRenderStyle.minWidth;
@@ -200,8 +196,8 @@ class CSSPositionedLayout {
     // If child has not height, should be calculate height by top and bottom
     if (childRenderStyle.height == null &&
         heightType != BoxSizeType.intrinsic &&
-        childRenderStyle.top != null &&
-        childRenderStyle.bottom != null) {
+        childRenderStyle.top != null && childRenderStyle.top.length != null &&
+        childRenderStyle.bottom != null && childRenderStyle.bottom.length != null) {
       double constraintHeight = parentSize.height - childRenderStyle.top.length - childRenderStyle.bottom.length;
       double maxHeight = childRenderStyle.maxHeight;
       double minHeight = childRenderStyle.minHeight;
@@ -283,8 +279,6 @@ class CSSPositionedLayout {
     double childMarginLeft = 0;
     double childMarginRight = 0;
 
-    Element childEl = parent.elementManager.getEventTargetByTargetId<Element>(child.targetId);
-    RenderBoxModel childRenderBoxModel = childEl.renderBoxModel;
     RenderStyle childRenderStyle = child.renderStyle;
     childMarginTop = childRenderStyle.marginTop.length;
     childMarginBottom = childRenderStyle.marginBottom.length;
@@ -294,9 +288,9 @@ class CSSPositionedLayout {
     // Offset to global coordinate system of base.
     if (childParentData.isPositioned) {
       RenderObject root = parent.elementManager.getRootRenderObject();
-      Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childRenderBoxModel.renderPositionHolder, parent) ?? Offset.zero;
+      Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(child.renderPositionHolder, parent) ?? Offset.zero;
 
-      Offset baseOffset = (childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
+      Offset baseOffset = (child.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
         parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root));
 
       EdgeInsets borderEdge = parent.renderStyle.borderEdge;
@@ -307,7 +301,8 @@ class CSSPositionedLayout {
       RenderStyle childRenderStyle = child.renderStyle;
       double top = childRenderStyle.top != null && !childRenderStyle.top.isAuto ?
         childRenderStyle.top.length + borderTop + childMarginTop : baseOffset.dy + childMarginTop;
-      if (childRenderStyle.top == null && childRenderStyle.bottom != null) {
+      if ((childRenderStyle.top == null || childRenderStyle.top.length == null) &&
+        (childRenderStyle.bottom != null && childRenderStyle.bottom.length != null)) {
         top = parentSize.height - child.boxSize.height - borderBottom - childMarginBottom -
           ((childRenderStyle.bottom.length) ?? 0);
 
@@ -320,7 +315,8 @@ class CSSPositionedLayout {
 
       double left = childRenderStyle.left != null && !childRenderStyle.left.isAuto ?
         childRenderStyle.left.length + borderLeft + childMarginLeft : baseOffset.dx + childMarginLeft;
-      if (childRenderStyle.left == null && childRenderStyle.right != null) {
+      if ((childRenderStyle.left == null || childRenderStyle.left.length == null) &&
+        (childRenderStyle.right != null && childRenderStyle.right.length != null)) {
         left = parentSize.width - child.boxSize.width - borderRight - childMarginRight -
           ((childRenderStyle.right.length) ?? 0);
 

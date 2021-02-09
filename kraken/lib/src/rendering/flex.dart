@@ -657,7 +657,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       } else {
         double height = childRenderStyle.height;
         if (flexBasis == null) {
-          if (height != '') {
+          if (height != null) {
             baseSize = height ?? 0;
           }
         } else {
@@ -1155,7 +1155,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       } else if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
         double maxCrossAxisSize;
         // Calculate max height constraints
-        if (heightSizeType == BoxSizeType.specified && child is RenderBoxModel && child.renderStyle.height != '') {
+        if (heightSizeType == BoxSizeType.specified && child is RenderBoxModel && child.renderStyle.height != null) {
           maxCrossAxisSize = child.renderStyle.height;
         } else {
           // Child in flex line expand automatic when height is not specified
