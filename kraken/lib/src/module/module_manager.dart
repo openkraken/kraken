@@ -13,7 +13,7 @@ abstract class BaseModule {
   void dispose();
 }
 
-typedef InvokeModuleCallback = void Function({String errmsg, String data});
+typedef InvokeModuleCallback = void Function({String errmsg, dynamic data});
 typedef NewModuleCreator = BaseModule Function(ModuleManager);
 
 class ModuleManager {

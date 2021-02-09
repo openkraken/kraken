@@ -9,9 +9,10 @@ export function dispatchConnectivityChangeEvent(event: any) {
 
 export default {
   getConnectivity() {
-    return new Promise((resolve) => {
-      kraken.invokeModule('Connection', 'getConnectivity', '', (json) => {
-        resolve(json);
+    return new Promise((resolve, reject) => {
+      kraken.invokeModule('Connection', 'getConnectivity', null, (e, data) => {
+        if (e) return reject(e);
+        resolve(data);
       });
     });
   },

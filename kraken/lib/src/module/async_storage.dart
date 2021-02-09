@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:kraken/src/module/module_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -79,7 +78,7 @@ class AsyncStorageModule extends BaseModule {
       case 'getAllKeys':
         AsyncStorageModule.getAllKeys().then((Set<String> set) {
           List<String> list = List.from(set);
-          callback(data: jsonEncode(list));
+          callback(data: list);
         }).catchError((e, stack) {
           callback(errmsg: 'Error: $e\n$stack');
         });

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
@@ -17,7 +16,7 @@ class DeviceInfoModule extends BaseModule {
   @override
   String get name => 'DeviceInfo';
 
-  static Future<String> getDeviceInfo() async {
+  static Future<Map> getDeviceInfo() async {
     _initDeviceInfoPlugin();
     Map<String, dynamic> deviceData;
 
@@ -48,7 +47,7 @@ class DeviceInfoModule extends BaseModule {
       deviceData = {};
     }
 
-    return jsonEncode(deviceData);
+    return deviceData;
   }
 
   static int getHardwareConcurrency() {
@@ -64,7 +63,7 @@ class DeviceInfoModule extends BaseModule {
   @override
   String invoke(String method, dynamic params, InvokeModuleCallback callback) {
     if (method == 'getDeviceInfo') {
-      getDeviceInfo().then((String json) {
+      getDeviceInfo().then((Map json) {
         callback(data: json);
       });
     } else if (method == 'getHardwareConcurrency') {

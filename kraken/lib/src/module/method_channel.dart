@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/src/module/module_manager.dart';
@@ -27,13 +26,13 @@ class MethodChannelModule extends BaseModule {
   String invoke(String method, dynamic params, callback) {
     if (method == 'invokeMethod') {
       invokeMethodFromJavaScript(moduleManager.controller, params[0], params[1]).then((result) {
-        callback(data: jsonEncode(result));
+        callback(data: result);
       }).catchError((e, stack) {
         callback(errmsg: '$e\n$stack');
       });
     } else if (method == 'setMethodCallHandler') {
       onJSMethodCall(moduleManager.controller, (String method, dynamic arguments) async {
-        moduleManager.emitModuleEvent('methodChannel', data: jsonEncode([method, arguments]));
+        moduleManager.emitModuleEvent('methodChannel', data: [method, arguments]);
       });
     }
     return '';

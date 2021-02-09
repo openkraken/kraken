@@ -12,12 +12,12 @@ export const navigator = {
     return kraken.userAgent;
   },
   get hardwareConcurrency() {
-    const logicalProcessors = kraken.invokeModule('DeviceInfo', 'getHardwareConcurrency', );
+    const logicalProcessors = kraken.invokeModule('DeviceInfo', 'getHardwareConcurrency');
     return parseInt(logicalProcessors);
   },
   getDeviceInfo() {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('DeviceInfo', 'getDeviceInfo', '', (e, data) => {
+      kraken.invokeModule('DeviceInfo', 'getDeviceInfo', null, (e, data) => {
         if (e) {
           return reject(e);
         }
@@ -28,7 +28,7 @@ export const navigator = {
   clipboard: {
     readText() {
       return new Promise((resolve, reject) => {
-        kraken.invokeModule('Clipboard', 'readText', '', (e, data) => {
+        kraken.invokeModule('Clipboard', 'readText', null, (e, data) => {
           if (e) {
             return reject(e);
           }

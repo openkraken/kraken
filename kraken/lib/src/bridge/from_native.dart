@@ -77,14 +77,14 @@ String invokeModule(
   String result = '';
 
   try {
-    void invokeModuleCallback({String errmsg, String data}) {
+    void invokeModuleCallback({String errmsg, dynamic data}) {
       if (errmsg != null) {
         callback(callbackContext, contextId, stringToNativeString(errmsg), nullptr);
       } else {
-        callback(callbackContext, contextId, nullptr, stringToNativeString(data ?? ''));
+        callback(callbackContext, contextId, nullptr, stringToNativeString(jsonEncode(data)));
       }
     }
-    result = controller.module.moduleManager.invokeModule(moduleName, method, jsonDecode(params), invokeModuleCallback);
+    result = controller.module.moduleManager.invokeModule(moduleName, method, (params != null && params != '""') ? jsonDecode(params) : null, invokeModuleCallback);
   } catch (e, stack) {
     String errmsg = '$e\n$stack';
     // print module error on the dart side.

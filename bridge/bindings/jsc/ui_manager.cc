@@ -104,7 +104,7 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
   JSStringRef paramsStringRef = nullptr;
   JSValueRef callbackValueRef = nullptr;
 
-  if (argumentCount > 2) {
+  if (argumentCount > 2 && !JSValueIsNull(ctx, arguments[2])) {
     paramsStringRef = JSValueCreateJSONString(ctx, arguments[2], 0, exception);
   }
 

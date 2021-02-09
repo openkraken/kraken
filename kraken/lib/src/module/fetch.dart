@@ -28,8 +28,7 @@ class FetchModule extends BaseModule {
     Map<String, dynamic> options = params;
 
     _fetch(url, options).then((Response response) {
-      String json = jsonEncode(['', response.statusCode, response.data]);
-      callback(data: json);
+      callback(data: ['', response.statusCode, response.data]);
     }).catchError((e, stack) {
       String errorMessage = e.toString();
       String json;
