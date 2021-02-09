@@ -6,13 +6,13 @@ export const asyncStorage = {
     return new Promise((resolve, reject) => {
       kraken.invokeModule('AsyncStorage', 'getItem', String(key), (e, data) => {
         if (e) return reject(e);
-        resolve(data);
+        resolve(data == null ? '' : data);
       });
     });
   },
   setItem(key: number | string, value: number | string) {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('AsyncStorage', 'setItem', [key, value], (e, data) => {
+      kraken.invokeModule('AsyncStorage', 'setItem', [String(key), `"${value ? String(value) : ''}"`], (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });
