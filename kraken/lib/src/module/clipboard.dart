@@ -27,8 +27,7 @@ class ClipBoardModule extends BaseModule {
         callback(errmsg: '$e\n$stack');
       });
     } else if (method == 'writeText') {
-      List methodArgs = params[2];
-      ClipBoardModule.writeText(methodArgs[0]).then((_) {
+      ClipBoardModule.writeText(params).then((_) {
         callback();
       }).catchError((e, stack) {
         callback(errmsg: '');
