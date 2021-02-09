@@ -270,7 +270,7 @@ export function fetch(input: Request | string, init?: RequestInit) {
         headers = new Headers(headers);
       }
 
-      kraken.invokeModule('fetch', url, ({
+      kraken.invokeModule('Fetch', url, ({
         ...init,
         headers: (headers as Headers).map
       }), (e, data) => {
