@@ -12,7 +12,7 @@ export const asyncStorage = {
   },
   setItem(key: number | string, value: number | string) {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('AsyncStorage', 'setItem', [String(key), `"${value ? String(value) : ''}"`], (e, data) => {
+      kraken.invokeModule('AsyncStorage', 'setItem', [String(key), String(value)], (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });
