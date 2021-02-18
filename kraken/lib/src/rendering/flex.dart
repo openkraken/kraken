@@ -501,12 +501,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     BoxSizeType widthSizeType = _getChildWidthSizeType(child);
     BoxSizeType heightSizeType = _getChildHeightSizeType(child);
 
-    if (style != null) {
-      if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-        return heightSizeType != null && heightSizeType == BoxSizeType.specified;
-      } else {
-        return widthSizeType != null && widthSizeType == BoxSizeType.specified;
-      }
+    if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
+      return heightSizeType != null && heightSizeType == BoxSizeType.specified;
+    } else {
+      return widthSizeType != null && widthSizeType == BoxSizeType.specified;
     }
 
     return false;

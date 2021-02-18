@@ -798,6 +798,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       child = childParentData.nextSibling;
     }
 
+
     if (runChildren.length > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
@@ -1152,16 +1153,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       double runMainExtent = 0;
       void iterateRunChildren(int targetId, RenderBox runChild) {
         double runChildMainSize = runChild.size.width;
-        // Decendants with percentage main size should not include in auto main size
-//        if (runChild is RenderBoxModel) {
-//          String mainSize = runChild.style[WIDTH];
-//          String mainMinSize = runChild.style[MIN_WIDTH];
-//          if (CSSLength.isPercentage(mainSize) ||
-//            (mainSize.isEmpty && CSSLength.isPercentage(mainMinSize))
-//          ) {
-//            runChildMainSize = 0;
-//          }
-//        }
         runMainExtent += runChildMainSize;
       }
       runChildren.forEach(iterateRunChildren);

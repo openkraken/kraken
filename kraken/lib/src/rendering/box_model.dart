@@ -398,9 +398,6 @@ class RenderBoxModel extends RenderBox with
   // id of current element
   int targetId;
 
-  // Element style;
-  CSSStyleDeclaration style;
-
   ElementManager elementManager;
 
   // When RenderBoxModel is scrolling box, contentConstraints are always equal to BoxConstraints();
@@ -887,7 +884,6 @@ class RenderBoxModel extends RenderBox with
 
     final double contentWidth = getContentWidth(this);
     final double contentHeight = getContentHeight(this);
-
     if (!isScrollingContentBox && (contentWidth != null || contentHeight != null)) {
       double minWidth;
       double maxWidth;
@@ -1241,7 +1237,6 @@ class RenderBoxModel extends RenderBox with
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty('targetId', targetId, missingIfNull: true));
-    properties.add(DiagnosticsProperty('style', style, tooltip: style.toString(), missingIfNull: true));
     properties.add(DiagnosticsProperty('contentSize', _contentSize));
     properties.add(DiagnosticsProperty('contentConstraints', _contentConstraints, missingIfNull: true));
     properties.add(DiagnosticsProperty('widthSizeType', widthSizeType, missingIfNull: true));

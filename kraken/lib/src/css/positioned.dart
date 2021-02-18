@@ -89,6 +89,8 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   CSSMargin marginRight = childRenderStyle.marginRight;
   CSSMargin marginTop = childRenderStyle.marginTop;
   CSSMargin marginBottom = childRenderStyle.marginBottom;
+  double width = childRenderStyle.width;
+  double height = childRenderStyle.height;
   CSSOffset left = childRenderStyle.left;
   CSSOffset right = childRenderStyle.right;
   CSSOffset top = childRenderStyle.top;
@@ -97,7 +99,8 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
   // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
   if ((left != null && !left.isAuto) &&
-      (right != null && !right.isAuto)) {
+    (right != null && !right.isAuto) &&
+    (child is! RenderIntrinsic || width != null)) {
     if (marginLeft.isAuto) {
       double leftValue = left.length ?? 0.0;
       double rightValue = right.length ?? 0.0;
@@ -112,7 +115,8 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   }
 
   if ((top != null && !top.isAuto) &&
-    (bottom != null && !bottom.isAuto)) {
+    (bottom != null && !bottom.isAuto) &&
+    (child is! RenderIntrinsic || height != null)) {
     if (marginTop.isAuto) {
       double topValue = top.length ?? 0.0;
       double bottomValue = bottom.length ?? 0.0;

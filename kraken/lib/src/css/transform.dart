@@ -1124,14 +1124,6 @@ mixin CSSTransformMixin on RenderStyleBase {
     renderBoxModel.markNeedsPaint();
   }
 
-//  CSSOrigin get transformOrigin => _transformOrigin;
-//  CSSOrigin _transformOrigin;
-//  set transformOrigin(CSSOrigin value) {
-//    if (_transformOrigin == value) return;
-//    _transformOrigin = value;
-//    renderBoxModel.markNeedsLayout();
-//  }
-
   void updateTransform(
     Matrix4 matrix4,
     {
@@ -1151,10 +1143,13 @@ mixin CSSTransformMixin on RenderStyleBase {
     // Upgrade this renderObject into repaintSelf mode.
     if (shouldConvertToRepaintBoundary && !renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;
+      RenderObject previousSibling;
+      if (parent is ContainerRenderObjectMixin) {
+        previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
+        parent.remove(renderBoxModel);
+      }
       RenderBoxModel repaintSelfBox = element.createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
       if (parent is ContainerRenderObjectMixin) {
-        RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
-        parent.remove(renderBoxModel);
         element.renderBoxModel = repaintSelfBox;
         element.parent.addChildRenderObject(element, after: previousSibling);
       } else if (parent is RenderObjectWithChildMixin) {
