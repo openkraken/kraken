@@ -994,7 +994,14 @@ class RenderBoxModel extends RenderBox with
     }
 
     if (childRenderStyle.right != null && !childRenderStyle.right.isAuto) {
-      maxScrollableX = math.max(maxScrollableX, -childRenderStyle.right.length + _contentSize.width);
+      if (isScrollingContentBox && (parent as RenderBoxModel).widthSizeType == BoxSizeType.specified) {
+        RenderBoxModel overflowContainerBox = parent;
+        maxScrollableX = math.max(maxScrollableX, -childRenderStyle.right.length + overflowContainerBox.renderStyle.width
+          - overflowContainerBox.renderStyle.paddingLeft - overflowContainerBox.renderStyle.paddingRight
+          - overflowContainerBox.renderStyle.borderLeft - overflowContainerBox.renderStyle.borderRight);
+      } else {
+        maxScrollableX = math.max(maxScrollableX, -childRenderStyle.right.length + _contentSize.width);
+      }
     }
 
     if (childRenderStyle.top != null && !childRenderStyle.top.isAuto) {
@@ -1011,7 +1018,6 @@ class RenderBoxModel extends RenderBox with
       }
 
     }
-
     scrollableSize = Size(maxScrollableX, maxScrollableY);
   }
 
