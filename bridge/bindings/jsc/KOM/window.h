@@ -33,8 +33,8 @@ private:
 
 class WindowInstance : public JSEventTarget::EventTargetInstance {
 public:
-  DEFINE_OBJECT_PROPERTY(Window, 11, devicePixelRatio, colorScheme, __location__, window, history, parent, scroll,
-                         scrollBy, scrollTo, scrollX, scrollY)
+  DEFINE_OBJECT_PROPERTY(Window, 8, devicePixelRatio, colorScheme, __location__, window, history, parent,  scrollX, scrollY)
+  DEFINE_STATIC_OBJECT_PROPERTY(Window, 3, scroll, scrollBy, scrollTo)
 
   WindowInstance() = delete;
   explicit WindowInstance(JSWindow *window);
@@ -53,8 +53,8 @@ public:
 private:
   JSLocation *location_;
 
-  JSFunctionHolder m_scroll{context, this, "scroll", scroll};
-  JSFunctionHolder m_scrollBy{context, this, "scrollBy", scrollBy};
+  JSFunctionHolder m_scroll{context, object, this, "scroll", scroll};
+  JSFunctionHolder m_scrollBy{context, object, this, "scrollBy", scrollBy};
 };
 
 struct NativeWindow {

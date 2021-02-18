@@ -74,6 +74,9 @@ JSAnimationPlayerElement::AnimationPlayerElementInstance::AnimationPlayerElement
 JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty(std::string &name,
                                                                                  JSValueRef *exception) {
   auto propertyMap = getAnimationPlayerPropertyMap();
+  auto staticPropertyMap = getAnimationPlayerStaticPropertyMap();
+  if (staticPropertyMap.count(name) > 0) return nullptr;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
@@ -81,9 +84,6 @@ JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty
       return m_src.makeString();
     case AnimationPlayerProperty::type:
       return m_type.makeString();
-    case AnimationPlayerProperty::play: {
-      return m_play.function();
-    }
     }
   }
 
@@ -93,6 +93,10 @@ JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty
 bool JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::string &name, JSValueRef value,
                                                                            JSValueRef *exception) {
   auto propertyMap = getAnimationPlayerPropertyMap();
+  auto staticPropertyMap = getAnimationPlayerStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
+
   auto property = propertyMap[name];
 
   if (property == AnimationPlayerProperty::src) {
@@ -126,6 +130,10 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::getPropertyNames(
   ElementInstance::getPropertyNames(accumulator);
 
   for (auto &property : getAnimationPlayerPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getAnimationPlayerStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

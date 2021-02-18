@@ -28,9 +28,10 @@ public:
 
   class InputElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(InputElement, 23, width, height, value, accept, autocomplete, autofocus, checked, disabled,
+    DEFINE_OBJECT_PROPERTY(InputElement, 21, width, height, value, accept, autocomplete, autofocus, checked, disabled,
                            min, max, minlength, maxlength, size, multiple, name, step, pattern, required, readonly,
-                           placeholder, type, focus, blur);
+                           placeholder, type);
+    DEFINE_STATIC_OBJECT_PROPERTY(InputElement, 2, focus, blur);
 
     InputElementInstance() = delete;
     ~InputElementInstance();
@@ -42,8 +43,8 @@ public:
     NativeInputElement *nativeInputElement;
 
   private:
-    JSFunctionHolder m_focus{context, this, "focus", focus};
-    JSFunctionHolder m_blur{context, this, "blur", blur};
+    JSFunctionHolder m_focus{context, object, this, "focus", focus};
+    JSFunctionHolder m_blur{context, object, this, "blur", blur};
   };
 
 protected:

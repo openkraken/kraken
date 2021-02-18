@@ -63,10 +63,9 @@ JSValueRef JSEvent::initWithNativeEvent(JSContextRef ctx, JSObjectRef function, 
 }
 
 JSValueRef JSEvent::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "__initWithNativeEvent__") {
-    return m_initWithNativeEvent.function();
-  }
-  return nullptr;
+  auto staticPropertyMap = JSEvent::getEventStaticPropertyMap();
+  if (staticPropertyMap.count(name) == 0) return nullptr;
+  return HostClass::getProperty(name, exception);
 }
 
 EventInstance::EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent)
@@ -91,6 +90,9 @@ EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType, JSValueRef
 
 JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
+  auto staticPropertyMap = JSEvent::getEventStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) == 0) return Instance::getProperty(name, exception);
 
@@ -125,20 +127,13 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
     return JSValueMakeNull(_hostClass->ctx);
   case JSEvent::EventProperty::returnValue:
     return JSValueMakeBoolean(_hostClass->ctx, !_canceledFlag);
-  case JSEvent::EventProperty::stopPropagation:
-    return prototype<JSEvent>()->m_stopPropagation.function();
   case JSEvent::EventProperty::cancelBubble:
     return JSValueMakeBoolean(_hostClass->ctx, _stopPropagationFlag);
-  case JSEvent::EventProperty::stopImmediatePropagation:
-    return prototype<JSEvent>()->m_stopImmediatePropagation.function();
-  case JSEvent::EventProperty::preventDefault:
-    return prototype<JSEvent>()->m_preventDefault.function();
   }
-
   return nullptr;
 }
 
-JSValueRef JSEvent::stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef EventInstance::stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                    size_t argumentCount, const JSValueRef *arguments,
                                                    JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
@@ -146,7 +141,7 @@ JSValueRef JSEvent::stopPropagation(JSContextRef ctx, JSObjectRef function, JSOb
   return nullptr;
 }
 
-JSValueRef JSEvent::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
+JSValueRef EventInstance::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
                                                             JSObjectRef thisObject, size_t argumentCount,
                                                             const JSValueRef *arguments, JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
@@ -155,7 +150,7 @@ JSValueRef JSEvent::stopImmediatePropagation(JSContextRef ctx, JSObjectRef funct
   return nullptr;
 }
 
-JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef EventInstance::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                   size_t argumentCount, const JSValueRef *arguments,
                                                   JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
@@ -167,6 +162,10 @@ JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObj
 
 bool EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
+  auto staticPropertyMap = JSEvent::getEventStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
@@ -187,6 +186,10 @@ EventInstance::~EventInstance() {
 }
 void EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : JSEvent::getEventPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : JSEvent::getEventStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

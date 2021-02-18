@@ -24,6 +24,12 @@ WindowInstance::~WindowInstance() {
 
 JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getWindowPropertyMap();
+  auto staticPropertyMap = getWindowStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
+
+  auto eventTargetStaticPropertyMap = JSEventTarget::getEventTargetStaticPropertyMap();
+  if (eventTargetStaticPropertyMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -60,11 +66,6 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
       JSStringRelease(key);
       return history;
     }
-    case WindowProperty::scrollTo:
-    case WindowProperty::scroll:
-      return m_scroll.function();
-    case WindowProperty::scrollBy:
-      return m_scrollBy.function();
     case WindowProperty::scrollX: {
       getDartMethod()->flushUICommand();
       auto document = DocumentInstance::instance(_hostClass->context);
@@ -93,6 +94,10 @@ void WindowInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) 
   EventTargetInstance::getPropertyNames(accumulator);
 
   for (auto &property : getWindowPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getWindowStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

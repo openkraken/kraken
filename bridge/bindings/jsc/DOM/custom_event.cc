@@ -64,6 +64,9 @@ CustomEventInstance::CustomEventInstance(JSCustomEvent *jsCustomEvent, NativeCus
 
 JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
+  auto staticPropertyMap = JSCustomEvent::getCustomEventStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
   auto property = propertyMap[name];
@@ -71,8 +74,6 @@ JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *excep
   switch (property) {
   case JSCustomEvent::CustomEventProperty::detail:
     return m_detail.value();
-  case JSCustomEvent::CustomEventProperty::initCustomEvent:
-    return m_initCustomEvent.function();
   }
 
   return nullptr;
@@ -80,6 +81,10 @@ JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *excep
 
 bool CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
+  auto staticPropertyMap = JSCustomEvent::getCustomEventStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
@@ -131,6 +136,10 @@ void CustomEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumula
   EventInstance::getPropertyNames(accumulator);
 
   for (auto &property : JSCustomEvent::getCustomEventPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : JSCustomEvent::getCustomEventStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

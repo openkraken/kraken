@@ -170,8 +170,9 @@ public:
 
 class JSPerformance : public HostObject {
 public:
-  DEFINE_OBJECT_PROPERTY(Performance, 11, now, timeOrigin, toJSON, clearMarks, clearMeasures, getEntries,
-                         getEntriesByName, getEntriesByType, mark, measure, __kraken_navigation_summary__)
+  DEFINE_OBJECT_PROPERTY(Performance, 1, timeOrigin)
+  DEFINE_STATIC_OBJECT_PROPERTY(Performance, 10, now, toJSON, clearMarks, clearMeasures, getEntries,
+                                getEntriesByName, getEntriesByType, mark, measure, __kraken_navigation_summary__)
 
   static JSValueRef now(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                         const JSValueRef arguments[], JSValueRef *exception);
@@ -214,18 +215,18 @@ public:
 
 private:
   friend JSPerformanceEntry;
-  JSFunctionHolder m_now{context, this,"now", now};
-  JSFunctionHolder m_toJSON{context, this, "toJSON", toJSON};
-  JSFunctionHolder m_clearMarks{context, this, "clearMarks", clearMarks};
-  JSFunctionHolder m_clearMeasures{context, this, "clearMeasures", clearMeasures};
-  JSFunctionHolder m_getEntries{context, this, "getEntries", getEntries};
-  JSFunctionHolder m_getEntriesByName{context, this, "getEntriesByName", getEntriesByName};
-  JSFunctionHolder m_getEntriesByType{context, this, "getEntriesByType", getEntriesByType};
-  JSFunctionHolder m_mark{context, this, "mark", mark};
-  JSFunctionHolder m_measure{context, this, "measure", measure};
+  JSFunctionHolder m_now{context, jsObject, this,"now", now};
+  JSFunctionHolder m_toJSON{context, jsObject, this, "toJSON", toJSON};
+  JSFunctionHolder m_clearMarks{context, jsObject, this, "clearMarks", clearMarks};
+  JSFunctionHolder m_clearMeasures{context, jsObject, this, "clearMeasures", clearMeasures};
+  JSFunctionHolder m_getEntries{context, jsObject, this, "getEntries", getEntries};
+  JSFunctionHolder m_getEntriesByName{context, jsObject, this, "getEntriesByName", getEntriesByName};
+  JSFunctionHolder m_getEntriesByType{context, jsObject, this, "getEntriesByType", getEntriesByType};
+  JSFunctionHolder m_mark{context, jsObject, this, "mark", mark};
+  JSFunctionHolder m_measure{context, jsObject, this, "measure", measure};
 
 #if ENABLE_PROFILE
-  JSFunctionHolder m_summary{context, "__navigation_summary__", __kraken_navigation_summary__};
+  JSFunctionHolder m_summary{context, jsObject, nullptr, "__navigation_summary__", __kraken_navigation_summary__};
   void measureSummary();
 #endif
   void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark,

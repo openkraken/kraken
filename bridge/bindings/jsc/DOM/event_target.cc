@@ -23,12 +23,7 @@ std::unordered_map<JSContext *, JSEventTarget *> JSEventTarget::instanceMap{};
 
 JSEventTarget *JSEventTarget::instance(JSContext *context) {
   if (instanceMap.count(context) == 0) {
-    const JSStaticFunction staticFunction[]{{"addEventListener", addEventListener, kJSPropertyAttributeReadOnly},
-                                            {"removeEventListener", removeEventListener, kJSPropertyAttributeReadOnly},
-                                            {"dispatchEvent", dispatchEvent, kJSPropertyAttributeReadOnly},
-                                            {"__clearListeners__", clearListeners, kJSPropertyAttributeReadOnly},
-                                            {nullptr}};
-    instanceMap[context] = new JSEventTarget(context, staticFunction, nullptr);
+    instanceMap[context] = new JSEventTarget(context, nullptr, nullptr);
   }
   return instanceMap[context];
 }
@@ -100,7 +95,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   }, nativeEventTarget);
 }
 
-JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount < 2) {
     throwJSError(ctx, "Failed to addEventListener: eventName and function parameter are required.", exception);
@@ -172,14 +167,6 @@ JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *ex
     auto property = propertyMap[name];
 
     switch (property) {
-    case EventTargetProperty::addEventListener:
-      return m_addEventListener.function();
-    case EventTargetProperty::removeEventListener:
-      return m_removeEventListener.function();
-    case EventTargetProperty::dispatchEvent:
-      return m_dispatchEvent.function();
-    case EventTargetProperty::__clearListeners__:
-      return m_clearListeners.function();
     default:
       break;
     }
@@ -188,7 +175,7 @@ JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *ex
   return HostClass::prototypeGetProperty(name, exception);
 }
 
-JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEventTarget::EventTargetInstance::removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                               size_t argumentCount, const JSValueRef *arguments,
                                               JSValueRef *exception) {
   if (argumentCount != 2) {
@@ -243,7 +230,7 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
   return nullptr;
 }
 
-JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                         size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     throwJSError(ctx, "Failed to dispatchEvent: first arguments should be an event object", exception);
@@ -293,7 +280,7 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
   return event->_canceledFlag;
 }
 
-JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEventTarget::EventTargetInstance::clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                          size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
@@ -310,22 +297,14 @@ JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function,
 
 JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getEventTargetPropertyMap();
+  auto staticPropertyMap = getEventTargetStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
-    case EventTargetProperty::addEventListener: {
-      return prototype<JSEventTarget>()->m_addEventListener.function();
-    }
-    case EventTargetProperty::removeEventListener: {
-      return prototype<JSEventTarget>()->m_removeEventListener.function();
-    }
-    case EventTargetProperty::dispatchEvent: {
-      return prototype<JSEventTarget>()->m_dispatchEvent.function();
-    }
-    case EventTargetProperty::__clearListeners__: {
-      return prototype<JSEventTarget>()->m_clearListeners.function();
-    }
     case EventTargetProperty::eventTargetId: {
       return JSValueMakeNumber(_hostClass->ctx, eventTargetId);
     }
@@ -338,6 +317,10 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
 }
 
 bool JSEventTarget::EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  auto staticPropertyMap = getEventTargetStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
+
   if (name.substr(0, 2) == "on") {
     setPropertyHandler(name, value, exception);
     return true;
@@ -381,6 +364,10 @@ void JSEventTarget::EventTargetInstance::setPropertyHandler(std::string &name, J
 
 void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &propertyName : getEventTargetPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
+  }
+
+  for (auto &propertyName : getEventTargetStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, propertyName);
   }
 }

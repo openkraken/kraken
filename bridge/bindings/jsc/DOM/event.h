@@ -56,22 +56,14 @@ class EventInstance;
 
 class JSEvent : public HostClass {
 public:
-  DEFINE_OBJECT_PROPERTY(Event, 13, type, bubbles, cancelable, timestamp, defaultPrevented, target, srcElement, currentTarget, returnValue, stopPropagation, cancelBubble, stopImmediatePropagation, preventDefault)
+  DEFINE_OBJECT_PROPERTY(Event, 10, type, bubbles, cancelable, timestamp, defaultPrevented, target, srcElement, currentTarget, returnValue, cancelBubble)
+  DEFINE_STATIC_OBJECT_PROPERTY(Event, 4, __initWithNativeEvent__, stopImmediatePropagation, stopPropagation, preventDefault)
 
   static std::unordered_map<JSContext *, JSEvent *> instanceMap;
   OBJECT_INSTANCE(JSEvent)
   // Create an Event Object from an nativeEvent address which allocated by dart side.
   static JSValueRef initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
 
   static EventInstance* buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent, bool isCustomEvent);
 
@@ -87,11 +79,8 @@ protected:
   ~JSEvent() override;
 
 private:
+  JSFunctionHolder m_initWithNativeEvent{context, classObject, this, "initWithNativeEvent", initWithNativeEvent};
   friend EventInstance;
-  JSFunctionHolder m_initWithNativeEvent{context, this, "initWithNativeEvent", initWithNativeEvent};
-  JSFunctionHolder m_stopImmediatePropagation{context, this, "stopImmediatePropagation", stopImmediatePropagation};
-  JSFunctionHolder m_stopPropagation{context, this, "stopPropagation", stopPropagation};
-  JSFunctionHolder m_preventDefault{context, this, "preventDefault", preventDefault};
 };
 
 class EventInstance : public HostClass::Instance {
@@ -113,7 +102,19 @@ public:
   bool _inPassiveListenerFlag{false};
 
 private:
+  static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+
   friend JSEvent;
+  JSFunctionHolder m_stopImmediatePropagation{context, object, this, "stopImmediatePropagation", stopImmediatePropagation};
+  JSFunctionHolder m_stopPropagation{context, object, this, "stopPropagation", stopPropagation};
+  JSFunctionHolder m_preventDefault{context, object, this, "preventDefault", preventDefault};
 };
 
 struct NativeEvent {

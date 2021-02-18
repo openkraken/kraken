@@ -30,24 +30,13 @@ class JSEventTarget : public HostClass {
 public:
   static std::unordered_map<JSContext *, JSEventTarget *> instanceMap;
   static JSEventTarget *instance(JSContext *context);
-  DEFINE_OBJECT_PROPERTY(EventTarget, 5, addEventListener, removeEventListener, dispatchEvent, __clearListeners__,
-                         eventTargetId)
+  DEFINE_OBJECT_PROPERTY(EventTarget, 1, eventTargetId)
+  DEFINE_STATIC_OBJECT_PROPERTY(EventTarget, 4, addEventListener, removeEventListener, dispatchEvent, __clearListeners__)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
   JSValueRef prototypeGetProperty(std::string &name, JSValueRef *exception) override;
-
-  static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
 
   class EventTargetInstance : public Instance {
   public:
@@ -70,6 +59,20 @@ public:
     // TODO: use std::u16string for better performance.
     std::unordered_map<std::string, std::deque<JSObjectRef>> _eventHandlers;
     bool internalDispatchEvent(EventInstance *eventInstance);
+
+    static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                       size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                          size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                    const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                     const JSValueRef arguments[], JSValueRef *exception);
+
+    JSFunctionHolder m_removeEventListener{context, object, this, "removeEventListener", removeEventListener};
+    JSFunctionHolder m_dispatchEvent{context, object, this, "dispatchEvent", dispatchEvent};
+    JSFunctionHolder m_clearListeners{context, object, this, "clearListeners", clearListeners};
+    JSFunctionHolder m_addEventListener{context, object, this, "addEventListener", addEventListener};
   };
 
 protected:
@@ -80,10 +83,6 @@ protected:
   ~JSEventTarget();
 
 private:
-  JSFunctionHolder m_removeEventListener{context, this, "removeEventListener", removeEventListener};
-  JSFunctionHolder m_dispatchEvent{context, this, "dispatchEvent", dispatchEvent};
-  JSFunctionHolder m_clearListeners{context, this, "clearListeners", clearListeners};
-  JSFunctionHolder m_addEventListener{context, this, "addEventListener", addEventListener};
   std::vector<std::string> m_jsOnlyEvents;
 };
 

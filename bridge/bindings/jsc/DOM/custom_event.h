@@ -28,7 +28,8 @@ struct NativeCustomEvent {
 
 class JSCustomEvent : public JSEvent {
 public:
-  DEFINE_OBJECT_PROPERTY(CustomEvent, 2, detail, initCustomEvent)
+  DEFINE_OBJECT_PROPERTY(CustomEvent, 1, detail)
+  DEFINE_STATIC_OBJECT_PROPERTY(CustomEvent, 1, initCustomEvent)
 
   static std::unordered_map<JSContext *, JSCustomEvent *> instanceMap;
   OBJECT_INSTANCE(JSCustomEvent)
@@ -62,7 +63,7 @@ public:
 private:
   friend JSCustomEvent;
   JSValueHolder m_detail{context, nullptr};
-  JSFunctionHolder m_initCustomEvent{context, this, "initCustomEvent", initCustomEvent};
+  JSFunctionHolder m_initCustomEvent{context, object, this, "initCustomEvent", initCustomEvent};
   NativeCustomEvent* nativeCustomEvent;
 };
 

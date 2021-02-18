@@ -427,27 +427,14 @@ JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception
     return JSEventTarget::prototypeGetProperty(name, exception);
   }
 
-  auto property = propertyMap[name];
-  switch (property) {
-  case NodeProperty::appendChild:
-    return m_appendChild.function();
-  case NodeProperty::remove:
-    return m_remove.function();
-  case NodeProperty::removeChild:
-    return m_removeChild.function();
-  case NodeProperty::insertBefore:
-    return m_insertBefore.function();
-  case NodeProperty::replaceChild:
-    return m_replaceChild.function();
-  default:
-    break;
-  }
-
   return nullptr;
 }
 
 JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getNodePropertyMap();
+  auto staticPropertyMap = getNodeStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) == 0) {
     return JSEventTarget::EventTargetInstance::getProperty(name, exception);
@@ -478,21 +465,6 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
     auto instance = nextSibling();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
-  case NodeProperty::appendChild: {
-    return prototype<JSNode>()->m_appendChild.function();
-  }
-  case NodeProperty::remove: {
-    return prototype<JSNode>()->m_remove.function();
-  }
-  case NodeProperty::removeChild: {
-    return prototype<JSNode>()->m_removeChild.function();
-  }
-  case NodeProperty::insertBefore: {
-    return prototype<JSNode>()->m_insertBefore.function();
-  }
-  case NodeProperty::replaceChild: {
-    return prototype<JSNode>()->m_replaceChild.function();
-  }
   case NodeProperty::childNodes: {
     JSValueRef arguments[childNodes.size()];
 
@@ -516,6 +488,9 @@ JSValueRef JSNode::NodeInstance::getProperty(std::string &name, JSValueRef *exce
 
 bool JSNode::NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getNodePropertyMap();
+  auto staticPropertyMap = getNodeStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -535,6 +510,10 @@ void JSNode::NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumul
   EventTargetInstance::getPropertyNames(accumulator);
 
   for (auto &property : getNodePropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getNodeStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

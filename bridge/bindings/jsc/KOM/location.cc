@@ -17,9 +17,7 @@ void updateLocation(std::string url = "") {
 }
 
 JSValueRef JSLocation::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "reload") {
-    return m_reload.function();
-  } else if (name == "href") {
+  if (name == "href") {
     JSStringRef hrefRef = JSStringCreateWithUTF8CString(href.c_str());
     return JSValueMakeString(context->context(), hrefRef);
   }

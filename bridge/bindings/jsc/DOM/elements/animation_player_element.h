@@ -25,7 +25,8 @@ public:
 
   class AnimationPlayerElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(AnimationPlayer, 3, src, type, play)
+    DEFINE_OBJECT_PROPERTY(AnimationPlayer, 2, src, type)
+    DEFINE_STATIC_OBJECT_PROPERTY(AnimationPlayer, 1, play)
 
     AnimationPlayerElementInstance() = delete;
     ~AnimationPlayerElementInstance();
@@ -39,7 +40,7 @@ public:
   private:
     JSStringHolder m_src{context, ""};
     JSStringHolder m_type{context, ""};
-    JSFunctionHolder m_play{context, this, "play", play};
+    JSFunctionHolder m_play{context, object, this, "play", play};
   };
 protected:
   JSAnimationPlayerElement() = delete;

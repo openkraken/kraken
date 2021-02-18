@@ -39,17 +39,9 @@ class JSContext;
 class JSFunctionHolder {
 public:
   JSFunctionHolder() = delete;
-  explicit JSFunctionHolder(JSContext *context, void *data, std::string name, JSObjectCallAsFunctionCallback callback);
-  ~JSFunctionHolder();
-
-  JSObjectRef function();
-
+  explicit JSFunctionHolder(JSContext *context, JSObjectRef root, void *data, const std::string &name,
+                            JSObjectCallAsFunctionCallback callback);
 private:
-  JSObjectRef m_function{nullptr};
-  JSContext *context{nullptr};
-  void *m_data{nullptr};
-  std::string m_name;
-  JSObjectCallAsFunctionCallback m_callback{nullptr};
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
 };
 
@@ -143,14 +135,15 @@ void buildUICommandArgs(std::string &key, NativeString &args_01);
 void buildUICommandArgs(std::string &key, JSStringRef value, NativeString &args_01, NativeString &args_02);
 void buildUICommandArgs(std::string &key, std::string &value, NativeString &args_01, NativeString &args_02);
 
-void throwJSError(JSContextRef ctx, const char* msg, JSValueRef *exception);
+void throwJSError(JSContextRef ctx, const char *msg, JSValueRef *exception);
 
 JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback,
                                 JSValueRef *exception);
 
 std::string JSStringToStdString(JSStringRef jsString);
 
-inline JSValueRef getObjectPropertyValue(JSContextRef ctx, const std::string& key, JSObjectRef object, JSValueRef *exception) {
+inline JSValueRef getObjectPropertyValue(JSContextRef ctx, const std::string &key, JSObjectRef object,
+                                         JSValueRef *exception) {
   JSStringRef keyRef = JSStringCreateWithUTF8CString(key.c_str());
   JSValueRef result = JSObjectGetProperty(ctx, object, keyRef, exception);
   JSStringRelease(keyRef);

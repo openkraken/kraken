@@ -23,7 +23,8 @@ public:
   OBJECT_INSTANCE(JSMediaElement)
   class MediaElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(MediaElement, 7, src, autoPlay, loop, play, pause, fastSeek, currentSrc)
+    DEFINE_OBJECT_PROPERTY(MediaElement, 4, src, autoPlay, loop, currentSrc)
+    DEFINE_STATIC_OBJECT_PROPERTY(MediaElement, 3, play, pause, fastSeek);
 
     static JSValueRef play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                            const JSValueRef arguments[], JSValueRef *exception);
@@ -47,9 +48,9 @@ public:
     JSStringRef _src{JSStringCreateWithUTF8CString("")};
     bool _autoPlay{false};
     bool _loop{false};
-    JSFunctionHolder m_play{context, this, "play", play};
-    JSFunctionHolder m_pause{context, this, "pause", pause};
-    JSFunctionHolder m_fastSeek{context, this, "fastSeek", fastSeek};
+    JSFunctionHolder m_play{context, object, this, "play", play};
+    JSFunctionHolder m_pause{context, object, this, "pause", pause};
+    JSFunctionHolder m_fastSeek{context, object, this, "fastSeek", fastSeek};
   };
 
 protected:

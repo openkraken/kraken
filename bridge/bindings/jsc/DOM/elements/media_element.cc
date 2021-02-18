@@ -73,6 +73,10 @@ JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSOb
 
 JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getMediaElementPropertyMap();
+  auto staticPropertyMap = getMediaElementStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch(property) {
@@ -84,12 +88,6 @@ JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, 
       return JSValueMakeBoolean(_hostClass->ctx, _autoPlay);
     case MediaElementProperty::loop:
       return JSValueMakeBoolean(_hostClass->ctx, _loop);
-    case MediaElementProperty::play:
-      return m_play.function();
-    case MediaElementProperty::pause:
-      return m_pause.function();
-    case MediaElementProperty::fastSeek:
-      return m_fastSeek.function();
     }
   }
 
@@ -98,6 +96,10 @@ JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, 
 
 bool JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getMediaElementPropertyMap();
+  auto staticPropertyMap = getMediaElementStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
+
   auto property = propertyMap[name];
 
   if (property == MediaElementProperty::src) {

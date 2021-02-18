@@ -233,27 +233,11 @@ NativeString *stringRefToNativeString(JSStringRef string) {
   return tmp.clone();
 }
 
-JSFunctionHolder::JSFunctionHolder(JSContext *context, void *data, std::string name,
-                                   JSObjectCallAsFunctionCallback callback)
-  : context(context), m_data(data), m_callback(callback), m_name(std::move(name)) {}
-
-JSFunctionHolder::~JSFunctionHolder() {
-  if (context->isValid() && m_function != nullptr) {
-    JSValueUnprotect(context->context(), m_function);
-  }
-}
-
-JSObjectRef JSFunctionHolder::function() {
-  if (m_function == nullptr) {
-    // If context is nullptr, create normal js function without private data
-    if (m_data == nullptr) {
-      m_function =
-        JSObjectMakeFunctionWithCallback(context->context(), JSStringCreateWithUTF8CString(m_name.c_str()), m_callback);
-    } else {
-      m_function = makeObjectFunctionWithPrivateData(context, m_data, m_name.c_str(), m_callback);
-    }
-  }
-  return m_function;
+JSFunctionHolder::JSFunctionHolder(JSContext *context, JSObjectRef root, void *data, const std::string& name,
+                                   JSObjectCallAsFunctionCallback callback) {
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+  JSObjectRef function = makeObjectFunctionWithPrivateData(context, data, name.c_str(), callback);
+  JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), function, kJSPropertyAttributeReadOnly, nullptr);
 }
 
 JSStringHolder::JSStringHolder(JSContext *context, const std::string &string)

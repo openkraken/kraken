@@ -36,7 +36,8 @@ public:
 
   class CanvasElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(CanvasElement, 3, width, height, getContext)
+    DEFINE_OBJECT_PROPERTY(CanvasElement, 2, width, height)
+    DEFINE_STATIC_OBJECT_PROPERTY(CanvasElement, 1, getContext)
 
     static JSValueRef getContext(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                  const JSValueRef arguments[], JSValueRef *exception);
@@ -55,7 +56,7 @@ public:
     double _width{300};
     double _height{150};
 
-    JSFunctionHolder m_getContext{context, this, "getContext", getContext};
+    JSFunctionHolder m_getContext{context, object, this, "getContext", getContext};
   };
 
 private:
@@ -101,8 +102,9 @@ public:
 
   class CanvasRenderingContext2DInstance : public Instance {
   public:
-    DEFINE_OBJECT_PROPERTY(CanvasRenderingContext2D, 10, font, fillStyle, strokeStyle, fillRect, clearRect, strokeRect,
-                           fillText, strokeText, save, restore)
+    DEFINE_OBJECT_PROPERTY(CanvasRenderingContext2D, 3, font, fillStyle, strokeStyle)
+    DEFINE_STATIC_OBJECT_PROPERTY(CanvasRenderingContext2D, 7, fillRect, clearRect, strokeRect,
+                                  fillText, strokeText, save, restore)
 
     static JSValueRef fillRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef arguments[], JSValueRef *exception);
@@ -140,13 +142,13 @@ public:
     JSStringHolder m_fillStyle{context, ""};
     JSStringHolder m_strokeStyle{context, ""};
 
-    JSFunctionHolder m_fillRect{context, this, "fillRect", fillRect};
-    JSFunctionHolder m_clearRect{context, this, "clearRect", clearRect};
-    JSFunctionHolder m_strokeRect{context, this, "strokeRect", strokeRect};
-    JSFunctionHolder m_fillText{context, this, "fillText", fillText};
-    JSFunctionHolder m_strokeText{context, this, "strokeText", strokeText};
-    JSFunctionHolder m_save{context, this, "save", save};
-    JSFunctionHolder m_restore{context, this, "restore", restore};
+    JSFunctionHolder m_fillRect{context, object, this, "fillRect", fillRect};
+    JSFunctionHolder m_clearRect{context, object, this, "clearRect", clearRect};
+    JSFunctionHolder m_strokeRect{context, object, this, "strokeRect", strokeRect};
+    JSFunctionHolder m_fillText{context, object, this, "fillText", fillText};
+    JSFunctionHolder m_strokeText{context, object, this, "strokeText", strokeText};
+    JSFunctionHolder m_save{context, object, this, "save", save};
+    JSFunctionHolder m_restore{context, object, this, "restore", restore};
   };
 
 protected:

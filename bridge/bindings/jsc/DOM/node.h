@@ -34,9 +34,9 @@ class JSNode : public JSEventTarget {
 public:
   static std::unordered_map<JSContext *, JSNode *> instanceMap;
   static JSNode *instance(JSContext *context);
-  DEFINE_OBJECT_PROPERTY(Node, 14, isConnected, firstChild, lastChild, parentNode, childNodes, previousSibling,
-                         nextSibling, appendChild, remove, removeChild, insertBefore, replaceChild, nodeType,
-                         textContent)
+  DEFINE_OBJECT_PROPERTY(Node, 9, isConnected, firstChild, lastChild, parentNode, childNodes, previousSibling,
+                         nextSibling, nodeType, textContent)
+  DEFINE_STATIC_OBJECT_PROPERTY(Node, 5, appendChild, remove, removeChild, insertBefore, replaceChild)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -104,6 +104,12 @@ public:
 
   private:
     void ensureDetached(JSNode::NodeInstance *node);
+
+    JSFunctionHolder m_removeChild{context, object, this, "removeChild", removeChild};
+    JSFunctionHolder m_appendChild{context, object, this, "appendChild", appendChild};
+    JSFunctionHolder m_remove{context, object, this, "remove", remove};
+    JSFunctionHolder m_insertBefore{context, object, this, "insertBefore", insertBefore};
+    JSFunctionHolder m_replaceChild{context, object, this, "replaceChild", replaceChild};
   };
 
 protected:
@@ -113,11 +119,6 @@ protected:
   ~JSNode();
 
 private:
-  JSFunctionHolder m_removeChild{context, this, "removeChild", removeChild};
-  JSFunctionHolder m_appendChild{context, this, "appendChild", appendChild};
-  JSFunctionHolder m_remove{context, this, "remove", remove};
-  JSFunctionHolder m_insertBefore{context, this, "insertBefore", insertBefore};
-  JSFunctionHolder m_replaceChild{context, this, "replaceChild", replaceChild};
 };
 
 struct NativeNode {

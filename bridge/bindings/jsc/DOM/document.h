@@ -54,8 +54,9 @@ private:
 
 class DocumentInstance : public JSNode::NodeInstance {
 public:
-  DEFINE_OBJECT_PROPERTY(Document, 10, createElement, body, createTextNode, createComment, nodeName, getElementById,
-                         documentElement, getElementsByTagName, all, cookie)
+  DEFINE_OBJECT_PROPERTY(Document, 4, nodeName,
+                         documentElement, all, cookie)
+  DEFINE_STATIC_OBJECT_PROPERTY(Document, 6, body, createElement, createTextNode, createComment, getElementById, getElementsByTagName)
 
   static DocumentInstance *instance(JSContext *context);
 
@@ -90,11 +91,11 @@ public:
   ElementInstance *body;
 
 private:
-  JSFunctionHolder m_createElement{context, this, "createElement", createElement};
-  JSFunctionHolder m_createTextNode{context, this, "createTextNode", createTextNode};
-  JSFunctionHolder m_createComment{context, this, "createComment", createComment};
-  JSFunctionHolder m_getElementById{context, this, "getElementById", getElementById};
-  JSFunctionHolder m_getElementsByTagName{context, this, "getElementsByTagName", getElementsByTagName};
+  JSFunctionHolder m_createElement{context, object, this, "createElement", createElement};
+  JSFunctionHolder m_createTextNode{context, object, this, "createTextNode", createTextNode};
+  JSFunctionHolder m_createComment{context, object, this, "createComment", createComment};
+  JSFunctionHolder m_getElementById{context, object, this, "getElementById", getElementById};
+  JSFunctionHolder m_getElementsByTagName{context, object, this, "getElementsByTagName", getElementsByTagName};
   DocumentCookie m_cookie;
 };
 

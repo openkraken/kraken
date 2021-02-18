@@ -34,7 +34,7 @@ public:
 
   class StyleDeclarationInstance : public Instance {
   public:
-    DEFINE_OBJECT_PROPERTY(CSSStyleDeclaration, 3, setProperty, removeProperty, getPropertyValue)
+    DEFINE_STATIC_OBJECT_PROPERTY(CSSStyleDeclaration, 3, setProperty, removeProperty, getPropertyValue)
 
     StyleDeclarationInstance() = delete;
     StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration,
@@ -59,9 +59,9 @@ public:
     std::unordered_map<std::string, JSStringRef> properties;
     const JSEventTarget::EventTargetInstance *ownerEventTarget;
 
-    JSFunctionHolder m_setProperty{context, this, "setProperty", setProperty};
-    JSFunctionHolder m_getPropertyValue{context, this, "getPropertyValue", getPropertyValue};
-    JSFunctionHolder m_removeProperty{context, this, "removeProperty", removeProperty};
+    JSFunctionHolder m_setProperty{context, object, this, "setProperty", setProperty};
+    JSFunctionHolder m_getPropertyValue{context, object, this, "getPropertyValue", getPropertyValue};
+    JSFunctionHolder m_removeProperty{context, object, this, "removeProperty", removeProperty};
   };
 
 protected:

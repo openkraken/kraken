@@ -93,40 +93,19 @@ JSPerformanceMeasure::JSPerformanceMeasure(JSContext *context, NativePerformance
 
 JSValueRef JSPerformance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getPerformancePropertyMap();
+  auto staticPropertyMap = getPerformanceStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
-    case PerformanceProperty::now: {
-      return m_now.function();
-    }
     case PerformanceProperty::timeOrigin: {
       double time =
         std::chrono::duration_cast<std::chrono::milliseconds>(context->timeOrigin.time_since_epoch()).count();
       return JSValueMakeNumber(ctx, time);
     }
-    case PerformanceProperty::toJSON: {
-      return m_toJSON.function();
-    }
-    case PerformanceProperty::clearMarks:
-      return m_clearMarks.function();
-    case PerformanceProperty::clearMeasures:
-      return m_clearMeasures.function();
-    case PerformanceProperty::getEntries:
-      return m_getEntries.function();
-    case PerformanceProperty::getEntriesByName:
-      return m_getEntriesByName.function();
-    case PerformanceProperty::getEntriesByType:
-      return m_getEntriesByType.function();
-    case PerformanceProperty::mark:
-      return m_mark.function();
-    case PerformanceProperty::measure:
-      return m_measure.function();
-#if ENABLE_PROFILE
-    case PerformanceProperty::__kraken_navigation_summary__:
-      return m_summary.function();
-#endif
     default:
       break;
     }
@@ -145,6 +124,10 @@ JSPerformance::~JSPerformance() {}
 
 void JSPerformance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : getPerformancePropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getPerformanceStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
