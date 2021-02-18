@@ -96,7 +96,7 @@ JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getMediaElementPropertyMap();
   auto property = propertyMap[name];
 
@@ -110,9 +110,10 @@ void JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValu
     buildUICommandArgs(name, _src, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
+    return true;
   }
 
-  ElementInstance::setProperty(name, value, exception);
+  return ElementInstance::setProperty(name, value, exception);
 }
 
 void JSMediaElement::MediaElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

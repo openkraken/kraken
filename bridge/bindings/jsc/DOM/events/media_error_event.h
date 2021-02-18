@@ -41,7 +41,7 @@ public:
   explicit MediaErrorEventInstance(JSMediaErrorEvent *jSMediaErrorEvent, NativeMediaErrorEvent *nativeMediaErrorEvent);
   explicit MediaErrorEventInstance(JSMediaErrorEvent *jsMediaErrorEvent, JSStringRef data);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-  void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+  bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   ~MediaErrorEventInstance() override;
 

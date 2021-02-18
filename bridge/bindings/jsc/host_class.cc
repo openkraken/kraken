@@ -136,8 +136,8 @@ bool HostClass::proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, J
                                          JSValueRef value, JSValueRef *exception) {
   auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
   std::string &&name = JSStringToStdString(propertyName);
-  hostClassInstance->setProperty(name, value, exception);
-  return hostClassInstance->context->handleException(*exception);
+  bool handledBySelf = hostClassInstance->setProperty(name, value, exception);
+  return hostClassInstance->context->handleException(*exception) || handledBySelf;
 }
 
 void HostClass::proxyInstanceGetPropertyNames(JSContextRef ctx, JSObjectRef object,
@@ -207,27 +207,13 @@ HostClass::Instance::Instance(HostClass *hostClass)
 }
 
 JSValueRef HostClass::Instance::getProperty(std::string &name, JSValueRef *exception) {
-  if (m_propertyMap.count(name) > 0) {
-    return m_propertyMap[name];
-  }
   return nullptr;
 }
 
-void HostClass::Instance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  if (m_propertyMap.count(name) > 0) {
-    JSValueUnprotect(ctx, m_propertyMap[name]);
-  }
-
-  JSValueProtect(ctx, value);
-  m_propertyMap[name] = value;
+bool HostClass::Instance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  return false;
 }
 
 void HostClass::Instance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
-HostClass::Instance::~Instance() {
-  if (context->isValid()) {
-    for (auto &prop : m_propertyMap) {
-      JSValueUnprotect(ctx, prop.second);
-    }
-  }
-}
+HostClass::Instance::~Instance() {}
 } // namespace kraken::binding::jsc

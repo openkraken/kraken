@@ -63,7 +63,7 @@ JSValueRef MediaErrorEventInstance::getProperty(std::string &name, JSValueRef *e
   return nullptr;
 }
 
-void MediaErrorEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool MediaErrorEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSMediaErrorEvent::getMediaErrorPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -79,8 +79,9 @@ void MediaErrorEventInstance::setProperty(std::string &name, JSValueRef value, J
       break;
     }
     }
+    return true;
   } else {
-    EventInstance::setProperty(name, value, exception);
+    return EventInstance::setProperty(name, value, exception);
   }
 }
 

@@ -59,7 +59,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getCanvasElementPropertyMap();
 
   if (propertyMap.count(name) > 0) {
@@ -96,8 +96,9 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     default:
       break;
     }
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 
@@ -194,7 +195,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
   return Instance::getProperty(name, exception);
 }
 
-void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std::string &name, JSValueRef value,
+bool CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std::string &name, JSValueRef value,
                                                                              JSValueRef *exception) {
   auto propertyMap = getCanvasRenderingContext2DPropertyMap();
   if (propertyMap.count(name) > 0) {
@@ -242,8 +243,9 @@ void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
     default:
       break;
     }
+    return true;
   } else {
-    Instance::setProperty(name, value, exception);
+    return Instance::setProperty(name, value, exception);
   }
 }
 

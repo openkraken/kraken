@@ -307,7 +307,7 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
   return JSObjectMakeArray(ctx, elements.size(), elementArguments, exception);
 }
 
-void DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getDocumentPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -317,8 +317,9 @@ void DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueR
       std::string cookie = JSStringToStdString(str);
       m_cookie.setCookie(cookie);
     }
+    return true;
   } else {
-    NodeInstance::setProperty(name, value, exception);
+    return NodeInstance::setProperty(name, value, exception);
   }
 }
 

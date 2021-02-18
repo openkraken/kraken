@@ -93,7 +93,7 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSInputElement::InputElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSInputElement::InputElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getInputElementPropertyMap();
   if (propertyMap.count(name) > 0) {
     JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
@@ -103,8 +103,9 @@ void JSInputElement::InputElementInstance::setProperty(std::string &name, JSValu
     buildUICommandArgs(name, string, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 

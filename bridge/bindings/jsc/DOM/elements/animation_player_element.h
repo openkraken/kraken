@@ -31,7 +31,7 @@ public:
     ~AnimationPlayerElementInstance();
     explicit AnimationPlayerElementInstance(JSAnimationPlayerElement *jsAnchorElement);
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+    bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
     NativeAnimationPlayerElement *nativeAnimationPlayerElement;

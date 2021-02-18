@@ -111,14 +111,14 @@ JSValueRef CSSStyleDeclaration::StyleDeclarationInstance::getProperty(std::strin
   return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(""));
 }
 
-void CSSStyleDeclaration::StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value,
+bool CSSStyleDeclaration::StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value,
                                                                 JSValueRef *exception) {
-  internalSetProperty(name, value, exception);
+  return internalSetProperty(name, value, exception);
 }
 
-void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value,
+bool CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value,
                                                                         JSValueRef *exception) {
-  if (name == "setProperty" || name == "removeProperty" || name == "getPropertyValue") return;
+  if (name == "setProperty" || name == "removeProperty" || name == "getPropertyValue") return true;
 
   JSStringRef valueStr;
   if (JSValueIsNull(_hostClass->ctx, value)) {
@@ -138,6 +138,8 @@ void CSSStyleDeclaration::StyleDeclarationInstance::internalSetProperty(std::str
   buildUICommandArgs(name, valueStr, args_01, args_02);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
+
+  return true;
 }
 
 void CSSStyleDeclaration::StyleDeclarationInstance::internalRemoveProperty(JSStringRef nameRef, JSValueRef *exception) {

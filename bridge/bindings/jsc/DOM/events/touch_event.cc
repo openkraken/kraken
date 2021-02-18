@@ -75,12 +75,12 @@ JSValueRef TouchEventInstance::getProperty(std::string &name, JSValueRef *except
   return nullptr;
 }
 
-void TouchEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool TouchEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSTouchEvent::getTouchEventPropertyMap();
   if (propertyMap.count(name) > 0) {
-   return;
+    return true;
   } else {
-    EventInstance::setProperty(name, value, exception);
+    return EventInstance::setProperty(name, value, exception);
   }
 }
 

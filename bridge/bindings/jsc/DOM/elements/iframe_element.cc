@@ -51,7 +51,7 @@ JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getIFrameElementPropertyMap();
 
   if (propertyMap.count(name) > 0) {
@@ -84,8 +84,9 @@ void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSVa
     default:
       break;
     }
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 

@@ -78,7 +78,7 @@ JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *excep
   return nullptr;
 }
 
-void CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -86,8 +86,9 @@ void CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSVal
     if (property == JSCustomEvent::CustomEventProperty::detail) {
       m_detail.setValue(value);
     }
+    return true;
   } else {
-    EventInstance::setProperty(name, value, exception);
+    return EventInstance::setProperty(name, value, exception);
   }
 }
 

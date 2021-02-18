@@ -49,9 +49,9 @@ public:
                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+    bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-    void internalSetProperty(std::string &name, JSValueRef value, JSValueRef *exception);
+    bool internalSetProperty(std::string &name, JSValueRef value, JSValueRef *exception);
     void internalRemoveProperty(JSStringRef name, JSValueRef *exception);
     JSValueRef internalGetPropertyValue(JSStringRef name, JSValueRef *exception);
 

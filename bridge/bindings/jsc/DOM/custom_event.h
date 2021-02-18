@@ -55,7 +55,7 @@ public:
   explicit CustomEventInstance(JSCustomEvent *jsCustomEvent, std::string CustomEventType, JSValueRef eventInit, JSValueRef *exception);
   explicit CustomEventInstance(JSCustomEvent *jsCustomEvent, NativeCustomEvent* nativeCustomEvent);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-  void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+  bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   ~CustomEventInstance() override;
 

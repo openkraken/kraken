@@ -169,7 +169,7 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
 }
 
 ElementInstance::~ElementInstance() {
-  if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
+//  if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
 
   ::foundation::UICommandCallbackQueue::instance(contextId)
     ->registerCallback([](void *ptr) { delete reinterpret_cast<NativeElement *>(ptr); }, nativeElement);
@@ -200,7 +200,6 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   case JSElement::ElementProperty::style: {
     if (style == nullptr) {
       style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
-      JSValueProtect(_hostClass->ctx, style->object);
     }
 
     return style->object;
@@ -317,7 +316,7 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   return nullptr;
 }
 
-void ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSElement::getElementPropertyMap();
 
   if (propertyMap.count(name) > 0) {
@@ -339,8 +338,9 @@ void ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
     default:
       break;
     }
+    return true;
   } else {
-    NodeInstance::setProperty(name, value, exception);
+    return NodeInstance::setProperty(name, value, exception);
   }
 }
 

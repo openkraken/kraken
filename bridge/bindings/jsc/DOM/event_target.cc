@@ -337,11 +337,12 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
   return Instance::getProperty(name, exception);
 }
 
-void JSEventTarget::EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSEventTarget::EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name.substr(0, 2) == "on") {
     setPropertyHandler(name, value, exception);
+    return true;
   } else {
-    Instance::setProperty(name, value, exception);
+    return Instance::setProperty(name, value, exception);
   }
 }
 

@@ -165,7 +165,7 @@ JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObj
   return nullptr;
 }
 
-void EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -176,8 +176,9 @@ void EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef 
         _stopPropagationFlag = true;
       }
     }
+    return true;
   } else {
-    Instance::setProperty(name, value, exception);
+    return Instance::setProperty(name, value, exception);
   }
 }
 

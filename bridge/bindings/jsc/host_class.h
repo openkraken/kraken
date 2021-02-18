@@ -52,7 +52,7 @@ public:
     explicit Instance(HostClass *hostClass);
     virtual ~Instance();
     virtual JSValueRef getProperty(std::string &name, JSValueRef *exception);
-    virtual void setProperty(std::string &name, JSValueRef value, JSValueRef *exception);
+    virtual bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception);
     virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
 
     template<typename T>
@@ -63,8 +63,6 @@ public:
     JSContext *context{nullptr};
     JSContextRef ctx{nullptr};
     int32_t contextId;
-  private:
-    std::unordered_map<std::string, JSValueRef> m_propertyMap;
   };
 
   static bool hasProto(JSContextRef ctx, JSObjectRef child, JSValueRef *exception);
