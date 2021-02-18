@@ -62,13 +62,9 @@ template<typename T>
 class JSHostObjectHolder {
 public:
   JSHostObjectHolder() = delete;
-  explicit JSHostObjectHolder(JSContext *context, T *hostObject): m_object(hostObject), m_context(context) {
-    JSValueProtect(m_object->ctx, m_object->jsObject);
-  }
-  ~JSHostObjectHolder() {
-    if (m_context->isValid()) {
-      JSValueUnprotect(m_object->ctx, m_object->jsObject);
-    }
+  explicit JSHostObjectHolder(JSContext *context, JSObjectRef root, const char* key, T *hostObject): m_object(hostObject), m_context(context) {
+    JSStringHolder keyStringHolder = JSStringHolder(context, key);
+    JSObjectSetProperty(context->context(), root, keyStringHolder.getString(), hostObject->jsObject, kJSPropertyAttributeNone, nullptr);
   }
   T* operator*() {
     return m_object;

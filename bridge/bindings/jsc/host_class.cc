@@ -137,7 +137,7 @@ bool HostClass::proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, J
   auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
   std::string &&name = JSStringToStdString(propertyName);
   bool handledBySelf = hostClassInstance->setProperty(name, value, exception);
-  return hostClassInstance->context->handleException(*exception) || handledBySelf;
+  return !hostClassInstance->context->handleException(*exception) || handledBySelf;
 }
 
 void HostClass::proxyInstanceGetPropertyNames(JSContextRef ctx, JSObjectRef object,

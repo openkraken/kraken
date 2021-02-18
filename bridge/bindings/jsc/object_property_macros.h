@@ -4,6 +4,11 @@
   }
 #define OBJECT_PROPERTY_ITEM(NAME, KEY)                                                                                \
   { #KEY, NAME##Property::KEY }
+#define OBJECT_STATIC_PROPERTY_ITEM(NAME, KEY) \
+  { #KEY, NAME##StaticProperty::KEY }
+
+#define OBJECT_STATIC_PROPERTY_ITEM_1(NAME, _1) OBJECT_STATIC_PROPERTY_ITEM(NAME, _1),
+#define OBJECT_STATIC_PROPERTY_ITEM_2(NAME, _1, _2) OBJECT_STATIC_PROPERTY_ITEM(NAME, _1), OBJECT_STATIC_PROPERTY_ITEM(NAME, _2),
 
 #define OBJECT_PROPERTY_ITEM_1(NAME, _1) OBJECT_PROPERTY_ITEM(NAME, _1),
 #define OBJECT_PROPERTY_ITEM_2(NAME, _1, _2) OBJECT_PROPERTY_ITEM(NAME, _1), OBJECT_PROPERTY_ITEM(NAME, _2),
@@ -550,6 +555,13 @@
     return propertyMap;                                                                                                \
   };
 
+#define OBJECT_PROPERTY_STATIC_MAP_FUNCTION(NAME, ARGS_COUNT, ...)                                                     \
+  static std::unordered_map<std::string, NAME##StaticProperty> &get##NAME##StaticPropertyMap() {                       \
+    static std::unordered_map<std::string, NAME##StaticProperty> staticPropertyMap{                                          \
+      OBJECT_STATIC_PROPERTY_ITEM_##ARGS_COUNT(NAME, __VA_ARGS__)};                                                           \
+    return staticPropertyMap;                                                                                                \
+  };
+
 #define OBJECT_PROPERTY_NAME(KEY) JSStringCreateWithUTF8CString(#KEY)
 
 #define OBJECT_PROPERTY_NAME_1(_1) OBJECT_PROPERTY_NAME(_1),
@@ -993,3 +1005,7 @@
   enum class OBJECT_PROPERTY(NAME##Property, __VA_ARGS__);                                                             \
   OBJECT_PROPERTY_MAP_FUNCTION(NAME, ARGS_COUNT, __VA_ARGS__);                                                         \
   OBJECT_PROPERTY_NAME_FUNCTION(NAME, ARGS_COUNT, __VA_ARGS__)
+
+#define DEFINE_OBJECT_STATIC_PROPERTY(NAME, ARGS_COUNT, ...)                                                           \
+  enum class OBJECT_PROPERTY(NAME##StaticProperty, __VA_ARGS__);                                                       \
+  OBJECT_PROPERTY_STATIC_MAP_FUNCTION(NAME, ARGS_COUNT, __VA_ARGS__)

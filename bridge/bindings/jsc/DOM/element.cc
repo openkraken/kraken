@@ -189,6 +189,19 @@ JSValueRef JSElement::getBoundingClientRect(JSContextRef ctx, JSObjectRef functi
 
 JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSElement::getElementPropertyMap();
+  auto staticPropertyMap = JSElement::getElementStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) {
+    JSElement::ElementStaticProperty staticProperty = staticPropertyMap[name];
+
+    if (staticProperty == JSElement::ElementStaticProperty::style) {
+      auto style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
+      JSStringHolder styleStringHolder = JSStringHolder(context, "style");
+      JSObjectSetProperty(ctx, object, styleStringHolder.getString(), style->object, kJSPropertyAttributeNone, exception);
+    }
+
+    return nullptr;
+  }
 
   if (propertyMap.count(name) == 0) {
     return JSNode::NodeInstance::getProperty(name, exception);
@@ -197,13 +210,6 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   JSElement::ElementProperty property = propertyMap[name];
 
   switch (property) {
-  case JSElement::ElementProperty::style: {
-    if (style == nullptr) {
-      style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
-    }
-
-    return style->object;
-  }
   case JSElement::ElementProperty::nodeName:
   case JSElement::ElementProperty::tagName: {
     return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName().c_str()));
@@ -308,9 +314,6 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
 
     return JSObjectMakeArray(_hostClass->ctx, elementCount, arguments, nullptr);
   }
-  case JSElement::ElementProperty::attributes: {
-    return (*m_attributes)->jsObject;
-  }
   }
 
   return nullptr;
@@ -318,6 +321,11 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
 
 bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSElement::getElementPropertyMap();
+  auto staticPropertyMap = JSElement::getElementStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) {
+    return false;
+  }
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];

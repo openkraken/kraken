@@ -47,10 +47,12 @@ private:
 
 class JSElement : public JSNode {
 public:
-  DEFINE_OBJECT_PROPERTY(Element, 27, style, nodeName, tagName, attributes, offsetLeft, offsetTop, offsetWidth,
+  DEFINE_OBJECT_PROPERTY(Element, 25, nodeName, tagName, offsetLeft, offsetTop, offsetWidth,
                          offsetHeight, clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft,
                          scrollHeight, scrollWidth, getBoundingClientRect, click, scroll, scrollBy, scrollTo, toBlob,
                          getAttribute, setAttribute, hasAttribute, removeAttribute, children)
+
+  DEFINE_OBJECT_STATIC_PROPERTY(Element, 2, style, attributes)
 
   enum class ElementTagName {
     kDiv,
@@ -136,7 +138,6 @@ public:
 
 private:
   friend JSElement;
-  CSSStyleDeclaration::StyleDeclarationInstance *style{nullptr};
   JSStringHolder m_tagName{context, ""};
 
   void _notifyNodeRemoved(JSNode::NodeInstance *node) override;
@@ -145,7 +146,7 @@ private:
   void _notifyChildInsert();
   void _didModifyAttribute(std::string &name, std::string &oldId, std::string &newId);
   void _beforeUpdateId(std::string &oldId, std::string &newId);
-  JSHostObjectHolder<JSElementAttributes> m_attributes{context, new JSElementAttributes(context)};
+  JSHostObjectHolder<JSElementAttributes> m_attributes{context, object, "attributes", new JSElementAttributes(context)};
 };
 
 struct NativeBoundingClientRect {

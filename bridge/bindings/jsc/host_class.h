@@ -90,23 +90,6 @@ private:
   HostClass *_parentHostClass{nullptr};
 };
 
-template <typename T> class JSHostClassHolder {
-public:
-  JSHostClassHolder() = delete;
-  explicit JSHostClassHolder(T *hostClass) : m_object(hostClass) {
-    JSValueProtect(m_object->ctx, m_object->object);
-  }
-  ~JSHostClassHolder() {
-    JSValueUnprotect(m_object->ctx, m_object->object);
-  }
-  T *operator*() {
-    return m_object;
-  }
-
-private:
-  T *m_object;
-};
-
 } // namespace kraken::binding::jsc
 
 #endif // KRAKENBRIDGE_HOST_CLASS_H

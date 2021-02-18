@@ -40,7 +40,6 @@ class JSFunctionHolder {
 public:
   JSFunctionHolder() = delete;
   explicit JSFunctionHolder(JSContext *context, void *data, std::string name, JSObjectCallAsFunctionCallback callback);
-  explicit JSFunctionHolder(JSContext *context, std::string name, JSObjectCallAsFunctionCallback callback);
   ~JSFunctionHolder();
 
   JSObjectRef function();
