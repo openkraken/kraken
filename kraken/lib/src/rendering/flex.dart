@@ -506,8 +506,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     } else {
       return widthSizeType != null && widthSizeType == BoxSizeType.specified;
     }
-
-    return false;
   }
 
   double _getCrossAxisExtent(RenderBox child) {
