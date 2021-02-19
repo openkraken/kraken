@@ -335,7 +335,7 @@ JSValueRef JSEventTarget::EventTargetInstance::getPropertyHandler(std::string &n
   std::string eventType = name.substr(2);
 
   if (_eventHandlers.count(eventType) == 0) {
-    return nullptr;
+    return JSValueMakeNull(ctx);
   }
   return _eventHandlers[eventType].front();
 }

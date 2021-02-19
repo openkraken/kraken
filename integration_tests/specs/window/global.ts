@@ -22,4 +22,8 @@ xdescribe('windowisglobal', () => {
     // @ts-ignore
     expect(window.foo).toBe('foo');
   });
+
+  it('onload should in window', () => {
+    expect('onload' in window).toBe(true);
+  });
 });
