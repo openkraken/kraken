@@ -79,7 +79,7 @@ protected:
   ~JSEvent() override;
 
 private:
-  JSFunctionHolder m_initWithNativeEvent{context, classObject, this, "initWithNativeEvent", initWithNativeEvent};
+  JSFunctionHolder m_initWithNativeEvent{context, classObject, this, "__initWithNativeEvent__", initWithNativeEvent};
   friend EventInstance;
 };
 
