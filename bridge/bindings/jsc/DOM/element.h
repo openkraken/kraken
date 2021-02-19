@@ -149,6 +149,7 @@ private:
   JSFunctionHolder m_toBlob{context, object, this, "toBlob", toBlob};
   JSFunctionHolder m_click{context, object, this, "click", click};
   JSFunctionHolder m_scroll{context, object, this, "scroll", scroll};
+  JSFunctionHolder m_scrollTo{context, object, this, "scrollTo", scroll};
   JSFunctionHolder m_scrollBy{context, object, this, "scrollBy", scrollBy};
 };
 

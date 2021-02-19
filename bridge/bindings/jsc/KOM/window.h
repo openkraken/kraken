@@ -54,6 +54,7 @@ private:
   JSLocation *location_;
 
   JSFunctionHolder m_scroll{context, object, this, "scroll", scroll};
+  JSFunctionHolder m_scrollTo{context, object, this, "scrollTo", scroll};
   JSFunctionHolder m_scrollBy{context, object, this, "scrollBy", scrollBy};
 };
 
