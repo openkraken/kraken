@@ -59,20 +59,6 @@ public:
     // TODO: use std::u16string for better performance.
     std::unordered_map<std::string, std::deque<JSObjectRef>> _eventHandlers;
     bool internalDispatchEvent(EventInstance *eventInstance);
-
-    static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                       size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                          size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                    const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                     const JSValueRef arguments[], JSValueRef *exception);
-
-    JSFunctionHolder m_removeEventListener{context, object, this, "removeEventListener", removeEventListener};
-    JSFunctionHolder m_dispatchEvent{context, object, this, "dispatchEvent", dispatchEvent};
-    JSFunctionHolder m_clearListeners{context, object, this, "__clearListeners__", clearListeners};
-    JSFunctionHolder m_addEventListener{context, object, this, "addEventListener", addEventListener};
   };
 
 protected:
@@ -84,6 +70,20 @@ protected:
 
 private:
   std::vector<std::string> m_jsOnlyEvents;
+
+  static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+
+  JSFunctionHolder m_removeEventListener{context, prototypeObject, nullptr, "removeEventListener", removeEventListener};
+  JSFunctionHolder m_dispatchEvent{context, prototypeObject, nullptr, "dispatchEvent", dispatchEvent};
+  JSFunctionHolder m_clearListeners{context, prototypeObject, nullptr, "__clearListeners__", clearListeners};
+  JSFunctionHolder m_addEventListener{context, prototypeObject, nullptr, "addEventListener", addEventListener};
 };
 
 using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent, int32_t isCustomEvent);

@@ -29,7 +29,7 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
   if (staticPropertyMap.count(name) > 0) return nullptr;
 
   auto eventTargetStaticPropertyMap = JSEventTarget::getEventTargetStaticPropertyMap();
-  if (eventTargetStaticPropertyMap.count(name) > 0) return nullptr;
+  if (eventTargetStaticPropertyMap.count(name) > 0) return JSEventTarget::EventTargetInstance::getProperty(name, exception);
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];

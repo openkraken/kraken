@@ -34,7 +34,6 @@ bool HostObject::proxySetProperty(JSContextRef ctx, JSObjectRef object, JSString
   auto &context = hostObject->context;
   std::string &&name = JSStringToStdString(propertyName);
   bool handledBySelf = hostObject->setProperty(name, value, exception);
-  JSStringRelease(propertyName);
   return !context->handleException(*exception) || handledBySelf;
 }
 

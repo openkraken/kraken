@@ -17,7 +17,9 @@ HostClass::HostClass(JSContext *context, std::string name)
   jsClass = JSClassCreate(&hostClassDefinition);
   JSClassRetain(jsClass);
   classObject = JSObjectMake(ctx, jsClass, this);
+  prototypeObject = JSObjectMake(ctx, nullptr, this);
   JSValueProtect(ctx, classObject);
+  JSValueProtect(ctx, prototypeObject);
   JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
   JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), HostClass, nullptr);
   instanceClass = JSClassCreate(&hostInstanceDefinition);
@@ -33,7 +35,9 @@ HostClass::HostClass(JSContext *context, HostClass *parentHostClass, std::string
   jsClass = JSClassCreate(&hostClassDefinition);
   JSClassRetain(jsClass);
   classObject = JSObjectMake(ctx, jsClass, this);
+  prototypeObject = JSObjectMake(ctx, nullptr, this);
   JSValueProtect(ctx, classObject);
+  JSValueProtect(ctx, prototypeObject);
   JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
   JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), HostClass, nullptr);
   instanceClass = JSClassCreate(&hostInstanceDefinition);
@@ -110,7 +114,7 @@ JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSS
   } else if (name == "prototype") {
     // We return Constructor class as the prototype of Constructor function.
     // So that a inherit js object can read constructor status function via prototype chain.
-    return hostClass->classObject;
+    return hostClass->prototypeObject;
   }
 
   return hostClass->getProperty(name, exception);
@@ -159,6 +163,7 @@ HostClass::~HostClass() {
   if (context->isValid()) {
     if (_call != nullptr) JSValueUnprotect(ctx, _call);
     JSValueUnprotect(ctx, classObject);
+    JSValueUnprotect(ctx, prototypeObject);
   }
 
   JSClassRelease(jsClass);

@@ -95,7 +95,7 @@ JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   }, nativeEventTarget);
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount < 2) {
     throwJSError(ctx, "Failed to addEventListener: eventName and function parameter are required.", exception);
@@ -175,7 +175,7 @@ JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *ex
   return HostClass::prototypeGetProperty(name, exception);
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                               size_t argumentCount, const JSValueRef *arguments,
                                               JSValueRef *exception) {
   if (argumentCount != 2) {
@@ -230,7 +230,7 @@ JSValueRef JSEventTarget::EventTargetInstance::removeEventListener(JSContextRef 
   return nullptr;
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                         size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     throwJSError(ctx, "Failed to dispatchEvent: first arguments should be an event object", exception);
@@ -280,7 +280,7 @@ bool JSEventTarget::EventTargetInstance::dispatchEvent(EventInstance *event) {
   return event->_canceledFlag;
 }
 
-JSValueRef JSEventTarget::EventTargetInstance::clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                          size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto eventTargetInstance = static_cast<JSEventTarget::EventTargetInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(eventTargetInstance != nullptr, "this object is not a instance of eventTarget.");
@@ -299,7 +299,9 @@ JSValueRef JSEventTarget::EventTargetInstance::getProperty(std::string &name, JS
   auto propertyMap = getEventTargetPropertyMap();
   auto staticPropertyMap = getEventTargetStaticPropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) return nullptr;
+  if (staticPropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSEventTarget>()->prototypeObject, JSStringCreateWithUTF8CString(name.c_str()), exception);
+  }
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];

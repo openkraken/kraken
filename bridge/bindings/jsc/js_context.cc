@@ -236,8 +236,15 @@ NativeString *stringRefToNativeString(JSStringRef string) {
 JSFunctionHolder::JSFunctionHolder(JSContext *context, JSObjectRef root, void *data, const std::string& name,
                                    JSObjectCallAsFunctionCallback callback) {
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
-  JSObjectRef function = makeObjectFunctionWithPrivateData(context, data, name.c_str(), callback);
-  JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), function, kJSPropertyAttributeReadOnly, nullptr);
+  JSObjectRef function;
+  // If context is nullptr, create normal js function without private data
+  if (data == nullptr) {
+    function = JSObjectMakeFunctionWithCallback(context->context(), nameStringHolder.getString(), callback);
+  } else {
+    function = makeObjectFunctionWithPrivateData(context, data, name.c_str(), callback);
+  }
+
+  JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), function, kJSPropertyAttributeNone, nullptr);
 }
 
 JSStringHolder::JSStringHolder(JSContext *context, const std::string &string)
