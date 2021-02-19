@@ -27,6 +27,7 @@
 #include "bindings/jsc/DOM/elements/input_element.h"
 #include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/DOM/custom_event.h"
+#include "bindings/jsc/DOM/gesture_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/close_event.h"
 #include "bindings/jsc/DOM/events/intersection_change_event.h"

@@ -45,6 +45,7 @@
 #define EVENT_SEEKING "seeking"
 #define EVENT_VOLUME_CHANGE "volumechange"
 #define EVENT_SCROLL "scroll"
+#define EVENT_SWIPE "swipe"
 
 
 namespace kraken::binding::jsc {

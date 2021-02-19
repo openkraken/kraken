@@ -6,6 +6,7 @@
 #include "event.h"
 #include "event_target.h"
 #include "bindings/jsc/DOM/custom_event.h"
+#include "bindings/jsc/DOM/gesture_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
@@ -206,6 +207,8 @@ EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *co
     eventInstance = new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
   } else if (eventType == EVENT_TOUCH_START || eventType == EVENT_TOUCH_END || eventType == EVENT_TOUCH_MOVE || eventType == EVENT_TOUCH_CANCEL) {
     eventInstance = new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+  } else if (eventType == EVENT_SWIPE) {
+    eventInstance = new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent*>(nativeEvent));
   } else {
     eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
   }

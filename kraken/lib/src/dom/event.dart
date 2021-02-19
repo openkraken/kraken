@@ -166,6 +166,13 @@ class GestureEvent extends Event {
 
   GestureEvent(String type, [GestureEventInit gestureEventInit])
       : _gestureEventInit = gestureEventInit, super(type, gestureEventInit);
+
+  Pointer<NativeGestureEvent> toNative() {
+    Pointer<NativeGestureEvent> nativeGestureEventPointer = allocate<NativeGestureEvent>();
+    nativeGestureEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
+    nativeGestureEventPointer.ref.state = stringToNativeString(state);
+    return nativeGestureEventPointer;
+  }
 }
 
 class CustomEventInit extends EventInit {

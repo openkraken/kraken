@@ -64,6 +64,12 @@ class NativeCustomEvent extends Struct {
   Pointer<NativeString> detail;
 }
 
+class NativeGestureEvent extends Struct {
+  Pointer<NativeEvent> nativeEvent;
+
+  Pointer<NativeString> state;
+}
+
 class NativeCloseEvent extends Struct {
   Pointer<NativeEvent> nativeEvent;
 
