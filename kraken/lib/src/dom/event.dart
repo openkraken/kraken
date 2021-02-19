@@ -123,22 +123,28 @@ class EventInit {
 
 
 class GestureEventInit extends EventInit {
+  final String state;
   final double rotation;
   final double deltaX;
   final double deltaY;
-  final int direction;
+  final double pageX;
+  final double pageY;
   final double velocityX;
   final double velocityY;
+  final double scale;
 
   GestureEventInit({
     bool bubbles = false,
     bool cancelable = false,
+    this.state = '',
     this.rotation = 0.0,
     this.deltaX = 0.0,
     this.deltaY = 0.0,
-    this.direction = 0,
+    this.pageX = 0.0,
+    this.pageY = 0.0,
     this.velocityX = 0.0,
     this.velocityY = 0.0,
+    this.scale = 0.0,
   })
       : super(bubbles: bubbles, cancelable: cancelable);
 }
@@ -147,12 +153,16 @@ class GestureEventInit extends EventInit {
 class GestureEvent extends Event {
   final GestureEventInit _gestureEventInit;
 
+  String get state => _gestureEventInit?.state;
   double get rotation => _gestureEventInit?.rotation;
   double get deltaX => _gestureEventInit?.deltaX;
   double get deltaY => _gestureEventInit?.deltaY;
-  int get direction => _gestureEventInit?.direction;
+  double get pageX => _gestureEventInit?.pageX;
+  double get pageY => _gestureEventInit?.pageY;
   double get velocityX => _gestureEventInit?.velocityX;
   double get velocityY => _gestureEventInit?.velocityY;
+  double get scale => _gestureEventInit?.scale;
+
 
   GestureEvent(String type, [GestureEventInit gestureEventInit])
       : _gestureEventInit = gestureEventInit, super(type, gestureEventInit);
