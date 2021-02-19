@@ -151,7 +151,9 @@ DocumentInstance::DocumentInstance(JSDocument *document)
   body = new ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
   body->document = this;
   JSStringHolder bodyStringHolder = JSStringHolder(context, "body");
+  JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
   JSObjectSetProperty(ctx, object, bodyStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);
+  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);
   instanceMap[document->context] = this;
   getDartMethod()->initDocument(contextId, nativeDocument);
 }
@@ -183,7 +185,6 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
     std::string cookie = m_cookie.getCookie();
     return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(cookie.c_str()));
   }
-  case DocumentProperty::documentElement:
   case DocumentProperty::nodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#document");
     return JSValueMakeString(_hostClass->ctx, nodeName);

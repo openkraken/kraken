@@ -54,9 +54,8 @@ private:
 
 class DocumentInstance : public JSNode::NodeInstance {
 public:
-  DEFINE_OBJECT_PROPERTY(Document, 4, nodeName,
-                         documentElement, all, cookie)
-  DEFINE_STATIC_OBJECT_PROPERTY(Document, 6, body, createElement, createTextNode, createComment, getElementById, getElementsByTagName)
+  DEFINE_OBJECT_PROPERTY(Document, 3, nodeName, all, cookie)
+  DEFINE_STATIC_OBJECT_PROPERTY(Document, 7, body, documentElement, createElement, createTextNode, createComment, getElementById, getElementsByTagName)
 
   static DocumentInstance *instance(JSContext *context);
 
