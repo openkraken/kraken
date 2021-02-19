@@ -86,8 +86,12 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
   JSValueRef eventTargetRet = JSEventTarget::EventTargetInstance::getProperty(name, exception);
   if (eventTargetRet != nullptr) return eventTargetRet;
 
-  JSStringRef keyStringRef = JSStringCreateWithUTF8CString(name.c_str());
-  return JSObjectGetProperty(_hostClass->ctx, _hostClass->context->global(), keyStringRef, exception);
+  JSStringHolder keyStringHolder = JSStringHolder(context, name);
+  if (JSObjectHasProperty(ctx, _hostClass->context->global(), keyStringHolder.getString())) {
+    return JSObjectGetProperty(_hostClass->ctx, _hostClass->context->global(), keyStringHolder.getString(), exception);
+  }
+
+  return nullptr;
 }
 
 void WindowInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

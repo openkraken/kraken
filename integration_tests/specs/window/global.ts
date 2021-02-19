@@ -15,4 +15,11 @@ xdescribe('windowisglobal', () => {
 
     f();
   });
+
+  it('can set property', () => {
+    // @ts-ignore
+    window.foo = 'foo';
+    // @ts-ignore
+    expect(window.foo).toBe('foo');
+  });
 });
