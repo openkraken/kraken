@@ -24,7 +24,8 @@ public:
                                      JSValueRef *exception);
   static JSValueRef proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                              JSValueRef *exception);
-  static JSValueRef proxyPrototypeGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef *exception);
+  static JSValueRef proxyPrototypeGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
+                                              JSValueRef *exception);
   static bool proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value,
                                        JSValueRef *exception);
   static void proxyInstanceGetPropertyNames(JSContextRef ctx, JSObjectRef object,
@@ -55,8 +56,9 @@ public:
     virtual bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception);
     virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
 
-    template<typename T>
-    T* prototype() { return reinterpret_cast<T*>(_hostClass); }
+    template <typename T> T *prototype() {
+      return reinterpret_cast<T *>(_hostClass);
+    }
 
     JSObjectRef object{nullptr};
     HostClass *_hostClass{nullptr};
@@ -82,12 +84,29 @@ public:
   JSObjectRef _call{nullptr};
 
 private:
-
   void initPrototype() const;
 
   // The class template of javascript constructor function.
   JSClassRef jsClass{nullptr};
   HostClass *_parentHostClass{nullptr};
+};
+
+class JSHostClassHolder {
+public:
+  JSHostClassHolder() = delete;
+  explicit JSHostClassHolder(JSContext *context, JSObjectRef root, const char *key, HostClass::Instance *hostClass)
+    : m_object(hostClass), m_context(context) {
+    JSStringHolder keyStringHolder = JSStringHolder(context, key);
+    JSObjectSetProperty(context->context(), root, keyStringHolder.getString(), hostClass->object,
+                        kJSPropertyAttributeNone, nullptr);
+  }
+  HostClass::Instance *operator*() {
+    return m_object;
+  }
+
+private:
+  HostClass::Instance *m_object;
+  JSContext *m_context{nullptr};
 };
 
 } // namespace kraken::binding::jsc

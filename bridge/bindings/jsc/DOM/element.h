@@ -139,6 +139,7 @@ private:
   void _didModifyAttribute(std::string &name, std::string &oldId, std::string &newId);
   void _beforeUpdateId(std::string &oldId, std::string &newId);
   JSHostObjectHolder<JSElementAttributes> m_attributes{context, object, "attributes", new JSElementAttributes(context)};
+  JSHostClassHolder m_style{context, object, "style", new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this)};
 
   JSFunctionHolder m_getBoundingClientRect{context, object, this, "getBoundingClientRect", getBoundingClientRect};
   JSFunctionHolder m_setAttribute{context, object, this, "setAttribute", setAttribute};

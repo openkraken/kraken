@@ -101,6 +101,7 @@ bool JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::
 
   if (property == AnimationPlayerProperty::src) {
     JSStringRef src = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    context->handleException(*exception);
     m_src.setString(src);
 
     NativeString args_01{};

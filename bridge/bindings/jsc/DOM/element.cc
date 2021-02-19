@@ -197,14 +197,6 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   auto staticPropertyMap = JSElement::getElementStaticPropertyMap();
 
   if (staticPropertyMap.count(name) > 0) {
-    JSElement::ElementStaticProperty staticProperty = staticPropertyMap[name];
-
-    if (staticProperty == JSElement::ElementStaticProperty::style) {
-      auto style = new CSSStyleDeclaration::StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
-      JSStringHolder styleStringHolder = JSStringHolder(context, "style");
-      JSObjectSetProperty(ctx, object, styleStringHolder.getString(), style->object, kJSPropertyAttributeNone, exception);
-    }
-
     return nullptr;
   }
 
