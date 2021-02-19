@@ -156,12 +156,18 @@ class Element extends Node
       return renderer;
     }
 
+    RenderStyle renderStyle;
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
       _renderIntrinsic = createRenderIntrinsic(this, repaintSelf: repaintSelf);
+      renderStyle = _renderIntrinsic.renderStyle;
     } else {
       _renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
+      renderStyle = _renderLayoutBox.renderStyle;
     }
+
+    /// Set display and transformedDisplay when display is not set in style
+    renderStyle.initDisplay(style, defaultDisplay);
 
     return renderer;
   }
@@ -521,11 +527,7 @@ class Element extends Node
     RenderStyle renderStyle = renderBoxModel.renderStyle;
 
     /// Set display and transformedDisplay when display is not set in style
-    renderStyle.display = CSSDisplayMixin.getDisplay(
-      CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]
-    );
-    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
-
+    renderStyle.initDisplay(style, defaultDisplay);
     didAttachRenderer();
   }
 
@@ -1382,6 +1384,9 @@ class Element extends Node
       }
 
       flexLayout.renderStyle.updateFlexbox();
+
+      /// Set display and transformedDisplay when display is not set in style
+      flexLayout.renderStyle.initDisplay(element.style, element.defaultDisplay);
       return flexLayout;
     } else if (display == CSSDisplay.block ||
       display == CSSDisplay.none ||
@@ -1441,6 +1446,8 @@ class Element extends Node
       }
 
       flowLayout.renderStyle.updateFlow();
+      /// Set display and transformedDisplay when display is not set in style
+      flowLayout.renderStyle.initDisplay(element.style, element.defaultDisplay);
       return flowLayout;
     } else if (display == CSSDisplay.sliver) {
       RenderRecyclerLayout renderRecyclerLayout;
@@ -1456,6 +1463,8 @@ class Element extends Node
         renderRecyclerLayout = prevRenderLayoutBox;
       }
 
+      /// Set display and transformedDisplay when display is not set in style
+      renderRecyclerLayout.renderStyle.initDisplay(element.style, element.defaultDisplay);
       return renderRecyclerLayout;
     } else {
       throw FlutterError('Not supported display type $display');

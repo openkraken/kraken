@@ -60,6 +60,14 @@ mixin CSSDisplayMixin on RenderStyleBase {
     }
   }
 
+  /// Set display and transformedDisplay when display is not set in style
+  void initDisplay(CSSStyleDeclaration style, String defaultDisplay) {
+    display = CSSDisplayMixin.getDisplay(
+      CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]
+    );
+    transformedDisplay = getTransformedDisplay();
+  }
+
   static CSSDisplay getDisplay(String displayString) {
     switch (displayString) {
       case 'none':
@@ -85,10 +93,6 @@ mixin CSSDisplayMixin on RenderStyleBase {
   /// https://www.w3.org/TR/css-display-3/#transformations
   CSSDisplay getTransformedDisplay() {
     RenderStyle renderStyle = this;
-    if (renderBoxModel.parent is! RenderBoxModel) {
-      return renderStyle.display;
-    }
-    RenderBoxModel parent = renderBoxModel.parent;
     CSSDisplay display = renderStyle.display;
 
     CSSPositionType position = renderStyle.position;
@@ -96,9 +100,12 @@ mixin CSSDisplayMixin on RenderStyleBase {
     // Display as inline-block when element is positioned
     if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {
       display = CSSDisplay.inlineBlock;
-    } else if (parent != null && parent is RenderFlexLayout) {
+    } else if (renderBoxModel.parent is! RenderBoxModel) {
+      return renderStyle.display;
+    } else if (renderBoxModel.parent is RenderFlexLayout) {
         // Display as inline-block if parent node is flex
         display = CSSDisplay.inlineBlock;
+        RenderBoxModel parent = renderBoxModel.parent;
         RenderStyle parentRenderStyle = parent.renderStyle;
 
         CSSMargin marginLeft = renderStyle.marginLeft;
