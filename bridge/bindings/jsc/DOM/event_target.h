@@ -71,7 +71,7 @@ public:
 
     JSFunctionHolder m_removeEventListener{context, object, this, "removeEventListener", removeEventListener};
     JSFunctionHolder m_dispatchEvent{context, object, this, "dispatchEvent", dispatchEvent};
-    JSFunctionHolder m_clearListeners{context, object, this, "clearListeners", clearListeners};
+    JSFunctionHolder m_clearListeners{context, object, this, "__clearListeners__", clearListeners};
     JSFunctionHolder m_addEventListener{context, object, this, "addEventListener", addEventListener};
   };
 
