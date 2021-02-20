@@ -215,10 +215,10 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
         ).distance * (movedHorizontalLocally.dx ?? 1).sign;
 
         if (_hasSufficientGlobalDistanceAndVelocityToAccept(event)) {
-          if (_globalVerticalDistanceMoved.abs() > kTouchSlop) {
-            _direction = (_globalVerticalDistanceMoved > 0) ? DIRECTION_UP : DIRECTION_DOWN;
+          if (_globalHorizontalDistanceMoved.abs() > kTouchSlop && _globalHorizontalDistanceMoved.abs() > _globalVerticalDistanceMoved.abs()) {
+            _direction = (_globalHorizontalDistanceMoved > 0) ? DIRECTION_RIGHT : DIRECTION_LEFT;
           } else {
-            _direction = (_globalHorizontalDistanceMoved > 0) ? DIRECTION_LEFT : DIRECTION_RIGHT;
+            _direction = (_globalVerticalDistanceMoved > 0) ? DIRECTION_DOWN : DIRECTION_UP;
           }
           resolve(GestureDisposition.accepted);
         }
