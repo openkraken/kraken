@@ -68,6 +68,26 @@ class NativeGestureEvent extends Struct {
   Pointer<NativeEvent> nativeEvent;
 
   Pointer<NativeString> state;
+
+  Pointer<NativeString> direction;
+
+  @Double()
+  double deltaX;
+
+  @Double()
+  double deltaY;
+
+  @Double()
+  double velocityX;
+
+  @Double()
+  double velocityY;
+
+  @Double()
+  double scale;
+
+  @Double()
+  double rotation;
 }
 
 class NativeCloseEvent extends Struct {

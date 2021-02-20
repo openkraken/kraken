@@ -131,11 +131,10 @@ class EventInit {
 
 class GestureEventInit extends EventInit {
   final String state;
+  final String direction;
   final double rotation;
   final double deltaX;
   final double deltaY;
-  final double pageX;
-  final double pageY;
   final double velocityX;
   final double velocityY;
   final double scale;
@@ -144,11 +143,10 @@ class GestureEventInit extends EventInit {
     bool bubbles = false,
     bool cancelable = false,
     this.state = '',
+    this.direction = '',
     this.rotation = 0.0,
     this.deltaX = 0.0,
     this.deltaY = 0.0,
-    this.pageX = 0.0,
-    this.pageY = 0.0,
     this.velocityX = 0.0,
     this.velocityY = 0.0,
     this.scale = 0.0,
@@ -161,11 +159,10 @@ class GestureEvent extends Event {
   final GestureEventInit _gestureEventInit;
 
   String get state => _gestureEventInit?.state;
+  String get direction => _gestureEventInit?.direction;
   double get rotation => _gestureEventInit?.rotation;
   double get deltaX => _gestureEventInit?.deltaX;
   double get deltaY => _gestureEventInit?.deltaY;
-  double get pageX => _gestureEventInit?.pageX;
-  double get pageY => _gestureEventInit?.pageY;
   double get velocityX => _gestureEventInit?.velocityX;
   double get velocityY => _gestureEventInit?.velocityY;
   double get scale => _gestureEventInit?.scale;
@@ -178,6 +175,13 @@ class GestureEvent extends Event {
     Pointer<NativeGestureEvent> nativeGestureEventPointer = allocate<NativeGestureEvent>();
     nativeGestureEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
     nativeGestureEventPointer.ref.state = stringToNativeString(state);
+    nativeGestureEventPointer.ref.direction = stringToNativeString(direction);
+    nativeGestureEventPointer.ref.deltaX = deltaX;
+    nativeGestureEventPointer.ref.deltaY = deltaY;
+    nativeGestureEventPointer.ref.velocityX = velocityX;
+    nativeGestureEventPointer.ref.velocityY = velocityY;
+    nativeGestureEventPointer.ref.scale = scale;
+    nativeGestureEventPointer.ref.rotation = rotation;
     return nativeGestureEventPointer;
   }
 }

@@ -14,12 +14,10 @@ enum _DragState {
   accepted,
 }
 
-enum _OffsetDirection {
-  up,
-  left,
-  down,
-  right,
-}
+final DIRECTION_UP = 'up';
+final DIRECTION_DOWN = 'down';
+final DIRECTION_LEFT = 'left';
+final DIRECTION_RIGHT = 'right';
 
 class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
@@ -118,7 +116,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int _initialButtons;
-  _OffsetDirection _direction = _OffsetDirection.left;
+  String _direction = '';
 
   /// Distance moved in the global coordinate space of the screen in drag direction.
   ///
@@ -130,7 +128,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? computeHitSlop(kind);
-    if (_direction == _OffsetDirection.left || _direction == _OffsetDirection.right) {
+    if (_direction == DIRECTION_LEFT || _direction == DIRECTION_RIGHT) {
       return estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance;
     } else {
       return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
@@ -218,9 +216,9 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
 
         if (_hasSufficientGlobalDistanceAndVelocityToAccept(event)) {
           if (_globalVerticalDistanceMoved.abs() > kTouchSlop) {
-            _direction = (_globalVerticalDistanceMoved > 0) ? _OffsetDirection.up : _OffsetDirection.down;
+            _direction = (_globalVerticalDistanceMoved > 0) ? DIRECTION_UP : DIRECTION_DOWN;
           } else {
-            _direction = (_globalHorizontalDistanceMoved > 0) ? _OffsetDirection.left : _OffsetDirection.right;
+            _direction = (_globalHorizontalDistanceMoved > 0) ? DIRECTION_LEFT : DIRECTION_RIGHT;
           }
           resolve(GestureDisposition.accepted);
         }
@@ -299,7 +297,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     final VelocityEstimate estimate = tracker.getVelocityEstimate();
     final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond).clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
 
-    GestureEventInit e = GestureEventInit(deltaX: velocity.pixelsPerSecond.dx, deltaY: velocity.pixelsPerSecond.dy, rotation: 0.0, state: 'up' );
+    GestureEventInit e = GestureEventInit(direction: _direction, velocityX: velocity.pixelsPerSecond.dx, velocityY: velocity.pixelsPerSecond.dy );
     invokeCallback<void>('onSwipe', () => onSwipe(GestureEvent(EVENT_SWIPE, e)), debugReport: debugReport);
   }
 

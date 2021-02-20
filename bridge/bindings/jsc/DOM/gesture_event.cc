@@ -48,8 +48,28 @@ GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, std::
   if (eventInitValue != nullptr) {
     JSObjectRef eventInit = JSValueToObject(ctx, eventInitValue, exception);
 
-    if (objectHasProperty(ctx, "detail", eventInit)) {
-      m_detail.setValue(getObjectPropertyValue(ctx, "detail", eventInit, exception));
+    if (objectHasProperty(ctx, "state", eventInit)) {
+      m_state.setValue(getObjectPropertyValue(ctx, "state", eventInit, exception));
+    }
+    if (objectHasProperty(ctx, "direction", eventInit)) {
+      m_direction.setValue(getObjectPropertyValue(ctx, "direction", eventInit, exception));
+    }
+    if (objectHasProperty(ctx, "deltaX", eventInit)) {
+      m_deltaX.setValue(getObjectPropertyValue(ctx, "deltaX", eventInit, exception));
+    }
+    if (objectHasProperty(ctx, "deltaY", eventInit)) {
+      m_deltaY.setValue(getObjectPropertyValue(ctx, "deltaY", eventInit, exception));
+    }
+    if (objectHasProperty(ctx, "velocityX", eventInit)) {
+      m_velocityX.setValue(getObjectPropertyValue(ctx, "velocityX", eventInit, exception));
+    }
+    if (objectHasProperty(ctx, "velocityY", eventInit)) {
+      m_velocityY.setValue(getObjectPropertyValue(ctx, "velocityY", eventInit, exception));
+    }if (objectHasProperty(ctx, "scale", eventInit)) {
+      m_scale.setValue(getObjectPropertyValue(ctx, "scale", eventInit, exception));
+    }
+    if (objectHasProperty(ctx, "rotation", eventInit)) {
+      m_rotation.setValue(getObjectPropertyValue(ctx, "rotation", eventInit, exception));
     }
   }
 }
@@ -57,9 +77,19 @@ GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, std::
 GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, NativeGestureEvent* nativeGestureEvent)
     : nativeGestureEvent(nativeGestureEvent)
     , EventInstance(jsGestureEvent, nativeGestureEvent->nativeEvent) {
-  JSStringRef ref = JSStringCreateWithCharacters(nativeGestureEvent->state->string, nativeGestureEvent->state->length);
+  JSStringRef refState = JSStringCreateWithCharacters(nativeGestureEvent->state->string, nativeGestureEvent->state->length);
   nativeGestureEvent->state->free();
-  m_detail.setValue(JSValueMakeString(context->context(), ref));
+  JSStringRef refDirection = JSStringCreateWithCharacters(nativeGestureEvent->direction->string, nativeGestureEvent->direction->length);
+  nativeGestureEvent->direction->free();
+
+  m_state.setValue(JSValueMakeString(context->context(), refState));
+  m_direction.setValue(JSValueMakeString(context->context(), refDirection));
+  m_deltaX.setValue(JSValueMakeNumber(context->context(), nativeGestureEvent->deltaX));
+  m_deltaY.setValue(JSValueMakeNumber(context->context(), nativeGestureEvent->deltaY));
+  m_velocityX.setValue(JSValueMakeNumber(context->context(), nativeGestureEvent->velocityX));
+  m_velocityY.setValue(JSValueMakeNumber(context->context(), nativeGestureEvent->velocityY));
+  m_scale.setValue(JSValueMakeNumber(context->context(), nativeGestureEvent->scale));
+  m_rotation.setValue(JSValueMakeNumber(context->context(), nativeGestureEvent->rotation));
 }
 
 JSValueRef GestureEventInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -70,7 +100,21 @@ JSValueRef GestureEventInstance::getProperty(std::string &name, JSValueRef *exce
 
   switch (property) {
     case JSGestureEvent::GestureEventProperty::state:
-      return m_detail.value();
+      return m_state.value();
+    case JSGestureEvent::GestureEventProperty::direction:
+      return m_direction.value();
+    case JSGestureEvent::GestureEventProperty::deltaX:
+      return m_deltaX.value();
+    case JSGestureEvent::GestureEventProperty::deltaY:
+      return m_deltaY.value();
+    case JSGestureEvent::GestureEventProperty::velocityX:
+      return m_velocityX.value();
+    case JSGestureEvent::GestureEventProperty::velocityY:
+      return m_velocityY.value();
+    case JSGestureEvent::GestureEventProperty::scale:
+      return m_scale.value();
+    case JSGestureEvent::GestureEventProperty::rotation:
+      return m_rotation.value();
     case JSGestureEvent::GestureEventProperty::initGestureEvent:
       return m_initGestureEvent.function();
   }
@@ -84,7 +128,28 @@ void GestureEventInstance::setProperty(std::string &name, JSValueRef value, JSVa
     auto property = propertyMap[name];
 
     if (property == JSGestureEvent::GestureEventProperty::state) {
-      m_detail.setValue(value);
+      m_state.setValue(value);
+    }
+    if (property == JSGestureEvent::GestureEventProperty::direction) {
+      m_direction.setValue(value);
+    }
+    if (property == JSGestureEvent::GestureEventProperty::deltaX) {
+      m_deltaX.setValue(value);
+    }
+    if (property == JSGestureEvent::GestureEventProperty::deltaY) {
+      m_deltaY.setValue(value);
+    }
+    if (property == JSGestureEvent::GestureEventProperty::velocityX) {
+      m_velocityX.setValue(value);
+    }
+    if (property == JSGestureEvent::GestureEventProperty::velocityY) {
+      m_velocityY.setValue(value);
+    }
+    if (property == JSGestureEvent::GestureEventProperty::scale) {
+      m_scale.setValue(value);
+    }
+    if (property == JSGestureEvent::GestureEventProperty::rotation) {
+      m_rotation.setValue(value);
     }
   } else {
     EventInstance::setProperty(name, value, exception);
@@ -118,7 +183,35 @@ JSValueRef GestureEventInstance::initGestureEvent(JSContextRef ctx, JSObjectRef 
   }
 
   if (argumentCount <= 4) {
-    eventInstance->m_detail.setValue(arguments[3]);
+    eventInstance->m_state.setValue(arguments[3]);
+  }
+
+  if (argumentCount <= 5) {
+    eventInstance->m_direction.setValue(arguments[4]);
+  }
+
+  if (argumentCount <= 6) {
+    eventInstance->m_deltaX.setValue(arguments[5]);
+  }
+
+  if (argumentCount <= 7) {
+    eventInstance->m_deltaY.setValue(arguments[6]);
+  }
+
+  if (argumentCount <= 8) {
+    eventInstance->m_velocityX.setValue(arguments[7]);
+  }
+
+  if (argumentCount <= 9) {
+    eventInstance->m_velocityY.setValue(arguments[8]);
+  }
+
+  if (argumentCount <= 10) {
+    eventInstance->m_scale.setValue(arguments[9]);
+  }
+
+  if (argumentCount <= 11) {
+    eventInstance->m_rotation.setValue(arguments[10]);
   }
 
   return nullptr;
