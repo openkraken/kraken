@@ -37,16 +37,36 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   GestureCallback onPan;
 
-  GestureCallback onPinch;
+  GestureCallback onScale;
 
-  void onPanEnd(DragEndDetails details) {
-    onSwipe(GestureEvent(EVENT_SWIPE, GestureEventInit()));
+  GestureCallback onLongPress;
+
+  void onPanStart(DragStartDetails details) {
+    onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
   }
 
-  void onPinchEnd(ScaleEndDetails details) {
-    if (details.velocity != Velocity.zero) {
-      onSwipe(GestureEvent(EVENT_SWIPE, GestureEventInit( velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy )));
-    }
+  void onPanUpdate(DragUpdateDetails details) {
+    onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+  }
+
+  void onPanEnd(DragEndDetails details) {
+    onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy )));
+  }
+
+  void onScaleStart(ScaleStartDetails details) {
+    onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_START )));
+  }
+
+  void onScaleUpdate(ScaleUpdateDetails details) {
+    onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale )));
+  }
+
+  void onScaleEnd(ScaleEndDetails details) {
+    onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_END )));
+  }
+
+  void onLongPressEnd(LongPressEndDetails details) {
+    onLongPress(GestureEvent(EVENT_Long_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
   }
 
   /// Called when a pointer signal this object.
@@ -61,11 +81,19 @@ mixin RenderPointerListenerMixin on RenderBox {
     }
     if (eventHandlers.containsKey('pan')) {
       gestures[PanGestureRecognizer] = PanGestureRecognizer();
+      (gestures[PanGestureRecognizer] as PanGestureRecognizer).onStart = onPanStart;
+      (gestures[PanGestureRecognizer] as PanGestureRecognizer).onUpdate = onPanUpdate;
       (gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = onPanEnd;
     }
-    if (eventHandlers.containsKey('pinch')) {
+    if (eventHandlers.containsKey('longPress')) {
+      gestures[LongPressGestureRecognizer] = LongPressGestureRecognizer();
+      (gestures[LongPressGestureRecognizer] as LongPressGestureRecognizer).onLongPressEnd = onLongPressEnd;
+    }
+    if (eventHandlers.containsKey('scale')) {
       gestures[ScaleGestureRecognizer] = ScaleGestureRecognizer();
-      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onEnd = onPinchEnd;
+      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onStart = onScaleStart;
+      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onUpdate = onScaleUpdate;
+      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onEnd = onScaleEnd;
     }
   }
 

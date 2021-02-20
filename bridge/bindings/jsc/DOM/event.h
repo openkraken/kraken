@@ -46,6 +46,9 @@
 #define EVENT_VOLUME_CHANGE "volumechange"
 #define EVENT_SCROLL "scroll"
 #define EVENT_SWIPE "swipe"
+#define EVENT_PAN "pan"
+#define EVENT_LONG_PRESS "longPress"
+#define EVENT_SCALE "scale"
 
 
 namespace kraken::binding::jsc {

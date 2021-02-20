@@ -207,7 +207,7 @@ EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *co
     eventInstance = new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
   } else if (eventType == EVENT_TOUCH_START || eventType == EVENT_TOUCH_END || eventType == EVENT_TOUCH_MOVE || eventType == EVENT_TOUCH_CANCEL) {
     eventInstance = new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
-  } else if (eventType == EVENT_SWIPE) {
+  } else if (eventType == EVENT_SWIPE || eventType == EVENT_PAN || eventType == EVENT_LONG_PRESS || eventType == EVENT_SCALE) {
     eventInstance = new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent*>(nativeEvent));
   } else {
     eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));

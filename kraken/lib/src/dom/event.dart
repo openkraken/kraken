@@ -10,7 +10,6 @@ import 'package:kraken/bridge.dart';
 import 'package:ffi/ffi.dart';
 
 const String EVENT_CLICK = 'click';
-const String EVENT_SWIPE = 'swipe';
 const String EVENT_INPUT = 'input';
 const String EVENT_APPEAR = 'appear';
 const String EVENT_DISAPPEAR = 'disappear';
@@ -45,6 +44,14 @@ const String EVENT_SEEKED = 'seeked';
 const String EVENT_SEEKING = 'seeking';
 const String EVENT_VOLUME_CHANGE = 'volumechange';
 const String EVENT_SCROLL = 'scroll';
+const String EVENT_SWIPE = 'swipe';
+const String EVENT_PAN = 'pan';
+const String EVENT_SCALE = 'scale';
+const String EVENT_Long_PRESS = 'longPress';
+
+const String EVENT_STATE_START = 'start';
+const String EVENT_STATE_UPDATE = 'update';
+const String EVENT_STATE_END = 'end';
 
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
