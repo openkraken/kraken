@@ -14,3 +14,4 @@ export 'src/gesture/scroll_simulation.dart';
 export 'src/gesture/click.dart';
 export 'src/gesture/swipe.dart';
 export 'src/gesture/monodrag.dart';
+export 'src/gesture/constants.dart';
