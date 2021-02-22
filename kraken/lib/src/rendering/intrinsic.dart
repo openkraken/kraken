@@ -147,8 +147,8 @@ class RenderIntrinsic extends RenderBoxModel
   /// Compute distance to baseline of replaced element
   @override
   double computeDistanceToBaseline() {
-    double marginTop = renderStyle.marginTop ?? 0;
-    double marginBottom = renderStyle.marginBottom ?? 0;
+    double marginTop = renderStyle.marginTop.length ?? 0;
+    double marginBottom = renderStyle.marginBottom.length ?? 0;
 
     // Use margin-bottom as baseline if layout has no children
     return marginTop + boxSize.height + marginBottom;

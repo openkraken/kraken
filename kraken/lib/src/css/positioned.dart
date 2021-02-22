@@ -110,31 +110,34 @@ class CSSPositionedLayout {
   }
 
   static Offset getRelativeOffset(RenderStyle renderStyle) {
-    CSSStyleDeclaration style = renderStyle.style;
-    if (renderStyle.position == CSSPositionType.relative) {
-      double dx;
-      double dy;
+      CSSOffset left = renderStyle.left;
+      CSSOffset right = renderStyle.right;
+      CSSOffset top = renderStyle.top;
+      CSSOffset bottom = renderStyle.bottom;
+      if (renderStyle.position == CSSPositionType.relative) {
+        double dx;
+        double dy;
 
-      if (style.contains(LEFT) && style[LEFT] != AUTO) {
-        dx = renderStyle.left;
-      } else if (style.contains(RIGHT) && style[RIGHT] != AUTO) {
-        double _dx = renderStyle.right;
-        if (_dx != null) dx = -_dx;
-      }
+        if (left != null && !left.isAuto) {
+          dx = renderStyle.left.length;
+        } else if (right != null && !right.isAuto) {
+          double _dx = renderStyle.right.length;
+          if (_dx != null) dx = -_dx;
+        }
 
-      if (style.contains(TOP) && style[TOP] != AUTO) {
-        dy = renderStyle.top;
-      } else if (style.contains(BOTTOM) && style[BOTTOM] != AUTO) {
-        double _dy = renderStyle.bottom;
-        if (_dy != null) dy = -_dy;
-      }
+        if (top != null && !top.isAuto) {
+          dy = renderStyle.top.length;
+        } else if (bottom != null && !bottom.isAuto) {
+          double _dy = renderStyle.bottom.length;
+          if (_dy != null) dy = -_dy;
+        }
 
-      if (dx != null || dy != null) {
-        return Offset(dx ?? 0, dy ?? 0);
+        if (dx != null || dy != null) {
+          return Offset(dx ?? 0, dy ?? 0);
+        }
       }
+      return null;
     }
-    return null;
-  }
 
   static void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox) {
     RenderLayoutParentData boxParentData = renderBox?.parentData;

@@ -1071,11 +1071,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   double computeDistanceToBaseline() {
     double lineDistance;
-    double marginTop = renderStyle.marginTop ?? 0;
-    double marginBottom = renderStyle.marginBottom ?? 0;
+    double marginTop = renderStyle.marginTop.length ?? 0;
+    double marginBottom = renderStyle.marginBottom.length ?? 0;
     bool isParentFlowLayout = parent is RenderFlowLayout;
-    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    bool isDisplayInline = display != CSSDisplay.block && display != CSSDisplay.flex;
+    CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
+    bool isDisplayInline = transformedDisplay != CSSDisplay.block && transformedDisplay != CSSDisplay.flex;
 
     // Use margin bottom as baseline if layout has no children
     if (lineBoxMetrics.length == 0) {
@@ -1097,7 +1097,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       lineBoxMetrics[lineBoxMetrics.length - 1] : lineBoxMetrics[0];
     // Use the max baseline of the children as the baseline in flow layout
     lineMetrics.runChildren.forEach((int targetId, RenderBox child) {
-      double childMarginTop = child is RenderBoxModel ? child.renderStyle.marginTop : 0;
+      double childMarginTop = child is RenderBoxModel ? child.renderStyle.marginTop.length : 0;
       RenderLayoutParentData childParentData = child.parentData;
       double childBaseLineDistance;
       if (child is RenderBoxModel) {
@@ -1110,7 +1110,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
       if (childBaseLineDistance != null) {
         // Baseline of relative positioned element equals its originial position
-        // so it needs to substract its vertical offset
+        // so it needs to subtract its vertical offset
         Offset relativeOffset;
         double childOffsetY = childParentData.offset.dy - childMarginTop;
         if (child is RenderBoxModel) {
@@ -1119,7 +1119,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (relativeOffset != null) {
           childOffsetY -= relativeOffset.dy;
         }
-        // It needs to substract margin-top cause offset already includes margin-top
+        // It needs to subtract margin-top cause offset already includes margin-top
         childBaseLineDistance += childOffsetY;
         if (lineDistance != null)
           lineDistance = math.max(lineDistance, childBaseLineDistance);

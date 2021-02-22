@@ -2307,11 +2307,11 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   double computeDistanceToBaseline() {
     double lineDistance = 0;
-    double marginTop = renderStyle.marginTop;
-    double marginBottom = renderStyle.marginBottom;
+    double marginTop = renderStyle.marginTop.length ?? 0;
+    double marginBottom = renderStyle.marginBottom.length ?? 0;
     bool isParentFlowLayout = parent is RenderFlowLayout;
-    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    bool isDisplayInline = display != CSSDisplay.block && display != CSSDisplay.flex;
+    CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
+    bool isDisplayInline = transformedDisplay != CSSDisplay.block && transformedDisplay != CSSDisplay.flex;
     // Use margin bottom as baseline if layout has no children
     if (flexLineBoxMetrics.length == 0) {
       if (isDisplayInline) {
@@ -2331,7 +2331,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     _RunChild firstRunChild = firstRunChildren[0];
     RenderBox child = firstRunChild.child;
 
-    double childMarginTop = child is RenderBoxModel ? child.renderStyle.marginTop : 0;
+    double childMarginTop = child is RenderBoxModel ? child.renderStyle.marginTop.length : 0;
     RenderLayoutParentData childParentData = child.parentData;
     double childBaseLineDistance = 0;
     if (child is RenderBoxModel) {
@@ -2350,7 +2350,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (relativeOffset != null) {
       childOffsetY -= relativeOffset.dy;
     }
-    // It needs to substract margin-top cause offset already includes margin-top
+    // It needs to subtract margin-top cause offset already includes margin-top
     lineDistance = childBaseLineDistance + childOffsetY;
     lineDistance += marginTop;
     return lineDistance;
