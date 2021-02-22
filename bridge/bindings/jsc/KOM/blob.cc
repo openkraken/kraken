@@ -4,7 +4,6 @@
  */
 
 #include "blob.h"
-#include "bindings/jsc/macros.h"
 #include "foundation/logging.h"
 
 namespace kraken::binding::jsc {

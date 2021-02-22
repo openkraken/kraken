@@ -26,6 +26,8 @@ export 'src/css/transform.dart';
 export 'src/css/transition.dart';
 export 'src/css/visibility.dart';
 export 'src/css/offset.dart';
+export 'src/css/display.dart';
+export 'src/css/sliver.dart';
 
 // CSS Values
 // ignore: directives_ordering

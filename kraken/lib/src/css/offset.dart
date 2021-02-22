@@ -13,40 +13,51 @@ enum CSSPositionType {
   sticky,
 }
 
+class CSSOffset {
+  CSSOffset({
+    this.length,
+    this.isAuto,
+  });
+  /// length if margin value is length type
+  double length;
+  /// Whether value is auto
+  bool isAuto;
+}
+
 mixin CSSPositionMixin on RenderStyleBase {
 
-  double _top;
-  double get top {
+  CSSOffset _top;
+  CSSOffset get top {
     return _top;
   }
-  set top(double value) {
+  set top(CSSOffset value) {
     if (_top == value) return;
     _top = value;
   }
 
-  double _bottom;
-  double get bottom {
+  CSSOffset _bottom;
+  CSSOffset get bottom {
     return _bottom;
   }
-  set bottom(double value) {
+  set bottom(CSSOffset value) {
     if (_bottom == value) return;
     _bottom = value;
   }
 
-  double _left;
-  double get left {
+  CSSOffset _left;
+  CSSOffset get left {
     return _left;
   }
-  set left(double value) {
+  set left(CSSOffset value) {
     if (_left == value) return;
     _left = value;
   }
 
-  double _right;
-  double get right {
+  CSSOffset _right;
+  CSSOffset get right {
     return _right;
   }
-  set right(double value) {
+  set right(CSSOffset value) {
     if (_right == value) return;
     _right = value;
   }
@@ -84,16 +95,16 @@ mixin CSSPositionMixin on RenderStyleBase {
   void updateOffset(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     switch (property) {
       case TOP:
-        top = value;
+        top = CSSOffset(length: value, isAuto: style[TOP] == AUTO);
         break;
       case LEFT:
-        left = value;
+        left = CSSOffset(length: value, isAuto: style[LEFT] == AUTO);
         break;
       case RIGHT:
-        right = value;
+        right = CSSOffset(length: value, isAuto: style[RIGHT] == AUTO);
         break;
       case BOTTOM:
-        bottom = value;
+        bottom = CSSOffset(length: value, isAuto: style[BOTTOM] == AUTO);
         break;
     }
     /// Should mark parent needsLayout directly cause positioned element is rendered as relayoutBoundary
@@ -104,8 +115,12 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   void updatePosition(String property, String present) {
-    position = CSSPositionMixin.parsePositionType(style[POSITION]);
+    RenderStyle renderStyle = this;
+    position = parsePositionType(style[POSITION]);
     zIndex = int.tryParse(present) ?? 0;
+    // Position change may affect transformed display
+    // https://www.w3.org/TR/css-display-3/#transformations
+    renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
   }
 
   static CSSPositionType parsePositionType(String input) {

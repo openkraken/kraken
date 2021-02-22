@@ -83,7 +83,88 @@ JSValueRef DocumentInstance::createComment(JSContextRef ctx, JSObjectRef functio
   return commentNodeInstance;
 }
 
-JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {}
+static std::atomic<bool> event_registered = false;
+static std::atomic<bool> document_registered = false;
+
+JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
+
+  if (!event_registered) {
+    event_registered = true;
+    JSEvent::defineEvent(EVENT_INPUT, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_MEDIA_ERROR, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_MESSAGE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new MessageEventInstance(JSMessageEvent::instance(context), reinterpret_cast<NativeMessageEvent*>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_CLOSE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new CloseEventInstance(JSCloseEvent::instance(context), reinterpret_cast<NativeCloseEvent*>(nativeEvent));;
+    });
+    JSEvent::defineEvent(EVENT_INTERSECTION_CHANGE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_TOUCH_START, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_TOUCH_END, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_TOUCH_MOVE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_TOUCH_CANCEL, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+    });
+  }
+  if (!document_registered) {
+    document_registered = true;
+
+    JSElement::defineElement("img", [](JSContext *context) -> ElementInstance* {
+      return new JSImageElement::ImageElementInstance(JSImageElement::instance(context));
+    });
+    JSElement::defineElement("a", [](JSContext *context) -> ElementInstance* {
+      return new JSAnchorElement::AnchorElementInstance(JSAnchorElement::instance(context));
+    });
+    JSElement::defineElement("canvas", [](JSContext *context) -> ElementInstance* {
+      return new JSCanvasElement::CanvasElementInstance(JSCanvasElement::instance(context));
+    });
+    JSElement::defineElement("input", [](JSContext *context) -> ElementInstance* {
+      return new JSInputElement::InputElementInstance(JSInputElement::instance(context));
+    });
+    JSElement::defineElement("audio", [](JSContext *context) -> ElementInstance* {
+      return new JSAudioElement::AudioElementInstance(JSAudioElement::instance(context));
+    });
+    JSElement::defineElement("video", [](JSContext *context) -> ElementInstance* {
+      return new JSVideoElement::VideoElementInstance(JSVideoElement::instance(context));
+    });
+    JSElement::defineElement("iframe", [](JSContext *context) -> ElementInstance* {
+      return new JSIframeElement::IframeElementInstance(JSIframeElement::instance(context));
+    });
+    JSElement::defineElement("object", [](JSContext *context) -> ElementInstance* {
+      return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
+    });
+    JSElement::defineElement("animation-player", [](JSContext *context) -> ElementInstance* {
+      return new JSAnimationPlayerElement::AnimationPlayerElementInstance(JSAnimationPlayerElement::instance(context));
+    });
+    JSElement::defineElement("span", [](JSContext *context) -> ElementInstance* {
+      return new ElementInstance(JSElement::instance(context), "span", true);
+    });
+    JSElement::defineElement("div", [](JSContext *context) -> ElementInstance* {
+      return new ElementInstance(JSElement::instance(context), "div", true);
+    });
+    JSElement::defineElement("strong", [](JSContext *context) -> ElementInstance* {
+      return new ElementInstance(JSElement::instance(context), "strong", true);
+    });
+    JSElement::defineElement("pre", [](JSContext *context) -> ElementInstance* {
+      return new ElementInstance(JSElement::instance(context), "pre", true);
+    });
+    JSElement::defineElement("p", [](JSContext *context) -> ElementInstance* {
+      return new ElementInstance(JSElement::instance(context), "p", true);
+    });
+  }
+}
 
 JSObjectRef JSDocument::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                             const JSValueRef *arguments, JSValueRef *exception) {
@@ -165,7 +246,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   if (propertyStaticMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) == 0) {
-    return JSNode::NodeInstance::getProperty(name, exception);
+    return NodeInstance::getProperty(name, exception);
   }
 
   DocumentProperty property = propertyMap[name];
@@ -174,7 +255,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   case DocumentProperty::all: {
     auto all = new JSAllCollection(context);
 
-    traverseNode(body, [&all](JSNode::NodeInstance *node) {
+    traverseNode(body, [&all](NodeInstance *node) {
       all->internalAdd(node, nullptr);
       return false;
     });
@@ -202,7 +283,7 @@ DocumentInstance::~DocumentInstance() {
 }
 
 void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-  JSNode::NodeInstance::getPropertyNames(accumulator);
+  NodeInstance::getPropertyNames(accumulator);
 
   for (auto &property : getDocumentPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
@@ -280,7 +361,7 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
 
   std::vector<ElementInstance *> elements;
 
-  traverseNode(document->body, [tagName, &elements](JSNode::NodeInstance *node) {
+  traverseNode(document->body, [tagName, &elements](NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = reinterpret_cast<ElementInstance *>(node);
       if (element->tagName() == tagName) {

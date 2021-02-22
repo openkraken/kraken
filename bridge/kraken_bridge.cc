@@ -212,3 +212,21 @@ void clearUICommandItems(int32_t contextId) {
 void flushUICommandCallback(int64_t contextId) {
   foundation::UICommandCallbackQueue::instance(contextId)->flushCallbacks();
 }
+
+NativeString *NativeString::clone() {
+  NativeString *newNativeString = new NativeString();
+  uint16_t *newString = new uint16_t[length];
+
+  for (size_t i = 0; i < length; i++) {
+    newString[i] = string[i];
+  }
+
+  newNativeString->string = newString;
+  newNativeString->length = length;
+  return newNativeString;
+}
+
+void NativeString::free() {
+  delete[] string;
+  delete this;
+}

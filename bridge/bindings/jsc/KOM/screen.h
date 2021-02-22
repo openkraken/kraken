@@ -6,8 +6,8 @@
 #ifndef KRAKEN_SCREEN_H
 #define KRAKEN_SCREEN_H
 
-#include "bindings/jsc/js_context.h"
-#include "bindings/jsc/host_object.h"
+#include "bindings/jsc/host_object_internal.h"
+#include "bindings/jsc/js_context_internal.h"
 #include <array>
 
 namespace kraken::binding::jsc {

@@ -5,7 +5,6 @@
 
 #include "window.h"
 #include "bindings/jsc/DOM/document.h"
-#include "bindings/jsc/macros.h"
 #include "dart_methods.h"
 #include "foundation/ui_command_queue.h"
 
@@ -29,7 +28,7 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
   if (staticPropertyMap.count(name) > 0) return nullptr;
 
   auto eventTargetStaticPropertyMap = JSEventTarget::getEventTargetStaticPropertyMap();
-  if (eventTargetStaticPropertyMap.count(name) > 0) return JSEventTarget::EventTargetInstance::getProperty(name, exception);
+  if (eventTargetStaticPropertyMap.count(name) > 0) return EventTargetInstance::getProperty(name, exception);
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -83,7 +82,7 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
     }
   }
 
-  JSValueRef eventTargetRet = JSEventTarget::EventTargetInstance::getProperty(name, exception);
+  JSValueRef eventTargetRet = EventTargetInstance::getProperty(name, exception);
   if (eventTargetRet != nullptr) return eventTargetRet;
 
   JSStringHolder keyStringHolder = JSStringHolder(context, name);
