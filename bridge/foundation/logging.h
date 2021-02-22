@@ -8,8 +8,8 @@
 
 #include <sstream>
 
-#include "macros.h"
 #include <string>
+#include "include/kraken_bridge.h"
 
 namespace foundation {
 

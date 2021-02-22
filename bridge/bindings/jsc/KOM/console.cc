@@ -4,7 +4,6 @@
  */
 
 #include "console.h"
-#include "bindings/jsc/macros.h"
 #include "foundation/logging.h"
 #include <sstream>
 
@@ -49,7 +48,7 @@ JSValueRef print(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
 ////////////////
 
 void bindConsole(std::unique_ptr<JSContext> &context) {
-  JSC_GLOBAL_BINDING_FUNCTION(context, KRAKEN_BINDING_CONSOLE, print);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_print__", print);
 }
 
 } // namespace kraken::binding::jsc

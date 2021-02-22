@@ -17,7 +17,21 @@ enum VerticalAlign {
   ///  middle,
 }
 
-class CSSInlineLayout {
+mixin CSSInlineMixin on RenderStyleBase {
+  VerticalAlign _verticalAlign = VerticalAlign.baseline;
+  VerticalAlign get verticalAlign => _verticalAlign;
+  set verticalAlign(VerticalAlign value) {
+    if (value == null) return;
+    if (_verticalAlign != value) {
+      renderBoxModel.markNeedsLayout();
+      _verticalAlign = value;
+    }
+  }
+
+  void updateVerticalAlign(String value) {
+    verticalAlign = parseVerticalAlign(value);
+  }
+
   static VerticalAlign parseVerticalAlign(String verticalAlign) {
     switch (verticalAlign) {
       case TOP:

@@ -8,9 +8,8 @@
 #define FLUTTER_FML_MEMORY_REF_COUNTED_INTERNAL_H_
 
 #include <atomic>
-
 #include "logging.h"
-#include "macros.h"
+#include "include/kraken_bridge.h"
 
 namespace fml {
 namespace internal {

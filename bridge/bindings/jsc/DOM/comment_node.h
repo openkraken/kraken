@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_COMMENT_NODE_H
 
 #include "bindings/jsc/DOM/node.h"
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 
 namespace kraken::binding::jsc {
 

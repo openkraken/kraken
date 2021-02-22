@@ -8,19 +8,18 @@
 
 #include "kraken_bridge.h"
 #include <cstdint>
-#define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void initTestFramework(int32_t contextId);
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 int8_t evaluateTestScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 
 using ExecuteCallback = void *(*)(int32_t contextId, NativeString *status);
 
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void executeTest(int32_t contextId, ExecuteCallback executeCallback);
 
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length);
 
 #endif

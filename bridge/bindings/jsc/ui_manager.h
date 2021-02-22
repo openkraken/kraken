@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_UI_MANAGER_H
 #define KRAKENBRIDGE_UI_MANAGER_H
 
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 
 namespace kraken::binding::jsc {
 void bindUIManager(std::unique_ptr<JSContext> &context);

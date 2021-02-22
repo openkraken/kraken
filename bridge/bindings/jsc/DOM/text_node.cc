@@ -51,7 +51,7 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueR
   auto propertyMap = getTextNodePropertyMap();
 
   if (propertyMap.count(name) == 0) {
-    return JSNode::NodeInstance::getProperty(name, exception);
+    return NodeInstance::getProperty(name, exception);
   }
 
   auto property = propertyMap[name];
@@ -79,7 +79,7 @@ void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
   } else {
-    JSNode::NodeInstance::setProperty(name, value, exception);
+    NodeInstance::setProperty(name, value, exception);
   }
 }
 
