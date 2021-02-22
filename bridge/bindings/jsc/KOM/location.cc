@@ -4,9 +4,7 @@
  */
 
 #include "location.h"
-#include "bindings/jsc/macros.h"
 #include "dart_methods.h"
-#include "foundation/logging.h"
 
 namespace kraken::binding::jsc {
 

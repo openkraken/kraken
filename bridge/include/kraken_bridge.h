@@ -8,32 +8,23 @@
 
 #include <cstdint>
 #include <thread>
-#define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
+
+#if KRAKEN_JSC_ENGINE
+#include "kraken_bridge_jsc.h"
+#endif
+
+#define KRAKEN_EXPORT_C extern "C" __attribute__((visibility("default"))) __attribute__((used))
+#define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
 void *getJSContext(int32_t contextId);
 std::__thread_id getUIThreadId();
 
-struct NativeString {
+struct KRAKEN_EXPORT NativeString {
   const uint16_t *string;
   int32_t length;
 
-  NativeString *clone() {
-    NativeString *newNativeString = new NativeString();
-    uint16_t *newString = new uint16_t[length];
-
-    for (size_t i = 0; i < length; i++) {
-      newString[i] = string[i];
-    }
-
-    newNativeString->string = newString;
-    newNativeString->length = length;
-    return newNativeString;
-  }
-
-  void free() {
-    delete[] string;
-    delete this;
-  }
+  NativeString *clone();
+  void free();
 };
 
 struct KrakenInfo;
@@ -65,22 +56,16 @@ enum UICommand {
   removeProperty
 };
 
-struct UICommandItem {
+struct KRAKEN_EXPORT UICommandItem {
   UICommandItem(int32_t id, int32_t type, NativeString args_01, NativeString args_02, void *nativePtr)
-    : type(type),
-      string_01(reinterpret_cast<int64_t>(args_01.string)),
-      args_01_length(args_01.length),
-      string_02(reinterpret_cast<int64_t>(args_02.string)),
-      args_02_length(args_02.length),
-      id(id),
+    : type(type), string_01(reinterpret_cast<int64_t>(args_01.string)), args_01_length(args_01.length),
+      string_02(reinterpret_cast<int64_t>(args_02.string)), args_02_length(args_02.length), id(id),
       nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
   UICommandItem(int32_t id, int32_t type, NativeString args_01, void *nativePtr)
-    : type(type),
-      string_01(reinterpret_cast<int64_t>(args_01.string)),
-      args_01_length(args_01.length),
-      id(id),
+    : type(type), string_01(reinterpret_cast<int64_t>(args_01.string)), args_01_length(args_01.length), id(id),
       nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
-  UICommandItem(int32_t id, int32_t type, void *nativePtr) : type(type), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+  UICommandItem(int32_t id, int32_t type, void *nativePtr)
+    : type(type), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
   int32_t type;
   int32_t id;
   int32_t args_01_length{0};
@@ -90,41 +75,41 @@ struct UICommandItem {
   int64_t nativePtr{0};
 };
 
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void initJSContextPool(int poolSize);
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void disposeContext(int32_t contextId);
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 int32_t allocateNewContext();
 
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 KrakenInfo *getKrakenInfo();
 
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 UICommandItem *getUICommandItems(int32_t contextId);
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 int64_t getUICommandItemSize(int32_t contextId);
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void clearUICommandItems(int32_t contextId);
 
 bool checkContext(int32_t contextId);
 bool checkContext(int32_t contextId, void *context);
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void flushBridgeTask();
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void flushUICommandCallback(int64_t contextId);
 
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void reloadJsContext(int32_t contextId);
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void invokeEventListener(int32_t contextId, int32_t type, NativeString *code);
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 Screen *createScreen(double width, double height);
 
-KRAKEN_EXPORT
+KRAKEN_EXPORT_C
 void registerDartMethods(uint64_t *methodBytes, int32_t length);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

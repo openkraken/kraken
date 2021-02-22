@@ -4,7 +4,6 @@
  */
 
 #include "dart_methods.h"
-#include "bindings/jsc/macros.h"
 #include "kraken_bridge.h"
 #include <memory>
 
