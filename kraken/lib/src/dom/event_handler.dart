@@ -34,6 +34,8 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onClick = null;
     renderBoxModel.onSwipe = null;
     renderBoxModel.onPan = null;
+    renderBoxModel.onScale = null;
+    renderBoxModel.onLongPress = null;
   }
 
   void handlePointDown(PointerDownEvent pointEvent) {
