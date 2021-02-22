@@ -422,6 +422,10 @@ class Element extends Node
       detach();
     }
 
+    if (parentElement != null) {
+      parentNode.removeChild(this);
+    }
+
     assert(renderBoxModel == null);
     // assert(renderBoxModel != null && renderBoxModel.parent == null);
     // Remove native reference.
