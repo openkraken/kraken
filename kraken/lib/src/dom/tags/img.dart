@@ -202,7 +202,7 @@ class ImageElement extends Element {
 
   /// Convert RenderIntrinsic to non repaint boundary
   void _convertToNonRepaint() {
-    if (renderBoxModel.isRepaintBoundary) {
+    if (renderBoxModel != null && renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;
       RenderBoxModel nonRepaintSelfBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: false);
       if (parent is ContainerRenderObjectMixin) {
@@ -221,7 +221,7 @@ class ImageElement extends Element {
 
   /// Convert RenderIntrinsic to repaint boundary
   void _convertToRepaint() {
-    if (!renderBoxModel.isRepaintBoundary) {
+    if (renderBoxModel != null && !renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;
       RenderBoxModel repaintSelfBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
       if (parent is ContainerRenderObjectMixin) {
