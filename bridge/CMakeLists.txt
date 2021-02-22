@@ -69,10 +69,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   endif ()
 
   list(APPEND BRIDGE_SOURCE
-          bindings/jsc/js_context_internal.h
-          bindings/jsc/js_context_internal.cc
-          bindings/jsc/host_object_internal.cc
-          bindings/jsc/host_object_internal.h
+    bindings/jsc/js_context_internal.h
+    bindings/jsc/js_context_internal.cc
+    bindings/jsc/host_object_internal.cc
+    bindings/jsc/host_object_internal.h
     bindings/jsc/host_class.cc
     bindings/jsc/host_class.h
     bindings/jsc/kraken.h
