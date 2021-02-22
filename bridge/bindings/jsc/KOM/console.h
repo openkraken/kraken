@@ -6,9 +6,9 @@
 #ifndef KRAKEN_JS_BINDINGS_CONSOLE_H_
 #define KRAKEN_JS_BINDINGS_CONSOLE_H_
 
+#include "bindings/jsc/js_context_internal.h"
 #include "foundation/logging.h"
 #include <memory>
-#include "bindings/jsc/js_context.h"
 
 namespace kraken::binding::jsc {
 

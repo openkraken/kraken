@@ -4,9 +4,8 @@
  */
 
 #include "kraken.h"
-#include "bindings/jsc/macros.h"
+#include "bindings/jsc/js_context_internal.h"
 #include "kraken_bridge.h"
-#include "bindings/jsc/js_context.h"
 #include <unordered_map>
 
 namespace kraken::binding::jsc {

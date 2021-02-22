@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 
 namespace kraken::binding::jsc {
 void bindKraken(std::unique_ptr<JSContext> &context);

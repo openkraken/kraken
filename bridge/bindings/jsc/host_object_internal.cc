@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "host_object.h"
+#include "host_object_internal.h"
 #include "foundation/logging.h"
 
 namespace kraken::binding::jsc {
