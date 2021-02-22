@@ -22,6 +22,7 @@ const String _kEllipsis = '\u2026';
 /// Flutter's paragraph line-height calculation logic differs from web's
 /// Use multiple line text painters to controll the leading of font in paint stage
 /// A render object that displays a paragraph of text.
+/// W3C line-height spec: https://www.w3.org/TR/css-inline-3/#inline-height
 class KrakenRenderParagraph extends RenderBox
   with ContainerRenderObjectMixin<RenderBox, TextParentData>,
     RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
@@ -560,6 +561,13 @@ class KrakenRenderParagraph extends RenderBox
     int index = -1;
     // Loop through each text box
     for (TextBox box in boxes) {
+      // Text include ideographic characters such as Chinese may be counted as seperated text box
+      // if font-family not specified, it needs to filter text box not started from 0 such as following:
+      // TextBox.fromLTRBD(14.0, 1.7, 39.1, 18.2, TextDirection.ltr)
+      if (box.left != 0) {
+        continue;
+      }
+
       index += 1;
       if (index == 0)
         continue;

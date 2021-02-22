@@ -34,10 +34,10 @@ class _RunMetrics {
 class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout(
       {List<RenderBox> children,
-      CSSStyleDeclaration style,
+      RenderStyle renderStyle,
       int targetId,
       ElementManager elementManager})
-      : super(targetId: targetId, style: style, elementManager: elementManager) {
+      : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager) {
     addAll(children);
   }
 
@@ -411,9 +411,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double marginVertical = 0;
 
     if (child is RenderBoxModel) {
-      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft + childRenderBoxModel.renderStyle.marginRight;
-      marginVertical = childRenderBoxModel.renderStyle.marginTop + childRenderBoxModel.renderStyle.marginBottom;
+      marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
+      marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
     }
 
     Size childSize = _getChildSize(child);
@@ -427,22 +426,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     return 0.0;
   }
 
-
-  RenderBoxModel _getChildRenderBoxModel(RenderBoxModel child) {
-    Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
-    RenderBoxModel renderBoxModel = childEl.renderBoxModel;
-    return renderBoxModel;
-  }
-
   double _getCrossAxisExtent(RenderBox child) {
     double lineHeight = _getLineHeight(child);
     double marginVertical = 0;
     double marginHorizontal = 0;
 
     if (child is RenderBoxModel) {
-      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-      marginHorizontal = childRenderBoxModel.renderStyle.marginLeft + childRenderBoxModel.renderStyle.marginRight;
-      marginVertical = childRenderBoxModel.renderStyle.marginTop + childRenderBoxModel.renderStyle.marginBottom;
+      marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
+      marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
     }
     Size childSize = _getChildSize(child);
     switch (direction) {
@@ -503,6 +494,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_START, uniqueId: targetId);
     }
 
+    CSSDisplay display = renderStyle.display;
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {
@@ -534,7 +526,12 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
 
-        setMaximumScrollableSizeForPositionedChild(childParentData, child);
+        setScrollableSize(childParentData, child);
+
+        // For scrolling box, the minimum width and height should not less than scrollableSize
+        if (isScrollingContentBox) {
+          ensureBoxSizeLargerThanScrollableSize();
+        }
       }
       child = childParentData.nextSibling;
     }
@@ -573,7 +570,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         } else if (percentageToContainingBlockFound == true || percentageToOwnFound == true ) {
           _layoutPositionedChild(child);
         }
-        setMaximumScrollableSizeForPositionedChild(childParentData, child);
+        setScrollableSize(childParentData, child);
       }
       child = childParentData.nextSibling;
     }
@@ -591,7 +588,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     final double contentWidth = RenderBoxModel.getContentWidth(this);
     final double contentHeight = RenderBoxModel.getContentHeight(this);
 
-    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
 
     double width = renderStyle.width;
     double height = renderStyle.height;
@@ -604,8 +601,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (childCount == 0) {
       double constraintWidth = contentWidth ?? 0;
       double constraintHeight = contentHeight ?? 0;
-      bool isInline = realDisplay == CSSDisplay.inline;
-      bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+      bool isInline = transformedDisplay == CSSDisplay.inline;
+      bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
 
       if (!isInline) {
         // Base width when width no exists, inline-block has width of 0
@@ -734,8 +731,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
 
       if (runChildren.length > 0 &&
-          (_isBlockElement(child) ||
-              _isBlockElement(preChild) ||
+          (_isChildBlockLevel(child) ||
+              _isChildBlockLevel(preChild) ||
               (runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit))) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
@@ -757,8 +754,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         runMainAxisExtent += spacing;
       }
       /// Calculate baseline extent of layout box
-      CSSStyleDeclaration childStyle = _getChildStyle(child);
-      VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
+      RenderStyle childRenderStyle = _getChildRenderStyle(child);
+      VerticalAlign verticalAlign = childRenderStyle.verticalAlign;
+
       bool isLineHeightValid = _isLineHeightValid(child);
 
       // Vertical align is only valid for inline box
@@ -766,9 +764,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginTop = 0;
         double childMarginBottom = 0;
         if (child is RenderBoxModel) {
-          RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-          childMarginTop = childRenderBoxModel.renderStyle.marginTop;
-          childMarginBottom = childRenderBoxModel.renderStyle.marginBottom;
+          childMarginTop = child.renderStyle.marginTop.length;
+          childMarginBottom = child.renderStyle.marginBottom.length;
         }
 
         Size childSize = _getChildSize(child);
@@ -781,6 +778,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         // When baseline of children not found, use boundary of margin bottom as baseline
         double childAscent = _getChildAscent(child);
+
         double extentAboveBaseline = childAscent + childLeading / 2;
         double extentBelowBaseline = childMarginTop + childSize.height + childMarginBottom
          - childAscent + childLeading / 2;
@@ -805,6 +803,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       child = childParentData.nextSibling;
     }
 
+
     if (runChildren.length > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
@@ -821,7 +820,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Default to children's width
     double constraintWidth = mainAxisExtent;
-    bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
 
     // Constrain to min-width or max-width if width not exists
     if (isInlineBlock && maxWidth != null && width == null) {
@@ -834,7 +833,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Default to children's height
     double constraintHeight = crossAxisExtent;
-    bool isNotInline = realDisplay != CSSDisplay.inline;
+    bool isNotInline = transformedDisplay != CSSDisplay.inline;
 
     // Constrain to min-height or max-height if width not exists
     if (isNotInline && maxHeight != null && height == null) {
@@ -950,17 +949,17 @@ class RenderFlowLayout extends RenderLayoutBox {
         // between element and its containing block on block-level element
         // which is not positioned and computed to 0px in other cases
         if (child is RenderBoxModel) {
-          CSSDisplay childRealDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
-          CSSStyleDeclaration childStyle = child.style;
-          String marginLeft = childStyle[MARGIN_LEFT];
-          String marginRight = childStyle[MARGIN_RIGHT];
+          RenderStyle childRenderStyle = child.renderStyle;
+          CSSDisplay childTransformedDisplay = childRenderStyle.transformedDisplay;
+          CSSMargin marginLeft = childRenderStyle.marginLeft;
+          CSSMargin marginRight = childRenderStyle.marginRight;
 
           // 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' +
           // 'border-right-width' + 'margin-right' = width of containing block
-          if (childRealDisplay == CSSDisplay.block || childRealDisplay == CSSDisplay.flex) {
-            if (marginLeft == AUTO) {
+          if (childTransformedDisplay == CSSDisplay.block || childTransformedDisplay == CSSDisplay.flex) {
+            if (marginLeft.isAuto) {
               double remainingSpace = mainAxisContentSize - childMainAxisExtent;
-              if (marginRight == AUTO) {
+              if (marginRight.isAuto) {
                 childMainPosition = remainingSpace / 2;
               } else {
                 childMainPosition = remainingSpace;
@@ -975,7 +974,6 @@ class RenderFlowLayout extends RenderLayoutBox {
             ? 0
             : _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
-        CSSStyleDeclaration childStyle = _getChildStyle(child);
 
         Size childSize = _getChildSize(child);
         // Line height of child
@@ -993,7 +991,8 @@ class RenderFlowLayout extends RenderLayoutBox {
           // Distance from top to baseline of child
           double childAscent = _getChildAscent(child);
 
-          VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
+          RenderStyle childRenderStyle = _getChildRenderStyle(child);
+          VerticalAlign verticalAlign = childRenderStyle.verticalAlign;
 
           // Leading between height of line box's content area and line height of line box
           double lineBoxLeading = 0;
@@ -1023,10 +1022,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginLeft = 0;
         double childMarginTop = 0;
         if (child is RenderBoxModel) {
-          Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
-          RenderBoxModel renderBoxModel = childEl.renderBoxModel;
-          childMarginLeft = renderBoxModel.renderStyle.marginLeft;
-          childMarginTop = renderBoxModel.renderStyle.marginTop;
+          childMarginLeft = child.renderStyle.marginLeft.length;
+          childMarginTop = child.renderStyle.marginTop.length;
         }
 
         Offset relativeOffset = _getOffset(
@@ -1034,7 +1031,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           crossAxisOffset + childLineExtent + renderStyle.paddingTop + renderStyle.borderTop + childMarginTop
         );
         /// Apply position relative offset change.
-        CSSPositionedLayout.applyRelativeOffset(relativeOffset, child, childStyle);
+        CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
 
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
@@ -1229,16 +1226,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       double runMainExtent = 0;
       void iterateRunChildren(int targetId, RenderBox runChild) {
         double runChildMainSize = runChild.size.width;
-        // Decendants with percentage main size should not include in auto main size
-        if (runChild is RenderBoxModel) {
-          String mainSize = runChild.style[WIDTH];
-          String mainMinSize = runChild.style[MIN_WIDTH];
-          if (CSSLength.isPercentage(mainSize) ||
-            (mainSize.isEmpty && CSSLength.isPercentage(mainMinSize))
-          ) {
-            runChildMainSize = 0;
-          }
-        }
         runMainExtent += runChildMainSize;
       }
       runChildren.forEach(iterateRunChildren);
@@ -1275,8 +1262,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double childMarginTop = 0;
     double childMarginBottom = 0;
     if (child is RenderBoxModel) {
-      childMarginTop = child.renderStyle.marginTop;
-      childMarginBottom = child.renderStyle.marginBottom;
+      childMarginTop = child.renderStyle.marginTop.length;
+      childMarginBottom = child.renderStyle.marginBottom.length;
     }
 
     Size childSize = _getChildSize(child);
@@ -1305,63 +1292,35 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (child is RenderTextBox) {
       return true;
     } else if (child is RenderBoxModel) {
-      CSSStyleDeclaration childStyle = _getChildStyle(child);
-      String childDisplay = childStyle['display'];
-      return childDisplay.startsWith('inline');
+      CSSDisplay childDisplay = child.renderStyle.display;
+      return childDisplay == CSSDisplay.inline ||
+        childDisplay == CSSDisplay.inlineBlock ||
+        childDisplay == CSSDisplay.inlineFlex;
     }
     return false;
   }
 
-  CSSStyleDeclaration _getChildStyle(RenderBox child) {
-    CSSStyleDeclaration childStyle;
-    int childNodeId;
+  RenderStyle _getChildRenderStyle(RenderBox child) {
+    RenderStyle childRenderStyle;
     if (child is RenderTextBox) {
-      childNodeId = targetId;
+      childRenderStyle = renderStyle;
     } else if (child is RenderBoxModel) {
-      childNodeId = child.targetId;
+      childRenderStyle = child.renderStyle;
     } else if (child is RenderPositionHolder) {
-      childNodeId = child.realDisplayedBox?.targetId;
+      childRenderStyle = child.realDisplayedBox.renderStyle;
     }
-    childStyle = elementManager.getEventTargetByTargetId<Element>(childNodeId)?.style;
-    return childStyle;
+    return childRenderStyle;
   }
 
-  String _getChildDisplayFromRenderBox(RenderBox child) {
-    String display = 'inline'; // Default value.
-    int targetId;
-    if (child is RenderFlowLayout) targetId = child.targetId;
-    if (child is RenderBoxModel) targetId = child.targetId;
-    if (child is RenderPositionHolder) targetId = child.realDisplayedBox?.targetId;
-
-    if (targetId != null) {
-      // @TODO: need to remove this after RenderObject merge have completed.
-      Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
-      if (element != null) {
-        String elementDisplayDeclaration = element.style['display'];
-        display = CSSStyleDeclaration.isNullOrEmptyValue(elementDisplayDeclaration)
-            ? element.defaultDisplay
-            : element.style['display'];
-
-        // @HACK: Use inline to impl flexWrap in with flex layout.
-        // @TODO: need to remove this after RenderObject merge have completed.
-        Element currentElement = elementManager.getEventTargetByTargetId<Element>(this.targetId);
-        String currentElementDisplay =
-            CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? currentElement.defaultDisplay : style['display'];
-        if (currentElementDisplay.endsWith('flex') && style['flexWrap'] == 'wrap') {
-          display = 'inline';
-        }
-      }
+  bool _isChildBlockLevel(RenderBox child) {
+    if (child is RenderTextBox) {
+      return false;
+    } else {
+      RenderStyle childRenderStyle = _getChildRenderStyle(child);
+      CSSDisplay childDisplay = childRenderStyle.display;
+      return childDisplay == CSSDisplay.block ||
+        childDisplay == CSSDisplay.flex;
     }
-
-    return display;
-  }
-
-  bool _isBlockElement(RenderBox child) {
-    List<String> blockTypes = [
-      'block',
-      'flex',
-    ];
-    return blockTypes.contains(_getChildDisplayFromRenderBox(child));
   }
 
   @override
@@ -1429,7 +1388,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderRecyclerLayout layout = RenderRecyclerLayout(
         targetId: targetId,
-        style: style,
+        renderStyle: renderStyle,
         elementManager: elementManager
     );
     layout.addAll(children);
@@ -1442,7 +1401,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderFlexLayout flexLayout = RenderFlexLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(flexLayout);
@@ -1454,7 +1413,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(selfRepaintFlowLayout);
@@ -1466,7 +1425,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(selfRepaintFlexLayout);
@@ -1479,8 +1438,8 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     List<RenderBox> children,
     int targetId,
     ElementManager elementManager,
-    CSSStyleDeclaration style,
-  }): super(children: children, targetId: targetId, elementManager: elementManager, style: style);
+    RenderStyle renderStyle,
+  }): super(children: children, targetId: targetId, elementManager: elementManager, renderStyle: renderStyle);
 
   @override
   bool get isRepaintBoundary => true;
@@ -1491,7 +1450,7 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(selfRepaintFlexLayout);
@@ -1503,7 +1462,7 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(renderFlowLayout);
@@ -1515,7 +1474,7 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
       children: children,
       targetId: targetId,
-      style: style,
+      renderStyle: renderStyle,
       elementManager: elementManager
     );
     return copyWith(renderFlexLayout);

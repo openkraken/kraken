@@ -8,19 +8,56 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/gesture.dart';
-import 'package:kraken/rendering.dart';
-import 'ticker_provider.dart';
+import 'gesture_detector.dart';
+import 'monodrag.dart';
+import 'scroll_activity.dart';
+import 'scroll_context.dart';
+import 'scroll_physics.dart';
+import 'scroll_position.dart';
+import 'scroll_position_with_single_context.dart';
 
-typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
-typedef PointListener = void Function(PointerEvent event);
+typedef _ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
 
-class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollContext {
+mixin _CustomTickerProviderStateMixin implements TickerProvider {
+  Set<Ticker> _tickers;
+
+  @override
+  Ticker createTicker(TickerCallback onTick) {
+    _tickers ??= <_CustomTicker>{};
+    final _CustomTicker result = _CustomTicker(onTick, this, debugLabel: 'created by $this');
+    _tickers.add(result);
+    return result;
+  }
+
+  void _removeTicker(_CustomTicker ticker) {
+    assert(_tickers != null);
+    assert(_tickers.contains(ticker));
+    _tickers.remove(ticker);
+  }
+}
+
+// This class should really be called _DisposingTicker or some such, but this
+// class name leaks into stack traces and error messages and that name would be
+// confusing. Instead we use the less precise but more anodyne "_WidgetTicker",
+// which attracts less attention.
+class _CustomTicker extends Ticker {
+  _CustomTicker(TickerCallback onTick, this._creator, {String debugLabel}) : super(onTick, debugLabel: debugLabel);
+
+  final _CustomTickerProviderStateMixin _creator;
+
+  @override
+  void dispose() {
+    _creator._removeTicker(this);
+    super.dispose();
+  }
+}
+
+class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollContext {
   AxisDirection _axisDirection;
   ScrollPosition position;
   ScrollPhysics _physics = BouncingScrollPhysics();
   DragStartBehavior dragStartBehavior;
-  ScrollListener scrollListener;
+  _ScrollListener scrollListener;
 
   KrakenScrollable({
     AxisDirection axisDirection = AxisDirection.down,
@@ -201,8 +238,8 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
 }
 
 mixin RenderOverflowMixin on RenderBox {
-  ScrollListener scrollListener;
-  PointListener pointerListener;
+  _ScrollListener scrollListener;
+  void Function(PointerEvent) pointerListener;
 
   bool _clipX = false;
   bool get clipX => _clipX;

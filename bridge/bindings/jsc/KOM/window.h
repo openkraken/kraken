@@ -6,7 +6,7 @@
 #define KRAKEN_JS_BINDINGS_WINDOW_H_
 
 #include "bindings/jsc/DOM/event_target.h"
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 #include "location.h"
 
 #include <array>
@@ -31,7 +31,7 @@ private:
   ~JSWindow();
 };
 
-class WindowInstance : public JSEventTarget::EventTargetInstance {
+class WindowInstance : public EventTargetInstance {
 public:
   DEFINE_OBJECT_PROPERTY(Window, 11, devicePixelRatio, colorScheme, __location__, window, history, parent, scroll,
                          scrollBy, scrollTo, scrollX, scrollY)

@@ -52,6 +52,11 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         Kraken kraken = Kraken.get(flutterEngine);
+        if (kraken == null) {
+          result.notImplemented();
+          return;
+        }
+
         if (call.method.equals("getUrl")) {
             result.success(kraken == null ? "" : kraken.getUrl());
         } else if (call.method.equals("invokeMethod")) {
@@ -68,7 +73,9 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
-        Kraken.get(flutterEngine).destory();
+        Kraken kraken = Kraken.get(flutterEngine);
+        if (kraken == null) return;
+        kraken.destory();
         flutterEngine = null;
     }
 }
