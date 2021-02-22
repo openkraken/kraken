@@ -84,7 +84,7 @@ void JSAnchorElement::AnchorElementInstance::getPropertyNames(JSPropertyNameAccu
 }
 
 JSAnchorElement::AnchorElementInstance::~AnchorElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeAnchorElement *>(ptr);
   }, nativeAnchorElement);
   if (_target != nullptr) JSStringRelease(_target);

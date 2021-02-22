@@ -126,7 +126,7 @@ void JSImageElement::ImageElementInstance::getPropertyNames(JSPropertyNameAccumu
 }
 
 JSImageElement::ImageElementInstance::~ImageElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeImageElement *>(ptr);
   }, nativeImageElement);
 }

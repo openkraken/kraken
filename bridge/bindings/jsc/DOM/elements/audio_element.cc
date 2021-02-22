@@ -32,7 +32,7 @@ JSAudioElement::AudioElementInstance::AudioElementInstance(JSAudioElement *jsAud
 }
 
 JSAudioElement::AudioElementInstance::~AudioElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeAudioElement *>(ptr);
   }, nativeAudioElement);
 }

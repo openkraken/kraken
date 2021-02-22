@@ -20,7 +20,7 @@ public:
   using Callback = void(*)(void*);
   UICommandCallbackQueue() = default;
 
-  static UICommandCallbackQueue *instance(int32_t contextId);
+  static UICommandCallbackQueue *instance();
   void registerCallback(const Callback &callback, void *data);
   void flushCallbacks();
 private:

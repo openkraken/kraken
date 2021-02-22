@@ -171,7 +171,7 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
 ElementInstance::~ElementInstance() {
   if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
 
-  ::foundation::UICommandCallbackQueue::instance(contextId)
+  ::foundation::UICommandCallbackQueue::instance()
     ->registerCallback([](void *ptr) { delete reinterpret_cast<NativeElement *>(ptr); }, nativeElement);
 }
 
@@ -815,6 +815,8 @@ JSValueRef ElementInstance::getStringValueProperty(std::string &name) {
   NativeString* returnedString = nativeElement->getStringValueProperty(nativeElement, nativeString);
   JSStringRef returnedStringRef = JSStringCreateWithCharacters(returnedString->string, returnedString->length);
   JSStringRelease(stringRef);
+  returnedString->free();
+  nativeString->free();
   return JSValueMakeString(_hostClass->ctx, returnedStringRef);
 }
 

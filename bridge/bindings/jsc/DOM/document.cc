@@ -206,7 +206,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
 }
 
 DocumentInstance::~DocumentInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeDocument *>(ptr);
   }, nativeDocument);
   instanceMap.erase(context);

@@ -35,7 +35,7 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback(
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback(
     [](void *ptr) { delete reinterpret_cast<NativeCanvasElement *>(ptr); }, nativeCanvasElement);
 }
 
@@ -147,7 +147,7 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::CanvasRenderingConte
   : Instance(canvasRenderContext2D), nativeCanvasRenderingContext2D(nativeCanvasRenderingContext2D) {}
 
 CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingContext2DInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback(
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback(
     [](void *ptr) { delete reinterpret_cast<NativeCanvasRenderingContext2D *>(ptr); }, nativeCanvasRenderingContext2D);
 }
 

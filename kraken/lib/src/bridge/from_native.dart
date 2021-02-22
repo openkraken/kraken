@@ -79,7 +79,9 @@ String invokeModule(
 
   try {
     result = controller.module.moduleManager.invokeModule(module, args, (String json) {
-      callback(callbackContext, contextId, stringToNativeString(json));
+      Pointer<NativeString> callbackData = stringToNativeString(json);
+      callback(callbackContext, contextId, callbackData);
+      freeNativeString(callbackData);
     });
   } catch (e, stack) {
     // Dart side internal error should print it directly.
