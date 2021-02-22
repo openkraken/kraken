@@ -23,6 +23,7 @@ void bindEvent(std::unique_ptr<JSContext> &context) {
 };
 
 std::unordered_map<JSContext *, JSEvent *> JSEvent::instanceMap{};
+std::unordered_map<std::string, EventCreator> JSEvent::eventCreatorMap{};
 
 JSEvent::~JSEvent() {
   instanceMap.erase(context);
@@ -63,6 +64,13 @@ JSValueRef JSEvent::initWithNativeEvent(JSContextRef ctx, JSObjectRef function, 
   return event->object;
 }
 
+void JSEvent::defineEvent(std::string eventType, EventCreator creator) {
+  if (eventCreatorMap.count(eventType) > 0) {
+    return;
+  }
+
+  eventCreatorMap[eventType] = creator;
+}
 JSValueRef JSEvent::getProperty(std::string &name, JSValueRef *exception) {
   if (name == "__initWithNativeEvent__") {
     return m_initWithNativeEvent.function();
@@ -114,13 +122,13 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
   case JSEvent::EventProperty::target:
   case JSEvent::EventProperty::srcElement:
     if (nativeEvent->target != nullptr) {
-      auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->target);
+      auto instance = reinterpret_cast<EventTargetInstance *>(nativeEvent->target);
       return instance->object;
     }
     return JSValueMakeNull(_hostClass->ctx);
   case JSEvent::EventProperty::currentTarget:
     if (nativeEvent->currentTarget != nullptr) {
-      auto instance = reinterpret_cast<JSEventTarget::EventTargetInstance *>(nativeEvent->currentTarget);
+      auto instance = reinterpret_cast<EventTargetInstance *>(nativeEvent->currentTarget);
       return instance->object;
     }
     return JSValueMakeNull(_hostClass->ctx);
@@ -209,6 +217,8 @@ EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *co
     eventInstance = new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
   } else if (eventType == EVENT_SWIPE || eventType == EVENT_PAN || eventType == EVENT_LONG_PRESS || eventType == EVENT_SCALE) {
     eventInstance = new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent*>(nativeEvent));
+  } else if (eventCreatorMap.count(eventType) > 0) {
+    eventInstance = eventCreatorMap[eventType](context, nativeEvent);
   } else {
     eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
   }

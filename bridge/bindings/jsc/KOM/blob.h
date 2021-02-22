@@ -6,7 +6,7 @@
 #define KRAKENBRIDGE_BLOB_H
 
 #include "bindings/jsc/host_class.h"
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 #include <memory>
 #include <unordered_map>
 #include <utility>

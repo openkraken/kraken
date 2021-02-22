@@ -4,7 +4,6 @@
  */
 
 #include "ui_manager.h"
-#include "bindings/jsc/macros.h"
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"

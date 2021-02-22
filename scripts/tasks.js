@@ -316,37 +316,6 @@ task('pub-get', (done) => {
   done()
 });
 
-task('macos-pack', (done) => {
-  const { version } = require(join(paths.cli, 'package.json'));
-  const filename = `kraken-${platform}-${version}.tar.gz`;
-  const fileFullPath = join(paths.targets, filename);
-  const source = join(paths.targets, platform);
-  // Make sure packed file not exists.
-  rimraf.sync(fileFullPath);
-
-  try {
-    // Ignore lib files, which is already copied to app shared frameworks.
-    execSync(`tar --exclude ./${platform}/lib -zcvf ${filename} ./${platform}`, {
-      cwd: paths.targets,
-      stdio: 'inherit',
-    });
-    done();
-  } catch (err) {
-    done(err.message);
-  }
-});
-
-task('macos-upload', (done) => {
-  const { version } = require(join(paths.cli, 'package.json'));
-  const filename = `kraken-${platform}-${version}.tar.gz`;
-  const fileFullPath = join(paths.targets, filename);
-  execSync(`node oss.js --ak ${process.env.OSS_AK} --sk ${process.env.OSS_SK} -s ${fileFullPath} -n ${filename}`, {
-    cwd: paths.scripts,
-    stdio: 'inherit'
-  });
-  done();
-});
-
 task('integration-test', (done) => {
   const { status } = spawnSync('npm', ['run', 'test'], {
     stdio: 'inherit',

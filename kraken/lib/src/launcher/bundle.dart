@@ -15,7 +15,6 @@ const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
-const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
 
 String getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
@@ -44,17 +43,12 @@ abstract class KrakenBundle {
 
   static Future<KrakenBundle> getBundle(String path, {String contentOverride}) async {
     KrakenBundle bundle;
+    Uri uri = path != null ? Uri.parse(path) : null;
     if (contentOverride != null && contentOverride.isNotEmpty) {
-      bundle = RawBundle(contentOverride, null);
+      bundle = RawBundle(contentOverride, uri);
     } else {
-      if (path == null) {
-        path = DEFAULT_BUNDLE_PATH;
-      }
-
       // Treat empty scheme as https.
       if (path.startsWith('//')) path = 'https' + path;
-
-      Uri uri = Uri.parse(path);
 
       if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
         bundle = NetworkBundle(uri);
@@ -70,7 +64,7 @@ abstract class KrakenBundle {
     return bundle;
   }
 
-  Future<void> run(int contextId) async {
+  Future<void> eval(int contextId) async {
     if (!isResolved) await resolve();
 
     if (kProfileMode) {
