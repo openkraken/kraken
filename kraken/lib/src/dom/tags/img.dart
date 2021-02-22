@@ -110,6 +110,7 @@ class ImageElement extends Element {
   @override
   void dispose() {
     super.dispose();
+    _removeStreamListener();
     _image = null;
     _imageBox = null;
     _imageStream = null;
