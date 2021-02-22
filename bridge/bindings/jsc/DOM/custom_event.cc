@@ -125,7 +125,7 @@ JSValueRef CustomEventInstance::initCustomEvent(JSContextRef ctx, JSObjectRef fu
 }
 
 CustomEventInstance::~CustomEventInstance() {
-  nativeCustomEvent->detail->free();
+  if (nativeCustomEvent->detail != nullptr) nativeCustomEvent->detail->free();
   delete nativeCustomEvent;
 }
 
