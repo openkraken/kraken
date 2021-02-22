@@ -25,6 +25,7 @@ double computeSwipeSlop(PointerDeviceKind kind) {
     case PointerDeviceKind.touch:
       return kSwipeSlop;
   }
+  return kSwipeSlop;
 }
 
 typedef GestureSwipeCancelCallback = void Function();
@@ -255,8 +256,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state != _SwipeState.accepted) {
       _state = _SwipeState.accepted;
       final OffsetPair delta = _pendingDragOffset;
-      final Duration timestamp = _lastPendingEventTimestamp;
-      final Matrix4 transform = _lastTransform;
       if (dragStartBehavior == DragStartBehavior.start) {
         _initialPosition = _initialPosition + delta;
       }
