@@ -124,11 +124,9 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   _SwipeState _state = _SwipeState.ready;
   OffsetPair _initialPosition;
   OffsetPair _pendingDragOffset;
-  Duration _lastPendingEventTimestamp;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int _initialButtons;
-  Matrix4 _lastTransform;
 
   String _direction;
 
@@ -190,8 +188,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       _pendingDragOffset = OffsetPair.zero;
       _globalHorizontalDistanceMoved = 0.0;
       _globalVerticalDistanceMoved= 0.0;
-      _lastPendingEventTimestamp = event.timeStamp;
-      _lastTransform = event.transform;
     } else if (_state == _SwipeState.accepted) {
       resolve(GestureDisposition.accepted);
     }
@@ -214,8 +210,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       }
 
       _pendingDragOffset += OffsetPair(local: event.localDelta, global: event.delta);
-      _lastPendingEventTimestamp = event.timeStamp;
-      _lastTransform = event.transform;
 
       final Matrix4 localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform);
 
@@ -260,8 +254,6 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
         _initialPosition = _initialPosition + delta;
       }
       _pendingDragOffset = OffsetPair.zero;
-      _lastPendingEventTimestamp = null;
-      _lastTransform = null;
     }
   }
 
