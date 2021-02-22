@@ -6,7 +6,6 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/dom.dart';
 
 class RenderStyle
   with
@@ -18,8 +17,12 @@ class RenderStyle
     CSSTextMixin,
     CSSPositionMixin,
     CSSTransformMixin,
+    CSSContentVisibilityMixin,
     CSSFlexboxMixin,
     CSSFlowMixin,
+    CSSDisplayMixin,
+    CSSInlineMixin,
+    CSSSliverMixin,
     CSSOpacityMixin {
 
   RenderBoxModel renderBoxModel;
@@ -27,9 +30,11 @@ class RenderStyle
   Size viewportSize;
 
   RenderStyle(
-    this.renderBoxModel,
-    this.style,
-    this.viewportSize,
+    {
+      this.renderBoxModel,
+      this.style,
+      this.viewportSize,
+    }
   );
 
   /// Resolve percentage size to px base on size of its containing block
@@ -470,11 +475,9 @@ class RenderStyle
   BoxConstraints getConstraints() {
     double constraintWidth = width ?? double.infinity;
     double constraintHeight = height ?? double.infinity;
-    int targetId = renderBoxModel.targetId;
-    ElementManager elementManager = renderBoxModel.elementManager;
-    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    bool isInline = realDisplay == CSSDisplay.inline;
-    bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+    CSSDisplay transformedDisplay = renderBoxModel.renderStyle.transformedDisplay;
+    bool isInline = transformedDisplay == CSSDisplay.inline;
+    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
 
     if (!isInline) {
       // Base width when width no exists, inline-block has width of 0

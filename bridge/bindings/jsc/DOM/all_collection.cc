@@ -64,12 +64,12 @@ JSValueRef JSAllCollection::add(JSContextRef ctx, JSObjectRef function, JSObject
     beforeRef = JSValueToObject(ctx, arguments[1], exception);
   }
 
-  auto nodeInstance = reinterpret_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeRef));
+  auto nodeInstance = reinterpret_cast<NodeInstance *>(JSObjectGetPrivate(nodeRef));
   auto collection = reinterpret_cast<JSAllCollection *>(JSObjectGetPrivate(function));
-  JSNode::NodeInstance *beforeInstance = nullptr;
+  NodeInstance *beforeInstance = nullptr;
 
   if (beforeRef != nullptr) {
-    beforeInstance = reinterpret_cast<JSNode::NodeInstance *>(JSObjectGetPrivate(nodeRef));
+    beforeInstance = reinterpret_cast<NodeInstance *>(JSObjectGetPrivate(nodeRef));
   }
 
   collection->internalAdd(nodeInstance, beforeInstance);
@@ -92,7 +92,7 @@ JSValueRef JSAllCollection::remove(JSContextRef ctx, JSObjectRef function, JSObj
   return nullptr;
 }
 
-void JSAllCollection::internalAdd(JSNode::NodeInstance *node, JSNode::NodeInstance *before) {
+void JSAllCollection::internalAdd(NodeInstance *node, NodeInstance *before) {
   if (before != nullptr) {
     auto it = std::find(m_nodes.begin(), m_nodes.end(), before);
     m_nodes.erase(it);

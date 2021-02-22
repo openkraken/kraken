@@ -43,14 +43,12 @@ abstract class KrakenBundle {
 
   static Future<KrakenBundle> getBundle(String path, {String contentOverride}) async {
     KrakenBundle bundle;
+    Uri uri = path != null ? Uri.parse(path) : null;
     if (contentOverride != null && contentOverride.isNotEmpty) {
-      bundle = RawBundle(contentOverride, null);
+      bundle = RawBundle(contentOverride, uri);
     } else {
-
       // Treat empty scheme as https.
       if (path.startsWith('//')) path = 'https' + path;
-
-      Uri uri = Uri.parse(path);
 
       if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
         bundle = NetworkBundle(uri);

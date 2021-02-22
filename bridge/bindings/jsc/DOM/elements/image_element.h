@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_IMAGE_ELEMENT_H
 
 #include "bindings/jsc/DOM/element.h"
-#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/js_context_internal.h"
 
 namespace kraken::binding::jsc {
 

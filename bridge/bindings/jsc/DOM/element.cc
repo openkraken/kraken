@@ -122,6 +122,7 @@ void JSElementAttributes::removeAttribute(std::string &name) {
 }
 
 std::unordered_map<JSContext *, JSElement *> JSElement::instanceMap{};
+std::unordered_map<std::string, ElementCreator> JSElement::elementCreatorMap{};
 
 JSElement::JSElement(JSContext *context) : JSNode(context, "Element") {}
 
@@ -174,8 +175,6 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
 }
 
 ElementInstance::~ElementInstance() {
-//  if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
-
   ::foundation::UICommandCallbackQueue::instance(contextId)
     ->registerCallback([](void *ptr) { delete reinterpret_cast<NativeElement *>(ptr); }, nativeElement);
 }
@@ -201,7 +200,7 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   }
 
   if (propertyMap.count(name) == 0) {
-    return JSNode::NodeInstance::getProperty(name, exception);
+    return NodeInstance::getProperty(name, exception);
   }
 
   JSElement::ElementProperty property = propertyMap[name];
@@ -632,50 +631,19 @@ JSValueRef ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef function, JSO
 }
 
 ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string &name) {
-  static std::unordered_map<std::string, ElementTagName> m_elementMaps{
-    {"a", ElementTagName::kAnchor},      {"animation-player", ElementTagName::kAnimationPlayer},
-    {"audio", ElementTagName::kAudio},   {"video", ElementTagName::kVideo},
-    {"canvas", ElementTagName::kCanvas}, {"div", ElementTagName::kDiv},
-    {"span", ElementTagName::kSpan},     {"strong", ElementTagName::kStrong},
-    {"pre", ElementTagName::kPre},       {"p", ElementTagName::kParagraph},
-    {"iframe", ElementTagName::kIframe}, {"object", ElementTagName::kObject},
-    {"img", ElementTagName::kImage},     {"input", ElementTagName::kInput}};
-
-  ElementTagName tagName;
-  if (m_elementMaps.count(name) > 0) {
-    tagName = m_elementMaps[name];
+  ElementInstance *elementInstance;
+  if (elementCreatorMap.count(name) > 0) {
+    elementInstance = elementCreatorMap[name](context);
   } else {
-    tagName = ElementTagName::kDiv;
+    elementInstance = new ElementInstance(JSElement::instance(context), name.c_str(), true);
   }
+  return elementInstance;
+}
 
-  switch (tagName) {
-  case ElementTagName::kImage:
-    return new JSImageElement::ImageElementInstance(JSImageElement::instance(context));
-  case ElementTagName::kAnchor:
-    return new JSAnchorElement::AnchorElementInstance(JSAnchorElement::instance(context));
-  case ElementTagName::kCanvas:
-    return new JSCanvasElement::CanvasElementInstance(JSCanvasElement::instance(context));
-  case ElementTagName::kInput:
-    return new JSInputElement::InputElementInstance(JSInputElement::instance(context));
-  case ElementTagName::kAudio:
-    return new JSAudioElement::AudioElementInstance(JSAudioElement::instance(context));
-  case ElementTagName::kVideo:
-    return new JSVideoElement::VideoElementInstance(JSVideoElement::instance(context));
-  case ElementTagName::kIframe:
-    return new JSIframeElement::IframeElementInstance(JSIframeElement::instance(context));
-  case ElementTagName::kObject:
-    return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
-  case ElementTagName::kAnimationPlayer:
-    return new JSAnimationPlayerElement::AnimationPlayerElementInstance(JSAnimationPlayerElement::instance(context));
-  case ElementTagName::kSpan:
-  case ElementTagName::kDiv:
-  case ElementTagName::kStrong:
-  case ElementTagName::kPre:
-  case ElementTagName::kParagraph:
-  default:
-    return new ElementInstance(JSElement::instance(context), name.c_str(), true);
-  }
-  return nullptr;
+void JSElement::defineElement(std::string tagName, ElementCreator creator) {
+  if (elementCreatorMap.count(tagName) > 0) return;
+
+  elementCreatorMap[tagName] = creator;
 }
 
 JSValueRef JSElement::prototypeGetProperty(std::string &name, JSValueRef *exception) {
@@ -688,9 +656,9 @@ JSValueRef JSElement::prototypeGetProperty(std::string &name, JSValueRef *except
   return nullptr;
 }
 
-void ElementInstance::_notifyNodeRemoved(JSNode::NodeInstance *insertionNode) {
+void ElementInstance::_notifyNodeRemoved(NodeInstance *insertionNode) {
   if (insertionNode->isConnected()) {
-    traverseNode(this, [](JSNode::NodeInstance *node) {
+    traverseNode(this, [](NodeInstance *node) {
       auto Element = JSElement::instance(node->context);
       if (node->_hostClass == Element) {
         auto element = reinterpret_cast<ElementInstance *>(node);
@@ -710,9 +678,9 @@ void ElementInstance::_notifyChildRemoved() {
     document->removeElementById(id, this);
   }
 }
-void ElementInstance::_notifyNodeInsert(JSNode::NodeInstance *insertNode) {
+void ElementInstance::_notifyNodeInsert(NodeInstance *insertNode) {
   if (insertNode->isConnected()) {
-    traverseNode(this, [](JSNode::NodeInstance *node) {
+    traverseNode(this, [](NodeInstance *node) {
       auto Element = JSElement::instance(node->context);
       if (node->_hostClass == Element) {
         auto element = reinterpret_cast<ElementInstance *>(node);
@@ -837,7 +805,7 @@ BoundingClientRect::~BoundingClientRect() {
   delete nativeBoundingClientRect;
 }
 
-void traverseNode(JSNode::NodeInstance *node, TraverseHandler handler) {
+void traverseNode(NodeInstance *node, TraverseHandler handler) {
   bool shouldExit = handler(node);
   if (shouldExit) return;
 

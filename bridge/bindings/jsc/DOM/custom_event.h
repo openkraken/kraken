@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_CUSTOM_EVENT_H
 #define KRAKENBRIDGE_CUSTOM_EVENT_H
 
-#include "bindings/jsc/host_class.h"
-#include "bindings/jsc/js_context.h"
 #include "bindings/jsc/DOM/event.h"
+#include "bindings/jsc/host_class.h"
+#include "bindings/jsc/js_context_internal.h"
 #include <vector>
 
 namespace kraken::binding::jsc {

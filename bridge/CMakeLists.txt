@@ -15,6 +15,11 @@ else()
   add_definitions(-DENABLE_PROFILE=0)
 endif()
 
+list(APPEND PUBLIC_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge_jsc.h
+)
+
 list(APPEND BRIDGE_SOURCE
     kraken_bridge.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
@@ -64,10 +69,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   endif ()
 
   list(APPEND BRIDGE_SOURCE
-    bindings/jsc/js_context.h
-    bindings/jsc/js_context.cc
-    bindings/jsc/host_object.cc
-    bindings/jsc/host_object.h
+    bindings/jsc/js_context_internal.h
+    bindings/jsc/js_context_internal.cc
+    bindings/jsc/host_object_internal.cc
+    bindings/jsc/host_object_internal.h
     bindings/jsc/host_class.cc
     bindings/jsc/host_class.h
     bindings/jsc/kraken.h
@@ -236,7 +241,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
     FRAMEWORK TRUE
     FRAMEWORK_VERSION C
     MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.kraken_bridge
-    PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
+    PUBLIC_HEADER ${PUBLIC_HEADERS}
     )
 
   if (${CMAKE_BUILD_TYPE} STREQUAL "release")
