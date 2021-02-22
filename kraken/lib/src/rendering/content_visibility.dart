@@ -1,35 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 /// Lays the child out as if it was in the tree, but without painting anything,
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
-mixin RenderContentVisibility on RenderBox {
-  /// Whether the child is hidden from the rest of the tree.
-  ///
-  /// If ContentVisibility.hidden, the child is laid out as if it was in the tree, but without
-  /// painting anything, without making the child available for hit testing, and
-  /// without taking any room in the parent.
-  ///
-  /// If ContentVisibility.visible, the child is included in the tree as normal.
-  ///
-  /// If ContentVisibility.auto, the framework will compute the intersection bounds and not to paint when child renderObject
-  /// are no longer intersection with this renderObject.
-  ContentVisibility _contentVisibility;
-  ContentVisibility get contentVisibility => _contentVisibility;
-  set contentVisibility(ContentVisibility value) {
-    if (value == null) return;
-    if (value == _contentVisibility) return;
-    _contentVisibility = value;
-    markNeedsPaint();
-  }
-
+mixin RenderContentVisibilityMixin on RenderBoxModelBase {
   bool contentVisibilityHitTest(BoxHitTestResult result, {Offset position}) {
+    ContentVisibility _contentVisibility = renderStyle.contentVisibility;
     return _contentVisibility != ContentVisibility.hidden;
   }
 
   void paintContentVisibility(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+    ContentVisibility _contentVisibility = renderStyle.contentVisibility;
     if (_contentVisibility == ContentVisibility.hidden) {
       return;
     }
@@ -37,6 +21,7 @@ mixin RenderContentVisibility on RenderBox {
   }
 
   void debugVisibilityProperties(DiagnosticPropertiesBuilder properties) {
+    ContentVisibility contentVisibility = renderStyle.contentVisibility;
     if (contentVisibility != null) properties.add(DiagnosticsProperty<ContentVisibility>('contentVisibility', contentVisibility));
   }
 }

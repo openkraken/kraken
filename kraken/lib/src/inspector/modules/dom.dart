@@ -106,10 +106,10 @@ class InspectDOMModule extends InspectModule {
         padding[6] + element.renderBoxModel.renderStyle.paddingLeft, padding[7] - element.renderBoxModel.renderStyle.paddingBottom,
       ];
       List<double> margin = [
-        border[0] - element.renderBoxModel.renderStyle.marginLeft, border[1] - element.renderBoxModel.renderStyle.marginTop,
-        border[2] + element.renderBoxModel.renderStyle.marginRight, border[3] - element.renderBoxModel.renderStyle.marginTop,
-        border[4] + element.renderBoxModel.renderStyle.marginRight, border[5] + element.renderBoxModel.renderStyle.marginBottom,
-        border[6] - element.renderBoxModel.renderStyle.marginLeft, border[7] + element.renderBoxModel.renderStyle.marginBottom,
+        border[0] - element.renderBoxModel.renderStyle.marginLeft.length, border[1] - element.renderBoxModel.renderStyle.marginTop.length,
+        border[2] + element.renderBoxModel.renderStyle.marginRight.length, border[3] - element.renderBoxModel.renderStyle.marginTop.length,
+        border[4] + element.renderBoxModel.renderStyle.marginRight.length, border[5] + element.renderBoxModel.renderStyle.marginBottom.length,
+        border[6] - element.renderBoxModel.renderStyle.marginLeft.length, border[7] + element.renderBoxModel.renderStyle.marginBottom.length,
       ];
 
       BoxModel boxModel = BoxModel(

@@ -142,9 +142,8 @@ class CSSBackground {
     return backgroundImage;
   }
 
-  static Gradient getBackgroundGradient(RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
+  static Gradient getBackgroundGradient(CSSStyleDeclaration style, RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
     Gradient gradient;
-    CSSStyleDeclaration style = renderBoxModel.style;
     ElementManager elementManager = renderBoxModel.elementManager;
     double viewportWidth = elementManager.viewportWidth;
     double viewportHeight = elementManager.viewportHeight;
