@@ -175,7 +175,7 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
 }
 
 ElementInstance::~ElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)
+  ::foundation::UICommandCallbackQueue::instance()
     ->registerCallback([](void *ptr) { delete reinterpret_cast<NativeElement *>(ptr); }, nativeElement);
 }
 
