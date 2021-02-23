@@ -6,6 +6,7 @@
 #include "event.h"
 #include "event_target.h"
 #include "bindings/jsc/DOM/custom_event.h"
+#include "bindings/jsc/DOM/gesture_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
@@ -202,7 +203,21 @@ EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *co
   EventInstance *eventInstance;
   if (isCustomEvent) {
     eventInstance = new CustomEventInstance(JSCustomEvent::instance(context), reinterpret_cast<NativeCustomEvent*>(nativeEvent));
-  } else if (eventCreatorMap.count(eventType) > 0){
+  } else if (eventType == EVENT_INPUT) {
+    eventInstance = new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
+  } else if (eventType == EVENT_MEDIA_ERROR) {
+    eventInstance = new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));
+  } else if (eventType == EVENT_MESSAGE) {
+    eventInstance = new MessageEventInstance(JSMessageEvent::instance(context), reinterpret_cast<NativeMessageEvent*>(nativeEvent));
+  } else if (eventType == EVENT_CLOSE) {
+    eventInstance = new CloseEventInstance(JSCloseEvent::instance(context), reinterpret_cast<NativeCloseEvent*>(nativeEvent));
+  } else if (eventType == EVENT_INTERSECTION_CHANGE) {
+    eventInstance = new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
+  } else if (eventType == EVENT_TOUCH_START || eventType == EVENT_TOUCH_END || eventType == EVENT_TOUCH_MOVE || eventType == EVENT_TOUCH_CANCEL) {
+    eventInstance = new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+  } else if (eventType == EVENT_SWIPE || eventType == EVENT_PAN || eventType == EVENT_LONG_PRESS || eventType == EVENT_SCALE) {
+    eventInstance = new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent*>(nativeEvent));
+  } else if (eventCreatorMap.count(eventType) > 0) {
     eventInstance = eventCreatorMap[eventType](context, nativeEvent);
   } else {
     eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
