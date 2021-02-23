@@ -133,7 +133,21 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return _renderParagraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+    return computeDistanceToBaseline();
+  }
+
+  double computeDistanceToBaseline() {
+    return parent is RenderFlowLayout ?
+      _renderParagraph.computeDistanceToLastLineBaseline() :
+      _renderParagraph.computeDistanceToFirstLineBaseline();
+  }
+
+  double computeDistanceToFirstLineBaseline() {
+    return _renderParagraph.computeDistanceToFirstLineBaseline();
+  }
+
+  double computeDistanceToLastLineBaseline() {
+    return _renderParagraph.computeDistanceToLastLineBaseline();
   }
 
   @override

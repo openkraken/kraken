@@ -264,6 +264,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     return true;
   }
 
+  /// Line boxes of flow layout
+  List<_RunMetrics> lineBoxMetrics = <_RunMetrics>[];
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
@@ -651,7 +654,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     assert(mainAxisLimit != null);
     final double spacing = this.spacing;
     final double runSpacing = this.runSpacing;
-    final List<_RunMetrics> runMetrics = <_RunMetrics>[];
+    List<_RunMetrics> runMetrics = <_RunMetrics>[];
     double mainAxisExtent = 0.0;
     double crossAxisExtent = 0.0;
     double runMainAxisExtent = 0.0;
@@ -660,6 +663,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double maxSizeAboveBaseline = 0;
     double maxSizeBelowBaseline = 0;
     Map<int, RenderBox> runChildren = {};
+
+    lineBoxMetrics = runMetrics;
 
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
@@ -1062,6 +1067,74 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
   }
 
+  /// Compute distance to baseline of flow layout
+  @override
+  double computeDistanceToBaseline() {
+    double lineDistance;
+    double marginTop = renderStyle.marginTop.length ?? 0;
+    double marginBottom = renderStyle.marginBottom.length ?? 0;
+    bool isParentFlowLayout = parent is RenderFlowLayout;
+    CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
+    bool isDisplayInline = transformedDisplay != CSSDisplay.block && transformedDisplay != CSSDisplay.flex;
+
+    // Use margin bottom as baseline if layout has no children
+    if (lineBoxMetrics.length == 0) {
+      if (isDisplayInline) {
+        // Flex item baseline does not includes margin-bottom
+        lineDistance = isParentFlowLayout ?
+        marginTop + boxSize.height + marginBottom :
+        marginTop + boxSize.height;
+        return lineDistance;
+      } else {
+        return null;
+      }
+    }
+
+    // Use baseline of last line in flow layout and layout is inline-level
+    // otherwise use baseline of first line
+    bool isLastLineBaseline = isParentFlowLayout && isDisplayInline;
+    _RunMetrics lineMetrics = isLastLineBaseline ?
+      lineBoxMetrics[lineBoxMetrics.length - 1] : lineBoxMetrics[0];
+    // Use the max baseline of the children as the baseline in flow layout
+    lineMetrics.runChildren.forEach((int targetId, RenderBox child) {
+      double childMarginTop = child is RenderBoxModel ? child.renderStyle.marginTop.length : 0;
+      RenderLayoutParentData childParentData = child.parentData;
+      double childBaseLineDistance;
+      if (child is RenderBoxModel) {
+        childBaseLineDistance = child.computeDistanceToBaseline();
+      } else if (child is RenderTextBox) {
+        // Text baseline not depends on its own parent but its grand parents
+        childBaseLineDistance = isLastLineBaseline ?
+          child.computeDistanceToLastLineBaseline() :
+          child.computeDistanceToFirstLineBaseline();
+      }
+      if (childBaseLineDistance != null) {
+        // Baseline of relative positioned element equals its originial position
+        // so it needs to subtract its vertical offset
+        Offset relativeOffset;
+        double childOffsetY = childParentData.offset.dy - childMarginTop;
+        if (child is RenderBoxModel) {
+          relativeOffset = CSSPositionedLayout.getRelativeOffset(child.renderStyle);
+        }
+        if (relativeOffset != null) {
+          childOffsetY -= relativeOffset.dy;
+        }
+        // It needs to subtract margin-top cause offset already includes margin-top
+        childBaseLineDistance += childOffsetY;
+        if (lineDistance != null)
+          lineDistance = math.max(lineDistance, childBaseLineDistance);
+        else
+          lineDistance = childBaseLineDistance;
+      }
+    });
+
+    // If no inline child found, use margin-bottom as baseline
+    if (isDisplayInline && lineDistance != null) {
+      lineDistance += marginTop;
+    }
+    return lineDistance;
+  }
+
   /// Resolve all percentage size of child based on size its containing block
   bool _resolveChildrenPercentageToContainingBlock() {
     bool percentageFound = false;
@@ -1194,10 +1267,11 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     Size childSize = _getChildSize(child);
+
+    double baseline = parent is RenderFlowLayout ? childMarginTop + childSize.height + childMarginBottom :
+      childMarginTop + childSize.height;
     // When baseline of children not found, use boundary of margin bottom as baseline
-    double extentAboveBaseline = childAscent != null ?
-      childMarginTop + childAscent :
-      childMarginTop + childSize.height + childMarginBottom;
+    double extentAboveBaseline = childAscent != null ? childAscent : baseline;
 
     return extentAboveBaseline;
   }

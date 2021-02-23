@@ -151,6 +151,510 @@ describe('Baseline-rules flexbox', () => {
     append(BODY, wrapper);
     await matchElementImageSnapshot(wrapper);
   });
+
+  it('flex layout nest flow layout', async () => {
+    let p;
+    let div1;
+    let div2;
+    let div3;
+    let div4;
+    let test;
+
+    test = createElement(
+      'div',
+      {
+        style: {
+          border: '1px solid black',
+          height: '200px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '20px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`aa a`)]
+        )),
+        (div2 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '10px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`bbbb b`)]
+        )),
+        (div3 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '30px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`c c c c  `)]
+        )),
+        (div4 = createElement(
+          'img',
+          {
+            src: 'assets/100x100-green.png',
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              width: '50px',
+            },
+          },
+        )),
+        createElement('div', {
+          style: {
+            display: 'inline-block',
+            alignSelf: 'baseline',
+            flexWrap: 'wrap',
+            width: '170px',
+            fontSize: '30px',
+            backgroundColor: 'red'
+          }
+        }, [
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'baseline',
+              width: '60px',
+              height: '40px',
+              fontSize: '20px',
+              backgroundColor: 'yellow'
+            }
+          }, [
+            createText('ee')
+          ]),
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'bottom',
+              width: '80px',
+              fontSize: '25px',
+              backgroundColor: 'blue'
+            }
+          }, [
+            createText('ff gggg')
+          ]),
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'bottom',
+              width: '60px',
+              height: '60px',
+              fontSize: '30px',
+              backgroundColor: 'purple'
+            }
+          }, [
+            createText('hh')
+          ]),
+
+        ])
+      ]
+    );
+    BODY.appendChild(test);
+
+    await matchViewportSnapshot(0.1);
+  });
+
+  it('flex layout nest flex layout', async () => {
+    let p;
+    let div1;
+    let div2;
+    let div3;
+    let div4;
+    let test;
+
+    test = createElement(
+      'div',
+      {
+        style: {
+          border: '1px solid black',
+          height: '200px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '20px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`aa a`)]
+        )),
+        (div2 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '10px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`bbbb b`)]
+        )),
+        (div3 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '30px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`c c c c  `)]
+        )),
+        (div4 = createElement(
+          'img',
+          {
+            src: 'assets/100x100-green.png',
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              width: '50px',
+            },
+          },
+        )),
+        createElement('div', {
+          style: {
+            display: 'inline-flex',
+            alignSelf: 'baseline',
+            flexWrap: 'wrap',
+            width: '170px',
+            fontSize: '30px',
+            backgroundColor: 'red'
+          }
+        }, [
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'baseline',
+              width: '60px',
+              height: '40px',
+              fontSize: '20px',
+              backgroundColor: 'yellow'
+            }
+          }, [
+            createText('ee')
+          ]),
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'bottom',
+              width: '80px',
+              fontSize: '25px',
+              backgroundColor: 'blue'
+            }
+          }, [
+            createText('ff gggg')
+          ]),
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'bottom',
+              width: '60px',
+              height: '60px',
+              fontSize: '30px',
+              backgroundColor: 'purple'
+            }
+          }, [
+            createText('hh')
+          ]),
+
+        ])
+      ]
+    );
+    BODY.appendChild(test);
+
+    await matchViewportSnapshot(0.1);
+  });
+
+  it('flow layout nest flex layout', async () => {
+    let p;
+    let div1;
+    let div2;
+    let div3;
+    let div4;
+    let test;
+
+    test = createElement(
+      'div',
+      {
+        style: {
+          border: '1px solid black',
+          height: '200px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '20px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`aa a`)]
+        )),
+        (div2 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '10px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`bbbb b`)]
+        )),
+        (div3 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '30px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`c c c c  `)]
+        )),
+        (div4 = createElement(
+          'img',
+          {
+            src: 'assets/100x100-green.png',
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              width: '50px',
+            },
+          },
+        )),
+        createElement('div', {
+          style: {
+            display: 'inline-flex',
+            alignSelf: 'baseline',
+            flexWrap: 'wrap',
+            width: '170px',
+            fontSize: '30px',
+            backgroundColor: 'red'
+          }
+        }, [
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'baseline',
+              width: '60px',
+              height: '40px',
+              fontSize: '20px',
+              backgroundColor: 'yellow'
+            }
+          }, [
+            createText('ee')
+          ]),
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'bottom',
+              width: '80px',
+              fontSize: '25px',
+              backgroundColor: 'blue'
+            }
+          }, [
+            createText('ff gggg')
+          ]),
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'bottom',
+              width: '60px',
+              height: '60px',
+              fontSize: '30px',
+              backgroundColor: 'purple'
+            }
+          }, [
+            createText('hh')
+          ]),
+
+        ])
+      ]
+    );
+    BODY.appendChild(test);
+
+    await matchViewportSnapshot(0.1);
+  });
+
+  it('flow layout nest flow layout', async () => {
+    let p;
+    let div1;
+    let div2;
+    let div3;
+    let div4;
+    let test;
+
+    test = createElement(
+      'div',
+      {
+        style: {
+          border: '1px solid black',
+          height: '200px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '20px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`aa a`)]
+        )),
+        (div2 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '10px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`bbbb b`)]
+        )),
+        (div3 = createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              backgroundColor: 'green',
+              'font-size': '30px',
+              width: '30px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`c c c c  `)]
+        )),
+        (div4 = createElement(
+          'img',
+          {
+            src: 'assets/100x100-green.png',
+            style: {
+              display: 'inline-block',
+              'align-self': 'baseline',
+              width: '50px',
+            },
+          },
+        )),
+        createElement('div', {
+          style: {
+            display: 'inline-block',
+            alignSelf: 'baseline',
+            flexWrap: 'wrap',
+            width: '170px',
+            fontSize: '30px',
+            backgroundColor: 'red'
+          }
+        }, [
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'baseline',
+              width: '60px',
+              height: '40px',
+              fontSize: '20px',
+              backgroundColor: 'yellow'
+            }
+          }, [
+            createText('ee')
+          ]),
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'bottom',
+              width: '80px',
+              fontSize: '25px',
+              backgroundColor: 'blue'
+            }
+          }, [
+            createText('ff gggg')
+          ]),
+          createElement('div', {
+            style: {
+              display: 'inline-block',
+              alignSelf: 'bottom',
+              width: '60px',
+              height: '60px',
+              fontSize: '30px',
+              backgroundColor: 'purple'
+            }
+          }, [
+            createText('hh')
+          ]),
+
+        ])
+      ]
+    );
+    BODY.appendChild(test);
+
+    await matchViewportSnapshot(0.1);
+  });
 });
 
 // @TODO: deps on inline-block features.

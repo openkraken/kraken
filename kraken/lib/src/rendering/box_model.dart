@@ -252,7 +252,7 @@ class RenderLayoutBox extends RenderBoxModel
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return computeDistanceToHighestActualBaseline(baseline);
+    return computeDistanceToBaseline();
   }
 
   /// Baseline rule is as follows:
@@ -284,8 +284,8 @@ class RenderLayoutBox extends RenderBoxModel
       // Use child's height if child has no baseline and not block-level
       // Text box always has baseline
       if (childDistance == null &&
-          isChildInline &&
-          child is RenderBoxModel && child.contentSize != null
+        isChildInline &&
+        child is RenderBoxModel && child.contentSize != null
       ) {
         // Flutter only allow access size of direct children, so cannot use child.size
         Size childSize = child.getBoxSize(child.contentSize);
@@ -304,6 +304,7 @@ class RenderLayoutBox extends RenderBoxModel
     }
     return result;
   }
+
 }
 
 mixin RenderBoxModelBase on RenderBox {
@@ -312,8 +313,8 @@ mixin RenderBoxModelBase on RenderBox {
 }
 
 class RenderBoxModel extends RenderBox with
-    RenderBoxModelBase,
-    RenderBoxDecorationMixin,
+  RenderBoxModelBase,
+  RenderBoxDecorationMixin,
     RenderTransformMixin,
     RenderOverflowMixin,
     RenderOpacityMixin,
@@ -1127,6 +1128,11 @@ class RenderBoxModel extends RenderBox with
     if (_debugShouldPaintOverlay) {
       debugPaintOverlay(context, offset);
     }
+  }
+
+  /// Compute distance to baseline
+  double computeDistanceToBaseline() {
+    return null;
   }
 
   bool _hasLocalBackgroundImage(RenderStyle renderStyle) {
