@@ -119,6 +119,8 @@ class Element extends Node
   // used to get original coordinate before move away from document flow.
   RenderObject renderPositionedPlaceholder;
 
+  Element scrollingElement;
+
   bool get isValidSticky => style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
 
   Size get viewportSize => Size(elementManager.viewportWidth, elementManager.viewportHeight);
@@ -433,6 +435,14 @@ class Element extends Node
 
     if (style != null) {
       style.dispose();
+      style = null;
+    }
+
+    properties.clear();
+
+    if (scrollingElement != null) {
+      scrollingElement.dispose();
+      scrollingElement = null;
     }
 
     assert(renderBoxModel == null);
