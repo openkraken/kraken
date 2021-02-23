@@ -37,6 +37,9 @@ class ImageElement extends Element {
   ImageStreamListener _initImageListener;
   ImageStreamListener _renderStreamListener;
 
+  /// Number of image frame, used to identify gif after image loaded
+  int _frameNumber = 0;
+
   bool _hasLazyLoading = false;
 
   static SplayTreeMap<int, ImageElement> _nativeMap = SplayTreeMap();
@@ -110,6 +113,7 @@ class ImageElement extends Element {
   @override
   void dispose() {
     super.dispose();
+    _removeStreamListener();
     _image = null;
     _imageBox = null;
     _imageStream = null;
@@ -185,9 +189,46 @@ class ImageElement extends Element {
   }
 
   void _renderMultiFrameImage(ImageInfo imageInfo, bool synchronousCall) {
+    _frameNumber++;
     _imageInfo = imageInfo;
     _imageBox?.image = _imageInfo?.image;
+    if (_frameNumber > 1) {
+      _convertToRepaint();
+    } else {
+      _convertToNonRepaint();
+    }
     _resize();
+  }
+
+  /// Convert RenderIntrinsic to non repaint boundary
+  void _convertToNonRepaint() {
+    if (renderBoxModel != null && renderBoxModel.isRepaintBoundary) {
+      _toggleRepaintSelf(repaintSelf: false);
+    }
+  }
+
+  /// Convert RenderIntrinsic to repaint boundary
+  void _convertToRepaint() {
+    if (renderBoxModel != null && !renderBoxModel.isRepaintBoundary) {
+      _toggleRepaintSelf(repaintSelf: true);
+    }
+  }
+
+  /// Toggle renderBoxModel between repaint boundary and non repaint boundary
+  void _toggleRepaintSelf({bool repaintSelf}) {
+    RenderObject parent = renderBoxModel.parent;
+    RenderBoxModel targetRenderBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: repaintSelf);
+    if (parent is ContainerRenderObjectMixin) {
+      RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
+      parent.remove(renderBoxModel);
+      renderBoxModel = targetRenderBox;
+      this.parent.addChildRenderObject(this, after: previousSibling);
+    } else if (parent is RenderObjectWithChildMixin) {
+      parent.child = targetRenderBox;
+    }
+    renderBoxModel = targetRenderBox;
+    // Update renderBoxModel reference in renderStyle
+    renderBoxModel.renderStyle.renderBoxModel = targetRenderBox;
   }
 
   void _resize() {
@@ -342,6 +383,8 @@ class ImageElement extends Element {
     double viewportHeight = elementManager.viewportHeight;
     Size viewportSize = Size(viewportWidth, viewportHeight);
 
+    // Reset frame number to zero when image needs to reload
+    _frameNumber = 0;
     if (key == 'src') {
       _setImage(value);
     } else if (key == 'loading' && _hasLazyLoading) {
