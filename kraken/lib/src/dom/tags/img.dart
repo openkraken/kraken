@@ -203,39 +203,32 @@ class ImageElement extends Element {
   /// Convert RenderIntrinsic to non repaint boundary
   void _convertToNonRepaint() {
     if (renderBoxModel != null && renderBoxModel.isRepaintBoundary) {
-      RenderObject parent = renderBoxModel.parent;
-      RenderBoxModel nonRepaintSelfBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: false);
-      if (parent is ContainerRenderObjectMixin) {
-        RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
-        parent.remove(renderBoxModel);
-        renderBoxModel = nonRepaintSelfBox;
-        this.parent.addChildRenderObject(this, after: previousSibling);
-      } else if (parent is RenderObjectWithChildMixin) {
-        parent.child = nonRepaintSelfBox;
-      }
-      renderBoxModel = nonRepaintSelfBox;
-      // Update renderBoxModel reference in renderStyle
-      renderBoxModel.renderStyle.renderBoxModel = nonRepaintSelfBox;
+      _toggleRepaintSelf(repaintSelf: false);
     }
   }
 
   /// Convert RenderIntrinsic to repaint boundary
   void _convertToRepaint() {
     if (renderBoxModel != null && !renderBoxModel.isRepaintBoundary) {
-      RenderObject parent = renderBoxModel.parent;
-      RenderBoxModel repaintSelfBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
-      if (parent is ContainerRenderObjectMixin) {
-        RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
-        parent.remove(renderBoxModel);
-        renderBoxModel = repaintSelfBox;
-        this.parent.addChildRenderObject(this, after: previousSibling);
-      } else if (parent is RenderObjectWithChildMixin) {
-        parent.child = repaintSelfBox;
-      }
-      renderBoxModel = repaintSelfBox;
-      // Update renderBoxModel reference in renderStyle
-      renderBoxModel.renderStyle.renderBoxModel = repaintSelfBox;
+      _toggleRepaintSelf(repaintSelf: true);
     }
+  }
+
+  /// Toggle renderBoxModel between repaint boundary and non repaint boundary
+  void _toggleRepaintSelf({bool repaintSelf}) {
+    RenderObject parent = renderBoxModel.parent;
+    RenderBoxModel targetRenderBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: repaintSelf);
+    if (parent is ContainerRenderObjectMixin) {
+      RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
+      parent.remove(renderBoxModel);
+      renderBoxModel = targetRenderBox;
+      this.parent.addChildRenderObject(this, after: previousSibling);
+    } else if (parent is RenderObjectWithChildMixin) {
+      parent.child = targetRenderBox;
+    }
+    renderBoxModel = targetRenderBox;
+    // Update renderBoxModel reference in renderStyle
+    renderBoxModel.renderStyle.renderBoxModel = targetRenderBox;
   }
 
   void _resize() {
