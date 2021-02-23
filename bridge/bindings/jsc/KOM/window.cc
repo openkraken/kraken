@@ -23,6 +23,12 @@ WindowInstance::~WindowInstance() {
 
 JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getWindowPropertyMap();
+  auto staticPropertyMap = getWindowStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
+
+  auto eventTargetStaticPropertyMap = JSEventTarget::getEventTargetStaticPropertyMap();
+  if (eventTargetStaticPropertyMap.count(name) > 0) return EventTargetInstance::getProperty(name, exception);
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -59,11 +65,6 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
       JSStringRelease(key);
       return history;
     }
-    case WindowProperty::scrollTo:
-    case WindowProperty::scroll:
-      return m_scroll.function();
-    case WindowProperty::scrollBy:
-      return m_scrollBy.function();
     case WindowProperty::scrollX: {
       getDartMethod()->flushUICommand();
       auto document = DocumentInstance::instance(_hostClass->context);
@@ -84,14 +85,22 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
   JSValueRef eventTargetRet = EventTargetInstance::getProperty(name, exception);
   if (eventTargetRet != nullptr) return eventTargetRet;
 
-  JSStringRef keyStringRef = JSStringCreateWithUTF8CString(name.c_str());
-  return JSObjectGetProperty(_hostClass->ctx, _hostClass->context->global(), keyStringRef, exception);
+  JSStringHolder keyStringHolder = JSStringHolder(context, name);
+  if (JSObjectHasProperty(ctx, _hostClass->context->global(), keyStringHolder.getString())) {
+    return JSObjectGetProperty(_hostClass->ctx, _hostClass->context->global(), keyStringHolder.getString(), exception);
+  }
+
+  return nullptr;
 }
 
 void WindowInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   EventTargetInstance::getPropertyNames(accumulator);
 
   for (auto &property : getWindowPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getWindowStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

@@ -74,6 +74,9 @@ JSAnimationPlayerElement::AnimationPlayerElementInstance::AnimationPlayerElement
 JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty(std::string &name,
                                                                                  JSValueRef *exception) {
   auto propertyMap = getAnimationPlayerPropertyMap();
+  auto staticPropertyMap = getAnimationPlayerStaticPropertyMap();
+  if (staticPropertyMap.count(name) > 0) return nullptr;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
@@ -81,22 +84,24 @@ JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty
       return m_src.makeString();
     case AnimationPlayerProperty::type:
       return m_type.makeString();
-    case AnimationPlayerProperty::play: {
-      return m_play.function();
-    }
     }
   }
 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::string &name, JSValueRef value,
+bool JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::string &name, JSValueRef value,
                                                                            JSValueRef *exception) {
   auto propertyMap = getAnimationPlayerPropertyMap();
+  auto staticPropertyMap = getAnimationPlayerStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
+
   auto property = propertyMap[name];
 
   if (property == AnimationPlayerProperty::src) {
     JSStringRef src = JSValueToStringCopy(_hostClass->ctx, value, exception);
+    context->handleException(*exception);
     m_src.setString(src);
 
     NativeString args_01{};
@@ -104,6 +109,7 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::
     buildUICommandArgs(name, src, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    return true;
   } else if (property == AnimationPlayerProperty::type) {
     JSStringRef type = JSValueToStringCopy(_hostClass->ctx, value, exception);
     m_type.setString(type);
@@ -114,8 +120,9 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::
     buildUICommandArgs(name, type, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 
@@ -124,6 +131,10 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::getPropertyNames(
   ElementInstance::getPropertyNames(accumulator);
 
   for (auto &property : getAnimationPlayerPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getAnimationPlayerStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

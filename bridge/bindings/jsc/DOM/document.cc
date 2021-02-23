@@ -231,13 +231,20 @@ DocumentInstance::DocumentInstance(JSDocument *document)
   auto Element = JSElement::instance(document->context);
   body = new ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
   body->document = this;
-  JSValueProtect(document->ctx, body->object);
+  JSStringHolder bodyStringHolder = JSStringHolder(context, "body");
+  JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
+  JSObjectSetProperty(ctx, object, bodyStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);
+  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);
   instanceMap[document->context] = this;
   getDartMethod()->initDocument(contextId, nativeDocument);
 }
 
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getDocumentPropertyMap();
+  auto propertyStaticMap = getDocumentStaticPropertyMap();
+
+  if (propertyStaticMap.count(name) > 0) return nullptr;
+
   if (propertyMap.count(name) == 0) {
     return NodeInstance::getProperty(name, exception);
   }
@@ -259,27 +266,9 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
     std::string cookie = m_cookie.getCookie();
     return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(cookie.c_str()));
   }
-  case DocumentProperty::createElement: {
-    return m_createElement.function();
-  }
-  case DocumentProperty::documentElement:
-  case DocumentProperty::body:
-    return body->object;
-  case DocumentProperty::createTextNode: {
-    return m_createTextNode.function();
-  }
-  case DocumentProperty::createComment: {
-    return m_createComment.function();
-  }
   case DocumentProperty::nodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#document");
     return JSValueMakeString(_hostClass->ctx, nodeName);
-  }
-  case DocumentProperty::getElementById: {
-    return m_getElementById.function();
-  }
-  case DocumentProperty::getElementsByTagName: {
-    return m_getElementsByTagName.function();
   }
   }
 
@@ -297,6 +286,10 @@ void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator
   NodeInstance::getPropertyNames(accumulator);
 
   for (auto &property : getDocumentPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getDocumentStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
@@ -388,8 +381,12 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
   return JSObjectMakeArray(ctx, elements.size(), elementArguments, exception);
 }
 
-void DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getDocumentPropertyMap();
+  auto propertyStaticMap = getDocumentStaticPropertyMap();
+
+  if (propertyStaticMap.count(name) > 0) return false;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
@@ -398,8 +395,9 @@ void DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueR
       std::string cookie = JSStringToStdString(str);
       m_cookie.setCookie(cookie);
     }
+    return true;
   } else {
-    NodeInstance::setProperty(name, value, exception);
+    return NodeInstance::setProperty(name, value, exception);
   }
 }
 

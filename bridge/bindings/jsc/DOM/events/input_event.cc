@@ -80,7 +80,7 @@ JSValueRef InputEventInstance::getProperty(std::string &name, JSValueRef *except
   return nullptr;
 }
 
-void InputEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool InputEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSInputEvent::getInputEventPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -97,8 +97,9 @@ void InputEventInstance::setProperty(std::string &name, JSValueRef value, JSValu
       break;
     }
     }
+    return true;
   } else {
-    EventInstance::setProperty(name, value, exception);
+    return EventInstance::setProperty(name, value, exception);
   }
 }
 

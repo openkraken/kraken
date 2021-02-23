@@ -23,12 +23,7 @@ std::unordered_map<JSContext *, JSEventTarget *> JSEventTarget::instanceMap{};
 
 JSEventTarget *JSEventTarget::instance(JSContext *context) {
   if (instanceMap.count(context) == 0) {
-    const JSStaticFunction staticFunction[]{{"addEventListener", addEventListener, kJSPropertyAttributeReadOnly},
-                                            {"removeEventListener", removeEventListener, kJSPropertyAttributeReadOnly},
-                                            {"dispatchEvent", dispatchEvent, kJSPropertyAttributeReadOnly},
-                                            {"__clearListeners__", clearListeners, kJSPropertyAttributeReadOnly},
-                                            {nullptr}};
-    instanceMap[context] = new JSEventTarget(context, staticFunction, nullptr);
+    instanceMap[context] = new JSEventTarget(context, nullptr, nullptr);
   }
   return instanceMap[context];
 }
@@ -172,14 +167,6 @@ JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *ex
     auto property = propertyMap[name];
 
     switch (property) {
-    case EventTargetProperty::addEventListener:
-      return m_addEventListener.function();
-    case EventTargetProperty::removeEventListener:
-      return m_removeEventListener.function();
-    case EventTargetProperty::dispatchEvent:
-      return m_dispatchEvent.function();
-    case EventTargetProperty::__clearListeners__:
-      return m_clearListeners.function();
     default:
       break;
     }
@@ -310,22 +297,16 @@ JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function,
 
 JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSEventTarget::getEventTargetPropertyMap();
+  auto staticPropertyMap = JSEventTarget::getEventTargetStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSEventTarget>()->prototypeObject, JSStringCreateWithUTF8CString(name.c_str()), exception);
+  }
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
-    case JSEventTarget::EventTargetProperty::addEventListener: {
-      return prototype<JSEventTarget>()->m_addEventListener.function();
-    }
-    case JSEventTarget::EventTargetProperty::removeEventListener: {
-      return prototype<JSEventTarget>()->m_removeEventListener.function();
-    }
-    case JSEventTarget::EventTargetProperty::dispatchEvent: {
-      return prototype<JSEventTarget>()->m_dispatchEvent.function();
-    }
-    case JSEventTarget::EventTargetProperty::__clearListeners__: {
-      return prototype<JSEventTarget>()->m_clearListeners.function();
-    }
     case JSEventTarget::EventTargetProperty::eventTargetId: {
       return JSValueMakeNumber(_hostClass->ctx, eventTargetId);
     }
@@ -337,11 +318,16 @@ JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *excep
   return Instance::getProperty(name, exception);
 }
 
-void EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  auto staticPropertyMap = JSEventTarget::getEventTargetStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
+
   if (name.substr(0, 2) == "on") {
     setPropertyHandler(name, value, exception);
+    return true;
   } else {
-    Instance::setProperty(name, value, exception);
+    return Instance::setProperty(name, value, exception);
   }
 }
 
@@ -349,7 +335,7 @@ JSValueRef EventTargetInstance::getPropertyHandler(std::string &name, JSValueRef
   std::string eventType = name.substr(2);
 
   if (_eventHandlers.count(eventType) == 0) {
-    return nullptr;
+    return JSValueMakeNull(ctx);
   }
   return _eventHandlers[eventType].front();
 }
@@ -380,6 +366,10 @@ void EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value
 
 void EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &propertyName : JSEventTarget::getEventTargetPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
+  }
+
+  for (auto &propertyName : JSEventTarget::getEventTargetStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, propertyName);
   }
 }

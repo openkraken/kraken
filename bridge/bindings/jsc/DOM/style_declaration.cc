@@ -89,36 +89,26 @@ StyleDeclarationInstance::~StyleDeclarationInstance() {
 }
 
 JSValueRef StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getCSSStyleDeclarationPropertyMap();
+  auto staticPropertyMap = getCSSStyleDeclarationStaticPropertyMap();
 
-  if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
-    switch (property) {
-    case CSSStyleDeclarationProperty::setProperty: {
-      return m_setProperty.function();
-    }
-    case CSSStyleDeclarationProperty::getPropertyValue: {
-      return m_getPropertyValue.function();
-    }
-    case CSSStyleDeclarationProperty::removeProperty: {
-      return m_removeProperty.function();
-    }
-    }
-  } else if (properties.count(name) > 0) {
+  if (staticPropertyMap.count(name) > 0) return nullptr;
+
+  if (properties.count(name) > 0) {
     return JSValueMakeString(_hostClass->ctx, properties[name]);
   }
 
   return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(""));
 }
 
-void StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value,
+bool StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value,
                                                                 JSValueRef *exception) {
-  internalSetProperty(name, value, exception);
+  return internalSetProperty(name, value, exception);
 }
 
-void StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value,
+bool StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value,
                                                                         JSValueRef *exception) {
-  if (name == "setProperty" || name == "removeProperty" || name == "getPropertyValue") return;
+  auto staticPropertyMap = getCSSStyleDeclarationStaticPropertyMap();
+  if (staticPropertyMap.count(name) > 0) return false;
 
   JSStringRef valueStr;
   if (JSValueIsNull(_hostClass->ctx, value)) {
@@ -138,6 +128,8 @@ void StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef
   buildUICommandArgs(name, valueStr, args_01, args_02);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
+
+  return true;
 }
 
 void StyleDeclarationInstance::internalRemoveProperty(JSStringRef nameRef, JSValueRef *exception) {
@@ -249,7 +241,7 @@ void StyleDeclarationInstance::getPropertyNames(JSPropertyNameAccumulatorRef acc
     JSPropertyNameAccumulatorAddName(accumulator, JSStringCreateWithUTF8CString(prop.first.c_str()));
   }
 
-  for (auto &prop : getCSSStyleDeclarationPropertyNames()) {
+  for (auto &prop : getCSSStyleDeclarationStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, prop);
   }
 }

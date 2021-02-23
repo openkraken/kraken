@@ -47,9 +47,8 @@ JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsComment
     ->registerCommand(eventTargetId, UICommand::createComment, args_01, nativeComment);
 }
 
-void JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  NodeInstance::setProperty(name, value, exception);
-  if (exception != nullptr) return;
+bool JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  return NodeInstance::setProperty(name, value, exception);
 }
 
 JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JSValueRef *exception) {

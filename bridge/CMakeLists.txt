@@ -58,7 +58,7 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
             JavaScriptCore
             )
   else ()
-    if (${DEBUG_JSC_ENGINE})
+    if (EXISTS ${DEBUG_JSC_ENGINE})
       list(APPEND BRIDGE_INCLUDE ${DEBUG_JSC_ENGINE}/Headers)
       add_library(JavaScriptCore SHARED IMPORTED)
       set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION ${DEBUG_JSC_ENGINE}/JavaScriptCore)
