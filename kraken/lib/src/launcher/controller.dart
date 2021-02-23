@@ -459,6 +459,9 @@ class KrakenController {
       PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
 
+    // Should clear previous page cached ui commands
+    clearUICommand(_view.contextId);
+
     _module = KrakenModuleController(this, _view.contextId);
     assert(!_controllerMap.containsKey(_view.contextId),
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
@@ -539,7 +542,7 @@ class KrakenController {
         rootController: this,
         navigationDelegate: _view.navigationDelegate);
     _view.attachView(parent, previousSibling);
-  } 
+  }
 
   // reload current kraken view.
   void reload() async {
