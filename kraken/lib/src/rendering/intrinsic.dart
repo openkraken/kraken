@@ -139,6 +139,21 @@ class RenderIntrinsic extends RenderBoxModel
     }
   }
 
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    return computeDistanceToBaseline();
+  }
+
+  /// Compute distance to baseline of replaced element
+  @override
+  double computeDistanceToBaseline() {
+    double marginTop = renderStyle.marginTop.length ?? 0;
+    double marginBottom = renderStyle.marginBottom.length ?? 0;
+
+    // Use margin-bottom as baseline if layout has no children
+    return marginTop + boxSize.height + marginBottom;
+  }
+
   /// This class mixin [RenderProxyBoxMixin], which has its' own paint method,
   /// override it to layout box model paint.
   @override

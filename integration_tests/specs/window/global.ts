@@ -15,4 +15,15 @@ xdescribe('windowisglobal', () => {
 
     f();
   });
+
+  it('can set property', () => {
+    // @ts-ignore
+    window.foo = 'foo';
+    // @ts-ignore
+    expect(window.foo).toBe('foo');
+  });
+
+  it('onload should in window', () => {
+    expect('onload' in window).toBe(true);
+  });
 });

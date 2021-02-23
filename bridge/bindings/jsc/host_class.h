@@ -10,7 +10,6 @@
 #include <unordered_map>
 
 namespace kraken::binding::jsc {
-
 } // namespace kraken::binding::jsc
 
 #endif // KRAKENBRIDGE_HOST_CLASS_H

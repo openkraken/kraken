@@ -47,7 +47,7 @@ JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getAnchorElementPropertyMap();
   auto property = propertyMap[name];
   if (property == AnchorElementProperty::href) {
@@ -61,6 +61,7 @@ void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSVa
     buildUICommandArgs(name, hrefString, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    return true;
   } else if (property == AnchorElementProperty::target) {
     _target = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_target);
@@ -70,8 +71,9 @@ void JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSVa
     buildUICommandArgs(name, _target, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 

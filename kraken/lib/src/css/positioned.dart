@@ -6,36 +6,6 @@ import 'package:kraken/css.dart';
 
 // CSS Positioned Layout: https://drafts.csswg.org/css-position/
 
-Offset _getRelativeOffset(RenderStyle renderStyle) {
-  CSSOffset left = renderStyle.left;
-  CSSOffset right = renderStyle.right;
-  CSSOffset top = renderStyle.top;
-  CSSOffset bottom = renderStyle.bottom;
-  if (renderStyle.position == CSSPositionType.relative) {
-    double dx;
-    double dy;
-
-    if (left != null && !left.isAuto) {
-      dx = renderStyle.left.length;
-    } else if (right != null && !right.isAuto) {
-      double _dx = renderStyle.right.length;
-      if (_dx != null) dx = -_dx;
-    }
-
-    if (top != null && !top.isAuto) {
-      dy = renderStyle.top.length;
-    } else if (bottom != null && !bottom.isAuto) {
-      double _dy = renderStyle.bottom.length;
-      if (_dy != null) dy = -_dy;
-    }
-
-    if (dx != null || dy != null) {
-      return Offset(dx ?? 0, dy ?? 0);
-    }
-  }
-  return null;
-}
-
 BoxSizeType _getChildWidthSizeType(RenderBox child) {
   if (child is RenderTextBox) {
     return child.widthSizeType;
@@ -139,6 +109,36 @@ class CSSPositionedLayout {
     return parentData;
   }
 
+  static Offset getRelativeOffset(RenderStyle renderStyle) {
+      CSSOffset left = renderStyle.left;
+      CSSOffset right = renderStyle.right;
+      CSSOffset top = renderStyle.top;
+      CSSOffset bottom = renderStyle.bottom;
+      if (renderStyle.position == CSSPositionType.relative) {
+        double dx;
+        double dy;
+
+        if (left != null && !left.isAuto) {
+          dx = renderStyle.left.length;
+        } else if (right != null && !right.isAuto) {
+          double _dx = renderStyle.right.length;
+          if (_dx != null) dx = -_dx;
+        }
+
+        if (top != null && !top.isAuto) {
+          dy = renderStyle.top.length;
+        } else if (bottom != null && !bottom.isAuto) {
+          double _dy = renderStyle.bottom.length;
+          if (_dy != null) dy = -_dy;
+        }
+
+        if (dx != null || dy != null) {
+          return Offset(dx ?? 0, dy ?? 0);
+        }
+      }
+      return null;
+    }
+
   static void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox) {
     RenderLayoutParentData boxParentData = renderBox?.parentData;
 
@@ -151,7 +151,7 @@ class CSSPositionedLayout {
       Offset styleOffset;
       // Text node does not have relative offset
       if (renderBox is RenderBoxModel) {
-        styleOffset = _getRelativeOffset(renderBox.renderStyle);
+        styleOffset = getRelativeOffset(renderBox.renderStyle);
       }
 
       if (relativeOffset != null) {

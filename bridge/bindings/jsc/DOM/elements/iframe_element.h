@@ -22,7 +22,8 @@ public:
 
   class IframeElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(IFrameElement, 4, width, height, contentWindow, postMessage)
+    DEFINE_OBJECT_PROPERTY(IFrameElement, 3, width, height, contentWindow)
+    DEFINE_STATIC_OBJECT_PROPERTY(IFrameElement, 1, postMessage)
 
     static JSValueRef postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
@@ -31,7 +32,7 @@ public:
     ~IframeElementInstance();
     explicit IframeElementInstance(JSIframeElement *jsIframeElement);
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+    bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
     NativeIframeElement *nativeIframeElement;
@@ -40,7 +41,7 @@ public:
     double _width;
     double _height;
 
-    JSFunctionHolder m_postMessage{context, this, "postMessage", postMessage};
+    JSFunctionHolder m_postMessage{context, object, this, "postMessage", postMessage};
   };
 protected:
   JSIframeElement() = delete;

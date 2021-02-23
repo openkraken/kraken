@@ -70,7 +70,7 @@ JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getImageElementPropertyMap();
 
   if (propertyMap.count(name) > 0) {
@@ -112,8 +112,9 @@ void JSImageElement::ImageElementInstance::setProperty(std::string &name, JSValu
     default:
       break;
     }
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 

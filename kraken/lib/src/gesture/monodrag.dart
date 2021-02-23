@@ -17,7 +17,7 @@ enum _DragState {
   accepted,
 }
 
-/// Pass gesture to native
+/// Pass gesture to native.
 abstract class GestureClient {
   void dragUpdateCallback(DragUpdateDetails details);
 
@@ -194,7 +194,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   double _getPrimaryValueFromOffset(Offset value);
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind);
 
-  // Can the swipe gesture win the arena
+  // Can the gesture win the arena
   bool _acceptDragGesture(PointerEvent event) => true;
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
@@ -440,6 +440,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
         return '$estimate; judged to not be a fling.';
       };
     }
+
     invokeCallback<void>('onEnd', () => onEnd(details), debugReport: debugReport);
   }
 
@@ -545,5 +546,3 @@ class ScrollHorizontalDragGestureRecognizer extends CompetitiveDragGestureRecogn
   @override
   String get debugDescription => 'scroll horizontal drag';
 }
-
-

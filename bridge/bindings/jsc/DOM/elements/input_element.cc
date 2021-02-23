@@ -67,6 +67,10 @@ JSInputElement::InputElementInstance::InputElementInstance(JSInputElement *jsAnc
 
 JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getInputElementPropertyMap();
+  auto staticPropertyMap = getInputElementStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
+
   if (propertyMap.count(name) > 0) {
     getDartMethod()->flushUICommand();
 
@@ -78,12 +82,6 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
     case InputElementProperty::height: {
       return JSValueMakeNumber(_hostClass->ctx, nativeInputElement->getInputHeight(nativeInputElement));
     }
-    case InputElementProperty::focus: {
-      return m_focus.function();
-    }
-    case InputElementProperty::blur: {
-      return m_blur.function();
-    }
     default: {
       return ElementInstance::getStringValueProperty(name);
     }
@@ -93,8 +91,12 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSInputElement::InputElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSInputElement::InputElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getInputElementPropertyMap();
+  auto staticPropertyMap = getInputElementStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
+
   if (propertyMap.count(name) > 0) {
     JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
     std::string string = JSStringToStdString(stringRef);
@@ -103,8 +105,9 @@ void JSInputElement::InputElementInstance::setProperty(std::string &name, JSValu
     buildUICommandArgs(name, string, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 
@@ -112,6 +115,10 @@ void JSInputElement::InputElementInstance::getPropertyNames(JSPropertyNameAccumu
   ElementInstance::getPropertyNames(accumulator);
 
   for (auto &property : getInputElementPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getInputElementStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

@@ -233,18 +233,13 @@ int32_t JSBlob::BlobInstance::size() {
 
 JSValueRef JSBlob::BlobInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getBlobPropertyMap();
+  auto staticPropertyMap = getBlobStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
-    case BlobProperty::arrayBuffer:
-      return m_arrayBuffer.function();
-    case BlobProperty::slice:
-      return m_slice.function();
-    case BlobProperty::text:
-      return m_text.function();
-    case BlobProperty::stream:
-      return nullptr;
     case BlobProperty::type: {
       JSStringRef typeStringRef = JSStringCreateWithUTF8CString(mimeType.empty() ? "" : mimeType.c_str());
       return JSValueMakeString(_hostClass->ctx, typeStringRef);
@@ -259,6 +254,10 @@ JSValueRef JSBlob::BlobInstance::getProperty(std::string &name, JSValueRef *exce
 
 void JSBlob::BlobInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : getBlobPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getBlobStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

@@ -44,6 +44,14 @@ const String EVENT_SEEKED = 'seeked';
 const String EVENT_SEEKING = 'seeking';
 const String EVENT_VOLUME_CHANGE = 'volumechange';
 const String EVENT_SCROLL = 'scroll';
+const String EVENT_SWIPE = 'swipe';
+const String EVENT_PAN = 'pan';
+const String EVENT_SCALE = 'scale';
+const String EVENT_Long_PRESS = 'longpress';
+
+const String EVENT_STATE_START = 'start';
+const String EVENT_STATE_UPDATE = 'update';
+const String EVENT_STATE_END = 'end';
 
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
@@ -114,7 +122,68 @@ class EventInit {
   final bool bubbles;
   final bool cancelable;
 
-  EventInit({ this.bubbles = false, this.cancelable = false });
+  EventInit({
+    this.bubbles = false,
+    this.cancelable = false,
+  });
+}
+
+
+class GestureEventInit extends EventInit {
+  final String state;
+  final String direction;
+  final double rotation;
+  final double deltaX;
+  final double deltaY;
+  final double velocityX;
+  final double velocityY;
+  final double scale;
+
+  GestureEventInit({
+    bool bubbles = false,
+    bool cancelable = false,
+    this.state = '',
+    this.direction = '',
+    this.rotation = 0.0,
+    this.deltaX = 0.0,
+    this.deltaY = 0.0,
+    this.velocityX = 0.0,
+    this.velocityY = 0.0,
+    this.scale = 0.0,
+  })
+      : super(bubbles: bubbles, cancelable: cancelable);
+}
+
+/// reference: https://developer.mozilla.org/en-US/docs/Web/API/GestureEvent
+class GestureEvent extends Event {
+  final GestureEventInit _gestureEventInit;
+
+  String get state => _gestureEventInit?.state;
+  String get direction => _gestureEventInit?.direction;
+  double get rotation => _gestureEventInit?.rotation;
+  double get deltaX => _gestureEventInit?.deltaX;
+  double get deltaY => _gestureEventInit?.deltaY;
+  double get velocityX => _gestureEventInit?.velocityX;
+  double get velocityY => _gestureEventInit?.velocityY;
+  double get scale => _gestureEventInit?.scale;
+
+
+  GestureEvent(String type, [GestureEventInit gestureEventInit])
+      : _gestureEventInit = gestureEventInit, super(type, gestureEventInit);
+
+  Pointer<NativeGestureEvent> toNative() {
+    Pointer<NativeGestureEvent> nativeGestureEventPointer = allocate<NativeGestureEvent>();
+    nativeGestureEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
+    nativeGestureEventPointer.ref.state = stringToNativeString(state);
+    nativeGestureEventPointer.ref.direction = stringToNativeString(direction);
+    nativeGestureEventPointer.ref.deltaX = deltaX;
+    nativeGestureEventPointer.ref.deltaY = deltaY;
+    nativeGestureEventPointer.ref.velocityX = velocityX;
+    nativeGestureEventPointer.ref.velocityY = velocityY;
+    nativeGestureEventPointer.ref.scale = scale;
+    nativeGestureEventPointer.ref.rotation = rotation;
+    return nativeGestureEventPointer;
+  }
 }
 
 class CustomEventInit extends EventInit {

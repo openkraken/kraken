@@ -41,6 +41,9 @@ JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
 
 JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getCanvasElementPropertyMap();
+  auto staticPropertyMap = getCanvasElementStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -51,16 +54,17 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
     }
     case CanvasElementProperty::height:
       return JSValueMakeNumber(_hostClass->ctx, _height);
-    case CanvasElementProperty::getContext:
-      return m_getContext.function();
     }
   }
 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getCanvasElementPropertyMap();
+  auto staticPropertyMap = getCanvasElementStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -96,8 +100,9 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     default:
       break;
     }
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 
@@ -105,6 +110,10 @@ void JSCanvasElement::CanvasElementInstance::getPropertyNames(JSPropertyNameAccu
   ElementInstance::getPropertyNames(accumulator);
 
   for (auto &property : getCanvasElementPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getCanvasElementStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
@@ -154,6 +163,9 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingCont
 JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProperty(std::string &name,
                                                                                    JSValueRef *exception) {
   auto propertyMap = getCanvasRenderingContext2DPropertyMap();
+  auto staticPropertyMap = getCanvasRenderingContext2DStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -167,36 +179,19 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
     case CanvasRenderingContext2DProperty::strokeStyle: {
       return m_strokeStyle.makeString();
     }
-    case CanvasRenderingContext2DProperty::fillRect: {
-      return m_fillRect.function();
-    }
-    case CanvasRenderingContext2DProperty::clearRect: {
-      return m_clearRect.function();
-    }
-    case CanvasRenderingContext2DProperty::strokeRect: {
-      return m_strokeRect.function();
-    }
-    case CanvasRenderingContext2DProperty::fillText: {
-      return m_fillText.function();
-    }
-    case CanvasRenderingContext2DProperty::strokeText: {
-      return m_strokeText.function();
-    }
-    case CanvasRenderingContext2DProperty::save: {
-      return m_save.function();
-    }
-    case CanvasRenderingContext2DProperty::restore: {
-      return m_restore.function();
-    }
     }
   }
 
   return Instance::getProperty(name, exception);
 }
 
-void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std::string &name, JSValueRef value,
+bool CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std::string &name, JSValueRef value,
                                                                              JSValueRef *exception) {
   auto propertyMap = getCanvasRenderingContext2DPropertyMap();
+  auto staticPropertyMap = getCanvasRenderingContext2DStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
@@ -242,8 +237,9 @@ void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
     default:
       break;
     }
+    return true;
   } else {
-    Instance::setProperty(name, value, exception);
+    return Instance::setProperty(name, value, exception);
   }
 }
 
@@ -441,6 +437,10 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::restore(J
 void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getPropertyNames(
   JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : getCanvasRenderingContext2DPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getCanvasRenderingContext2DStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

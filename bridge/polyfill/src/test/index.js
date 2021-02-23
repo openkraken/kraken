@@ -208,6 +208,7 @@ __kraken_executeTest__((done) => {
           });
         }
       } catch (e) {
+        console.log(e);
         reject(e);
       }
     });

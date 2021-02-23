@@ -6,6 +6,7 @@
 #include "event.h"
 #include "event_target.h"
 #include "bindings/jsc/DOM/custom_event.h"
+#include "bindings/jsc/DOM/gesture_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
@@ -71,10 +72,9 @@ void JSEvent::defineEvent(std::string eventType, EventCreator creator) {
   eventCreatorMap[eventType] = creator;
 }
 JSValueRef JSEvent::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "__initWithNativeEvent__") {
-    return m_initWithNativeEvent.function();
-  }
-  return nullptr;
+  auto staticPropertyMap = JSEvent::getEventStaticPropertyMap();
+  if (staticPropertyMap.count(name) == 0) return nullptr;
+  return HostClass::getProperty(name, exception);
 }
 
 EventInstance::EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent)
@@ -99,6 +99,9 @@ EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType, JSValueRef
 
 JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
+  auto staticPropertyMap = JSEvent::getEventStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) == 0) return Instance::getProperty(name, exception);
 
@@ -133,20 +136,13 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
     return JSValueMakeNull(_hostClass->ctx);
   case JSEvent::EventProperty::returnValue:
     return JSValueMakeBoolean(_hostClass->ctx, !_canceledFlag);
-  case JSEvent::EventProperty::stopPropagation:
-    return prototype<JSEvent>()->m_stopPropagation.function();
   case JSEvent::EventProperty::cancelBubble:
     return JSValueMakeBoolean(_hostClass->ctx, _stopPropagationFlag);
-  case JSEvent::EventProperty::stopImmediatePropagation:
-    return prototype<JSEvent>()->m_stopImmediatePropagation.function();
-  case JSEvent::EventProperty::preventDefault:
-    return prototype<JSEvent>()->m_preventDefault.function();
   }
-
   return nullptr;
 }
 
-JSValueRef JSEvent::stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef EventInstance::stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                    size_t argumentCount, const JSValueRef *arguments,
                                                    JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
@@ -154,7 +150,7 @@ JSValueRef JSEvent::stopPropagation(JSContextRef ctx, JSObjectRef function, JSOb
   return nullptr;
 }
 
-JSValueRef JSEvent::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
+JSValueRef EventInstance::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
                                                             JSObjectRef thisObject, size_t argumentCount,
                                                             const JSValueRef *arguments, JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
@@ -163,7 +159,7 @@ JSValueRef JSEvent::stopImmediatePropagation(JSContextRef ctx, JSObjectRef funct
   return nullptr;
 }
 
-JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef EventInstance::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                   size_t argumentCount, const JSValueRef *arguments,
                                                   JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
@@ -173,8 +169,12 @@ JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObj
   return nullptr;
 }
 
-void EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
+  auto staticPropertyMap = JSEvent::getEventStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
@@ -184,8 +184,9 @@ void EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef 
         _stopPropagationFlag = true;
       }
     }
+    return true;
   } else {
-    Instance::setProperty(name, value, exception);
+    return Instance::setProperty(name, value, exception);
   }
 }
 
@@ -197,13 +198,31 @@ void EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : JSEvent::getEventPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
+
+  for (auto &property : JSEvent::getEventStaticPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
 }
 
 EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent, bool isCustomEvent) {
   EventInstance *eventInstance;
   if (isCustomEvent) {
     eventInstance = new CustomEventInstance(JSCustomEvent::instance(context), reinterpret_cast<NativeCustomEvent*>(nativeEvent));
-  } else if (eventCreatorMap.count(eventType) > 0){
+  } else if (eventType == EVENT_INPUT) {
+    eventInstance = new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
+  } else if (eventType == EVENT_MEDIA_ERROR) {
+    eventInstance = new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));
+  } else if (eventType == EVENT_MESSAGE) {
+    eventInstance = new MessageEventInstance(JSMessageEvent::instance(context), reinterpret_cast<NativeMessageEvent*>(nativeEvent));
+  } else if (eventType == EVENT_CLOSE) {
+    eventInstance = new CloseEventInstance(JSCloseEvent::instance(context), reinterpret_cast<NativeCloseEvent*>(nativeEvent));
+  } else if (eventType == EVENT_INTERSECTION_CHANGE) {
+    eventInstance = new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
+  } else if (eventType == EVENT_TOUCH_START || eventType == EVENT_TOUCH_END || eventType == EVENT_TOUCH_MOVE || eventType == EVENT_TOUCH_CANCEL) {
+    eventInstance = new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+  } else if (eventType == EVENT_SWIPE || eventType == EVENT_PAN || eventType == EVENT_LONG_PRESS || eventType == EVENT_SCALE) {
+    eventInstance = new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent*>(nativeEvent));
+  } else if (eventCreatorMap.count(eventType) > 0) {
     eventInstance = eventCreatorMap[eventType](context, nativeEvent);
   } else {
     eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));

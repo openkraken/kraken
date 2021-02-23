@@ -33,6 +33,10 @@ JSIframeElement::IframeElementInstance::IframeElementInstance(JSIframeElement *j
 
 JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getIFrameElementPropertyMap();
+  auto staticPropertyMap = getIFrameElementStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return nullptr;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
@@ -43,16 +47,17 @@ JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name
     case IFrameElementProperty::contentWindow:
       // TODO: support contentWindow property.
       break;
-    case IFrameElementProperty::postMessage:
-      return m_postMessage.function();
     }
   }
 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getIFrameElementPropertyMap();
+  auto staticPropertyMap = getIFrameElementStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -84,8 +89,9 @@ void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSVa
     default:
       break;
     }
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 
@@ -93,6 +99,10 @@ void JSIframeElement::IframeElementInstance::getPropertyNames(JSPropertyNameAccu
   ElementInstance::getPropertyNames(accumulator);
 
   for (auto &property : getIFrameElementPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getIFrameElementStaticPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

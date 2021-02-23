@@ -47,7 +47,7 @@ public:
   explicit TouchEventInstance(JSTouchEvent *jsTouchEvent, NativeTouchEvent *nativeTouchEvent);
   explicit TouchEventInstance(JSTouchEvent *jsTouchEvent, JSStringRef data);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-  void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+  bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   ~TouchEventInstance() override;
 
