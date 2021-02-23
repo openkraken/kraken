@@ -205,7 +205,9 @@ void EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
 
 EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent, bool isCustomEvent) {
   EventInstance *eventInstance;
-  if (eventCreatorMap.count(eventType) > 0) {
+  if (isCustomEvent) {
+    eventInstance = new CustomEventInstance(JSCustomEvent::instance(context), reinterpret_cast<NativeCustomEvent*>(nativeEvent));
+  } else if (eventCreatorMap.count(eventType) > 0) {
     eventInstance = eventCreatorMap[eventType](context, nativeEvent);
   } else {
     eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
