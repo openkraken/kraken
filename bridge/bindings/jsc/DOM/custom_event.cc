@@ -130,10 +130,7 @@ JSValueRef CustomEventInstance::initCustomEvent(JSContextRef ctx, JSObjectRef fu
   return nullptr;
 }
 
-CustomEventInstance::~CustomEventInstance() {
-  if (nativeCustomEvent->detail != nullptr) nativeCustomEvent->detail->free();
-  delete nativeCustomEvent;
-}
+CustomEventInstance::~CustomEventInstance() {}
 
 void CustomEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   EventInstance::getPropertyNames(accumulator);
