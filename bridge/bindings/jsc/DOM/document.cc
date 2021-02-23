@@ -117,6 +117,18 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     JSEvent::defineEvent(EVENT_TOUCH_CANCEL, [](JSContext *context, void *nativeEvent) -> EventInstance* {
       return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
     });
+    JSEvent::defineEvent(EVENT_SWIPE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_PAN, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_LONG_PRESS, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_SCALE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    });
   }
   if (!document_registered) {
     document_registered = true;
