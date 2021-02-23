@@ -85,7 +85,7 @@ mixin RenderPointerListenerMixin on RenderBox {
       (gestures[PanGestureRecognizer] as PanGestureRecognizer).onUpdate = onPanUpdate;
       (gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = onPanEnd;
     }
-    if (eventHandlers.containsKey('longPress')) {
+    if (eventHandlers.containsKey('longpress')) {
       gestures[LongPressGestureRecognizer] = LongPressGestureRecognizer();
       (gestures[LongPressGestureRecognizer] as LongPressGestureRecognizer).onLongPressEnd = onLongPressEnd;
     }
