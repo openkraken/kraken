@@ -26,6 +26,7 @@
 #include "bindings/jsc/DOM/events/close_event.h"
 #include "bindings/jsc/DOM/events/intersection_change_event.h"
 #include "bindings/jsc/DOM/events/touch_event.h"
+#include "bindings/jsc/DOM/gesture_event.h"
 
 namespace kraken::binding::jsc {
 

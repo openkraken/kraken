@@ -43,6 +43,9 @@ class BoundingClientRect;
 struct NativeElement;
 class JSEvent;
 struct NativeEvent;
+class JSGestureEvent;
+struct NativeGestureEvent;
+class GestureEventInstance;
 
 class JSContext {
 public:
@@ -906,5 +909,81 @@ struct NativeElement {
   Scroll scroll{nullptr};
   ScrollBy scrollBy{nullptr};
 };
+
+struct NativeGestureEvent {
+  NativeGestureEvent() = delete;
+  explicit NativeGestureEvent(NativeEvent *nativeEvent) : nativeEvent(nativeEvent){};
+
+  NativeEvent *nativeEvent;
+
+  NativeString *state;
+
+  NativeString *direction;
+
+  double_t deltaX;
+
+  double_t deltaY;
+
+  double_t velocityX;
+
+  double_t velocityY;
+
+  double_t scale;
+
+  double_t rotation;
+};
+
+class JSGestureEvent : public JSEvent {
+public:
+  DEFINE_OBJECT_PROPERTY(GestureEvent, 8, state, direction, deltaX, deltaY, velocityX, velocityY, scale, rotation)
+
+  DEFINE_STATIC_OBJECT_PROPERTY(GestureEvent, 1, initGestureEvent);
+
+  static std::unordered_map<JSContext *, JSGestureEvent *> instanceMap;
+  OBJECT_INSTANCE(JSGestureEvent)
+
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                  const JSValueRef *arguments, JSValueRef *exception) override;
+
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+
+protected:
+  JSGestureEvent() = delete;
+  explicit JSGestureEvent(JSContext *context);
+  ~JSGestureEvent() override;
+
+private:
+  friend GestureEventInstance;
+
+  JSFunctionHolder m_initGestureEvent{context, prototypeObject, this, "initGestureEvent", initGestureEvent};
+
+  static JSValueRef initGestureEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+};
+
+class GestureEventInstance : public EventInstance {
+public:
+  GestureEventInstance() = delete;
+  explicit GestureEventInstance(JSGestureEvent *jsGestureEvent, std::string GestureEventType, JSValueRef eventInit,
+                                JSValueRef *exception);
+  explicit GestureEventInstance(JSGestureEvent *jsGestureEvent, NativeGestureEvent *nativeGestureEvent);
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+  bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+  ~GestureEventInstance() override;
+
+private:
+  friend JSGestureEvent;
+  JSValueHolder m_state{context, nullptr};
+  JSValueHolder m_direction{context, nullptr};
+  JSValueHolder m_deltaX{context, nullptr};
+  JSValueHolder m_deltaY{context, nullptr};
+  JSValueHolder m_velocityX{context, nullptr};
+  JSValueHolder m_velocityY{context, nullptr};
+  JSValueHolder m_scale{context, nullptr};
+  JSValueHolder m_rotation{context, nullptr};
+  NativeGestureEvent *nativeGestureEvent;
+};
+
 
 } // namespace kraken::binding::jsc
