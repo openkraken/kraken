@@ -445,8 +445,6 @@ class Element extends Node
       scrollingElement = null;
     }
 
-    assert(renderBoxModel == null);
-    // assert(renderBoxModel != null && renderBoxModel.parent == null);
     // Remove native reference.
     _nativeMap.remove(nativeElementPtr.address);
   }
