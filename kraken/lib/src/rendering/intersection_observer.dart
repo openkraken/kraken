@@ -370,8 +370,11 @@ const _kDefaultTolerance = 0.01;
 /// Computes the area of a rectangle of the specified dimensions.
 double _area(Size size) {
   assert(size != null);
-  assert(size.width >= 0);
-  assert(size.height >= 0);
+  // Negative areas are considered empty.
+  // Empty area considered square as zero.
+  if (size.isEmpty) {
+    return 0.0;
+  }
   return size.width * size.height;
 }
 
