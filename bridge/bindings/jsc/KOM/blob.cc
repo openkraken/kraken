@@ -133,13 +133,13 @@ JSObjectRef JSBlob::instanceConstructor(JSContextRef ctx, JSObjectRef constructo
   return blob->object;
 }
 
-JSValueRef JSBlob::BlobInstance::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSBlob::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                        size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef startValueRef = arguments[0];
   const JSValueRef endValueRef = arguments[1];
   const JSValueRef contentTypeValueRef = arguments[2];
 
-  auto blob = static_cast<JSBlob::BlobInstance *>(JSObjectGetPrivate(function));
+  auto blob = static_cast<JSBlob::BlobInstance *>(JSObjectGetPrivate(thisObject));
   size_t start = 0;
   size_t end = blob->_data.size();
   std::string mimeType = blob->mimeType;
@@ -172,9 +172,9 @@ JSValueRef JSBlob::BlobInstance::slice(JSContextRef ctx, JSObjectRef function, J
   return newBlob->object;
 }
 
-JSValueRef JSBlob::BlobInstance::text(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSBlob::text(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                       size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  auto blob = static_cast<JSBlob::BlobInstance *>(JSObjectGetPrivate(function));
+  auto blob = static_cast<JSBlob::BlobInstance *>(JSObjectGetPrivate(thisObject));
   auto context = new BlobPromiseContext();
   context->blobInstance = blob;
   JSObjectCallAsFunctionCallback callback = [](JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -197,9 +197,9 @@ JSValueRef JSBlob::BlobInstance::text(JSContextRef ctx, JSObjectRef function, JS
   return JSObjectMakePromise(blob->context, context, callback, exception);
 }
 
-JSValueRef JSBlob::BlobInstance::arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSBlob::arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                              size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  auto blob = static_cast<JSBlob::BlobInstance *>(JSObjectGetPrivate(function));
+  auto blob = static_cast<JSBlob::BlobInstance *>(JSObjectGetPrivate(thisObject));
   auto context = new BlobPromiseContext();
   context->blobInstance = blob;
   JSObjectCallAsFunctionCallback callback = [](JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -233,9 +233,12 @@ int32_t JSBlob::BlobInstance::size() {
 
 JSValueRef JSBlob::BlobInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getBlobPropertyMap();
-  auto staticPropertyMap = getBlobStaticPropertyMap();
+  auto prototypePropertyMap = getBlobPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
-  if (staticPropertyMap.count(name) > 0) return nullptr;
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSBlob>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -257,7 +260,7 @@ void JSBlob::BlobInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumul
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 
-  for (auto &property : getBlobStaticPropertyNames()) {
+  for (auto &property : getBlobPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

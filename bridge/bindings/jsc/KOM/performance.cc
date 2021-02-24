@@ -93,9 +93,9 @@ JSPerformanceMeasure::JSPerformanceMeasure(JSContext *context, NativePerformance
 
 JSValueRef JSPerformance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getPerformancePropertyMap();
-  auto staticPropertyMap = getPerformanceStaticPropertyMap();
+  auto prototypePropertyMap = getPerformancePrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) return nullptr;
+  if (prototypePropertyMap.count(name) > 0) return nullptr;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -127,7 +127,7 @@ void JSPerformance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 
-  for (auto &property : getPerformanceStaticPropertyNames()) {
+  for (auto &property : getPerformancePrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

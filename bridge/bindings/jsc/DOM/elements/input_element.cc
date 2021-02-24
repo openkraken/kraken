@@ -36,7 +36,7 @@ JSValueRef JSInputElement::focus(JSContextRef ctx, JSObjectRef function, JSObjec
   getDartMethod()->flushUICommand();
 
   auto elementInstance =
-    static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(function));
+    static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(elementInstance->nativeInputElement->focus != nullptr,
            "Failed to call dart method: focus() is nullptr");
   elementInstance->nativeInputElement->focus(elementInstance->nativeInputElement);
@@ -48,7 +48,7 @@ JSValueRef JSInputElement::blur(JSContextRef ctx, JSObjectRef function, JSObject
   getDartMethod()->flushUICommand();
 
   auto elementInstance =
-    static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(function));
+    static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(elementInstance->nativeInputElement->blur != nullptr,
            "Failed to call dart method: blur() is nullptr");
   elementInstance->nativeInputElement->blur(elementInstance->nativeInputElement);
@@ -67,9 +67,12 @@ JSInputElement::InputElementInstance::InputElementInstance(JSInputElement *jsAnc
 
 JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getInputElementPropertyMap();
-  auto staticPropertyMap = getInputElementStaticPropertyMap();
+  auto propertyPropertyMap = getInputElementPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
-  if (staticPropertyMap.count(name) > 0) return nullptr;
+  if (propertyPropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSInputElement>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
 
   if (propertyMap.count(name) > 0) {
     getDartMethod()->flushUICommand();
@@ -93,9 +96,9 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
 
 bool JSInputElement::InputElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getInputElementPropertyMap();
-  auto staticPropertyMap = getInputElementStaticPropertyMap();
+  auto prototypePropertyMap = getInputElementPrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) return false;
+  if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
     JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
@@ -118,7 +121,7 @@ void JSInputElement::InputElementInstance::getPropertyNames(JSPropertyNameAccumu
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 
-  for (auto &property : getInputElementStaticPropertyNames()) {
+  for (auto &property : getInputElementPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

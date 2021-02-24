@@ -23,11 +23,7 @@ public:
   class IframeElementInstance : public ElementInstance {
   public:
     DEFINE_OBJECT_PROPERTY(IFrameElement, 3, width, height, contentWindow)
-    DEFINE_STATIC_OBJECT_PROPERTY(IFrameElement, 1, postMessage)
-
-    static JSValueRef postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef arguments[], JSValueRef *exception);
-
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(IFrameElement, 1, postMessage)
     IframeElementInstance() = delete;
     ~IframeElementInstance();
     explicit IframeElementInstance(JSIframeElement *jsIframeElement);
@@ -40,13 +36,16 @@ public:
   private:
     double _width;
     double _height;
-
-    JSFunctionHolder m_postMessage{context, object, this, "postMessage", postMessage};
   };
 protected:
   JSIframeElement() = delete;
   explicit JSIframeElement(JSContext *context);
   ~JSIframeElement();
+
+  static JSValueRef postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef arguments[], JSValueRef *exception);
+
+  JSFunctionHolder m_postMessage{context, prototypeObject, this, "postMessage", postMessage};
 };
 
 using IframePostMessage = void (*)(NativeIframeElement *nativePtr, NativeString *message);
