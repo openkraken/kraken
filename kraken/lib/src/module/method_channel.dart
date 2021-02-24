@@ -1,16 +1,30 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/src/module/module_manager.dart';
 
 typedef MethodCallCallback = Future<dynamic> Function(String method, dynamic arguments);
+const String METHOD_CHANNEL_NOT_INITIALIZED = 'MethodChannel not initialized.';
+const String CONTROLLER_NOT_INITIALIZED = 'Kraken controller not initialized.';
 
 Future<dynamic> invokeMethodFromJavaScript(KrakenController controller, String method, List args) {
+  if (controller == null || controller.methodChannel == null) {
+    return Future.error(FlutterError(METHOD_CHANNEL_NOT_INITIALIZED));
+  }
   return controller.methodChannel._invokeMethodFromJavaScript(method, args);
 }
 
 void onJSMethodCall(KrakenController controller, MethodCallCallback value) {
+  if (controller == null) {
+    throw FlutterError(CONTROLLER_NOT_INITIALIZED);
+  }
+
+  if (controller.methodChannel == null) {
+    throw FlutterError(METHOD_CHANNEL_NOT_INITIALIZED);
+  }
+
   controller.methodChannel._onJSMethodCall = value;
 }
 
