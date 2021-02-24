@@ -23,7 +23,7 @@ JSGestureEvent::~JSGestureEvent() {
 JSGestureEvent::JSGestureEvent(JSContext *context) : JSEvent(context, "GestureEvent") {}
 
 JSObjectRef JSGestureEvent::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
-                                               const JSValueRef *arguments, JSValueRef *exception) {
+                                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
     throwJSError(ctx, "Failed to construct 'GestureEvent': 1 argument required, but only 0 present.", exception);
     return nullptr;
@@ -35,7 +35,8 @@ JSObjectRef JSGestureEvent::instanceConstructor(JSContextRef ctx, JSObjectRef co
     gestureEventInit = arguments[1];
   }
   std::string &&gestureEventType = JSStringToStdString(typeArgsStringRef);
-  auto gestureEvent = new GestureEventInstance(JSGestureEvent::instance(context), gestureEventType, gestureEventInit, exception);
+  auto gestureEvent =
+    new GestureEventInstance(JSGestureEvent::instance(context), gestureEventType, gestureEventInit, exception);
   return gestureEvent->object;
 }
 
@@ -43,8 +44,9 @@ JSValueRef JSGestureEvent::getProperty(std::string &name, JSValueRef *exception)
   return JSEvent::getProperty(name, exception);
 }
 
-GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, std::string eventType, JSValueRef eventInitValue, JSValueRef *exception)
-      : EventInstance(jsGestureEvent, std::move(eventType), eventInitValue, exception) {
+GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, std::string eventType,
+                                           JSValueRef eventInitValue, JSValueRef *exception)
+  : EventInstance(jsGestureEvent, std::move(eventType), eventInitValue, exception) {
   if (eventInitValue != nullptr) {
     JSObjectRef eventInit = JSValueToObject(ctx, eventInitValue, exception);
 
@@ -65,7 +67,8 @@ GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, std::
     }
     if (objectHasProperty(ctx, "velocityY", eventInit)) {
       m_velocityY.setValue(getObjectPropertyValue(ctx, "velocityY", eventInit, exception));
-    }if (objectHasProperty(ctx, "scale", eventInit)) {
+    }
+    if (objectHasProperty(ctx, "scale", eventInit)) {
       m_scale.setValue(getObjectPropertyValue(ctx, "scale", eventInit, exception));
     }
     if (objectHasProperty(ctx, "rotation", eventInit)) {
@@ -74,12 +77,13 @@ GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, std::
   }
 }
 
-GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, NativeGestureEvent* nativeGestureEvent)
-    : nativeGestureEvent(nativeGestureEvent)
-    , EventInstance(jsGestureEvent, nativeGestureEvent->nativeEvent) {
-  JSStringRef refState = JSStringCreateWithCharacters(nativeGestureEvent->state->string, nativeGestureEvent->state->length);
+GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, NativeGestureEvent *nativeGestureEvent)
+  : nativeGestureEvent(nativeGestureEvent), EventInstance(jsGestureEvent, nativeGestureEvent->nativeEvent) {
+  JSStringRef refState =
+    JSStringCreateWithCharacters(nativeGestureEvent->state->string, nativeGestureEvent->state->length);
   nativeGestureEvent->state->free();
-  JSStringRef refDirection = JSStringCreateWithCharacters(nativeGestureEvent->direction->string, nativeGestureEvent->direction->length);
+  JSStringRef refDirection =
+    JSStringCreateWithCharacters(nativeGestureEvent->direction->string, nativeGestureEvent->direction->length);
   nativeGestureEvent->direction->free();
 
   m_state.setValue(JSValueMakeString(context->context(), refState));
@@ -94,35 +98,39 @@ GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, Nativ
 
 JSValueRef GestureEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSGestureEvent::getGestureEventPropertyMap();
+  auto staticPropertyMap = JSGestureEvent::getGestureEventStaticPropertyMap();
+
+  if (staticPropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSEventTarget>()->prototypeObject,
+                               JSStringCreateWithUTF8CString(name.c_str()), exception);
+  }
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
   auto property = propertyMap[name];
 
   switch (property) {
-    case JSGestureEvent::GestureEventProperty::state:
-      return m_state.value();
-    case JSGestureEvent::GestureEventProperty::direction:
-      return m_direction.value();
-    case JSGestureEvent::GestureEventProperty::deltaX:
-      return m_deltaX.value();
-    case JSGestureEvent::GestureEventProperty::deltaY:
-      return m_deltaY.value();
-    case JSGestureEvent::GestureEventProperty::velocityX:
-      return m_velocityX.value();
-    case JSGestureEvent::GestureEventProperty::velocityY:
-      return m_velocityY.value();
-    case JSGestureEvent::GestureEventProperty::scale:
-      return m_scale.value();
-    case JSGestureEvent::GestureEventProperty::rotation:
-      return m_rotation.value();
-    case JSGestureEvent::GestureEventProperty::initGestureEvent:
-      return m_initGestureEvent.function();
+  case JSGestureEvent::GestureEventProperty::state:
+    return m_state.value();
+  case JSGestureEvent::GestureEventProperty::direction:
+    return m_direction.value();
+  case JSGestureEvent::GestureEventProperty::deltaX:
+    return m_deltaX.value();
+  case JSGestureEvent::GestureEventProperty::deltaY:
+    return m_deltaY.value();
+  case JSGestureEvent::GestureEventProperty::velocityX:
+    return m_velocityX.value();
+  case JSGestureEvent::GestureEventProperty::velocityY:
+    return m_velocityY.value();
+  case JSGestureEvent::GestureEventProperty::scale:
+    return m_scale.value();
+  case JSGestureEvent::GestureEventProperty::rotation:
+    return m_rotation.value();
   }
 
   return nullptr;
 }
 
-void GestureEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool GestureEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSGestureEvent::getGestureEventPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -151,16 +159,17 @@ void GestureEventInstance::setProperty(std::string &name, JSValueRef value, JSVa
     if (property == JSGestureEvent::GestureEventProperty::rotation) {
       m_rotation.setValue(value);
     }
+    return true;
   } else {
-    EventInstance::setProperty(name, value, exception);
+    return EventInstance::setProperty(name, value, exception);
   }
 }
 
-JSValueRef GestureEventInstance::initGestureEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-      size_t argumentCount, const JSValueRef *arguments,
-      JSValueRef *exception) {
+JSValueRef JSGestureEvent::initGestureEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    throwJSError(ctx, "Failed to execute 'initGestureEvent' on 'GestureEvent': 1 argument required, but only 0 present", exception);
+    throwJSError(ctx, "Failed to execute 'initGestureEvent' on 'GestureEvent': 1 argument required, but only 0 present",
+                 exception);
     return nullptr;
   }
   auto eventInstance = static_cast<GestureEventInstance *>(JSObjectGetPrivate(thisObject));

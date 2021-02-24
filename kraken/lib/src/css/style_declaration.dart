@@ -605,6 +605,15 @@ class CSSStyleDeclaration {
     });
   }
 
+  void dispose() {
+    target = null;
+    _properties.clear();
+    _animationProperties.clear();
+    _styleChangeListeners.clear();
+    _transitions.clear();
+    _propertyRunningTransition.clear();
+  }
+
   double getLengthByPropertyName(String propertyName, ElementManager elementManager) {
     double viewportWidth = elementManager.viewportWidth;
     double viewportHeight = elementManager.viewportHeight;

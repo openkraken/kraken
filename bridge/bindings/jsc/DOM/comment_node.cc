@@ -83,7 +83,7 @@ std::string JSCommentNode::CommentNodeInstance::internalGetTextContent() {
 }
 
 JSCommentNode::CommentNodeInstance::~CommentNodeInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeComment *>(ptr);
   }, nativeComment);
 }
