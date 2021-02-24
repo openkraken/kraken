@@ -29,10 +29,13 @@ struct NativeCustomEvent {
 class JSCustomEvent : public JSEvent {
 public:
   DEFINE_OBJECT_PROPERTY(CustomEvent, 1, detail)
-  DEFINE_STATIC_OBJECT_PROPERTY(CustomEvent, 1, initCustomEvent)
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(CustomEvent, 1, initCustomEvent)
 
   static std::unordered_map<JSContext *, JSCustomEvent *> instanceMap;
   OBJECT_INSTANCE(JSCustomEvent)
+
+  static JSValueRef initCustomEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                    const JSValueRef arguments[], JSValueRef *exception);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -45,13 +48,12 @@ protected:
   ~JSCustomEvent() override;
 
 private:
+  JSFunctionHolder m_initCustomEvent{context, prototypeObject, this, "initCustomEvent", initCustomEvent};
   friend CustomEventInstance;
 };
 
 class CustomEventInstance : public EventInstance {
 public:
-  static JSValueRef initCustomEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
   CustomEventInstance() = delete;
   explicit CustomEventInstance(JSCustomEvent *jsCustomEvent, std::string CustomEventType, JSValueRef eventInit, JSValueRef *exception);
   explicit CustomEventInstance(JSCustomEvent *jsCustomEvent, NativeCustomEvent* nativeCustomEvent);
@@ -63,7 +65,6 @@ public:
 private:
   friend JSCustomEvent;
   JSValueHolder m_detail{context, nullptr};
-  JSFunctionHolder m_initCustomEvent{context, object, this, "initCustomEvent", initCustomEvent};
   NativeCustomEvent* nativeCustomEvent;
 };
 

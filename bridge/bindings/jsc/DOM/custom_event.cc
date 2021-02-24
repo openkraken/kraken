@@ -64,9 +64,12 @@ CustomEventInstance::CustomEventInstance(JSCustomEvent *jsCustomEvent, NativeCus
 
 JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
-  auto staticPropertyMap = JSCustomEvent::getCustomEventStaticPropertyMap();
+  auto prototypePropertyMap = JSCustomEvent::getCustomEventPrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) return nullptr;
+  if (prototypePropertyMap.count(name) > 0) {
+    JSStringHolder nameStringHolder = JSStringHolder(context, name);
+    return JSObjectGetProperty(ctx, prototype<JSCustomEvent>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
   auto property = propertyMap[name];
@@ -81,9 +84,9 @@ JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *excep
 
 bool CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
-  auto staticPropertyMap = JSCustomEvent::getCustomEventStaticPropertyMap();
+  auto prototypePropertyMap = JSCustomEvent::getCustomEventPrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) return false;
+  if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -97,7 +100,7 @@ bool CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSVal
   }
 }
 
-JSValueRef CustomEventInstance::initCustomEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSCustomEvent::initCustomEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                 size_t argumentCount, const JSValueRef *arguments,
                                                 JSValueRef *exception) {
   if (argumentCount < 1) {
@@ -139,7 +142,7 @@ void CustomEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumula
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 
-  for (auto &property : JSCustomEvent::getCustomEventStaticPropertyNames()) {
+  for (auto &property : JSCustomEvent::getCustomEventPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

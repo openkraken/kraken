@@ -49,7 +49,7 @@ JSValueRef JSAnimationPlayerElement::play(JSContextRef ctx, JSObjectRef function
   }
 
   auto elementInstance =
-    static_cast<JSAnimationPlayerElement::AnimationPlayerElementInstance *>(JSObjectGetPrivate(function));
+    static_cast<JSAnimationPlayerElement::AnimationPlayerElementInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod()->flushUICommand();
   assert_m(elementInstance->nativeAnimationPlayerElement->play != nullptr,
@@ -74,8 +74,11 @@ JSAnimationPlayerElement::AnimationPlayerElementInstance::AnimationPlayerElement
 JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty(std::string &name,
                                                                                  JSValueRef *exception) {
   auto propertyMap = getAnimationPlayerPropertyMap();
-  auto staticPropertyMap = getAnimationPlayerStaticPropertyMap();
-  if (staticPropertyMap.count(name) > 0) return nullptr;
+  auto prototypePropertyMap = getAnimationPlayerPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSAnimationPlayerElement>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -93,9 +96,12 @@ JSValueRef JSAnimationPlayerElement::AnimationPlayerElementInstance::getProperty
 bool JSAnimationPlayerElement::AnimationPlayerElementInstance::setProperty(std::string &name, JSValueRef value,
                                                                            JSValueRef *exception) {
   auto propertyMap = getAnimationPlayerPropertyMap();
-  auto staticPropertyMap = getAnimationPlayerStaticPropertyMap();
+  auto prototypePropertyMap = getAnimationPlayerPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
-  if (staticPropertyMap.count(name) > 0) return false;
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSAnimationPlayerElement>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
 
   auto property = propertyMap[name];
 
@@ -134,7 +140,7 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::getPropertyNames(
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 
-  for (auto &property : getAnimationPlayerStaticPropertyNames()) {
+  for (auto &property : getAnimationPlayerPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

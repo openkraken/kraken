@@ -27,27 +27,27 @@ JSMediaElement::MediaElementInstance::~MediaElementInstance() {
   }, nativeMediaElement);
 }
 
-JSValueRef JSMediaElement::MediaElementInstance::play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSMediaElement::play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                       size_t argumentCount, const JSValueRef *arguments,
                                                       JSValueRef *exception) {
-  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
   assert_m(elementInstance->nativeMediaElement->play != nullptr, "Failed to execute play(): dart method is nullptr.");
   elementInstance->nativeMediaElement->play(elementInstance->nativeMediaElement);
   return nullptr;
 }
 
-JSValueRef JSMediaElement::MediaElementInstance::pause(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSMediaElement::pause(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                        size_t argumentCount, const JSValueRef *arguments,
                                                        JSValueRef *exception) {
-  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
   assert_m(elementInstance->nativeMediaElement->pause != nullptr, "Failed to execute pause(): dart method is nullptr.");
   elementInstance->nativeMediaElement->pause(elementInstance->nativeMediaElement);
   return nullptr;
 }
 
-JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSObjectRef function,
+JSValueRef JSMediaElement::fastSeek(JSContextRef ctx, JSObjectRef function,
                                                           JSObjectRef thisObject, size_t argumentCount,
                                                           const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
@@ -62,7 +62,7 @@ JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSOb
 
   double duration = JSValueToNumber(ctx, arguments[0], exception);
 
-  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod()->flushUICommand();
   assert_m(elementInstance->nativeMediaElement->fastSeek != nullptr, "Failed to execute fastSeek(): dart method is nullptr.");
@@ -73,9 +73,12 @@ JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSOb
 
 JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getMediaElementPropertyMap();
-  auto staticPropertyMap = getMediaElementStaticPropertyMap();
+  auto prototypePropertyMap = getMediaElementPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
-  if (staticPropertyMap.count(name) > 0) return nullptr;
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSMediaElement>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -96,9 +99,9 @@ JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, 
 
 bool JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getMediaElementPropertyMap();
-  auto staticPropertyMap = getMediaElementStaticPropertyMap();
+  auto prototypePropertyMap = getMediaElementPrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) return false;
+  if (prototypePropertyMap.count(name) > 0) return false;
 
   auto property = propertyMap[name];
 

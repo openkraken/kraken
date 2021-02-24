@@ -72,8 +72,7 @@ void JSEvent::defineEvent(std::string eventType, EventCreator creator) {
   eventCreatorMap[eventType] = creator;
 }
 JSValueRef JSEvent::getProperty(std::string &name, JSValueRef *exception) {
-  auto staticPropertyMap = JSEvent::getEventStaticPropertyMap();
-  if (staticPropertyMap.count(name) == 0) return nullptr;
+  if (name == "__initWithNativeEvent__") return nullptr;
   return HostClass::getProperty(name, exception);
 }
 
@@ -99,9 +98,12 @@ EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType, JSValueRef
 
 JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
-  auto staticPropertyMap = JSEvent::getEventStaticPropertyMap();
+  auto prototypeProperty = JSEvent::getEventPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
-  if (staticPropertyMap.count(name) > 0) return nullptr;
+  if (prototypeProperty.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSEvent>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
 
   if (propertyMap.count(name) == 0) return Instance::getProperty(name, exception);
 
@@ -142,7 +144,7 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
   return nullptr;
 }
 
-JSValueRef EventInstance::stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEvent::stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                    size_t argumentCount, const JSValueRef *arguments,
                                                    JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
@@ -150,7 +152,7 @@ JSValueRef EventInstance::stopPropagation(JSContextRef ctx, JSObjectRef function
   return nullptr;
 }
 
-JSValueRef EventInstance::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
+JSValueRef JSEvent::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
                                                             JSObjectRef thisObject, size_t argumentCount,
                                                             const JSValueRef *arguments, JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
@@ -159,7 +161,7 @@ JSValueRef EventInstance::stopImmediatePropagation(JSContextRef ctx, JSObjectRef
   return nullptr;
 }
 
-JSValueRef EventInstance::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                   size_t argumentCount, const JSValueRef *arguments,
                                                   JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
@@ -171,9 +173,9 @@ JSValueRef EventInstance::preventDefault(JSContextRef ctx, JSObjectRef function,
 
 bool EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
-  auto staticPropertyMap = JSEvent::getEventStaticPropertyMap();
+  auto prototypePropertyMap = JSEvent::getEventPrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) return false;
+  if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -198,7 +200,7 @@ void EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 
-  for (auto &property : JSEvent::getEventStaticPropertyNames()) {
+  for (auto &property : JSEvent::getEventPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

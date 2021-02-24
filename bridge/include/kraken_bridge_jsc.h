@@ -313,7 +313,7 @@ class JSEvent : public HostClass {
 public:
   DEFINE_OBJECT_PROPERTY(Event, 10, type, bubbles, cancelable, timestamp, defaultPrevented, target, srcElement,
                          currentTarget, returnValue, cancelBubble)
-  DEFINE_STATIC_OBJECT_PROPERTY(Event, 4, __initWithNativeEvent__, stopImmediatePropagation, stopPropagation,
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Event, 3, stopImmediatePropagation, stopPropagation,
                                 preventDefault)
 
   static std::unordered_map<JSContext *, JSEvent *> instanceMap;
@@ -322,6 +322,16 @@ public:
   // Create an Event Object from an nativeEvent address which allocated by dart side.
   static JSValueRef initWithNativeEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+
 
   static EventInstance *buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent,
                                            bool isCustomEvent);
@@ -340,8 +350,12 @@ protected:
   ~JSEvent() override;
 
 private:
-  JSFunctionHolder m_initWithNativeEvent{context, classObject, this, "__initWithNativeEvent__", initWithNativeEvent};
   friend EventInstance;
+  JSFunctionHolder m_initWithNativeEvent{context, classObject, this, "__initWithNativeEvent__", initWithNativeEvent};
+  JSFunctionHolder m_stopImmediatePropagation{context, prototypeObject, this, "stopImmediatePropagation",
+                                              stopImmediatePropagation};
+  JSFunctionHolder m_stopPropagation{context, prototypeObject, this, "stopPropagation", stopPropagation};
+  JSFunctionHolder m_preventDefault{context, prototypeObject, this, "preventDefault", preventDefault};
 };
 
 class EventInstance : public HostClass::Instance {
@@ -363,20 +377,7 @@ public:
   bool _inPassiveListenerFlag{false};
 
 private:
-  static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                             size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
-
   friend JSEvent;
-  JSFunctionHolder m_stopImmediatePropagation{context, object, this, "stopImmediatePropagation",
-                                              stopImmediatePropagation};
-  JSFunctionHolder m_stopPropagation{context, object, this, "stopPropagation", stopPropagation};
-  JSFunctionHolder m_preventDefault{context, object, this, "preventDefault", preventDefault};
 };
 
 struct NativeEvent {
@@ -398,7 +399,7 @@ public:
   static std::unordered_map<JSContext *, JSEventTarget *> instanceMap;
   static JSEventTarget *instance(JSContext *context);
   DEFINE_OBJECT_PROPERTY(EventTarget, 1, eventTargetId)
-  DEFINE_STATIC_OBJECT_PROPERTY(EventTarget, 4, addEventListener, removeEventListener, dispatchEvent,
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(EventTarget, 4, addEventListener, removeEventListener, dispatchEvent,
                                 __clearListeners__)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
@@ -487,7 +488,7 @@ public:
   static JSNode *instance(JSContext *context);
   DEFINE_OBJECT_PROPERTY(Node, 9, isConnected, firstChild, lastChild, parentNode, childNodes, previousSibling,
                          nextSibling, nodeType, textContent)
-  DEFINE_STATIC_OBJECT_PROPERTY(Node, 5, appendChild, remove, removeChild, insertBefore, replaceChild)
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Node, 5, appendChild, remove, removeChild, insertBefore, replaceChild)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -520,6 +521,11 @@ protected:
   ~JSNode();
 
 private:
+  JSFunctionHolder m_removeChild{context, prototypeObject, this, "removeChild", removeChild};
+  JSFunctionHolder m_appendChild{context, prototypeObject, this, "appendChild", appendChild};
+  JSFunctionHolder m_remove{context, prototypeObject, this, "remove", remove};
+  JSFunctionHolder m_insertBefore{context, prototypeObject, this, "insertBefore", insertBefore};
+  JSFunctionHolder m_replaceChild{context, prototypeObject, this, "replaceChild", replaceChild};
 };
 
 class NodeInstance : public EventTargetInstance {
@@ -565,12 +571,6 @@ public:
 
 private:
   void ensureDetached(NodeInstance *node);
-
-  JSFunctionHolder m_removeChild{context, object, this, "removeChild", JSNode::removeChild};
-  JSFunctionHolder m_appendChild{context, object, this, "appendChild", JSNode::appendChild};
-  JSFunctionHolder m_remove{context, object, this, "remove", JSNode::remove};
-  JSFunctionHolder m_insertBefore{context, object, this, "insertBefore", JSNode::insertBefore};
-  JSFunctionHolder m_replaceChild{context, object, this, "replaceChild", JSNode::replaceChild};
 };
 
 struct NativeNode {
@@ -587,11 +587,31 @@ public:
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
+  static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                   const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 private:
 protected:
   JSDocument() = delete;
   JSDocument(JSContext *context);
   ~JSDocument();
+
+  JSFunctionHolder m_createElement{context, prototypeObject, this, "createElement", createElement};
+  JSFunctionHolder m_createTextNode{context, prototypeObject, this, "createTextNode", createTextNode};
+  JSFunctionHolder m_createComment{context, prototypeObject, this, "createComment", createComment};
+  JSFunctionHolder m_getElementById{context, prototypeObject, this, "getElementById", getElementById};
+  JSFunctionHolder m_getElementsByTagName{context, prototypeObject, this, "getElementsByTagName", getElementsByTagName};
 };
 
 class DocumentCookie {
@@ -614,26 +634,11 @@ struct NativeDocument {
 
 class DocumentInstance : public NodeInstance {
 public:
-  DEFINE_OBJECT_PROPERTY(Document, 3, nodeName, all, cookie)
-  DEFINE_STATIC_OBJECT_PROPERTY(Document, 7, body, documentElement, createElement, createTextNode, createComment,
+  DEFINE_OBJECT_PROPERTY(Document, 5, nodeName, all, cookie, body, documentElement)
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 5, createElement, createTextNode, createComment,
                                 getElementById, getElementsByTagName)
 
   static DocumentInstance *instance(JSContext *context);
-
-  static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   DocumentInstance() = delete;
   KRAKEN_EXPORT explicit DocumentInstance(JSDocument *document);
@@ -651,11 +656,6 @@ public:
   ElementInstance *body;
 
 private:
-  JSFunctionHolder m_createElement{context, object, this, "createElement", createElement};
-  JSFunctionHolder m_createTextNode{context, object, this, "createTextNode", createTextNode};
-  JSFunctionHolder m_createComment{context, object, this, "createComment", createComment};
-  JSFunctionHolder m_getElementById{context, object, this, "getElementById", getElementById};
-  JSFunctionHolder m_getElementsByTagName{context, object, this, "getElementsByTagName", getElementsByTagName};
   DocumentCookie m_cookie;
 };
 
@@ -703,26 +703,30 @@ public:
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
-protected:
-  CSSStyleDeclaration() = delete;
-  ~CSSStyleDeclaration();
-  explicit CSSStyleDeclaration(JSContext *context);
-};
-
-class StyleDeclarationInstance : public HostClass::Instance {
-public:
-  DEFINE_STATIC_OBJECT_PROPERTY(CSSStyleDeclaration, 3, setProperty, removeProperty, getPropertyValue)
-
-  StyleDeclarationInstance() = delete;
-  StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration, EventTargetInstance *ownerEventTarget);
-  ~StyleDeclarationInstance();
-
   static JSValueRef setProperty(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef removeProperty(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef getPropertyValue(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+protected:
+  CSSStyleDeclaration() = delete;
+  ~CSSStyleDeclaration();
+  explicit CSSStyleDeclaration(JSContext *context);
+
+  JSFunctionHolder m_setProperty{context, prototypeObject, this, "setProperty", setProperty};
+  JSFunctionHolder m_getPropertyValue{context, prototypeObject, this, "getPropertyValue", getPropertyValue};
+  JSFunctionHolder m_removeProperty{context, prototypeObject, this, "removeProperty", removeProperty};
+};
+
+class StyleDeclarationInstance : public HostClass::Instance {
+public:
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(CSSStyleDeclaration, 3, setProperty, removeProperty, getPropertyValue)
+
+  StyleDeclarationInstance() = delete;
+  StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration, EventTargetInstance *ownerEventTarget);
+  ~StyleDeclarationInstance();
 
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
@@ -734,21 +738,16 @@ public:
 private:
   std::unordered_map<std::string, JSStringRef> properties;
   const EventTargetInstance *ownerEventTarget;
-
-  JSFunctionHolder m_setProperty{context, object, this, "setProperty", setProperty};
-  JSFunctionHolder m_getPropertyValue{context, object, this, "getPropertyValue", getPropertyValue};
-  JSFunctionHolder m_removeProperty{context, object, this, "removeProperty", removeProperty};
 };
 
 using ElementCreator = ElementInstance *(*)(JSContext *context);
 
 class JSElement : public JSNode {
 public:
-  DEFINE_OBJECT_PROPERTY(Element, 15, nodeName, tagName, offsetLeft, offsetTop, offsetWidth, offsetHeight, clientWidth,
-                         clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight, scrollWidth,
-                         children)
+  DEFINE_OBJECT_PROPERTY(Element, 17, style, attributes, nodeName, tagName, offsetLeft, offsetTop, offsetWidth, offsetHeight, clientWidth,
+                         clientHeight, clientTop, clientLeft, scrollTop, scrollLeft, scrollHeight, scrollWidth, children)
 
-  DEFINE_STATIC_OBJECT_PROPERTY(Element, 12, style, attributes, getBoundingClientRect, getAttribute, setAttribute,
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Element, 10, getBoundingClientRect, getAttribute, setAttribute,
                                 hasAttribute, removeAttribute, toBlob, click, scroll, scrollBy, scrollTo)
 
   enum class ElementTagName {
@@ -788,6 +787,36 @@ protected:
 
 private:
   friend ElementInstance;
+
+  static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                          size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                           const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                          const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                           const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+  JSFunctionHolder m_getBoundingClientRect{context, prototypeObject, this, "getBoundingClientRect", getBoundingClientRect};
+  JSFunctionHolder m_setAttribute{context, prototypeObject, this, "setAttribute", setAttribute};
+  JSFunctionHolder m_getAttribute{context, prototypeObject, this, "getAttribute", getAttribute};
+  JSFunctionHolder m_hasAttribute{context, prototypeObject, this, "hasAttribute", hasAttribute};
+  JSFunctionHolder m_removeAttribute{context, prototypeObject, this, "removeAttribute", removeAttribute};
+  JSFunctionHolder m_toBlob{context, prototypeObject, this, "toBlob", toBlob};
+  JSFunctionHolder m_click{context, prototypeObject, this, "click", click};
+  JSFunctionHolder m_scroll{context, prototypeObject, this, "scroll", scroll};
+  JSFunctionHolder m_scrollTo{context, prototypeObject, this, "scrollTo", scroll};
+  JSFunctionHolder m_scrollBy{context, prototypeObject, this, "scrollBy", scrollBy};
 };
 
 class ElementInstance : public NodeInstance {
@@ -812,26 +841,6 @@ private:
   friend JSElement;
   JSStringHolder m_tagName{context, ""};
 
-  static JSValueRef getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                          size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-
-  static JSValueRef hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                 const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                 const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                 const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                           const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                          const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                           const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-
   void _notifyNodeRemoved(NodeInstance *node) override;
   void _notifyChildRemoved();
   void _notifyNodeInsert(NodeInstance *insertNode) override;
@@ -842,17 +851,6 @@ private:
   JSHostClassHolder m_style{
     context, object, "style",
     new StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this)};
-
-  JSFunctionHolder m_getBoundingClientRect{context, object, this, "getBoundingClientRect", getBoundingClientRect};
-  JSFunctionHolder m_setAttribute{context, object, this, "setAttribute", setAttribute};
-  JSFunctionHolder m_getAttribute{context, object, this, "getAttribute", getAttribute};
-  JSFunctionHolder m_hasAttribute{context, object, this, "hasAttribute", hasAttribute};
-  JSFunctionHolder m_removeAttribute{context, object, this, "removeAttribute", removeAttribute};
-  JSFunctionHolder m_toBlob{context, object, this, "toBlob", toBlob};
-  JSFunctionHolder m_click{context, object, this, "click", click};
-  JSFunctionHolder m_scroll{context, object, this, "scroll", scroll};
-  JSFunctionHolder m_scrollTo{context, object, this, "scrollTo", scroll};
-  JSFunctionHolder m_scrollBy{context, object, this, "scrollBy", scrollBy};
 };
 
 enum class ViewModuleProperty {
@@ -937,7 +935,7 @@ class JSGestureEvent : public JSEvent {
 public:
   DEFINE_OBJECT_PROPERTY(GestureEvent, 8, state, direction, deltaX, deltaY, velocityX, velocityY, scale, rotation)
 
-  DEFINE_STATIC_OBJECT_PROPERTY(GestureEvent, 1, initGestureEvent);
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(GestureEvent, 1, initGestureEvent);
 
   static std::unordered_map<JSContext *, JSGestureEvent *> instanceMap;
   OBJECT_INSTANCE(JSGestureEvent)

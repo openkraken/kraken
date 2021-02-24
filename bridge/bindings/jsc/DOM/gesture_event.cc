@@ -98,9 +98,9 @@ GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, Nativ
 
 JSValueRef GestureEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSGestureEvent::getGestureEventPropertyMap();
-  auto staticPropertyMap = JSGestureEvent::getGestureEventStaticPropertyMap();
+  auto prototypePropertyMap = JSGestureEvent::getGestureEventPrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) {
+  if (prototypePropertyMap.count(name) > 0) {
     return JSObjectGetProperty(ctx, prototype<JSEventTarget>()->prototypeObject,
                                JSStringCreateWithUTF8CString(name.c_str()), exception);
   }

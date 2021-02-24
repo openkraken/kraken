@@ -32,14 +32,7 @@ public:
   class BlobInstance : public Instance {
   public:
     DEFINE_OBJECT_PROPERTY(Blob, 2, type, size)
-    DEFINE_STATIC_OBJECT_PROPERTY(Blob, 4, stream, arrayBuffer, slice, text)
-
-    static JSValueRef slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                            const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef text(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                           const JSValueRef arguments[], JSValueRef *exception);
-    static JSValueRef arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef arguments[], JSValueRef *exception);
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(Blob, 4, stream, arrayBuffer, slice, text)
 
     BlobInstance() = delete;
     explicit BlobInstance(JSBlob *jsBlob) : _size(0), Instance(jsBlob){};
@@ -60,23 +53,32 @@ public:
     int32_t size();
 
   private:
-    JSFunctionHolder m_arrayBuffer{context, object, this, "arrayBuffer", arrayBuffer};
-    JSFunctionHolder m_slice{context, object, this, "slice", slice};
-    JSFunctionHolder m_text{context, object, this, "text", text};
-
     size_t _size;
     std::string mimeType{""};
     std::vector<uint8_t> _data;
     friend BlobBuilder;
+    friend JSBlob;
   };
   struct BlobPromiseContext {
     BlobInstance *blobInstance;
   };
 
 protected:
+  friend BlobInstance;
   JSBlob() = delete;
   ~JSBlob();
   explicit JSBlob(JSContext *context) : HostClass(context, "Blob"){};
+
+  static JSValueRef slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                          const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef text(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                         const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef arguments[], JSValueRef *exception);
+
+  JSFunctionHolder m_arrayBuffer{context, prototypeObject, this, "arrayBuffer", arrayBuffer};
+  JSFunctionHolder m_slice{context, prototypeObject, this, "slice", slice};
+  JSFunctionHolder m_text{context, prototypeObject, this, "text", text};
 };
 
 class BlobBuilder {

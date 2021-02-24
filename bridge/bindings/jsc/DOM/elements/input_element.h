@@ -31,7 +31,7 @@ public:
     DEFINE_OBJECT_PROPERTY(InputElement, 21, width, height, value, accept, autocomplete, autofocus, checked, disabled,
                            min, max, minlength, maxlength, size, multiple, name, step, pattern, required, readonly,
                            placeholder, type);
-    DEFINE_STATIC_OBJECT_PROPERTY(InputElement, 2, focus, blur);
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(InputElement, 2, focus, blur);
 
     InputElementInstance() = delete;
     ~InputElementInstance();
@@ -43,14 +43,15 @@ public:
     NativeInputElement *nativeInputElement;
 
   private:
-    JSFunctionHolder m_focus{context, object, this, "focus", focus};
-    JSFunctionHolder m_blur{context, object, this, "blur", blur};
   };
 
 protected:
   JSInputElement() = delete;
   explicit JSInputElement(JSContext *context);
   ~JSInputElement();
+
+  JSFunctionHolder m_focus{context, prototypeObject, this, "focus", focus};
+  JSFunctionHolder m_blur{context, prototypeObject, this, "blur", blur};
 };
 
 using GetInputWidth = double (*)(NativeInputElement *nativeInputElement);
