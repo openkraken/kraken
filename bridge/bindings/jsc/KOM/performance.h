@@ -170,7 +170,7 @@ public:
 class JSPerformance : public HostObject {
 public:
   DEFINE_OBJECT_PROPERTY(Performance, 1, timeOrigin)
-  DEFINE_STATIC_OBJECT_PROPERTY(Performance, 10, now, toJSON, clearMarks, clearMeasures, getEntries,
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Performance, 10, now, toJSON, clearMarks, clearMeasures, getEntries,
                                 getEntriesByName, getEntriesByType, mark, measure, __kraken_navigation_summary__)
 
   static JSValueRef now(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,

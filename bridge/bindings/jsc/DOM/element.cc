@@ -179,7 +179,7 @@ ElementInstance::~ElementInstance() {
     ->registerCallback([](void *ptr) { delete reinterpret_cast<NativeElement *>(ptr); }, nativeElement);
 }
 
-JSValueRef ElementInstance::getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSElement::getBoundingClientRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
@@ -193,10 +193,11 @@ JSValueRef ElementInstance::getBoundingClientRect(JSContextRef ctx, JSObjectRef 
 
 JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSElement::getElementPropertyMap();
-  auto staticPropertyMap = JSElement::getElementStaticPropertyMap();
+  auto prototypePropertyMap = JSElement::getElementPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
-  if (staticPropertyMap.count(name) > 0) {
-    return nullptr;
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSElement>()->prototypeObject, nameStringHolder.getString(), exception);
   }
 
   if (propertyMap.count(name) == 0) {
@@ -209,6 +210,10 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   case JSElement::ElementProperty::nodeName:
   case JSElement::ElementProperty::tagName: {
     return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName().c_str()));
+  }
+  case JSElement::ElementProperty::attributes:
+  case JSElement::ElementProperty::style: {
+    return nullptr;
   }
   case JSElement::ElementProperty::offsetLeft: {
     getDartMethod()->flushUICommand();
@@ -290,9 +295,9 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
 
 bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSElement::getElementPropertyMap();
-  auto staticPropertyMap = JSElement::getElementStaticPropertyMap();
+  auto prototypePropertyMap = JSElement::getElementPrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) {
+  if (prototypePropertyMap.count(name) > 0) {
     return false;
   }
 
@@ -300,6 +305,9 @@ bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
     auto property = propertyMap[name];
 
     switch (property) {
+    case JSElement::ElementProperty::style:
+    case JSElement::ElementProperty::attributes:
+      return false;
     case JSElement::ElementProperty::scrollTop: {
       getDartMethod()->flushUICommand();
       assert_m(nativeElement->setViewModuleProperty != nullptr, "Failed to execute setScrollTop(): dart method is nullptr.");
@@ -328,7 +336,7 @@ void ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator)
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 
-  for (auto &property : JSElement::getElementStaticPropertyNames()) {
+  for (auto &property : JSElement::getElementPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
@@ -344,7 +352,7 @@ std::string ElementInstance::internalGetTextContent() {
   return buffer;
 }
 
-JSValueRef ElementInstance::setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 2) {
     throwJSError(ctx,
@@ -400,7 +408,7 @@ JSValueRef ElementInstance::setAttribute(JSContextRef ctx, JSObjectRef function,
   return nullptr;
 }
 
-JSValueRef ElementInstance::getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+JSValueRef JSElement::getAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     throwJSError(ctx, "Failed to execute 'getAttribute' on 'Element': 1 argument required, but only 0 present",
@@ -427,7 +435,7 @@ JSValueRef ElementInstance::getAttribute(JSContextRef ctx, JSObjectRef function,
   return nullptr;
 }
 
-JSValueRef ElementInstance::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+JSValueRef JSElement::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                    const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
     throwJSError(ctx, "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present",
@@ -450,7 +458,7 @@ JSValueRef ElementInstance::hasAttribute(JSContextRef ctx, JSObjectRef function,
   return JSValueMakeBoolean(ctx, attributes->hasAttribute(name));
 }
 
-JSValueRef ElementInstance::removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSElement::removeAttribute(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                       size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     throwJSError(ctx, "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present",
@@ -497,7 +505,7 @@ struct ToBlobPromiseContext {
   JSContext *context;
 };
 
-JSValueRef ElementInstance::toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+JSValueRef JSElement::toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef &devicePixelRatioValueRef = arguments[0];
 
@@ -571,7 +579,7 @@ JSValueRef ElementInstance::toBlob(JSContextRef ctx, JSObjectRef function, JSObj
   return JSObjectMakePromise(context, toBlobPromiseContext, promiseCallback, exception);
 }
 
-JSValueRef ElementInstance::click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+JSValueRef JSElement::click(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef *arguments, JSValueRef *exception) {
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
@@ -581,7 +589,7 @@ JSValueRef ElementInstance::click(JSContextRef ctx, JSObjectRef function, JSObje
   return nullptr;
 }
 
-JSValueRef ElementInstance::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+JSValueRef JSElement::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef xValueRef = arguments[0];
   const JSValueRef yValueRef = arguments[1];
@@ -605,7 +613,7 @@ JSValueRef ElementInstance::scroll(JSContextRef ctx, JSObjectRef function, JSObj
   return nullptr;
 }
 
-JSValueRef ElementInstance::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+JSValueRef JSElement::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef xValueRef = arguments[0];
   const JSValueRef yValueRef = arguments[1];
@@ -648,9 +656,9 @@ void JSElement::defineElement(std::string tagName, ElementCreator creator) {
 
 JSValueRef JSElement::prototypeGetProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getElementPropertyMap();
-  auto staticPropertyMap = getElementStaticPropertyMap();
+  auto prototypePropertyMap = getElementPrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) return nullptr;
+  if (prototypePropertyMap.count(name) > 0) return nullptr;
   if (propertyMap.count(name) == 0) return JSNode::prototypeGetProperty(name, exception);
 
   return nullptr;

@@ -297,10 +297,11 @@ JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function,
 
 JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSEventTarget::getEventTargetPropertyMap();
-  auto staticPropertyMap = JSEventTarget::getEventTargetStaticPropertyMap();
+  auto prototypePropertyMap = JSEventTarget::getEventTargetPrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) {
-    return JSObjectGetProperty(ctx, prototype<JSEventTarget>()->prototypeObject, JSStringCreateWithUTF8CString(name.c_str()), exception);
+  if (prototypePropertyMap.count(name) > 0) {
+    JSStringHolder nameStringHolder = JSStringHolder(context, name);
+    return JSObjectGetProperty(ctx, prototype<JSEventTarget>()->prototypeObject, nameStringHolder.getString(), exception);
   }
 
   if (propertyMap.count(name) > 0) {
@@ -319,7 +320,7 @@ JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *excep
 }
 
 bool EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto staticPropertyMap = JSEventTarget::getEventTargetStaticPropertyMap();
+  auto staticPropertyMap = JSEventTarget::getEventTargetPrototypePropertyMap();
 
   if (staticPropertyMap.count(name) > 0) return false;
 
@@ -369,7 +370,7 @@ void EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumula
     JSPropertyNameAccumulatorAddName(accumulator, propertyName);
   }
 
-  for (auto &propertyName : JSEventTarget::getEventTargetStaticPropertyNames()) {
+  for (auto &propertyName : JSEventTarget::getEventTargetPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, propertyName);
   }
 }

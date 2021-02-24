@@ -34,7 +34,7 @@ JSDocument::~JSDocument() {
   instanceMap.erase(context);
 }
 
-JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 1) {
     throwJSError(ctx, "Failed to createElement: only accept 1 parameter.", exception);
@@ -50,13 +50,13 @@ JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef functio
   JSStringRef tagNameStringRef = JSValueToStringCopy(ctx, tagNameValue, exception);
   std::string tagName = JSStringToStdString(tagNameStringRef);
 
-  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   auto element = JSElement::buildElementInstance(document->context, tagName);
   element->document = document;
   return element->object;
 }
 
-JSValueRef DocumentInstance::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     throwJSError(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.",
@@ -64,7 +64,7 @@ JSValueRef DocumentInstance::createTextNode(JSContextRef ctx, JSObjectRef functi
     return nullptr;
   }
 
-  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   auto TextNode = JSTextNode::instance(document->context);
   auto textNodeInstance = JSObjectCallAsConstructor(ctx, TextNode->classObject, 1, arguments, exception);
   auto textNode = reinterpret_cast<JSTextNode::TextNodeInstance *>(JSObjectGetPrivate(textNodeInstance));
@@ -72,9 +72,9 @@ JSValueRef DocumentInstance::createTextNode(JSContextRef ctx, JSObjectRef functi
   return textNodeInstance;
 }
 
-JSValueRef DocumentInstance::createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSDocument::createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   auto CommentNode = JSCommentNode::instance(document->context);
   auto commentNodeInstance =
     JSObjectCallAsConstructor(ctx, CommentNode->classObject, argumentCount, arguments, exception);
@@ -253,9 +253,12 @@ DocumentInstance::DocumentInstance(JSDocument *document)
 
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getDocumentPropertyMap();
-  auto propertyStaticMap = getDocumentStaticPropertyMap();
+  auto prototypePropertyMap = getDocumentPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
-  if (propertyStaticMap.count(name) > 0) return nullptr;
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSDocument>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
 
   if (propertyMap.count(name) == 0) {
     return NodeInstance::getProperty(name, exception);
@@ -264,6 +267,10 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   DocumentProperty property = propertyMap[name];
 
   switch (property) {
+  case DocumentProperty::documentElement:
+  case DocumentProperty::body: {
+    return nullptr;
+  }
   case DocumentProperty::all: {
     auto all = new JSAllCollection(context);
 
@@ -300,10 +307,6 @@ void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator
   for (auto &property : getDocumentPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
-
-  for (auto &property : getDocumentStaticPropertyNames()) {
-    JSPropertyNameAccumulatorAddName(accumulator, property);
-  }
 }
 
 void DocumentInstance::removeElementById(std::string &id, ElementInstance *element) {
@@ -326,7 +329,7 @@ void DocumentInstance::addElementById(std::string &id, ElementInstance *element)
   }
 }
 
-JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSDocument::getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
     throwJSError(
@@ -340,7 +343,7 @@ JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef functi
   std::string id = JSStringToStdString(idStringRef);
   if (id.empty()) return nullptr;
 
-  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   if (document->elementMapById.count(id) == 0) {
     return nullptr;
   }
@@ -355,7 +358,7 @@ JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef functi
   return nullptr;
 }
 
-JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSDocument::getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                   size_t argumentCount, const JSValueRef *arguments,
                                                   JSValueRef *exception) {
   if (argumentCount < 1) {
@@ -366,7 +369,7 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
     return nullptr;
   }
 
-  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   JSStringRef tagNameStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
   std::string tagName = JSStringToStdString(tagNameStringRef);
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
@@ -395,9 +398,9 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
 
 bool DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getDocumentPropertyMap();
-  auto propertyStaticMap = getDocumentStaticPropertyMap();
+  auto prototypePropertyMap = getDocumentPrototypePropertyMap();
 
-  if (propertyStaticMap.count(name) > 0) return false;
+  if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
