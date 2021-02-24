@@ -97,7 +97,7 @@ std::string JSTextNode::TextNodeInstance::internalGetTextContent() {
 }
 
 JSTextNode::TextNodeInstance::~TextNodeInstance() {
-  foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeTextNode *>(ptr);
   }, nativeTextNode);
 }

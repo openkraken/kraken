@@ -140,7 +140,7 @@ void JSAnimationPlayerElement::AnimationPlayerElementInstance::getPropertyNames(
 }
 
 JSAnimationPlayerElement::AnimationPlayerElementInstance::~AnimationPlayerElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeAnimationPlayerElement *>(ptr);
   }, nativeAnimationPlayerElement);
 }

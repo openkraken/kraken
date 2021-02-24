@@ -119,6 +119,8 @@ class Element extends Node
   // used to get original coordinate before move away from document flow.
   RenderObject renderPositionedPlaceholder;
 
+  Element scrollingElement;
+
   bool get isValidSticky => style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
 
   Size get viewportSize => Size(elementManager.viewportWidth, elementManager.viewportHeight);
@@ -427,8 +429,22 @@ class Element extends Node
       detach();
     }
 
-    assert(renderBoxModel == null);
-    // assert(renderBoxModel != null && renderBoxModel.parent == null);
+    if (parentElement != null) {
+      parentNode.removeChild(this);
+    }
+
+    if (style != null) {
+      style.dispose();
+      style = null;
+    }
+
+    properties.clear();
+
+    if (scrollingElement != null) {
+      scrollingElement.dispose();
+      scrollingElement = null;
+    }
+
     // Remove native reference.
     _nativeMap.remove(nativeElementPtr.address);
   }
@@ -926,6 +942,7 @@ class Element extends Node
     if (CSSLength.isPercentage(present)) return;
 
     double presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
+    if (presentValue == null) return;
     renderBoxModel.renderStyle.updateOffset(property, presentValue);
   }
 

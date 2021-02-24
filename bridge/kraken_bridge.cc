@@ -209,8 +209,8 @@ void clearUICommandItems(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
 }
 
-void flushUICommandCallback(int64_t contextId) {
-  foundation::UICommandCallbackQueue::instance(contextId)->flushCallbacks();
+void flushUICommandCallback() {
+  foundation::UICommandCallbackQueue::instance()->flushCallbacks();
 }
 
 NativeString *NativeString::clone() {

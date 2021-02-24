@@ -191,6 +191,7 @@ bool EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef 
 }
 
 EventInstance::~EventInstance() {
+  nativeEvent->type->free();
   delete nativeEvent;
 }
 void EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

@@ -73,6 +73,7 @@ class EventTarget {
     elementManager.removeTarget(this);
     // @remove reference to elementManager.
     elementManager = null;
+    eventHandlers.clear();
   }
 
   List<EventHandler> getEventHandlers(String type) {

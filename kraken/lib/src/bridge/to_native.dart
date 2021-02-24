@@ -90,7 +90,9 @@ void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event even
   Dart_DispatchEvent dispatchEvent = nativeEventTarget.ref.dispatchEvent.asFunction();
   Pointer<Void> nativeEvent = event.toNative().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
-  dispatchEvent(nativeEventTarget, stringToNativeString(event.type), nativeEvent, isCustomEvent ? 1 : 0);
+  Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
+  dispatchEvent(nativeEventTarget, eventTypeString, nativeEvent, isCustomEvent ? 1 : 0);
+  freeNativeString(eventTypeString);
 }
 
 void emitModuleEvent(int contextId, String data) {
@@ -185,14 +187,14 @@ void flushBridgeTask() {
   _flushBridgeTask();
 }
 
-typedef Native_FlushUICommandCallback = Void Function(Int64 contextId);
-typedef Dart_FlushUICommandCallback = void Function(int contextId);
+typedef Native_FlushUICommandCallback = Void Function();
+typedef Dart_FlushUICommandCallback = void Function();
 
 final Dart_FlushUICommandCallback _flushUICommandCallback =
 nativeDynamicLibrary.lookup<NativeFunction<Native_FlushUICommandCallback>>('flushUICommandCallback').asFunction();
 
-void flushUICommandCallback(int contextId) {
-  _flushUICommandCallback(contextId);
+void flushUICommandCallback() {
+  _flushUICommandCallback();
 }
 
 enum UICommandType {

@@ -157,6 +157,7 @@ mixin CSSOverflowMixin on ElementBase {
     scrollingContentLayoutBox = element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
     scrollingContentLayoutBox.isScrollingContentBox = true;
     scrollingElement.renderBoxModel = scrollingContentLayoutBox;
+    element.scrollingElement = scrollingElement;
   }
 
   // Create two repaintBoundary for an overflow scroll container.

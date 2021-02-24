@@ -99,7 +99,7 @@ void JSObjectElement::ObjectElementInstance::getPropertyNames(JSPropertyNameAccu
 }
 
 JSObjectElement::ObjectElementInstance::~ObjectElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeObjectElement *>(ptr);
   }, nativeObjectElement);
 }
