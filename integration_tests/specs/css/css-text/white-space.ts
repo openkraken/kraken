@@ -116,7 +116,7 @@ describe('Text WhiteSpace', () => {
 });
 
 describe('Inline level element', () => {
-  it("should work with nowrap", async (done) => {
+  it("should work with nowrap", async () => {
     let div;
     let span;
     div = createElement(
@@ -204,7 +204,7 @@ describe('Inline level element', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with normal", async (done) => {
+  it("should work with normal", async () => {
     let div;
     let span;
     div = createElement(
