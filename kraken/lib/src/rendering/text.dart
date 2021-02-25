@@ -87,6 +87,7 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
   set whiteSpace(WhiteSpace value) {
     if (value == whiteSpace) return;
     _whiteSpace = value;
+    markNeedsLayout();
   }
 
   @override
