@@ -87,7 +87,7 @@ describe('Text WhiteSpace', () => {
       done();
     });
 
-    return matchViewportSnapshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with value change from nowrap to normal', async (done) => {
@@ -111,7 +111,7 @@ describe('Text WhiteSpace', () => {
       done();
     });
 
-    return matchViewportSnapshot();
+    await matchViewportSnapshot();
   });
 });
 
@@ -201,7 +201,7 @@ describe('Inline level element', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it("should work with normal", async (done) => {
@@ -288,7 +288,7 @@ describe('Inline level element', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it("should work with change from nowrap to normal", async (done) => {
@@ -382,7 +382,7 @@ describe('Inline level element', () => {
       done();
     });
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it("should work with change from normal to nowrap", async (done) => {
@@ -476,7 +476,7 @@ describe('Inline level element', () => {
       done();
     });
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });
 
