@@ -17,8 +17,7 @@ class JSAllCollection : public HostObject {
 public:
   JSAllCollection() = delete;
   explicit JSAllCollection(JSContext *context) : HostObject(context, "HTMLAllCollection") {};
-  DEFINE_OBJECT_PROPERTY(AllCollection, 1, length)
-  DEFINE_STATIC_OBJECT_PROPERTY(AllCollection, 3, item, add, remove)
+  DEFINE_OBJECT_PROPERTY(AllCollection, 4, length, item, add, remove)
 
   static JSValueRef item(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);

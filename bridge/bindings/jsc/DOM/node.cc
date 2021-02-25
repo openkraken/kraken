@@ -431,9 +431,12 @@ JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception
 
 JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSNode::getNodePropertyMap();
-  auto staticPropertyMap = JSNode::getNodeStaticPropertyMap();
+  auto prototypePropertyMap = JSNode::getNodePrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) return nullptr;
+  if (prototypePropertyMap.count(name) > 0) {
+    JSStringHolder nameStringHolder = JSStringHolder(context, name);
+    return JSObjectGetProperty(ctx, prototype<JSNode>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
 
   if (propertyMap.count(name) == 0) {
     return EventTargetInstance::getProperty(name, exception);
@@ -487,9 +490,9 @@ JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
 
 bool NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSNode::getNodePropertyMap();
-  auto staticPropertyMap = JSNode::getNodeStaticPropertyMap();
+  auto prototypePropertyMap = JSNode::getNodePrototypePropertyMap();
 
-  if (staticPropertyMap.count(name) > 0) return false;
+  if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -512,7 +515,7 @@ void NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 
-  for (auto &property : JSNode::getNodeStaticPropertyNames()) {
+  for (auto &property : JSNode::getNodePrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

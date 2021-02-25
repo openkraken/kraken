@@ -192,7 +192,10 @@ class ImageElement extends Element {
     _frameNumber++;
     _imageInfo = imageInfo;
     _imageBox?.image = _imageInfo?.image;
-    if (_frameNumber > 1) {
+    // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
+    // so use two frames to tell multiframe image from static image, note this optimization will fail
+    // at multiframe image with only two frames which is not common
+    if (_frameNumber > 2) {
       _convertToRepaint();
     } else {
       _convertToNonRepaint();
