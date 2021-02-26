@@ -1,7 +1,6 @@
 require('./tasks');
 const chalk = require('chalk');
-const minimist = require('minimist');
-const { series, parallel } = require('gulp');
+const { series } = require('gulp');
 
 series(
   'sdk-clean',
