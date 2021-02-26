@@ -17,7 +17,6 @@ endif()
 
 list(APPEND PUBLIC_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge_jsc.h
 )
 
 list(APPEND BRIDGE_SOURCE
