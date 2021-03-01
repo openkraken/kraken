@@ -975,6 +975,8 @@ class Element extends Node
     if (CSSLength.isPercentage(present)) return;
 
     double presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
+    if (presentValue == null) return;
+
     renderBoxModel.renderStyle.updateSizing(property, presentValue);
   }
 

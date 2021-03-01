@@ -76,6 +76,7 @@ class CSSLength {
 
     unitedValue = unitedValue.trim();
     if (unitedValue == INITIAL) return null;
+    if (unitedValue.indexOf('nan') >= 0) return null;
 
     double displayPortValue;
     double viewportWidth = viewportSize.width;
@@ -85,7 +86,7 @@ class CSSLength {
     if (unitedValue == ZERO) {
       return 0;
     } else if (unitedValue.endsWith(RPX)) {
-      double currentValue = double.parse(unitedValue.split(RPX)[0]);
+      double currentValue = double.tryParse(unitedValue.split(RPX)[0]);
       displayPortValue = currentValue / 750.0 * window.physicalSize.width / window.devicePixelRatio;
     } else if (unitedValue.endsWith(Q)) {
       displayPortValue = double.tryParse(unitedValue.split(Q)[0]) * _1Q;
@@ -95,11 +96,11 @@ class CSSLength {
           displayPortValue = double.tryParse(unitedValue.split(PX)[0]);
           break;
         case VW:
-          double currentValue = double.parse(unitedValue.split(VW)[0]);
+          double currentValue = double.tryParse(unitedValue.split(VW)[0]);
           displayPortValue = currentValue / 100.0 * viewportWidth;
           break;
         case VH:
-          double currentValue = double.parse(unitedValue.split(VH)[0]);
+          double currentValue = double.tryParse(unitedValue.split(VH)[0]);
           displayPortValue = currentValue / 100.0 * viewportHeight;
           break;
         case IN:
