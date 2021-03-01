@@ -1,6 +1,36 @@
-import { krakenModuleListener } from '../modules/module-listener';
 import { addKrakenModuleListener, krakenInvokeModule, privateKraken } from '../bridge';
-import { methodChannel } from '../modules/method-channel';
+import {methodChannel, triggerMethodCallHandler} from '../modules/method-channel';
+import {dispatchConnectivityChangeEvent} from "../modules/connection";
+import {dispatchPositionEvent} from "../modules/geolocation";
+import {dispatchMQTTEvent} from "../modules/mqtt";
+import {dispatchWebSocketEvent} from "../modules/websocket";
+
+function krakenModuleListener(moduleName: string, event: Event, data: any) {
+  switch (moduleName) {
+    case 'Connection': {
+      dispatchConnectivityChangeEvent(event);
+      break;
+    }
+    case 'Geolocation': {
+      dispatchPositionEvent(data);
+      break;
+    }
+    case 'MQTT': {
+      dispatchMQTTEvent(data, event)
+      break;
+    }
+    case 'MethodChannel': {
+      const method = data[0];
+      const args = data[1];
+      triggerMethodCallHandler(method, args);
+      break;
+    }
+    case 'WebSocket': {
+      dispatchWebSocketEvent(data, event as ErrorEvent);
+      break;
+    }
+  }
+}
 
 addKrakenModuleListener(krakenModuleListener);
 

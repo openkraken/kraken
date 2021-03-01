@@ -1,4 +1,5 @@
-import { kraken } from '../kom/kraken';
+import {kraken} from "../kom/kraken";
+
 let connectivityChangeListener: (data: Object) => any;
 
 export function dispatchConnectivityChangeEvent(event: any) {
