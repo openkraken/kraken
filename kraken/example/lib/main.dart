@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'dart:ui';
 
-import 'package:kraken/module.dart';
-
 void main() {
   runApp(MyApp());
 }
@@ -82,17 +80,10 @@ class _MyHomePageState extends State<MyBrowser> {
         // the App.build method, and use it to set our appbar title.
       );
 
-    KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
-    javaScriptChannel.onMethodCall = (String method, dynamic arguments) async {
-      javaScriptChannel.invokeMethod(method, arguments);
-      return 'method: ' + method;
-    };
-
     kraken = Kraken(
       viewportWidth: window.physicalSize.width / window.devicePixelRatio,
       viewportHeight: window.physicalSize.height / window.devicePixelRatio - appBar.preferredSize.height - queryData.padding.top,
       bundlePath: 'assets/bundle.js',
-      javaScriptChannel: javaScriptChannel,
     );
 
     return Scaffold(
