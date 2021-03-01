@@ -26,24 +26,28 @@ public:
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
-private:
-  JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName){};
-  ~JSWindow();
-};
-
-class WindowInstance : public EventTargetInstance {
-public:
-  DEFINE_OBJECT_PROPERTY(Window, 11, devicePixelRatio, colorScheme, __location__, window, history, parent, scroll,
-                         scrollBy, scrollTo, scrollX, scrollY)
-
-  WindowInstance() = delete;
-  explicit WindowInstance(JSWindow *window);
-  ~WindowInstance();
-
   static JSValueRef scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                            const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
+
+private:
+  JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName){};
+  ~JSWindow();
+
+  JSFunctionHolder m_scroll{context, prototypeObject, this, "scroll", scroll};
+  JSFunctionHolder m_scrollTo{context, prototypeObject, this, "scrollTo", scroll};
+  JSFunctionHolder m_scrollBy{context, prototypeObject, this, "scrollBy", scrollBy};
+};
+
+class WindowInstance : public EventTargetInstance {
+public:
+  DEFINE_OBJECT_PROPERTY(Window, 8, devicePixelRatio, colorScheme, __location__, window, history, parent,  scrollX, scrollY)
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Window, 3, scroll, scrollBy, scrollTo)
+
+  WindowInstance() = delete;
+  explicit WindowInstance(JSWindow *window);
+  ~WindowInstance();
 
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
@@ -52,9 +56,6 @@ public:
 
 private:
   JSLocation *location_;
-
-  JSFunctionHolder m_scroll{context, this, "scroll", scroll};
-  JSFunctionHolder m_scrollBy{context, this, "scrollBy", scrollBy};
 };
 
 struct NativeWindow {

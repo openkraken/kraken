@@ -36,17 +36,15 @@ public:
 
   class CanvasElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(CanvasElement, 3, width, height, getContext)
-
-    static JSValueRef getContext(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                 const JSValueRef arguments[], JSValueRef *exception);
+    DEFINE_OBJECT_PROPERTY(CanvasElement, 2, width, height)
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasElement, 1, getContext)
 
     CanvasElementInstance() = delete;
     explicit CanvasElementInstance(JSCanvasElement *jsCanvasElement);
     ~CanvasElementInstance();
 
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+    bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
     NativeCanvasElement *nativeCanvasElement;
@@ -54,14 +52,16 @@ public:
   private:
     double _width{300};
     double _height{150};
-
-    JSFunctionHolder m_getContext{context, this, "getContext", getContext};
   };
 
 private:
   JSCanvasElement() = delete;
   ~JSCanvasElement();
   explicit JSCanvasElement(JSContext *context);
+
+  static JSValueRef getContext(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef arguments[], JSValueRef *exception);
+  JSFunctionHolder m_getContext{context, prototypeObject, this, "getContext", getContext};
 };
 
 using SetFont = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *font);
@@ -99,38 +99,39 @@ public:
   static std::unordered_map<JSContext *, CanvasRenderingContext2D *> instanceMap;
   OBJECT_INSTANCE(CanvasRenderingContext2D)
 
+  static JSValueRef fillRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef clearRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                              const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef strokeRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef fillText(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef strokeText(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef save(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                         const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef restore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                            const JSValueRef arguments[], JSValueRef *exception);
+
   class CanvasRenderingContext2DInstance : public Instance {
   public:
-    DEFINE_OBJECT_PROPERTY(CanvasRenderingContext2D, 10, font, fillStyle, strokeStyle, fillRect, clearRect, strokeRect,
-                           fillText, strokeText, save, restore)
-
-    static JSValueRef fillRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                               const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef clearRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef strokeRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                 const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef fillText(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                               const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef strokeText(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                 const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef save(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                           const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef restore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                              const JSValueRef arguments[], JSValueRef *exception);
+    DEFINE_OBJECT_PROPERTY(CanvasRenderingContext2D, 3, font, fillStyle, strokeStyle)
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasRenderingContext2D, 7, fillRect, clearRect, strokeRect,
+                                  fillText, strokeText, save, restore)
 
     CanvasRenderingContext2DInstance() = delete;
     explicit CanvasRenderingContext2DInstance(CanvasRenderingContext2D *canvasRenderContext2D,
                                               NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
     ~CanvasRenderingContext2DInstance() override;
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+    bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
     NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D;
@@ -139,19 +140,19 @@ public:
     JSStringHolder m_font{context, ""};
     JSStringHolder m_fillStyle{context, ""};
     JSStringHolder m_strokeStyle{context, ""};
-
-    JSFunctionHolder m_fillRect{context, this, "fillRect", fillRect};
-    JSFunctionHolder m_clearRect{context, this, "clearRect", clearRect};
-    JSFunctionHolder m_strokeRect{context, this, "strokeRect", strokeRect};
-    JSFunctionHolder m_fillText{context, this, "fillText", fillText};
-    JSFunctionHolder m_strokeText{context, this, "strokeText", strokeText};
-    JSFunctionHolder m_save{context, this, "save", save};
-    JSFunctionHolder m_restore{context, this, "restore", restore};
   };
 
 protected:
   CanvasRenderingContext2D() = delete;
   explicit CanvasRenderingContext2D(JSContext *context);
+
+  JSFunctionHolder m_fillRect{context, prototypeObject, this, "fillRect", fillRect};
+  JSFunctionHolder m_clearRect{context, prototypeObject, this, "clearRect", clearRect};
+  JSFunctionHolder m_strokeRect{context, prototypeObject, this, "strokeRect", strokeRect};
+  JSFunctionHolder m_fillText{context, prototypeObject, this, "fillText", fillText};
+  JSFunctionHolder m_strokeText{context, prototypeObject, this, "strokeText", strokeText};
+  JSFunctionHolder m_save{context, prototypeObject, this, "save", save};
+  JSFunctionHolder m_restore{context, prototypeObject, this, "restore", restore};
 };
 
 } // namespace kraken::binding::jsc

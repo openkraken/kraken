@@ -9,7 +9,7 @@ import 'package:kraken/dom.dart';
 import 'package:flutter/gestures.dart';
 
 /// A tap with a primary button has occurred.
-typedef GestureClickCallback = void Function(Event);
+typedef GestureCallback = void Function(Event);
 
 class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
@@ -49,7 +49,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
       onClick(Event(EVENT_CLICK, EventInit(bubbles: true, cancelable: true)));
   }
 
-  GestureClickCallback onClick;
+  GestureCallback onClick;
 
   /// A pointer that previously triggered [handleTapDown] will not end up
   /// causing a tap.

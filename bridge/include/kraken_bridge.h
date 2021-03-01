@@ -100,7 +100,7 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
 KRAKEN_EXPORT_C
 void flushBridgeTask();
 KRAKEN_EXPORT_C
-void flushUICommandCallback(int64_t contextId);
+void flushUICommandCallback();
 
 KRAKEN_EXPORT_C
 void reloadJsContext(int32_t contextId);

@@ -154,9 +154,10 @@ mixin CSSOverflowMixin on ElementBase {
     elementManager.setEventTarget(scrollingElement);
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
     repaintBoundaryStyle.setProperty('overflow', 'visible');
-    scrollingContentLayoutBox = createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
+    scrollingContentLayoutBox = element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
     scrollingContentLayoutBox.isScrollingContentBox = true;
     scrollingElement.renderBoxModel = scrollingContentLayoutBox;
+    element.scrollingElement = scrollingElement;
   }
 
   // Create two repaintBoundary for an overflow scroll container.
@@ -167,7 +168,7 @@ mixin CSSOverflowMixin on ElementBase {
     RenderObject layoutBoxParent = renderBoxModel.parent;
 
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox outerLayoutBox = createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
+    RenderLayoutBox outerLayoutBox = element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
 
     _createScrollingLayoutBox(element);
     outerLayoutBox.add(scrollingContentLayoutBox);
@@ -182,7 +183,7 @@ mixin CSSOverflowMixin on ElementBase {
     if (!renderBoxModel.isRepaintBoundary) return;
     RenderObject layoutBoxParent = renderBoxModel.parent;
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
+    RenderLayoutBox newLayoutBox = element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
     element.renderBoxModel = newLayoutBox;
     // Update renderBoxModel reference in renderStyle
     element.renderBoxModel.renderStyle.renderBoxModel = newLayoutBox;

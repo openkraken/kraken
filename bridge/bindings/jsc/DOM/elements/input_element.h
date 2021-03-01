@@ -28,28 +28,30 @@ public:
 
   class InputElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(InputElement, 23, width, height, value, accept, autocomplete, autofocus, checked, disabled,
+    DEFINE_OBJECT_PROPERTY(InputElement, 21, width, height, value, accept, autocomplete, autofocus, checked, disabled,
                            min, max, minlength, maxlength, size, multiple, name, step, pattern, required, readonly,
-                           placeholder, type, focus, blur);
+                           placeholder, type);
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(InputElement, 2, focus, blur);
 
     InputElementInstance() = delete;
     ~InputElementInstance();
     explicit InputElementInstance(JSInputElement *JSInputElement);
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+    bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
     NativeInputElement *nativeInputElement;
 
   private:
-    JSFunctionHolder m_focus{context, this, "focus", focus};
-    JSFunctionHolder m_blur{context, this, "blur", blur};
   };
 
 protected:
   JSInputElement() = delete;
   explicit JSInputElement(JSContext *context);
   ~JSInputElement();
+
+  JSFunctionHolder m_focus{context, prototypeObject, this, "focus", focus};
+  JSFunctionHolder m_blur{context, prototypeObject, this, "blur", blur};
 };
 
 using GetInputWidth = double (*)(NativeInputElement *nativeInputElement);

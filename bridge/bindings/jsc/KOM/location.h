@@ -29,7 +29,7 @@ public:
 
 
 private:
-  JSFunctionHolder m_reload{context, this, "reload", reload};
+  JSFunctionHolder m_reload{context, jsObject, this, "reload", reload};
   std::array<JSStringRef, 2> propertyNames {
     JSStringCreateWithUTF8CString("reload"),
     JSStringCreateWithUTF8CString("href")

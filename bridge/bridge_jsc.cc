@@ -49,6 +49,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindEvent(context);
   bindCustomEvent(context);
   bindCloseEvent(context);
+  bindGestureEvent(context);
   bindMediaErrorEvent(context);
   bindTouchEvent(context);
   bindInputEvent(context);

@@ -36,6 +36,7 @@ class ModuleManager {
       defineModule(NavigationModule(this));
       defineModule(NavigatorModule(this));
       defineModule(WebSocketModule(this));
+      inited = true;
     }
   }
 

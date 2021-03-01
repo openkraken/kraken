@@ -34,7 +34,7 @@ JSDocument::~JSDocument() {
   instanceMap.erase(context);
 }
 
-JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 1) {
     throwJSError(ctx, "Failed to createElement: only accept 1 parameter.", exception);
@@ -50,13 +50,13 @@ JSValueRef DocumentInstance::createElement(JSContextRef ctx, JSObjectRef functio
   JSStringRef tagNameStringRef = JSValueToStringCopy(ctx, tagNameValue, exception);
   std::string tagName = JSStringToStdString(tagNameStringRef);
 
-  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   auto element = JSElement::buildElementInstance(document->context, tagName);
   element->document = document;
   return element->object;
 }
 
-JSValueRef DocumentInstance::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     throwJSError(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.",
@@ -64,7 +64,7 @@ JSValueRef DocumentInstance::createTextNode(JSContextRef ctx, JSObjectRef functi
     return nullptr;
   }
 
-  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   auto TextNode = JSTextNode::instance(document->context);
   auto textNodeInstance = JSObjectCallAsConstructor(ctx, TextNode->classObject, 1, arguments, exception);
   auto textNode = reinterpret_cast<JSTextNode::TextNodeInstance *>(JSObjectGetPrivate(textNodeInstance));
@@ -72,9 +72,9 @@ JSValueRef DocumentInstance::createTextNode(JSContextRef ctx, JSObjectRef functi
   return textNodeInstance;
 }
 
-JSValueRef DocumentInstance::createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSDocument::createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   auto CommentNode = JSCommentNode::instance(document->context);
   auto commentNodeInstance =
     JSObjectCallAsConstructor(ctx, CommentNode->classObject, argumentCount, arguments, exception);
@@ -116,6 +116,18 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     });
     JSEvent::defineEvent(EVENT_TOUCH_CANCEL, [](JSContext *context, void *nativeEvent) -> EventInstance* {
       return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_SWIPE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_PAN, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_LONG_PRESS, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    });
+    JSEvent::defineEvent(EVENT_SCALE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
     });
   }
   if (!document_registered) {
@@ -231,13 +243,23 @@ DocumentInstance::DocumentInstance(JSDocument *document)
   auto Element = JSElement::instance(document->context);
   body = new ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
   body->document = this;
-  JSValueProtect(document->ctx, body->object);
+  JSStringHolder bodyStringHolder = JSStringHolder(context, "body");
+  JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
+  JSObjectSetProperty(ctx, object, bodyStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);
+  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);
   instanceMap[document->context] = this;
   getDartMethod()->initDocument(contextId, nativeDocument);
 }
 
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getDocumentPropertyMap();
+  auto prototypePropertyMap = getDocumentPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSDocument>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
+
   if (propertyMap.count(name) == 0) {
     return NodeInstance::getProperty(name, exception);
   }
@@ -245,6 +267,10 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   DocumentProperty property = propertyMap[name];
 
   switch (property) {
+  case DocumentProperty::documentElement:
+  case DocumentProperty::body: {
+    return nullptr;
+  }
   case DocumentProperty::all: {
     auto all = new JSAllCollection(context);
 
@@ -259,27 +285,9 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
     std::string cookie = m_cookie.getCookie();
     return JSValueMakeString(ctx, JSStringCreateWithUTF8CString(cookie.c_str()));
   }
-  case DocumentProperty::createElement: {
-    return m_createElement.function();
-  }
-  case DocumentProperty::documentElement:
-  case DocumentProperty::body:
-    return body->object;
-  case DocumentProperty::createTextNode: {
-    return m_createTextNode.function();
-  }
-  case DocumentProperty::createComment: {
-    return m_createComment.function();
-  }
   case DocumentProperty::nodeName: {
     JSStringRef nodeName = JSStringCreateWithUTF8CString("#document");
     return JSValueMakeString(_hostClass->ctx, nodeName);
-  }
-  case DocumentProperty::getElementById: {
-    return m_getElementById.function();
-  }
-  case DocumentProperty::getElementsByTagName: {
-    return m_getElementsByTagName.function();
   }
   }
 
@@ -287,7 +295,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
 }
 
 DocumentInstance::~DocumentInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeDocument *>(ptr);
   }, nativeDocument);
   instanceMap.erase(context);
@@ -321,7 +329,7 @@ void DocumentInstance::addElementById(std::string &id, ElementInstance *element)
   }
 }
 
-JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSDocument::getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                             size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
     throwJSError(
@@ -335,7 +343,7 @@ JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef functi
   std::string id = JSStringToStdString(idStringRef);
   if (id.empty()) return nullptr;
 
-  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   if (document->elementMapById.count(id) == 0) {
     return nullptr;
   }
@@ -350,7 +358,7 @@ JSValueRef DocumentInstance::getElementById(JSContextRef ctx, JSObjectRef functi
   return nullptr;
 }
 
-JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSDocument::getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                   size_t argumentCount, const JSValueRef *arguments,
                                                   JSValueRef *exception) {
   if (argumentCount < 1) {
@@ -361,7 +369,7 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
     return nullptr;
   }
 
-  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(function));
+  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   JSStringRef tagNameStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
   std::string tagName = JSStringToStdString(tagNameStringRef);
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
@@ -388,8 +396,12 @@ JSValueRef DocumentInstance::getElementsByTagName(JSContextRef ctx, JSObjectRef 
   return JSObjectMakeArray(ctx, elements.size(), elementArguments, exception);
 }
 
-void DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getDocumentPropertyMap();
+  auto prototypePropertyMap = getDocumentPrototypePropertyMap();
+
+  if (prototypePropertyMap.count(name) > 0) return false;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
@@ -398,8 +410,9 @@ void DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueR
       std::string cookie = JSStringToStdString(str);
       m_cookie.setCookie(cookie);
     }
+    return true;
   } else {
-    NodeInstance::setProperty(name, value, exception);
+    return NodeInstance::setProperty(name, value, exception);
   }
 }
 

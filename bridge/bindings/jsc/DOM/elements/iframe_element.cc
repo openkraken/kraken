@@ -33,6 +33,13 @@ JSIframeElement::IframeElementInstance::IframeElementInstance(JSIframeElement *j
 
 JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getIFrameElementPropertyMap();
+  auto prototypePropertyMap = getIFrameElementPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSIframeElement>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
@@ -43,16 +50,20 @@ JSValueRef JSIframeElement::IframeElementInstance::getProperty(std::string &name
     case IFrameElementProperty::contentWindow:
       // TODO: support contentWindow property.
       break;
-    case IFrameElementProperty::postMessage:
-      return m_postMessage.function();
     }
   }
 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getIFrameElementPropertyMap();
+  auto prototypePropertyMap = getIFrameElementPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSIframeElement>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -84,8 +95,9 @@ void JSIframeElement::IframeElementInstance::setProperty(std::string &name, JSVa
     default:
       break;
     }
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 
@@ -95,15 +107,19 @@ void JSIframeElement::IframeElementInstance::getPropertyNames(JSPropertyNameAccu
   for (auto &property : getIFrameElementPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
+
+  for (auto &property : getIFrameElementPrototypePropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
 }
 
 JSIframeElement::IframeElementInstance::~IframeElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeIframeElement *>(ptr);
   }, nativeIframeElement);
 }
 
-JSValueRef JSIframeElement::IframeElementInstance::postMessage(JSContextRef ctx, JSObjectRef function,
+JSValueRef JSIframeElement::postMessage(JSContextRef ctx, JSObjectRef function,
                                                                JSObjectRef thisObject, size_t argumentCount,
                                                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
@@ -122,7 +138,7 @@ JSValueRef JSIframeElement::IframeElementInstance::postMessage(JSContextRef ctx,
   message.string = JSStringGetCharactersPtr(messageStringRef);
   message.length = JSStringGetLength(messageStringRef);
 
-  auto instance = reinterpret_cast<JSIframeElement::IframeElementInstance *>(JSObjectGetPrivate(function));
+  auto instance = reinterpret_cast<JSIframeElement::IframeElementInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(instance->nativeIframeElement->postMessage != nullptr, "Failed to execute postMessage(): dart method is nullptr.");
   instance->nativeIframeElement->postMessage(instance->nativeIframeElement, &message);
 

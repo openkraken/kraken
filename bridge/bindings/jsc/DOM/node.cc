@@ -41,7 +41,7 @@ NodeInstance::~NodeInstance() {
     }
   }
 
-  foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeNode *>(ptr);
   }, nativeNode);
 }
@@ -426,27 +426,17 @@ JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception
     return JSEventTarget::prototypeGetProperty(name, exception);
   }
 
-  auto property = propertyMap[name];
-  switch (property) {
-  case NodeProperty::appendChild:
-    return m_appendChild.function();
-  case NodeProperty::remove:
-    return m_remove.function();
-  case NodeProperty::removeChild:
-    return m_removeChild.function();
-  case NodeProperty::insertBefore:
-    return m_insertBefore.function();
-  case NodeProperty::replaceChild:
-    return m_replaceChild.function();
-  default:
-    break;
-  }
-
   return nullptr;
 }
 
 JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSNode::getNodePropertyMap();
+  auto prototypePropertyMap = JSNode::getNodePrototypePropertyMap();
+
+  if (prototypePropertyMap.count(name) > 0) {
+    JSStringHolder nameStringHolder = JSStringHolder(context, name);
+    return JSObjectGetProperty(ctx, prototype<JSNode>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
 
   if (propertyMap.count(name) == 0) {
     return EventTargetInstance::getProperty(name, exception);
@@ -477,21 +467,6 @@ JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
     auto instance = nextSibling();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
   }
-  case JSNode::NodeProperty::appendChild: {
-    return prototype<JSNode>()->m_appendChild.function();
-  }
-  case JSNode::NodeProperty::remove: {
-    return prototype<JSNode>()->m_remove.function();
-  }
-  case JSNode::NodeProperty::removeChild: {
-    return prototype<JSNode>()->m_removeChild.function();
-  }
-  case JSNode::NodeProperty::insertBefore: {
-    return prototype<JSNode>()->m_insertBefore.function();
-  }
-  case JSNode::NodeProperty::replaceChild: {
-    return prototype<JSNode>()->m_replaceChild.function();
-  }
   case JSNode::NodeProperty::childNodes: {
     JSValueRef arguments[childNodes.size()];
 
@@ -513,8 +488,11 @@ JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   return nullptr;
 }
 
-void NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSNode::getNodePropertyMap();
+  auto prototypePropertyMap = JSNode::getNodePrototypePropertyMap();
+
+  if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -523,8 +501,10 @@ void NodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *
       JSStringRef textContent = JSValueToStringCopy(_hostClass->ctx, value, exception);
       internalSetTextContent(textContent, exception);
     }
+
+    return true;
   } else {
-    EventTargetInstance::setProperty(name, value, exception);
+    return EventTargetInstance::setProperty(name, value, exception);
   }
 }
 
@@ -532,6 +512,10 @@ void NodeInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   EventTargetInstance::getPropertyNames(accumulator);
 
   for (auto &property : JSNode::getNodePropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : JSNode::getNodePrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

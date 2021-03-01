@@ -40,7 +40,6 @@ if (buildMode === 'Release') {
 series(
   'clean',
   'pub-get',
-  'copy-build-libs',
   buildAppTasks
 )((err) => {
   if (err) {

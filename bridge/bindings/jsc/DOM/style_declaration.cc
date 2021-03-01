@@ -89,36 +89,29 @@ StyleDeclarationInstance::~StyleDeclarationInstance() {
 }
 
 JSValueRef StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getCSSStyleDeclarationPropertyMap();
+  auto prototypePropertyMap = getCSSStyleDeclarationPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
-  if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
-    switch (property) {
-    case CSSStyleDeclarationProperty::setProperty: {
-      return m_setProperty.function();
-    }
-    case CSSStyleDeclarationProperty::getPropertyValue: {
-      return m_getPropertyValue.function();
-    }
-    case CSSStyleDeclarationProperty::removeProperty: {
-      return m_removeProperty.function();
-    }
-    }
-  } else if (properties.count(name) > 0) {
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<CSSStyleDeclaration>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
+
+  if (properties.count(name) > 0) {
     return JSValueMakeString(_hostClass->ctx, properties[name]);
   }
 
   return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(""));
 }
 
-void StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value,
+bool StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value,
                                                                 JSValueRef *exception) {
-  internalSetProperty(name, value, exception);
+  return internalSetProperty(name, value, exception);
 }
 
-void StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value,
+bool StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value,
                                                                         JSValueRef *exception) {
-  if (name == "setProperty" || name == "removeProperty" || name == "getPropertyValue") return;
+  auto prototypePropertyMap = getCSSStyleDeclarationPrototypePropertyMap();
+  if (prototypePropertyMap.count(name) > 0) return false;
 
   JSStringRef valueStr;
   if (JSValueIsNull(_hostClass->ctx, value)) {
@@ -138,6 +131,8 @@ void StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef
   buildUICommandArgs(name, valueStr, args_01, args_02);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
+
+  return true;
 }
 
 void StyleDeclarationInstance::internalRemoveProperty(JSStringRef nameRef, JSValueRef *exception) {
@@ -170,7 +165,7 @@ JSValueRef StyleDeclarationInstance::internalGetPropertyValue(JSStringRef nameRe
   return JSValueMakeString(_hostClass->ctx, properties[name]);
 }
 
-JSValueRef StyleDeclarationInstance::setProperty(JSContextRef ctx, JSObjectRef function,
+JSValueRef CSSStyleDeclaration::setProperty(JSContextRef ctx, JSObjectRef function,
                                                                       JSObjectRef thisObject, size_t argumentCount,
                                                                       const JSValueRef *arguments,
                                                                       JSValueRef *exception) {
@@ -194,14 +189,14 @@ JSValueRef StyleDeclarationInstance::setProperty(JSContextRef ctx, JSObjectRef f
     return nullptr;
   }
 
-  auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(function));
+  auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(thisObject));
   std::string name = JSStringToStdString(propertyStringRef);
   styleInstance->internalSetProperty(name, valueValueRef, exception);
 
   return nullptr;
 }
 
-JSValueRef StyleDeclarationInstance::removeProperty(JSContextRef ctx, JSObjectRef function,
+JSValueRef CSSStyleDeclaration::removeProperty(JSContextRef ctx, JSObjectRef function,
                                                                          JSObjectRef thisObject, size_t argumentCount,
                                                                          const JSValueRef *arguments,
                                                                          JSValueRef *exception) {
@@ -218,12 +213,12 @@ JSValueRef StyleDeclarationInstance::removeProperty(JSContextRef ctx, JSObjectRe
   }
 
   JSStringRef propertyStringRef = JSValueToStringCopy(ctx, propertyValueRef, exception);
-  auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(function));
+  auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(thisObject));
   styleInstance->internalRemoveProperty(propertyStringRef, exception);
   return nullptr;
 }
 
-JSValueRef StyleDeclarationInstance::getPropertyValue(JSContextRef ctx, JSObjectRef function,
+JSValueRef CSSStyleDeclaration::getPropertyValue(JSContextRef ctx, JSObjectRef function,
                                                                            JSObjectRef thisObject, size_t argumentCount,
                                                                            const JSValueRef *arguments,
                                                                            JSValueRef *exception) {
@@ -240,7 +235,7 @@ JSValueRef StyleDeclarationInstance::getPropertyValue(JSContextRef ctx, JSObject
   }
 
   JSStringRef propertyStringRef = JSValueToStringCopy(ctx, propertyValueRef, exception);
-  auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(function));
+  auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(thisObject));
   return styleInstance->internalGetPropertyValue(propertyStringRef, exception);
 }
 
@@ -249,7 +244,7 @@ void StyleDeclarationInstance::getPropertyNames(JSPropertyNameAccumulatorRef acc
     JSPropertyNameAccumulatorAddName(accumulator, JSStringCreateWithUTF8CString(prop.first.c_str()));
   }
 
-  for (auto &prop : getCSSStyleDeclarationPropertyNames()) {
+  for (auto &prop : getCSSStyleDeclarationPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, prop);
   }
 }

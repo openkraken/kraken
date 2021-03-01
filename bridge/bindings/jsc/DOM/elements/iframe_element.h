@@ -22,16 +22,13 @@ public:
 
   class IframeElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(IFrameElement, 4, width, height, contentWindow, postMessage)
-
-    static JSValueRef postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef arguments[], JSValueRef *exception);
-
+    DEFINE_OBJECT_PROPERTY(IFrameElement, 3, width, height, contentWindow)
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(IFrameElement, 1, postMessage)
     IframeElementInstance() = delete;
     ~IframeElementInstance();
     explicit IframeElementInstance(JSIframeElement *jsIframeElement);
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+    bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
     NativeIframeElement *nativeIframeElement;
@@ -39,13 +36,16 @@ public:
   private:
     double _width;
     double _height;
-
-    JSFunctionHolder m_postMessage{context, this, "postMessage", postMessage};
   };
 protected:
   JSIframeElement() = delete;
   explicit JSIframeElement(JSContext *context);
   ~JSIframeElement();
+
+  static JSValueRef postMessage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef arguments[], JSValueRef *exception);
+
+  JSFunctionHolder m_postMessage{context, prototypeObject, this, "postMessage", postMessage};
 };
 
 using IframePostMessage = void (*)(NativeIframeElement *nativePtr, NativeString *message);

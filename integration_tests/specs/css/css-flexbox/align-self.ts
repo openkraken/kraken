@@ -265,7 +265,7 @@ describe('align-self', () => {
 
     await matchViewportSnapshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let p;
     let div1;
     let div2;
@@ -597,7 +597,7 @@ describe('align-self', () => {
 
     await matchViewportSnapshot();
   });
-  xit('010', async () => {
+  it('010', async () => {
     let p;
     let div1;
     let div2;

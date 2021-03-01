@@ -23,22 +23,14 @@ public:
   OBJECT_INSTANCE(JSMediaElement)
   class MediaElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(MediaElement, 7, src, autoPlay, loop, play, pause, fastSeek, currentSrc)
-
-    static JSValueRef play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                           const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef pause(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                            const JSValueRef arguments[], JSValueRef *exception);
-
-    static JSValueRef fastSeek(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                               const JSValueRef arguments[], JSValueRef *exception);
+    DEFINE_OBJECT_PROPERTY(MediaElement, 4, src, autoPlay, loop, currentSrc)
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(MediaElement, 3, play, pause, fastSeek);
 
     MediaElementInstance() = delete;
     explicit MediaElementInstance(JSMediaElement *jsMediaElement, const char *tagName);
     ~MediaElementInstance();
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-    void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+    bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
     NativeMediaElement *nativeMediaElement;
@@ -47,15 +39,25 @@ public:
     JSStringRef _src{JSStringCreateWithUTF8CString("")};
     bool _autoPlay{false};
     bool _loop{false};
-    JSFunctionHolder m_play{context, this, "play", play};
-    JSFunctionHolder m_pause{context, this, "pause", pause};
-    JSFunctionHolder m_fastSeek{context, this, "fastSeek", fastSeek};
   };
 
 protected:
   JSMediaElement() = delete;
   ~JSMediaElement();
   explicit JSMediaElement(JSContext *context);
+
+  static JSValueRef play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                         const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef pause(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                          const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef fastSeek(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+
+  JSFunctionHolder m_play{context, prototypeObject, this, "play", play};
+  JSFunctionHolder m_pause{context, prototypeObject, this, "pause", pause};
+  JSFunctionHolder m_fastSeek{context, prototypeObject, this, "fastSeek", fastSeek};
 };
 
 struct NativeMediaElement {

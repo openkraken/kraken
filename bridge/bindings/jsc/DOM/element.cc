@@ -51,7 +51,12 @@ JSValueRef JSElementAttributes::getProperty(std::string &name, JSValueRef *excep
   }
   return nullptr;
 }
-void JSElementAttributes::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {}
+
+bool JSElementAttributes::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  JSStringRef stringValue = JSValueToStringCopy(ctx, value, exception);
+  setAttribute(name, stringValue);
+  return false;
+}
 void JSElementAttributes::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : getAttributePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
@@ -170,9 +175,7 @@ ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRe
 }
 
 ElementInstance::~ElementInstance() {
-  if (style != nullptr && context->isValid()) JSValueUnprotect(_hostClass->ctx, style->object);
-
-  ::foundation::UICommandCallbackQueue::instance(contextId)
+  ::foundation::UICommandCallbackQueue::instance()
     ->registerCallback([](void *ptr) { delete reinterpret_cast<NativeElement *>(ptr); }, nativeElement);
 }
 
@@ -190,6 +193,12 @@ JSValueRef JSElement::getBoundingClientRect(JSContextRef ctx, JSObjectRef functi
 
 JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSElement::getElementPropertyMap();
+  auto prototypePropertyMap = JSElement::getElementPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSElement>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
 
   if (propertyMap.count(name) == 0) {
     return NodeInstance::getProperty(name, exception);
@@ -198,17 +207,13 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
   JSElement::ElementProperty property = propertyMap[name];
 
   switch (property) {
-  case JSElement::ElementProperty::style: {
-    if (style == nullptr) {
-      style = new StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this);
-      JSValueProtect(_hostClass->ctx, style->object);
-    }
-
-    return style->object;
-  }
   case JSElement::ElementProperty::nodeName:
   case JSElement::ElementProperty::tagName: {
     return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(tagName().c_str()));
+  }
+  case JSElement::ElementProperty::attributes:
+  case JSElement::ElementProperty::style: {
+    return nullptr;
   }
   case JSElement::ElementProperty::offsetLeft: {
     getDartMethod()->flushUICommand();
@@ -270,33 +275,6 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
     assert_m(nativeElement->getViewModuleProperty != nullptr, "Failed to execute getViewModuleProperty(): dart method is nullptr.");
     return JSValueMakeNumber(_hostClass->ctx, nativeElement->getViewModuleProperty(nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollWidth)));
   }
-  case JSElement::ElementProperty::getBoundingClientRect: {
-    return prototype<JSElement>()->m_getBoundingClientRect.function();
-  }
-  case JSElement::ElementProperty::click: {
-    return prototype<JSElement>()->m_click.function();
-  }
-  case JSElement::ElementProperty::scrollTo:
-  case JSElement::ElementProperty::scroll: {
-    return prototype<JSElement>()->m_scroll.function();
-  }
-  case JSElement::ElementProperty::scrollBy: {
-    return prototype<JSElement>()->m_scrollBy.function();
-  }
-  case JSElement::ElementProperty::toBlob: {
-    return prototype<JSElement>()->m_toBlob.function();
-  }
-  case JSElement::ElementProperty::getAttribute: {
-    return prototype<JSElement>()->m_getAttribute.function();
-  }
-  case JSElement::ElementProperty::setAttribute: {
-    return prototype<JSElement>()->m_setAttribute.function();
-  }
-  case JSElement::ElementProperty::removeAttribute: {
-    return prototype<JSElement>()->m_removeAttribute.function();
-  }
-  case JSElement::ElementProperty::hasAttribute:
-    return prototype<JSElement>()->m_hasAttribute.function();
   case JSElement::ElementProperty::children: {
     JSValueRef arguments[childNodes.size()];
 
@@ -310,21 +288,26 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
 
     return JSObjectMakeArray(_hostClass->ctx, elementCount, arguments, nullptr);
   }
-  case JSElement::ElementProperty::attributes: {
-    return (*m_attributes)->jsObject;
-  }
   }
 
   return nullptr;
 }
 
-void ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSElement::getElementPropertyMap();
+  auto prototypePropertyMap = JSElement::getElementPrototypePropertyMap();
+
+  if (prototypePropertyMap.count(name) > 0) {
+    return false;
+  }
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch (property) {
+    case JSElement::ElementProperty::style:
+    case JSElement::ElementProperty::attributes:
+      return false;
     case JSElement::ElementProperty::scrollTop: {
       getDartMethod()->flushUICommand();
       assert_m(nativeElement->setViewModuleProperty != nullptr, "Failed to execute setScrollTop(): dart method is nullptr.");
@@ -340,8 +323,9 @@ void ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
     default:
       break;
     }
+    return true;
   } else {
-    NodeInstance::setProperty(name, value, exception);
+    return NodeInstance::setProperty(name, value, exception);
   }
 }
 
@@ -349,6 +333,10 @@ void ElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator)
   NodeInstance::getPropertyNames(accumulator);
 
   for (auto &property : JSElement::getElementPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : JSElement::getElementPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
@@ -668,32 +656,11 @@ void JSElement::defineElement(std::string tagName, ElementCreator creator) {
 
 JSValueRef JSElement::prototypeGetProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getElementPropertyMap();
-  if (propertyMap.count(name) == 0) return JSNode::prototypeGetProperty(name, exception);
-  auto property = propertyMap[name];
+  auto prototypePropertyMap = getElementPrototypePropertyMap();
 
-  switch (property) {
-  case ElementProperty::getBoundingClientRect:
-    return m_getBoundingClientRect.function();
-  case ElementProperty::click:
-    return m_click.function();
-  case ElementProperty::scrollTo:
-  case ElementProperty::scroll:
-    return m_scroll.function();
-  case ElementProperty::scrollBy:
-    return m_scrollBy.function();
-  case ElementProperty::toBlob:
-    return m_toBlob.function();
-  case ElementProperty::getAttribute:
-    return m_getAttribute.function();
-  case ElementProperty::setAttribute:
-    return m_setAttribute.function();
-  case ElementProperty::hasAttribute:
-    return m_hasAttribute.function();
-  case ElementProperty::removeAttribute:
-    return m_removeAttribute.function();
-  default:
-    break;
-  }
+  if (prototypePropertyMap.count(name) > 0) return nullptr;
+  if (propertyMap.count(name) == 0) return JSNode::prototypeGetProperty(name, exception);
+
   return nullptr;
 }
 
@@ -785,6 +752,8 @@ JSValueRef ElementInstance::getStringValueProperty(std::string &name) {
   NativeString* returnedString = nativeElement->getStringValueProperty(nativeElement, nativeString);
   JSStringRef returnedStringRef = JSStringCreateWithCharacters(returnedString->string, returnedString->length);
   JSStringRelease(stringRef);
+  returnedString->free();
+  nativeString->free();
   return JSValueMakeString(_hostClass->ctx, returnedStringRef);
 }
 

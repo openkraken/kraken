@@ -85,7 +85,7 @@ JSValueRef CloseEventInstance::getProperty(std::string &name, JSValueRef *except
   return nullptr;
 }
 
-void CloseEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool CloseEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSCloseEvent::getCloseEventPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -106,8 +106,9 @@ void CloseEventInstance::setProperty(std::string &name, JSValueRef value, JSValu
       break;
     }
     }
+    return true;
   } else {
-    EventInstance::setProperty(name, value, exception);
+    return EventInstance::setProperty(name, value, exception);
   }
 }
 

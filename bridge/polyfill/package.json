@@ -1,8 +1,6 @@
 {
-  "name": "kraken-polyfill",
-  "version": "0.1.0",
   "private": true,
-  "description": "js polyfill for kraken export JS API",
+  "description": "JavaScript polyfill for kraken",
   "main": "dist/index.js",
   "scripts": {
     "build": "NODE_ENV=development rollup --config rollup.config.js && npm run mainToC && npm run testToC",
@@ -12,8 +10,6 @@
     "mainToC": "node scripts/js_to_c.js -s ../dist/main.js -o ../dist",
     "testToC": "node scripts/js_to_c.js -s ../dist/test.js -o ../dist -n TestFramework"
   },
-  "author": "KrakenTeam",
-  "license": "MIT",
   "dependencies": {
     "@types/raf": "^3.4.0",
     "es6-promise": "^4.2.8",

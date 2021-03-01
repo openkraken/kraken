@@ -40,7 +40,7 @@ int initBridge() {
 
         flushBridgeTask();
         flushUICommand();
-        flushUICommandCallback(contextId);
+        flushUICommandCallback();
       });
     });
   }

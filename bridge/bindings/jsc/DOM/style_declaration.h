@@ -22,7 +22,6 @@ template <typename CharacterType> inline bool isASCIILower(CharacterType charact
 template <typename CharacterType> inline CharacterType toASCIIUpper(CharacterType character) {
   return character & ~(isASCIILower(character) << 5);
 }
-
 } // namespace kraken::binding::jsc
 
 #endif // KRAKENBRIDGE_STYLE_DECLARATION_H

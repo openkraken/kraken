@@ -6,6 +6,7 @@
 #include "event.h"
 #include "event_target.h"
 #include "bindings/jsc/DOM/custom_event.h"
+#include "bindings/jsc/DOM/gesture_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
@@ -71,10 +72,8 @@ void JSEvent::defineEvent(std::string eventType, EventCreator creator) {
   eventCreatorMap[eventType] = creator;
 }
 JSValueRef JSEvent::getProperty(std::string &name, JSValueRef *exception) {
-  if (name == "__initWithNativeEvent__") {
-    return m_initWithNativeEvent.function();
-  }
-  return nullptr;
+  if (name == "__initWithNativeEvent__") return nullptr;
+  return HostClass::getProperty(name, exception);
 }
 
 EventInstance::EventInstance(JSEvent *jsEvent, NativeEvent *nativeEvent)
@@ -99,6 +98,12 @@ EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType, JSValueRef
 
 JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
+  auto prototypeProperty = JSEvent::getEventPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (prototypeProperty.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSEvent>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
 
   if (propertyMap.count(name) == 0) return Instance::getProperty(name, exception);
 
@@ -133,16 +138,9 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
     return JSValueMakeNull(_hostClass->ctx);
   case JSEvent::EventProperty::returnValue:
     return JSValueMakeBoolean(_hostClass->ctx, !_canceledFlag);
-  case JSEvent::EventProperty::stopPropagation:
-    return prototype<JSEvent>()->m_stopPropagation.function();
   case JSEvent::EventProperty::cancelBubble:
     return JSValueMakeBoolean(_hostClass->ctx, _stopPropagationFlag);
-  case JSEvent::EventProperty::stopImmediatePropagation:
-    return prototype<JSEvent>()->m_stopImmediatePropagation.function();
-  case JSEvent::EventProperty::preventDefault:
-    return prototype<JSEvent>()->m_preventDefault.function();
   }
-
   return nullptr;
 }
 
@@ -173,8 +171,12 @@ JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObj
   return nullptr;
 }
 
-void EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSEvent::getEventPropertyMap();
+  auto prototypePropertyMap = JSEvent::getEventPrototypePropertyMap();
+
+  if (prototypePropertyMap.count(name) > 0) return false;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
@@ -184,16 +186,22 @@ void EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef 
         _stopPropagationFlag = true;
       }
     }
+    return true;
   } else {
-    Instance::setProperty(name, value, exception);
+    return Instance::setProperty(name, value, exception);
   }
 }
 
 EventInstance::~EventInstance() {
+  nativeEvent->type->free();
   delete nativeEvent;
 }
 void EventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : JSEvent::getEventPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : JSEvent::getEventPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
@@ -202,7 +210,7 @@ EventInstance *JSEvent::buildEventInstance(std::string &eventType, JSContext *co
   EventInstance *eventInstance;
   if (isCustomEvent) {
     eventInstance = new CustomEventInstance(JSCustomEvent::instance(context), reinterpret_cast<NativeCustomEvent*>(nativeEvent));
-  } else if (eventCreatorMap.count(eventType) > 0){
+  } else if (eventCreatorMap.count(eventType) > 0) {
     eventInstance = eventCreatorMap[eventType](context, nativeEvent);
   } else {
     eventInstance = new EventInstance(JSEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));

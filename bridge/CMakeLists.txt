@@ -17,7 +17,6 @@ endif()
 
 list(APPEND PUBLIC_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge_jsc.h
 )
 
 list(APPEND BRIDGE_SOURCE
@@ -58,7 +57,7 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
             JavaScriptCore
             )
   else ()
-    if (${DEBUG_JSC_ENGINE})
+    if (EXISTS ${DEBUG_JSC_ENGINE})
       list(APPEND BRIDGE_INCLUDE ${DEBUG_JSC_ENGINE}/Headers)
       add_library(JavaScriptCore SHARED IMPORTED)
       set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION ${DEBUG_JSC_ENGINE}/JavaScriptCore)
@@ -69,10 +68,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   endif ()
 
   list(APPEND BRIDGE_SOURCE
-          bindings/jsc/js_context_internal.h
-          bindings/jsc/js_context_internal.cc
-          bindings/jsc/host_object_internal.cc
-          bindings/jsc/host_object_internal.h
+    bindings/jsc/js_context_internal.h
+    bindings/jsc/js_context_internal.cc
+    bindings/jsc/host_object_internal.cc
+    bindings/jsc/host_object_internal.h
     bindings/jsc/host_class.cc
     bindings/jsc/host_class.h
     bindings/jsc/kraken.h
@@ -120,6 +119,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/event.h
     bindings/jsc/DOM/event.cc
     bindings/jsc/DOM/custom_event.h
+    bindings/jsc/DOM/gesture_event.cc
+    bindings/jsc/DOM/gesture_event.h
     bindings/jsc/DOM/custom_event.cc
     bindings/jsc/DOM/events/input_event.cc
     bindings/jsc/DOM/events/input_event.h

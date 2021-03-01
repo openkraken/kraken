@@ -65,7 +65,7 @@ JSValueRef IntersectionChangeEventInstance::getProperty(std::string &name, JSVal
   return nullptr;
 }
 
-void IntersectionChangeEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool IntersectionChangeEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSIntersectionChangeEvent::getIntersectionChangePropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -73,8 +73,9 @@ void IntersectionChangeEventInstance::setProperty(std::string &name, JSValueRef 
     if (property == JSIntersectionChangeEvent::IntersectionChangeProperty::intersectionRatio) {
       intersectionRatio = JSValueToNumber(ctx, value, exception);
     }
+    return true;
   } else {
-    EventInstance::setProperty(name, value, exception);
+    return EventInstance::setProperty(name, value, exception);
   }
 }
 

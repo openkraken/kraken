@@ -28,10 +28,14 @@ struct NativeCustomEvent {
 
 class JSCustomEvent : public JSEvent {
 public:
-  DEFINE_OBJECT_PROPERTY(CustomEvent, 2, detail, initCustomEvent)
+  DEFINE_OBJECT_PROPERTY(CustomEvent, 1, detail)
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(CustomEvent, 1, initCustomEvent)
 
   static std::unordered_map<JSContext *, JSCustomEvent *> instanceMap;
   OBJECT_INSTANCE(JSCustomEvent)
+
+  static JSValueRef initCustomEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                    const JSValueRef arguments[], JSValueRef *exception);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -44,25 +48,23 @@ protected:
   ~JSCustomEvent() override;
 
 private:
+  JSFunctionHolder m_initCustomEvent{context, prototypeObject, this, "initCustomEvent", initCustomEvent};
   friend CustomEventInstance;
 };
 
 class CustomEventInstance : public EventInstance {
 public:
-  static JSValueRef initCustomEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                   const JSValueRef arguments[], JSValueRef *exception);
   CustomEventInstance() = delete;
   explicit CustomEventInstance(JSCustomEvent *jsCustomEvent, std::string CustomEventType, JSValueRef eventInit, JSValueRef *exception);
   explicit CustomEventInstance(JSCustomEvent *jsCustomEvent, NativeCustomEvent* nativeCustomEvent);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
-  void setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+  bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   ~CustomEventInstance() override;
 
 private:
   friend JSCustomEvent;
   JSValueHolder m_detail{context, nullptr};
-  JSFunctionHolder m_initCustomEvent{context, this, "initCustomEvent", initCustomEvent};
   NativeCustomEvent* nativeCustomEvent;
 };
 

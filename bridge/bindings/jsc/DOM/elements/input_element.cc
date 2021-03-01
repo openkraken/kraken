@@ -36,7 +36,7 @@ JSValueRef JSInputElement::focus(JSContextRef ctx, JSObjectRef function, JSObjec
   getDartMethod()->flushUICommand();
 
   auto elementInstance =
-    static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(function));
+    static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(elementInstance->nativeInputElement->focus != nullptr,
            "Failed to call dart method: focus() is nullptr");
   elementInstance->nativeInputElement->focus(elementInstance->nativeInputElement);
@@ -48,7 +48,7 @@ JSValueRef JSInputElement::blur(JSContextRef ctx, JSObjectRef function, JSObject
   getDartMethod()->flushUICommand();
 
   auto elementInstance =
-    static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(function));
+    static_cast<JSInputElement::InputElementInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(elementInstance->nativeInputElement->blur != nullptr,
            "Failed to call dart method: blur() is nullptr");
   elementInstance->nativeInputElement->blur(elementInstance->nativeInputElement);
@@ -67,6 +67,13 @@ JSInputElement::InputElementInstance::InputElementInstance(JSInputElement *jsAnc
 
 JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getInputElementPropertyMap();
+  auto propertyPropertyMap = getInputElementPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (propertyPropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSInputElement>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
+
   if (propertyMap.count(name) > 0) {
     getDartMethod()->flushUICommand();
 
@@ -78,12 +85,6 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
     case InputElementProperty::height: {
       return JSValueMakeNumber(_hostClass->ctx, nativeInputElement->getInputHeight(nativeInputElement));
     }
-    case InputElementProperty::focus: {
-      return m_focus.function();
-    }
-    case InputElementProperty::blur: {
-      return m_blur.function();
-    }
     default: {
       return ElementInstance::getStringValueProperty(name);
     }
@@ -93,8 +94,12 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSInputElement::InputElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSInputElement::InputElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getInputElementPropertyMap();
+  auto prototypePropertyMap = getInputElementPrototypePropertyMap();
+
+  if (prototypePropertyMap.count(name) > 0) return false;
+
   if (propertyMap.count(name) > 0) {
     JSStringRef stringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
     std::string string = JSStringToStdString(stringRef);
@@ -103,8 +108,9 @@ void JSInputElement::InputElementInstance::setProperty(std::string &name, JSValu
     buildUICommandArgs(name, string, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 
@@ -112,6 +118,10 @@ void JSInputElement::InputElementInstance::getPropertyNames(JSPropertyNameAccumu
   ElementInstance::getPropertyNames(accumulator);
 
   for (auto &property : getInputElementPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getInputElementPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

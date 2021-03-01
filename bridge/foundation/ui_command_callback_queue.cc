@@ -7,14 +7,14 @@
 
 namespace foundation {
 
-UICommandCallbackQueue *UICommandCallbackQueue::instance(int32_t contextId) {
-  static std::unordered_map<int32_t, UICommandCallbackQueue *> instanceMap;
+UICommandCallbackQueue *UICommandCallbackQueue::instance() {
+  static UICommandCallbackQueue *queue = nullptr;
 
-  if (instanceMap.count(contextId) == 0) {
-    instanceMap[contextId] = new UICommandCallbackQueue();
+  if (queue == nullptr) {
+    queue = new UICommandCallbackQueue();
   }
 
-  return instanceMap[contextId];
+  return queue;
 }
 
 void UICommandCallbackQueue::flushCallbacks() {

@@ -23,6 +23,12 @@ WindowInstance::~WindowInstance() {
 
 JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getWindowPropertyMap();
+  auto prototypePropertyMap = getWindowPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSWindow>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -59,11 +65,6 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
       JSStringRelease(key);
       return history;
     }
-    case WindowProperty::scrollTo:
-    case WindowProperty::scroll:
-      return m_scroll.function();
-    case WindowProperty::scrollBy:
-      return m_scrollBy.function();
     case WindowProperty::scrollX: {
       getDartMethod()->flushUICommand();
       auto document = DocumentInstance::instance(_hostClass->context);
@@ -84,8 +85,12 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
   JSValueRef eventTargetRet = EventTargetInstance::getProperty(name, exception);
   if (eventTargetRet != nullptr) return eventTargetRet;
 
-  JSStringRef keyStringRef = JSStringCreateWithUTF8CString(name.c_str());
-  return JSObjectGetProperty(_hostClass->ctx, _hostClass->context->global(), keyStringRef, exception);
+  JSStringHolder keyStringHolder = JSStringHolder(context, name);
+  if (JSObjectHasProperty(ctx, _hostClass->context->global(), keyStringHolder.getString())) {
+    return JSObjectGetProperty(_hostClass->ctx, _hostClass->context->global(), keyStringHolder.getString(), exception);
+  }
+
+  return nullptr;
 }
 
 void WindowInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -96,7 +101,7 @@ void WindowInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) 
   }
 }
 
-JSValueRef WindowInstance::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+JSValueRef JSWindow::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef xValueRef = arguments[0];
   const JSValueRef yValueRef = arguments[1];
@@ -112,7 +117,7 @@ JSValueRef WindowInstance::scroll(JSContextRef ctx, JSObjectRef function, JSObje
     y = JSValueToNumber(ctx, yValueRef, exception);
   }
 
-  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(function));
+  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
   auto document = DocumentInstance::instance(window->context);
   assert_m( document->body->nativeElement->scroll != nullptr, "Failed to execute scroll(): dart method is nullptr.");
@@ -121,7 +126,7 @@ JSValueRef WindowInstance::scroll(JSContextRef ctx, JSObjectRef function, JSObje
   return nullptr;
 }
 
-JSValueRef WindowInstance::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSWindow::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                     size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef xValueRef = arguments[0];
   const JSValueRef yValueRef = arguments[1];
@@ -137,7 +142,7 @@ JSValueRef WindowInstance::scrollBy(JSContextRef ctx, JSObjectRef function, JSOb
     y = JSValueToNumber(ctx, yValueRef, exception);
   }
 
-  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(function));
+  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
   auto document = DocumentInstance::instance(window->context);
   assert_m( document->body->nativeElement->scrollBy != nullptr, "Failed to execute scroll(): dart method is nullptr.");

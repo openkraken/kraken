@@ -1,7 +1,7 @@
 ---
-Language:        Cpp
-BasedOnStyle:  LLVM
-ColumnLimit:     120
+Language: Cpp
+BasedOnStyle: LLVM
+ColumnLimit: 120
 AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortFunctionsOnASingleLine: Empty
 ContinuationIndentWidth: 2

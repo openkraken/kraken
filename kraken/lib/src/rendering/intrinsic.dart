@@ -12,8 +12,8 @@ import 'package:kraken/rendering.dart';
 
 class RenderIntrinsic extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
-  RenderIntrinsic(int targetId, CSSStyleDeclaration style, ElementManager elementManager)
-      : super(targetId: targetId, style: style, elementManager: elementManager);
+  RenderIntrinsic(int targetId, RenderStyle renderStyle, ElementManager elementManager)
+      : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager);
 
   BoxSizeType get widthSizeType {
     bool widthDefined = renderStyle.width != null || (renderStyle.minWidth != null);
@@ -50,6 +50,7 @@ class RenderIntrinsic extends RenderBoxModel
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: targetId);
     }
 
+    CSSDisplay display = renderStyle.display;
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {
@@ -82,8 +83,8 @@ class RenderIntrinsic extends RenderBoxModel
 
       setMaxScrollableSize(child.size.width, child.size.height);
 
-      CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-      bool isInlineLevel = realDisplay == CSSDisplay.inlineBlock || realDisplay == CSSDisplay.inlineFlex;
+      CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
+      bool isInlineLevel = transformedDisplay == CSSDisplay.inlineBlock || transformedDisplay == CSSDisplay.inlineFlex;
 
       double constraintWidth = child.size.width;
       double constraintHeight = child.size.height;
@@ -138,6 +139,21 @@ class RenderIntrinsic extends RenderBoxModel
     }
   }
 
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    return computeDistanceToBaseline();
+  }
+
+  /// Compute distance to baseline of replaced element
+  @override
+  double computeDistanceToBaseline() {
+    double marginTop = renderStyle.marginTop.length ?? 0;
+    double marginBottom = renderStyle.marginBottom.length ?? 0;
+
+    // Use margin-bottom as baseline if layout has no children
+    return marginTop + boxSize.height + marginBottom;
+  }
+
   /// This class mixin [RenderProxyBoxMixin], which has its' own paint method,
   /// override it to layout box model paint.
   @override
@@ -172,7 +188,7 @@ class RenderIntrinsic extends RenderBoxModel
   RenderSelfRepaintIntrinsic toSelfRepaint() {
     RenderObject childRenderObject = child;
     child = null;
-    RenderSelfRepaintIntrinsic newChild = RenderSelfRepaintIntrinsic(targetId, style, elementManager);
+    RenderSelfRepaintIntrinsic newChild = RenderSelfRepaintIntrinsic(targetId, renderStyle, elementManager);
     newChild.child = childRenderObject;
     return copyWith(newChild);
   }
@@ -187,8 +203,8 @@ class RenderIntrinsic extends RenderBoxModel
 }
 
 class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
-  RenderSelfRepaintIntrinsic(int targetId, CSSStyleDeclaration style, ElementManager elementManager):
-        super(targetId, style, elementManager);
+  RenderSelfRepaintIntrinsic(int targetId, RenderStyle renderStyle, ElementManager elementManager):
+        super(targetId, renderStyle, elementManager);
 
   @override
   bool get isRepaintBoundary => true;
@@ -196,7 +212,7 @@ class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
   RenderIntrinsic toParentRepaint() {
     RenderObject childRenderObject = child;
     child = null;
-    RenderIntrinsic newChild = RenderIntrinsic(targetId, style, elementManager);
+    RenderIntrinsic newChild = RenderIntrinsic(targetId, renderStyle, elementManager);
     newChild.child = childRenderObject;
     return copyWith(newChild);
   }

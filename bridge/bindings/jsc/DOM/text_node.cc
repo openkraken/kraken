@@ -67,7 +67,7 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueR
   }
 }
 
-void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   if (name == "data") {
     JSStringRef data = JSValueToStringCopy(_hostClass->ctx, value, exception);
     m_data.setString(data);
@@ -78,8 +78,9 @@ void JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
     buildUICommandArgs(name, dataString, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    return true;
   } else {
-    NodeInstance::setProperty(name, value, exception);
+    return NodeInstance::setProperty(name, value, exception);
   }
 }
 
@@ -96,7 +97,7 @@ std::string JSTextNode::TextNodeInstance::internalGetTextContent() {
 }
 
 JSTextNode::TextNodeInstance::~TextNodeInstance() {
-  foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeTextNode *>(ptr);
   }, nativeTextNode);
 }

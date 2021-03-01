@@ -22,32 +22,32 @@ JSMediaElement::MediaElementInstance::MediaElementInstance(JSMediaElement *jsMed
 JSMediaElement::MediaElementInstance::~MediaElementInstance() {
   if (_src != nullptr) JSStringRelease(_src);
 
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback([](void *ptr) {
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
     delete reinterpret_cast<NativeMediaElement *>(ptr);
   }, nativeMediaElement);
 }
 
-JSValueRef JSMediaElement::MediaElementInstance::play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSMediaElement::play(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                       size_t argumentCount, const JSValueRef *arguments,
                                                       JSValueRef *exception) {
-  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
   assert_m(elementInstance->nativeMediaElement->play != nullptr, "Failed to execute play(): dart method is nullptr.");
   elementInstance->nativeMediaElement->play(elementInstance->nativeMediaElement);
   return nullptr;
 }
 
-JSValueRef JSMediaElement::MediaElementInstance::pause(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSMediaElement::pause(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                        size_t argumentCount, const JSValueRef *arguments,
                                                        JSValueRef *exception) {
-  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
   assert_m(elementInstance->nativeMediaElement->pause != nullptr, "Failed to execute pause(): dart method is nullptr.");
   elementInstance->nativeMediaElement->pause(elementInstance->nativeMediaElement);
   return nullptr;
 }
 
-JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSObjectRef function,
+JSValueRef JSMediaElement::fastSeek(JSContextRef ctx, JSObjectRef function,
                                                           JSObjectRef thisObject, size_t argumentCount,
                                                           const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
@@ -62,7 +62,7 @@ JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSOb
 
   double duration = JSValueToNumber(ctx, arguments[0], exception);
 
-  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(function));
+  auto elementInstance = reinterpret_cast<JSMediaElement::MediaElementInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod()->flushUICommand();
   assert_m(elementInstance->nativeMediaElement->fastSeek != nullptr, "Failed to execute fastSeek(): dart method is nullptr.");
@@ -73,6 +73,13 @@ JSValueRef JSMediaElement::MediaElementInstance::fastSeek(JSContextRef ctx, JSOb
 
 JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getMediaElementPropertyMap();
+  auto prototypePropertyMap = getMediaElementPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSMediaElement>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch(property) {
@@ -84,20 +91,18 @@ JSValueRef JSMediaElement::MediaElementInstance::getProperty(std::string &name, 
       return JSValueMakeBoolean(_hostClass->ctx, _autoPlay);
     case MediaElementProperty::loop:
       return JSValueMakeBoolean(_hostClass->ctx, _loop);
-    case MediaElementProperty::play:
-      return m_play.function();
-    case MediaElementProperty::pause:
-      return m_pause.function();
-    case MediaElementProperty::fastSeek:
-      return m_fastSeek.function();
     }
   }
 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getMediaElementPropertyMap();
+  auto prototypePropertyMap = getMediaElementPrototypePropertyMap();
+
+  if (prototypePropertyMap.count(name) > 0) return false;
+
   auto property = propertyMap[name];
 
   if (property == MediaElementProperty::src) {
@@ -110,9 +115,10 @@ void JSMediaElement::MediaElementInstance::setProperty(std::string &name, JSValu
     buildUICommandArgs(name, _src, args_01, args_02);
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
+    return true;
   }
 
-  ElementInstance::setProperty(name, value, exception);
+  return ElementInstance::setProperty(name, value, exception);
 }
 
 void JSMediaElement::MediaElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

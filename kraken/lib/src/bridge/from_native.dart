@@ -79,9 +79,13 @@ String invokeModule(
   try {
     void invokeModuleCallback({String errmsg, dynamic data}) {
       if (errmsg != null) {
-        callback(callbackContext, contextId, stringToNativeString(errmsg), nullptr);
+        Pointer<NativeString> errmsgPtr = stringToNativeString(errmsg);
+        callback(callbackContext, contextId, errmsgPtr, nullptr);
+        freeNativeString(errmsgPtr);
       } else {
-        callback(callbackContext, contextId, nullptr, stringToNativeString(jsonEncode(data)));
+        Pointer<NativeString> dataPtr = stringToNativeString(jsonEncode(data));
+        callback(callbackContext, contextId, nullptr, dataPtr);
+        freeNativeString(dataPtr);
       }
     }
     result = controller.module.moduleManager.invokeModule(moduleName, method, (params != null && params != '""') ? jsonDecode(params) : null, invokeModuleCallback);

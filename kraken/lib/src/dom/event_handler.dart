@@ -18,7 +18,11 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerMove = handlePointMove;
     renderBoxModel.onPointerUp = handlePointUp;
     renderBoxModel.onPointerCancel = handlePointCancel;
-    renderBoxModel.onClick = handleClick;
+    renderBoxModel.onClick = dispatchEvent;
+    renderBoxModel.onSwipe = dispatchEvent;
+    renderBoxModel.onPan = dispatchEvent;
+    renderBoxModel.onScale = dispatchEvent;
+    renderBoxModel.onLongPress = dispatchEvent;
     renderBoxModel.initGestureRecognizer(eventHandlers);
   }
 
@@ -27,14 +31,11 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerMove = null;
     renderBoxModel.onPointerUp = null;
     renderBoxModel.onPointerCancel = null;
-  }
-
-  bool hasPointerEvent() {
-    return eventHandlers.containsKey('click') ||
-        eventHandlers.containsKey('touchstart') ||
-        eventHandlers.containsKey('touchmove') ||
-        eventHandlers.containsKey('touchend') ||
-        eventHandlers.containsKey('touchcancel');
+    renderBoxModel.onClick = null;
+    renderBoxModel.onSwipe = null;
+    renderBoxModel.onPan = null;
+    renderBoxModel.onScale = null;
+    renderBoxModel.onLongPress = null;
   }
 
   void handlePointDown(PointerDownEvent pointEvent) {

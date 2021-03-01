@@ -140,6 +140,33 @@
   }
 #define OBJECT_PROPERTY_ITEM(NAME, KEY)                                                                                \
   { #KEY, NAME##Property::KEY }
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, KEY)                                                                         \
+  { #KEY, NAME##PrototypeProperty::KEY }
+
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_1(NAME, _1) OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _1)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_2(NAME, _1, _2)                                                                    \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_1(NAME, _1), OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _2)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_3(NAME, _1, _2, _3)                                                                \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_2(NAME, _1, _2), OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _3)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_4(NAME, _1, _2, _3, _4)                                                            \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_3(NAME, _1, _2, _3), OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _4)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_5(NAME, _1, _2, _3, _4, _5)                                                        \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_4(NAME, _1, _2, _3, _4), OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _5)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_6(NAME, _1, _2, _3, _4, _5, _6)                                                    \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_5(NAME, _1, _2, _3, _4, _5), OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _6)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_7(NAME, _1, _2, _3, _4, _5, _6, _7)                                                \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_6(NAME, _1, _2, _3, _4, _5, _6), OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _7)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_8(NAME, _1, _2, _3, _4, _5, _6, _7, _8)                                            \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_7(NAME, _1, _2, _3, _4, _5, _6, _7), OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _8)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_9(NAME, _1, _2, _3, _4, _5, _6, _7, _8, _9)                                        \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_8(NAME, _1, _2, _3, _4, _5, _6, _7, _8), OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _9)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_10(NAME, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10)                                  \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_9(NAME, _1, _2, _3, _4, _5, _6, _7, _8, _9), OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _10)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_11(NAME, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11)                             \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_10(NAME, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10), OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _11)
+#define OBJECT_PROTOTYPE_PROPERTY_ITEM_12(NAME, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12)                        \
+  OBJECT_PROTOTYPE_PROPERTY_ITEM_11(NAME, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11),                                  \
+    OBJECT_PROTOTYPE_PROPERTY_ITEM(NAME, _12)
 
 #define OBJECT_PROPERTY_ITEM_1(NAME, _1) OBJECT_PROPERTY_ITEM(NAME, _1),
 #define OBJECT_PROPERTY_ITEM_2(NAME, _1, _2) OBJECT_PROPERTY_ITEM(NAME, _1), OBJECT_PROPERTY_ITEM(NAME, _2),
@@ -686,6 +713,13 @@
     return propertyMap;                                                                                                \
   };
 
+#define OBJECT_PROTOTYPE_PROPERTY_MAP_FUNCTION(NAME, ARGS_COUNT, ...)                                                     \
+  static std::unordered_map<std::string, NAME##PrototypeProperty> &get##NAME##PrototypePropertyMap() {                       \
+    static std::unordered_map<std::string, NAME##PrototypeProperty> prototypePropertyMap{                                    \
+      OBJECT_PROTOTYPE_PROPERTY_ITEM_##ARGS_COUNT(NAME, __VA_ARGS__)};                                                    \
+    return prototypePropertyMap;                                                                                          \
+  };
+
 #define OBJECT_PROPERTY_NAME(KEY) JSStringCreateWithUTF8CString(#KEY)
 
 #define OBJECT_PROPERTY_NAME_1(_1) OBJECT_PROPERTY_NAME(_1),
@@ -1125,7 +1159,18 @@
     return propertyNames;                                                                                              \
   }
 
+#define OBJECT_PROTOTYPE_PROPERTY_NAME_FUNCTION(NAME, ARGS_COUNT, ...)                                                    \
+  static std::vector<JSStringRef> &get##NAME##PrototypePropertyNames() {                                                  \
+    static std::vector<JSStringRef> propertyNames{OBJECT_PROPERTY_NAME_##ARGS_COUNT(__VA_ARGS__)};                     \
+    return propertyNames;                                                                                              \
+  }
+
 #define DEFINE_OBJECT_PROPERTY(NAME, ARGS_COUNT, ...)                                                                  \
   enum class OBJECT_PROPERTY(NAME##Property, __VA_ARGS__);                                                             \
   OBJECT_PROPERTY_MAP_FUNCTION(NAME, ARGS_COUNT, __VA_ARGS__);                                                         \
   OBJECT_PROPERTY_NAME_FUNCTION(NAME, ARGS_COUNT, __VA_ARGS__)
+
+#define DEFINE_PROTOTYPE_OBJECT_PROPERTY(NAME, ARGS_COUNT, ...)                                                           \
+  enum class OBJECT_PROPERTY(NAME##PrototypeProperty, __VA_ARGS__);                                                    \
+  OBJECT_PROTOTYPE_PROPERTY_MAP_FUNCTION(NAME, ARGS_COUNT, __VA_ARGS__)                                                \
+  OBJECT_PROTOTYPE_PROPERTY_NAME_FUNCTION(NAME, ARGS_COUNT, __VA_ARGS__)

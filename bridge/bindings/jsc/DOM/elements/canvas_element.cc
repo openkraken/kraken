@@ -35,12 +35,18 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback(
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback(
     [](void *ptr) { delete reinterpret_cast<NativeCanvasElement *>(ptr); }, nativeCanvasElement);
 }
 
 JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getCanvasElementPropertyMap();
+  auto prototypePropertyMap = getCanvasElementPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<JSCanvasElement>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -51,16 +57,17 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
     }
     case CanvasElementProperty::height:
       return JSValueMakeNumber(_hostClass->ctx, _height);
-    case CanvasElementProperty::getContext:
-      return m_getContext.function();
     }
   }
 
   return ElementInstance::getProperty(name, exception);
 }
 
-void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getCanvasElementPropertyMap();
+  auto prototypePropertyMap = getCanvasElementPrototypePropertyMap();
+
+  if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -96,8 +103,9 @@ void JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     default:
       break;
     }
+    return true;
   } else {
-    ElementInstance::setProperty(name, value, exception);
+    return ElementInstance::setProperty(name, value, exception);
   }
 }
 
@@ -107,9 +115,13 @@ void JSCanvasElement::CanvasElementInstance::getPropertyNames(JSPropertyNameAccu
   for (auto &property : getCanvasElementPropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
+
+  for (auto &property : getCanvasElementPrototypePropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
 }
 
-JSValueRef JSCanvasElement::CanvasElementInstance::getContext(JSContextRef ctx, JSObjectRef function,
+JSValueRef JSCanvasElement::getContext(JSContextRef ctx, JSObjectRef function,
                                                               JSObjectRef thisObject, size_t argumentCount,
                                                               const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
@@ -126,7 +138,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getContext(JSContextRef ctx, 
 
   getDartMethod()->flushUICommand();
 
-  auto elementInstance = reinterpret_cast<JSCanvasElement::CanvasElementInstance *>(JSObjectGetPrivate(function));
+  auto elementInstance = reinterpret_cast<JSCanvasElement::CanvasElementInstance *>(JSObjectGetPrivate(thisObject));
   assert_m(elementInstance->nativeCanvasElement->getContext != nullptr,
            "Failed to call getContext(): dart method is nullptr");
   NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D =
@@ -147,13 +159,19 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::CanvasRenderingConte
   : Instance(canvasRenderContext2D), nativeCanvasRenderingContext2D(nativeCanvasRenderingContext2D) {}
 
 CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingContext2DInstance() {
-  ::foundation::UICommandCallbackQueue::instance(contextId)->registerCallback(
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback(
     [](void *ptr) { delete reinterpret_cast<NativeCanvasRenderingContext2D *>(ptr); }, nativeCanvasRenderingContext2D);
 }
 
 JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProperty(std::string &name,
                                                                                    JSValueRef *exception) {
   auto propertyMap = getCanvasRenderingContext2DPropertyMap();
+  auto prototypePropertyMap = getCanvasRenderingContext2DPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<CanvasRenderingContext2D>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
@@ -167,36 +185,22 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
     case CanvasRenderingContext2DProperty::strokeStyle: {
       return m_strokeStyle.makeString();
     }
-    case CanvasRenderingContext2DProperty::fillRect: {
-      return m_fillRect.function();
-    }
-    case CanvasRenderingContext2DProperty::clearRect: {
-      return m_clearRect.function();
-    }
-    case CanvasRenderingContext2DProperty::strokeRect: {
-      return m_strokeRect.function();
-    }
-    case CanvasRenderingContext2DProperty::fillText: {
-      return m_fillText.function();
-    }
-    case CanvasRenderingContext2DProperty::strokeText: {
-      return m_strokeText.function();
-    }
-    case CanvasRenderingContext2DProperty::save: {
-      return m_save.function();
-    }
-    case CanvasRenderingContext2DProperty::restore: {
-      return m_restore.function();
-    }
     }
   }
 
   return Instance::getProperty(name, exception);
 }
 
-void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std::string &name, JSValueRef value,
+bool CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std::string &name, JSValueRef value,
                                                                              JSValueRef *exception) {
   auto propertyMap = getCanvasRenderingContext2DPropertyMap();
+  auto prototypePropertyMap = getCanvasRenderingContext2DPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  if (prototypePropertyMap.count(name) > 0) {
+    return JSObjectGetProperty(ctx, prototype<CanvasRenderingContext2D>()->prototypeObject, nameStringHolder.getString(), exception);
+  }
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
@@ -242,12 +246,13 @@ void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
     default:
       break;
     }
+    return true;
   } else {
-    Instance::setProperty(name, value, exception);
+    return Instance::setProperty(name, value, exception);
   }
 }
 
-JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillRect(JSContextRef ctx, JSObjectRef function,
+JSValueRef CanvasRenderingContext2D::fillRect(JSContextRef ctx, JSObjectRef function,
                                                                                 JSObjectRef thisObject,
                                                                                 size_t argumentCount,
                                                                                 const JSValueRef *arguments,
@@ -267,7 +272,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillRect(
   double height = JSValueToNumber(ctx, arguments[3], exception);
 
   auto instance =
-    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod()->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->fillRect != nullptr,
@@ -276,7 +281,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillRect(
   return nullptr;
 }
 
-JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::clearRect(JSContextRef ctx, JSObjectRef function,
+JSValueRef CanvasRenderingContext2D::clearRect(JSContextRef ctx, JSObjectRef function,
                                                                                  JSObjectRef thisObject,
                                                                                  size_t argumentCount,
                                                                                  const JSValueRef *arguments,
@@ -296,7 +301,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::clearRect
   double height = JSValueToNumber(ctx, arguments[3], exception);
 
   auto instance =
-    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod()->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->clearRect != nullptr,
@@ -306,7 +311,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::clearRect
   return nullptr;
 }
 
-JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::strokeRect(
+JSValueRef CanvasRenderingContext2D::strokeRect(
   JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef *arguments,
   JSValueRef *exception) {
   if (argumentCount != 4) {
@@ -324,7 +329,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::strokeRec
   double height = JSValueToNumber(ctx, arguments[3], exception);
 
   auto instance =
-    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod()->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->strokeRect != nullptr,
@@ -334,7 +339,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::strokeRec
   return nullptr;
 }
 
-JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillText(JSContextRef ctx, JSObjectRef function,
+JSValueRef CanvasRenderingContext2D::fillText(JSContextRef ctx, JSObjectRef function,
                                                                                 JSObjectRef thisObject,
                                                                                 size_t argumentCount,
                                                                                 const JSValueRef *arguments,
@@ -363,7 +368,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillText(
   }
 
   auto instance =
-    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod()->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->fillText != nullptr,
@@ -372,7 +377,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::fillText(
   return nullptr;
 }
 
-JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::strokeText(
+JSValueRef CanvasRenderingContext2D::strokeText(
   JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef *arguments,
   JSValueRef *exception) {
   if (argumentCount < 3) {
@@ -399,7 +404,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::strokeTex
   }
 
   auto instance =
-    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod()->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->strokeText != nullptr,
@@ -408,13 +413,13 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::strokeTex
   return nullptr;
 }
 
-JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::save(JSContextRef ctx, JSObjectRef function,
+JSValueRef CanvasRenderingContext2D::save(JSContextRef ctx, JSObjectRef function,
                                                                             JSObjectRef thisObject,
                                                                             size_t argumentCount,
                                                                             const JSValueRef *arguments,
                                                                             JSValueRef *exception) {
   auto instance =
-    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod()->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->save != nullptr,
@@ -423,13 +428,13 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::save(JSCo
   return nullptr;
 }
 
-JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::restore(JSContextRef ctx, JSObjectRef function,
+JSValueRef CanvasRenderingContext2D::restore(JSContextRef ctx, JSObjectRef function,
                                                                                JSObjectRef thisObject,
                                                                                size_t argumentCount,
                                                                                const JSValueRef *arguments,
                                                                                JSValueRef *exception) {
   auto instance =
-    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(function));
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
 
   getDartMethod()->flushUICommand();
   assert_m(instance->nativeCanvasRenderingContext2D->restore != nullptr,
@@ -441,6 +446,10 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::restore(J
 void CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getPropertyNames(
   JSPropertyNameAccumulatorRef accumulator) {
   for (auto &property : getCanvasRenderingContext2DPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : getCanvasRenderingContext2DPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }

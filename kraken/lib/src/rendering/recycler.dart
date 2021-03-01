@@ -31,41 +31,19 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   }
 
   RenderRecyclerLayout({
-    Axis axis = Axis.vertical,
     int targetId,
     ElementManager elementManager,
-    CSSStyleDeclaration style,
-  }) : assert(axis != null),
-        super(targetId: targetId, style: style, elementManager: elementManager) {
-
-    _element = elementManager.getEventTargetByTargetId<Element>(targetId);
-    _axis = resolveAxis(_element.style);
-
+    RenderStyle renderStyle,
+  }) : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager) {
     _buildRenderViewport();
-    super.insert(_renderViewport);
+    super.insert(renderViewport);
   }
 
   @override
   bool get isRepaintBoundary => true;
 
-  Axis _axis;
-  Axis get axis => _axis;
-  set axis(Axis value) {
-    if (_axis != value) {
-      _axis = value;
-
-      AxisDirection axisDirection = _getAxisDirection();
-      _scrollable = KrakenScrollable(axisDirection: axisDirection);
-      _renderViewport.axisDirection = axisDirection;
-      _renderViewport.crossAxisDirection = _getCrossAxisDirection();
-      _renderViewport.offset = _scrollable.position;
-
-      markNeedsLayout();
-    }
-  }
-
   Element _element;
-  RenderViewport _renderViewport;
+  RenderViewport renderViewport;
   RenderSliverList _renderSliverList;
 
   // Children targetId list.
@@ -81,7 +59,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   @override
   void insert(RenderBox child, { RenderBox after }) {
     // Append to last.
-    if (after == _renderViewport) {
+    if (after == renderViewport) {
       return add(child);
     }
 
@@ -134,20 +112,20 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     }
   }
 
-  KrakenScrollable _scrollable;
-  KrakenScrollable get scrollable => _scrollable;
+  KrakenScrollable scrollable;
 
   @protected
   RenderViewport _buildRenderViewport() {
     pointerListener = _pointerListener;
+    Axis sliverAxis = renderStyle.sliverAxis;
 
-    AxisDirection axisDirection = _getAxisDirection();
-    _scrollable = KrakenScrollable(axisDirection: axisDirection);
+    AxisDirection axisDirection = getAxisDirection(sliverAxis);
+    scrollable = KrakenScrollable(axisDirection: axisDirection);
 
-    return _renderViewport = RenderViewport(
-      offset: _scrollable.position,
+    return renderViewport = RenderViewport(
+      offset: scrollable.position,
       axisDirection: axisDirection,
-      crossAxisDirection: _getCrossAxisDirection(),
+      crossAxisDirection: getCrossAxisDirection(sliverAxis),
       children: [_buildRenderSliverList()],
       cacheExtent: kReleaseMode ? null : 0.0,
     );
@@ -155,12 +133,12 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   void _pointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
-      _scrollable?.handlePointerDown(event);
+      scrollable?.handlePointerDown(event);
     }
   }
 
-  AxisDirection _getAxisDirection() {
-    switch (_axis) {
+  static AxisDirection getAxisDirection(Axis sliverAxis) {
+    switch (sliverAxis) {
       case Axis.horizontal:
         return AxisDirection.right;
       case Axis.vertical:
@@ -169,8 +147,8 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     }
   }
 
-  AxisDirection _getCrossAxisDirection() {
-    switch (_axis) {
+  static AxisDirection getCrossAxisDirection(Axis sliverAxis) {
+    switch (sliverAxis) {
       case Axis.horizontal:
         return AxisDirection.down;
       case Axis.vertical:
@@ -193,6 +171,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_START, uniqueId: targetId);
     }
 
+    CSSDisplay display = renderStyle.display;
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {
@@ -205,14 +184,15 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
     // If width is given, use exact width; or expand to parent extent width.
     // If height is given, use exact height; or use 0.
-    // Only layout [_renderViewport] as only-child.
-    RenderBox child = _renderViewport;
+    // Only layout [renderViewport] as only-child.
+    RenderBox child = renderViewport;
     BoxConstraints childConstraints;
 
     double width = renderStyle.width;
     double height = renderStyle.height;
+    Axis sliverAxis = renderStyle.sliverAxis;
 
-    switch (_axis) {
+    switch (sliverAxis) {
       case Axis.horizontal:
         childConstraints = BoxConstraints(
           maxWidth: width ?? 0.0,
@@ -426,7 +406,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
         children: children,
         targetId: targetId,
-        style: style,
+        renderStyle: renderStyle,
         elementManager: elementManager
     );
     return copyWith(renderFlexLayout);
@@ -436,7 +416,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
         targetId: targetId,
-        style: style,
+        renderStyle: renderStyle,
         elementManager: elementManager
     );
     renderFlowLayout.addAll(children);

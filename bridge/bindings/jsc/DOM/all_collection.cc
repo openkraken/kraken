@@ -9,17 +9,16 @@ namespace kraken::binding::jsc {
 
 JSValueRef JSAllCollection::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getAllCollectionPropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     switch(property) {
-    case AllCollectionProperty::item:
-      return m_item.function();
     case AllCollectionProperty::add:
-      return m_add.function();
+    case AllCollectionProperty::item:
     case AllCollectionProperty::remove:
-      return m_remove.function();
+      return JSObjectGetProperty(ctx, jsObject, nameStringHolder.getString(), exception);
     case AllCollectionProperty::length:
       return JSValueMakeNumber(ctx, m_nodes.size());
     }
@@ -100,6 +99,14 @@ void JSAllCollection::internalAdd(NodeInstance *node, NodeInstance *before) {
     m_nodes.insert(it, node);
   } else {
     m_nodes.emplace_back(node);
+  }
+}
+
+void JSAllCollection::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  HostObject::getPropertyNames(accumulator);
+
+  for (auto &property : getAllCollectionPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
 

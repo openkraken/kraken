@@ -64,6 +64,12 @@ CustomEventInstance::CustomEventInstance(JSCustomEvent *jsCustomEvent, NativeCus
 
 JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
+  auto prototypePropertyMap = JSCustomEvent::getCustomEventPrototypePropertyMap();
+
+  if (prototypePropertyMap.count(name) > 0) {
+    JSStringHolder nameStringHolder = JSStringHolder(context, name);
+    return JSObjectGetProperty(ctx, prototype<JSCustomEvent>()->prototypeObject, nameStringHolder.getString(), exception);
+  };
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
   auto property = propertyMap[name];
@@ -71,27 +77,30 @@ JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *excep
   switch (property) {
   case JSCustomEvent::CustomEventProperty::detail:
     return m_detail.value();
-  case JSCustomEvent::CustomEventProperty::initCustomEvent:
-    return m_initCustomEvent.function();
   }
 
   return nullptr;
 }
 
-void CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+bool CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
+  auto prototypePropertyMap = JSCustomEvent::getCustomEventPrototypePropertyMap();
+
+  if (prototypePropertyMap.count(name) > 0) return false;
+
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
     if (property == JSCustomEvent::CustomEventProperty::detail) {
       m_detail.setValue(value);
     }
+    return true;
   } else {
-    EventInstance::setProperty(name, value, exception);
+    return EventInstance::setProperty(name, value, exception);
   }
 }
 
-JSValueRef CustomEventInstance::initCustomEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+JSValueRef JSCustomEvent::initCustomEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                 size_t argumentCount, const JSValueRef *arguments,
                                                 JSValueRef *exception) {
   if (argumentCount < 1) {
@@ -130,6 +139,10 @@ void CustomEventInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumula
   EventInstance::getPropertyNames(accumulator);
 
   for (auto &property : JSCustomEvent::getCustomEventPropertyNames()) {
+    JSPropertyNameAccumulatorAddName(accumulator, property);
+  }
+
+  for (auto &property : JSCustomEvent::getCustomEventPrototypePropertyNames()) {
     JSPropertyNameAccumulatorAddName(accumulator, property);
   }
 }
