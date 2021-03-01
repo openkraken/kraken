@@ -1,6 +1,5 @@
 const { src, dest, series, parallel, task } = require('gulp');
 const mkdirp = require('mkdirp');
-const rimraf = require('rimraf');
 const path = require('path');
 const { readFileSync, writeFileSync, mkdirSync } = require('fs');
 const { spawnSync, execSync, fork } = require('child_process');
@@ -19,7 +18,6 @@ const platform = os.platform();
 const buildMode = process.env.KRAKEN_BUILD || 'Debug';
 const targetDist = join(TARGET_PATH, platform, buildMode.toLowerCase());
 const paths = {
-  cli: resolveKraken('cli'),
   targets: resolveKraken('targets'),
   scripts: resolveKraken('scripts'),
   example: resolveKraken('kraken/example'),
@@ -27,9 +25,9 @@ const paths = {
   bridge: resolveKraken('bridge'),
   polyfill: resolveKraken('bridge/polyfill'),
   thirdParty: resolveKraken('third_party'),
-  devtools: resolveKraken('devtools'),
   tests: resolveKraken('integration_tests'),
-  sdk: resolveKraken('sdk')
+  sdk: resolveKraken('sdk'),
+  templates: resolveKraken('templates')
 };
 
 function resolveKraken(submodule) {
@@ -39,11 +37,11 @@ function resolveKraken(submodule) {
 function buildKraken(platform, mode) {
   let runtimeMode = '--debug';
   if (mode === 'Release' && platform === 'darwin') runtimeMode = '--release';
-
+  let main = path.join(paths.kraken, 'lib/cli.dart');
   const args = [
     'build',
     platform === 'darwin' ? 'macos' : platform,
-    '--target=lib/cli.dart',
+    `--target=${main}`,
     runtimeMode,
   ];
 
@@ -277,15 +275,6 @@ task('build-kraken-embedded-lib', (done) => {
   done(handle.status === 0 ? null : handle.error);
 });
 
-task('copy-build-libs', (done) => {
-  execSync(`cp -r ${paths.thirdParty}/v8-${V8_VERSION}/lib/${platform === 'darwin' ? 'macos' : platform}/ ${libOutputPath}`, {
-    env: process.env,
-    stdio: 'inherit'
-  });
-
-  done();
-});
-
 task('compile-polyfill', (done) => {
   if (!fs.existsSync(path.join(paths.polyfill, 'node_modules'))) {
     spawnSync('tnpm', ['install'], {
@@ -454,13 +443,13 @@ task(`build-ios-kraken-lib-release`, (done) => {
 
   const targetDynamicSDKPath = `${paths.sdk}/build/ios/framework`;
   const frameworkPath = `${targetDynamicSDKPath}/kraken_bridge.framework`;
-  const plistPath = path.join(paths.scripts, 'support/kraken_bridge.plist');
+  const plistPath = path.join(paths.templates, 'kraken_bridge.plist');
   mkdirp.sync(frameworkPath);
   execSync(`lipo -create ${armDynamicSDKPath} ${x64DynamicSDKPath} ${arm64DynamicSDKPath} -output ${frameworkPath}/kraken_bridge`, {
     stdio: 'inherit'
   });
   execSync(`cp ${plistPath} ${frameworkPath}/Info.plist`, { stdio: 'inherit' });
-  const podspecContent = readFileSync(path.join(paths.scripts, 'support/KrakenSDK.podspec'), 'utf-8');
+  const podspecContent = readFileSync(path.join(paths.templates, 'KrakenSDK.podspec'), 'utf-8');
   const pkgVersion = readFileSync(path.join(paths.kraken, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
   writeFileSync(
     `${targetDynamicSDKPath}/KrakenSDK.podspec`,

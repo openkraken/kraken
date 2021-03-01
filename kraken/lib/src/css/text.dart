@@ -125,6 +125,15 @@ mixin CSSTextMixin on RenderStyleBase {
     _textShadow = value;
   }
 
+  WhiteSpace _whiteSpace;
+  WhiteSpace get whiteSpace {
+    return _whiteSpace;
+  }
+  set whiteSpace(WhiteSpace value) {
+    if (_whiteSpace == value) return;
+    _whiteSpace = value;
+  }
+  
   static TextSpan createTextSpan(String text, Element parent) {
     TextStyle textStyle = parent != null ? getTextStyle(parent) : null;
     return TextSpan(
@@ -213,6 +222,7 @@ mixin CSSTextMixin on RenderStyleBase {
     letterSpacing = CSSText.getLetterSpacing(style, viewportSize);
     wordSpacing = CSSText.getWordSpacing(style, viewportSize);
     textShadow = CSSText.getTextShadow(style, viewportSize);
+    whiteSpace = CSSText.getWhiteSpace(style);
   }
 }
 

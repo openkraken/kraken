@@ -911,6 +911,17 @@ class Element extends Node
       case WORD_SPACING:
         _updateTextChildNodesStyle(property);
         break;
+
+      case WHITE_SPACE:
+        _updateTextChildNodesStyle(property);
+        
+        // white-space affects whether lines in flow layout may wrap at unforced soft wrap opportunities
+        // https://www.w3.org/TR/css-text-3/#line-breaking
+        // so FlowLayout needs to relayout when its value changes
+        if (renderBoxModel is RenderFlowLayout) {
+          renderBoxModel.markNeedsLayout();
+        }
+        break;
     }
   }
 

@@ -64,4 +64,420 @@ describe('Text WhiteSpace', () => {
 
     return matchViewportSnapshot();
   });
+
+
+  it('should work with value change from normal to nowrap', async (done) => {
+    const cont = createElementWithStyle(
+      'div',
+      {
+        width: '100px',
+        backgroundColor: '#f40',
+        whiteSpace: 'normal',
+      },
+      [
+        createText('\n there should \t\n\r be\n no new line'),
+      ]
+    );
+
+    append(BODY, cont);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      cont.style.whiteSpace = 'nowrap';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
+
+  it('should work with value change from nowrap to normal', async (done) => {
+    const cont = createElementWithStyle(
+      'div',
+      {
+        width: '100px',
+        backgroundColor: '#f40',
+        whiteSpace: 'nowrap',
+      },
+      [
+        createText('\n there should \t\n\r be\n no new line'),
+      ]
+    );
+
+    append(BODY, cont);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      cont.style.whiteSpace = 'normal';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
 });
+
+describe('Inline level element', () => {
+  it("should work with nowrap", async () => {
+    let div;
+    let span;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'white-space': 'nowrap',
+          background: 'blue',
+          margin: '10px 0',
+          border: '1px solid black',
+          width: '80px',
+        },
+      },
+      [
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'yellow',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'pink',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`two`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'lightblue',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'block',
+            },
+          },
+          [createText(`three`)]
+        ),
+        (span = createElement(
+          'span',
+          {
+            style: {
+              background: 'grey',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`four`)]
+        )),
+        (createElement(
+          'span',
+          {
+            style: {
+              background: 'green',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`five`)]
+        )),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with normal", async () => {
+    let div;
+    let span;
+    div = createElement(
+      'div',
+      {
+        style: {
+          background: 'blue',
+          margin: '10px 0',
+          border: '1px solid black',
+          width: '80px',
+        },
+      },
+      [
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'yellow',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'pink',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`two`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'lightblue',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'block',
+            },
+          },
+          [createText(`three`)]
+        ),
+        (span = createElement(
+          'span',
+          {
+            style: {
+              background: 'grey',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`four`)]
+        )),
+        (createElement(
+          'span',
+          {
+            style: {
+              background: 'green',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`five`)]
+        )),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with change from nowrap to normal", async (done) => {
+    let div;
+    let span;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'white-space': 'nowrap',
+          background: 'blue',
+          margin: '10px 0',
+          border: '1px solid black',
+          width: '80px',
+        },
+      },
+      [
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'yellow',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'pink',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`two`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'lightblue',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'block',
+            },
+          },
+          [createText(`three`)]
+        ),
+        (span = createElement(
+          'span',
+          {
+            style: {
+              background: 'grey',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`four`)]
+        )),
+        (createElement(
+          'span',
+          {
+            style: {
+              background: 'green',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`five`)]
+        )),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      div.style.whiteSpace = 'normal';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
+
+  it("should work with change from normal to nowrap", async (done) => {
+    let div;
+    let span;
+    div = createElement(
+      'div',
+      {
+        style: {
+          'white-space': 'normal',
+          background: 'blue',
+          margin: '10px 0',
+          border: '1px solid black',
+          width: '80px',
+        },
+      },
+      [
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'yellow',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'pink',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`two`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'lightblue',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'block',
+            },
+          },
+          [createText(`three`)]
+        ),
+        (span = createElement(
+          'span',
+          {
+            style: {
+              background: 'grey',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`four`)]
+        )),
+        (createElement(
+          'span',
+          {
+            style: {
+              background: 'green',
+              margin: '10px 0',
+              width: '50px',
+              height: '50px',
+              display: 'inline-block',
+            },
+          },
+          [createText(`five`)]
+        )),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      div.style.whiteSpace = 'nowrap';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
+});
+
+
