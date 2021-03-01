@@ -72,57 +72,42 @@ mixin CSSMarginMixin on RenderStyleBase {
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
-  EdgeInsets _getMargin() {
-    Size viewportSize = this.viewportSize;
-    CSSStyleDeclaration style = this.style;
-    double marginLeft;
-    double marginTop;
-    double marginRight;
-    double marginBottom;
-
-    if (style.contains(MARGIN_LEFT)) marginLeft = CSSLength.toDisplayPortValue(style[MARGIN_LEFT], viewportSize);
-    if (style.contains(MARGIN_TOP)) marginTop = CSSLength.toDisplayPortValue(style[MARGIN_TOP], viewportSize);
-    if (style.contains(MARGIN_RIGHT)) marginRight = CSSLength.toDisplayPortValue(style[MARGIN_RIGHT], viewportSize);
-    if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSLength.toDisplayPortValue(style[MARGIN_BOTTOM], viewportSize);
-
-    return EdgeInsets.only(top: marginTop ?? 0.0, right: marginRight ?? 0.0, bottom: marginBottom ?? 0.0, left: marginLeft ?? 0.0);
-  }
-
   void updateMargin(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     RenderStyle renderStyle = this;
-    EdgeInsets prevMargin = renderStyle.margin;
 
-    if (prevMargin != null) {
-      double left = prevMargin.left;
-      double top = prevMargin.top;
-      double right = prevMargin.right;
-      double bottom = prevMargin.bottom;
+    EdgeInsets prevMargin = renderStyle.margin ?? EdgeInsets.only(
+      top: 0.0,
+      right: 0.0,
+      bottom: 0.0,
+      left: 0.0
+    );
+    
+    double left = prevMargin.left;
+    double top = prevMargin.top;
+    double right = prevMargin.right;
+    double bottom = prevMargin.bottom;
 
-      // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
-      switch (property) {
-        case MARGIN_LEFT:
-          left = value;
-          break;
-        case MARGIN_TOP:
-          top = value;
-          break;
-        case MARGIN_BOTTOM:
-          bottom = value;
-          break;
-        case MARGIN_RIGHT:
-          right = value;
-          break;
-      }
-
-      renderStyle.margin = EdgeInsets.only(
-        left: left,
-        top: top,
-        right: right,
-        bottom: bottom,
-      );
-    } else {
-      renderStyle.margin = _getMargin();
+    // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
+    switch (property) {
+      case MARGIN_LEFT:
+        left = value;
+        break;
+      case MARGIN_TOP:
+        top = value;
+        break;
+      case MARGIN_BOTTOM:
+        bottom = value;
+        break;
+      case MARGIN_RIGHT:
+        right = value;
+        break;
     }
+    renderStyle.margin = EdgeInsets.only(
+      left: left,
+      top: top,
+      right: right,
+      bottom: bottom,
+    );
 
     if (shouldMarkNeedsLayout) {
       renderBoxModel.markNeedsLayout();

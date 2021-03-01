@@ -92,4 +92,41 @@ describe('Box padding', () => {
     BODY.appendChild(div);
     await matchViewportSnapshot();
   });
+
+  it('should work with percentage of parents width and height not equal', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '100px',
+          height: '200px',
+          padding: '20px',
+          backgroundColor: 'green',
+        },
+      },
+      [
+          createElement('div', {
+            style: {
+              width: '100%',
+              height: '100%',
+              padding: '30%',
+              backgroundColor: 'yellow',
+            }
+          }, [
+              createElement('div', {
+                  style: {
+                      width: '20px',
+                      height: '20px',
+                      backgroundColor: 'red'
+                  }
+               })
+          ])
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
 });
