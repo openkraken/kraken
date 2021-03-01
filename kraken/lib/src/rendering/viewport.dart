@@ -23,6 +23,9 @@ class RenderViewportBox extends RenderProxyBox
     }
   }
 
+  @override
+  bool get isRepaintBoundary => true;
+
   Color background;
 
   Size _viewportSize;
