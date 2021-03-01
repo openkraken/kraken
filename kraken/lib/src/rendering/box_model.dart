@@ -337,7 +337,7 @@ class RenderBoxModel extends RenderBox with
   RenderStyle renderStyle;
 
   @override
-  bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
+  bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
 
   RenderPositionHolder renderPositionHolder;
 
