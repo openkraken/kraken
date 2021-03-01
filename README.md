@@ -2,7 +2,7 @@
 
 # Kraken [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken)
 
-## 💁 Hava a try
+## 💁 Have a try
 
 1. Install Kraken CLI
 
