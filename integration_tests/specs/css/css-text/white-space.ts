@@ -81,13 +81,13 @@ describe('Text WhiteSpace', () => {
 
     append(BODY, cont);
 
+    await matchViewportSnapshot();
+
     requestAnimationFrame(async () => {
       cont.style.whiteSpace = 'nowrap';
       await matchViewportSnapshot(0.1);
       done();
     });
-
-    await matchViewportSnapshot();
   });
 
   it('should work with value change from nowrap to normal', async (done) => {
@@ -105,13 +105,13 @@ describe('Text WhiteSpace', () => {
 
     append(BODY, cont);
 
+    await matchViewportSnapshot();
+
     requestAnimationFrame(async () => {
       cont.style.whiteSpace = 'normal';
       await matchViewportSnapshot(0.1);
       done();
     });
-
-    await matchViewportSnapshot();
   });
 });
 
@@ -376,13 +376,13 @@ describe('Inline level element', () => {
     );
     BODY.appendChild(div);
 
+    await matchViewportSnapshot();
+
     requestAnimationFrame(async () => {
       div.style.whiteSpace = 'normal';
       await matchViewportSnapshot(0.1);
       done();
     });
-
-    await matchViewportSnapshot();
   });
 
   it("should work with change from normal to nowrap", async (done) => {
@@ -470,13 +470,13 @@ describe('Inline level element', () => {
     );
     BODY.appendChild(div);
 
+    await matchViewportSnapshot();
+
     requestAnimationFrame(async () => {
       div.style.whiteSpace = 'nowrap';
       await matchViewportSnapshot(0.1);
       done();
     });
-
-    await matchViewportSnapshot();
   });
 });
 
