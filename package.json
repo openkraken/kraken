@@ -1,9 +1,6 @@
 {
-  "name": "kraken",
-  "version": "0.0.0",
-  "description": "Web standard based rendering engine.",
+  "private": true,
   "scripts": {
-    "start": "cd app_launcher && flutter run",
     "build:macos": "node scripts/build_darwin",
     "build:macos:release": "KRAKEN_BUILD=Release node scripts/build_darwin",
     "build:android": "node scripts/build_android_app",
@@ -15,32 +12,21 @@
     "build:linux": "node scripts/build_linux",
     "upload": "node scripts/macos_pack_and_upload",
     "pretest": "npm install && npm run lint && ENABLE_PROFILE=true node scripts/build_darwin_dylib",
+    "start": "cd kraken/example && flutter run",
     "test": "node scripts/run_test.js",
     "lint": "cd kraken && flutter analyze",
     "format": "cd kraken && flutter format . --line-length=120",
     "ci": "npm install && npm run lint"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@gitlab.alibaba-inc.com:kraken/kraken.git"
-  },
-  "keywords": [
-    "kraken",
-    "w3c"
-  ],
   "devDependencies": {
+    "commander": "^5.1.0",
+    "ws": "^7.3.0",
     "ali-oss": "^6.5.1",
     "chalk": "^3.0.0",
-    "commander": "^5.0.0",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
     "minimist": "^1.2.4",
     "mkdirp": "^0.5.1",
     "rimraf": "^3.0.2"
-  },
-  "author": "Kraken Team",
-  "dependencies": {
-    "commander": "^5.1.0",
-    "ws": "^7.3.0"
   }
 }
