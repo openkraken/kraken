@@ -331,8 +331,8 @@ class IntersectionObserverLayer extends ContainerLayer {
 
   /// Executes visibility callbacks for all updated.
   void _processCallbacks(Iterable<Layer> layerChain, int layerHash) {
-    if (!attached) {
-      _fireCallback(IntersectionObserverEntry(size: _lastIntersectionInfo?.size));
+    if (!attached && parent == null) {
+      _fireCallback(IntersectionObserverEntry(size: Size.zero));
       return;
     }
 
@@ -399,6 +399,8 @@ class IntersectionObserverEntry {
   // If this is true, then, the IntersectionObserverEntry describes a transition into a state of intersection;
   // if it's false, then you know the transition is from intersecting to not-intersecting.
   bool get isIntersecting {
+    if (size == Size.zero) return false;
+
     if (boundingClientRect.right < rootBounds.left || rootBounds.right < boundingClientRect.left) return false;
     if (boundingClientRect.bottom < rootBounds.top || rootBounds.bottom < boundingClientRect.top) return false;
     return true;
