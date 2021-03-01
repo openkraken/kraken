@@ -666,6 +666,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     lineBoxMetrics = runMetrics;
 
+    WhiteSpace whiteSpace = renderStyle.whiteSpace;
+
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
 
@@ -730,10 +732,17 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
       }
 
-      if (runChildren.length > 0 &&
-          (_isChildBlockLevel(child) ||
-              _isChildBlockLevel(preChild) ||
-              (runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit))) {
+      // white-space property not only specifies whether and how white space is collapsed
+      // but only specifies whether lines may wrap at unforced soft wrap opportunities
+      // https://www.w3.org/TR/css-text-3/#line-breaking
+      bool isChildBlockLevel = _isChildBlockLevel(child);
+      bool isPreChildBlockLevel = _isChildBlockLevel(preChild);
+      bool isLineLengthExeedContainter = whiteSpace != WhiteSpace.nowrap &&
+          (runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit);
+
+      if (runChildren.length > 0  &&
+        (isChildBlockLevel || isPreChildBlockLevel || isLineLengthExeedContainter)
+      ) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
@@ -1313,14 +1322,13 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   bool _isChildBlockLevel(RenderBox child) {
-    if (child is RenderTextBox) {
-      return false;
-    } else {
+    if (child != null && child is! RenderTextBox) {
       RenderStyle childRenderStyle = _getChildRenderStyle(child);
       CSSDisplay childDisplay = childRenderStyle.display;
       return childDisplay == CSSDisplay.block ||
         childDisplay == CSSDisplay.flex;
     }
+    return false;
   }
 
   @override

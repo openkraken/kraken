@@ -310,7 +310,7 @@ describe('flexbox_flex-N', () => {
 
     await matchViewportSnapshot();
   });
-  xit('0-N-shrink-ref', async () => {
+  it('0-N-shrink-ref', async () => {
     let div;
     div = createElement(
       'div',
