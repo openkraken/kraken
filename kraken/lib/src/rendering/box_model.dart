@@ -1034,6 +1034,16 @@ class RenderBoxModel extends RenderBox with
     throw FlutterError('Please impl performPaint of $runtimeType.');
   }
 
+  Offset getChildScrollOffset(RenderObject child, Offset offset) {
+    final RenderLayoutParentData childParentData = child.parentData;
+    bool isChildFixed = child is RenderBoxModel ?
+    child.renderStyle.position == CSSPositionType.fixed : false;
+    // Fixed elements always paint original offset
+    Offset scrollOffset = isChildFixed ?
+    childParentData.offset : childParentData.offset + offset;
+    return scrollOffset;
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (kProfileMode) {
