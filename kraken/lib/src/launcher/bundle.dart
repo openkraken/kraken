@@ -178,6 +178,6 @@ mixin BundleMixin on KrakenBundle {
   Future<String> _resolveStringFromData(ByteData data, String key) async {
     if (data == null) throw FlutterError('Unable to load asset: $key');
     // Utf8 decode is fast enough with dart 2.10
-    return utf8.decode(data.buffer.asUint8List());
+    return utf8.decode(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
   }
 }
