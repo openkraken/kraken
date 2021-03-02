@@ -18,7 +18,7 @@ class BodyElement extends Element {
         targetId,
         nativePtr,
         elementManager,
-        repaintSelf: true,
+        repaintSelf: false,
         tagName: BODY,
         defaultStyle: {
             WIDTH: '${viewportWidth}px',
