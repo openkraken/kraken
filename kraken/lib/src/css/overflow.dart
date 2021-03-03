@@ -148,7 +148,7 @@ mixin CSSOverflowMixin on ElementBase {
 
   void _createScrollingLayoutBox(Element element) {
     int shadowElementTargetId = 0 - element.targetId;
-    if (shadowElementTargetId > 0) {
+    if (element.targetId == BODY_ID || element.targetId == DOCUMENT_ID) {
       shadowElementTargetId = shadowElementTargetId - 1024;
     }
     // @HACK: create shadow element for scrollingLayoutBox
