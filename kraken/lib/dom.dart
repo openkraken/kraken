@@ -17,7 +17,6 @@ export 'src/dom/document.dart';
 
 // Tags
 export 'src/dom/tags/a.dart';
-export 'src/dom/tags/animation_player.dart';
 export 'src/dom/tags/audio.dart';
 export 'src/dom/tags/body.dart';
 export 'src/dom/tags/camera_preview.dart';

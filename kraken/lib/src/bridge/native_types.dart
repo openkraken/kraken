@@ -356,15 +356,6 @@ class NativeCanvasRenderingContext2D extends Struct {
   Pointer<NativeFunction<Native_RenderingContextRestore>> restore;
 }
 
-typedef Native_PlayAnimation = Void Function(
-    Pointer<NativeAnimationElement> nativePtr, Pointer<NativeString> name, Double mix, Double mixSeconds);
-
-class NativeAnimationElement extends Struct {
-  Pointer<NativeElement> nativeElement;
-
-  Pointer<NativeFunction<Native_PlayAnimation>> play;
-}
-
 class NativePerformanceEntry extends Struct {
   Pointer<Utf8> name;
   Pointer<Utf8> entryType;

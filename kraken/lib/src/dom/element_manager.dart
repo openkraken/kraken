@@ -122,7 +122,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(document);
 
     if (!inited) {
-      defineElement(DIV, (id, nativePtr, elementManager) => DivElement(id, nativePtr.cast<NativeElement>(), elementManager));
+        defineElement(DIV, (id, nativePtr, elementManager) => DivElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(SPAN, (id, nativePtr, elementManager) => SpanElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(ANCHOR, (id, nativePtr, elementManager) => AnchorElement(id, nativePtr.cast<NativeAnchorElement>(), elementManager));
       defineElement(STRONG, (id, nativePtr, elementManager) => StrongElement(id, nativePtr.cast<NativeElement>(), elementManager));
@@ -131,7 +131,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       defineElement(INPUT, (id, nativePtr, elementManager) => InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager));
       defineElement(PRE, (id, nativePtr, elementManager) => PreElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager));
-      defineElement(ANIMATION_PLAYER, (id, nativePtr, elementManager) => AnimationPlayerElement(id, nativePtr.cast<NativeAnimationElement>(), elementManager));
       defineElement(VIDEO, (id, nativePtr, elementManager) => VideoElement(id, nativePtr.cast<NativeVideoElement>(), elementManager));
       defineElement(CAMERA_PREVIEW, (id, nativePtr, elementManager) => CameraPreviewElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(IFRAME, (id, nativePtr, elementManager) => IFrameElement(id, nativePtr.cast<NativeIframeElement>(), elementManager));
