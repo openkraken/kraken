@@ -337,7 +337,7 @@ class RenderBoxModel extends RenderBox with
   RenderStyle renderStyle;
 
   @override
-  bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
+  bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
 
   RenderPositionHolder renderPositionHolder;
 
@@ -1038,6 +1038,16 @@ class RenderBoxModel extends RenderBox with
   /// Used by [RenderIntrinsic], [RenderFlowLayout], [RenderFlexLayout].
   void performPaint(PaintingContext context, Offset offset) {
     throw FlutterError('Please impl performPaint of $runtimeType.');
+  }
+
+  Offset getChildScrollOffset(RenderObject child, Offset offset) {
+    final RenderLayoutParentData childParentData = child.parentData;
+    bool isChildFixed = child is RenderBoxModel ?
+    child.renderStyle.position == CSSPositionType.fixed : false;
+    // Fixed elements always paint original offset
+    Offset scrollOffset = isChildFixed ?
+    childParentData.offset : childParentData.offset + offset;
+    return scrollOffset;
   }
 
   @override

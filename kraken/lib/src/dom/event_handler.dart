@@ -8,10 +8,17 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/scheduler.dart';
 
+enum AppearEventState {
+  none,
+  appear,
+  disappear
+}
 
 mixin EventHandlerMixin on Node {
   static const int MAX_STEP_MS = 10;
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
+
+  AppearEventState appearEventState = AppearEventState.none;
 
   void addEventResponder(RenderBoxModel renderBoxModel) {
     renderBoxModel.onPointerDown = handlePointDown;
@@ -90,19 +97,19 @@ mixin EventHandlerMixin on Node {
   }
 
   void handleAppear() {
+    if (appearEventState == AppearEventState.appear) return;
+    appearEventState = AppearEventState.appear;
+
     dispatchEvent(AppearEvent());
   }
 
   void handleDisappear() {
+    if (appearEventState == AppearEventState.disappear) return;
+    appearEventState = AppearEventState.disappear;
     dispatchEvent(DisappearEvent());
   }
 
   void handleIntersectionChange(IntersectionObserverEntry entry) {
-    // Only visible element will trigger intersection change event
-    Rect boundingClientRect = entry.boundingClientRect;
-    if (boundingClientRect.left == boundingClientRect.right || boundingClientRect.top == boundingClientRect.bottom)
-      return;
-
     dispatchEvent(IntersectionChangeEvent(entry.intersectionRatio));
     if (entry.intersectionRatio > 0) {
       handleAppear();

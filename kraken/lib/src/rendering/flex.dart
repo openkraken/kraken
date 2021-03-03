@@ -2407,16 +2407,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     return defaultHitTestChildren(result, position: position);
   }
 
-  Offset getChildScrollOffset(RenderObject child, Offset offset) {
-    final RenderLayoutParentData childParentData = child.parentData;
-    bool isChildFixed = child is RenderBoxModel ?
-      child.renderStyle.position == CSSPositionType.fixed : false;
-    // Fixed elements always paint original offset
-    Offset scrollOffset = isChildFixed ?
-    childParentData.offset : childParentData.offset + offset;
-    return scrollOffset;
-  }
-
   @override
   void performPaint(PaintingContext context, Offset offset) {
     if (needsSortChildren) {
