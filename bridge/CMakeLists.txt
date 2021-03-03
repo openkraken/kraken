@@ -171,6 +171,7 @@ add_library(kraken_static STATIC ${BRIDGE_SOURCE})
 
 if (${IS_ANDROID})
   find_library(log-lib log)
+  add_definitions(-DIS_ANDROID=1)
   list(APPEND BRIDGE_LINK_LIBS ${log-lib})
 endif ()
 

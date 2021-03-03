@@ -225,7 +225,7 @@ private:
   JSFunctionHolder m_measure{context, jsObject, this, "measure", measure};
 
 #if ENABLE_PROFILE
-  JSFunctionHolder m_summary{context, jsObject, nullptr, "__navigation_summary__", __kraken_navigation_summary__};
+  JSFunctionHolder m_summary{context, jsObject, nullptr, "__kraken_navigation_summary__", __kraken_navigation_summary__};
   void measureSummary();
 #endif
   void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark,
