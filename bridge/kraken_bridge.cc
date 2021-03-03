@@ -213,6 +213,13 @@ void flushUICommandCallback() {
   foundation::UICommandCallbackQueue::instance()->flushCallbacks();
 }
 
+void patchKrakenPolyFill(NativeString *patchCode, const char *patchName) {
+  kraken::PolyFillPatch patch {
+    patchCode, patchName
+  };
+  kraken::JSBridge::polyfillPatches.emplace_back(patch);
+}
+
 NativeString *NativeString::clone() {
   NativeString *newNativeString = new NativeString();
   uint16_t *newString = new uint16_t[length];

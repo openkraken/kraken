@@ -112,4 +112,7 @@ Screen *createScreen(double width, double height);
 KRAKEN_EXPORT_C
 void registerDartMethods(uint64_t *methodBytes, int32_t length);
 
+KRAKEN_EXPORT_C
+void patchKrakenPolyFill(NativeString *patchCode, const char *patchName);
+
 #endif // KRAKEN_BRIDGE_EXPORT_H
