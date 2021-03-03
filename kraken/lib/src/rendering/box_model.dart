@@ -516,8 +516,8 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  /// Width of render box model calcaluted from style
-  static double getContentWidth(RenderBoxModel renderBoxModel) {
+  /// Content width of render box model calcaluted from style
+  static double getLogicalContentWidth(RenderBoxModel renderBoxModel) {
     double cropWidth = 0;
     CSSDisplay display = renderBoxModel.renderStyle.transformedDisplay;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
@@ -598,7 +598,7 @@ class RenderBoxModel extends RenderBox with
     }
 
     if (width == null && intrinsicRatio != null && heightSizeType == BoxSizeType.specified) {
-      double height = getContentHeight(renderBoxModel);
+      double height = getLogicalContentHeight(renderBoxModel);
       if (height != null) {
         width = height / intrinsicRatio;
       }
@@ -641,8 +641,8 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  /// Height of render box model calcaluted from style
-  static double getContentHeight(RenderBoxModel renderBoxModel) {
+  /// Content height of render box model calcaluted from style
+  static double getLogicalContentHeight(RenderBoxModel renderBoxModel) {
     CSSDisplay display = renderBoxModel.renderStyle.transformedDisplay;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
     double height = renderStyle.height;
@@ -700,7 +700,7 @@ class RenderBoxModel extends RenderBox with
     }
 
     if (height == null && intrinsicRatio != null && widthSizeType == BoxSizeType.specified) {
-      double width = getContentWidth(renderBoxModel);
+      double width = getLogicalContentWidth(renderBoxModel);
       if (width != null) {
         height = width * intrinsicRatio;
       }
@@ -856,6 +856,11 @@ class RenderBoxModel extends RenderBox with
     return _contentSize;
   }
 
+  /// Logical content width calculated from style
+  double logicalContentWidth;
+  /// Logical content height calculated from style
+  double logicalContentHeight;
+
   double get clientWidth {
     double width = contentSize.width;
     if (renderStyle.padding != null) {
@@ -883,9 +888,10 @@ class RenderBoxModel extends RenderBox with
     // Deflate padding constraints.
     boxConstraints = renderStyle.deflatePaddingConstraints(boxConstraints);
 
-    final double contentWidth = getContentWidth(this);
-    final double contentHeight = getContentHeight(this);
-    if (!isScrollingContentBox && (contentWidth != null || contentHeight != null)) {
+    logicalContentWidth = getLogicalContentWidth(this);
+    logicalContentHeight = getLogicalContentHeight(this);
+    
+    if (!isScrollingContentBox && (logicalContentWidth != null || logicalContentHeight != null)) {
       double minWidth;
       double maxWidth;
       double minHeight;
@@ -893,9 +899,9 @@ class RenderBoxModel extends RenderBox with
 
       if (boxConstraints.hasTightWidth) {
         minWidth = maxWidth = boxConstraints.maxWidth;
-      } else if (contentWidth != null) {
+      } else if (logicalContentWidth != null) {
         minWidth = 0.0;
-        maxWidth = contentWidth;
+        maxWidth = logicalContentWidth;
       } else {
         minWidth = boxConstraints.minWidth;
         maxWidth = boxConstraints.maxWidth;
@@ -903,9 +909,9 @@ class RenderBoxModel extends RenderBox with
 
       if (boxConstraints.hasTightHeight) {
         minHeight = maxHeight = boxConstraints.maxHeight;
-      } else if (contentHeight != null) {
+      } else if (logicalContentHeight != null) {
         minHeight = 0.0;
-        maxHeight = contentHeight;
+        maxHeight = logicalContentHeight;
       } else {
         minHeight = boxConstraints.minHeight;
         maxHeight = boxConstraints.maxHeight;
