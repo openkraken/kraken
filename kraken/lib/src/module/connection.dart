@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'package:connectivity/connectivity.dart';
 import 'module_manager.dart';
 
-String _toString(ConnectivityResult connectivityResult) {
-  String isConnected = jsonEncode(ConnectivityResult.none != connectivityResult);
+Map _getResult(ConnectivityResult connectivityResult) {
   String type = _parseConnectivityResult(connectivityResult);
-
-  return '{"isConnected": $isConnected, "type": "$type"}';
+  return {"isConnected": ConnectivityResult.none != connectivityResult, "type": type};
 }
 
 String _parseConnectivityResult(ConnectivityResult state) {
@@ -21,9 +18,12 @@ String _parseConnectivityResult(ConnectivityResult state) {
   }
 }
 
-typedef OnConnectivityChangedCallback = void Function(String json);
+typedef OnConnectivityChangedCallback = void Function(Map json);
 
 class ConnectionModule extends BaseModule {
+  @override
+  String get name => 'Connection';
+
   static Connectivity _connectivity;
 
   static void _initConnectivity() {
@@ -32,17 +32,17 @@ class ConnectionModule extends BaseModule {
     }
   }
 
-  static void getConnectivity(callback) {
+  static void getConnectivity(OnConnectivityChangedCallback callback) {
     _initConnectivity();
     _connectivity.checkConnectivity().then((ConnectivityResult connectivityResult) {
-      callback(_toString(connectivityResult));
+      callback(_getResult(connectivityResult));
     });
   }
 
   static void onConnectivityChanged(OnConnectivityChangedCallback callback) {
     _initConnectivity();
     _connectivity.onConnectivityChanged.listen((ConnectivityResult connectivityResul) {
-      String json = _toString(connectivityResul);
+      Map json = _getResult(connectivityResul);
       callback(json);
     });
   }
@@ -53,19 +53,17 @@ class ConnectionModule extends BaseModule {
   void dispose() {}
 
   @override
-  String invoke(List<dynamic> params, InvokeModuleCallback callback) {
-    String method = params[1];
-
+  String invoke(String method, dynamic params, InvokeModuleCallback callback) {
     switch (method) {
       case 'getConnectivity': {
-        getConnectivity((String json) {
-          callback(json);
+        getConnectivity((Map json) {
+          callback(data: json);
         });
         break;
       }
       case 'onConnectivityChanged': {
-        onConnectivityChanged((String json) {
-          moduleManager.emitModuleEvent('["onConnectivityChanged", $json]');
+        onConnectivityChanged((Map data) {
+          moduleManager.emitModuleEvent(name, data: data);
         });
         break;
       }

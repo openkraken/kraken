@@ -2,6 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:kraken/src/module/module_manager.dart';
 
 class ClipBoardModule extends BaseModule {
+  @override
+  String get name => 'Clipboard';
   ClipBoardModule(ModuleManager moduleManager) : super(moduleManager);
 
   static Future<String> readText() async {
@@ -17,20 +19,19 @@ class ClipBoardModule extends BaseModule {
   void dispose() {}
 
   @override
-  String invoke(List params, callback) {
-    String method = params[1];
+  String invoke(String method, dynamic params, callback) {
+    print(1234);
     if (method == 'readText') {
       ClipBoardModule.readText().then((String value) {
-        callback(value ?? '');
+        callback(data: value ?? '');
       }).catchError((e, stack) {
-        callback('Error: $e\n$stack');
+        callback(errmsg: '$e\n$stack');
       });
     } else if (method == 'writeText') {
-      List methodArgs = params[2];
-      ClipBoardModule.writeText(methodArgs[0]).then((_) {
-        callback('');
+      ClipBoardModule.writeText(params).then((_) {
+        callback();
       }).catchError((e, stack) {
-        callback('Error: $e\n$stack');
+        callback(errmsg: '');
       });
     }
     return '';

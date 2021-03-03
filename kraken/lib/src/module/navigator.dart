@@ -2,6 +2,9 @@ import 'package:kraken/src/module/module_manager.dart';
 import 'package:vibration/vibration.dart';
 
 class NavigatorModule extends BaseModule {
+  @override
+  String get name => 'Navigator';
+
   NavigatorModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override
@@ -9,10 +12,9 @@ class NavigatorModule extends BaseModule {
   }
 
   @override
-  String invoke(List<dynamic> params, callback) {
-    String method = params[1];
+  String invoke(String method, dynamic params, callback) {
     if (method == 'vibrate') {
-      List methodArgs = params[2];
+      List methodArgs = params;
       if (methodArgs.length == 1) {
         int duration = methodArgs[0];
         Vibration.vibrate(duration: duration);

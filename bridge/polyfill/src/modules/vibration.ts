@@ -1,6 +1,6 @@
 // Impl by W3C vibration API.
 // https://w3c.github.io/vibration/
-import { krakenInvokeModule } from '../bridge';
+import {kraken} from "../kom/kraken";
 
 type VibratePattern = number | number[];
 type _ValidVibratePattern = number[];
@@ -28,12 +28,11 @@ function _performVibration(pattern: VibratePattern | null ) : boolean {
 
   _cancelVibration();
 
-  const moduleArgs = ['Navigator', 'vibrate', pattern];
-  krakenInvokeModule(JSON.stringify(moduleArgs));
+  kraken.invokeModule('Navigator', 'vibrate', (pattern));
 
   return true;
 }
 
 function _cancelVibration() {
-  krakenInvokeModule(JSON.stringify(['Navigator', 'cancelVibrate']));
+  kraken.invokeModule('Navigator', 'cancelVibrate');
 }

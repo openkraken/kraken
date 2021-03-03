@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:kraken/src/module/module_manager.dart';
 import 'package:kraken_geolocation/kraken_geolocation.dart';
@@ -20,17 +19,18 @@ const int ERROR_CODE_TIMEOUT = 3;
 StreamSubscription<LocationData> _streamSubscription;
 LocationData _watchCachedLocation;
 
-typedef Callback = void Function(String json);
-typedef WatchPositionCallback = void Function(String result);
+typedef Callback = void Function(dynamic json);
+typedef WatchPositionCallback = void Function(Map result);
 
 class GeolocationModule extends BaseModule {
+  @override
+  String get name => 'Geolocation';
   GeolocationModule(ModuleManager moduleManager) : super(moduleManager);
 
   static void getCurrentPosition(Map<String, dynamic> options, Callback callback) async {
     Location location = await _getLocation();
     if (location == null) {
-      String result = jsonEncode({'code': ERROR_CODE_PERMISSION_DENIED, "message": 'permission denied'});
-      callback(result);
+      callback({'code': ERROR_CODE_PERMISSION_DENIED, "message": 'permission denied'});
       return;
     }
     // TODO: options is only for current call, not set to global
@@ -52,14 +52,14 @@ class GeolocationModule extends BaseModule {
         locationData = await location.getLocation();
       }
       if (locationData == null) {
-        String result = jsonEncode({'code': ERROR_CODE_TIMEOUT, "message": 'timeout'});
+        Map result = {'code': ERROR_CODE_TIMEOUT, "message": 'timeout'};
         callback(result);
       } else {
         _cachedLocation = locationData;
         callback(_getLocationResult(locationData));
       }
     } catch (e) {
-      String result = jsonEncode({'code': ERROR_CODE_POSITION_UNAVAILABLE, "message": e.toString()});
+      Map result = {'code': ERROR_CODE_POSITION_UNAVAILABLE, "message": e.toString()};
       callback(result);
     }
   }
@@ -68,7 +68,7 @@ class GeolocationModule extends BaseModule {
     _changeOptions(options, true);
     _getLocation().then((location) {
       if (location == null) {
-        String result = jsonEncode({'code': ERROR_CODE_PERMISSION_DENIED, 'message': 'permission denied'});
+        Map result = {'code': ERROR_CODE_PERMISSION_DENIED, 'message': 'permission denied'};
         callback(result);
         if (_streamSubscription != null) {
           _streamSubscription.cancel();
@@ -80,7 +80,7 @@ class GeolocationModule extends BaseModule {
       if (watchMaximumAge > 0 &&
           _watchCachedLocation != null &&
           (DateTime.now().microsecondsSinceEpoch - _watchCachedLocation.time) < watchMaximumAge) {
-        String result = _getLocationResult(_watchCachedLocation);
+        Map result = _getLocationResult(_watchCachedLocation);
         callback(result);
       }
       Stream<LocationData> stream = location.onLocationChanged();
@@ -89,11 +89,11 @@ class GeolocationModule extends BaseModule {
           if (_watchCachedLocation == null ||
               (_watchCachedLocation != null && !_compareLocation(_watchCachedLocation, locationData))) {
             _watchCachedLocation = locationData;
-            String result = _getLocationResult(_watchCachedLocation);
+            Map result = _getLocationResult(_watchCachedLocation);
             callback(result);
           }
         }, onError: (e) {
-          String result = jsonEncode({'code': ERROR_CODE_POSITION_UNAVAILABLE, 'message': e?.toString()});
+          Map result = {'code': ERROR_CODE_POSITION_UNAVAILABLE, 'message': e?.toString()};
           callback(result);
         }, cancelOnError: false);
       }
@@ -114,8 +114,7 @@ class GeolocationModule extends BaseModule {
   }
 
   @override
-  String invoke(List params, callback) {
-    String method = params[1];
+  String invoke(String method, dynamic params, callback) {
     if (method == 'getCurrentPosition') {
       List positionArgs = params[2];
       Map<String, dynamic> options;
@@ -123,7 +122,7 @@ class GeolocationModule extends BaseModule {
         options = positionArgs[0];
       }
       GeolocationModule.getCurrentPosition(options, (json) {
-        callback(json);
+        callback(data: json);
       });
     } else if (method == 'watchPosition') {
       List positionArgs = params[2];
@@ -131,8 +130,8 @@ class GeolocationModule extends BaseModule {
       if (positionArgs.length > 0) {
         options = positionArgs[0];
       }
-      return GeolocationModule.watchPosition(options, (String result) {
-        moduleManager.emitModuleEvent('["watchPosition", $result]');
+      return GeolocationModule.watchPosition(options, (dynamic result) {
+        moduleManager.emitModuleEvent(name, data: ["watchPosition", result]);
       }).toString();
     } else if (method == 'clearWatch') {
       List positionArgs = params[2];
@@ -177,8 +176,8 @@ bool _compareLocation(LocationData cachedData, LocationData data) {
       cachedData.accuracy == data.accuracy;
 }
 
-String _getLocationResult(LocationData locationData) {
-  return jsonEncode({
+Map _getLocationResult(LocationData locationData) {
+  return {
     'coords': {
       'latitude': locationData?.latitude ?? 0.0,
       'longitude': locationData?.longitude ?? 0.0,
@@ -189,7 +188,7 @@ String _getLocationResult(LocationData locationData) {
       'heading': locationData?.heading ?? 0.0
     },
     'timestamp': locationData?.time?.toInt() ?? 0
-  });
+  };
 }
 
 Future<Location> _getLocation() async {

@@ -1,16 +1,19 @@
+import 'dart:convert';
 import 'package:kraken/bridge.dart' as bridge;
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/src/module/navigator.dart';
 
 abstract class BaseModule {
+  String get name;
   final ModuleManager moduleManager;
   BaseModule(this.moduleManager);
-  String invoke(List<dynamic> params, InvokeModuleCallback callback);
+  String invoke(String method, dynamic params, InvokeModuleCallback callback);
   void dispose();
 }
 
-typedef InvokeModuleCallback = void Function(String);
+typedef InvokeModuleCallback = void Function({String errmsg, dynamic data});
 typedef NewModuleCreator = BaseModule Function(ModuleManager);
 
 class ModuleManager {
@@ -22,40 +25,40 @@ class ModuleManager {
 
   ModuleManager(this.controller, this.contextId) {
     if (!inited) {
-      defineModule('AsyncStorage', AsyncStorageModule(this));
-      defineModule('Clipboard', ClipBoardModule(this));
-      defineModule('Connection', ConnectionModule(this));
-      defineModule('DeviceInfo', DeviceInfoModule(this));
-      defineModule('fetch', FetchModule(this));
-      defineModule('Geolocation', GeolocationModule(this));
-      defineModule('MethodChannel', MethodChannelModule(this));
-      defineModule('MQTT', MQTTModule(this));
-      defineModule('Navigation', NavigationModule(this));
-      defineModule('Navigator', NavigatorModule(this));
-      defineModule('WebSocket', WebSocketModule(this));
+      defineModule(AsyncStorageModule(this));
+      defineModule(ClipBoardModule(this));
+      defineModule(ConnectionModule(this));
+      defineModule(DeviceInfoModule(this));
+      defineModule(FetchModule(this));
+      defineModule(GeolocationModule(this));
+      defineModule(MethodChannelModule(this));
+      defineModule(MQTTModule(this));
+      defineModule(NavigationModule(this));
+      defineModule(NavigatorModule(this));
+      defineModule(WebSocketModule(this));
       inited = true;
     }
   }
 
-  static void defineModule(String type, BaseModule module) {
-    if (_moduleMap.containsKey(type)) {
-      throw Exception('ModuleManager: redefined module of type: $type');
+  static void defineModule(BaseModule module) {
+    if (_moduleMap.containsKey(module.name)) {
+      throw Exception('ModuleManager: redefined module of type: ${module.name}');
     }
 
-    _moduleMap[type] = module;
+    _moduleMap[module.name] = module;
   }
 
-  void emitModuleEvent(String json) {
-    bridge.emitModuleEvent(contextId, json);
+  void emitModuleEvent(String moduleName, {Event event, Object data}) {
+    bridge.emitModuleEvent(contextId, moduleName, event, jsonEncode(data));
   }
 
-  String invokeModule(String type, List<dynamic> params, InvokeModuleCallback callback) {
-    if (!_moduleMap.containsKey(type)) {
-      throw Exception('ModuleManager: Can not find module of type: $type');
+  String invokeModule(String moduleName, String method, dynamic params, InvokeModuleCallback callback) {
+    if (!_moduleMap.containsKey(moduleName)) {
+      throw Exception('ModuleManager: Can not find module of name: $moduleName');
     }
 
-    BaseModule module = _moduleMap[type];
-    return module.invoke(params, callback);
+    BaseModule module = _moduleMap[moduleName];
+    return module.invoke(method, params, callback);
   }
 
   void dispose() {

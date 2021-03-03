@@ -1,37 +1,44 @@
-import { krakenInvokeModule } from '../bridge';
+import { kraken } from "../kom/kraken";
 
 const TRUE = 'true';
 export const asyncStorage = {
   getItem(key: number | string) {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule(JSON.stringify(['AsyncStorage', 'getItem', [`${key}`]]), resolve);
+      kraken.invokeModule('AsyncStorage', 'getItem', String(key), (e, data) => {
+        if (e) return reject(e);
+        resolve(data == null ? '' : data);
+      });
     });
   },
   setItem(key: number | string, value: number | string) {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule(JSON.stringify(['AsyncStorage', 'setItem', [`${key}`, `${value}`]]), (ret) => {
-        ret === TRUE ? resolve() : reject();
+      kraken.invokeModule('AsyncStorage', 'setItem', [String(key), String(value)], (e, data) => {
+        if (e) return reject(e);
+        resolve(data);
       });
     });
   },
   removeItem(key: number | string) {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule(JSON.stringify(['AsyncStorage', 'removeItem', [`${key}`]]), (ret) => {
-        ret === TRUE ? resolve() : reject();
+      kraken.invokeModule('AsyncStorage', 'removeItem', String(key), (e, data) => {
+        if (e) return reject(e);
+        resolve(data);
       });
     });
   },
   clear() {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule(`["AsyncStorage","clear"]`, (ret) => {
-        ret === TRUE ? resolve() : reject();
+      kraken.invokeModule('AsyncStorage', 'clear', '', (e, data) => {
+        if (e) return reject(e);
+        resolve(data);
       });
     });
   },
   getAllKeys() {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule(`["AsyncStorage","getAllKeys"]`, (json) => {
-        resolve(JSON.parse(json));
+      kraken.invokeModule('AsyncStorage', 'getAllKeys', '', (e, data) => {
+        if (e) return reject(e);
+        resolve(data);
       });
     });
   }

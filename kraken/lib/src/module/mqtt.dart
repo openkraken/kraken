@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:convert';
 
+import 'package:kraken/dom.dart';
 import 'dart:io';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
@@ -8,9 +9,12 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'module_manager.dart';
 
 enum ReadyState { CONNECTING, OPEN, CLOSING, CLOSED }
-typedef MQTTEventCallback = void Function(String id, String event);
+typedef MQTTEventCallback = void Function(String id, Event event);
 
 class MQTTModule extends BaseModule {
+  @override
+  String get name => 'MQTT';
+
   Map<String, MqttClient> _clientMap = {};
   int _clientId = 0;
 
@@ -24,33 +28,24 @@ class MQTTModule extends BaseModule {
   }
 
   @override
-  String invoke(List args, InvokeModuleCallback callback) {
-    String method = args[1];
+  String invoke(String method, dynamic args, InvokeModuleCallback callback) {
     if (method == 'init') {
-      List methodArgs = args[2];
-      return init(methodArgs[0], methodArgs[1]);
+      return init(args[0], args[1]);
     } else if (method == 'open') {
-      List methodArgs = args[2];
-      open(methodArgs[0], methodArgs[1]);
+      open(args[0], args[1]);
     } else if (method == 'close') {
-      List methodArgs = args[2];
-      close(methodArgs[0]);
+      close(args[0]);
     } else if (method == 'publish') {
-      List methodArgs = args[2];
-      publish(methodArgs[0], methodArgs[1], methodArgs[2], methodArgs[3], methodArgs[4]);
+      publish(args[0], args[1], args[2], args[3], args[4]);
     } else if (method == 'subscribe') {
-      List methodArgs = args[2];
-      subscribe(methodArgs[0], methodArgs[1], methodArgs[2]);
+      subscribe(args[0], args[1], args[2]);
     } else if (method == 'unsubscribe') {
-      List methodArgs = args[2];
-      unsubscribe(methodArgs[0], methodArgs[1]);
+      unsubscribe(args[0], args[1]);
     } else if (method == 'getReadyState') {
-      List methodArgs = args[2];
-      return getReadyState(methodArgs[0]);
+      return getReadyState(args[0]);
     } else if (method == 'addEvent') {
-      List methodArgs = args[2];
-      addEvent(methodArgs[0], methodArgs[1], (String id, String event) {
-        moduleManager.emitModuleEvent('["MQTT", $id, $event]');
+      addEvent(args[0], args[1], (String id, Event event) {
+        moduleManager.emitModuleEvent(name, data: id, event: event);
       });
     }
 
@@ -167,21 +162,17 @@ class MQTTModule extends BaseModule {
         final String topic = c[0].topic;
         final MqttPublishMessage recMess = c[0].payload;
         final String message = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-        String event = jsonEncode({
-          'type': 'message',
-          'data': {'topic': topic, 'message': message},
-          'origin': client.server
-        });
+        Event event = MessageEvent(jsonEncode({'topic': topic, 'message': message}), origin: client.server);
         callback(id, event);
       });
     } else if (type == 'open') {
       client.onConnected = () {
-        String event = jsonEncode({'type': 'open'});
+        Event event = Event('open');
         callback(id, event);
       };
     } else if (type == 'close') {
       client.onDisconnected = () {
-        String event = jsonEncode({'type': 'close'});
+        Event event = Event('close');
         callback(id, event);
       };
     } else if (type == 'publish') {
@@ -189,12 +180,12 @@ class MQTTModule extends BaseModule {
       /// handshake which is Qos dependant. Any message received on this stream has completed its
       /// publishing handshake with the broker.
       client.published.listen((MqttPublishMessage message) {
-        String event = jsonEncode({
-          'type': 'publish',
+        CustomEventInit init = CustomEventInit(detail: jsonEncode({
           'topic': message.variableHeader.topicName,
           'message': MqttPublishPayload.bytesToStringAsString(message.payload.message),
           'code': message.variableHeader.returnCode,
-        });
+        }));
+        CustomEvent event = CustomEvent('publish', init);
         callback(id, event);
       });
     } else if (type == 'subscribe') {
@@ -204,17 +195,26 @@ class MQTTModule extends BaseModule {
       /// can fail either because you have tried to subscribe to an invalid topic or the broker
       /// rejects the subscribe request.
       client.onSubscribed = (String topic) {
-        String event = jsonEncode({'type': 'subscribe', 'topic': topic});
+        CustomEventInit init = CustomEventInit(detail: jsonEncode({
+          'topic': topic
+        }));
+        Event event = CustomEvent('subscribe', init);
         callback(id, event);
       };
     } else if (type == 'subscribeerror') {
       client.onSubscribeFail = (String topic) {
-        String event = jsonEncode({'type': 'subscribeerror', 'topic': topic});
+        CustomEventInit init = CustomEventInit(detail: jsonEncode({
+          'topic': topic
+        }));
+        Event event = CustomEvent('subscribeerror', init);
         callback(id, event);
       };
     } else if (type == 'unsubscribe') {
       client.onUnsubscribed = (String topic) {
-        String event = jsonEncode({'type': 'unsubscribe', 'topic': topic});
+        CustomEventInit init = CustomEventInit(detail: jsonEncode({
+          'topic': topic
+        }));
+        Event event = CustomEvent('unsubscribe', init);
         callback(id, event);
       };
     }

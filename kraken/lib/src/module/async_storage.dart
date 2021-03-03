@@ -1,10 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:kraken/src/module/module_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AsyncStorageModule extends BaseModule {
+  @override
+  String get name => 'AsyncStorage';
+
   static Future<SharedPreferences> _prefs;
 
   AsyncStorageModule(ModuleManager moduleManager) : super(moduleManager);
@@ -48,52 +50,44 @@ class AsyncStorageModule extends BaseModule {
   }
 
   @override
-  String invoke(List<dynamic> args, InvokeModuleCallback callback) {
-    String method = args[1];
-
+  String invoke(String method, dynamic args, InvokeModuleCallback callback) {
     switch (method) {
       case 'getItem':
-        List methodArgs = args[2];
-        String key = methodArgs[0];
-        AsyncStorageModule.getItem(key).then((String value) {
-          callback(value ?? '');
+        AsyncStorageModule.getItem(args).then((String value) {
+          callback(data: value ?? '');
         }).catchError((e, stack) {
-          callback('$e\n$stack');
+          callback(errmsg: '$e\n$stack');
         });
         break;
       case 'setItem':
-        List methodArgs = args[2];
-        String key = methodArgs[0];
-        String value = methodArgs[1];
+        String key = args[0];
+        String value = args[1];
         AsyncStorageModule.setItem(key, value).then((bool isSuccess) {
-          callback(isSuccess.toString());
+          callback(data: isSuccess.toString());
         }).catchError((e, stack) {
-          callback('Error: $e\n$stack');
+          callback(errmsg: 'Error: $e\n$stack');
         });
         break;
       case 'removeItem':
-        List methodArgs = args[2];
-        String key = methodArgs[0];
-        AsyncStorageModule.removeItem(key).then((bool isSuccess) {
-          callback(isSuccess.toString());
+        AsyncStorageModule.removeItem(args).then((bool isSuccess) {
+          callback(data: isSuccess.toString());
         }).catchError((e, stack) {
-          callback('Error: $e\n$stack');
+          callback(errmsg: 'Error: $e\n$stack');
         });
         break;
       case 'getAllKeys':
-        // @TODO: catch error case
         AsyncStorageModule.getAllKeys().then((Set<String> set) {
           List<String> list = List.from(set);
-          callback(jsonEncode(list));
+          callback(data: list);
         }).catchError((e, stack) {
-          callback('Error: $e\n$stack');
+          callback(errmsg: 'Error: $e\n$stack');
         });
         break;
       case 'clear':
         AsyncStorageModule.clear().then((bool isSuccess) {
-          callback(isSuccess.toString());
+          callback(data: isSuccess.toString());
         }).catchError((e, stack) {
-          callback('Error: $e\n$stack');
+          callback(errmsg: 'Error: $e\n$stack');
         });
         break;
       default:
