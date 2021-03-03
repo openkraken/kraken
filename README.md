@@ -41,7 +41,7 @@ By contributing to Kraken, you agree that your contributions will be licensed un
 
 0. Prerequisites
     * [Node.js](https://nodejs.org/) v12.0 or later
-    * [Flutter](https://flutter.dev/docs/get-started/install) v1.17.0 or later 
+    * [Flutter](https://flutter.dev/docs/get-started/install) version in the `kraken/pubspec.yaml`
     * [CMake](https://cmake.org/)
 
 1. Install
@@ -49,11 +49,11 @@ By contributing to Kraken, you agree that your contributions will be licensed un
     $ npm install
     ```
 
-2. Build
+2. Start Example
     ```shell
-    $ npm run build:macos
-    $ npm run build:android
-    $ npm run build:linux
+    $ cd kraken/example
+    $ flutter pub get
+    $ flutter run
     ```
 
 3. Test (Unit Test and Integration Test)
@@ -61,7 +61,14 @@ By contributing to Kraken, you agree that your contributions will be licensed un
     $ npm test
     ```
 
-4. Pack vendors and upload to OSS
+4. Build
+    ```shell
+    $ npm run build:macos
+    $ npm run build:android
+    $ npm run build:linux
+    ```
+
+5. Pack vendors and upload to OSS
     ```shell
     $ npm run upload # Set OSS_AK and OSS_SK for env first
     ```
