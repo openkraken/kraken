@@ -19,7 +19,6 @@ export 'src/dom/document.dart';
 export 'src/dom/tags/a.dart';
 export 'src/dom/tags/audio.dart';
 export 'src/dom/tags/body.dart';
-export 'src/dom/tags/camera_preview.dart';
 export 'src/dom/tags/canvas.dart';
 export 'src/dom/tags/div.dart';
 export 'src/dom/tags/iframe.dart';
