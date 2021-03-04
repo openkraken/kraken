@@ -1,0 +1,1 @@
+../../bridge/include/kraken_bridge_jsc_config.h
