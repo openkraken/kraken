@@ -307,7 +307,7 @@ bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
     switch (property) {
     case JSElement::ElementProperty::style:
     case JSElement::ElementProperty::attributes:
-      return false;
+      break;
     case JSElement::ElementProperty::scrollTop: {
       getDartMethod()->flushUICommand();
       assert_m(nativeElement->setViewModuleProperty != nullptr, "Failed to execute setScrollTop(): dart method is nullptr.");
@@ -323,7 +323,7 @@ bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
     default:
       break;
     }
-    return true;
+    return NodeInstance::setProperty(name, value, exception);
   } else {
     return NodeInstance::setProperty(name, value, exception);
   }

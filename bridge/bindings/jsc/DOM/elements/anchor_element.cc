@@ -49,6 +49,9 @@ JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name
 
 bool JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
   auto propertyMap = getAnchorElementPropertyMap();
+
+  if (propertyMap.count(name) == 0) return ElementInstance::setProperty(name, value, exception);
+
   auto property = propertyMap[name];
   if (property == AnchorElementProperty::href) {
     _href = JSValueToStringCopy(_hostClass->ctx, value, exception);
@@ -72,9 +75,9 @@ bool JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSVa
     foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
       ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
     return true;
-  } else {
-    return ElementInstance::setProperty(name, value, exception);
   }
+
+  return true;
 }
 
 void JSAnchorElement::AnchorElementInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
