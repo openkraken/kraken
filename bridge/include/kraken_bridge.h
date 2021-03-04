@@ -9,6 +9,9 @@
 #include <cstdint>
 #include <thread>
 
+#include "kraken_foundation.h"
+#include "dart_methods.h"
+
 #if KRAKEN_JSC_ENGINE
 #include "kraken_bridge_jsc.h"
 #endif

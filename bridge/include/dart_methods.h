@@ -7,9 +7,16 @@
 #define KRAKEN_DART_METHODS_H_
 
 #include "kraken_bridge.h"
+
+#ifdef ENABLE_TEST
 #include "kraken_bridge_test.h"
+#endif
 #include <memory>
 #include <thread>
+
+#define KRAKEN_EXPORT __attribute__((__visibility__("default")))
+
+struct Screen;
 
 using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
 using AsyncRAFCallback = void (*)(void *callbackContext, int32_t contextId, double result, const char *errmsg);
@@ -92,6 +99,7 @@ struct DartMethodPointer {
 void registerDartMethods(uint64_t *methodBytes, int32_t length);
 void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length);
 
+KRAKEN_EXPORT
 std::shared_ptr<DartMethodPointer> getDartMethod();
 
 } // namespace kraken
