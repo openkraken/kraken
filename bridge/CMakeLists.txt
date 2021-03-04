@@ -95,8 +95,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/all_collection.h
     bindings/jsc/DOM/elements/anchor_element.cc
     bindings/jsc/DOM/elements/anchor_element.h
-    bindings/jsc/DOM/elements/animation_player_element.cc
-    bindings/jsc/DOM/elements/animation_player_element.h
     bindings/jsc/DOM/elements/media_element.cc
     bindings/jsc/DOM/elements/media_element.h
     bindings/jsc/DOM/elements/audio_element.cc

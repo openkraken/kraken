@@ -157,9 +157,6 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     JSElement::defineElement("object", [](JSContext *context) -> ElementInstance* {
       return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
     });
-    JSElement::defineElement("animation-player", [](JSContext *context) -> ElementInstance* {
-      return new JSAnimationPlayerElement::AnimationPlayerElementInstance(JSAnimationPlayerElement::instance(context));
-    });
     JSElement::defineElement("span", [](JSContext *context) -> ElementInstance* {
       return new ElementInstance(JSElement::instance(context), "span", true);
     });

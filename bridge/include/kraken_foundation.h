@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_FOUNDATION_H
 
 #include "kraken_bridge.h"
+#include "kraken_bridge_jsc_config.h"
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
@@ -21,9 +22,9 @@ class UICommandCallbackQueue {
 public:
   using Callback = void (*)(void *);
   UICommandCallbackQueue() = default;
-  static UICommandCallbackQueue *instance();
-  void registerCallback(const Callback &callback, void *data);
-  void flushCallbacks();
+  static KRAKEN_EXPORT UICommandCallbackQueue *instance();
+  KRAKEN_EXPORT void registerCallback(const Callback &callback, void *data);
+  KRAKEN_EXPORT void flushCallbacks();
 
 private:
   struct CallbackItem {
@@ -39,15 +40,15 @@ class UICommandTaskMessageQueue {
 public:
   UICommandTaskMessageQueue() = delete;
   explicit UICommandTaskMessageQueue(int32_t contextId);
-  static UICommandTaskMessageQueue *instance(int32_t contextId);
+  static KRAKEN_EXPORT UICommandTaskMessageQueue *instance(int32_t contextId);
 
-  void registerCommand(int32_t id, int32_t type, void *nativePtr, bool batchedUpdate);
-  void registerCommand(int32_t id, int32_t type, void *nativePtr);
-  void registerCommand(int32_t id, int32_t type, NativeString &args_01, NativeString &args_02, void *nativePtr);
-  void registerCommand(int32_t id, int32_t type, NativeString &args_01, void *nativePtr);
-  UICommandItem *data();
-  int64_t size();
-  void clear();
+  KRAKEN_EXPORT void registerCommand(int32_t id, int32_t type, void *nativePtr, bool batchedUpdate);
+  KRAKEN_EXPORT void registerCommand(int32_t id, int32_t type, void *nativePtr);
+  KRAKEN_EXPORT void registerCommand(int32_t id, int32_t type, NativeString &args_01, NativeString &args_02, void *nativePtr);
+  KRAKEN_EXPORT void registerCommand(int32_t id, int32_t type, NativeString &args_01, void *nativePtr);
+  KRAKEN_EXPORT UICommandItem *data();
+  KRAKEN_EXPORT int64_t size();
+  KRAKEN_EXPORT void clear();
 
 private:
   int32_t contextId;

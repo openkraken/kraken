@@ -11,8 +11,8 @@
 #include "element.h"
 #include "node.h"
 
+
 #include "bindings/jsc/DOM/elements/anchor_element.h"
-#include "bindings/jsc/DOM/elements/animation_player_element.h"
 #include "bindings/jsc/DOM/elements/audio_element.h"
 #include "bindings/jsc/DOM/elements/canvas_element.h"
 #include "bindings/jsc/DOM/elements/iframe_element.h"
