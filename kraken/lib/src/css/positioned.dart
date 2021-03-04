@@ -217,8 +217,8 @@ class CSSPositionedLayout {
     // Whether child need to layout
     bool isChildNeedsLayout = true;
     if (child is RenderBoxModel && child.hasSize) {
-      double childContentWidth = RenderBoxModel.getContentWidth(child);
-      double childContentHeight = RenderBoxModel.getContentHeight(child);
+      double childContentWidth = RenderBoxModel.getLogicalContentWidth(child);
+      double childContentHeight = RenderBoxModel.getLogicalContentHeight(child);
       // Always layout child when parent is not laid out yet or child is marked as needsLayout
       if (!parent.hasSize || child.needsLayout || needsRelayout) {
         isChildNeedsLayout = true;

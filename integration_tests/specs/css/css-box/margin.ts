@@ -123,4 +123,33 @@ describe('Box margin', () => {
     BODY.appendChild(div);
     await matchViewportSnapshot();
   });
+
+  it('should work with percentage of parents width and height not equal', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '100px',
+          height: '200px',
+          padding: '20px',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '50px',
+            width: '50px',
+            margin: '100%',
+            backgroundColor: 'yellow',
+          }
+        })
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
 });

@@ -11,10 +11,14 @@ mixin RenderColorFilter on RenderBox {
     }
   }
 
+  ColorFilterLayer _colorFilterLayer;
+
   void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_colorFilter != null) {
+      _colorFilterLayer ??= ColorFilterLayer();
       context.pushColorFilter(offset, _colorFilter, callback);
     } else {
+      _colorFilterLayer = null;
       callback(context, offset);
     }
   }
