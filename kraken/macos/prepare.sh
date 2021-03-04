@@ -8,7 +8,7 @@ if [ -L "libkraken_jsc.dylib" ]; then
   ROOT=$(pwd)
   rm libkraken_jsc.dylib
   ln -s $ROOT/../../sdk/build/macos/lib/x86_64/libkraken_jsc.dylib
-elif [ ! -d "libkraken_jsc.dylib" ]; then
+elif [ ! -e "libkraken_jsc.dylib" ]; then
   read_version
   curl -O https://kraken.oss-cn-hangzhou.aliyuncs.com/kraken_bridge/$VERSION/libkraken_jsc.dylib
 fi
