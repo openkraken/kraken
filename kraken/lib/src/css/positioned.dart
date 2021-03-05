@@ -173,9 +173,11 @@ class CSSPositionedLayout {
   ) {
     // Default to no constraints. (0 - infinite)
     BoxConstraints childConstraints = const BoxConstraints();
-    Size trySize = parent.contentConstraints.biggest;
-    Size parentSize = trySize.isInfinite ? parent.contentConstraints.smallest : trySize;
-
+    // Scrolling element has two repaint boundary box, the inner box has constraints of inifinity
+    // so it needs to find the upper box for querying content constraints
+    RenderBoxModel containerBox = parent.isScrollingContentBox ? parent.parent : parent;
+    Size trySize = containerBox.contentConstraints.biggest;
+    Size parentSize = trySize.isInfinite ? containerBox.contentConstraints.smallest : trySize;
     BoxSizeType widthType = _getChildWidthSizeType(child);
     BoxSizeType heightType = _getChildHeightSizeType(child);
     RenderStyle childRenderStyle = child.renderStyle;
