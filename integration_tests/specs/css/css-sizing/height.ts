@@ -357,7 +357,7 @@ describe('Height', () => {
     await matchViewportSnapshot();
   });
 
-  it('should work with percentage and flow layout of no height', async () => {
+  it('should work with percentage and flow layout of no height', async (done) => {
     let div;
     let text;
     div = createElement(
@@ -403,7 +403,7 @@ describe('Height', () => {
     });
   });
 
-  it('should work with percentage and flow layout of height', async () => {
+  it('should work with percentage and flow layout of height', async (done) => {
     let div;
     let text;
     div = createElement(
@@ -450,7 +450,7 @@ describe('Height', () => {
     });
   });
 
-  it('should work with percentage and flex layout of no height', async () => {
+  it('should work with percentage and flex layout of no height', async (done) => {
     let div;
     let text;
     div = createElement(
@@ -498,7 +498,7 @@ describe('Height', () => {
     });
   });
 
-  it('should work with percentage and flex layout of height', async () => {
+  it('should work with percentage and flex layout of height', async (done) => {
     let div;
     let text;
     div = createElement(
