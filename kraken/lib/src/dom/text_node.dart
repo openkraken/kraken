@@ -11,6 +11,11 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
+const String WHITE_SPACE_CHAR = ' ';
+const String NEW_LINE_CHAR = '\n';
+const String RETURN_CHAR = '\r';
+const String TAB_CHAR = '\t';
+
 class TextNode extends Node {
   final Pointer<NativeTextNode> nativeTextNodePtr;
 
@@ -59,11 +64,14 @@ class TextNode extends Node {
       // Append space while next is node(including textNode).
       //   Consider: (PS: ` is text node seperater.)
       //        <ltr><span>foo</span>`bar``hello`</ltr>
-      if (previousSibling is Element && isSpace(_data[0])) {
+      if ((previousSibling is TextNode || 
+          previousSibling is ParagraphElement ||
+          previousSibling is SpanElement) &&
+          isWhiteSpace(_data[0])) {
         collapsedData = NORMAL_SPACE + collapsedData;
       }
 
-      if (nextSibling is Node && isSpace(_data[_data.length - 1])) {
+      if (nextSibling is Node && isWhiteSpace(_data[_data.length - 1])) {
         collapsedData = collapsedData + NORMAL_SPACE;
       }
       return collapsedData;
@@ -188,19 +196,20 @@ class TextNode extends Node {
   }
 }
 
-bool isSpace(String ch) => ch == ' ';
-bool isLineBreaker(String ch) => ch == '\n' || ch == '\r' || ch == '\t';
+bool isWhiteSpace(String ch) => ch == WHITE_SPACE_CHAR || ch == TAB_CHAR;
+bool isLineBreak(String ch) => ch == NEW_LINE_CHAR || ch == RETURN_CHAR;
 
+/// https://drafts.csswg.org/css-text-3/#propdef-white-space
 /// Utility function to collapse whitespace runs to single spaces
 /// and strip leading/trailing whitespace.
-String collapseWhitespace(String string, {bool collapseSpace = true, bool collapseLineBreaker = true}) {
+String collapseWhitespace(String string, {bool collapseSpace = true, bool collapseLineBreak = true}) {
   var result = StringBuffer();
   var _skip = true;
   for (var i = 0; i < string.length; i++) {
     var character = string[i];
-    if ((collapseSpace && isSpace(character)) || (collapseLineBreaker && isLineBreaker(character))) {
+    if ((collapseSpace && isWhiteSpace(character)) || (collapseLineBreak && isLineBreak(character))) {
       if (!_skip) {
-        result.write(' ');
+        result.write(WHITE_SPACE_CHAR);
         _skip = true;
       }
     } else {
@@ -208,5 +217,6 @@ String collapseWhitespace(String string, {bool collapseSpace = true, bool collap
       _skip = false;
     }
   }
+
   return result.toString().trim();
 }
