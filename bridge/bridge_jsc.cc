@@ -18,7 +18,7 @@ namespace kraken {
 
 using namespace binding::jsc;
 
-std::vector<PolyFillPatch> JSBridge::polyfillPatches{};
+std::map<std::string, NativeString *> JSBridge::polyfillPatches{};
 
 /**
  * JSRuntime
@@ -79,7 +79,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   initKrakenPolyFill(this);
 
   for (auto patch : polyfillPatches) {
-    evaluateScript(patch.code, patch.name, 0);
+    evaluateScript(patch.second, patch.first.c_str(), 0);
   }
 
 #if ENABLE_PROFILE

@@ -51,14 +51,9 @@
 
 namespace kraken {
 
-struct PolyFillPatch {
-  NativeString *code;
-  const char *name;
-};
-
 class JSBridge final {
 public:
-  static std::vector<PolyFillPatch> polyfillPatches;
+  static std::map<std::string, NativeString*> polyfillPatches;
 
   JSBridge() = delete;
   JSBridge(int32_t jsContext, const JSExceptionHandler &handler);

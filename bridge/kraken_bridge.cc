@@ -214,10 +214,11 @@ void flushUICommandCallback() {
 }
 
 void patchKrakenPolyFill(NativeString *patchCode, const char *patchName) {
-  kraken::PolyFillPatch patch {
-    patchCode, patchName
-  };
-  kraken::JSBridge::polyfillPatches.emplace_back(patch);
+  if (kraken::JSBridge::polyfillPatches.count(patchName) == 0) {
+    kraken::JSBridge::polyfillPatches[patchName] = patchCode;
+  } else {
+    kraken::JSBridge::polyfillPatches[patchName]->free();
+  }
 }
 
 NativeString *NativeString::clone() {

@@ -15,37 +15,39 @@ abstract class BaseModule {
 
 typedef InvokeModuleCallback = void Function({String errmsg, dynamic data});
 typedef NewModuleCreator = BaseModule Function(ModuleManager);
+typedef ModuleCreator = BaseModule Function(ModuleManager moduleNamager);
 
 class ModuleManager {
   final int contextId;
   final KrakenController controller;
 
-  static Map<String, BaseModule> _moduleMap = Map();
+  static Map<String, ModuleCreator> _creatorMap = Map();
   static bool inited = false;
+  Map<String, BaseModule> _moduleMap = Map();
 
   ModuleManager(this.controller, this.contextId) {
     if (!inited) {
-      defineModule(AsyncStorageModule(this));
-      defineModule(ClipBoardModule(this));
-      defineModule(ConnectionModule(this));
-      defineModule(DeviceInfoModule(this));
-      defineModule(FetchModule(this));
-      defineModule(GeolocationModule(this));
-      defineModule(MethodChannelModule(this));
-      defineModule(MQTTModule(this));
-      defineModule(NavigationModule(this));
-      defineModule(NavigatorModule(this));
-      defineModule(WebSocketModule(this));
+      defineModule((moduleManager) => AsyncStorageModule(moduleManager));
+      defineModule((moduleManager) => ClipBoardModule(moduleManager));
+      defineModule((moduleManager) => ConnectionModule(moduleManager));
+      defineModule((moduleManager) => DeviceInfoModule(moduleManager));
+      defineModule((moduleManager) => FetchModule(moduleManager));
+      defineModule((moduleManager) => MethodChannelModule(moduleManager));
+      defineModule((moduleManager) => MQTTModule(moduleManager));
+      defineModule((moduleManager) => NavigationModule(moduleManager));
+      defineModule((moduleManager) => NavigatorModule(moduleManager));
+      defineModule((moduleManager) => WebSocketModule(moduleManager));
       inited = true;
     }
   }
 
-  static void defineModule(BaseModule module) {
-    if (_moduleMap.containsKey(module.name)) {
-      throw Exception('ModuleManager: redefined module of type: ${module.name}');
+  static void defineModule(ModuleCreator moduleCreator) {
+    BaseModule fakeModule = moduleCreator(null);
+    if (_creatorMap.containsKey(fakeModule.name)) {
+      throw Exception('ModuleManager: redefined module of type: ${fakeModule.name}');
     }
 
-    _moduleMap[module.name] = module;
+    _creatorMap[fakeModule.name] = moduleCreator;
   }
 
   void emitModuleEvent(String moduleName, {Event event, Object data}) {
@@ -53,8 +55,12 @@ class ModuleManager {
   }
 
   String invokeModule(String moduleName, String method, dynamic params, InvokeModuleCallback callback) {
-    if (!_moduleMap.containsKey(moduleName)) {
+    if (!_creatorMap.containsKey(moduleName)) {
       throw Exception('ModuleManager: Can not find module of name: $moduleName');
+    }
+
+    if (!_moduleMap.containsKey(moduleName)) {
+      _moduleMap[moduleName] = _creatorMap[moduleName](this);
     }
 
     BaseModule module = _moduleMap[moduleName];

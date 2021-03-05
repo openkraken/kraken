@@ -26,7 +26,6 @@ dependencies:
   kraken_video_player: ^0.1.0
   kraken_webview: ^0.1.5
   audioplayers: ^0.17.2
-  kraken_geolocation: ^0.1.0
 
 dev_dependencies:
   effective_dart: ^1.2.1
