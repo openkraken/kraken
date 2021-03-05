@@ -37,7 +37,7 @@ JSDocument::~JSDocument() {
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount < 1) {
-    throwJSError(ctx, "Failed to createElement: only accept 1 parameter.", exception);
+    throwJSError(ctx, "Failed to createElement: 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
