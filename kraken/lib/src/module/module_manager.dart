@@ -33,7 +33,6 @@ class ModuleManager {
       defineModule((moduleManager) => DeviceInfoModule(moduleManager));
       defineModule((moduleManager) => FetchModule(moduleManager));
       defineModule((moduleManager) => MethodChannelModule(moduleManager));
-      defineModule((moduleManager) => MQTTModule(moduleManager));
       defineModule((moduleManager) => NavigationModule(moduleManager));
       defineModule((moduleManager) => NavigatorModule(moduleManager));
       defineModule((moduleManager) => WebSocketModule(moduleManager));
