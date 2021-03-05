@@ -15,7 +15,7 @@ describe('MethodChannel', () => {
     expect(result).toBe('method: helloworld');
   });
 
-  fit('setMethodCallHandler multi params', async (done) => {
+  it('setMethodCallHandler multi params', async (done) => {
     kraken.methodChannel.setMethodCallHandler((method: string, args: any[]) => {
       expect(method).toBe('helloworld');
       expect(args).toEqual(['abc', 1234, null, /* undefined will be converted to */ null, [], true, false, {name: 1}]);
