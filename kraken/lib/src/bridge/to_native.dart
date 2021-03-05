@@ -154,7 +154,7 @@ typedef Native_PatchKrakenPolyfill = Void Function(Pointer<NativeString> patchCo
 typedef Dart_PatchKrakenPolyfill = void Function(Pointer<NativeString> patchCode, Pointer<Utf8> patchName);
 
 final Dart_PatchKrakenPolyfill _patchKrakenPolyfill =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_PatchKrakenPolyfill>>('patchKrakenPolyfill').asFunction();
+    nativeDynamicLibrary.lookup<NativeFunction<Native_PatchKrakenPolyfill>>('patchKrakenPolyFill').asFunction();
 
 void patchKrakenPolyfill(String patchCode, String patchName) {
   assert(patchCode != null);
