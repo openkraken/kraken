@@ -70,6 +70,11 @@ mixin CSSPositionMixin on RenderStyleBase {
     if (_zIndex == value) return;
     _zIndex = value;
     _markParentNeedsLayout();
+    // Needs to sort children when parent paint children
+    if (renderBoxModel.parentData is RenderLayoutParentData) {
+      RenderLayoutBox parent = renderBoxModel.parent;
+      parent.markNeedsSortChildren();
+    }
   }
 
   CSSPositionType _position = CSSPositionType.static;
