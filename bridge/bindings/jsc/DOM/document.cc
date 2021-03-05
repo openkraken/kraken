@@ -145,12 +145,6 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     JSElement::defineElement("input", [](JSContext *context) -> ElementInstance* {
       return new JSInputElement::InputElementInstance(JSInputElement::instance(context));
     });
-    JSElement::defineElement("audio", [](JSContext *context) -> ElementInstance* {
-      return new JSAudioElement::AudioElementInstance(JSAudioElement::instance(context));
-    });
-    JSElement::defineElement("video", [](JSContext *context) -> ElementInstance* {
-      return new JSVideoElement::VideoElementInstance(JSVideoElement::instance(context));
-    });
     JSElement::defineElement("iframe", [](JSContext *context) -> ElementInstance* {
       return new JSIframeElement::IframeElementInstance(JSIframeElement::instance(context));
     });

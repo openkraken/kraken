@@ -131,9 +131,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       defineElement(INPUT, (id, nativePtr, elementManager) => InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager));
       defineElement(PRE, (id, nativePtr, elementManager) => PreElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager));
-      defineElement(VIDEO, (id, nativePtr, elementManager) => VideoElement(id, nativePtr.cast<NativeVideoElement>(), elementManager));
       defineElement(IFRAME, (id, nativePtr, elementManager) => IFrameElement(id, nativePtr.cast<NativeIframeElement>(), elementManager));
-      defineElement(AUDIO, (id, nativePtr, elementManager) => AudioElement(id, nativePtr.cast<NativeAudioElement>(), elementManager));
       defineElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager));
       inited = true;
     }

@@ -17,7 +17,6 @@ export 'src/dom/document.dart';
 
 // Tags
 export 'src/dom/tags/a.dart';
-export 'src/dom/tags/audio.dart';
 export 'src/dom/tags/body.dart';
 export 'src/dom/tags/canvas.dart';
 export 'src/dom/tags/div.dart';
@@ -26,7 +25,6 @@ export 'src/dom/tags/img.dart';
 export 'src/dom/tags/input.dart';
 export 'src/dom/tags/p.dart';
 export 'src/dom/tags/span.dart';
-export 'src/dom/tags/video.dart';
 export 'src/dom/tags/pre.dart';
 export 'src/dom/tags/strong.dart';
 export 'src/dom/tags/object.dart';
