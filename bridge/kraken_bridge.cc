@@ -218,6 +218,7 @@ void patchKrakenPolyFill(NativeString *patchCode, const char *patchName) {
     kraken::JSBridge::polyfillPatches[patchName] = patchCode;
   } else {
     kraken::JSBridge::polyfillPatches[patchName]->free();
+    kraken::JSBridge::polyfillPatches[patchName] = patchCode;
   }
 }
 
