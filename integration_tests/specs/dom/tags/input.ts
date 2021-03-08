@@ -60,8 +60,8 @@ describe('Tags input', () => {
     input.value = '';
     input.addEventListener('input', function handler(event: InputEvent) {
       input.removeEventListener('input', handler);
+      expect(input.value).toEqual(VALUE);
       expect(event.type).toEqual('input');
-      expect(event.data).toEqual(VALUE);
       expect(event.target).toEqual(input);
       expect(event.currentTarget).toEqual(input);
       expect(event.bubbles).toEqual(false);
