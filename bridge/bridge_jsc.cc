@@ -123,18 +123,17 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
   }
 
   JSValueRef exception = nullptr;
+  JSObjectRef eventObjectRef = nullptr;
+  if (event != nullptr) {
+    std::string type = std::string(eventType);
+    EventInstance *eventInstance = JSEvent::buildEventInstance(type, context.get(), event, false);
+    eventObjectRef = eventInstance->object;
+  }
 
   for (const auto &callback : krakenModuleListenerList) {
     if (exception != nullptr) {
       context->handleException(exception);
       return;
-    }
-
-    JSObjectRef eventObjectRef = nullptr;
-    if (event != nullptr) {
-      std::string type = std::string(eventType);
-      EventInstance *eventInstance = JSEvent::buildEventInstance(type, context.get(), event, false);
-      eventObjectRef = eventInstance->object;
     }
 
     JSStringRef moduleNameStringRef = JSStringCreateWithCharacters(moduleName->string, moduleName->length);
