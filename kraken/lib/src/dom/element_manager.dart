@@ -218,6 +218,20 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(comment);
   }
 
+  void cloneNode(int oldId, int newId, bool deep) {
+    assert(existsTarget(oldId), 'targetId: $oldId');
+    assert(existsTarget(newId), 'targetId: $newId');
+
+    Element oldTarget = getEventTargetByTargetId<Element>(oldId);
+    Element newTarget = getEventTargetByTargetId<Element>(newId);
+
+    newTarget.style = oldTarget.style;
+    newTarget.properties.clear();
+    oldTarget.properties.forEach((key, value) {
+      newTarget.properties[key] = value;
+    });
+  }
+
   void removeNode(int targetId) {
     assert(existsTarget(targetId), 'targetId: $targetId');
 

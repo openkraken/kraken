@@ -121,6 +121,27 @@ void JSElementAttributes::removeAttribute(std::string &name) {
   m_attributes.erase(name);
 }
 
+std::map<std::string, JSStringRef>& JSElementAttributes::getAttributesMap() {
+  return  m_attributes;
+}
+
+void JSElementAttributes::setAttributesMap(std::map<std::string, JSStringRef>& attributes) {
+  //std::copy(attributes.begin(),attributes.end(), inserter(m_attributes, m_attributes.begin()));
+  std::map<std::string, JSStringRef>::iterator iter = attributes.begin();
+  while (iter != attributes.end()) {
+    m_attributes[iter->first] = JSValueToStringCopy(ctx, JSValueMakeString(ctx, iter->second), nullptr);
+    iter++;
+  }
+}
+
+std::vector<JSStringRef>& JSElementAttributes::getAttributesVector() {
+  return v_attributes;
+}
+
+void JSElementAttributes::setAttributesVector(std::vector<JSStringRef>& attributes) {
+  v_attributes.assign(attributes.begin(), attributes.end());
+}
+
 std::unordered_map<JSContext *, JSElement *> JSElement::instanceMap{};
 std::unordered_map<std::string, ElementCreator> JSElement::elementCreatorMap{};
 
@@ -307,7 +328,7 @@ bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRe
     switch (property) {
     case JSElement::ElementProperty::style:
     case JSElement::ElementProperty::attributes:
-      break;
+      return false;
     case JSElement::ElementProperty::scrollTop: {
       getDartMethod()->flushUICommand();
       assert_m(nativeElement->setViewModuleProperty != nullptr, "Failed to execute setScrollTop(): dart method is nullptr.");
@@ -729,6 +750,22 @@ std::string ElementInstance::tagName() {
   std::string tagName = m_tagName.string();
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
   return tagName;
+}
+
+JSHostObjectHolder<JSElementAttributes>& ElementInstance::getAttributes() {
+  return m_attributes;
+}
+
+JSHostClassHolder& ElementInstance::getStyle() {
+  return m_style;
+}
+
+void ElementInstance::setStyle(JSHostClassHolder& style) {
+  m_style = style;
+}
+
+void ElementInstance::setAttributes(JSHostObjectHolder<JSElementAttributes>& attributes) {
+  m_attributes = JSHostObjectHolder<JSElementAttributes>(attributes);
 }
 
 void ElementInstance::internalSetTextContent(JSStringRef content, JSValueRef *exception) {

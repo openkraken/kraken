@@ -126,6 +126,66 @@ JSObjectRef JSNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructo
   return nullptr;
 }
 
+JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef *arguments, JSValueRef *exception) {
+  printf("cloneNode\n");
+  auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
+
+  const JSValueRef deepValue = arguments[0];
+  if (!JSValueIsBoolean(ctx, deepValue)) {
+    throwJSError(ctx, "Failed to cloneNode: deep should be a Boolean.", exception);
+    return nullptr;
+  }
+
+  bool deepBooleanRef = JSValueToBoolean(ctx, deepValue);
+
+  if (selfInstance->nodeType == ELEMENT_NODE) {
+    auto element = static_cast<ElementInstance *>(selfInstance);
+
+    /* createElement */
+    std::string tagName = element->tagName();
+    auto newElement = JSElement::buildElementInstance(selfInstance->document->context, tagName);
+    newElement->document = element->document;
+
+    /* copy attributes */
+    JSValueRef attributeValueRef = JSObjectGetProperty(ctx, element->object, JSStringCreateWithUTF8CString("attributes"), nullptr);
+    JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
+    auto mAttributes = reinterpret_cast<JSElementAttributes*>(JSObjectGetPrivate(attributeObjectRef));
+
+    std::map<std::string, JSStringRef>& attributesMap = mAttributes->getAttributesMap();
+    std::vector<JSStringRef>& attributesVector = mAttributes->getAttributesVector();
+
+    (*newElement->getAttributes())->setAttributesMap(attributesMap);
+    (*newElement->getAttributes())->setAttributesVector(attributesVector);
+
+    /* copy style */
+    newElement->setStyle(element->getStyle());
+
+    std::string nodeEventTargetId = std::to_string(element->eventTargetId);
+    std::string position = std::to_string(newElement->eventTargetId);
+    bool isDeep = JSValueToBoolean(ctx, deepValue);
+    std::string position2 = isDeep ? "true" : "false";
+
+    NativeString args_01{};
+    NativeString args_02{};
+    buildUICommandArgs(position, position2, args_01, args_02);
+
+
+    foundation::UICommandTaskMessageQueue::instance(newElement->contextId)
+      ->registerCommand(element->eventTargetId, UICommand::cloneNode, args_01, args_02, nullptr);
+
+    return newElement->object;
+  } else {
+    return nullptr;
+  }
+
+//  if (deepBooleanRef) {
+//    return selfInstance->object;
+//  } else {
+//    return selfInstance->object;
+//  }
+}
+
 JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {

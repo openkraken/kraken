@@ -280,6 +280,10 @@ class KrakenViewController {
     }
   }
 
+  void cloneNode(int oldId, int newId, bool deep) {
+    _elementManager.cloneNode(oldId, newId, deep);
+  }
+
   void setStyle(int targetId, String key, String value) {
     if (kProfileMode) {
       PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_START, uniqueId: targetId);
