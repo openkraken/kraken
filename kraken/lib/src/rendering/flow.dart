@@ -1336,40 +1336,21 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (needsSortChildren) {
-      if (!isChildrenSorted) {
-        sortChildrenByZIndex();
-      }
-      for (int i = 0; i < sortedChildren.length; i ++) {
-        RenderObject child = sortedChildren[i];
-        if (child is! RenderPositionHolder) {
-          DateTime childPaintStart;
-          if (kProfileMode) {
-            childPaintStart = DateTime.now();
-          }
-          context.paintChild(child, getChildScrollOffset(child, offset));
-          if (kProfileMode) {
-            DateTime childPaintEnd = DateTime.now();
-            childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
-          }
+    if (!isChildrenSorted) {
+      sortChildrenByZIndex();
+    }
+    for (int i = 0; i < sortedChildren.length; i ++) {
+      RenderObject child = sortedChildren[i];
+      if (child is! RenderPositionHolder) {
+        DateTime childPaintStart;
+        if (kProfileMode) {
+          childPaintStart = DateTime.now();
         }
-      }
-    } else {
-      RenderObject child = firstChild;
-      while (child != null) {
-        final RenderLayoutParentData childParentData = child.parentData;
-        if (child is! RenderPositionHolder) {
-          DateTime childPaintStart;
-          if (kProfileMode) {
-            childPaintStart = DateTime.now();
-          }
-          context.paintChild(child, getChildScrollOffset(child, offset));
-          if (kProfileMode) {
-            DateTime childPaintEnd = DateTime.now();
-            childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
-          }
+        context.paintChild(child, getChildScrollOffset(child, offset));
+        if (kProfileMode) {
+          DateTime childPaintEnd = DateTime.now();
+          childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
         }
-        child = childParentData.nextSibling;
       }
     }
   }

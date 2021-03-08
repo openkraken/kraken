@@ -159,14 +159,10 @@ class RenderLayoutBox extends RenderBoxModel
     }
   }
 
-  bool _needsSortChildren = true;
-  bool get needsSortChildren {
-    return _needsSortChildren;
-  }
   // Mark this container to sort children by zIndex properties.
   // When children have positioned elements, which needs to reorder and paint earlier than flow layout renderObjects.
   void markNeedsSortChildren() {
-    _needsSortChildren = true;
+    _isChildrenSorted = false;
   }
 
   bool _isChildrenSorted = false;

@@ -462,19 +462,15 @@ class Element extends Node
       case CSSPositionType.absolute:
       case CSSPositionType.fixed:
         _addPositionedChild(child, positionType);
-        _renderLayoutBox.markNeedsSortChildren();
         break;
       case CSSPositionType.sticky:
         _addStickyChild(child, after);
-        _renderLayoutBox.markNeedsSortChildren();
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
-        if (scrollingContentLayoutBox != null) {
-          scrollingContentLayoutBox.insert(child.renderBoxModel, after: after);
-        } else {
-          _renderLayoutBox.insert(child.renderBoxModel, after: after);
-        }
+        RenderLayoutBox parentRenderLayoutBox = scrollingContentLayoutBox != null ?
+          scrollingContentLayoutBox : _renderLayoutBox;
+        parentRenderLayoutBox.insert(child.renderBoxModel, after: after);
         break;
     }
   }
@@ -664,44 +660,20 @@ class Element extends Node
   }
 
   void _addPositionedChild(Element child, CSSPositionType position) {
-    RenderLayoutBox parentRenderLayoutBox;
-
+    Element containingBlockElement;
     switch (position) {
       case CSSPositionType.absolute:
-        Element containingBlockElement = _findContainingBlock(child);
-
-        if (containingBlockElement.scrollingContentLayoutBox != null) {
-          parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox;
-        } else {
-          parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
-        }
-
+        containingBlockElement = _findContainingBlock(child);
         break;
-
       case CSSPositionType.fixed:
-        final Element rootEl = elementManager.getRootElement();
-
-        if (rootEl.scrollingContentLayoutBox != null) {
-          parentRenderLayoutBox = rootEl.scrollingContentLayoutBox;
-        } else {
-          parentRenderLayoutBox = rootEl._renderLayoutBox;
-        }
+        containingBlockElement = elementManager.getRootElement();
         break;
-
-      case CSSPositionType.sticky:
-        Element containingBlockElement = _findContainingBlock(child);
-
-        if (containingBlockElement.scrollingContentLayoutBox != null) {
-          parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox;
-        } else {
-          parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
-        }
-
-        break;
-
       default:
         return;
     }
+
+    RenderLayoutBox parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox != null ?
+      containingBlockElement.scrollingContentLayoutBox : containingBlockElement._renderLayoutBox;
 
     Size preferredSize = Size.zero;
     CSSDisplay childDisplay = child.renderBoxModel.renderStyle.display;
@@ -729,12 +701,9 @@ class Element extends Node
 
   void _addStickyChild(Element child, RenderObject after) {
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-
-    if (scrollingContentLayoutBox != null) {
-      scrollingContentLayoutBox.insert(childRenderBoxModel, after: after);
-    } else {
-      (renderBoxModel as RenderLayoutBox).insert(childRenderBoxModel, after: after);
-    }
+    RenderLayoutBox parentRenderLayoutBox = scrollingContentLayoutBox != null ?
+      scrollingContentLayoutBox : renderBoxModel;
+    parentRenderLayoutBox.insert(childRenderBoxModel, after: after);
 
     // Set sticky element offset
     Element scrollContainer = _findScrollContainer(child);
