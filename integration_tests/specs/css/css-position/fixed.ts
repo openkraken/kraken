@@ -70,6 +70,48 @@ describe('Position fixed', () => {
     });
   });
 
+  it('works with body scroll', async (done) => {
+    let container = createElement('div',
+      {
+        style: {
+          width: '100px',
+          backgroundColor: '#999',
+        },
+      },
+      [
+        createText('12345'),
+        createElement('div', {
+          style: {
+            width: '50px',
+            height: '900px',
+            background: 'red',
+            top: '50px',
+          },
+        }),
+        createElement('div', {
+          style: {
+            width: '30px',
+            height: '30px',
+            background: 'green',
+            position: 'fixed',
+            top: '50px',
+          },
+        }),
+      ]
+    );
+
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+
+    requestAnimationFrame( () => {
+      BODY.scroll(0, 200);
+      setTimeout(async () => {
+        await matchViewportSnapshot();
+        done();
+      }, 100);
+    });
+  });
+
   it('hitTest with position fixed elements', async () => {
     let box;
     let clickCount = 0;

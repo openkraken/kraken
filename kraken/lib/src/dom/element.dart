@@ -661,19 +661,25 @@ class Element extends Node
 
   void _addPositionedChild(Element child, CSSPositionType position) {
     Element containingBlockElement;
+    RenderLayoutBox parentRenderLayoutBox;
     switch (position) {
       case CSSPositionType.absolute:
         containingBlockElement = _findContainingBlock(child);
+        parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox != null ?
+          containingBlockElement.scrollingContentLayoutBox : containingBlockElement._renderLayoutBox;
         break;
       case CSSPositionType.fixed:
         containingBlockElement = elementManager.getRootElement();
+        // Fixed element doesn't scroll with root element, so its renderObject should not
+        // append to the inner repaint boundary box of scrolling box cause it will skip paint
+        // its children which will cause fixed element scroll with root element
+        parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox != null ?
+          containingBlockElement.scrollingContentLayoutBox.parent : containingBlockElement._renderLayoutBox;
         break;
       default:
         return;
     }
 
-    RenderLayoutBox parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox != null ?
-      containingBlockElement.scrollingContentLayoutBox : containingBlockElement._renderLayoutBox;
 
     Size preferredSize = Size.zero;
     CSSDisplay childDisplay = child.renderBoxModel.renderStyle.display;
@@ -883,7 +889,7 @@ class Element extends Node
 
       case WHITE_SPACE:
         _updateTextChildNodesStyle(property);
-        
+
         // white-space affects whether lines in flow layout may wrap at unforced soft wrap opportunities
         // https://www.w3.org/TR/css-text-3/#line-breaking
         // so FlowLayout needs to relayout when its value changes
