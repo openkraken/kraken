@@ -97,8 +97,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/elements/anchor_element.h
     bindings/jsc/DOM/elements/canvas_element.cc
     bindings/jsc/DOM/elements/canvas_element.h
-    bindings/jsc/DOM/elements/iframe_element.cc
-    bindings/jsc/DOM/elements/iframe_element.h
     bindings/jsc/DOM/elements/image_element.cc
     bindings/jsc/DOM/elements/image_element.h
     bindings/jsc/DOM/elements/input_element.cc

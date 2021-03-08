@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'package:meta/meta.dart';
 import 'package:kraken/gesture.dart';
 
 class Kraken extends StatelessWidget {

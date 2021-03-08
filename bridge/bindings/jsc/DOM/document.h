@@ -14,7 +14,6 @@
 
 #include "bindings/jsc/DOM/elements/anchor_element.h"
 #include "bindings/jsc/DOM/elements/canvas_element.h"
-#include "bindings/jsc/DOM/elements/iframe_element.h"
 #include "bindings/jsc/DOM/elements/image_element.h"
 #include "bindings/jsc/DOM/elements/input_element.h"
 #include "bindings/jsc/DOM/elements/object_element.h"

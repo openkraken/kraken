@@ -265,14 +265,6 @@ class NativeAnchorElement extends Struct {
   Pointer<NativeElement> nativeElement;
 }
 
-typedef Native_IframePostMessage = Void Function(Pointer<NativeIframeElement> nativePtr, Pointer<NativeString> message);
-
-class NativeIframeElement extends Struct {
-  Pointer<NativeElement> nativeElement;
-
-  Pointer<NativeFunction<Native_IframePostMessage>> postMessage;
-}
-
 typedef GetImageWidth = Double Function(Pointer<NativeImgElement> nativePtr);
 typedef GetImageHeight = Double Function(Pointer<NativeImgElement> nativePtr);
 typedef GetImageNaturalWidth = Double Function(Pointer<NativeImgElement> nativePtr);

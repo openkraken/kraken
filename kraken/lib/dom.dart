@@ -20,7 +20,6 @@ export 'src/dom/tags/a.dart';
 export 'src/dom/tags/body.dart';
 export 'src/dom/tags/canvas.dart';
 export 'src/dom/tags/div.dart';
-export 'src/dom/tags/iframe.dart';
 export 'src/dom/tags/img.dart';
 export 'src/dom/tags/input.dart';
 export 'src/dom/tags/p.dart';

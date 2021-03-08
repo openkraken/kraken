@@ -145,9 +145,6 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     JSElement::defineElement("input", [](JSContext *context) -> ElementInstance* {
       return new JSInputElement::InputElementInstance(JSInputElement::instance(context));
     });
-    JSElement::defineElement("iframe", [](JSContext *context) -> ElementInstance* {
-      return new JSIframeElement::IframeElementInstance(JSIframeElement::instance(context));
-    });
     JSElement::defineElement("object", [](JSContext *context) -> ElementInstance* {
       return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
     });
