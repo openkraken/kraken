@@ -493,6 +493,10 @@ public:
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
+  static void traverseCloneNode(JSContextRef ctx, ElementInstance* element, ElementInstance* parentElement);
+
+  static JSValueRef copyNodeValue(JSContextRef ctx, ElementInstance* element);
+
   static JSValueRef cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef arguments[], JSValueRef *exception);
 

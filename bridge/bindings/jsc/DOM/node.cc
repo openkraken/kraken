@@ -126,9 +126,55 @@ JSObjectRef JSNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructo
   return nullptr;
 }
 
+
+JSValueRef JSNode::copyNodeValue(JSContextRef ctx, ElementInstance* element) {
+  /* createElement */
+  std::string tagName = element->tagName();
+  auto newElement = JSElement::buildElementInstance(element->document->context, tagName);
+  newElement->document = element->document;
+
+  /* copy attributes */
+  JSValueRef attributeValueRef = JSObjectGetProperty(ctx, element->object, JSStringCreateWithUTF8CString("attributes"), nullptr);
+  JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
+  auto mAttributes = reinterpret_cast<JSElementAttributes*>(JSObjectGetPrivate(attributeObjectRef));
+
+  std::map<std::string, JSStringRef>& attributesMap = mAttributes->getAttributesMap();
+  std::vector<JSStringRef>& attributesVector = mAttributes->getAttributesVector();
+
+  (*newElement->getAttributes())->setAttributesMap(attributesMap);
+  (*newElement->getAttributes())->setAttributesVector(attributesVector);
+
+  /* copy style */
+  newElement->setStyle(element->getStyle());
+
+  std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
+  std::string argument = "";
+
+  NativeString args_01{};
+  NativeString args_02{};
+  buildUICommandArgs(newNodeEventTargetId, argument, args_01, args_02);
+
+
+  foundation::UICommandTaskMessageQueue::instance(newElement->contextId)
+    ->registerCommand(element->eventTargetId, UICommand::cloneNode, args_01, args_02, nullptr);
+
+  return newElement->object;
+}
+
+void JSNode::traverseCloneNode(JSContextRef ctx, ElementInstance* element, ElementInstance* parentElement) {
+  for (auto iter : element->childNodes)
+  {
+    JSValueRef newElementRef = copyNodeValue(ctx, static_cast<ElementInstance *> (iter));
+    JSObjectRef newNodeObjectRef = JSValueToObject(ctx, newElementRef, nullptr);
+    auto newNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newNodeObjectRef));
+    parentElement->internalAppendChild(newNodeInstance);
+
+    traverseCloneNode(ctx, static_cast<ElementInstance *> (iter),  static_cast<ElementInstance *> (newNodeInstance));
+  }
+}
+
 JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
-  printf("cloneNode\n");
   auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
 
   const JSValueRef deepValue = arguments[0];
@@ -142,48 +188,20 @@ JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef
   if (selfInstance->nodeType == ELEMENT_NODE) {
     auto element = static_cast<ElementInstance *>(selfInstance);
 
-    /* createElement */
-    std::string tagName = element->tagName();
-    auto newElement = JSElement::buildElementInstance(selfInstance->document->context, tagName);
-    newElement->document = element->document;
-
-    /* copy attributes */
-    JSValueRef attributeValueRef = JSObjectGetProperty(ctx, element->object, JSStringCreateWithUTF8CString("attributes"), nullptr);
-    JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
-    auto mAttributes = reinterpret_cast<JSElementAttributes*>(JSObjectGetPrivate(attributeObjectRef));
-
-    std::map<std::string, JSStringRef>& attributesMap = mAttributes->getAttributesMap();
-    std::vector<JSStringRef>& attributesVector = mAttributes->getAttributesVector();
-
-    (*newElement->getAttributes())->setAttributesMap(attributesMap);
-    (*newElement->getAttributes())->setAttributesVector(attributesVector);
-
-    /* copy style */
-    newElement->setStyle(element->getStyle());
-
-    std::string nodeEventTargetId = std::to_string(element->eventTargetId);
-    std::string position = std::to_string(newElement->eventTargetId);
-    bool isDeep = JSValueToBoolean(ctx, deepValue);
-    std::string position2 = isDeep ? "true" : "false";
-
-    NativeString args_01{};
-    NativeString args_02{};
-    buildUICommandArgs(position, position2, args_01, args_02);
 
 
-    foundation::UICommandTaskMessageQueue::instance(newElement->contextId)
-      ->registerCommand(element->eventTargetId, UICommand::cloneNode, args_01, args_02, nullptr);
+    JSValueRef rootElementRef = copyNodeValue(ctx, static_cast<ElementInstance *> (element));
+    JSObjectRef rootNodeObjectRef = JSValueToObject(ctx, rootElementRef, nullptr);
+    auto rootNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(rootNodeObjectRef));
 
-    return newElement->object;
+    if (deepBooleanRef) {
+      traverseCloneNode(ctx, static_cast<ElementInstance *> (element), static_cast<ElementInstance *> (rootNodeInstance));
+    }
+
+    return rootNodeInstance->object;
   } else {
     return nullptr;
   }
-
-//  if (deepBooleanRef) {
-//    return selfInstance->object;
-//  } else {
-//    return selfInstance->object;
-//  }
 }
 
 JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
