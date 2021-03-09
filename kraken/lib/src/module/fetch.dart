@@ -5,7 +5,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:kraken/bridge.dart';
@@ -14,29 +13,27 @@ import 'package:kraken/src/module/module_manager.dart';
 String EMPTY_STRING = '';
 
 class FetchModule extends BaseModule {
+  @override
+  String get name => 'Fetch';
+
   FetchModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override
   void dispose() {}
 
   @override
-  String invoke(List<dynamic> params, InvokeModuleCallback callback) {
-    List fetchArgs = params[1];
-    String url = fetchArgs[0];
-    Map<String, dynamic> options = fetchArgs[1];
+  String invoke(String method, dynamic params, InvokeModuleCallback callback) {
+    String url = method;
+    Map<String, dynamic> options = params;
 
     _fetch(url, options).then((Response response) {
-      String json = jsonEncode(['', response.statusCode, response.data]);
-      callback(json);
+      callback(data: ['', response.statusCode, response.data]);
     }).catchError((e, stack) {
-      String errorMessage = e.toString();
-      String json;
       if (e is DioError && e.type == DioErrorType.RESPONSE) {
-        json = jsonEncode([errorMessage, e.response.statusCode, EMPTY_STRING]);
+        callback(data: [e.toString(), e.response.statusCode, EMPTY_STRING]);
       } else {
-        json = jsonEncode(['$errorMessage\n$stack', null, EMPTY_STRING]);
+        callback(errmsg: '$e\n$stack');
       }
-      callback(json);
     });
 
     return '';

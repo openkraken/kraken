@@ -1,5 +1,5 @@
-import { krakenInvokeModule } from '../bridge';
 import { initPropertyHandlersForEventTargets } from "../helpers";
+import { kraken } from '../kom/kraken';
 
 function validateUrl(url: string) {
   let protocol = url.substring(0, url.indexOf(':'));
@@ -86,24 +86,24 @@ export class WebSocket extends EventTarget {
     this.url = url;
     this.readyState = ReadyState.CONNECTING;
 
-    this.id = krakenInvokeModule(JSON.stringify(['WebSocket', 'init', [url]]));
+    this.id = kraken.invokeModule('WebSocket', 'init', url);
     wsClientMap[this.id] = this;
 
     initPropertyHandlersForEventTargets(this, builtInEvents);
   }
 
   addEventListener(type: string, callback: any) {
-    krakenInvokeModule(`["WebSocket","addEvent",["${this.id}","${type}"]]`);
+    kraken.invokeModule('WebSocket', 'addEvent', ([this.id, type]))
     super.addEventListener(type, callback);
   }
 
   // TODO add blob arrayBuffer ArrayBufferView format support
   public send(message: string) {
-    krakenInvokeModule(JSON.stringify(['WebSocket', 'send', [this.id, message]]));
+    kraken.invokeModule('WebSocket', 'send', ([this.id, message]))
   }
 
   public close(code: number, reason: string) {
     this.readyState = ReadyState.CLOSING;
-    krakenInvokeModule(JSON.stringify(['WebSocket', 'close', [this.id, code, reason]]));
+    kraken.invokeModule('WebSocket', 'close', ([this.id, code, reason]));
   }
 }

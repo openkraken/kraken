@@ -75,8 +75,7 @@ public:
     return context;
   }
 
-  void invokeEventListener(int32_t type, const NativeString *args);
-  void handleModuleListener(const NativeString *args, JSValueRef *exception);
+  void invokeModuleEvent(NativeString *moduleName, const char* eventType, void *event, NativeString *extra);
   void reportError(const char *errmsg);
 
   std::atomic<bool> event_registered = false;

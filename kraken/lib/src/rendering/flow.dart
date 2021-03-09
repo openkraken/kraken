@@ -504,6 +504,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     beforeLayout();
+
     RenderBox child = firstChild;
 
     // Layout positioned element
@@ -555,9 +556,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist();
+        bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
         bool percentageToOwnFound = child.renderStyle.isPercentageToOwnExist();
-        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock();
+        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
 
         /// When percentage exists in sizing styles(width/height) and styles relies on its own size,
         /// it needs to relayout twice cause the latter relies on the size calculated in the first relayout
@@ -585,9 +586,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    final double contentWidth = RenderBoxModel.getContentWidth(this);
-    final double contentHeight = RenderBoxModel.getContentHeight(this);
-
     CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
 
     double width = renderStyle.width;
@@ -599,8 +597,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      double constraintWidth = contentWidth ?? 0;
-      double constraintHeight = contentHeight ?? 0;
+      double constraintWidth = logicalContentWidth ?? 0;
+      double constraintHeight = logicalContentHeight ?? 0;
       bool isInline = transformedDisplay == CSSDisplay.inline;
       bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
 
@@ -640,7 +638,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     switch (direction) {
       case Axis.horizontal:
         double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(this);
-        mainAxisLimit = contentWidth != null ? contentWidth : maxConstraintWidth;
+        mainAxisLimit = logicalContentWidth != null ? logicalContentWidth : maxConstraintWidth;
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
@@ -686,8 +684,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       // Whether child need to layout
       bool isChildNeedsLayout = true;
       if (child is RenderBoxModel && child.hasSize) {
-        double childContentWidth = RenderBoxModel.getContentWidth(child);
-        double childContentHeight = RenderBoxModel.getContentHeight(child);
+        double childContentWidth = RenderBoxModel.getLogicalContentWidth(child);
+        double childContentHeight = RenderBoxModel.getLogicalContentHeight(child);
         // Always layout child when parent is not laid out yet or child is marked as needsLayout
         if (!hasSize || child.needsLayout || needsRelayout) {
           isChildNeedsLayout = true;
@@ -836,8 +834,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
     } else if (isInlineBlock && minWidth != null && width == null) {
       constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
-    } else if (contentWidth != null) {
-      constraintWidth = math.max(constraintWidth, contentWidth);
+    } else if (logicalContentWidth != null) {
+      constraintWidth = math.max(constraintWidth, logicalContentWidth);
     }
 
     // Default to children's height
@@ -849,8 +847,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
     } else if (isNotInline && minHeight != null && height == null) {
       constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
-    } else if (contentHeight != null) {
-      constraintHeight = math.max(constraintHeight, contentHeight);
+    } else if (logicalContentHeight != null) {
+      constraintHeight = math.max(constraintHeight, logicalContentHeight);
     }
 
     // Main and cross content size of flow layout
@@ -1156,7 +1154,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.resolvePercentageToContainingBlock();
+        percentageFound = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
       }
       child = childParentData.nextSibling;
     }
@@ -1194,7 +1192,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.isPercentageOfSizingExist();
+        percentageFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
       }
       child = childParentData.nextSibling;
     }
@@ -1336,52 +1334,23 @@ class RenderFlowLayout extends RenderLayoutBox {
     return defaultHitTestChildren(result, position: position);
   }
 
-  Offset getChildScrollOffset(RenderObject child, Offset offset) {
-    final RenderLayoutParentData childParentData = child.parentData;
-    bool isChildFixed = child is RenderBoxModel ?
-      child.renderStyle.position == CSSPositionType.fixed : false;
-    // Fixed elements always paint original offset
-    Offset scrollOffset = isChildFixed ?
-      childParentData.offset : childParentData.offset + offset;
-    return scrollOffset;
-  }
-
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    if (needsSortChildren) {
-      if (!isChildrenSorted) {
-        sortChildrenByZIndex();
-      }
-      for (int i = 0; i < sortedChildren.length; i ++) {
-        RenderObject child = sortedChildren[i];
-        if (child is! RenderPositionHolder) {
-          DateTime childPaintStart;
-          if (kProfileMode) {
-            childPaintStart = DateTime.now();
-          }
-          context.paintChild(child, getChildScrollOffset(child, offset));
-          if (kProfileMode) {
-            DateTime childPaintEnd = DateTime.now();
-            childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
-          }
+    if (!isChildrenSorted) {
+      sortChildrenByZIndex();
+    }
+    for (int i = 0; i < sortedChildren.length; i ++) {
+      RenderObject child = sortedChildren[i];
+      if (child is! RenderPositionHolder) {
+        DateTime childPaintStart;
+        if (kProfileMode) {
+          childPaintStart = DateTime.now();
         }
-      }
-    } else {
-      RenderObject child = firstChild;
-      while (child != null) {
-        final RenderLayoutParentData childParentData = child.parentData;
-        if (child is! RenderPositionHolder) {
-          DateTime childPaintStart;
-          if (kProfileMode) {
-            childPaintStart = DateTime.now();
-          }
-          context.paintChild(child, getChildScrollOffset(child, offset));
-          if (kProfileMode) {
-            DateTime childPaintEnd = DateTime.now();
-            childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
-          }
+        context.paintChild(child, getChildScrollOffset(child, offset));
+        if (kProfileMode) {
+          DateTime childPaintEnd = DateTime.now();
+          childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
         }
-        child = childParentData.nextSibling;
       }
     }
   }

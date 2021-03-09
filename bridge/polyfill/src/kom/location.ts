@@ -1,5 +1,6 @@
 import { krakenInvokeModule } from '../bridge';
 import { URL } from './url';
+import {kraken} from "./kraken";
 
 // @ts-ignore
 const krakenLocation = window.__location__;
@@ -14,7 +15,7 @@ export const location = {
     return getUrl().href;
   },
   set href(url: string) {
-    krakenInvokeModule(JSON.stringify(['Navigation', 'goTo', [url]]));
+    kraken.invokeModule('Navigation', 'goTo', url);
   },
   get origin() {
     return getUrl().origin;
@@ -43,7 +44,7 @@ export const location = {
 
   get assign() {
     return (assignURL: string) => {
-      krakenInvokeModule(JSON.stringify(['Navigation', 'goTo', [assignURL]]));
+      kraken.invokeModule('Navigation', 'goTo', assignURL);
     };
   },
   get reload() {
@@ -51,7 +52,7 @@ export const location = {
   },
   get replace() {
     return (replaceURL: string) => {
-      krakenInvokeModule(JSON.stringify(['Navigation', 'goTo', [replaceURL]]));
+      kraken.invokeModule('Navigation', 'goTo', replaceURL);
     };
   },
   get toString() {

@@ -1,34 +1,27 @@
-import {krakenInvokeModule} from "../bridge";
+import {kraken} from "../kom/kraken";
 
 type MethodCallHandler = (method: string, args: any[]) => void;
 
-let methodCallHandler: MethodCallHandler;
+let methodCallHandlers: MethodCallHandler;
 
 // Like flutter platform channels
 export const methodChannel = {
   setMethodCallHandler(handler: MethodCallHandler) {
-    methodCallHandler = handler;
-    krakenInvokeModule('["MethodChannel","setMethodCallHandler"]');
+    methodCallHandlers = handler;
+    kraken.invokeModule('MethodChannel', 'setMethodCallHandler');
   },
   invokeMethod(method: string, ...args: any[]): Promise<string> {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule(JSON.stringify([
-        'MethodChannel',
-        'invokeMethod',
-        [method, args]
-      ]), (result) => {
-        if (result.indexOf('Error:') === 0) {
-          reject(new Error(result));
-        } else {
-          resolve(result);
-        }
-      })
+      kraken.invokeModule('MethodChannel', 'invokeMethod', [method, args], (e, data) => {
+        if (e) return reject(e);
+        resolve(data);
+      });
     });
   },
 };
 
 export function triggerMethodCallHandler(method: string, args: any) {
-  if (methodCallHandler) {
-    methodCallHandler(method, args);
+  if (methodCallHandlers) {
+    methodCallHandlers(method, args);
   }
 }

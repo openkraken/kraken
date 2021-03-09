@@ -356,4 +356,194 @@ describe('Height', () => {
     BODY.appendChild(div);
     await matchViewportSnapshot();
   });
+
+  it('should work with percentage and flow layout of no height', async (done) => {
+    let div;
+    let text;
+    div = createElement(
+      'div',
+      {
+        style: {
+          background: 'blue',
+          border: '1px solid black',
+          width: '120px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'yellow',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'pink',
+              height: '100%',
+            },
+          },
+          [(text = createText(`two`))]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      text.data = 'three';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
+
+  it('should work with percentage and flow layout of height', async (done) => {
+    let div;
+    let text;
+    div = createElement(
+      'div',
+      {
+        style: {
+          background: 'blue',
+          border: '1px solid black',
+          width: '120px',
+          height: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'yellow',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'pink',
+              height: '100%',
+            },
+          },
+          [(text = createText(`two`))]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      text.data = 'three';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
+
+  it('should work with percentage and flex layout of no height', async (done) => {
+    let div;
+    let text;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'blue',
+          border: '1px solid black',
+          width: '120px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'yellow',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'pink',
+              height: '100%',
+            },
+          },
+          [(text = createText(`two`))]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      text.data = 'three';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
+
+  it('should work with percentage and flex layout of height', async (done) => {
+    let div;
+    let text;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'blue',
+          border: '1px solid black',
+          width: '120px',
+          height: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'yellow',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'pink',
+              height: '100%',
+            },
+          },
+          [(text = createText(`two`))]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      text.data = 'three';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
 });

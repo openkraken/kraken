@@ -106,7 +106,7 @@ void flushUICommandCallback();
 KRAKEN_EXPORT_C
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT_C
-void invokeEventListener(int32_t contextId, int32_t type, NativeString *code);
+void invokeModuleEvent(int32_t contextId, NativeString *module, const char *eventType, void* event, NativeString *extra);
 KRAKEN_EXPORT_C
 Screen *createScreen(double width, double height);
 

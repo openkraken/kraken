@@ -37,6 +37,7 @@ Pointer<Uint16> _stringToUint16(String string) {
 }
 
 Pointer<NativeString> stringToNativeString(String string) {
+  assert(string != null);
   Pointer<NativeString> nativeString = allocate<NativeString>();
   nativeString.ref.string = _stringToUint16(string);
   nativeString.ref.length = string.length;
@@ -63,37 +64,51 @@ void freeNativeString(Pointer<NativeString> pointer) {
 
 // Register InvokeModule
 typedef NativeAsyncModuleCallback = Void Function(
-    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeString> json);
+    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeString> errmsg,  Pointer<NativeString> json);
 typedef DartAsyncModuleCallback = void Function(
-    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeString> json);
+    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeString> errmsg, Pointer<NativeString> json);
 
 typedef Native_InvokeModule = Pointer<NativeString> Function(Pointer<JSCallbackContext> callbackContext,
-    Int32 contextId, Pointer<NativeString>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
+    Int32 contextId, Pointer<NativeString> module, Pointer<NativeString> method, Pointer<NativeString> params, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
 
 String invokeModule(
-    Pointer<JSCallbackContext> callbackContext, int contextId, String json, DartAsyncModuleCallback callback) {
+    Pointer<JSCallbackContext> callbackContext, int contextId, String moduleName, String method, String params, DartAsyncModuleCallback callback) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  dynamic args = jsonDecode(json);
-  String module = args[0];
   String result = '';
 
   try {
-    result = controller.module.moduleManager.invokeModule(module, args, (String json) {
-      Pointer<NativeString> callbackData = stringToNativeString(json);
-      callback(callbackContext, contextId, callbackData);
-      freeNativeString(callbackData);
-    });
+    void invokeModuleCallback({String errmsg, dynamic data}) {
+      if (errmsg != null) {
+        Pointer<NativeString> errmsgPtr = stringToNativeString(errmsg);
+        callback(callbackContext, contextId, errmsgPtr, nullptr);
+        freeNativeString(errmsgPtr);
+      } else {
+        Pointer<NativeString> dataPtr = stringToNativeString(jsonEncode(data));
+        callback(callbackContext, contextId, nullptr, dataPtr);
+        freeNativeString(dataPtr);
+      }
+    }
+    result = controller.module.moduleManager.invokeModule(moduleName, method, (params != null && params != '""') ? jsonDecode(params) : null, invokeModuleCallback);
   } catch (e, stack) {
-    // Dart side internal error should print it directly.
+    String errmsg = '$e\n$stack';
+    // print module error on the dart side.
     print('$e\n$stack');
+    callback(callbackContext, contextId, stringToNativeString(errmsg), nullptr);
   }
 
-  return result ?? '';
+  return result;
 }
 
 Pointer<NativeString> _invokeModule(Pointer<JSCallbackContext> callbackContext, int contextId,
-    Pointer<NativeString> json, Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
-  String result = invokeModule(callbackContext, contextId, nativeStringToString(json), callback.asFunction());
+    Pointer<NativeString> module, Pointer<NativeString> method, Pointer<NativeString> params, Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
+  String result = invokeModule(
+    callbackContext,
+    contextId,
+    nativeStringToString(module),
+    nativeStringToString(method),
+    params == nullptr ? null : nativeStringToString(params),
+    callback.asFunction()
+  );
   return stringToNativeString(result);
 }
 

@@ -4,58 +4,84 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 
 /// Returns a sequence containing the specified [Layer] and all of its
 /// ancestors.  The returned sequence is in [parent, child] order.
-Iterable<Layer> _getLayerChain(Layer start) {
+Iterable<Layer> _getLayerChain(Layer root, Layer start) {
   final layerChain = <Layer>[];
-  for (var layer = start; layer != null; layer = layer.parent) {
+  for (var layer = start.parent; layer != null && layer != root; layer = layer.parent) {
+    // Skip zero OffsetLayer to avoid expensive applyTransform() operations.
+    if (layer is OffsetLayer && !(layer is TransformLayer) && layer.offset == Offset.zero) {
+      continue;
+    }
+
     layerChain.add(layer);
   }
-  return layerChain.reversed;
+  return layerChain;
 }
 
-/// Returns the accumulated transform from the specified sequence of [Layer]s.
-/// The sequence must be in [parent, child] order.  The sequence must not be
-/// null.
-Matrix4 _accumulateTransforms(Iterable<Layer> layerChain) {
-  assert(layerChain != null);
-
-  final transform = Matrix4.identity();
-  if (layerChain.isNotEmpty) {
-    var parent = layerChain.first;
-    for (final child in layerChain.skip(1)) {
-      (parent as ContainerLayer).applyTransform(child, transform);
-      parent = child;
+int _layerShortHash(Iterable<Layer> layerChains) {
+  int hash = 0;
+  for (final p in layerChains) {
+    if (p is TransformLayer) {
+      hash += p.hashCode + p.transform.hashCode;
+      continue;
+    } else if (p is OffsetLayer) {
+      hash += p.hashCode + p.offset.hashCode;
+      continue;
+    } else if (p is ClipRectLayer) {
+      hash += p.hashCode + p.clipRect.hashCode;
+      continue;
+    } else if (p is PictureLayer) {
+      hash += p.hashCode + p.picture.hashCode;
+      continue;
+    } else if (p is TextureLayer) {
+      hash += p.hashCode + p.textureId;
+      continue;
+    } else if (p is PlatformViewLayer) {
+      hash += p.hashCode + p.viewId;
+      continue;
+    } else if (p is ClipRRectLayer) {
+      hash += p.hashCode + p.clipRRect.hashCode;
+      continue;
+    } else if (p is ClipPathLayer) {
+      hash += p.hashCode + p.clipPath.hashCode;
+      continue;
+    } else if (p is ColorFilterLayer) {
+      hash += p.hashCode + p.colorFilter.hashCode;
+      continue;
+    } else if (p is ImageFilterLayer) {
+      hash += p.hashCode + p.imageFilter.hashCode;
+      continue;
+    } else if (p is OpacityLayer) {
+      hash += p.hashCode + p.alpha + p.offset.hashCode;
+      continue;
+    } else if (p is ShaderMaskLayer) {
+      hash += p.hashCode + p.shader.hashCode;
+      continue;
+    } else if (p is BackdropFilterLayer) {
+      hash += p.hashCode + p.filter.hashCode;
+      continue;
+    } else if (p is PhysicalModelLayer) {
+      hash += p.hashCode + p.elevation.hashCode + p.clipPath.hashCode + p.color.hashCode;
+      continue;
+    } else if (p is LeaderLayer) {
+      hash += p.hashCode + p.link.hashCode + p.offset.hashCode;
+      continue;
+    } else if (p is FollowerLayer) {
+      hash += p.hashCode + p.link.hashCode;
+      continue;
     }
   }
-  return transform;
-}
-
-/// Converts a [Rect] in local coordinates of the specified [Layer] to a new
-/// [Rect] in global coordinates.
-Rect _localRectToGlobal(Layer layer, Rect localRect) {
-  final layerChain = _getLayerChain(layer);
-
-  // Skip the root layer which transforms from logical pixels to physical
-  // device pixels.
-  assert(layerChain.isNotEmpty);
-  assert(layerChain.first is TransformLayer);
-  final transform = _accumulateTransforms(layerChain.skip(1));
-  return MatrixUtils.transformRect(transform, localRect);
+  return hash;
 }
 
 typedef IntersectionChangeCallback = void Function(IntersectionObserverEntry info);
 
 mixin RenderIntersectionObserverMixin on RenderBox {
-
   IntersectionChangeCallback _onIntersectionChange;
-
-  bool intersectionAlwaysNeedsCompositing() {
-    return _onIntersectionChange != null;
-  }
-
-  IntersectionObserverLayer _intersectionObserverLayer;
+  IntersectionObserverLayer intersectionObserverLayer;
 
   /**
    * A list of event handlers
@@ -105,30 +131,47 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       return;
     }
 
-    if (_intersectionObserverLayer == null) {
-      _intersectionObserverLayer = IntersectionObserverLayer(
-        elementSize: size, paintOffset: offset, onIntersectionChange: _onIntersectionChange);
+    if (intersectionObserverLayer == null) {
+      intersectionObserverLayer = IntersectionObserverLayer(
+        elementSize: size, paintOffset: offset, onIntersectionChange: _onIntersectionChange,
+          rootRenderObject: (this as RenderBoxModel).elementManager.getRootRenderObject());
     } else {
-      _intersectionObserverLayer.elementSize = semanticBounds.size;
-      _intersectionObserverLayer.paintOffset = offset;
+      intersectionObserverLayer.elementSize = semanticBounds.size;
+      intersectionObserverLayer.paintOffset = offset;
     }
 
-    context.pushLayer(_intersectionObserverLayer, callback, offset);
+    context.pushLayer(intersectionObserverLayer, callback, offset);
   }
 }
 
 class IntersectionObserverLayer extends ContainerLayer {
   IntersectionObserverLayer(
-      {@required this.elementSize, @required this.paintOffset, @required this.onIntersectionChange})
+      {@required Size elementSize, @required Offset paintOffset, @required this.onIntersectionChange, @required this.rootRenderObject})
       : assert(paintOffset != null),
         assert(elementSize != null),
         assert(onIntersectionChange != null),
-        _layerOffset = Offset.zero;
+        _layerOffset = Offset.zero,
+        _elementSize = elementSize,
+        _paintOffset = paintOffset;
+
+  bool _needsComputeBounds = true;
 
   /// The size of the corresponding element.
-  Size elementSize;
+  Size _elementSize;
+  set elementSize(Size value) {
+    if (value == _elementSize) return;
+    _needsComputeBounds = true;
+    _elementSize = value;
+  }
 
-  Offset paintOffset;
+  Offset _paintOffset;
+  set paintOffset(Offset value) {
+    if (value == _paintOffset) return;
+    _needsComputeBounds = true;
+    _paintOffset = value;
+  }
+
+  RenderBox rootRenderObject;
 
   /// Last known layer offset supplied to [addToScene].  Never null.
   Offset _layerOffset;
@@ -141,6 +184,34 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// changed.  Stores entries only for visible element objects;
   /// entries for non-visible ones are actively removed.
   IntersectionObserverEntry _lastIntersectionInfo;
+
+  /// Converts a [Rect] in local coordinates of the specified [Layer] to a new
+  /// [Rect] in global coordinates.
+  Rect _localRectToGlobal(Iterable<Layer> layerChain, Rect localRect) {
+    final transform = _accumulateTransforms(layerChain);
+    Rect result = MatrixUtils.transformRect(transform, localRect);
+    return result;
+  }
+
+  void markNeedsToComputedBounds() {
+    _needsComputeBounds = true;
+  }
+
+  /// Returns the accumulated transform from the specified sequence of [Layer]s.
+  /// The sequence must be in [parent, child] order.  The sequence must not be
+  /// null.
+  Matrix4 _accumulateTransforms(Iterable<Layer> layerChain) {
+    assert(layerChain != null);
+    Matrix4 transform = Matrix4.identity();
+    if (layerChain.isNotEmpty) {
+      var parent = layerChain.first;
+      for (final child in layerChain) {
+        (parent as ContainerLayer).applyTransform(child, transform);
+        parent = child;
+      }
+    }
+    return transform;
+  }
 
   /// See [Layer.addToScene].
   @override
@@ -161,8 +232,6 @@ class IntersectionObserverLayer extends ContainerLayer {
   @override
   void detach() {
     super.detach();
-    // The Layer might no longer be visible.  We'll figure out whether it gets
-    // re-attached later.
     _scheduleIntersectionObservationUpdate();
   }
 
@@ -172,8 +241,8 @@ class IntersectionObserverLayer extends ContainerLayer {
     super.debugFillProperties(properties);
 
     properties
-      ..add(DiagnosticsProperty<Rect>('elementRect', _computeElementBounds()))
-      ..add(DiagnosticsProperty<Rect>('clipRect', _computeClipRect()));
+      ..add(DiagnosticsProperty<Rect>('elementRect', _elementBounds))
+      ..add(DiagnosticsProperty<Rect>('rootBounds', _rootBounds));
   }
 
   bool _isScheduled = false;
@@ -181,7 +250,11 @@ class IntersectionObserverLayer extends ContainerLayer {
     if (!_isScheduled) {
       _isScheduled = true;
       scheduleMicrotask(() {
-        _processCallbacks();
+        // ignore: invalid_use_of_protected_member
+        Layer rootLayer = rootRenderObject.layer;
+        Iterable<Layer> layerChains = _getLayerChain(rootLayer, this);
+        int layerHash = _layerShortHash(layerChains);
+        _processCallbacks(layerChains, layerHash);
         _isScheduled = false;
       });
     }
@@ -189,15 +262,15 @@ class IntersectionObserverLayer extends ContainerLayer {
 
   /// Computes the bounds for the corresponding element in
   /// global coordinates.
-  Rect _computeElementBounds() {
-    final r = _localRectToGlobal(this, Offset.zero & elementSize);
-    return r.shift(paintOffset + _layerOffset);
+  Rect _computeElementBounds(Iterable<Layer> layerChain) {
+    final r = _localRectToGlobal(layerChain, Offset.zero & _elementSize);
+    return r.shift(_paintOffset + _layerOffset);
   }
 
   /// Computes the accumulated clipping bounds, in global coordinates.
-  Rect _computeClipRect() {
+  Rect _computeClipRect(Iterable<Layer> layerChain) {
     assert(RendererBinding.instance?.renderView != null);
-    var clipRect = Offset.zero & RendererBinding.instance.renderView.size;
+    var clipRect = Offset.zero & rootRenderObject.size;
 
     ContainerLayer parentLayer = parent;
     while (parentLayer != null) {
@@ -215,7 +288,7 @@ class IntersectionObserverLayer extends ContainerLayer {
         // also walks up the tree.  In practice there probably will be a small
         // number of clipping layers in the chain, so it might not be a problem.
         // Alternatively we could cache transformations and clipping rectangles.
-        curClipRect = _localRectToGlobal(parentLayer, curClipRect);
+        curClipRect = _localRectToGlobal(layerChain, curClipRect);
         clipRect = clipRect.intersect(curClipRect);
       }
 
@@ -252,16 +325,40 @@ class IntersectionObserverLayer extends ContainerLayer {
     onIntersectionChange(info);
   }
 
+  Rect _rootBounds;
+  Rect _elementBounds;
+  int previousLayerHash = 0;
+
   /// Executes visibility callbacks for all updated.
-  void _processCallbacks() {
-    if (!attached) {
-      _fireCallback(IntersectionObserverEntry(size: _lastIntersectionInfo?.size));
+  void _processCallbacks(Iterable<Layer> layerChain, int layerHash) {
+    if (!attached && parent == null) {
+      _fireCallback(IntersectionObserverEntry(size: Size.zero));
       return;
     }
 
-    Rect elementBounds = _computeElementBounds();
+    // If layerHash is different, we needs to recompute bounds.
+    if (layerHash != previousLayerHash) {
+      _needsComputeBounds = true;
+    }
 
-    final info = IntersectionObserverEntry.fromRects(boundingClientRect: elementBounds, rootBounds: _computeClipRect());
+    Rect elementBounds;
+    Rect rootBounds;
+
+    // If previousLayerHash is not changed, It means that the position of the current Layer in the entire Layer tree has not changed.
+    // So we use cached computed bounds data.
+    if (!_needsComputeBounds) {
+      assert(_elementBounds != null);
+      assert(_rootBounds != null);
+      elementBounds = _elementBounds;
+      rootBounds = _rootBounds;
+    } else {
+      elementBounds = _elementBounds = _computeElementBounds(layerChain);
+      rootBounds = _rootBounds = _computeClipRect(layerChain);
+      _needsComputeBounds = false;
+      previousLayerHash = layerHash;
+    }
+
+    final info = IntersectionObserverEntry.fromRects(boundingClientRect: elementBounds, rootBounds: rootBounds);
     _fireCallback(info);
   }
 }
@@ -302,6 +399,8 @@ class IntersectionObserverEntry {
   // If this is true, then, the IntersectionObserverEntry describes a transition into a state of intersection;
   // if it's false, then you know the transition is from intersecting to not-intersecting.
   bool get isIntersecting {
+    if (size == Size.zero) return false;
+
     if (boundingClientRect.right < rootBounds.left || rootBounds.right < boundingClientRect.left) return false;
     if (boundingClientRect.bottom < rootBounds.top || rootBounds.bottom < boundingClientRect.top) return false;
     return true;

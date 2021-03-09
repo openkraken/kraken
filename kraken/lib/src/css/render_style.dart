@@ -39,159 +39,178 @@ class RenderStyle
 
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
-  bool resolvePercentageToContainingBlock() {
+  bool resolvePercentageToContainingBlock(double parentLogicalContentWidth, double parentLogicalContentHeight) {
     if (!renderBoxModel.hasSize) {
       return false;
     }
+
     RenderBoxModel parent = renderBoxModel.parent;
+    RenderStyle parentRenderStyle = parent.renderStyle;
     bool isPercentageExist = false;
     Size parentSize = parent.size;
     Size size = renderBoxModel.boxSize;
 
+    double parentHorizontalBorderWidth = parentRenderStyle.borderEdge != null ?
+      parentRenderStyle.borderEdge.horizontal : 0;
+    double parentVerticalBorderWidth = parentRenderStyle.borderEdge != null ?
+      parentRenderStyle.borderEdge.vertical : 0;
+    double parentHorizontalPaddingWidth = parentRenderStyle.padding != null ?
+      parentRenderStyle.padding.horizontal : 0;
+    double parentVerticalPaddingHeight = parentRenderStyle.padding != null ?
+      parentRenderStyle.padding.vertical : 0;
+
+    /// Width and height of parent padding box
+    double parentPaddingBoxWidth = parentSize.width - parentHorizontalBorderWidth;
+    double parentPaddingBoxHeight = parentSize.height - parentVerticalBorderWidth;
+    /// Width and height of parent content box
+    double parentContentBoxWidth = parentSize.width - parentHorizontalBorderWidth - parentHorizontalPaddingWidth;
+    double parentContentBoxHeight = parentSize.height - parentVerticalBorderWidth - parentVerticalPaddingHeight;
+
+    /// Percentage sizing, margin and padding starts from the edge of content box of containing block
     /// Update sizing
-    if (CSSLength.isPercentage(style[WIDTH])) {
-      updateSizing(
-        WIDTH,
-        parentSize.width * CSSLength.parsePercentage(style[WIDTH]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
+    if (parentLogicalContentWidth != null) {
+      if (CSSLength.isPercentage(style[WIDTH])) {
+        updateSizing(
+          WIDTH,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[WIDTH]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
+
+      if (CSSLength.isPercentage(style[MIN_WIDTH])) {
+        updateSizing(
+          MIN_WIDTH,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[MIN_WIDTH]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
+
+      if (CSSLength.isPercentage(style[MAX_WIDTH])) {
+        updateSizing(
+          MAX_WIDTH,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[MAX_WIDTH]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
     }
 
-    if (CSSLength.isPercentage(style[MIN_WIDTH])) {
-      updateSizing(
-        MIN_WIDTH,
-        parentSize.width * CSSLength.parsePercentage(style[MIN_WIDTH]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
+    if (parentLogicalContentHeight != null) {
+      if (CSSLength.isPercentage(style[HEIGHT])) {
+        updateSizing(
+          HEIGHT,
+          parentContentBoxHeight * CSSLength.parsePercentage(style[HEIGHT]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
+
+      if (CSSLength.isPercentage(style[MIN_HEIGHT])) {
+        updateSizing(
+          MIN_HEIGHT,
+          parentContentBoxHeight * CSSLength.parsePercentage(style[MIN_HEIGHT]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
+
+      if (CSSLength.isPercentage(style[MAX_HEIGHT])) {
+        updateSizing(
+          MAX_HEIGHT,
+          parentContentBoxHeight * CSSLength.parsePercentage(style[MAX_HEIGHT]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
     }
 
-    if (CSSLength.isPercentage(style[MAX_WIDTH])) {
-      updateSizing(
-        MAX_WIDTH,
-        parentSize.width * CSSLength.parsePercentage(style[MAX_WIDTH]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
+    /// Percentage of padding and margin refer to the logical width of containing block
+    if (parentLogicalContentWidth != null) {
+      /// Update padding
+      /// https://www.w3.org/TR/css-box-3/#padding-physical
+      if (CSSLength.isPercentage(style[PADDING_TOP])) {
+        updatePadding(
+          PADDING_TOP,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[PADDING_TOP]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
 
-    if (CSSLength.isPercentage(style[HEIGHT])) {
-      updateSizing(
-        HEIGHT,
-        parentSize.height * CSSLength.parsePercentage(style[HEIGHT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
+      if (CSSLength.isPercentage(style[PADDING_RIGHT])) {
+        updatePadding(
+          PADDING_RIGHT,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[PADDING_RIGHT]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
 
-    if (CSSLength.isPercentage(style[MIN_HEIGHT])) {
-      updateSizing(
-        MIN_HEIGHT,
-        parentSize.height * CSSLength.parsePercentage(style[MIN_HEIGHT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
+      if (CSSLength.isPercentage(style[PADDING_BOTTOM])) {
+        updatePadding(
+          PADDING_BOTTOM,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[PADDING_BOTTOM]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
 
-    if (CSSLength.isPercentage(style[MAX_HEIGHT])) {
-      updateSizing(
-        MAX_HEIGHT,
-        parentSize.height * CSSLength.parsePercentage(style[MAX_HEIGHT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
+      if (CSSLength.isPercentage(style[PADDING_LEFT])) {
+        updatePadding(
+          PADDING_LEFT,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[PADDING_LEFT]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
 
-    /// Update padding
-    if (CSSLength.isPercentage(style[PADDING_TOP])) {
-      updatePadding(
-        PADDING_TOP,
-        parentSize.height * CSSLength.parsePercentage(style[PADDING_TOP]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
+      /// Update margin
+      /// https://www.w3.org/TR/css-box-3/#margin-physical
+      if (CSSLength.isPercentage(style[MARGIN_TOP])) {
+        updateMargin(
+          MARGIN_TOP,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[MARGIN_TOP]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
 
-    if (CSSLength.isPercentage(style[PADDING_RIGHT])) {
-      updatePadding(
-        PADDING_RIGHT,
-        parentSize.width * CSSLength.parsePercentage(style[PADDING_RIGHT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
+      if (CSSLength.isPercentage(style[MARGIN_RIGHT])) {
+        updateMargin(
+          MARGIN_RIGHT,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[MARGIN_RIGHT]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
 
-    if (CSSLength.isPercentage(style[PADDING_BOTTOM])) {
-      updatePadding(
-        PADDING_BOTTOM,
-        parentSize.height * CSSLength.parsePercentage(style[PADDING_BOTTOM]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
+      if (CSSLength.isPercentage(style[MARGIN_BOTTOM])) {
+        updateMargin(
+          MARGIN_BOTTOM,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[MARGIN_BOTTOM]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
 
-    if (CSSLength.isPercentage(style[PADDING_LEFT])) {
-      updatePadding(
-        PADDING_LEFT,
-        parentSize.width * CSSLength.parsePercentage(style[PADDING_LEFT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
-
-    /// Update margin
-    if (CSSLength.isPercentage(style[MARGIN_TOP])) {
-      updateMargin(
-        MARGIN_TOP,
-        parentSize.height * CSSLength.parsePercentage(style[MARGIN_TOP]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
-
-    if (CSSLength.isPercentage(style[MARGIN_RIGHT])) {
-      updateMargin(
-        MARGIN_RIGHT,
-        parentSize.width * CSSLength.parsePercentage(style[MARGIN_RIGHT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
-
-    if (CSSLength.isPercentage(style[MARGIN_BOTTOM])) {
-      updateMargin(
-        MARGIN_BOTTOM,
-        parentSize.height * CSSLength.parsePercentage(style[MARGIN_BOTTOM]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
-    }
-
-    if (CSSLength.isPercentage(style[MARGIN_LEFT])) {
-      updateMargin(
-        MARGIN_LEFT,
-        parentSize.width * CSSLength.parsePercentage(style[MARGIN_LEFT]),
-        shouldMarkNeedsLayout: false
-      );
-      isPercentageExist = true;
+      if (CSSLength.isPercentage(style[MARGIN_LEFT])) {
+        updateMargin(
+          MARGIN_LEFT,
+          parentContentBoxWidth * CSSLength.parsePercentage(style[MARGIN_LEFT]),
+          shouldMarkNeedsLayout: false
+        );
+        isPercentageExist = true;
+      }
     }
 
     /// Update offset
-
-    /// Offset of positioned element starts from content other than border,
-    /// it needs to substract border width
-    double parentHorizontalBorderWidth = parent.renderStyle.borderEdge != null ?
-      parent.renderStyle.borderEdge.horizontal : 0;
-    double parentVerticalBorderWidth = parent.renderStyle.borderEdge != null ?
-      parent.renderStyle.borderEdge.vertical : 0;
-    double parentContentWidth = parentSize.width - parentHorizontalBorderWidth;
-    double parentContentHeight = parentSize.height - parentVerticalBorderWidth;
-
+    /// Offset of positioned element starts from the edge of padding box of containing block
     if (CSSLength.isPercentage(style[TOP])) {
       updateOffset(
         TOP,
-        parentContentHeight * CSSLength.parsePercentage(style[TOP]),
+        parentPaddingBoxHeight * CSSLength.parsePercentage(style[TOP]),
         shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
@@ -200,7 +219,7 @@ class RenderStyle
     if (CSSLength.isPercentage(style[RIGHT])) {
       updateOffset(
         RIGHT,
-        parentContentWidth * CSSLength.parsePercentage(style[RIGHT]),
+        parentPaddingBoxWidth * CSSLength.parsePercentage(style[RIGHT]),
         shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
@@ -209,7 +228,7 @@ class RenderStyle
     if (CSSLength.isPercentage(style[BOTTOM])) {
       updateOffset(
         BOTTOM,
-        parentContentHeight * CSSLength.parsePercentage(style[BOTTOM]),
+        parentPaddingBoxHeight * CSSLength.parsePercentage(style[BOTTOM]),
         shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
@@ -218,7 +237,7 @@ class RenderStyle
     if (CSSLength.isPercentage(style[LEFT])) {
       updateOffset(
         LEFT,
-        parentContentWidth * CSSLength.parsePercentage(style[LEFT]),
+        parentPaddingBoxWidth * CSSLength.parsePercentage(style[LEFT]),
         shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
@@ -337,14 +356,20 @@ class RenderStyle
     return isPercentageExist;
   }
 
-  bool isPercentageOfSizingExist() {
-    if (CSSLength.isPercentage(style[WIDTH]) ||
+  bool isPercentageOfSizingExist(double parentLogicalContentWidth, double parentLogicalContentHeight) {
+    if (parentLogicalContentWidth != null && (
+      CSSLength.isPercentage(style[WIDTH]) ||
       CSSLength.isPercentage(style[MIN_WIDTH]) ||
-      CSSLength.isPercentage(style[MAX_WIDTH]) ||
+      CSSLength.isPercentage(style[MAX_WIDTH])
+    )) {
+      return true;
+    }
+
+    if (parentLogicalContentHeight != null && (
       CSSLength.isPercentage(style[HEIGHT]) ||
       CSSLength.isPercentage(style[MIN_HEIGHT]) ||
       CSSLength.isPercentage(style[MAX_HEIGHT])
-    ) {
+    )) {
       return true;
     }
     return false;

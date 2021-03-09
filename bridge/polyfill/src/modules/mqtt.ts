@@ -1,5 +1,5 @@
-import { krakenInvokeModule } from '../bridge';
 import {initPropertyHandlersForEventTargets} from "../helpers";
+import {kraken} from "../kom/kraken";
 
 enum ReadyState {
   CONNECTING = 0,
@@ -40,41 +40,41 @@ export class MQTT extends EventTarget {
     // @ts-ignore
     super(builtInEvents);
     this.url = url;
-    this.id = krakenInvokeModule(JSON.stringify(['MQTT', 'init', [url, clientId]]));
+    this.id = kraken.invokeModule('MQTT', 'init', ([url, clientId]));
     mqttClientMap[this.id] = this;
 
     initPropertyHandlersForEventTargets(this, builtInEvents);
   }
 
   addEventListener(type: string, callback: any) {
-    krakenInvokeModule(`["MQTT","addEvent",["${this.id}","${type}"]]`);
+    kraken.invokeModule('MQTT', 'addEvent', [this.id, type]);
     super.addEventListener(type, callback);
   }
 
   get readyState() {
-    var state = krakenInvokeModule(`["MQTT","getReadyState",["${this.id}"]]`);
+    var state = kraken.invokeModule('MQTT', 'getReadyState', [this.id]);
     return parseInt(state);
   }
 
   // Client requests a connection to a Server
   open(options: { QoS?: QoS, username?: string, password?: string, keepalive?: number} = {}) {
-    krakenInvokeModule(`["MQTT","open",["${this.id}",${JSON.stringify(options)}]]`);
+    kraken.invokeModule('MQTT', 'open', [this.id, options]);
   }
   // Subscribe to topics
   subscribe(topic: string, options: { QoS?: QoS} = {}) {
-    krakenInvokeModule(JSON.stringify(['MQTT', 'subscribe', [this.id, topic, options.QoS || QoS.AT_MOST_ONCE]]));
+    kraken.invokeModule('MQTT', 'subscribe', ([this.id, topic, options.QoS || QoS.AT_MOST_ONCE]));
   }
   // Unsubscribe from topics
   unsubscribe(topic: string) {
-    krakenInvokeModule(JSON.stringify(['MQTT', 'unsubscribe', [this.id, topic]]));
+    kraken.invokeModule('MQTT', 'unsubscribe', ([this.id, topic]));
   }
   // Publish message
   publish(topic: string, message: string, options: { QoS?: QoS, retain?: boolean} = {}) {
-    krakenInvokeModule(JSON.stringify(['MQTT', 'publish', [this.id, topic, message, options.QoS || QoS.AT_MOST_ONCE, options.retain || false]]));
+    kraken.invokeModule('MQTT', 'publish', ([this.id, topic, message, options.QoS || QoS.AT_MOST_ONCE, options.retain || false]));
   }
   // Disconnect notification
   close() {
-    krakenInvokeModule(`["MQTT","close",["${this.id}"]]`);
+    kraken.invokeModule('MQTT','close',[this.id]);
     mqttClientMap[this.id] = null;
   }
 }

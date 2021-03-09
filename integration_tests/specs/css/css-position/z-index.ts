@@ -138,4 +138,63 @@ describe('z-index', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('with z-index change', async (done) => {
+    let root;
+    let div1;
+    root = createElement(
+      'div',
+      {
+        style: {
+          background: '#999',
+          width: '200px',
+          height: '200px',
+          padding: '50px',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            style: {
+              position: 'relative',
+              top: 0,
+              left: 0,
+              'background-color': 'blue',
+              height: '90px',
+              'padding-left': '5px',
+              width: '90px',
+              zIndex: 200,
+              transform: 'translate(0, 0)'
+            },
+          },
+        )),
+        createElement(
+          'div',
+          {
+            style: {
+              'position': 'relative',
+              top: '-100px',
+              left: 0,
+              'background-color': 'yellow',
+              height: '100px',
+              width: '100px',
+              zIndex: 100,
+              transform: 'translate(0, 50px)'
+            },
+          },
+        )
+      ]
+    );
+
+    BODY.appendChild(root);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      div1.style.zIndex = 99;
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
 });

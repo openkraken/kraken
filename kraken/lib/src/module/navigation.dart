@@ -23,17 +23,18 @@ enum KrakenNavigationType {
 }
 
 class NavigationModule extends BaseModule {
+  @override
+  String get name => 'Navigation';
+
   NavigationModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override
   void dispose() {}
 
   @override
-  String invoke(List<dynamic> params, callback) {
-    String method = params[1];
-    List navigationArgs = params[2];
+  String invoke(String method, dynamic params, callback) {
     if (method == 'goTo') {
-      String url = navigationArgs[0];
+      String url = params[0];
       String sourceUrl = moduleManager.controller.bundleURL;
 
       Uri targetUri = Uri.parse(url);

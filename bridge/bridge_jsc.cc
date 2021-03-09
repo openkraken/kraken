@@ -15,6 +15,9 @@
 #include <memory>
 
 namespace kraken {
+
+using namespace binding::jsc;
+
 /**
  * JSRuntime
  */
@@ -40,31 +43,31 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_START);
 #endif
 
-  kraken::binding::jsc::bindKraken(context);
-  kraken::binding::jsc::bindUIManager(context);
-  kraken::binding::jsc::bindConsole(context);
-  kraken::binding::jsc::bindEvent(context);
-  kraken::binding::jsc::bindCustomEvent(context);
-  kraken::binding::jsc::bindGestureEvent(context);
-  kraken::binding::jsc::bindCloseEvent(context);
-  kraken::binding::jsc::bindMediaErrorEvent(context);
-  kraken::binding::jsc::bindTouchEvent(context);
-  kraken::binding::jsc::bindInputEvent(context);
-  kraken::binding::jsc::bindIntersectionChangeEvent(context);
-  kraken::binding::jsc::bindMessageEvent(context);
-  kraken::binding::jsc::bindEventTarget(context);
-  kraken::binding::jsc::bindDocument(context);
-  kraken::binding::jsc::bindNode(context);
-  kraken::binding::jsc::bindTextNode(context);
-  kraken::binding::jsc::bindCommentNode(context);
-  kraken::binding::jsc::bindElement(context);
-  kraken::binding::jsc::bindImageElement(context);
-  kraken::binding::jsc::bindInputElement(context);
-  kraken::binding::jsc::bindWindow(context);
-  kraken::binding::jsc::bindPerformance(context);
-  kraken::binding::jsc::bindCSSStyleDeclaration(context);
-  kraken::binding::jsc::bindScreen(context);
-  kraken::binding::jsc::bindBlob(context);
+  bindKraken(context);
+  bindUIManager(context);
+  bindConsole(context);
+  bindEvent(context);
+  bindCustomEvent(context);
+  bindCloseEvent(context);
+  bindGestureEvent(context);
+  bindMediaErrorEvent(context);
+  bindTouchEvent(context);
+  bindInputEvent(context);
+  bindIntersectionChangeEvent(context);
+  bindMessageEvent(context);
+  bindEventTarget(context);
+  bindDocument(context);
+  bindNode(context);
+  bindTextNode(context);
+  bindCommentNode(context);
+  bindElement(context);
+  bindImageElement(context);
+  bindInputElement(context);
+  bindWindow(context);
+  bindPerformance(context);
+  bindCSSStyleDeclaration(context);
+  bindScreen(context);
+  bindBlob(context);
 
 #if ENABLE_PROFILE
   nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_END);
@@ -106,28 +109,37 @@ void JSBridge::detachDevtools() {
 }
 #endif // ENABLE_DEBUGGER
 
-void JSBridge::handleModuleListener(const NativeString *args, JSValueRef *exception) {
-  for (const auto &callback : krakenModuleListenerList) {
-    JSStringRef argsRef = JSStringCreateWithCharacters(args->string, args->length);
-    const JSValueRef arguments[] = {JSValueMakeString(context->context(), argsRef)};
-    JSObjectCallAsFunction(context->context(), callback, context->global(), 1, arguments, exception);
-  }
-}
-
-const int UI_EVENT = 0;
-const int MODULE_EVENT = 1;
-
-void JSBridge::invokeEventListener(int32_t type, const NativeString *args) {
+void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *event, NativeString *extra) {
   if (!context->isValid()) return;
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[invokeEventListener VERBOSE]: message " << args;
+    KRAKEN_LOG(VERBOSE) << "[invokeModuleEvent VERBOSE]: moduleName " << moduleName << " event: " << event;
   }
 
   JSValueRef exception = nullptr;
-  if (MODULE_EVENT == type) {
-    this->handleModuleListener(args, &exception);
+  JSObjectRef eventObjectRef = nullptr;
+  if (event != nullptr) {
+    std::string type = std::string(eventType);
+    EventInstance *eventInstance = JSEvent::buildEventInstance(type, context.get(), event, false);
+    eventObjectRef = eventInstance->object;
   }
+
+  for (const auto &callback : krakenModuleListenerList) {
+    if (exception != nullptr) {
+      context->handleException(exception);
+      return;
+    }
+
+    JSStringRef moduleNameStringRef = JSStringCreateWithCharacters(moduleName->string, moduleName->length);
+    JSStringRef moduleExtraDataRef = JSStringCreateWithCharacters(extra->string, extra->length);
+    const JSValueRef args[] = {
+      JSValueMakeString(context->context(), moduleNameStringRef),
+      eventObjectRef == nullptr ? JSValueMakeNull(context->context()) : eventObjectRef,
+      JSValueMakeFromJSONString(context->context(), moduleExtraDataRef)
+    };
+    JSObjectCallAsFunction(context->context(), callback, context->global(), 3, args, &exception);
+  }
+
   context->handleException(exception);
 }
 

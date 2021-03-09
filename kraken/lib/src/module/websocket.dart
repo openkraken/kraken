@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:kraken/dom.dart';
@@ -8,7 +7,7 @@ import 'module_manager.dart';
 
 enum _ConnectionState { closed }
 
-typedef WebSocketEventCallback = void Function(String id, String event);
+typedef WebSocketEventCallback = void Function(String id, Event event);
 
 class _WebSocketState {
   _ConnectionState status;
@@ -18,6 +17,9 @@ class _WebSocketState {
 }
 
 class WebSocketModule extends BaseModule {
+  @override
+  String get name => 'WebSocket';
+
   Map<String, IOWebSocketChannel> _clientMap = {};
   Map<String, Map<String, bool>> _listenMap = {};
   Map<String, _WebSocketState> _stateMap = {};
@@ -26,22 +28,17 @@ class WebSocketModule extends BaseModule {
   WebSocketModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override
-  String invoke(List<dynamic> params, callback) {
-    String method = params[1];
+  String invoke(String method, dynamic params, callback) {
     if (method == 'init') {
-      List methodArgs = params[2];
-      return init(methodArgs[0], (String id, String event) {
-        moduleManager.emitModuleEvent('["WebSocket", $id, $event]');
+      return init(params, (String id, Event event) {
+        moduleManager.emitModuleEvent(name, event: event, data: id);
       });
     } else if (method == 'addEvent') {
-      List methodArgs = params[2];
-      addEvent(methodArgs[0], methodArgs[1]);
+      addEvent(params[0], params[1]);
     } else if (method == 'send') {
-      List methodArgs = params[2];
-      send(methodArgs[0], methodArgs[1]);
+      send(params[0], params[1]);
     } else if (method == 'close') {
-      List methodArgs = params[2];
-      close(methodArgs[0], methodArgs[1], methodArgs[2]);
+      close(params[0], params[1], params[2]);
     }
     return '';
   }
@@ -65,7 +62,7 @@ class WebSocketModule extends BaseModule {
         dynamic data = state.data;
         webSocket.close(data[0], data[1]);
         CloseEvent event = CloseEvent(data[0] ?? 0, data[1] ?? '', true);
-        callback(id, jsonEncode(event));
+        callback(id, event);
         _stateMap.remove(id);
         return;
       }
@@ -74,13 +71,13 @@ class WebSocketModule extends BaseModule {
       _listen(id, callback);
       if (_hasListener(id, EVENT_OPEN)) {
         Event event = Event(EVENT_OPEN);
-        callback(id, jsonEncode(event));
+        callback(id, event);
       }
     }).catchError((e, stack) {
       // print connection error internally and trigger error event.
       print(e);
       Event event = Event(EVENT_ERROR);
-      callback(id, jsonEncode(event));
+      callback(id, event);
     });
 
     return id;
@@ -125,18 +122,18 @@ class WebSocketModule extends BaseModule {
     client.stream.listen((message) {
       if (!_hasListener(id, EVENT_MESSAGE)) return;
       MessageEvent event = MessageEvent(message);
-      callback(id, jsonEncode(event));
+      callback(id, event);
     }, onError: (error) {
       if (!_hasListener(id, EVENT_ERROR)) return;
       // print error internally and trigger error event;
       print(error);
       Event event = Event(EVENT_ERROR);
-      callback(id, jsonEncode(event));
+      callback(id, event);
     }, onDone: () {
       if (_hasListener(id, EVENT_CLOSE)) {
         // CloseEvent https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/CloseEvent
         CloseEvent event = CloseEvent(client.closeCode, client.closeReason, false);
-        callback(id, jsonEncode(event));
+        callback(id, event);
       }
       // Clear instance after close
       _listenMap.remove(id);
