@@ -112,6 +112,50 @@ describe('Position fixed', () => {
     });
   });
 
+  it('works with single frame image in body scroll', async (done) => {
+    let container = createElement('div',
+      {
+        style: {
+          width: '600px',
+          backgroundColor: '#999',
+        },
+      },
+      [
+        createText('12345'),
+        createElement('div', {
+          style: {
+            width: '50px',
+            height: '900px',
+            background: 'red',
+            top: '50px',
+          },
+        }),
+        createElement('img', {
+          src: 'assets/100x100-green.png',
+          style: {
+            width: '100px',
+            height: '100px',
+            background: 'green',
+            position: 'fixed',
+            top: '50px',
+            left: '50px',
+          },
+        }),
+      ]
+    );
+
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+
+    requestAnimationFrame( () => {
+      BODY.scroll(100, 200);
+      setTimeout(async () => {
+        await matchViewportSnapshot();
+        done();
+      }, 100);
+    });
+  });
+
   it('hitTest with position fixed elements', async () => {
     let box;
     let clickCount = 0;
