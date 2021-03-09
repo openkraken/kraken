@@ -220,6 +220,13 @@ void patchKrakenPolyFill(NativeString *patchCode, const char *patchName) {
     kraken::JSBridge::polyfillPatches[patchName]->free();
     kraken::JSBridge::polyfillPatches[patchName] = patchCode;
   }
+
+  // Append polyfill when js context already created.
+  for (int i = 0; i < maxPoolSize; i ++) {
+    if (contextPool[i] != nullptr) {
+      contextPool[i]->evaluateScript(patchCode, patchName, 0);
+    }
+  }
 }
 
 NativeString *NativeString::clone() {

@@ -1,3 +1,7 @@
+## 0.6.6-dev.6
+
+- 移除 WebSocket 依赖
+
 ## 0.6.6-dev.5
 
 - 移除 webview 依赖

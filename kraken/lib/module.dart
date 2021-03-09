@@ -12,6 +12,5 @@ export 'src/module/fetch.dart';
 export 'src/module/method_channel.dart';
 export 'src/module/schedule_frame.dart';
 export 'src/module/timer.dart';
-export 'src/module/websocket.dart';
 export 'src/module/navigation.dart';
 export 'src/module/performance_timing.dart';
