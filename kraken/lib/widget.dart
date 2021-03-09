@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
 import 'package:kraken/gesture.dart';
 
@@ -144,7 +143,10 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       PerformanceTiming.instance(0).mark(PERF_CONTROLLER_INIT_START);
     }
 
-    KrakenController controller = KrakenController(shortHash(_krakenWidget.hashCode), _krakenWidget.viewportWidth, _krakenWidget.viewportHeight,
+    KrakenController controller = KrakenController(
+      shortHash(_krakenWidget.hashCode),
+      _krakenWidget.viewportWidth,
+      _krakenWidget.viewportHeight,
       background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       bundleContent: _krakenWidget.bundleContent,
@@ -156,6 +158,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       methodChannel: _krakenWidget.javaScriptChannel,
       debugEnableInspector: _krakenWidget.debugEnableInspector,
       gestureClient: _krakenWidget.gestureClient,
+      navigationDelegate: _krakenWidget.navigationDelegate,
     );
 
     if (kProfileMode) {

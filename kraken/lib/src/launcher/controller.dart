@@ -330,7 +330,7 @@ class KrakenViewController {
           rootController.reloadUrl(action.target);
           break;
         default:
-        // for linkActivated and other type, we choose to do nothing.
+        // Navigate and other type, do nothing.
       }
     } catch (e, stack) {
       if (navigationDelegate.errorHandler != null) {
