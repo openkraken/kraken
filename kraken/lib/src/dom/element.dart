@@ -223,7 +223,7 @@ class Element extends Node
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
     layoutStickyChildren(scrollOffset, axisDirection);
-    layoutFixedChildren(scrollOffset, axisDirection);
+    paintFixedChildren(scrollOffset, axisDirection);
 
     if (eventHandlers.containsKey(SCROLL)) {
       _fireScrollEvent();
@@ -235,10 +235,13 @@ class Element extends Node
     dispatchEvent(Event(EVENT_SCROLL));
   }
 
-  void layoutFixedChildren(double scrollOffset, AxisDirection axisDirection) {
+  /// Normally element in scroll box will not repaint on scroll because of repaint boundary optimization
+  /// So it needs to manually mark element needs paint and add scroll offset in paint stage
+  void paintFixedChildren(double scrollOffset, AxisDirection axisDirection) {
     // Only root element has fixed children
     if (targetId == -1) {
       for (RenderBoxModel child in scrollingContentLayoutBox.fixedChildren) {
+        // Save scrolling offset for paint
         if (axisDirection == AxisDirection.down) {
           child.scrollingOffsetY = scrollOffset;
         } else if (axisDirection == AxisDirection.right) {
@@ -397,9 +400,55 @@ class Element extends Node
     }
   }
 
+  /// Convert RenderIntrinsic to non repaint boundary
+  void _convertToNonRepaint() {
+    // Multiframe image should always convert to repaint boundary for scroll performance
+    if (this is ImageElement && (this as ImageElement).isMultiframe) {
+      return;
+    }
+    if (renderBoxModel != null && renderBoxModel.isRepaintBoundary) {
+      toggleRepaintSelf(repaintSelf: false);
+    }
+  }
+
+  /// Convert RenderIntrinsic to repaint boundary
+  void _convertToRepaint() {
+    if (renderBoxModel != null && !renderBoxModel.isRepaintBoundary) {
+      toggleRepaintSelf(repaintSelf: true);
+    }
+  }
+
+  /// Toggle renderBoxModel between repaint boundary and non repaint boundary
+  void toggleRepaintSelf({bool repaintSelf}) {
+    RenderObject parent = renderBoxModel.parent;
+    RenderObject previousSibling;
+    // Remove old renderObject
+    if (parent is ContainerRenderObjectMixin) {
+      previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
+      parent.remove(renderBoxModel);
+    }
+    RenderBoxModel targetRenderBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: repaintSelf);
+    // Append new renderObject
+    if (parent is ContainerRenderObjectMixin) {
+      renderBoxModel = targetRenderBox;
+      this.parent.addChildRenderObject(this, after: previousSibling);
+    } else if (parent is RenderObjectWithChildMixin) {
+      parent.child = targetRenderBox;
+    }
+
+    renderBoxModel = targetRenderBox;
+    // Update renderBoxModel reference in renderStyle
+    renderBoxModel.renderStyle.renderBoxModel = targetRenderBox;
+  }
+
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
     if (renderBoxModel.parent is RenderLayoutBox) {
       renderBoxModel.renderStyle.position = currentPosition;
+    }
+
+    // Remove fixed children before convert to non repaint boundary renderObject
+    if (currentPosition != CSSPositionType.fixed) {
+      _removeFixedChild(renderBoxModel);
     }
 
     // Move element according to position when it's already attached to render tree.
@@ -407,6 +456,17 @@ class Element extends Node
       RenderObject prev = previousSibling?.renderer;
       detach();
       attachTo(parent, after: prev);
+    }
+
+    if (currentPosition == CSSPositionType.fixed) {
+      _convertToRepaint();
+    } else {
+      _convertToNonRepaint();
+    }
+
+    // Add fixed children after convert to repaint boundary renderObject
+    if (currentPosition == CSSPositionType.fixed) {
+      _addFixedChild(renderBoxModel);
     }
   }
 
@@ -565,6 +625,9 @@ class Element extends Node
 
     willDetachRenderer();
 
+    // Remove fixed children from root when dispose
+    _removeFixedChild(renderBoxModel);
+
     RenderObject parent = renderBoxModel.parent;
     if (parent is ContainerRenderObjectMixin) {
       parent.remove(renderBoxModel);
@@ -710,16 +773,6 @@ class Element extends Node
 
     parentRenderLayoutBox.add(childRenderBoxModel);
 
-    // Convert renderBoxModel of fixed element to repaint boundary to restrict paint area
-    // to self when scrolling to improve paint efficiency
-    if (position == CSSPositionType.fixed) {
-      RenderBoxModel targetRenderBox = createRenderBoxModel(child, prevRenderBoxModel: child.renderBoxModel, repaintSelf: true);
-      parentRenderLayoutBox.remove(child.renderBoxModel);
-      child.renderBoxModel = targetRenderBox;
-      parentRenderLayoutBox.add(child.renderBoxModel);
-      // Update renderBoxModel reference in renderStyle
-      child.renderBoxModel.renderStyle.renderBoxModel = targetRenderBox;
-    }
     /// Placeholder of flexbox needs to inherit size from its real display box,
     /// so it needs to layout after real box layout
     child.parent.addChild(childPositionHolder);
@@ -740,6 +793,27 @@ class Element extends Node
     // Set sticky child offset manually
     scrollContainer.layoutStickyChild(child, 0, AxisDirection.down);
     scrollContainer.layoutStickyChild(child, 0, AxisDirection.right);
+
+  }
+
+  /// Cache fixed renderObject to root element
+  void _addFixedChild(RenderBoxModel childRenderBoxModel) {
+    Element rootEl = elementManager.getRootElement();
+    RenderLayoutBox rootRenderLayoutBox = rootEl.scrollingContentLayoutBox;
+    List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
+    if (fixedChildren.indexOf(childRenderBoxModel) == -1) {
+      fixedChildren.add(childRenderBoxModel);
+    }
+  }
+
+  /// Remove non fixed renderObject to root element
+  void _removeFixedChild(RenderBoxModel childRenderBoxModel) {
+    Element rootEl = elementManager.getRootElement();
+    RenderLayoutBox rootRenderLayoutBox = rootEl.scrollingContentLayoutBox;
+    List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
+    if (fixedChildren.indexOf(childRenderBoxModel) != -1) {
+      fixedChildren.remove(childRenderBoxModel);
+    }
   }
 
   // Inline box including inline/inline-block/inline-flex/...

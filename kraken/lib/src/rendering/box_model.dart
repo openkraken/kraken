@@ -416,7 +416,7 @@ class RenderBoxModel extends RenderBox with
   // to be used in paint of fixed children
   double scrollingOffsetY;
   // Cache all the fixed children of renderBoxModel of root element
-  List<RenderBox> fixedChildren = [];
+  List<RenderBoxModel> fixedChildren = [];
 
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;

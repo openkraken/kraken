@@ -221,7 +221,6 @@ mixin CSSOverflowMixin on ElementBase {
   void _onScrollXStart() {
     if(_scrollableX.position.isScrollingNotifier.value) {
       stickyChildren = _findStickyChildren(this);
-      _findFixedChildren();
     }
   }
 
@@ -229,26 +228,6 @@ mixin CSSOverflowMixin on ElementBase {
   void _onScrollYStart() {
     if(_scrollableY.position.isScrollingNotifier.value) {
       stickyChildren = _findStickyChildren(this);
-      _findFixedChildren();
-    }
-  }
-
-  /// Cache fixed children when scroll starts
-  void _findFixedChildren() {
-    List<RenderBox> fixedChildren = [];
-
-    // Only root element has fixed children
-    if (targetId == -1)  {
-      RenderBox child = scrollingContentLayoutBox.firstChild;
-      while (child != null) {
-        final RenderLayoutParentData childParentData = child.parentData;
-        if (child is RenderBoxModel && child.renderStyle.position == CSSPositionType.fixed) {
-          fixedChildren.add(child);
-        }
-        child = childParentData.nextSibling;
-      }
-
-      scrollingContentLayoutBox.fixedChildren = fixedChildren;
     }
   }
 
@@ -327,7 +306,6 @@ mixin CSSOverflowMixin on ElementBase {
 
   void scrollBy({ num dx = 0.0, num dy = 0.0, bool withAnimation }) {
     stickyChildren = _findStickyChildren(this);
-    _findFixedChildren();
 
     if (dx != 0) {
       _scroll(scrollLeft + dx, Axis.horizontal, withAnimation: withAnimation);
@@ -339,7 +317,6 @@ mixin CSSOverflowMixin on ElementBase {
 
   void scrollTo({ num x, num y, bool withAnimation }) {
     stickyChildren = _findStickyChildren(this);
-    _findFixedChildren();
 
     if (x != null) {
       _scroll(x, Axis.horizontal, withAnimation: withAnimation);
