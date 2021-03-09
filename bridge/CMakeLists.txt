@@ -22,6 +22,8 @@ list(APPEND PUBLIC_HEADERS
 list(APPEND BRIDGE_SOURCE
     kraken_bridge.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_foundation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/dart_methods.h
     foundation/logging.cc
     foundation/logging.h
     foundation/colors.h
@@ -38,7 +40,6 @@ list(APPEND BRIDGE_SOURCE
     foundation/closure.h
     foundation/bridge_callback.h
     dart_methods.cc
-    dart_methods.h
     polyfill/dist/polyfill.cc
 )
 
@@ -94,18 +95,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/all_collection.h
     bindings/jsc/DOM/elements/anchor_element.cc
     bindings/jsc/DOM/elements/anchor_element.h
-    bindings/jsc/DOM/elements/animation_player_element.cc
-    bindings/jsc/DOM/elements/animation_player_element.h
-    bindings/jsc/DOM/elements/media_element.cc
-    bindings/jsc/DOM/elements/media_element.h
-    bindings/jsc/DOM/elements/audio_element.cc
-    bindings/jsc/DOM/elements/audio_element.h
-    bindings/jsc/DOM/elements/video_element.cc
-    bindings/jsc/DOM/elements/video_element.h
     bindings/jsc/DOM/elements/canvas_element.cc
     bindings/jsc/DOM/elements/canvas_element.h
-    bindings/jsc/DOM/elements/iframe_element.cc
-    bindings/jsc/DOM/elements/iframe_element.h
     bindings/jsc/DOM/elements/image_element.cc
     bindings/jsc/DOM/elements/image_element.h
     bindings/jsc/DOM/elements/input_element.cc
@@ -171,6 +162,7 @@ add_library(kraken_static STATIC ${BRIDGE_SOURCE})
 
 if (${IS_ANDROID})
   find_library(log-lib log)
+  add_definitions(-DIS_ANDROID=1)
   list(APPEND BRIDGE_LINK_LIBS ${log-lib})
 endif ()
 
@@ -183,10 +175,10 @@ target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
 if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
   ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
   ### remove dynamic_cast and exceptions
-  target_compile_options(kraken PRIVATE -fno-rtti -fno-exceptions -fvisibility=hidden)
+  target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden)
 else()
   ### remove dynamic_cast and exceptions
-  target_compile_options(kraken PRIVATE -fno-rtti -fno-exceptions)
+  target_compile_options(kraken PRIVATE -fno-exceptions)
 endif()
 
 ### KrakenStatic

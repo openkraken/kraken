@@ -4,20 +4,10 @@
  */
 
 #include "element.h"
-#include "bindings/jsc/DOM/elements/anchor_element.h"
-#include "bindings/jsc/DOM/elements/animation_player_element.h"
-#include "bindings/jsc/DOM/elements/audio_element.h"
-#include "bindings/jsc/DOM/elements/canvas_element.h"
-#include "bindings/jsc/DOM/elements/iframe_element.h"
-#include "bindings/jsc/DOM/elements/image_element.h"
-#include "bindings/jsc/DOM/elements/input_element.h"
-#include "bindings/jsc/DOM/elements/object_element.h"
-#include "bindings/jsc/DOM/elements/video_element.h"
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "event_target.h"
 #include "foundation/ui_command_queue.h"
-#include "foundation/ui_command_callback_queue.h"
 #include "text_node.h"
 
 namespace kraken::binding::jsc {
@@ -643,6 +633,7 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
   if (elementCreatorMap.count(name) > 0) {
     elementInstance = elementCreatorMap[name](context);
   } else {
+    KRAKEN_LOG(VERBOSE) << "Unknown element tag: " << name << std::endl;
     elementInstance = new ElementInstance(JSElement::instance(context), name.c_str(), true);
   }
   return elementInstance;

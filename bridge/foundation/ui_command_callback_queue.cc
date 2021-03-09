@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "ui_command_callback_queue.h"
+#include "kraken_bridge.h"
 
 namespace foundation {
 

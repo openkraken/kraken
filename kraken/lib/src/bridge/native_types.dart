@@ -268,14 +268,6 @@ class NativeAnchorElement extends Struct {
   Pointer<NativeElement> nativeElement;
 }
 
-typedef Native_IframePostMessage = Void Function(Pointer<NativeIframeElement> nativePtr, Pointer<NativeString> message);
-
-class NativeIframeElement extends Struct {
-  Pointer<NativeElement> nativeElement;
-
-  Pointer<NativeFunction<Native_IframePostMessage>> postMessage;
-}
-
 typedef GetImageWidth = Double Function(Pointer<NativeImgElement> nativePtr);
 typedef GetImageHeight = Double Function(Pointer<NativeImgElement> nativePtr);
 typedef GetImageNaturalWidth = Double Function(Pointer<NativeImgElement> nativePtr);
@@ -296,26 +288,6 @@ class NativeImgElement extends Struct {
 
 class NativeObjectElement extends Struct {
   Pointer<NativeElement> nativeElement;
-}
-
-typedef Native_PlayMedia = Void Function(Pointer<NativeMediaElement> nativeMediaElement);
-typedef Native_PauseMedia = Void Function(Pointer<NativeMediaElement> nativeMediaElement);
-typedef Native_FastSeek = Void Function(Pointer<NativeMediaElement> nativeMediaElement, Double duration);
-
-class NativeMediaElement extends Struct {
-  Pointer<NativeElement> nativeElement;
-
-  Pointer<NativeFunction<Native_PlayMedia>> play;
-  Pointer<NativeFunction<Native_PauseMedia>> pause;
-  Pointer<NativeFunction<Native_FastSeek>> fastSeek;
-}
-
-class NativeAudioElement extends Struct {
-  Pointer<NativeMediaElement> nativeMediaElement;
-}
-
-class NativeVideoElement extends Struct {
-  Pointer<NativeMediaElement> nativeMediaElement;
 }
 
 class NativeInputElement extends Struct {
@@ -357,15 +329,6 @@ class NativeCanvasRenderingContext2D extends Struct {
   Pointer<NativeFunction<Native_RenderingContextStrokeText>> strokeText;
   Pointer<NativeFunction<Native_RenderingContextSave>> save;
   Pointer<NativeFunction<Native_RenderingContextRestore>> restore;
-}
-
-typedef Native_PlayAnimation = Void Function(
-    Pointer<NativeAnimationElement> nativePtr, Pointer<NativeString> name, Double mix, Double mixSeconds);
-
-class NativeAnimationElement extends Struct {
-  Pointer<NativeElement> nativeElement;
-
-  Pointer<NativeFunction<Native_PlayAnimation>> play;
 }
 
 class NativePerformanceEntry extends Struct {

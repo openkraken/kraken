@@ -150,6 +150,18 @@ void disposeBridge(int contextId) {
   _disposeContext(contextId);
 }
 
+typedef Native_PatchKrakenPolyfill = Void Function(Pointer<NativeString> patchCode, Pointer<Utf8> patchName);
+typedef Dart_PatchKrakenPolyfill = void Function(Pointer<NativeString> patchCode, Pointer<Utf8> patchName);
+
+final Dart_PatchKrakenPolyfill _patchKrakenPolyfill =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_PatchKrakenPolyfill>>('patchKrakenPolyFill').asFunction();
+
+void patchKrakenPolyfill(String patchCode, String patchName) {
+  assert(patchCode != null);
+  assert(patchName != null);
+  _patchKrakenPolyfill(stringToNativeString(patchCode), Utf8.toUtf8(patchName));
+}
+
 typedef Native_AllocateNewContext = Int32 Function();
 typedef Dart_AllocateNewContext = int Function();
 

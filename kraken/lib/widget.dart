@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
-import 'package:meta/meta.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
 
 class Kraken extends StatelessWidget {
@@ -89,8 +89,8 @@ class Kraken extends StatelessWidget {
 
   Kraken({
     Key key,
-    @required this.viewportWidth,
-    @required this.viewportHeight,
+    this.viewportWidth,
+    this.viewportHeight,
     this.bundleURL,
     this.bundlePath,
     this.bundleContent,
@@ -143,10 +143,10 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       PerformanceTiming.instance(0).mark(PERF_CONTROLLER_INIT_START);
     }
 
-    KrakenController controller = KrakenController(
-      shortHash(_krakenWidget.hashCode),
-      _krakenWidget.viewportWidth,
-      _krakenWidget.viewportHeight,
+    double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
+    double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
+
+    KrakenController controller = KrakenController(shortHash(_krakenWidget.hashCode), viewportWidth, viewportHeight,
       background: _krakenWidget.background,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       bundleContent: _krakenWidget.bundleContent,

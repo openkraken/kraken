@@ -1,22 +1,12 @@
 import { addKrakenModuleListener, krakenInvokeModule, privateKraken } from '../bridge';
 import {methodChannel, triggerMethodCallHandler} from '../modules/method-channel';
 import {dispatchConnectivityChangeEvent} from "../modules/connection";
-import {dispatchPositionEvent} from "../modules/geolocation";
-import {dispatchMQTTEvent} from "../modules/mqtt";
 import {dispatchWebSocketEvent} from "../modules/websocket";
 
 function krakenModuleListener(moduleName: string, event: Event, data: any) {
   switch (moduleName) {
     case 'Connection': {
       dispatchConnectivityChangeEvent(event);
-      break;
-    }
-    case 'Geolocation': {
-      dispatchPositionEvent(data);
-      break;
-    }
-    case 'MQTT': {
-      dispatchMQTTEvent(data, event)
       break;
     }
     case 'MethodChannel': {
