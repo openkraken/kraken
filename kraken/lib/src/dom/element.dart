@@ -223,6 +223,7 @@ class Element extends Node
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
     layoutStickyChildren(scrollOffset, axisDirection);
+    layoutFixedChildren(scrollOffset, axisDirection);
 
     if (eventHandlers.containsKey(SCROLL)) {
       _fireScrollEvent();
@@ -232,6 +233,20 @@ class Element extends Node
   /// https://drafts.csswg.org/cssom-view/#scrolling-events
   void _fireScrollEvent() {
     dispatchEvent(Event(EVENT_SCROLL));
+  }
+
+  void layoutFixedChildren(double scrollOffset, AxisDirection axisDirection) {
+    // Only root element has fixed children
+    if (targetId == -1) {
+      for (RenderBoxModel child in scrollingContentLayoutBox.fixedChildren) {
+        if (axisDirection == AxisDirection.down) {
+          child.scrollingOffsetY = scrollOffset;
+        } else if (axisDirection == AxisDirection.right) {
+          child.scrollingOffsetX = scrollOffset;
+        }
+        child.markNeedsPaint();
+      }
+    }
   }
 
   // Set sticky child offset according to scroll offset and direction
@@ -661,25 +676,19 @@ class Element extends Node
 
   void _addPositionedChild(Element child, CSSPositionType position) {
     Element containingBlockElement;
-    RenderLayoutBox parentRenderLayoutBox;
     switch (position) {
       case CSSPositionType.absolute:
         containingBlockElement = _findContainingBlock(child);
-        parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox != null ?
-          containingBlockElement.scrollingContentLayoutBox : containingBlockElement._renderLayoutBox;
         break;
       case CSSPositionType.fixed:
         containingBlockElement = elementManager.getRootElement();
-        // Fixed element doesn't scroll with root element, so its renderObject should not
-        // append to the inner repaint boundary box of scrolling box cause it will skip paint
-        // its children which will cause fixed element scroll with root element
-        parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox != null ?
-          containingBlockElement.scrollingContentLayoutBox.parent : containingBlockElement._renderLayoutBox;
         break;
       default:
         return;
     }
 
+    RenderLayoutBox parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox != null ?
+      containingBlockElement.scrollingContentLayoutBox : containingBlockElement._renderLayoutBox;
 
     Size preferredSize = Size.zero;
     CSSDisplay childDisplay = child.renderBoxModel.renderStyle.display;
@@ -694,12 +703,23 @@ class Element extends Node
     RenderPositionHolder childPositionHolder = RenderPositionHolder(preferredSize: preferredSize);
 
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
+
     childRenderBoxModel.renderPositionHolder = childPositionHolder;
     _setPositionedChildParentData(parentRenderLayoutBox, child);
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
 
     parentRenderLayoutBox.add(childRenderBoxModel);
 
+    // Convert renderBoxModel of fixed element to repaint boundary to restrict paint area
+    // to self when scrolling to improve paint efficiency
+    if (position == CSSPositionType.fixed) {
+      RenderBoxModel targetRenderBox = createRenderBoxModel(child, prevRenderBoxModel: child.renderBoxModel, repaintSelf: true);
+      parentRenderLayoutBox.remove(child.renderBoxModel);
+      child.renderBoxModel = targetRenderBox;
+      parentRenderLayoutBox.add(child.renderBoxModel);
+      // Update renderBoxModel reference in renderStyle
+      child.renderBoxModel.renderStyle.renderBoxModel = targetRenderBox;
+    }
     /// Placeholder of flexbox needs to inherit size from its real display box,
     /// so it needs to layout after real box layout
     child.parent.addChild(childPositionHolder);
