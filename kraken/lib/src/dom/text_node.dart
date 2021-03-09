@@ -11,6 +11,13 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
+
+final RegExp _whiteSpaceReg = RegExp(r'\s+');
+const String WHITE_SPACE_CHAR = ' ';
+const String NEW_LINE_CHAR = '\n';
+const String RETURN_CHAR = '\r';
+const String TAB_CHAR = '\t';
+
 class TextNode extends Node {
   final Pointer<NativeTextNode> nativeTextNodePtr;
 
@@ -37,6 +44,7 @@ class TextNode extends Node {
 
     WhiteSpace whiteSpace = CSSText.getWhiteSpace(parent?.style);
 
+    /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
     //
     // New lines	Spaces and tabs	Text wrapping	End-of-line spaces
@@ -50,22 +58,23 @@ class TextNode extends Node {
         whiteSpace == WhiteSpace.preLine ||
         whiteSpace == WhiteSpace.preWrap ||
         whiteSpace == WhiteSpace.breakSpaces) {
-      return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_data, collapseSpace: true) : _data;
+      return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_data) : _data;
     } else {
       String collapsedData = collapseWhitespace(_data);
-      // Append space while prev is element.
-      //   Consider:
-      //        <ltr><span>foo</span>bar</ltr>
-      // Append space while next is node(including textNode).
-      //   Consider: (PS: ` is text node seperater.)
-      //        <ltr><span>foo</span>`bar``hello`</ltr>
-      if (previousSibling is Element && isSpace(_data[0])) {
-        collapsedData = NORMAL_SPACE + collapsedData;
+      // TODO: 
+      // Remove the leading space while prev element have space too:
+      //   <p><span>foo </span> bar</p>
+      // Refs: 
+      //   https://github.com/WebKit/WebKit/blob/6a970b217d59f36e64606ed03f5238d572c23c48/Source/WebCore/layout/inlineformatting/InlineLineBuilder.cpp#L295
+      
+      if (previousSibling == null) {
+        collapsedData = collapsedData.trimLeft();
       }
 
-      if (nextSibling is Node && isSpace(_data[_data.length - 1])) {
-        collapsedData = collapsedData + NORMAL_SPACE;
+      if (nextSibling == null) {
+        collapsedData = collapsedData.trimRight();
       }
+
       return collapsedData;
     }
   }
@@ -188,25 +197,9 @@ class TextNode extends Node {
   }
 }
 
-bool isSpace(String ch) => ch == ' ';
-bool isLineBreaker(String ch) => ch == '\n' || ch == '\r' || ch == '\t';
+bool isWhiteSpace(String ch) => ch == WHITE_SPACE_CHAR || ch == TAB_CHAR || ch == NEW_LINE_CHAR || ch == RETURN_CHAR;
 
-/// Utility function to collapse whitespace runs to single spaces
-/// and strip leading/trailing whitespace.
-String collapseWhitespace(String string, {bool collapseSpace = true, bool collapseLineBreaker = true}) {
-  var result = StringBuffer();
-  var _skip = true;
-  for (var i = 0; i < string.length; i++) {
-    var character = string[i];
-    if ((collapseSpace && isSpace(character)) || (collapseLineBreaker && isLineBreaker(character))) {
-      if (!_skip) {
-        result.write(' ');
-        _skip = true;
-      }
-    } else {
-      result.write(character);
-      _skip = false;
-    }
-  }
-  return result.toString().trim();
+// '  a b  c   \n' => ' a b c '
+String collapseWhitespace(String string) {
+  return string.replaceAll(_whiteSpaceReg, WHITE_SPACE_CHAR);
 }

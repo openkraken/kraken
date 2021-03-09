@@ -19,6 +19,7 @@ import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
 const String INPUT = 'INPUT';
+const String VALUE = 'value';
 
 const TextInputType TEXT_INPUT_TYPE_NUMBER = TextInputType.numberWithOptions(signed: true);
 
@@ -175,14 +176,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   String get placeholderText => properties['placeholder'] ?? '';
 
-  TextStyle get placeholderTextStyle {
-    return TextStyle(color: CSSColor.parseColor('grey'));
-  }
-
   TextSpan get placeholderTextSpan {
-    return TextSpan(
+    // TODO: support ::placeholder pseudo element
+    return buildTextSpan(
       text: placeholderText,
-      style: placeholderTextStyle,
     );
   }
 
@@ -262,7 +259,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   TextSpan buildTextSpan({String text = ''}) {
-    text ??= properties['value'];
+    text ??= properties[VALUE];
     return CSSTextMixin.createTextSpan(text, this);
   }
 
@@ -302,7 +299,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
+  // Store the state at the begin of user input.
+  String _inputValueAtBegin;
+
   void activeTextInput() {
+    _inputValueAtBegin = properties[VALUE];
+
     if (textInputConfiguration == null) {
       textInputConfiguration = TextInputConfiguration(
         inputType: _textInputType,
@@ -476,7 +478,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
           renderEditable.text = textSpan;
         }
       }
-      _triggerInputEvent(value.text);
+      // Sync value to input element property 
+      properties[VALUE] = value.text;
+      // TODO: return the string containing the data that was added to the element,
+      // which MAY be null if it doesn't apply.
+      String inputData = '';
+      InputEvent inputEvent = InputEvent(inputData);
+      dispatchEvent(inputEvent);
     }
 
     if (renderEditable != null) {
@@ -498,18 +506,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     _startCursorTimer();
   }
 
-  void _triggerInputEvent(String text) {
-    InputEvent inputEvent = InputEvent(text);
-    dispatchEvent(inputEvent);
-  }
-
-  String _lastChangedTextString;
   void _triggerChangeEvent() {
-    String currentText = textSelectionDelegate.textEditingValue?.text;
-    if (_lastChangedTextString != currentText) {
+    String currentValue = textSelectionDelegate.textEditingValue?.text;
+    if (_inputValueAtBegin != currentValue) {
       Event changeEvent = Event(EVENT_CHANGE);
       dispatchEvent(changeEvent);
-      _lastChangedTextString = currentText;
     }
   }
 
@@ -517,7 +518,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void setProperty(String key, value) {
     super.setProperty(key, value);
 
-    if (key == 'value') {
+    if (key == VALUE) {
       String text = value?.toString() ?? '';
       TextRange composing = textSelectionDelegate.textEditingValue?.composing ?? TextRange.empty;
       TextSelection selection = TextSelection.collapsed(offset: text.length);

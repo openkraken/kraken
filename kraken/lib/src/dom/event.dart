@@ -210,7 +210,11 @@ class CustomEvent extends Event {
   }
 }
 
+// https://w3c.github.io/input-events/
 class InputEvent extends Event {
+  // A String containing the type of input that was made.
+  // There are many possible values, such as insertText,
+  // deleteContentBackward, insertFromPaste, and formatBold. 
   final String inputType;
   final String data;
 
@@ -225,7 +229,7 @@ class InputEvent extends Event {
 
   InputEvent(
     this.data, {
-    this.inputType = 'insertText',
+    this.inputType = '',
   }) :  assert(data != null),
         super(EVENT_INPUT, EventInit(cancelable: true));
 }

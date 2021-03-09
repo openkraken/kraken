@@ -65,7 +65,7 @@ class InspectServer {
     String data = jsonEncode({
       if (id != null) 'id': id,
       // Give an empty object for response.
-      'result': result ?? '{}',
+      'result': result ?? {},
     });
     _ws.add(data);
   }
