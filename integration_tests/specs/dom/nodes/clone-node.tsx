@@ -82,5 +82,28 @@ describe('Clone child', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('text node', async () => {
+    const text = document.createTextNode('text');
+    document.body.appendChild(text);
+
+    const text2 = text.cloneNode(true);
+    document.body.appendChild(text2);
+
+    await matchViewportSnapshot();
+  });
+
+  it('element node nested text node', async () => {
+    const div = document.createElement('div');
+    div.style.color = 'red';
+    const text = document.createTextNode('text');
+    document.body.appendChild(div);
+    div.appendChild(text);
+
+    const div2 = div.cloneNode(true);
+    document.body.appendChild(div2);
+
+    await matchViewportSnapshot();
+  });
 });
   

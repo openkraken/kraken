@@ -218,10 +218,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(comment);
   }
 
-  void cloneNode(int oldId, int newId, bool deep) {
-    assert(existsTarget(oldId), 'targetId: $oldId');
-    assert(existsTarget(newId), 'targetId: $newId');
-
+  void cloneNode(int oldId, int newId) {
     Element oldTarget = getEventTargetByTargetId<Element>(oldId);
     Element newTarget = getEventTargetByTargetId<Element>(newId);
 

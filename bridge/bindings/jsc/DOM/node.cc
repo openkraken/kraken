@@ -126,50 +126,62 @@ JSObjectRef JSNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructo
   return nullptr;
 }
 
+JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance* node) {
+  if (node->nodeType == ELEMENT_NODE) {
+    ElementInstance* element = reinterpret_cast<ElementInstance*>(node);
 
-JSValueRef JSNode::copyNodeValue(JSContextRef ctx, ElementInstance* element) {
-  /* createElement */
-  std::string tagName = element->tagName();
-  auto newElement = JSElement::buildElementInstance(element->document->context, tagName);
-  newElement->document = element->document;
+    /* createElement */
+    std::string tagName = element->tagName();
+    auto newElement = JSElement::buildElementInstance(element->document->context, tagName);
+    newElement->document = element->document;
 
-  /* copy attributes */
-  JSValueRef attributeValueRef = JSObjectGetProperty(ctx, element->object, JSStringCreateWithUTF8CString("attributes"), nullptr);
-  JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
-  auto mAttributes = reinterpret_cast<JSElementAttributes*>(JSObjectGetPrivate(attributeObjectRef));
+    /* copy attributes */
+    JSValueRef attributeValueRef = JSObjectGetProperty(ctx, element->object, JSStringCreateWithUTF8CString("attributes"), nullptr);
+    JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
+    auto mAttributes = reinterpret_cast<JSElementAttributes*>(JSObjectGetPrivate(attributeObjectRef));
 
-  std::map<std::string, JSStringRef>& attributesMap = mAttributes->getAttributesMap();
-  std::vector<JSStringRef>& attributesVector = mAttributes->getAttributesVector();
+    std::map<std::string, JSStringRef>& attributesMap = mAttributes->getAttributesMap();
+    std::vector<JSStringRef>& attributesVector = mAttributes->getAttributesVector();
 
-  (*newElement->getAttributes())->setAttributesMap(attributesMap);
-  (*newElement->getAttributes())->setAttributesVector(attributesVector);
+    (*newElement->getAttributes())->setAttributesMap(attributesMap);
+    (*newElement->getAttributes())->setAttributesVector(attributesVector);
 
-  /* copy style */
-  newElement->setStyle(element->getStyle());
+    /* copy style */
+    newElement->setStyle(element->getStyle());
 
-  std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
-  std::string argument = "";
+    std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
+    std::string argument = "";
 
-  NativeString args_01{};
-  NativeString args_02{};
-  buildUICommandArgs(newNodeEventTargetId, argument, args_01, args_02);
+    NativeString args_01{};
+    NativeString args_02{};
+    buildUICommandArgs(newNodeEventTargetId, argument, args_01, args_02);
 
+    foundation::UICommandTaskMessageQueue::instance(newElement->contextId)
+      ->registerCommand(element->eventTargetId, UICommand::cloneNode, args_01, args_02, nullptr);
 
-  foundation::UICommandTaskMessageQueue::instance(newElement->contextId)
-    ->registerCommand(element->eventTargetId, UICommand::cloneNode, args_01, args_02, nullptr);
+    return newElement->object;
+  } else if (node->nodeType == TEXT_NODE) {
+    JSTextNode::TextNodeInstance* textNode = reinterpret_cast<JSTextNode::TextNodeInstance*>(node);
+    std::string content = textNode->internalGetTextContent();
+    std::string newContent = content;
+    auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(textNode->document->context), JSStringCreateWithUTF8CString(newContent.c_str()));
+    return newTextNodeInstance->object;
+  }
 
-  return newElement->object;
+  return nullptr;
 }
 
-void JSNode::traverseCloneNode(JSContextRef ctx, ElementInstance* element, ElementInstance* parentElement) {
+void JSNode::traverseCloneNode(JSContextRef ctx, NodeInstance* element, NodeInstance* parentElement) {
   for (auto iter : element->childNodes)
   {
-    JSValueRef newElementRef = copyNodeValue(ctx, static_cast<ElementInstance *> (iter));
-    JSObjectRef newNodeObjectRef = JSValueToObject(ctx, newElementRef, nullptr);
-    auto newNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newNodeObjectRef));
+    JSValueRef newElementRef = copyNodeValue(ctx, static_cast<NodeInstance *> (iter));
+    JSObjectRef newElementObjectRef = JSValueToObject(ctx, newElementRef, nullptr);
+    auto newNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newElementObjectRef));
     parentElement->internalAppendChild(newNodeInstance);
-
-    traverseCloneNode(ctx, static_cast<ElementInstance *> (iter),  static_cast<ElementInstance *> (newNodeInstance));
+    // element node needs recursive child nodes.
+    if (iter->nodeType == ELEMENT_NODE) {
+      traverseCloneNode(ctx, static_cast<ElementInstance *> (iter),  static_cast<ElementInstance *> (newNodeInstance));
+    }
   }
 }
 
@@ -182,15 +194,12 @@ JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef
     throwJSError(ctx, "Failed to cloneNode: deep should be a Boolean.", exception);
     return nullptr;
   }
-
   bool deepBooleanRef = JSValueToBoolean(ctx, deepValue);
 
   if (selfInstance->nodeType == ELEMENT_NODE) {
     auto element = static_cast<ElementInstance *>(selfInstance);
 
-
-
-    JSValueRef rootElementRef = copyNodeValue(ctx, static_cast<ElementInstance *> (element));
+    JSValueRef rootElementRef = copyNodeValue(ctx, static_cast<NodeInstance *> (element));
     JSObjectRef rootNodeObjectRef = JSValueToObject(ctx, rootElementRef, nullptr);
     auto rootNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(rootNodeObjectRef));
 
@@ -199,6 +208,13 @@ JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef
     }
 
     return rootNodeInstance->object;
+  } else if (selfInstance->nodeType == TEXT_NODE) {
+    auto textNode = static_cast<JSTextNode::TextNodeInstance *>(selfInstance);
+    JSValueRef newTextNodeRef = copyNodeValue(ctx, static_cast<NodeInstance *> (textNode));
+    JSObjectRef newTextNodeObjectRef = JSValueToObject(ctx, newTextNodeRef, nullptr);
+    auto newTextNodeObjectInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newTextNodeObjectRef));
+
+    return newTextNodeObjectInstance->object;
   } else {
     return nullptr;
   }

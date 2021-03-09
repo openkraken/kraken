@@ -280,8 +280,8 @@ class KrakenViewController {
     }
   }
 
-  void cloneNode(int oldId, int newId, bool deep) {
-    _elementManager.cloneNode(oldId, newId, deep);
+  void cloneNode(int oldId, int newId) {
+    _elementManager.cloneNode(oldId, newId);
   }
 
   void setStyle(int targetId, String key, String value) {

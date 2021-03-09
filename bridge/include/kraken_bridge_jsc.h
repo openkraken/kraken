@@ -530,8 +530,8 @@ private:
   JSFunctionHolder m_remove{context, prototypeObject, this, "remove", remove};
   JSFunctionHolder m_insertBefore{context, prototypeObject, this, "insertBefore", insertBefore};
   JSFunctionHolder m_replaceChild{context, prototypeObject, this, "replaceChild", replaceChild};
-  static void traverseCloneNode(JSContextRef ctx, ElementInstance* element, ElementInstance* parentElement);
-  static JSValueRef copyNodeValue(JSContextRef ctx, ElementInstance* element);
+  static void traverseCloneNode(JSContextRef ctx, NodeInstance* element, NodeInstance* parentElement);
+  static JSValueRef copyNodeValue(JSContextRef ctx, NodeInstance* element);
 };
 
 class NodeInstance : public EventTargetInstance {
