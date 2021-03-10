@@ -9,6 +9,7 @@
 #include "event_target.h"
 #include "foundation/ui_command_queue.h"
 #include "text_node.h"
+#include "bindings/jsc/KOM/blob.h"
 
 namespace kraken::binding::jsc {
 using namespace foundation;

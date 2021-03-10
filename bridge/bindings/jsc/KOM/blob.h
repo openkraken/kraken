@@ -21,7 +21,7 @@ void bindBlob(std::unique_ptr<JSContext> &context);
 class JSBlob;
 class BlobBuilder;
 
-class JSBlob : public HostClass {
+class KRAKEN_EXPORT JSBlob : public HostClass {
 public:
   static std::unordered_map<JSContext *, JSBlob *> instanceMap;
   static JSBlob *instance(JSContext *context);

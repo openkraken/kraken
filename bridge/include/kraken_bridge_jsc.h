@@ -59,7 +59,7 @@ public:
   KRAKEN_EXPORT bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
   KRAKEN_EXPORT bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
 
-  bool isValid();
+  KRAKEN_EXPORT bool isValid();
 
   KRAKEN_EXPORT JSObjectRef global();
   KRAKEN_EXPORT JSGlobalContextRef context();
@@ -143,6 +143,15 @@ void KRAKEN_EXPORT throwJSError(JSContextRef ctx, const char *msg, JSValueRef *e
 
 KRAKEN_EXPORT NativeString *stringToNativeString(std::string &string);
 KRAKEN_EXPORT NativeString *stringRefToNativeString(JSStringRef string);
+
+
+KRAKEN_EXPORT JSObjectRef makeObjectFunctionWithPrivateData(JSContext *context, void *data, const char *name,
+                                                JSObjectCallAsFunctionCallback callback);
+
+KRAKEN_EXPORT JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback,
+                                  JSValueRef *exception);
+
+KRAKEN_EXPORT std::string JSStringToStdString(JSStringRef jsString);
 
 class HostObject {
 public:

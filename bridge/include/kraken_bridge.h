@@ -19,6 +19,7 @@
 #define KRAKEN_EXPORT_C extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
+KRAKEN_EXPORT_C
 void *getJSContext(int32_t contextId);
 std::__thread_id getUIThreadId();
 

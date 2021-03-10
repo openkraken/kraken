@@ -14,6 +14,7 @@ namespace kraken::binding::jsc {
 
 #define JSLocationName "Location"
 
+KRAKEN_EXPORT
 void updateLocation(std::string url);
 
 class JSWindow;
