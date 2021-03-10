@@ -22,8 +22,6 @@ namespace kraken {
 
 class JSBridge final {
 public:
-  static std::map<std::string, NativeString*> polyfillPatches;
-
   JSBridge() = delete;
   JSBridge(int32_t jsContext, const JSExceptionHandler &handler);
   ~JSBridge();
