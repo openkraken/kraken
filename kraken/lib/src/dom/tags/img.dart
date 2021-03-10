@@ -152,6 +152,7 @@ class ImageElement extends Element {
       // Once appear remove the listener
       _resetLazyLoading();
     }
+    _constructImageChild();
   }
 
   void _resetLazyLoading() {

@@ -415,8 +415,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
     }
 
-    Size childSize = _getChildSize(child);
-
+    Size childSize = _getChildSize(child) ?? Size.zero;
     switch (direction) {
       case Axis.horizontal:
         return childSize.width + marginHorizontal;
@@ -435,7 +434,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
       marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
     }
-    Size childSize = _getChildSize(child);
+    Size childSize = _getChildSize(child) ?? Size.zero;
     switch (direction) {
       case Axis.horizontal:
         return lineHeight != null ?
@@ -1322,9 +1321,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   bool _isChildBlockLevel(RenderBox child) {
     if (child != null && child is! RenderTextBox) {
       RenderStyle childRenderStyle = _getChildRenderStyle(child);
-      CSSDisplay childDisplay = childRenderStyle.display;
-      return childDisplay == CSSDisplay.block ||
-        childDisplay == CSSDisplay.flex;
+      if (childRenderStyle != null) {
+        CSSDisplay childDisplay = childRenderStyle.display;
+        return childDisplay == CSSDisplay.block ||
+            childDisplay == CSSDisplay.flex;
+      }
     }
     return false;
   }
