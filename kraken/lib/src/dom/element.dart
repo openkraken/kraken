@@ -247,7 +247,6 @@ class Element extends Node
         } else if (axisDirection == AxisDirection.right) {
           child.scrollingOffsetX = scrollOffset;
         }
-        child.markNeedsPaint();
       }
     }
   }
@@ -499,6 +498,8 @@ class Element extends Node
   @override
   void dispose() {
     super.dispose();
+
+    renderBoxModel.dispose();
 
     if (isRendererAttached) {
       detach();

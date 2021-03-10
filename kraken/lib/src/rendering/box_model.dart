@@ -411,10 +411,28 @@ class RenderBoxModel extends RenderBox with
 
   // Cache scroll offset of scrolling box in horizontal direction
   // to be used in paint of fixed children
-  double scrollingOffsetX;
+  double _scrollingOffsetX;
+  double get scrollingOffsetX => _scrollingOffsetX;
+  set scrollingOffsetX(double value) {
+    if (value == null) return;
+    if (_scrollingOffsetX != value) {
+      _scrollingOffsetX = value;
+      markNeedsPaint();
+    }
+  }
+
   // Cache scroll offset of scrolling box in vertical direction
   // to be used in paint of fixed children
-  double scrollingOffsetY;
+  double _scrollingOffsetY;
+  double get scrollingOffsetY => _scrollingOffsetY;
+  set scrollingOffsetY(double value) {
+    if (value == null) return;
+    if (_scrollingOffsetY != value) {
+      _scrollingOffsetY = value;
+      markNeedsPaint();
+    }
+  }
+
   // Cache all the fixed children of renderBoxModel of root element
   List<RenderBoxModel> fixedChildren = [];
 
@@ -1162,6 +1180,14 @@ class RenderBoxModel extends RenderBox with
   void detach() {
     disposePainter();
     super.detach();
+  }
+
+  /// Called when its corresponding element disposed
+  void dispose() {
+    // Clear renderObjects in list when disposed to avoid memory leak
+    if (fixedChildren.length != 0) {
+      fixedChildren.clear();
+    }
   }
 
   Offset getTotalScrollOffset() {
