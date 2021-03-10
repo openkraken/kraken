@@ -1,4 +1,4 @@
-describe('Clone child', () => {
+describe('Clone node', () => {
   it('with a div when deep is true', async () => {
     const div = document.createElement('div');
     div.style.width = '100px';
@@ -31,7 +31,7 @@ describe('Clone child', () => {
     const div = document.createElement('div');
     div.style.width = '100px';
     div.style.height = '100px';
-    div.style.backgroundColor = 'red';
+    div.style.backgroundColor = 'green';
     div.setAttribute('id', '123');
     document.body.appendChild(div)
 
@@ -59,7 +59,7 @@ describe('Clone child', () => {
     const div = document.createElement('div');
     div.style.width = '100px';
     div.style.height = '100px';
-    div.style.backgroundColor = 'red';
+    div.style.backgroundColor = 'green';
     div.setAttribute('id', '123');
     document.body.appendChild(div)
 
@@ -95,7 +95,7 @@ describe('Clone child', () => {
 
   it('element node nested text node', async () => {
     const div = document.createElement('div');
-    div.style.color = 'red';
+    div.style.color = 'blue';
     const text = document.createTextNode('text');
     document.body.appendChild(div);
     div.appendChild(text);

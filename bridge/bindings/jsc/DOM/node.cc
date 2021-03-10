@@ -162,9 +162,12 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance* node) {
     return newElement->object;
   } else if (node->nodeType == TEXT_NODE) {
     JSTextNode::TextNodeInstance* textNode = reinterpret_cast<JSTextNode::TextNodeInstance*>(node);
+
     std::string content = textNode->internalGetTextContent();
     std::string newContent = content;
     auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(textNode->document->context), JSStringCreateWithUTF8CString(newContent.c_str()));
+    newTextNodeInstance->document = textNode->document;
+
     return newTextNodeInstance->object;
   }
 
