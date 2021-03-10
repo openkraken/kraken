@@ -243,7 +243,7 @@ describe('position-fixed', () => {
     BODY.appendChild(div);
     BODY.appendChild(p);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
   it('007', async () => {
     let p;

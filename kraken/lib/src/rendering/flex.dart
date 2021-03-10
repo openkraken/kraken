@@ -2420,7 +2420,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childPaintStart = DateTime.now();
         }
-        context.paintChild(child, getChildScrollOffset(child, offset));
+        final RenderLayoutParentData childParentData = child.parentData;
+        context.paintChild(child, childParentData.offset + offset);
         if (kProfileMode) {
           DateTime childPaintEnd = DateTime.now();
           childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);

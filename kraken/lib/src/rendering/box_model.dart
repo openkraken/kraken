@@ -409,6 +409,33 @@ class RenderBoxModel extends RenderBox with
     return heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
   }
 
+  // Cache scroll offset of scrolling box in horizontal direction
+  // to be used in paint of fixed children
+  double _scrollingOffsetX;
+  double get scrollingOffsetX => _scrollingOffsetX;
+  set scrollingOffsetX(double value) {
+    if (value == null) return;
+    if (_scrollingOffsetX != value) {
+      _scrollingOffsetX = value;
+      markNeedsPaint();
+    }
+  }
+
+  // Cache scroll offset of scrolling box in vertical direction
+  // to be used in paint of fixed children
+  double _scrollingOffsetY;
+  double get scrollingOffsetY => _scrollingOffsetY;
+  set scrollingOffsetY(double value) {
+    if (value == null) return;
+    if (_scrollingOffsetY != value) {
+      _scrollingOffsetY = value;
+      markNeedsPaint();
+    }
+  }
+
+  // Cache all the fixed children of renderBoxModel of root element
+  List<RenderBoxModel> fixedChildren = [];
+
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;
 
@@ -886,7 +913,7 @@ class RenderBoxModel extends RenderBox with
 
     logicalContentWidth = getLogicalContentWidth(this);
     logicalContentHeight = getLogicalContentHeight(this);
-    
+
     if (!isScrollingContentBox && (logicalContentWidth != null || logicalContentHeight != null)) {
       double minWidth;
       double maxWidth;
@@ -1036,16 +1063,6 @@ class RenderBoxModel extends RenderBox with
     throw FlutterError('Please impl performPaint of $runtimeType.');
   }
 
-  Offset getChildScrollOffset(RenderObject child, Offset offset) {
-    final RenderLayoutParentData childParentData = child.parentData;
-    bool isChildFixed = child is RenderBoxModel ?
-    child.renderStyle.position == CSSPositionType.fixed : false;
-    // Fixed elements always paint original offset
-    Offset scrollOffset = isChildFixed ?
-    childParentData.offset : childParentData.offset + offset;
-    return scrollOffset;
-  }
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (kProfileMode) {
@@ -1073,6 +1090,13 @@ class RenderBoxModel extends RenderBox with
   }
 
   void paintBoxModel(PaintingContext context, Offset offset) {
+    // Paint fixed element to fixed position by compensating scroll offset
+    double offsetY = scrollingOffsetY != null ? offset.dy + scrollingOffsetY : offset.dy;
+    double offsetX = scrollingOffsetX != null ? offset.dx + scrollingOffsetX : offset.dx;
+    offset = Offset(
+      offsetX,
+      offsetY
+    );
     paintColorFilter(context, offset, _chainPaintImageFilter);
   }
 
@@ -1156,6 +1180,14 @@ class RenderBoxModel extends RenderBox with
   void detach() {
     disposePainter();
     super.detach();
+  }
+
+  /// Called when its corresponding element disposed
+  void dispose() {
+    // Clear renderObjects in list when disposed to avoid memory leak
+    if (fixedChildren.length != 0) {
+      fixedChildren.clear();
+    }
   }
 
   Offset getTotalScrollOffset() {
