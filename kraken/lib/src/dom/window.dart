@@ -61,4 +61,11 @@ class Window extends EventTarget {
         break;
     }
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Remove native reference.
+    _nativeMap.remove(nativeWindowPtr.address);
+  }
 }
