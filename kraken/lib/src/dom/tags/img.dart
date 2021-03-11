@@ -51,15 +51,14 @@ class ImageElement extends Element {
     return element;
   }
 
-  // imgEl.width -> imgEl.getAttribute('width');
   static double getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.getProperty(WIDTH);
+    return imageElement.width;
   }
 
   static double getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.getProperty(HEIGHT);
+    return imageElement.height;
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
@@ -121,6 +120,30 @@ class ImageElement extends Element {
     _nativeMap.remove(nativeImgElement.address);
   }
 
+  double get width {
+    if (_imageBox != null) {
+      return _imageBox.width;
+    }
+
+    if (renderBoxModel != null && renderBoxModel.hasSize) {
+      return renderBoxModel.clientWidth;
+    }
+
+    return 0.0;
+  }
+
+  double get height {
+    if (_imageBox != null) {
+      return _imageBox.height;
+    }
+
+    if (renderBoxModel != null && renderBoxModel.hasSize) {
+      return renderBoxModel.clientHeight;
+    }
+
+    return 0.0;
+  }
+
   double get naturalWidth {
     if (_imageInfo != null && _imageInfo.image != null) {
       return _imageInfo.image.width.toDouble();
@@ -177,25 +200,31 @@ class ImageElement extends Element {
 
   void _handleEventAfterImageLoaded() {
     // `load` event is a simple event.
-    if (isRendererAttached) {
-      // If image in tree, make sure the image-box has been layout, using scheduleMicrotask.
+    if (isConnected) {
+      // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
+      SchedulerBinding.instance.scheduleFrame();
       SchedulerBinding.instance.addPostFrameCallback((_) {
         dispatchEvent(Event(EVENT_LOAD));
       });
     } else {
-      // Image load event should trigger asynchronously to make sure load event had bind,
-      // using Timer.run to run ASAP.
-      Timer.run(() {
-        dispatchEvent(Event(EVENT_LOAD));
-      });
+      // If not in tree, dispatch the event directly.
+      dispatchEvent(Event(EVENT_LOAD));
     }
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
 
-    _handleEventAfterImageLoaded();
+    if (synchronousCall) {
+      // `synchronousCall` happens when caches image and calling `addListener`.
+      scheduleMicrotask(() {
+        _handleEventAfterImageLoaded();
+      });
+    } else {
+      _handleEventAfterImageLoaded();
+    }
 
+    // Only trigger `initImageListener` once.
     if (_initImageListener != null) {
       _imageStream?.removeListener(_initImageListener);
     }

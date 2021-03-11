@@ -886,7 +886,7 @@ class RenderBoxModel extends RenderBox with
 
     logicalContentWidth = getLogicalContentWidth(this);
     logicalContentHeight = getLogicalContentHeight(this);
-    
+
     if (!isScrollingContentBox && (logicalContentWidth != null || logicalContentHeight != null)) {
       double minWidth;
       double maxWidth;
