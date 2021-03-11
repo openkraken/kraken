@@ -62,7 +62,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     _right = value;
   }
 
-  int _zIndex = 0;
+  int _zIndex;
   int get zIndex {
     return _zIndex;
   }
@@ -122,7 +122,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   void updatePosition(String property, String present) {
     RenderStyle renderStyle = this;
     position = parsePositionType(style[POSITION]);
-    zIndex = int.tryParse(present) ?? 0;
+    zIndex = int.tryParse(present);
     // Position change may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
     renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();

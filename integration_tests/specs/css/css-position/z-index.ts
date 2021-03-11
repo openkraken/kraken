@@ -91,6 +91,148 @@ describe('z-index', () => {
     await matchViewportSnapshot();
   });
 
+  it('two flex items with both zIndex', async () => {
+    let root;
+    root = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          background: '#999',
+          width: '200px',
+          height: '200px',
+          padding: '50px',
+          position: 'relative',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'blue',
+              height: '100px',
+              'padding-left': '5px',
+              width: '100px',
+              zIndex: 3,
+            },
+          },
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'position': 'absolute',
+              top: '80px',
+              'background-color': 'yellow',
+              height: '100px',
+              'padding-left': '5px',
+              width: '100px',
+              zIndex: 1,
+
+            },
+          },
+        )
+      ]
+    );
+    BODY.appendChild(root);
+
+    await matchViewportSnapshot();
+  });
+
+  it('two flex items of zIndex and no zIndex', async () => {
+    let root;
+    root = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          background: '#999',
+          width: '200px',
+          height: '200px',
+          padding: '50px',
+          position: 'relative',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'blue',
+              height: '100px',
+              'padding-left': '5px',
+              width: '100px',
+              zIndex: 3,
+            },
+          },
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'position': 'absolute',
+              top: '80px',
+              'background-color': 'yellow',
+              height: '100px',
+              'padding-left': '5px',
+              width: '100px',
+            },
+          },
+        )
+      ]
+    );
+    BODY.appendChild(root);
+
+    await matchViewportSnapshot();
+  });
+
+  it('two flex items of both no zIndex', async () => {
+    let root;
+    root = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          background: '#999',
+          width: '200px',
+          height: '200px',
+          padding: '50px',
+          position: 'relative',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'position': 'absolute',
+              top: '80px',
+              'background-color': 'yellow',
+              height: '100px',
+              'padding-left': '5px',
+              width: '100px',
+            },
+          },
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'blue',
+              height: '100px',
+              'padding-left': '5px',
+              width: '100px',
+            },
+          },
+        ),
+      ]
+    );
+    BODY.appendChild(root);
+
+    await matchViewportSnapshot();
+  });
+
   it('without flex-item', async () => {
     let root;
     root = createElement(
