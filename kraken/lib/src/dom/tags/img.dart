@@ -217,9 +217,7 @@ class ImageElement extends Element {
 
     if (synchronousCall) {
       // `synchronousCall` happens when caches image and calling `addListener`.
-      scheduleMicrotask(() {
-        _handleEventAfterImageLoaded();
-      });
+      scheduleMicrotask(_handleEventAfterImageLoaded);
     } else {
       _handleEventAfterImageLoaded();
     }
