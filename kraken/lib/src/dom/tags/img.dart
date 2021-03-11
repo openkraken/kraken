@@ -4,6 +4,7 @@
  */
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
@@ -176,13 +177,18 @@ class ImageElement extends Element {
 
   void _handleEventAfterImageLoaded() {
     // `load` event is a simple event.
-    // If image in tree, make sure the image-box has been layout, using scheduleMicrotask.
-    // Image load event should trigger asynchronously to make sure load event had bind,
-    // using Timer.run to run ASAP.
-    Function runner = isRendererAttached ? scheduleMicrotask : Timer.run;
-    runner(() {
-      dispatchEvent(Event(EVENT_LOAD));
-    });
+    if (isRendererAttached) {
+      // If image in tree, make sure the image-box has been layout, using scheduleMicrotask.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        dispatchEvent(Event(EVENT_LOAD));
+      });
+    } else {
+      // Image load event should trigger asynchronously to make sure load event had bind,
+      // using Timer.run to run ASAP.
+      Timer.run(() {
+        dispatchEvent(Event(EVENT_LOAD));
+      });
+    }
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
