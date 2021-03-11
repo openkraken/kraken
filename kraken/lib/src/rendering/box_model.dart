@@ -219,26 +219,6 @@ class RenderLayoutBox extends RenderBoxModel
     _isChildrenSorted = false;
   }
 
-  void sortChildrenByZIndex() {
-    List<RenderObject> children = getChildrenAsList();
-    children.sort((RenderObject prev, RenderObject next) {
-      CSSPositionType prevPosition = prev is RenderBoxModel ? prev.renderStyle.position : CSSPositionType.static;
-      CSSPositionType nextPosition = next is RenderBoxModel ? next.renderStyle.position : CSSPositionType.static;
-      // Place positioned element after non positioned element
-      if (prevPosition == CSSPositionType.static && nextPosition != CSSPositionType.static) {
-        return -1;
-      }
-      if (prevPosition != CSSPositionType.static && nextPosition == CSSPositionType.static) {
-        return 1;
-      }
-      // z-index applies to flex-item ignoring position property
-      int prevZIndex = prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? 0) : 0;
-      int nextZIndex = next is RenderBoxModel ? (next.renderStyle.zIndex ?? 0) : 0;
-      return prevZIndex - nextZIndex;
-    });
-    sortedChildren = children;
-  }
-
   // Get all children as a list and detach them all.
   List<RenderObject> getDetachedChildrenAsList() {
     List<RenderObject> children = getChildrenAsList();
