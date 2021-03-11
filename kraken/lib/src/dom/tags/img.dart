@@ -9,7 +9,6 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/bridge.dart';
-import 'dart:async';
 import 'dart:ffi';
 import 'dart:collection';
 
