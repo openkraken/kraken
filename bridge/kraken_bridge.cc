@@ -213,6 +213,13 @@ void flushUICommandCallback() {
   foundation::UICommandCallbackQueue::instance()->flushCallbacks();
 }
 
+void registerPluginSource(NativeString *code, const char *pluginName) {
+  kraken::JSBridge::pluginSourceCode[pluginName] = NativeString{
+    code->string,
+    code->length
+  };
+}
+
 NativeString *NativeString::clone() {
   NativeString *newNativeString = new NativeString();
   uint16_t *newString = new uint16_t[length];

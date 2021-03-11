@@ -30,6 +30,8 @@ public:
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
+  static std::unordered_map<std::string, NativeString> pluginSourceCode;
+
   std::deque<JSObjectRef> krakenModuleListenerList;
 
   int32_t contextId;

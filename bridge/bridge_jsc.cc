@@ -48,6 +48,8 @@ namespace kraken {
 
 using namespace binding::jsc;
 
+std::unordered_map<std::string, NativeString> JSBridge::pluginSourceCode {};
+
 /**
  * JSRuntime
  */
@@ -105,6 +107,10 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 #endif
 
   initKrakenPolyFill(this);
+
+  for (auto p : pluginSourceCode) {
+    evaluateScript(&p.second, p.first.c_str(), 0);
+  }
 
 #if ENABLE_PROFILE
   nativePerformance->mark(PERF_JS_POLYFILL_INIT_END);

@@ -116,4 +116,7 @@ Screen *createScreen(double width, double height);
 KRAKEN_EXPORT_C
 void registerDartMethods(uint64_t *methodBytes, int32_t length);
 
+KRAKEN_EXPORT_C
+void registerPluginSource(NativeString* code, const char *pluginName);
+
 #endif // KRAKEN_BRIDGE_EXPORT_H
