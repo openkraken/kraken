@@ -135,8 +135,9 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
     newElement->document = element->document;
 
     /* copy attributes */
+    JSStringHolder attributesStringHolder = JSStringHolder(element->document->context, "attributes");
     JSValueRef attributeValueRef =
-      JSObjectGetProperty(ctx, element->object, JSStringCreateWithUTF8CString("attributes"), nullptr);
+      JSObjectGetProperty(ctx, element->object, attributesStringHolder.getString(), nullptr);
     JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
     auto mAttributes = reinterpret_cast<JSElementAttributes *>(JSObjectGetPrivate(attributeObjectRef));
 
@@ -150,23 +151,20 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
     newElement->setStyle(element->getStyle());
 
     std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
-    std::string argument = "";
 
     NativeString args_01{};
-    NativeString args_02{};
-    buildUICommandArgs(newNodeEventTargetId, argument, args_01, args_02);
+    buildUICommandArgs(newNodeEventTargetId, args_01);
 
     foundation::UICommandTaskMessageQueue::instance(newElement->contextId)
-      ->registerCommand(element->eventTargetId, UICommand::cloneNode, args_01, args_02, nullptr);
+      ->registerCommand(element->eventTargetId, UICommand::cloneNode, args_01, nullptr);
 
     return newElement->object;
   } else if (node->nodeType == TEXT_NODE) {
     JSTextNode::TextNodeInstance *textNode = reinterpret_cast<JSTextNode::TextNodeInstance *>(node);
 
     std::string content = textNode->internalGetTextContent();
-    std::string newContent = content;
     auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(textNode->document->context),
-                                                                JSStringCreateWithUTF8CString(newContent.c_str()));
+                                                                JSStringCreateWithUTF8CString(content.c_str()));
     newTextNodeInstance->document = textNode->document;
 
     return newTextNodeInstance->object;
