@@ -151,8 +151,8 @@ class ImageElement extends Element {
     if (entry.isIntersecting) {
       // Once appear remove the listener
       _resetLazyLoading();
+      _constructImageChild();
     }
-    _constructImageChild();
   }
 
   void _resetLazyLoading() {
