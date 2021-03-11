@@ -176,7 +176,6 @@ class ImageElement extends Element {
   }
 
   void _handleEventAfterImageLoaded() {
-    // Image load event should trigger asynchronously to make sure load event had bind.
     // `load` event is a simple event.
     dispatchEvent(Event(EVENT_LOAD));
   }
@@ -184,7 +183,8 @@ class ImageElement extends Element {
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
 
-    // Make sure the image-box has been layout.
+    // Image load event should trigger asynchronously to make sure load event had bind.
+    // Alos make sure the image-box has been layout.
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _handleEventAfterImageLoaded();
     });
