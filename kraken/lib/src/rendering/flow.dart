@@ -415,8 +415,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
     }
 
-    Size childSize = _getChildSize(child);
-
+    Size childSize = _getChildSize(child) ?? Size.zero;
     switch (direction) {
       case Axis.horizontal:
         return childSize.width + marginHorizontal;
@@ -435,7 +434,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
       marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
     }
-    Size childSize = _getChildSize(child);
+    Size childSize = _getChildSize(child) ?? Size.zero;
     switch (direction) {
       case Axis.horizontal:
         return lineHeight != null ?
@@ -1322,9 +1321,11 @@ class RenderFlowLayout extends RenderLayoutBox {
   bool _isChildBlockLevel(RenderBox child) {
     if (child != null && child is! RenderTextBox) {
       RenderStyle childRenderStyle = _getChildRenderStyle(child);
-      CSSDisplay childDisplay = childRenderStyle.display;
-      return childDisplay == CSSDisplay.block ||
-        childDisplay == CSSDisplay.flex;
+      if (childRenderStyle != null) {
+        CSSDisplay childDisplay = childRenderStyle.display;
+        return childDisplay == CSSDisplay.block ||
+            childDisplay == CSSDisplay.flex;
+      }
     }
     return false;
   }
@@ -1332,6 +1333,25 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
     return defaultHitTestChildren(result, position: position);
+  }
+
+  void sortChildrenByZIndex() {
+    List<RenderObject> children = getChildrenAsList();
+    children.sort((RenderObject prev, RenderObject next) {
+      CSSPositionType prevPosition = prev is RenderBoxModel ? prev.renderStyle.position : CSSPositionType.static;
+      CSSPositionType nextPosition = next is RenderBoxModel ? next.renderStyle.position : CSSPositionType.static;
+      // Place positioned element after non positioned element
+      if (prevPosition == CSSPositionType.static && nextPosition != CSSPositionType.static) {
+        return -1;
+      }
+      if (prevPosition != CSSPositionType.static && nextPosition == CSSPositionType.static) {
+        return 1;
+      }
+      int prevZIndex = prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? 0) : 0;
+      int nextZIndex = next is RenderBoxModel ? (next.renderStyle.zIndex ?? 0) : 0;
+      return prevZIndex - nextZIndex;
+    });
+    sortedChildren = children;
   }
 
   @override
@@ -1346,7 +1366,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childPaintStart = DateTime.now();
         }
-        context.paintChild(child, getChildScrollOffset(child, offset));
+        final RenderLayoutParentData childParentData = child.parentData;
+        context.paintChild(child, childParentData.offset + offset);
         if (kProfileMode) {
           DateTime childPaintEnd = DateTime.now();
           childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
