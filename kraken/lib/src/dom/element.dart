@@ -499,7 +499,10 @@ class Element extends Node
   void dispose() {
     super.dispose();
 
-    renderBoxModel.dispose();
+    // Call dispose method of renderBoxModel when GC auto dispose element
+    if (renderBoxModel != null) {
+      renderBoxModel.dispose();
+    }
 
     if (isRendererAttached) {
       detach();
@@ -622,6 +625,10 @@ class Element extends Node
   // Detach renderObject of current node from parent
   @override
   void detach() {
+    // Call dispose method of renderBoxModel when it is detached from tree
+    if (renderBoxModel != null) {
+      renderBoxModel.dispose();
+    }
     if (renderBoxModel == null) return;
 
     willDetachRenderer();
