@@ -9,6 +9,7 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/bridge.dart';
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:collection';
 
@@ -53,15 +54,14 @@ class ImageElement extends Element {
     return element;
   }
 
-  // imgEl.width -> imgEl.getAttribute('width');
   static double getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.getProperty(WIDTH);
+    return imageElement.width;
   }
 
   static double getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.getProperty(HEIGHT);
+    return imageElement.height;
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
@@ -123,6 +123,30 @@ class ImageElement extends Element {
     _nativeMap.remove(nativeImgElement.address);
   }
 
+  double get width {
+    if (_imageBox != null) {
+      return _imageBox.width;
+    }
+
+    if (renderBoxModel != null && renderBoxModel.hasSize) {
+      return renderBoxModel.clientWidth;
+    }
+
+    return 0.0;
+  }
+
+  double get height {
+    if (_imageBox != null) {
+      return _imageBox.height;
+    }
+
+    if (renderBoxModel != null && renderBoxModel.hasSize) {
+      return renderBoxModel.clientHeight;
+    }
+
+    return 0.0;
+  }
+
   double get naturalWidth {
     if (_imageInfo != null && _imageInfo.image != null) {
       return _imageInfo.image.width.toDouble();
@@ -154,8 +178,8 @@ class ImageElement extends Element {
     if (entry.isIntersecting) {
       // Once appear remove the listener
       _resetLazyLoading();
+      _constructImageChild();
     }
-    _constructImageChild();
   }
 
   void _resetLazyLoading() {
@@ -179,18 +203,29 @@ class ImageElement extends Element {
 
   void _handleEventAfterImageLoaded() {
     // `load` event is a simple event.
-    dispatchEvent(Event(EVENT_LOAD));
+    if (isConnected) {
+      // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
+      SchedulerBinding.instance.scheduleFrame();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        dispatchEvent(Event(EVENT_LOAD));
+      });
+    } else {
+      // If not in tree, dispatch the event directly.
+      dispatchEvent(Event(EVENT_LOAD));
+    }
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
 
-    // Image load event should trigger asynchronously to make sure load event had bind.
-    // Alos make sure the image-box has been layout.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    if (synchronousCall) {
+      // `synchronousCall` happens when caches image and calling `addListener`.
+      scheduleMicrotask(_handleEventAfterImageLoaded);
+    } else {
       _handleEventAfterImageLoaded();
-    });
+    }
 
+    // Only trigger `initImageListener` once.
     if (_initImageListener != null) {
       _imageStream?.removeListener(_initImageListener);
     }
