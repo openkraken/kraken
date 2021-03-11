@@ -161,4 +161,19 @@ describe('Tags img', () => {
     expect(img.naturalWidth).toEqual(0);
     expect(img.naturalWidth).toEqual(0);
   });
+
+  it('should work with loading=lazy', (done) => {
+    const img = document.createElement('img');
+    // Make image loading=lazy.
+    img.setAttribute('loading', 'lazy');
+    img.src = '//gw.alicdn.com/tfs/TB1MRC_cvb2gK0jSZK9XXaEgFXa-1701-1535.png';
+    img.style.width = '60px';
+    
+    document.body.appendChild(img);
+
+    img.onload = async () => {
+      await matchElementImageSnapshot(img);
+      done();
+    };
+  });
 });
