@@ -9,6 +9,7 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/bridge.dart';
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:collection';
 
@@ -176,17 +177,19 @@ class ImageElement extends Element {
 
   void _handleEventAfterImageLoaded() {
     // `load` event is a simple event.
-    dispatchEvent(Event(EVENT_LOAD));
+    // If image in tree, make sure the image-box has been layout, using scheduleMicrotask.
+    // Image load event should trigger asynchronously to make sure load event had bind,
+    // using Timer.run to run ASAP.
+    Function runner = isRendererAttached ? scheduleMicrotask : Timer.run;
+    runner(() {
+      dispatchEvent(Event(EVENT_LOAD));
+    });
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
 
-    // Image load event should trigger asynchronously to make sure load event had bind.
-    // Alos make sure the image-box has been layout.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _handleEventAfterImageLoaded();
-    });
+    _handleEventAfterImageLoaded();
 
     if (_initImageListener != null) {
       _imageStream?.removeListener(_initImageListener);
