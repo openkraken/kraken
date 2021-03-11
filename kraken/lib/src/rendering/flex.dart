@@ -2420,8 +2420,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       // 3. element has no z-index and position is static
       CSSPositionType prevPosition = prev is RenderBoxModel ? prev.renderStyle.position : CSSPositionType.static;
       CSSPositionType nextPosition = next is RenderBoxModel ? next.renderStyle.position : CSSPositionType.static;
-      int prevZIndex = prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? null) : null;
-      int nextZIndex = next is RenderBoxModel ? (next.renderStyle.zIndex ?? null) : null;
+      int prevZIndex = prev is RenderBoxModel ? prev.renderStyle.zIndex : null;
+      int nextZIndex = next is RenderBoxModel ? next.renderStyle.zIndex : null;
 
       if (prevZIndex != null && nextZIndex != null) {
         return prevZIndex - nextZIndex;
