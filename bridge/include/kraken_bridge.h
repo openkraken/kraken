@@ -9,6 +9,9 @@
 #include <cstdint>
 #include <thread>
 
+#include "kraken_foundation.h"
+#include "dart_methods.h"
+
 #if KRAKEN_JSC_ENGINE
 #include "kraken_bridge_jsc.h"
 #endif
@@ -16,6 +19,7 @@
 #define KRAKEN_EXPORT_C extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
+KRAKEN_EXPORT_C
 void *getJSContext(int32_t contextId);
 std::__thread_id getUIThreadId();
 
@@ -112,5 +116,8 @@ Screen *createScreen(double width, double height);
 
 KRAKEN_EXPORT_C
 void registerDartMethods(uint64_t *methodBytes, int32_t length);
+
+KRAKEN_EXPORT_C
+void registerPluginSource(NativeString* code, const char *pluginName);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

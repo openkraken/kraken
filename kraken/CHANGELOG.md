@@ -1,3 +1,38 @@
+## 0.6.6+2
+
+- 修复 plugin 模块注册失败的问题
+
+## 0.6.6+1
+
+- 去除 patchKrakenPolyfill API
+
+## 0.6.6
+
+- 支持插件化方案，移除多余的依赖
+
+## 0.6.6-dev.6
+
+- 移除 WebSocket 依赖
+
+## 0.6.6-dev.5
+
+- 移除 webview 依赖
+
+## 0.6.6-dev.4
+
+- 修复 Hot Restart 之后，Event 对象销毁引发的 Crash
+
+## 0.6.6-dev.3
+
+- 修复 Hot Restart 之后，`patchKrakenPolyFill` 执行引发的 Crash
+
+## 0.6.6-dev.2
+
+- 移除 kraken_video_player
+- 移除 MQTT 模块
+- 移除 audio_player 依赖
+- 移除 geolocation 依赖
+
 ## 0.6.0
 
 **Features**

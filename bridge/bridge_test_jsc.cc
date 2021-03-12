@@ -6,7 +6,6 @@
 #include "bridge_test_jsc.h"
 #include "bindings/jsc/KOM/blob.h"
 #include "bindings/jsc/KOM/location.h"
-#include "bindings/jsc/js_context_internal.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include "testframework.h"

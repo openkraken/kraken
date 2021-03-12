@@ -81,7 +81,7 @@
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
-            key = "KRAKEN_SPEC_DIR"
+            key = "KRAKEN_TEST_DIR"
             value = "${PROJECT_DIR}/../"
             isEnabled = "YES">
          </EnvironmentVariable>

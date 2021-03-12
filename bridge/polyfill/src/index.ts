@@ -11,7 +11,6 @@ import { asyncStorage } from './modules/async-storage';
 import { URLSearchParams } from './kom/url-search-params';
 import { URL } from './kom/url';
 import { kraken } from './kom/kraken';
-import { MQTT } from './modules/mqtt';
 import { history } from './kom/history';
 
 defineGlobalProperty('console', console);
@@ -29,7 +28,6 @@ defineGlobalProperty('asyncStorage', asyncStorage);
 defineGlobalProperty('URLSearchParams', URLSearchParams);
 defineGlobalProperty('URL', URL);
 defineGlobalProperty('kraken', kraken);
-defineGlobalProperty('MQTT', MQTT);
 
 function defineGlobalProperty(key: string, value: any) {
   Object.defineProperty(globalThis, key, {

@@ -1,12 +1,10 @@
 import { kraken } from './kraken';
-import geolocation from '../modules/geolocation';
 import connection from '../modules/connection';
 import { vibrate } from '../modules/vibration';
 
 export const navigator = {
   vibrate,
   connection,
-  geolocation,
   // UA is read-only.
   get userAgent() {
     return kraken.userAgent;

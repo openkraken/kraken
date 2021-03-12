@@ -11,15 +11,12 @@
 #include "element.h"
 #include "node.h"
 
+
 #include "bindings/jsc/DOM/elements/anchor_element.h"
-#include "bindings/jsc/DOM/elements/animation_player_element.h"
-#include "bindings/jsc/DOM/elements/audio_element.h"
 #include "bindings/jsc/DOM/elements/canvas_element.h"
-#include "bindings/jsc/DOM/elements/iframe_element.h"
 #include "bindings/jsc/DOM/elements/image_element.h"
 #include "bindings/jsc/DOM/elements/input_element.h"
 #include "bindings/jsc/DOM/elements/object_element.h"
-#include "bindings/jsc/DOM/elements/video_element.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
