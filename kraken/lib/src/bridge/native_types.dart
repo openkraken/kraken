@@ -245,8 +245,11 @@ class NativeElement extends Struct {
   Pointer<NativeFunction<Native_ScrollBy>> scrollBy;
 }
 
+typedef Native_Open = Void Function(Pointer<NativeWindow> nativeWindow,Pointer<NativeString> url);
+
 class NativeWindow extends Struct {
   Pointer<NativeEventTarget> nativeEventTarget;
+  Pointer<NativeFunction<Native_Open>> open;
 }
 
 class NativeDocument extends Struct {

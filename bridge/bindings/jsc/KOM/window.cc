@@ -101,6 +101,15 @@ void WindowInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) 
   }
 }
 
+JSValueRef JSWindow::open(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  const JSValueRef urlValueRef = arguments[0];
+  JSStringRef url = JSValueToStringCopy(ctx, urlValueRef, exception);
+  auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
+  window->nativeWindow->open(window->nativeWindow, stringRefToNativeString(url));
+  return nullptr;
+}
+
 JSValueRef JSWindow::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef xValueRef = arguments[0];

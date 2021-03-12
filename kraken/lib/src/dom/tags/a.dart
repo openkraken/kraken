@@ -28,6 +28,7 @@ class AnchorElement extends Element {
   void handleClick(Event event) {
     super.handleClick(event);
     if (_href == null) return;
+
     Uri uri = Uri.parse(_href);
     KrakenController rootController = elementManager.controller.view.rootController;
     String sourceUrl = rootController.bundleURL;
@@ -53,11 +54,9 @@ class AnchorElement extends Element {
         if (_target == null || _target == '_self') {
           return KrakenNavigationType.reload;
         }
-
-        return KrakenNavigationType.linkActivated;
-      default:
-        return KrakenNavigationType.other;
     }
+
+    return KrakenNavigationType.navigate;
   }
 
   @override

@@ -11,15 +11,20 @@ enum KrakenNavigationActionPolicy {
   cancel
 }
 
+// https://www.w3.org/TR/navigation-timing-2/#sec-performance-navigation-types
 enum KrakenNavigationType {
-  // A link with an href attribute was activated by the user.
-  linkActivated,
+  // Navigation where the history handling behavior is set to "default"
+  // or "replace" and the navigation was not initiated by a prerender hint.
+  navigate,
 
-  // the view was reloaded
+  // Navigation where the history handling behavior is set to "reload".
   reload,
 
-  // other navigation type
-  other
+  // Navigation where the history handling behavior is set to "entry update".
+  backForward,
+
+  // Navigation initiated by a prerender hint.
+  prerender
 }
 
 class NavigationModule extends BaseModule {
