@@ -19,6 +19,7 @@
 #define KRAKEN_EXPORT_C extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
+KRAKEN_EXPORT_C
 void *getJSContext(int32_t contextId);
 std::__thread_id getUIThreadId();
 
@@ -56,7 +57,8 @@ enum UICommand {
   insertAdjacentNode,
   setStyle,
   setProperty,
-  removeProperty
+  removeProperty,
+  cloneNode
 };
 
 struct KRAKEN_EXPORT UICommandItem {
@@ -116,6 +118,6 @@ KRAKEN_EXPORT_C
 void registerDartMethods(uint64_t *methodBytes, int32_t length);
 
 KRAKEN_EXPORT_C
-void patchKrakenPolyFill(NativeString *patchCode, const char *patchName);
+void registerPluginSource(NativeString* code, const char *pluginName);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

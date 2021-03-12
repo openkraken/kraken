@@ -4,6 +4,7 @@
  */
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
@@ -42,6 +43,9 @@ class ImageElement extends Element {
 
   bool _hasLazyLoading = false;
 
+  // Whether is multiframe image
+  bool isMultiframe = false;
+
   static SplayTreeMap<int, ImageElement> _nativeMap = SplayTreeMap();
 
   static Element getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
@@ -50,15 +54,14 @@ class ImageElement extends Element {
     return element;
   }
 
-  // imgEl.width -> imgEl.getAttribute('width');
   static double getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.getProperty(WIDTH);
+    return imageElement.width;
   }
 
   static double getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
-    return imageElement.getProperty(HEIGHT);
+    return imageElement.height;
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
@@ -120,6 +123,30 @@ class ImageElement extends Element {
     _nativeMap.remove(nativeImgElement.address);
   }
 
+  double get width {
+    if (_imageBox != null) {
+      return _imageBox.width;
+    }
+
+    if (renderBoxModel != null && renderBoxModel.hasSize) {
+      return renderBoxModel.clientWidth;
+    }
+
+    return 0.0;
+  }
+
+  double get height {
+    if (_imageBox != null) {
+      return _imageBox.height;
+    }
+
+    if (renderBoxModel != null && renderBoxModel.hasSize) {
+      return renderBoxModel.clientHeight;
+    }
+
+    return 0.0;
+  }
+
   double get naturalWidth {
     if (_imageInfo != null && _imageInfo.image != null) {
       return _imageInfo.image.width.toDouble();
@@ -151,6 +178,7 @@ class ImageElement extends Element {
     if (entry.isIntersecting) {
       // Once appear remove the listener
       _resetLazyLoading();
+      _constructImageChild();
     }
   }
 
@@ -173,16 +201,31 @@ class ImageElement extends Element {
     }
   }
 
-  void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
-    // img load event should trigger asynchronously to make sure load event had bind.
-    Timer.run(() {
+  void _handleEventAfterImageLoaded() {
+    // `load` event is a simple event.
+    if (isConnected) {
+      // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
+      SchedulerBinding.instance.scheduleFrame();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        dispatchEvent(Event(EVENT_LOAD));
+      });
+    } else {
+      // If not in tree, dispatch the event directly.
       dispatchEvent(Event(EVENT_LOAD));
-    });
+    }
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
-    _handleEventAfterImageLoaded(imageInfo, synchronousCall);
+
+    if (synchronousCall) {
+      // `synchronousCall` happens when caches image and calling `addListener`.
+      scheduleMicrotask(_handleEventAfterImageLoaded);
+    } else {
+      _handleEventAfterImageLoaded();
+    }
+
+    // Only trigger `initImageListener` once.
     if (_initImageListener != null) {
       _imageStream?.removeListener(_initImageListener);
     }
@@ -192,10 +235,16 @@ class ImageElement extends Element {
     _frameNumber++;
     _imageInfo = imageInfo;
     _imageBox?.image = _imageInfo?.image;
+
+    CSSPositionType position = renderBoxModel != null ? renderBoxModel.renderStyle.position : null;
     // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
     // so use two frames to tell multiframe image from static image, note this optimization will fail
     // at multiframe image with only two frames which is not common
-    if (_frameNumber > 2) {
+
+    // Fixed element should always convert to repaint boundary for scroll performance
+    if (_frameNumber > 2 ||
+      position == CSSPositionType.fixed
+    ) {
       _convertToRepaint();
     } else {
       _convertToNonRepaint();
@@ -205,33 +254,24 @@ class ImageElement extends Element {
 
   /// Convert RenderIntrinsic to non repaint boundary
   void _convertToNonRepaint() {
+    CSSPositionType position = renderBoxModel != null ? renderBoxModel.renderStyle.position : null;
+    // Fixed element should always convert to repaint boundary for scroll performance
+    if (position == CSSPositionType.fixed) {
+      return;
+    }
+    // Fixed element should convert to repaint boundary for scroll performance
     if (renderBoxModel != null && renderBoxModel.isRepaintBoundary) {
-      _toggleRepaintSelf(repaintSelf: false);
+      toggleRepaintSelf(repaintSelf: false);
+      isMultiframe = false;
     }
   }
 
   /// Convert RenderIntrinsic to repaint boundary
   void _convertToRepaint() {
     if (renderBoxModel != null && !renderBoxModel.isRepaintBoundary) {
-      _toggleRepaintSelf(repaintSelf: true);
+      toggleRepaintSelf(repaintSelf: true);
+      isMultiframe = true;
     }
-  }
-
-  /// Toggle renderBoxModel between repaint boundary and non repaint boundary
-  void _toggleRepaintSelf({bool repaintSelf}) {
-    RenderObject parent = renderBoxModel.parent;
-    RenderBoxModel targetRenderBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: repaintSelf);
-    if (parent is ContainerRenderObjectMixin) {
-      RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
-      parent.remove(renderBoxModel);
-      renderBoxModel = targetRenderBox;
-      this.parent.addChildRenderObject(this, after: previousSibling);
-    } else if (parent is RenderObjectWithChildMixin) {
-      parent.child = targetRenderBox;
-    }
-    renderBoxModel = targetRenderBox;
-    // Update renderBoxModel reference in renderStyle
-    renderBoxModel.renderStyle.renderBoxModel = targetRenderBox;
   }
 
   void _resize() {

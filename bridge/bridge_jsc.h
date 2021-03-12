@@ -9,7 +9,6 @@
 #ifndef  KRAKEN_ENABLE_JSA
 
 #include "foundation/bridge_callback.h"
-#include "foundation/thread_safe_array.h"
 #include "include/kraken_bridge.h"
 
 #include <atomic>
@@ -19,42 +18,10 @@
 #include <devtools/frontdoor.h>
 #endif // ENABLE_DEBUGGER
 
-#include "bindings/jsc/DOM/comment_node.h"
-#include "bindings/jsc/DOM/custom_event.h"
-#include "bindings/jsc/DOM/document.h"
-#include "bindings/jsc/DOM/element.h"
-#include "bindings/jsc/DOM/elements/image_element.h"
-#include "bindings/jsc/DOM/elements/input_element.h"
-#include "bindings/jsc/DOM/event.h"
-#include "bindings/jsc/DOM/custom_event.h"
-#include "bindings/jsc/DOM/gesture_event.h"
-#include "bindings/jsc/DOM/events/input_event.h"
-#include "bindings/jsc/DOM/event_target.h"
-#include "bindings/jsc/DOM/events/close_event.h"
-#include "bindings/jsc/DOM/events/input_event.h"
-#include "bindings/jsc/DOM/events/intersection_change_event.h"
-#include "bindings/jsc/DOM/events/media_error_event.h"
-#include "bindings/jsc/DOM/events/message_event.h"
-#include "bindings/jsc/DOM/events/touch_event.h"
-#include "bindings/jsc/DOM/node.h"
-#include "bindings/jsc/DOM/style_declaration.h"
-#include "bindings/jsc/DOM/text_node.h"
-#include "bindings/jsc/KOM/blob.h"
-#include "bindings/jsc/KOM/console.h"
-#include "bindings/jsc/KOM/location.h"
-#include "bindings/jsc/KOM/performance.h"
-#include "bindings/jsc/KOM/screen.h"
-#include "bindings/jsc/KOM/window.h"
-#include "bindings/jsc/js_context_internal.h"
-#include "bindings/jsc/kraken.h"
-#include "bindings/jsc/ui_manager.h"
-
 namespace kraken {
 
 class JSBridge final {
 public:
-  static std::map<std::string, NativeString*> polyfillPatches;
-
   JSBridge() = delete;
   JSBridge(int32_t jsContext, const JSExceptionHandler &handler);
   ~JSBridge();
@@ -63,6 +30,8 @@ public:
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
+  static std::unordered_map<std::string, NativeString> pluginSourceCode;
+
   std::deque<JSObjectRef> krakenModuleListenerList;
 
   int32_t contextId;
@@ -70,8 +39,8 @@ public:
   // the owner pointer which take JSBridge as property.
   void *owner;
   /// evaluate JavaScript source codes in standard mode.
-  void evaluateScript(const NativeString *script, const char *url, int startLine);
-  void evaluateScript(const std::u16string& script, const char *url, int startLine);
+  KRAKEN_EXPORT void evaluateScript(const NativeString *script, const char *url, int startLine);
+  KRAKEN_EXPORT void evaluateScript(const std::u16string& script, const char *url, int startLine);
 
   const std::unique_ptr<kraken::binding::jsc::JSContext> &getContext() const {
     return context;

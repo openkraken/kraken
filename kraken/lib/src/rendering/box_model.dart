@@ -219,26 +219,6 @@ class RenderLayoutBox extends RenderBoxModel
     _isChildrenSorted = false;
   }
 
-  void sortChildrenByZIndex() {
-    List<RenderObject> children = getChildrenAsList();
-    children.sort((RenderObject prev, RenderObject next) {
-      CSSPositionType prevPosition = prev is RenderBoxModel ? prev.renderStyle.position : CSSPositionType.static;
-      CSSPositionType nextPosition = next is RenderBoxModel ? next.renderStyle.position : CSSPositionType.static;
-      // Place positioned element after non positioned element
-      if (prevPosition == CSSPositionType.static && nextPosition != CSSPositionType.static) {
-        return -1;
-      }
-      if (prevPosition != CSSPositionType.static && nextPosition == CSSPositionType.static) {
-        return 1;
-      }
-      // z-index applies to flex-item ignoring position property
-      int prevZIndex = prev is RenderBoxModel ? (prev.renderStyle.zIndex ?? 0) : 0;
-      int nextZIndex = next is RenderBoxModel ? (next.renderStyle.zIndex ?? 0) : 0;
-      return prevZIndex - nextZIndex;
-    });
-    sortedChildren = children;
-  }
-
   // Get all children as a list and detach them all.
   List<RenderObject> getDetachedChildrenAsList() {
     List<RenderObject> children = getChildrenAsList();
@@ -408,6 +388,33 @@ class RenderBoxModel extends RenderBox with
     bool heightDefined = renderStyle.height != null;
     return heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
   }
+
+  // Cache scroll offset of scrolling box in horizontal direction
+  // to be used in paint of fixed children
+  double _scrollingOffsetX;
+  double get scrollingOffsetX => _scrollingOffsetX;
+  set scrollingOffsetX(double value) {
+    if (value == null) return;
+    if (_scrollingOffsetX != value) {
+      _scrollingOffsetX = value;
+      markNeedsPaint();
+    }
+  }
+
+  // Cache scroll offset of scrolling box in vertical direction
+  // to be used in paint of fixed children
+  double _scrollingOffsetY;
+  double get scrollingOffsetY => _scrollingOffsetY;
+  set scrollingOffsetY(double value) {
+    if (value == null) return;
+    if (_scrollingOffsetY != value) {
+      _scrollingOffsetY = value;
+      markNeedsPaint();
+    }
+  }
+
+  // Cache all the fixed children of renderBoxModel of root element
+  List<RenderBoxModel> fixedChildren = [];
 
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;
@@ -886,7 +893,7 @@ class RenderBoxModel extends RenderBox with
 
     logicalContentWidth = getLogicalContentWidth(this);
     logicalContentHeight = getLogicalContentHeight(this);
-    
+
     if (!isScrollingContentBox && (logicalContentWidth != null || logicalContentHeight != null)) {
       double minWidth;
       double maxWidth;
@@ -1036,16 +1043,6 @@ class RenderBoxModel extends RenderBox with
     throw FlutterError('Please impl performPaint of $runtimeType.');
   }
 
-  Offset getChildScrollOffset(RenderObject child, Offset offset) {
-    final RenderLayoutParentData childParentData = child.parentData;
-    bool isChildFixed = child is RenderBoxModel ?
-    child.renderStyle.position == CSSPositionType.fixed : false;
-    // Fixed elements always paint original offset
-    Offset scrollOffset = isChildFixed ?
-    childParentData.offset : childParentData.offset + offset;
-    return scrollOffset;
-  }
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (kProfileMode) {
@@ -1073,6 +1070,13 @@ class RenderBoxModel extends RenderBox with
   }
 
   void paintBoxModel(PaintingContext context, Offset offset) {
+    // Paint fixed element to fixed position by compensating scroll offset
+    double offsetY = scrollingOffsetY != null ? offset.dy + scrollingOffsetY : offset.dy;
+    double offsetX = scrollingOffsetX != null ? offset.dx + scrollingOffsetX : offset.dx;
+    offset = Offset(
+      offsetX,
+      offsetY
+    );
     paintColorFilter(context, offset, _chainPaintImageFilter);
   }
 
@@ -1156,6 +1160,14 @@ class RenderBoxModel extends RenderBox with
   void detach() {
     disposePainter();
     super.detach();
+  }
+
+  /// Called when its corresponding element disposed
+  void dispose() {
+    // Clear renderObjects in list when disposed to avoid memory leak
+    if (fixedChildren.length != 0) {
+      fixedChildren.clear();
+    }
   }
 
   Offset getTotalScrollOffset() {

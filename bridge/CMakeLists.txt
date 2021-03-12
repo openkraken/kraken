@@ -48,11 +48,11 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
 
   if (${IS_ANDROID})
     list(APPEND BRIDGE_INCLUDE
-            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore-604.1.13/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore/include
             )
     add_library(JavaScriptCore SHARED IMPORTED)
     set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION
-            "${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore-604.1.13/lib/android/${ANDROID_ABI}/libjsc.so"
+            "${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore/lib/android/${ANDROID_ABI}/libjsc.so"
             )
     list(APPEND BRIDGE_LINK_LIBS
             JavaScriptCore
@@ -236,17 +236,4 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
     MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.kraken_bridge
     PUBLIC_HEADER ${PUBLIC_HEADERS}
     )
-
-  if (${CMAKE_BUILD_TYPE} STREQUAL "release")
-    get_target_property(OUTPUT_DIRECTORY kraken LIBRARY_OUTPUT_DIRECTORY)
-    add_custom_command(TARGET kraken POST_BUILD
-      COMMAND ${CMAKE_STRIP} -x -X -S ${OUTPUT_DIRECTORY}/kraken_bridge.framework/kraken_bridge)
-  endif ()
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "darwin")
-  if (${CMAKE_BUILD_TYPE} STREQUAL "release")
-    get_target_property(OUTPUT_DIRECTORY kraken LIBRARY_OUTPUT_DIRECTORY)
-    get_target_property(OUTPUT_NAME kraken OUTPUT_NAME)
-    add_custom_command(TARGET kraken POST_BUILD
-      COMMAND ${CMAKE_STRIP} -x -X -S ${OUTPUT_DIRECTORY}/lib${OUTPUT_NAME}.dylib)
-  endif ()
 endif()

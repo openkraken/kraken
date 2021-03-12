@@ -28,9 +28,10 @@ dependencies:
   kraken:
     path: ../kraken
   image: ^2.1.19
-  kraken_video_player: ^0.2.1
-  kraken_websocket: ^0.0.1
-  kraken_animation_player: ^0.0.1
+  kraken_video_player: ^0.2.2
+  kraken_websocket: ^0.0.2
+  kraken_animation_player: ^0.0.2
+  kraken_webview: ^0.2.2
 
 dev_dependencies:
   flutter_driver:

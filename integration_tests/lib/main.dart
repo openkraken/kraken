@@ -15,6 +15,7 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
 import 'package:kraken_animation_player/kraken_animation_player.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
+import 'package:kraken_webview/kraken_webview.dart';
 
 String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST FAILED]');
@@ -54,6 +55,7 @@ void main() async {
   KrakenWebsocket.initialize();
   KrakenAnimationPlayer.initialize();
   KrakenVideoPlayer.initialize();
+  KrakenWebView.initialize();
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
   CSSText.DEFAULT_FONT_SIZE = 14.0;

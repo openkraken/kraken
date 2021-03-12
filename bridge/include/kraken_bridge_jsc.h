@@ -59,7 +59,7 @@ public:
   KRAKEN_EXPORT bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
   KRAKEN_EXPORT bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
 
-  bool isValid();
+  KRAKEN_EXPORT bool isValid();
 
   KRAKEN_EXPORT JSObjectRef global();
   KRAKEN_EXPORT JSGlobalContextRef context();
@@ -143,6 +143,15 @@ void KRAKEN_EXPORT throwJSError(JSContextRef ctx, const char *msg, JSValueRef *e
 
 KRAKEN_EXPORT NativeString *stringToNativeString(std::string &string);
 KRAKEN_EXPORT NativeString *stringRefToNativeString(JSStringRef string);
+
+
+KRAKEN_EXPORT JSObjectRef makeObjectFunctionWithPrivateData(JSContext *context, void *data, const char *name,
+                                                JSObjectCallAsFunctionCallback callback);
+
+KRAKEN_EXPORT JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback,
+                                  JSValueRef *exception);
+
+KRAKEN_EXPORT std::string JSStringToStdString(JSStringRef jsString);
 
 class HostObject {
 public:
@@ -485,10 +494,13 @@ public:
   static JSNode *instance(JSContext *context);
   DEFINE_OBJECT_PROPERTY(Node, 9, isConnected, firstChild, lastChild, parentNode, childNodes, previousSibling,
                          nextSibling, nodeType, textContent)
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Node, 5, appendChild, remove, removeChild, insertBefore, replaceChild)
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Node, 6, appendChild, remove, removeChild, insertBefore, replaceChild, cloneNode)
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
+
+  static JSValueRef cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef arguments[], JSValueRef *exception);
@@ -518,11 +530,14 @@ protected:
   ~JSNode();
 
 private:
+  JSFunctionHolder m_cloneNode{context, prototypeObject, this, "cloneNode", cloneNode};
   JSFunctionHolder m_removeChild{context, prototypeObject, this, "removeChild", removeChild};
   JSFunctionHolder m_appendChild{context, prototypeObject, this, "appendChild", appendChild};
   JSFunctionHolder m_remove{context, prototypeObject, this, "remove", remove};
   JSFunctionHolder m_insertBefore{context, prototypeObject, this, "insertBefore", insertBefore};
   JSFunctionHolder m_replaceChild{context, prototypeObject, this, "replaceChild", replaceChild};
+  static void traverseCloneNode(JSContextRef ctx, NodeInstance* element, NodeInstance* parentElement);
+  static JSValueRef copyNodeValue(JSContextRef ctx, NodeInstance* element);
 };
 
 class NodeInstance : public EventTargetInstance {
@@ -671,6 +686,12 @@ public:
   KRAKEN_EXPORT void setAttribute(std::string &name, JSStringRef value);
   KRAKEN_EXPORT bool hasAttribute(std::string &name);
   KRAKEN_EXPORT void removeAttribute(std::string &name);
+
+  KRAKEN_EXPORT std::map<std::string, JSStringRef>& getAttributesMap();
+  KRAKEN_EXPORT void setAttributesMap(std::map<std::string, JSStringRef>& attributes);
+
+  KRAKEN_EXPORT std::vector<JSStringRef>& getAttributesVector();
+  KRAKEN_EXPORT void setAttributesVector(std::vector<JSStringRef>& attributes);
 
   KRAKEN_EXPORT JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   KRAKEN_EXPORT bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
@@ -831,6 +852,10 @@ public:
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   std::string internalGetTextContent() override;
   void internalSetTextContent(JSStringRef content, JSValueRef *exception) override;
+  JSHostObjectHolder<JSElementAttributes>& getAttributes();
+  JSHostClassHolder& getStyle();
+  void setStyle(JSHostClassHolder& style);
+  void setAttributes(JSHostObjectHolder<JSElementAttributes>& attributes);
 
   NativeElement *nativeElement{nullptr};
 

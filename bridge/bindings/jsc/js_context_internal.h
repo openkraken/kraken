@@ -36,14 +36,6 @@ static inline bool isNumberIndex(std::string &name) {
   return f >= '0' && f <= '9';
 }
 
-JSObjectRef makeObjectFunctionWithPrivateData(JSContext *context, void *data, const char *name,
-                                              JSObjectCallAsFunctionCallback callback);
-
-JSObjectRef JSObjectMakePromise(JSContext *context, void *data, JSObjectCallAsFunctionCallback callback,
-                                JSValueRef *exception);
-
-std::string JSStringToStdString(JSStringRef jsString);
-
 inline JSValueRef getObjectPropertyValue(JSContextRef ctx, const std::string& key, JSObjectRef object, JSValueRef *exception) {
   JSStringRef keyRef = JSStringCreateWithUTF8CString(key.c_str());
   JSValueRef result = JSObjectGetProperty(ctx, object, keyRef, exception);

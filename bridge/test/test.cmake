@@ -4,24 +4,17 @@ list(APPEND KRAKEN_TEST_SOURCE
         polyfill/dist/testframework.cc
         )
 
-if (${KRAKEN_ENABLE_JSA})
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   list(APPEND KRAKEN_TEST_SOURCE
-      bridge_test_jsa.cc
-      bridge_test_jsa.h
+    bridge_test_jsc.cc
+    bridge_test_jsc.h
   )
-else()
-  if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
-    list(APPEND KRAKEN_TEST_SOURCE
-      bridge_test_jsc.cc
-      bridge_test_jsc.h
-    )
-  endif()
 endif()
 
-add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE} ${BRIDGE_SOURCE})
+add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE})
 
 ### kraken_test
-target_link_libraries(kraken_test PRIVATE ${BRIDGE_LINK_LIBS})
+target_link_libraries(kraken_test PRIVATE ${BRIDGE_LINK_LIBS} kraken)
 target_include_directories(kraken_test PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)

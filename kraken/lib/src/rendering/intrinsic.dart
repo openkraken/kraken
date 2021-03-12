@@ -131,12 +131,30 @@ class RenderIntrinsic extends RenderBoxModel
 
       didLayout();
     } else {
-      super.performResize();
+      performResize();
     }
 
     if (kProfileMode) {
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
     }
+  }
+
+  @override
+  void performResize() {
+    double width = 0, height = 0;
+    final BoxConstraints constraints = contentConstraints;
+    if (constraints != null) {
+      final Size attempingSize = constraints.biggest;
+      if (attempingSize.width.isFinite) {
+        width = attempingSize.width;
+      }
+      if (attempingSize.height.isFinite) {
+        height = attempingSize.height;
+      }
+    }
+
+    size = Size(width, height);
+    assert(size.isFinite);
   }
 
   @override

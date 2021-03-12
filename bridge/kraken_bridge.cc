@@ -213,20 +213,11 @@ void flushUICommandCallback() {
   foundation::UICommandCallbackQueue::instance()->flushCallbacks();
 }
 
-void patchKrakenPolyFill(NativeString *patchCode, const char *patchName) {
-  if (kraken::JSBridge::polyfillPatches.count(patchName) == 0) {
-    kraken::JSBridge::polyfillPatches[patchName] = patchCode;
-  } else {
-    kraken::JSBridge::polyfillPatches[patchName]->free();
-    kraken::JSBridge::polyfillPatches[patchName] = patchCode;
-  }
-
-  // Append polyfill when js context already created.
-  for (int i = 0; i < maxPoolSize; i ++) {
-    if (contextPool[i] != nullptr) {
-      contextPool[i]->evaluateScript(patchCode, patchName, 0);
-    }
-  }
+void registerPluginSource(NativeString *code, const char *pluginName) {
+  kraken::JSBridge::pluginSourceCode[pluginName] = NativeString{
+    code->string,
+    code->length
+  };
 }
 
 NativeString *NativeString::clone() {
