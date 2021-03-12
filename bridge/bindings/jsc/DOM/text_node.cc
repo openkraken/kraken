@@ -40,9 +40,8 @@ JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringR
 
   m_data.setString(data);
 
-  std::string dataString = JSStringToStdString(data);
   NativeString args_01{};
-  buildUICommandArgs(dataString, args_01);
+  buildUICommandArgs(data, args_01);
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(eventTargetId, UICommand::createTextNode, args_01, nativeTextNode);
 }
