@@ -6,10 +6,10 @@
 #include "document.h"
 #include "comment_node.h"
 #include "element.h"
+#include "foundation/ui_command_callback_queue.h"
 #include "text_node.h"
 #include <mutex>
 #include <regex>
-#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -35,9 +35,9 @@ JSDocument::~JSDocument() {
 }
 
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
-  if (argumentCount != 1) {
-    throwJSError(ctx, "Failed to createElement: only accept 1 parameter.", exception);
+                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
+  if (argumentCount < 1) {
+    throwJSError(ctx, "Failed to createElement: 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
@@ -57,10 +57,10 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
 }
 
 JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+                                      size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     throwJSError(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.",
-                    exception);
+                 exception);
     return nullptr;
   }
 
@@ -73,7 +73,7 @@ JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JS
 }
 
 JSValueRef JSDocument::createComment(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                           size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+                                     size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   auto CommentNode = JSCommentNode::instance(document->context);
   auto commentNodeInstance =
@@ -90,89 +90,97 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
 
   if (!event_registered) {
     event_registered = true;
-    JSEvent::defineEvent(EVENT_INPUT, [](JSContext *context, void *nativeEvent) -> EventInstance* {
-      return new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent*>(nativeEvent));
+    JSEvent::defineEvent(EVENT_INPUT, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new InputEventInstance(JSInputEvent::instance(context), reinterpret_cast<NativeInputEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_MEDIA_ERROR, [](JSContext *context, void *nativeEvent) -> EventInstance* {
-      return new MediaErrorEventInstance(JSMediaErrorEvent::instance(context), reinterpret_cast<NativeMediaErrorEvent*>(nativeEvent));
+    JSEvent::defineEvent(EVENT_MEDIA_ERROR, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new MediaErrorEventInstance(JSMediaErrorEvent::instance(context),
+                                         reinterpret_cast<NativeMediaErrorEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_MESSAGE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
-      return new MessageEventInstance(JSMessageEvent::instance(context), reinterpret_cast<NativeMessageEvent*>(nativeEvent));
+    JSEvent::defineEvent(EVENT_MESSAGE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new MessageEventInstance(JSMessageEvent::instance(context),
+                                      reinterpret_cast<NativeMessageEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_CLOSE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
-      return new CloseEventInstance(JSCloseEvent::instance(context), reinterpret_cast<NativeCloseEvent*>(nativeEvent));;
+    JSEvent::defineEvent(EVENT_CLOSE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new CloseEventInstance(JSCloseEvent::instance(context), reinterpret_cast<NativeCloseEvent *>(nativeEvent));
+      ;
     });
-    JSEvent::defineEvent(EVENT_INTERSECTION_CHANGE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
-      return new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context), reinterpret_cast<NativeIntersectionChangeEvent*>(nativeEvent));
+    JSEvent::defineEvent(EVENT_INTERSECTION_CHANGE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new IntersectionChangeEventInstance(JSIntersectionChangeEvent::instance(context),
+                                                 reinterpret_cast<NativeIntersectionChangeEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_TOUCH_START, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+    JSEvent::defineEvent(EVENT_TOUCH_START, [](JSContext *context, void *nativeEvent) -> EventInstance * {
       return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_TOUCH_END, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+    JSEvent::defineEvent(EVENT_TOUCH_END, [](JSContext *context, void *nativeEvent) -> EventInstance * {
       return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_TOUCH_MOVE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+    JSEvent::defineEvent(EVENT_TOUCH_MOVE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
       return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_TOUCH_CANCEL, [](JSContext *context, void *nativeEvent) -> EventInstance* {
+    JSEvent::defineEvent(EVENT_TOUCH_CANCEL, [](JSContext *context, void *nativeEvent) -> EventInstance * {
       return new TouchEventInstance(JSTouchEvent::instance(context), reinterpret_cast<NativeTouchEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_SWIPE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
-      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    JSEvent::defineEvent(EVENT_SWIPE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new GestureEventInstance(JSGestureEvent::instance(context),
+                                      reinterpret_cast<NativeGestureEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_PAN, [](JSContext *context, void *nativeEvent) -> EventInstance* {
-      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    JSEvent::defineEvent(EVENT_PAN, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new GestureEventInstance(JSGestureEvent::instance(context),
+                                      reinterpret_cast<NativeGestureEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_LONG_PRESS, [](JSContext *context, void *nativeEvent) -> EventInstance* {
-      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    JSEvent::defineEvent(EVENT_LONG_PRESS, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new GestureEventInstance(JSGestureEvent::instance(context),
+                                      reinterpret_cast<NativeGestureEvent *>(nativeEvent));
     });
-    JSEvent::defineEvent(EVENT_SCALE, [](JSContext *context, void *nativeEvent) -> EventInstance* {
-      return new GestureEventInstance(JSGestureEvent::instance(context), reinterpret_cast<NativeGestureEvent *>(nativeEvent));
+    JSEvent::defineEvent(EVENT_SCALE, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new GestureEventInstance(JSGestureEvent::instance(context),
+                                      reinterpret_cast<NativeGestureEvent *>(nativeEvent));
     });
   }
   if (!document_registered) {
     document_registered = true;
 
-    JSElement::defineElement("img", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("img", [](JSContext *context) -> ElementInstance * {
       return new JSImageElement::ImageElementInstance(JSImageElement::instance(context));
     });
-    JSElement::defineElement("a", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("a", [](JSContext *context) -> ElementInstance * {
       return new JSAnchorElement::AnchorElementInstance(JSAnchorElement::instance(context));
     });
-    JSElement::defineElement("canvas", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("canvas", [](JSContext *context) -> ElementInstance * {
       return new JSCanvasElement::CanvasElementInstance(JSCanvasElement::instance(context));
     });
-    JSElement::defineElement("input", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("input", [](JSContext *context) -> ElementInstance * {
       return new JSInputElement::InputElementInstance(JSInputElement::instance(context));
     });
-    JSElement::defineElement("audio", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("audio", [](JSContext *context) -> ElementInstance * {
       return new JSAudioElement::AudioElementInstance(JSAudioElement::instance(context));
     });
-    JSElement::defineElement("video", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("video", [](JSContext *context) -> ElementInstance * {
       return new JSVideoElement::VideoElementInstance(JSVideoElement::instance(context));
     });
-    JSElement::defineElement("iframe", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("iframe", [](JSContext *context) -> ElementInstance * {
       return new JSIframeElement::IframeElementInstance(JSIframeElement::instance(context));
     });
-    JSElement::defineElement("object", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("object", [](JSContext *context) -> ElementInstance * {
       return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
     });
-    JSElement::defineElement("animation-player", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("animation-player", [](JSContext *context) -> ElementInstance * {
       return new JSAnimationPlayerElement::AnimationPlayerElementInstance(JSAnimationPlayerElement::instance(context));
     });
-    JSElement::defineElement("span", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("span", [](JSContext *context) -> ElementInstance * {
       return new ElementInstance(JSElement::instance(context), "span", true);
     });
-    JSElement::defineElement("div", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("div", [](JSContext *context) -> ElementInstance * {
       return new ElementInstance(JSElement::instance(context), "div", true);
     });
-    JSElement::defineElement("strong", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("strong", [](JSContext *context) -> ElementInstance * {
       return new ElementInstance(JSElement::instance(context), "strong", true);
     });
-    JSElement::defineElement("pre", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("pre", [](JSContext *context) -> ElementInstance * {
       return new ElementInstance(JSElement::instance(context), "pre", true);
     });
-    JSElement::defineElement("p", [](JSContext *context) -> ElementInstance* {
+    JSElement::defineElement("p", [](JSContext *context) -> ElementInstance * {
       return new ElementInstance(JSElement::instance(context), "p", true);
     });
   }
@@ -246,7 +254,8 @@ DocumentInstance::DocumentInstance(JSDocument *document)
   JSStringHolder bodyStringHolder = JSStringHolder(context, "body");
   JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
   JSObjectSetProperty(ctx, object, bodyStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);
-  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);
+  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly,
+                      nullptr);
   instanceMap[document->context] = this;
   getDartMethod()->initDocument(contextId, nativeDocument);
 }
@@ -295,9 +304,8 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
 }
 
 DocumentInstance::~DocumentInstance() {
-  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
-    delete reinterpret_cast<NativeDocument *>(ptr);
-  }, nativeDocument);
+  ::foundation::UICommandCallbackQueue::instance()->registerCallback(
+    [](void *ptr) { delete reinterpret_cast<NativeDocument *>(ptr); }, nativeDocument);
   instanceMap.erase(context);
 }
 
@@ -330,7 +338,7 @@ void DocumentInstance::addElementById(std::string &id, ElementInstance *element)
 }
 
 JSValueRef JSDocument::getElementById(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+                                      size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
     throwJSError(
       ctx,
@@ -359,13 +367,12 @@ JSValueRef JSDocument::getElementById(JSContextRef ctx, JSObjectRef function, JS
 }
 
 JSValueRef JSDocument::getElementsByTagName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                                  size_t argumentCount, const JSValueRef *arguments,
-                                                  JSValueRef *exception) {
+                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
     throwJSError(ctx,
-                    "Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, "
-                    "but only 0 present.",
-                    exception);
+                 "Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, "
+                 "but only 0 present.",
+                 exception);
     return nullptr;
   }
 
