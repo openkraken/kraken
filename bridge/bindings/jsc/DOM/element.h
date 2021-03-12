@@ -6,6 +6,7 @@
 #ifndef KRAKENBRIDGE_ELEMENT_H
 #define KRAKENBRIDGE_ELEMENT_H
 
+#include "bindings/jsc/js_context_internal.h"
 #include "bindings/jsc/host_object_internal.h"
 #include "include/kraken_bridge.h"
 #include "node.h"

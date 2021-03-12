@@ -4,8 +4,8 @@
  */
 
 #include "node.h"
-#include "foundation/ui_command_queue.h"
 #include "foundation/ui_command_callback_queue.h"
+#include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -41,9 +41,8 @@ NodeInstance::~NodeInstance() {
     }
   }
 
-  foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
-    delete reinterpret_cast<NativeNode *>(ptr);
-  }, nativeNode);
+  foundation::UICommandCallbackQueue::instance()->registerCallback(
+    [](void *ptr) { delete reinterpret_cast<NativeNode *>(ptr); }, nativeNode);
 }
 
 NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)
@@ -126,6 +125,102 @@ JSObjectRef JSNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructo
   return nullptr;
 }
 
+JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
+  if (node->nodeType == ELEMENT_NODE) {
+    ElementInstance *element = reinterpret_cast<ElementInstance *>(node);
+
+    /* createElement */
+    std::string tagName = element->tagName();
+    auto newElement = JSElement::buildElementInstance(element->document->context, tagName);
+    newElement->document = element->document;
+
+    /* copy attributes */
+    JSStringHolder attributesStringHolder = JSStringHolder(element->document->context, "attributes");
+    JSValueRef attributeValueRef =
+      JSObjectGetProperty(ctx, element->object, attributesStringHolder.getString(), nullptr);
+    JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
+    auto mAttributes = reinterpret_cast<JSElementAttributes *>(JSObjectGetPrivate(attributeObjectRef));
+
+    std::map<std::string, JSStringRef> &attributesMap = mAttributes->getAttributesMap();
+    std::vector<JSStringRef> &attributesVector = mAttributes->getAttributesVector();
+
+    (*newElement->getAttributes())->setAttributesMap(attributesMap);
+    (*newElement->getAttributes())->setAttributesVector(attributesVector);
+
+    /* copy style */
+    newElement->setStyle(element->getStyle());
+
+    std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
+
+    NativeString args_01{};
+    buildUICommandArgs(newNodeEventTargetId, args_01);
+
+    foundation::UICommandTaskMessageQueue::instance(newElement->contextId)
+      ->registerCommand(element->eventTargetId, UICommand::cloneNode, args_01, nullptr);
+
+    return newElement->object;
+  } else if (node->nodeType == TEXT_NODE) {
+    JSTextNode::TextNodeInstance *textNode = reinterpret_cast<JSTextNode::TextNodeInstance *>(node);
+
+    std::string content = textNode->internalGetTextContent();
+    auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(textNode->document->context),
+                                                                JSStringCreateWithUTF8CString(content.c_str()));
+    newTextNodeInstance->document = textNode->document;
+
+    return newTextNodeInstance->object;
+  }
+
+  return nullptr;
+}
+
+void JSNode::traverseCloneNode(JSContextRef ctx, NodeInstance *element, NodeInstance *parentElement) {
+  for (auto iter : element->childNodes) {
+    JSValueRef newElementRef = copyNodeValue(ctx, static_cast<NodeInstance *>(iter));
+    JSObjectRef newElementObjectRef = JSValueToObject(ctx, newElementRef, nullptr);
+    auto newNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newElementObjectRef));
+    parentElement->internalAppendChild(newNodeInstance);
+    // element node needs recursive child nodes.
+    if (iter->nodeType == ELEMENT_NODE) {
+      traverseCloneNode(ctx, static_cast<ElementInstance *>(iter), static_cast<ElementInstance *>(newNodeInstance));
+    }
+  }
+}
+
+JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef *arguments, JSValueRef *exception) {
+  auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
+
+  const JSValueRef deepValue = arguments[0];
+  if (!JSValueIsBoolean(ctx, deepValue)) {
+    throwJSError(ctx, "Failed to cloneNode: deep should be a Boolean.", exception);
+    return nullptr;
+  }
+  bool deepBooleanRef = JSValueToBoolean(ctx, deepValue);
+
+  if (selfInstance->nodeType == ELEMENT_NODE) {
+    auto element = static_cast<ElementInstance *>(selfInstance);
+
+    JSValueRef rootElementRef = copyNodeValue(ctx, static_cast<NodeInstance *>(element));
+    JSObjectRef rootNodeObjectRef = JSValueToObject(ctx, rootElementRef, nullptr);
+    auto rootNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(rootNodeObjectRef));
+
+    if (deepBooleanRef) {
+      traverseCloneNode(ctx, static_cast<ElementInstance *>(element), static_cast<ElementInstance *>(rootNodeInstance));
+    }
+
+    return rootNodeInstance->object;
+  } else if (selfInstance->nodeType == TEXT_NODE) {
+    auto textNode = static_cast<JSTextNode::TextNodeInstance *>(selfInstance);
+    JSValueRef newTextNodeRef = copyNodeValue(ctx, static_cast<NodeInstance *>(textNode));
+    JSObjectRef newTextNodeObjectRef = JSValueToObject(ctx, newTextNodeRef, nullptr);
+    auto newTextNodeObjectInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newTextNodeObjectRef));
+
+    return newTextNodeObjectInstance->object;
+  } else {
+    return nullptr;
+  }
+}
+
 JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
@@ -138,8 +233,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   const JSValueRef nodeValueRef = arguments[0];
 
   if (!JSValueIsObject(ctx, nodeValueRef)) {
-    throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.",
-                    exception);
+    throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.", exception);
     return nullptr;
   }
 
@@ -147,14 +241,13 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   auto nodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
   if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
-    throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.",
-                    exception);
+    throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.", exception);
     return nullptr;
   }
 
   if (nodeInstance->eventTargetId == BODY_TARGET_ID || nodeInstance == selfInstance) {
     throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.",
-                    exception);
+                 exception);
     return nullptr;
   }
 
@@ -188,7 +281,7 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
   } else if (!JSValueIsNull(ctx, referenceNodeValueRef)) {
     assert(false);
     throwJSError(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'",
-                    exception);
+                 exception);
     return nullptr;
   }
 
@@ -210,7 +303,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
 
   if (argumentCount < 2) {
     throwJSError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required",
-                    exception);
+                 exception);
     return nullptr;
   }
 
@@ -219,7 +312,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
 
   if (!JSValueIsObject(ctx, newChildValueRef)) {
     throwJSError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 1 arguments is not object",
-                    exception);
+                 exception);
     return nullptr;
   }
 
@@ -227,7 +320,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
 
   if (!JSValueIsObject(ctx, oldChildValueRef)) {
     throwJSError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments is not object.",
-                    exception);
+                 exception);
     return nullptr;
   }
 
@@ -237,10 +330,11 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
   auto newChildInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newChildObjectRef));
   auto oldChildInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(oldChildObjectRef));
 
-  if (oldChildInstance == nullptr || oldChildInstance->parentNode != selfInstance || oldChildInstance->_identify != NODE_IDENTIFY) {
+  if (oldChildInstance == nullptr || oldChildInstance->parentNode != selfInstance ||
+      oldChildInstance->_identify != NODE_IDENTIFY) {
     throwJSError(ctx,
-                    "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.",
-                    exception);
+                 "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.",
+                 exception);
     return nullptr;
   }
 
@@ -254,8 +348,7 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
   return nullptr;
 }
 
-void NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *referenceNode,
-                                                JSValueRef *exception) {
+void NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *referenceNode, JSValueRef *exception) {
   if (referenceNode == nullptr) {
     internalAppendChild(node);
   } else {
@@ -274,7 +367,9 @@ void NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *refere
       auto it = std::find(parentChildNodes.begin(), parentChildNodes.end(), referenceNode);
 
       if (it == parentChildNodes.end()) {
-        throwJSError(_hostClass->ctx, "Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.", exception);
+        throwJSError(_hostClass->ctx,
+                     "Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.",
+                     exception);
         return;
       }
 
@@ -306,8 +401,7 @@ JSValueRef JSNode::remove(JSContextRef ctx, JSObjectRef function, JSObjectRef th
 JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount < 1) {
-    throwJSError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1 arguments required",
-                    exception);
+    throwJSError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1 arguments required", exception);
     return nullptr;
   }
 
@@ -315,7 +409,7 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
 
   if (!JSValueIsObject(ctx, nodeValueRef)) {
     throwJSError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object",
-                    exception);
+                 exception);
     return nullptr;
   }
 
@@ -323,7 +417,7 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
 
   if (!JSValueIsObject(ctx, nodeObjectRef)) {
     throwJSError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object.",
-                    exception);
+                 exception);
     return nullptr;
   }
 
@@ -380,9 +474,8 @@ NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node, JSValueRef *
   return node;
 }
 
-NodeInstance *NodeInstance::internalReplaceChild(NodeInstance *newChild,
-                                                                 NodeInstance *oldChild,
-                                                                 JSValueRef *exception) {
+NodeInstance *NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance *oldChild,
+                                                 JSValueRef *exception) {
   ensureDetached(newChild);
   assert_m(newChild->parentNode == nullptr, "ReplaceChild Error: newChild was not detached.");
   oldChild->parentNode = nullptr;
