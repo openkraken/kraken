@@ -26,6 +26,18 @@ typedef LoadHandler = void Function(KrakenController controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
 typedef JSErrorHandler = void Function(String message);
 
+typedef TraverseElementCallback = void Function(Element element);
+
+// Traverse DOM element.
+void traverseElement(Element element, TraverseElementCallback callback) {
+  if (element != null) {
+    for (Element el in element.children) {
+      callback(el);
+      traverseElement(el, callback);
+    }
+  }
+}
+
 // See http://github.com/flutter/flutter/wiki/Desktop-shells
 /// If the current platform is a desktop platform that isn't yet supported by
 /// TargetPlatform, override the default platform to one that is.
