@@ -845,8 +845,11 @@ class Element extends Node
         break;
 
       case POSITION:
-      case Z_INDEX:
         _stylePositionChangedListener(property, original, present);
+        break;
+
+      case Z_INDEX:
+        _styleZIndexChangedListener(property, original, present);
         break;
 
       case TOP:
@@ -1021,6 +1024,10 @@ class Element extends Node
     if (prevPosition != currentPosition) {
       _updatePosition(prevPosition, currentPosition);
     }
+  }
+
+  void _styleZIndexChangedListener(String property, String original, String present) {
+    renderBoxModel.renderStyle.updateZIndex(property, present);
   }
 
   void _styleOffsetChangedListener(String property, String original, String present) {
