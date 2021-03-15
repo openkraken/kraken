@@ -277,7 +277,7 @@ task('build-kraken-embedded-lib', (done) => {
 
 task('compile-polyfill', (done) => {
   if (!fs.existsSync(path.join(paths.polyfill, 'node_modules'))) {
-    spawnSync('tnpm', ['install'], {
+    spawnSync('npm', ['install'], {
       cwd: paths.polyfill,
       stdio: 'inherit'
     });
