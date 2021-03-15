@@ -43,15 +43,16 @@ By contributing to Kraken, you agree that your contributions will be licensed un
     * [Node.js](https://nodejs.org/) v12.0 or later
     * [Flutter](https://flutter.dev/docs/get-started/install) version in the `kraken/pubspec.yaml`
     * [CMake](https://cmake.org/)
+    * [Android NDK](https://developer.android.com/studio/projects/install-ndk) version `20.0.5594570` installed.
 
 1. Install
     ```shell
     $ npm install
     ```
 
-2. Building bridge in MacOS
+2. Building Bridge
     ```shell
-    $ node ./scripts/build_darwin_dylib.js
+    $ npm run build:bridge:all
     ```
 
 3. Start example

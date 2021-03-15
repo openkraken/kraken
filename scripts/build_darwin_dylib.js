@@ -9,7 +9,7 @@ const chalk = require('chalk');
 series(
   'sdk-clean',
   'compile-polyfill',
-  'build-darwin-kraken-lib-release',
+  'build-darwin-kraken-lib',
 )((err) => {
   if (err) {
     console.log(err);
