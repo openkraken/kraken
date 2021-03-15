@@ -27,15 +27,9 @@ class RenderStyle
 
   RenderBoxModel renderBoxModel;
   CSSStyleDeclaration style;
-  Size viewportSize;
+  Size get viewportSize => renderBoxModel.elementManager.viewport.viewportSize;
 
-  RenderStyle(
-    {
-      this.renderBoxModel,
-      this.style,
-      this.viewportSize,
-    }
-  );
+  RenderStyle({ this.renderBoxModel, this.style });
 
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
@@ -530,8 +524,10 @@ class RenderStyle
 }
 
 mixin RenderStyleBase {
+  // Follwing properties used for exposing APIs
+  // for class that extends [RenderStyleBase].
   RenderBoxModel renderBoxModel;
   CSSStyleDeclaration style;
-  Size viewportSize;
+  Size get viewportSize;
 }
 

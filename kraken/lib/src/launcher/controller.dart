@@ -59,13 +59,29 @@ class KrakenViewController {
 
   GestureClient gestureClient;
 
-  double viewportWidth;
-  double viewportHeight;
+  double _viewportWidth;
+  double get viewportWidth => _viewportWidth;
+  set viewportWidth(double value) {
+    if (value != _viewportWidth) {
+      _viewportWidth = value;
+      viewport?.viewportSize = Size(_viewportWidth, _viewportHeight);
+    }
+  }
+
+  double _viewportHeight;
+  double get viewportHeight => _viewportHeight;
+  set viewportHeight(double value) {
+    if (value != _viewportHeight) {
+      _viewportHeight = value;
+      viewport?.viewportSize = Size(_viewportWidth, _viewportHeight);
+    }
+  }
+
   Color background;
 
   KrakenViewController(
-    this.viewportWidth,
-    this.viewportHeight, {
+    this._viewportWidth,
+    this._viewportHeight, {
     this.background,
     this.showPerformanceOverlay,
     this.enableDebug = false,
@@ -107,8 +123,6 @@ class KrakenViewController {
     }
 
     _elementManager = ElementManager(
-      viewportWidth,
-      viewportHeight,
       contextId: _contextId,
       viewport: viewport,
       showPerformanceOverlayOverride: showPerformanceOverlay,
