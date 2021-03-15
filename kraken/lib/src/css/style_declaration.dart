@@ -458,7 +458,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [Size viewportSize, bool fromAnimation = false]) {
+  void setProperty(String propertyName, value, [Size viewportSize]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -542,6 +542,8 @@ class CSSStyleDeclaration {
         break;
     }
 
+    _properties[propertyName] = normalizedValue;
+
     // https://github.com/WebKit/webkit/blob/master/Source/WebCore/animation/AnimationTimeline.cpp#L257
     // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
     // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
@@ -553,14 +555,8 @@ class CSSStyleDeclaration {
       _propertyRunningTransition.clear();
     }
 
-    if (!fromAnimation && _shouldTransition(propertyName, prevValue, normalizedValue)) {
+    if (_shouldTransition(propertyName, prevValue, normalizedValue)) {
       return _transition(propertyName, prevValue, normalizedValue, viewportSize);
-    }
-
-    if (fromAnimation) {
-      _animationProperties[propertyName] = normalizedValue;
-    } else {
-      _properties[propertyName] = normalizedValue;
     }
 
     _invokePropertyChangedListener(propertyName, prevValue, normalizedValue);
