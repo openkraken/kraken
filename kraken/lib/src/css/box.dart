@@ -70,7 +70,7 @@ mixin CSSBoxMixin on RenderStyleBase {
         gradient.borderEdge = newValue;
       }
     }
-    renderBoxModel.markNeedsLayout();
+    renderBoxModel.markNeedsPaint();
   }
 
   double get borderTop {
