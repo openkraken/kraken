@@ -306,8 +306,12 @@ class KrakenRenderParagraph extends RenderBox
     double firstLineOffset = _lineOffset[0];
     ui.LineMetrics firstLineMetrics = _lineMetrics[0];
 
-    // Use the baseline of the last line as paragraph baseline
-    return firstLineOffset + firstLineMetrics.ascent;
+    if((text as TextSpan).text == '') {
+      return 0.0;
+    } else {
+      // Use the baseline of the last line as paragraph baseline
+      return firstLineOffset + firstLineMetrics.ascent;
+    }
   }
 
   /// Compute distance to baseline of last text line
@@ -315,8 +319,12 @@ class KrakenRenderParagraph extends RenderBox
     double lastLineOffset = _lineOffset[_lineOffset.length - 1];
     ui.LineMetrics lastLineMetrics = _lineMetrics[_lineMetrics.length - 1];
 
-    // Use the baseline of the last line as paragraph baseline
-    return lastLineOffset + lastLineMetrics.ascent;
+    if((text as TextSpan).text == '') {
+      return 0.0;
+    } else {
+      // Use the baseline of the last line as paragraph baseline
+      return lastLineOffset + lastLineMetrics.ascent;
+    }
   }
 
   // Intrinsics cannot be calculated without a full layout for
@@ -643,13 +651,15 @@ class KrakenRenderParagraph extends RenderBox
     _setParentData();
     _layoutMultiLineTextWithConstraints(constraints);
 
-    // Height of paragraph
-    double paragraphHeight = 0;
 
-    for (int i = 0; i < _lineMetrics.length; i++) {
-      ui.LineMetrics lineMetric = _lineMetrics[i];
-      double height = lineHeight != null ? lineHeight : lineMetric.height;
-      paragraphHeight += height;
+    double paragraphHeight = 0;
+    if ((text as TextSpan).text != '') {
+      // Height of paragraph
+      for (int i = 0; i < _lineMetrics.length; i++) {
+        ui.LineMetrics lineMetric = _lineMetrics[i];
+        double height = lineHeight != null ? lineHeight : lineMetric.height;
+        paragraphHeight += height;
+      }
     }
 
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
