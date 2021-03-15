@@ -44,15 +44,19 @@ By contributing to Kraken, you agree that your contributions will be licensed un
     * [Flutter](https://flutter.dev/docs/get-started/install) version in the `kraken/pubspec.yaml`
     * [CMake](https://cmake.org/)
     * [Android NDK](https://developer.android.com/studio/projects/install-ndk) version `20.0.5594570` installed.
+    * macOS Platform
 
 1. Install
     ```shell
     $ npm install
     ```
 
-2. Building Bridge
+2. Building bridge in macOS
     ```shell
-    $ npm run build:bridge:all
+    $ npm run build:bridge:all # for macOS, android, iOS
+    $ npm run build:bridge:android # for android
+    $ npm run build:bridge:ios # for iOS
+    $ npm run build:bridge:macos # for macOS
     ```
 
 3. Start example
