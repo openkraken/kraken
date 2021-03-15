@@ -49,26 +49,18 @@ By contributing to Kraken, you agree that your contributions will be licensed un
     $ npm install
     ```
 
-2. Start Example
+2. Building bridge in MacOS
+    ```shell
+    $ node ./scripts/build_darwin_dylib.js
+    ```
+
+3. Start example
     ```shell
     $ cd kraken/example
-    $ flutter pub get
     $ flutter run
     ```
 
-3. Test (Unit Test and Integration Test)
+4. Test (Unit Test and Integration Test)
     ```shell
     $ npm test
-    ```
-
-4. Build
-    ```shell
-    $ npm run build:macos
-    $ npm run build:android
-    $ npm run build:linux
-    ```
-
-5. Pack vendors and upload to OSS
-    ```shell
-    $ npm run upload # Set OSS_AK and OSS_SK for env first
     ```
