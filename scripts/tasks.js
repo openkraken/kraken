@@ -184,7 +184,7 @@ function matchError(errmsg) {
 
 task('integration-test', (done) => {
   const { status, stdout, stderr } = spawnSync('npm', ['run', 'test'], {
-    stdio: 'inherit',
+    stdio: 'pipe',
     cwd: paths.tests
   });
 
