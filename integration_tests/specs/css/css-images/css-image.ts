@@ -233,4 +233,44 @@ describe('css-image', () => {
       done();
     };
   });
+
+  it('should work with percentage of cached image', async (done) => {
+    let div;
+    let image1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'red',
+          position: 'relative',
+        },
+      },
+      [
+        (image1 = createElement('img', {
+          src: 'assets/100x100-green.png',
+          style: {
+            height: '50%',
+            width: '50%',
+          }
+        })),
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    setTimeout(async () => {
+      let image2 = createElement('img', {
+        src: 'assets/100x100-green.png',
+        style: {
+          height: '50%',
+          width: '50%',
+        }
+      });
+      div.appendChild(image2);
+      await matchViewportSnapshot(0.1);
+      done();
+    }, 1000);
+  });
 });
