@@ -12,15 +12,13 @@ jobs:
     - name: Echo branch name
       run: echo ${BRANCH_NAME}
     - name: Clone The Code
-      run: git clone -b ${BRANCH_NAME} git@github.com:openkraken/kraken.git --depth=1 ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}
+      run: "\n
+if [ -d "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}" ]; then
+  git clone -b ${BRANCH_NAME} git@github.com:openkraken/kraken.git --depth=1 ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}
+elif
+  cd ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}
+  git pull
+fi"
     - name: Run Test
       run: cd ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME} && npm test
-  clean_up:
-    runs-on: self-hosted
-    needs: integration_test
-    steps:
-    - name: Set branch name
-      run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
-    - name: Clean Up
-      run: rm -rf ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}
 
