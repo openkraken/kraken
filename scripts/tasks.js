@@ -2,7 +2,7 @@ const { src, dest, series, parallel, task } = require('gulp');
 const mkdirp = require('mkdirp');
 const path = require('path');
 const { readFileSync, writeFileSync, mkdirSync } = require('fs');
-const { spawnSync, execSync, fork } = require('child_process');
+const { spawnSync, execSync, fork, spawn } = require('child_process');
 const { join, resolve } = require('path');
 const chalk = require('chalk');
 const fs = require('fs');
@@ -183,24 +183,45 @@ function matchError(errmsg) {
 }
 
 task('integration-test', (done) => {
-  const { status, stdout, stderr } = spawnSync('npm', ['run', 'test'], {
+  const childProcess = spawn('npm', ['run', 'test'], {
     stdio: 'pipe',
     cwd: paths.tests
   });
 
-  let dartErrorMatch = matchError(stdout + stderr);
-  if (dartErrorMatch) {
-    let error = new Error('UnExpected Flutter Assert Failed.');
-    done(error);
-    return;
-  }
+  let stdout = '';
 
-  if (status !== 0) {
-    console.error('Run intefration test with error.');
-    process.exit(status);
-  } else {
-    done();
-  }
+  childProcess.stderr.pipe(process.stderr);
+  childProcess.stdout.pipe(process.stdout);
+
+  childProcess.stderr.on('data', (data) => {
+    stdout += data + '';
+  });
+
+  childProcess.stdout.pipe(process.stdout);
+  childProcess.stdout.on('data', (data) => {
+    stdout += data + '';
+  });
+
+  childProcess.on('error', (error) => {
+    done(error);
+  });
+
+  childProcess.on('close', (code) => {
+    let dartErrorMatch = matchError(stdout);
+    if (dartErrorMatch) {
+      let error = new Error('UnExpected Flutter Assert Failed.');
+      done(error);
+      return;
+    }
+
+    if (code == 0) {
+      done();
+    } else {
+      // TODO: collect error message from stdout.
+      const err = new Error('Some error occured, please check log.');
+      done(err);
+    }
+  });
 });
 
 task('sdk-clean', (done) => {
