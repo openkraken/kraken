@@ -26,6 +26,18 @@ typedef LoadHandler = void Function(KrakenController controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
 typedef JSErrorHandler = void Function(String message);
 
+typedef TraverseElementCallback = void Function(Element element);
+
+// Traverse DOM element.
+void traverseElement(Element element, TraverseElementCallback callback) {
+  if (element != null) {
+    for (Element el in element.children) {
+      callback(el);
+      traverseElement(el, callback);
+    }
+  }
+}
+
 // See http://github.com/flutter/flutter/wiki/Desktop-shells
 /// If the current platform is a desktop platform that isn't yet supported by
 /// TargetPlatform, override the default platform to one that is.
@@ -47,13 +59,29 @@ class KrakenViewController {
 
   GestureClient gestureClient;
 
-  double viewportWidth;
-  double viewportHeight;
+  double _viewportWidth;
+  double get viewportWidth => _viewportWidth;
+  set viewportWidth(double value) {
+    if (value != _viewportWidth) {
+      _viewportWidth = value;
+      viewport?.viewportSize = Size(_viewportWidth, _viewportHeight);
+    }
+  }
+
+  double _viewportHeight;
+  double get viewportHeight => _viewportHeight;
+  set viewportHeight(double value) {
+    if (value != _viewportHeight) {
+      _viewportHeight = value;
+      viewport?.viewportSize = Size(_viewportWidth, _viewportHeight);
+    }
+  }
+
   Color background;
 
   KrakenViewController(
-    this.viewportWidth,
-    this.viewportHeight, {
+    this._viewportWidth,
+    this._viewportHeight, {
     this.background,
     this.showPerformanceOverlay,
     this.enableDebug = false,
@@ -95,8 +123,6 @@ class KrakenViewController {
     }
 
     _elementManager = ElementManager(
-      viewportWidth,
-      viewportHeight,
       contextId: _contextId,
       viewport: viewport,
       showPerformanceOverlayOverride: showPerformanceOverlay,

@@ -173,6 +173,23 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
     super.updateRenderObject(context, renderObject);
     KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
     controller.name = shortHash(_krakenWidget.hashCode);
+
+    bool viewportWidthHasChanged = controller.view.viewportWidth != _krakenWidget.viewportWidth;
+    bool viewportHeightHasChanged = controller.view.viewportHeight != _krakenWidget.viewportHeight;
+
+    if (viewportWidthHasChanged) {
+      controller.view.viewportWidth = _krakenWidget.viewportWidth;
+    }
+
+    if (viewportHeightHasChanged) {
+      controller.view.viewportHeight = _krakenWidget.viewportHeight;
+    }
+
+    if (viewportWidthHasChanged || viewportHeightHasChanged) {
+      traverseElement(controller.view.document.body, (element) {
+        element.style.applyTargetProperties();
+      });
+    }
   }
 
   @override
