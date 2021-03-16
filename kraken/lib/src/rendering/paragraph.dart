@@ -92,8 +92,8 @@ class KrakenRenderParagraph extends RenderBox
   double lineHeight;
 
   /// The text to display.
-  InlineSpan get text => _textPainter.text;
-  set text(InlineSpan value) {
+  TextSpan get text => _textPainter.text;
+  set text(TextSpan value) {
     assert(value != null);
     switch (_textPainter.text.compareTo(value)) {
       case RenderComparison.identical:
@@ -306,10 +306,10 @@ class KrakenRenderParagraph extends RenderBox
     double firstLineOffset = _lineOffset[0];
     ui.LineMetrics firstLineMetrics = _lineMetrics[0];
 
-    if((text as TextSpan).text == '') {
+    if(text.text == '') {
       return 0.0;
     } else {
-      // Use the baseline of the last line as paragraph baseline
+      // Use the baseline of the last line as paragraph baseline.
       return firstLineOffset + firstLineMetrics.ascent;
     }
   }
@@ -319,10 +319,10 @@ class KrakenRenderParagraph extends RenderBox
     double lastLineOffset = _lineOffset[_lineOffset.length - 1];
     ui.LineMetrics lastLineMetrics = _lineMetrics[_lineMetrics.length - 1];
 
-    if((text as TextSpan).text == '') {
+    if(text.text == '') {
       return 0.0;
     } else {
-      // Use the baseline of the last line as paragraph baseline
+      // Use the baseline of the last line as paragraph baseline.
       return lastLineOffset + lastLineMetrics.ascent;
     }
   }
