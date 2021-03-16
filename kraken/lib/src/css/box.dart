@@ -301,6 +301,11 @@ mixin CSSBoxMixin on RenderStyleBase {
     bool isBorderWidthChange = property == BORDER_TOP_WIDTH || property == BORDER_RIGHT_WIDTH ||
       property == BORDER_BOTTOM_WIDTH || property == BORDER_LEFT_WIDTH;
 
+    // Only border width change will affect layout
+    if (isBorderWidthChange) {
+      renderBoxModel.markNeedsLayout();
+    }
+
     if (border != null) {
       BorderSide left =  border.left;
       BorderSide top =  border.top;
@@ -327,11 +332,6 @@ mixin CSSBoxMixin on RenderStyleBase {
           right: right ?? BorderSide.none,
           bottom: bottom ?? BorderSide.none,
         ));
-
-        // Only border width change will affect layout
-        if (isBorderWidthChange) {
-          renderBoxModel.markNeedsLayout();
-        }
         return;
       }
     }
@@ -345,11 +345,6 @@ mixin CSSBoxMixin on RenderStyleBase {
         right: borderSides[2],
         bottom: borderSides[3],
       ));
-    }
-
-    // Only border width change will affect layout
-    if (isBorderWidthChange) {
-      renderBoxModel.markNeedsLayout();
     }
   }
 
