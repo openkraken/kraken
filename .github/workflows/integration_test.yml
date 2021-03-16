@@ -4,17 +4,23 @@ on: [push]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "greet"
   integration_test:
-    # The type of runner that the job will run on
     runs-on: self-hosted
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Runs a single command using the runners shell
     - name: Set branch name
       run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
     - name: Echo branch name
       run: echo ${BRANCH_NAME}
-    - name: Show env
-      run: env
+    - name: Clone The Code
+      run: git clone -b ${BRANCH_NAME} git@github.com:openkraken/kraken.git --depth=1 ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}
+    - name: Run Test
+      run: cd ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME} && npm test
+  clean_up:
+    runs-on: self-hosted
+    needs: integration_test
+    steps:
+    - name: Set branch name
+      run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
+    - name: Clean Up
+      run: rm -rf ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}
+
