@@ -306,12 +306,8 @@ class KrakenRenderParagraph extends RenderBox
     double firstLineOffset = _lineOffset[0];
     ui.LineMetrics firstLineMetrics = _lineMetrics[0];
 
-    if(text.text == '') {
-      return 0.0;
-    } else {
-      // Use the baseline of the last line as paragraph baseline.
-      return firstLineOffset + firstLineMetrics.ascent;
-    }
+    // Use the baseline of the last line as paragraph baseline.
+    return text.text == '' ? 0.0 : (firstLineOffset + firstLineMetrics.ascent);
   }
 
   /// Compute distance to baseline of last text line
@@ -319,12 +315,8 @@ class KrakenRenderParagraph extends RenderBox
     double lastLineOffset = _lineOffset[_lineOffset.length - 1];
     ui.LineMetrics lastLineMetrics = _lineMetrics[_lineMetrics.length - 1];
 
-    if(text.text == '') {
-      return 0.0;
-    } else {
-      // Use the baseline of the last line as paragraph baseline.
-      return lastLineOffset + lastLineMetrics.ascent;
-    }
+    // Use the baseline of the last line as paragraph baseline.
+    return text.text == '' ? 0.0 : (lastLineOffset + lastLineMetrics.ascent);
   }
 
   // Intrinsics cannot be calculated without a full layout for
