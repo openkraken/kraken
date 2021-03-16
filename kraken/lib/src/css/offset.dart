@@ -122,10 +122,13 @@ mixin CSSPositionMixin on RenderStyleBase {
   void updatePosition(String property, String present) {
     RenderStyle renderStyle = this;
     position = parsePositionType(style[POSITION]);
-    zIndex = int.tryParse(present);
     // Position change may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
     renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
+  }
+
+  void updateZIndex(String property, String present) {
+    zIndex = int.tryParse(present);
   }
 
   static CSSPositionType parsePositionType(String input) {

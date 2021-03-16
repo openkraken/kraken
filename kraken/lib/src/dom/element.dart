@@ -123,7 +123,7 @@ class Element extends Node
 
   bool get isValidSticky => style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
 
-  Size get viewportSize => Size(elementManager.viewportWidth, elementManager.viewportHeight);
+  Size get viewportSize => elementManager.viewport.viewportSize;
 
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
       {this.tagName,
@@ -211,9 +211,6 @@ class Element extends Node
   }
 
   void _setDefaultStyle() {
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
     if (defaultStyle != null && defaultStyle.isNotEmpty) {
       defaultStyle.forEach((property, dynamic value) {
         style.setProperty(property, value, viewportSize);
@@ -845,8 +842,11 @@ class Element extends Node
         break;
 
       case POSITION:
-      case Z_INDEX:
         _stylePositionChangedListener(property, original, present);
+        break;
+
+      case Z_INDEX:
+        _styleZIndexChangedListener(property, original, present);
         break;
 
       case TOP:
@@ -1023,6 +1023,10 @@ class Element extends Node
     }
   }
 
+  void _styleZIndexChangedListener(String property, String original, String present) {
+    renderBoxModel.renderStyle.updateZIndex(property, present);
+  }
+
   void _styleOffsetChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
     if (CSSLength.isPercentage(present)) return;
@@ -1169,9 +1173,6 @@ class Element extends Node
   // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, dynamic value) {
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
     // @HACK: delay transition property at next frame to make sure transition trigger after all style had been set.
     // https://github.com/WebKit/webkit/blob/master/Source/WebCore/style/StyleTreeResolver.cpp#L220
     // This it not a good solution between webkit implementation which write all new style property into an RenderStyle object
@@ -1431,7 +1432,7 @@ class Element extends Node
     CSSDisplay display = CSSDisplayMixin.getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]
     );
-    RenderStyle renderStyle = RenderStyle(style: style, viewportSize: viewportSize);
+    RenderStyle renderStyle = RenderStyle(style: style);
 
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       RenderFlexLayout flexLayout;
@@ -1577,7 +1578,7 @@ class Element extends Node
   RenderIntrinsic createRenderIntrinsic(Element element,
     {RenderIntrinsic prevRenderIntrinsic, bool repaintSelf = false}) {
     RenderIntrinsic intrinsic;
-    RenderStyle renderStyle = RenderStyle(style: style, viewportSize: viewportSize);
+    RenderStyle renderStyle = RenderStyle(style: style);
 
     if (prevRenderIntrinsic == null) {
       if (repaintSelf) {

@@ -339,4 +339,106 @@ describe('z-index', () => {
       done();
     });
   });
+
+  it('works with z-index compare 1', async () => {
+    let root;
+    let div1;
+    root = createElement(
+      'div',
+      {
+        style: {
+          background: '#999',
+          width: '200px',
+          height: '200px',
+          padding: '50px',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            style: {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              'background-color': 'blue',
+              height: '100px',
+              'padding-left': '5px',
+              width: '100px',
+              zIndex: 5,
+            },
+          },
+        )),
+        createElement(
+          'div',
+          {
+            style: {
+              top: '50px',
+              'position': 'absolute',
+              left: 0,
+              'background-color': 'yellow',
+              height: '100px',
+              width: '100px',
+              zIndex: 10,
+            },
+          },
+        )
+      ]
+    );
+
+    BODY.appendChild(root);
+
+    await matchViewportSnapshot();
+  });
+
+  it('works with z-index compare 2', async () => {
+    let root;
+    let div1;
+    root = createElement(
+      'div',
+      {
+        style: {
+          background: '#999',
+          width: '200px',
+          height: '200px',
+          padding: '50px',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            style: {
+              top: 0,
+              left: 0,
+              position: 'absolute',
+              'background-color': 'blue',
+              height: '100px',
+              'padding-left': '5px',
+              width: '100px',
+              zIndex: 20,
+            },
+          },
+        )),
+        createElement(
+          'div',
+          {
+            style: {
+              top: '50px',
+              'position': 'absolute',
+              left: 0,
+              'background-color': 'yellow',
+              height: '100px',
+              width: '100px',
+              zIndex: 10,
+            },
+          },
+        )
+      ]
+    );
+
+    BODY.appendChild(root);
+
+    await matchViewportSnapshot();
+  });
 });
