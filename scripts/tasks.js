@@ -178,11 +178,23 @@ task('compile-polyfill', (done) => {
 });
 
 
+function matchError(errmsg) {
+  return errmsg.match(/(Failed assertion|\sexception\s|Dart\nError)/i);
+}
+
 task('integration-test', (done) => {
-  const { status } = spawnSync('npm', ['run', 'test'], {
+  const { status, stdout, stderr } = spawnSync('npm', ['run', 'test'], {
     stdio: 'inherit',
     cwd: paths.tests
   });
+
+  let dartErrorMatch = matchError(stdout + stderr);
+  if (dartErrorMatch) {
+    let error = new Error('UnExpected Flutter Assert Failed.');
+    done(error);
+    return;
+  }
+
   if (status !== 0) {
     console.error('Run intefration test with error.');
     process.exit(status);
