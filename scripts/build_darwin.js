@@ -42,7 +42,7 @@ series(
   'clean',
   'pub-get',
   'compile-polyfill',
-  'build-darwin-kraken-lib-release',
+  'build-darwin-kraken-lib',
   buildAppTasks,
   uploadToOSS ? ['pack', 'upload'] : []
 )((err) => {
