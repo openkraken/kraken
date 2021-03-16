@@ -12,7 +12,7 @@ jobs:
     - name: Echo branch name
       run: echo ${BRANCH_NAME}
     - name: Clone The Code
-      run: if [ ! -d "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}" ]; then git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}"; el cd "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}" && git pull; fi
+      run: if [ ! -d "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}" ]; then git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}"; el; cd "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}" && git pull; fi
     - name: Run Test
       run: cd ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME} && npm test
 
