@@ -653,7 +653,7 @@ class KrakenRenderParagraph extends RenderBox
 
 
     double paragraphHeight = 0;
-    if ((text as TextSpan).text != '') {
+    if (text.text != '') {
       // Height of paragraph
       for (int i = 0; i < _lineMetrics.length; i++) {
         ui.LineMetrics lineMetric = _lineMetrics[i];
