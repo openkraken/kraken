@@ -23,6 +23,16 @@ xdescribe('windowisglobal', () => {
     expect(window.foo).toBe('foo');
   });
 
+  it('set property are sample with set into global', () => {
+    // @ts-ignore
+    window.abc = '1234';
+    // @ts-ignore
+    expect(abc).toBe('1234');
+    expect(globalThis.abc).toBe('1234');
+    // @ts-ignore
+    expect(window.abc).toBe('1234');
+  });
+
   it('onload should in window', () => {
     expect('onload' in window).toBe(true);
   });
