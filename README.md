@@ -42,21 +42,45 @@ By contributing to Kraken, you agree that your contributions will be licensed un
 0. Prerequisites
     * [Node.js](https://nodejs.org/) v12.0 or later
     * [Flutter](https://flutter.dev/docs/get-started/install) version in the `kraken/pubspec.yaml`
-    * [CMake](https://cmake.org/)
-    * [Android NDK](https://developer.android.com/studio/projects/install-ndk) version `20.0.5594570` installed.
-    * macOS with Xcode (10.12) installed.
+    * [CMake](https://cmake.org/) v3.2.0 or later
+    * macOS with Xcode (10.12) or later installed.
+
+
+    External prerequisites for Android platform:
+      * [Android NDK](https://developer.android.com/studio/projects/install-ndk) version `20.0.5594570` or later.
 
 1. Install
+
     ```shell
     $ npm install
     ```
 
 2. Building bridge
+
+    Building bridge for all supported platform (macOS, iOS, Android)
+
     ```shell
-    $ npm run build:bridge:all # target os: macOS, android, iOS
-    $ npm run build:bridge:android # target os: android
-    $ npm run build:bridge:ios # target os: iOS
-    $ npm run build:bridge:macos # target os: macOS
+    $ npm run build:bridge:all
+    ```
+
+    Building bridge for one platform
+
+    **macOS**
+
+    ```shell
+    $ npm run build:bridge:macos
+    ```
+
+    **iOS**
+
+    ```shell
+    $ npm run build:bridge:ios
+    ```
+
+    **Android**
+
+    ```shell
+    $ npm run build:bridge:android
     ```
 
 3. Start example

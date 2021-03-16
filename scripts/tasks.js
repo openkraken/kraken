@@ -329,7 +329,18 @@ task('build-android-app', (done) => {
 
 task('build-android-kraken-lib', (done) => {
   const androidHome = path.join(process.env.HOME, 'Library/Android/sdk');
-  const ndkVersion = '20.0.5594570';
+  const ndkDir = path.join(androidHome, 'ndk');
+  let installedNDK = fs.readdirSync(ndkDir).filter(d => d[0] != '.');
+  if (installedNDK.length == 0) {
+    throw new Error('Android NDK not Found. Please install one');
+  }
+
+  const ndkVersion = installedNDK[0];
+
+  if (parseInt(ndkVersion.substr(0, 2)) < 20) {
+    throw new Error('Android NDK version must at least >= 20');
+  }
+
   const archs = ['arm64-v8a', 'armeabi-v7a'];
   const buildType = buildMode == 'Release' ? 'Relwithdebinfo' : 'Debug';
 
@@ -344,7 +355,7 @@ task('build-android-kraken-lib', (done) => {
     -DANDROID_ABI="${arch}" \
     -DANDROID_PLATFORM="android-16" \
     -DANDROID_STL=c++_shared \
-    -G "Ninja" \
+    -G "Unix Makefiles" \
     -B ${paths.bridge}/cmake-build-android-${arch} -S ${paths.bridge}`,
       {
         cwd: paths.bridge,
@@ -360,19 +371,6 @@ task('build-android-kraken-lib', (done) => {
     execSync(`cmake --build ${paths.bridge}/cmake-build-android-${arch} --target kraken -- -j 12`, {
       stdio: 'inherit'
     });
-
-    let toolchainPath = '';
-    if (arch == 'arm64-v8a') {
-      toolchainPath = `${androidHome}/ndk/${ndkVersion}/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64/aarch64-linux-android/bin`;
-    } else if (arch == 'armeabi-v7a') {
-      toolchainPath = `${androidHome}/ndk/${ndkVersion}/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/arm-linux-androideabi/bin`;
-    }
-
-    // strip binary and debug symbols.
-    execSync(`${toolchainPath}/objcopy \
-    --only-keep-debug ${soBinaryDirectory}/libkraken_jsc.so ${soBinaryDirectory}/libkraken_jsc.debug`, { stdio: 'inherit' });
-
-    execSync(`${toolchainPath}/strip -S -x -X ${soBinaryDirectory}/libkraken_jsc.so`, { stdio: 'inherit' });
   });
 
   done();
