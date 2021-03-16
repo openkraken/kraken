@@ -1,6 +1,7 @@
 #include <JavaScriptCore/JavaScript.h>
 #include <chrono>
 #include <deque>
+#include <cassert>
 #include <functional>
 #include <map>
 #include <unordered_map>

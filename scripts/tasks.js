@@ -10,7 +10,6 @@ const del = require('del');
 const os = require('os');
 
 const SUPPORTED_JS_ENGINES = ['jsc'];
-const V8_VERSION = '7.9.317.31';
 
 const KRAKEN_ROOT = join(__dirname, '..');
 const TARGET_PATH = join(KRAKEN_ROOT, 'targets');
@@ -27,7 +26,7 @@ const paths = {
   thirdParty: resolveKraken('third_party'),
   tests: resolveKraken('integration_tests'),
   sdk: resolveKraken('sdk'),
-  templates: resolveKraken('templates')
+  templates: resolveKraken('scripts/templates')
 };
 
 function resolveKraken(submodule) {
@@ -126,8 +125,13 @@ task('clean', () => {
 
 const libOutputPath = join(TARGET_PATH, platform, 'lib');
 
-task('build-darwin-kraken-lib-release', done => {
-  execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_TEST=true \
+task('build-darwin-kraken-lib', done => {
+  let buildType = 'Debug';
+  if (process.env.KRAKEN_BUILD === 'Release') {
+    buildType = 'RelWithDebInfo';
+  }
+
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} -DENABLE_TEST=true \
     -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-macos-x86_64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
@@ -144,135 +148,12 @@ task('build-darwin-kraken-lib-release', done => {
 
   const binaryPath = path.join(paths.sdk, 'build/macos/lib/x86_64/libkraken_jsc.dylib');
 
-  execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
-  execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit'});
+  if (buildMode == 'Release') {
+    execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
+    execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit' });
+  }
 
   done();
-});
-
-for (let jsEngine of SUPPORTED_JS_ENGINES) {
-  task('generate-cmake-files-' + jsEngine, (done) => {
-    function generateCmake(args) {
-      const handle = spawnSync('cmake', args, {
-        cwd: paths.bridge,
-        env: Object.assign(process.env, {
-          LIBRARY_OUTPUT_DIR: libOutputPath,
-          KRAKEN_JS_ENGINE: jsEngine
-        }),
-        stdio: 'inherit',
-      });
-      if (handle.status !== 0) {
-        console.error(handle.error);
-        return done(false);
-      }
-    }
-
-    let cmakeArgs = [
-      '-DCMAKE_BUILD_TYPE=' + buildMode,
-      '-DENABLE_TEST=true'
-    ];
-
-    if (process.env.ENABLE_PROFILE) {
-      cmakeArgs.push('-DENABLE_PROFILE=true');
-    }
-
-    const makeFileArgs = [
-      ...cmakeArgs,
-      '-G',
-      'CodeBlocks - Unix Makefiles',
-      '-B',
-      resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
-      '-S',
-      paths.bridge
-    ];
-
-    // generate xcode project for debugging on macOS.
-    if (platform === 'darwin') {
-      const xcodeArgs = [
-        '-DCMAKE_BUILD_TYPE=' + buildMode,
-        '-G',
-        'Xcode',
-        '-B',
-        resolve(paths.bridge, 'cmake-build-macos'),
-        '-S',
-        paths.bridge
-      ];
-      generateCmake(xcodeArgs);
-    }
-
-    generateCmake(makeFileArgs);
-    done(null);
-  });
-
-  task('build-kraken-lib-' + jsEngine, (done) => {
-    const krakenTarget = [
-      'kraken',
-      'kraken_static',
-    ];
-
-    if (buildMode == 'Debug') {
-      krakenTarget.push('kraken_test')
-    }
-
-    const args = [
-      '--build',
-      resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
-      '--target',
-      ...krakenTarget,
-      '--',
-      '-j',
-      '4'
-    ];
-    mkdirp.sync(libOutputPath);
-    const handle = spawnSync('cmake', args, {
-      cwd: paths.bridge,
-      env: Object.assign(process.env, {
-        KRAKEN_JS_ENGINE: jsEngine
-      }),
-      stdio: 'inherit',
-    });
-    done(handle.status === 0 ? null : handle.error);
-  });
-}
-
-task('generate-cmake-embedded-files', (done) => {
-  const args = [
-    '-DCMAKE_BUILD_TYPE=' + buildMode,
-    '-G',
-    'CodeBlocks - Unix Makefiles',
-    '-B',
-    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-' + buildMode.toLowerCase()),
-    '-S',
-    resolve(paths.platform, 'linux_' + os.arch())
-  ];
-  const handle = spawnSync('cmake', args, {
-    cwd: path.join(paths.platform, 'linux_' + os.arch()),
-    env: Object.assign(process.env),
-    stdio: 'inherit',
-  });
-  if (handle.status !== 0) {
-    console.error(handle.error);
-    return done(false);
-  }
-  done(null);
-});
-
-task('build-kraken-embedded-lib', (done) => {
-  const args = [
-    '--build',
-    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-' + buildMode.toLowerCase()),
-    '--target',
-    'kraken_embbeder',
-    '--',
-    '-j',
-    '4'
-  ];
-  const handle = spawnSync('cmake', args, {
-    cwd: resolve(paths.platform, 'linux_' + os.arch()),
-    env: process.env,
-    stdio: 'inherit',
-  });
-  done(handle.status === 0 ? null : handle.error);
 });
 
 task('compile-polyfill', (done) => {
@@ -296,20 +177,24 @@ task('compile-polyfill', (done) => {
   done();
 });
 
-task('pub-get', (done) => {
-  execSync('flutter pub get', {
-    cwd: paths.example,
-    env: process.env,
-    stdio: 'inherit'
-  });
-  done()
-});
+
+function matchError(errmsg) {
+  return errmsg.match(/(Failed assertion|\sexception\s|Dart\nError)/i);
+}
 
 task('integration-test', (done) => {
-  const { status } = spawnSync('npm', ['run', 'test'], {
+  const { status, stdout, stderr } = spawnSync('npm', ['run', 'test'], {
     stdio: 'inherit',
     cwd: paths.tests
   });
+
+  let dartErrorMatch = matchError(stdout + stderr);
+  if (dartErrorMatch) {
+    let error = new Error('UnExpected Flutter Assert Failed.');
+    done(error);
+    return;
+  }
+
   if (status !== 0) {
     console.error('Run intefration test with error.');
     process.exit(status);
@@ -318,70 +203,16 @@ task('integration-test', (done) => {
   }
 });
 
-task('build-embedded-assets', (done) => {
-  const distInclude = join(TARGET_PATH, 'linux', buildMode, 'include');
-  if (!fs.existsSync(distInclude)) {
-    fs.mkdirSync(distInclude);
-  }
-  let copySource = [
-    {
-      src: paths.example + '/linux/flutter/generated_plugin_registrant.h',
-      dest: distInclude + '/generated_plugin_registrant.h'
-    },
-    {
-      src: paths.bridge + '/include/kraken_bridge_export.h',
-      dest: distInclude + '/kraken_bridge_export.h'
-    },
-    {
-      src: paths.platform + '/linux_x64/kraken_embbeder.h',
-      dest: distInclude + '/kraken_embbeder.h'
-    },
-    {
-      src: paths.example + '/linux/flutter/ephemeral/flutter_export.h',
-      dest: distInclude + '/flutter_export.h'
-    },
-    {
-      src: paths.example + '/linux/flutter/ephemeral/flutter_glfw.h',
-      dest: distInclude + '/flutter_glfw.h'
-    },
-    {
-      src: paths.example + '/linux/flutter/ephemeral/flutter_messenger.h',
-      dest: distInclude + '/flutter_messenger.h'
-    },
-    {
-      src: paths.example + '/linux/flutter/ephemeral/flutter_plugin_registrar.h',
-      dest: distInclude + '/flutter_plugin_registrar.h'
-    }
-  ];
-
-  for (let source of copySource) {
-    fs.copyFileSync(source.src, source.dest);
-  }
-
-  execSync(`cp -r ${paths.example}/linux/flutter/ephemeral/cpp_client_wrapper_glfw/include/flutter ${distInclude}`);
-  execSync(`ln -s ../app/lib/libflutter_linux_glfw.so ./`, {
-    cwd: libOutputPath,
-    stdio: 'inherit'
-  });
-  execSync('chrpath -r "\\$ORIGIN" ./libkraken.so', {
-    cwd: libOutputPath,
-    stdio: 'inherit'
-  });
-  execSync('chrpath -r "\\$ORIGIN ./libkraken_embbeder.so"', {
-    cwd: libOutputPath,
-    stdio: 'inherit'
-  });
-  done();
-});
-
 task('sdk-clean', (done) => {
   execSync(`rm -rf ${paths.sdk}/build`, { stdio: 'inherit' });
   done();
 });
 
-task(`build-ios-kraken-lib-release`, (done) => {
+task(`build-ios-kraken-lib`, (done) => {
+  const buildType = buildMode == 'Release' ? 'RelWithDebInfo' : 'Debug';
+
   // generate build scripts for simulator
-  execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=SIMULATOR64 \
     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
@@ -400,7 +231,7 @@ task(`build-ios-kraken-lib-release`, (done) => {
   });
 
   // geneate builds scripts for ARMV7, ARMV7S
-  execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=OS \
     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
@@ -419,7 +250,7 @@ task(`build-ios-kraken-lib-release`, (done) => {
   });
 
   // geneate builds scripts for ARM64
-  execSync(`cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
      -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
      -DPLATFORM=OS64 \
      -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
@@ -457,9 +288,11 @@ task(`build-ios-kraken-lib-release`, (done) => {
     'utf-8'
   );
 
-  execSync(`dsymutil ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
-  execSync(`mv ${frameworkPath}/kraken_bridge.dSYM ${targetDynamicSDKPath}`)
-  execSync(`strip -S -X -x ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
+  if (buildMode == 'Release') {
+    execSync(`dsymutil ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
+    execSync(`mv ${frameworkPath}/kraken_bridge.dSYM ${targetDynamicSDKPath}`)
+    execSync(`strip -S -X -x ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
+  }
 
   const armStaticSDKPath = path.join(paths.sdk, 'build/ios/lib/arm/libkraken_jsc.a');
   const arm64StaticSDKPath = path.join(paths.sdk, 'build/ios/lib/arm64/libkraken_jsc.a');
@@ -471,6 +304,7 @@ task(`build-ios-kraken-lib-release`, (done) => {
   execSync(`pod ipc spec KrakenSDK.podspec > KrakenSDK.podspec.json`, { cwd: targetDynamicSDKPath });
   done();
 });
+
 
 task(`build-ios-kraken-lib-profile`, done => {
   let frameworkSource = `${paths.sdk}/build/ios/framework/Release/kraken.framework`;
@@ -505,27 +339,35 @@ task('build-android-app', (done) => {
   done();
 });
 
-task('build-android-kraken-lib-release', (done) => {
-  if (!process.env['ANDROID_HOME']) {
-    throw new Error('Please download Android SDK and configure PATH env. \n export ANDROID_HOME=/path/to/sdk');
+task('build-android-kraken-lib', (done) => {
+  const androidHome = path.join(process.env.HOME, 'Library/Android/sdk');
+  const ndkDir = path.join(androidHome, 'ndk');
+  let installedNDK = fs.readdirSync(ndkDir).filter(d => d[0] != '.');
+  if (installedNDK.length == 0) {
+    throw new Error('Android NDK not Found. Please install one');
   }
 
-  const androidHome = process.env.ANDROID_HOME;
-  const ndkVersion = '20.0.5594570';
+  const ndkVersion = installedNDK[0];
+
+  if (parseInt(ndkVersion.substr(0, 2)) < 20) {
+    throw new Error('Android NDK version must at least >= 20');
+  }
+
   const archs = ['arm64-v8a', 'armeabi-v7a'];
+  const buildType = buildMode == 'Release' ? 'Relwithdebinfo' : 'Debug';
 
   archs.forEach(arch => {
     const soBinaryDirectory = path.join(paths.sdk, `build/android/lib/${arch}`);
 
     // generate project
-    execSync(`cmake -DCMAKE_BUILD_TYPE=relwithdebinfo \
+    execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${androidHome}/ndk/${ndkVersion}/build/cmake/android.toolchain.cmake \
     -DANDROID_NDK=${androidHome}/ndk/${ndkVersion} \
     -DIS_ANDROID=TRUE \
     -DANDROID_ABI="${arch}" \
     -DANDROID_PLATFORM="android-16" \
     -DANDROID_STL=c++_shared \
-    -G "Ninja" \
+    -G "Unix Makefiles" \
     -B ${paths.bridge}/cmake-build-android-${arch} -S ${paths.bridge}`,
       {
         cwd: paths.bridge,
@@ -541,19 +383,6 @@ task('build-android-kraken-lib-release', (done) => {
     execSync(`cmake --build ${paths.bridge}/cmake-build-android-${arch} --target kraken -- -j 12`, {
       stdio: 'inherit'
     });
-
-    let toolchainPath = '';
-    if (arch == 'arm64-v8a') {
-      toolchainPath = `${androidHome}/ndk/${ndkVersion}/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64/aarch64-linux-android/bin`;
-    } else if (arch == 'armeabi-v7a') {
-      toolchainPath = `${androidHome}/ndk/${ndkVersion}/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/arm-linux-androideabi/bin`;
-    }
-
-    // strip binary and debug symbols.
-    execSync(`${toolchainPath}/objcopy \
-    --only-keep-debug ${soBinaryDirectory}/libkraken_jsc.so ${soBinaryDirectory}/libkraken_jsc.debug`, { stdio: 'inherit' });
-
-    execSync(`${toolchainPath}/strip -S -x -X ${soBinaryDirectory}/libkraken_jsc.so`, { stdio: 'inherit' });
   });
 
   done();
@@ -575,12 +404,4 @@ task('build-android-sdk', (done) => {
   done();
 });
 
-task('build-android-sdk-and-upload', (done) => {
-  let cmd = './gradlew assembleRelease uploadArchives';
-  execSync(cmd, {
-    eng: process.env,
-    cwd: path.join(paths.sdk, '.android'),
-    stdio: 'inherit'
-  });
-  done();
-});
+
