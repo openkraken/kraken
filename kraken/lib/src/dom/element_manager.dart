@@ -79,15 +79,14 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   bool showPerformanceOverlayOverride;
   KrakenController controller;
 
-  final double viewportWidth;
-  final double viewportHeight;
+  double get viewportWidth => viewport.viewportSize.width;
+  double get viewportHeight => viewport.viewportSize.height;
 
   final int contextId;
 
   final List<VoidCallback> _detachCallbacks = [];
 
-  ElementManager(this.viewportWidth, this.viewportHeight,
-      {this.contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
+  ElementManager({this.contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
 
     if (kProfileMode) {
       PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);

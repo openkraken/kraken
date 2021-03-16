@@ -13,7 +13,7 @@ const buildMode = process.env.KRAKEN_BUILD || 'Debug';
 series(
   'sdk-clean',
   'compile-polyfill',
-  'build-ios-kraken-lib-release'
+  'build-ios-kraken-lib'
 )((err) => {
   if (err) {
     console.log(err);

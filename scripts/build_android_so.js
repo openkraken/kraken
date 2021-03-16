@@ -6,7 +6,7 @@ const chalk = require('chalk');
 series(
   'sdk-clean',
   'compile-polyfill',
-  'build-android-kraken-lib-release'
+  'build-android-kraken-lib'
 )((err) => {
   if (err) {
     console.log(err);
