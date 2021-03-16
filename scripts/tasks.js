@@ -197,7 +197,6 @@ task('integration-test', (done) => {
     stdout += data + '';
   });
 
-  childProcess.stdout.pipe(process.stdout);
   childProcess.stdout.on('data', (data) => {
     stdout += data + '';
   });
