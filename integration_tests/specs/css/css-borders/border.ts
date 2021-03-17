@@ -264,4 +264,39 @@ describe('border', () => {
     await simulateClick(11.0, 11.0);
     expect(clickCount).toBe(1);
   });
+
+  it('should work with border-width change', async (done) => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'red',
+          position: 'relative',
+          border: '2px solid black'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '100px',
+            backgroundColor: 'yellow',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+       div.style.borderWidth = '10px';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
 });
