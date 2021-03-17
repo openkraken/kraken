@@ -831,7 +831,7 @@ class Element extends Node
     return displayValue == INLINE;
   }
 
-  void _onStyleChanged(String property, String original, String present, bool inAnimation) {
+  void _onStyleChanged(String property, String original, String present) {
     switch (property) {
       case DISPLAY:
         _styleDisplayChangedListener(property, original, present);

@@ -202,7 +202,7 @@ class CanvasElement extends Element {
     }
   }
 
-  void _styleChangedListener(String key, String original, String present, bool inAnimation) {
+  void _styleChangedListener(String key, String original, String present) {
     switch (key) {
       case 'width':
       case 'height':
