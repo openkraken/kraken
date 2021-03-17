@@ -7,7 +7,7 @@
 1. Install Kraken CLI
 
     ```shell
-    $ npm i @kraken-project/cli -g
+    $ npm i @openkraken/cli -g
     ```
 
 2. Open with kraken
