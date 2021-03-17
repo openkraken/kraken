@@ -26,6 +26,13 @@ jobs:
         fi
     - name: Run Test
       run: cd ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME} && npm test
+  upload_snapshots:
+    runs-on: self-hosted
+    needs: integration_test
+    steps:
+    - name: Set branch name
+      run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
+    - name: Echo branch name
+      run: echo ${BRANCH_NAME}
     - name: Upload Snapshots
-      if: ${{ always() }}
       run: node ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}/scripts/upload_snapshots.js
