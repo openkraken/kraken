@@ -367,7 +367,7 @@ task('build-android-kraken-lib', (done) => {
     throw new Error('Android NDK not Found. Please install one');
   }
 
-  const ndkVersion = installedNDK[0];
+  const ndkVersion = installedNDK.slice(-1)[0];
 
   if (parseInt(ndkVersion.substr(0, 2)) < 20) {
     throw new Error('Android NDK version must at least >= 20');
