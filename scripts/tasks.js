@@ -29,6 +29,8 @@ const paths = {
   templates: resolveKraken('scripts/templates')
 };
 
+exports.paths = paths;
+
 function resolveKraken(submodule) {
   return resolve(KRAKEN_ROOT, submodule);
 }
@@ -138,7 +140,7 @@ task('build-darwin-kraken-lib', done => {
     env: {
       ...process.env,
       KRAKEN_JS_ENGINE: 'jsc',
-      LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/macos/lib/x86_64')
+      LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/macos/lib/x86_64')
     }
   });
 
@@ -146,7 +148,7 @@ task('build-darwin-kraken-lib', done => {
     stdio: 'inherit'
   });
 
-  const binaryPath = path.join(paths.sdk, 'build/macos/lib/x86_64/libkraken_jsc.dylib');
+  const binaryPath = path.join(paths.bridge, 'build/macos/lib/x86_64/libkraken_jsc.dylib');
 
   if (buildMode == 'Release') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
@@ -241,7 +243,7 @@ task(`build-ios-kraken-lib`, (done) => {
     env: {
       ...process.env,
       KRAKEN_JS_ENGINE: 'jsc',
-      LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/x86_64')
+      LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/x86_64')
     }
   });
 
@@ -260,7 +262,7 @@ task(`build-ios-kraken-lib`, (done) => {
     env: {
       ...process.env,
       KRAKEN_JS_ENGINE: 'jsc',
-      LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/arm')
+      LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm')
     }
   });
 
@@ -279,7 +281,7 @@ task(`build-ios-kraken-lib`, (done) => {
     env: {
       ...process.env,
       KRAKEN_JS_ENGINE: 'jsc',
-      LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/arm64')
+      LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm64')
     }
   });
 
@@ -288,11 +290,11 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
 
-  const armDynamicSDKPath = path.join(paths.sdk, 'build/ios/lib/arm/kraken_bridge.framework/kraken_bridge');
-  const arm64DynamicSDKPath = path.join(paths.sdk, 'build/ios/lib/arm64/kraken_bridge.framework/kraken_bridge');
-  const x64DynamicSDKPath = path.join(paths.sdk, 'build/ios/lib/x86_64/kraken_bridge.framework/kraken_bridge');
+  const armDynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/arm/kraken_bridge.framework/kraken_bridge');
+  const arm64DynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/arm64/kraken_bridge.framework/kraken_bridge');
+  const x64DynamicSDKPath = path.join(paths.bridge, 'build/ios/lib/x86_64/kraken_bridge.framework/kraken_bridge');
 
-  const targetDynamicSDKPath = `${paths.sdk}/build/ios/framework`;
+  const targetDynamicSDKPath = `${paths.bridge}/build/ios/framework`;
   const frameworkPath = `${targetDynamicSDKPath}/kraken_bridge.framework`;
   const plistPath = path.join(paths.templates, 'kraken_bridge.plist');
   mkdirp.sync(frameworkPath);
@@ -314,12 +316,11 @@ task(`build-ios-kraken-lib`, (done) => {
     execSync(`strip -S -X -x ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
   }
 
-  const armStaticSDKPath = path.join(paths.sdk, 'build/ios/lib/arm/libkraken_jsc.a');
-  const arm64StaticSDKPath = path.join(paths.sdk, 'build/ios/lib/arm64/libkraken_jsc.a');
-  const x64StaticSDKPath = path.join(paths.sdk, 'build/ios/lib/x86_64/libkraken_jsc.a');
+  const armStaticSDKPath = path.join(paths.bridge, 'build/ios/lib/arm/libkraken_jsc.a');
+  const arm64StaticSDKPath = path.join(paths.bridge, 'build/ios/lib/arm64/libkraken_jsc.a');
+  const x64StaticSDKPath = path.join(paths.bridge, 'build/ios/lib/x86_64/libkraken_jsc.a');
 
-  const targetStaticSDKPath = `${paths.sdk}/build/ios/framework`;
-
+  const targetStaticSDKPath = `${paths.bridge}/build/ios/framework`;
   execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_jsc.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
   execSync(`pod ipc spec KrakenSDK.podspec > KrakenSDK.podspec.json`, { cwd: targetDynamicSDKPath });
   done();
@@ -367,7 +368,7 @@ task('build-android-kraken-lib', (done) => {
     throw new Error('Android NDK not Found. Please install one');
   }
 
-  const ndkVersion = installedNDK[0];
+  const ndkVersion = installedNDK.slice(-1)[0];
 
   if (parseInt(ndkVersion.substr(0, 2)) < 20) {
     throw new Error('Android NDK version must at least >= 20');
@@ -377,7 +378,7 @@ task('build-android-kraken-lib', (done) => {
   const buildType = buildMode == 'Release' ? 'Relwithdebinfo' : 'Debug';
 
   archs.forEach(arch => {
-    const soBinaryDirectory = path.join(paths.sdk, `build/android/lib/${arch}`);
+    const soBinaryDirectory = path.join(paths.bridge, `build/android/lib/${arch}`);
 
     // generate project
     execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
