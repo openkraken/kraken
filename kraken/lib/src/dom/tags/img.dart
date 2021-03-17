@@ -249,7 +249,27 @@ class ImageElement extends Element {
     } else {
       _convertToNonRepaint();
     }
-    _resize();
+
+    // Delay image size setting to next frame to make sure image has been layouted
+    // to wait for percentage size to be caculated correctly in the case of image has been cached
+    if (synchronousCall) {
+      // `synchronousCall` happens when caches image and calling `addListener`.
+      scheduleMicrotask(_handleResizeAfterImageLoaded);
+    } else {
+      _handleResizeAfterImageLoaded();
+    }
+  }
+
+  void _handleResizeAfterImageLoaded() {
+    if (isConnected) {
+      // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
+      SchedulerBinding.instance.scheduleFrame();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _resize();
+      });
+    } else {
+      _resize();
+    }
   }
 
   /// Convert RenderIntrinsic to non repaint boundary

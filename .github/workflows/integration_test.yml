@@ -16,8 +16,23 @@ jobs:
         if [ ! -d "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}" ]; then
           git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}";
         else
-          cd "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}" && git pull;
+          cd "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}";
+          {
+            git pull;
+          } || {
+            rm -rf "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}"
+            git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}";
+          }
         fi
     - name: Run Test
       run: cd ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME} && npm test
-
+  upload_snapshots:
+    runs-on: self-hosted
+    needs: integration_test
+    steps:
+    - name: Set branch name
+      run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
+    - name: Echo branch name
+      run: echo ${BRANCH_NAME}
+    - name: Upload Snapshots
+      run: node ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}/scripts/upload_snapshots.js
