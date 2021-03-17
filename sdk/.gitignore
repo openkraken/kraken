@@ -53,9 +53,5 @@ app.*.symbols
 pubspec.lock
 assets/*
 !assets/.gitkeep
-.android/targets
-.ios/Flutter/engine
-.ios/Flutter/Generated.xcconfig
-.ios/Flutter/flutter_export_environment.sh
-.ios/Flutter/FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.m
-.ios/Flutter/FlutterPluginRegistrant/FlutterPluginRegistrant.podspec
+.ios
+.android

@@ -200,10 +200,46 @@ class BoxDecorationPainter extends BoxPainter {
     if (_decoration.boxShadow == null)
       return;
     for (final BoxShadow boxShadow in _decoration.boxShadow) {
-      final Paint paint = boxShadow.toPaint();
-      final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
-      _paintBox(canvas, bounds, paint, textDirection);
+      _paintBoxShadow(canvas, rect, textDirection, boxShadow);
     }
+  }
+
+  void _paintBoxShadow(Canvas canvas, Rect rect, TextDirection textDirection, BoxShadow boxShadow) {
+    final Paint paint = Paint()
+      ..color = boxShadow.color
+    // Following W3C spec, blur sigma is exactly half the blur radius
+    // which is different from the value of Flutter:
+    // https://www.w3.org/TR/css-backgrounds-3/#shadow-blur
+    // https://html.spec.whatwg.org/C/#when-shadows-are-drawn
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, boxShadow.blurRadius / 2);
+
+    // Rect of box shadow not including blur radius
+    final Rect shadowRect = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
+    // Rect of box shadow including blur radius, add 1 pixel to avoid the fill bleed in (due to antialiasing)
+    final Rect shadowBlurRect = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius + boxShadow.blurRadius + 1);
+    // Path of border rect
+    Path borderPath;
+    // Path of box shadow rect
+    Path shadowPath;
+    // Path of box shadow including blur rect
+    Path shadowBlurPath;
+
+    if (_decoration.borderRadius == null) {
+      borderPath = Path()..addRect(rect);
+      shadowPath = Path()..addRect(shadowRect);
+      shadowBlurPath = Path()..addRect(shadowBlurRect);
+    } else {
+      borderPath = Path()..addRRect(_decoration.borderRadius.resolve(textDirection).toRRect(rect));
+      shadowPath = Path()..addRRect(_decoration.borderRadius.resolve(textDirection).toRRect(shadowRect));
+      shadowBlurPath = Path()..addRRect(_decoration.borderRadius.resolve(textDirection).toRRect(shadowBlurRect));
+    }
+
+    // Path of shadow blur rect subtract border rect of which the box shadow should paint
+    final Path clipedPath = Path.combine(PathOperation.difference, shadowBlurPath, borderPath);
+    canvas.save();
+    canvas.clipPath(clipedPath);
+    canvas.drawPath(shadowPath, paint);
+    canvas.restore();
   }
 
   void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection textDirection) {
@@ -349,8 +385,6 @@ class BoxDecorationPainter extends BoxPainter {
     final Rect rect = offset & configuration.size;
     final TextDirection textDirection = configuration.textDirection;
 
-    _paintShadows(canvas, rect, textDirection);
-
     bool hasLocalAttachment = hasLocalBackgroundImage(renderStyle);
     if (!hasLocalAttachment) {
       Rect backgroundClipRect = _getBackgroundClipRect(offset, configuration);
@@ -368,6 +402,8 @@ class BoxDecorationPainter extends BoxPainter {
       borderRadius: _decoration.borderRadius as BorderRadius,
       textDirection: configuration.textDirection,
     );
+
+    _paintShadows(canvas, rect, textDirection);
   }
 
   @override

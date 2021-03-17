@@ -19,6 +19,80 @@ describe('BoxShadow', () => {
     await matchElementImageSnapshot(reference);
   });
 
+  it('with background color', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'inline-block',
+          width: '200px',
+          height: '100px',
+          margin: '20px',
+          backgroundColor: 'green',
+          boxShadow: '0 0 10px 5px rgba(0, 0, 0, 0.6)',
+        },
+      },
+    );
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('without background color and shadow offset', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'inline-block',
+          width: '200px',
+          height: '100px',
+          margin: '20px',
+          boxShadow: '0 0 10px 5px rgba(0, 0, 0, 0.6)',
+        },
+      },
+    );
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('with shadow blur and spread radius', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'inline-block',
+          width: '200px',
+          height: '100px',
+          margin: '20px',
+          boxShadow: '5px 5px 10px 0px rgba(0, 0, 0, 0.6)',
+        },
+      },
+    );
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('with border radius', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'inline-block',
+          width: '200px',
+          height: '100px',
+          margin: '20px',
+          borderRadius: '10px',
+          boxShadow: '5px 5px 10px 0px rgba(0, 0, 0, 0.6)',
+        },
+      },
+    );
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
   it('remove box-shadow', async () => {
     const div = createElementWithStyle('div', {
       width: '50px',
