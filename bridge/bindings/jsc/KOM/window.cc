@@ -93,6 +93,26 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
   return nullptr;
 }
 
+bool WindowInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
+  auto propertyMap = getWindowPropertyMap();
+  auto prototypePropertyMap = getWindowPrototypePropertyMap();
+  JSStringHolder nameStringHolder = JSStringHolder(context, name);
+
+  // Key is prototype property, return false to handled by engine itself.
+  if (prototypePropertyMap.count(name) > 0) {
+    return false;
+  }
+
+  // Key is window's built-in property. return true to do nothing because this properties are readonly.
+  if (propertyMap.count(name) > 0) {
+    return true;
+  }
+
+  JSObjectSetProperty(_hostClass->ctx, _hostClass->context->global(), nameStringHolder.getString(), value, kJSPropertyAttributeNone, exception);
+
+  return EventTargetInstance::setProperty(name, value, exception);
+}
+
 void WindowInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
   EventTargetInstance::getPropertyNames(accumulator);
 

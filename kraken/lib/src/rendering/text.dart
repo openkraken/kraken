@@ -46,7 +46,7 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
   // Auto value for min-height
   double autoMinHeight = 0;
 
-  set text(InlineSpan value) {
+  set text(TextSpan value) {
     assert(_renderParagraph != null);
     _renderParagraph.text = value;
   }

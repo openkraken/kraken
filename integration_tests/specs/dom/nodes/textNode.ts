@@ -66,4 +66,46 @@ describe('TextNode', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('createTextNode should not has height when the text is a empty string', async () => {
+    const child = document.createElement('div');
+    child.style.width = '10px';
+    child.style.height = '10px';
+    child.style.backgroundColor = 'blue';
+    document.body.appendChild(child);
+    const text = document.createTextNode("")
+    document.body.appendChild(text);
+
+    const child2 = document.createElement('div');
+    child2.style.width = '10px';
+    child2.style.height = '10px';
+    child2.style.backgroundColor = 'red';
+    document.body.appendChild(child2);
+
+    await matchViewportSnapshot();
+  });
+
+  it('createTextNode should not has height when the text is a empty string and flex layout', async () => {
+    const div = document.createElement('div');
+    div.style.display = 'flex';
+
+    document.body.appendChild(div);
+
+    const child = document.createElement('div');
+    child.style.width = '10px';
+    child.style.height = '10px';
+    child.style.backgroundColor = 'blue';
+    div.appendChild(child);
+    const text = document.createTextNode("")
+    div.appendChild(text);
+
+
+    const child2 = document.createElement('div');
+    child2.style.width = '10px';
+    child2.style.height = '10px';
+    child2.style.backgroundColor = 'red';
+    div.appendChild(child2);
+
+    await matchViewportSnapshot();
+  });
 });

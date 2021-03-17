@@ -92,8 +92,8 @@ class KrakenRenderParagraph extends RenderBox
   double lineHeight;
 
   /// The text to display.
-  InlineSpan get text => _textPainter.text;
-  set text(InlineSpan value) {
+  TextSpan get text => _textPainter.text;
+  set text(TextSpan value) {
     assert(value != null);
     switch (_textPainter.text.compareTo(value)) {
       case RenderComparison.identical:
@@ -306,8 +306,8 @@ class KrakenRenderParagraph extends RenderBox
     double firstLineOffset = _lineOffset[0];
     ui.LineMetrics firstLineMetrics = _lineMetrics[0];
 
-    // Use the baseline of the last line as paragraph baseline
-    return firstLineOffset + firstLineMetrics.ascent;
+    // Use the baseline of the last line as paragraph baseline.
+    return text.text == '' ? 0.0 : (firstLineOffset + firstLineMetrics.ascent);
   }
 
   /// Compute distance to baseline of last text line
@@ -315,8 +315,8 @@ class KrakenRenderParagraph extends RenderBox
     double lastLineOffset = _lineOffset[_lineOffset.length - 1];
     ui.LineMetrics lastLineMetrics = _lineMetrics[_lineMetrics.length - 1];
 
-    // Use the baseline of the last line as paragraph baseline
-    return lastLineOffset + lastLineMetrics.ascent;
+    // Use the baseline of the last line as paragraph baseline.
+    return text.text == '' ? 0.0 : (lastLineOffset + lastLineMetrics.ascent);
   }
 
   // Intrinsics cannot be calculated without a full layout for
@@ -643,13 +643,15 @@ class KrakenRenderParagraph extends RenderBox
     _setParentData();
     _layoutMultiLineTextWithConstraints(constraints);
 
-    // Height of paragraph
-    double paragraphHeight = 0;
 
-    for (int i = 0; i < _lineMetrics.length; i++) {
-      ui.LineMetrics lineMetric = _lineMetrics[i];
-      double height = lineHeight != null ? lineHeight : lineMetric.height;
-      paragraphHeight += height;
+    double paragraphHeight = 0;
+    if (text.text != '') {
+      // Height of paragraph
+      for (int i = 0; i < _lineMetrics.length; i++) {
+        ui.LineMetrics lineMetric = _lineMetrics[i];
+        double height = lineHeight != null ? lineHeight : lineMetric.height;
+        paragraphHeight += height;
+      }
     }
 
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because

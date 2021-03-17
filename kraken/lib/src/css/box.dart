@@ -70,7 +70,7 @@ mixin CSSBoxMixin on RenderStyleBase {
         gradient.borderEdge = newValue;
       }
     }
-    renderBoxModel.markNeedsLayout();
+    renderBoxModel.markNeedsPaint();
   }
 
   double get borderTop {
@@ -297,6 +297,14 @@ mixin CSSBoxMixin on RenderStyleBase {
 
   void updateBorder(String property, {Color borderColor, double borderWidth}) {
     Border border = decoration.border as Border;
+
+    bool isBorderWidthChange = property == BORDER_TOP_WIDTH || property == BORDER_RIGHT_WIDTH ||
+      property == BORDER_BOTTOM_WIDTH || property == BORDER_LEFT_WIDTH;
+
+    // Only border width change will affect layout
+    if (isBorderWidthChange) {
+      renderBoxModel.markNeedsLayout();
+    }
 
     if (border != null) {
       BorderSide left =  border.left;
