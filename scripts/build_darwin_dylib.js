@@ -4,6 +4,8 @@
 const { series } = require('gulp');
 const chalk = require('chalk');
 
+require('./tasks');
+
 // Run tasks
 series(
   'macos-dylib-clean',
