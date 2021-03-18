@@ -425,4 +425,7 @@ task('build-android-sdk', (done) => {
   done();
 });
 
-
+task('macos-dylib-clean', (done) => {
+  execSync(`rm -rf ${paths.bridge}/build/macos`, { stdio: 'inherit' });
+  done();
+});

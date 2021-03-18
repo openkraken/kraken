@@ -1,6 +1,6 @@
 const fs = require('fs');
 const archiver = require('archiver');
-const { src, dest, series, parallel, task } = require('gulp');
+const { series, task } = require('gulp');
 const OSS = require('ali-oss');
 const path = require('path');
 const uuid = require('uuid').v4;
@@ -8,8 +8,8 @@ const chalk = require('chalk');
 
 function createSnapshotArchiver(baseDir) {
   return new Promise((resolve, reject) => {
-    var output = fs.createWriteStream(baseDir + '/snapshot.zip');
-    var archive = archiver('zip', {
+    const output = fs.createWriteStream(baseDir + '/snapshot.zip');
+    const archive = archiver('zip', {
       zlib: { level: 9 } // Sets the compression level.
     });
 
