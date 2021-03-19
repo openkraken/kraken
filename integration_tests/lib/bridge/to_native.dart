@@ -8,7 +8,6 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/src/bridge/from_native.dart';
 
 import 'platform.dart';
 

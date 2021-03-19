@@ -558,8 +558,8 @@ class KeyframeEffect extends AnimationEffect {
       // If fill is backwards that will be null when animation finished
       _propertySpecificKeyframeGroups.forEach((String propertyName, value) {
         style.removeAnimationProperty(propertyName);
-        String value = style.getStylePropertyValue(propertyName);
-        style.setProperty(propertyName, value, viewportSize);
+        String currentValue = style.getStylePropertyValue(propertyName);
+        style.setRenderStyleProperty(propertyName, null, currentValue);
       });
 
     } else {

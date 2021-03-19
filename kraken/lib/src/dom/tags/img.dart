@@ -503,7 +503,7 @@ class ImageElement extends Element {
     return super.getProperty(key);
   }
 
-  void _stylePropertyChanged(String property, String original, String present, bool inAnimation) {
+  void _stylePropertyChanged(String property, String original, String present) {
     if (property == WIDTH || property == HEIGHT) {
       _resize();
     } else if (property == OBJECT_FIT) {
