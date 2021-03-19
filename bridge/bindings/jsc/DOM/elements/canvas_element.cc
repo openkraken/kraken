@@ -252,6 +252,33 @@ bool CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
   }
 }
 
+JSValueRef CanvasRenderingContext2D::translate(JSContextRef ctx, JSObjectRef function,
+                                                                                JSObjectRef thisObject,
+                                                                                size_t argumentCount,
+                                                                                const JSValueRef *arguments,
+                                                                                JSValueRef *exception) {
+  if (argumentCount != 2) {
+    throwJSError(ctx,
+                    ("Failed to execute 'translate' on 'CanvasRenderingContext2D':  2 arguments required, but only " +
+                     std::to_string(argumentCount) + " present.")
+                      .c_str(),
+                    exception);
+    return nullptr;
+  }
+
+  double x = JSValueToNumber(ctx, arguments[0], exception);
+  double y = JSValueToNumber(ctx, arguments[1], exception);
+
+  auto instance =
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
+
+  getDartMethod()->flushUICommand();
+  assert_m(instance->nativeCanvasRenderingContext2D->translate != nullptr,
+           "Failed to execute translate(): dart method is nullptr.");
+  instance->nativeCanvasRenderingContext2D->translate(instance->nativeCanvasRenderingContext2D, x, y);
+  return nullptr;
+}
+
 JSValueRef CanvasRenderingContext2D::fillRect(JSContextRef ctx, JSObjectRef function,
                                                                                 JSObjectRef thisObject,
                                                                                 size_t argumentCount,

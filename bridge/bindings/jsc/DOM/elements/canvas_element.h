@@ -68,6 +68,7 @@ using SetFont = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingCo
 using SetFillStyle = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *fillStyle);
 using SetStrokeStyle = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D,
                                 NativeString *strokeStyle);
+using Translate = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y);
 using FillRect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
                           double width, double height);
 using ClearRect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
@@ -85,6 +86,7 @@ struct NativeCanvasRenderingContext2D {
   SetFont setFont{nullptr};
   SetFillStyle setFillStyle{nullptr};
   SetStrokeStyle setStrokeStyle{nullptr};
+  Translate translate{nullptr};
   FillRect fillRect{nullptr};
   ClearRect clearRect{nullptr};
   StrokeRect strokeRect{nullptr};
@@ -98,6 +100,9 @@ class CanvasRenderingContext2D : public HostClass {
 public:
   static std::unordered_map<JSContext *, CanvasRenderingContext2D *> instanceMap;
   OBJECT_INSTANCE(CanvasRenderingContext2D)
+
+  static JSValueRef translate(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef fillRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
@@ -146,6 +151,7 @@ protected:
   CanvasRenderingContext2D() = delete;
   explicit CanvasRenderingContext2D(JSContext *context);
 
+  JSFunctionHolder m_fillRect{context, prototypeObject, this, "translate", translate};
   JSFunctionHolder m_fillRect{context, prototypeObject, this, "fillRect", fillRect};
   JSFunctionHolder m_clearRect{context, prototypeObject, this, "clearRect", clearRect};
   JSFunctionHolder m_strokeRect{context, prototypeObject, this, "strokeRect", strokeRect};

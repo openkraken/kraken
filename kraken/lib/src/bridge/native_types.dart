@@ -310,6 +310,7 @@ class NativeCanvasElement extends Struct {
 typedef Native_RenderingContextSetFont = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> font);
 typedef Native_RenderingContextSetFillStyle = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> fillStyle);
 typedef Native_RenderingContextSetStrokeStyle = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> strokeStyle);
+typedef Native_RenderingContextTranslate = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
 typedef Native_RenderingContextFillRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
 typedef Native_RenderingContextClearRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
 typedef Native_RenderingContextStrokeRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
@@ -322,6 +323,7 @@ class NativeCanvasRenderingContext2D extends Struct {
   Pointer<NativeFunction<Native_RenderingContextSetFont>> setFont;
   Pointer<NativeFunction<Native_RenderingContextSetFillStyle>> setFillStyle;
   Pointer<NativeFunction<Native_RenderingContextSetStrokeStyle>> setStrokeStyle;
+  Pointer<NativeFunction<Native_RenderingContextTranslate>> translate;
   Pointer<NativeFunction<Native_RenderingContextFillRect>> fillRect;
   Pointer<NativeFunction<Native_RenderingContextClearRect>> clearRect;
   Pointer<NativeFunction<Native_RenderingContextStrokeRect>> strokeRect;

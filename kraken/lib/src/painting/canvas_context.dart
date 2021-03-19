@@ -11,11 +11,6 @@ typedef CanvasAction = void Function(Canvas, Size);
 
 List<CanvasRenderingContext> canvasRenderingContexts = [];
 
-enum CanvasFillRule {
-  nonzero,
-  evenodd,
-}
-
 enum ImageSmoothingQuality { low, medium, high }
 
 enum CanvasLineCap { butt, round, square }
@@ -160,27 +155,6 @@ abstract class CanvasRect {
   void strokeRect(double x, double y, double w, double h);
 }
 
-abstract class CanvasDrawPath {
-  // path API (see also CanvasPath)
-  void beginPath();
-  void fill(CanvasFillRule fillRule, {Path2D path});
-  void stroke({Path2D path});
-  void clip(CanvasFillRule fillRule, {Path2D path});
-  bool isPointInPath(double x, double y, CanvasFillRule fillRule, {Path2D path});
-  bool isPointInStroke(double x, double y, {Path2D path});
-}
-
-abstract class Path2D {
-  Path2D(dynamic path);
-
-  void addPath(Path2D path, {String transform});
-}
-
-abstract class CanvasUserInterface {
-  void drawFocusIfNeeded({Path2D path});
-  void scrollPathIntoView({Path2D path});
-}
-
 abstract class CanvasText {
   // text (see also the CanvasPathDrawingStyles and CanvasTextDrawingStyles
 
@@ -237,28 +211,6 @@ abstract class CanvasTextDrawingStyles {
   CanvasTextAlign textAlign; // (default: "start")
   CanvasTextBaseline textBaseline; // (default: "alphabetic")
   CanvasDirection direction; // (default: "inherit")
-}
-
-abstract class CanvasPath {
-  // shared path API methods
-  void closePath();
-
-  void moveTo(double x, double y);
-
-  void lineTo(double x, double y);
-
-  void quadraticCurveTo(double cpx, double cpy, double x, double y);
-
-  void bezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y);
-
-  void arcTo(double x1, double y1, double x2, double y2, double radius);
-
-  void rect(double x, double y, double w, double h);
-
-  void arc(double x, double y, double radius, double startAngle, double endAngle, {bool anticlockwise = false});
-
-  void ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle,
-      {bool anticlockwise = false});
 }
 
 // ignore: one_member_abstracts
