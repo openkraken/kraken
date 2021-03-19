@@ -38,8 +38,6 @@ class MyBrowser extends StatefulWidget {
 
 class _MyHomePageState extends State<MyBrowser> {
 
-  Kraken _kraken;
-
   OutlineInputBorder outlineBorder = OutlineInputBorder(
     borderSide: BorderSide(color: Colors.transparent, width: 0.0),
     borderRadius: const BorderRadius.all(
@@ -52,6 +50,7 @@ class _MyHomePageState extends State<MyBrowser> {
     final MediaQueryData queryData = MediaQuery.of(context);
     final TextEditingController textEditingController = TextEditingController();
 
+    Kraken _kraken;
     AppBar appBar = AppBar(
         backgroundColor: Colors.black87,
         titleSpacing: 10.0,
