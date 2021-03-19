@@ -20,6 +20,10 @@ jobs:
     if: ${{ always() }}
     needs: integration_test
     steps:
+    - name: Set branch name
+      run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
+    - name: Echo branch name
+      run: echo ${BRANCH_NAME}
     - name: Upload Snapshots
       run: cd "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && node scripts/upload_snapshots.js
   clean_up:
