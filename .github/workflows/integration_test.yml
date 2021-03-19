@@ -7,7 +7,12 @@ jobs:
   integration_test:
     runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v2
+    - name: Set branch name
+      run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
+    - name: Echo branch name
+      run: echo ${BRANCH_NAME}
+    - name: Clone the Code
+      run: git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/${BRANCH_NAME}";
     - name: Run Test
       run: npm test
   upload_snapshots:
@@ -16,4 +21,11 @@ jobs:
     needs: integration_test
     steps:
     - name: Upload Snapshots
-      run: node scripts/upload_snapshots.js
+      run: node "${RUNNER_WORKSPACE}/${BRANCH_NAME}/scripts/upload_snapshots.js"
+  clean_up:
+    runs-on: self-hosted
+    if: ${{ always() }}
+    needs: upload_snapshots
+    steps:
+    - name: Clean
+      run: rm -rf "${RUNNER_WORKSPACE}/${BRANCH_NAME}"
