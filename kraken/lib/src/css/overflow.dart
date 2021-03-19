@@ -157,7 +157,7 @@ mixin CSSOverflowMixin on ElementBase {
         defaultStyle: element.defaultStyle, isIntrinsicBox: element.isInlineBox, tagName: element.tagName, isScrollingElement: true);
     elementManager.setEventTarget(scrollingElement);
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
-    repaintBoundaryStyle.setProperty('overflow', 'visible');
+    repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
     scrollingContentLayoutBox = element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
     scrollingContentLayoutBox.isScrollingContentBox = true;
     scrollingElement.renderBoxModel = scrollingContentLayoutBox;

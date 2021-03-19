@@ -31,7 +31,7 @@ List<Kraken> kraken = List<Kraken>(KRAKEN_NUM);
 class NativeGestureClient implements GestureClient {
   NativeGestureClient({
     this.gestureClientID
-  }) {}
+  });
 
   int gestureClientID;
 
@@ -145,7 +145,6 @@ void main() async {
       String status = results[i];
       if (status == 'failed') {
         exit(1);
-        return;
       }
     }
 
