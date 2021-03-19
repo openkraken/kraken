@@ -12,6 +12,8 @@ jobs:
       run: npm test
   upload_snapshots:
     runs-on: self-hosted
+    if: ${{ always() }}
+    needs: integration_test
     steps:
     - name: Upload Snapshots
       run: node scripts/upload_snapshots.js
