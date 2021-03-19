@@ -1,6 +1,6 @@
 name: Integration Test WorkFlow
 
-on: [push]
+on: [push, workflow_dispatch]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -11,23 +11,13 @@ jobs:
       run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
     - name: Echo branch name
       run: echo ${BRANCH_NAME}
-    - name: Clone The Code
-      run: |
-        if [ ! -d "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}" ]; then
-          git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}";
-        else
-          cd "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}";
-          {
-            git pull;
-          } || {
-            rm -rf "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}"
-            git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}";
-          }
-        fi
+    - name: Clone the Code
+      run: git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/${BRANCH_NAME}";
     - name: Run Test
-      run: cd ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME} && npm test
+      run: cd "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && npm test
   upload_snapshots:
     runs-on: self-hosted
+    if: ${{ always() }}
     needs: integration_test
     steps:
     - name: Set branch name
@@ -35,4 +25,11 @@ jobs:
     - name: Echo branch name
       run: echo ${BRANCH_NAME}
     - name: Upload Snapshots
-      run: node ${RUNNER_WORKSPACE}/kraken_${BRANCH_NAME}/scripts/upload_snapshots.js
+      run: cd "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && node scripts/upload_snapshots.js
+  clean_up:
+    runs-on: self-hosted
+    if: ${{ always() }}
+    needs: upload_snapshots
+    steps:
+    - name: Clean
+      run: rm -rf "${RUNNER_WORKSPACE}/${BRANCH_NAME}"
