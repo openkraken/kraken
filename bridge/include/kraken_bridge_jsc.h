@@ -487,8 +487,6 @@ enum NodeType {
   DOCUMENT_FRAGMENT_NODE = 11
 };
 
-#define NODE_IDENTIFY 1
-
 class JSNode : public JSEventTarget {
 public:
   static std::unordered_map<JSContext *, JSNode *> instanceMap;
@@ -575,7 +573,6 @@ public:
   void unrefer();
 
   int32_t _referenceCount{0};
-  int32_t _identify{NODE_IDENTIFY};
 
   DocumentInstance *document{nullptr};
   virtual void _notifyNodeRemoved(NodeInstance *node);
