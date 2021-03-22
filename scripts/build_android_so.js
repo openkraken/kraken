@@ -6,10 +6,6 @@ const os = require('os');
 const path = require('path');
 const { copyFileSync } = require('fs');
 
-task('android-so-clean', (done) => {
-  execSync(`rm -rf ${paths.bridge}/build/android`, { stdio: 'inherit' });
-  done();
-});
 
 const buildTasks = [
   'android-so-clean',

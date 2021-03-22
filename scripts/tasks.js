@@ -31,6 +31,15 @@ const paths = {
 
 exports.paths = paths;
 
+let winShell = null;
+if (platform == 'win32') {
+  winShell = path.join(process.env.ProgramW6432, '\\Git\\bin\\bash.exe');
+ 
+  if (!fs.existsSync(winShell)) {
+    return done(new Error('Can not location bash.exe, Please install Git for Windows at C:\\Program Files. \n https://git-scm.com/download/win'));
+  }
+}
+
 function resolveKraken(submodule) {
   return resolve(KRAKEN_ROOT, submodule);
 }
@@ -364,7 +373,7 @@ task('build-android-kraken-lib', (done) => {
   let androidHome;
 
   if (platform == 'win32') {
-    androidHome = path.join(process.env.HOME, '\\AppData\\Local\\Android\\Sdk');
+    androidHome = path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
   } else {
     androidHome = path.join(process.env.HOME, 'Library/Android/sdk')  
   }
@@ -440,12 +449,6 @@ task('macos-dylib-clean', (done) => {
 
 task('patch-windows-symbol-link-for-android', done => {
   const jniLibsDir = path.join(paths.kraken, 'android/jniLibs');
-  const winShell = path.join(process.env.ProgramW6432, '\\Git\\bin\\bash.exe');
- 
-  if (!fs.existsSync(winShell)) {
-    return done(new Error('Can not location bash.exe, Please install Git for Windows at C:\\Program Files. \n https://git-scm.com/download/win'));
-  }
-
   const archs = ['arm64-v8a', 'armeabi-v7a'];
 
   for(let arch of archs) {
@@ -460,5 +463,10 @@ task('patch-windows-symbol-link-for-android', done => {
     fs.copyFileSync(path.join(paths.bridge, `build/android/lib/${arch}/libkraken_jsc.so`), path.join(libPath, 'libkraken_jsc.so'));
   }
   
+  done();
+});
+
+task('android-so-clean', (done) => {
+  execSync(`rm -rf ${paths.bridge}/build/android`, { stdio: 'inherit', shell: winShell });
   done();
 });
