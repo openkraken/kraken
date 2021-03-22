@@ -34,9 +34,9 @@ exports.paths = paths;
 let winShell = null;
 if (platform == 'win32') {
   winShell = path.join(process.env.ProgramW6432, '\\Git\\bin\\bash.exe');
- 
+
   if (!fs.existsSync(winShell)) {
-    return done(new Error('Can not location bash.exe, Please install Git for Windows at C:\\Program Files. \n https://git-scm.com/download/win'));
+    return done(new Error(`Can not location bash.exe, Please install Git for Windows at ${process.env.ProgramW6432}. \n https://git-scm.com/download/win`));
   }
 }
 
@@ -375,7 +375,7 @@ task('build-android-kraken-lib', (done) => {
   if (platform == 'win32') {
     androidHome = path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
   } else {
-    androidHome = path.join(process.env.HOME, 'Library/Android/sdk')  
+    androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
   }
 
   const ndkDir = path.join(androidHome, 'ndk');
@@ -462,7 +462,7 @@ task('patch-windows-symbol-link-for-android', done => {
     fs.copyFileSync(path.join(paths.thirdParty, `JavaScriptCore\\lib\\android\\${arch}\\libc++_shared.so`), path.join(libPath, 'libc++_shared.so'));
     fs.copyFileSync(path.join(paths.bridge, `build/android/lib/${arch}/libkraken_jsc.so`), path.join(libPath, 'libkraken_jsc.so'));
   }
-  
+
   done();
 });
 
