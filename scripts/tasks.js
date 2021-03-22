@@ -440,8 +440,8 @@ task('macos-dylib-clean', (done) => {
 
 task('patch-windows-symbol-link-for-android', done => {
   const jniLibsDir = path.join(paths.kraken, 'android/jniLibs');
-  const winShell = 'C:\\Program Files\\Git\\bin\\bash.exe';
-
+  const winShell = path.join(process.env.ProgramW6432, '\\Git\\bin\\bash.exe');
+ 
   if (!fs.existsSync(winShell)) {
     return done(new Error('Can not location bash.exe, Please install Git for Windows at C:\\Program Files. \n https://git-scm.com/download/win'));
   }
