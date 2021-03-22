@@ -279,7 +279,6 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
     referenceNodeObjectRef = JSValueToObject(ctx, referenceNodeValueRef, exception);
     referenceInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(referenceNodeObjectRef));
   } else if (!JSValueIsNull(ctx, referenceNodeValueRef)) {
-    assert(false);
     throwJSError(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'",
                  exception);
     return nullptr;
