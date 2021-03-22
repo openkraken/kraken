@@ -30,9 +30,9 @@ typedef TraverseElementCallback = void Function(Element element);
 
 // Traverse DOM element.
 void traverseElement(Element element, TraverseElementCallback callback) {
+  callback(element);
   if (element != null) {
     for (Element el in element.children) {
-      callback(el);
       traverseElement(el, callback);
     }
   }
