@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/gesture.dart';
+import 'package:kraken/css.dart';
 
 class Kraken extends StatelessWidget {
   // The background color for viewport, default to transparent.
@@ -179,15 +180,18 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
 
     if (viewportWidthHasChanged) {
       controller.view.viewportWidth = _krakenWidget.viewportWidth;
+      controller.view.document.body.style.setProperty(WIDTH, controller.view.viewportWidth.toString() + 'px');
     }
 
     if (viewportHeightHasChanged) {
       controller.view.viewportHeight = _krakenWidget.viewportHeight;
+      controller.view.document.body.style.setProperty(HEIGHT, controller.view.viewportHeight.toString() + 'px');
     }
 
     if (viewportWidthHasChanged || viewportHeightHasChanged) {
       traverseElement(controller.view.document.body, (element) {
         element.style.applyTargetProperties();
+        element.renderBoxModel.markNeedsLayout();
       });
     }
   }
