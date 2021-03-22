@@ -47,11 +47,10 @@ class _MyHomePageState extends State<MyBrowser> {
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData queryData = MediaQuery.of(context);
-
-    Kraken kraken;
+    final MediaQueryData queryData = MediaQuery.of(context);
     final TextEditingController textEditingController = TextEditingController();
 
+    Kraken _kraken;
     AppBar appBar = AppBar(
         backgroundColor: Colors.black87,
         titleSpacing: 10.0,
@@ -61,7 +60,7 @@ class _MyHomePageState extends State<MyBrowser> {
             controller: textEditingController,
             onSubmitted: (value) {
               textEditingController.text = value;
-              kraken.loadURL(value);
+              _kraken?.loadURL(value);
             },
             decoration: InputDecoration(
               hintText: 'Enter a app url',
@@ -80,18 +79,17 @@ class _MyHomePageState extends State<MyBrowser> {
         // the App.build method, and use it to set our appbar title.
       );
 
-    kraken = Kraken(
-      viewportWidth: window.physicalSize.width / window.devicePixelRatio,
-      viewportHeight: window.physicalSize.height / window.devicePixelRatio - appBar.preferredSize.height - queryData.padding.top,
-      bundlePath: 'assets/bundle.js',
-    );
-
+    final Size viewportSize = queryData.size;
     return Scaffold(
         appBar: appBar,
         body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: kraken
+        child: _kraken = Kraken(
+          viewportWidth: viewportSize.width - queryData.padding.horizontal,
+          viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
+          bundlePath: 'assets/bundle.js',
+        ),
     ));
   }
 }
