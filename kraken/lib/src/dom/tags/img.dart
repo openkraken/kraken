@@ -277,7 +277,7 @@ class ImageElement extends Element {
   // Delay image size setting to next frame to make sure image has been layouted
   // to wait for percentage size to be caculated correctly in the case of image has been cached
   bool _hasImageLayoutCallbackPending = false;
-  void _handleImageResizeAfterLayout () {
+  void _handleImageResizeAfterLayout() {
     if (_hasImageLayoutCallbackPending) return;
     _hasImageLayoutCallbackPending = true;
     SchedulerBinding.instance.scheduleFrame();
