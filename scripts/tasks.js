@@ -31,6 +31,15 @@ const paths = {
 
 exports.paths = paths;
 
+let winShell = null;
+if (platform == 'win32') {
+  winShell = path.join(process.env.ProgramW6432, '\\Git\\bin\\bash.exe');
+
+  if (!fs.existsSync(winShell)) {
+    return done(new Error(`Can not location bash.exe, Please install Git for Windows at ${process.env.ProgramW6432}. \n https://git-scm.com/download/win`));
+  }
+}
+
 function resolveKraken(submodule) {
   return resolve(KRAKEN_ROOT, submodule);
 }
@@ -361,7 +370,14 @@ task('build-android-app', (done) => {
 });
 
 task('build-android-kraken-lib', (done) => {
-  const androidHome = path.join(process.env.HOME, 'Library/Android/sdk');
+  let androidHome;
+
+  if (platform == 'win32') {
+    androidHome = path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
+  } else {
+    androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
+  }
+
   const ndkDir = path.join(androidHome, 'ndk');
   let installedNDK = fs.readdirSync(ndkDir).filter(d => d[0] != '.');
   if (installedNDK.length == 0) {
@@ -377,18 +393,19 @@ task('build-android-kraken-lib', (done) => {
   const archs = ['arm64-v8a', 'armeabi-v7a'];
   const buildType = buildMode == 'Release' ? 'Relwithdebinfo' : 'Debug';
 
+  const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
   archs.forEach(arch => {
     const soBinaryDirectory = path.join(paths.bridge, `build/android/lib/${arch}`);
-
+    const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-android-' + arch);
     // generate project
     execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
-    -DCMAKE_TOOLCHAIN_FILE=${androidHome}/ndk/${ndkVersion}/build/cmake/android.toolchain.cmake \
-    -DANDROID_NDK=${androidHome}/ndk/${ndkVersion} \
+    -DCMAKE_TOOLCHAIN_FILE=${path.join(androidHome, 'ndk', ndkVersion, '/build/cmake/android.toolchain.cmake')} \
+    -DANDROID_NDK=${path.join(androidHome, '/ndk/', ndkVersion)} \
     -DIS_ANDROID=TRUE \
     -DANDROID_ABI="${arch}" \
     -DANDROID_PLATFORM="android-16" \
     -DANDROID_STL=c++_shared \
-    -G "Unix Makefiles" \
+    -G "${cmakeGeneratorTemplate}" \
     -B ${paths.bridge}/cmake-build-android-${arch} -S ${paths.bridge}`,
       {
         cwd: paths.bridge,
@@ -401,7 +418,7 @@ task('build-android-kraken-lib', (done) => {
       });
 
     // build
-    execSync(`cmake --build ${paths.bridge}/cmake-build-android-${arch} --target kraken -- -j 12`, {
+    execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
       stdio: 'inherit'
     });
   });
@@ -427,5 +444,29 @@ task('build-android-sdk', (done) => {
 
 task('macos-dylib-clean', (done) => {
   execSync(`rm -rf ${paths.bridge}/build/macos`, { stdio: 'inherit' });
+  done();
+});
+
+task('patch-windows-symbol-link-for-android', done => {
+  const jniLibsDir = path.join(paths.kraken, 'android/jniLibs');
+  const archs = ['arm64-v8a', 'armeabi-v7a'];
+
+  for(let arch of archs) {
+    const libPath = path.join(jniLibsDir, arch);
+    execSync('rm -f ./*', {
+      cwd: libPath,
+      shell: winShell,
+      stdio: 'inherit'
+    });
+    fs.copyFileSync(path.join(paths.thirdParty, `JavaScriptCore\\lib\\android\\${arch}\\libjsc.so`), path.join(libPath, 'libjsc.so'));
+    fs.copyFileSync(path.join(paths.thirdParty, `JavaScriptCore\\lib\\android\\${arch}\\libc++_shared.so`), path.join(libPath, 'libc++_shared.so'));
+    fs.copyFileSync(path.join(paths.bridge, `build/android/lib/${arch}/libkraken_jsc.so`), path.join(libPath, 'libkraken_jsc.so'));
+  }
+
+  done();
+});
+
+task('android-so-clean', (done) => {
+  execSync(`rm -rf ${paths.bridge}/build/android`, { stdio: 'inherit', shell: winShell });
   done();
 });
