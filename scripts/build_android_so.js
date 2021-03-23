@@ -2,17 +2,26 @@ const { paths } = require('./tasks');
 const { series, task } = require('gulp');
 const chalk = require('chalk');
 const { execSync } = require('child_process');
+const os = require('os');
+const path = require('path');
+const { copyFileSync } = require('fs');
 
-task('android-so-clean', (done) => {
-  execSync(`rm -rf ${paths.bridge}/build/android`, { stdio: 'inherit' });
-  done();
-});
 
-// Run tasks
-series(
+const buildTasks = [
   'android-so-clean',
   'compile-polyfill',
   'build-android-kraken-lib'
+];
+
+if (os.platform() == 'win32') {
+  buildTasks.push(
+    'patch-windows-symbol-link-for-android'
+  );
+}
+
+// Run tasks
+series(
+  buildTasks
 )((err) => {
   if (err) {
     console.log(err);

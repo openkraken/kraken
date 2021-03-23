@@ -6,6 +6,7 @@ on: [push, workflow_dispatch]
 jobs:
   integration_test:
     runs-on: self-hosted
+    continue-on-error: true
     steps:
     - name: Set branch name
       run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
@@ -15,21 +16,7 @@ jobs:
       run: git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/${BRANCH_NAME}";
     - name: Run Test
       run: cd "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && npm test
-  upload_snapshots:
-    runs-on: self-hosted
-    if: ${{ always() }}
-    needs: integration_test
-    steps:
-    - name: Set branch name
-      run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
-    - name: Echo branch name
-      run: echo ${BRANCH_NAME}
     - name: Upload Snapshots
       run: cd "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && node scripts/upload_snapshots.js
-  clean_up:
-    runs-on: self-hosted
-    if: ${{ always() }}
-    needs: upload_snapshots
-    steps:
     - name: Clean
       run: rm -rf "${RUNNER_WORKSPACE}/${BRANCH_NAME}"
