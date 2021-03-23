@@ -288,11 +288,13 @@ class ImageElement extends Element {
   }
 
   void _resize() {
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    if (!isRendererAttached) {
+      return _handleImageResizeAfterLayout();
+    }
 
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
     // Waiting for size computed after layout stage
-    if (!isRendererAttached ||
-        style.contains(WIDTH) && renderStyle.width == null ||
+    if (style.contains(WIDTH) && renderStyle.width == null ||
         style.contains(HEIGHT) && renderStyle.height == null) {
       return _handleImageResizeAfterLayout();
     }
