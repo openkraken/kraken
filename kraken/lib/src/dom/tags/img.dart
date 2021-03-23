@@ -14,12 +14,11 @@ import 'dart:ffi';
 import 'dart:collection';
 
 const String IMAGE = 'IMG';
-
 const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK};
+final RegExp _numExp = RegExp(r"^\d+");
 
-bool _isNumber(String str) {
-  RegExp regExp = RegExp(r"^\d+");
-  return regExp.hasMatch(str);
+bool _isNumberString(String str) {
+  return _numExp.hasMatch(str);
 }
 
 final Pointer<NativeFunction<GetImageWidth>> nativeGetImageWidth =  Pointer.fromFunction(ImageElement.getImageWidth, 0.0);
@@ -85,7 +84,7 @@ class ImageElement extends Element {
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,
         tagName: IMAGE) {
-    _renderStreamListener = ImageStreamListener(_renderMultiFrameImage);
+    _renderStreamListener = ImageStreamListener(_renderImageStream);
     _nativeMap[nativeImgElement.address] = this;
 
     nativeImgElement.ref.getImageWidth = nativeGetImageWidth;
@@ -231,7 +230,7 @@ class ImageElement extends Element {
     }
   }
 
-  void _renderMultiFrameImage(ImageInfo imageInfo, bool synchronousCall) {
+  void _renderImageStream(ImageInfo imageInfo, bool synchronousCall) {
     _frameNumber++;
     _imageInfo = imageInfo;
     _imageBox?.image = _imageInfo?.image;
@@ -250,26 +249,7 @@ class ImageElement extends Element {
       _convertToNonRepaint();
     }
 
-    // Delay image size setting to next frame to make sure image has been layouted
-    // to wait for percentage size to be caculated correctly in the case of image has been cached
-    if (synchronousCall) {
-      // `synchronousCall` happens when caches image and calling `addListener`.
-      scheduleMicrotask(_handleResizeAfterImageLoaded);
-    } else {
-      _handleResizeAfterImageLoaded();
-    }
-  }
-
-  void _handleResizeAfterImageLoaded() {
-    if (isConnected) {
-      // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
-      SchedulerBinding.instance.scheduleFrame();
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _resize();
-      });
-    } else {
-      _resize();
-    }
+    _resize();
   }
 
   /// Convert RenderIntrinsic to non repaint boundary
@@ -294,50 +274,60 @@ class ImageElement extends Element {
     }
   }
 
+  // Delay image size setting to next frame to make sure image has been layouted
+  // to wait for percentage size to be caculated correctly in the case of image has been cached
+  bool _hasImageLayoutCallbackPending = false;
+  void _handleImageResizeAfterLayout() {
+    if (_hasImageLayoutCallbackPending) return;
+    _hasImageLayoutCallbackPending = true;
+    SchedulerBinding.instance.scheduleFrame();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _hasImageLayoutCallbackPending = false;
+      _resize();
+    });
+  }
+
   void _resize() {
-    if (isRendererAttached) {
-      double width = 0.0;
-      double height = 0.0;
-      bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
-      bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
-      if (!containWidth && !containHeight) {
-        width = naturalWidth;
-        height = naturalHeight;
-      } else {
-        if (containWidth && containHeight) {
-          width = renderStyle.width ?? _propertyWidth;
-          height = renderStyle.height ?? _propertyHeight;
-        } else if (containWidth) {
-          width = renderStyle.width ?? _propertyWidth;
-          if (naturalWidth != 0) {
-            height = width * naturalHeight / naturalWidth;
-          }
-        } else if (containHeight) {
-          height = renderStyle.height ?? _propertyHeight;
-          if (naturalHeight != 0) {
-            width = height * naturalWidth / naturalHeight;
-          }
-        }
-      }
+    if (!isRendererAttached) {
+      return _handleImageResizeAfterLayout();
+    }
 
-      if (height == null || !height.isFinite) {
-        height = 0.0;
-      }
-      if (width == null || !width.isFinite) {
-        width = 0.0;
-      }
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    // Waiting for size computed after layout stage
+    if (style.contains(WIDTH) && renderStyle.width == null ||
+        style.contains(HEIGHT) && renderStyle.height == null) {
+      return _handleImageResizeAfterLayout();
+    }
 
-      _imageBox?.width = width;
-      _imageBox?.height = height;
-      renderBoxModel.intrinsicWidth = naturalWidth;
-      renderBoxModel.intrinsicHeight = naturalHeight;
+    double width = renderStyle.width ?? _propertyWidth;
+    double height = renderStyle.height ?? _propertyHeight;
 
-      if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-        renderBoxModel.intrinsicRatio = null;
-      } else {
-        renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
-      }
+    if (width == null && height == null) {
+      width = naturalWidth;
+      height = naturalHeight;
+    } else if (width != null && height == null && naturalWidth != 0) {
+      height = width * naturalHeight / naturalWidth;
+    } else if (width == null && height != null && naturalHeight != 0) {
+      width = height * naturalWidth / naturalHeight;
+    }
+
+    if (height == null || !height.isFinite) {
+      height = 0.0;
+    }
+
+    if (width == null || !width.isFinite) {
+      width = 0.0;
+    }
+
+    _imageBox?.width = width;
+    _imageBox?.height = height;
+    renderBoxModel.intrinsicWidth = naturalWidth;
+    renderBoxModel.intrinsicHeight = naturalHeight;
+
+    if (naturalWidth == 0.0 || naturalHeight == 0.0) {
+      renderBoxModel.intrinsicRatio = null;
+    } else {
+      renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
     }
   }
 
@@ -454,14 +444,14 @@ class ImageElement extends Element {
       // Should reset lazy when value change.
       _resetLazyLoading();
     } else if (key == WIDTH) {
-      if (value is String && _isNumber(value)) {
+      if (value is String && _isNumberString(value)) {
         value += 'px';
       }
 
       _propertyWidth = CSSLength.toDisplayPortValue(value, viewportSize);
       _resize();
     } else if (key == HEIGHT) {
-      if (value is String && _isNumber(value)) {
+      if (value is String && _isNumberString(value)) {
         value += 'px';
       }
 
