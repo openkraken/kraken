@@ -288,55 +288,44 @@ class ImageElement extends Element {
   }
 
   void _resize() {
-    if (isRendererAttached) {
-      double width = 0.0;
-      double height = 0.0;
-      bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
-      bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
-      if (!containWidth && !containHeight) {
-        width = naturalWidth;
-        height = naturalHeight;
-      } else {
-        if (containWidth && containHeight) {
-          width = renderStyle.width ?? _propertyWidth;
-          height = renderStyle.height ?? _propertyHeight;
-        } else if (containWidth) {
-          width = renderStyle.width ?? _propertyWidth;
-          // Waiting for image layouted
-          if (width == null) return _handleImageResizeAfterLayout();
-          if (naturalWidth != 0) {
-            height = width * naturalHeight / naturalWidth;
-          }
-        } else if (containHeight) {
-          height = renderStyle.height ?? _propertyHeight;
-          // Waiting for image layouted
-          if (height == null) return _handleImageResizeAfterLayout();
-          if (naturalHeight != 0) {
-            width = height * naturalWidth / naturalHeight;
-          }
-        }
-      }
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
 
-      if (height == null || !height.isFinite) {
-        height = 0.0;
-      }
-      if (width == null || !width.isFinite) {
-        width = 0.0;
-      }
+    // Waiting for size computed after layout stage
+    if (!isRendererAttached ||
+        style.contains(WIDTH) && renderStyle.width == null ||
+        style.contains(HEIGHT) && renderStyle.height == null) {
+      return _handleImageResizeAfterLayout();
+    }
 
-      _imageBox?.width = width;
-      _imageBox?.height = height;
-      renderBoxModel.intrinsicWidth = naturalWidth;
-      renderBoxModel.intrinsicHeight = naturalHeight;
+    double width = renderStyle.width ?? _propertyWidth;
+    double height = renderStyle.height ?? _propertyHeight;
 
-      if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-        renderBoxModel.intrinsicRatio = null;
-      } else {
-        renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
-      }
+    if (width == null && height == null) {
+      width = naturalWidth;
+      height = naturalHeight;
+    } else if (width != null && height == null && naturalWidth != 0) {
+      height = width * naturalHeight / naturalWidth;
+    } else if (width == null && height != null && naturalHeight != 0) {
+      width = height * naturalWidth / naturalHeight;
+    }
+
+    if (height == null || !height.isFinite) {
+      height = 0.0;
+    }
+
+    if (width == null || !width.isFinite) {
+      width = 0.0;
+    }
+
+    _imageBox?.width = width;
+    _imageBox?.height = height;
+    renderBoxModel.intrinsicWidth = naturalWidth;
+    renderBoxModel.intrinsicHeight = naturalHeight;
+
+    if (naturalWidth == 0.0 || naturalHeight == 0.0) {
+      renderBoxModel.intrinsicRatio = null;
     } else {
-      _handleImageResizeAfterLayout();
+      renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
     }
   }
 
