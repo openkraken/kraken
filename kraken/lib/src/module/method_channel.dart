@@ -8,29 +8,22 @@ typedef MethodCallCallback = Future<dynamic> Function(String method, dynamic arg
 const String METHOD_CHANNEL_NOT_INITIALIZED = 'MethodChannel not initialized.';
 const String CONTROLLER_NOT_INITIALIZED = 'Kraken controller not initialized.';
 
-Future<dynamic> invokeMethodFromJavaScript(KrakenController controller, String method, List args) {
+Future<dynamic> _invokeMethodFromJavaScript(KrakenController controller, String method, List args) {
   if (controller == null || controller.methodChannel == null) {
     return Future.error(FlutterError(METHOD_CHANNEL_NOT_INITIALIZED));
   }
   return controller.methodChannel._invokeMethodFromJavaScript(method, args);
 }
 
-void onJSMethodCall(KrakenController controller, MethodCallCallback value) {
-  if (controller == null) {
-    throw FlutterError(CONTROLLER_NOT_INITIALIZED);
-  }
-
-  if (controller.methodChannel == null) {
-    throw FlutterError(METHOD_CHANNEL_NOT_INITIALIZED);
-  }
-
-  controller.methodChannel._onJSMethodCall = value;
-}
-
 class MethodChannelModule extends BaseModule {
   @override
   String get name => 'MethodChannel';
-  MethodChannelModule(ModuleManager moduleManager) : super(moduleManager);
+  MethodChannelModule(ModuleManager moduleManager) : super(moduleManager) {
+    if (moduleManager == null) return;
+    moduleManager.controller.methodChannel._onJSMethodCall = (String method, dynamic arguments) async {
+      moduleManager.emitModuleEvent(name, data: [method, arguments]);
+    };
+  }
 
   @override
   void dispose() {}
@@ -38,14 +31,10 @@ class MethodChannelModule extends BaseModule {
   @override
   String invoke(String method, dynamic params, callback) {
     if (method == 'invokeMethod') {
-      invokeMethodFromJavaScript(moduleManager.controller, params[0], params[1]).then((result) {
+      _invokeMethodFromJavaScript(moduleManager.controller, params[0], params[1]).then((result) {
         callback(data: result);
       }).catchError((e, stack) {
         callback(errmsg: '$e\n$stack');
-      });
-    } else if (method == 'setMethodCallHandler') {
-      onJSMethodCall(moduleManager.controller, (String method, dynamic arguments) async {
-        moduleManager.emitModuleEvent(name, data: [method, arguments]);
       });
     }
     return '';
