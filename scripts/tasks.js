@@ -29,6 +29,8 @@ const paths = {
   templates: resolveKraken('scripts/templates')
 };
 
+const isProfile = process.env.ENABLE_PROFILE === 'true';
+
 exports.paths = paths;
 
 let winShell = null;
@@ -142,7 +144,7 @@ task('build-darwin-kraken-lib', done => {
     buildType = 'RelWithDebInfo';
   }
 
-  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} -DENABLE_TEST=true \
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} -DENABLE_TEST=true ${isProfile ? '-DENABLE_PROFILE=TRUE' : ''} \
     -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-macos-x86_64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
@@ -246,6 +248,7 @@ task(`build-ios-kraken-lib`, (done) => {
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=SIMULATOR64 \
+    ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
@@ -265,6 +268,7 @@ task(`build-ios-kraken-lib`, (done) => {
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=OS \
+    ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
@@ -284,6 +288,7 @@ task(`build-ios-kraken-lib`, (done) => {
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
      -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
      -DPLATFORM=OS64 \
+     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
      -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
@@ -403,6 +408,7 @@ task('build-android-kraken-lib', (done) => {
     -DANDROID_NDK=${path.join(androidHome, '/ndk/', ndkVersion)} \
     -DIS_ANDROID=TRUE \
     -DANDROID_ABI="${arch}" \
+    ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
     -DANDROID_PLATFORM="android-16" \
     -DANDROID_STL=c++_shared \
     -G "${cmakeGeneratorTemplate}" \
