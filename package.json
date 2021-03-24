@@ -8,7 +8,7 @@
     "build:bridge:ios": "node scripts/build_ios_framework",
     "build:bridge:ios:release": "KRAKEN_BUILD=Release node scripts/build_ios_framework",
     "build:bridge:all": "node scripts/prepare_kraken_release_binary",
-    "build:bridge:all:release": "node scripts/prepare_kraken_release_binary",
+    "build:bridge:all:release": "KRAKEN_BUILD=Release node scripts/prepare_kraken_release_binary",
     "upload": "node scripts/macos_pack_and_upload",
     "pretest": "npm install && npm run lint && ENABLE_PROFILE=true node scripts/build_darwin_dylib",
     "start": "cd kraken/example && flutter run",
