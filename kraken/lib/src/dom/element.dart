@@ -125,6 +125,26 @@ class Element extends Node
 
   Size get viewportSize => elementManager.viewport.viewportSize;
 
+  /// Whether should create repaintBoundary for this element when style changed
+  bool get shouldConvertToRepaintBoundary {
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+
+    // Following cases should always convert to repaint boundary for performance consideration
+    // Multiframe image
+    bool isMultiframeImage = this is ImageElement && (this as ImageElement).isMultiframe;
+    // Scrolling box
+    bool isScrollingBox = scrollingContentLayoutBox == null;
+    // Intrinsic element such as Canvas
+    bool isSetRepaintSelf = repaintSelf;
+    // Transform element
+    bool hasTransform = renderStyle.transform != null;
+    // Fixed element
+    bool isPositionedFixed = renderStyle.position == CSSPositionType.fixed;
+
+    return isMultiframeImage || isScrollingBox ||
+      isSetRepaintSelf || hasTransform || isPositionedFixed;
+  }
+
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
       {this.tagName,
         this.defaultStyle = const <String, dynamic>{},
@@ -396,19 +416,15 @@ class Element extends Node
     }
   }
 
-  /// Convert RenderIntrinsic to non repaint boundary
-  void _convertToNonRepaint() {
-    // Multiframe image should always convert to repaint boundary for scroll performance
-    if (this is ImageElement && (this as ImageElement).isMultiframe) {
-      return;
-    }
+  /// Convert renderBoxModel to non repaint boundary
+  void convertToNonRepaintBoundary() {
     if (renderBoxModel != null && renderBoxModel.isRepaintBoundary) {
       toggleRepaintSelf(repaintSelf: false);
     }
   }
 
-  /// Convert RenderIntrinsic to repaint boundary
-  void _convertToRepaint() {
+  /// Convert renderBoxModel to repaint boundary
+  void convertToRepaintBoundary() {
     if (renderBoxModel != null && !renderBoxModel.isRepaintBoundary) {
       toggleRepaintSelf(repaintSelf: true);
     }
@@ -454,10 +470,10 @@ class Element extends Node
       attachTo(parent, after: prev);
     }
 
-    if (currentPosition == CSSPositionType.fixed) {
-      _convertToRepaint();
+    if (shouldConvertToRepaintBoundary) {
+      convertToRepaintBoundary();
     } else {
-      _convertToNonRepaint();
+      convertToNonRepaintBoundary();
     }
 
     // Add fixed children after convert to repaint boundary renderObject
@@ -1138,6 +1154,7 @@ class Element extends Node
     if (RenderStyle.isTransformTranslatePercentage(present)) return;
 
     Matrix4 matrix4 = CSSTransform.parseTransform(present, viewportSize);
+    // @FIXME support `none` value
     renderBoxModel.renderStyle.updateTransform(matrix4);
   }
 

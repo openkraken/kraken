@@ -239,39 +239,15 @@ class ImageElement extends Element {
     // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
     // so use two frames to tell multiframe image from static image, note this optimization will fail
     // at multiframe image with only two frames which is not common
+    isMultiframe = _frameNumber > 2;
 
-    // Fixed element should always convert to repaint boundary for scroll performance
-    if (_frameNumber > 2 ||
-      position == CSSPositionType.fixed
-    ) {
-      _convertToRepaint();
+    if (shouldConvertToRepaintBoundary) {
+      convertToRepaintBoundary();
     } else {
-      _convertToNonRepaint();
+      convertToNonRepaintBoundary();
     }
 
     _resize();
-  }
-
-  /// Convert RenderIntrinsic to non repaint boundary
-  void _convertToNonRepaint() {
-    CSSPositionType position = renderBoxModel != null ? renderBoxModel.renderStyle.position : null;
-    // Fixed element should always convert to repaint boundary for scroll performance
-    if (position == CSSPositionType.fixed) {
-      return;
-    }
-    // Fixed element should convert to repaint boundary for scroll performance
-    if (renderBoxModel != null && renderBoxModel.isRepaintBoundary) {
-      toggleRepaintSelf(repaintSelf: false);
-      isMultiframe = false;
-    }
-  }
-
-  /// Convert RenderIntrinsic to repaint boundary
-  void _convertToRepaint() {
-    if (renderBoxModel != null && !renderBoxModel.isRepaintBoundary) {
-      toggleRepaintSelf(repaintSelf: true);
-      isMultiframe = true;
-    }
   }
 
   // Delay image size setting to next frame to make sure image has been layouted
