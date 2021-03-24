@@ -569,6 +569,9 @@ JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
     JSObjectRef array = JSObjectMakeArray(_hostClass->ctx, childNodes.size(), arguments, nullptr);
     return array;
   }
+  case JSNode::NodeProperty::ownerDocument: {
+    return document->object;
+  }
   case JSNode::NodeProperty::nodeType:
     return JSValueMakeNumber(_hostClass->ctx, nodeType);
   case JSNode::NodeProperty::textContent: {
