@@ -75,7 +75,7 @@ class CSSLength {
 
   static double toDisplayPortValue(String unitedValue, Size viewportSize) {
     if (unitedValue == null || unitedValue.isEmpty) return null;
-    
+
     unitedValue = unitedValue.trim();
     if (unitedValue == INITIAL) return null;
 
