@@ -235,7 +235,6 @@ class ImageElement extends Element {
     _imageInfo = imageInfo;
     _imageBox?.image = _imageInfo?.image;
 
-    CSSPositionType position = renderBoxModel != null ? renderBoxModel.renderStyle.position : null;
     // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
     // so use two frames to tell multiframe image from static image, note this optimization will fail
     // at multiframe image with only two frames which is not common

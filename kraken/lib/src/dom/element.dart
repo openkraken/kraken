@@ -127,19 +127,17 @@ class Element extends Node
 
   /// Whether should create repaintBoundary for this element when style changed
   bool get shouldConvertToRepaintBoundary {
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
-
     // Following cases should always convert to repaint boundary for performance consideration
     // Multiframe image
     bool isMultiframeImage = this is ImageElement && (this as ImageElement).isMultiframe;
-    // Scrolling box
-    bool isScrollingBox = scrollingContentLayoutBox == null;
     // Intrinsic element such as Canvas
     bool isSetRepaintSelf = repaintSelf;
+    // Scrolling box
+    bool isScrollingBox = scrollingContentLayoutBox != null;
     // Transform element
-    bool hasTransform = renderStyle.transform != null;
+    bool hasTransform = renderBoxModel?.renderStyle?.transform != null;
     // Fixed element
-    bool isPositionedFixed = renderStyle.position == CSSPositionType.fixed;
+    bool isPositionedFixed = renderBoxModel?.renderStyle?.position == CSSPositionType.fixed;
 
     return isMultiframeImage || isScrollingBox ||
       isSetRepaintSelf || hasTransform || isPositionedFixed;
@@ -466,8 +464,24 @@ class Element extends Node
     // Move element according to position when it's already attached to render tree.
     if (isRendererAttached) {
       RenderObject prev = previousSibling?.renderer;
-      detach();
-      attachTo(parent, after: prev);
+
+      // Remove placeholder of positioned element.
+      RenderPositionHolder renderPositionHolder = renderBoxModel.renderPositionHolder;
+      if (renderPositionHolder != null) {
+        ContainerRenderObjectMixin parent = renderPositionHolder.parent;
+        if (parent != null) {
+          parent.remove(renderPositionHolder);
+          renderBoxModel.renderPositionHolder = null;
+        }
+      }
+      // Remove renderBoxModel from original parent and append to its containing block
+      RenderObject parentRenderBoxModel = renderBoxModel.parent;
+      if (parentRenderBoxModel is ContainerRenderObjectMixin) {
+        parentRenderBoxModel.remove(renderBoxModel);
+      } else if (parentRenderBoxModel is RenderProxyBox) {
+        parentRenderBoxModel.child = null;
+      }
+      parent.addChildRenderObject(this, after: prev);
     }
 
     if (shouldConvertToRepaintBoundary) {
@@ -1065,7 +1079,7 @@ class Element extends Node
   }
 
   void _styleOverflowChangedListener(String property, String original, String present) {
-    updateRenderOverflow(renderBoxModel, this, _scrollListener);
+    updateRenderOverflow(this, _scrollListener);
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
