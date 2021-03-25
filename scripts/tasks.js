@@ -4,12 +4,21 @@ const path = require('path');
 const { readFileSync, writeFileSync, mkdirSync } = require('fs');
 const { spawnSync, execSync, fork, spawn } = require('child_process');
 const { join, resolve } = require('path');
+const { program } = require('commander');
 const chalk = require('chalk');
 const fs = require('fs');
 const del = require('del');
 const os = require('os');
 
-const SUPPORTED_JS_ENGINES = ['jsc'];
+program.
+option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
+.parse(process.argv);
+
+const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
+
+if (SUPPORTED_JS_ENGINES.indexOf(program.jsEngine) < 0) {
+  throw new Error('Unsupported js engine:' + program.jsEngine);
+}
 
 const KRAKEN_ROOT = join(__dirname, '..');
 const TARGET_PATH = join(KRAKEN_ROOT, 'targets');
@@ -150,7 +159,7 @@ task('build-darwin-kraken-lib', done => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: 'jsc',
+      KRAKEN_JS_ENGINE: program.jsEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/macos/lib/x86_64')
     }
   });
@@ -159,7 +168,7 @@ task('build-darwin-kraken-lib', done => {
     stdio: 'inherit'
   });
 
-  const binaryPath = path.join(paths.bridge, 'build/macos/lib/x86_64/libkraken_jsc.dylib');
+  const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken_${program.jsEngine}.dylib`);
 
   if (buildMode == 'Release') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
@@ -180,6 +189,7 @@ task('compile-polyfill', (done) => {
   let result = spawnSync('npm', ['run', buildMode === 'Release' ? 'build:release' : 'build'], {
     cwd: paths.polyfill,
     env: process.env,
+    KRAKEN_JS_ENGINE: program.jsEngine,
     stdio: 'inherit'
   });
 
@@ -254,7 +264,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: 'jsc',
+      KRAKEN_JS_ENGINE: program.jsEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/x86_64')
     }
   });
@@ -274,7 +284,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: 'jsc',
+      KRAKEN_JS_ENGINE: program.jsEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm')
     }
   });
@@ -294,7 +304,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: 'jsc',
+      KRAKEN_JS_ENGINE: program.jsEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm64')
     }
   });
@@ -330,12 +340,12 @@ task(`build-ios-kraken-lib`, (done) => {
     execSync(`strip -S -X -x ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
   }
 
-  const armStaticSDKPath = path.join(paths.bridge, 'build/ios/lib/arm/libkraken_jsc.a');
-  const arm64StaticSDKPath = path.join(paths.bridge, 'build/ios/lib/arm64/libkraken_jsc.a');
-  const x64StaticSDKPath = path.join(paths.bridge, 'build/ios/lib/x86_64/libkraken_jsc.a');
+  const armStaticSDKPath = path.join(paths.bridge, `build/ios/lib/arm/libkraken_${program.jsEngine}.a`);
+  const arm64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/libkraken_${program.jsEngine}.a`);
+  const x64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/libkraken_${program.jsEngine}.a`);
 
   const targetStaticSDKPath = `${paths.bridge}/build/ios/framework`;
-  execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_jsc.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
+  execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_${program.jsEngine}.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
   execSync(`pod ipc spec KrakenSDK.podspec > KrakenSDK.podspec.json`, { cwd: targetDynamicSDKPath });
   done();
 });
@@ -418,7 +428,7 @@ task('build-android-kraken-lib', (done) => {
         stdio: 'inherit',
         env: {
           ...process.env,
-          KRAKEN_JS_ENGINE: 'jsc',
+          KRAKEN_JS_ENGINE: program.jsEngine,
           LIBRARY_OUTPUT_DIR: soBinaryDirectory
         }
       });
@@ -453,6 +463,7 @@ task('macos-dylib-clean', (done) => {
   done();
 });
 
+// TODO: support patch windows symbol of quickjs engine.
 task('patch-windows-symbol-link-for-android', done => {
   const jniLibsDir = path.join(paths.kraken, 'android/jniLibs');
   const archs = ['arm64-v8a', 'armeabi-v7a'];

@@ -1,4 +1,4 @@
-import 'es6-promise/dist/es6-promise.auto';
+process.env.__ES6_PROMISE_PATCH__
 
 import { console } from './kom/console';
 import { WebSocket } from './modules/websocket';
