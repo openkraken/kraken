@@ -178,6 +178,7 @@ mixin CSSOverflowMixin on ElementBase {
     // before creating two repaintBoundary.
     if (renderBoxModel.isRepaintBoundary) {
       element.convertToNonRepaintBoundary();
+      renderBoxModel = element.renderBoxModel;
     }
     RenderObject layoutBoxParent = renderBoxModel.parent;
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
@@ -185,8 +186,8 @@ mixin CSSOverflowMixin on ElementBase {
 
     _createScrollingLayoutBox(element);
 
-    // If outer scrolling box alreay has children in the case of element already attached,
-    // move them into the children of inner scrolling box
+    // If outer scrolling box already has children in the case of element already attached,
+    // move them into the children of inner scrolling box.
     List<RenderBox> children = [];
     outerLayoutBox.visitChildren((child) {
       children.add(child);
