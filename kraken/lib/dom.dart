@@ -15,15 +15,15 @@ export 'src/dom/text_node.dart';
 export 'src/dom/window.dart';
 export 'src/dom/document.dart';
 
-// Tags
-export 'src/dom/tags/a.dart';
-export 'src/dom/tags/body.dart';
-export 'src/dom/tags/canvas.dart';
-export 'src/dom/tags/div.dart';
-export 'src/dom/tags/img.dart';
-export 'src/dom/tags/input.dart';
-export 'src/dom/tags/p.dart';
-export 'src/dom/tags/span.dart';
-export 'src/dom/tags/pre.dart';
-export 'src/dom/tags/strong.dart';
-export 'src/dom/tags/object.dart';
+// Elements
+export 'src/dom/elements/a.dart';
+export 'src/dom/elements/body.dart';
+export 'src/dom/elements/canvas.dart';
+export 'src/dom/elements/div.dart';
+export 'src/dom/elements/img.dart';
+export 'src/dom/elements/input.dart';
+export 'src/dom/elements/p.dart';
+export 'src/dom/elements/span.dart';
+export 'src/dom/elements/pre.dart';
+export 'src/dom/elements/strong.dart';
+export 'src/dom/elements/object.dart';
