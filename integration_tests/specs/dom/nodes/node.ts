@@ -91,4 +91,15 @@ describe('Node API', () => {
     expect(container.childNodes.length == 1);
     await matchViewportSnapshot();
   });
+
+  it('should work with ownerDocument', () => {
+    let textNode = document.createTextNode('text');
+    expect(textNode.ownerDocument === document);
+    let element = document.createElement('div');
+    expect(element.ownerDocument === document);
+    expect(document.body.ownerDocument === document);
+    let commentNode = document.createComment('comment');
+    expect(commentNode.ownerDocument === document);
+    expect(document.ownerDocument === null);
+  });
 });

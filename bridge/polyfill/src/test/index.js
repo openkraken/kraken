@@ -197,6 +197,7 @@ __kraken_executeTest__((done) => {
           clearAllTimer();
           clearAllEventsListeners();
           clearAllNodes();
+          kraken.methodChannel.clearMethodCallHandler();
           requestAnimationFrame(() => {
             __kraken_refresh_paint__(function (e) {
               if (e) {
