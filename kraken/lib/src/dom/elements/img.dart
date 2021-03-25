@@ -14,7 +14,7 @@ import 'dart:ffi';
 import 'dart:collection';
 
 const String IMAGE = 'IMG';
-const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK};
+
 final RegExp _numExp = RegExp(r"^\d+");
 
 bool _isNumberString(String str) {
@@ -81,7 +81,6 @@ class ImageElement extends Element {
         targetId,
         nativeImgElement.ref.nativeElement,
         elementManager,
-        defaultStyle: _defaultStyle,
         isIntrinsicBox: true,
         tagName: IMAGE) {
     _renderStreamListener = ImageStreamListener(_renderImageStream);

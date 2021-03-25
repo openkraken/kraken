@@ -19,10 +19,6 @@ const double ELEMENT_DEFAULT_HEIGHT_IN_PIXEL = 150.0;
 final Pointer<NativeFunction<Native_CanvasGetContext>> nativeGetContext =
     Pointer.fromFunction(CanvasElement._getContext);
 
-const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE_BLOCK,
-};
-
 class RenderCanvasPaint extends RenderCustomPaint {
   @override
   bool get isRepaintBoundary => true;
@@ -64,7 +60,6 @@ class CanvasElement extends Element {
           targetId,
           nativeCanvasElement.ref.nativeElement,
           elementManager,
-          defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
           repaintSelf: true,
           tagName: CANVAS,

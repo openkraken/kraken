@@ -126,7 +126,7 @@ class Element extends Node
   Size get viewportSize => elementManager.viewport.viewportSize;
 
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
-      {this.tagName,
+      { this.tagName,
         this.defaultStyle = const <String, dynamic>{},
         // Whether element allows children.
         bool isIntrinsicBox = false,
@@ -137,7 +137,8 @@ class Element extends Node
       : assert(targetId != null),
         assert(tagName != null),
         _isIntrinsicBox = isIntrinsicBox,
-        defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK,
+        // https://drafts.csswg.org/css-display/#the-display-properties
+        defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
 

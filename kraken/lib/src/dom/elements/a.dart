@@ -5,14 +5,11 @@
 
 import 'dart:ffi';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 
 const String ANCHOR = 'A';
-
-const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE};
 
 class AnchorElement extends Element {
   String _href;
@@ -21,7 +18,7 @@ class AnchorElement extends Element {
   final Pointer<NativeAnchorElement> nativeAnchorElement;
 
   AnchorElement(int targetId, this.nativeAnchorElement, ElementManager elementManager)
-      : super(targetId, nativeAnchorElement.ref.nativeElement, elementManager, tagName: ANCHOR, defaultStyle: _defaultStyle) {
+      : super(targetId, nativeAnchorElement.ref.nativeElement, elementManager, tagName: ANCHOR) {
     addEvent(EVENT_CLICK);
   }
 

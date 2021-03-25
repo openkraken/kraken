@@ -19,7 +19,7 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  final Pointer<NativeTextNode> nativeTextNodePtr;
+  final Pointer<NativeTextNode> _nativePtr;
 
   static SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
 
@@ -29,14 +29,13 @@ class TextNode extends Node {
     return textNode;
   }
 
-  TextNode(int targetId, this.nativeTextNodePtr, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativeTextNodePtr.ref.nativeNode, elementManager, '#text') {
-    _nativeMap[nativeTextNodePtr.address] = this;
+  TextNode(int targetId, this._nativePtr, this._data, ElementManager elementManager)
+      : super(NodeType.TEXT_NODE, targetId, _nativePtr.ref.nativeNode, elementManager, '#text') {
+    _nativeMap[_nativePtr.address] = this;
   }
 
   RenderTextBox _renderTextBox;
 
-  static const String NORMAL_SPACE = '\u0020';
   // The text string.
   String _data;
   String get data {
@@ -87,7 +86,6 @@ class TextNode extends Node {
 
   @override
   RenderObject get renderer => _renderTextBox;
-
 
   void updateTextStyle() {
     if (isRendererAttached) {
@@ -193,7 +191,7 @@ class TextNode extends Node {
     }
 
     assert(_renderTextBox == null);
-    _nativeMap.remove(nativeTextNodePtr.address);
+    _nativeMap.remove(_nativePtr.address);
   }
 }
 
