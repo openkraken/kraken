@@ -4,22 +4,24 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 
 final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 
 const double DEFAULT_LETTER_SPACING = 0.0;
 const double DEFAULT_WORD_SPACING = 0.0;
+const double DEFAULT_FONT_SIZE = 16.0;
+const double DEFAULT_LINE_HEIGHT = 1.2;
 
 // CSS Text: https://drafts.csswg.org/css-text-3/
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 mixin CSSTextMixin on RenderStyleBase {
-
   Color _color = CSSColor.initial;
   Color get color {
     return _color;
   }
+
   set color(Color value) {
     if (_color == value) return;
     _color = value;
@@ -29,6 +31,7 @@ mixin CSSTextMixin on RenderStyleBase {
   TextDecoration get textDecorationLine {
     return _textDecorationLine;
   }
+
   set textDecorationLine(TextDecoration value) {
     if (_textDecorationLine == value) return;
     _textDecorationLine = value;
@@ -38,6 +41,7 @@ mixin CSSTextMixin on RenderStyleBase {
   Color get textDecorationColor {
     return _textDecorationColor;
   }
+
   set textDecorationColor(Color value) {
     if (_textDecorationColor == value) return;
     _textDecorationColor = value;
@@ -47,6 +51,7 @@ mixin CSSTextMixin on RenderStyleBase {
   TextDecorationStyle get textDecorationStyle {
     return _textDecorationStyle;
   }
+
   set textDecorationStyle(TextDecorationStyle value) {
     if (_textDecorationStyle == value) return;
     _textDecorationStyle = value;
@@ -56,6 +61,7 @@ mixin CSSTextMixin on RenderStyleBase {
   FontWeight get fontWeight {
     return _fontWeight;
   }
+
   set fontWeight(FontWeight value) {
     if (_fontWeight == value) return;
     _fontWeight = value;
@@ -65,6 +71,7 @@ mixin CSSTextMixin on RenderStyleBase {
   FontStyle get fontStyle {
     return _fontStyle;
   }
+
   set fontStyle(FontStyle value) {
     if (_fontStyle == value) return;
     _fontStyle = value;
@@ -74,15 +81,17 @@ mixin CSSTextMixin on RenderStyleBase {
   List<String> get fontFamily {
     return _fontFamily;
   }
+
   set fontFamily(List<String> value) {
     if (_fontFamily == value) return;
     _fontFamily = value;
   }
 
-  double _fontSize;
+  double _fontSize = DEFAULT_FONT_SIZE;
   double get fontSize {
     return _fontSize;
   }
+
   set fontSize(double value) {
     if (_fontSize == value) return;
     _fontSize = value;
@@ -92,6 +101,7 @@ mixin CSSTextMixin on RenderStyleBase {
   double get lineHeight {
     return _lineHeight;
   }
+
   set lineHeight(double value) {
     if (_lineHeight == value) return;
     _lineHeight = value;
@@ -102,6 +112,7 @@ mixin CSSTextMixin on RenderStyleBase {
   double get letterSpacing {
     return _letterSpacing;
   }
+
   set letterSpacing(double value) {
     if (_letterSpacing == value) return;
     _letterSpacing = value;
@@ -111,6 +122,7 @@ mixin CSSTextMixin on RenderStyleBase {
   double get wordSpacing {
     return _wordSpacing;
   }
+
   set wordSpacing(double value) {
     if (_wordSpacing == value) return;
     _wordSpacing = value;
@@ -120,6 +132,7 @@ mixin CSSTextMixin on RenderStyleBase {
   List<Shadow> get textShadow {
     return _textShadow;
   }
+
   set textShadow(List<Shadow> value) {
     if (_textShadow == value) return;
     _textShadow = value;
@@ -129,11 +142,12 @@ mixin CSSTextMixin on RenderStyleBase {
   WhiteSpace get whiteSpace {
     return _whiteSpace;
   }
+
   set whiteSpace(WhiteSpace value) {
     if (_whiteSpace == value) return;
     _whiteSpace = value;
   }
-  
+
   static TextSpan createTextSpan(String text, Element parent) {
     TextStyle textStyle = parent != null ? getTextStyle(parent) : null;
     return TextSpan(
@@ -165,48 +179,56 @@ mixin CSSTextMixin on RenderStyleBase {
     double viewportHeight = elementManager.viewportHeight;
     Size viewportSize = Size(viewportWidth, viewportHeight);
 
-    // Text may be created when parent renderObject not created, get it from style instead
-    Color color = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.color : CSSText.getTextColor(parent.style);
-    TextDecoration textDecorationLine = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textDecorationLine : CSSText.getTextDecorationLine(parent.style);
-    Color textDecorationColor = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textDecorationColor : CSSText.getTextDecorationColor(parent.style);
-    TextDecorationStyle textDecorationStyle = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textDecorationStyle : CSSText.getTextDecorationStyle(parent.style);
-    FontWeight fontWeight = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontWeight : CSSText.getFontWeight(parent.style);
-    FontStyle fontStyle = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontStyle : CSSText.getFontStyle(parent.style);
-    double fontSize = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontSize : CSSText.getFontSize(parent.style, viewportSize);
-    double letterSpacing = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.letterSpacing : CSSText.getLetterSpacing(parent.style, viewportSize);
-    double wordSpacing = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.wordSpacing : CSSText.getWordSpacing(parent.style, viewportSize);
-    List<Shadow> textShadow = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textShadow : CSSText.getTextShadow(parent.style, viewportSize);
+    // To keep compatibility with font-family custimazition in test,
+    // get style from constants if style not defined
+    var fontFamilyFallback = CSSText.getFontFamilyFallback(parent.style);
+    var textBaseline = CSSText.getTextBaseLine(parentStyle);
+    var package = CSSText.getFontPackage(parentStyle);
+    var locale = CSSText.getLocale(parentStyle);
+    var background = CSSText.getBackground(parentStyle);
+    var foreground = CSSText.getForeground(parentStyle);
 
-    return TextStyle(
-      color: color,
-      decoration: textDecorationLine,
-      decorationColor: textDecorationColor,
-      decorationStyle: textDecorationStyle,
-      fontWeight: fontWeight,
-      fontStyle: fontStyle,
-      // To keep compatibility with font-family custimazition in test,
-      // get style from constants if style not defined
-      fontFamilyFallback: CSSText.getFontFamilyFallback(parent.style),
-      fontSize: fontSize,
-      letterSpacing: letterSpacing,
-      wordSpacing: wordSpacing,
-      shadows: textShadow,
-      textBaseline: CSSText.getTextBaseLine(parentStyle),
-      package: CSSText.getFontPackage(parentStyle),
-      locale: CSSText.getLocale(parentStyle),
-      background: CSSText.getBackground(parentStyle),
-      foreground: CSSText.getForeground(parentStyle),
-    );
+    if (parentRenderBoxModel != null) {
+      // Text may be created when parent renderObject not created, and force update text style
+      parentRenderBoxModel.renderStyle.updateTextStyle();
+      return TextStyle(
+        color: parentRenderBoxModel.renderStyle.color,
+        decoration: parentRenderBoxModel.renderStyle.textDecorationLine,
+        decorationColor: parentRenderBoxModel.renderStyle.textDecorationColor,
+        decorationStyle: parentRenderBoxModel.renderStyle.textDecorationStyle,
+        fontWeight: parentRenderBoxModel.renderStyle.fontWeight,
+        fontStyle: parentRenderBoxModel.renderStyle.fontStyle,
+        fontSize: parentRenderBoxModel.renderStyle.fontSize,
+        letterSpacing: parentRenderBoxModel.renderStyle.letterSpacing,
+        wordSpacing: parentRenderBoxModel.renderStyle.wordSpacing,
+        shadows: parentRenderBoxModel.renderStyle.textShadow,
+        fontFamilyFallback: fontFamilyFallback,
+        textBaseline: textBaseline,
+        package: package,
+        locale: locale,
+        background: background,
+        foreground: foreground,
+      );
+    } else {
+      return TextStyle(
+        color: CSSText.getTextColor(parentStyle),
+        decoration: CSSText.getTextDecorationLine(parentStyle),
+        decorationColor: CSSText.getTextDecorationColor(parentStyle),
+        decorationStyle: CSSText.getTextDecorationStyle(parentStyle),
+        fontWeight: CSSText.getFontWeight(parentStyle),
+        fontStyle: CSSText.getFontStyle(parentStyle),
+        fontSize: CSSText.getFontSize(parentStyle, viewportSize),
+        letterSpacing: CSSText.getLetterSpacing(parentStyle, viewportSize),
+        wordSpacing: CSSText.getWordSpacing(parentStyle, viewportSize),
+        shadows: CSSText.getTextShadow(parentStyle, viewportSize),
+        fontFamilyFallback: fontFamilyFallback,
+        textBaseline: textBaseline,
+        package: package,
+        locale: locale,
+        background: background,
+        foreground: foreground,
+      );
+    }
   }
 
   void updateTextStyle() {
@@ -227,7 +249,6 @@ mixin CSSTextMixin on RenderStyleBase {
 }
 
 class CSSText {
-
   static bool isValidFontStyleValue(String value) {
     return value == 'normal' || value == 'italic' || value == 'oblique';
   }
@@ -268,6 +289,8 @@ class CSSText {
           lineHeight = getFontSize(style, viewportSize) * multipliedNumber;
         }
       }
+    } else {
+      lineHeight = getFontSize(style, viewportSize) * DEFAULT_LINE_HEIGHT;
     }
     return lineHeight;
   }
@@ -309,7 +332,7 @@ class CSSText {
   }
 
   static WhiteSpace getWhiteSpace(CSSStyleDeclaration style) {
-    switch(style[WHITE_SPACE]) {
+    switch (style[WHITE_SPACE]) {
       case 'nowrap':
         return WhiteSpace.nowrap;
       case 'pre':
@@ -350,7 +373,7 @@ class CSSText {
       return textOverflow;
     }
 
-    switch(style[TEXT_OVERFLOW]) {
+    switch (style[TEXT_OVERFLOW]) {
       case 'ellipsis':
         return TextOverflow.ellipsis;
       case 'fade':
@@ -360,7 +383,6 @@ class CSSText {
         return TextOverflow.clip;
     }
   }
-
 
   static Color getTextColor(CSSStyleDeclaration style) {
     if (style.contains(COLOR)) {
@@ -476,35 +498,26 @@ class CSSText {
 
         switch (familyName) {
           case 'sans-serif':
-          // Default sans-serif font in iOS (9 and newer)and iPadOS: Helvetica
-          // Default sans-serif font in Android (4.0+): Roboto
+            // Default sans-serif font in iOS (9 and newer)and iPadOS: Helvetica
+            // Default sans-serif font in Android (4.0+): Roboto
             resolvedFamily.addAll(['Helvetica', 'Roboto', 'PingFang SC', 'PingFang TC']);
             break;
           case 'serif':
-          // Default serif font in iOS and iPadOS: Times
-          // Default serif font in Android (4.0+): Noto Serif
-            resolvedFamily.addAll([
-              'Times',
-              'Times New Roman',
-              'Noto Serif',
-              'Songti SC',
-              'Songti TC',
-              'Hiragino Mincho ProN',
-              'AppleMyungjo',
-              'Apple SD Gothic Neo'
-            ]);
+            // Default serif font in iOS and iPadOS: Times
+            // Default serif font in Android (4.0+): Noto Serif
+            resolvedFamily.addAll(['Times', 'Times New Roman', 'Noto Serif', 'Songti SC', 'Songti TC', 'Hiragino Mincho ProN', 'AppleMyungjo', 'Apple SD Gothic Neo']);
             break;
           case 'monospace':
-          // Default monospace font in iOS and iPadOS: Courier
+            // Default monospace font in iOS and iPadOS: Courier
             resolvedFamily.addAll(['Courier', 'Courier New', 'DroidSansMono', 'Monaco', 'Heiti SC', 'Heiti TC']);
             break;
           case 'cursive':
-          // Default cursive font in iOS and iPadOS: Snell Roundhand
+            // Default cursive font in iOS and iPadOS: Snell Roundhand
             resolvedFamily.addAll(['Snell Roundhand', 'Apple Chancery', 'DancingScript', 'Comic Sans MS']);
             break;
           case 'fantasy':
-          // Default fantasy font in iOS and iPadOS:
-          // Default fantasy font in MacOS: Papyrus
+            // Default fantasy font in iOS and iPadOS:
+            // Default fantasy font in MacOS: Papyrus
             resolvedFamily.addAll(['Papyrus', 'Impact']);
             break;
           default:
@@ -516,7 +529,6 @@ class CSSText {
     return DEFAULT_FONT_FAMILY_FALLBACK;
   }
 
-  static double DEFAULT_FONT_SIZE = 16.0;
   static double getFontSize(CSSStyleDeclaration style, Size viewportSize) {
     if (style.contains(FONT_SIZE)) {
       return CSSLength.toDisplayPortValue(style[FONT_SIZE], viewportSize) ?? DEFAULT_FONT_SIZE;

@@ -587,7 +587,7 @@ class Element extends Node
     /// where it can access the font-size of its parent element
     if (renderBoxModel.parseFontSize) {
       RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
-      double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
+      double parentFontSize = parentRenderStyle.fontSize ?? DEFAULT_FONT_SIZE;
       double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
       renderBoxModel.renderStyle.fontSize = parsedFontSize;
       for (Node node in childNodes) {
@@ -602,7 +602,7 @@ class Element extends Node
     /// where it can access the font-size of its own element
     if (renderBoxModel.parseLineHeight) {
       RenderStyle renderStyle = renderBoxModel.renderStyle;
-      double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
+      double fontSize = renderStyle.fontSize ?? DEFAULT_FONT_SIZE;
       double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
       renderBoxModel.renderStyle.lineHeight = parsedLineHeight;
       for (Node node in childNodes) {
