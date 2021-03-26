@@ -95,16 +95,16 @@ class CSSLength {
       if (currentValue == null) return null;
       displayPortValue = currentValue * _1Q;
     }  else if (unitedValue.endsWith(VMIN)) {
-      // if the height of the window is less than its width, 1vmin will be equivalent to 1vh.
-      // If the width of the window is less than it’s height, 1vmin is equvialent to 1vw.
+      // 1% of viewport's smaller (vw or vh) dimension.
+      // If the height of the viewport is less than its width, 1vmin will be equivalent to 1vh.
+      // If the width of the viewport is less than it’s height, 1vmin is equvialent to 1vw.
       double currentValue = double.tryParse(unitedValue.split(VMIN)[0]);
       if (currentValue == null) return null;
       double smallest = viewportWidth > viewportHeight ? viewportHeight : viewportWidth;
       displayPortValue = currentValue / 100.0 * smallest;
     }  else if (unitedValue.endsWith(VMAX)) {
       double currentValue = double.tryParse(unitedValue.split(VMAX)[0]);
-      // If the viewport is wider than it is tall; if the window is taller than it is wide,
-      // 1vmax will be equivalent to 1vh.
+      // 1% of viewport's larger (vw or vh) dimension.
       if (currentValue == null) return null;
       double largest = viewportWidth > viewportHeight ? viewportWidth : viewportHeight;
       displayPortValue = currentValue / 100.0 * largest;
