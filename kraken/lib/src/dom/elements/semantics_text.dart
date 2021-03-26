@@ -69,8 +69,9 @@ const Map<String, dynamic> _defaultStyle = {
   FONT_STYLE: ITALIC
 };
 
-class LineBreakElement extends Element {
-  LineBreakElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+// https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlbrelement
+class BRElement extends Element {
+  BRElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(
         targetId, nativePtr, elementManager,
         tagName: BR,
@@ -136,8 +137,8 @@ class DataElement extends Element {
 }
 
 // TODO: enclosed text is a short inline quotation
-class QuotationElement extends Element {
-  QuotationElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+class QuoteElement extends Element {
+  QuoteElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: Q);
 }
 

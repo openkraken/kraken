@@ -122,7 +122,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     if (!inited) {
       // Inline text
-      defineElement(BR, (id, nativePtr, elementManager) => LineBreakElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(BR, (id, nativePtr, elementManager) => BRElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(B, (id, nativePtr, elementManager) => BringElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(ABBR, (id, nativePtr, elementManager) => AbbreviationElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(EM, (id, nativePtr, elementManager) => EmphasisElement(id, nativePtr.cast<NativeElement>(), elementManager));
@@ -138,7 +138,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       defineElement(TIME, (id, nativePtr, elementManager) => TimeElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(DATA, (id, nativePtr, elementManager) => DataElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(MARK, (id, nativePtr, elementManager) => MarkElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineElement(Q, (id, nativePtr, elementManager) => QuotationElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(Q, (id, nativePtr, elementManager) => QuoteElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(KBD, (id, nativePtr, elementManager) => KeyboardElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(DFN, (id, nativePtr, elementManager) => DefinitionElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(SPAN, (id, nativePtr, elementManager) => SpanElement(id, nativePtr.cast<NativeElement>(), elementManager));
@@ -147,10 +147,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       defineElement(PRE, (id, nativePtr, elementManager) => PreElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(PARAGRAPH, (id, nativePtr, elementManager) => ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(DIV, (id, nativePtr, elementManager) => DivElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineElement(UL, (id, nativePtr, elementManager) => ULElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineElement(OL, (id, nativePtr, elementManager) => OLElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(UL, (id, nativePtr, elementManager) => UListElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(OL, (id, nativePtr, elementManager) => OListElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(LI, (id, nativePtr, elementManager) => LIElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineElement(DL, (id, nativePtr, elementManager) => DLElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(DL, (id, nativePtr, elementManager) => DListElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(DT, (id, nativePtr, elementManager) => DTElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(DD, (id, nativePtr, elementManager) => DDElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(FIGURE, (id, nativePtr, elementManager) => FigureElement(id, nativePtr.cast<NativeElement>(), elementManager));
@@ -177,7 +177,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       defineElement(BUTTON, (id, nativePtr, elementManager) => ButtonElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(INPUT, (id, nativePtr, elementManager) => InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager));
       // Edits
-      defineElement(DEL, (id, nativePtr, elementManager) => DeletedElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(DEL, (id, nativePtr, elementManager) => DelElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(INS, (id, nativePtr, elementManager) => InsElement(id, nativePtr.cast<NativeElement>(), elementManager));
       // Others
       defineElement(IMAGE, (id, nativePtr, elementManager) => ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager));

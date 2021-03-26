@@ -20,8 +20,8 @@ const Map<String, dynamic> _delDefaultStyle = {
   TEXT_DECORATION: LINE_THROUGH
 };
 
-class DeletedElement extends Element {
-  DeletedElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+class DelElement extends Element {
+  DelElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: DEL, defaultStyle: _delDefaultStyle);
 }
 

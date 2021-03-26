@@ -70,18 +70,21 @@ class BlockQuotationElement extends Element {
       : super(targetId, nativePtr, elementManager, tagName: BLOCKQUOTE, defaultStyle: _bDefaultStyle);
 }
 
+// https://html.spec.whatwg.org/multipage/grouping-content.html#htmlparagraphelement
 class ParagraphElement extends Element {
   ParagraphElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: PARAGRAPH, defaultStyle: _pDefaultStyle);
 }
 
-class ULElement extends Element {
-  ULElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+// https://html.spec.whatwg.org/multipage/grouping-content.html#htmlulistelement
+class UListElement extends Element {
+  UListElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: UL, defaultStyle: _pDefaultStyle);
 }
 
-class OLElement extends Element {
-  OLElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+// https://html.spec.whatwg.org/multipage/grouping-content.html#htmlolistelement
+class OListElement extends Element {
+  OListElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: OL, defaultStyle: _pDefaultStyle);
 }
 
@@ -90,6 +93,7 @@ class LIElement extends Element {
       : super(targetId, nativePtr, elementManager, tagName: LI, defaultStyle: _defaultStyle);
 }
 
+// https://html.spec.whatwg.org/multipage/grouping-content.html#htmlpreelement
 class PreElement extends Element {
   PreElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: PRE, defaultStyle: _preDefaultStyle);
@@ -106,7 +110,8 @@ class DTElement extends Element {
       : super(targetId, nativePtr, elementManager, tagName: DT, defaultStyle: _defaultStyle);
 }
 
-class DLElement extends Element {
-  DLElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
+// https://html.spec.whatwg.org/multipage/grouping-content.html#htmldlistelement
+class DListElement extends Element {
+  DListElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: DL, defaultStyle: _pDefaultStyle);
 }
