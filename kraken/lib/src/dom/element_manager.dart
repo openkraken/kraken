@@ -143,7 +143,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       defineElement(DFN, (id, nativePtr, elementManager) => DefinitionElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(SPAN, (id, nativePtr, elementManager) => SpanElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(ANCHOR, (id, nativePtr, elementManager) => AnchorElement(id, nativePtr.cast<NativeAnchorElement>(), elementManager));
-      defineElement(STRONG, (id, nativePtr, elementManager) => StrongElement(id, nativePtr.cast<NativeElement>(), elementManager));
       // Content
       defineElement(PRE, (id, nativePtr, elementManager) => PreElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(PARAGRAPH, (id, nativePtr, elementManager) => ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager));
