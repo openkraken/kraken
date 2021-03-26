@@ -1,4 +1,4 @@
-describe('vw_vh', () => {
+describe('vw-vh', () => {
   it('basic', async () => {
     let div;
     div = createElement(
