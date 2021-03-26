@@ -683,7 +683,7 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
   if (elementCreatorMap.count(name) > 0) {
     elementInstance = elementCreatorMap[name](context);
   } else {
-    KRAKEN_LOG(VERBOSE) << "Unknown element tag: " << name << std::endl;
+    // Fallback to default Element Class
     elementInstance = new ElementInstance(JSElement::instance(context), name.c_str(), true);
   }
   return elementInstance;

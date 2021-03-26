@@ -46,13 +46,13 @@ class TextNode extends Node {
     /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
     //
-    // New lines	Spaces and tabs	Text wrapping	End-of-line spaces
-    // normal	Collapse	Collapse	Wrap	Remove
-    // nowrap	Collapse	Collapse	No wrap	Remove
-    // pre	Preserve	Preserve	No wrap	Preserve
-    // pre-wrap	Preserve	Preserve	Wrap	Hang
-    // pre-line	Preserve	Collapse	Wrap	Remove
-    // break-spaces	Preserve	Preserve	Wrap	Wrap
+    //       New lines / Spaces and tabs / Text wrapping / End-of-line spaces
+    // normal    Collapse  Collapse  Wrap     Remove
+    // nowrap    Collapse  Collapse  No wrap  Remove
+    // pre       Preserve  Preserve  No wrap  Preserve
+    // pre-wrap  Preserve  Preserve  Wrap     Hang
+    // pre-line  Preserve  Collapse  Wrap     Remove
+    // break-spaces  Preserve  Preserve  Wrap  Wrap
     if (whiteSpace == WhiteSpace.pre ||
         whiteSpace == WhiteSpace.preLine ||
         whiteSpace == WhiteSpace.preWrap ||

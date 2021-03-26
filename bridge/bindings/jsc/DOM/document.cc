@@ -156,21 +156,6 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     JSElement::defineElement("object", [](JSContext *context) -> ElementInstance* {
       return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
     });
-    JSElement::defineElement("span", [](JSContext *context) -> ElementInstance* {
-      return new ElementInstance(JSElement::instance(context), "span", true);
-    });
-    JSElement::defineElement("div", [](JSContext *context) -> ElementInstance * {
-      return new ElementInstance(JSElement::instance(context), "div", true);
-    });
-    JSElement::defineElement("strong", [](JSContext *context) -> ElementInstance * {
-      return new ElementInstance(JSElement::instance(context), "strong", true);
-    });
-    JSElement::defineElement("pre", [](JSContext *context) -> ElementInstance * {
-      return new ElementInstance(JSElement::instance(context), "pre", true);
-    });
-    JSElement::defineElement("p", [](JSContext *context) -> ElementInstance * {
-      return new ElementInstance(JSElement::instance(context), "p", true);
-    });
   }
 }
 

@@ -23,7 +23,6 @@ export 'src/dom/elements/headings.dart';
 export 'src/dom/elements/forms.dart';
 export 'src/dom/elements/edits.dart';
 export 'src/dom/elements/a.dart';
-export 'src/dom/elements/br.dart';
 export 'src/dom/elements/body.dart';
 export 'src/dom/elements/canvas.dart';
 export 'src/dom/elements/img.dart';
