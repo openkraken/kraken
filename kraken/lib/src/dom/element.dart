@@ -441,7 +441,7 @@ class Element extends Node
   Node _findPrevNonCommentNode() {
     Node preSibling = previousSibling;
     while (preSibling is Comment) {
-      preSibling = previousSibling.previousSibling;
+      preSibling = preSibling.previousSibling;
     }
     return preSibling;
   }
