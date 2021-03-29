@@ -146,7 +146,7 @@ describe('Position relative', () => {
 
     await matchViewportSnapshot();
 
-    requestAnimationFrame(async() => {
+    requestAnimationFrame(async () => {
       row1.style.position = 'static';
       row1.style.position = 'relative';
       row2.style.position = 'static';
