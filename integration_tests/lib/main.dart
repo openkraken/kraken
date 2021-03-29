@@ -21,7 +21,8 @@ String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST FAILED]');
 
 final String __dirname = path.dirname(Platform.script.path);
-final String testDirectory = Platform.environment['KRAKEN_TEST_DIR'] ?? __dirname;
+final String testDirectory =
+    Platform.environment['KRAKEN_TEST_DIR'] ?? __dirname;
 // final String testDirectory = '/Users/yuanyan/Kraken/kraken/integration_tests/';
 final Directory specsDirectory = Directory(path.join(testDirectory, '.specs'));
 
@@ -29,25 +30,22 @@ const int KRAKEN_NUM = 1;
 List<Kraken> kraken = List<Kraken>(KRAKEN_NUM);
 
 class NativeGestureClient implements GestureClient {
-  NativeGestureClient({
-    this.gestureClientID
-  });
+  NativeGestureClient({this.gestureClientID});
 
   int gestureClientID;
 
   @override
-  void dragUpdateCallback(DragUpdateDetails details) {
-  }
+  void dragUpdateCallback(DragUpdateDetails details) {}
 
   @override
   void dragStartCallback(DragStartDetails details) {
-    var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
+    var event =
+        CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
     kraken[gestureClientID].controller.view.document.body.dispatchEvent(event);
   }
 
   @override
-  void dragEndCallback(DragEndDetails details) {
-  }
+  void dragEndCallback(DragEndDetails details) {}
 }
 
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
@@ -58,7 +56,6 @@ void main() async {
   KrakenWebView.initialize();
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
-  CSSText.DEFAULT_FONT_SIZE = 14.0;
   setObjectElementFactory(customObjectElementFactory);
 
   List<FileSystemEntity> specs = specsDirectory.listSync(recursive: true);
@@ -81,7 +78,7 @@ void main() async {
   ];
   List<Kraken> widgets = [];
 
-  for (int i = 0; i < KRAKEN_NUM; i ++) {
+  for (int i = 0; i < KRAKEN_NUM; i++) {
     KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
     javaScriptChannel.onMethodCall = (String method, dynamic arguments) async {
       javaScriptChannel.invokeMethod(method, arguments);
@@ -96,7 +93,7 @@ void main() async {
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
       debugEnableInspector: false,
-      gestureClient: NativeGestureClient(gestureClientID:i),
+      gestureClient: NativeGestureClient(gestureClientID: i),
     );
     widgets.add(kraken[i]);
   }
@@ -105,22 +102,19 @@ void main() async {
     title: 'Kraken Intergration Tests',
     debugShowCheckedModeBanner: false,
     home: Scaffold(
-      appBar: AppBar(
-        title: Text('Kraken Integration Tests')
-      ),
+      appBar: AppBar(title: Text('Kraken Integration Tests')),
       body: Wrap(
         children: widgets,
       ),
     ),
   ));
 
-  WidgetsBinding.instance
-      .addPostFrameCallback((_) async {
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();
 
     List<Future<String>> testResults = [];
 
-    for (int i = 0; i < widgets.length; i ++) {
+    for (int i = 0; i < widgets.length; i++) {
       int contextId = i;
       initTestFramework(contextId);
       addJSErrorListener(contextId, (String err) {
@@ -141,7 +135,7 @@ void main() async {
 
     List<String> results = await Future.wait(testResults);
 
-    for (int i = 0; i < results.length; i ++) {
+    for (int i = 0; i < results.length; i++) {
       String status = results[i];
       if (status == 'failed') {
         exit(1);
@@ -151,4 +145,3 @@ void main() async {
     exit(0);
   });
 }
-
