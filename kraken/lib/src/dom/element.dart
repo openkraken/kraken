@@ -437,15 +437,6 @@ class Element extends Node
     renderBoxModel.renderStyle.renderBoxModel = targetRenderBox;
   }
 
-  /// Find nearest previous node which is not Comment Node
-  Node _findPrevNonCommentNode() {
-    Node preSibling = previousSibling;
-    while (preSibling is Comment) {
-      preSibling = preSibling.previousSibling;
-    }
-    return preSibling;
-  }
-
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
     if (renderBoxModel.parent is RenderLayoutBox) {
       renderBoxModel.renderStyle.position = currentPosition;
@@ -458,9 +449,7 @@ class Element extends Node
 
     // Move element according to position when it's already attached to render tree.
     if (isRendererAttached) {
-      // It should skip comment node which has no renderer when finding previous node's renderer.
-      Node prevNode = _findPrevNonCommentNode();
-      RenderObject prev = prevNode?.renderer;
+      RenderObject prev = (renderBoxModel.parentData as ContainerBoxParentData).previousSibling;
       detach();
       attachTo(parent, after: prev);
     }
