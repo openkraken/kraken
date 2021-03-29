@@ -18,22 +18,21 @@ describe('vmin-vmax', () => {
       left: 0,
       width: '50vmin',
       height: '20vmax',
-      transition: 'all 0.5s ease-out',
+      transition: 'all 0.1s ease-out',
       backgroundColor: 'green'
     };
     let div = <div style={style} />;
     BODY.appendChild(div);
 
+    div.addEventListener('transitionend', async () => {
+      await matchViewportSnapshot();
+      done();
+    });
+
     requestAnimationFrame(() => {
       setElementStyle(div, {
         top: '50vmin',
       });
-
-      // Wait for animation finished.
-      setTimeout(async () => {
-        await matchViewportSnapshot();
-        done();
-      }, 600);
     });
   });
 });
