@@ -449,7 +449,7 @@ class Element extends Node
 
     // Move element according to position when it's already attached to render tree.
     if (isRendererAttached) {
-      RenderObject prev = (renderBoxModel.parentData as ContainerBoxParentData).previousSibling;
+      RenderObject prev = (renderer.parentData as ContainerBoxParentData).previousSibling;
       detach();
       attachTo(parent, after: prev);
     }
