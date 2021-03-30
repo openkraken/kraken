@@ -37,7 +37,8 @@
 
 #else
 
-#if (PLATFORM(MAC) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 101100) || PLATFORM(IOS)
+#include <Security/SecBase.h>
+
 typedef uint32_t SecSignatureHashAlgorithm;
 enum {
     kSecSignatureHashAlgorithmUnknown = 0,
@@ -56,11 +57,11 @@ WTF_EXTERN_C_BEGIN
 SecSignatureHashAlgorithm SecCertificateGetSignatureHashAlgorithm(SecCertificateRef);
 
 WTF_EXTERN_C_END
-#endif
 
 #endif
 
 typedef struct __SecTask *SecTaskRef;
+typedef struct __SecTrust *SecTrustRef;
 
 WTF_EXTERN_C_BEGIN
 
@@ -68,19 +69,23 @@ SecTaskRef SecTaskCreateWithAuditToken(CFAllocatorRef, audit_token_t);
 SecTaskRef SecTaskCreateFromSelf(CFAllocatorRef);
 CFTypeRef SecTaskCopyValueForEntitlement(SecTaskRef, CFStringRef entitlement, CFErrorRef *);
 
-#if PLATFORM(MAC) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 101200
-CFStringRef SecTaskCopySigningIdentifier(SecTaskRef, CFErrorRef *);
-#endif
-
 #if PLATFORM(MAC)
 #include <Security/SecAsn1Types.h>
+CFStringRef SecTaskCopySigningIdentifier(SecTaskRef, CFErrorRef *);
 extern const SecAsn1Template kSecAsn1AlgorithmIDTemplate[];
 extern const SecAsn1Template kSecAsn1SubjectPublicKeyInfoTemplate[];
+uint32_t SecTaskGetCodeSignStatus(SecTaskRef);
 #endif
 
 #if HAVE(SEC_TRUST_SERIALIZATION)
 CF_RETURNS_RETAINED CFDataRef SecTrustSerialize(SecTrustRef, CFErrorRef *);
 CF_RETURNS_RETAINED SecTrustRef SecTrustDeserialize(CFDataRef serializedTrust, CFErrorRef *);
 #endif
+
+CF_RETURNS_RETAINED CFDictionaryRef SecTrustCopyInfo(SecTrustRef);
+
+extern const CFStringRef kSecTrustInfoExtendedValidationKey;
+extern const CFStringRef kSecTrustInfoCompanyNameKey;
+extern const CFStringRef kSecTrustInfoRevocationKey;
 
 WTF_EXTERN_C_END

@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.2.0)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
 project(KrakenBridge)
 
 set(CMAKE_CXX_FLAGS "-std=c++17 -stdlib=libc++")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
@@ -43,6 +44,14 @@ list(APPEND BRIDGE_SOURCE
     polyfill/dist/polyfill.cc
 )
 
+list(APPEND BRIDGE_INCLUDE
+  ./foundation
+  ./
+  ./include
+  ./polyfill/dist
+  ${ADDITIONAL_INCLUDE_DIRS}
+  )
+
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   add_compile_options(-DKRAKEN_JSC_ENGINE=1)
 
@@ -63,6 +72,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
       add_library(JavaScriptCore SHARED IMPORTED)
       set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION ${DEBUG_JSC_ENGINE}/JavaScriptCore)
       list(APPEND BRIDGE_LINK_LIBS JavaScriptCore)
+      include(devtools/devtool.cmake)
+      list(APPEND BRIDGE_LINK_LIBS devtool)
     else()
       list(APPEND BRIDGE_LINK_LIBS "-framework JavaScriptCore")
     endif()
@@ -143,15 +154,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bridge_jsc.h
   )
 endif()
-
-list(APPEND BRIDGE_INCLUDE
-    ./foundation
-    ./
-    ./include
-    ./polyfill/dist
-    ${ADDITIONAL_INCLUDE_DIRS}
-)
-
 
 list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h

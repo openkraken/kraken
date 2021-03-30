@@ -16,6 +16,7 @@
 
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
+struct NativeString;
 struct Screen;
 
 using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
