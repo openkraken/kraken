@@ -1120,9 +1120,14 @@ class Element extends Node
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
     CSSDisplay display = renderBoxModel.renderStyle.display;
-    if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
-      for (Element child in children) {
-        if (renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
+
+    CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
+    bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
+
+    // Flex factor change will cause flex item self and its siblings relayout.
+    if (isParentFlexDisplayType) {
+      for (Element child in parent.children) {
+        if (parent.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
           child.renderBoxModel.renderStyle.updateFlexItem();
           child.renderBoxModel.markNeedsLayout();
         }
