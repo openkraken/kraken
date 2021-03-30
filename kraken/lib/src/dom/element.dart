@@ -449,7 +449,13 @@ class Element extends Node
 
     // Move element according to position when it's already attached to render tree.
     if (isRendererAttached) {
-      RenderObject prev = previousSibling?.renderer;
+      RenderObject prev = (renderer.parentData as ContainerBoxParentData).previousSibling;
+      // It needs to find the previous sibling of the previous sibling if the placeholder of
+      // positioned element exists and follows renderObject at the same time, eg.
+      // <div style="position: relative"><div style="postion: absolute" /></div>
+      if (prev == renderBoxModel) {
+        prev = (renderBoxModel.parentData as ContainerBoxParentData).previousSibling;
+      }
       detach();
       attachTo(parent, after: prev);
     }
