@@ -823,7 +823,7 @@ class CSSTransform {
   }
 
   static bool isValidTransformValue(String value, [Size viewportSize]) {
-    return value == 'none' || parseTransform(value, viewportSize) != null;
+    return value == NONE || parseTransform(value, viewportSize) != null;
   }
 
   static Matrix4 initial = Matrix4.identity();
