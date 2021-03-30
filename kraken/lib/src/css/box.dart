@@ -455,12 +455,6 @@ mixin CSSBoxMixin on RenderStyleBase {
           }
         }
       }
-
-      // Tips only debug.
-      if (!PRODUCTION && boxShadow.isEmpty) {
-        print('[Warning] Wrong style format with boxShadow: ${style[BOX_SHADOW]}');
-        print('    Correct syntax: inset? && <length>{2,4} && <color>?');
-      }
     }
 
     return boxShadow;
