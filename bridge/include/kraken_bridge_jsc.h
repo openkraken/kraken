@@ -322,7 +322,7 @@ class JSEvent : public HostClass {
 public:
   DEFINE_OBJECT_PROPERTY(Event, 10, type, bubbles, cancelable, timestamp, defaultPrevented, target, srcElement,
                          currentTarget, returnValue, cancelBubble)
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Event, 3, stopImmediatePropagation, stopPropagation, preventDefault)
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Event, 4, stopImmediatePropagation, stopPropagation, preventDefault, initEvent)
 
   static std::unordered_map<JSContext *, JSEvent *> instanceMap;
   static std::unordered_map<std::string, EventCreator> eventCreatorMap;
@@ -332,6 +332,9 @@ public:
                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef initEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -362,6 +365,7 @@ private:
   JSFunctionHolder m_stopImmediatePropagation{context, prototypeObject, this, "stopImmediatePropagation",
                                               stopImmediatePropagation};
   JSFunctionHolder m_stopPropagation{context, prototypeObject, this, "stopPropagation", stopPropagation};
+  JSFunctionHolder m_initEvent{context, prototypeObject, this, "initEvent", initEvent};
   JSFunctionHolder m_preventDefault{context, prototypeObject, this, "preventDefault", preventDefault};
 };
 
@@ -597,6 +601,9 @@ public:
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
 
+  static JSValueRef createEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
 
@@ -618,6 +625,8 @@ protected:
   JSDocument(JSContext *context);
   ~JSDocument();
 
+
+  JSFunctionHolder m_createEvent{context, prototypeObject, this, "createEvent", createEvent};
   JSFunctionHolder m_createElement{context, prototypeObject, this, "createElement", createElement};
   JSFunctionHolder m_createTextNode{context, prototypeObject, this, "createTextNode", createTextNode};
   JSFunctionHolder m_createComment{context, prototypeObject, this, "createComment", createComment};
@@ -646,8 +655,8 @@ struct NativeDocument {
 class DocumentInstance : public NodeInstance {
 public:
   DEFINE_OBJECT_PROPERTY(Document, 5, nodeName, all, cookie, body, documentElement)
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 5, createElement, createTextNode, createComment, getElementById,
-                                   getElementsByTagName)
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 6, createElement, createTextNode, createComment, getElementById,
+                                   getElementsByTagName, createEvent)
 
   static DocumentInstance *instance(JSContext *context);
 

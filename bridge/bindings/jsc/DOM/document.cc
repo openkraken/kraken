@@ -34,6 +34,35 @@ JSDocument::~JSDocument() {
   instanceMap.erase(context);
 }
 
+JSValueRef JSDocument::createEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                   size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
+  if (argumentCount < 1) {
+    throwJSError(ctx, "Failed to argumentCount: 1 argument required, but only 0 present.", exception);
+    return nullptr;
+  }
+
+  const JSValueRef eventTypeRef = arguments[0];
+  if (!JSValueIsString(ctx, eventTypeRef)) {
+    throwJSError(ctx, "Failed to createEvent: type should be a string.", exception);
+    return nullptr;
+  }
+  JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventTypeRef, exception);
+  std::string eventType = JSStringToStdString(eventTypeStringRef);
+
+  if (eventType == "Event") {
+    auto customEvent = NativeCustomEvent(new NativeEvent(stringToNativeString(eventType)));
+    std::string detail = "";
+    customEvent.detail = stringToNativeString(detail);
+
+    auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
+    auto event = JSEvent::buildEventInstance(eventType, document->context, &customEvent, true);
+    return event->object;
+  } else {
+    return nullptr;
+  }
+}
+
+
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount < 1) {
