@@ -530,7 +530,7 @@ class CSSStyleDeclaration {
         if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
       case TRANSFORM:
-        if (CSSTransform.parseTransform(normalizedValue, viewportSize) == null) {
+        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize)) {
           return;
         }
         break;
