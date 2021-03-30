@@ -329,7 +329,7 @@ describe('Event', () => {
   })
 
   it('should work with createEvent and initEvent', async (done) => {
-    const type = 'customType'
+    const type = 'customtype';
 
     const div = document.createElement('div');
     div.style.width ='200px';
@@ -345,7 +345,7 @@ describe('Event', () => {
 
     div.addEventListener(type,()=>{
       done();
-    })
+    });
 
     div.click();
   });

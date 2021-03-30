@@ -167,7 +167,7 @@ JSValueRef JSEvent::initEvent(JSContextRef ctx, JSObjectRef function, JSObjectRe
   eventInstance->nativeEvent->type = stringToNativeString(type);
   eventInstance->nativeEvent->bubbles = JSValueToBoolean(ctx, bubblesValueRef) ? 1 : 0;
   eventInstance->nativeEvent->cancelable = JSValueToBoolean(ctx, cancelableValueRef) ? 1 : 0;
-  
+
   return nullptr;
 }
 
