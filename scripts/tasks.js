@@ -188,8 +188,10 @@ task('compile-polyfill', (done) => {
 
   let result = spawnSync('npm', ['run', buildMode === 'Release' ? 'build:release' : 'build'], {
     cwd: paths.polyfill,
-    env: process.env,
-    KRAKEN_JS_ENGINE: program.jsEngine,
+    env: {
+      ...process.env,
+      KRAKEN_JS_ENGINE: program.jsEngine
+    },
     stdio: 'inherit'
   });
 
