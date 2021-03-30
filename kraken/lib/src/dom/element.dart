@@ -888,13 +888,13 @@ class Element extends Node
 
       case FLEX_DIRECTION:
       case FLEX_WRAP:
-      case ALIGN_SELF:
       case ALIGN_CONTENT:
       case ALIGN_ITEMS:
       case JUSTIFY_CONTENT:
         _styleFlexChangedListener(property, original, present);
         break;
 
+      case ALIGN_SELF:
       case FLEX_GROW:
       case FLEX_SHRINK:
       case FLEX_BASIS:
