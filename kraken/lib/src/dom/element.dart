@@ -1119,8 +1119,6 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
-    CSSDisplay display = renderBoxModel.renderStyle.display;
-
     CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
     bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
 

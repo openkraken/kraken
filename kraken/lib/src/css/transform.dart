@@ -1131,6 +1131,7 @@ mixin CSSTransformMixin on RenderStyleBase {
   void updateTransform(
     Matrix4 matrix4,
     {
+      bool shouldToggleRepaintBoundary = true,
       bool shouldMarkNeedsLayout = true
     }
   ) {
@@ -1144,10 +1145,12 @@ mixin CSSTransformMixin on RenderStyleBase {
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     element.renderBoxModel.renderStyle.transform = matrix4;
 
-    if (element.shouldConvertToRepaintBoundary) {
-      element.convertToRepaintBoundary();
-    } else {
-      element.convertToNonRepaintBoundary();
+    if (shouldToggleRepaintBoundary) {
+      if (element.shouldConvertToRepaintBoundary) {
+        element.convertToRepaintBoundary();
+      } else {
+        element.convertToNonRepaintBoundary();
+      }
     }
 
     if (shouldMarkNeedsLayout) {

@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';

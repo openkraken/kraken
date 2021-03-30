@@ -280,6 +280,7 @@ class RenderStyle
     if (transformValue != null) {
       updateTransform(
         transformValue,
+        shouldToggleRepaintBoundary: false,
         shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
@@ -340,6 +341,7 @@ class RenderStyle
     if (transformValue != null) {
       updateTransform(
         transformValue,
+        shouldToggleRepaintBoundary: false,
         shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
