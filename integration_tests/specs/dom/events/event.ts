@@ -328,14 +328,14 @@ describe('Event', () => {
     expect(clickText).toBe(1);
   })
 
-  it('should work with createEvent', async (done) => {
+  it('should work with createEvent and initEvent', async (done) => {
     const type = 'customType'
 
     const div = document.createElement('div');
     div.style.width ='200px';
     div.style.height ='200px';
     div.style.backgroundColor ='red';
-    
+
     document.body.appendChild(div)
     div.addEventListener('click', ()=> {
         const e = document.createEvent('Event');
