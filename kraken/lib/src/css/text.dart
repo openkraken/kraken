@@ -189,8 +189,6 @@ mixin CSSTextMixin on RenderStyleBase {
     var foreground = CSSText.getForeground(parentStyle);
 
     if (parentRenderBoxModel != null) {
-      // Text may be created when parent renderObject not created, and force update text style
-      parentRenderBoxModel.renderStyle.updateTextStyle();
       return TextStyle(
         color: parentRenderBoxModel.renderStyle.color,
         decoration: parentRenderBoxModel.renderStyle.textDecorationLine,
@@ -210,6 +208,7 @@ mixin CSSTextMixin on RenderStyleBase {
         foreground: foreground,
       );
     } else {
+      // Text may be created when parent renderObject not created
       return TextStyle(
         color: CSSText.getTextColor(parentStyle),
         decoration: CSSText.getTextDecorationLine(parentStyle),
@@ -238,13 +237,13 @@ mixin CSSTextMixin on RenderStyleBase {
     textDecorationStyle = CSSText.getTextDecorationStyle(style);
     fontWeight = CSSText.getFontWeight(style);
     fontStyle = CSSText.getFontStyle(style);
-    fontFamily = CSSText.getFontFamilyFallback(style);
     fontSize = CSSText.getFontSize(style, viewportSize);
-    lineHeight = CSSText.getLineHeight(style, viewportSize);
+    fontFamily = CSSText.getFontFamilyFallback(style);
     letterSpacing = CSSText.getLetterSpacing(style, viewportSize);
     wordSpacing = CSSText.getWordSpacing(style, viewportSize);
     textShadow = CSSText.getTextShadow(style, viewportSize);
     whiteSpace = CSSText.getWhiteSpace(style);
+    lineHeight = CSSText.getLineHeight(style, viewportSize);
   }
 }
 

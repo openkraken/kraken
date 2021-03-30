@@ -386,7 +386,7 @@ class CSSBackground {
               } else if (!renderBoxModel.attached) {
                 /// When node is not attached and has no width/height, gradient length
                 /// cannot be obtained, so wait for renderBoxModel attached to recalculate gradient length
-                renderBoxModel.recalGradient = true;
+                renderBoxModel.shouldRecalGradient = true;
               }
             }
             colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
