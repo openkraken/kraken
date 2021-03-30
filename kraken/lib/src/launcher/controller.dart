@@ -365,6 +365,8 @@ class KrakenViewController {
     } catch (e, stack) {
       if (navigationDelegate.errorHandler != null) {
         navigationDelegate.errorHandler(e, stack);
+      } else {
+        print('Kraken navigation failed: $e\n$stack');
       }
     }
   }
