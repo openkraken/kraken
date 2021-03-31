@@ -8,8 +8,6 @@ import 'dart:ffi';
 import 'package:kraken/bridge.dart';
 import 'package:meta/meta.dart';
 
-const String DATA = 'data';
-
 enum NodeType {
   ELEMENT_NODE,
   TEXT_NODE,

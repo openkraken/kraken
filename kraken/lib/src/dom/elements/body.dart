@@ -24,6 +24,7 @@ class BodyElement extends Element {
             WIDTH: '${viewportWidth}px',
             HEIGHT: '${viewportHeight}px',
             OVERFLOW: AUTO,
+            DISPLAY: BLOCK,
             BACKGROUND_COLOR: 'white',
           }
         ) {

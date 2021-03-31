@@ -137,7 +137,7 @@ class Element extends Node
       : assert(targetId != null),
         assert(tagName != null),
         _isIntrinsicBox = isIntrinsicBox,
-        defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK,
+        defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
 
@@ -582,15 +582,15 @@ class Element extends Node
     }
 
     /// Recalculate gradient after node attached when gradient length cannot be obtained from style
-    if (renderBoxModel.recalGradient) {
+    if (renderBoxModel.shouldRecalGradient) {
       String backgroundImage = style[BACKGROUND_IMAGE];
       renderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage);
-      renderBoxModel.recalGradient = false;
+      renderBoxModel.shouldRecalGradient = false;
     }
 
     /// Calculate font-size which is percentage when node attached
     /// where it can access the font-size of its parent element
-    if (renderBoxModel.parseFontSize) {
+    if (renderBoxModel.shouldLazyCalFontSize) {
       RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
       double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
       double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
@@ -600,12 +600,12 @@ class Element extends Node
           node.updateTextStyle();
         }
       }
-      renderBoxModel.parseFontSize = false;
+      renderBoxModel.shouldLazyCalFontSize = false;
     }
 
     /// Calculate line-height which is percentage when node attached
     /// where it can access the font-size of its own element
-    if (renderBoxModel.parseLineHeight) {
+    if (renderBoxModel.shouldLazyCalLineHeight) {
       RenderStyle renderStyle = renderBoxModel.renderStyle;
       double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
       double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
@@ -615,7 +615,7 @@ class Element extends Node
           node.updateTextStyle();
         }
       }
-      renderBoxModel.parseLineHeight = false;
+      renderBoxModel.shouldLazyCalLineHeight = false;
     }
 
     RenderStyle renderStyle = renderBoxModel.renderStyle;
@@ -1154,14 +1154,14 @@ class Element extends Node
     /// Percentage font-size should be resolved when node attached
     /// cause it needs to know its parents style
     if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
-      renderBoxModel.parseFontSize = true;
+      renderBoxModel.shouldLazyCalFontSize = true;
       return;
     }
 
     /// Percentage line-height should be resolved when node attached
     /// cause it needs to know other style in its own element
     if (property == LINE_HEIGHT && CSSLength.isPercentage(style[LINE_HEIGHT])) {
-      renderBoxModel.parseLineHeight = true;
+      renderBoxModel.shouldLazyCalLineHeight = true;
       return;
     }
 
