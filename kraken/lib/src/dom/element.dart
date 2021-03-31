@@ -463,7 +463,13 @@ class Element extends Node
 
     // Move element according to position when it's already attached to render tree.
     if (isRendererAttached) {
-      RenderObject prev = previousSibling?.renderer;
+      RenderObject prev = (renderer.parentData as ContainerBoxParentData).previousSibling;
+      // It needs to find the previous sibling of the previous sibling if the placeholder of
+      // positioned element exists and follows renderObject at the same time, eg.
+      // <div style="position: relative"><div style="postion: absolute" /></div>
+      if (prev == renderBoxModel) {
+        prev = (renderBoxModel.parentData as ContainerBoxParentData).previousSibling;
+      }
 
       // Remove placeholder of positioned element.
       RenderPositionHolder renderPositionHolder = renderBoxModel.renderPositionHolder;
@@ -1031,9 +1037,6 @@ class Element extends Node
   }
 
   void _styleDisplayChangedListener(String property, String original, String present) {
-    // Display change may case width/height doesn't works at all.
-    _styleSizeChangedListener(property, original, present);
-
     renderBoxModel.renderStyle.updateDisplay(present, this);
   }
 

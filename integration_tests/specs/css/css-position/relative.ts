@@ -114,4 +114,45 @@ describe('Position relative', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('should work with update position relative when comment node exists', async (done) => {
+    let row1;
+    let row2;
+    let cont = createElement(
+      'div',
+      {
+        style: {
+        }
+      },
+      [
+        (row1 = createElement('div', {
+            style: {
+              position: 'relative'
+            }
+        }, [
+            createText('aaaaaa')
+        ])),
+        document.createComment(null),
+        (row2 = createElement('div', {
+            style: {
+              position: 'relative'
+            }
+        }, [
+            createText('bbbbbb')
+        ])),
+      ]
+    );
+    append(BODY, cont);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      row1.style.position = 'static';
+      row1.style.position = 'relative';
+      row2.style.position = 'static';
+      row2.style.position = 'relative';
+      await matchViewportSnapshot();
+      done();
+    });
+  });
 });
