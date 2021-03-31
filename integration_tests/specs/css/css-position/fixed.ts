@@ -251,4 +251,60 @@ describe('Position fixed', () => {
     await matchViewportSnapshot();
   });
 
+  it('change from fixed to static and transform exists', async (done) => {
+    const cont = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '100px',
+          height: '100px',
+          backgroundColor: 'green',
+          position: 'fixed',
+          top: '100px',
+          transform: 'translate(100px, 0)',
+        }
+      },
+      [
+        createText(`1234`)
+      ]
+    );
+    append(BODY, cont);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async() => {
+      cont.style.position = 'static';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
+
+  it('change from fixed to static and no transform exists', async (done) => {
+    const cont = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '100px',
+          height: '100px',
+          backgroundColor: 'green',
+          position: 'fixed',
+          top: '100px',
+        }
+      },
+      [
+        createText(`1234`)
+      ]
+    );
+    append(BODY, cont);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async() => {
+      cont.style.position = 'static';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
 });

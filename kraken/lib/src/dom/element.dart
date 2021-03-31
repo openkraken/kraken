@@ -125,6 +125,24 @@ class Element extends Node
 
   Size get viewportSize => elementManager.viewport.viewportSize;
 
+  /// Whether should create repaintBoundary for this element when style changed
+  bool get shouldConvertToRepaintBoundary {
+    // Following cases should always convert to repaint boundary for performance consideration
+    // Multiframe image
+    bool isMultiframeImage = this is ImageElement && (this as ImageElement).isMultiframe;
+    // Intrinsic element such as Canvas
+    bool isSetRepaintSelf = repaintSelf;
+    // Scrolling box
+    bool isScrollingBox = scrollingContentLayoutBox != null;
+    // Transform element
+    bool hasTransform = renderBoxModel?.renderStyle?.transform != null;
+    // Fixed element
+    bool isPositionedFixed = renderBoxModel?.renderStyle?.position == CSSPositionType.fixed;
+
+    return isMultiframeImage || isScrollingBox ||
+      isSetRepaintSelf || hasTransform || isPositionedFixed;
+  }
+
   Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
       {this.tagName,
         this.defaultStyle = const <String, dynamic>{},
@@ -396,19 +414,15 @@ class Element extends Node
     }
   }
 
-  /// Convert RenderIntrinsic to non repaint boundary
-  void _convertToNonRepaint() {
-    // Multiframe image should always convert to repaint boundary for scroll performance
-    if (this is ImageElement && (this as ImageElement).isMultiframe) {
-      return;
-    }
+  /// Convert renderBoxModel to non repaint boundary
+  void convertToNonRepaintBoundary() {
     if (renderBoxModel != null && renderBoxModel.isRepaintBoundary) {
       toggleRepaintSelf(repaintSelf: false);
     }
   }
 
-  /// Convert RenderIntrinsic to repaint boundary
-  void _convertToRepaint() {
+  /// Convert renderBoxModel to repaint boundary
+  void convertToRepaintBoundary() {
     if (renderBoxModel != null && !renderBoxModel.isRepaintBoundary) {
       toggleRepaintSelf(repaintSelf: true);
     }
@@ -456,14 +470,30 @@ class Element extends Node
       if (prev == renderBoxModel) {
         prev = (renderBoxModel.parentData as ContainerBoxParentData).previousSibling;
       }
-      detach();
-      attachTo(parent, after: prev);
+
+      // Remove placeholder of positioned element.
+      RenderPositionHolder renderPositionHolder = renderBoxModel.renderPositionHolder;
+      if (renderPositionHolder != null) {
+        ContainerRenderObjectMixin parent = renderPositionHolder.parent;
+        if (parent != null) {
+          parent.remove(renderPositionHolder);
+          renderBoxModel.renderPositionHolder = null;
+        }
+      }
+      // Remove renderBoxModel from original parent and append to its containing block
+      RenderObject parentRenderBoxModel = renderBoxModel.parent;
+      if (parentRenderBoxModel is ContainerRenderObjectMixin) {
+        parentRenderBoxModel.remove(renderBoxModel);
+      } else if (parentRenderBoxModel is RenderProxyBox) {
+        parentRenderBoxModel.child = null;
+      }
+      parent.addChildRenderObject(this, after: prev);
     }
 
-    if (currentPosition == CSSPositionType.fixed) {
-      _convertToRepaint();
+    if (shouldConvertToRepaintBoundary) {
+      convertToRepaintBoundary();
     } else {
-      _convertToNonRepaint();
+      convertToNonRepaintBoundary();
     }
 
     // Add fixed children after convert to repaint boundary renderObject
@@ -1052,7 +1082,7 @@ class Element extends Node
   }
 
   void _styleOverflowChangedListener(String property, String original, String present) {
-    updateRenderOverflow(renderBoxModel, this, _scrollListener);
+    updateRenderOverflow(this, _scrollListener);
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
@@ -1141,6 +1171,7 @@ class Element extends Node
     if (RenderStyle.isTransformTranslatePercentage(present)) return;
 
     Matrix4 matrix4 = CSSTransform.parseTransform(present, viewportSize);
+    // @FIXME support `none` value
     renderBoxModel.renderStyle.updateTransform(matrix4);
   }
 
