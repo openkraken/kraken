@@ -62,6 +62,21 @@ describe('Node API', () => {
     expect(child.isConnected).toBe(true, 'child is connected');
   });
 
+  it('previousSibling should to null when child is firstChild and children.size() > 2', () => {
+    let container = document.createElement('div');
+    let a = document.createElement('div');
+    let b = document.createElement('div');
+    let c = document.createElement('div');
+    let d = document.createElement('div');
+    container.appendChild(a);
+    container.appendChild(b);
+    container.appendChild(c);
+    container.appendChild(d);
+    document.body.appendChild(container);
+    expect(a.previousSibling).toBe(null, 'firstChild should be null');
+    expect(a.isConnected).toBe(true, 'isConnected should be true');
+  });
+
   it('next sibling should to null when child is lastChild of multiple children list', () => {
     let container = document.createElement('div');
     let child = document.createElement('div');

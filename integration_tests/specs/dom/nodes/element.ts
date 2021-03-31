@@ -40,4 +40,21 @@ describe('DOM Element API', () => {
     div.removeAttribute('foo');
     expect(div.hasAttribute('foo')).toBeFalse();
   });
+
+  it('children should only contain elements', () => {
+    let container = document.createElement('div');
+    let a = document.createElement('div');
+    let b = document.createElement('div');
+    let text = document.createTextNode('test');
+    let comment = document.createTextNode('#comment');
+    container.appendChild(a);
+    container.appendChild(text);
+    container.appendChild(b);
+    container.appendChild(comment);
+
+    expect(container.childNodes.length).toBe(4);
+    expect(container.children.length).toBe(2);
+    expect(container.children[0]).toBe(a);
+    expect(container.children[1]).toBe(b);
+  });
 });
