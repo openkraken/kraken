@@ -100,7 +100,7 @@ NodeInstance *NodeInstance::previousSibling() {
     return nullptr;
   }
 
-  if ((it - 1) != parentChildNodes.end()) {
+  if (it != parentChildNodes.begin()) {
     return *(it - 1);
   }
 
