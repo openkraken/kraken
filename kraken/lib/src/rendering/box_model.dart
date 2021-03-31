@@ -1055,6 +1055,7 @@ class RenderBoxModel extends RenderBox with
       }
       return;
     }
+
     paintBoxModel(context, offset);
     if (kProfileMode) {
       int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;

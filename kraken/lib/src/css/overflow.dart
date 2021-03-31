@@ -61,8 +61,9 @@ mixin CSSOverflowMixin on ElementBase {
   // House content which can be scrolled.
   RenderLayoutBox scrollingContentLayoutBox;
 
-  void updateRenderOverflow(RenderBoxModel renderBoxModel, Element element, ScrollListener scrollListener) {
+  void updateRenderOverflow(Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
+    RenderBoxModel renderBoxModel = element.renderBoxModel;
     if (style != null) {
       List<CSSOverflowType> overflow = getOverflowTypes(style);
       CSSOverflowType overflowX = overflow[0];
@@ -138,9 +139,9 @@ mixin CSSOverflowMixin on ElementBase {
 
       if (renderBoxModel is RenderLayoutBox) {
         if (shouldRepaintSelf) {
-          _upgradeToSelfRepaint(element, renderBoxModel);
+          _upgradeToSelfRepaint(element);
         } else {
-          _downgradeToParentRepaint(element, renderBoxModel);
+          _downgradeToParentRepaint(element);
         }
       }
     }
@@ -167,33 +168,77 @@ mixin CSSOverflowMixin on ElementBase {
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
   // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.
-  void _upgradeToSelfRepaint(Element element, RenderBoxModel renderBoxModel) {
-    if (renderBoxModel.isRepaintBoundary) return;
+  void _upgradeToSelfRepaint(Element element) {
+    RenderBoxModel renderBoxModel = element.renderBoxModel;
+    if (scrollingContentLayoutBox != null) {
+      return;
+    }
+    // If renderBoxModel is already repaintBoundary caused by styles such as
+    // transform or position fixed, degrade to non repaint boundary first
+    // before creating two repaintBoundary.
+    if (renderBoxModel.isRepaintBoundary) {
+      element.convertToNonRepaintBoundary();
+      renderBoxModel = element.renderBoxModel;
+    }
     RenderObject layoutBoxParent = renderBoxModel.parent;
-
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
     RenderLayoutBox outerLayoutBox = element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
 
     _createScrollingLayoutBox(element);
+
+    // If outer scrolling box already has children in the case of element already attached,
+    // move them into the children of inner scrolling box.
+    List<RenderBox> children = [];
+    outerLayoutBox.visitChildren((child) {
+      children.add(child);
+    });
+    if (children.length != 0) {
+      for (RenderBox child in children) {
+        outerLayoutBox.remove(child);
+        scrollingContentLayoutBox.insert(child);
+      }
+    }
+
     outerLayoutBox.add(scrollingContentLayoutBox);
+
+    _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
     element.renderBoxModel = outerLayoutBox;
     // Update renderBoxModel reference in renderStyle
     element.renderBoxModel.renderStyle.renderBoxModel = outerLayoutBox;
-
-    _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
   }
 
-  void _downgradeToParentRepaint(Element element, RenderBoxModel renderBoxModel) {
-    if (!renderBoxModel.isRepaintBoundary) return;
+  void _downgradeToParentRepaint(Element element) {
+    RenderBoxModel renderBoxModel = element.renderBoxModel;
+    if (scrollingContentLayoutBox == null) return;
     RenderObject layoutBoxParent = renderBoxModel.parent;
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
     RenderLayoutBox newLayoutBox = element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
-    element.renderBoxModel = newLayoutBox;
-    // Update renderBoxModel reference in renderStyle
-    element.renderBoxModel.renderStyle.renderBoxModel = newLayoutBox;
-    scrollingContentLayoutBox = null;
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
+    element.renderBoxModel = newLayoutBox;
+
+    // Move children of inner scrolling box to the children of outer scrolling box
+    List<RenderBox> children = [];
+    scrollingContentLayoutBox.visitChildren((child) {
+      children.add(child);
+    });
+    if (children.length != 0) {
+      for (RenderBox child in children) {
+        scrollingContentLayoutBox.remove(child);
+        newLayoutBox.insert(child);
+      }
+    }
+    // Remove inner scrolling box
+    newLayoutBox.remove(scrollingContentLayoutBox);
+    scrollingContentLayoutBox = null;
+
+    element.renderBoxModel.renderStyle.renderBoxModel = newLayoutBox;
+
+    // If renderBoxModel should be converted to repaintBoundary caused by styles
+    // such as transform or position fixed, convert to repaintBoundary at last.
+    if (element.shouldConvertToRepaintBoundary) {
+      element.convertToRepaintBoundary();
+    }
   }
 
   RenderObject _detachRenderObject(Element element, RenderObject parent, RenderObject renderObject) {
@@ -213,6 +258,8 @@ mixin CSSOverflowMixin on ElementBase {
     if (parent is RenderObjectWithChildMixin<RenderBox>) {
       parent.child = newRenderObject;
     } else if (parent is ContainerRenderObjectMixin) {
+      // Update renderBoxModel reference before move to its containing block
+      element.renderBoxModel = newRenderObject;
       element.parent.addChildRenderObject(element, after: previousSibling);
     }
   }
