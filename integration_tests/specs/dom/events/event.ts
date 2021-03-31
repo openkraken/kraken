@@ -349,4 +349,23 @@ describe('Event', () => {
 
     div.click();
   });
+
+  it('createEvent set bubbles', async (done) => {
+    const e = document.createEvent('Event');
+    e.initEvent('type', true, true);
+    expect(e.bubbles).toBe(true);
+  });
+
+  it('createEvent set cancelable', async (done) => {
+    const e = document.createEvent('Event');
+    e.initEvent('type', true, true);
+    expect(e.cancelable).toBe(true);
+  });
+
+  it('createEvent set type', async (done) => {
+    const type = 'customtype';
+    const e = document.createEvent('Event');
+    e.initEvent(type, true, true);
+    expect(e.type).toBe(type);
+  });
 });
