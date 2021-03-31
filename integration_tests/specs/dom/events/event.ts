@@ -237,7 +237,7 @@ describe('Event', () => {
 
     document.body.appendChild(container);
 
-    const block =document.createElement('div');
+    const block = document.createElement('div');
     block.style.width = '300px';
     block.style.height = '50px';
     block.style.backgroundColor = 'green';
@@ -332,18 +332,18 @@ describe('Event', () => {
     const type = 'customtype';
 
     const div = document.createElement('div');
-    div.style.width ='200px';
-    div.style.height ='200px';
-    div.style.backgroundColor ='red';
+    div.style.width = '200px';
+    div.style.height = '200px';
+    div.style.backgroundColor = 'red';
 
-    document.body.appendChild(div)
-    div.addEventListener('click', ()=> {
+    document.body.appendChild(div);
+    div.addEventListener('click', () => {
         const e = document.createEvent('Event');
         e.initEvent(type, true, true);
-        div.dispatchEvent(e);    
+        div.dispatchEvent(e);
     })
 
-    div.addEventListener(type,()=>{
+    div.addEventListener(type, () => {
       done();
     });
 
