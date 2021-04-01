@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
 project(KrakenBridge)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "-std=c++17 -stdlib=libc++")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
@@ -48,11 +48,11 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
 
   if (${IS_ANDROID})
     list(APPEND BRIDGE_INCLUDE
-            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/JavaScriptCore/include
             )
     add_library(JavaScriptCore SHARED IMPORTED)
     set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION
-            "${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore/lib/android/${ANDROID_ABI}/libjsc.so"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../third_party/JavaScriptCore/lib/android/${ANDROID_ABI}/libjsc.so"
             )
     list(APPEND BRIDGE_LINK_LIBS
             JavaScriptCore
@@ -198,7 +198,7 @@ string(REGEX REPLACE "\n$" "" APP_VER "${APP_VER}")
 string(REPLACE \n "" APP_VER ${APP_VER}) # Remove last \n
 add_definitions(-DAPP_VERSION="${APP_VER}") # Read from dartfm version
 execute_process(
-  COMMAND /usr/bin/git rev-parse --short HEAD
+  COMMAND git rev-parse --short HEAD
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_HEAD
 )

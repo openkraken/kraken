@@ -14,12 +14,7 @@ const String SAFE_AREA_INSET_LEFT = '$SAFE_AREA_INSET-left';
 const String SAFE_AREA_INSET_RIGHT = '$SAFE_AREA_INSET-right';
 const String SAFE_AREA_INSET_BOTTOM = '$SAFE_AREA_INSET-bottom';
 
-typedef StyleChangeListener = void Function(
-  String property,
-  String original,
-  String present,
-  bool inAnimation
-);
+typedef StyleChangeListener = void Function(String property,  String original, String present);
 
 // https://github.com/WebKit/webkit/blob/master/Source/WebCore/css/CSSProperties.json
 
@@ -194,7 +189,7 @@ class CSSStyleDeclaration {
       // When begin propertyValue is AUTO, skip animation and trigger style update directly.
       if (begin == AUTO) {
         _properties[propertyName] = end;
-        _invokePropertyChangedListener(propertyName, begin, end);
+        setRenderStyleProperty(propertyName, begin, end);
         return;
       }
     }
@@ -227,7 +222,7 @@ class CSSStyleDeclaration {
     String prevValue = _properties[propertyName];
     if (value == prevValue) return;
     _properties[propertyName] = value;
-    _invokePropertyChangedListener(propertyName, prevValue, value);
+    setRenderStyleProperty(propertyName, prevValue, value);
   }
 
   /// Textual representation of the declaration block.
@@ -327,7 +322,7 @@ class CSSStyleDeclaration {
       _properties.remove(propertyName);
     }
 
-    _invokePropertyChangedListener(propertyName, prevValue, EMPTY_STRING);
+    setRenderStyleProperty(propertyName, prevValue, EMPTY_STRING);
 
     return prevValue;
   }
@@ -378,7 +373,6 @@ class CSSStyleDeclaration {
     }
 
     if (longhandProperties.isNotEmpty) {
-//      longhandProperties.forEach(setProperty);
       longhandProperties.forEach((String propertyName, String value) {
         setProperty(propertyName, value, viewportSize);
       });
@@ -458,7 +452,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [Size viewportSize, bool fromAnimation = false]) {
+  void setProperty(String propertyName, value, [Size viewportSize]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -542,6 +536,8 @@ class CSSStyleDeclaration {
         break;
     }
 
+    _properties[propertyName] = normalizedValue;
+
     // https://github.com/WebKit/webkit/blob/master/Source/WebCore/animation/AnimationTimeline.cpp#L257
     // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
     // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
@@ -553,17 +549,11 @@ class CSSStyleDeclaration {
       _propertyRunningTransition.clear();
     }
 
-    if (!fromAnimation && _shouldTransition(propertyName, prevValue, normalizedValue)) {
-      return _transition(propertyName, prevValue, normalizedValue, viewportSize);
-    }
-
-    if (fromAnimation) {
-      _animationProperties[propertyName] = normalizedValue;
+    if (_shouldTransition(propertyName, prevValue, normalizedValue)) {
+      _transition(propertyName, prevValue, normalizedValue, viewportSize);
     } else {
-      _properties[propertyName] = normalizedValue;
+      setRenderStyleProperty(propertyName, prevValue, normalizedValue);
     }
-
-    _invokePropertyChangedListener(propertyName, prevValue, normalizedValue);
   }
 
   /// Override [] and []= operator to get/set style properties.
@@ -589,19 +579,19 @@ class CSSStyleDeclaration {
     }
   }
 
-  void _invokePropertyChangedListener(String property, String original, String present, [bool inAnimation]) {
+  void setRenderStyleProperty(String property, String original, String present) {
     assert(property != null);
 
     for (int i = 0; i < _styleChangeListeners.length; i++) {
       StyleChangeListener listener = _styleChangeListeners[i];
-      listener(property, original, present, inAnimation);
+      listener(property, original, present);
     }
   }
 
   void applyTargetProperties() {
     _properties.forEach((key, value) {
       String normalizedValue = _normalizeValue(value);
-      _invokePropertyChangedListener(key, null, normalizedValue);
+      setRenderStyleProperty(key, null, normalizedValue);
     });
   }
 

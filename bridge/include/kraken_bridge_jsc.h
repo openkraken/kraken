@@ -487,13 +487,11 @@ enum NodeType {
   DOCUMENT_FRAGMENT_NODE = 11
 };
 
-#define NODE_IDENTIFY 1
-
 class JSNode : public JSEventTarget {
 public:
   static std::unordered_map<JSContext *, JSNode *> instanceMap;
   static JSNode *instance(JSContext *context);
-  DEFINE_OBJECT_PROPERTY(Node, 9, isConnected, firstChild, lastChild, parentNode, childNodes, previousSibling,
+  DEFINE_OBJECT_PROPERTY(Node, 10, isConnected, ownerDocument, firstChild, lastChild, parentNode, childNodes, previousSibling,
                          nextSibling, nodeType, textContent)
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(Node, 6, appendChild, remove, removeChild, insertBefore, replaceChild, cloneNode)
 
@@ -553,6 +551,7 @@ public:
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
   bool isConnected();
+  DocumentInstance *ownerDocument();
   NodeInstance *firstChild();
   NodeInstance *lastChild();
   NodeInstance *previousSibling();
@@ -575,7 +574,6 @@ public:
   void unrefer();
 
   int32_t _referenceCount{0};
-  int32_t _identify{NODE_IDENTIFY};
 
   DocumentInstance *document{nullptr};
   virtual void _notifyNodeRemoved(NodeInstance *node);

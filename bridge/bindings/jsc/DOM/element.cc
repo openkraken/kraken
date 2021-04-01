@@ -4,12 +4,12 @@
  */
 
 #include "element.h"
+#include "bindings/jsc/KOM/blob.h"
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "event_target.h"
 #include "foundation/ui_command_queue.h"
 #include "text_node.h"
-#include "bindings/jsc/KOM/blob.h"
 
 namespace kraken::binding::jsc {
 using namespace foundation;
@@ -312,17 +312,14 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
                                                 nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollWidth)));
   }
   case JSElement::ElementProperty::children: {
-    JSValueRef arguments[childNodes.size()];
-
-    size_t elementCount = 0;
-    for (int i = 0; i < childNodes.size(); i++) {
-      if (childNodes[i]->nodeType == NodeType::ELEMENT_NODE) {
-        arguments[i] = childNodes[i]->object;
-        elementCount++;
+    std::vector<JSValueRef> arguments;
+    for (auto &childNode : childNodes) {
+      if (childNode->nodeType == NodeType::ELEMENT_NODE) {
+        arguments.emplace_back(childNode->object);
       }
     }
 
-    return JSObjectMakeArray(_hostClass->ctx, elementCount, arguments, nullptr);
+    return JSObjectMakeArray(_hostClass->ctx, arguments.size(), arguments.data(), nullptr);
   }
   }
 
@@ -683,7 +680,7 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
   if (elementCreatorMap.count(name) > 0) {
     elementInstance = elementCreatorMap[name](context);
   } else {
-    KRAKEN_LOG(VERBOSE) << "Unknown element tag: " << name << std::endl;
+    // Fallback to default Element class
     elementInstance = new ElementInstance(JSElement::instance(context), name.c_str(), true);
   }
   return elementInstance;

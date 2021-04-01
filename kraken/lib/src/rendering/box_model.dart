@@ -341,34 +341,34 @@ class RenderBoxModel extends RenderBox with
   /// Whether need to recalculate gradient when setting style used in cases
   /// when linear-gradient has length specified and layout has no size in gradient direction
   /// such as 'linear-gradient(to right, red 0px, red 50px, orange 50px, orange 80px)' and style has no width set
-  bool _recalGradient = false;
-  bool get recalGradient => _recalGradient;
-  set recalGradient(bool value) {
+  bool _shouldRecalGradient = false;
+  bool get shouldRecalGradient => _shouldRecalGradient;
+  set shouldRecalGradient(bool value) {
     if (value == null) return;
-    if (_recalGradient != value) {
-      _recalGradient = value;
+    if (_shouldRecalGradient != value) {
+      _shouldRecalGradient = value;
     }
   }
 
   /// Used when setting percentage font-size style, it needs to be calculated when node attached
   /// where it needs to know the font-size of its parent element
-  bool _parseFontSize = false;
-  bool get parseFontSize => _parseFontSize;
-  set parseFontSize(bool value) {
+  bool _shouldLazyCalFontSize = false;
+  bool get shouldLazyCalFontSize => _shouldLazyCalFontSize;
+  set shouldLazyCalFontSize(bool value) {
     if (value == null) return;
-    if (_parseFontSize != value) {
-      _parseFontSize = value;
+    if (_shouldLazyCalFontSize != value) {
+      _shouldLazyCalFontSize = value;
     }
   }
 
   /// Used when setting percentage line-height style, it needs to be calculated when node attached
   /// where it needs to know the font-size of its own element
-  bool _parseLineHeight = false;
-  bool get parseLineHeight => _parseLineHeight;
-  set parseLineHeight(bool value) {
+  bool _shouldLazyCalLineHeight = false;
+  bool get shouldLazyCalLineHeight => _shouldLazyCalLineHeight;
+  set shouldLazyCalLineHeight(bool value) {
     if (value == null) return;
-    if (_parseLineHeight != value) {
-      _parseLineHeight = value;
+    if (_shouldLazyCalLineHeight != value) {
+      _shouldLazyCalLineHeight = value;
     }
   }
 
@@ -1055,6 +1055,7 @@ class RenderBoxModel extends RenderBox with
       }
       return;
     }
+
     paintBoxModel(context, offset);
     if (kProfileMode) {
       int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;

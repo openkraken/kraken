@@ -1,13 +1,13 @@
 ![kraken Post](https://user-images.githubusercontent.com/677114/101163298-6264ae80-366e-11eb-9151-f560d18c2ceb.png)
 
-# Kraken [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken)
+# Kraken [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken) [![Integration Test WorkFlow](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml/badge.svg)](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml)
 
 ## 💁 Have a try
 
 1. Install Kraken CLI
 
     ```shell
-    $ npm i @kraken-project/cli -g
+    $ npm i @openkraken/cli -g
     ```
 
 2. Open with kraken
@@ -75,6 +75,8 @@ By contributing to Kraken, you agree that your contributions will be licensed un
     ```
 
     **Android**
+
+    > For Windows Users, Make sure to run this command under MINGW64 environmen(For Example: Git Bash is a MINGW64 env).
 
     ```shell
     $ npm run build:bridge:android

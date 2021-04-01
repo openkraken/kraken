@@ -1,13 +1,14 @@
 /**
  * Only build libkraken.dylib for macOS
  */
-require('./tasks');
 const { series } = require('gulp');
 const chalk = require('chalk');
 
+require('./tasks');
+
 // Run tasks
 series(
-  'sdk-clean',
+  'macos-dylib-clean',
   'compile-polyfill',
   'build-darwin-kraken-lib',
 )((err) => {

@@ -46,6 +46,8 @@ export function jsx(tag, { ref, children, ...props } = {}) {
   }
 }
 
+export const jsxs = jsx;
+
 export function Fragment({ children } = {}) {
   const element = document.createDocumentFragment();
 

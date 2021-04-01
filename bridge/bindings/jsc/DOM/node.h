@@ -6,10 +6,10 @@
 #ifndef KRAKENBRIDGE_NODE_H
 #define KRAKENBRIDGE_NODE_H
 
-#include "event_target.h"
-#include "include/kraken_bridge.h"
 #include <array>
 #include <vector>
+#include "event_target.h"
+#include "include/kraken_bridge.h"
 #include "text_node.h"
 
 namespace kraken::binding::jsc {

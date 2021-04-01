@@ -1,3 +1,18 @@
+## 0.7.0
+
+**Bug Fixed**
+
+- fix: zIndex set fail [#45](https://github.com/openkraken/kraken/pull/45)
+- fix: border radius percentage [#50](https://github.com/openkraken/kraken/pull/50)
+- fix: create text node empty string has height [#52](https://github.com/openkraken/kraken/pull/52)
+- fix: cached percentage image has no size [#54](https://github.com/openkraken/kraken/pull/54)
+- fix: fix set property to window did't refer to globalThis [#60](https://github.com/openkraken/kraken/pull/60)
+- fix: box-shadow [#66](https://github.com/openkraken/kraken/pull/66)
+
+**Feature**
+
+- Feat: resize if viewport changed [#47](https://github.com/openkraken/kraken/pull/47)
+
 ## 0.6.6+2
 
 - 修复 plugin 模块注册失败的问题

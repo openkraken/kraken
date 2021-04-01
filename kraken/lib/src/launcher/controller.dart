@@ -30,9 +30,9 @@ typedef TraverseElementCallback = void Function(Element element);
 
 // Traverse DOM element.
 void traverseElement(Element element, TraverseElementCallback callback) {
+  callback(element);
   if (element != null) {
     for (Element el in element.children) {
-      callback(el);
       traverseElement(el, callback);
     }
   }
@@ -365,6 +365,8 @@ class KrakenViewController {
     } catch (e, stack) {
       if (navigationDelegate.errorHandler != null) {
         navigationDelegate.errorHandler(e, stack);
+      } else {
+        print('Kraken navigation failed: $e\n$stack');
       }
     }
   }

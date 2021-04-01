@@ -73,7 +73,10 @@ typedef Native_MatchImageSnapshot = Void Function(
 
 void _matchImageSnapshot(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Uint8> bytes, int size, Pointer<NativeString> snapshotNamePtr, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>> pointer) {
   Dart_MatchImageSnapshotCallback callback = pointer.asFunction();
-  matchImageSnapshot(bytes.asTypedList(size), nativeStringToString(snapshotNamePtr)).then((value) {
+  String filename = nativeStringToString(snapshotNamePtr);
+  filename = filename.replaceAll(new RegExp(r'[><"\|/?:*'
+      ']'), '_');
+  matchImageSnapshot(bytes.asTypedList(size), filename).then((value) {
     callback(callbackContext, contextId, value ? 1 : 0);
   });
 }

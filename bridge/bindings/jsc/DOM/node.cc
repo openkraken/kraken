@@ -4,6 +4,7 @@
  */
 
 #include "node.h"
+#include "document.h"
 #include "foundation/ui_command_callback_queue.h"
 #include "foundation/ui_command_queue.h"
 
@@ -51,16 +52,28 @@ NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)
 NodeInstance::NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId)
   : EventTargetInstance(node, targetId), nativeNode(new NativeNode(nativeEventTarget)), nodeType(nodeType) {}
 
+// Returns true if node is connected and false otherwise.
 bool NodeInstance::isConnected() {
   bool _isConnected = eventTargetId == BODY_TARGET_ID;
   auto parent = parentNode;
 
-  while (parent != nullptr) {
+  while (parent != nullptr && !_isConnected) {
     _isConnected = parent->eventTargetId == BODY_TARGET_ID;
     parent = parent->parentNode;
   }
 
   return _isConnected;
+}
+
+// The ownerDocument attribute’s getter must return null,
+// if this is a document, and this’s node document otherwise.
+// https://dom.spec.whatwg.org/#dom-node-ownerdocument
+DocumentInstance *NodeInstance::ownerDocument() {
+  if (nodeType == NodeType::DOCUMENT_NODE) {
+    return nullptr;
+  }
+
+  return document;
 }
 
 NodeInstance *NodeInstance::firstChild() {
@@ -87,7 +100,7 @@ NodeInstance *NodeInstance::previousSibling() {
     return nullptr;
   }
 
-  if ((it - 1) != parentChildNodes.end()) {
+  if (it != parentChildNodes.begin()) {
     return *(it - 1);
   }
 
@@ -126,7 +139,7 @@ JSObjectRef JSNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructo
 }
 
 JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
-  if (node->nodeType == ELEMENT_NODE) {
+  if (node->nodeType == NodeType::ELEMENT_NODE) {
     ElementInstance *element = reinterpret_cast<ElementInstance *>(node);
 
     /* createElement */
@@ -180,7 +193,7 @@ void JSNode::traverseCloneNode(JSContextRef ctx, NodeInstance *element, NodeInst
     auto newNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(newElementObjectRef));
     parentElement->internalAppendChild(newNodeInstance);
     // element node needs recursive child nodes.
-    if (iter->nodeType == ELEMENT_NODE) {
+    if (iter->nodeType == NodeType::ELEMENT_NODE) {
       traverseCloneNode(ctx, static_cast<ElementInstance *>(iter), static_cast<ElementInstance *>(newNodeInstance));
     }
   }
@@ -197,7 +210,7 @@ JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef
   }
   bool deepBooleanRef = JSValueToBoolean(ctx, deepValue);
 
-  if (selfInstance->nodeType == ELEMENT_NODE) {
+  if (selfInstance->nodeType == NodeType::ELEMENT_NODE) {
     auto element = static_cast<ElementInstance *>(selfInstance);
 
     JSValueRef rootElementRef = copyNodeValue(ctx, static_cast<NodeInstance *>(element));
@@ -209,7 +222,7 @@ JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef
     }
 
     return rootNodeInstance->object;
-  } else if (selfInstance->nodeType == TEXT_NODE) {
+  } else if (selfInstance->nodeType == NodeType::TEXT_NODE) {
     auto textNode = static_cast<JSTextNode::TextNodeInstance *>(selfInstance);
     JSValueRef newTextNodeRef = copyNodeValue(ctx, static_cast<NodeInstance *>(textNode));
     JSObjectRef newTextNodeObjectRef = JSValueToObject(ctx, newTextNodeRef, nullptr);
@@ -240,7 +253,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   JSObjectRef nodeObjectRef = JSValueToObject(ctx, nodeValueRef, exception);
   auto nodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
-  if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
+  if (nodeInstance == nullptr || nodeInstance->document != selfInstance->document) {
     throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.", exception);
     return nullptr;
   }
@@ -279,7 +292,6 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
     referenceNodeObjectRef = JSValueToObject(ctx, referenceNodeValueRef, exception);
     referenceInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(referenceNodeObjectRef));
   } else if (!JSValueIsNull(ctx, referenceNodeValueRef)) {
-    assert(false);
     throwJSError(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'",
                  exception);
     return nullptr;
@@ -288,7 +300,7 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
   auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
   auto nodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
-  if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
+  if (nodeInstance == nullptr || nodeInstance->document != selfInstance->document) {
     throwJSError(ctx, "Failed to execute 'insertBefore' on 'Node': parameter 1 is not of type 'Node'", exception);
     return nullptr;
   }
@@ -331,14 +343,14 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
   auto oldChildInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(oldChildObjectRef));
 
   if (oldChildInstance == nullptr || oldChildInstance->parentNode != selfInstance ||
-      oldChildInstance->_identify != NODE_IDENTIFY) {
+      oldChildInstance->document != selfInstance->document) {
     throwJSError(ctx,
                  "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.",
                  exception);
     return nullptr;
   }
 
-  if (newChildInstance == nullptr || newChildInstance->_identify != NODE_IDENTIFY) {
+  if (newChildInstance == nullptr || newChildInstance->document != selfInstance->document) {
     throwJSError(ctx, "Failed to execute 'replaceChild' on 'Node': The new node is not a type of node.", exception);
     return nullptr;
   }
@@ -424,7 +436,7 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
   auto nodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
-  if (nodeInstance == nullptr || nodeInstance->_identify != NODE_IDENTIFY) {
+  if (nodeInstance == nullptr || nodeInstance->document != selfInstance->document) {
     throwJSError(ctx, "Failed to execute 'removeChild' on 'Node': 1st arguments is not a Node object.", exception);
     return nullptr;
   }
@@ -540,6 +552,10 @@ JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
   switch (property) {
   case JSNode::NodeProperty::isConnected:
     return JSValueMakeBoolean(_hostClass->ctx, isConnected());
+  case JSNode::NodeProperty::ownerDocument: {
+    auto instance = ownerDocument();
+    return instance != nullptr ? instance->object : JSValueMakeNull(ctx);
+  }
   case JSNode::NodeProperty::firstChild: {
     auto instance = firstChild();
     return instance != nullptr ? instance->object : JSValueMakeNull(ctx);

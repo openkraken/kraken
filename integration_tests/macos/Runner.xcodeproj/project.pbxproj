@@ -21,7 +21,6 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		1B588CCF25ADDF36001D7686 /* libkraken_test_jsc.dylib in Bundle Framework */ = {isa = PBXBuildFile; fileRef = 1B588CCE25ADDF36001D7686 /* libkraken_test_jsc.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
@@ -30,6 +29,7 @@
 		33D1A10422148B71006C7A3E /* FlutterMacOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33D1A10322148B71006C7A3E /* FlutterMacOS.framework */; };
 		33D1A10522148B93006C7A3E /* FlutterMacOS.framework in Bundle Framework */ = {isa = PBXBuildFile; fileRef = 33D1A10322148B71006C7A3E /* FlutterMacOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3963CE8F1F1D011CB10F69AF /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 898D0AF9FC94B297B3A8EA29 /* Pods_Runner.framework */; };
+		77571BA22603959E00E9F9EB /* libkraken_test_jsc.dylib in Bundle Framework */ = {isa = PBXBuildFile; fileRef = 77571BA02603959E00E9F9EB /* libkraken_test_jsc.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		D73912F022F37F9E000D13A0 /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D73912EF22F37F9E000D13A0 /* App.framework */; };
 		D73912F222F3801D000D13A0 /* App.framework in Bundle Framework */ = {isa = PBXBuildFile; fileRef = D73912EF22F37F9E000D13A0 /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -51,7 +51,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1B588CCF25ADDF36001D7686 /* libkraken_test_jsc.dylib in Bundle Framework */,
+				77571BA22603959E00E9F9EB /* libkraken_test_jsc.dylib in Bundle Framework */,
 				D73912F222F3801D000D13A0 /* App.framework in Bundle Framework */,
 				33D1A10522148B93006C7A3E /* FlutterMacOS.framework in Bundle Framework */,
 			);
@@ -61,8 +61,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1B588CCA25ADDEFA001D7686 /* libkraken_test_jsc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libkraken_test_jsc.dylib; path = ../../sdk/build/macos/lib/x86_64/libkraken_test_jsc.dylib; sourceTree = "<group>"; };
-		1B588CCE25ADDF36001D7686 /* libkraken_test_jsc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libkraken_test_jsc.dylib; path = ../../sdk/build/macos/lib/x86_64/libkraken_test_jsc.dylib; sourceTree = "<group>"; };
 		2B2CF02B663036E9927885A7 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 		335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
@@ -79,6 +77,7 @@
 		33E51913231747F40026EE4D /* DebugProfile.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DebugProfile.entitlements; sourceTree = "<group>"; };
 		33E51914231749380026EE4D /* Release.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
 		33E5194F232828860026EE4D /* AppInfo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppInfo.xcconfig; sourceTree = "<group>"; };
+		77571BA02603959E00E9F9EB /* libkraken_test_jsc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libkraken_test_jsc.dylib; path = ../../bridge/build/macos/lib/x86_64/libkraken_test_jsc.dylib; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		898D0AF9FC94B297B3A8EA29 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
@@ -115,7 +114,6 @@
 		33CC10E42044A3C60003C045 = {
 			isa = PBXGroup;
 			children = (
-				1B588CCE25ADDF36001D7686 /* libkraken_test_jsc.dylib */,
 				33FAB671232836740065AC1E /* Runner */,
 				33CEB47122A05771004F2AC0 /* Flutter */,
 				33CC10EE2044A3C60003C045 /* Products */,
@@ -182,7 +180,7 @@
 		D73912EC22F37F3D000D13A0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1B588CCA25ADDEFA001D7686 /* libkraken_test_jsc.dylib */,
+				77571BA02603959E00E9F9EB /* libkraken_test_jsc.dylib */,
 				898D0AF9FC94B297B3A8EA29 /* Pods_Runner.framework */,
 			);
 			name = Frameworks;
