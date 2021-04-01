@@ -101,12 +101,16 @@ abstract class CanvasState {
 abstract class CanvasTransform {
   // transformations (default transform is the identity matrix)
   void scale(double x, double y);
+
   void rotate(double angle);
+
   void translate(double x, double y);
+
   void transform(double a, double b, double c, double d, double e, double f);
 
   // DOMMatrix getTransform();
   void setTransform(double a, double b, double c, double d, double e, double f);
+
   // void setTransform(DOMMatrix2DInit transform = {});
   void resetTransform();
 }
@@ -131,7 +135,9 @@ abstract class CanvasFillStrokeStyles {
   Color strokeStyle; // (default black)
   Color fillStyle; // (default black)
   CanvasGradient createLinearGradient(double x0, double y0, double x1, double y1);
+
   CanvasGradient createRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1);
+
   CanvasPattern createPattern(CanvasImageSource image, String repetition);
 }
 
@@ -151,7 +157,9 @@ abstract class CanvasFilters {
 abstract class CanvasRect {
   // rects
   void clearRect(double x, double y, double w, double h);
+
   void fillRect(double x, double y, double w, double h);
+
   void strokeRect(double x, double y, double w, double h);
 }
 
@@ -187,8 +195,7 @@ abstract class CanvasImageData {
 
   ImageData getImageData(double sx, double sy, double sw, double sh);
 
-  void putImageData(ImageData imagedata, double dx, double dy,
-      {double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight});
+  void putImageData(ImageData imagedata, double dx, double dy, {double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight});
 }
 
 abstract class CanvasPathDrawingStyles {

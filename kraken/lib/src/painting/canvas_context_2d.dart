@@ -25,6 +25,10 @@ class CanvasRenderingContext2DSettings {
 final Pointer<NativeFunction<Native_RenderingContextSetFont>> nativeSetFont = Pointer.fromFunction(CanvasRenderingContext2D._setFont);
 final Pointer<NativeFunction<Native_RenderingContextSetFillStyle>> nativeSetFillStyle = Pointer.fromFunction(CanvasRenderingContext2D._setFillStyle);
 final Pointer<NativeFunction<Native_RenderingContextSetStrokeStyle>> nativeSetStrokeStyle = Pointer.fromFunction(CanvasRenderingContext2D._setStrokeStyle);
+
+final Pointer<NativeFunction<Native_RenderingContextArc>> nativeArc= Pointer.fromFunction(CanvasRenderingContext2D._arc);
+final Pointer<NativeFunction<Native_RenderingContextArcTo>> nativeArcTo = Pointer.fromFunction(CanvasRenderingContext2D._arcTo);
+
 final Pointer<NativeFunction<Native_RenderingContextTranslate>> nativeTranslate = Pointer.fromFunction(CanvasRenderingContext2D._translate);
 final Pointer<NativeFunction<Native_RenderingContextFillRect>> nativeFillRect = Pointer.fromFunction(CanvasRenderingContext2D._fillRect);
 final Pointer<NativeFunction<Native_RenderingContextClearRect>> nativeClearRect = Pointer.fromFunction(CanvasRenderingContext2D._clearRect);
@@ -33,7 +37,6 @@ final Pointer<NativeFunction<Native_RenderingContextFillText>> nativeFillText = 
 final Pointer<NativeFunction<Native_RenderingContextStrokeText>> nativeStrokeText = Pointer.fromFunction(CanvasRenderingContext2D._strokeText);
 final Pointer<NativeFunction<Native_RenderingContextSave>> nativeSave = Pointer.fromFunction(CanvasRenderingContext2D._save);
 final Pointer<NativeFunction<Native_RenderingContextRestore>> nativeRestore = Pointer.fromFunction(CanvasRenderingContext2D._restore);
-
 
 class _CanvasRenderingContext2D extends CanvasRenderingContext {
   int get actionCount => _actions.length;
@@ -57,6 +60,7 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
   String type = 'CanvasRenderingContext2D';
 
   static SplayTreeMap<int, CanvasRenderingContext2D> _nativeMap = SplayTreeMap();
+
   static CanvasRenderingContext2D getCanvasRenderContext2dOfNativePtr(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
     CanvasRenderingContext2D renderingContext = _nativeMap[nativePtr.address];
     assert(renderingContext != null, 'Can not get nativeRenderingContext2D from pointer: $nativePtr');
@@ -81,6 +85,16 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
   static void _setStrokeStyle(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> strokeStyle) {
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
     canvasRenderingContext2D.strokeStyle = CSSColor.parseColor(nativeStringToString(strokeStyle));
+  }
+
+  static void _arc(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y, double radius, double startAngle, double endAngle, double counterclockwise) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.arc(x, y, radius, startAngle, endAngle, anticlockwise : counterclockwise == 1 ? true : false);
+  }
+
+  static void _arcTo(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x1, double y1, double x2, double y2, double radius) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.arcTo(x1, y1, x2, y2, radius);
   }
 
   static void _translate(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y) {
@@ -187,7 +201,6 @@ mixin CanvasState2D on _CanvasRenderingContext2D implements CanvasState {
 }
 
 mixin CanvasPath2D on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, CanvasPathDrawingStyles2D {
-
   Paint _getPathPainter() {
     Paint paint = Paint()
       ..color = strokeStyle
@@ -211,16 +224,14 @@ mixin CanvasPath2D on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, Canva
   void fill(PathFillType fillType) {
     action((Canvas canvas, Size size) {
       path2d.path.fillType = fillType;
-      Paint paint = _getPathPainter()
-        ..style = PaintingStyle.fill;
+      Paint paint = _getPathPainter()..style = PaintingStyle.fill;
       canvas.drawPath(path2d.path, paint);
     });
   }
 
   void stroke() {
     action((Canvas canvas, Size size) {
-      Paint paint = _getPathPainter()
-        ..style = PaintingStyle.stroke;
+      Paint paint = _getPathPainter()..style = PaintingStyle.stroke;
       canvas.drawPath(path2d.path, paint);
     });
   }
@@ -325,7 +336,7 @@ mixin CanvasTransform2D on _CanvasRenderingContext2D implements CanvasTransform 
 
   @override
   void scale(double x, double y) {
-   action((Canvas canvas, Size size) {
+    action((Canvas canvas, Size size) {
       canvas.scale(x, y);
     });
   }
@@ -348,10 +359,10 @@ mixin CanvasTransform2D on _CanvasRenderingContext2D implements CanvasTransform 
   void transform(double a, double b, double c, double d, double e, double f) {
     action((Canvas canvas, Size size) {
       // Matrix3
-      // [ a c e 
-      //   b d f 
+      // [ a c e
+      //   b d f
       //   0 0 1 ]
-      // 
+      //
       // Matrix4
       // [ a, b, 0, 0,
       //   c, d, 0, 0,
@@ -376,7 +387,7 @@ mixin CanvasTransform2D on _CanvasRenderingContext2D implements CanvasTransform 
       m4storage[15] = 1.0;
       canvas.transform(m4storage);
     });
-  }  
+  }
 }
 
 mixin CanvasFillStrokeStyles2D implements CanvasFillStrokeStyles {
@@ -410,17 +421,13 @@ mixin CanvasFillStrokeStyles2D implements CanvasFillStrokeStyles {
   }
 }
 
-mixin CanvasRect2D
-on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, CanvasPathDrawingStyles2D
-implements CanvasRect {
-
+mixin CanvasRect2D on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, CanvasPathDrawingStyles2D implements CanvasRect {
   @override
   void clearRect(double x, double y, double w, double h) {
     Rect rect = Rect.fromLTWH(x, y, w, h);
 
     action((Canvas canvas, Size size) {
-      Paint paint = Paint()
-        ..blendMode = BlendMode.src;
+      Paint paint = Paint()..blendMode = BlendMode.src;
       canvas.drawRect(rect, paint);
     });
   }
@@ -428,8 +435,7 @@ implements CanvasRect {
   @override
   void fillRect(double x, double y, double w, double h) {
     Rect rect = Rect.fromLTWH(x, y, w, h);
-    Paint paint = Paint()
-      ..color = fillStyle;
+    Paint paint = Paint()..color = fillStyle;
 
     action((Canvas canvas, Size size) {
       canvas.drawRect(rect, paint);
@@ -450,9 +456,7 @@ implements CanvasRect {
   }
 }
 
-mixin CanvasText2D
-on _CanvasRenderingContext2D, CanvasTextDrawingStyles2D, CanvasFillStrokeStyles2D
-implements CanvasText {
+mixin CanvasText2D on _CanvasRenderingContext2D, CanvasTextDrawingStyles2D, CanvasFillStrokeStyles2D implements CanvasText {
   TextStyle _getTextStyle(Color color) {
     return TextStyle(
       color: color,
@@ -544,7 +548,9 @@ implements CanvasText {
 
 mixin CanvasTextDrawingStyles2D implements CanvasTextDrawingStyles {
   double _fontSize = 10.0;
+
   double get fontSize => _fontSize;
+
   set fontSize(double value) {
     assert(value != null);
     if (_fontSize != value) {
@@ -553,7 +559,9 @@ mixin CanvasTextDrawingStyles2D implements CanvasTextDrawingStyles {
   }
 
   String _fontFamily = 'sans-serif';
+
   String get fontFamily => _fontFamily;
+
   set fontFamily(String value) {
     assert(value != null);
     if (_fontFamily != value) {
@@ -562,8 +570,7 @@ mixin CanvasTextDrawingStyles2D implements CanvasTextDrawingStyles {
   }
 
   @override
-  set font(String newValue) {
-  }
+  set font(String newValue) {}
 
   @override
   String get font => '${fontSize}px $fontFamily';

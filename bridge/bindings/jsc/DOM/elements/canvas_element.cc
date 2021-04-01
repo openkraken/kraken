@@ -252,6 +252,73 @@ bool CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
   }
 }
 
+JSValueRef CanvasRenderingContext2D::arc(JSContextRef ctx, JSObjectRef function,
+                                                                                JSObjectRef thisObject,
+                                                                                size_t argumentCount,
+                                                                                const JSValueRef *arguments,
+                                                                                JSValueRef *exception) {
+  if (argumentCount != 5 || argumentCount != 6) {
+    throwJSError(ctx,
+                    ("Failed to execute 'arc' on 'CanvasRenderingContext2D':  5 or 6 arguments required, but only " +
+                     std::to_string(argumentCount) + " present.")
+                      .c_str(),
+                    exception);
+    return nullptr;
+  }
+
+  double x = JSValueToNumber(ctx, arguments[0], exception);
+  double y = JSValueToNumber(ctx, arguments[1], exception);
+  double radius = JSValueToNumber(ctx, arguments[2], exception);
+  double startAngle = JSValueToNumber(ctx, arguments[3], exception);
+  double endAngle = JSValueToNumber(ctx, arguments[4], exception);
+  // An optional Boolean. If true, draws the arc counter-clockwise between the start and end angles.
+  // The default is false (clockwise).
+  // 0 will become false, and 1 for true
+  double counterclockwise = false;
+  if (argumentCount == 6) {
+    counterclockwise = JSValueToBoolean(ctx, arguments[5]);
+  }
+
+  auto instance =
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
+
+  getDartMethod()->flushUICommand();
+  assert_m(instance->nativeCanvasRenderingContext2D->arc != nullptr,
+           "Failed to execute arc(): dart method is nullptr.");
+  instance->nativeCanvasRenderingContext2D->arc(instance->nativeCanvasRenderingContext2D, x, y, radius, startAngle, endAngle, counterclockwise ? 1 : 0);
+  return nullptr;
+}
+
+JSValueRef CanvasRenderingContext2D::arcTo(JSContextRef ctx, JSObjectRef function,
+                                                                                JSObjectRef thisObject,
+                                                                                size_t argumentCount,
+                                                                                const JSValueRef *arguments,
+                                                                                JSValueRef *exception) {
+  if (argumentCount != 5) {
+    throwJSError(ctx,
+                    ("Failed to execute 'arcTo' on 'CanvasRenderingContext2D':  5 arguments required, but only " +
+                     std::to_string(argumentCount) + " present.")
+                      .c_str(),
+                    exception);
+    return nullptr;
+  }
+
+  double x1 = JSValueToNumber(ctx, arguments[0], exception);
+  double y1 = JSValueToNumber(ctx, arguments[1], exception);
+  double x2 = JSValueToNumber(ctx, arguments[2], exception);
+  double y2 = JSValueToNumber(ctx, arguments[3], exception);
+  double radius = JSValueToNumber(ctx, arguments[4], exception);
+
+  auto instance =
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
+
+  getDartMethod()->flushUICommand();
+  assert_m(instance->nativeCanvasRenderingContext2D->arcTo != nullptr,
+           "Failed to execute arcTo(): dart method is nullptr.");
+  instance->nativeCanvasRenderingContext2D->arcTo(instance->nativeCanvasRenderingContext2D, x1, y1, x2, y2, radius);
+  return nullptr;
+}
+
 JSValueRef CanvasRenderingContext2D::translate(JSContextRef ctx, JSObjectRef function,
                                                                                 JSObjectRef thisObject,
                                                                                 size_t argumentCount,
