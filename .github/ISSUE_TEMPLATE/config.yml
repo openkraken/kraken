@@ -1,6 +1,6 @@
 blank_issues_enabled: true
 contact_links:
-  - name: \U0001F4D7  文档问题 ｜ Documentation Issue
+  - name: 📃 文档问题 ｜ Documentation Issue
     url: https://github.com/openkraken/website/issues/new
     about: 文档问题请在这里反馈。 ｜ Please file documentation issues here.
 

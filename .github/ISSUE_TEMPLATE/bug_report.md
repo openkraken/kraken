@@ -1,5 +1,5 @@
 ---
-name: \U0001F41B  Bug 反馈 ｜ Bug report
+name: 🐛 Bug 反馈 ｜ Bug report
 about: 创建反馈帮助我们完善 ｜ Create a report to help us improve
 labels: bug
 

@@ -1,5 +1,5 @@
 ---
-name: \U0001F680  功能需求 ｜ Feature request
+name: 🚀 功能需求 ｜ Feature request
 about: 提供一个新想法 ｜ Suggest an new idea
 labels: enhancement
 
