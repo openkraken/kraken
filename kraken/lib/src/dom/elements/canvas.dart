@@ -16,12 +16,12 @@ const String CANVAS = 'CANVAS';
 const double ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300.0;
 const double ELEMENT_DEFAULT_HEIGHT_IN_PIXEL = 150.0;
 
-final Pointer<NativeFunction<Native_CanvasGetContext>> nativeGetContext =
-    Pointer.fromFunction(CanvasElement._getContext);
-
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
+
+final Pointer<NativeFunction<Native_CanvasGetContext>> nativeGetContext =
+    Pointer.fromFunction(CanvasElement._getContext);
 
 class RenderCanvasPaint extends RenderCustomPaint {
   @override
@@ -64,10 +64,11 @@ class CanvasElement extends Element {
           targetId,
           nativeCanvasElement.ref.nativeElement,
           elementManager,
-          defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
           repaintSelf: true,
+          defaultStyle: _defaultStyle,
           tagName: CANVAS,
+
         ) {
     nativeCanvasElement.ref.getContext = nativeGetContext;
 

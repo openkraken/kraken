@@ -12,6 +12,7 @@ import 'package:kraken/dom.dart';
 const String OBJECT = 'OBJECT';
 
 const Map<String, dynamic> _defaultStyle = {
+  DISPLAY: INLINE_BLOCK,
   WIDTH: ELEMENT_DEFAULT_WIDTH,
   HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
@@ -65,11 +66,11 @@ class ObjectElement extends Element implements ObjectElementHost {
     }
   }
 
-  @override
-  void setStyle(String key, value) {
-    super.setStyle(key, value);
-    _objectElementClient?.setStyle(key, value);
-  }
+  // @override
+  // void setStyle(String key, value) {
+  //   super.setStyle(key, value);
+  //   _objectElementClient?.setStyle(key, value);
+  // }
 
   @override
   void updateChildTextureBox(TextureBox textureBox) {
