@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008, 2013, 2016 Apple Inc. All rights reserved.
+ * Copyright (C) 2008-2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,10 +25,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef Locker_h
-#define Locker_h
+
+#pragma once
 
 #include <wtf/Assertions.h>
+#include <wtf/Atomics.h>
 #include <wtf/Noncopyable.h>
 
 namespace WTF {
@@ -64,6 +65,7 @@ public:
 
     ~Locker()
     {
+        compilerFence();
         if (m_lockable)
             m_lockable->unlock();
     }
@@ -108,6 +110,7 @@ private:
     {
         if (m_lockable)
             m_lockable->lock();
+        compilerFence();
     }
     
     T* m_lockable;
@@ -119,6 +122,12 @@ template<typename LockType>
 Locker<LockType> holdLock(LockType& lock)
 {
     return Locker<LockType>(lock);
+}
+
+template<typename LockType>
+Locker<LockType> holdLockIf(LockType& lock, bool predicate)
+{
+    return Locker<LockType>(predicate ? &lock : nullptr);
 }
 
 template<typename LockType>
@@ -134,5 +143,4 @@ using WTF::Locker;
 using WTF::NoLockingNecessaryTag;
 using WTF::NoLockingNecessary;
 using WTF::holdLock;
-
-#endif
+using WTF::holdLockIf;
