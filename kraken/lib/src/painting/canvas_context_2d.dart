@@ -28,8 +28,6 @@ final Pointer<NativeFunction<Native_RenderingContextSetStrokeStyle>> nativeSetSt
 
 final Pointer<NativeFunction<Native_RenderingContextArc>> nativeArc= Pointer.fromFunction(CanvasRenderingContext2D._arc);
 final Pointer<NativeFunction<Native_RenderingContextArcTo>> nativeArcTo = Pointer.fromFunction(CanvasRenderingContext2D._arcTo);
-
-final Pointer<NativeFunction<Native_RenderingContextTranslate>> nativeTranslate = Pointer.fromFunction(CanvasRenderingContext2D._translate);
 final Pointer<NativeFunction<Native_RenderingContextFillRect>> nativeFillRect = Pointer.fromFunction(CanvasRenderingContext2D._fillRect);
 final Pointer<NativeFunction<Native_RenderingContextClearRect>> nativeClearRect = Pointer.fromFunction(CanvasRenderingContext2D._clearRect);
 final Pointer<NativeFunction<Native_RenderingContextStrokeRect>> nativeStrokeRect = Pointer.fromFunction(CanvasRenderingContext2D._strokeRect);
@@ -37,6 +35,21 @@ final Pointer<NativeFunction<Native_RenderingContextFillText>> nativeFillText = 
 final Pointer<NativeFunction<Native_RenderingContextStrokeText>> nativeStrokeText = Pointer.fromFunction(CanvasRenderingContext2D._strokeText);
 final Pointer<NativeFunction<Native_RenderingContextSave>> nativeSave = Pointer.fromFunction(CanvasRenderingContext2D._save);
 final Pointer<NativeFunction<Native_RenderingContextRestore>> nativeRestore = Pointer.fromFunction(CanvasRenderingContext2D._restore);
+final Pointer<NativeFunction<Native_RenderingContextTransform>> nativeTransform = Pointer.fromFunction(CanvasRenderingContext2D._transform);
+final Pointer<NativeFunction<Native_RenderingContextTranslate>> nativeTranslate = Pointer.fromFunction(CanvasRenderingContext2D._translate);
+final Pointer<NativeFunction<Native_RenderingContextBeginPath>> nativeBeginPath = Pointer.fromFunction(CanvasRenderingContext2D._beginPath);
+final Pointer<NativeFunction<Native_RenderingContextBezierCurveTo>> nativeBezierCurveTo = Pointer.fromFunction(CanvasRenderingContext2D._bezierCurveTo);
+final Pointer<NativeFunction<Native_RenderingContextClip>> nativeClip = Pointer.fromFunction(CanvasRenderingContext2D._clip);
+final Pointer<NativeFunction<Native_RenderingContextClosePath>> nativeClosePath = Pointer.fromFunction(CanvasRenderingContext2D._closePath);
+final Pointer<NativeFunction<Native_RenderingContextEllipse>> nativeEllipse = Pointer.fromFunction(CanvasRenderingContext2D._ellipse);
+final Pointer<NativeFunction<Native_RenderingContextFill>> nativeFill = Pointer.fromFunction(CanvasRenderingContext2D._fill);
+final Pointer<NativeFunction<Native_RenderingContextLineTo>> nativeLineTo = Pointer.fromFunction(CanvasRenderingContext2D._lineTo);
+final Pointer<NativeFunction<Native_RenderingContextMoveTo>> nativeMoveTo = Pointer.fromFunction(CanvasRenderingContext2D._moveTo);
+final Pointer<NativeFunction<Native_RenderingContextQuadraticCurveTo>> nativeQuadraticCurveTo = Pointer.fromFunction(CanvasRenderingContext2D._quadraticCurveTo);
+final Pointer<NativeFunction<Native_RenderingContextRect>> nativeRect = Pointer.fromFunction(CanvasRenderingContext2D._rect);
+final Pointer<NativeFunction<Native_RenderingContextRotate>> nativeRotate = Pointer.fromFunction(CanvasRenderingContext2D._rotate);
+final Pointer<NativeFunction<Native_RenderingContextScale>> nativeScale = Pointer.fromFunction(CanvasRenderingContext2D._scale);
+final Pointer<NativeFunction<Native_RenderingContextStroke>> nativeStroke = Pointer.fromFunction(CanvasRenderingContext2D._stroke);
 
 class _CanvasRenderingContext2D extends CanvasRenderingContext {
   int get actionCount => _actions.length;
@@ -126,7 +139,8 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
     }
   }
 
-  static void _strokeText(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text, double x, double y, double maxWidth) {
+  static void _strokeText(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text,
+                          double x, double y, double maxWidth) {
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
     if (maxWidth != double.nan) {
       canvasRenderingContext2D.strokeText(nativeStringToString(text), x, y, maxWidth: maxWidth);
@@ -145,6 +159,98 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
     canvasRenderingContext2D.restore();
   }
 
+  static void _beginPath(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.beginPath();
+  }
+
+
+  static void _bezierCurveTo(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x1, double y1,
+                            double x2, double y2, double x, double y) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.bezierCurveTo(x1, y1, x2, y2, x, y);
+  }
+
+
+  static void _clip(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> fillRule) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+
+    PathFillType fillType = nativeStringToString(fillRule) == 'evenodd' ? PathFillType.evenOdd : PathFillType.nonZero;
+    canvasRenderingContext2D.clip(fillType);
+  }
+
+
+  static void _closePath(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.closePath();
+  }
+
+
+  static void _ellipse(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y,
+                      double radiusX, double radiusY, double rotation, double startAngle, double endAngle,
+                      double counterclockwise) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise : counterclockwise == 1 ? true : false);
+  }
+
+
+  static void _fill(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> fillRule) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    PathFillType fillType = nativeStringToString(fillRule) == 'evenodd' ? PathFillType.evenOdd : PathFillType.nonZero;
+
+    canvasRenderingContext2D.fill(fillType);
+  }
+
+
+  static void _lineTo(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.lineTo(x, y);
+  }
+
+
+  static void _moveTo(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.moveTo(x, y);
+  }
+
+
+  static void _quadraticCurveTo(Pointer<NativeCanvasRenderingContext2D> nativePtr, double cpx, double cpy,
+                                double x, double y) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.quadraticCurveTo(cpx, cpy, x, y);
+  }
+
+
+  static void _rect(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y,
+                    double width, double height) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.rect(x, y, width, height);
+  }
+
+
+  static void _rotate(Pointer<NativeCanvasRenderingContext2D> nativePtr, double angle) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.rotate(angle);
+  }
+
+
+  static void _scale(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.scale(x, y);
+  }
+
+
+  static void _stroke(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.stroke();
+  }
+
+
+  static void _transform(Pointer<NativeCanvasRenderingContext2D> nativePtr, double a, double b, double c, double d, double e, double f) {
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2dOfNativePtr(nativePtr);
+    canvasRenderingContext2D.transform(a, b, c, d, e, f);
+  }
+
   final Pointer<NativeCanvasRenderingContext2D> nativeCanvasRenderingContext2D;
 
   CanvasRenderingContext2D() : nativeCanvasRenderingContext2D = allocate<NativeCanvasRenderingContext2D>() {
@@ -155,14 +261,32 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
     nativeCanvasRenderingContext2D.ref.setFont = nativeSetFont;
     nativeCanvasRenderingContext2D.ref.setFillStyle = nativeSetFillStyle;
     nativeCanvasRenderingContext2D.ref.setStrokeStyle = nativeSetStrokeStyle;
-    nativeCanvasRenderingContext2D.ref.translate = nativeTranslate;
-    nativeCanvasRenderingContext2D.ref.fillRect = nativeFillRect;
+
+    nativeCanvasRenderingContext2D.ref.arc = nativeArc;
+    nativeCanvasRenderingContext2D.ref.arcTo = nativeArcTo;
+    nativeCanvasRenderingContext2D.ref.beginPath = nativeBeginPath;
+    nativeCanvasRenderingContext2D.ref.bezierCurveTo = nativeBezierCurveTo;
     nativeCanvasRenderingContext2D.ref.clearRect = nativeClearRect;
-    nativeCanvasRenderingContext2D.ref.strokeRect = nativeStrokeRect;
+    nativeCanvasRenderingContext2D.ref.clip = nativeClip;
+    nativeCanvasRenderingContext2D.ref.closePath = nativeClosePath;
+    nativeCanvasRenderingContext2D.ref.ellipse = nativeEllipse;
+    nativeCanvasRenderingContext2D.ref.fill = nativeFill;
+    nativeCanvasRenderingContext2D.ref.fillRect = nativeFillRect;
     nativeCanvasRenderingContext2D.ref.fillText = nativeFillText;
-    nativeCanvasRenderingContext2D.ref.strokeText = nativeStrokeText;
-    nativeCanvasRenderingContext2D.ref.save = nativeSave;
+    nativeCanvasRenderingContext2D.ref.lineTo = nativeLineTo;
+    nativeCanvasRenderingContext2D.ref.moveTo = nativeMoveTo;
+    nativeCanvasRenderingContext2D.ref.quadraticCurveTo = nativeQuadraticCurveTo;
+    nativeCanvasRenderingContext2D.ref.rect = nativeRect;
+    nativeCanvasRenderingContext2D.ref.rotate = nativeRotate;
     nativeCanvasRenderingContext2D.ref.restore = nativeRestore;
+    nativeCanvasRenderingContext2D.ref.scale = nativeScale;
+    nativeCanvasRenderingContext2D.ref.stroke = nativeStroke;
+    nativeCanvasRenderingContext2D.ref.strokeText = nativeStrokeText;
+    nativeCanvasRenderingContext2D.ref.strokeRect = nativeStrokeRect;
+    nativeCanvasRenderingContext2D.ref.save = nativeSave;
+    nativeCanvasRenderingContext2D.ref.transform = nativeTransform;
+    nativeCanvasRenderingContext2D.ref.translate = nativeTranslate;
+
   }
 
   static Size viewportSize;
@@ -211,7 +335,9 @@ mixin CanvasPath2D on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, Canva
   Path2D path2d = Path2D();
 
   void beginPath() {
-    path2d = Path2D();
+    action((Canvas canvas, Size size) {
+      path2d = Path2D();
+    });
   }
 
   void clip(PathFillType fillType) {
@@ -245,39 +371,57 @@ mixin CanvasPath2D on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, Canva
   }
 
   void arc(double x, double y, double radius, double startAngle, double endAngle, {bool anticlockwise = false}) {
-    path2d.arc(x, y, radius, startAngle, endAngle, anticlockwise: anticlockwise);
+    action((Canvas canvas, Size size) {
+      path2d.arc(x, y, radius, startAngle, endAngle, anticlockwise: anticlockwise);
+    });
   }
 
   void arcTo(double x1, double y1, double x2, double y2, double radius) {
-    path2d.arcTo(x1, y1, x2, y2, radius);
+    action((Canvas canvas, Size size) {
+      path2d.arcTo(x1, y1, x2, y2, radius);
+    });
   }
 
   void bezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y) {
-    path2d.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+    action((Canvas canvas, Size size) {
+      path2d.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+    });
   }
 
   void closePath() {
-    path2d.closePath();
+    action((Canvas canvas, Size size) {
+      path2d.closePath();
+    });
   }
 
   void ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, {bool anticlockwise = false}) {
-    path2d.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise: anticlockwise);
+    action((Canvas canvas, Size size) {
+      path2d.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise: anticlockwise);
+    });
   }
 
   void lineTo(double x, double y) {
-    path2d.lineTo(x, y);
+    action((Canvas canvas, Size size) {
+      path2d.lineTo(x, y);
+    });
   }
 
   void moveTo(double x, double y) {
-    path2d.moveTo(x, y);
+    action((Canvas canvas, Size size) {
+      path2d.moveTo(x, y);
+    });
   }
 
   void quadraticCurveTo(double cpx, double cpy, double x, double y) {
-    path2d.quadraticCurveTo(cpx, cpy, x, y);
+    action((Canvas canvas, Size size) {
+      path2d.quadraticCurveTo(cpx, cpy, x, y);
+    });
   }
 
   void rect(double x, double y, double w, double h) {
-    path2d.quadraticCurveTo(x, y, w, h);
+    action((Canvas canvas, Size size) {
+      path2d.rect(x, y, w, h);
+    });
   }
 }
 

@@ -36,8 +36,8 @@ public:
 
   class CanvasElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(CanvasElement, 2, width, height)
-    DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasElement, 1, getContext)
+    DEFINE_OBJECT_PROPERTY(CanvasElement, 2, width, height);
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasElement, 1, getContext);
 
     CanvasElementInstance() = delete;
     explicit CanvasElementInstance(JSCanvasElement *jsCanvasElement);
@@ -67,24 +67,41 @@ private:
 using SetFont = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *font);
 using SetFillStyle = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *fillStyle);
 using SetStrokeStyle = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *strokeStyle);
-
 using Arc = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
                     double radius, double startAngle, double endAngle, double counterclockwise);
 using ArcTo = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x1, double y1,
                       double x2, double y2, double radius);
-using Translate = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y);
-using FillRect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
-                          double width, double height);
+using BeginPath = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
+using BezierCurveTo = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x1, double y1,
+                              double x2, double y2, double x, double y);
 using ClearRect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
                            double width, double height);
-using StrokeRect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
-                            double width, double height);
+using Clip = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *fillRule);
+using ClosePath = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
+using Ellipse = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
+                        double radiusX, double radiusY, double rotation, double startAngle, double endAngle, double counterclockwise);
+using Fill = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *fillRule);
+using FillRect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
+                          double width, double height);
 using FillText = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *text, double x,
                           double y, double maxWidth);
+using LineTo = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y);
+using MoveTo = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y);
+using QuadraticCurveTo = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double cpx, double cpy,
+                           double x, double y);
+using Rect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
+                           double width, double height);
+using Rotate = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double angle);
+using Restore = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
+using Save = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
+using Scale = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y);
+using Stroke = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
+using StrokeRect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
+                            double width, double height);
 using StrokeText = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *text,
                             double x, double y, double maxWidth);
-using Save = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
-using Restore = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
+using Transform = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double a, double b, double c, double d, double e, double f);
+using Translate = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y);
 
 struct NativeCanvasRenderingContext2D {
   SetFont setFont{nullptr};
@@ -92,14 +109,28 @@ struct NativeCanvasRenderingContext2D {
   SetStrokeStyle setStrokeStyle{nullptr};
   Arc arc{nullptr};
   ArcTo arcTo{nullptr};
-  Translate translate{nullptr};
-  FillRect fillRect{nullptr};
+  BeginPath beginPath{nullptr};
+  BezierCurveTo bezierCurveTo{nullptr};
   ClearRect clearRect{nullptr};
-  StrokeRect strokeRect{nullptr};
+  Clip clip{nullptr};
+  ClosePath closePath{nullptr};
+  Ellipse ellipse{nullptr};
+  Fill fill{nullptr};
+  FillRect fillRect{nullptr};
   FillText fillText{nullptr};
-  StrokeText strokeText{nullptr};
-  Save save{nullptr};
+  LineTo lineTo{nullptr};
+  MoveTo moveTo{nullptr};
+  QuadraticCurveTo quadraticCurveTo{nullptr};
+  Rect rect{nullptr};
   Restore restore{nullptr};
+  Rotate rotate{nullptr};
+  Save save{nullptr};
+  Scale scale{nullptr};
+  Stroke stroke{nullptr};
+  StrokeRect strokeRect{nullptr};
+  StrokeText strokeText{nullptr};
+  Transform transform{nullptr};
+  Translate translate{nullptr};
 };
 
 class CanvasRenderingContext2D : public HostClass {
@@ -117,11 +148,9 @@ public:
                              const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef closePath(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef clip(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef ellipse(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef isPointInPath(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef isPointInStroke(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef lineTo(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
@@ -155,22 +184,18 @@ public:
                          const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef scale(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef setTransform(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef transform(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef getTransform(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                         const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef setLineDash(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef getLineDash(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
 
   class CanvasRenderingContext2DInstance : public Instance {
   public:
-    DEFINE_OBJECT_PROPERTY(CanvasRenderingContext2D, 3, font, fillStyle, strokeStyle)
-    DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasRenderingContext2D, 9, arc, arcTo, fillRect, clearRect, strokeRect,
-                                  fillText, strokeText, save, restore)
+    DEFINE_OBJECT_PROPERTY(CanvasRenderingContext2D, 3, font, fillStyle, strokeStyle);
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasRenderingContext2D, 24,
+                                    arc, arcTo, beginPath, bezierCurveTo, clearRect,
+                                    closePath, clip, ellipse, fill, fillRect,
+                                    fillText, lineTo, moveTo, rect, restore,
+                                    rotate, stroke, strokeRect, save, scale,
+                                    strokeText, quadraticCurveTo, transform, translate);
 
     CanvasRenderingContext2DInstance() = delete;
     explicit CanvasRenderingContext2DInstance(CanvasRenderingContext2D *canvasRenderContext2D,
@@ -194,14 +219,28 @@ protected:
 
   JSFunctionHolder m_arc{context, prototypeObject, this, "arc", arc};
   JSFunctionHolder m_arcTo{context, prototypeObject, this, "arcTo", arcTo};
-  JSFunctionHolder m_translate{context, prototypeObject, this, "translate", translate};
-  JSFunctionHolder m_fillRect{context, prototypeObject, this, "fillRect", fillRect};
+  JSFunctionHolder m_beginPath{context, prototypeObject, this, "beginPath", beginPath};
+  JSFunctionHolder m_bezierCurveTo{context, prototypeObject, this, "bezierCurveTo", bezierCurveTo};
+  JSFunctionHolder m_closePath{context, prototypeObject, this, "closePath", closePath};
   JSFunctionHolder m_clearRect{context, prototypeObject, this, "clearRect", clearRect};
-  JSFunctionHolder m_strokeRect{context, prototypeObject, this, "strokeRect", strokeRect};
+  JSFunctionHolder m_clip{context, prototypeObject, this, "clip", clip};
+  JSFunctionHolder m_ellipse{context, prototypeObject, this, "ellipse", ellipse};
+  JSFunctionHolder m_fill{context, prototypeObject, this, "fill", fill};
   JSFunctionHolder m_fillText{context, prototypeObject, this, "fillText", fillText};
-  JSFunctionHolder m_strokeText{context, prototypeObject, this, "strokeText", strokeText};
-  JSFunctionHolder m_save{context, prototypeObject, this, "save", save};
+  JSFunctionHolder m_fillRect{context, prototypeObject, this, "fillRect", fillRect};
+  JSFunctionHolder m_lineTo{context, prototypeObject, this, "lineTo", lineTo};
+  JSFunctionHolder m_moveTo{context, prototypeObject, this, "moveTo", moveTo};
+  JSFunctionHolder m_quadraticCurveTo{context, prototypeObject, this, "quadraticCurveTo", quadraticCurveTo};
+  JSFunctionHolder m_rect{context, prototypeObject, this, "rect", rect};
+  JSFunctionHolder m_rotate{context, prototypeObject, this, "rotate", rotate};
   JSFunctionHolder m_restore{context, prototypeObject, this, "restore", restore};
+  JSFunctionHolder m_save{context, prototypeObject, this, "save", save};
+  JSFunctionHolder m_scale{context, prototypeObject, this, "scale", scale};
+  JSFunctionHolder m_stroke{context, prototypeObject, this, "stroke", stroke};
+  JSFunctionHolder m_strokeRect{context, prototypeObject, this, "strokeRect", strokeRect};
+  JSFunctionHolder m_strokeText{context, prototypeObject, this, "strokeText", strokeText};
+  JSFunctionHolder m_transform{context, prototypeObject, this, "transform", transform};
+  JSFunctionHolder m_translate{context, prototypeObject, this, "translate", translate};
 };
 
 } // namespace kraken::binding::jsc

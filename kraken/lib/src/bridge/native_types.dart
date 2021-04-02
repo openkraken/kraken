@@ -313,15 +313,28 @@ typedef Native_RenderingContextSetStrokeStyle = Void Function(Pointer<NativeCanv
 
 typedef Native_RenderingContextArc = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double radius, Double startAngle, Double endAngle, Double counterclockwise);
 typedef Native_RenderingContextArcTo = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x1, Double y1, Double x2, Double y2, Double radius);
-
-typedef Native_RenderingContextTranslate = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
-typedef Native_RenderingContextFillRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
+typedef Native_RenderingContextBeginPath = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
+typedef Native_RenderingContextClosePath = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
 typedef Native_RenderingContextClearRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
 typedef Native_RenderingContextStrokeRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
-typedef Native_RenderingContextFillText = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text, Double x, Double y, Double maxWidth);
 typedef Native_RenderingContextStrokeText = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text, Double x, Double y, Double maxWidth);
 typedef Native_RenderingContextSave = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
 typedef Native_RenderingContextRestore = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
+typedef Native_RenderingContextBezierCurveTo = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x1, Double y1, Double x2, Double y2, Double x, Double y);
+typedef Native_RenderingContextClip = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> fillRule);
+typedef Native_RenderingContextEllipse = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double radiusX, Double radiusY, Double rotation, Double startAngle, Double endAngle, Double counterclockwise);
+typedef Native_RenderingContextFill = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> fillRule);
+typedef Native_RenderingContextFillRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
+typedef Native_RenderingContextFillText = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text, Double x, Double y, Double maxWidth);
+typedef Native_RenderingContextLineTo = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
+typedef Native_RenderingContextMoveTo = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
+typedef Native_RenderingContextQuadraticCurveTo = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double cpx, Double cpy, Double x, Double y);
+typedef Native_RenderingContextRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
+typedef Native_RenderingContextRotate = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double angle);
+typedef Native_RenderingContextScale = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
+typedef Native_RenderingContextStroke = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
+typedef Native_RenderingContextTransform = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double a, Double b, Double c, Double d, Double e, Double f);
+typedef Native_RenderingContextTranslate = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
 
 class NativeCanvasRenderingContext2D extends Struct {
   Pointer<NativeFunction<Native_RenderingContextSetFont>> setFont;
@@ -329,14 +342,28 @@ class NativeCanvasRenderingContext2D extends Struct {
   Pointer<NativeFunction<Native_RenderingContextSetStrokeStyle>> setStrokeStyle;
   Pointer<NativeFunction<Native_RenderingContextArc>> arc;
   Pointer<NativeFunction<Native_RenderingContextArcTo>> arcTo;
-  Pointer<NativeFunction<Native_RenderingContextTranslate>> translate;
-  Pointer<NativeFunction<Native_RenderingContextFillRect>> fillRect;
+  Pointer<NativeFunction<Native_RenderingContextBeginPath>> beginPath;
+  Pointer<NativeFunction<Native_RenderingContextBezierCurveTo>> bezierCurveTo;
+  Pointer<NativeFunction<Native_RenderingContextClosePath>> closePath;
   Pointer<NativeFunction<Native_RenderingContextClearRect>> clearRect;
-  Pointer<NativeFunction<Native_RenderingContextStrokeRect>> strokeRect;
+  Pointer<NativeFunction<Native_RenderingContextClip>> clip;
+  Pointer<NativeFunction<Native_RenderingContextEllipse>> ellipse;
+  Pointer<NativeFunction<Native_RenderingContextFill>> fill;
+  Pointer<NativeFunction<Native_RenderingContextFillRect>> fillRect;
   Pointer<NativeFunction<Native_RenderingContextFillText>> fillText;
+  Pointer<NativeFunction<Native_RenderingContextLineTo>> lineTo;
+  Pointer<NativeFunction<Native_RenderingContextMoveTo>> moveTo;
+  Pointer<NativeFunction<Native_RenderingContextQuadraticCurveTo>> quadraticCurveTo;
+  Pointer<NativeFunction<Native_RenderingContextRotate>> rotate;
+  Pointer<NativeFunction<Native_RenderingContextRect>> rect;
+  Pointer<NativeFunction<Native_RenderingContextRestore>> restore;
+  Pointer<NativeFunction<Native_RenderingContextStroke>> stroke;
+  Pointer<NativeFunction<Native_RenderingContextStrokeRect>> strokeRect;
   Pointer<NativeFunction<Native_RenderingContextStrokeText>> strokeText;
   Pointer<NativeFunction<Native_RenderingContextSave>> save;
-  Pointer<NativeFunction<Native_RenderingContextRestore>> restore;
+  Pointer<NativeFunction<Native_RenderingContextScale>> scale;
+  Pointer<NativeFunction<Native_RenderingContextTransform>> transform;
+  Pointer<NativeFunction<Native_RenderingContextTranslate>> translate;
 }
 
 class NativePerformanceEntry extends Struct {
