@@ -47,13 +47,13 @@ JSValueRef JSDocument::createEvent(JSContextRef ctx, JSObjectRef function, JSObj
     return nullptr;
   }
   JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventTypeRef, exception);
-  std::string eventType = JSStringToStdString(eventTypeStringRef);
+  std::string &&eventType = JSStringToStdString(eventTypeStringRef);
 
   if (eventType == "Event") {
-    auto event = NativeEvent(stringToNativeString(eventType));
+    auto nativeEvent = new NativeEvent(stringToNativeString(eventType));
 
     auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
-    auto e = JSEvent::buildEventInstance(eventType, document->context, &event, false);
+    auto e = JSEvent::buildEventInstance(eventType, document->context, nativeEvent, false);
     return e->object;
   } else {
     return nullptr;
