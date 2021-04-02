@@ -1,32 +1,23 @@
 ---
-name: Bug report
-about: 帮助 Kraken 完善功能与体验
-title: "[Bug Report] 请简单描述你遇到的问题或现象"
+name: 🐛 Bug 反馈 ｜ Bug report
+about: 创建反馈帮助我们完善 ｜ Create a report to help us improve
 labels: bug
-assignees: ''
 
 ---
 
-**描述问题（需求）**
-请描述该问题或者需求。
+### 使用的 Kraken 版本 ｜ What version of kraken are you using
+<!-- Version: master/v0.7/v0.8 etc. -->
 
-**版本**
-请检查该问题是否存在最新版本中。
 
-**重现链接**
-请提供一个尽可能精简的最小化重现链接或是 GitHub 仓库的链接。
+### 重现步骤 ｜ Steps To Reproduce
+<!-- 请提供重现问题的步骤，简洁清晰的重现步骤能够帮助我们更迅速地定位问题所在。 ｜ Provide a detailed list of steps that reproduce the issue. -->
 
-**给出重现步骤**
-请提供重现问题的步骤，简洁清晰的重现步骤能够帮助我们更迅速地定位问题所在。
 
-**预期结果**
-请清晰地描述期望的结果是什么。
+**重现代码 | Code example:** <!-- 请提供一个尽可能精简的最小化重现代码或是 GitHub 仓库的链接。 ｜ Please provide a link to a repository on GitHub, or provide a minimal code example that reproduces the problem. -->
 
-**实际结果**
-请清晰地描述实际的结果是什么。
 
-**屏幕截图**
-请提供屏幕的截图帮助你描述该问题。
+**预期结果 ｜ Expected results:** <!-- 期望的结果是什么？｜ what did you want to see? -->
 
-**补充说明**
-请补充其他有效的信息。
+
+**实际结果 ｜ Actual results:** <!-- 实际的结果是什么？what did you see? -->
+
