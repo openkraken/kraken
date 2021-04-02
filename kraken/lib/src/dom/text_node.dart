@@ -19,7 +19,7 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  final Pointer<NativeTextNode> nativeTextNodePtr;
+  final Pointer<NativeTextNode> _nativePtr;
 
   static SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
 
@@ -29,9 +29,9 @@ class TextNode extends Node {
     return textNode;
   }
 
-  TextNode(int targetId, this.nativeTextNodePtr, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativeTextNodePtr.ref.nativeNode, elementManager, '#text') {
-    _nativeMap[nativeTextNodePtr.address] = this;
+  TextNode(int targetId, this._nativePtr, this._data, ElementManager elementManager)
+      : super(NodeType.TEXT_NODE, targetId, _nativePtr.ref.nativeNode, elementManager, '#text') {
+    _nativeMap[_nativePtr.address] = this;
   }
 
   RenderTextBox _renderTextBox;
@@ -47,13 +47,13 @@ class TextNode extends Node {
     /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
     //
-    // New lines	Spaces and tabs	Text wrapping	End-of-line spaces
-    // normal	Collapse	Collapse	Wrap	Remove
-    // nowrap	Collapse	Collapse	No wrap	Remove
-    // pre	Preserve	Preserve	No wrap	Preserve
-    // pre-wrap	Preserve	Preserve	Wrap	Hang
-    // pre-line	Preserve	Collapse	Wrap	Remove
-    // break-spaces	Preserve	Preserve	Wrap	Wrap
+    //       New lines / Spaces and tabs / Text wrapping / End-of-line spaces
+    // normal    Collapse  Collapse  Wrap     Remove
+    // nowrap    Collapse  Collapse  No wrap  Remove
+    // pre       Preserve  Preserve  No wrap  Preserve
+    // pre-wrap  Preserve  Preserve  Wrap     Hang
+    // pre-line  Preserve  Collapse  Wrap     Remove
+    // break-spaces  Preserve  Preserve  Wrap  Wrap
     if (whiteSpace == WhiteSpace.pre ||
         whiteSpace == WhiteSpace.preLine ||
         whiteSpace == WhiteSpace.preWrap ||
@@ -193,7 +193,7 @@ class TextNode extends Node {
     }
 
     assert(_renderTextBox == null);
-    _nativeMap.remove(nativeTextNodePtr.address);
+    _nativeMap.remove(_nativePtr.address);
   }
 }
 

@@ -358,4 +358,28 @@ describe('max-width', () => {
     BODY.appendChild(div);
     await matchViewportSnapshot();
   });
+
+  it('change from not none to none', async (done) => {
+    const cont = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          maxWidth: '100px',
+          height: '100px',
+          backgroundColor: 'green',
+          fontSize: '18px',
+        }
+      }
+    );
+    append(BODY, cont);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      cont.style.maxWidth = 'none';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
 });

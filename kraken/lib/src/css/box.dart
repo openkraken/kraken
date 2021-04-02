@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -454,12 +453,6 @@ mixin CSSBoxMixin on RenderStyleBase {
             ));
           }
         }
-      }
-
-      // Tips only debug.
-      if (!PRODUCTION && boxShadow.isEmpty) {
-        print('[Warning] Wrong style format with boxShadow: ${style[BOX_SHADOW]}');
-        print('    Correct syntax: inset? && <length>{2,4} && <color>?');
       }
     }
 

@@ -155,7 +155,7 @@ class Element extends Node
       : assert(targetId != null),
         assert(tagName != null),
         _isIntrinsicBox = isIntrinsicBox,
-        defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK,
+        defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
 
@@ -612,15 +612,15 @@ class Element extends Node
     }
 
     /// Recalculate gradient after node attached when gradient length cannot be obtained from style
-    if (renderBoxModel.recalGradient) {
+    if (renderBoxModel.shouldRecalGradient) {
       String backgroundImage = style[BACKGROUND_IMAGE];
       renderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage);
-      renderBoxModel.recalGradient = false;
+      renderBoxModel.shouldRecalGradient = false;
     }
 
     /// Calculate font-size which is percentage when node attached
     /// where it can access the font-size of its parent element
-    if (renderBoxModel.parseFontSize) {
+    if (renderBoxModel.shouldLazyCalFontSize) {
       RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
       double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
       double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
@@ -630,12 +630,12 @@ class Element extends Node
           node.updateTextStyle();
         }
       }
-      renderBoxModel.parseFontSize = false;
+      renderBoxModel.shouldLazyCalFontSize = false;
     }
 
     /// Calculate line-height which is percentage when node attached
     /// where it can access the font-size of its own element
-    if (renderBoxModel.parseLineHeight) {
+    if (renderBoxModel.shouldLazyCalLineHeight) {
       RenderStyle renderStyle = renderBoxModel.renderStyle;
       double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
       double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
@@ -645,7 +645,7 @@ class Element extends Node
           node.updateTextStyle();
         }
       }
-      renderBoxModel.parseLineHeight = false;
+      renderBoxModel.shouldLazyCalLineHeight = false;
     }
 
     RenderStyle renderStyle = renderBoxModel.renderStyle;
@@ -894,13 +894,13 @@ class Element extends Node
 
       case FLEX_DIRECTION:
       case FLEX_WRAP:
-      case ALIGN_SELF:
       case ALIGN_CONTENT:
       case ALIGN_ITEMS:
       case JUSTIFY_CONTENT:
         _styleFlexChangedListener(property, original, present);
         break;
 
+      case ALIGN_SELF:
       case FLEX_GROW:
       case FLEX_SHRINK:
       case FLEX_BASIS:
@@ -1122,10 +1122,13 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
-    CSSDisplay display = renderBoxModel.renderStyle.display;
-    if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
-      for (Element child in children) {
-        if (renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
+    CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
+    bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
+
+    // Flex factor change will cause flex item self and its siblings relayout.
+    if (isParentFlexDisplayType) {
+      for (Element child in parent.children) {
+        if (parent.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
           child.renderBoxModel.renderStyle.updateFlexItem();
           child.renderBoxModel.markNeedsLayout();
         }
@@ -1185,14 +1188,14 @@ class Element extends Node
     /// Percentage font-size should be resolved when node attached
     /// cause it needs to know its parents style
     if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
-      renderBoxModel.parseFontSize = true;
+      renderBoxModel.shouldLazyCalFontSize = true;
       return;
     }
 
     /// Percentage line-height should be resolved when node attached
     /// cause it needs to know other style in its own element
     if (property == LINE_HEIGHT && CSSLength.isPercentage(style[LINE_HEIGHT])) {
-      renderBoxModel.parseLineHeight = true;
+      renderBoxModel.shouldLazyCalLineHeight = true;
       return;
     }
 

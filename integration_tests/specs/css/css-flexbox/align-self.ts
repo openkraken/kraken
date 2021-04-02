@@ -1660,5 +1660,39 @@ describe('align-self', () => {
 
 
     await matchViewportSnapshot();
-  })
+  });
+
+  it('change from center to flex-end', async (done) => {
+    let foo;
+    const cont = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          height: '100px',
+          width: '100px',
+          backgroundColor: 'green',
+          fontSize: '18px',
+        }
+      }, [
+          (foo = createElement('div', {
+            style: {
+              alignSelf: 'center',
+              height: '50px',
+              width: '50px',
+              backgroundColor: 'red'
+            }
+          }))
+      ]
+    );
+    append(BODY, cont);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      foo.style.alignSelf = 'flex-end';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
 });
