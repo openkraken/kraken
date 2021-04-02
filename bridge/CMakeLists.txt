@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
 project(KrakenBridge)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -7,14 +7,19 @@ set(CMAKE_C_FLAGS -flto)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
-
-#set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(${ENABLE_PROFILE})
   add_definitions(-DENABLE_PROFILE=1)
 else()
   add_definitions(-DENABLE_PROFILE=0)
 endif()
+
+execute_process(
+  COMMAND bash "-c" "read dart_sdk < <(type -p dart) && echo $\{dart_sdk%/*\}/cache/dart-sdk | xargs"
+  OUTPUT_VARIABLE DART_SDK
+)
+string(REGEX REPLACE "\n$" "" DART_SDK "${DART_SDK}")
 
 list(APPEND PUBLIC_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
@@ -44,6 +49,15 @@ list(APPEND BRIDGE_SOURCE
     polyfill/dist/polyfill.cc
 )
 
+list(APPEND BRIDGE_INCLUDE
+  ./foundation
+  ./
+  ./include
+  ./polyfill/dist
+  ${DART_SDK}
+  ${ADDITIONAL_INCLUDE_DIRS}
+  )
+
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   add_compile_options(-DKRAKEN_JSC_ENGINE=1)
 
@@ -64,6 +78,9 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
       add_library(JavaScriptCore SHARED IMPORTED)
       set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION ${DEBUG_JSC_ENGINE}/JavaScriptCore)
       list(APPEND BRIDGE_LINK_LIBS JavaScriptCore)
+      include(inspector/inspector.cmake)
+      list(APPEND BRIDGE_LINK_LIBS inspector)
+      add_compile_options(-DENABLE_DEBUGGER=1)
     else()
       list(APPEND BRIDGE_LINK_LIBS "-framework JavaScriptCore")
     endif()
@@ -170,15 +187,6 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
 
   target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
 endif()
-
-list(APPEND BRIDGE_INCLUDE
-    ./foundation
-    ./
-    ./include
-    ./polyfill/dist
-    ${ADDITIONAL_INCLUDE_DIRS}
-)
-
 
 list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h

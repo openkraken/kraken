@@ -44,10 +44,10 @@ private:
   const char *file_;
   const int line_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(LogMessage);
+  KRAKEN_DISALLOW_COPY_AND_ASSIGN(LogMessage);
 };
 
-void printLog(std::stringstream &stream, std::string level);
+void printLog(std::stringstream &stream, std::string level, JSObjectRef global);
 
 } // namespace foundation
 
