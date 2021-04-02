@@ -120,29 +120,16 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   Object promiseHandler = context->global().getPropertyAsObject(*context, "__global_unhandled_promise_handler__");
   context->setUnhandledPromiseRejectionHandler(promiseHandler);
 #endif
+
+#if ENABLE_DEBUGGER
+  attachInspector();
+#endif
 }
 
 #ifdef ENABLE_DEBUGGER
-void JSBridge::attachDevtools() {
-  auto &context = getContext();
-#ifdef IS_APPLE
-  JSGlobalContextRef context = reinterpret_cast<JSGlobalContextRef>(globalImpl);
-  JSC::ExecState *exec = toJS(context);
-  JSC::JSLockHolder locker(exec);
-  globalImpl = exec->lexicalGlobalObject();
-#endif
-
+void JSBridge::attachInspector() {
   std::shared_ptr<BridgeProtocolHandler> handler = std::make_shared<BridgeProtocolHandler>(this);
-  new kraken::debugger::FrontDoor(reinterpret_cast<JSC::JSGlobalObject*>(context->global()), handler);
-//  devtools_front_door_ =
-//    kraken::debugger::FrontDoor::newInstance(reinterpret_cast<JSC::JSGlobalObject *>(globalImpl), nullptr, "127.0.0.1");
-//  devtools_front_door_->setup();
-}
-
-void JSBridge::detachDevtools() {
-//  assert(devtools_front_door_ != nullptr);
-  KRAKEN_LOG(VERBOSE) << "Kraken will detach devtools ...";
-//  devtools_front_door_->terminate();
+  m_inspector = std::make_shared<debugger::FrontDoor>(reinterpret_cast<JSC::JSGlobalObject *>(context->global()), handler);
 }
 #endif // ENABLE_DEBUGGER
 

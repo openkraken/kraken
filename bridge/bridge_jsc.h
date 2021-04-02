@@ -28,8 +28,7 @@ public:
   JSBridge(int32_t jsContext, const JSExceptionHandler &handler);
   ~JSBridge();
 #ifdef ENABLE_DEBUGGER
-  void attachDevtools();
-  void detachDevtools();
+  void attachInspector();
 #endif // ENABLE_DEBUGGER
 
   static std::unordered_map<std::string, NativeString> pluginSourceCode;
@@ -58,6 +57,7 @@ public:
   //#endif // ENABLE_DEBUGGER
 private:
   std::unique_ptr<binding::jsc::JSContext> context;
+  std::shared_ptr<debugger::FrontDoor> m_inspector;
   JSExceptionHandler handler_;
 };
 
