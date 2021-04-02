@@ -1,5 +1,4 @@
 import 'es6-promise/dist/es6-promise.auto';
-
 import { console } from './kom/console';
 import { WebSocket } from './modules/websocket';
 import { fetch, Request, Response, Headers } from './modules/fetch';

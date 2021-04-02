@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.2.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
 project(KrakenBridge)
 
-set(CMAKE_CXX_FLAGS "-std=c++17 -stdlib=libc++")
+set(CMAKE_CXX_FLAGS "-std=c++17 -stdlib=libc++ -flto")
+set(CMAKE_C_FLAGS -flto)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
@@ -142,6 +143,32 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bridge_jsc.cc
     bridge_jsc.h
   )
+elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+  add_compile_options(-DKRAKEN_QUICK_JS_ENGINE=1)
+
+  execute_process(
+      COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/VERSION
+      OUTPUT_VARIABLE QUICKJS_VERSION
+  )
+
+  list(APPEND QUICK_JS_SOURCE
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp-opcode.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode-table.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/list.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
+  )
+  add_library(quickjs SHARED ${QUICK_JS_SOURCE})
+
+  target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
 endif()
 
 list(APPEND BRIDGE_INCLUDE
