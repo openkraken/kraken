@@ -15,6 +15,12 @@
 #include <iostream>
 #endif
 
+#if ENABLE_DEBUGGER
+#include <JavaScriptCore/ConsoleTypes.h>
+#include <JavaScriptCore/JSGlobalObject.h>
+#include "inspector/impl/jsc_console_client_impl.h"
+#endif
+
 namespace foundation {
 namespace {
 
@@ -82,7 +88,7 @@ LogMessage::~LogMessage() {
 #endif
 }
 
-void printLog(std::stringstream &stream, std::string level) {
+void printLog(std::stringstream &stream, std::string level, JSObjectRef global) {
 #ifdef ENABLE_DEBUGGER
     JSC::MessageLevel _log_level = JSC::MessageLevel::Log;
 #endif
@@ -122,9 +128,9 @@ void printLog(std::stringstream &stream, std::string level) {
     }
 
 #ifdef ENABLE_DEBUGGER
-    auto client = reinterpret_cast<JSC::JSGlobalObject *>(context.globalImpl())->consoleClient();
+  auto client = reinterpret_cast<JSC::JSGlobalObject *>(global)->consoleClient();
   if (client && client != ((void *)0x1)) {
-    auto client_impl = reinterpret_cast<kraken::Debugger::JSCConsoleClientImpl *>(client);
+    auto client_impl = reinterpret_cast<kraken::debugger::JSCConsoleClientImpl *>(client);
     client_impl->sendMessageToConsole(_log_level, stream.str());
   }
 #endif
