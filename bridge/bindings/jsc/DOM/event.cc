@@ -144,6 +144,33 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
   return nullptr;
 }
 
+JSValueRef JSEvent::initEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef *arguments,
+                                    JSValueRef *exception) {
+  if (argumentCount < 1) {
+    throwJSError(ctx, "Failed to initEvent required, but only 0 present.", exception);
+    return nullptr;
+  }
+
+  const JSValueRef typeValueRef = arguments[0];
+  const JSValueRef bubblesValueRef = arguments[1];
+  const JSValueRef cancelableValueRef = arguments[2];
+  if (!JSValueIsString(ctx, typeValueRef)) {
+    throwJSError(ctx, "Failed to createElement: type should be a string.", exception);
+    return nullptr;
+  }
+
+  JSStringRef typeStringRef = JSValueToStringCopy(ctx, typeValueRef, exception);
+  std::string type = JSStringToStdString(typeStringRef);
+
+  auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
+  eventInstance->nativeEvent->type = stringToNativeString(type);
+  eventInstance->nativeEvent->bubbles = JSValueToBoolean(ctx, bubblesValueRef) ? 1 : 0;
+  eventInstance->nativeEvent->cancelable = JSValueToBoolean(ctx, cancelableValueRef) ? 1 : 0;
+
+  return nullptr;
+}
+
 JSValueRef JSEvent::stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                    size_t argumentCount, const JSValueRef *arguments,
                                                    JSValueRef *exception) {
