@@ -20,7 +20,7 @@ function startIntegrationTest() {
       KRAKEN_TEST_DIR: path.join(__dirname, '../')
     },
     cwd: process.cwd(),
-    stdio: 'pipe'
+    stdio: 'inherit'
   });
   tester.on('close', (code) => {
     process.exit(code);
