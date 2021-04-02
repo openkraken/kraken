@@ -341,6 +341,13 @@ typedef Native_RenderingContextTransform = Void Function(Pointer<NativeCanvasRen
 typedef Native_RenderingContextTranslate = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
 
 class NativeCanvasRenderingContext2D extends Struct {
+  Pointer<NativeFunction<Native_RenderingContextSetFont>> setFont;
+  Pointer<NativeFunction<Native_RenderingContextSetFillStyle>> setFillStyle;
+  Pointer<NativeFunction<Native_RenderingContextSetStrokeStyle>> setStrokeStyle;
+  Pointer<NativeFunction<Native_RenderingContextArc>> arc;
+  Pointer<NativeFunction<Native_RenderingContextArcTo>> arcTo;
+  Pointer<NativeFunction<Native_RenderingContextBeginPath>> beginPath;
+  Pointer<NativeFunction<Native_RenderingContextBezierCurveTo>> bezierCurveTo;
   Pointer<NativeFunction<Native_RenderingContextClearRect>> clearRect;
   Pointer<NativeFunction<Native_RenderingContextClip>> clip;
   Pointer<NativeFunction<Native_RenderingContextClosePath>> closePath;
