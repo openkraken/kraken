@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
+// Recommend notes for someone who want's to edit this files:
+// All the struct which prefix with NativeXXX struct (exp: NativeElement) has a corresponding struct in Dart code.
+// All struct members include variables and functions must be follow the same order with Dart class, to keep the same memory layout cross dart and C++ code.
+
 #include <JavaScriptCore/JavaScript.h>
 #include <chrono>
 #include <deque>

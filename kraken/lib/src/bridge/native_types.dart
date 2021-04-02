@@ -2,6 +2,10 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'from_native.dart';
 
+// Recommend note for someone who want's to edit this files:
+// All the class which extends Struct class has a corresponding struct in C++ code.
+// All class members include variables and functions must be follow the same order with C++ struct, to keep the same memory layout cross dart and C++ code.
+
 // representation of JSContext
 class JSCallbackContext extends Struct {}
 
@@ -337,16 +341,9 @@ typedef Native_RenderingContextTransform = Void Function(Pointer<NativeCanvasRen
 typedef Native_RenderingContextTranslate = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
 
 class NativeCanvasRenderingContext2D extends Struct {
-  Pointer<NativeFunction<Native_RenderingContextSetFont>> setFont;
-  Pointer<NativeFunction<Native_RenderingContextSetFillStyle>> setFillStyle;
-  Pointer<NativeFunction<Native_RenderingContextSetStrokeStyle>> setStrokeStyle;
-  Pointer<NativeFunction<Native_RenderingContextArc>> arc;
-  Pointer<NativeFunction<Native_RenderingContextArcTo>> arcTo;
-  Pointer<NativeFunction<Native_RenderingContextBeginPath>> beginPath;
-  Pointer<NativeFunction<Native_RenderingContextBezierCurveTo>> bezierCurveTo;
-  Pointer<NativeFunction<Native_RenderingContextClosePath>> closePath;
   Pointer<NativeFunction<Native_RenderingContextClearRect>> clearRect;
   Pointer<NativeFunction<Native_RenderingContextClip>> clip;
+  Pointer<NativeFunction<Native_RenderingContextClosePath>> closePath;
   Pointer<NativeFunction<Native_RenderingContextEllipse>> ellipse;
   Pointer<NativeFunction<Native_RenderingContextFill>> fill;
   Pointer<NativeFunction<Native_RenderingContextFillRect>> fillRect;
@@ -354,14 +351,14 @@ class NativeCanvasRenderingContext2D extends Struct {
   Pointer<NativeFunction<Native_RenderingContextLineTo>> lineTo;
   Pointer<NativeFunction<Native_RenderingContextMoveTo>> moveTo;
   Pointer<NativeFunction<Native_RenderingContextQuadraticCurveTo>> quadraticCurveTo;
-  Pointer<NativeFunction<Native_RenderingContextRotate>> rotate;
   Pointer<NativeFunction<Native_RenderingContextRect>> rect;
   Pointer<NativeFunction<Native_RenderingContextRestore>> restore;
+  Pointer<NativeFunction<Native_RenderingContextRotate>> rotate;
+  Pointer<NativeFunction<Native_RenderingContextSave>> save;
+  Pointer<NativeFunction<Native_RenderingContextScale>> scale;
   Pointer<NativeFunction<Native_RenderingContextStroke>> stroke;
   Pointer<NativeFunction<Native_RenderingContextStrokeRect>> strokeRect;
   Pointer<NativeFunction<Native_RenderingContextStrokeText>> strokeText;
-  Pointer<NativeFunction<Native_RenderingContextSave>> save;
-  Pointer<NativeFunction<Native_RenderingContextScale>> scale;
   Pointer<NativeFunction<Native_RenderingContextTransform>> transform;
   Pointer<NativeFunction<Native_RenderingContextTranslate>> translate;
 }

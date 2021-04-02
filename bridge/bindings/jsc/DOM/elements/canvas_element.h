@@ -103,6 +103,7 @@ using StrokeText = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderin
 using Transform = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double a, double b, double c, double d, double e, double f);
 using Translate = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y);
 
+// Function pointer's order must be as same as the NativeCanvasRenderingContext2D class of dart side.
 struct NativeCanvasRenderingContext2D {
   SetFont setFont{nullptr};
   SetFillStyle setFillStyle{nullptr};
