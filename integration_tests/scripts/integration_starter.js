@@ -20,7 +20,7 @@ function startIntegrationTest() {
       KRAKEN_TEST_DIR: path.join(__dirname, '../')
     },
     cwd: process.cwd(),
-    stdio: 'inherit'
+    stdio: 'pipe'
   });
   tester.on('close', (code) => {
     process.exit(code);
@@ -29,9 +29,9 @@ function startIntegrationTest() {
     console.error(error);
     process.exit(1);
   });
-  tester.on('exit', (code) => {
+  tester.on('exit', (code, signal) => {
     if (code != 0) {
-      process.exit(code);
+      process.exit(1);
     }
   });
 }
