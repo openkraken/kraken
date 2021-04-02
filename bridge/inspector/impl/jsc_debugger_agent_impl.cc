@@ -4,9 +4,11 @@
  */
 
 #include "inspector/impl/jsc_debugger_agent_impl.h"
-#include "inspector/inspector_session_impl.h"
+#include "inspector/inspector_session.h"
 #include "inspector/protocol/location.h"
 #include "inspector/protocol/maybe.h"
+
+#include <wtf/JSONValues.h>
 
 namespace kraken::debugger {
 const char *JSCDebuggerAgentImpl::backtraceObjectGroup = "backtrace";
@@ -20,7 +22,7 @@ static String objectGroupForBreakpointAction(const Inspector::ScriptBreakpointAc
   return makeString(objectGroup.get(), String::number(action.identifier));
 }
 
-JSCDebuggerAgentImpl::JSCDebuggerAgentImpl(debugger::InspectorSessionImpl *session, debugger::AgentContext &context)
+JSCDebuggerAgentImpl::JSCDebuggerAgentImpl(debugger::InspectorSession *session, debugger::AgentContext &context)
   : m_session(session),
     m_frontend(context.channel), m_debugger(context.debugger),
     m_injectedScriptManager(context.injectedScriptManager), m_continueToLocationBreakpointID(JSC::noBreakpointID)
@@ -1142,7 +1144,6 @@ void JSCDebuggerAgentImpl::didClearGlobalObject() {
 
 Ref<JSON::ArrayOf<Inspector::Protocol::Debugger::CallFrame>>
 JSCDebuggerAgentImpl::currentCallFrames(const Inspector::InjectedScript &injectedScript) {
-  //            ASSERT(!injectedScript.hasNoValue());
   if (injectedScript.hasNoValue())
     return JSON::ArrayOf<Inspector::Protocol::Debugger::CallFrame>::create();
 

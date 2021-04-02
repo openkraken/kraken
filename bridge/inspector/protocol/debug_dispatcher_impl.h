@@ -100,7 +100,7 @@ public:
   ~DebugDispatcherImpl() override {}
 
   bool canDispatch(const std::string &method) override;
-  void dispatch(uint64_t callId, const std::string &method, jsonRpc::JSONObject message) override;
+  void dispatch(uint64_t callId, const std::string &method, JSONObject message) override;
   std::unordered_map<std::string, std::string> &redirects() {
     return m_redirects;
   }
@@ -111,41 +111,41 @@ protected:
 
   rapidjson::Document m_json_doc;
   using CallHandler = std::function<void(uint64_t /*callId*/, const std::string & /*method*/,
-                                         jsonRpc::JSONObject /*msg*/, ErrorSupport *)>;
+                                         JSONObject /*msg*/, ErrorSupport *)>;
   using DispatchMap = std::unordered_map<std::string, CallHandler>;
   DispatchMap m_dispatchMap;
 
   /*debugger commands (28)*/
 
-  void continueToLocation(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void disable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void enable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void evaluateOnCallFrame(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void getPossibleBreakpoints(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void getScriptSource(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void getStackTrace(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void pause(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void pauseOnAsyncCall(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void removeBreakpoint(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void restartFrame(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void resume(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void searchInContent(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setAsyncCallStackDepth(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setBlackboxPatterns(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setBlackboxedRanges(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setBreakpoint(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setBreakpointByUrl(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setBreakpointOnFunctionCall(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+  void continueToLocation(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void disable(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void enable(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void evaluateOnCallFrame(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void getPossibleBreakpoints(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void getScriptSource(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void getStackTrace(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void pause(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void pauseOnAsyncCall(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void removeBreakpoint(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void restartFrame(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void resume(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void searchInContent(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setAsyncCallStackDepth(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setBlackboxPatterns(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setBlackboxedRanges(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setBreakpoint(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setBreakpointByUrl(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setBreakpointOnFunctionCall(uint64_t callId, const std::string &method, JSONObject message,
                                    ErrorSupport *);
-  void setBreakpointsActive(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setPauseOnExceptions(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setReturnValue(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setScriptSource(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setSkipAllPauses(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setVariableValue(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void stepInto(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void stepOut(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void stepOver(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
+  void setBreakpointsActive(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setPauseOnExceptions(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setReturnValue(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setScriptSource(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setSkipAllPauses(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setVariableValue(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void stepInto(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void stepOut(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void stepOver(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
 };
 } // namespace kraken
 

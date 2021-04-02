@@ -85,7 +85,7 @@ public:
 
   ~RuntimeDispatcherImpl() override {}
   bool canDispatch(const std::string &method) override;
-  void dispatch(uint64_t callId, const std::string &method, jsonRpc::JSONObject message) override;
+  void dispatch(uint64_t callId, const std::string &method, JSONObject message) override;
 
   std::unordered_map<std::string, std::string> &redirects() {
     return m_redirects;
@@ -93,7 +93,7 @@ public:
 
 protected:
   using CallHandler = std::function<void(uint64_t /*callId*/, const std::string & /*method*/,
-                                         jsonRpc::JSONObject /*msg*/, ErrorSupport *)>;
+                                         JSONObject /*msg*/, ErrorSupport *)>;
   using DispatchMap = std::unordered_map<std::string, CallHandler>;
 
   DispatchMap m_dispatchMap;
@@ -103,29 +103,29 @@ protected:
   rapidjson::Document m_json_doc;
 
   /*runtime commands*/
-  void awaitPromise(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void callFunctionOn(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void compileScript(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void disable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void discardConsoleEntries(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void enable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void evaluate(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void getIsolateId(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void getHeapUsage(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void getProperties(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void globalLexicalScopeNames(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void queryObjects(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void releaseObject(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void releaseObjectGroup(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void runIfWaitingForDebugger(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void runScript(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void setCustomObjectFormatterEnabled(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+  void awaitPromise(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void callFunctionOn(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void compileScript(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void disable(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void discardConsoleEntries(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void enable(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void evaluate(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void getIsolateId(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void getHeapUsage(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void getProperties(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void globalLexicalScopeNames(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void queryObjects(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void releaseObject(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void releaseObjectGroup(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void runIfWaitingForDebugger(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void runScript(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void setCustomObjectFormatterEnabled(uint64_t callId, const std::string &method, JSONObject message,
                                        ErrorSupport *);
-  void setMaxCallStackSizeToCapture(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+  void setMaxCallStackSizeToCapture(uint64_t callId, const std::string &method, JSONObject message,
                                     ErrorSupport *);
-  void terminateExecution(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void addBinding(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void removeBinding(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
+  void terminateExecution(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void addBinding(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void removeBinding(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
 };
 } // namespace debugger
 } // namespace kraken

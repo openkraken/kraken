@@ -4,13 +4,12 @@
  */
 
 #include "jsc_debugger_impl.h"
-#include <thread>
+#include <JavaScriptCore/JSCJSValueInlines.h>
 
 namespace kraken::debugger {
 using namespace JSC;
 JSCDebuggerImpl::JSCDebuggerImpl(JSGlobalObject *globalObject)
-  : Inspector::ScriptDebugServer(globalObject->vm()), m_globalObject(globalObject) {
-}
+  : Inspector::ScriptDebugServer(globalObject->vm()), m_globalObject(globalObject) {}
 
 void JSCDebuggerImpl::recompileAllJSFunctions() {
   KRAKEN_LOG(VERBOSE) << "recompileAllJSFunctions called";
@@ -40,4 +39,22 @@ void JSCDebuggerImpl::runEventLoopWhilePaused() {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 }
-} // namespace kraken
+
+void JSCDebuggerImpl::reportException(JSC::ExecState *exec, JSC::Exception *exception) const {
+  if (m_globalObject && m_globalObject->consoleClient()) {
+    JSC::VM &vm = m_globalObject->vm();
+    if (isTerminatedExecutionException(vm, exception)) return;
+
+    auto scope = DECLARE_CATCH_SCOPE(vm);
+    JSC::ErrorHandlingScope errorScope(vm);
+
+    Ref<Inspector::ScriptCallStack> callStack = Inspector::createScriptCallStackFromException(
+      exec, exception, Inspector::ScriptCallStack::maxCallStackSizeToCapture);
+
+    String errorMessage = exception->value().getString(exec);
+    scope.clearException();
+
+    m_globalObject->consoleClient()->profile(nullptr, errorMessage);
+  }
+}
+} // namespace kraken::debugger

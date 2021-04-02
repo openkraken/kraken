@@ -8,7 +8,7 @@
 #include "foundation/logging.h"
 
 namespace kraken::debugger {
-JSCHeapProfilerAgentImpl::JSCHeapProfilerAgentImpl(kraken::debugger::InspectorSessionImpl *session,
+JSCHeapProfilerAgentImpl::JSCHeapProfilerAgentImpl(kraken::debugger::InspectorSession *session,
                                                    kraken::debugger::AgentContext &context)
   : m_session(session), m_environment(context.environment) {}
 

@@ -35,28 +35,28 @@ namespace Internal {
  * }
  *
  * */
-static void reportProtocolErrorTo(FrontendChannel *frontendChannel, uint64_t callId, jsonRpc::ErrorCode code,
+static void reportProtocolErrorTo(FrontendChannel *frontendChannel, uint64_t callId, ErrorCode code,
                                   const std::string &errorMessage, ErrorSupport *errors) {
   if (!frontendChannel) {
     return;
   }
 
-  jsonRpc::Response response;
+  Response response;
   response.id = callId;
-  response.result = jsonRpc::JSONObject(rapidjson::kObjectType);
+  response.result = JSONObject(rapidjson::kObjectType);
   response.hasError = true;
 
   rapidjson::Document d;
-  jsonRpc::JSONObject error;
+  JSONObject error;
   error.SetObject(); // 一定要先初始化结构啊
   error.AddMember("code", code, d.GetAllocator());
 
-  jsonRpc::JSONObject msg;
+  JSONObject msg;
   msg.SetString(errorMessage.c_str(), errorMessage.length(), d.GetAllocator());
 
   error.AddMember("message", msg, d.GetAllocator());
   if (errors) {
-    jsonRpc::JSONObject err;
+    JSONObject err;
     err.SetString(errors->errors().c_str(), errors->errors().length(), d.GetAllocator());
     error.AddMember("data", err, d.GetAllocator());
   }
@@ -76,16 +76,16 @@ static void reportProtocolErrorTo(FrontendChannel *frontendChannel, uint64_t cal
  * }
  *
  * */
-static void reportProtocolErrorTo(FrontendChannel *frontendChannel, jsonRpc::ErrorCode code,
+static void reportProtocolErrorTo(FrontendChannel *frontendChannel, ErrorCode code,
                                   const std::string &errorMessage) {
   if (!frontendChannel) {
     return;
   }
-  jsonRpc::Error error;
+  Error error;
 
   error.code = code;
   error.message = errorMessage;
-  error.data = jsonRpc::JSONObject(rapidjson::kObjectType);
+  error.data = JSONObject(rapidjson::kObjectType);
   frontendChannel->sendProtocolError(std::move(error));
 }
 } // namespace Internal
@@ -116,12 +116,12 @@ public:
   class Callback {
   public:
     Callback(std::unique_ptr<WeakPtr> backendImpl, uint64_t callId, const std::string &method,
-             jsonRpc::JSONObject message);
+             JSONObject message);
     virtual ~Callback();
     void dispose();
 
   protected:
-    void sendIfActive(jsonRpc::JSONObject message, const DispatchResponse &response);
+    void sendIfActive(JSONObject message, const DispatchResponse &response);
     void fallThroughIfActive();
 
   private:
@@ -129,22 +129,22 @@ public:
     uint64_t m_callId;
     std::string m_method;
 
-    jsonRpc::JSONObject m_message;
+    JSONObject m_message;
   };
 
   explicit DispatcherBase(debugger::FrontendChannel *);
   virtual ~DispatcherBase();
 
   virtual bool canDispatch(const std::string &method) = 0;
-  virtual void dispatch(uint64_t callId, const std::string &method, jsonRpc::JSONObject message) = 0;
+  virtual void dispatch(uint64_t callId, const std::string &method, JSONObject message) = 0;
   FrontendChannel *channel() {
     return m_frontendChannel;
   }
 
-  void sendResponse(uint64_t callId, const DispatchResponse &, jsonRpc::JSONObject result);
+  void sendResponse(uint64_t callId, const DispatchResponse &, JSONObject result);
   void sendResponse(uint64_t callId, const DispatchResponse &);
 
-  void reportProtocolError(uint64_t callId, jsonRpc::ErrorCode, const std::string &errorMessage, ErrorSupport *errors);
+  void reportProtocolError(uint64_t callId, ErrorCode, const std::string &errorMessage, ErrorSupport *errors);
   void clearFrontend();
 
   std::unique_ptr<WeakPtr> weakPtr();

@@ -4,11 +4,11 @@
  */
 
 #include "jsc_page_agent_impl.h"
-#include "inspector/inspector_session_impl.h"
+#include "inspector/inspector_session.h"
 
 namespace kraken::debugger {
 
-JSCPageAgentImpl::JSCPageAgentImpl(kraken::debugger::InspectorSessionImpl *session,
+JSCPageAgentImpl::JSCPageAgentImpl(kraken::debugger::InspectorSession *session,
                                    kraken::debugger::AgentContext &context)
   : m_session(session) {}
 

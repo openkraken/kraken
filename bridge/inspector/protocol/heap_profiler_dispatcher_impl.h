@@ -62,32 +62,32 @@ public:
   ~HeapProfilerDispatcherImpl() override {}
 
   bool canDispatch(const std::string &method) override;
-  void dispatch(uint64_t callId, const std::string &method, jsonRpc::JSONObject message) override;
+  void dispatch(uint64_t callId, const std::string &method, JSONObject message) override;
   std::unordered_map<std::string, std::string> &redirects() {
     return m_redirects;
   }
 
 protected:
   using CallHandler = std::function<void(uint64_t /*callId*/, const std::string & /*method*/,
-                                         jsonRpc::JSONObject /*msg*/, ErrorSupport *)>;
+                                         JSONObject /*msg*/, ErrorSupport *)>;
   using DispatchMap = std::unordered_map<std::string, CallHandler>;
 
   DispatchMap m_dispatchMap;
   std::unordered_map<std::string, std::string> m_redirects;
 
-  void addInspectedHeapObject(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void collectGarbage(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void disable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void enable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void getHeapObjectId(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void getObjectByHeapObjectId(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void getSamplingProfile(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void startSampling(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void startTrackingHeapObjects(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+  void addInspectedHeapObject(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void collectGarbage(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void disable(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void enable(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void getHeapObjectId(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void getObjectByHeapObjectId(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void getSamplingProfile(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void startSampling(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void startTrackingHeapObjects(uint64_t callId, const std::string &method, JSONObject message,
                                 ErrorSupport *);
-  void stopSampling(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void stopTrackingHeapObjects(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void takeHeapSnapshot(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
+  void stopSampling(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void stopTrackingHeapObjects(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void takeHeapSnapshot(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
 
   HeapProfilerBackend *m_backend;
 };

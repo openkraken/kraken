@@ -9,8 +9,7 @@
 
 #ifdef ENABLE_DEBUGGER
 #include "JavaScriptCore/JSGlobalObject.h"
-#include "JavaScriptCore/runtime/ConsoleTypes.h"
-#include <devtools/impl/jsc_console_client_impl.h>
+#include "JavaScriptCore/ConsoleTypes.h"
 #endif
 
 namespace kraken::binding::jsc {
@@ -38,7 +37,7 @@ JSValueRef print(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
     logLevel = std::move(JSStringToStdString(JSValueToStringCopy(ctx, level, nullptr)));
   }
 
-  foundation::printLog(stream, logLevel);
+  foundation::printLog(stream, logLevel, JSContextGetGlobalObject(ctx));
 
   return JSValueMakeUndefined(ctx);
 }

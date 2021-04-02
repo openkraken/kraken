@@ -28,7 +28,7 @@
 
 namespace kraken::debugger {
 
-class InspectorSessionImpl;
+class InspectorSession;
 class AgentContext;
 
 class JSCDebuggerAgentImpl : public DebuggerBackend, public Inspector::ScriptDebugListener {
@@ -38,7 +38,7 @@ private:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(JSCDebuggerAgentImpl);
 
 public:
-  JSCDebuggerAgentImpl(InspectorSessionImpl *session, debugger::AgentContext &context);
+  JSCDebuggerAgentImpl(InspectorSession *session, debugger::AgentContext &context);
   ~JSCDebuggerAgentImpl() override;
 
   /* Inspector::ScriptDebugListener */
@@ -236,7 +236,7 @@ private:
   int m_asyncStackTraceDepth{0};
 
 private:
-  InspectorSessionImpl *m_session;
+  InspectorSession *m_session;
   DebuggerFrontend m_frontend;
   debugger::JSCDebuggerImpl *m_debugger;
 

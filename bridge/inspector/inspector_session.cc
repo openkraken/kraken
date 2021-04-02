@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "inspector/inspector_session_impl.h"
+#include "inspector/inspector_session.h"
 #include "inspector/impl/jsc_console_client_impl.h"
 #include "inspector/impl/jsc_debugger_agent_impl.h"
 #include "inspector/impl/jsc_heap_profiler_agent_impl.h"
@@ -20,7 +20,7 @@
 
 namespace kraken::debugger {
 
-InspectorSessionImpl::InspectorSessionImpl(void *rpcSession, JSC::JSGlobalObject *globalObject,
+InspectorSession::InspectorSession(RPCSession *rpcSession, JSC::JSGlobalObject *globalObject,
                                            std::shared_ptr<ProtocolHandler> handler)
   : m_rpcSession(rpcSession), m_dispatcher(this), m_protocol_handler(handler),
     m_executionStopwatch(Stopwatch::create()) {
@@ -49,12 +49,12 @@ InspectorSessionImpl::InspectorSessionImpl(void *rpcSession, JSC::JSGlobalObject
   HeapProfilerDispatcherContract::wire(&m_dispatcher, m_heap_profiler_agent.get());
 }
 
-InspectorSessionImpl::~InspectorSessionImpl() {
+InspectorSession::~InspectorSession() {
 //  m_rpcSession = nullptr;
   KRAKEN_LOG(VERBOSE) << "InspectorSession Will Destroyed";
 }
 
-void InspectorSessionImpl::onSessionClosed(int, const std::string &) {
+void InspectorSession::onSessionClosed(int, const std::string &) {
   //            JSC::JSLockHolder holder(vm());
   if (m_debugger->globalObject()) {
     m_debugger->globalObject()->setConsoleClient(nullptr);
@@ -66,79 +66,62 @@ void InspectorSessionImpl::onSessionClosed(int, const std::string &) {
   m_injectedScriptManager->disconnect();
 }
 
-void InspectorSessionImpl::sendProtocolResponse(uint64_t callId, debugger::jsonRpc::Response message) {
-//  if (m_rpcSession && callId == message.id) {
-//    m_rpcSession->sendResponse(std::move(message));
-//  }
+void InspectorSession::sendProtocolResponse(uint64_t callId, debugger::Response message) {
+  if (m_rpcSession && callId == message.id) {
+    m_rpcSession->sendResponse(std::move(message));
+  }
 }
 
-void InspectorSessionImpl::sendProtocolNotification(debugger::jsonRpc::Event message) {
-//  if (m_rpcSession) {
-//    m_rpcSession->sendEvent(std::move(message));
-//  }
+void InspectorSession::sendProtocolNotification(debugger::Event message) {
+  if (m_rpcSession) {
+    m_rpcSession->sendEvent(std::move(message));
+  }
 }
 
-void InspectorSessionImpl::sendProtocolError(debugger::jsonRpc::Error message) {
-//  if (m_rpcSession) {
-//    m_rpcSession->sendError(std::move(message));
-//  }
+void InspectorSession::sendProtocolError(debugger::Error message) {
+  if (m_rpcSession) {
+    m_rpcSession->sendError(std::move(message));
+  }
 }
 
-void InspectorSessionImpl::fallThrough(uint64_t callId, const std::string &method, jsonRpc::JSONObject message) {
+void InspectorSession::fallThrough(uint64_t callId, const std::string &method, JSONObject message) {
   KRAKEN_LOG(ERROR) << "[fallThrough] can not handle request: " << callId << "," << method;
 }
 
-//////////
-
-bool InspectorSession::canDispatchMethod(const std::string &method) {
-  // 可以处理domain为Debugger或者Runtime的指令
-  return method.find("Debugger") != std::string::npos || method.find("Runtime") != std::string::npos ||
-         method.find("Page") != std::string::npos || method.find("Log") != std::string::npos;
-}
-
-void InspectorSessionImpl::dispatchProtocolMessage(jsonRpc::Request message) {
+void InspectorSession::dispatchProtocolMessage(Request message) {
   JSC::JSLockHolder holder(vm());
   m_dispatcher.dispatch(message.id, message.method, std::move(message.params));
 }
 
-std::vector<std::unique_ptr<Domain>> InspectorSessionImpl::supportedDomains() {
-  std::vector<std::unique_ptr<Domain>> _result;
-  _result.push_back(Domain::create().setVersion("1.0.0").setName("Debugger").build());
-  _result.push_back(Domain::create().setVersion("1.0.0").setName("Runtime").build());
-  _result.push_back(Domain::create().setVersion("1.0.0").setName("Page").build());
-  _result.push_back(Domain::create().setVersion("1.0.0").setName("Log").build());
-  return _result;
-}
-
 //////////////////////Inspector::InspectorEnvironment///////////////////////////////
 
-bool InspectorSessionImpl::developerExtrasEnabled() const {
+bool InspectorSession::developerExtrasEnabled() const {
   return true;
 }
 
-bool InspectorSessionImpl::canAccessInspectedScriptState(JSC::ExecState *) const {
+bool InspectorSession::canAccessInspectedScriptState(JSC::ExecState *) const {
   return true;
 }
 
-Inspector::InspectorFunctionCallHandler InspectorSessionImpl::functionCallHandler() const {
+Inspector::InspectorFunctionCallHandler InspectorSession::functionCallHandler() const {
   return JSC::call;
 }
 
-Inspector::InspectorEvaluateHandler InspectorSessionImpl::evaluateHandler() const {
+Inspector::InspectorEvaluateHandler InspectorSession::evaluateHandler() const {
   return JSC::evaluate;
 }
 
-void InspectorSessionImpl::frontendInitialized() {}
+void InspectorSession::frontendInitialized() {}
 
-Ref<WTF::Stopwatch> InspectorSessionImpl::executionStopwatch() {
+Ref<WTF::Stopwatch> InspectorSession::executionStopwatch() {
   return m_executionStopwatch.copyRef();
 }
 
-Inspector::ScriptDebugServer &InspectorSessionImpl::scriptDebugServer() {
+Inspector::ScriptDebugServer &InspectorSession::scriptDebugServer() {
   return *this->m_debugger;
 }
 
-JSC::VM &InspectorSessionImpl::vm() {
+JSC::VM &InspectorSession::vm() {
   return this->m_debugger->vm();
 }
 

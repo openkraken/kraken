@@ -20,7 +20,7 @@ bool LogDispatcherImpl::canDispatch(const std::string &method) {
 }
 
 void LogDispatcherImpl::dispatch(uint64_t callId, const std::string &method,
-                                 kraken::debugger::jsonRpc::JSONObject message) {
+                                 kraken::debugger::JSONObject message) {
   std::unordered_map<std::string, CallHandler>::iterator it = m_dispatchMap.find(method);
   if (it == m_dispatchMap.end()) {
     return;
@@ -32,7 +32,7 @@ void LogDispatcherImpl::dispatch(uint64_t callId, const std::string &method,
 /////////
 
 void LogDispatcherImpl::enable(uint64_t callId, const std::string &method,
-                               kraken::debugger::jsonRpc::JSONObject message, kraken::debugger::ErrorSupport *) {
+                               kraken::debugger::JSONObject message, kraken::debugger::ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->enable();
   if (response.status() == DispatchResponse::kFallThrough) {
@@ -54,7 +54,7 @@ void LogDispatcherImpl::enable(uint64_t callId, const std::string &method,
 }
 
 void LogDispatcherImpl::disable(uint64_t callId, const std::string &method,
-                                kraken::debugger::jsonRpc::JSONObject message, kraken::debugger::ErrorSupport *) {
+                                kraken::debugger::JSONObject message, kraken::debugger::ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->disable();
   if (response.status() == DispatchResponse::kFallThrough) {
@@ -65,7 +65,7 @@ void LogDispatcherImpl::disable(uint64_t callId, const std::string &method,
   return;
 }
 
-void LogDispatcherImpl::clear(uint64_t callId, const std::string &method, kraken::debugger::jsonRpc::JSONObject message,
+void LogDispatcherImpl::clear(uint64_t callId, const std::string &method, kraken::debugger::JSONObject message,
                               kraken::debugger::ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->clear();
@@ -78,13 +78,13 @@ void LogDispatcherImpl::clear(uint64_t callId, const std::string &method, kraken
 }
 
 void LogDispatcherImpl::startViolationsReport(uint64_t callId, const std::string &method,
-                                              kraken::debugger::jsonRpc::JSONObject message,
+                                              kraken::debugger::JSONObject message,
                                               kraken::debugger::ErrorSupport *) {
   // TODO
 }
 
 void LogDispatcherImpl::stopViolationsReport(uint64_t callId, const std::string &method,
-                                             kraken::debugger::jsonRpc::JSONObject message,
+                                             kraken::debugger::JSONObject message,
                                              kraken::debugger::ErrorSupport *) {
   // TODO
 }

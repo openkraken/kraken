@@ -52,24 +52,7 @@ private:
   }
 
   // chrome控制台打印
-  void reportException(JSC::ExecState *exec, JSC::Exception *exception) const override {
-    if (m_globalObject && m_globalObject->consoleClient()) {
-      JSC::VM &vm = exec->vm();
-      if (isTerminatedExecutionException(vm, exception)) return;
-
-      auto scope = DECLARE_CATCH_SCOPE(vm);
-      JSC::ErrorHandlingScope errorScope(vm);
-
-      Ref<Inspector::ScriptCallStack> callStack = Inspector::createScriptCallStackFromException(
-        exec, exception, Inspector::ScriptCallStack::maxCallStackSizeToCapture);
-
-      String errorMessage = exception->value().toWTFString(exec);
-      scope.clearException();
-
-      // 借用下这个方法将错误日志传过去...
-      m_globalObject->consoleClient()->profile(nullptr, errorMessage);
-    }
-  }
+  void reportException(JSC::ExecState *exec, JSC::Exception *exception) const override;
 
   JSC::JSGlobalObject *m_globalObject;
 };

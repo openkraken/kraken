@@ -12,11 +12,11 @@
 #include "inspector/service/rpc/protocol.h"
 #include "foundation/logging.h"
 
-namespace kraken::debugger::jsonRpc {
+namespace kraken::debugger {
 
 namespace {
-jsonRpc::JSONObject clone(rapidjson::Document *doc, jsonRpc::JSONObject value) {
-  return jsonRpc::JSONObject(value, doc->GetAllocator());
+JSONObject clone(rapidjson::Document *doc, JSONObject value) {
+  return JSONObject(value, doc->GetAllocator());
 }
 } // namespace
 
@@ -75,7 +75,7 @@ inline std::string deserializeError(Error error) {
   rapidjson::Document doc;
   doc.SetObject();
 
-  jsonRpc::JSONObject content;
+  JSONObject content;
   content.SetObject();
   content.AddMember("code", error.code, doc.GetAllocator());
   rapidjson::Value method;

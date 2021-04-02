@@ -18,7 +18,7 @@ void DebuggerFrontend::breakpointResolved(const std::string &breakpointId,
     BreakpointResolvedNotification::create().setBreakpointId(breakpointId).setLocation(std::move(location)).build();
 
   rapidjson::Document doc;
-  jsonRpc::Event event = {"Debugger.breakpointResolved", messageData->toValue(doc.GetAllocator())};
+  Event event = {"Debugger.breakpointResolved", messageData->toValue(doc.GetAllocator())};
   m_frontendChannel->sendProtocolNotification(std::move(event));
 }
 
@@ -40,13 +40,13 @@ void DebuggerFrontend::paused(std::unique_ptr<std::vector<std::unique_ptr<kraken
     messageData->setAsyncCallStackTraceId(std::move(asyncCallStackTraceId).takeJust());
 
   rapidjson::Document doc;
-  jsonRpc::Event event = {"Debugger.paused", messageData->toValue(doc.GetAllocator())};
+  Event event = {"Debugger.paused", messageData->toValue(doc.GetAllocator())};
   m_frontendChannel->sendProtocolNotification(std::move(event));
 }
 
 void DebuggerFrontend::resumed() {
   if (!m_frontendChannel) return;
-  jsonRpc::Event event = {"Debugger.resumed", rapidjson::Value(rapidjson::kObjectType)};
+  Event event = {"Debugger.resumed", rapidjson::Value(rapidjson::kObjectType)};
   m_frontendChannel->sendProtocolNotification(std::move(event));
 }
 
@@ -78,7 +78,7 @@ void DebuggerFrontend::scriptFailedToParse(const std::string &scriptId, const st
   if (stackTrace.isJust()) messageData->setStackTrace(std::move(stackTrace).takeJust());
 
   rapidjson::Document doc;
-  jsonRpc::Event event = {"Debugger.scriptFailedToParse", messageData->toValue(doc.GetAllocator())};
+  Event event = {"Debugger.scriptFailedToParse", messageData->toValue(doc.GetAllocator())};
 
   m_frontendChannel->sendProtocolNotification(std::move(event));
 }
@@ -112,7 +112,7 @@ void DebuggerFrontend::scriptParsed(const std::string &scriptId, const std::stri
   if (stackTrace.isJust()) messageData->setStackTrace(std::move(stackTrace).takeJust());
 
   rapidjson::Document doc;
-  jsonRpc::Event event = {"Debugger.scriptParsed", messageData->toValue(doc.GetAllocator())};
+  Event event = {"Debugger.scriptParsed", messageData->toValue(doc.GetAllocator())};
 
   m_frontendChannel->sendProtocolNotification(std::move(event));
 }

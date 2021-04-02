@@ -11,7 +11,7 @@
 
 namespace kraken::debugger {
 
-class InspectorSessionImpl;
+class InspectorSession;
 class AgentContext;
 
 class JSCPageAgentImpl : public PageBackend {
@@ -19,7 +19,7 @@ private:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(JSCPageAgentImpl);
 
 public:
-  JSCPageAgentImpl(InspectorSessionImpl *session, debugger::AgentContext &context);
+  JSCPageAgentImpl(InspectorSession *session, debugger::AgentContext &context);
   ~JSCPageAgentImpl() override;
 
   /***************** PageBackend *********************/
@@ -32,7 +32,7 @@ private:
   bool m_enabled{false};
 
 private:
-  InspectorSessionImpl *m_session;
+  InspectorSession *m_session;
 };
 } // namespace kraken::debugger
 

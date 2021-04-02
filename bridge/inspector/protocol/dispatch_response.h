@@ -26,7 +26,7 @@ public:
   const std::string &errorMessage() const {
     return m_errorMessage;
   }
-  jsonRpc::ErrorCode errorCode() const {
+  ErrorCode errorCode() const {
     return m_errorCode;
   }
   bool isSuccess() const {
@@ -42,7 +42,7 @@ public:
 private:
   Status m_status;
   std::string m_errorMessage;
-  jsonRpc::ErrorCode m_errorCode;
+  ErrorCode m_errorCode;
 };
 } // namespace debugger
 } // namespace kraken

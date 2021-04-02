@@ -12,7 +12,7 @@ const char DispatcherBase::kInvalidParamsString[] = "Invalid parameters";
 
 DispatcherBase::Callback::Callback(std::unique_ptr<kraken::debugger::DispatcherBase::WeakPtr> backendImpl,
                                    uint64_t callId, const std::string &method,
-                                   kraken::debugger::jsonRpc::JSONObject message)
+                                   kraken::debugger::JSONObject message)
   : m_backendImpl(std::move(backendImpl)), m_callId(callId), m_method(method), m_message(std::move(message)) {}
 
 DispatcherBase::Callback::~Callback() = default;
@@ -21,7 +21,7 @@ void DispatcherBase::Callback::dispose() {
   m_backendImpl = nullptr;
 }
 
-void DispatcherBase::Callback::sendIfActive(kraken::debugger::jsonRpc::JSONObject message,
+void DispatcherBase::Callback::sendIfActive(kraken::debugger::JSONObject message,
                                             const kraken::debugger::DispatchResponse &response) {
   if (!m_backendImpl || !m_backendImpl->get()) return;
   m_backendImpl->get()->sendResponse(m_callId, response, std::move(message));
@@ -52,11 +52,11 @@ DispatcherBase::~DispatcherBase() {
 }
 
 void DispatcherBase::sendResponse(uint64_t callId, const debugger::DispatchResponse &response) {
-  sendResponse(callId, response, jsonRpc::JSONObject(rapidjson::kObjectType));
+  sendResponse(callId, response, JSONObject(rapidjson::kObjectType));
 }
 
 void DispatcherBase::sendResponse(uint64_t callId, const debugger::DispatchResponse &response,
-                                  debugger::jsonRpc::JSONObject result) {
+                                  debugger::JSONObject result) {
   if (!m_frontendChannel) {
     KRAKEN_LOG(ERROR) << "FrontendChannel invalid...";
     return;
@@ -66,10 +66,10 @@ void DispatcherBase::sendResponse(uint64_t callId, const debugger::DispatchRespo
     return;
   }
   m_frontendChannel->sendProtocolResponse(
-    callId, {callId, std::move(result), jsonRpc::JSONObject(rapidjson::kObjectType), false});
+    callId, {callId, std::move(result), JSONObject(rapidjson::kObjectType), false});
 }
 
-void DispatcherBase::reportProtocolError(uint64_t callId, debugger::jsonRpc::ErrorCode code,
+void DispatcherBase::reportProtocolError(uint64_t callId, debugger::ErrorCode code,
                                          const std::string &errorMessage, debugger::ErrorSupport *errors) {
   Internal::reportProtocolErrorTo(m_frontendChannel, callId, code, errorMessage, errors);
 }

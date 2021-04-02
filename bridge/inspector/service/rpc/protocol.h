@@ -11,9 +11,10 @@
 
 #include <string>
 #include <rapidjson/document.h>
+#include <rapidjson/writer.h>
 #include "kraken_foundation.h"
 
-namespace kraken::debugger::jsonRpc {
+namespace kraken::debugger {
 
 typedef rapidjson::Value JSONObject;
 

@@ -16,6 +16,8 @@ list(APPEND INSPECTOR_INCLUDE
 )
 
 list(APPEND INSPECTOR_SOURCE
+  ${INSPECTOR_SOURCE_DIR}/frontdoor.h
+  ${INSPECTOR_SOURCE_DIR}/frontdoor.cc
   ${INSPECTOR_SOURCE_DIR}/impl/jsc_console_client_impl.cc
   ${INSPECTOR_SOURCE_DIR}/impl/jsc_console_client_impl.h
   ${INSPECTOR_SOURCE_DIR}/impl/jsc_debugger_agent_impl.cc
@@ -68,7 +70,6 @@ list(APPEND INSPECTOR_SOURCE
   ${INSPECTOR_SOURCE_DIR}/protocol/heap_profiler_dispatcher_contract.h
   ${INSPECTOR_SOURCE_DIR}/protocol/heap_profiler_dispatcher_impl.cc
   ${INSPECTOR_SOURCE_DIR}/protocol/heap_profiler_dispatcher_impl.h
-  ${INSPECTOR_SOURCE_DIR}/protocol/inspector_session.h
   ${INSPECTOR_SOURCE_DIR}/protocol/internal_property_descriptor.cc
   ${INSPECTOR_SOURCE_DIR}/protocol/internal_property_descriptor.h
   ${INSPECTOR_SOURCE_DIR}/protocol/location.cc
@@ -125,12 +126,11 @@ list(APPEND INSPECTOR_SOURCE
   ${INSPECTOR_SOURCE_DIR}/protocol/uber_dispatcher.h
   ${INSPECTOR_SOURCE_DIR}/service/rpc/object_serializer.h
   ${INSPECTOR_SOURCE_DIR}/service/rpc/protocol.h
-  ${INSPECTOR_SOURCE_DIR}/service/rpc/session.h
-  ${INSPECTOR_SOURCE_DIR}/frontdoor.h
-  ${INSPECTOR_SOURCE_DIR}/frontdoor.cc
-  ${INSPECTOR_SOURCE_DIR}/inspector_session_impl.cc
-  ${INSPECTOR_SOURCE_DIR}/inspector_session_impl.h
+  ${INSPECTOR_SOURCE_DIR}/inspector_session.cc
+  ${INSPECTOR_SOURCE_DIR}/inspector_session.h
   ${INSPECTOR_SOURCE_DIR}/protocol_handler.h
+  ${INSPECTOR_SOURCE_DIR}/rpc_session.h
+  ${INSPECTOR_SOURCE_DIR}/rpc_session.cc
 )
 
 add_library(inspector STATIC ${INSPECTOR_SOURCE})

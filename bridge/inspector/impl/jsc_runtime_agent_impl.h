@@ -16,7 +16,7 @@
 #include <rapidjson/writer.h>
 
 namespace kraken::debugger {
-class InspectorSessionImpl;
+class InspectorSession;
 class AgentContext;
 
 class JSCRuntimeAgentImpl : public RuntimeBackend {
@@ -24,7 +24,7 @@ private:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(JSCRuntimeAgentImpl);
 
 public:
-  JSCRuntimeAgentImpl(InspectorSessionImpl *session, debugger::AgentContext &context);
+  JSCRuntimeAgentImpl(InspectorSession *session, debugger::AgentContext &context);
   ~JSCRuntimeAgentImpl() override;
 
   /***************** RuntimeBackend *********************/
@@ -108,7 +108,7 @@ private:
   bool m_isControlFlowProfilingEnabled{false};
 
 private:
-  InspectorSessionImpl *m_session;
+  InspectorSession *m_session;
   RuntimeFrontend m_frontend;
   debugger::JSCDebuggerImpl *m_debugger;
   rapidjson::Document m_doc;

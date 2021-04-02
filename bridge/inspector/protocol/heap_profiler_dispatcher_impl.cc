@@ -13,7 +13,7 @@ bool HeapProfilerDispatcherImpl::canDispatch(const std::string &method) {
 }
 
 void HeapProfilerDispatcherImpl::dispatch(uint64_t callId, const std::string &method,
-                                          kraken::debugger::jsonRpc::JSONObject message) {
+                                          kraken::debugger::JSONObject message) {
   std::unordered_map<std::string, CallHandler>::iterator it = m_dispatchMap.find(method);
   if (it == m_dispatchMap.end()) {
     return;
@@ -23,7 +23,7 @@ void HeapProfilerDispatcherImpl::dispatch(uint64_t callId, const std::string &me
 }
 
 void HeapProfilerDispatcherImpl::enable(uint64_t callId, const std::string &method,
-                                        kraken::debugger::jsonRpc::JSONObject message,
+                                        kraken::debugger::JSONObject message,
                                         kraken::debugger::ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->enable();
@@ -36,7 +36,7 @@ void HeapProfilerDispatcherImpl::enable(uint64_t callId, const std::string &meth
 }
 
 void HeapProfilerDispatcherImpl::disable(uint64_t callId, const std::string &method,
-                                         kraken::debugger::jsonRpc::JSONObject message,
+                                         kraken::debugger::JSONObject message,
                                          kraken::debugger::ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->disable();
@@ -49,7 +49,7 @@ void HeapProfilerDispatcherImpl::disable(uint64_t callId, const std::string &met
 }
 
 void HeapProfilerDispatcherImpl::collectGarbage(uint64_t callId, const std::string &method,
-                                                kraken::debugger::jsonRpc::JSONObject message,
+                                                kraken::debugger::JSONObject message,
                                                 kraken::debugger::ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->collectGarbage();
@@ -62,39 +62,39 @@ void HeapProfilerDispatcherImpl::collectGarbage(uint64_t callId, const std::stri
 }
 
 void HeapProfilerDispatcherImpl::addInspectedHeapObject(uint64_t callId, const std::string &method,
-                                                        kraken::debugger::jsonRpc::JSONObject message,
+                                                        kraken::debugger::JSONObject message,
                                                         kraken::debugger::ErrorSupport *) {}
 
 void HeapProfilerDispatcherImpl::getHeapObjectId(uint64_t callId, const std::string &method,
-                                                 kraken::debugger::jsonRpc::JSONObject message,
+                                                 kraken::debugger::JSONObject message,
                                                  kraken::debugger::ErrorSupport *) {}
 
 void HeapProfilerDispatcherImpl::getObjectByHeapObjectId(uint64_t callId, const std::string &method,
-                                                         kraken::debugger::jsonRpc::JSONObject message,
+                                                         kraken::debugger::JSONObject message,
                                                          kraken::debugger::ErrorSupport *) {}
 
 void HeapProfilerDispatcherImpl::getSamplingProfile(uint64_t callId, const std::string &method,
-                                                    kraken::debugger::jsonRpc::JSONObject message,
+                                                    kraken::debugger::JSONObject message,
                                                     kraken::debugger::ErrorSupport *) {}
 
 void HeapProfilerDispatcherImpl::startSampling(uint64_t callId, const std::string &method,
-                                               kraken::debugger::jsonRpc::JSONObject message,
+                                               kraken::debugger::JSONObject message,
                                                kraken::debugger::ErrorSupport *) {}
 
 void HeapProfilerDispatcherImpl::startTrackingHeapObjects(uint64_t callId, const std::string &method,
-                                                          kraken::debugger::jsonRpc::JSONObject message,
+                                                          kraken::debugger::JSONObject message,
                                                           kraken::debugger::ErrorSupport *) {}
 
 void HeapProfilerDispatcherImpl::stopSampling(uint64_t callId, const std::string &method,
-                                              kraken::debugger::jsonRpc::JSONObject message,
+                                              kraken::debugger::JSONObject message,
                                               kraken::debugger::ErrorSupport *) {}
 
 void HeapProfilerDispatcherImpl::stopTrackingHeapObjects(uint64_t callId, const std::string &method,
-                                                         kraken::debugger::jsonRpc::JSONObject message,
+                                                         kraken::debugger::JSONObject message,
                                                          kraken::debugger::ErrorSupport *) {}
 
 void HeapProfilerDispatcherImpl::takeHeapSnapshot(uint64_t callId, const std::string &method,
-                                                  kraken::debugger::jsonRpc::JSONObject message,
+                                                  kraken::debugger::JSONObject message,
                                                   kraken::debugger::ErrorSupport *) {}
 
 } // namespace debugger

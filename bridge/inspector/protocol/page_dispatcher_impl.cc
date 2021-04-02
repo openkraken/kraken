@@ -12,7 +12,7 @@ bool PageDispatcherImpl::canDispatch(const std::string &method) {
 }
 
 void PageDispatcherImpl::dispatch(uint64_t callId, const std::string &method,
-                                  kraken::debugger::jsonRpc::JSONObject message) {
+                                  kraken::debugger::JSONObject message) {
   std::unordered_map<std::string, CallHandler>::iterator it = m_dispatchMap.find(method);
   if (it == m_dispatchMap.end()) {
     return;
@@ -24,7 +24,7 @@ void PageDispatcherImpl::dispatch(uint64_t callId, const std::string &method,
 //--------------------------------------
 
 void PageDispatcherImpl::enable(uint64_t callId, const std::string &method,
-                                kraken::debugger::jsonRpc::JSONObject message, kraken::debugger::ErrorSupport *) {
+                                kraken::debugger::JSONObject message, kraken::debugger::ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->enable();
   if (response.status() == DispatchResponse::kFallThrough) {
@@ -36,7 +36,7 @@ void PageDispatcherImpl::enable(uint64_t callId, const std::string &method,
 }
 
 void PageDispatcherImpl::disable(uint64_t callId, const std::string &method,
-                                 kraken::debugger::jsonRpc::JSONObject message, kraken::debugger::ErrorSupport *) {
+                                 kraken::debugger::JSONObject message, kraken::debugger::ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->disable();
   if (response.status() == DispatchResponse::kFallThrough) {
@@ -48,7 +48,7 @@ void PageDispatcherImpl::disable(uint64_t callId, const std::string &method,
 }
 
 void PageDispatcherImpl::reload(uint64_t callId, const std::string &method,
-                                kraken::debugger::jsonRpc::JSONObject message, kraken::debugger::ErrorSupport *errors) {
+                                kraken::debugger::JSONObject message, kraken::debugger::ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
 
@@ -74,7 +74,7 @@ void PageDispatcherImpl::reload(uint64_t callId, const std::string &method,
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 

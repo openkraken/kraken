@@ -3,36 +3,51 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKEN_JSON_RPC_SESSION_H
-#define KRAKEN_JSON_RPC_SESSION_H
+#ifndef KRAKENBRIDGE_RPC_SESSION_H
+#define KRAKENBRIDGE_RPC_SESSION_H
 
+#include <JavaScriptCore/JSGlobalObject.h>
+
+#include "foundation/logging.h"
 #include "inspector/service/rpc/object_serializer.h"
 #include "inspector/service/rpc/protocol.h"
-#include "foundation/logging.h"
-
+#include "protocol_handler.h"
+#include "inspector/inspector_session.h"
 #include <functional>
-#include <memory>
 
-namespace kraken::debugger::jsonRpc {
-using RPCSessionCloseObservable = std::function<void(size_t)>;
+namespace kraken::debugger {
+
+class InspectorSession;
+
+using OnMessageCallback = std::function<void(const std::string &message)>;
+
+class WebSocketServer {
+public:
+  void send(std::string msg) {
+    KRAKEN_LOG(VERBOSE) << "recevie message " << msg;
+  };
+
+  void close(int code, const std::string &reason) {
+    KRAKEN_LOG(VERBOSE) << "close " << code << " reason " << reason;
+  }
+
+  void setOnMessageCallback(OnMessageCallback callback) {}
+};
 
 class RPCSession {
 public:
-  RPCSession(size_t token_num,
-             RPCSessionCloseObservable observable)
-    : _token_num(token_num), _observable(observable) {
-//    this->_m_handle->setOnMessageCallback(std::bind(&RPCSession::_on_message, this, std::placeholders::_1));
-//    this->_m_handle->setOnCloseCallback(
-//      std::bind(&RPCSession::_on_close, this, std::placeholders::_1, std::placeholders::_2));
+  explicit RPCSession(size_t token_num, JSC::JSGlobalObject *globalObject, std::shared_ptr<ProtocolHandler> handler) : _token_num(token_num) {
+    m_debug_session = std::make_unique<InspectorSession>(this, globalObject, handler);
+
+    this->m_handler->setOnMessageCallback(std::bind(&RPCSession::_on_message, this, std::placeholders::_1));
   }
 
-  virtual ~RPCSession() {
+  ~RPCSession() {
     KRAKEN_LOG(VERBOSE) << "--------- RPCSession Destroyed --------- ";
   }
 
-  virtual void handleRequest(Request req) = 0;
-  virtual void handleResponse(Response response) = 0;
-  virtual void handleClose(int code, const std::string &reason) = 0;
+  void handleRequest(Request req);
+  void handleResponse(Response response);
 
   void sendRequest(Request req) {
     auto message = deserializeRequest(std::move(req));
@@ -59,10 +74,10 @@ public:
   };
 
   void closeSession(int code, const std::string &reason) {
-//    if (this->_m_handle) {
-//      this->_m_handle->close(code, reason);
-//      KRAKEN_LOG(VERBOSE) << "[rpc] session " << _token_num << " closed";
-//    }
+    if (this->m_handler) {
+      this->m_handler->close(code, reason);
+      KRAKEN_LOG(VERBOSE) << "[rpc] session " << _token_num << " closed";
+    }
   }
 
   size_t sessionId() const {
@@ -71,10 +86,9 @@ public:
 
 private:
   void _send_text(const std::string &message) {
-    //                    KRAKEN_LOG(VERBOSE) << "[rpc] session " << _token_num << " send message: " << message;
-//    if (this->_m_handle) {
-//      this->_m_handle->send(message);
-//    }
+    if (this->m_handler) {
+      this->m_handler->send(message);
+    }
   }
 
   void _on_message(const std::string &message) {
@@ -94,19 +108,12 @@ private:
     }
   }
 
-  void _on_close(int code, const std::string &reason) {
-    KRAKEN_LOG(VERBOSE) << "[rpc] session " << _token_num << " closed: " << code << " " << reason;
-    handleClose(code, reason);
-    if (_observable) {
-      _observable(_token_num);
-    }
-  }
-
 private:
-  RPCSessionCloseObservable _observable;
+  std::shared_ptr<WebSocketServer> m_handler;
+  std::shared_ptr<InspectorSession> m_debug_session;
   size_t _token_num;
 };
 
-} // namespace kraken
+} // namespace kraken::debugger::jsonRpc
 
-#endif // KRAKEN_JSON_RPC_SESSION_H
+#endif // KRAKENBRIDGE_RPC_SESSION_H

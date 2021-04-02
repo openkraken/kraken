@@ -4,11 +4,11 @@
  */
 
 #include "jsc_log_agent_impl.h"
-#include "inspector/inspector_session_impl.h"
+#include "inspector/inspector_session.h"
 
 namespace kraken::debugger {
 
-JSCLogAgentImpl::JSCLogAgentImpl(kraken::debugger::InspectorSessionImpl *session,
+JSCLogAgentImpl::JSCLogAgentImpl(kraken::debugger::InspectorSession *session,
                                  kraken::debugger::AgentContext &context)
   : m_session(session), m_frontend(context.channel) {}
 

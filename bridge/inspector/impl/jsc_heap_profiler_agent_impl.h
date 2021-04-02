@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "inspector/inspector_session_impl.h"
+#include "inspector/inspector_session.h"
 #include "inspector/protocol/heap_profiler_backend.h"
 
 #include <JavaScriptCore/InspectorEnvironment.h>
@@ -11,7 +11,7 @@
 namespace kraken::debugger {
 class JSCHeapProfilerAgentImpl : public HeapProfilerBackend, public JSC::HeapObserver {
 public:
-  JSCHeapProfilerAgentImpl(InspectorSessionImpl *session, debugger::AgentContext &context);
+  JSCHeapProfilerAgentImpl(InspectorSession *session, debugger::AgentContext &context);
 
   DispatchResponse collectGarbage() override;
   DispatchResponse disable() override;
@@ -21,7 +21,7 @@ public:
   void didGarbageCollect(JSC::CollectionScope) override;
 
 private:
-  InspectorSessionImpl *m_session;
+  InspectorSession *m_session;
   bool m_enabled{false};
   double m_gcStartTime{-1};
   Inspector::InspectorEnvironment *m_environment;

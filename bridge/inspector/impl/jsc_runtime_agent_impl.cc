@@ -3,14 +3,14 @@
  * Author: Kraken Team.
  */
 
-#include <JavaScriptCore/DeleteAllCodeEffort.h>
 #include "jsc_runtime_agent_impl.h"
-#include "inspector/inspector_session_impl.h"
+#include "inspector/inspector_session.h"
+#include <JavaScriptCore/DeleteAllCodeEffort.h>
 
 namespace kraken {
 namespace debugger {
 
-JSCRuntimeAgentImpl::JSCRuntimeAgentImpl(kraken::debugger::InspectorSessionImpl *session,
+JSCRuntimeAgentImpl::JSCRuntimeAgentImpl(kraken::debugger::InspectorSession *session,
                                          kraken::debugger::AgentContext &context)
   : m_session(session), m_frontend(context.channel), m_debugger(context.debugger),
     m_injectedScriptManager(context.injectedScriptManager) {}

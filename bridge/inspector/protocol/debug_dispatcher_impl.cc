@@ -21,7 +21,7 @@ bool DebugDispatcherImpl::canDispatch(const std::string &method) {
   return m_dispatchMap.find(method) != m_dispatchMap.end();
 }
 
-void DebugDispatcherImpl::dispatch(uint64_t callId, const std::string &method, debugger::jsonRpc::JSONObject message) {
+void DebugDispatcherImpl::dispatch(uint64_t callId, const std::string &method, debugger::JSONObject message) {
   std::unordered_map<std::string, CallHandler>::iterator it = m_dispatchMap.find(method);
   if (it == m_dispatchMap.end()) {
     return;
@@ -39,7 +39,7 @@ void DebugDispatcherImpl::dispatch(uint64_t callId, const std::string &method, d
  *
  * */
 void DebugDispatcherImpl::continueToLocation(uint64_t callId, const std::string &method,
-                                             debugger::jsonRpc::JSONObject message, debugger::ErrorSupport *errors) {
+                                             debugger::JSONObject message, debugger::ErrorSupport *errors) {
   KRAKEN_LOG(VERBOSE) << "received [continueToLocation] message: " << callId;
   // Prepare input parameters.
   errors->push();
@@ -65,7 +65,7 @@ void DebugDispatcherImpl::continueToLocation(uint64_t callId, const std::string 
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -84,7 +84,7 @@ void DebugDispatcherImpl::continueToLocation(uint64_t callId, const std::string 
  * Disables debugger for given page.
  *
  * */
-void DebugDispatcherImpl::disable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::disable(uint64_t callId, const std::string &method, JSONObject message,
                                   ErrorSupport *) {
   KRAKEN_LOG(VERBOSE) << "received [disable] message: " << callId;
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
@@ -108,7 +108,7 @@ void DebugDispatcherImpl::disable(uint64_t callId, const std::string &method, js
  *                          the debugger can hold. Puts no limit if parameter is omitted
  *
  * **/
-void DebugDispatcherImpl::enable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::enable(uint64_t callId, const std::string &method, JSONObject message,
                                  ErrorSupport *) {
   KRAKEN_LOG(VERBOSE) << "received [enable] message: " << callId;
 
@@ -125,10 +125,10 @@ void DebugDispatcherImpl::enable(uint64_t callId, const std::string &method, jso
     channel()->fallThrough(callId, method, std::move(message));
     return;
   }
-  debugger::jsonRpc::JSONObject result;
+  debugger::JSONObject result;
   result.SetObject();
   if (response.status() == DispatchResponse::kSuccess) {
-    debugger::jsonRpc::JSONObject debugId;
+    debugger::JSONObject debugId;
     debugId.SetString(out_debuggerId.c_str(), m_json_doc.GetAllocator());
     result.AddMember("debuggerId", debugId, m_json_doc.GetAllocator());
   }
@@ -158,7 +158,7 @@ void DebugDispatcherImpl::enable(uint64_t callId, const std::string &method, jso
  *      - exceptionDetails: Exception details.
  *
  * */
-void DebugDispatcherImpl::evaluateOnCallFrame(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::evaluateOnCallFrame(uint64_t callId, const std::string &method, JSONObject message,
                                               ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -251,7 +251,7 @@ void DebugDispatcherImpl::evaluateOnCallFrame(uint64_t callId, const std::string
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
   // Declare output parameters.
@@ -294,7 +294,7 @@ void DebugDispatcherImpl::evaluateOnCallFrame(uint64_t callId, const std::string
  *
  * */
 void DebugDispatcherImpl::getPossibleBreakpoints(uint64_t callId, const std::string &method,
-                                                 jsonRpc::JSONObject message, ErrorSupport *errors) {
+                                                 JSONObject message, ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
 
@@ -330,7 +330,7 @@ void DebugDispatcherImpl::getPossibleBreakpoints(uint64_t callId, const std::str
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
   // Declare output parameters.
@@ -366,7 +366,7 @@ void DebugDispatcherImpl::getPossibleBreakpoints(uint64_t callId, const std::str
  * @return scriptSource: Script source.
  *
  * */
-void DebugDispatcherImpl::getScriptSource(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::getScriptSource(uint64_t callId, const std::string &method, JSONObject message,
                                           ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -381,7 +381,7 @@ void DebugDispatcherImpl::getScriptSource(uint64_t callId, const std::string &me
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
   // Declare output parameters.
@@ -411,7 +411,7 @@ void DebugDispatcherImpl::getScriptSource(uint64_t callId, const std::string &me
  * @return stackTrace
  *
  * */
-void DebugDispatcherImpl::getStackTrace(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::getStackTrace(uint64_t callId, const std::string &method, JSONObject message,
                                         ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -427,7 +427,7 @@ void DebugDispatcherImpl::getStackTrace(uint64_t callId, const std::string &meth
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
   // Declare output parameters.
@@ -455,7 +455,7 @@ void DebugDispatcherImpl::getStackTrace(uint64_t callId, const std::string &meth
  * Stops on the next JavaScript statement.
  *
  * */
-void DebugDispatcherImpl::pause(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::pause(uint64_t callId, const std::string &method, JSONObject message,
                                 ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->pause();
@@ -467,7 +467,7 @@ void DebugDispatcherImpl::pause(uint64_t callId, const std::string &method, json
   return;
 }
 
-void DebugDispatcherImpl::pauseOnAsyncCall(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::pauseOnAsyncCall(uint64_t callId, const std::string &method, JSONObject message,
                                            ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -482,7 +482,7 @@ void DebugDispatcherImpl::pauseOnAsyncCall(uint64_t callId, const std::string &m
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -502,7 +502,7 @@ void DebugDispatcherImpl::pauseOnAsyncCall(uint64_t callId, const std::string &m
  *
  * @param breakpointId
  * */
-void DebugDispatcherImpl::removeBreakpoint(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::removeBreakpoint(uint64_t callId, const std::string &method, JSONObject message,
                                            ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -516,7 +516,7 @@ void DebugDispatcherImpl::removeBreakpoint(uint64_t callId, const std::string &m
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -540,7 +540,7 @@ void DebugDispatcherImpl::removeBreakpoint(uint64_t callId, const std::string &m
  *      - asyncStackTrace: Async stack trace, if any.
  *      - asyncStackTraceId: Async stack trace, if any.
  * */
-void DebugDispatcherImpl::restartFrame(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::restartFrame(uint64_t callId, const std::string &method, JSONObject message,
                                        ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -555,7 +555,7 @@ void DebugDispatcherImpl::restartFrame(uint64_t callId, const std::string &metho
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -596,7 +596,7 @@ void DebugDispatcherImpl::restartFrame(uint64_t callId, const std::string &metho
   return;
 }
 
-void DebugDispatcherImpl::resume(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::resume(uint64_t callId, const std::string &method, JSONObject message,
                                  ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->resume();
@@ -621,7 +621,7 @@ void DebugDispatcherImpl::resume(uint64_t callId, const std::string &method, jso
  *      - result: List of search matches.
  *
  * */
-void DebugDispatcherImpl::searchInContent(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::searchInContent(uint64_t callId, const std::string &method, JSONObject message,
                                           ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -664,7 +664,7 @@ void DebugDispatcherImpl::searchInContent(uint64_t callId, const std::string &me
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
   // Declare output parameters.
@@ -692,7 +692,7 @@ void DebugDispatcherImpl::searchInContent(uint64_t callId, const std::string &me
 }
 
 void DebugDispatcherImpl::setAsyncCallStackDepth(uint64_t callId, const std::string &method,
-                                                 jsonRpc::JSONObject message, ErrorSupport *errors) {
+                                                 JSONObject message, ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
   int in_maxDepth = 0;
@@ -705,7 +705,7 @@ void DebugDispatcherImpl::setAsyncCallStackDepth(uint64_t callId, const std::str
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -719,7 +719,7 @@ void DebugDispatcherImpl::setAsyncCallStackDepth(uint64_t callId, const std::str
   return;
 }
 
-void DebugDispatcherImpl::setBlackboxPatterns(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::setBlackboxPatterns(uint64_t callId, const std::string &method, JSONObject message,
                                               ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -738,7 +738,7 @@ void DebugDispatcherImpl::setBlackboxPatterns(uint64_t callId, const std::string
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -752,7 +752,7 @@ void DebugDispatcherImpl::setBlackboxPatterns(uint64_t callId, const std::string
   return;
 }
 
-void DebugDispatcherImpl::setBlackboxedRanges(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::setBlackboxedRanges(uint64_t callId, const std::string &method, JSONObject message,
                                               ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -780,7 +780,7 @@ void DebugDispatcherImpl::setBlackboxedRanges(uint64_t callId, const std::string
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -794,7 +794,7 @@ void DebugDispatcherImpl::setBlackboxedRanges(uint64_t callId, const std::string
   return;
 }
 
-void DebugDispatcherImpl::setBreakpoint(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::setBreakpoint(uint64_t callId, const std::string &method, JSONObject message,
                                         ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -820,7 +820,7 @@ void DebugDispatcherImpl::setBreakpoint(uint64_t callId, const std::string &meth
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
   // Declare output parameters.
@@ -864,7 +864,7 @@ void DebugDispatcherImpl::setBreakpoint(uint64_t callId, const std::string &meth
  * breakpoint if this expression evaluates to true.
  *
  * */
-void DebugDispatcherImpl::setBreakpointByUrl(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::setBreakpointByUrl(uint64_t callId, const std::string &method, JSONObject message,
                                              ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -929,7 +929,7 @@ void DebugDispatcherImpl::setBreakpointByUrl(uint64_t callId, const std::string 
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -964,7 +964,7 @@ void DebugDispatcherImpl::setBreakpointByUrl(uint64_t callId, const std::string 
 }
 
 void DebugDispatcherImpl::setBreakpointOnFunctionCall(uint64_t callId, const std::string &method,
-                                                      jsonRpc::JSONObject message, ErrorSupport *errors) {
+                                                      JSONObject message, ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
   std::string in_objectId = "";
@@ -987,7 +987,7 @@ void DebugDispatcherImpl::setBreakpointOnFunctionCall(uint64_t callId, const std
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
   // Declare output parameters.
@@ -1010,7 +1010,7 @@ void DebugDispatcherImpl::setBreakpointOnFunctionCall(uint64_t callId, const std
   return;
 }
 
-void DebugDispatcherImpl::setBreakpointsActive(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::setBreakpointsActive(uint64_t callId, const std::string &method, JSONObject message,
                                                ErrorSupport *errors) {
   KRAKEN_LOG(VERBOSE) << "received [setBreakpointsActive] message: " << callId;
 
@@ -1026,7 +1026,7 @@ void DebugDispatcherImpl::setBreakpointsActive(uint64_t callId, const std::strin
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -1040,7 +1040,7 @@ void DebugDispatcherImpl::setBreakpointsActive(uint64_t callId, const std::strin
   return;
 }
 
-void DebugDispatcherImpl::setPauseOnExceptions(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::setPauseOnExceptions(uint64_t callId, const std::string &method, JSONObject message,
                                                ErrorSupport *errors) {
   KRAKEN_LOG(VERBOSE) << "received [setPauseOnExceptions] message: " << callId;
 
@@ -1056,7 +1056,7 @@ void DebugDispatcherImpl::setPauseOnExceptions(uint64_t callId, const std::strin
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -1070,7 +1070,7 @@ void DebugDispatcherImpl::setPauseOnExceptions(uint64_t callId, const std::strin
   return;
 }
 
-void DebugDispatcherImpl::setReturnValue(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::setReturnValue(uint64_t callId, const std::string &method, JSONObject message,
                                          ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -1086,7 +1086,7 @@ void DebugDispatcherImpl::setReturnValue(uint64_t callId, const std::string &met
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -1100,7 +1100,7 @@ void DebugDispatcherImpl::setReturnValue(uint64_t callId, const std::string &met
   return;
 }
 
-void DebugDispatcherImpl::setScriptSource(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::setScriptSource(uint64_t callId, const std::string &method, JSONObject message,
                                           ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -1133,7 +1133,7 @@ void DebugDispatcherImpl::setScriptSource(uint64_t callId, const std::string &me
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -1184,7 +1184,7 @@ void DebugDispatcherImpl::setScriptSource(uint64_t callId, const std::string &me
   return;
 }
 
-void DebugDispatcherImpl::setSkipAllPauses(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::setSkipAllPauses(uint64_t callId, const std::string &method, JSONObject message,
                                            ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -1198,7 +1198,7 @@ void DebugDispatcherImpl::setSkipAllPauses(uint64_t callId, const std::string &m
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -1212,7 +1212,7 @@ void DebugDispatcherImpl::setSkipAllPauses(uint64_t callId, const std::string &m
   return;
 }
 
-void DebugDispatcherImpl::setVariableValue(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::setVariableValue(uint64_t callId, const std::string &method, JSONObject message,
                                            ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -1253,7 +1253,7 @@ void DebugDispatcherImpl::setVariableValue(uint64_t callId, const std::string &m
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -1268,7 +1268,7 @@ void DebugDispatcherImpl::setVariableValue(uint64_t callId, const std::string &m
   return;
 }
 
-void DebugDispatcherImpl::stepInto(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::stepInto(uint64_t callId, const std::string &method, JSONObject message,
                                    ErrorSupport *errors) {
   KRAKEN_LOG(VERBOSE) << "received [stepInto] message: " << callId;
 
@@ -1287,7 +1287,7 @@ void DebugDispatcherImpl::stepInto(uint64_t callId, const std::string &method, j
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -1301,7 +1301,7 @@ void DebugDispatcherImpl::stepInto(uint64_t callId, const std::string &method, j
   return;
 }
 
-void DebugDispatcherImpl::stepOut(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::stepOut(uint64_t callId, const std::string &method, JSONObject message,
                                   ErrorSupport *) {
   KRAKEN_LOG(VERBOSE) << "received [stepOut] message: " << callId;
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
@@ -1314,7 +1314,7 @@ void DebugDispatcherImpl::stepOut(uint64_t callId, const std::string &method, js
   return;
 }
 
-void DebugDispatcherImpl::stepOver(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void DebugDispatcherImpl::stepOver(uint64_t callId, const std::string &method, JSONObject message,
                                    ErrorSupport *) {
   KRAKEN_LOG(VERBOSE) << "received [stepOver] message: " << callId;
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();

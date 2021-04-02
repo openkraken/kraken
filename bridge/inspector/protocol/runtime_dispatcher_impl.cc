@@ -12,7 +12,7 @@ bool RuntimeDispatcherImpl::canDispatch(const std::string &method) {
 }
 
 void RuntimeDispatcherImpl::dispatch(uint64_t callId, const std::string &method,
-                                     kraken::debugger::jsonRpc::JSONObject message) {
+                                     kraken::debugger::JSONObject message) {
   std::unordered_map<std::string, CallHandler>::iterator it = m_dispatchMap.find(method);
   if (it == m_dispatchMap.end()) {
     return;
@@ -23,7 +23,7 @@ void RuntimeDispatcherImpl::dispatch(uint64_t callId, const std::string &method,
 
 /////////////  COMMANDS  //////////////////////
 
-void RuntimeDispatcherImpl::enable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::enable(uint64_t callId, const std::string &method, JSONObject message,
                                    ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->enable();
@@ -35,7 +35,7 @@ void RuntimeDispatcherImpl::enable(uint64_t callId, const std::string &method, j
   return;
 }
 
-void RuntimeDispatcherImpl::disable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::disable(uint64_t callId, const std::string &method, JSONObject message,
                                     ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->disable();
@@ -47,13 +47,13 @@ void RuntimeDispatcherImpl::disable(uint64_t callId, const std::string &method, 
   return;
 }
 
-void RuntimeDispatcherImpl::awaitPromise(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::awaitPromise(uint64_t callId, const std::string &method, JSONObject message,
                                          ErrorSupport *) {}
 
 class CallFunctionOnCallbackImpl : public RuntimeBackend::CallFunctionOnCallback, public DispatcherBase::Callback {
 public:
   CallFunctionOnCallbackImpl(std::unique_ptr<DispatcherBase::WeakPtr> backendImpl, uint64_t callId,
-                             const std::string &method, kraken::debugger::jsonRpc::JSONObject message,
+                             const std::string &method, kraken::debugger::JSONObject message,
                              rapidjson::Document::AllocatorType &allocator)
     : DispatcherBase::Callback(std::move(backendImpl), callId, method, std::move(message)), m_allocator(allocator) {}
 
@@ -80,7 +80,7 @@ private:
   rapidjson::Document::AllocatorType &m_allocator;
 };
 
-void RuntimeDispatcherImpl::callFunctionOn(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::callFunctionOn(uint64_t callId, const std::string &method, JSONObject message,
                                            ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -188,7 +188,7 @@ void RuntimeDispatcherImpl::callFunctionOn(uint64_t callId, const std::string &m
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -202,7 +202,7 @@ void RuntimeDispatcherImpl::callFunctionOn(uint64_t callId, const std::string &m
   return;
 }
 
-void RuntimeDispatcherImpl::compileScript(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::compileScript(uint64_t callId, const std::string &method, JSONObject message,
                                           ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -243,7 +243,7 @@ void RuntimeDispatcherImpl::compileScript(uint64_t callId, const std::string &me
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -275,12 +275,12 @@ void RuntimeDispatcherImpl::compileScript(uint64_t callId, const std::string &me
 }
 
 void RuntimeDispatcherImpl::discardConsoleEntries(uint64_t callId, const std::string &method,
-                                                  jsonRpc::JSONObject message, ErrorSupport *) {}
+                                                  JSONObject message, ErrorSupport *) {}
 
 class EvaluateCallbackImpl : public RuntimeBackend::EvaluateCallback, public DispatcherBase::Callback {
 public:
   EvaluateCallbackImpl(std::unique_ptr<DispatcherBase::WeakPtr> backendImpl, uint64_t callId, const std::string &method,
-                       kraken::debugger::jsonRpc::JSONObject message, rapidjson::Document::AllocatorType &allocator)
+                       kraken::debugger::JSONObject message, rapidjson::Document::AllocatorType &allocator)
     : DispatcherBase::Callback(std::move(backendImpl), callId, method, std::move(message)), m_allocator(allocator) {}
 
   void sendSuccess(std::unique_ptr<debugger::RemoteObject> result,
@@ -305,7 +305,7 @@ private:
   rapidjson::Document::AllocatorType &m_allocator;
 };
 
-void RuntimeDispatcherImpl::evaluate(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::evaluate(uint64_t callId, const std::string &method, JSONObject message,
                                      ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -420,7 +420,7 @@ void RuntimeDispatcherImpl::evaluate(uint64_t callId, const std::string &method,
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -434,7 +434,7 @@ void RuntimeDispatcherImpl::evaluate(uint64_t callId, const std::string &method,
   return;
 }
 
-void RuntimeDispatcherImpl::getIsolateId(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::getIsolateId(uint64_t callId, const std::string &method, JSONObject message,
                                          ErrorSupport *) {
   // Declare output parameters.
   std::string out_id;
@@ -454,7 +454,7 @@ void RuntimeDispatcherImpl::getIsolateId(uint64_t callId, const std::string &met
   return;
 }
 
-void RuntimeDispatcherImpl::getHeapUsage(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::getHeapUsage(uint64_t callId, const std::string &method, JSONObject message,
                                          ErrorSupport *) {
   // Declare output parameters.
   double out_usedSize;
@@ -490,7 +490,7 @@ void RuntimeDispatcherImpl::getHeapUsage(uint64_t callId, const std::string &met
  *      - privateProperties: Object private properties.
  *      - exceptionDetails
  * */
-void RuntimeDispatcherImpl::getProperties(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::getProperties(uint64_t callId, const std::string &method, JSONObject message,
                                           ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -534,7 +534,7 @@ void RuntimeDispatcherImpl::getProperties(uint64_t callId, const std::string &me
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -589,12 +589,12 @@ void RuntimeDispatcherImpl::getProperties(uint64_t callId, const std::string &me
 }
 
 void RuntimeDispatcherImpl::globalLexicalScopeNames(uint64_t callId, const std::string &method,
-                                                    jsonRpc::JSONObject message, ErrorSupport *) {}
+                                                    JSONObject message, ErrorSupport *) {}
 
-void RuntimeDispatcherImpl::queryObjects(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::queryObjects(uint64_t callId, const std::string &method, JSONObject message,
                                          ErrorSupport *) {}
 
-void RuntimeDispatcherImpl::releaseObject(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::releaseObject(uint64_t callId, const std::string &method, JSONObject message,
                                           ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -607,7 +607,7 @@ void RuntimeDispatcherImpl::releaseObject(uint64_t callId, const std::string &me
   }
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -621,7 +621,7 @@ void RuntimeDispatcherImpl::releaseObject(uint64_t callId, const std::string &me
   return;
 }
 
-void RuntimeDispatcherImpl::releaseObjectGroup(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::releaseObjectGroup(uint64_t callId, const std::string &method, JSONObject message,
                                                ErrorSupport *errors) {
   // Prepare input parameters.
   errors->push();
@@ -635,7 +635,7 @@ void RuntimeDispatcherImpl::releaseObjectGroup(uint64_t callId, const std::strin
 
   errors->pop();
   if (errors->hasErrors()) {
-    reportProtocolError(callId, jsonRpc::kInvalidParams, kInvalidParamsString, errors);
+    reportProtocolError(callId, kInvalidParams, kInvalidParamsString, errors);
     return;
   }
 
@@ -650,7 +650,7 @@ void RuntimeDispatcherImpl::releaseObjectGroup(uint64_t callId, const std::strin
 }
 
 void RuntimeDispatcherImpl::runIfWaitingForDebugger(uint64_t callId, const std::string &method,
-                                                    jsonRpc::JSONObject message, ErrorSupport *) {
+                                                    JSONObject message, ErrorSupport *) {
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->runIfWaitingForDebugger();
   if (response.status() == DispatchResponse::kFallThrough) {
@@ -661,22 +661,22 @@ void RuntimeDispatcherImpl::runIfWaitingForDebugger(uint64_t callId, const std::
   return;
 }
 
-void RuntimeDispatcherImpl::runScript(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::runScript(uint64_t callId, const std::string &method, JSONObject message,
                                       ErrorSupport *) {}
 
 void RuntimeDispatcherImpl::setCustomObjectFormatterEnabled(uint64_t callId, const std::string &method,
-                                                            jsonRpc::JSONObject message, ErrorSupport *) {}
+                                                            JSONObject message, ErrorSupport *) {}
 
 void RuntimeDispatcherImpl::setMaxCallStackSizeToCapture(uint64_t callId, const std::string &method,
-                                                         jsonRpc::JSONObject message, ErrorSupport *) {}
+                                                         JSONObject message, ErrorSupport *) {}
 
-void RuntimeDispatcherImpl::terminateExecution(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::terminateExecution(uint64_t callId, const std::string &method, JSONObject message,
                                                ErrorSupport *) {}
 
-void RuntimeDispatcherImpl::addBinding(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::addBinding(uint64_t callId, const std::string &method, JSONObject message,
                                        ErrorSupport *) {}
 
-void RuntimeDispatcherImpl::removeBinding(uint64_t callId, const std::string &method, jsonRpc::JSONObject message,
+void RuntimeDispatcherImpl::removeBinding(uint64_t callId, const std::string &method, JSONObject message,
                                           ErrorSupport *) {}
 
 } // namespace debugger

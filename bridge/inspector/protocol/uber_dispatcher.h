@@ -25,7 +25,7 @@ public:
   bool canDispatch(const std::string &method);
 
   void dispatch(uint64_t callId, const std::string &method,
-                debugger::jsonRpc::JSONObject message /*params. move only*/);
+                debugger::JSONObject message /*params. move only*/);
 
   FrontendChannel *channel() {
     return m_frontendChannel;

@@ -35,24 +35,24 @@ public:
   }
   ~LogDispatcherImpl() override {}
   bool canDispatch(const std::string &method) override;
-  void dispatch(uint64_t callId, const std::string &method, jsonRpc::JSONObject message) override;
+  void dispatch(uint64_t callId, const std::string &method, JSONObject message) override;
   std::unordered_map<std::string, std::string> &redirects() {
     return m_redirects;
   }
 
 protected:
   using CallHandler = std::function<void(uint64_t /*callId*/, const std::string & /*method*/,
-                                         jsonRpc::JSONObject /*msg*/, ErrorSupport *)>;
+                                         JSONObject /*msg*/, ErrorSupport *)>;
   using DispatchMap = std::unordered_map<std::string, CallHandler>;
 
   DispatchMap m_dispatchMap;
   std::unordered_map<std::string, std::string> m_redirects;
 
-  void clear(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void disable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void enable(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void startViolationsReport(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
-  void stopViolationsReport(uint64_t callId, const std::string &method, jsonRpc::JSONObject message, ErrorSupport *);
+  void clear(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void disable(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void enable(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void startViolationsReport(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
+  void stopViolationsReport(uint64_t callId, const std::string &method, JSONObject message, ErrorSupport *);
 
   LogBackend *m_backend;
 };

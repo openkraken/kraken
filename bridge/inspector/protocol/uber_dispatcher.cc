@@ -29,7 +29,7 @@ bool UberDispatcher::canDispatch(const std::string &in_method) {
   return findDispatcher(method) != nullptr;
 }
 
-void UberDispatcher::dispatch(uint64_t callId, const std::string &in_method, debugger::jsonRpc::JSONObject message) {
+void UberDispatcher::dispatch(uint64_t callId, const std::string &in_method, debugger::JSONObject message) {
   std::string method = in_method;
   auto redirectIt = m_redirects.find(method);
   if (redirectIt != m_redirects.end()) {
@@ -37,7 +37,7 @@ void UberDispatcher::dispatch(uint64_t callId, const std::string &in_method, deb
   }
   auto dispatcher = findDispatcher(method);
   if (!dispatcher) {
-    Internal::reportProtocolErrorTo(m_frontendChannel, callId, jsonRpc::kMethodNotFound,
+    Internal::reportProtocolErrorTo(m_frontendChannel, callId, kMethodNotFound,
                                     "'" + method + "' wasn't found", nullptr);
     return;
   }

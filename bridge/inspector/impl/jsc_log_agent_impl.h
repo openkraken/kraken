@@ -10,7 +10,7 @@
 #include "inspector/protocol/log_frontend.h"
 
 namespace kraken::debugger {
-class InspectorSessionImpl;
+class InspectorSession;
 class AgentContext;
 
 class JSCLogAgentImpl : public LogBackend {
@@ -18,7 +18,7 @@ private:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(JSCLogAgentImpl);
 
 public:
-  JSCLogAgentImpl(InspectorSessionImpl *session, debugger::AgentContext &context);
+  JSCLogAgentImpl(InspectorSession *session, debugger::AgentContext &context);
   ~JSCLogAgentImpl() override;
 
   /***************** LogBackend *********************/
@@ -31,7 +31,7 @@ private:
   bool m_enabled{false};
 
 private:
-  InspectorSessionImpl *m_session;
+  InspectorSession *m_session;
   LogFrontend m_frontend;
 };
 } // namespace kraken::debugger

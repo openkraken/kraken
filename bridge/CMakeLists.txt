@@ -8,13 +8,17 @@ string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-#set(CMAKE_VERBOSE_MAKEFILE TRUE)
-
 if(${ENABLE_PROFILE})
   add_definitions(-DENABLE_PROFILE=1)
 else()
   add_definitions(-DENABLE_PROFILE=0)
 endif()
+
+execute_process(
+  COMMAND bash "-c" "read dart_sdk < <(type -p dart) && echo $\{dart_sdk%/*\}/cache/dart-sdk | xargs"
+  OUTPUT_VARIABLE DART_SDK
+)
+string(REGEX REPLACE "\n$" "" DART_SDK "${DART_SDK}")
 
 list(APPEND PUBLIC_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
@@ -49,6 +53,7 @@ list(APPEND BRIDGE_INCLUDE
   ./
   ./include
   ./polyfill/dist
+  ${DART_SDK}
   ${ADDITIONAL_INCLUDE_DIRS}
   )
 
@@ -73,7 +78,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
       set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION ${DEBUG_JSC_ENGINE}/JavaScriptCore)
       list(APPEND BRIDGE_LINK_LIBS JavaScriptCore)
       include(inspector/inspector.cmake)
-      list(APPEND BRIDGE_LINK_LIBS devtool)
+      list(APPEND BRIDGE_LINK_LIBS inspector)
+      add_compile_options(-DENABLE_DEBUGGER=1)
     else()
       list(APPEND BRIDGE_LINK_LIBS "-framework JavaScriptCore")
     endif()
