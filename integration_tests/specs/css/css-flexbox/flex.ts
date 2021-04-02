@@ -982,4 +982,39 @@ describe('flex', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('change from not none to none', async (done) => {
+    let item;
+    const cont = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          minHeight: '100px',
+          width: '100px',
+          backgroundColor: 'green',
+          fontSize: '18px',
+        }
+      }, [
+        (item = createElement('div',  {
+          style: {
+            display: 'flex',
+            width: '50px',
+            height: '50px',
+            backgroundColor: 'red',
+            flex: 1,
+          }
+        }))
+      ]
+    );
+    append(BODY, cont);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      item.style.flex = 'none';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
 });

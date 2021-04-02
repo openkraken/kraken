@@ -24,5 +24,6 @@ jobs:
       run: rm -rf "${RUNNER_WORKSPACE}/${BRANCH_NAME}"
       continue-on-error: true
     - name: Check on failures
+      continue-on-error: true
       if: steps.test.outcome != 'success'
       run: exit 1
