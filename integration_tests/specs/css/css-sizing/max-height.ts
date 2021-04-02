@@ -362,4 +362,29 @@ describe('max-height', () => {
     BODY.appendChild(div);
     await matchViewportSnapshot();
   });
+
+  it('change from not none to none', async (done) => {
+    const cont = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          height: '200px',
+          maxHeight: '100px',
+          width: '100px',
+          backgroundColor: 'green',
+          fontSize: '18px',
+        }
+      }
+    );
+    append(BODY, cont);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      cont.style.maxHeight = 'none';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
 });

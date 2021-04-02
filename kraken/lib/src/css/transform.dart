@@ -822,6 +822,10 @@ class CSSTransform {
     return [translate, scale, angle, m11, m12, m21, m22];
   }
 
+  static bool isValidTransformValue(String value, [Size viewportSize]) {
+    return value == NONE || parseTransform(value, viewportSize) != null;
+  }
+
   static Matrix4 initial = Matrix4.identity();
 
   static Matrix4 parseTransform(String value, [Size viewportSize]) {
@@ -1127,11 +1131,11 @@ mixin CSSTransformMixin on RenderStyleBase {
   void updateTransform(
     Matrix4 matrix4,
     {
-      bool shouldConvertToRepaintBoundary = true,
+      bool shouldToggleRepaintBoundary = true,
       bool shouldMarkNeedsLayout = true
     }
   ) {
-    // If render box model was not creared yet, then exit.
+    // If render box model was not created yet, then exit.
     if (renderBoxModel == null) {
       return;
     }
@@ -1139,27 +1143,15 @@ mixin CSSTransformMixin on RenderStyleBase {
     ElementManager elementManager = renderBoxModel.elementManager;
     int targetId = renderBoxModel.targetId;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
+    element.renderBoxModel.renderStyle.transform = matrix4;
 
-    // Upgrade this renderObject into repaintSelf mode.
-    if (shouldConvertToRepaintBoundary && !renderBoxModel.isRepaintBoundary) {
-      RenderObject parent = renderBoxModel.parent;
-      RenderObject previousSibling;
-      if (parent is ContainerRenderObjectMixin) {
-        previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
-        parent.remove(renderBoxModel);
+    if (shouldToggleRepaintBoundary) {
+      if (element.shouldConvertToRepaintBoundary) {
+        element.convertToRepaintBoundary();
+      } else {
+        element.convertToNonRepaintBoundary();
       }
-      RenderBoxModel repaintSelfBox = element.createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
-      if (parent is ContainerRenderObjectMixin) {
-        element.renderBoxModel = repaintSelfBox;
-        element.parent.addChildRenderObject(element, after: previousSibling);
-      } else if (parent is RenderObjectWithChildMixin) {
-        parent.child = repaintSelfBox;
-      }
-      element.renderBoxModel = repaintSelfBox;
-      // Update renderBoxModel reference in renderStyle
-      element.renderBoxModel.renderStyle.renderBoxModel = element.renderBoxModel;
     }
-    element.renderBoxModel.renderStyle.transform = matrix4 ?? CSSTransform.initial;
 
     if (shouldMarkNeedsLayout) {
       element.renderBoxModel.markNeedsLayout();

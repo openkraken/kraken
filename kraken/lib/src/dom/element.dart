@@ -894,13 +894,13 @@ class Element extends Node
 
       case FLEX_DIRECTION:
       case FLEX_WRAP:
-      case ALIGN_SELF:
       case ALIGN_CONTENT:
       case ALIGN_ITEMS:
       case JUSTIFY_CONTENT:
         _styleFlexChangedListener(property, original, present);
         break;
 
+      case ALIGN_SELF:
       case FLEX_GROW:
       case FLEX_SHRINK:
       case FLEX_BASIS:
@@ -1122,10 +1122,13 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
-    CSSDisplay display = renderBoxModel.renderStyle.display;
-    if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
-      for (Element child in children) {
-        if (renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
+    CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
+    bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
+
+    // Flex factor change will cause flex item self and its siblings relayout.
+    if (isParentFlexDisplayType) {
+      for (Element child in parent.children) {
+        if (parent.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
           child.renderBoxModel.renderStyle.updateFlexItem();
           child.renderBoxModel.markNeedsLayout();
         }

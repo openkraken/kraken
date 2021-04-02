@@ -109,4 +109,29 @@ describe('BoxShadow', () => {
     // BoxShadow has been removed.
     await matchViewportSnapshot();
   });
+
+  it('change from not none to none', async (done) => {
+    const cont = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          minHeight: '100px',
+          width: '100px',
+          backgroundColor: 'green',
+          fontSize: '18px',
+          boxShadow: '4px 4px 4px 0 red',
+        }
+      }
+    );
+    append(BODY, cont);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      cont.style.boxShadow = 'none';
+      await matchViewportSnapshot(0.1);
+      done();
+    });
+  });
 });

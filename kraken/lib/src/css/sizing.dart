@@ -110,14 +110,14 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   double getMinWidth(double minWidth) {
-    if (minWidth < 0)  {
+    if (minWidth == null || minWidth < 0)  {
       return null;
     }
     return minWidth;
   }
 
   double getMaxWidth(double maxWidth, double minWidth) {
-    if (maxWidth < 0) {
+    if (maxWidth == null || maxWidth < 0) {
       return null;
     }
     // max-width is invalid if max-width is smaller than min-width
@@ -128,14 +128,14 @@ mixin CSSSizingMixin on RenderStyleBase {
   }
 
   double getMinHeight(double minHeight) {
-    if (minHeight < 0)  {
+    if (minHeight == null || minHeight < 0)  {
       return null;
     }
     return minHeight;
   }
 
   double getMaxHeight(double maxHeight, double minHeight) {
-    if (maxHeight < 0) {
+    if (maxHeight == null || maxHeight < 0) {
       return null;
     }
     // max-height is invalid if max-height is smaller than min-height

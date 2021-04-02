@@ -491,10 +491,17 @@ class CSSStyleDeclaration {
           return;
         }
         break;
-      case MIN_WIDTH:
-      case MIN_HEIGHT:
       case MAX_WIDTH:
       case MAX_HEIGHT:
+        if (normalizedValue != NONE &&
+          !CSSLength.isLength(normalizedValue) &&
+          !CSSLength.isPercentage(normalizedValue)
+        ) {
+          return;
+        }
+        break;
+      case MIN_WIDTH:
+      case MIN_HEIGHT:
       case PADDING_TOP:
       case PADDING_LEFT:
       case PADDING_BOTTOM:
@@ -530,7 +537,7 @@ class CSSStyleDeclaration {
         if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
       case TRANSFORM:
-        if (CSSTransform.parseTransform(normalizedValue, viewportSize) == null) {
+        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize)) {
           return;
         }
         break;
