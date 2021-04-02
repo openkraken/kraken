@@ -53,7 +53,7 @@ JSValueRef JSDocument::createEvent(JSContextRef ctx, JSObjectRef function, JSObj
     auto event = NativeEvent(stringToNativeString(eventType));
 
     auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
-    auto e = JSEvent::buildEventInstance(eventType, document->context, &event, true);
+    auto e = JSEvent::buildEventInstance(eventType, document->context, &event, false);
     return e->object;
   } else {
     return nullptr;
