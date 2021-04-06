@@ -127,6 +127,41 @@ describe('border_radius', () => {
     await matchViewportSnapshot();
   });
 
+  it('should work with percentage border-radius and percentage sizing of multiple children in flow layout', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '50%',
+            height: '50%',
+            borderRadius: '100% 50%',
+            backgroundColor: 'green',
+          }
+        }),
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
   it('should work with percentage border-radius and percentage sizing in flex layout', async () => {
     let div;
     div = createElement(
@@ -149,6 +184,42 @@ describe('border_radius', () => {
             backgroundColor: 'green',
           }
         })
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage border-radius and percentage sizing of multiple children in flex layout', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '50%',
+            height: '50%',
+            borderRadius: '100% 50%',
+            backgroundColor: 'green',
+          }
+        }),
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+          }
+        }),
       ]
     );
 

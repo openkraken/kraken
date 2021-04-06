@@ -1004,7 +1004,10 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
+        if (percentageExist) {
+          percentageFound = true;
+        }
       }
       child = childParentData.nextSibling;
     }
@@ -1044,7 +1047,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
+        if (percentageExist) {
+          percentageFound = true;
+          break;
+        }
       }
       child = childParentData.nextSibling;
     }
@@ -1064,7 +1071,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.isPercentageToOwnExist();
+        bool percentageExist = child.renderStyle.isPercentageToOwnExist();
+        if (percentageExist) {
+          percentageFound = true;
+          break;
+        }
       }
       child = childParentData.nextSibling;
     }
