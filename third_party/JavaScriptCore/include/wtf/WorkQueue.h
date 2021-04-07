@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2010, 2015 Apple Inc. All rights reserved.
  * Portions Copyright (c) 2010 Motorola Mobility, Inc.  All rights reserved.
+ * Copyright (C) 2017 Sony Interactive Entertainment Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,13 +25,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WorkQueue_h
-#define WorkQueue_h
+#pragma once
 
-#include <functional>
 #include <wtf/Forward.h>
 #include <wtf/FunctionDispatcher.h>
-#include <wtf/RefCounted.h>
 #include <wtf/Seconds.h>
 #include <wtf/Threading.h>
 
@@ -39,6 +37,8 @@
 #endif
 
 #if USE(WINDOWS_EVENT_LOOP)
+#include <wtf/HashMap.h>
+#include <wtf/ThreadingPrimitives.h>
 #include <wtf/Vector.h>
 #endif
 
@@ -50,6 +50,7 @@
 namespace WTF {
 
 class WorkQueue final : public FunctionDispatcher {
+
 public:
     enum class Type {
         Serial,
@@ -69,7 +70,7 @@ public:
     WTF_EXPORT_PRIVATE void dispatch(Function<void()>&&) override;
     WTF_EXPORT_PRIVATE void dispatchAfter(Seconds, Function<void()>&&);
 
-    WTF_EXPORT_PRIVATE static void concurrentApply(size_t iterations, const std::function<void(size_t index)>&);
+    WTF_EXPORT_PRIVATE static void concurrentApply(size_t iterations, WTF::Function<void(size_t index)>&&);
 
 #if USE(COCOA_EVENT_LOOP)
     dispatch_queue_t dispatchQueue() const { return m_dispatchQueue; }
@@ -98,14 +99,11 @@ private:
 #elif USE(WINDOWS_EVENT_LOOP)
     volatile LONG m_isWorkThreadRegistered;
 
-    Mutex m_functionQueueLock;
+    Lock m_functionQueueLock;
     Vector<Function<void()>> m_functionQueue;
 
     HANDLE m_timerQueue;
 #elif USE(GLIB_EVENT_LOOP) || USE(GENERIC_EVENT_LOOP)
-    ThreadIdentifier m_workQueueThread;
-    Lock m_initializeRunLoopConditionMutex;
-    Condition m_initializeRunLoopCondition;
     RunLoop* m_runLoop;
 #endif
 };
@@ -113,5 +111,3 @@ private:
 }
 
 using WTF::WorkQueue;
-
-#endif
