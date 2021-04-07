@@ -52,12 +52,11 @@ public:
 
   std::atomic<bool> event_registered = false;
 
-  //#ifdef ENABLE_DEBUGGER
-  //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;
-  //#endif // ENABLE_DEBUGGER
+  #ifdef ENABLE_DEBUGGER
+    std::shared_ptr<debugger::FrontDoor> m_inspector;
+  #endif // ENABLE_DEBUGGER
 private:
   std::unique_ptr<binding::jsc::JSContext> context;
-  std::shared_ptr<debugger::FrontDoor> m_inspector;
   JSExceptionHandler handler_;
 };
 

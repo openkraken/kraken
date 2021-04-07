@@ -15,6 +15,14 @@ const String INSPECTOR_URL = 'devtools://devtools/bundled/inspector.html';
 const int INSPECTOR_DEFAULT_PORT = 9222;
 const String INSPECTOR_DEFAULT_ADDRESS = '127.0.0.1';
 
+class DOMUpdatedEvent extends InspectorEvent {
+  @override
+  String get method => 'DOM.documentUpdated';
+
+  @override
+  JSONEncodable get params => null;
+}
+
 class Inspector {
   /// Design preInspector for reload page,
   /// do not use it in any other place.
@@ -86,7 +94,7 @@ class Inspector {
 
   void onDOMTreeChanged() {
     if (server.connected) {
-      server.sendEventToFrontend(InspectorEvent('DOM.documentUpdated', null));
+      server.sendEventToFrontend(DOMUpdatedEvent());
     }
   }
 
@@ -117,11 +125,10 @@ abstract class JSONEncodable {
   Map toJson();
 }
 
-@immutable
-class InspectorEvent implements JSONEncodable {
-  final String method;
-  final JSONEncodable params;
-  InspectorEvent(this.method, this.params) : assert(method != null);
+abstract class InspectorEvent extends JSONEncodable {
+  String get method;
+  JSONEncodable get params;
+  InspectorEvent();
 
   Map toJson() {
     return {
@@ -132,7 +139,7 @@ class InspectorEvent implements JSONEncodable {
 }
 
 class JSONEncodableMap extends JSONEncodable {
-  Map map;
+  Map<String, dynamic> map;
   JSONEncodableMap(this.map);
 
   Map toJson() => map;
