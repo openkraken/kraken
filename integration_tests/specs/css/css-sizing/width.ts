@@ -228,6 +228,42 @@ describe('Width', function() {
     await matchViewportSnapshot();
   });
 
+  it('should work with percentage and multiple children in flow layout', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '100px',
+            backgroundColor: 'blue',
+          }
+        }
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
   it('should work with percentage in flex layout in row direction', async () => {
     let div;
     let foo;
@@ -311,6 +347,44 @@ describe('Width', function() {
             }
           }),
         ]
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with percentage and multiple children in flex layout ', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexWrap: 'wrap',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '150px',
+            backgroundColor: 'blue',
+          }
+        }
         )
       ]
     );
