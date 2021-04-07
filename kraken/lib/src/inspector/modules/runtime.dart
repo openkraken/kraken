@@ -294,9 +294,9 @@ class InspectRuntimeModule extends InspectModule {
   void enable() {
     ExecutionContextCreatedEvent event = ExecutionContextCreatedEvent(ExecutionContextDescription(
       inspector.elementManager.contextId,
-      'kraken://',
-      'Main',
-      'Main'
+      inspector.elementManager.controller.origin,
+      inspector.elementManager.controller.name,
+      inspector.elementManager.controller.name
       // inspector.elementManager.controller.name,
       // inspector.elementManager.controller.name
     ));

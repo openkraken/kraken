@@ -516,6 +516,7 @@ class KrakenController {
 
   // the bundle manager which used to download javascript source and run.
   KrakenBundle _bundle;
+  KrakenBundle get bundle => _bundle;
 
   void setNavigationDelegate(KrakenNavigationDelegate delegate) {
     assert(_view != null);
@@ -623,6 +624,8 @@ class KrakenController {
     if (value == null) return;
     _bundleURL = value;
   }
+
+  String get origin => _bundleURL ?? _bundlePath;
 
   // preload javascript source and cache it.
   void loadBundle({

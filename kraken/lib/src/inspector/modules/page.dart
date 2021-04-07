@@ -212,6 +212,12 @@ class InspectPageModule extends InspectModule {
         FrameResourceTree frameResourceTree = getResourceTree();
         sendToFrontend(id, JSONEncodableMap({'frameTree': frameResourceTree}));
         break;
+      case 'getResourceContent':
+        sendToFrontend(id, JSONEncodableMap({
+          'content': inspector.elementManager.controller.bundle.content,
+          'base64Encoded': false
+        }));
+        break;
       case 'reload':
         sendToFrontend(id, null);
         handleReloadPage();
@@ -219,10 +225,11 @@ class InspectPageModule extends InspectModule {
   }
 
   FrameResourceTree getResourceTree() {
-    Frame frame = Frame('1', 'loaderId', 'kraken://', '', '',
-        'application/javascript', 'sameOrigin', 'Isolated', [],
-        name: 'test.js');
-    FrameResource resource = FrameResource('kraken://a.js', enumKey(ResourceType.Script.toString()), 'application/javascript');
+    final String frameId = '1'; // TODO: used this id when multiple bundle load supported.
+    final String networkLoaderId = '1'; //TODO: associated with network loader id when Network panel supported.
+    Frame frame = Frame(frameId, networkLoaderId, inspector.elementManager.controller.origin, '', '',
+        'application/javascript', 'sameOrigin', 'Isolated', []);
+    FrameResource resource = FrameResource('://', enumKey(ResourceType.Script.toString()), 'application/javascript');
     return FrameResourceTree(frame, [resource]);
   }
 
