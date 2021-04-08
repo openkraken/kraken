@@ -42,6 +42,7 @@ typedef void (*FlushUICommand)();
 typedef void (*InitBody)(int32_t contextId, void *nativePtr);
 typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
 typedef void (*InitDocument)(int32_t contextId, void *nativePtr);
+typedef void (*InspectorMessage)(int32_t contextId, const char* message);
 
 using RefreshPaintCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
 using RefreshPaint = void (*)(void *callbackContext, int32_t contextId, RefreshPaintCallback callback);
@@ -95,6 +96,10 @@ struct DartMethodPointer {
   InitBody initBody{nullptr};
   InitWindow initWindow{nullptr};
   InitDocument initDocument{nullptr};
+
+#if ENABLE_DEBUGGER
+  InspectorMessage inspectorMessage{nullptr};
+#endif
 };
 
 void registerDartMethods(uint64_t *methodBytes, int32_t length);

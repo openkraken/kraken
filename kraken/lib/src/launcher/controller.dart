@@ -625,7 +625,7 @@ class KrakenController {
     _bundleURL = value;
   }
 
-  String get origin => _bundleURL ?? _bundlePath;
+  String get origin => _bundleURL ?? _bundlePath ?? 'vm://' + name;
 
   // preload javascript source and cache it.
   void loadBundle({

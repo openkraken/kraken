@@ -47,7 +47,7 @@ private:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(LogMessage);
 };
 
-void printLog(std::stringstream &stream, std::string level, JSObjectRef global);
+void printLog(std::stringstream &stream, std::string level, JSGlobalContextRef ctx);
 
 } // namespace foundation
 

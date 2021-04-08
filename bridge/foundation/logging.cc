@@ -18,6 +18,7 @@
 #if ENABLE_DEBUGGER
 #include <JavaScriptCore/ConsoleTypes.h>
 #include <JavaScriptCore/JSGlobalObject.h>
+#include <JavaScriptCore/APICast.h>
 #include "inspector/impl/jsc_console_client_impl.h"
 #endif
 
@@ -88,7 +89,7 @@ LogMessage::~LogMessage() {
 #endif
 }
 
-void printLog(std::stringstream &stream, std::string level, JSObjectRef global) {
+void printLog(std::stringstream &stream, std::string level, JSGlobalContextRef ctx) {
 #ifdef ENABLE_DEBUGGER
     JSC::MessageLevel _log_level = JSC::MessageLevel::Log;
 #endif
@@ -128,7 +129,11 @@ void printLog(std::stringstream &stream, std::string level, JSObjectRef global) 
     }
 
 #ifdef ENABLE_DEBUGGER
-  auto client = reinterpret_cast<JSC::JSGlobalObject *>(global)->consoleClient();
+  JSC::ExecState* exec = toJS(ctx);
+  JSC::VM& vm = exec->vm();
+  JSC::JSLockHolder locker(vm);
+  JSC::JSGlobalObject *globalObject = exec->lexicalGlobalObject();
+  auto client = globalObject->consoleClient();
   if (client && client != ((void *)0x1)) {
     auto client_impl = reinterpret_cast<kraken::debugger::JSCConsoleClientImpl *>(client);
     client_impl->sendMessageToConsole(_log_level, stream.str());

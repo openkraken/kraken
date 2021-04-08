@@ -37,7 +37,7 @@ JSValueRef print(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
     logLevel = std::move(JSStringToStdString(JSValueToStringCopy(ctx, level, nullptr)));
   }
 
-  foundation::printLog(stream, logLevel, JSContextGetGlobalObject(ctx));
+  foundation::printLog(stream, logLevel, JSContextGetGlobalContext(ctx));
 
   return JSValueMakeUndefined(ctx);
 }

@@ -75,6 +75,12 @@ class InspectServer {
     _ws.add(jsonEncode(event));
   }
 
+  void sendRawJSONToFrontend(String message) {
+    assert(_ws != null, 'WebSocket should connect.');
+    print('send raw message: $message');
+    _ws.add(message);
+  }
+
   Map<String, dynamic> _parseMessage(message) {
     try {
       Map<String, dynamic> data = jsonDecode(message);
