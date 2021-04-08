@@ -353,6 +353,17 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<Native_JSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
+typedef Native_InspectorMessage = Void Function(Int32 contextId, Pointer<Utf8>);
+
+void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  if (controller.view.inspector != null) {
+    controller.view.inspector.server.sendRawJSONToFrontend(Utf8.fromUtf8(message));
+  }
+}
+
+final Pointer<NativeFunction<Native_InspectorMessage>> _nativeInspectorMessage = Pointer.fromFunction(_onInspectorMessage);
+
 final List<int> _dartNativeMethods = [
   _nativeInvokeModule.address,
   _nativeRequestBatchUpdate.address,
@@ -372,6 +383,7 @@ final List<int> _dartNativeMethods = [
   _nativeInitDocument.address,
   _nativeGetEntries.address,
   _nativeOnJsError.address,
+  _nativeInspectorMessage.address
 ];
 
 typedef Native_RegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);

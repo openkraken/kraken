@@ -50,7 +50,6 @@ InspectorSession::InspectorSession(RPCSession *rpcSession, JSC::JSGlobalObject *
 }
 
 InspectorSession::~InspectorSession() {
-//  m_rpcSession = nullptr;
   KRAKEN_LOG(VERBOSE) << "InspectorSession Will Destroyed";
 }
 
