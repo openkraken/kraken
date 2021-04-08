@@ -77,7 +77,6 @@ class InspectServer {
 
   void sendRawJSONToFrontend(String message) {
     assert(_ws != null, 'WebSocket should connect.');
-    print('send raw message: $message');
     _ws.add(message);
   }
 

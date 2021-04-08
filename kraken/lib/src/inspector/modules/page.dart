@@ -229,7 +229,7 @@ class InspectPageModule extends InspectModule {
     final String networkLoaderId = '1'; //TODO: associated with network loader id when Network panel supported.
     Frame frame = Frame(frameId, networkLoaderId, inspector.elementManager.controller.origin, '', '',
         'application/javascript', 'sameOrigin', 'Isolated', []);
-    FrameResource resource = FrameResource('://', enumKey(ResourceType.Script.toString()), 'application/javascript');
+    FrameResource resource = FrameResource('kraken://', enumKey(ResourceType.Script.toString()), 'application/javascript');
     return FrameResourceTree(frame, [resource]);
   }
 
