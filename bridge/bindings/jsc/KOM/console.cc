@@ -31,7 +31,7 @@ JSValueRef print(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
     return JSValueMakeUndefined(ctx);
   }
 
-  std::string logLevel = "log";
+  std::string logLevel = "info";
   const JSValueRef &level = arguments[1];
   if (JSValueIsString(ctx, level)) {
     logLevel = std::move(JSStringToStdString(JSValueToStringCopy(ctx, level, nullptr)));

@@ -91,7 +91,7 @@ LogMessage::~LogMessage() {
 
 void printLog(std::stringstream &stream, std::string level, JSGlobalContextRef ctx) {
 #ifdef ENABLE_DEBUGGER
-    JSC::MessageLevel _log_level = JSC::MessageLevel::Log;
+    JSC::MessageLevel _log_level = JSC::MessageLevel::Info;
 #endif
     switch (level[0]) {
       case 'l':

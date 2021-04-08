@@ -42,8 +42,8 @@ InspectorSession::InspectorSession(RPCSession *rpcSession, JSC::JSGlobalObject *
   m_log_agent.reset(new JSCLogAgentImpl(this, context));
   LogDispatcherContract::wire(&m_dispatcher, m_log_agent.get());
 
-  m_console_client = std::make_unique<JSCConsoleClientImpl>(m_log_agent.get());
-  globalObject->setConsoleClient(m_console_client.get()); // bind console client
+  m_console_client = new JSCConsoleClientImpl(m_log_agent.get());
+  globalObject->setConsoleClient(m_console_client); // bind console client
 
   m_heap_profiler_agent.reset(new JSCHeapProfilerAgentImpl(this, context));
   HeapProfilerDispatcherContract::wire(&m_dispatcher, m_heap_profiler_agent.get());

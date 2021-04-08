@@ -150,7 +150,7 @@ private:
   std::unique_ptr<JSCRuntimeAgentImpl> m_runtime_agent;
   std::unique_ptr<JSCPageAgentImpl> m_page_agent;
   std::unique_ptr<JSCLogAgentImpl> m_log_agent;
-  std::unique_ptr<JSCConsoleClientImpl> m_console_client;
+  JSCConsoleClientImpl *m_console_client{nullptr};
   std::unique_ptr<JSCHeapProfilerAgentImpl> m_heap_profiler_agent;
 
   std::shared_ptr<ProtocolHandler> m_protocol_handler;
