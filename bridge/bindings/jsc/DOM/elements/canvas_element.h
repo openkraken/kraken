@@ -93,6 +93,7 @@ using Rect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingConte
                            double width, double height);
 using Rotate = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double angle);
 using Restore = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
+using ResetTransform = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderinContext2D);
 using Save = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
 using Scale = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y);
 using Stroke = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
@@ -100,6 +101,7 @@ using StrokeRect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderin
                             double width, double height);
 using StrokeText = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *text,
                             double x, double y, double maxWidth);
+using SetTransform = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double a, double b, double c, double d, double e, double f);
 using Transform = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double a, double b, double c, double d, double e, double f);
 using Translate = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y);
 
@@ -125,11 +127,13 @@ struct NativeCanvasRenderingContext2D {
   Rect rect{nullptr};
   Restore restore{nullptr};
   Rotate rotate{nullptr};
+  ResetTransform resetTransform{nullptr};
   Save save{nullptr};
   Scale scale{nullptr};
   Stroke stroke{nullptr};
   StrokeRect strokeRect{nullptr};
   StrokeText strokeText{nullptr};
+  SetTransform setTransform{nullptr};
   Transform transform{nullptr};
   Translate translate{nullptr};
 };
@@ -151,7 +155,15 @@ public:
                              const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef clip(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef clearRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                              const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef ellipse(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef fill(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef fillText(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef fillRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef lineTo(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
@@ -159,44 +171,41 @@ public:
                              const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef quadraticCurveTo(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef restore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                            const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef rotate(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                         const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef rect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef fillRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef clearRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                              const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef strokeRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                               const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef fill(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+  static JSValueRef resetTransform(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef stroke(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef fillText(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef strokeText(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                               const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef strokeRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef save(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                          const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef restore(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                            const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef translate(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                             const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef rotate(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                         const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef scale(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                             const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef setTransform(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef transform(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                             const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef translate(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
 
   class CanvasRenderingContext2DInstance : public Instance {
   public:
     DEFINE_OBJECT_PROPERTY(CanvasRenderingContext2D, 3, font, fillStyle, strokeStyle);
-    DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasRenderingContext2D, 24,
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasRenderingContext2D, 26,
                                     arc, arcTo, beginPath, bezierCurveTo, clearRect,
                                     closePath, clip, ellipse, fill, fillRect,
-                                    fillText, lineTo, moveTo, rect, restore,
-                                    rotate, stroke, strokeRect, save, scale,
-                                    strokeText, quadraticCurveTo, transform, translate);
+                                    fillText, lineTo, moveTo, rect, restore, 
+                                    resetTransform, rotate, quadraticCurveTo, stroke, strokeRect,
+                                    save, scale, strokeText, setTransform, transform,
+                                    translate);
 
     CanvasRenderingContext2DInstance() = delete;
     explicit CanvasRenderingContext2DInstance(CanvasRenderingContext2D *canvasRenderContext2D,
@@ -235,11 +244,13 @@ protected:
   JSFunctionHolder m_rect{context, prototypeObject, this, "rect", rect};
   JSFunctionHolder m_rotate{context, prototypeObject, this, "rotate", rotate};
   JSFunctionHolder m_restore{context, prototypeObject, this, "restore", restore};
+  JSFunctionHolder m_resetTransform{context, prototypeObject, this, "resetTransform", resetTransform};
   JSFunctionHolder m_save{context, prototypeObject, this, "save", save};
   JSFunctionHolder m_scale{context, prototypeObject, this, "scale", scale};
   JSFunctionHolder m_stroke{context, prototypeObject, this, "stroke", stroke};
   JSFunctionHolder m_strokeRect{context, prototypeObject, this, "strokeRect", strokeRect};
   JSFunctionHolder m_strokeText{context, prototypeObject, this, "strokeText", strokeText};
+  JSFunctionHolder m_setTransform{context, prototypeObject, this, "setTransform", setTransform};
   JSFunctionHolder m_transform{context, prototypeObject, this, "transform", transform};
   JSFunctionHolder m_translate{context, prototypeObject, this, "translate", translate};
 };

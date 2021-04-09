@@ -105,8 +105,9 @@ class CanvasElement extends Element {
     switch (contextId) {
       case '2d':
         if (painter.context == null) {
-          CanvasRenderingContext2D.viewportSize = viewportSize;
-          painter.context = CanvasRenderingContext2D();
+          CanvasRenderingContext2D context2d = CanvasRenderingContext2D();
+          context2d.viewportSize = viewportSize;
+          painter.context = context2d;
         }
         return painter.context;
       default:
@@ -222,16 +223,30 @@ class CanvasElement extends Element {
   @override
   void setProperty(String key, value) {
     super.setProperty(key, value);
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
+    // TODO:
+    // When the user agent is to set bitmap dimensions to width and height, it must run these steps:
+    //
+    // 1. Reset the rendering context to its default state.
+    //
+    // 2. Resize the output bitmap to the new width and height and clear it to transparent black.
+    //
+    // 3. Let canvas be the canvas element to which the rendering context's canvas attribute was initialized.
+    //
+    // 4. If the numeric value of canvas's width content attribute differs from width,
+    // then set canvas's width content attribute to the shortest possible string representing width as
+    // a valid non-negative integer.
+    //
+    // 5. If the numeric value of canvas's height content attribute differs from height,
+    // then set canvas's height content attribute to the shortest possible string representing height as
+    // a valid non-negative integer.
     switch (key) {
       case WIDTH:
-        attrWidth = CSSLength.toDisplayPortValue('$value${CSSLength.PX}', viewportSize);
+        // The width of the coordinate space in CSS pixels. Defaults to 300.
+        attrWidth = double.tryParse(value);
         break;
       case HEIGHT:
-        attrHeight = CSSLength.toDisplayPortValue('$value${CSSLength.PX}', viewportSize);
+        // The height of the coordinate space in CSS pixels. Defaults to 150.
+        attrHeight = double.tryParse(value);
         break;
     }
   }

@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-// Recommend notes for someone who want's to edit this files:
+// MUST READ: 
 // All the struct which prefix with NativeXXX struct (exp: NativeElement) has a corresponding struct in Dart code.
 // All struct members include variables and functions must be follow the same order with Dart class, to keep the same memory layout cross dart and C++ code.
 

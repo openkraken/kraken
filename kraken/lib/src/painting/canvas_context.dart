@@ -212,14 +212,6 @@ abstract class CanvasPathDrawingStyles {
   double lineDashOffset;
 }
 
-abstract class CanvasTextDrawingStyles {
-  // text
-  String font; // (default 10px sans-serif)
-  CanvasTextAlign textAlign; // (default: "start")
-  CanvasTextBaseline textBaseline; // (default: "alphabetic")
-  CanvasDirection direction; // (default: "inherit")
-}
-
 // ignore: one_member_abstracts
 abstract class CanvasGradient {
   // opaque object

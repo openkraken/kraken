@@ -2,7 +2,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'from_native.dart';
 
-// Recommend note for someone who want's to edit this files:
+// MUST READ: 
 // All the class which extends Struct class has a corresponding struct in C++ code.
 // All class members include variables and functions must be follow the same order with C++ struct, to keep the same memory layout cross dart and C++ code.
 
@@ -335,8 +335,10 @@ typedef Native_RenderingContextMoveTo = Void Function(Pointer<NativeCanvasRender
 typedef Native_RenderingContextQuadraticCurveTo = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double cpx, Double cpy, Double x, Double y);
 typedef Native_RenderingContextRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
 typedef Native_RenderingContextRotate = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double angle);
+typedef Native_RenderingContextResetTransform = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
 typedef Native_RenderingContextScale = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
 typedef Native_RenderingContextStroke = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
+typedef Native_RenderingContextSetTransform = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double a, Double b, Double c, Double d, Double e, Double f);
 typedef Native_RenderingContextTransform = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double a, Double b, Double c, Double d, Double e, Double f);
 typedef Native_RenderingContextTranslate = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
 
@@ -361,11 +363,13 @@ class NativeCanvasRenderingContext2D extends Struct {
   Pointer<NativeFunction<Native_RenderingContextRect>> rect;
   Pointer<NativeFunction<Native_RenderingContextRestore>> restore;
   Pointer<NativeFunction<Native_RenderingContextRotate>> rotate;
+  Pointer<NativeFunction<Native_RenderingContextResetTransform>> resetTransform;
   Pointer<NativeFunction<Native_RenderingContextSave>> save;
   Pointer<NativeFunction<Native_RenderingContextScale>> scale;
   Pointer<NativeFunction<Native_RenderingContextStroke>> stroke;
   Pointer<NativeFunction<Native_RenderingContextStrokeRect>> strokeRect;
   Pointer<NativeFunction<Native_RenderingContextStrokeText>> strokeText;
+  Pointer<NativeFunction<Native_RenderingContextSetTransform>> setTransform;
   Pointer<NativeFunction<Native_RenderingContextTransform>> transform;
   Pointer<NativeFunction<Native_RenderingContextTranslate>> translate;
 }

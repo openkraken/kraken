@@ -27,4 +27,243 @@ describe('Canvas context 2d', () => {
 
     await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
   });
+
+  it('should work with ellipse', async () => {
+    const canvas = <canvas height="200" width="200" />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    // Draw the ellipse
+    ctx.beginPath();
+    ctx.ellipse(100, 100, 50, 75, Math.PI / 4, 0, 2 * Math.PI);
+    ctx.stroke();
+    // Draw the ellipse's line of reflection
+    ctx.beginPath();
+    ctx.moveTo(0, 200);
+    ctx.lineTo(200, 0);
+    ctx.stroke();
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with save and restore', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    // Save the default state
+    ctx.save();
+
+    ctx.fillStyle = 'green';
+    ctx.fillRect(10, 10, 100, 100);
+
+    // Restore the default state
+    ctx.restore();
+
+    ctx.fillRect(150, 40, 100, 100);
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with moveTO and lineTo', async () => {
+    const canvas = <canvas height="200" width="200" />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.moveTo(0, 200);
+    ctx.lineTo(200, 0);
+    ctx.stroke();
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with rotate and translate', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'gray';
+    ctx.fillRect(80, 60, 140, 30);
+    
+    // Matrix transformation
+    ctx.translate(150, 75);
+    ctx.rotate(Math.PI / 2);
+    ctx.translate(-150, -75);
+    
+    // Rotated rectangle
+    ctx.fillStyle = 'red';
+    ctx.fillRect(80, 60, 140, 30);
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with transform and resetTransform', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    // Skewed rectangles
+    ctx.transform(1, 0, 1.7, 1, 0, 0);
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(40, 40, 50, 20);
+    ctx.fillRect(40, 90, 50, 20);
+    
+    // Non-skewed rectangles
+    ctx.resetTransform();
+    ctx.fillStyle = 'red';
+    ctx.fillRect(40, 40, 50, 20);
+    ctx.fillRect(40, 90, 50, 20);
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with strokeText', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    ctx.font = '50px serif';
+    ctx.strokeText('Hello world', 50, 90);
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with fillText', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    ctx.font = '50px serif';
+    ctx.fillText('Hello world', 50, 90);
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with rect and fill', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    ctx.rect(10, 20, 150, 100);
+    ctx.fill();
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with bezierCurveTo', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    // Define the points as {x, y}
+    let start = { x: 50,    y: 20  };
+    let cp1 =   { x: 230,   y: 30  };
+    let cp2 =   { x: 150,   y: 80  };
+    let end =   { x: 250,   y: 100 };
+
+    // Cubic Bézier curve
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, end.x, end.y);
+    ctx.stroke();
+
+    // Start and end points
+    ctx.fillStyle = 'blue';
+    ctx.beginPath();
+    ctx.arc(start.x, start.y, 5, 0, 2 * Math.PI);  // Start point
+    ctx.arc(end.x, end.y, 5, 0, 2 * Math.PI);      // End point
+    ctx.fill();
+
+    // Control points
+    ctx.fillStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(cp1.x, cp1.y, 5, 0, 2 * Math.PI);  // Control point one
+    ctx.arc(cp2.x, cp2.y, 5, 0, 2 * Math.PI);  // Control point two
+    ctx.fill();
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with quadraticCurveTo', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    // Quadratic Bézier curve
+    ctx.beginPath();
+    ctx.moveTo(50, 20);
+    ctx.quadraticCurveTo(230, 30, 50, 100);
+    ctx.stroke();
+    
+    // Start and end points
+    ctx.fillStyle = 'blue';
+    ctx.beginPath();
+    ctx.arc(50, 20, 5, 0, 2 * Math.PI);   // Start point
+    ctx.arc(50, 100, 5, 0, 2 * Math.PI);  // End point
+    ctx.fill();
+    
+    // Control point
+    ctx.fillStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(230, 30, 5, 0, 2 * Math.PI);
+    ctx.fill();
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with fill and fillRect and clearRect', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    // Draw yellow background
+    ctx.beginPath();
+    ctx.fillStyle = '#ff6';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw blue triangle
+    ctx.beginPath();
+    ctx.fillStyle = 'blue';
+    ctx.moveTo(20, 20);
+    ctx.lineTo(180, 20);
+    ctx.lineTo(130, 130);
+    ctx.closePath();
+    ctx.fill();
+
+    // Clear part of the canvas
+    ctx.clearRect(10, 10, 120, 100);
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with clip', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    // Create circular clipping region
+    ctx.beginPath();
+    ctx.arc(100, 75, 50, 0, Math.PI * 2);
+    ctx.clip();
+
+    // Draw stuff that gets clipped
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'orange';
+    ctx.fillRect(0, 0, 100, 100);
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with setTransform', async () => {
+    const canvas1 = <canvas />;
+    const canvas2 = <canvas />;
+    document.body.appendChild(canvas1);
+    document.body.appendChild(canvas2);
+
+    const ctx1 = canvas1.getContext('2d');
+    const ctx2 = canvas2.getContext('2d');
+    
+    ctx1.rotate(45 * Math.PI / 180);
+    ctx1.setTransform(1, .2, .8, 1, 0, 0);
+    ctx1.fillRect(25, 25, 50, 50);
+    
+    ctx2.scale(9, 3);
+    ctx2.setTransform(1, .2, .8, 1, 0, 0);
+    ctx2.beginPath();
+    ctx2.arc(50, 50, 50, 0, 2 * Math.PI);
+    ctx2.fill();
+
+    await matchViewportSnapshot();
+  });
+
 });

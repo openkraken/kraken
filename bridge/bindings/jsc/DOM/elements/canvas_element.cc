@@ -76,7 +76,7 @@ bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     case CanvasElementProperty::width: {
       _width = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      std::string widthString = std::to_string(_width) + "px";
+      std::string widthString = std::to_string(_width);
 
       NativeString args_01{};
       NativeString args_02{};
@@ -90,7 +90,7 @@ bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
     case CanvasElementProperty::height: {
       _height = JSValueToNumber(_hostClass->ctx, value, exception);
 
-      std::string heightString = std::to_string(_height) + "px";
+      std::string heightString = std::to_string(_height);
 
       NativeString args_01{};
       NativeString args_02{};
@@ -864,6 +864,51 @@ JSValueRef CanvasRenderingContext2D::restore(JSContextRef ctx, JSObjectRef funct
   assert_m(instance->nativeCanvasRenderingContext2D->restore != nullptr,
            "Failed to execute restore(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->restore(instance->nativeCanvasRenderingContext2D);
+  return nullptr;
+}
+
+JSValueRef CanvasRenderingContext2D::resetTransform(JSContextRef ctx, JSObjectRef function,
+                                            JSObjectRef thisObject,
+                                            size_t argumentCount,
+                                            const JSValueRef *arguments,
+                                            JSValueRef *exception) {
+  auto instance =
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
+
+  getDartMethod()->flushUICommand();
+  assert_m(instance->nativeCanvasRenderingContext2D->resetTransform != nullptr,
+           "Failed to execute resetTransform(): dart method is nullptr.");
+  instance->nativeCanvasRenderingContext2D->resetTransform(instance->nativeCanvasRenderingContext2D);
+  return nullptr;
+}
+
+JSValueRef CanvasRenderingContext2D::setTransform(JSContextRef ctx, JSObjectRef function,
+                                              JSObjectRef thisObject,
+                                              size_t argumentCount,
+                                              const JSValueRef *arguments,
+                                              JSValueRef *exception) {
+  if (argumentCount != 6) {
+    throwJSError(ctx,
+                    ("Failed to execute 'setTransform' on 'CanvasRenderingContext2D':  6 arguments required, but " +
+                     std::to_string(argumentCount) + " present.").c_str(),
+                    exception);
+    return nullptr;
+  }
+
+  double a = JSValueToNumber(ctx, arguments[0], exception);
+  double b = JSValueToNumber(ctx, arguments[1], exception);
+  double c = JSValueToNumber(ctx, arguments[2], exception);
+  double d = JSValueToNumber(ctx, arguments[3], exception);
+  double e = JSValueToNumber(ctx, arguments[4], exception);
+  double f = JSValueToNumber(ctx, arguments[5], exception);
+
+  auto instance =
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
+
+  getDartMethod()->flushUICommand();
+  assert_m(instance->nativeCanvasRenderingContext2D->setTransform != nullptr,
+           "Failed to execute setTransform(): dart method is nullptr.");
+  instance->nativeCanvasRenderingContext2D->setTransform(instance->nativeCanvasRenderingContext2D, a, b, c, d, e, f);
   return nullptr;
 }
 
