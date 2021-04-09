@@ -180,7 +180,7 @@ bool JSCDebuggerAgentImpl::convertCallFrames(
         if (iterator != m_scripts.end()) {
           auto script = iterator->value;
           WTF::String url = !script.sourceURL.isEmpty() ? script.sourceURL : script.url;
-          callframe.AddMember("url", rapidjson::StringRef(url.utf8().data()), in_allocator);
+          callframe.AddMember("url", std::string(url.utf8().data()), in_allocator);
         }
       } else {
         callframe.AddMember("url", "(gart)", in_allocator);

@@ -111,7 +111,7 @@ std::unique_ptr<PropertyDescriptor> PropertyDescriptor::fromValue(rapidjson::Val
 
 rapidjson::Value PropertyDescriptor::toValue(rapidjson::Document::AllocatorType &allocator) const {
   rapidjson::Value result(rapidjson::kObjectType);
-  result.AddMember("name", rapidjson::StringRef(m_name.c_str()), allocator);
+  result.AddMember("name", m_name, allocator);
   if (m_value.isJust()) result.AddMember("value", m_value.fromJust()->toValue(allocator), allocator);
   if (m_writable.isJust()) result.AddMember("writable", m_writable.fromJust(), allocator);
   if (m_get.isJust()) result.AddMember("get", m_get.fromJust()->toValue(allocator), allocator);
