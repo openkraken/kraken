@@ -64,9 +64,8 @@ private:
   JSFunctionHolder m_getContext{context, prototypeObject, this, "getContext", getContext};
 };
 
-using SetFont = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *font);
-using SetFillStyle = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *fillStyle);
-using SetStrokeStyle = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *strokeStyle);
+
+using SetProperty = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *value);
 using Arc = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
                     double radius, double startAngle, double endAngle, double counterclockwise);
 using ArcTo = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x1, double y1,
@@ -107,9 +106,17 @@ using Translate = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRendering
 
 // Function pointer's order must be as same as the NativeCanvasRenderingContext2D class of dart side.
 struct NativeCanvasRenderingContext2D {
-  SetFont setFont{nullptr};
-  SetFillStyle setFillStyle{nullptr};
-  SetStrokeStyle setStrokeStyle{nullptr};
+  SetProperty setDirection{nullptr};
+  SetProperty setFont{nullptr};
+  SetProperty setFillStyle{nullptr};
+  SetProperty setStrokeStyle{nullptr};
+  SetProperty setLineCap{nullptr};
+  SetProperty setLineDashOffset{nullptr};
+  SetProperty setLineJoin{nullptr};
+  SetProperty setLineWidth{nullptr};
+  SetProperty setMiterLimit{nullptr};
+  SetProperty setTextAlign{nullptr};
+  SetProperty setTextBaseline{nullptr};
   Arc arc{nullptr};
   ArcTo arcTo{nullptr};
   BeginPath beginPath{nullptr};
@@ -198,7 +205,10 @@ public:
 
   class CanvasRenderingContext2DInstance : public Instance {
   public:
-    DEFINE_OBJECT_PROPERTY(CanvasRenderingContext2D, 3, font, fillStyle, strokeStyle);
+    DEFINE_OBJECT_PROPERTY(CanvasRenderingContext2D, 11,
+                          direction, font, fillStyle, strokeStyle, lineCap,
+                          lineDashOffset, lineJoin, lineWidth, miterLimit, textAlign,
+                          textBaseline);
     DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasRenderingContext2D, 26,
                                     arc, arcTo, beginPath, bezierCurveTo, clearRect,
                                     closePath, clip, ellipse, fill, fillRect,
@@ -218,9 +228,17 @@ public:
     NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D;
 
   private:
+    JSStringHolder m_direction{context, ""};
     JSStringHolder m_font{context, ""};
     JSStringHolder m_fillStyle{context, ""};
+    JSStringHolder m_lineCap{context, ""};
+    JSStringHolder m_lineDashOffset{context, ""};
+    JSStringHolder m_lineJoin{context, ""};
+    JSStringHolder m_lineWidth{context, ""};
+    JSStringHolder m_miterLimit{context, ""};
     JSStringHolder m_strokeStyle{context, ""};
+    JSStringHolder m_textAlign{context, ""};
+    JSStringHolder m_textBaseline{context, ""};
   };
 
 protected:

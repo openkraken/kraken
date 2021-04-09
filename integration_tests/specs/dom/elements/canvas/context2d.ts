@@ -28,6 +28,109 @@ describe('Canvas context 2d', () => {
     await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
   });
 
+  it('should work with lineWidth', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+
+    ctx.lineWidth = 15;
+
+    ctx.beginPath();
+    ctx.moveTo(20, 20);
+    ctx.lineTo(130, 130);
+    ctx.rect(40, 40, 70, 70);
+    ctx.stroke();
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with lineJoin', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+
+    ctx.lineWidth = 20;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(20, 20);
+    ctx.lineTo(190, 100);
+    ctx.lineTo(280, 20);
+    ctx.lineTo(280, 150);
+    ctx.stroke();
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+
+  it('should work with lineCap', async () => {
+    const canvas = <canvas />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+
+    ctx.beginPath();
+    ctx.moveTo(20, 20);
+    ctx.lineWidth = 15;
+    ctx.lineCap = 'round';
+    ctx.lineTo(100, 100);
+    ctx.stroke();
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+  it('should work with textAlign', async () => {
+    const canvas = <canvas widht="350" />;
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+
+    const x = canvas.width / 2;
+
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+    
+    ctx.font = '30px serif';
+    
+    ctx.textAlign = 'left';
+    ctx.fillText('left-aligned', x, 40);
+    
+    ctx.textAlign = 'center';
+    ctx.fillText('center-aligned', x, 85);
+    
+    ctx.textAlign = 'right';
+    ctx.fillText('right-aligned', x, 130);
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
+
+  it('should work with miterLimit', async () => {
+    const canvas = <canvas width="150" height="150" />;
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    // Draw guides
+    ctx.strokeStyle = '#09f';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-5, 50, 160, 50);
+
+    // Set line styles
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 10;
+
+    ctx.miterLimit = 10.0;
+
+    // Draw lines
+    ctx.beginPath();
+    ctx.moveTo(0, 100);
+    for (var i = 0; i < 24 ; i++) {
+      var dy = i % 2 == 0 ? 25 : -25;
+      ctx.lineTo(Math.pow(i, 1.5) * 2, 75 + dy);
+    }
+    ctx.stroke();
+
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
   it('should work with ellipse', async () => {
     const canvas = <canvas height="200" width="200" />;
     document.body.appendChild(canvas);

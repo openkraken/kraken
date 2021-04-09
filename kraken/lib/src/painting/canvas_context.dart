@@ -198,20 +198,6 @@ abstract class CanvasImageData {
   void putImageData(ImageData imagedata, double dx, double dy, {double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight});
 }
 
-abstract class CanvasPathDrawingStyles {
-  // line caps/joins
-  double lineWidth; // (default 1)
-  CanvasLineCap lineCap; // (default "butt")
-  CanvasLineJoin lineJoin; // (default "miter")
-  double miterLimit; // (default 10)
-
-  // dashed lines
-  void setLineDash(String segments); // default empty
-  String getLineDash();
-
-  double lineDashOffset;
-}
-
 // ignore: one_member_abstracts
 abstract class CanvasGradient {
   // opaque object

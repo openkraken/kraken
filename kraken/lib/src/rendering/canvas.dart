@@ -60,6 +60,7 @@ class CanvasPainter extends CustomPainter {
         /// and the canvas objects are invalid and cannot be used further.
         _picture = _pictureRecorder.endRecording();
         context.clearActionRecords();
+        // FIXME: That make clearRect not work in next frame action
         canvas.drawPicture(_picture);
       }
     }

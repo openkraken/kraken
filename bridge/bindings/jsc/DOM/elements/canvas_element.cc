@@ -178,14 +178,38 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
+    case CanvasRenderingContext2DProperty::direction: {
+      return m_direction.makeString();
+    }
     case CanvasRenderingContext2DProperty::font: {
       return m_font.makeString();
     }
     case CanvasRenderingContext2DProperty::fillStyle: {
       return m_fillStyle.makeString();
     }
+    case CanvasRenderingContext2DProperty::lineCap: {
+      return m_lineCap.makeString();
+    }
+    case CanvasRenderingContext2DProperty::lineDashOffset: {
+      return m_lineDashOffset.makeString();
+    }
+    case CanvasRenderingContext2DProperty::lineJoin: {
+      return m_lineJoin.makeString();
+    }
+    case CanvasRenderingContext2DProperty::lineWidth: {
+      return m_lineWidth.makeString();
+    }
+    case CanvasRenderingContext2DProperty::miterLimit: {
+      return m_miterLimit.makeString();
+    }
     case CanvasRenderingContext2DProperty::strokeStyle: {
       return m_strokeStyle.makeString();
+    }
+    case CanvasRenderingContext2DProperty::textAlign: {
+      return m_textAlign.makeString();
+    }
+    case CanvasRenderingContext2DProperty::textBaseline: {
+      return m_textBaseline.makeString();
     }
     }
   }
@@ -209,6 +233,18 @@ bool CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
     getDartMethod()->flushUICommand();
 
     switch (property) {
+    case CanvasRenderingContext2DProperty::direction: {
+      JSStringRef direction = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_direction.setString(direction);
+
+      NativeString nativeDirection{};
+      nativeDirection.string = m_direction.ptr();
+      nativeDirection.length = m_direction.size();
+      assert_m(nativeCanvasRenderingContext2D->setDirection != nullptr,
+               "Failed to execute setDirection(): dart method is nullptr.");
+      nativeCanvasRenderingContext2D->setDirection(nativeCanvasRenderingContext2D, &nativeDirection);
+      break;
+    }
     case CanvasRenderingContext2DProperty::font: {
       JSStringRef font = JSValueToStringCopy(_hostClass->ctx, value, exception);
       m_font.setString(font);
@@ -243,6 +279,90 @@ bool CanvasRenderingContext2D::CanvasRenderingContext2DInstance::setProperty(std
       assert_m(nativeCanvasRenderingContext2D->setStrokeStyle != nullptr,
                "Failed to execute setStrokeStyle(): dart method is nullptr.");
       nativeCanvasRenderingContext2D->setStrokeStyle(nativeCanvasRenderingContext2D, &nativeStrokeStyle);
+      break;
+    }
+    case CanvasRenderingContext2DProperty::lineCap: {
+      JSStringRef lineCap = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_lineCap.setString(lineCap);
+
+      NativeString nativeLineCap{};
+      nativeLineCap.string = m_lineCap.ptr();
+      nativeLineCap.length = m_lineCap.size();
+      assert_m(nativeCanvasRenderingContext2D->setLineCap != nullptr,
+               "Failed to execute setLineCap(): dart method is nullptr.");
+      nativeCanvasRenderingContext2D->setLineCap(nativeCanvasRenderingContext2D, &nativeLineCap);
+      break;
+    }
+    case CanvasRenderingContext2DProperty::lineDashOffset: {
+      JSStringRef lineDashOffset = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_lineDashOffset.setString(lineDashOffset);
+
+      NativeString nativeLineDashOffset{};
+      nativeLineDashOffset.string = m_lineDashOffset.ptr();
+      nativeLineDashOffset.length = m_lineDashOffset.size();
+      assert_m(nativeCanvasRenderingContext2D->setLineDashOffset != nullptr,
+               "Failed to execute setLineDashOffset(): dart method is nullptr.");
+      nativeCanvasRenderingContext2D->setLineDashOffset(nativeCanvasRenderingContext2D, &nativeLineDashOffset);
+      break;
+    }
+    case CanvasRenderingContext2DProperty::lineJoin: {
+      JSStringRef lineJoin = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_lineJoin.setString(lineJoin);
+
+      NativeString nativeLineJoin{};
+      nativeLineJoin.string = m_lineJoin.ptr();
+      nativeLineJoin.length = m_lineJoin.size();
+      assert_m(nativeCanvasRenderingContext2D->setLineJoin != nullptr,
+               "Failed to execute setLineJoin(): dart method is nullptr.");
+      nativeCanvasRenderingContext2D->setLineJoin(nativeCanvasRenderingContext2D, &nativeLineJoin);
+      break;
+    }
+    case CanvasRenderingContext2DProperty::lineWidth: {
+      JSStringRef lineWidth = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_lineWidth.setString(lineWidth);
+
+      NativeString nativeLineWidth{};
+      nativeLineWidth.string = m_lineWidth.ptr();
+      nativeLineWidth.length = m_lineWidth.size();
+      assert_m(nativeCanvasRenderingContext2D->setLineWidth != nullptr,
+               "Failed to execute setLineWidth(): dart method is nullptr.");
+      nativeCanvasRenderingContext2D->setLineWidth(nativeCanvasRenderingContext2D, &nativeLineWidth);
+      break;
+    }
+    case CanvasRenderingContext2DProperty::miterLimit: {
+      JSStringRef miterLimit = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_miterLimit.setString(miterLimit);
+
+      NativeString nativeMiterLimit{};
+      nativeMiterLimit.string = m_miterLimit.ptr();
+      nativeMiterLimit.length = m_miterLimit.size();
+      assert_m(nativeCanvasRenderingContext2D->setMiterLimit != nullptr,
+               "Failed to execute setMiterLimit(): dart method is nullptr.");
+      nativeCanvasRenderingContext2D->setMiterLimit(nativeCanvasRenderingContext2D, &nativeMiterLimit);
+      break;
+    }
+    case CanvasRenderingContext2DProperty::textAlign: {
+      JSStringRef textAlign = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_textAlign.setString(textAlign);
+
+      NativeString nativeTextAlign{};
+      nativeTextAlign.string = m_textAlign.ptr();
+      nativeTextAlign.length = m_textAlign.size();
+      assert_m(nativeCanvasRenderingContext2D->setTextAlign != nullptr,
+               "Failed to execute setTextAlign(): dart method is nullptr.");
+      nativeCanvasRenderingContext2D->setTextAlign(nativeCanvasRenderingContext2D, &nativeTextAlign);
+      break;
+    }
+    case CanvasRenderingContext2DProperty::textBaseline: {
+      JSStringRef textBaseline = JSValueToStringCopy(_hostClass->ctx, value, exception);
+      m_textBaseline.setString(textBaseline);
+
+      NativeString nativeTextBaseline{};
+      nativeTextBaseline.string = m_textBaseline.ptr();
+      nativeTextBaseline.length = m_textBaseline.size();
+      assert_m(nativeCanvasRenderingContext2D->setTextBaseline != nullptr,
+               "Failed to execute setTextBaseline(): dart method is nullptr.");
+      nativeCanvasRenderingContext2D->setTextBaseline(nativeCanvasRenderingContext2D, &nativeTextBaseline);
       break;
     }
     default:

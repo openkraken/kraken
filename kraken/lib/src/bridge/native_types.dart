@@ -2,7 +2,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'from_native.dart';
 
-// MUST READ: 
+// MUST READ:
 // All the class which extends Struct class has a corresponding struct in C++ code.
 // All class members include variables and functions must be follow the same order with C++ struct, to keep the same memory layout cross dart and C++ code.
 
@@ -311,9 +311,7 @@ class NativeCanvasElement extends Struct {
   Pointer<NativeFunction<Native_CanvasGetContext>> getContext;
 }
 
-typedef Native_RenderingContextSetFont = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> font);
-typedef Native_RenderingContextSetFillStyle = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> fillStyle);
-typedef Native_RenderingContextSetStrokeStyle = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> strokeStyle);
+typedef Native_RenderingContextSetProperty = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> value);
 
 typedef Native_RenderingContextArc = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double radius, Double startAngle, Double endAngle, Double counterclockwise);
 typedef Native_RenderingContextArcTo = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x1, Double y1, Double x2, Double y2, Double radius);
@@ -343,9 +341,17 @@ typedef Native_RenderingContextTransform = Void Function(Pointer<NativeCanvasRen
 typedef Native_RenderingContextTranslate = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
 
 class NativeCanvasRenderingContext2D extends Struct {
-  Pointer<NativeFunction<Native_RenderingContextSetFont>> setFont;
-  Pointer<NativeFunction<Native_RenderingContextSetFillStyle>> setFillStyle;
-  Pointer<NativeFunction<Native_RenderingContextSetStrokeStyle>> setStrokeStyle;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setDirection;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setFont;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setFillStyle;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setStrokeStyle;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setLineCap;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setLineDashOffset;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setLineJoin;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setLineWidth;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setMiterLimit;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setTextAlign;
+  Pointer<NativeFunction<Native_RenderingContextSetProperty>> setTextBaseline;
   Pointer<NativeFunction<Native_RenderingContextArc>> arc;
   Pointer<NativeFunction<Native_RenderingContextArcTo>> arcTo;
   Pointer<NativeFunction<Native_RenderingContextBeginPath>> beginPath;
