@@ -118,25 +118,25 @@ rapidjson::Value RemoteObject::toValue(rapidjson::Document::AllocatorType &alloc
   rapidjson::Value result = rapidjson::Value(rapidjson::kObjectType);
   result.SetObject();
 
-  result.AddMember("type", rapidjson::StringRef(m_type.c_str()), allocator);
+  result.AddMember("type", m_type, allocator);
 
   if (m_subtype.isJust()) {
-    result.AddMember("subtype", rapidjson::StringRef(m_subtype.fromJust().c_str()), allocator);
+    result.AddMember("subtype", m_subtype.fromJust(), allocator);
   }
   if (m_className.isJust()) {
-    result.AddMember("className", rapidjson::StringRef(m_className.fromJust().c_str()), allocator);
+    result.AddMember("className", m_className.fromJust(), allocator);
   }
   if (m_value.isJust()) {
     result.AddMember("value", *m_value.fromJust(), allocator);
   }
   if (m_unserializableValue.isJust()) {
-    result.AddMember("unserializableValue", rapidjson::StringRef(m_unserializableValue.fromJust().c_str()), allocator);
+    result.AddMember("unserializableValue", m_unserializableValue.fromJust(), allocator);
   }
   if (m_description.isJust()) {
-    result.AddMember("description", rapidjson::StringRef(m_description.fromJust().c_str()), allocator);
+    result.AddMember("description", m_description.fromJust(), allocator);
   }
   if (m_objectId.isJust()) {
-    result.AddMember("objectId", rapidjson::StringRef(m_objectId.fromJust().c_str()), allocator);
+    result.AddMember("objectId", m_objectId.fromJust(), allocator);
   }
   if (m_preview.isJust()) {
     result.AddMember("preview", m_preview.fromJust()->toValue(allocator), allocator);

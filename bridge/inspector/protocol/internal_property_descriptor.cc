@@ -42,7 +42,7 @@ InternalPropertyDescriptor::fromValue(rapidjson::Value *value, kraken::debugger:
 rapidjson::Value InternalPropertyDescriptor::toValue(rapidjson::Document::AllocatorType &allocator) const {
   rapidjson::Value result(rapidjson::kObjectType);
 
-  result.AddMember("name", rapidjson::StringRef(m_name.c_str()), allocator);
+  result.AddMember("name", m_name, allocator);
   if (m_value.isJust()) result.AddMember("value", m_value.fromJust()->toValue(allocator), allocator);
   return result;
 }

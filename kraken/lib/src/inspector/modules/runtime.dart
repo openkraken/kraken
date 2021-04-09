@@ -285,8 +285,7 @@ class InspectRuntimeModule extends InspectModule {
         onGetIsolateId(id, params);
         break;
       default:
-        print('id: $id, method: $method, params: $params');
-        callNativeInspectorMethod(id, method, params);
+        callNativeInspectorMethod(id, name + '.' + method, params);
         break;
     }
   }

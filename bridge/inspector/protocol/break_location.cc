@@ -57,10 +57,10 @@ std::unique_ptr<BreakLocation> BreakLocation::fromValue(rapidjson::Value *value,
 rapidjson::Value BreakLocation::toValue(rapidjson::Document::AllocatorType &allocator) const {
   rapidjson::Value result = rapidjson::Value(rapidjson::kObjectType);
   result.SetObject();
-  result.AddMember("scriptId", rapidjson::StringRef(m_scriptId.c_str()), allocator);
+  result.AddMember("scriptId", m_scriptId, allocator);
   result.AddMember("lineNumber", m_lineNumber, allocator);
   if (m_columnNumber.isJust()) result.AddMember("columnNumber", m_columnNumber.fromJust(), allocator);
-  if (m_type.isJust()) result.AddMember("type", rapidjson::StringRef(m_type.fromJust().c_str()), allocator);
+  if (m_type.isJust()) result.AddMember("type", m_type.fromJust(), allocator);
   return result;
 }
 } // namespace debugger

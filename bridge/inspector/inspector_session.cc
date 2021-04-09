@@ -88,7 +88,6 @@ void InspectorSession::fallThrough(uint64_t callId, const std::string &method, J
 }
 
 void InspectorSession::dispatchProtocolMessage(Request message) {
-  JSC::JSLockHolder holder(vm());
   m_dispatcher.dispatch(message.id, message.method, std::move(message.params));
 }
 

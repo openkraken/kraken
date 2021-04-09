@@ -91,14 +91,14 @@ std::unique_ptr<CallFrame> CallFrame::fromValue(rapidjson::Value *value, kraken:
 rapidjson::Value CallFrame::toValue(rapidjson::Document::AllocatorType &allocator) const {
   rapidjson::Value result = rapidjson::Value(rapidjson::kObjectType);
   result.SetObject();
-  result.AddMember("callFrameId", rapidjson::StringRef(m_callFrameId.c_str()), allocator);
-  result.AddMember("functionName", rapidjson::StringRef(m_functionName.c_str()), allocator);
+  result.AddMember("callFrameId", m_callFrameId, allocator);
+  result.AddMember("functionName", m_functionName, allocator);
 
   if (m_functionLocation.isJust()) {
     result.AddMember("functionLocation", m_functionLocation.fromJust()->toValue(allocator), allocator);
   }
   result.AddMember("location", m_location->toValue(allocator), allocator);
-  result.AddMember("url", rapidjson::StringRef(m_url.c_str()), allocator);
+  result.AddMember("url", m_url, allocator);
 
   rapidjson::Value arr = rapidjson::Value(rapidjson::kArrayType);
   arr.SetArray();

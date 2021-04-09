@@ -143,18 +143,18 @@ rapidjson::Value ScriptParsedNotification::toValue(rapidjson::Document::Allocato
   rapidjson::Value result = rapidjson::Value(rapidjson::kObjectType);
   result.SetObject();
 
-  result.AddMember("scriptId", rapidjson::StringRef(m_scriptId.c_str()), allocator);
-  result.AddMember("url", rapidjson::StringRef(m_url.c_str()), allocator);
+  result.AddMember("scriptId", m_scriptId, allocator);
+  result.AddMember("url", m_url, allocator);
   result.AddMember("startLine", m_startLine, allocator);
   result.AddMember("startColumn", m_startColumn, allocator);
   result.AddMember("endLine", m_endLine, allocator);
   result.AddMember("endColumn", m_endColumn, allocator);
   result.AddMember("executionContextId", m_executionContextId, allocator);
-  result.AddMember("hash", rapidjson::StringRef(m_hash.c_str()), allocator);
+  result.AddMember("hash", m_hash, allocator);
   if (m_executionContextAuxData.isJust())
     result.AddMember("executionContextAuxData", *m_executionContextAuxData.fromJust(), allocator);
   if (m_isLiveEdit.isJust()) result.AddMember("isLiveEdit", m_isLiveEdit.fromJust(), allocator);
-  if (m_sourceMapURL.isJust()) result.AddMember("sourceMapURL", rapidjson::StringRef(m_sourceMapURL.fromJust().c_str()), allocator);
+  if (m_sourceMapURL.isJust()) result.AddMember("sourceMapURL", m_sourceMapURL.fromJust(), allocator);
   if (m_hasSourceURL.isJust()) result.AddMember("hasSourceURL", m_hasSourceURL.fromJust(), allocator);
   if (m_isModule.isJust()) result.AddMember("isModule", m_isModule.fromJust(), allocator);
   if (m_length.isJust()) result.AddMember("length", m_length.fromJust(), allocator);

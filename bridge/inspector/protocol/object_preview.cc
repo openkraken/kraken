@@ -109,9 +109,9 @@ std::unique_ptr<ObjectPreview> ObjectPreview::fromValue(rapidjson::Value *value,
 rapidjson::Value ObjectPreview::toValue(rapidjson::Document::AllocatorType &allocator) const {
   rapidjson::Value result(rapidjson::kObjectType);
 
-  result.AddMember("type", rapidjson::StringRef(m_type.c_str()), allocator);
-  if (m_subtype.isJust()) result.AddMember("subtype", rapidjson::StringRef(m_subtype.fromJust().c_str()), allocator);
-  if (m_description.isJust()) result.AddMember("description", rapidjson::StringRef(m_description.fromJust().c_str()), allocator);
+  result.AddMember("type", m_type, allocator);
+  if (m_subtype.isJust()) result.AddMember("subtype", m_subtype.fromJust(), allocator);
+  if (m_description.isJust()) result.AddMember("description", m_description.fromJust(), allocator);
   result.AddMember("overflow", m_overflow, allocator);
 
   rapidjson::Value _properties = rapidjson::Value(rapidjson::kArrayType);

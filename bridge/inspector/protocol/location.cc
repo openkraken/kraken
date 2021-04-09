@@ -44,7 +44,7 @@ std::unique_ptr<Location> Location::fromValue(rapidjson::Value *value, kraken::d
 rapidjson::Value Location::toValue(rapidjson::Document::AllocatorType &allocator) const {
   rapidjson::Value value = rapidjson::Value(rapidjson::kObjectType);
   value.SetObject();
-  value.AddMember("scriptId", rapidjson::StringRef(m_scriptId.c_str()), allocator);
+  value.AddMember("scriptId", m_scriptId, allocator);
   value.AddMember("lineNumber", m_lineNumber, allocator);
   if (m_columnNumber.isJust()) {
     value.AddMember("columnNumber", m_columnNumber.fromJust(), allocator);

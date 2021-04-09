@@ -45,7 +45,6 @@ abstract class InspectModule {
   }
 
   void callNativeInspectorMethod(int id, String method, Map<String, dynamic> params) {
-    print(inspector.nativeInspectorMessageHandler);
     if (inspector.nativeInspectorMessageHandler != null) {
       inspector.nativeInspectorMessageHandler(jsonEncode({
         'id': id,

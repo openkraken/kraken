@@ -117,7 +117,7 @@ rapidjson::Value PausedNotification::toValue(rapidjson::Document::AllocatorType 
   }
   result.AddMember("callFrames", arr, allocator);
 
-  result.AddMember("reason", rapidjson::StringRef(m_reason.c_str()), allocator);
+  result.AddMember("reason", m_reason, allocator);
   if (m_data.isJust()) {
     result.AddMember("data", *m_data.fromJust(), allocator);
   }
