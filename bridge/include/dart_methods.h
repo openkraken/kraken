@@ -43,6 +43,8 @@ typedef void (*InitBody)(int32_t contextId, void *nativePtr);
 typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
 typedef void (*InitDocument)(int32_t contextId, void *nativePtr);
 typedef void (*InspectorMessage)(int32_t contextId, const char* message);
+typedef void (*InspectorMessageCallback)(void *rpcSession, const char *message);
+typedef void (*RegisterInspectorMessageCallback)(int32_t contextId, void *rpcSession, InspectorMessageCallback inspectorMessageCallback);
 
 using RefreshPaintCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
 using RefreshPaint = void (*)(void *callbackContext, int32_t contextId, RefreshPaintCallback callback);
@@ -99,6 +101,7 @@ struct DartMethodPointer {
 
 #if ENABLE_DEBUGGER
   InspectorMessage inspectorMessage{nullptr};
+  RegisterInspectorMessageCallback registerInspectorMessageCallback{nullptr};
 #endif
 };
 

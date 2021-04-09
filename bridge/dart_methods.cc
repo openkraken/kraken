@@ -57,7 +57,9 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
 
 #if ENABLE_DEBUGGER
   methodPointer->inspectorMessage = reinterpret_cast<InspectorMessage>(methodBytes[i++]);
+  methodPointer->registerInspectorMessageCallback = reinterpret_cast<RegisterInspectorMessageCallback>(methodBytes[i++]);
 #else
+  i++;
   i++;
 #endif
 

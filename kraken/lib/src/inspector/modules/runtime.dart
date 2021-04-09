@@ -21,16 +21,12 @@ class ExecutionContextDescription extends JSONEncodable {
 
   final dynamic auxData;
 
-  ExecutionContextDescription(this.id, this.origin, this.name, this.uniqueId, [this.auxData]);
+  ExecutionContextDescription(this.id, this.origin, this.name, this.uniqueId,
+      [this.auxData]);
 
   @override
   Map toJson() {
-    Map map = {
-      'id': id,
-      'origin': origin,
-      'name': name,
-      'uniqueId': uniqueId
-    };
+    Map map = {'id': id, 'origin': origin, 'name': name, 'uniqueId': uniqueId};
 
     if (auxData != null) {
       map['auxData'] = auxData;
@@ -48,9 +44,8 @@ class ExecutionContextDescription extends JSONEncodable {
 class ExecutionContextCreatedEvent extends InspectorEvent {
   String get method => 'Runtime.executionContextCreated';
 
-  JSONEncodable get params => JSONEncodableMap({
-    'context': _contextDescription
-  });
+  JSONEncodable get params =>
+      JSONEncodableMap({'context': _contextDescription});
 
   final ExecutionContextDescription _contextDescription;
 
@@ -75,14 +70,12 @@ class PropertyPreview extends JSONEncodable {
   // Allowed Values: array, null, node, regexp, date, map, set, weakmap, weakset, iterator, generator, error, proxy, promise, typedarray, arraybuffer, dataview, webassemblymemory, wasmvalue
   String subtype;
 
-  PropertyPreview(this.name, this.type, {this.value, this.valuePreview, this.subtype});
+  PropertyPreview(this.name, this.type,
+      {this.value, this.valuePreview, this.subtype});
 
   @override
   Map toJson() {
-    Map map = {
-      'name': name,
-      'type': type
-    };
+    Map map = {'name': name, 'type': type};
     if (value != null) map['value'] = value;
     if (valuePreview != null) map['valuePreview'] = valuePreview;
     if (subtype != null) map['subtype'] = subtype;
@@ -131,7 +124,8 @@ class ObjectPreview extends JSONEncodable {
   // List of the entries. Specified for map and set subtype values only.
   List<EntryPreview> entries;
 
-  ObjectPreview(this.type, this.overflow, this.properties, {this.subtype, this.description, this.entries});
+  ObjectPreview(this.type, this.overflow, this.properties,
+      {this.subtype, this.description, this.entries});
 
   @override
   Map toJson() {
@@ -158,9 +152,7 @@ class CustomPreview extends JSONEncodable {
 
   @override
   Map toJson() {
-    Map map = {
-      'header': header
-    };
+    Map map = {'header': header};
     if (bodyGetterId != null) map['bodyGetterId'] = bodyGetterId;
     return map;
   }
@@ -194,17 +186,23 @@ class RemoteObject extends JSONEncodable {
   // Preview containing abbreviated property values. Specified for object type values only.
   ObjectPreview preview;
 
-  RemoteObject(this.type, {this.subtype, this.className, this.value, this.unserializableValue, this.description, this.objectId, this.preview});
+  RemoteObject(this.type,
+      {this.subtype,
+      this.className,
+      this.value,
+      this.unserializableValue,
+      this.description,
+      this.objectId,
+      this.preview});
 
   @override
   Map toJson() {
-    Map<String, dynamic> map = {
-      'type': type
-    };
+    Map<String, dynamic> map = {'type': type};
     if (subtype != null) map['subtype'] = subtype;
     if (className != null) map['className'] = className;
     if (value != null) map['value'] = value;
-    if (unserializableValue != null) map['unserializableValue'] = unserializableValue;
+    if (unserializableValue != null)
+      map['unserializableValue'] = unserializableValue;
     if (description != null) map['description'] = description;
     if (objectId != null) map['objectId'] = objectId;
     if (preview != null) map['preview'] = preview;
@@ -263,7 +261,8 @@ class ConsoleAPICalledEvent extends InspectorEvent {
   // Optional
   String context;
 
-  ConsoleAPICalledEvent(this.type, this.args, this.executionContextId, this.timestamp);
+  ConsoleAPICalledEvent(
+      this.type, this.args, this.executionContextId, this.timestamp);
 }
 
 class InspectRuntimeModule extends InspectModule {
@@ -282,30 +281,35 @@ class InspectRuntimeModule extends InspectModule {
       case 'enable':
         enable();
         break;
-      case 'runIfWaitingForDebugger':
-        sendToFrontend(id, null);
-        break;
       case 'getIsolateId':
         onGetIsolateId(id, params);
+        break;
+      default:
+        print('id: $id, method: $method, params: $params');
+        callNativeInspectorMethod(id, method, params);
         break;
     }
   }
 
   void enable() {
-    ExecutionContextCreatedEvent event = ExecutionContextCreatedEvent(ExecutionContextDescription(
-      inspector.elementManager.contextId,
-      inspector.elementManager.controller.origin,
-      inspector.elementManager.controller.name,
-      inspector.elementManager.controller.name
-      // inspector.elementManager.controller.name,
-      // inspector.elementManager.controller.name
-    ));
+    ExecutionContextCreatedEvent event = ExecutionContextCreatedEvent(
+        ExecutionContextDescription(
+            inspector.elementManager.contextId,
+            inspector.elementManager.controller.origin,
+            inspector.elementManager.controller.name,
+            inspector.elementManager.controller.name));
     sendEventToFrontend(event);
-    ConsoleAPICalledEvent welcome = ConsoleAPICalledEvent('log', [RemoteObject('string', value: 'Welcome to Kraken inspector.')], inspector.elementManager.contextId, DateTime.now().millisecondsSinceEpoch);
+
+    ConsoleAPICalledEvent welcome = ConsoleAPICalledEvent(
+        'log',
+        [RemoteObject('string', value: 'Welcome to Kraken inspector.')],
+        inspector.elementManager.contextId,
+        DateTime.now().millisecondsSinceEpoch);
     sendEventToFrontend(welcome);
   }
 
   void onGetIsolateId(int id, Map<String, dynamic> params) {
-    sendToFrontend(id, JSONEncodableMap({ 'id': inspector.elementManager.contextId }));
+    sendToFrontend(
+        id, JSONEncodableMap({'id': inspector.elementManager.contextId}));
   }
 }

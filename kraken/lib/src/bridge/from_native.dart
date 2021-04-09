@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
@@ -364,6 +365,24 @@ void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
 
 final Pointer<NativeFunction<Native_InspectorMessage>> _nativeInspectorMessage = Pointer.fromFunction(_onInspectorMessage);
 
+typedef Native_InspectorMessageCallback = Void Function(Pointer<Void> rpcSession, Pointer<Utf8> message);
+typedef Dart_InspectorMessageCallback = void Function(Pointer<Void> rpcSession, Pointer<Utf8> message);
+
+typedef Native_RegisterInspectorMessageCallback = Void Function(Int32 contextId, Pointer<Void> rpcSession, Pointer<NativeFunction<Native_InspectorMessageCallback>> inspectorMessageCallback);
+
+void _registerInspectorMessageCallback(int contextId, Pointer<Void> rpcSession, Pointer<NativeFunction<Native_InspectorMessageCallback>> inspectorMessageCallback) {
+  scheduleMicrotask(() {
+    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+    Dart_InspectorMessageCallback nativeCallback = inspectorMessageCallback.asFunction();
+    print('register callback: $contextId $rpcSession $inspectorMessageCallback controller: $controller');
+    controller.view.inspector.nativeInspectorMessageHandler = (String message) {
+      nativeCallback(rpcSession, Utf8.toUtf8(message));
+    };
+  });
+}
+
+final Pointer<NativeFunction<Native_RegisterInspectorMessageCallback>> _nativeRegisterInspectorMessageCallback = Pointer.fromFunction(_registerInspectorMessageCallback);
+
 final List<int> _dartNativeMethods = [
   _nativeInvokeModule.address,
   _nativeRequestBatchUpdate.address,
@@ -383,7 +402,8 @@ final List<int> _dartNativeMethods = [
   _nativeInitDocument.address,
   _nativeGetEntries.address,
   _nativeOnJsError.address,
-  _nativeInspectorMessage.address
+  _nativeInspectorMessage.address,
+  _nativeRegisterInspectorMessageCallback.address
 ];
 
 typedef Native_RegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);

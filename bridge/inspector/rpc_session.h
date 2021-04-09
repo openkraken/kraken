@@ -19,15 +19,15 @@ namespace kraken::debugger {
 
 class InspectorSession;
 
-using OnMessageCallback = std::function<void(const std::string &message)>;
-
 class DartRPC {
 public:
   void send(int32_t contextId, std::string msg) {
     getDartMethod()->inspectorMessage(contextId, msg.c_str());
   };
 
-  void setOnMessageCallback(OnMessageCallback callback) {}
+  void setOnMessageCallback(int32_t contextId, void* rpcSession, InspectorMessageCallback callback) {
+    getDartMethod()->registerInspectorMessageCallback(contextId, rpcSession, callback);
+  }
 };
 
 class RPCSession {
@@ -35,7 +35,11 @@ public:
   explicit RPCSession(size_t contextId, JSC::JSGlobalObject *globalObject, std::shared_ptr<ProtocolHandler> handler) : _contextId(contextId) {
     m_debug_session = std::make_unique<InspectorSession>(this, globalObject, handler);
     m_handler = std::make_shared<DartRPC>();
-    this->m_handler->setOnMessageCallback(std::bind(&RPCSession::_on_message, this, std::placeholders::_1));
+    InspectorMessageCallback callback = [](void *rpcSession, const char *message) -> void {
+      auto session = reinterpret_cast_ptr<RPCSession *>(rpcSession);
+      session->_on_message(message);
+    };
+    this->m_handler->setOnMessageCallback(contextId, this, callback);
   }
 
   ~RPCSession() {
@@ -77,6 +81,7 @@ private:
   }
 
   void _on_message(const std::string &message) {
+    KRAKEN_LOG(VERBOSE) << "NATIVE INSPECTOR ON MESSAGE: " << message;
     rapidjson::Document doc;
     doc.Parse(message.c_str());
     if (doc.HasParseError() || !doc.IsObject()) {

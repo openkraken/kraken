@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:kraken/inspector.dart';
 
 export 'modules/dom.dart';
@@ -39,6 +41,17 @@ abstract class InspectModule {
   void sendEventToFrontend(InspectorEvent event) {
     if (inspector.server.connected) {
       inspector.server.sendEventToFrontend(event);
+    }
+  }
+
+  void callNativeInspectorMethod(int id, String method, Map<String, dynamic> params) {
+    print(inspector.nativeInspectorMessageHandler);
+    if (inspector.nativeInspectorMessageHandler != null) {
+      inspector.nativeInspectorMessageHandler(jsonEncode({
+        'id': id,
+        'method': method,
+        'params': params
+      }));
     }
   }
 
