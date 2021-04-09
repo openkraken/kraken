@@ -839,7 +839,7 @@ void DebugDispatcherImpl::setBreakpoint(uint64_t callId, const std::string &meth
   result.SetObject();
 
   if (response.status() == DispatchResponse::kSuccess) {
-    result.AddMember("breakpointId", rapidjson::StringRef(out_breakpointId.c_str()), m_json_doc.GetAllocator());
+    result.AddMember("breakpointId", out_breakpointId, m_json_doc.GetAllocator());
     result.AddMember("actualLocation", out_actualLocation.get()->toValue(m_json_doc.GetAllocator()),
                      m_json_doc.GetAllocator());
   }
@@ -948,7 +948,7 @@ void DebugDispatcherImpl::setBreakpointByUrl(uint64_t callId, const std::string 
   rapidjson::Value result(rapidjson::kObjectType);
   result.SetObject();
   if (response.status() == DispatchResponse::kSuccess) {
-    result.AddMember("breakpointId", rapidjson::StringRef(out_breakpointId.c_str()), m_json_doc.GetAllocator());
+    result.AddMember("breakpointId", out_breakpointId, m_json_doc.GetAllocator());
 
     if (out_locations != nullptr) {
       rapidjson::Value _location_array(rapidjson::kArrayType);
@@ -1004,7 +1004,7 @@ void DebugDispatcherImpl::setBreakpointOnFunctionCall(uint64_t callId, const std
   rapidjson::Value result(rapidjson::kObjectType);
   result.SetObject();
   if (response.status() == DispatchResponse::kSuccess) {
-    result.AddMember("breakpointId", rapidjson::StringRef(out_breakpointId.c_str()), m_json_doc.GetAllocator());
+    result.AddMember("breakpointId", out_breakpointId, m_json_doc.GetAllocator());
   }
   if (weak->get()) weak->get()->sendResponse(callId, response, std::move(result));
   return;

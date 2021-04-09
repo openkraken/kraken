@@ -102,11 +102,11 @@ rapidjson::Value ExceptionDetails::toValue(rapidjson::Document::AllocatorType &a
   result.SetObject();
 
   result.AddMember("exceptionId", m_exceptionId, allocator);
-  result.AddMember("text", rapidjson::StringRef(m_text.c_str()), allocator);
+  result.AddMember("text", m_text, allocator);
   result.AddMember("lineNumber", m_lineNumber, allocator);
   result.AddMember("columnNumber", m_columnNumber, allocator);
-  if (m_scriptId.isJust()) result.AddMember("scriptId", rapidjson::StringRef(m_scriptId.fromJust().c_str()), allocator);
-  if (m_url.isJust()) result.AddMember("url", rapidjson::StringRef(m_url.fromJust().c_str()), allocator);
+  if (m_scriptId.isJust()) result.AddMember("scriptId", m_scriptId.fromJust(), allocator);
+  if (m_url.isJust()) result.AddMember("url", m_url.fromJust(), allocator);
   if (m_stackTrace.isJust()) result.AddMember("stackTrace", m_stackTrace.fromJust()->toValue(allocator), allocator);
   if (m_exception.isJust()) result.AddMember("exception", m_exception.fromJust()->toValue(allocator), allocator);
   if (m_executionContextId.isJust()) result.AddMember("executionContextId", m_executionContextId.fromJust(), allocator);

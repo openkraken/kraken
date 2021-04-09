@@ -40,7 +40,7 @@ rapidjson::Value SearchMatch::toValue(rapidjson::Document::AllocatorType &alloca
   result.SetObject();
 
   result.AddMember("lineNumber", m_lineNumber, allocator);
-  result.AddMember("lineContent", rapidjson::StringRef(m_lineContent.c_str()), allocator);
+  result.AddMember("lineContent", m_lineContent, allocator);
   return result;
 }
 } // namespace debugger

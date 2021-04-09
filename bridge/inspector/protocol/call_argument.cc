@@ -50,8 +50,8 @@ rapidjson::Value CallArgument::toValue(rapidjson::Document::AllocatorType &alloc
 
   if (m_value.isJust()) result.AddMember("value", *m_value.fromJust(), allocator);
   if (m_unserializableValue.isJust())
-    result.AddMember("unserializableValue", rapidjson::StringRef(m_unserializableValue.fromJust().c_str()), allocator);
-  if (m_objectId.isJust()) result.AddMember("objectId", rapidjson::StringRef(m_objectId.fromJust().c_str()), allocator);
+    result.AddMember("unserializableValue", m_unserializableValue.fromJust(), allocator);
+  if (m_objectId.isJust()) result.AddMember("objectId", m_objectId.fromJust(), allocator);
   return result;
 }
 } // namespace debugger

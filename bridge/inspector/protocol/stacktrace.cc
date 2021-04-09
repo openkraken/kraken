@@ -69,7 +69,7 @@ rapidjson::Value StackTrace::toValue(rapidjson::Document::AllocatorType &allocat
   result.SetObject();
 
   if (m_description.isJust()) {
-    result.AddMember("description", rapidjson::StringRef(m_description.fromJust().c_str()), allocator);
+    result.AddMember("description", m_description.fromJust(), allocator);
   }
   rapidjson::Value arr = rapidjson::Value(rapidjson::kArrayType);
   arr.SetArray();

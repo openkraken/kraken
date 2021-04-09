@@ -42,7 +42,7 @@ rapidjson::Value BreakpointResolvedNotification::toValue(rapidjson::Document::Al
   rapidjson::Value result = rapidjson::Value(rapidjson::kObjectType);
   result.SetObject();
 
-  result.AddMember("breakpointId", rapidjson::StringRef(m_breakpointId.c_str()), allocator);
+  result.AddMember("breakpointId", m_breakpointId, allocator);
   result.AddMember("location", m_location->toValue(allocator), allocator);
   return result;
 }

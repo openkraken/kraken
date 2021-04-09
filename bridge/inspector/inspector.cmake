@@ -6,6 +6,7 @@
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os -ffunction-sections -fdata-sections -fPIC")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 
+add_compile_definitions(RAPIDJSON_HAS_STDSTRING=1)
 set(INSPECTOR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inspector)
 
 message(${DEBUG_JSC_ENGINE})

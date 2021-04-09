@@ -80,11 +80,11 @@ rapidjson::Value Scope::toValue(rapidjson::Document::AllocatorType &allocator) c
   rapidjson::Value result = rapidjson::Value(rapidjson::kObjectType);
   result.SetObject();
 
-  result.AddMember("type", rapidjson::StringRef(m_type.c_str()), allocator);
+  result.AddMember("type", m_type, allocator);
   result.AddMember("object", m_object->toValue(allocator), allocator);
 
   if (m_name.isJust()) {
-    result.AddMember("name", rapidjson::StringRef(m_name.fromJust().c_str()), allocator);
+    result.AddMember("name", m_name.fromJust(), allocator);
   }
   if (m_startLocation.isJust()) {
     result.AddMember("startLocation", m_startLocation.fromJust()->toValue(allocator), allocator);

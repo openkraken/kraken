@@ -39,9 +39,9 @@ std::unique_ptr<StackTraceId> StackTraceId::fromValue(rapidjson::Value *value, k
 
 rapidjson::Value StackTraceId::toValue(rapidjson::Document::AllocatorType &allocator) const {
   rapidjson::Value result = rapidjson::Value(rapidjson::kObjectType);
-  result.AddMember("id", rapidjson::StringRef(m_id.c_str()), allocator);
+  result.AddMember("id", m_id, allocator);
   if (m_debuggerId.isJust()) {
-    result.AddMember("debuggerId", rapidjson::StringRef(m_debuggerId.fromJust().c_str()), allocator);
+    result.AddMember("debuggerId", m_debuggerId.fromJust(), allocator);
   }
   return result;
 }

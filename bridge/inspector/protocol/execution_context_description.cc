@@ -50,8 +50,8 @@ ExecutionContextDescription::fromValue(rapidjson::Value *value, kraken::debugger
 rapidjson::Value ExecutionContextDescription::toValue(rapidjson::Document::AllocatorType &allocator) const {
   rapidjson::Value result(rapidjson::kObjectType);
   result.AddMember("id", m_id, allocator);
-  result.AddMember("origin", rapidjson::StringRef(m_origin.c_str()), allocator);
-  result.AddMember("name", rapidjson::StringRef(m_name.c_str()), allocator);
+  result.AddMember("origin", m_origin, allocator);
+  result.AddMember("name", m_name, allocator);
   if (m_auxData.isJust()) result.AddMember("auxData", *m_auxData.fromJust(), allocator);
   return result;
 }

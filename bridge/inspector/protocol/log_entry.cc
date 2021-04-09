@@ -116,15 +116,15 @@ std::unique_ptr<LogEntry> LogEntry::fromValue(rapidjson::Value *value, ErrorSupp
 rapidjson::Value LogEntry::toValue(rapidjson::Document::AllocatorType &allocator) const {
   rapidjson::Value result(rapidjson::kObjectType);
 
-  result.AddMember("source", rapidjson::StringRef(m_source.c_str()), allocator);
-  result.AddMember("level", rapidjson::StringRef(m_level.c_str()), allocator);
-  result.AddMember("text", rapidjson::StringRef(m_text.c_str()), allocator);
+  result.AddMember("source", m_source, allocator);
+  result.AddMember("level", m_level, allocator);
+  result.AddMember("text", m_text, allocator);
   result.AddMember("timestamp", m_timestamp, allocator);
-  if (m_url.isJust()) result.AddMember("url", rapidjson::StringRef(m_url.fromJust().c_str()), allocator);
+  if (m_url.isJust()) result.AddMember("url", m_url.fromJust(), allocator);
   if (m_lineNumber.isJust()) result.AddMember("lineNumber", m_lineNumber.fromJust(), allocator);
   if (m_stackTrace.isJust()) result.AddMember("stackTrace", m_stackTrace.fromJust()->toValue(allocator), allocator);
-  if (m_networkRequestId.isJust()) result.AddMember("networkRequestId", rapidjson::StringRef(m_networkRequestId.fromJust().c_str()), allocator);
-  if (m_workerId.isJust()) result.AddMember("workerId", rapidjson::StringRef(m_workerId.fromJust().c_str()), allocator);
+  if (m_networkRequestId.isJust()) result.AddMember("networkRequestId", m_networkRequestId.fromJust(), allocator);
+  if (m_workerId.isJust()) result.AddMember("workerId", m_workerId.fromJust(), allocator);
   return result;
 }
 } // namespace kraken::debugger

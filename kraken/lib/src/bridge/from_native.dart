@@ -374,7 +374,6 @@ void _registerInspectorMessageCallback(int contextId, Pointer<Void> rpcSession, 
   scheduleMicrotask(() {
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
     Dart_InspectorMessageCallback nativeCallback = inspectorMessageCallback.asFunction();
-    print('register callback: $contextId $rpcSession $inspectorMessageCallback controller: $controller');
     controller.view.inspector.nativeInspectorMessageHandler = (String message) {
       nativeCallback(rpcSession, Utf8.toUtf8(message));
     };

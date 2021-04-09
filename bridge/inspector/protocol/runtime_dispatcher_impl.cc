@@ -263,7 +263,7 @@ void RuntimeDispatcherImpl::compileScript(uint64_t callId, const std::string &me
   rapidjson::Value result(rapidjson::kObjectType);
   if (response.status() == DispatchResponse::kSuccess) {
     if (out_scriptId.isJust()) {
-      result.AddMember("scriptId", rapidjson::StringRef(out_scriptId.fromJust().c_str()), m_json_doc.GetAllocator());
+      result.AddMember("scriptId", out_scriptId.fromJust(), m_json_doc.GetAllocator());
     }
     if (out_exceptionDetails.isJust()) {
       result.AddMember("exceptionDetails", out_exceptionDetails.fromJust()->toValue(m_json_doc.GetAllocator()),
@@ -448,7 +448,7 @@ void RuntimeDispatcherImpl::getIsolateId(uint64_t callId, const std::string &met
 
   rapidjson::Value result(rapidjson::kObjectType);
   if (response.status() == DispatchResponse::kSuccess) {
-    result.AddMember("id", rapidjson::StringRef(out_id.c_str()), m_json_doc.GetAllocator());
+    result.AddMember("id", out_id, m_json_doc.GetAllocator());
   }
   if (weak->get()) weak->get()->sendResponse(callId, response, std::move(result));
   return;
