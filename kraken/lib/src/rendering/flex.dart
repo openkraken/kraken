@@ -1183,27 +1183,20 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && child.hasSize) {
         double childContentWidth = RenderBoxModel.getLogicalContentWidth(child);
         double childContentHeight = RenderBoxModel.getLogicalContentHeight(child);
-        bool hasFlexFactor = false;
-        if (child is RenderBoxModel) {
-          hasFlexFactor = child.renderStyle.flexGrow != 0 ||
-            child.renderStyle.flexShrink != 0;
-        }
 
         // Always layout child in following cases
         // 1. Parent is not laid out yet
         // 2. Child is marked as needsLayout
-        // 3. Child has flex-grow or flex-shrink
-        // 4. Needs relayout when percentage sizing is parsed
-        if (!hasSize || child.needsLayout || hasFlexFactor || needsRelayout) {
+        // 3. Needs relayout when percentage sizing is parsed
+        if (!hasSize || child.needsLayout || needsRelayout) {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = _getChildSize(child);
-          /// No need to layout child when both width and height of child can be calculated from style
-          /// and be the same as old size, in other cases always relayout.
-          bool childSizeCalculatedSame = childContentWidth != null && childContentHeight != null &&
-            (childOldSize.width == childContentWidth ||
-              childOldSize.height == childContentHeight);
-          isChildNeedsLayout = !childSizeCalculatedSame;
+          // Need to layout child when width and height both can be calculated from style
+          // and differ from its previous size
+          isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
+              (childOldSize.width != childContentWidth ||
+                  childOldSize.height != childContentHeight);
         }
       }
 
