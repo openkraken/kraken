@@ -1,3 +1,30 @@
+## 0.7.1
+
+**Bug Fixed**
+
+- fix: resize img wainting for img layouted[#86](https://github.com/openkraken/kraken/pull/86)
+- fix: fix: encoding snapshots filename to compact with windows. [#69](https://github.com/openkraken/kraken/pull/69)
+- fix: fix insertBefore crash when passing none node object. [#70](https://github.com/openkraken/kraken/pull/70)
+- fix: windows platform support build target to Android. [#88](https://github.com/openkraken/kraken/pull/88)
+- fix: element size not change when widget size change [#90](https://github.com/openkraken/kraken/pull/90)
+- fix: fix navigation failed of anchor element. [#95](https://github.com/openkraken/kraken/pull/95)
+- fix: 'kraken.methodChannel.setMethodCallHandler' override previous handler [#96](https://github.com/openkraken/kraken/pull/96)
+- fix: repaintBoundary convert logic [#111](https://github.com/openkraken/kraken/pull/111)
+- fix: element append order wrong with comment node exists [#116](https://github.com/openkraken/kraken/pull/116)
+- fix: fix access Node.previousSibling crashed when target node at top of childNodes. [#126](https://github.com/openkraken/kraken/pull/126)
+- fix: fix access Element.children crashed when contains non-element nodes in childNodes. [#126](https://github.com/openkraken/kraken/pull/126)
+- fix: percentage resolve fail with multiple sibling exists [#144](https://github.com/openkraken/kraken/pull/144)
+- fix: default unknow element display change to inline [#133](https://github.com/openkraken/kraken/pull/133)
+
+**Feature**
+
+- feat: support Node.ownerDocument [#107](https://github.com/openkraken/kraken/pull/107)
+- feat: support vmin and vmax [#109](https://github.com/openkraken/kraken/pull/109)
+- feat: support css none value [#129](https://github.com/openkraken/kraken/pull/129)
+- feat: suport Event.initEvent() and Document.createEvent() [#130](https://github.com/openkraken/kraken/pull/131)
+- feat: Add block element: h1-h6 main header aside. [#133](https://github.com/openkraken/kraken/pull/133)
+- feat: Add inline element: small i code samp... [#133](https://github.com/openkraken/kraken/pull/133)
+
 ## 0.7.0
 
 **Bug Fixed**
