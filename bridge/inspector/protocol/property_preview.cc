@@ -91,12 +91,12 @@ std::unique_ptr<PropertyPreview> PropertyPreview::fromValue(rapidjson::Value *va
 
 rapidjson::Value PropertyPreview::toValue(rapidjson::Document::AllocatorType &allocator) const {
   rapidjson::Value result(rapidjson::kObjectType);
-  result.AddMember("name", rapidjson::StringRef(m_name.c_str()), allocator);
-  result.AddMember("type", rapidjson::StringRef(m_type.c_str()), allocator);
-  if (m_value.isJust()) result.AddMember("value", rapidjson::StringRef(m_value.fromJust().c_str()), allocator);
+  result.AddMember("name", m_name, allocator);
+  result.AddMember("type", m_type, allocator);
+  if (m_value.isJust()) result.AddMember("value", m_value.fromJust(), allocator);
   if (m_valuePreview.isJust())
     result.AddMember("valuePreview", m_valuePreview.fromJust()->toValue(allocator), allocator);
-  if (m_subtype.isJust()) result.AddMember("subtype", rapidjson::StringRef(m_subtype.fromJust().c_str()), allocator);
+  if (m_subtype.isJust()) result.AddMember("subtype", m_subtype.fromJust(), allocator);
   return result;
 }
 } // namespace debugger

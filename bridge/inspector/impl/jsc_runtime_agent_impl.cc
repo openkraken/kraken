@@ -289,7 +289,7 @@ DispatchResponse JSCRuntimeAgentImpl::getProperties(
                          .setType("Object")
                          .setSubtype("Object")
                          .setObjectId("")
-                         .setValue(0)
+                         .setValue(nullptr)
                          .setUnserializableValue("")
                          .setDescription(desc.toString().utf8().data())
                          //                            .setPreview(std::move(preview))
