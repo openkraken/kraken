@@ -23,14 +23,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef Atomics_h
-#define Atomics_h
+#pragma once
 
 #include <atomic>
 #include <wtf/StdLibExtras.h>
 
 #if OS(WINDOWS)
-#if !COMPILER(GCC_OR_CLANG)
+#if !COMPILER(GCC_COMPATIBLE)
 extern "C" void _ReadWriteBarrier(void);
 #pragma intrinsic(_ReadWriteBarrier)
 #endif
@@ -44,11 +43,6 @@ ALWAYS_INLINE bool hasFence(std::memory_order order)
 {
     return order != std::memory_order_relaxed;
 }
-
-enum class TransactionAbortLikelihood {
-    Unlikely,
-    Likely
-};
     
 // Atomic wraps around std::atomic with the sole purpose of making the compare_exchange
 // operations not alter the expected value. This is more in line with how we typically
@@ -66,8 +60,25 @@ struct Atomic {
     ALWAYS_INLINE T load(std::memory_order order = std::memory_order_seq_cst) const { return value.load(order); }
     
     ALWAYS_INLINE T loadRelaxed() const { return load(std::memory_order_relaxed); }
-
+    
+    // This is a load that simultaneously does a full fence - neither loads nor stores will move
+    // above or below it.
+    ALWAYS_INLINE T loadFullyFenced() const
+    {
+        Atomic<T>* ptr = const_cast<Atomic<T>*>(this);
+        return ptr->exchangeAdd(T());
+    }
+    
     ALWAYS_INLINE void store(T desired, std::memory_order order = std::memory_order_seq_cst) { value.store(desired, order); }
+    
+    ALWAYS_INLINE void storeRelaxed(T desired) { store(desired, std::memory_order_relaxed); }
+
+    // This is a store that simultaneously does a full fence - neither loads nor stores will move
+    // above or below it.
+    ALWAYS_INLINE void storeFullyFenced(T desired)
+    {
+        exchange(desired);
+    }
 
     ALWAYS_INLINE bool compareExchangeWeak(T expected, T desired, std::memory_order order = std::memory_order_seq_cst)
     {
@@ -86,6 +97,8 @@ struct Atomic {
         return value.compare_exchange_weak(expectedOrActual, desired, order_success, order_failure);
     }
 
+    // WARNING: This does not have strong fencing guarantees when it fails. For example, stores could
+    // sink below it in that case.
     ALWAYS_INLINE T compareExchangeStrong(T expected, T desired, std::memory_order order = std::memory_order_seq_cst)
     {
         T expectedOrActual = expected;
@@ -116,131 +129,34 @@ struct Atomic {
     ALWAYS_INLINE T exchangeXor(U operand, std::memory_order order = std::memory_order_seq_cst) { return value.fetch_xor(operand, order); }
     
     ALWAYS_INLINE T exchange(T newValue, std::memory_order order = std::memory_order_seq_cst) { return value.exchange(newValue, order); }
-    
-#if HAVE(LL_SC)
-    ALWAYS_INLINE T loadLink(std::memory_order order = std::memory_order_seq_cst);
-    ALWAYS_INLINE bool storeCond(T value,  std::memory_order order = std::memory_order_seq_cst);
-#endif // HAVE(LL_SC)
-
-    ALWAYS_INLINE T prepare(std::memory_order order = std::memory_order_seq_cst)
-    {
-#if HAVE(LL_SC)
-        return loadLink(order);
-#else
-        UNUSED_PARAM(order);
-        return load(std::memory_order_relaxed);
-#endif
-    }
-    
-#if HAVE(LL_SC)
-    static const bool prepareIsFast = false;
-#else
-    static const bool prepareIsFast = true;
-#endif
-
-    ALWAYS_INLINE bool attempt(T oldValue, T newValue, std::memory_order order = std::memory_order_seq_cst)
-    {
-#if HAVE(LL_SC)
-        UNUSED_PARAM(oldValue);
-        return storeCond(newValue, order);
-#else
-        return compareExchangeWeak(oldValue, newValue, order);
-#endif
-    }
 
     template<typename Func>
-    ALWAYS_INLINE bool transaction(const Func& func, std::memory_order order = std::memory_order_seq_cst, TransactionAbortLikelihood abortLikelihood = TransactionAbortLikelihood::Likely)
+    ALWAYS_INLINE bool transaction(const Func& func, std::memory_order order = std::memory_order_seq_cst)
     {
-        // If preparing is not fast then we want to skip the loop when func would fail.
-        if (!prepareIsFast && abortLikelihood == TransactionAbortLikelihood::Likely) {
-            T oldValue = load(std::memory_order_relaxed);
-            // Note: many funcs will constant-fold to true, which will kill all of this code.
-            if (!func(oldValue))
-                return false;
-        }
         for (;;) {
-            T oldValue = prepare(order);
+            T oldValue = load(std::memory_order_relaxed);
             T newValue = oldValue;
             if (!func(newValue))
                 return false;
-            if (attempt(oldValue, newValue, order))
+            if (compareExchangeWeak(oldValue, newValue, order))
                 return true;
         }
     }
 
     template<typename Func>
-    ALWAYS_INLINE bool transactionRelaxed(const Func& func, TransactionAbortLikelihood abortLikelihood = TransactionAbortLikelihood::Likely)
+    ALWAYS_INLINE bool transactionRelaxed(const Func& func)
     {
-        return transaction(func, std::memory_order_relaxed, abortLikelihood);
+        return transaction(func, std::memory_order_relaxed);
+    }
+
+    Atomic() = default;
+    constexpr Atomic(T initial)
+        : value(std::forward<T>(initial))
+    {
     }
 
     std::atomic<T> value;
 };
-
-#if CPU(ARM64) && HAVE(LL_SC)
-#define DEFINE_LL_SC(width, modifier, suffix)   \
-    template<> \
-    ALWAYS_INLINE uint ## width ## _t Atomic<uint ## width ##_t>::loadLink(std::memory_order order) \
-    { \
-        int ## width ## _t result; \
-        if (hasFence(order)) { \
-            asm volatile ( \
-                "ldaxr" suffix " %" modifier "0, [%1]" \
-                : "=r"(result) \
-                : "r"(this) \
-                : "memory"); \
-        } else { \
-            asm ( \
-                "ldxr" suffix " %" modifier "0, [%1]" \
-                : "=r"(result) \
-                : "r"(this) \
-                : "memory"); \
-        } \
-        return result; \
-    } \
-    \
-    template<> \
-    ALWAYS_INLINE bool Atomic<uint ## width ## _t>::storeCond(uint ## width ## _t value, std::memory_order order) \
-    { \
-        bool result; \
-        if (hasFence(order)) { \
-            asm volatile ( \
-                "stlxr" suffix " %w0, %" modifier "1, [%2]" \
-                : "=&r"(result) \
-                : "r"(value), "r"(this) \
-                : "memory"); \
-        } else { \
-            asm ( \
-                "stxr" suffix " %w0, %" modifier "1, [%2]" \
-                : "=&r"(result) \
-                : "r"(value), "r"(this) \
-                : "memory"); \
-        } \
-        return !result; \
-    } \
-    \
-    template<> \
-    ALWAYS_INLINE int ## width ## _t Atomic<int ## width ## _t>::loadLink(std::memory_order order) \
-    { \
-        return bitwise_cast<Atomic<uint ## width ## _t>*>(this)->loadLink(order); \
-    } \
-    \
-    template<> \
-    ALWAYS_INLINE bool Atomic<int ## width ## _t>::storeCond(int ## width ## _t value, std::memory_order order) \
-    { \
-        return bitwise_cast<Atomic<uint ## width ## _t>*>(this)->storeCond(value, order); \
-    }
-
-DEFINE_LL_SC(8, "w", "b")
-DEFINE_LL_SC(16, "w", "h")
-DEFINE_LL_SC(32, "w", "")
-DEFINE_LL_SC(64, "", "")
-#if OS(DARWIN)
-DEFINE_LL_SC(ptr, "", "")
-#endif
-
-#undef DEFINE_LL_SC
-#endif // CPU(ARM64) && HAVE(LL_SC)
 
 template<typename T>
 inline T atomicLoad(T* location, std::memory_order order = std::memory_order_seq_cst)
@@ -249,9 +165,21 @@ inline T atomicLoad(T* location, std::memory_order order = std::memory_order_seq
 }
 
 template<typename T>
+inline T atomicLoadFullyFenced(T* location)
+{
+    return bitwise_cast<Atomic<T>*>(location)->loadFullyFenced();
+}
+
+template<typename T>
 inline void atomicStore(T* location, T newValue, std::memory_order order = std::memory_order_seq_cst)
 {
     bitwise_cast<Atomic<T>*>(location)->store(newValue, order);
+}
+
+template<typename T>
+inline void atomicStoreFullyFenced(T* location, T newValue)
+{
+    bitwise_cast<Atomic<T>*>(location)->storeFullyFenced(newValue);
 }
 
 template<typename T>
@@ -313,7 +241,7 @@ inline T atomicExchange(T* location, T newValue, std::memory_order order = std::
 // to do things like register allocation and code motion over pure operations.
 inline void compilerFence()
 {
-#if OS(WINDOWS) && !COMPILER(GCC_OR_CLANG)
+#if OS(WINDOWS) && !COMPILER(GCC_COMPATIBLE)
     _ReadWriteBarrier();
 #else
     asm volatile("" ::: "memory");
@@ -368,18 +296,6 @@ inline void x86_cpuid()
 #if OS(WINDOWS)
     int info[4];
     __cpuid(info, 0);
-#elif CPU(X86)
-    // GCC 4.9 on x86 in PIC mode can't use %ebx, so we have to save and restore it manually.
-    // But since we don't care about what cpuid returns (we use it as a serializing instruction),
-    // we can simply throw away what cpuid put in %ebx.
-    intptr_t a = 0, c, d;
-    asm volatile(
-        "pushl %%ebx\n\t"
-        "cpuid\n\t"
-        "popl %%ebx\n\t"
-        : "+a"(a), "=c"(c), "=d"(d)
-        :
-        : "memory");
 #else
     intptr_t a = 0, b, c, d;
     asm volatile(
@@ -410,124 +326,128 @@ inline void crossModifyingCodeFence() { std::atomic_thread_fence(std::memory_ord
 
 #endif
 
-typedef unsigned Dependency;
+typedef unsigned InternalDependencyType;
 
-ALWAYS_INLINE Dependency nullDependency()
+inline InternalDependencyType opaqueMixture()
 {
     return 0;
 }
 
-template <typename T, typename std::enable_if<sizeof(T) == 8>::type* = nullptr>
-ALWAYS_INLINE Dependency dependency(T value)
+template<typename... Arguments, typename T>
+inline InternalDependencyType opaqueMixture(T value, Arguments... arguments)
 {
-    unsigned dependency;
-    uint64_t copy = bitwise_cast<uint64_t>(value);
-#if CPU(ARM64)
-    // Create a magical zero value through inline assembly, whose computation
-    // isn't visible to the optimizer. This zero is then usable as an offset in
-    // further address computations: adding zero does nothing, but the compiler
-    // doesn't know it. It's magical because it creates an address dependency
-    // from the load of `location` to the uses of the dependency, which triggers
-    // the ARM ISA's address dependency rule, a.k.a. the mythical C++ consume
-    // ordering. This forces weak memory order CPUs to observe `location` and
-    // dependent loads in their store order without the reader using a barrier
-    // or an acquire load.
-    asm("eor %w[dependency], %w[in], %w[in]"
-        : [dependency] "=r"(dependency)
-        : [in] "r"(copy));
-#elif CPU(ARM)
-    asm("eor %[dependency], %[in], %[in]"
-        : [dependency] "=r"(dependency)
-        : [in] "r"(copy));
-#else
-    // No dependency is needed for this architecture.
-    loadLoadFence();
-    dependency = 0;
-    UNUSED_PARAM(copy);
-#endif
-    return dependency;
+    union {
+        InternalDependencyType copy;
+        T value;
+    } u;
+    u.copy = 0;
+    u.value = value;
+    return opaqueMixture(arguments...) + u.copy;
 }
 
-// FIXME: This code is almost identical to the other dependency() overload.
-// https://bugs.webkit.org/show_bug.cgi?id=169405
-template <typename T, typename std::enable_if<sizeof(T) == 4>::type* = nullptr>
-ALWAYS_INLINE Dependency dependency(T value)
-{
-    unsigned dependency;
-    uint32_t copy = bitwise_cast<uint32_t>(value);
-#if CPU(ARM64)
-    asm("eor %w[dependency], %w[in], %w[in]"
-        : [dependency] "=r"(dependency)
-        : [in] "r"(copy));
-#elif CPU(ARM)
-    asm("eor %[dependency], %[in], %[in]"
-        : [dependency] "=r"(dependency)
-        : [in] "r"(copy));
-#else
-    loadLoadFence();
-    dependency = 0;
-    UNUSED_PARAM(copy);
-#endif
-    return dependency;
-}
-
-template <typename T, typename std::enable_if<sizeof(T) == 2>::type* = nullptr>
-ALWAYS_INLINE Dependency dependency(T value)
-{
-    return dependency(static_cast<uint32_t>(value));
-}
-
-template <typename T, typename std::enable_if<sizeof(T) == 1>::type* = nullptr>
-ALWAYS_INLINE Dependency dependency(T value)
-{
-    return dependency(static_cast<uint32_t>(value));
-}
-
-template<typename T>
-struct DependencyWith {
+class Dependency {
 public:
-    DependencyWith()
-        : dependency(nullDependency())
-        , value()
+    Dependency()
+        : m_value(0)
     {
     }
     
-    DependencyWith(Dependency dependency, const T& value)
-        : dependency(dependency)
+    // On TSO architectures, this is a load-load fence and the value it returns is not meaningful (it's
+    // zero). The load-load fence is usually just a compiler fence. On ARM, this is a self-xor that
+    // produces zero, but it's concealed from the compiler. The CPU understands this dummy op to be a
+    // phantom dependency.
+    template<typename... Arguments>
+    static Dependency fence(Arguments... arguments)
+    {
+        InternalDependencyType input = opaqueMixture(arguments...);
+        InternalDependencyType output;
+#if CPU(ARM64)
+        // Create a magical zero value through inline assembly, whose computation
+        // isn't visible to the optimizer. This zero is then usable as an offset in
+        // further address computations: adding zero does nothing, but the compiler
+        // doesn't know it. It's magical because it creates an address dependency
+        // from the load of `location` to the uses of the dependency, which triggers
+        // the ARM ISA's address dependency rule, a.k.a. the mythical C++ consume
+        // ordering. This forces weak memory order CPUs to observe `location` and
+        // dependent loads in their store order without the reader using a barrier
+        // or an acquire load.
+        asm("eor %w[out], %w[in], %w[in]"
+            : [out] "=r"(output)
+            : [in] "r"(input));
+#elif CPU(ARM)
+        asm("eor %[out], %[in], %[in]"
+            : [out] "=r"(output)
+            : [in] "r"(input));
+#else
+        // No dependency is needed for this architecture.
+        loadLoadFence();
+        output = 0;
+        UNUSED_PARAM(input);
+#endif
+        Dependency result;
+        result.m_value = output;
+        return result;
+    }
+    
+    // On TSO architectures, this just returns the pointer you pass it. On ARM, this produces a new
+    // pointer that is dependent on this dependency and the input pointer.
+    template<typename T>
+    T* consume(T* pointer)
+    {
+#if CPU(ARM64) || CPU(ARM)
+        return bitwise_cast<T*>(bitwise_cast<char*>(pointer) + m_value);
+#else
+        UNUSED_PARAM(m_value);
+        return pointer;
+#endif
+    }
+    
+private:
+    InternalDependencyType m_value;
+};
+
+template<typename InputType, typename ValueType>
+struct InputAndValue {
+    InputAndValue() { }
+    
+    InputAndValue(InputType input, ValueType value)
+        : input(input)
         , value(value)
     {
     }
     
-    Dependency dependency;
-    T value;
+    InputType input;
+    ValueType value;
 };
-    
-template<typename T>
-inline DependencyWith<T> dependencyWith(Dependency dependency, const T& value)
+
+template<typename InputType, typename ValueType>
+InputAndValue<InputType, ValueType> inputAndValue(InputType input, ValueType value)
 {
-    return DependencyWith<T>(dependency, value);
+    return InputAndValue<InputType, ValueType>(input, value);
 }
 
-template<typename T>
-inline T* consume(T* pointer, Dependency dependency)
+template<typename T, typename Func>
+ALWAYS_INLINE T& ensurePointer(Atomic<T*>& pointer, const Func& func)
 {
-#if CPU(ARM64) || CPU(ARM)
-    return bitwise_cast<T*>(bitwise_cast<char*>(pointer) + dependency);
-#else
-    UNUSED_PARAM(dependency);
-    return pointer;
-#endif
+    for (;;) {
+        T* oldValue = pointer.load(std::memory_order_relaxed);
+        if (oldValue) {
+            // On all sensible CPUs, we get an implicit dependency-based load-load barrier when
+            // loading this.
+            return *oldValue;
+        }
+        T* newValue = func();
+        if (pointer.compareExchangeWeak(oldValue, newValue))
+            return *newValue;
+        delete newValue;
+    }
 }
 
 } // namespace WTF
 
 using WTF::Atomic;
 using WTF::Dependency;
-using WTF::DependencyWith;
-using WTF::TransactionAbortLikelihood;
-using WTF::consume;
-using WTF::dependency;
-using WTF::dependencyWith;
-using WTF::nullDependency;
-
-#endif // Atomics_h
+using WTF::InputAndValue;
+using WTF::inputAndValue;
+using WTF::ensurePointer;
+using WTF::opaqueMixture;

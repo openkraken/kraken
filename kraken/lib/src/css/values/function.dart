@@ -4,6 +4,7 @@ final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
 final _functionStart = '(';
 final _functionEnd = ')';
 final _functionArgsSplit = ',';
+final _functionNotationUrl = 'url';
 
 // ignore: public_member_api_docs
 class CSSFunction {
@@ -28,7 +29,9 @@ class CSSFunction {
       bool match = false;
       // find all args in this function
       while (argsBeginIndex < value.length) {
-        if (value[argsBeginIndex] == _functionArgsSplit) {
+        // url() function notation should not be splitted cause it only accept one URL.
+        // https://drafts.csswg.org/css-values-3/#urls
+        if (fn != _functionNotationUrl && value[argsBeginIndex] == _functionArgsSplit) {
           if (containLeftCount == 0 && argBeginIndex < argsBeginIndex) {
             argList.add(value.substring(argBeginIndex, argsBeginIndex));
             argBeginIndex = argsBeginIndex + 1;
