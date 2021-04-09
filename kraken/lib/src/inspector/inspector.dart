@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
 import 'package:kraken/module.dart';
-import 'package:meta/meta.dart';
+import 'package:kraken/bridge.dart';
 import 'server.dart';
 import 'module.dart';
 
@@ -22,6 +22,8 @@ class DOMUpdatedEvent extends InspectorEvent {
   @override
   JSONEncodable get params => null;
 }
+
+typedef NativeInspectorMessageHandler = void Function(String message);
 
 class Inspector {
   /// Design preInspector for reload page,
@@ -63,6 +65,8 @@ class Inspector {
       ..onFrontendMessage = messageRouter
       ..start();
   }
+
+  NativeInspectorMessageHandler nativeInspectorMessageHandler;
 
   void registerModule(InspectModule module) {
     moduleRegistrar[module.name] = module;

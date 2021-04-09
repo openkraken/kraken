@@ -102,7 +102,8 @@ struct AgentContext {
 
 class InspectorSession : public FrontendChannel, public Inspector::InspectorEnvironment {
 public:
-  InspectorSession(RPCSession *rpcSession, JSC::JSGlobalObject *globalObject,
+  InspectorSession() = delete;
+  explicit InspectorSession(RPCSession *rpcSession, JSC::JSGlobalObject *globalObject,
                        std::shared_ptr<ProtocolHandler> handler);
 
   ~InspectorSession();
