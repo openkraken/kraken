@@ -3,10 +3,12 @@
  * Author: Kraken Team.
  */
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart' show CanvasRenderingContext2D;
 
 class CanvasPainter extends CustomPainter {
+  CanvasPainter({Listenable repaint}): super(repaint: repaint);
   CanvasRenderingContext2D context;
 
   bool _shouldRepaint = false;

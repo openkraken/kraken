@@ -5,6 +5,7 @@
 
 import 'dart:collection';
 import 'dart:ffi';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/bridge.dart';
@@ -36,8 +37,9 @@ class RenderCanvasPaint extends RenderCustomPaint {
 }
 
 class CanvasElement extends Element {
+  final ChangeNotifier repaintNotifier = ChangeNotifier();
   /// The painter that paints before the children.
-  final CanvasPainter painter = CanvasPainter();
+  CanvasPainter painter;
 
   // The custom paint render object.
   RenderCustomPaint renderCustomPaint;
@@ -74,6 +76,8 @@ class CanvasElement extends Element {
 
     // Keep reference so that we can search back with nativePtr from bridge.
     _nativeMap[nativeCanvasElement.address] = this;
+
+    painter = CanvasPainter(repaint: repaintNotifier);
   }
 
   @override
@@ -106,8 +110,10 @@ class CanvasElement extends Element {
       case '2d':
         if (painter.context == null) {
           CanvasRenderingContext2D context2d = CanvasRenderingContext2D();
+          context2d.canvas = this;
           context2d.viewportSize = viewportSize;
           painter.context = context2d;
+
         }
         return painter.context;
       default:

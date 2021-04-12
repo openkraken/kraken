@@ -11,6 +11,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/dom.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'canvas_context.dart';
 import 'canvas_path_2d.dart';
@@ -61,6 +62,7 @@ class CanvasRenderingContext2DSettings {
 
 class _CanvasRenderingContext2D extends CanvasRenderingContext {
   Size viewportSize;
+  CanvasElement canvas;
 
   int get actionCount => _actions.length;
 
@@ -74,6 +76,8 @@ class _CanvasRenderingContext2D extends CanvasRenderingContext {
 
   void action(CanvasAction action) {
     _actions.add(action);
+    // Must trigger repait after action
+    canvas.repaintNotifier.notifyListeners();
   }
 }
 
