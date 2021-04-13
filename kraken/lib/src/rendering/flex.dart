@@ -1187,6 +1187,36 @@ class RenderFlexLayout extends RenderLayoutBox {
         );
       }
 
+      // Constrain by min/max width/height
+//      double minConstraintWidth = innerConstraints.minWidth;
+//      double maxConstraintWidth = innerConstraints.maxWidth;
+//      double minConstraintHeight = innerConstraints.minHeight;
+//      double maxConstraintHeight = innerConstraints.maxHeight;
+//      double minWidth = child is RenderBoxModel ? child.renderStyle.minWidth : 0;
+//      double maxWidth = child is RenderBoxModel ? child.renderStyle.maxWidth : double.infinity;
+//      double minHeight = child is RenderBoxModel ? child.renderStyle.minHeight : 0;
+//      double maxHeight = child is RenderBoxModel ? child.renderStyle.maxHeight : double.infinity;
+//
+//      if (maxWidth != null) {
+//        maxConstraintWidth = maxConstraintWidth > maxWidth ? maxWidth : maxConstraintWidth;
+//      }
+//      if (minWidth != null) {
+//        minConstraintWidth = minConstraintWidth < minWidth ? minWidth : minConstraintWidth;
+//      }
+//
+//      if (maxHeight != null) {
+//        maxConstraintHeight = maxConstraintHeight > maxHeight ? maxHeight : maxConstraintHeight;
+//      }
+//      if (minHeight != null) {
+//        minConstraintHeight = minConstraintHeight < minHeight ? minHeight : minConstraintHeight;
+//      }
+//      innerConstraints = BoxConstraints(
+//        minWidth: minConstraintWidth,
+//        maxWidth: maxConstraintWidth,
+//        minHeight: minConstraintHeight,
+//        maxHeight: maxConstraintHeight,
+//      );
+
       BoxConstraints childConstraints = deflateOverflowConstraints(innerConstraints);
 
       // Whether child need to layout
@@ -1219,9 +1249,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         // Relayout child after percentage size is resolved
         if (needsRelayout && child is RenderBoxModel) {
-          childConstraints = child.renderStyle.getConstraints();
+//          childConstraints = child.renderStyle.getConstraints();
         }
-
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
@@ -1615,8 +1644,7 @@ class RenderFlexLayout extends RenderLayoutBox {
               /// In some cases such as flex-wrap: wrap, child cross size depends on remaining spaces of flex lines
               /// which also depends on the size of its siblings so it cannot be calculated from style without layout.
               bool childSizeCalculatedSame = childContentWidth != null && childContentHeight != null &&
-                (childOldSize.width == childContentWidth ||
-                  childOldSize.height == childContentHeight);
+                childOldSize.width == childContentWidth && childOldSize.height == childContentHeight;
               isChildNeedsLayout = !childSizeCalculatedSame;
             }
           }
@@ -1957,7 +1985,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   /// Get flex line height according to flex-wrap style
-  double _getFlexLineHeight(double runCrossAxisExtent, double runBetweenSpace) {
+  double _getFlexLineHeight(double runCrossAxisExtent, double runBetweenSpace, {bool beforeSetSize = true}) {
     // Flex line of align-content stretch should includes between space
     bool isMultiLineStretch = (renderStyle.flexWrap == FlexWrap.wrap || renderStyle.flexWrap == FlexWrap.wrapReverse) &&
       renderStyle.alignContent == AlignContent.stretch;
@@ -1965,7 +1993,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     bool isSingleLine = (renderStyle.flexWrap != FlexWrap.wrap && renderStyle.flexWrap != FlexWrap.wrapReverse);
 
     if (isSingleLine) {
-      return hasSize ? _getContentCrossSize() : runCrossAxisExtent;
+      // Use content size if container size is not set yet
+      return beforeSetSize ? runCrossAxisExtent : _getContentCrossSize();
     } else if (isMultiLineStretch) {
       return runCrossAxisExtent + runBetweenSpace;
     } else {
@@ -2135,7 +2164,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         /// Align flex item by direction returned by align-items or align-self
         double alignFlexItem(String alignment) {
-          double flexLineHeight = _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
+          double flexLineHeight = _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace, beforeSetSize: false);
 
           switch (alignment) {
             case 'start':

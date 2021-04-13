@@ -492,33 +492,53 @@ class RenderStyle
 
   /// Calculate renderBoxModel constraints based on style
   BoxConstraints getConstraints() {
-    double constraintWidth = width ?? double.infinity;
-    double constraintHeight = height ?? double.infinity;
     CSSDisplay transformedDisplay = renderBoxModel.renderStyle.transformedDisplay;
     bool isInline = transformedDisplay == CSSDisplay.inline;
-    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
+
+    double minConstraintWidth = 0;
+    double maxConstraintWidth = double.infinity;
+    double minConstraintHeight = 0;
+    double maxConstraintHeight = double.infinity;;
 
     if (!isInline) {
-      // Base width when width no exists, inline-block has width of 0
-      double baseWidth = isInlineBlock ? 0 : constraintWidth;
-      if (maxWidth != null && width == null) {
-        constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
-      } else if (minWidth != null && width == null) {
-        constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
+      double horizontalBorderWidth = borderEdge != null ? borderEdge.horizontal : 0;
+      double verticalBorderWidth = borderEdge != null ? borderEdge.vertical : 0;
+      double horizontalPaddingWidth = padding != null ? padding.horizontal : 0;
+      double verticalPaddingWidth = padding != null ? padding.vertical : 0;
+
+      double realWidth = width;
+      double realHeight = height;
+      if (width != null) {
+        realWidth = horizontalBorderWidth + horizontalPaddingWidth > width ? horizontalBorderWidth + horizontalPaddingWidth : width;
       }
+      if (height != null) {
+        realHeight = verticalBorderWidth + verticalPaddingWidth > height ? verticalBorderWidth + verticalPaddingWidth : height;
+      }
+
+      // Base width when width no exists, inline-block has width of 0
+      maxConstraintWidth = realWidth ?? double.infinity;
+      if (maxWidth != null && realWidth == null) {
+        maxConstraintWidth = maxConstraintWidth > maxWidth ? maxWidth : maxConstraintWidth;
+      }
+      if (minWidth != null && realWidth == null) {
+        minConstraintWidth = minConstraintWidth < minWidth ? minWidth : minConstraintWidth;
+      }
+
       // Base height always equals to 0 no matter
-      double baseHeight = 0;
-      if (maxHeight != null && height == null) {
-        constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
-      } else if (minHeight != null && height == null) {
-        constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
+      maxConstraintHeight = realHeight ?? double.infinity;;
+      if (maxHeight != null && realHeight == null) {
+        maxConstraintHeight = maxConstraintHeight > maxHeight ? maxHeight : maxConstraintHeight;
+      }
+      if (minHeight != null && realHeight == null) {
+        minConstraintHeight = minConstraintHeight < minHeight ? minHeight : minConstraintHeight;
       }
     }
+
     return BoxConstraints(
-      minWidth: 0,
-      maxWidth: constraintWidth,
-      minHeight: 0,
-      maxHeight: constraintHeight,
+      minWidth: minConstraintWidth,
+      maxWidth: maxConstraintWidth,
+      minHeight: minConstraintHeight,
+      maxHeight: maxConstraintHeight,
     );
   }
 }

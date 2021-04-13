@@ -76,10 +76,10 @@ mixin CSSSizingMixin on RenderStyleBase {
     RenderStyle renderStyle = this;
     switch (property) {
       case WIDTH:
-        renderStyle.width = value;
+        renderStyle.width = value != null && value >= 0 ? value.abs() : null;
         break;
       case HEIGHT:
-        renderStyle.height = value;
+        renderStyle.height = value != null && value >= 0 ? value.abs() : null;
         break;
       case MIN_HEIGHT:
         renderStyle.minHeight = getMinHeight(value);

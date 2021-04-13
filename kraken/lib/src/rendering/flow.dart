@@ -704,7 +704,11 @@ class RenderFlowLayout extends RenderLayoutBox {
           childLayoutStart = DateTime.now();
         }
         // Relayout child after percentage size is resolved
-        if (needsRelayout && child is RenderBoxModel) {
+//        if (needsRelayout && child is RenderBoxModel) {
+//          childConstraints = child.renderStyle.getConstraints();
+//        }
+
+        if (child is RenderBoxModel) {
           childConstraints = child.renderStyle.getConstraints();
         }
         child.layout(childConstraints, parentUsesSize: true);
