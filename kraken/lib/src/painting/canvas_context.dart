@@ -92,29 +92,6 @@ abstract class CanvasRenderingContext {
   }
 }
 
-abstract class CanvasState {
-  // state
-  void save(); // push state on state stack
-  void restore(); // pop state stack and restore state
-}
-
-abstract class CanvasTransform {
-  // transformations (default transform is the identity matrix)
-  void scale(double x, double y);
-
-  void rotate(double angle);
-
-  void translate(double x, double y);
-
-  void transform(double a, double b, double c, double d, double e, double f);
-
-  // DOMMatrix getTransform();
-  void setTransform(double a, double b, double c, double d, double e, double f);
-
-  // void setTransform(DOMMatrix2DInit transform = {});
-  void resetTransform();
-}
-
 abstract class CanvasCompositing {
   double globalAlpha; // (default 1.0)
   String globalCompositeOperation; // (default source-over)
@@ -152,25 +129,6 @@ abstract class CanvasShadowStyles {
 abstract class CanvasFilters {
   // filters
   String filter; // (default "none")
-}
-
-abstract class CanvasRect {
-  // rects
-  void clearRect(double x, double y, double w, double h);
-
-  void fillRect(double x, double y, double w, double h);
-
-  void strokeRect(double x, double y, double w, double h);
-}
-
-abstract class CanvasText {
-  // text (see also the CanvasPathDrawingStyles and CanvasTextDrawingStyles
-
-  void fillText(String text, double x, double y, {double maxWidth});
-
-  void strokeText(String text, double x, double y, {double maxWidth});
-
-  TextMetrics measureText(String text);
 }
 
 // ignore: one_member_abstracts

@@ -16,7 +16,7 @@ class CanvasPainter extends CustomPainter {
   Picture _picture;
   Canvas _canvas;
 
-  bool get _shouldUpdatePainting => context != null && context.actionCount > 0;
+  bool get _shouldPainting => context != null && context.actionCount > 0;
   bool get _shouldPaintSnapshot => _picture != null && _picture.approximateBytesUsed > 0;
 
   // Notice: Canvas is stateless, change scaleX or scaleY will case dropping drawn content.
@@ -39,6 +39,8 @@ class CanvasPainter extends CustomPainter {
     }
   }
 
+  final Paint _saveLayerPaint = Paint();
+
   @override
   void paint(Canvas canvas, Size size) {
     if (context != null) {
@@ -47,9 +49,7 @@ class CanvasPainter extends CustomPainter {
       // so where they overlap would be darker than where they do not. By using saveLayer to group them together,
       // they can be drawn with an opaque color at first,
       // and then the entire group can be made transparent using the saveLayer's paint.
-      if (context.shouldSaveLayer) {
-        canvas.saveLayer(null, Paint());
-      }
+      canvas.saveLayer(null, _saveLayerPaint);
 
       // Paint last content
       if (_shouldPaintSnapshot) {
@@ -57,7 +57,7 @@ class CanvasPainter extends CustomPainter {
       }
 
       // Paint new actions
-      if (_shouldUpdatePainting) {
+      if (_shouldPainting) {
         _pictureRecorder = PictureRecorder();
         _canvas = Canvas(_pictureRecorder);
 
@@ -76,10 +76,7 @@ class CanvasPainter extends CustomPainter {
       }
 
       // Call restore to pop the save stack and apply the paint to the group.
-      if (context.shouldSaveLayer) {
-        canvas.restore();
-        context.shouldSaveLayer = false;
-      }
+      canvas.restore();
     }
   }
 
