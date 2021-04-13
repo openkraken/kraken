@@ -55,6 +55,24 @@ final Pointer<NativeFunction<Native_RenderingContextSetTransform>> nativeSetTran
 final Pointer<NativeFunction<Native_RenderingContextTransform>> nativeTransform = Pointer.fromFunction(CanvasRenderingContext2D._transform);
 final Pointer<NativeFunction<Native_RenderingContextTranslate>> nativeTranslate = Pointer.fromFunction(CanvasRenderingContext2D._translate);
 
+const String _DEFAULT_FONT = '10px sans-serif';
+const String START = 'start';
+const String END = 'end';
+const String CENTER = 'center';
+const String LTR = 'ltr';
+const String RTL = 'rtl';
+const String INHERIT = 'inherit';
+const String HANGING = 'hanging';
+const String MIDDLE = 'middle';
+const String ALPHABETIC = 'alphabetic';
+const String IDEOGRAPHIC = 'ideographic';
+const String EVENODD = 'evenodd';
+const String BUTT = 'butt';
+const String ROUND = 'round';
+const String SQUARE = 'square';
+const String MITER = 'miter';
+const String BEVEL = 'bevel';
+
 class CanvasRenderingContext2DSettings {
   bool alpha = true;
   bool desynchronized = false;
@@ -63,6 +81,7 @@ class CanvasRenderingContext2DSettings {
 class _CanvasRenderingContext2D extends CanvasRenderingContext {
   Size viewportSize;
   CanvasElement canvas;
+  bool shouldSaveLayer = false;
 
   int get actionCount => _actions.length;
 
@@ -76,7 +95,7 @@ class _CanvasRenderingContext2D extends CanvasRenderingContext {
 
   void action(CanvasAction action) {
     _actions.add(action);
-    // Must trigger repait after action
+    // Must trigger repaint after action
     canvas.repaintNotifier.notifyListeners();
   }
 }
@@ -217,7 +236,7 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
   static void _clip(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> fillRule) {
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2DOfNativePtr(nativePtr);
 
-    PathFillType fillType = nativeStringToString(fillRule) == 'evenodd' ? PathFillType.evenOdd : PathFillType.nonZero;
+    PathFillType fillType = nativeStringToString(fillRule) == EVENODD ? PathFillType.evenOdd : PathFillType.nonZero;
     canvasRenderingContext2D.clip(fillType);
   }
 
@@ -235,7 +254,7 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
 
   static void _fill(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> fillRule) {
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2DOfNativePtr(nativePtr);
-    PathFillType fillType = nativeStringToString(fillRule) == 'evenodd' ? PathFillType.evenOdd : PathFillType.nonZero;
+    PathFillType fillType = nativeStringToString(fillRule) == EVENODD ? PathFillType.evenOdd : PathFillType.nonZero;
 
     canvasRenderingContext2D.fill(fillType);
   }
@@ -342,7 +361,6 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
     nativeCanvasRenderingContext2D.ref.setTransform = nativeSetTransform;
     nativeCanvasRenderingContext2D.ref.transform = nativeTransform;
     nativeCanvasRenderingContext2D.ref.translate = nativeTranslate;
-
   }
 
   /// Perform canvas drawing.
@@ -494,12 +512,6 @@ mixin CanvasPath2D on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, Canva
     });
   }
 }
-
-const String BUTT = 'butt';
-const String ROUND = 'round';
-const String SQUARE = 'square';
-const String MITER = 'miter';
-const String BEVEL = 'bevel';
 
 mixin CanvasPathDrawingStyles2D on _CanvasRenderingContext2D {
   // butt, round, square
@@ -706,12 +718,13 @@ mixin CanvasRect2D on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, Canva
   void clearRect(double x, double y, double w, double h) {
     Rect rect = Rect.fromLTWH(x, y, w, h);
     action((Canvas canvas, Size size) {
-      // FIXME: current is black background when clearRect
       Paint paint = Paint()
         ..style = PaintingStyle.fill
         ..blendMode = BlendMode.clear;
       canvas.drawRect(rect, paint);
     });
+    // Must saveLayer before clear avoid there is a "black" background
+    shouldSaveLayer = true;
   }
 
   @override
@@ -841,18 +854,6 @@ mixin CanvasText2D on _CanvasRenderingContext2D, CanvasTextDrawingStyles2D, Canv
   }
 }
 
-const String _DEFAULT_FONT = '10px sans-serif';
-const String START = 'start';
-const String END = 'end';
-const String CENTER = 'center';
-const String LTR = 'ltr';
-const String RTL = 'rtl';
-const String INHERIT = 'inherit';
-const String HANGING = 'hanging';
-const String MIDDLE = 'middle';
-const String ALPHABETIC = 'alphabetic';
-const String IDEOGRAPHIC = 'ideographic';
-
 mixin CanvasTextDrawingStyles2D on _CanvasRenderingContext2D {
   static TextAlign parseTextAlign(String value) {
     // start, end, left, right, center
@@ -898,6 +899,7 @@ mixin CanvasTextDrawingStyles2D on _CanvasRenderingContext2D {
     }
     return null;
   }
+
   CanvasTextBaseline _textBaseline = CanvasTextBaseline.alphabetic; // (default: "alphabetic")
   set textBaseline(CanvasTextBaseline value) {
     if (value == null) return;
@@ -905,8 +907,8 @@ mixin CanvasTextDrawingStyles2D on _CanvasRenderingContext2D {
       _textBaseline = value;
     });
   }
-  CanvasTextBaseline get textBaseline => _textBaseline;
 
+  CanvasTextBaseline get textBaseline => _textBaseline;
   static TextDirection parseDirection(String value) {
     switch (value) {
       case LTR:

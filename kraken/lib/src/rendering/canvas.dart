@@ -16,8 +16,8 @@ class CanvasPainter extends CustomPainter {
   Picture _picture;
   Canvas _canvas;
 
-  bool get _shouldPaintContextActions => context != null && context.actionCount > 0;
-  bool get _shouldPaintCustomPicture => _picture != null && _picture.approximateBytesUsed > 0;
+  bool get _shouldUpdatePainting => context != null && context.actionCount > 0;
+  bool get _shouldPaintSnapshot => _picture != null && _picture.approximateBytesUsed > 0;
 
   // Notice: Canvas is stateless, change scaleX or scaleY will case dropping drawn content.
   /// https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-set-bitmap-dimensions
@@ -42,28 +42,43 @@ class CanvasPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (context != null) {
-      if (_shouldPaintContextActions) {
+      // This lets you create composite effects, for example making a group of drawing commands semi-transparent.
+      // Without using saveLayer, each part of the group would be painted individually,
+      // so where they overlap would be darker than where they do not. By using saveLayer to group them together,
+      // they can be drawn with an opaque color at first,
+      // and then the entire group can be made transparent using the saveLayer's paint.
+      if (context.shouldSaveLayer) {
+        canvas.saveLayer(null, Paint());
+      }
+
+      // Paint last content
+      if (_shouldPaintSnapshot) {
+        canvas.drawPicture(_picture);
+      }
+
+      // Paint new actions
+      if (_shouldUpdatePainting) {
         _pictureRecorder = PictureRecorder();
         _canvas = Canvas(_pictureRecorder);
 
         if (_scaleX != 1.0 || _scaleY != 1.0) {
           _canvas.scale(_scaleX, _scaleY);
         }
-      }
 
-      if (_shouldPaintCustomPicture) {
-        canvas.drawPicture(_picture);
-      }
-
-      if (_shouldPaintContextActions) {
         context.performAction(_canvas, size);
 
         /// After calling this function, both the picture recorder
         /// and the canvas objects are invalid and cannot be used further.
         _picture = _pictureRecorder.endRecording();
         context.clearActionRecords();
-        // FIXME: That make clearRect not work in next frame action
+
         canvas.drawPicture(_picture);
+      }
+
+      // Call restore to pop the save stack and apply the paint to the group.
+      if (context.shouldSaveLayer) {
+        canvas.restore();
+        context.shouldSaveLayer = false;
       }
     }
   }

@@ -48,7 +48,7 @@ class CanvasElement extends Element {
 
   static CanvasElement getCanvasElementOfNativePtr(Pointer<NativeCanvasElement> nativeCanvasElement) {
     CanvasElement canvasElement = _nativeMap[nativeCanvasElement.address];
-    assert(canvasElement != null, 'Can not get canvasElement from nativeElement: $nativeCanvasElement');
+    assert(canvasElement != null, 'Can not get canvas element from nativeElement: $nativeCanvasElement');
     return canvasElement;
   }
 
