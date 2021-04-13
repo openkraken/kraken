@@ -11,6 +11,7 @@ export 'modules/network.dart';
 export 'modules/overlay.dart';
 export 'modules/profiler.dart';
 export 'modules/runtime.dart';
+export 'modules/debugger.dart';
 
 abstract class InspectModule {
   Inspector inspector;
@@ -18,6 +19,7 @@ abstract class InspectModule {
   String get name;
 
   bool _enable = false;
+
   void invoke(int id, String method, Map<String, dynamic> params) {
     if (method == 'enable') {
       _enable = true;
@@ -33,25 +35,17 @@ abstract class InspectModule {
   }
 
   void sendToFrontend(int id, JSONEncodable result) {
-    if (inspector.server.connected) {
-      inspector.server.sendToFrontend(id, result);
-    }
+    inspector.serverPort.send(InspectorMethodResult(id, result));
   }
 
   void sendEventToFrontend(InspectorEvent event) {
-    if (inspector.server.connected) {
-      inspector.server.sendEventToFrontend(event);
-    }
+    inspector.serverPort.send(event);
   }
 
-  void callNativeInspectorMethod(int id, String method, Map<String, dynamic> params) {
-    if (inspector.nativeInspectorMessageHandler != null) {
-      inspector.nativeInspectorMessageHandler(jsonEncode({
-        'id': id,
-        'method': method,
-        'params': params
-      }));
-    }
+  void callNativeInspectorMethod(
+      int id, String method, Map<String, dynamic> params) {
+    inspector.serverPort.send(InspectorNativeMessage(
+        jsonEncode({'id': id, 'method': name + '.' + method, 'params': params})));
   }
 
   void receiveFromFrontend(int id, String method, Map<String, dynamic> params);

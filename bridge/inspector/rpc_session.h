@@ -22,11 +22,11 @@ class InspectorSession;
 class DartRPC {
 public:
   void send(int32_t contextId, std::string msg) {
-    getDartMethod()->inspectorMessage(contextId, msg.c_str());
+    getInspectorDartMethod()->inspectorMessage(contextId, msg.c_str());
   };
 
   void setOnMessageCallback(int32_t contextId, void* rpcSession, InspectorMessageCallback callback) {
-    getDartMethod()->registerInspectorMessageCallback(contextId, rpcSession, callback);
+    getInspectorDartMethod()->registerInspectorMessageCallback(contextId, rpcSession, callback);
   }
 };
 
