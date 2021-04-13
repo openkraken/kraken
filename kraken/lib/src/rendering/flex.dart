@@ -584,11 +584,17 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (child is RenderBoxModel) {
       RenderStyle childRenderStyle = child.renderStyle;
       double flexBasis = _getFlexBasis(child);
-      double baseSize;
-      // @FIXME when flex-basis is smaller than content width, it will not take effects
-      if (flexBasis != null) {
-        baseSize = flexBasis ?? 0;
+
+      // Main axis size of child's content
+      double childContentMainSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
+        child.autoMinWidth : child.autoMinHeight;
+
+      double baseSize = childContentMainSize ;
+      // When flex-basis is smaller than its base content size, it will not take effects.
+      if (flexBasis != null && flexBasis >= childContentMainSize) {
+        baseSize = flexBasis;
       }
+
       if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
         minWidth = childRenderStyle.minWidth != null ? childRenderStyle.minWidth : 0;
         maxWidth = childRenderStyle.maxWidth != null ? childRenderStyle.maxWidth : double.infinity;
@@ -1160,6 +1166,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         // Calculate max height constraints
         if (heightSizeType == BoxSizeType.specified && child is RenderBoxModel && child.renderStyle.height != null) {
           maxCrossAxisSize = child.renderStyle.height;
+        } else if (child is RenderBoxModel && child.renderStyle.maxHeight != null) {
+          maxCrossAxisSize = child.renderStyle.maxHeight;
         } else {
           // Child in flex line expand automatic when height is not specified
           if (renderStyle.flexWrap == FlexWrap.wrap || renderStyle.flexWrap == FlexWrap.wrapReverse) {
@@ -1180,6 +1188,34 @@ class RenderFlexLayout extends RenderLayoutBox {
           minWidth: baseConstraints.minWidth,
           maxWidth: baseConstraints.maxWidth,
           maxHeight: maxCrossAxisSize,
+        );
+      } else if (CSSFlex.isVerticalFlexDirection(renderStyle.flexDirection)) {
+        double maxCrossAxisSize;
+        // Calculate max width constraints
+        if (child is RenderBoxModel && child.renderStyle.width != null) {
+          maxCrossAxisSize = child.renderStyle.width;
+        } else if (child is RenderBoxModel && child.renderStyle.maxWidth != null) {
+          maxCrossAxisSize = child.renderStyle.maxWidth;
+        } else {
+          // Child in flex line expand automatic when height is not specified
+          if (renderStyle.flexWrap == FlexWrap.wrap || renderStyle.flexWrap == FlexWrap.wrapReverse) {
+            maxCrossAxisSize = double.infinity;
+          } else if (child is RenderTextBox) {
+            maxCrossAxisSize = double.infinity;
+          } else {
+            // Should substract margin when layout child
+            double marginHorizontal = 0;
+            if (child is RenderBoxModel) {
+              marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
+            }
+            maxCrossAxisSize = logicalContentWidth != null ? logicalContentWidth - marginHorizontal : double.infinity;
+          }
+        }
+
+        innerConstraints = BoxConstraints(
+          minHeight: baseConstraints.minHeight,
+          maxHeight: baseConstraints.maxHeight,
+          maxWidth: maxCrossAxisSize,
         );
       } else {
         innerConstraints = BoxConstraints(
@@ -1247,10 +1283,6 @@ class RenderFlexLayout extends RenderLayoutBox {
           childLayoutStart = DateTime.now();
         }
 
-        // Relayout child after percentage size is resolved
-        if (needsRelayout && child is RenderBoxModel) {
-//          childConstraints = child.renderStyle.getConstraints();
-        }
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
@@ -2415,6 +2447,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       return Offset(mainAxisOffset, crossAxisOffset);
     }
   }
+
   /// Get cross size of  content size
   double _getContentCrossSize() {
     if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
