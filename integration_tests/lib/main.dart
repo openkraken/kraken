@@ -58,7 +58,6 @@ void main() async {
   KrakenWebView.initialize();
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
-  CSSText.DEFAULT_FONT_SIZE = 14.0;
   setObjectElementFactory(customObjectElementFactory);
 
   List<FileSystemEntity> specs = specsDirectory.listSync(recursive: true);

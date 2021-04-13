@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2008, 2012-2013, 2016 Apple Inc. All rights reserved
+ * Copyright (C) 2006-2017 Apple Inc. All rights reserved
  * Copyright (C) Research In Motion Limited 2009. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
@@ -19,12 +19,11 @@
  *
  */
 
-#ifndef StringHash_h
-#define StringHash_h
+#pragma once
 
-#include <wtf/text/AtomicString.h>
 #include <wtf/HashTraits.h>
-#include <wtf/Hasher.h>
+#include <wtf/text/AtomicString.h>
+#include <wtf/text/StringHasher.h>
 
 namespace WTF {
 
@@ -79,16 +78,18 @@ namespace WTF {
         static const bool safeToCompareToEmptyOrDeleted = false;
     };
 
-    class ASCIICaseInsensitiveHash {
-    public:
-        template<typename T> static inline UChar foldCase(T character)
-        {
-            return toASCIILower(character);
-        }
+    struct ASCIICaseInsensitiveHash {
+        template<typename T>
+        struct FoldCase {
+            static inline UChar convert(T character)
+            {
+                return toASCIILower(character);
+            }
+        };
 
         static unsigned hash(const UChar* data, unsigned length)
         {
-            return StringHasher::computeHashAndMaskTop8Bits<UChar, foldCase<UChar>>(data, length);
+            return StringHasher::computeHashAndMaskTop8Bits<UChar, FoldCase<UChar>>(data, length);
         }
 
         static unsigned hash(StringImpl& string)
@@ -105,7 +106,7 @@ namespace WTF {
 
         static unsigned hash(const LChar* data, unsigned length)
         {
-            return StringHasher::computeHashAndMaskTop8Bits<LChar, foldCase<LChar>>(data, length);
+            return StringHasher::computeHashAndMaskTop8Bits<LChar, FoldCase<LChar>>(data, length);
         }
 
         static inline unsigned hash(const char* data, unsigned length)
@@ -176,10 +177,25 @@ namespace WTF {
         }
     };
 
+    // FIXME: Find a way to incorporate this functionality into ASCIICaseInsensitiveHash and allow
+    // a HashMap whose keys are type String to perform operations when given a key of type StringView.
+    struct ASCIICaseInsensitiveStringViewHashTranslator {
+        static unsigned hash(StringView key)
+        {
+            if (key.is8Bit())
+                return ASCIICaseInsensitiveHash::hash(key.characters8(), key.length());
+            return ASCIICaseInsensitiveHash::hash(key.characters16(), key.length());
+        }
+
+        static bool equal(const String& a, StringView b)
+        {
+            return equalIgnoringASCIICaseCommon(a, b);
+        }
+    };
+
 }
 
 using WTF::ASCIICaseInsensitiveHash;
+using WTF::ASCIICaseInsensitiveStringViewHashTranslator;
 using WTF::AlreadyHashed;
 using WTF::StringHash;
-
-#endif

@@ -1,14 +1,18 @@
 /*
  * Copyright (c) 2014, 2015, 2016 Apple Inc. All rights reserved.
  * Copyright (c) 2014, 2017 -2017 Apple Inc. All rights reserved.
- * Copyright (c) 2015 Andy VanWagoner <thetalecrafter@gmail.com>.
+ * Copyright (c) 2015 Andy VanWagoner <andy@vanwagoner.family>.
  * Copyright (c) 2015 Jordan Harband. All rights reserved.
  * Copyright (c) 2015, 2016 -2016 Apple Inc. All rights reserved.
  * Copyright (c) 2015, 2016 -2016 Yusuke Suzuki <utatane.tea@gmail.com>.
- * Copyright (c) 2015, 2016 Yusuke Suzuki <utatane.tea@gmail.com>.
+ * Copyright (c) 2015, 2016, 2017 Yusuke Suzuki <utatane.tea@gmail.com>.
  * Copyright (c) 2016 Caitlin Potter <caitp@igalia.com>.
- * Copyright (c) 2016 Oleksandr Skachkov <gskachkov@gmail.com>.
  * Copyright (c) 2016 Yusuke Suzuki <utatane.tea@gmail.com>
+ * Copyright (c) 2016, 2017 -2017 Yusuke Suzuki <utatane.tea@gmail.com>.
+ * Copyright (c) 2016, 2017, 2018 Oleksandr Skachkov <gskachkov@gmail.com>.
+ * Copyright (c) 2016, 2018 -2018 Apple Inc. All rights reserved.
+ * Copyright (c) 2017 Caio Lima <ticaiolima@gmail.com>.
+ * Copyright (c) 2018 Yusuke Suzuki <yusukesuzuki@slowstart.org>.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,14 +51,18 @@ enum class ConstructAbility : unsigned;
 
 namespace JSC {
 
+extern const char s_JSCCombinedCode[];
+
+extern const unsigned s_JSCCombinedCodeLength;
+
 /* ArrayConstructor */
-extern const char* s_arrayConstructorOfCode;
+extern const char* const s_arrayConstructorOfCode;
 extern const int s_arrayConstructorOfCodeLength;
 extern const JSC::ConstructAbility s_arrayConstructorOfCodeConstructAbility;
-extern const char* s_arrayConstructorFromCode;
+extern const char* const s_arrayConstructorFromCode;
 extern const int s_arrayConstructorFromCodeLength;
 extern const JSC::ConstructAbility s_arrayConstructorFromCodeConstructAbility;
-extern const char* s_arrayConstructorIsArrayCode;
+extern const char* const s_arrayConstructorIsArrayCode;
 extern const int s_arrayConstructorIsArrayCodeLength;
 extern const JSC::ConstructAbility s_arrayConstructorIsArrayCodeConstructAbility;
 
@@ -64,16 +72,16 @@ extern const JSC::ConstructAbility s_arrayConstructorIsArrayCodeConstructAbility
     macro(isArray, arrayConstructorIsArray, 1) \
 
 /* ArrayIteratorPrototype */
-extern const char* s_arrayIteratorPrototypeNextCode;
+extern const char* const s_arrayIteratorPrototypeNextCode;
 extern const int s_arrayIteratorPrototypeNextCodeLength;
 extern const JSC::ConstructAbility s_arrayIteratorPrototypeNextCodeConstructAbility;
-extern const char* s_arrayIteratorPrototypeArrayIteratorValueNextCode;
+extern const char* const s_arrayIteratorPrototypeArrayIteratorValueNextCode;
 extern const int s_arrayIteratorPrototypeArrayIteratorValueNextCodeLength;
 extern const JSC::ConstructAbility s_arrayIteratorPrototypeArrayIteratorValueNextCodeConstructAbility;
-extern const char* s_arrayIteratorPrototypeArrayIteratorKeyNextCode;
+extern const char* const s_arrayIteratorPrototypeArrayIteratorKeyNextCode;
 extern const int s_arrayIteratorPrototypeArrayIteratorKeyNextCodeLength;
 extern const JSC::ConstructAbility s_arrayIteratorPrototypeArrayIteratorKeyNextCodeConstructAbility;
-extern const char* s_arrayIteratorPrototypeArrayIteratorKeyValueNextCode;
+extern const char* const s_arrayIteratorPrototypeArrayIteratorKeyValueNextCode;
 extern const int s_arrayIteratorPrototypeArrayIteratorKeyValueNextCodeLength;
 extern const JSC::ConstructAbility s_arrayIteratorPrototypeArrayIteratorKeyValueNextCodeConstructAbility;
 
@@ -84,63 +92,78 @@ extern const JSC::ConstructAbility s_arrayIteratorPrototypeArrayIteratorKeyValue
     macro(arrayIteratorKeyValueNext, arrayIteratorPrototypeArrayIteratorKeyValueNext, 0) \
 
 /* ArrayPrototype */
-extern const char* s_arrayPrototypeCreateArrayIteratorConstructorCode;
+extern const char* const s_arrayPrototypeCreateArrayIteratorConstructorCode;
 extern const int s_arrayPrototypeCreateArrayIteratorConstructorCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeCreateArrayIteratorConstructorCodeConstructAbility;
-extern const char* s_arrayPrototypeValuesCode;
+extern const char* const s_arrayPrototypeValuesCode;
 extern const int s_arrayPrototypeValuesCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeValuesCodeConstructAbility;
-extern const char* s_arrayPrototypeKeysCode;
+extern const char* const s_arrayPrototypeKeysCode;
 extern const int s_arrayPrototypeKeysCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeKeysCodeConstructAbility;
-extern const char* s_arrayPrototypeEntriesCode;
+extern const char* const s_arrayPrototypeEntriesCode;
 extern const int s_arrayPrototypeEntriesCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeEntriesCodeConstructAbility;
-extern const char* s_arrayPrototypeReduceCode;
+extern const char* const s_arrayPrototypeReduceCode;
 extern const int s_arrayPrototypeReduceCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeReduceCodeConstructAbility;
-extern const char* s_arrayPrototypeReduceRightCode;
+extern const char* const s_arrayPrototypeReduceRightCode;
 extern const int s_arrayPrototypeReduceRightCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeReduceRightCodeConstructAbility;
-extern const char* s_arrayPrototypeEveryCode;
+extern const char* const s_arrayPrototypeEveryCode;
 extern const int s_arrayPrototypeEveryCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeEveryCodeConstructAbility;
-extern const char* s_arrayPrototypeForEachCode;
+extern const char* const s_arrayPrototypeForEachCode;
 extern const int s_arrayPrototypeForEachCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeForEachCodeConstructAbility;
-extern const char* s_arrayPrototypeFilterCode;
+extern const char* const s_arrayPrototypeFilterCode;
 extern const int s_arrayPrototypeFilterCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeFilterCodeConstructAbility;
-extern const char* s_arrayPrototypeMapCode;
+extern const char* const s_arrayPrototypeMapCode;
 extern const int s_arrayPrototypeMapCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeMapCodeConstructAbility;
-extern const char* s_arrayPrototypeSomeCode;
+extern const char* const s_arrayPrototypeSomeCode;
 extern const int s_arrayPrototypeSomeCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeSomeCodeConstructAbility;
-extern const char* s_arrayPrototypeFillCode;
+extern const char* const s_arrayPrototypeFillCode;
 extern const int s_arrayPrototypeFillCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeFillCodeConstructAbility;
-extern const char* s_arrayPrototypeFindCode;
+extern const char* const s_arrayPrototypeFindCode;
 extern const int s_arrayPrototypeFindCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeFindCodeConstructAbility;
-extern const char* s_arrayPrototypeFindIndexCode;
+extern const char* const s_arrayPrototypeFindIndexCode;
 extern const int s_arrayPrototypeFindIndexCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeFindIndexCodeConstructAbility;
-extern const char* s_arrayPrototypeIncludesCode;
+extern const char* const s_arrayPrototypeIncludesCode;
 extern const int s_arrayPrototypeIncludesCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeIncludesCodeConstructAbility;
-extern const char* s_arrayPrototypeSortCode;
+extern const char* const s_arrayPrototypeSortCode;
 extern const int s_arrayPrototypeSortCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeSortCodeConstructAbility;
-extern const char* s_arrayPrototypeConcatSlowPathCode;
+extern const char* const s_arrayPrototypeConcatSlowPathCode;
 extern const int s_arrayPrototypeConcatSlowPathCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeConcatSlowPathCodeConstructAbility;
-extern const char* s_arrayPrototypeConcatCode;
+extern const char* const s_arrayPrototypeConcatCode;
 extern const int s_arrayPrototypeConcatCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeConcatCodeConstructAbility;
-extern const char* s_arrayPrototypeCopyWithinCode;
+extern const char* const s_arrayPrototypeCopyWithinCode;
 extern const int s_arrayPrototypeCopyWithinCodeLength;
 extern const JSC::ConstructAbility s_arrayPrototypeCopyWithinCodeConstructAbility;
+extern const char* const s_arrayPrototypeArraySpeciesCreateCode;
+extern const int s_arrayPrototypeArraySpeciesCreateCodeLength;
+extern const JSC::ConstructAbility s_arrayPrototypeArraySpeciesCreateCodeConstructAbility;
+extern const char* const s_arrayPrototypeFlatIntoArrayCode;
+extern const int s_arrayPrototypeFlatIntoArrayCodeLength;
+extern const JSC::ConstructAbility s_arrayPrototypeFlatIntoArrayCodeConstructAbility;
+extern const char* const s_arrayPrototypeFlatCode;
+extern const int s_arrayPrototypeFlatCodeLength;
+extern const JSC::ConstructAbility s_arrayPrototypeFlatCodeConstructAbility;
+extern const char* const s_arrayPrototypeFlatIntoArrayWithCallbackCode;
+extern const int s_arrayPrototypeFlatIntoArrayWithCallbackCodeLength;
+extern const JSC::ConstructAbility s_arrayPrototypeFlatIntoArrayWithCallbackCodeConstructAbility;
+extern const char* const s_arrayPrototypeFlatMapCode;
+extern const int s_arrayPrototypeFlatMapCodeLength;
+extern const JSC::ConstructAbility s_arrayPrototypeFlatMapCodeConstructAbility;
 
 #define JSC_FOREACH_ARRAYPROTOTYPE_BUILTIN_DATA(macro) \
     macro(createArrayIterator, arrayPrototypeCreateArrayIteratorConstructor, 3) \
@@ -162,23 +185,128 @@ extern const JSC::ConstructAbility s_arrayPrototypeCopyWithinCodeConstructAbilit
     macro(concatSlowPath, arrayPrototypeConcatSlowPath, 0) \
     macro(concat, arrayPrototypeConcat, 1) \
     macro(copyWithin, arrayPrototypeCopyWithin, 2) \
+    macro(arraySpeciesCreate, arrayPrototypeArraySpeciesCreate, 2) \
+    macro(flatIntoArray, arrayPrototypeFlatIntoArray, 5) \
+    macro(flat, arrayPrototypeFlat, 0) \
+    macro(flatIntoArrayWithCallback, arrayPrototypeFlatIntoArrayWithCallback, 6) \
+    macro(flatMap, arrayPrototypeFlatMap, 1) \
+
+/* AsyncFromSyncIteratorPrototype */
+extern const char* const s_asyncFromSyncIteratorPrototypeNextCode;
+extern const int s_asyncFromSyncIteratorPrototypeNextCodeLength;
+extern const JSC::ConstructAbility s_asyncFromSyncIteratorPrototypeNextCodeConstructAbility;
+extern const char* const s_asyncFromSyncIteratorPrototypeReturnCode;
+extern const int s_asyncFromSyncIteratorPrototypeReturnCodeLength;
+extern const JSC::ConstructAbility s_asyncFromSyncIteratorPrototypeReturnCodeConstructAbility;
+extern const char* const s_asyncFromSyncIteratorPrototypeThrowCode;
+extern const int s_asyncFromSyncIteratorPrototypeThrowCodeLength;
+extern const JSC::ConstructAbility s_asyncFromSyncIteratorPrototypeThrowCodeConstructAbility;
+extern const char* const s_asyncFromSyncIteratorPrototypeCreateAsyncFromSyncIteratorCode;
+extern const int s_asyncFromSyncIteratorPrototypeCreateAsyncFromSyncIteratorCodeLength;
+extern const JSC::ConstructAbility s_asyncFromSyncIteratorPrototypeCreateAsyncFromSyncIteratorCodeConstructAbility;
+extern const char* const s_asyncFromSyncIteratorPrototypeAsyncFromSyncIteratorConstructorConstructorCode;
+extern const int s_asyncFromSyncIteratorPrototypeAsyncFromSyncIteratorConstructorConstructorCodeLength;
+extern const JSC::ConstructAbility s_asyncFromSyncIteratorPrototypeAsyncFromSyncIteratorConstructorConstructorCodeConstructAbility;
+
+#define JSC_FOREACH_ASYNCFROMSYNCITERATORPROTOTYPE_BUILTIN_DATA(macro) \
+    macro(next, asyncFromSyncIteratorPrototypeNext, 1) \
+    macro(return, asyncFromSyncIteratorPrototypeReturn, 1) \
+    macro(throw, asyncFromSyncIteratorPrototypeThrow, 1) \
+    macro(createAsyncFromSyncIterator, asyncFromSyncIteratorPrototypeCreateAsyncFromSyncIterator, 2) \
+    macro(AsyncFromSyncIteratorConstructor, asyncFromSyncIteratorPrototypeAsyncFromSyncIteratorConstructorConstructor, 2) \
 
 /* AsyncFunctionPrototype */
-extern const char* s_asyncFunctionPrototypeAsyncFunctionResumeCode;
+extern const char* const s_asyncFunctionPrototypeAsyncFunctionResumeCode;
 extern const int s_asyncFunctionPrototypeAsyncFunctionResumeCodeLength;
 extern const JSC::ConstructAbility s_asyncFunctionPrototypeAsyncFunctionResumeCodeConstructAbility;
 
 #define JSC_FOREACH_ASYNCFUNCTIONPROTOTYPE_BUILTIN_DATA(macro) \
     macro(asyncFunctionResume, asyncFunctionPrototypeAsyncFunctionResume, 4) \
 
+/* AsyncGeneratorPrototype */
+extern const char* const s_asyncGeneratorPrototypeAsyncGeneratorQueueIsEmptyCode;
+extern const int s_asyncGeneratorPrototypeAsyncGeneratorQueueIsEmptyCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeAsyncGeneratorQueueIsEmptyCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeAsyncGeneratorQueueEnqueueCode;
+extern const int s_asyncGeneratorPrototypeAsyncGeneratorQueueEnqueueCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeAsyncGeneratorQueueEnqueueCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeAsyncGeneratorQueueDequeueCode;
+extern const int s_asyncGeneratorPrototypeAsyncGeneratorQueueDequeueCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeAsyncGeneratorQueueDequeueCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeAsyncGeneratorDequeueCode;
+extern const int s_asyncGeneratorPrototypeAsyncGeneratorDequeueCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeAsyncGeneratorDequeueCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeIsExecutionStateCode;
+extern const int s_asyncGeneratorPrototypeIsExecutionStateCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeIsExecutionStateCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeIsSuspendYieldStateCode;
+extern const int s_asyncGeneratorPrototypeIsSuspendYieldStateCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeIsSuspendYieldStateCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeAsyncGeneratorRejectCode;
+extern const int s_asyncGeneratorPrototypeAsyncGeneratorRejectCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeAsyncGeneratorRejectCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeAsyncGeneratorResolveCode;
+extern const int s_asyncGeneratorPrototypeAsyncGeneratorResolveCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeAsyncGeneratorResolveCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeAsyncGeneratorYieldCode;
+extern const int s_asyncGeneratorPrototypeAsyncGeneratorYieldCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeAsyncGeneratorYieldCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeAwaitValueCode;
+extern const int s_asyncGeneratorPrototypeAwaitValueCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeAwaitValueCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeDoAsyncGeneratorBodyCallCode;
+extern const int s_asyncGeneratorPrototypeDoAsyncGeneratorBodyCallCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeDoAsyncGeneratorBodyCallCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeAsyncGeneratorResumeNextCode;
+extern const int s_asyncGeneratorPrototypeAsyncGeneratorResumeNextCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeAsyncGeneratorResumeNextCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeAsyncGeneratorEnqueueCode;
+extern const int s_asyncGeneratorPrototypeAsyncGeneratorEnqueueCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeAsyncGeneratorEnqueueCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeNextCode;
+extern const int s_asyncGeneratorPrototypeNextCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeNextCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeReturnCode;
+extern const int s_asyncGeneratorPrototypeReturnCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeReturnCodeConstructAbility;
+extern const char* const s_asyncGeneratorPrototypeThrowCode;
+extern const int s_asyncGeneratorPrototypeThrowCodeLength;
+extern const JSC::ConstructAbility s_asyncGeneratorPrototypeThrowCodeConstructAbility;
+
+#define JSC_FOREACH_ASYNCGENERATORPROTOTYPE_BUILTIN_DATA(macro) \
+    macro(asyncGeneratorQueueIsEmpty, asyncGeneratorPrototypeAsyncGeneratorQueueIsEmpty, 1) \
+    macro(asyncGeneratorQueueEnqueue, asyncGeneratorPrototypeAsyncGeneratorQueueEnqueue, 2) \
+    macro(asyncGeneratorQueueDequeue, asyncGeneratorPrototypeAsyncGeneratorQueueDequeue, 1) \
+    macro(asyncGeneratorDequeue, asyncGeneratorPrototypeAsyncGeneratorDequeue, 1) \
+    macro(isExecutionState, asyncGeneratorPrototypeIsExecutionState, 1) \
+    macro(isSuspendYieldState, asyncGeneratorPrototypeIsSuspendYieldState, 1) \
+    macro(asyncGeneratorReject, asyncGeneratorPrototypeAsyncGeneratorReject, 2) \
+    macro(asyncGeneratorResolve, asyncGeneratorPrototypeAsyncGeneratorResolve, 3) \
+    macro(asyncGeneratorYield, asyncGeneratorPrototypeAsyncGeneratorYield, 3) \
+    macro(awaitValue, asyncGeneratorPrototypeAwaitValue, 3) \
+    macro(doAsyncGeneratorBodyCall, asyncGeneratorPrototypeDoAsyncGeneratorBodyCall, 3) \
+    macro(asyncGeneratorResumeNext, asyncGeneratorPrototypeAsyncGeneratorResumeNext, 1) \
+    macro(asyncGeneratorEnqueue, asyncGeneratorPrototypeAsyncGeneratorEnqueue, 3) \
+    macro(next, asyncGeneratorPrototypeNext, 1) \
+    macro(return, asyncGeneratorPrototypeReturn, 1) \
+    macro(throw, asyncGeneratorPrototypeThrow, 1) \
+
+/* AsyncIteratorPrototype */
+extern const char* const s_asyncIteratorPrototypeSymbolAsyncIteratorGetterCode;
+extern const int s_asyncIteratorPrototypeSymbolAsyncIteratorGetterCodeLength;
+extern const JSC::ConstructAbility s_asyncIteratorPrototypeSymbolAsyncIteratorGetterCodeConstructAbility;
+
+#define JSC_FOREACH_ASYNCITERATORPROTOTYPE_BUILTIN_DATA(macro) \
+    macro(symbolAsyncIteratorGetter, asyncIteratorPrototypeSymbolAsyncIteratorGetter, 0) \
+
 /* DatePrototype */
-extern const char* s_datePrototypeToLocaleStringCode;
+extern const char* const s_datePrototypeToLocaleStringCode;
 extern const int s_datePrototypeToLocaleStringCodeLength;
 extern const JSC::ConstructAbility s_datePrototypeToLocaleStringCodeConstructAbility;
-extern const char* s_datePrototypeToLocaleDateStringCode;
+extern const char* const s_datePrototypeToLocaleDateStringCode;
 extern const int s_datePrototypeToLocaleDateStringCodeLength;
 extern const JSC::ConstructAbility s_datePrototypeToLocaleDateStringCodeConstructAbility;
-extern const char* s_datePrototypeToLocaleTimeStringCode;
+extern const char* const s_datePrototypeToLocaleTimeStringCode;
 extern const int s_datePrototypeToLocaleTimeStringCodeLength;
 extern const JSC::ConstructAbility s_datePrototypeToLocaleTimeStringCodeConstructAbility;
 
@@ -188,16 +316,16 @@ extern const JSC::ConstructAbility s_datePrototypeToLocaleTimeStringCodeConstruc
     macro(toLocaleTimeString, datePrototypeToLocaleTimeString, 0) \
 
 /* FunctionPrototype */
-extern const char* s_functionPrototypeCallCode;
+extern const char* const s_functionPrototypeCallCode;
 extern const int s_functionPrototypeCallCodeLength;
 extern const JSC::ConstructAbility s_functionPrototypeCallCodeConstructAbility;
-extern const char* s_functionPrototypeApplyCode;
+extern const char* const s_functionPrototypeApplyCode;
 extern const int s_functionPrototypeApplyCodeLength;
 extern const JSC::ConstructAbility s_functionPrototypeApplyCodeConstructAbility;
-extern const char* s_functionPrototypeSymbolHasInstanceCode;
+extern const char* const s_functionPrototypeSymbolHasInstanceCode;
 extern const int s_functionPrototypeSymbolHasInstanceCodeLength;
 extern const JSC::ConstructAbility s_functionPrototypeSymbolHasInstanceCodeConstructAbility;
-extern const char* s_functionPrototypeBindCode;
+extern const char* const s_functionPrototypeBindCode;
 extern const int s_functionPrototypeBindCodeLength;
 extern const JSC::ConstructAbility s_functionPrototypeBindCodeConstructAbility;
 
@@ -208,30 +336,30 @@ extern const JSC::ConstructAbility s_functionPrototypeBindCodeConstructAbility;
     macro(bind, functionPrototypeBind, 1) \
 
 /* GeneratorPrototype */
-extern const char* s_generatorPrototypeGeneratorResumeCode;
+extern const char* const s_generatorPrototypeGeneratorResumeCode;
 extern const int s_generatorPrototypeGeneratorResumeCodeLength;
 extern const JSC::ConstructAbility s_generatorPrototypeGeneratorResumeCodeConstructAbility;
-extern const char* s_generatorPrototypeNextCode;
+extern const char* const s_generatorPrototypeNextCode;
 extern const int s_generatorPrototypeNextCodeLength;
 extern const JSC::ConstructAbility s_generatorPrototypeNextCodeConstructAbility;
-extern const char* s_generatorPrototypeReturnCode;
+extern const char* const s_generatorPrototypeReturnCode;
 extern const int s_generatorPrototypeReturnCodeLength;
 extern const JSC::ConstructAbility s_generatorPrototypeReturnCodeConstructAbility;
-extern const char* s_generatorPrototypeThrowCode;
+extern const char* const s_generatorPrototypeThrowCode;
 extern const int s_generatorPrototypeThrowCodeLength;
 extern const JSC::ConstructAbility s_generatorPrototypeThrowCodeConstructAbility;
 
 #define JSC_FOREACH_GENERATORPROTOTYPE_BUILTIN_DATA(macro) \
-    macro(generatorResume, generatorPrototypeGeneratorResume, 3) \
+    macro(generatorResume, generatorPrototypeGeneratorResume, 6) \
     macro(next, generatorPrototypeNext, 1) \
     macro(return, generatorPrototypeReturn, 1) \
     macro(throw, generatorPrototypeThrow, 1) \
 
 /* GlobalObject */
-extern const char* s_globalObjectIsFiniteCode;
+extern const char* const s_globalObjectIsFiniteCode;
 extern const int s_globalObjectIsFiniteCodeLength;
 extern const JSC::ConstructAbility s_globalObjectIsFiniteCodeConstructAbility;
-extern const char* s_globalObjectIsNaNCode;
+extern const char* const s_globalObjectIsNaNCode;
 extern const int s_globalObjectIsNaNCodeLength;
 extern const JSC::ConstructAbility s_globalObjectIsNaNCodeConstructAbility;
 
@@ -240,24 +368,27 @@ extern const JSC::ConstructAbility s_globalObjectIsNaNCodeConstructAbility;
     macro(isNaN, globalObjectIsNaN, 1) \
 
 /* GlobalOperations */
-extern const char* s_globalOperationsToIntegerCode;
+extern const char* const s_globalOperationsToIntegerCode;
 extern const int s_globalOperationsToIntegerCodeLength;
 extern const JSC::ConstructAbility s_globalOperationsToIntegerCodeConstructAbility;
-extern const char* s_globalOperationsToLengthCode;
+extern const char* const s_globalOperationsToLengthCode;
 extern const int s_globalOperationsToLengthCodeLength;
 extern const JSC::ConstructAbility s_globalOperationsToLengthCodeConstructAbility;
-extern const char* s_globalOperationsIsDictionaryCode;
+extern const char* const s_globalOperationsIsDictionaryCode;
 extern const int s_globalOperationsIsDictionaryCodeLength;
 extern const JSC::ConstructAbility s_globalOperationsIsDictionaryCodeConstructAbility;
-extern const char* s_globalOperationsSpeciesGetterCode;
+extern const char* const s_globalOperationsSpeciesGetterCode;
 extern const int s_globalOperationsSpeciesGetterCodeLength;
 extern const JSC::ConstructAbility s_globalOperationsSpeciesGetterCodeConstructAbility;
-extern const char* s_globalOperationsSpeciesConstructorCode;
+extern const char* const s_globalOperationsSpeciesConstructorCode;
 extern const int s_globalOperationsSpeciesConstructorCodeLength;
 extern const JSC::ConstructAbility s_globalOperationsSpeciesConstructorCodeConstructAbility;
-extern const char* s_globalOperationsCopyDataPropertiesCode;
+extern const char* const s_globalOperationsCopyDataPropertiesCode;
 extern const int s_globalOperationsCopyDataPropertiesCodeLength;
 extern const JSC::ConstructAbility s_globalOperationsCopyDataPropertiesCodeConstructAbility;
+extern const char* const s_globalOperationsCopyDataPropertiesNoExclusionsCode;
+extern const int s_globalOperationsCopyDataPropertiesNoExclusionsCodeLength;
+extern const JSC::ConstructAbility s_globalOperationsCopyDataPropertiesNoExclusionsCodeConstructAbility;
 
 #define JSC_FOREACH_GLOBALOPERATIONS_BUILTIN_DATA(macro) \
     macro(toInteger, globalOperationsToInteger, 1) \
@@ -266,12 +397,13 @@ extern const JSC::ConstructAbility s_globalOperationsCopyDataPropertiesCodeConst
     macro(speciesGetter, globalOperationsSpeciesGetter, 0) \
     macro(speciesConstructor, globalOperationsSpeciesConstructor, 2) \
     macro(copyDataProperties, globalOperationsCopyDataProperties, 3) \
+    macro(copyDataPropertiesNoExclusions, globalOperationsCopyDataPropertiesNoExclusions, 2) \
 
 /* InspectorInstrumentationObject */
-extern const char* s_inspectorInstrumentationObjectPromiseFulfilledCode;
+extern const char* const s_inspectorInstrumentationObjectPromiseFulfilledCode;
 extern const int s_inspectorInstrumentationObjectPromiseFulfilledCodeLength;
 extern const JSC::ConstructAbility s_inspectorInstrumentationObjectPromiseFulfilledCodeConstructAbility;
-extern const char* s_inspectorInstrumentationObjectPromiseRejectedCode;
+extern const char* const s_inspectorInstrumentationObjectPromiseRejectedCode;
 extern const int s_inspectorInstrumentationObjectPromiseRejectedCodeLength;
 extern const JSC::ConstructAbility s_inspectorInstrumentationObjectPromiseRejectedCodeConstructAbility;
 
@@ -280,7 +412,7 @@ extern const JSC::ConstructAbility s_inspectorInstrumentationObjectPromiseReject
     macro(promiseRejected, inspectorInstrumentationObjectPromiseRejected, 3) \
 
 /* InternalPromiseConstructor */
-extern const char* s_internalPromiseConstructorInternalAllCode;
+extern const char* const s_internalPromiseConstructorInternalAllCode;
 extern const int s_internalPromiseConstructorInternalAllCodeLength;
 extern const JSC::ConstructAbility s_internalPromiseConstructorInternalAllCodeConstructAbility;
 
@@ -288,7 +420,7 @@ extern const JSC::ConstructAbility s_internalPromiseConstructorInternalAllCodeCo
     macro(internalAll, internalPromiseConstructorInternalAll, 1) \
 
 /* IteratorHelpers */
-extern const char* s_iteratorHelpersPerformIterationCode;
+extern const char* const s_iteratorHelpersPerformIterationCode;
 extern const int s_iteratorHelpersPerformIterationCodeLength;
 extern const JSC::ConstructAbility s_iteratorHelpersPerformIterationCodeConstructAbility;
 
@@ -296,110 +428,118 @@ extern const JSC::ConstructAbility s_iteratorHelpersPerformIterationCodeConstruc
     macro(performIteration, iteratorHelpersPerformIteration, 1) \
 
 /* IteratorPrototype */
-extern const char* s_iteratorPrototypeSymbolIteratorGetterCode;
+extern const char* const s_iteratorPrototypeSymbolIteratorGetterCode;
 extern const int s_iteratorPrototypeSymbolIteratorGetterCodeLength;
 extern const JSC::ConstructAbility s_iteratorPrototypeSymbolIteratorGetterCodeConstructAbility;
 
 #define JSC_FOREACH_ITERATORPROTOTYPE_BUILTIN_DATA(macro) \
     macro(symbolIteratorGetter, iteratorPrototypeSymbolIteratorGetter, 0) \
 
+/* MapIteratorPrototype */
+extern const char* const s_mapIteratorPrototypeMapIteratorNextCode;
+extern const int s_mapIteratorPrototypeMapIteratorNextCodeLength;
+extern const JSC::ConstructAbility s_mapIteratorPrototypeMapIteratorNextCodeConstructAbility;
+extern const char* const s_mapIteratorPrototypeNextCode;
+extern const int s_mapIteratorPrototypeNextCodeLength;
+extern const JSC::ConstructAbility s_mapIteratorPrototypeNextCodeConstructAbility;
+
+#define JSC_FOREACH_MAPITERATORPROTOTYPE_BUILTIN_DATA(macro) \
+    macro(mapIteratorNext, mapIteratorPrototypeMapIteratorNext, 2) \
+    macro(next, mapIteratorPrototypeNext, 0) \
+
 /* MapPrototype */
-extern const char* s_mapPrototypeForEachCode;
+extern const char* const s_mapPrototypeCreateMapIteratorConstructorCode;
+extern const int s_mapPrototypeCreateMapIteratorConstructorCodeLength;
+extern const JSC::ConstructAbility s_mapPrototypeCreateMapIteratorConstructorCodeConstructAbility;
+extern const char* const s_mapPrototypeValuesCode;
+extern const int s_mapPrototypeValuesCodeLength;
+extern const JSC::ConstructAbility s_mapPrototypeValuesCodeConstructAbility;
+extern const char* const s_mapPrototypeKeysCode;
+extern const int s_mapPrototypeKeysCodeLength;
+extern const JSC::ConstructAbility s_mapPrototypeKeysCodeConstructAbility;
+extern const char* const s_mapPrototypeEntriesCode;
+extern const int s_mapPrototypeEntriesCodeLength;
+extern const JSC::ConstructAbility s_mapPrototypeEntriesCodeConstructAbility;
+extern const char* const s_mapPrototypeForEachCode;
 extern const int s_mapPrototypeForEachCodeLength;
 extern const JSC::ConstructAbility s_mapPrototypeForEachCodeConstructAbility;
 
 #define JSC_FOREACH_MAPPROTOTYPE_BUILTIN_DATA(macro) \
+    macro(createMapIterator, mapPrototypeCreateMapIteratorConstructor, 2) \
+    macro(values, mapPrototypeValues, 0) \
+    macro(keys, mapPrototypeKeys, 0) \
+    macro(entries, mapPrototypeEntries, 0) \
     macro(forEach, mapPrototypeForEach, 1) \
 
-/* ModuleLoaderPrototype */
-extern const char* s_moduleLoaderPrototypeSetStateToMaxCode;
-extern const int s_moduleLoaderPrototypeSetStateToMaxCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeSetStateToMaxCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeNewRegistryEntryCode;
-extern const int s_moduleLoaderPrototypeNewRegistryEntryCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeNewRegistryEntryCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeEnsureRegisteredCode;
-extern const int s_moduleLoaderPrototypeEnsureRegisteredCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeEnsureRegisteredCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeForceFulfillPromiseCode;
-extern const int s_moduleLoaderPrototypeForceFulfillPromiseCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeForceFulfillPromiseCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeFulfillFetchCode;
-extern const int s_moduleLoaderPrototypeFulfillFetchCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeFulfillFetchCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeFulfillInstantiateCode;
-extern const int s_moduleLoaderPrototypeFulfillInstantiateCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeFulfillInstantiateCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeCommitInstantiatedCode;
-extern const int s_moduleLoaderPrototypeCommitInstantiatedCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeCommitInstantiatedCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeInstantiationCode;
-extern const int s_moduleLoaderPrototypeInstantiationCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeInstantiationCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeRequestFetchCode;
-extern const int s_moduleLoaderPrototypeRequestFetchCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeRequestFetchCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeRequestInstantiateCode;
-extern const int s_moduleLoaderPrototypeRequestInstantiateCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeRequestInstantiateCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeRequestSatisfyCode;
-extern const int s_moduleLoaderPrototypeRequestSatisfyCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeRequestSatisfyCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeRequestLinkCode;
-extern const int s_moduleLoaderPrototypeRequestLinkCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeRequestLinkCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeRequestReadyCode;
-extern const int s_moduleLoaderPrototypeRequestReadyCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeRequestReadyCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeLinkCode;
-extern const int s_moduleLoaderPrototypeLinkCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeLinkCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeModuleEvaluationCode;
-extern const int s_moduleLoaderPrototypeModuleEvaluationCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeModuleEvaluationCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeProvideCode;
-extern const int s_moduleLoaderPrototypeProvideCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeProvideCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeLoadAndEvaluateModuleCode;
-extern const int s_moduleLoaderPrototypeLoadAndEvaluateModuleCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeLoadAndEvaluateModuleCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeLoadModuleCode;
-extern const int s_moduleLoaderPrototypeLoadModuleCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeLoadModuleCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeLinkAndEvaluateModuleCode;
-extern const int s_moduleLoaderPrototypeLinkAndEvaluateModuleCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeLinkAndEvaluateModuleCodeConstructAbility;
-extern const char* s_moduleLoaderPrototypeRequestImportModuleCode;
-extern const int s_moduleLoaderPrototypeRequestImportModuleCodeLength;
-extern const JSC::ConstructAbility s_moduleLoaderPrototypeRequestImportModuleCodeConstructAbility;
+/* ModuleLoader */
+extern const char* const s_moduleLoaderSetStateToMaxCode;
+extern const int s_moduleLoaderSetStateToMaxCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderSetStateToMaxCodeConstructAbility;
+extern const char* const s_moduleLoaderNewRegistryEntryCode;
+extern const int s_moduleLoaderNewRegistryEntryCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderNewRegistryEntryCodeConstructAbility;
+extern const char* const s_moduleLoaderEnsureRegisteredCode;
+extern const int s_moduleLoaderEnsureRegisteredCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderEnsureRegisteredCodeConstructAbility;
+extern const char* const s_moduleLoaderForceFulfillPromiseCode;
+extern const int s_moduleLoaderForceFulfillPromiseCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderForceFulfillPromiseCodeConstructAbility;
+extern const char* const s_moduleLoaderFulfillFetchCode;
+extern const int s_moduleLoaderFulfillFetchCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderFulfillFetchCodeConstructAbility;
+extern const char* const s_moduleLoaderRequestFetchCode;
+extern const int s_moduleLoaderRequestFetchCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderRequestFetchCodeConstructAbility;
+extern const char* const s_moduleLoaderRequestInstantiateCode;
+extern const int s_moduleLoaderRequestInstantiateCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderRequestInstantiateCodeConstructAbility;
+extern const char* const s_moduleLoaderRequestSatisfyCode;
+extern const int s_moduleLoaderRequestSatisfyCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderRequestSatisfyCodeConstructAbility;
+extern const char* const s_moduleLoaderLinkCode;
+extern const int s_moduleLoaderLinkCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderLinkCodeConstructAbility;
+extern const char* const s_moduleLoaderModuleEvaluationCode;
+extern const int s_moduleLoaderModuleEvaluationCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderModuleEvaluationCodeConstructAbility;
+extern const char* const s_moduleLoaderProvideFetchCode;
+extern const int s_moduleLoaderProvideFetchCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderProvideFetchCodeConstructAbility;
+extern const char* const s_moduleLoaderLoadModuleCode;
+extern const int s_moduleLoaderLoadModuleCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderLoadModuleCodeConstructAbility;
+extern const char* const s_moduleLoaderLinkAndEvaluateModuleCode;
+extern const int s_moduleLoaderLinkAndEvaluateModuleCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderLinkAndEvaluateModuleCodeConstructAbility;
+extern const char* const s_moduleLoaderLoadAndEvaluateModuleCode;
+extern const int s_moduleLoaderLoadAndEvaluateModuleCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderLoadAndEvaluateModuleCodeConstructAbility;
+extern const char* const s_moduleLoaderRequestImportModuleCode;
+extern const int s_moduleLoaderRequestImportModuleCodeLength;
+extern const JSC::ConstructAbility s_moduleLoaderRequestImportModuleCodeConstructAbility;
 
-#define JSC_FOREACH_MODULELOADERPROTOTYPE_BUILTIN_DATA(macro) \
-    macro(setStateToMax, moduleLoaderPrototypeSetStateToMax, 2) \
-    macro(newRegistryEntry, moduleLoaderPrototypeNewRegistryEntry, 1) \
-    macro(ensureRegistered, moduleLoaderPrototypeEnsureRegistered, 1) \
-    macro(forceFulfillPromise, moduleLoaderPrototypeForceFulfillPromise, 2) \
-    macro(fulfillFetch, moduleLoaderPrototypeFulfillFetch, 2) \
-    macro(fulfillInstantiate, moduleLoaderPrototypeFulfillInstantiate, 3) \
-    macro(commitInstantiated, moduleLoaderPrototypeCommitInstantiated, 3) \
-    macro(instantiation, moduleLoaderPrototypeInstantiation, 3) \
-    macro(requestFetch, moduleLoaderPrototypeRequestFetch, 2) \
-    macro(requestInstantiate, moduleLoaderPrototypeRequestInstantiate, 2) \
-    macro(requestSatisfy, moduleLoaderPrototypeRequestSatisfy, 2) \
-    macro(requestLink, moduleLoaderPrototypeRequestLink, 2) \
-    macro(requestReady, moduleLoaderPrototypeRequestReady, 2) \
-    macro(link, moduleLoaderPrototypeLink, 2) \
-    macro(moduleEvaluation, moduleLoaderPrototypeModuleEvaluation, 2) \
-    macro(provide, moduleLoaderPrototypeProvide, 3) \
-    macro(loadAndEvaluateModule, moduleLoaderPrototypeLoadAndEvaluateModule, 3) \
-    macro(loadModule, moduleLoaderPrototypeLoadModule, 3) \
-    macro(linkAndEvaluateModule, moduleLoaderPrototypeLinkAndEvaluateModule, 2) \
-    macro(requestImportModule, moduleLoaderPrototypeRequestImportModule, 2) \
+#define JSC_FOREACH_MODULELOADER_BUILTIN_DATA(macro) \
+    macro(setStateToMax, moduleLoaderSetStateToMax, 2) \
+    macro(newRegistryEntry, moduleLoaderNewRegistryEntry, 1) \
+    macro(ensureRegistered, moduleLoaderEnsureRegistered, 1) \
+    macro(forceFulfillPromise, moduleLoaderForceFulfillPromise, 2) \
+    macro(fulfillFetch, moduleLoaderFulfillFetch, 2) \
+    macro(requestFetch, moduleLoaderRequestFetch, 3) \
+    macro(requestInstantiate, moduleLoaderRequestInstantiate, 3) \
+    macro(requestSatisfy, moduleLoaderRequestSatisfy, 4) \
+    macro(link, moduleLoaderLink, 2) \
+    macro(moduleEvaluation, moduleLoaderModuleEvaluation, 2) \
+    macro(provideFetch, moduleLoaderProvideFetch, 2) \
+    macro(loadModule, moduleLoaderLoadModule, 3) \
+    macro(linkAndEvaluateModule, moduleLoaderLinkAndEvaluateModule, 2) \
+    macro(loadAndEvaluateModule, moduleLoaderLoadAndEvaluateModule, 3) \
+    macro(requestImportModule, moduleLoaderRequestImportModule, 3) \
 
 /* NumberConstructor */
-extern const char* s_numberConstructorIsFiniteCode;
+extern const char* const s_numberConstructorIsFiniteCode;
 extern const int s_numberConstructorIsFiniteCodeLength;
 extern const JSC::ConstructAbility s_numberConstructorIsFiniteCodeConstructAbility;
-extern const char* s_numberConstructorIsNaNCode;
+extern const char* const s_numberConstructorIsNaNCode;
 extern const int s_numberConstructorIsNaNCodeLength;
 extern const JSC::ConstructAbility s_numberConstructorIsNaNCodeConstructAbility;
 
@@ -407,45 +547,29 @@ extern const JSC::ConstructAbility s_numberConstructorIsNaNCodeConstructAbility;
     macro(isFinite, numberConstructorIsFinite, 1) \
     macro(isNaN, numberConstructorIsNaN, 1) \
 
-/* NumberPrototype */
-extern const char* s_numberPrototypeToLocaleStringCode;
-extern const int s_numberPrototypeToLocaleStringCodeLength;
-extern const JSC::ConstructAbility s_numberPrototypeToLocaleStringCodeConstructAbility;
-
-#define JSC_FOREACH_NUMBERPROTOTYPE_BUILTIN_DATA(macro) \
-    macro(toLocaleString, numberPrototypeToLocaleString, 0) \
-
 /* ObjectConstructor */
-extern const char* s_objectConstructorEnumerableOwnPropertiesCode;
-extern const int s_objectConstructorEnumerableOwnPropertiesCodeLength;
-extern const JSC::ConstructAbility s_objectConstructorEnumerableOwnPropertiesCodeConstructAbility;
-extern const char* s_objectConstructorValuesCode;
-extern const int s_objectConstructorValuesCodeLength;
-extern const JSC::ConstructAbility s_objectConstructorValuesCodeConstructAbility;
-extern const char* s_objectConstructorEntriesCode;
+extern const char* const s_objectConstructorEntriesCode;
 extern const int s_objectConstructorEntriesCodeLength;
 extern const JSC::ConstructAbility s_objectConstructorEntriesCodeConstructAbility;
-extern const char* s_objectConstructorAssignCode;
-extern const int s_objectConstructorAssignCodeLength;
-extern const JSC::ConstructAbility s_objectConstructorAssignCodeConstructAbility;
+extern const char* const s_objectConstructorFromEntriesCode;
+extern const int s_objectConstructorFromEntriesCodeLength;
+extern const JSC::ConstructAbility s_objectConstructorFromEntriesCodeConstructAbility;
 
 #define JSC_FOREACH_OBJECTCONSTRUCTOR_BUILTIN_DATA(macro) \
-    macro(enumerableOwnProperties, objectConstructorEnumerableOwnProperties, 2) \
-    macro(values, objectConstructorValues, 1) \
     macro(entries, objectConstructorEntries, 1) \
-    macro(assign, objectConstructorAssign, 2) \
+    macro(fromEntries, objectConstructorFromEntries, 1) \
 
 /* PromiseConstructor */
-extern const char* s_promiseConstructorAllCode;
+extern const char* const s_promiseConstructorAllCode;
 extern const int s_promiseConstructorAllCodeLength;
 extern const JSC::ConstructAbility s_promiseConstructorAllCodeConstructAbility;
-extern const char* s_promiseConstructorRaceCode;
+extern const char* const s_promiseConstructorRaceCode;
 extern const int s_promiseConstructorRaceCodeLength;
 extern const JSC::ConstructAbility s_promiseConstructorRaceCodeConstructAbility;
-extern const char* s_promiseConstructorRejectCode;
+extern const char* const s_promiseConstructorRejectCode;
 extern const int s_promiseConstructorRejectCodeLength;
 extern const JSC::ConstructAbility s_promiseConstructorRejectCodeConstructAbility;
-extern const char* s_promiseConstructorResolveCode;
+extern const char* const s_promiseConstructorResolveCode;
 extern const int s_promiseConstructorResolveCodeLength;
 extern const JSC::ConstructAbility s_promiseConstructorResolveCodeConstructAbility;
 
@@ -456,34 +580,37 @@ extern const JSC::ConstructAbility s_promiseConstructorResolveCodeConstructAbili
     macro(resolve, promiseConstructorResolve, 1) \
 
 /* PromiseOperations */
-extern const char* s_promiseOperationsIsPromiseCode;
+extern const char* const s_promiseOperationsIsPromiseCode;
 extern const int s_promiseOperationsIsPromiseCodeLength;
 extern const JSC::ConstructAbility s_promiseOperationsIsPromiseCodeConstructAbility;
-extern const char* s_promiseOperationsNewPromiseReactionCode;
+extern const char* const s_promiseOperationsNewPromiseReactionCode;
 extern const int s_promiseOperationsNewPromiseReactionCodeLength;
 extern const JSC::ConstructAbility s_promiseOperationsNewPromiseReactionCodeConstructAbility;
-extern const char* s_promiseOperationsNewPromiseCapabilityCode;
+extern const char* const s_promiseOperationsNewPromiseCapabilityCode;
 extern const int s_promiseOperationsNewPromiseCapabilityCodeLength;
 extern const JSC::ConstructAbility s_promiseOperationsNewPromiseCapabilityCodeConstructAbility;
-extern const char* s_promiseOperationsTriggerPromiseReactionsCode;
+extern const char* const s_promiseOperationsNewHandledRejectedPromiseCode;
+extern const int s_promiseOperationsNewHandledRejectedPromiseCodeLength;
+extern const JSC::ConstructAbility s_promiseOperationsNewHandledRejectedPromiseCodeConstructAbility;
+extern const char* const s_promiseOperationsTriggerPromiseReactionsCode;
 extern const int s_promiseOperationsTriggerPromiseReactionsCodeLength;
 extern const JSC::ConstructAbility s_promiseOperationsTriggerPromiseReactionsCodeConstructAbility;
-extern const char* s_promiseOperationsRejectPromiseCode;
+extern const char* const s_promiseOperationsRejectPromiseCode;
 extern const int s_promiseOperationsRejectPromiseCodeLength;
 extern const JSC::ConstructAbility s_promiseOperationsRejectPromiseCodeConstructAbility;
-extern const char* s_promiseOperationsFulfillPromiseCode;
+extern const char* const s_promiseOperationsFulfillPromiseCode;
 extern const int s_promiseOperationsFulfillPromiseCodeLength;
 extern const JSC::ConstructAbility s_promiseOperationsFulfillPromiseCodeConstructAbility;
-extern const char* s_promiseOperationsCreateResolvingFunctionsCode;
+extern const char* const s_promiseOperationsCreateResolvingFunctionsCode;
 extern const int s_promiseOperationsCreateResolvingFunctionsCodeLength;
 extern const JSC::ConstructAbility s_promiseOperationsCreateResolvingFunctionsCodeConstructAbility;
-extern const char* s_promiseOperationsPromiseReactionJobCode;
+extern const char* const s_promiseOperationsPromiseReactionJobCode;
 extern const int s_promiseOperationsPromiseReactionJobCodeLength;
 extern const JSC::ConstructAbility s_promiseOperationsPromiseReactionJobCodeConstructAbility;
-extern const char* s_promiseOperationsPromiseResolveThenableJobCode;
+extern const char* const s_promiseOperationsPromiseResolveThenableJobCode;
 extern const int s_promiseOperationsPromiseResolveThenableJobCodeLength;
 extern const JSC::ConstructAbility s_promiseOperationsPromiseResolveThenableJobCodeConstructAbility;
-extern const char* s_promiseOperationsInitializePromiseCode;
+extern const char* const s_promiseOperationsInitializePromiseCode;
 extern const int s_promiseOperationsInitializePromiseCodeLength;
 extern const JSC::ConstructAbility s_promiseOperationsInitializePromiseCodeConstructAbility;
 
@@ -491,6 +618,7 @@ extern const JSC::ConstructAbility s_promiseOperationsInitializePromiseCodeConst
     macro(isPromise, promiseOperationsIsPromise, 1) \
     macro(newPromiseReaction, promiseOperationsNewPromiseReaction, 3) \
     macro(newPromiseCapability, promiseOperationsNewPromiseCapability, 1) \
+    macro(newHandledRejectedPromise, promiseOperationsNewHandledRejectedPromise, 1) \
     macro(triggerPromiseReactions, promiseOperationsTriggerPromiseReactions, 3) \
     macro(rejectPromise, promiseOperationsRejectPromise, 2) \
     macro(fulfillPromise, promiseOperationsFulfillPromise, 2) \
@@ -500,25 +628,37 @@ extern const JSC::ConstructAbility s_promiseOperationsInitializePromiseCodeConst
     macro(initializePromise, promiseOperationsInitializePromise, 1) \
 
 /* PromisePrototype */
-extern const char* s_promisePrototypeCatchCode;
+extern const char* const s_promisePrototypeCatchCode;
 extern const int s_promisePrototypeCatchCodeLength;
 extern const JSC::ConstructAbility s_promisePrototypeCatchCodeConstructAbility;
-extern const char* s_promisePrototypeThenCode;
+extern const char* const s_promisePrototypeThenCode;
 extern const int s_promisePrototypeThenCodeLength;
 extern const JSC::ConstructAbility s_promisePrototypeThenCodeConstructAbility;
+extern const char* const s_promisePrototypeFinallyCode;
+extern const int s_promisePrototypeFinallyCodeLength;
+extern const JSC::ConstructAbility s_promisePrototypeFinallyCodeConstructAbility;
+extern const char* const s_promisePrototypeGetThenFinallyCode;
+extern const int s_promisePrototypeGetThenFinallyCodeLength;
+extern const JSC::ConstructAbility s_promisePrototypeGetThenFinallyCodeConstructAbility;
+extern const char* const s_promisePrototypeGetCatchFinallyCode;
+extern const int s_promisePrototypeGetCatchFinallyCodeLength;
+extern const JSC::ConstructAbility s_promisePrototypeGetCatchFinallyCodeConstructAbility;
 
 #define JSC_FOREACH_PROMISEPROTOTYPE_BUILTIN_DATA(macro) \
     macro(catch, promisePrototypeCatch, 1) \
     macro(then, promisePrototypeThen, 2) \
+    macro(finally, promisePrototypeFinally, 1) \
+    macro(getThenFinally, promisePrototypeGetThenFinally, 2) \
+    macro(getCatchFinally, promisePrototypeGetCatchFinally, 2) \
 
 /* ReflectObject */
-extern const char* s_reflectObjectApplyCode;
+extern const char* const s_reflectObjectApplyCode;
 extern const int s_reflectObjectApplyCodeLength;
 extern const JSC::ConstructAbility s_reflectObjectApplyCodeConstructAbility;
-extern const char* s_reflectObjectDeletePropertyCode;
+extern const char* const s_reflectObjectDeletePropertyCode;
 extern const int s_reflectObjectDeletePropertyCodeLength;
 extern const JSC::ConstructAbility s_reflectObjectDeletePropertyCodeConstructAbility;
-extern const char* s_reflectObjectHasCode;
+extern const char* const s_reflectObjectHasCode;
 extern const int s_reflectObjectHasCodeLength;
 extern const JSC::ConstructAbility s_reflectObjectHasCodeConstructAbility;
 
@@ -528,31 +668,34 @@ extern const JSC::ConstructAbility s_reflectObjectHasCodeConstructAbility;
     macro(has, reflectObjectHas, 2) \
 
 /* RegExpPrototype */
-extern const char* s_regExpPrototypeAdvanceStringIndexCode;
+extern const char* const s_regExpPrototypeAdvanceStringIndexCode;
 extern const int s_regExpPrototypeAdvanceStringIndexCodeLength;
 extern const JSC::ConstructAbility s_regExpPrototypeAdvanceStringIndexCodeConstructAbility;
-extern const char* s_regExpPrototypeRegExpExecCode;
+extern const char* const s_regExpPrototypeRegExpExecCode;
 extern const int s_regExpPrototypeRegExpExecCodeLength;
 extern const JSC::ConstructAbility s_regExpPrototypeRegExpExecCodeConstructAbility;
-extern const char* s_regExpPrototypeHasObservableSideEffectsForRegExpMatchCode;
+extern const char* const s_regExpPrototypeHasObservableSideEffectsForRegExpMatchCode;
 extern const int s_regExpPrototypeHasObservableSideEffectsForRegExpMatchCodeLength;
 extern const JSC::ConstructAbility s_regExpPrototypeHasObservableSideEffectsForRegExpMatchCodeConstructAbility;
-extern const char* s_regExpPrototypeMatchCode;
+extern const char* const s_regExpPrototypeMatchSlowCode;
+extern const int s_regExpPrototypeMatchSlowCodeLength;
+extern const JSC::ConstructAbility s_regExpPrototypeMatchSlowCodeConstructAbility;
+extern const char* const s_regExpPrototypeMatchCode;
 extern const int s_regExpPrototypeMatchCodeLength;
 extern const JSC::ConstructAbility s_regExpPrototypeMatchCodeConstructAbility;
-extern const char* s_regExpPrototypeReplaceCode;
+extern const char* const s_regExpPrototypeReplaceCode;
 extern const int s_regExpPrototypeReplaceCodeLength;
 extern const JSC::ConstructAbility s_regExpPrototypeReplaceCodeConstructAbility;
-extern const char* s_regExpPrototypeSearchCode;
+extern const char* const s_regExpPrototypeSearchCode;
 extern const int s_regExpPrototypeSearchCodeLength;
 extern const JSC::ConstructAbility s_regExpPrototypeSearchCodeConstructAbility;
-extern const char* s_regExpPrototypeHasObservableSideEffectsForRegExpSplitCode;
+extern const char* const s_regExpPrototypeHasObservableSideEffectsForRegExpSplitCode;
 extern const int s_regExpPrototypeHasObservableSideEffectsForRegExpSplitCodeLength;
 extern const JSC::ConstructAbility s_regExpPrototypeHasObservableSideEffectsForRegExpSplitCodeConstructAbility;
-extern const char* s_regExpPrototypeSplitCode;
+extern const char* const s_regExpPrototypeSplitCode;
 extern const int s_regExpPrototypeSplitCodeLength;
 extern const JSC::ConstructAbility s_regExpPrototypeSplitCodeConstructAbility;
-extern const char* s_regExpPrototypeTestCode;
+extern const char* const s_regExpPrototypeTestCode;
 extern const int s_regExpPrototypeTestCodeLength;
 extern const JSC::ConstructAbility s_regExpPrototypeTestCodeConstructAbility;
 
@@ -560,6 +703,7 @@ extern const JSC::ConstructAbility s_regExpPrototypeTestCodeConstructAbility;
     macro(advanceStringIndex, regExpPrototypeAdvanceStringIndex, 3) \
     macro(regExpExec, regExpPrototypeRegExpExec, 2) \
     macro(hasObservableSideEffectsForRegExpMatch, regExpPrototypeHasObservableSideEffectsForRegExpMatch, 1) \
+    macro(matchSlow, regExpPrototypeMatchSlow, 2) \
     macro(match, regExpPrototypeMatch, 1) \
     macro(replace, regExpPrototypeReplace, 2) \
     macro(search, regExpPrototypeSearch, 1) \
@@ -567,16 +711,40 @@ extern const JSC::ConstructAbility s_regExpPrototypeTestCodeConstructAbility;
     macro(split, regExpPrototypeSplit, 2) \
     macro(test, regExpPrototypeTest, 1) \
 
+/* SetIteratorPrototype */
+extern const char* const s_setIteratorPrototypeSetIteratorNextCode;
+extern const int s_setIteratorPrototypeSetIteratorNextCodeLength;
+extern const JSC::ConstructAbility s_setIteratorPrototypeSetIteratorNextCodeConstructAbility;
+extern const char* const s_setIteratorPrototypeNextCode;
+extern const int s_setIteratorPrototypeNextCodeLength;
+extern const JSC::ConstructAbility s_setIteratorPrototypeNextCodeConstructAbility;
+
+#define JSC_FOREACH_SETITERATORPROTOTYPE_BUILTIN_DATA(macro) \
+    macro(setIteratorNext, setIteratorPrototypeSetIteratorNext, 2) \
+    macro(next, setIteratorPrototypeNext, 0) \
+
 /* SetPrototype */
-extern const char* s_setPrototypeForEachCode;
+extern const char* const s_setPrototypeCreateSetIteratorConstructorCode;
+extern const int s_setPrototypeCreateSetIteratorConstructorCodeLength;
+extern const JSC::ConstructAbility s_setPrototypeCreateSetIteratorConstructorCodeConstructAbility;
+extern const char* const s_setPrototypeValuesCode;
+extern const int s_setPrototypeValuesCodeLength;
+extern const JSC::ConstructAbility s_setPrototypeValuesCodeConstructAbility;
+extern const char* const s_setPrototypeEntriesCode;
+extern const int s_setPrototypeEntriesCodeLength;
+extern const JSC::ConstructAbility s_setPrototypeEntriesCodeConstructAbility;
+extern const char* const s_setPrototypeForEachCode;
 extern const int s_setPrototypeForEachCodeLength;
 extern const JSC::ConstructAbility s_setPrototypeForEachCodeConstructAbility;
 
 #define JSC_FOREACH_SETPROTOTYPE_BUILTIN_DATA(macro) \
+    macro(createSetIterator, setPrototypeCreateSetIteratorConstructor, 2) \
+    macro(values, setPrototypeValues, 0) \
+    macro(entries, setPrototypeEntries, 0) \
     macro(forEach, setPrototypeForEach, 1) \
 
 /* StringConstructor */
-extern const char* s_stringConstructorRawCode;
+extern const char* const s_stringConstructorRawCode;
 extern const int s_stringConstructorRawCodeLength;
 extern const JSC::ConstructAbility s_stringConstructorRawCodeConstructAbility;
 
@@ -584,7 +752,7 @@ extern const JSC::ConstructAbility s_stringConstructorRawCodeConstructAbility;
     macro(raw, stringConstructorRaw, 1) \
 
 /* StringIteratorPrototype */
-extern const char* s_stringIteratorPrototypeNextCode;
+extern const char* const s_stringIteratorPrototypeNextCode;
 extern const int s_stringIteratorPrototypeNextCodeLength;
 extern const JSC::ConstructAbility s_stringIteratorPrototypeNextCodeConstructAbility;
 
@@ -592,39 +760,84 @@ extern const JSC::ConstructAbility s_stringIteratorPrototypeNextCodeConstructAbi
     macro(next, stringIteratorPrototypeNext, 0) \
 
 /* StringPrototype */
-extern const char* s_stringPrototypeMatchCode;
+extern const char* const s_stringPrototypeMatchCode;
 extern const int s_stringPrototypeMatchCodeLength;
 extern const JSC::ConstructAbility s_stringPrototypeMatchCodeConstructAbility;
-extern const char* s_stringPrototypeRepeatSlowPathCode;
+extern const char* const s_stringPrototypeRepeatSlowPathCode;
 extern const int s_stringPrototypeRepeatSlowPathCodeLength;
 extern const JSC::ConstructAbility s_stringPrototypeRepeatSlowPathCodeConstructAbility;
-extern const char* s_stringPrototypeRepeatCharactersSlowPathCode;
+extern const char* const s_stringPrototypeRepeatCharactersSlowPathCode;
 extern const int s_stringPrototypeRepeatCharactersSlowPathCodeLength;
 extern const JSC::ConstructAbility s_stringPrototypeRepeatCharactersSlowPathCodeConstructAbility;
-extern const char* s_stringPrototypeRepeatCode;
+extern const char* const s_stringPrototypeRepeatCode;
 extern const int s_stringPrototypeRepeatCodeLength;
 extern const JSC::ConstructAbility s_stringPrototypeRepeatCodeConstructAbility;
-extern const char* s_stringPrototypePadStartCode;
+extern const char* const s_stringPrototypePadStartCode;
 extern const int s_stringPrototypePadStartCodeLength;
 extern const JSC::ConstructAbility s_stringPrototypePadStartCodeConstructAbility;
-extern const char* s_stringPrototypePadEndCode;
+extern const char* const s_stringPrototypePadEndCode;
 extern const int s_stringPrototypePadEndCodeLength;
 extern const JSC::ConstructAbility s_stringPrototypePadEndCodeConstructAbility;
-extern const char* s_stringPrototypeHasObservableSideEffectsForStringReplaceCode;
+extern const char* const s_stringPrototypeHasObservableSideEffectsForStringReplaceCode;
 extern const int s_stringPrototypeHasObservableSideEffectsForStringReplaceCodeLength;
 extern const JSC::ConstructAbility s_stringPrototypeHasObservableSideEffectsForStringReplaceCodeConstructAbility;
-extern const char* s_stringPrototypeReplaceCode;
+extern const char* const s_stringPrototypeReplaceCode;
 extern const int s_stringPrototypeReplaceCodeLength;
 extern const JSC::ConstructAbility s_stringPrototypeReplaceCodeConstructAbility;
-extern const char* s_stringPrototypeLocaleCompareCode;
-extern const int s_stringPrototypeLocaleCompareCodeLength;
-extern const JSC::ConstructAbility s_stringPrototypeLocaleCompareCodeConstructAbility;
-extern const char* s_stringPrototypeSearchCode;
+extern const char* const s_stringPrototypeSearchCode;
 extern const int s_stringPrototypeSearchCodeLength;
 extern const JSC::ConstructAbility s_stringPrototypeSearchCodeConstructAbility;
-extern const char* s_stringPrototypeSplitCode;
+extern const char* const s_stringPrototypeSplitCode;
 extern const int s_stringPrototypeSplitCodeLength;
 extern const JSC::ConstructAbility s_stringPrototypeSplitCodeConstructAbility;
+extern const char* const s_stringPrototypeStringConcatSlowPathCode;
+extern const int s_stringPrototypeStringConcatSlowPathCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeStringConcatSlowPathCodeConstructAbility;
+extern const char* const s_stringPrototypeConcatCode;
+extern const int s_stringPrototypeConcatCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeConcatCodeConstructAbility;
+extern const char* const s_stringPrototypeCreateHTMLCode;
+extern const int s_stringPrototypeCreateHTMLCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeCreateHTMLCodeConstructAbility;
+extern const char* const s_stringPrototypeAnchorCode;
+extern const int s_stringPrototypeAnchorCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeAnchorCodeConstructAbility;
+extern const char* const s_stringPrototypeBigCode;
+extern const int s_stringPrototypeBigCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeBigCodeConstructAbility;
+extern const char* const s_stringPrototypeBlinkCode;
+extern const int s_stringPrototypeBlinkCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeBlinkCodeConstructAbility;
+extern const char* const s_stringPrototypeBoldCode;
+extern const int s_stringPrototypeBoldCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeBoldCodeConstructAbility;
+extern const char* const s_stringPrototypeFixedCode;
+extern const int s_stringPrototypeFixedCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeFixedCodeConstructAbility;
+extern const char* const s_stringPrototypeFontcolorCode;
+extern const int s_stringPrototypeFontcolorCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeFontcolorCodeConstructAbility;
+extern const char* const s_stringPrototypeFontsizeCode;
+extern const int s_stringPrototypeFontsizeCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeFontsizeCodeConstructAbility;
+extern const char* const s_stringPrototypeItalicsCode;
+extern const int s_stringPrototypeItalicsCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeItalicsCodeConstructAbility;
+extern const char* const s_stringPrototypeLinkCode;
+extern const int s_stringPrototypeLinkCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeLinkCodeConstructAbility;
+extern const char* const s_stringPrototypeSmallCode;
+extern const int s_stringPrototypeSmallCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeSmallCodeConstructAbility;
+extern const char* const s_stringPrototypeStrikeCode;
+extern const int s_stringPrototypeStrikeCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeStrikeCodeConstructAbility;
+extern const char* const s_stringPrototypeSubCode;
+extern const int s_stringPrototypeSubCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeSubCodeConstructAbility;
+extern const char* const s_stringPrototypeSupCode;
+extern const int s_stringPrototypeSupCodeLength;
+extern const JSC::ConstructAbility s_stringPrototypeSupCodeConstructAbility;
 
 #define JSC_FOREACH_STRINGPROTOTYPE_BUILTIN_DATA(macro) \
     macro(match, stringPrototypeMatch, 1) \
@@ -635,42 +848,57 @@ extern const JSC::ConstructAbility s_stringPrototypeSplitCodeConstructAbility;
     macro(padEnd, stringPrototypePadEnd, 1) \
     macro(hasObservableSideEffectsForStringReplace, stringPrototypeHasObservableSideEffectsForStringReplace, 2) \
     macro(replace, stringPrototypeReplace, 2) \
-    macro(localeCompare, stringPrototypeLocaleCompare, 1) \
     macro(search, stringPrototypeSearch, 1) \
     macro(split, stringPrototypeSplit, 2) \
+    macro(stringConcatSlowPath, stringPrototypeStringConcatSlowPath, 0) \
+    macro(concat, stringPrototypeConcat, 1) \
+    macro(createHTML, stringPrototypeCreateHTML, 5) \
+    macro(anchor, stringPrototypeAnchor, 1) \
+    macro(big, stringPrototypeBig, 0) \
+    macro(blink, stringPrototypeBlink, 0) \
+    macro(bold, stringPrototypeBold, 0) \
+    macro(fixed, stringPrototypeFixed, 0) \
+    macro(fontcolor, stringPrototypeFontcolor, 1) \
+    macro(fontsize, stringPrototypeFontsize, 1) \
+    macro(italics, stringPrototypeItalics, 0) \
+    macro(link, stringPrototypeLink, 1) \
+    macro(small, stringPrototypeSmall, 0) \
+    macro(strike, stringPrototypeStrike, 0) \
+    macro(sub, stringPrototypeSub, 0) \
+    macro(sup, stringPrototypeSup, 0) \
 
 /* TypedArrayConstructor */
-extern const char* s_typedArrayConstructorOfCode;
+extern const char* const s_typedArrayConstructorOfCode;
 extern const int s_typedArrayConstructorOfCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorOfCodeConstructAbility;
-extern const char* s_typedArrayConstructorFromCode;
+extern const char* const s_typedArrayConstructorFromCode;
 extern const int s_typedArrayConstructorFromCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorFromCodeConstructAbility;
-extern const char* s_typedArrayConstructorAllocateInt8ArrayCode;
+extern const char* const s_typedArrayConstructorAllocateInt8ArrayCode;
 extern const int s_typedArrayConstructorAllocateInt8ArrayCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorAllocateInt8ArrayCodeConstructAbility;
-extern const char* s_typedArrayConstructorAllocateInt16ArrayCode;
+extern const char* const s_typedArrayConstructorAllocateInt16ArrayCode;
 extern const int s_typedArrayConstructorAllocateInt16ArrayCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorAllocateInt16ArrayCodeConstructAbility;
-extern const char* s_typedArrayConstructorAllocateInt32ArrayCode;
+extern const char* const s_typedArrayConstructorAllocateInt32ArrayCode;
 extern const int s_typedArrayConstructorAllocateInt32ArrayCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorAllocateInt32ArrayCodeConstructAbility;
-extern const char* s_typedArrayConstructorAllocateUint32ArrayCode;
+extern const char* const s_typedArrayConstructorAllocateUint32ArrayCode;
 extern const int s_typedArrayConstructorAllocateUint32ArrayCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorAllocateUint32ArrayCodeConstructAbility;
-extern const char* s_typedArrayConstructorAllocateUint16ArrayCode;
+extern const char* const s_typedArrayConstructorAllocateUint16ArrayCode;
 extern const int s_typedArrayConstructorAllocateUint16ArrayCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorAllocateUint16ArrayCodeConstructAbility;
-extern const char* s_typedArrayConstructorAllocateUint8ArrayCode;
+extern const char* const s_typedArrayConstructorAllocateUint8ArrayCode;
 extern const int s_typedArrayConstructorAllocateUint8ArrayCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorAllocateUint8ArrayCodeConstructAbility;
-extern const char* s_typedArrayConstructorAllocateUint8ClampedArrayCode;
+extern const char* const s_typedArrayConstructorAllocateUint8ClampedArrayCode;
 extern const int s_typedArrayConstructorAllocateUint8ClampedArrayCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorAllocateUint8ClampedArrayCodeConstructAbility;
-extern const char* s_typedArrayConstructorAllocateFloat32ArrayCode;
+extern const char* const s_typedArrayConstructorAllocateFloat32ArrayCode;
 extern const int s_typedArrayConstructorAllocateFloat32ArrayCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorAllocateFloat32ArrayCodeConstructAbility;
-extern const char* s_typedArrayConstructorAllocateFloat64ArrayCode;
+extern const char* const s_typedArrayConstructorAllocateFloat64ArrayCode;
 extern const int s_typedArrayConstructorAllocateFloat64ArrayCodeLength;
 extern const JSC::ConstructAbility s_typedArrayConstructorAllocateFloat64ArrayCodeConstructAbility;
 
@@ -688,58 +916,58 @@ extern const JSC::ConstructAbility s_typedArrayConstructorAllocateFloat64ArrayCo
     macro(allocateFloat64Array, typedArrayConstructorAllocateFloat64Array, 1) \
 
 /* TypedArrayPrototype */
-extern const char* s_typedArrayPrototypeTypedArraySpeciesConstructorCode;
+extern const char* const s_typedArrayPrototypeTypedArraySpeciesConstructorCode;
 extern const int s_typedArrayPrototypeTypedArraySpeciesConstructorCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeTypedArraySpeciesConstructorCodeConstructAbility;
-extern const char* s_typedArrayPrototypeTypedArrayClampArgumentToStartOrEndCode;
+extern const char* const s_typedArrayPrototypeTypedArrayClampArgumentToStartOrEndCode;
 extern const int s_typedArrayPrototypeTypedArrayClampArgumentToStartOrEndCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeTypedArrayClampArgumentToStartOrEndCodeConstructAbility;
-extern const char* s_typedArrayPrototypeValuesCode;
+extern const char* const s_typedArrayPrototypeValuesCode;
 extern const int s_typedArrayPrototypeValuesCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeValuesCodeConstructAbility;
-extern const char* s_typedArrayPrototypeKeysCode;
+extern const char* const s_typedArrayPrototypeKeysCode;
 extern const int s_typedArrayPrototypeKeysCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeKeysCodeConstructAbility;
-extern const char* s_typedArrayPrototypeEntriesCode;
+extern const char* const s_typedArrayPrototypeEntriesCode;
 extern const int s_typedArrayPrototypeEntriesCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeEntriesCodeConstructAbility;
-extern const char* s_typedArrayPrototypeEveryCode;
+extern const char* const s_typedArrayPrototypeEveryCode;
 extern const int s_typedArrayPrototypeEveryCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeEveryCodeConstructAbility;
-extern const char* s_typedArrayPrototypeFillCode;
+extern const char* const s_typedArrayPrototypeFillCode;
 extern const int s_typedArrayPrototypeFillCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeFillCodeConstructAbility;
-extern const char* s_typedArrayPrototypeFindCode;
+extern const char* const s_typedArrayPrototypeFindCode;
 extern const int s_typedArrayPrototypeFindCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeFindCodeConstructAbility;
-extern const char* s_typedArrayPrototypeFindIndexCode;
+extern const char* const s_typedArrayPrototypeFindIndexCode;
 extern const int s_typedArrayPrototypeFindIndexCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeFindIndexCodeConstructAbility;
-extern const char* s_typedArrayPrototypeForEachCode;
+extern const char* const s_typedArrayPrototypeForEachCode;
 extern const int s_typedArrayPrototypeForEachCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeForEachCodeConstructAbility;
-extern const char* s_typedArrayPrototypeSomeCode;
+extern const char* const s_typedArrayPrototypeSomeCode;
 extern const int s_typedArrayPrototypeSomeCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeSomeCodeConstructAbility;
-extern const char* s_typedArrayPrototypeSortCode;
+extern const char* const s_typedArrayPrototypeSortCode;
 extern const int s_typedArrayPrototypeSortCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeSortCodeConstructAbility;
-extern const char* s_typedArrayPrototypeSubarrayCode;
+extern const char* const s_typedArrayPrototypeSubarrayCode;
 extern const int s_typedArrayPrototypeSubarrayCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeSubarrayCodeConstructAbility;
-extern const char* s_typedArrayPrototypeReduceCode;
+extern const char* const s_typedArrayPrototypeReduceCode;
 extern const int s_typedArrayPrototypeReduceCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeReduceCodeConstructAbility;
-extern const char* s_typedArrayPrototypeReduceRightCode;
+extern const char* const s_typedArrayPrototypeReduceRightCode;
 extern const int s_typedArrayPrototypeReduceRightCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeReduceRightCodeConstructAbility;
-extern const char* s_typedArrayPrototypeMapCode;
+extern const char* const s_typedArrayPrototypeMapCode;
 extern const int s_typedArrayPrototypeMapCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeMapCodeConstructAbility;
-extern const char* s_typedArrayPrototypeFilterCode;
+extern const char* const s_typedArrayPrototypeFilterCode;
 extern const int s_typedArrayPrototypeFilterCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeFilterCodeConstructAbility;
-extern const char* s_typedArrayPrototypeToLocaleStringCode;
+extern const char* const s_typedArrayPrototypeToLocaleStringCode;
 extern const int s_typedArrayPrototypeToLocaleStringCodeLength;
 extern const JSC::ConstructAbility s_typedArrayPrototypeToLocaleStringCodeConstructAbility;
 
@@ -763,159 +991,225 @@ extern const JSC::ConstructAbility s_typedArrayPrototypeToLocaleStringCodeConstr
     macro(filter, typedArrayPrototypeFilter, 1) \
     macro(toLocaleString, typedArrayPrototypeToLocaleString, 0) \
 
+/* WebAssemblyPrototype */
+extern const char* const s_webAssemblyPrototypeCompileStreamingCode;
+extern const int s_webAssemblyPrototypeCompileStreamingCodeLength;
+extern const JSC::ConstructAbility s_webAssemblyPrototypeCompileStreamingCodeConstructAbility;
+extern const char* const s_webAssemblyPrototypeInstantiateStreamingCode;
+extern const int s_webAssemblyPrototypeInstantiateStreamingCodeLength;
+extern const JSC::ConstructAbility s_webAssemblyPrototypeInstantiateStreamingCodeConstructAbility;
+
+#define JSC_FOREACH_WEBASSEMBLYPROTOTYPE_BUILTIN_DATA(macro) \
+    macro(compileStreaming, webAssemblyPrototypeCompileStreaming, 1) \
+    macro(instantiateStreaming, webAssemblyPrototypeInstantiateStreaming, 1) \
+
 #define JSC_FOREACH_BUILTIN_CODE(macro) \
-    macro(arrayConstructorOfCode, of, s_arrayConstructorOfCodeLength) \
-    macro(arrayConstructorFromCode, from, s_arrayConstructorFromCodeLength) \
-    macro(arrayConstructorIsArrayCode, isArray, s_arrayConstructorIsArrayCodeLength) \
-    macro(arrayIteratorPrototypeArrayIteratorValueNextCode, arrayIteratorValueNext, s_arrayIteratorPrototypeArrayIteratorValueNextCodeLength) \
-    macro(arrayIteratorPrototypeNextCode, next, s_arrayIteratorPrototypeNextCodeLength) \
-    macro(arrayIteratorPrototypeArrayIteratorKeyNextCode, arrayIteratorKeyNext, s_arrayIteratorPrototypeArrayIteratorKeyNextCodeLength) \
-    macro(arrayIteratorPrototypeArrayIteratorKeyValueNextCode, arrayIteratorKeyValueNext, s_arrayIteratorPrototypeArrayIteratorKeyValueNextCodeLength) \
-    macro(arrayPrototypeCreateArrayIteratorConstructorCode, createArrayIterator, s_arrayPrototypeCreateArrayIteratorConstructorCodeLength) \
-    macro(arrayPrototypeValuesCode, values, s_arrayPrototypeValuesCodeLength) \
-    macro(arrayPrototypeKeysCode, keys, s_arrayPrototypeKeysCodeLength) \
-    macro(arrayPrototypeEntriesCode, entries, s_arrayPrototypeEntriesCodeLength) \
-    macro(arrayPrototypeReduceCode, reduce, s_arrayPrototypeReduceCodeLength) \
-    macro(arrayPrototypeReduceRightCode, reduceRight, s_arrayPrototypeReduceRightCodeLength) \
-    macro(arrayPrototypeEveryCode, every, s_arrayPrototypeEveryCodeLength) \
-    macro(arrayPrototypeForEachCode, forEach, s_arrayPrototypeForEachCodeLength) \
-    macro(arrayPrototypeFilterCode, filter, s_arrayPrototypeFilterCodeLength) \
-    macro(arrayPrototypeMapCode, map, s_arrayPrototypeMapCodeLength) \
-    macro(arrayPrototypeSomeCode, some, s_arrayPrototypeSomeCodeLength) \
-    macro(arrayPrototypeFillCode, fill, s_arrayPrototypeFillCodeLength) \
-    macro(arrayPrototypeFindCode, find, s_arrayPrototypeFindCodeLength) \
-    macro(arrayPrototypeFindIndexCode, findIndex, s_arrayPrototypeFindIndexCodeLength) \
-    macro(arrayPrototypeIncludesCode, includes, s_arrayPrototypeIncludesCodeLength) \
-    macro(arrayPrototypeSortCode, sort, s_arrayPrototypeSortCodeLength) \
-    macro(arrayPrototypeConcatSlowPathCode, concatSlowPath, s_arrayPrototypeConcatSlowPathCodeLength) \
-    macro(arrayPrototypeConcatCode, concat, s_arrayPrototypeConcatCodeLength) \
-    macro(arrayPrototypeCopyWithinCode, copyWithin, s_arrayPrototypeCopyWithinCodeLength) \
-    macro(asyncFunctionPrototypeAsyncFunctionResumeCode, asyncFunctionResume, s_asyncFunctionPrototypeAsyncFunctionResumeCodeLength) \
-    macro(datePrototypeToLocaleStringCode, toLocaleString, s_datePrototypeToLocaleStringCodeLength) \
-    macro(datePrototypeToLocaleDateStringCode, toLocaleDateString, s_datePrototypeToLocaleDateStringCodeLength) \
-    macro(datePrototypeToLocaleTimeStringCode, toLocaleTimeString, s_datePrototypeToLocaleTimeStringCodeLength) \
-    macro(functionPrototypeCallCode, call, s_functionPrototypeCallCodeLength) \
-    macro(functionPrototypeApplyCode, apply, s_functionPrototypeApplyCodeLength) \
-    macro(functionPrototypeSymbolHasInstanceCode, symbolHasInstance, s_functionPrototypeSymbolHasInstanceCodeLength) \
-    macro(functionPrototypeBindCode, bind, s_functionPrototypeBindCodeLength) \
-    macro(generatorPrototypeGeneratorResumeCode, generatorResume, s_generatorPrototypeGeneratorResumeCodeLength) \
-    macro(generatorPrototypeNextCode, next, s_generatorPrototypeNextCodeLength) \
-    macro(generatorPrototypeReturnCode, return, s_generatorPrototypeReturnCodeLength) \
-    macro(generatorPrototypeThrowCode, throw, s_generatorPrototypeThrowCodeLength) \
-    macro(globalObjectIsFiniteCode, isFinite, s_globalObjectIsFiniteCodeLength) \
-    macro(globalObjectIsNaNCode, isNaN, s_globalObjectIsNaNCodeLength) \
-    macro(globalOperationsToIntegerCode, toInteger, s_globalOperationsToIntegerCodeLength) \
-    macro(globalOperationsToLengthCode, toLength, s_globalOperationsToLengthCodeLength) \
-    macro(globalOperationsIsDictionaryCode, isDictionary, s_globalOperationsIsDictionaryCodeLength) \
-    macro(globalOperationsSpeciesGetterCode, speciesGetter, s_globalOperationsSpeciesGetterCodeLength) \
-    macro(globalOperationsSpeciesConstructorCode, speciesConstructor, s_globalOperationsSpeciesConstructorCodeLength) \
-    macro(globalOperationsCopyDataPropertiesCode, copyDataProperties, s_globalOperationsCopyDataPropertiesCodeLength) \
-    macro(inspectorInstrumentationObjectPromiseFulfilledCode, promiseFulfilled, s_inspectorInstrumentationObjectPromiseFulfilledCodeLength) \
-    macro(inspectorInstrumentationObjectPromiseRejectedCode, promiseRejected, s_inspectorInstrumentationObjectPromiseRejectedCodeLength) \
-    macro(internalPromiseConstructorInternalAllCode, internalAll, s_internalPromiseConstructorInternalAllCodeLength) \
-    macro(iteratorHelpersPerformIterationCode, performIteration, s_iteratorHelpersPerformIterationCodeLength) \
-    macro(iteratorPrototypeSymbolIteratorGetterCode, symbolIteratorGetter, s_iteratorPrototypeSymbolIteratorGetterCodeLength) \
-    macro(mapPrototypeForEachCode, forEach, s_mapPrototypeForEachCodeLength) \
-    macro(moduleLoaderPrototypeSetStateToMaxCode, setStateToMax, s_moduleLoaderPrototypeSetStateToMaxCodeLength) \
-    macro(moduleLoaderPrototypeNewRegistryEntryCode, newRegistryEntry, s_moduleLoaderPrototypeNewRegistryEntryCodeLength) \
-    macro(moduleLoaderPrototypeEnsureRegisteredCode, ensureRegistered, s_moduleLoaderPrototypeEnsureRegisteredCodeLength) \
-    macro(moduleLoaderPrototypeForceFulfillPromiseCode, forceFulfillPromise, s_moduleLoaderPrototypeForceFulfillPromiseCodeLength) \
-    macro(moduleLoaderPrototypeFulfillFetchCode, fulfillFetch, s_moduleLoaderPrototypeFulfillFetchCodeLength) \
-    macro(moduleLoaderPrototypeFulfillInstantiateCode, fulfillInstantiate, s_moduleLoaderPrototypeFulfillInstantiateCodeLength) \
-    macro(moduleLoaderPrototypeCommitInstantiatedCode, commitInstantiated, s_moduleLoaderPrototypeCommitInstantiatedCodeLength) \
-    macro(moduleLoaderPrototypeInstantiationCode, instantiation, s_moduleLoaderPrototypeInstantiationCodeLength) \
-    macro(moduleLoaderPrototypeRequestFetchCode, requestFetch, s_moduleLoaderPrototypeRequestFetchCodeLength) \
-    macro(moduleLoaderPrototypeRequestInstantiateCode, requestInstantiate, s_moduleLoaderPrototypeRequestInstantiateCodeLength) \
-    macro(moduleLoaderPrototypeRequestSatisfyCode, requestSatisfy, s_moduleLoaderPrototypeRequestSatisfyCodeLength) \
-    macro(moduleLoaderPrototypeRequestLinkCode, requestLink, s_moduleLoaderPrototypeRequestLinkCodeLength) \
-    macro(moduleLoaderPrototypeRequestReadyCode, requestReady, s_moduleLoaderPrototypeRequestReadyCodeLength) \
-    macro(moduleLoaderPrototypeLinkCode, link, s_moduleLoaderPrototypeLinkCodeLength) \
-    macro(moduleLoaderPrototypeModuleEvaluationCode, moduleEvaluation, s_moduleLoaderPrototypeModuleEvaluationCodeLength) \
-    macro(moduleLoaderPrototypeProvideCode, provide, s_moduleLoaderPrototypeProvideCodeLength) \
-    macro(moduleLoaderPrototypeLoadAndEvaluateModuleCode, loadAndEvaluateModule, s_moduleLoaderPrototypeLoadAndEvaluateModuleCodeLength) \
-    macro(moduleLoaderPrototypeLoadModuleCode, loadModule, s_moduleLoaderPrototypeLoadModuleCodeLength) \
-    macro(moduleLoaderPrototypeLinkAndEvaluateModuleCode, linkAndEvaluateModule, s_moduleLoaderPrototypeLinkAndEvaluateModuleCodeLength) \
-    macro(moduleLoaderPrototypeRequestImportModuleCode, requestImportModule, s_moduleLoaderPrototypeRequestImportModuleCodeLength) \
-    macro(numberConstructorIsFiniteCode, isFinite, s_numberConstructorIsFiniteCodeLength) \
-    macro(numberConstructorIsNaNCode, isNaN, s_numberConstructorIsNaNCodeLength) \
-    macro(numberPrototypeToLocaleStringCode, toLocaleString, s_numberPrototypeToLocaleStringCodeLength) \
-    macro(objectConstructorEnumerableOwnPropertiesCode, enumerableOwnProperties, s_objectConstructorEnumerableOwnPropertiesCodeLength) \
-    macro(objectConstructorValuesCode, values, s_objectConstructorValuesCodeLength) \
-    macro(objectConstructorEntriesCode, entries, s_objectConstructorEntriesCodeLength) \
-    macro(objectConstructorAssignCode, assign, s_objectConstructorAssignCodeLength) \
-    macro(promiseConstructorAllCode, all, s_promiseConstructorAllCodeLength) \
-    macro(promiseConstructorRaceCode, race, s_promiseConstructorRaceCodeLength) \
-    macro(promiseConstructorRejectCode, reject, s_promiseConstructorRejectCodeLength) \
-    macro(promiseConstructorResolveCode, resolve, s_promiseConstructorResolveCodeLength) \
-    macro(promiseOperationsIsPromiseCode, isPromise, s_promiseOperationsIsPromiseCodeLength) \
-    macro(promiseOperationsNewPromiseReactionCode, newPromiseReaction, s_promiseOperationsNewPromiseReactionCodeLength) \
-    macro(promiseOperationsNewPromiseCapabilityCode, newPromiseCapability, s_promiseOperationsNewPromiseCapabilityCodeLength) \
-    macro(promiseOperationsTriggerPromiseReactionsCode, triggerPromiseReactions, s_promiseOperationsTriggerPromiseReactionsCodeLength) \
-    macro(promiseOperationsRejectPromiseCode, rejectPromise, s_promiseOperationsRejectPromiseCodeLength) \
-    macro(promiseOperationsFulfillPromiseCode, fulfillPromise, s_promiseOperationsFulfillPromiseCodeLength) \
-    macro(promiseOperationsCreateResolvingFunctionsCode, createResolvingFunctions, s_promiseOperationsCreateResolvingFunctionsCodeLength) \
-    macro(promiseOperationsPromiseReactionJobCode, promiseReactionJob, s_promiseOperationsPromiseReactionJobCodeLength) \
-    macro(promiseOperationsPromiseResolveThenableJobCode, promiseResolveThenableJob, s_promiseOperationsPromiseResolveThenableJobCodeLength) \
-    macro(promiseOperationsInitializePromiseCode, initializePromise, s_promiseOperationsInitializePromiseCodeLength) \
-    macro(promisePrototypeCatchCode, catch, s_promisePrototypeCatchCodeLength) \
-    macro(promisePrototypeThenCode, then, s_promisePrototypeThenCodeLength) \
-    macro(reflectObjectApplyCode, apply, s_reflectObjectApplyCodeLength) \
-    macro(reflectObjectDeletePropertyCode, deleteProperty, s_reflectObjectDeletePropertyCodeLength) \
-    macro(reflectObjectHasCode, has, s_reflectObjectHasCodeLength) \
-    macro(regExpPrototypeAdvanceStringIndexCode, advanceStringIndex, s_regExpPrototypeAdvanceStringIndexCodeLength) \
-    macro(regExpPrototypeRegExpExecCode, regExpExec, s_regExpPrototypeRegExpExecCodeLength) \
-    macro(regExpPrototypeHasObservableSideEffectsForRegExpMatchCode, hasObservableSideEffectsForRegExpMatch, s_regExpPrototypeHasObservableSideEffectsForRegExpMatchCodeLength) \
-    macro(regExpPrototypeMatchCode, match, s_regExpPrototypeMatchCodeLength) \
-    macro(regExpPrototypeReplaceCode, replace, s_regExpPrototypeReplaceCodeLength) \
-    macro(regExpPrototypeSearchCode, search, s_regExpPrototypeSearchCodeLength) \
-    macro(regExpPrototypeHasObservableSideEffectsForRegExpSplitCode, hasObservableSideEffectsForRegExpSplit, s_regExpPrototypeHasObservableSideEffectsForRegExpSplitCodeLength) \
-    macro(regExpPrototypeSplitCode, split, s_regExpPrototypeSplitCodeLength) \
-    macro(regExpPrototypeTestCode, test, s_regExpPrototypeTestCodeLength) \
-    macro(setPrototypeForEachCode, forEach, s_setPrototypeForEachCodeLength) \
-    macro(stringConstructorRawCode, raw, s_stringConstructorRawCodeLength) \
-    macro(stringIteratorPrototypeNextCode, next, s_stringIteratorPrototypeNextCodeLength) \
-    macro(stringPrototypeMatchCode, match, s_stringPrototypeMatchCodeLength) \
-    macro(stringPrototypeRepeatSlowPathCode, repeatSlowPath, s_stringPrototypeRepeatSlowPathCodeLength) \
-    macro(stringPrototypeRepeatCharactersSlowPathCode, repeatCharactersSlowPath, s_stringPrototypeRepeatCharactersSlowPathCodeLength) \
-    macro(stringPrototypeRepeatCode, repeat, s_stringPrototypeRepeatCodeLength) \
-    macro(stringPrototypePadStartCode, padStart, s_stringPrototypePadStartCodeLength) \
-    macro(stringPrototypePadEndCode, padEnd, s_stringPrototypePadEndCodeLength) \
-    macro(stringPrototypeHasObservableSideEffectsForStringReplaceCode, hasObservableSideEffectsForStringReplace, s_stringPrototypeHasObservableSideEffectsForStringReplaceCodeLength) \
-    macro(stringPrototypeReplaceCode, replace, s_stringPrototypeReplaceCodeLength) \
-    macro(stringPrototypeLocaleCompareCode, localeCompare, s_stringPrototypeLocaleCompareCodeLength) \
-    macro(stringPrototypeSearchCode, search, s_stringPrototypeSearchCodeLength) \
-    macro(stringPrototypeSplitCode, split, s_stringPrototypeSplitCodeLength) \
-    macro(typedArrayConstructorOfCode, of, s_typedArrayConstructorOfCodeLength) \
-    macro(typedArrayConstructorFromCode, from, s_typedArrayConstructorFromCodeLength) \
-    macro(typedArrayConstructorAllocateInt8ArrayCode, allocateInt8Array, s_typedArrayConstructorAllocateInt8ArrayCodeLength) \
-    macro(typedArrayConstructorAllocateInt16ArrayCode, allocateInt16Array, s_typedArrayConstructorAllocateInt16ArrayCodeLength) \
-    macro(typedArrayConstructorAllocateInt32ArrayCode, allocateInt32Array, s_typedArrayConstructorAllocateInt32ArrayCodeLength) \
-    macro(typedArrayConstructorAllocateUint32ArrayCode, allocateUint32Array, s_typedArrayConstructorAllocateUint32ArrayCodeLength) \
-    macro(typedArrayConstructorAllocateUint16ArrayCode, allocateUint16Array, s_typedArrayConstructorAllocateUint16ArrayCodeLength) \
-    macro(typedArrayConstructorAllocateUint8ArrayCode, allocateUint8Array, s_typedArrayConstructorAllocateUint8ArrayCodeLength) \
-    macro(typedArrayConstructorAllocateUint8ClampedArrayCode, allocateUint8ClampedArray, s_typedArrayConstructorAllocateUint8ClampedArrayCodeLength) \
-    macro(typedArrayConstructorAllocateFloat32ArrayCode, allocateFloat32Array, s_typedArrayConstructorAllocateFloat32ArrayCodeLength) \
-    macro(typedArrayConstructorAllocateFloat64ArrayCode, allocateFloat64Array, s_typedArrayConstructorAllocateFloat64ArrayCodeLength) \
-    macro(typedArrayPrototypeTypedArraySpeciesConstructorCode, typedArraySpeciesConstructor, s_typedArrayPrototypeTypedArraySpeciesConstructorCodeLength) \
-    macro(typedArrayPrototypeTypedArrayClampArgumentToStartOrEndCode, typedArrayClampArgumentToStartOrEnd, s_typedArrayPrototypeTypedArrayClampArgumentToStartOrEndCodeLength) \
-    macro(typedArrayPrototypeValuesCode, values, s_typedArrayPrototypeValuesCodeLength) \
-    macro(typedArrayPrototypeKeysCode, keys, s_typedArrayPrototypeKeysCodeLength) \
-    macro(typedArrayPrototypeEntriesCode, entries, s_typedArrayPrototypeEntriesCodeLength) \
-    macro(typedArrayPrototypeEveryCode, every, s_typedArrayPrototypeEveryCodeLength) \
-    macro(typedArrayPrototypeFillCode, fill, s_typedArrayPrototypeFillCodeLength) \
-    macro(typedArrayPrototypeFindCode, find, s_typedArrayPrototypeFindCodeLength) \
-    macro(typedArrayPrototypeFindIndexCode, findIndex, s_typedArrayPrototypeFindIndexCodeLength) \
-    macro(typedArrayPrototypeForEachCode, forEach, s_typedArrayPrototypeForEachCodeLength) \
-    macro(typedArrayPrototypeSomeCode, some, s_typedArrayPrototypeSomeCodeLength) \
-    macro(typedArrayPrototypeSortCode, sort, s_typedArrayPrototypeSortCodeLength) \
-    macro(typedArrayPrototypeSubarrayCode, subarray, s_typedArrayPrototypeSubarrayCodeLength) \
-    macro(typedArrayPrototypeReduceCode, reduce, s_typedArrayPrototypeReduceCodeLength) \
-    macro(typedArrayPrototypeReduceRightCode, reduceRight, s_typedArrayPrototypeReduceRightCodeLength) \
-    macro(typedArrayPrototypeMapCode, map, s_typedArrayPrototypeMapCodeLength) \
-    macro(typedArrayPrototypeFilterCode, filter, s_typedArrayPrototypeFilterCodeLength) \
-    macro(typedArrayPrototypeToLocaleStringCode, toLocaleString, s_typedArrayPrototypeToLocaleStringCodeLength) \
+    macro(asyncFromSyncIteratorPrototypeAsyncFromSyncIteratorConstructorConstructorCode, AsyncFromSyncIteratorConstructor, static_cast<const char*>(nullptr), s_asyncFromSyncIteratorPrototypeAsyncFromSyncIteratorConstructorConstructorCodeLength) \
+    macro(regExpPrototypeAdvanceStringIndexCode, advanceStringIndex, static_cast<const char*>(nullptr), s_regExpPrototypeAdvanceStringIndexCodeLength) \
+    macro(promiseConstructorAllCode, all, static_cast<const char*>(nullptr), s_promiseConstructorAllCodeLength) \
+    macro(typedArrayConstructorAllocateFloat32ArrayCode, allocateFloat32Array, static_cast<const char*>(nullptr), s_typedArrayConstructorAllocateFloat32ArrayCodeLength) \
+    macro(typedArrayConstructorAllocateFloat64ArrayCode, allocateFloat64Array, static_cast<const char*>(nullptr), s_typedArrayConstructorAllocateFloat64ArrayCodeLength) \
+    macro(typedArrayConstructorAllocateInt16ArrayCode, allocateInt16Array, static_cast<const char*>(nullptr), s_typedArrayConstructorAllocateInt16ArrayCodeLength) \
+    macro(typedArrayConstructorAllocateInt32ArrayCode, allocateInt32Array, static_cast<const char*>(nullptr), s_typedArrayConstructorAllocateInt32ArrayCodeLength) \
+    macro(typedArrayConstructorAllocateInt8ArrayCode, allocateInt8Array, static_cast<const char*>(nullptr), s_typedArrayConstructorAllocateInt8ArrayCodeLength) \
+    macro(typedArrayConstructorAllocateUint16ArrayCode, allocateUint16Array, static_cast<const char*>(nullptr), s_typedArrayConstructorAllocateUint16ArrayCodeLength) \
+    macro(typedArrayConstructorAllocateUint32ArrayCode, allocateUint32Array, static_cast<const char*>(nullptr), s_typedArrayConstructorAllocateUint32ArrayCodeLength) \
+    macro(typedArrayConstructorAllocateUint8ArrayCode, allocateUint8Array, static_cast<const char*>(nullptr), s_typedArrayConstructorAllocateUint8ArrayCodeLength) \
+    macro(typedArrayConstructorAllocateUint8ClampedArrayCode, allocateUint8ClampedArray, static_cast<const char*>(nullptr), s_typedArrayConstructorAllocateUint8ClampedArrayCodeLength) \
+    macro(stringPrototypeAnchorCode, anchor, static_cast<const char*>(nullptr), s_stringPrototypeAnchorCodeLength) \
+    macro(functionPrototypeApplyCode, apply, static_cast<const char*>(nullptr), s_functionPrototypeApplyCodeLength) \
+    macro(reflectObjectApplyCode, apply, static_cast<const char*>(nullptr), s_reflectObjectApplyCodeLength) \
+    macro(arrayIteratorPrototypeArrayIteratorKeyNextCode, arrayIteratorKeyNext, static_cast<const char*>(nullptr), s_arrayIteratorPrototypeArrayIteratorKeyNextCodeLength) \
+    macro(arrayIteratorPrototypeArrayIteratorKeyValueNextCode, arrayIteratorKeyValueNext, static_cast<const char*>(nullptr), s_arrayIteratorPrototypeArrayIteratorKeyValueNextCodeLength) \
+    macro(arrayIteratorPrototypeArrayIteratorValueNextCode, arrayIteratorValueNext, static_cast<const char*>(nullptr), s_arrayIteratorPrototypeArrayIteratorValueNextCodeLength) \
+    macro(arrayPrototypeArraySpeciesCreateCode, arraySpeciesCreate, static_cast<const char*>(nullptr), s_arrayPrototypeArraySpeciesCreateCodeLength) \
+    macro(asyncFunctionPrototypeAsyncFunctionResumeCode, asyncFunctionResume, static_cast<const char*>(nullptr), s_asyncFunctionPrototypeAsyncFunctionResumeCodeLength) \
+    macro(asyncGeneratorPrototypeAsyncGeneratorDequeueCode, asyncGeneratorDequeue, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeAsyncGeneratorDequeueCodeLength) \
+    macro(asyncGeneratorPrototypeAsyncGeneratorEnqueueCode, asyncGeneratorEnqueue, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeAsyncGeneratorEnqueueCodeLength) \
+    macro(asyncGeneratorPrototypeAsyncGeneratorQueueDequeueCode, asyncGeneratorQueueDequeue, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeAsyncGeneratorQueueDequeueCodeLength) \
+    macro(asyncGeneratorPrototypeAsyncGeneratorQueueEnqueueCode, asyncGeneratorQueueEnqueue, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeAsyncGeneratorQueueEnqueueCodeLength) \
+    macro(asyncGeneratorPrototypeAsyncGeneratorQueueIsEmptyCode, asyncGeneratorQueueIsEmpty, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeAsyncGeneratorQueueIsEmptyCodeLength) \
+    macro(asyncGeneratorPrototypeAsyncGeneratorRejectCode, asyncGeneratorReject, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeAsyncGeneratorRejectCodeLength) \
+    macro(asyncGeneratorPrototypeAsyncGeneratorResolveCode, asyncGeneratorResolve, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeAsyncGeneratorResolveCodeLength) \
+    macro(asyncGeneratorPrototypeAsyncGeneratorResumeNextCode, asyncGeneratorResumeNext, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeAsyncGeneratorResumeNextCodeLength) \
+    macro(asyncGeneratorPrototypeAsyncGeneratorYieldCode, asyncGeneratorYield, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeAsyncGeneratorYieldCodeLength) \
+    macro(asyncGeneratorPrototypeAwaitValueCode, awaitValue, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeAwaitValueCodeLength) \
+    macro(stringPrototypeBigCode, big, static_cast<const char*>(nullptr), s_stringPrototypeBigCodeLength) \
+    macro(functionPrototypeBindCode, bind, static_cast<const char*>(nullptr), s_functionPrototypeBindCodeLength) \
+    macro(stringPrototypeBlinkCode, blink, static_cast<const char*>(nullptr), s_stringPrototypeBlinkCodeLength) \
+    macro(stringPrototypeBoldCode, bold, static_cast<const char*>(nullptr), s_stringPrototypeBoldCodeLength) \
+    macro(functionPrototypeCallCode, call, static_cast<const char*>(nullptr), s_functionPrototypeCallCodeLength) \
+    macro(promisePrototypeCatchCode, catch, static_cast<const char*>(nullptr), s_promisePrototypeCatchCodeLength) \
+    macro(webAssemblyPrototypeCompileStreamingCode, compileStreaming, static_cast<const char*>(nullptr), s_webAssemblyPrototypeCompileStreamingCodeLength) \
+    macro(arrayPrototypeConcatCode, concat, static_cast<const char*>(nullptr), s_arrayPrototypeConcatCodeLength) \
+    macro(stringPrototypeConcatCode, concat, static_cast<const char*>(nullptr), s_stringPrototypeConcatCodeLength) \
+    macro(arrayPrototypeConcatSlowPathCode, concatSlowPath, static_cast<const char*>(nullptr), s_arrayPrototypeConcatSlowPathCodeLength) \
+    macro(globalOperationsCopyDataPropertiesCode, copyDataProperties, static_cast<const char*>(nullptr), s_globalOperationsCopyDataPropertiesCodeLength) \
+    macro(globalOperationsCopyDataPropertiesNoExclusionsCode, copyDataPropertiesNoExclusions, static_cast<const char*>(nullptr), s_globalOperationsCopyDataPropertiesNoExclusionsCodeLength) \
+    macro(arrayPrototypeCopyWithinCode, copyWithin, static_cast<const char*>(nullptr), s_arrayPrototypeCopyWithinCodeLength) \
+    macro(arrayPrototypeCreateArrayIteratorConstructorCode, createArrayIterator, static_cast<const char*>(nullptr), s_arrayPrototypeCreateArrayIteratorConstructorCodeLength) \
+    macro(asyncFromSyncIteratorPrototypeCreateAsyncFromSyncIteratorCode, createAsyncFromSyncIterator, static_cast<const char*>(nullptr), s_asyncFromSyncIteratorPrototypeCreateAsyncFromSyncIteratorCodeLength) \
+    macro(stringPrototypeCreateHTMLCode, createHTML, static_cast<const char*>(nullptr), s_stringPrototypeCreateHTMLCodeLength) \
+    macro(mapPrototypeCreateMapIteratorConstructorCode, createMapIterator, static_cast<const char*>(nullptr), s_mapPrototypeCreateMapIteratorConstructorCodeLength) \
+    macro(promiseOperationsCreateResolvingFunctionsCode, createResolvingFunctions, static_cast<const char*>(nullptr), s_promiseOperationsCreateResolvingFunctionsCodeLength) \
+    macro(setPrototypeCreateSetIteratorConstructorCode, createSetIterator, static_cast<const char*>(nullptr), s_setPrototypeCreateSetIteratorConstructorCodeLength) \
+    macro(reflectObjectDeletePropertyCode, deleteProperty, static_cast<const char*>(nullptr), s_reflectObjectDeletePropertyCodeLength) \
+    macro(asyncGeneratorPrototypeDoAsyncGeneratorBodyCallCode, doAsyncGeneratorBodyCall, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeDoAsyncGeneratorBodyCallCodeLength) \
+    macro(moduleLoaderEnsureRegisteredCode, ensureRegistered, static_cast<const char*>(nullptr), s_moduleLoaderEnsureRegisteredCodeLength) \
+    macro(arrayPrototypeEntriesCode, entries, static_cast<const char*>(nullptr), s_arrayPrototypeEntriesCodeLength) \
+    macro(mapPrototypeEntriesCode, entries, static_cast<const char*>(nullptr), s_mapPrototypeEntriesCodeLength) \
+    macro(objectConstructorEntriesCode, entries, static_cast<const char*>(nullptr), s_objectConstructorEntriesCodeLength) \
+    macro(setPrototypeEntriesCode, entries, static_cast<const char*>(nullptr), s_setPrototypeEntriesCodeLength) \
+    macro(typedArrayPrototypeEntriesCode, entries, static_cast<const char*>(nullptr), s_typedArrayPrototypeEntriesCodeLength) \
+    macro(arrayPrototypeEveryCode, every, static_cast<const char*>(nullptr), s_arrayPrototypeEveryCodeLength) \
+    macro(typedArrayPrototypeEveryCode, every, static_cast<const char*>(nullptr), s_typedArrayPrototypeEveryCodeLength) \
+    macro(arrayPrototypeFillCode, fill, static_cast<const char*>(nullptr), s_arrayPrototypeFillCodeLength) \
+    macro(typedArrayPrototypeFillCode, fill, static_cast<const char*>(nullptr), s_typedArrayPrototypeFillCodeLength) \
+    macro(arrayPrototypeFilterCode, filter, static_cast<const char*>(nullptr), s_arrayPrototypeFilterCodeLength) \
+    macro(typedArrayPrototypeFilterCode, filter, static_cast<const char*>(nullptr), s_typedArrayPrototypeFilterCodeLength) \
+    macro(promisePrototypeFinallyCode, finally, static_cast<const char*>(nullptr), s_promisePrototypeFinallyCodeLength) \
+    macro(arrayPrototypeFindCode, find, static_cast<const char*>(nullptr), s_arrayPrototypeFindCodeLength) \
+    macro(typedArrayPrototypeFindCode, find, static_cast<const char*>(nullptr), s_typedArrayPrototypeFindCodeLength) \
+    macro(arrayPrototypeFindIndexCode, findIndex, static_cast<const char*>(nullptr), s_arrayPrototypeFindIndexCodeLength) \
+    macro(typedArrayPrototypeFindIndexCode, findIndex, static_cast<const char*>(nullptr), s_typedArrayPrototypeFindIndexCodeLength) \
+    macro(stringPrototypeFixedCode, fixed, static_cast<const char*>(nullptr), s_stringPrototypeFixedCodeLength) \
+    macro(arrayPrototypeFlatCode, flat, static_cast<const char*>(nullptr), s_arrayPrototypeFlatCodeLength) \
+    macro(arrayPrototypeFlatIntoArrayCode, flatIntoArray, static_cast<const char*>(nullptr), s_arrayPrototypeFlatIntoArrayCodeLength) \
+    macro(arrayPrototypeFlatIntoArrayWithCallbackCode, flatIntoArrayWithCallback, static_cast<const char*>(nullptr), s_arrayPrototypeFlatIntoArrayWithCallbackCodeLength) \
+    macro(arrayPrototypeFlatMapCode, flatMap, static_cast<const char*>(nullptr), s_arrayPrototypeFlatMapCodeLength) \
+    macro(stringPrototypeFontcolorCode, fontcolor, static_cast<const char*>(nullptr), s_stringPrototypeFontcolorCodeLength) \
+    macro(stringPrototypeFontsizeCode, fontsize, static_cast<const char*>(nullptr), s_stringPrototypeFontsizeCodeLength) \
+    macro(arrayPrototypeForEachCode, forEach, static_cast<const char*>(nullptr), s_arrayPrototypeForEachCodeLength) \
+    macro(mapPrototypeForEachCode, forEach, static_cast<const char*>(nullptr), s_mapPrototypeForEachCodeLength) \
+    macro(setPrototypeForEachCode, forEach, static_cast<const char*>(nullptr), s_setPrototypeForEachCodeLength) \
+    macro(typedArrayPrototypeForEachCode, forEach, static_cast<const char*>(nullptr), s_typedArrayPrototypeForEachCodeLength) \
+    macro(moduleLoaderForceFulfillPromiseCode, forceFulfillPromise, static_cast<const char*>(nullptr), s_moduleLoaderForceFulfillPromiseCodeLength) \
+    macro(arrayConstructorFromCode, from, static_cast<const char*>(nullptr), s_arrayConstructorFromCodeLength) \
+    macro(typedArrayConstructorFromCode, from, static_cast<const char*>(nullptr), s_typedArrayConstructorFromCodeLength) \
+    macro(objectConstructorFromEntriesCode, fromEntries, static_cast<const char*>(nullptr), s_objectConstructorFromEntriesCodeLength) \
+    macro(moduleLoaderFulfillFetchCode, fulfillFetch, static_cast<const char*>(nullptr), s_moduleLoaderFulfillFetchCodeLength) \
+    macro(promiseOperationsFulfillPromiseCode, fulfillPromise, static_cast<const char*>(nullptr), s_promiseOperationsFulfillPromiseCodeLength) \
+    macro(generatorPrototypeGeneratorResumeCode, generatorResume, static_cast<const char*>(nullptr), s_generatorPrototypeGeneratorResumeCodeLength) \
+    macro(promisePrototypeGetCatchFinallyCode, getCatchFinally, static_cast<const char*>(nullptr), s_promisePrototypeGetCatchFinallyCodeLength) \
+    macro(promisePrototypeGetThenFinallyCode, getThenFinally, static_cast<const char*>(nullptr), s_promisePrototypeGetThenFinallyCodeLength) \
+    macro(reflectObjectHasCode, has, static_cast<const char*>(nullptr), s_reflectObjectHasCodeLength) \
+    macro(regExpPrototypeHasObservableSideEffectsForRegExpMatchCode, hasObservableSideEffectsForRegExpMatch, static_cast<const char*>(nullptr), s_regExpPrototypeHasObservableSideEffectsForRegExpMatchCodeLength) \
+    macro(regExpPrototypeHasObservableSideEffectsForRegExpSplitCode, hasObservableSideEffectsForRegExpSplit, static_cast<const char*>(nullptr), s_regExpPrototypeHasObservableSideEffectsForRegExpSplitCodeLength) \
+    macro(stringPrototypeHasObservableSideEffectsForStringReplaceCode, hasObservableSideEffectsForStringReplace, static_cast<const char*>(nullptr), s_stringPrototypeHasObservableSideEffectsForStringReplaceCodeLength) \
+    macro(arrayPrototypeIncludesCode, includes, static_cast<const char*>(nullptr), s_arrayPrototypeIncludesCodeLength) \
+    macro(promiseOperationsInitializePromiseCode, initializePromise, static_cast<const char*>(nullptr), s_promiseOperationsInitializePromiseCodeLength) \
+    macro(webAssemblyPrototypeInstantiateStreamingCode, instantiateStreaming, static_cast<const char*>(nullptr), s_webAssemblyPrototypeInstantiateStreamingCodeLength) \
+    macro(internalPromiseConstructorInternalAllCode, internalAll, static_cast<const char*>(nullptr), s_internalPromiseConstructorInternalAllCodeLength) \
+    macro(arrayConstructorIsArrayCode, isArray, static_cast<const char*>(nullptr), s_arrayConstructorIsArrayCodeLength) \
+    macro(globalOperationsIsDictionaryCode, isDictionary, static_cast<const char*>(nullptr), s_globalOperationsIsDictionaryCodeLength) \
+    macro(asyncGeneratorPrototypeIsExecutionStateCode, isExecutionState, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeIsExecutionStateCodeLength) \
+    macro(globalObjectIsFiniteCode, isFinite, static_cast<const char*>(nullptr), s_globalObjectIsFiniteCodeLength) \
+    macro(numberConstructorIsFiniteCode, isFinite, static_cast<const char*>(nullptr), s_numberConstructorIsFiniteCodeLength) \
+    macro(globalObjectIsNaNCode, isNaN, static_cast<const char*>(nullptr), s_globalObjectIsNaNCodeLength) \
+    macro(numberConstructorIsNaNCode, isNaN, static_cast<const char*>(nullptr), s_numberConstructorIsNaNCodeLength) \
+    macro(promiseOperationsIsPromiseCode, isPromise, static_cast<const char*>(nullptr), s_promiseOperationsIsPromiseCodeLength) \
+    macro(asyncGeneratorPrototypeIsSuspendYieldStateCode, isSuspendYieldState, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeIsSuspendYieldStateCodeLength) \
+    macro(stringPrototypeItalicsCode, italics, static_cast<const char*>(nullptr), s_stringPrototypeItalicsCodeLength) \
+    macro(arrayPrototypeKeysCode, keys, static_cast<const char*>(nullptr), s_arrayPrototypeKeysCodeLength) \
+    macro(mapPrototypeKeysCode, keys, static_cast<const char*>(nullptr), s_mapPrototypeKeysCodeLength) \
+    macro(typedArrayPrototypeKeysCode, keys, static_cast<const char*>(nullptr), s_typedArrayPrototypeKeysCodeLength) \
+    macro(moduleLoaderLinkCode, link, static_cast<const char*>(nullptr), s_moduleLoaderLinkCodeLength) \
+    macro(stringPrototypeLinkCode, link, static_cast<const char*>(nullptr), s_stringPrototypeLinkCodeLength) \
+    macro(moduleLoaderLinkAndEvaluateModuleCode, linkAndEvaluateModule, static_cast<const char*>(nullptr), s_moduleLoaderLinkAndEvaluateModuleCodeLength) \
+    macro(moduleLoaderLoadAndEvaluateModuleCode, loadAndEvaluateModule, static_cast<const char*>(nullptr), s_moduleLoaderLoadAndEvaluateModuleCodeLength) \
+    macro(moduleLoaderLoadModuleCode, loadModule, static_cast<const char*>(nullptr), s_moduleLoaderLoadModuleCodeLength) \
+    macro(arrayPrototypeMapCode, map, static_cast<const char*>(nullptr), s_arrayPrototypeMapCodeLength) \
+    macro(typedArrayPrototypeMapCode, map, static_cast<const char*>(nullptr), s_typedArrayPrototypeMapCodeLength) \
+    macro(mapIteratorPrototypeMapIteratorNextCode, mapIteratorNext, static_cast<const char*>(nullptr), s_mapIteratorPrototypeMapIteratorNextCodeLength) \
+    macro(regExpPrototypeMatchCode, match, "[Symbol.match]", s_regExpPrototypeMatchCodeLength) \
+    macro(stringPrototypeMatchCode, match, static_cast<const char*>(nullptr), s_stringPrototypeMatchCodeLength) \
+    macro(regExpPrototypeMatchSlowCode, matchSlow, static_cast<const char*>(nullptr), s_regExpPrototypeMatchSlowCodeLength) \
+    macro(moduleLoaderModuleEvaluationCode, moduleEvaluation, static_cast<const char*>(nullptr), s_moduleLoaderModuleEvaluationCodeLength) \
+    macro(promiseOperationsNewHandledRejectedPromiseCode, newHandledRejectedPromise, static_cast<const char*>(nullptr), s_promiseOperationsNewHandledRejectedPromiseCodeLength) \
+    macro(promiseOperationsNewPromiseCapabilityCode, newPromiseCapability, static_cast<const char*>(nullptr), s_promiseOperationsNewPromiseCapabilityCodeLength) \
+    macro(promiseOperationsNewPromiseReactionCode, newPromiseReaction, static_cast<const char*>(nullptr), s_promiseOperationsNewPromiseReactionCodeLength) \
+    macro(moduleLoaderNewRegistryEntryCode, newRegistryEntry, static_cast<const char*>(nullptr), s_moduleLoaderNewRegistryEntryCodeLength) \
+    macro(arrayIteratorPrototypeNextCode, next, static_cast<const char*>(nullptr), s_arrayIteratorPrototypeNextCodeLength) \
+    macro(asyncFromSyncIteratorPrototypeNextCode, next, static_cast<const char*>(nullptr), s_asyncFromSyncIteratorPrototypeNextCodeLength) \
+    macro(asyncGeneratorPrototypeNextCode, next, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeNextCodeLength) \
+    macro(generatorPrototypeNextCode, next, static_cast<const char*>(nullptr), s_generatorPrototypeNextCodeLength) \
+    macro(mapIteratorPrototypeNextCode, next, static_cast<const char*>(nullptr), s_mapIteratorPrototypeNextCodeLength) \
+    macro(setIteratorPrototypeNextCode, next, static_cast<const char*>(nullptr), s_setIteratorPrototypeNextCodeLength) \
+    macro(stringIteratorPrototypeNextCode, next, static_cast<const char*>(nullptr), s_stringIteratorPrototypeNextCodeLength) \
+    macro(arrayConstructorOfCode, of, static_cast<const char*>(nullptr), s_arrayConstructorOfCodeLength) \
+    macro(typedArrayConstructorOfCode, of, static_cast<const char*>(nullptr), s_typedArrayConstructorOfCodeLength) \
+    macro(stringPrototypePadEndCode, padEnd, static_cast<const char*>(nullptr), s_stringPrototypePadEndCodeLength) \
+    macro(stringPrototypePadStartCode, padStart, static_cast<const char*>(nullptr), s_stringPrototypePadStartCodeLength) \
+    macro(iteratorHelpersPerformIterationCode, performIteration, static_cast<const char*>(nullptr), s_iteratorHelpersPerformIterationCodeLength) \
+    macro(inspectorInstrumentationObjectPromiseFulfilledCode, promiseFulfilled, static_cast<const char*>(nullptr), s_inspectorInstrumentationObjectPromiseFulfilledCodeLength) \
+    macro(promiseOperationsPromiseReactionJobCode, promiseReactionJob, static_cast<const char*>(nullptr), s_promiseOperationsPromiseReactionJobCodeLength) \
+    macro(inspectorInstrumentationObjectPromiseRejectedCode, promiseRejected, static_cast<const char*>(nullptr), s_inspectorInstrumentationObjectPromiseRejectedCodeLength) \
+    macro(promiseOperationsPromiseResolveThenableJobCode, promiseResolveThenableJob, static_cast<const char*>(nullptr), s_promiseOperationsPromiseResolveThenableJobCodeLength) \
+    macro(moduleLoaderProvideFetchCode, provideFetch, static_cast<const char*>(nullptr), s_moduleLoaderProvideFetchCodeLength) \
+    macro(promiseConstructorRaceCode, race, static_cast<const char*>(nullptr), s_promiseConstructorRaceCodeLength) \
+    macro(stringConstructorRawCode, raw, static_cast<const char*>(nullptr), s_stringConstructorRawCodeLength) \
+    macro(arrayPrototypeReduceCode, reduce, static_cast<const char*>(nullptr), s_arrayPrototypeReduceCodeLength) \
+    macro(typedArrayPrototypeReduceCode, reduce, static_cast<const char*>(nullptr), s_typedArrayPrototypeReduceCodeLength) \
+    macro(arrayPrototypeReduceRightCode, reduceRight, static_cast<const char*>(nullptr), s_arrayPrototypeReduceRightCodeLength) \
+    macro(typedArrayPrototypeReduceRightCode, reduceRight, static_cast<const char*>(nullptr), s_typedArrayPrototypeReduceRightCodeLength) \
+    macro(regExpPrototypeRegExpExecCode, regExpExec, static_cast<const char*>(nullptr), s_regExpPrototypeRegExpExecCodeLength) \
+    macro(promiseConstructorRejectCode, reject, static_cast<const char*>(nullptr), s_promiseConstructorRejectCodeLength) \
+    macro(promiseOperationsRejectPromiseCode, rejectPromise, static_cast<const char*>(nullptr), s_promiseOperationsRejectPromiseCodeLength) \
+    macro(stringPrototypeRepeatCode, repeat, static_cast<const char*>(nullptr), s_stringPrototypeRepeatCodeLength) \
+    macro(stringPrototypeRepeatCharactersSlowPathCode, repeatCharactersSlowPath, static_cast<const char*>(nullptr), s_stringPrototypeRepeatCharactersSlowPathCodeLength) \
+    macro(stringPrototypeRepeatSlowPathCode, repeatSlowPath, static_cast<const char*>(nullptr), s_stringPrototypeRepeatSlowPathCodeLength) \
+    macro(regExpPrototypeReplaceCode, replace, "[Symbol.replace]", s_regExpPrototypeReplaceCodeLength) \
+    macro(stringPrototypeReplaceCode, replace, static_cast<const char*>(nullptr), s_stringPrototypeReplaceCodeLength) \
+    macro(moduleLoaderRequestFetchCode, requestFetch, static_cast<const char*>(nullptr), s_moduleLoaderRequestFetchCodeLength) \
+    macro(moduleLoaderRequestImportModuleCode, requestImportModule, static_cast<const char*>(nullptr), s_moduleLoaderRequestImportModuleCodeLength) \
+    macro(moduleLoaderRequestInstantiateCode, requestInstantiate, static_cast<const char*>(nullptr), s_moduleLoaderRequestInstantiateCodeLength) \
+    macro(moduleLoaderRequestSatisfyCode, requestSatisfy, static_cast<const char*>(nullptr), s_moduleLoaderRequestSatisfyCodeLength) \
+    macro(promiseConstructorResolveCode, resolve, static_cast<const char*>(nullptr), s_promiseConstructorResolveCodeLength) \
+    macro(asyncFromSyncIteratorPrototypeReturnCode, return, static_cast<const char*>(nullptr), s_asyncFromSyncIteratorPrototypeReturnCodeLength) \
+    macro(asyncGeneratorPrototypeReturnCode, return, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeReturnCodeLength) \
+    macro(generatorPrototypeReturnCode, return, static_cast<const char*>(nullptr), s_generatorPrototypeReturnCodeLength) \
+    macro(regExpPrototypeSearchCode, search, "[Symbol.search]", s_regExpPrototypeSearchCodeLength) \
+    macro(stringPrototypeSearchCode, search, static_cast<const char*>(nullptr), s_stringPrototypeSearchCodeLength) \
+    macro(setIteratorPrototypeSetIteratorNextCode, setIteratorNext, static_cast<const char*>(nullptr), s_setIteratorPrototypeSetIteratorNextCodeLength) \
+    macro(moduleLoaderSetStateToMaxCode, setStateToMax, static_cast<const char*>(nullptr), s_moduleLoaderSetStateToMaxCodeLength) \
+    macro(stringPrototypeSmallCode, small, static_cast<const char*>(nullptr), s_stringPrototypeSmallCodeLength) \
+    macro(arrayPrototypeSomeCode, some, static_cast<const char*>(nullptr), s_arrayPrototypeSomeCodeLength) \
+    macro(typedArrayPrototypeSomeCode, some, static_cast<const char*>(nullptr), s_typedArrayPrototypeSomeCodeLength) \
+    macro(arrayPrototypeSortCode, sort, static_cast<const char*>(nullptr), s_arrayPrototypeSortCodeLength) \
+    macro(typedArrayPrototypeSortCode, sort, static_cast<const char*>(nullptr), s_typedArrayPrototypeSortCodeLength) \
+    macro(globalOperationsSpeciesConstructorCode, speciesConstructor, static_cast<const char*>(nullptr), s_globalOperationsSpeciesConstructorCodeLength) \
+    macro(globalOperationsSpeciesGetterCode, speciesGetter, "get [Symbol.species]", s_globalOperationsSpeciesGetterCodeLength) \
+    macro(regExpPrototypeSplitCode, split, "[Symbol.split]", s_regExpPrototypeSplitCodeLength) \
+    macro(stringPrototypeSplitCode, split, static_cast<const char*>(nullptr), s_stringPrototypeSplitCodeLength) \
+    macro(stringPrototypeStrikeCode, strike, static_cast<const char*>(nullptr), s_stringPrototypeStrikeCodeLength) \
+    macro(stringPrototypeStringConcatSlowPathCode, stringConcatSlowPath, static_cast<const char*>(nullptr), s_stringPrototypeStringConcatSlowPathCodeLength) \
+    macro(stringPrototypeSubCode, sub, static_cast<const char*>(nullptr), s_stringPrototypeSubCodeLength) \
+    macro(typedArrayPrototypeSubarrayCode, subarray, static_cast<const char*>(nullptr), s_typedArrayPrototypeSubarrayCodeLength) \
+    macro(stringPrototypeSupCode, sup, static_cast<const char*>(nullptr), s_stringPrototypeSupCodeLength) \
+    macro(asyncIteratorPrototypeSymbolAsyncIteratorGetterCode, symbolAsyncIteratorGetter, "[Symbol.asyncIterator]", s_asyncIteratorPrototypeSymbolAsyncIteratorGetterCodeLength) \
+    macro(functionPrototypeSymbolHasInstanceCode, symbolHasInstance, "[Symbol.hasInstance]", s_functionPrototypeSymbolHasInstanceCodeLength) \
+    macro(iteratorPrototypeSymbolIteratorGetterCode, symbolIteratorGetter, "[Symbol.iterator]", s_iteratorPrototypeSymbolIteratorGetterCodeLength) \
+    macro(regExpPrototypeTestCode, test, static_cast<const char*>(nullptr), s_regExpPrototypeTestCodeLength) \
+    macro(promisePrototypeThenCode, then, static_cast<const char*>(nullptr), s_promisePrototypeThenCodeLength) \
+    macro(asyncFromSyncIteratorPrototypeThrowCode, throw, static_cast<const char*>(nullptr), s_asyncFromSyncIteratorPrototypeThrowCodeLength) \
+    macro(asyncGeneratorPrototypeThrowCode, throw, static_cast<const char*>(nullptr), s_asyncGeneratorPrototypeThrowCodeLength) \
+    macro(generatorPrototypeThrowCode, throw, static_cast<const char*>(nullptr), s_generatorPrototypeThrowCodeLength) \
+    macro(globalOperationsToIntegerCode, toInteger, static_cast<const char*>(nullptr), s_globalOperationsToIntegerCodeLength) \
+    macro(globalOperationsToLengthCode, toLength, static_cast<const char*>(nullptr), s_globalOperationsToLengthCodeLength) \
+    macro(datePrototypeToLocaleDateStringCode, toLocaleDateString, static_cast<const char*>(nullptr), s_datePrototypeToLocaleDateStringCodeLength) \
+    macro(datePrototypeToLocaleStringCode, toLocaleString, static_cast<const char*>(nullptr), s_datePrototypeToLocaleStringCodeLength) \
+    macro(typedArrayPrototypeToLocaleStringCode, toLocaleString, static_cast<const char*>(nullptr), s_typedArrayPrototypeToLocaleStringCodeLength) \
+    macro(datePrototypeToLocaleTimeStringCode, toLocaleTimeString, static_cast<const char*>(nullptr), s_datePrototypeToLocaleTimeStringCodeLength) \
+    macro(promiseOperationsTriggerPromiseReactionsCode, triggerPromiseReactions, static_cast<const char*>(nullptr), s_promiseOperationsTriggerPromiseReactionsCodeLength) \
+    macro(typedArrayPrototypeTypedArrayClampArgumentToStartOrEndCode, typedArrayClampArgumentToStartOrEnd, static_cast<const char*>(nullptr), s_typedArrayPrototypeTypedArrayClampArgumentToStartOrEndCodeLength) \
+    macro(typedArrayPrototypeTypedArraySpeciesConstructorCode, typedArraySpeciesConstructor, static_cast<const char*>(nullptr), s_typedArrayPrototypeTypedArraySpeciesConstructorCodeLength) \
+    macro(arrayPrototypeValuesCode, values, static_cast<const char*>(nullptr), s_arrayPrototypeValuesCodeLength) \
+    macro(mapPrototypeValuesCode, values, static_cast<const char*>(nullptr), s_mapPrototypeValuesCodeLength) \
+    macro(setPrototypeValuesCode, values, static_cast<const char*>(nullptr), s_setPrototypeValuesCodeLength) \
+    macro(typedArrayPrototypeValuesCode, values, static_cast<const char*>(nullptr), s_typedArrayPrototypeValuesCodeLength) \
 
 #define JSC_FOREACH_BUILTIN_FUNCTION_NAME(macro) \
+    macro(AsyncFromSyncIteratorConstructor) \
     macro(advanceStringIndex) \
     macro(all) \
     macro(allocateFloat32Array) \
@@ -927,60 +1221,94 @@ extern const JSC::ConstructAbility s_typedArrayPrototypeToLocaleStringCodeConstr
     macro(allocateUint32Array) \
     macro(allocateUint8Array) \
     macro(allocateUint8ClampedArray) \
+    macro(anchor) \
     macro(apply) \
     macro(arrayIteratorKeyNext) \
     macro(arrayIteratorKeyValueNext) \
     macro(arrayIteratorValueNext) \
-    macro(assign) \
+    macro(arraySpeciesCreate) \
     macro(asyncFunctionResume) \
+    macro(asyncGeneratorDequeue) \
+    macro(asyncGeneratorEnqueue) \
+    macro(asyncGeneratorQueueDequeue) \
+    macro(asyncGeneratorQueueEnqueue) \
+    macro(asyncGeneratorQueueIsEmpty) \
+    macro(asyncGeneratorReject) \
+    macro(asyncGeneratorResolve) \
+    macro(asyncGeneratorResumeNext) \
+    macro(asyncGeneratorYield) \
+    macro(awaitValue) \
+    macro(big) \
     macro(bind) \
+    macro(blink) \
+    macro(bold) \
     macro(call) \
     macro(catch) \
-    macro(commitInstantiated) \
+    macro(compileStreaming) \
     macro(concat) \
     macro(concatSlowPath) \
     macro(copyDataProperties) \
+    macro(copyDataPropertiesNoExclusions) \
     macro(copyWithin) \
     macro(createArrayIterator) \
+    macro(createAsyncFromSyncIterator) \
+    macro(createHTML) \
+    macro(createMapIterator) \
     macro(createResolvingFunctions) \
+    macro(createSetIterator) \
     macro(deleteProperty) \
+    macro(doAsyncGeneratorBodyCall) \
     macro(ensureRegistered) \
     macro(entries) \
-    macro(enumerableOwnProperties) \
     macro(every) \
     macro(fill) \
     macro(filter) \
+    macro(finally) \
     macro(find) \
     macro(findIndex) \
+    macro(fixed) \
+    macro(flat) \
+    macro(flatIntoArray) \
+    macro(flatIntoArrayWithCallback) \
+    macro(flatMap) \
+    macro(fontcolor) \
+    macro(fontsize) \
     macro(forEach) \
     macro(forceFulfillPromise) \
     macro(from) \
+    macro(fromEntries) \
     macro(fulfillFetch) \
-    macro(fulfillInstantiate) \
     macro(fulfillPromise) \
     macro(generatorResume) \
+    macro(getCatchFinally) \
+    macro(getThenFinally) \
     macro(has) \
     macro(hasObservableSideEffectsForRegExpMatch) \
     macro(hasObservableSideEffectsForRegExpSplit) \
     macro(hasObservableSideEffectsForStringReplace) \
     macro(includes) \
     macro(initializePromise) \
-    macro(instantiation) \
+    macro(instantiateStreaming) \
     macro(internalAll) \
     macro(isArray) \
     macro(isDictionary) \
+    macro(isExecutionState) \
     macro(isFinite) \
     macro(isNaN) \
     macro(isPromise) \
+    macro(isSuspendYieldState) \
+    macro(italics) \
     macro(keys) \
     macro(link) \
     macro(linkAndEvaluateModule) \
     macro(loadAndEvaluateModule) \
     macro(loadModule) \
-    macro(localeCompare) \
     macro(map) \
+    macro(mapIteratorNext) \
     macro(match) \
+    macro(matchSlow) \
     macro(moduleEvaluation) \
+    macro(newHandledRejectedPromise) \
     macro(newPromiseCapability) \
     macro(newPromiseReaction) \
     macro(newRegistryEntry) \
@@ -993,7 +1321,7 @@ extern const JSC::ConstructAbility s_typedArrayPrototypeToLocaleStringCodeConstr
     macro(promiseReactionJob) \
     macro(promiseRejected) \
     macro(promiseResolveThenableJob) \
-    macro(provide) \
+    macro(provideFetch) \
     macro(race) \
     macro(raw) \
     macro(reduce) \
@@ -1008,19 +1336,24 @@ extern const JSC::ConstructAbility s_typedArrayPrototypeToLocaleStringCodeConstr
     macro(requestFetch) \
     macro(requestImportModule) \
     macro(requestInstantiate) \
-    macro(requestLink) \
-    macro(requestReady) \
     macro(requestSatisfy) \
     macro(resolve) \
     macro(return) \
     macro(search) \
+    macro(setIteratorNext) \
     macro(setStateToMax) \
+    macro(small) \
     macro(some) \
     macro(sort) \
     macro(speciesConstructor) \
     macro(speciesGetter) \
     macro(split) \
+    macro(strike) \
+    macro(stringConcatSlowPath) \
+    macro(sub) \
     macro(subarray) \
+    macro(sup) \
+    macro(symbolAsyncIteratorGetter) \
     macro(symbolHasInstance) \
     macro(symbolIteratorGetter) \
     macro(test) \
@@ -1037,44 +1370,72 @@ extern const JSC::ConstructAbility s_typedArrayPrototypeToLocaleStringCodeConstr
     macro(values) \
 
 #define JSC_FOREACH_BUILTIN_FUNCTION_PRIVATE_GLOBAL_NAME(macro) \
+    macro(AsyncFromSyncIteratorConstructor, asyncFromSyncIteratorPrototypeAsyncFromSyncIteratorConstructorConstructor) \
     macro(advanceStringIndex, regExpPrototypeAdvanceStringIndex) \
     macro(arrayIteratorKeyNext, arrayIteratorPrototypeArrayIteratorKeyNext) \
     macro(arrayIteratorKeyValueNext, arrayIteratorPrototypeArrayIteratorKeyValueNext) \
     macro(arrayIteratorValueNext, arrayIteratorPrototypeArrayIteratorValueNext) \
+    macro(arraySpeciesCreate, arrayPrototypeArraySpeciesCreate) \
     macro(asyncFunctionResume, asyncFunctionPrototypeAsyncFunctionResume) \
+    macro(asyncGeneratorDequeue, asyncGeneratorPrototypeAsyncGeneratorDequeue) \
+    macro(asyncGeneratorEnqueue, asyncGeneratorPrototypeAsyncGeneratorEnqueue) \
+    macro(asyncGeneratorQueueDequeue, asyncGeneratorPrototypeAsyncGeneratorQueueDequeue) \
+    macro(asyncGeneratorQueueEnqueue, asyncGeneratorPrototypeAsyncGeneratorQueueEnqueue) \
+    macro(asyncGeneratorQueueIsEmpty, asyncGeneratorPrototypeAsyncGeneratorQueueIsEmpty) \
+    macro(asyncGeneratorReject, asyncGeneratorPrototypeAsyncGeneratorReject) \
+    macro(asyncGeneratorResolve, asyncGeneratorPrototypeAsyncGeneratorResolve) \
+    macro(asyncGeneratorResumeNext, asyncGeneratorPrototypeAsyncGeneratorResumeNext) \
+    macro(asyncGeneratorYield, asyncGeneratorPrototypeAsyncGeneratorYield) \
+    macro(awaitValue, asyncGeneratorPrototypeAwaitValue) \
+    macro(concatSlowPath, arrayPrototypeConcatSlowPath) \
     macro(copyDataProperties, globalOperationsCopyDataProperties) \
+    macro(copyDataPropertiesNoExclusions, globalOperationsCopyDataPropertiesNoExclusions) \
     macro(createArrayIterator, arrayPrototypeCreateArrayIteratorConstructor) \
+    macro(createAsyncFromSyncIterator, asyncFromSyncIteratorPrototypeCreateAsyncFromSyncIterator) \
+    macro(createHTML, stringPrototypeCreateHTML) \
+    macro(createMapIterator, mapPrototypeCreateMapIteratorConstructor) \
     macro(createResolvingFunctions, promiseOperationsCreateResolvingFunctions) \
-    macro(enumerableOwnProperties, objectConstructorEnumerableOwnProperties) \
+    macro(createSetIterator, setPrototypeCreateSetIteratorConstructor) \
+    macro(doAsyncGeneratorBodyCall, asyncGeneratorPrototypeDoAsyncGeneratorBodyCall) \
+    macro(flatIntoArray, arrayPrototypeFlatIntoArray) \
+    macro(flatIntoArrayWithCallback, arrayPrototypeFlatIntoArrayWithCallback) \
     macro(fulfillPromise, promiseOperationsFulfillPromise) \
     macro(generatorResume, generatorPrototypeGeneratorResume) \
+    macro(getCatchFinally, promisePrototypeGetCatchFinally) \
+    macro(getThenFinally, promisePrototypeGetThenFinally) \
     macro(hasObservableSideEffectsForRegExpMatch, regExpPrototypeHasObservableSideEffectsForRegExpMatch) \
     macro(hasObservableSideEffectsForRegExpSplit, regExpPrototypeHasObservableSideEffectsForRegExpSplit) \
     macro(hasObservableSideEffectsForStringReplace, stringPrototypeHasObservableSideEffectsForStringReplace) \
     macro(initializePromise, promiseOperationsInitializePromise) \
     macro(isDictionary, globalOperationsIsDictionary) \
+    macro(isExecutionState, asyncGeneratorPrototypeIsExecutionState) \
     macro(isFinite, globalObjectIsFinite) \
     macro(isNaN, globalObjectIsNaN) \
     macro(isPromise, promiseOperationsIsPromise) \
+    macro(isSuspendYieldState, asyncGeneratorPrototypeIsSuspendYieldState) \
+    macro(mapIteratorNext, mapIteratorPrototypeMapIteratorNext) \
+    macro(matchSlow, regExpPrototypeMatchSlow) \
+    macro(newHandledRejectedPromise, promiseOperationsNewHandledRejectedPromise) \
     macro(newPromiseCapability, promiseOperationsNewPromiseCapability) \
     macro(newPromiseReaction, promiseOperationsNewPromiseReaction) \
-    macro(newRegistryEntry, moduleLoaderPrototypeNewRegistryEntry) \
+    macro(newRegistryEntry, moduleLoaderNewRegistryEntry) \
     macro(promiseReactionJob, promiseOperationsPromiseReactionJob) \
     macro(promiseResolveThenableJob, promiseOperationsPromiseResolveThenableJob) \
     macro(regExpExec, regExpPrototypeRegExpExec) \
     macro(rejectPromise, promiseOperationsRejectPromise) \
     macro(repeatCharactersSlowPath, stringPrototypeRepeatCharactersSlowPath) \
     macro(repeatSlowPath, stringPrototypeRepeatSlowPath) \
-    macro(setStateToMax, moduleLoaderPrototypeSetStateToMax) \
+    macro(setIteratorNext, setIteratorPrototypeSetIteratorNext) \
+    macro(setStateToMax, moduleLoaderSetStateToMax) \
     macro(speciesConstructor, globalOperationsSpeciesConstructor) \
-    macro(speciesGetter, globalOperationsSpeciesGetter) \
+    macro(stringConcatSlowPath, stringPrototypeStringConcatSlowPath) \
     macro(toInteger, globalOperationsToInteger) \
     macro(toLength, globalOperationsToLength) \
     macro(triggerPromiseReactions, promiseOperationsTriggerPromiseReactions) \
     macro(typedArrayClampArgumentToStartOrEnd, typedArrayPrototypeTypedArrayClampArgumentToStartOrEnd) \
     macro(typedArraySpeciesConstructor, typedArrayPrototypeTypedArraySpeciesConstructor) \
 
-#define DECLARE_BUILTIN_GENERATOR(codeName, functionName, argumentCount) \
+#define DECLARE_BUILTIN_GENERATOR(codeName, functionName, overriddenName, argumentCount) \
     JSC::FunctionExecutable* codeName##Generator(JSC::VM&);
 
 JSC_FOREACH_BUILTIN_CODE(DECLARE_BUILTIN_GENERATOR)
