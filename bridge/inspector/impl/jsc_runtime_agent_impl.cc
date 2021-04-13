@@ -319,33 +319,33 @@ DispatchResponse JSCRuntimeAgentImpl::getProperties(
 
   injectedScript.getInternalProperties(errorString, objectId, in_generatePreview.fromMaybe(false), internalProperties);
 
-  // if is set / map ...
-  RefPtr<JSON::ArrayOf<Inspector::Protocol::Runtime::CollectionEntry>> collection_entries;
-  injectedScript.getCollectionEntries(errorString, objectId, WTF::String(), 0, 0, collection_entries);
-
-  if (collection_entries && result) {
-    auto descriptor = Inspector::Protocol::Runtime::PropertyDescriptor::create()
-                        .setName("[[Entries]]")
-                        .setEnumerable(true)
-                        .setConfigurable(false)
-                        .release();
-    auto remoteObj = Inspector::Protocol::Runtime::RemoteObject::create()
-                       .setType(Inspector::Protocol::Runtime::RemoteObject::Type::Object)
-                       .release();
-    WTF::StringBuilder builder;
-    builder.append("Array(");
-    builder.append(WTF::String::number(collection_entries->length()));
-    builder.append(")");
-    remoteObj->setDescription(builder.toString());
-
-    d.AddMember("type", "collection", d.GetAllocator());
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    d.Accept(writer);
-    remoteObj->setObjectId(buffer.GetString());
-    descriptor->setValue(std::move(remoteObj));
-    result->addItem(std::move(descriptor));
-  }
+  // TODO: support set / map ...
+//  RefPtr<JSON::ArrayOf<Inspector::Protocol::Runtime::CollectionEntry>> collection_entries;
+//  injectedScript.getCollectionEntries(errorString, objectId, WTF::String(), 0, 0, collection_entries);
+//
+//  if (collection_entries && result) {
+//    auto descriptor = Inspector::Protocol::Runtime::PropertyDescriptor::create()
+//                        .setName("[[Entries]]")
+//                        .setEnumerable(true)
+//                        .setConfigurable(false)
+//                        .release();
+//    auto remoteObj = Inspector::Protocol::Runtime::RemoteObject::create()
+//                       .setType(Inspector::Protocol::Runtime::RemoteObject::Type::Object)
+//                       .release();
+//    WTF::StringBuilder builder;
+//    builder.append("Array(");
+//    builder.append(WTF::String::number(collection_entries->length()));
+//    builder.append(")");
+//    remoteObj->setDescription(builder.toString());
+//
+//    d.AddMember("type", "collection", d.GetAllocator());
+//    rapidjson::StringBuffer buffer;
+//    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+//    d.Accept(writer);
+//    remoteObj->setObjectId(buffer.GetString());
+//    descriptor->setValue(std::move(remoteObj));
+//    result->addItem(std::move(descriptor));
+//  }
 
   setPauseOnExceptionsState(*m_debugger, previousPauseOnExceptionsState);
 
