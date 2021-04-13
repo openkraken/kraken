@@ -47,7 +47,7 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
 
     List<String> splitVal = nativeStringToString(font).split(_splitRegExp);
     if (splitVal.length == 2) {
-      canvasRenderingContext2D.fontSize = CSSLength.toDisplayPortValue(splitVal[0], viewportSize) ?? 14.0;
+      canvasRenderingContext2D.fontSize = CSSLength.toDisplayPortValue(splitVal[0], viewportSize);
       canvasRenderingContext2D.fontFamily = splitVal[1];
     }
   }

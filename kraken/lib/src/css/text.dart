@@ -79,7 +79,7 @@ mixin CSSTextMixin on RenderStyleBase {
     _fontFamily = value;
   }
 
-  double _fontSize;
+  double _fontSize = CSSText.DEFAULT_FONT_SIZE;
   double get fontSize {
     return _fontSize;
   }
