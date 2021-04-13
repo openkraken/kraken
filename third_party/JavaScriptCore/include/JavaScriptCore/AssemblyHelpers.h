@@ -57,12 +57,12 @@ public:
         if (m_codeBlock) {
             ASSERT(m_baselineCodeBlock);
             ASSERT(!m_baselineCodeBlock->alternative());
-            ASSERT(m_baselineCodeBlock->jitType() == JITCode::None || JITCode::isBaselineCode(m_baselineCodeBlock->jitType()));
+            ASSERT(m_baselineCodeBlock->jitType() == JITType::None || JITCode::isBaselineCode(m_baselineCodeBlock->jitType()));
         }
     }
 
     CodeBlock* codeBlock() { return m_codeBlock; }
-    VM& vm() { return *m_codeBlock->vm(); }
+    VM& vm() { return m_codeBlock->vm(); }
     AssemblerType_T& assembler() { return m_assembler; }
 
     void checkStackPointerAlignment()
@@ -482,7 +482,7 @@ public:
     }
 
 #if CPU(X86_64) || CPU(X86)
-    static size_t prologueStackPointerDelta()
+    static constexpr size_t prologueStackPointerDelta()
     {
         // Prologue only saves the framePointerRegister
         return sizeof(void*);
@@ -522,7 +522,7 @@ public:
 #endif // CPU(X86_64) || CPU(X86)
 
 #if CPU(ARM_THUMB2) || CPU(ARM64)
-    static size_t prologueStackPointerDelta()
+    static constexpr size_t prologueStackPointerDelta()
     {
         // Prologue saves the framePointerRegister and linkRegister
         return 2 * sizeof(void*);
@@ -563,7 +563,7 @@ public:
 #endif
 
 #if CPU(MIPS)
-    static size_t prologueStackPointerDelta()
+    static constexpr size_t prologueStackPointerDelta()
     {
         // Prologue saves the framePointerRegister and returnAddressRegister
         return 2 * sizeof(void*);
@@ -1432,9 +1432,10 @@ public:
     
     bool isStrictModeFor(CodeOrigin codeOrigin)
     {
-        if (!codeOrigin.inlineCallFrame)
+        auto* inlineCallFrame = codeOrigin.inlineCallFrame();
+        if (!inlineCallFrame)
             return codeBlock()->isStrictMode();
-        return codeOrigin.inlineCallFrame->isStrictMode();
+        return inlineCallFrame->isStrictMode();
     }
     
     ECMAMode ecmaModeFor(CodeOrigin codeOrigin)
@@ -1474,7 +1475,7 @@ public:
     
     static VirtualRegister argumentsStart(const CodeOrigin& codeOrigin)
     {
-        return argumentsStart(codeOrigin.inlineCallFrame);
+        return argumentsStart(codeOrigin.inlineCallFrame());
     }
 
     static VirtualRegister argumentCount(InlineCallFrame* inlineCallFrame)
@@ -1487,7 +1488,7 @@ public:
 
     static VirtualRegister argumentCount(const CodeOrigin& codeOrigin)
     {
-        return argumentCount(codeOrigin.inlineCallFrame);
+        return argumentCount(codeOrigin.inlineCallFrame());
     }
     
     void emitLoadStructure(VM&, RegisterID source, RegisterID dest, RegisterID scratch);
@@ -1540,8 +1541,6 @@ public:
     
     void barrierStoreLoadFence(VM& vm)
     {
-        if (!Options::useConcurrentBarriers())
-            return;
         Jump ok = jumpIfMutatorFenceNotNeeded(vm);
         memoryFence();
         ok.link(this);
@@ -1555,40 +1554,73 @@ public:
         storeFence();
         ok.link(this);
     }
-    
-    void cage(Gigacage::Kind kind, GPRReg storage)
+
+    void cageWithoutUntagging(Gigacage::Kind kind, GPRReg storage)
     {
 #if GIGACAGE_ENABLED
         if (!Gigacage::isEnabled(kind))
             return;
-        
+
+#if CPU(ARM64E)
+        RegisterID tempReg = InvalidGPRReg;
+        if (kind == Gigacage::Primitive) {
+            tempReg = getCachedMemoryTempRegisterIDAndInvalidate();
+            move(storage, tempReg);
+            // Flip the registers since bitFieldInsert only inserts into the low bits.
+            std::swap(storage, tempReg);
+        }
+#endif
         andPtr(TrustedImmPtr(Gigacage::mask(kind)), storage);
         addPtr(TrustedImmPtr(Gigacage::basePtr(kind)), storage);
+#if CPU(ARM64E)
+        if (kind == Gigacage::Primitive)
+            bitFieldInsert64(storage, 0, 64 - numberOfPACBits, tempReg);
+#endif
+
 #else
         UNUSED_PARAM(kind);
         UNUSED_PARAM(storage);
 #endif
     }
-    
-    void cageConditionally(Gigacage::Kind kind, GPRReg storage, GPRReg scratch)
+
+    // length may be the same register as scratch.
+    void cageConditionally(Gigacage::Kind kind, GPRReg storage, GPRReg length, GPRReg scratch)
     {
 #if GIGACAGE_ENABLED
-        if (!Gigacage::isEnabled(kind))
-            return;
-        
-        if (kind != Gigacage::Primitive || Gigacage::isDisablingPrimitiveGigacageDisabled())
-            return cage(kind, storage);
-        
-        loadPtr(&Gigacage::basePtr(kind), scratch);
-        Jump done = branchTestPtr(Zero, scratch);
-        andPtr(TrustedImmPtr(Gigacage::mask(kind)), storage);
-        addPtr(scratch, storage);
-        done.link(this);
+        if (Gigacage::isEnabled(kind)) {
+            if (kind != Gigacage::Primitive || Gigacage::isDisablingPrimitiveGigacageDisabled())
+                cageWithoutUntagging(kind, storage);
+            else {
+#if CPU(ARM64E)
+                if (length == scratch)
+                    scratch = getCachedMemoryTempRegisterIDAndInvalidate();
+#endif
+                loadPtr(&Gigacage::basePtr(kind), scratch);
+                Jump done = branchTest64(Zero, scratch);
+#if CPU(ARM64E)
+                GPRReg tempReg = getCachedDataTempRegisterIDAndInvalidate();
+                move(storage, tempReg);
+                ASSERT(LogicalImmediate::create64(Gigacage::mask(kind)).isValid());
+                andPtr(TrustedImmPtr(Gigacage::mask(kind)), tempReg);
+                addPtr(scratch, tempReg);
+                bitFieldInsert64(tempReg, 0, 64 - numberOfPACBits, storage);
 #else
+                andPtr(TrustedImmPtr(Gigacage::mask(kind)), storage);
+                addPtr(scratch, storage);
+#endif // CPU(ARM64E)
+                done.link(this);
+            }
+        }
+#endif
+
+#if CPU(ARM64E)
+        if (kind == Gigacage::Primitive)
+            untagArrayPtr(length, storage);
+#endif
         UNUSED_PARAM(kind);
         UNUSED_PARAM(storage);
+        UNUSED_PARAM(length);
         UNUSED_PARAM(scratch);
-#endif
     }
 
     void emitComputeButterflyIndexingMask(GPRReg vectorLengthGPR, GPRReg scratchGPR, GPRReg resultGPR)

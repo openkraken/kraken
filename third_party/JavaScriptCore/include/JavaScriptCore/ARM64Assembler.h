@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 Apple Inc. All rights reserved.
+ * Copyright (C) 2012-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,6 +27,7 @@
 
 #if ENABLE(ASSEMBLER) && CPU(ARM64)
 
+#include "ARM64Registers.h"
 #include "AssemblerBuffer.h"
 #include "AssemblerCommon.h"
 #include "CPU.h"
@@ -164,102 +165,33 @@ inline uint16_t getHalfword(uint64_t value, int which)
     return value >> (which << 4);
 }
 
-namespace ARM64Registers {
+namespace RegisterNames {
 
 typedef enum : int8_t {
-    // Parameter/result registers.
-    x0,
-    x1,
-    x2,
-    x3,
-    x4,
-    x5,
-    x6,
-    x7,
-    // Indirect result location register.
-    x8,
-    // Temporary registers.
-    x9,
-    x10,
-    x11,
-    x12,
-    x13,
-    x14,
-    x15,
-    // Intra-procedure-call scratch registers (temporary).
-    x16,
-    x17,
-    // Platform Register (temporary).
-    x18,
-    // Callee-saved.
-    x19,
-    x20,
-    x21,
-    x22,
-    x23,
-    x24,
-    x25,
-    x26,
-    x27,
-    x28,
-    // Special.
-    fp,
-    lr,
-    sp,
+#define REGISTER_ID(id, name, r, cs) id,
+    FOR_EACH_GP_REGISTER(REGISTER_ID)
+#undef REGISTER_ID
 
-    ip0 = x16,
-    ip1 = x17,
-    x29 = fp,
-    x30 = lr,
-    zr = 0x3f,
+#define REGISTER_ALIAS(id, name, alias) id = alias,
+    FOR_EACH_REGISTER_ALIAS(REGISTER_ALIAS)
+#undef REGISTER_ALIAS
+
     InvalidGPRReg = -1,
 } RegisterID;
 
 typedef enum : int8_t {
-    pc,
-    nzcv,
-    fpsr
+#define REGISTER_ID(id, name) id,
+    FOR_EACH_SP_REGISTER(REGISTER_ID)
+#undef REGISTER_ID
 } SPRegisterID;
 
 // ARM64 always has 32 FPU registers 128-bits each. See http://llvm.org/devmtg/2012-11/Northover-AArch64.pdf
 // and Section 5.1.2 in http://infocenter.arm.com/help/topic/com.arm.doc.ihi0055b/IHI0055B_aapcs64.pdf.
 // However, we only use them for 64-bit doubles.
 typedef enum : int8_t {
-    // Parameter/result registers.
-    q0,
-    q1,
-    q2,
-    q3,
-    q4,
-    q5,
-    q6,
-    q7,
-    // Callee-saved (up to 64-bits only!).
-    q8,
-    q9,
-    q10,
-    q11,
-    q12,
-    q13,
-    q14,
-    q15,
-    // Temporary registers.
-    q16,
-    q17,
-    q18,
-    q19,
-    q20,
-    q21,
-    q22,
-    q23,
-    q24,
-    q25,
-    q26,
-    q27,
-    q28,
-    q29,
-    q30,
-    q31,
+#define REGISTER_ID(id, name, r, cs) id,
+    FOR_EACH_FP_REGISTER(REGISTER_ID)
+#undef REGISTER_ID                       
     InvalidFPRReg = -1,
 } FPRegisterID;
 
@@ -292,10 +224,9 @@ public:
     {
         ASSERT(id >= firstRegister() && id <= lastRegister());
         static const char* const nameForRegister[numberOfRegisters()] = {
-            "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-            "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-            "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
-            "r24", "r25", "r26", "r27", "r28", "fp", "lr", "sp"
+#define REGISTER_NAME(id, name, r, cs) name,
+        FOR_EACH_GP_REGISTER(REGISTER_NAME)
+#undef REGISTER_NAME
         };
         return nameForRegister[id];
     }
@@ -304,7 +235,9 @@ public:
     {
         ASSERT(id >= firstSPRegister() && id <= lastSPRegister());
         static const char* const nameForRegister[numberOfSPRegisters()] = {
-            "pc", "nzcv", "fpsr"
+#define REGISTER_NAME(id, name) name,
+        FOR_EACH_SP_REGISTER(REGISTER_NAME)
+#undef REGISTER_NAME
         };
         return nameForRegister[id];
     }
@@ -313,10 +246,9 @@ public:
     {
         ASSERT(id >= firstFPRegister() && id <= lastFPRegister());
         static const char* const nameForRegister[numberOfFPRegisters()] = {
-            "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7",
-            "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15",
-            "q16", "q17", "q18", "q19", "q20", "q21", "q22", "q23",
-            "q24", "q25", "q26", "q27", "q28", "q29", "q30", "q31"
+#define REGISTER_NAME(id, name, r, cs) name,
+        FOR_EACH_FP_REGISTER(REGISTER_NAME)
+#undef REGISTER_NAME
         };
         return nameForRegister[id];
     }
@@ -458,11 +390,11 @@ public:
             struct RealTypes {
                 int64_t m_from;
                 int64_t m_to;
+                RegisterID m_compareRegister;
                 JumpType m_type : 8;
                 JumpLinkType m_linkType : 8;
                 Condition m_condition : 4;
                 unsigned m_bitNumber : 6;
-                RegisterID m_compareRegister : 6;
                 bool m_is64Bit : 1;
             } realTypes;
             struct CopyTypes {
@@ -2978,7 +2910,27 @@ public:
         return m_jumpsToLink;
     }
 
+#if CPU(ARM64E)
+    class CopyFunction {
+        typedef void* (*Func)(void*, const void*, size_t);
+    public:
+        CopyFunction(Func func)
+            : m_func(func)
+        {
+            assertIsNullOrTaggedWith(func, CopyFunctionPtrTag);
+        }
+
+        void* operator()(void* dst, const void* src, size_t size)
+        {
+            return ptrauth_auth_function(m_func, ptrauth_key_process_dependent_code, CopyFunctionPtrTag)(dst, src, size);
+        }
+
+    private:
+        Func m_func;
+    };
+#else
     typedef void* (*CopyFunction)(void*, const void*, size_t);
+#endif
 
     static void ALWAYS_INLINE link(LinkRecord& record, uint8_t* from, const uint8_t* fromInstruction8, uint8_t* to, CopyFunction copy)
     {
@@ -3045,7 +2997,7 @@ protected:
     }
 
     template<bool isCall>
-    static void linkJumpOrCall(int* from, const int* fromInstruction, void* to, CopyFunction copy = performJITMemcpy)
+    static void linkJumpOrCall(int* from, const int* fromInstruction, void* to, CopyFunction copy = tagCFunctionPtr<CopyFunctionPtrTag>(performJITMemcpy))
     {
         bool link;
         int imm26;
@@ -3066,7 +3018,7 @@ protected:
     }
 
     template<bool isDirect>
-    static void linkCompareAndBranch(Condition condition, bool is64Bit, RegisterID rt, int* from, const int* fromInstruction, void* to, CopyFunction copy = performJITMemcpy)
+    static void linkCompareAndBranch(Condition condition, bool is64Bit, RegisterID rt, int* from, const int* fromInstruction, void* to, CopyFunction copy = tagCFunctionPtr<CopyFunctionPtrTag>(performJITMemcpy))
     {
         ASSERT(!(reinterpret_cast<intptr_t>(from) & 3));
         ASSERT(!(reinterpret_cast<intptr_t>(to) & 3));
@@ -3094,7 +3046,7 @@ protected:
     }
 
     template<bool isDirect>
-    static void linkConditionalBranch(Condition condition, int* from, const int* fromInstruction, void* to, CopyFunction copy = performJITMemcpy)
+    static void linkConditionalBranch(Condition condition, int* from, const int* fromInstruction, void* to, CopyFunction copy = tagCFunctionPtr<CopyFunctionPtrTag>(performJITMemcpy))
     {
         ASSERT(!(reinterpret_cast<intptr_t>(from) & 3));
         ASSERT(!(reinterpret_cast<intptr_t>(to) & 3));
@@ -3122,7 +3074,7 @@ protected:
     }
 
     template<bool isDirect>
-    static void linkTestAndBranch(Condition condition, unsigned bitNumber, RegisterID rt, int* from, const int* fromInstruction, void* to, CopyFunction copy = performJITMemcpy)
+    static void linkTestAndBranch(Condition condition, unsigned bitNumber, RegisterID rt, int* from, const int* fromInstruction, void* to, CopyFunction copy = tagCFunctionPtr<CopyFunctionPtrTag>(performJITMemcpy))
     {
         ASSERT(!(reinterpret_cast<intptr_t>(from) & 3));
         ASSERT(!(reinterpret_cast<intptr_t>(to) & 3));

@@ -30,7 +30,6 @@
 #pragma once
 
 #include "InjectedScript.h"
-#include "InjectedScriptHost.h"
 #include "InspectorEnvironment.h"
 #include <wtf/Forward.h>
 #include <wtf/HashMap.h>
@@ -42,6 +41,8 @@ class ExecState;
 
 namespace Inspector {
 
+class InjectedScriptHost;
+
 class JS_EXPORT_PRIVATE InjectedScriptManager {
     WTF_MAKE_NONCOPYABLE(InjectedScriptManager);
     WTF_MAKE_FAST_ALLOCATED;
@@ -49,6 +50,7 @@ public:
     InjectedScriptManager(InspectorEnvironment&, Ref<InjectedScriptHost>&&);
     virtual ~InjectedScriptManager();
 
+    virtual void connect();
     virtual void disconnect();
     virtual void discardInjectedScripts();
 
@@ -60,6 +62,7 @@ public:
     int injectedScriptIdFor(JSC::ExecState*);
     InjectedScript injectedScriptForObjectId(const String& objectId);
     void releaseObjectGroup(const String& objectGroup);
+    void clearEventValue();
     void clearExceptionValue();
 
 protected:

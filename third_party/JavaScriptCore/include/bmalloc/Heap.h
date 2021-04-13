@@ -76,9 +76,8 @@ public:
     size_t largeSize(std::unique_lock<Mutex>&, void*);
     void shrinkLarge(std::unique_lock<Mutex>&, const Range&, size_t);
 
-    void scavenge(std::lock_guard<Mutex>&, BulkDecommit&);
+    void scavenge(std::lock_guard<Mutex>&, BulkDecommit&, size_t& deferredDecommits);
     void scavenge(std::lock_guard<Mutex>&, BulkDecommit&, size_t& freed, size_t goal);
-    void scavengeToHighWatermark(std::lock_guard<Mutex>&, BulkDecommit&);
 
     size_t freeableMemory(std::lock_guard<Mutex>&);
     size_t footprint();
@@ -128,7 +127,10 @@ private:
     LargeRange splitAndAllocate(std::unique_lock<Mutex>&, LargeRange&, size_t alignment, size_t);
 
     HeapKind m_kind;
-    
+
+    bool m_hasPendingDecommits { false };
+    std::condition_variable_any m_condition;
+
     size_t m_vmPageSizePhysical;
     Vector<LineMetadata> m_smallLineMetadata;
     std::array<size_t, sizeClassCount> m_pageClasses;
@@ -147,14 +149,9 @@ private:
     size_t m_footprint { 0 };
     size_t m_freeableMemory { 0 };
 
-    bool m_hasPendingDecommits { false };
-    std::condition_variable_any m_condition;
-
 #if ENABLE_PHYSICAL_PAGE_MAP 
     PhysicalPageMap m_physicalPageMap;
 #endif
-
-    void* m_highWatermark { nullptr };
 };
 
 inline void Heap::allocateSmallBumpRanges(

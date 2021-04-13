@@ -27,11 +27,14 @@
 
 #include <wtf/CrossThreadCopier.h>
 #include <wtf/Function.h>
+#include <wtf/RefPtr.h>
 #include <wtf/StdLibExtras.h>
+#include <wtf/ThreadSafeRefCounted.h>
 
 namespace WTF {
 
 class CrossThreadTask {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     CrossThreadTask() = default;
 
@@ -65,7 +68,7 @@ void callFunctionForCrossThreadTask(F function, ArgsTuple&& args)
 template<typename... Parameters, typename... Arguments>
 CrossThreadTask createCrossThreadTask(void (*method)(Parameters...), const Arguments&... arguments)
 {
-    return CrossThreadTask([method, arguments = std::make_tuple(crossThreadCopy<Arguments>(arguments)...)]() mutable {
+    return CrossThreadTask([method, arguments = std::make_tuple(crossThreadCopy(arguments)...)]() mutable {
         callFunctionForCrossThreadTask(method, WTFMove(arguments));
     });
 }
@@ -82,10 +85,18 @@ void callMemberFunctionForCrossThreadTask(C* object, MF function, ArgsTuple&& ar
     callMemberFunctionForCrossThreadTaskImpl(object, function, std::forward<ArgsTuple>(args), ArgsIndicies());
 }
 
-template<typename T, typename... Parameters, typename... Arguments>
+template<typename T, typename std::enable_if<std::is_base_of<ThreadSafeRefCounted<T>, T>::value, int>::type = 0, typename... Parameters, typename... Arguments>
 CrossThreadTask createCrossThreadTask(T& callee, void (T::*method)(Parameters...), const Arguments&... arguments)
 {
-    return CrossThreadTask([callee = &callee, method, arguments = std::make_tuple(crossThreadCopy<Arguments>(arguments)...)]() mutable {
+    return CrossThreadTask([callee = makeRefPtr(&callee), method, arguments = std::make_tuple(crossThreadCopy(arguments)...)]() mutable {
+        callMemberFunctionForCrossThreadTask(callee.get(), method, WTFMove(arguments));
+    });
+}
+
+template<typename T, typename std::enable_if<!std::is_base_of<ThreadSafeRefCounted<T>, T>::value, int>::type = 0, typename... Parameters, typename... Arguments>
+CrossThreadTask createCrossThreadTask(T& callee, void (T::*method)(Parameters...), const Arguments&... arguments)
+{
+    return CrossThreadTask([callee = &callee, method, arguments = std::make_tuple(crossThreadCopy(arguments)...)]() mutable {
         callMemberFunctionForCrossThreadTask(callee, method, WTFMove(arguments));
     });
 }

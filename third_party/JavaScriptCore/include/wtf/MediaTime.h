@@ -41,7 +41,7 @@ namespace WTF {
 
 class PrintStream;
 
-class WTF_EXPORT_PRIVATE MediaTime {
+class WTF_EXPORT_PRIVATE MediaTime final {
     WTF_MAKE_FAST_ALLOCATED;
 public:
     enum {
@@ -154,6 +154,8 @@ inline MediaTime operator*(int32_t lhs, const MediaTime& rhs) { return rhs.opera
 WTF_EXPORT_PRIVATE extern MediaTime abs(const MediaTime& rhs);
 
 struct WTF_EXPORT_PRIVATE MediaTimeRange {
+    WTF_MAKE_STRUCT_FAST_ALLOCATED;
+
     String toJSONString() const;
 
     const MediaTime start;
@@ -173,6 +175,25 @@ bool MediaTime::decode(Decoder& decoder, MediaTime& time)
         && decoder.decode(time.m_timeScale)
         && decoder.decode(time.m_timeFlags);
 }
+
+template<typename Type>
+struct LogArgument;
+
+template <>
+struct LogArgument<MediaTime> {
+    static String toString(const MediaTime& time)
+    {
+        return time.toJSONString();
+    }
+};
+
+template <>
+struct LogArgument<MediaTimeRange> {
+    static String toString(const MediaTimeRange& range)
+    {
+        return range.toJSONString();
+    }
+};
 
 }
 

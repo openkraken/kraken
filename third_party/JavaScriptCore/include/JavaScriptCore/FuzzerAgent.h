@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -20,38 +20,23 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #pragma once
 
-#include "JSCast.h"
-#include "Watchpoint.h"
+#include "CodeOrigin.h"
+#include "SpeculatedType.h"
 
 namespace JSC {
 
-class ArrayBufferNeuteringWatchpoint final : public JSCell {
+class CodeBlock;
+
+class FuzzerAgent {
 public:
-    typedef JSCell Base;
-    static const unsigned StructureFlags = Base::StructureFlags | StructureIsImmortal;
+    JS_EXPORT_PRIVATE virtual ~FuzzerAgent();
 
-    DECLARE_INFO;
-    
-    static ArrayBufferNeuteringWatchpoint* create(VM&);
-
-    static const bool needsDestruction = true;
-    static void destroy(JSCell*);
-    
-    static Structure* createStructure(VM&);
-    
-    WatchpointSet& set() { return m_set.get(); }
-    
-    void fireAll();
-
-private:
-    explicit ArrayBufferNeuteringWatchpoint(VM&);
-    
-    Ref<WatchpointSet> m_set;
+    JS_EXPORT_PRIVATE virtual SpeculatedType getPrediction(CodeBlock*, const CodeOrigin&, SpeculatedType);
 };
 
 } // namespace JSC

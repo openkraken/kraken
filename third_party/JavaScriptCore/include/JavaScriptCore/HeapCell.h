@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 Apple Inc. All rights reserved.
+ * Copyright (C) 2016-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,8 +37,6 @@ class Subspace;
 class VM;
 struct CellAttributes;
 
-static constexpr unsigned minimumDistanceBetweenCellsFromDifferentOrigins = sizeof(void*) == 8 ? 304 : 288;
-
 class HeapCell {
 public:
     enum Kind : int8_t {
@@ -49,8 +47,17 @@ public:
     
     HeapCell() { }
     
-    void zap() { *reinterpret_cast_ptr<uintptr_t**>(this) = 0; }
-    bool isZapped() const { return !*reinterpret_cast_ptr<uintptr_t* const*>(this); }
+    // We're intentionally only zapping the bits for the structureID and leaving
+    // the rest of the cell header bits intact for crash analysis uses.
+    enum ZapReason : int8_t { Unspecified, Destruction, StopAllocating };
+    void zap(ZapReason reason)
+    {
+        uint32_t* cellWords = bitwise_cast<uint32_t*>(this);
+        cellWords[0] = 0;
+        // Leaving cellWords[1] alone for crash analysis if needed.
+        cellWords[2] = reason;
+    }
+    bool isZapped() const { return !*bitwise_cast<const uint32_t*>(this); }
 
     bool isLive();
 
@@ -66,7 +73,7 @@ public:
     // recommended to use it for too many other things, since the large allocation cutoff is
     // a runtime option and its default value is small (400 bytes).
     Heap* heap() const;
-    VM* vm() const;
+    VM& vm() const;
     
     size_t cellSize() const;
     CellAttributes cellAttributes() const;

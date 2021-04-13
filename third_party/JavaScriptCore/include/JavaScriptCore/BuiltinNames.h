@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2016 Apple Inc. All rights reserved.
+ * Copyright (C) 2014-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -50,6 +50,7 @@ namespace JSC {
     macro(arrayIteratorNext) \
     macro(arrayIteratorIsDone) \
     macro(arrayIteratorKind) \
+    macro(arraySpeciesCreate) \
     macro(assert) \
     macro(charCodeAt) \
     macro(executor) \
@@ -64,17 +65,14 @@ namespace JSC {
     macro(ArrayBuffer) \
     macro(RegExp) \
     macro(Promise) \
-    macro(Reflect) \
     macro(InternalPromise) \
     macro(trunc) \
     macro(create) \
     macro(defineProperty) \
     macro(getPrototypeOf) \
-    macro(getOwnPropertyDescriptor) \
     macro(getOwnPropertyNames) \
     macro(ownKeys) \
     macro(Set) \
-    macro(TypeError) \
     macro(typedArrayLength) \
     macro(typedArraySort) \
     macro(typedArrayGetOriginalConstructor) \
@@ -82,7 +80,6 @@ namespace JSC {
     macro(BuiltinLog) \
     macro(BuiltinDescribe) \
     macro(homeObject) \
-    macro(templateRegistryKey) \
     macro(enqueueJob) \
     macro(hostPromiseRejectionTracker) \
     macro(promiseIsHandled) \
@@ -136,13 +133,13 @@ namespace JSC {
     macro(hasInstanceBoundFunction) \
     macro(instanceOf) \
     macro(isArraySlow) \
-    macro(isArrayConstructor) \
     macro(isConstructor) \
     macro(concatMemcpy) \
     macro(appendMemcpy) \
     macro(regExpCreate) \
     macro(replaceUsingRegExp) \
     macro(replaceUsingStringSearch) \
+    macro(makeTypeError) \
     macro(mapBucket) \
     macro(mapBucketHead) \
     macro(mapBucketNext) \
@@ -167,6 +164,11 @@ namespace JSC {
     macro(regExpSearchFast) \
     macro(regExpSplitFast) \
     macro(regExpTestFast) \
+    macro(regExpStringIteratorRegExp) \
+    macro(regExpStringIteratorString) \
+    macro(regExpStringIteratorGlobal) \
+    macro(regExpStringIteratorUnicode) \
+    macro(regExpStringIteratorDone) \
     macro(stringIncludesInternal) \
     macro(stringSplitFast) \
     macro(stringSubstrInternal) \
@@ -196,7 +198,7 @@ class BuiltinNames {
     WTF_MAKE_NONCOPYABLE(BuiltinNames); WTF_MAKE_FAST_ALLOCATED;
     
 public:
-    BuiltinNames(VM*, CommonIdentifiers*);
+    BuiltinNames(VM&, CommonIdentifiers*);
 
     SymbolImpl* lookUpPrivateName(const Identifier&) const;
     Identifier getPublicName(VM&, SymbolImpl*) const;
@@ -235,10 +237,10 @@ inline SymbolImpl* BuiltinNames::lookUpPrivateName(const Identifier& ident) cons
 inline Identifier BuiltinNames::getPublicName(VM& vm, SymbolImpl* symbol) const
 {
     if (symbol->isPrivate())
-        return Identifier::fromString(&vm, symbol);
+        return Identifier::fromString(vm, symbol);
     // We have special handling for well-known symbols.
     ASSERT(symbol->startsWith("Symbol."));
-    return Identifier::fromString(&vm, makeString(String(symbol->substring(strlen("Symbol."))), "Symbol"));
+    return Identifier::fromString(vm, makeString(String(symbol->substring(strlen("Symbol."))), "Symbol"));
 }
 
 inline void BuiltinNames::checkPublicToPrivateMapConsistency(UniquedStringImpl* publicName, UniquedStringImpl* privateName)

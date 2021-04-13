@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2017 Apple Inc. All rights reserved.
+ * Copyright (C) 2015-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,6 +32,12 @@
 #include <wtf/UnalignedAccess.h>
 
 namespace WTF {
+
+template<typename CharacterType> inline bool isLatin1(CharacterType character)
+{
+    using UnsignedCharacterType = typename std::make_unsigned<CharacterType>::type;
+    return static_cast<UnsignedCharacterType>(character) <= static_cast<UnsignedCharacterType>(0xFF);
+}
 
 using CodeUnitMatchFunction = bool (*)(UChar);
 
@@ -466,6 +472,14 @@ size_t findIgnoringASCIICase(const SearchCharacterType* source, const MatchChara
     return notFound;
 }
 
+inline size_t findIgnoringASCIICaseWithoutLength(const char* source, const char* matchCharacters)
+{
+    unsigned searchLength = strlen(source);
+    unsigned matchLength = strlen(matchCharacters);
+
+    return matchLength < searchLength ? findIgnoringASCIICase(source, matchCharacters, 0, searchLength, matchLength) : notFound;
+}
+
 template<typename StringClassA, typename StringClassB>
 size_t findIgnoringASCIICase(const StringClassA& source, const StringClassB& stringToFind, unsigned startOffset)
 {
@@ -540,7 +554,7 @@ ALWAYS_INLINE size_t find(const UChar* characters, unsigned length, LChar matchC
 
 inline size_t find(const LChar* characters, unsigned length, UChar matchCharacter, unsigned index = 0)
 {
-    if (matchCharacter & ~0xFF)
+    if (!isLatin1(matchCharacter))
         return notFound;
     return find(characters, length, static_cast<LChar>(matchCharacter), index);
 }
@@ -658,3 +672,4 @@ template<unsigned lowercaseLettersLength> inline bool equalLettersIgnoringASCIIC
 
 using WTF::equalIgnoringASCIICase;
 using WTF::equalLettersIgnoringASCIICase;
+using WTF::isLatin1;

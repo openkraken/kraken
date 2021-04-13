@@ -60,7 +60,8 @@ namespace WTF {
 // juggle a lot of variable-length BitVectors and you're worried about wasting
 // space.
 
-class BitVector {
+class BitVector final {
+    WTF_MAKE_FAST_ALLOCATED;
 public: 
     BitVector()
         : m_bitsOrPointer(makeInlineBits(0))
@@ -235,6 +236,13 @@ public:
             return bitCount(cleanseInlineBits(m_bitsOrPointer));
         return bitCountSlow();
     }
+
+    bool isEmpty() const
+    {
+        if (isInline())
+            return !cleanseInlineBits(m_bitsOrPointer);
+        return isEmptySlow();
+    }
     
     size_t findBit(size_t index, bool value) const
     {
@@ -290,6 +298,7 @@ public:
     }
     
     class iterator {
+        WTF_MAKE_FAST_ALLOCATED;
     public:
         iterator()
             : m_bitVector(nullptr)
@@ -453,6 +462,7 @@ private:
     WTF_EXPORT_PRIVATE void excludeSlow(const BitVector& other);
     
     WTF_EXPORT_PRIVATE size_t bitCountSlow() const;
+    WTF_EXPORT_PRIVATE bool isEmptySlow() const;
     
     WTF_EXPORT_PRIVATE bool equalsSlowCase(const BitVector& other) const;
     bool equalsSlowCaseFast(const BitVector& other) const;

@@ -72,9 +72,23 @@ void IsoHeap<Type>::scavenge()
 template<typename Type>
 bool IsoHeap<Type>::isInitialized()
 {
-    std::atomic<unsigned>* atomic =
-        reinterpret_cast<std::atomic<unsigned>*>(&m_allocatorOffsetPlusOne);
-    return !!atomic->load(std::memory_order_acquire);
+    auto* atomic = reinterpret_cast<std::atomic<IsoHeapImpl<Config>*>*>(&m_impl);
+    return atomic->load(std::memory_order_acquire);
+}
+
+template<typename Type>
+void IsoHeap<Type>::initialize()
+{
+    // We are using m_impl field as a guard variable of the initialization of IsoHeap.
+    // IsoHeap::isInitialized gets m_impl with "acquire", and IsoHeap::initialize stores
+    // the value to m_impl with "release". To make IsoHeap changes visible to any threads
+    // when IsoHeap::isInitialized returns true, we need to store the value to m_impl *after*
+    // all the initialization finishes.
+    auto* heap = new IsoHeapImpl<Config>();
+    setAllocatorOffset(heap->allocatorOffset());
+    setDeallocatorOffset(heap->deallocatorOffset());
+    auto* atomic = reinterpret_cast<std::atomic<IsoHeapImpl<Config>*>*>(&m_impl);
+    atomic->store(heap, std::memory_order_release);
 }
 
 template<typename Type>
@@ -109,8 +123,9 @@ public: \
     \
     void* operator new[](size_t size) = delete; \
     void operator delete[](void* p) = delete; \
+using webkitFastMalloced = int; \
 private: \
-typedef int __makeBisoMallocedInlineMacroSemicolonifier
+using __makeBisoMallocedInlineMacroSemicolonifier = int
 
 #define MAKE_BISO_MALLOCED_IMPL(isoType) \
 ::bmalloc::api::IsoHeap<isoType>& isoType::bisoHeap() \
@@ -125,6 +140,29 @@ void* isoType::operator new(size_t size) \
     return bisoHeap().allocate(); \
 } \
 \
+void isoType::operator delete(void* p) \
+{ \
+    bisoHeap().deallocate(p); \
+} \
+\
+struct MakeBisoMallocedImplMacroSemicolonifier##isoType { }
+
+#define MAKE_BISO_MALLOCED_IMPL_TEMPLATE(isoType) \
+template<> \
+::bmalloc::api::IsoHeap<isoType>& isoType::bisoHeap() \
+{ \
+    static ::bmalloc::api::IsoHeap<isoType> heap; \
+    return heap; \
+} \
+\
+template<> \
+void* isoType::operator new(size_t size) \
+{ \
+    RELEASE_BASSERT(size == sizeof(isoType)); \
+    return bisoHeap().allocate(); \
+} \
+\
+template<> \
 void isoType::operator delete(void* p) \
 { \
     bisoHeap().deallocate(p); \

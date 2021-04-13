@@ -122,6 +122,9 @@ public:
   DispatchResponse stepOut() override;
   DispatchResponse stepOver() override;
 
+  void willRunMicrotask() override;
+  void didRunMicrotask() override;
+
   /*own*/
 
   static const char *backtraceObjectGroup;

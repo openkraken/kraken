@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2018 Apple Inc. All rights reserved.
+ * Copyright (C) 2015-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,7 +38,7 @@ void GenericArguments<Type>::visitChildren(JSCell* thisCell, SlotVisitor& visito
     Base::visitChildren(thisCell, visitor);
     
     if (thisObject->m_modifiedArgumentsDescriptor)
-        visitor.markAuxiliary(thisObject->m_modifiedArgumentsDescriptor.get());
+        visitor.markAuxiliary(thisObject->m_modifiedArgumentsDescriptor.getUnsafe());
 }
 
 template<typename Type>
@@ -92,18 +92,18 @@ bool GenericArguments<Type>::getOwnPropertySlotByIndex(JSObject* object, ExecSta
 template<typename Type>
 void GenericArguments<Type>::getOwnPropertyNames(JSObject* object, ExecState* exec, PropertyNameArray& array, EnumerationMode mode)
 {
+    VM& vm = exec->vm();
     Type* thisObject = jsCast<Type*>(object);
 
     if (array.includeStringProperties()) {
         for (unsigned i = 0; i < thisObject->internalLength(); ++i) {
             if (!thisObject->isMappedArgument(i))
                 continue;
-            array.add(Identifier::from(exec, i));
+            array.add(Identifier::from(vm, i));
         }
     }
 
     if (mode.includeDontEnumProperties() && !thisObject->overrodeThings()) {
-        VM& vm = exec->vm();
         array.add(vm.propertyNames->length);
         array.add(vm.propertyNames->callee);
         if (array.includeSymbolProperties())
@@ -265,7 +265,7 @@ void GenericArguments<Type>::initModifiedArgumentsDescriptor(VM& vm, unsigned ar
     if (argsLength) {
         void* backingStore = vm.gigacageAuxiliarySpace(m_modifiedArgumentsDescriptor.kind).allocateNonVirtual(vm, WTF::roundUpToMultipleOf<8>(argsLength), nullptr, AllocationFailureMode::Assert);
         bool* modifiedArguments = static_cast<bool*>(backingStore);
-        m_modifiedArgumentsDescriptor.set(vm, this, modifiedArguments);
+        m_modifiedArgumentsDescriptor.set(vm, this, modifiedArguments, argsLength);
         for (unsigned i = argsLength; i--;)
             modifiedArguments[i] = false;
     }
@@ -283,7 +283,7 @@ void GenericArguments<Type>::setModifiedArgumentDescriptor(VM& vm, unsigned inde
 {
     initModifiedArgumentsDescriptorIfNecessary(vm, length);
     if (index < length)
-        m_modifiedArgumentsDescriptor[index] = true;
+        m_modifiedArgumentsDescriptor.at(index, length) = true;
 }
 
 template<typename Type>
@@ -292,7 +292,7 @@ bool GenericArguments<Type>::isModifiedArgumentDescriptor(unsigned index, unsign
     if (!m_modifiedArgumentsDescriptor)
         return false;
     if (index < length)
-        return m_modifiedArgumentsDescriptor[index];
+        return m_modifiedArgumentsDescriptor.at(index, length);
     return false;
 }
 

@@ -27,7 +27,6 @@
 
 #include "ClassInfo.h"
 #include "CodeLocation.h"
-#include "CodeOrigin.h"
 #include "IndexingType.h"
 #include "JITStubRoutine.h"
 #include "Structure.h"
@@ -40,7 +39,7 @@ class Symbol;
 
 class StructureStubInfo;
 
-enum JITArrayMode {
+enum JITArrayMode : uint8_t {
     JITInt32,
     JITDouble,
     JITContiguous,

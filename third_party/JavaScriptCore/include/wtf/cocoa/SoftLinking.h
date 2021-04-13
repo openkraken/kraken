@@ -24,9 +24,10 @@
 
 #pragma once
 
-#import <wtf/Assertions.h>
 #import <dlfcn.h>
 #import <objc/runtime.h>
+#import <wtf/Assertions.h>
+#import <wtf/FileSystem.h>
 
 #pragma mark - Soft-link macros for use within a single source file
 
@@ -63,10 +64,16 @@
         return frameworkLibrary; \
     }
 
+#if USE(REALPATH_FOR_DLOPEN_PREFLIGHT)
+#define DLOPEN_PREFLIGHT(path) dlopen_preflight(FileSystem::realPath(path##_s).utf8().data())
+#else
+#define DLOPEN_PREFLIGHT(path) dlopen_preflight(path)
+#endif
+
 #define SOFT_LINK_FRAMEWORK_OPTIONAL_PREFLIGHT(framework) \
     static bool framework##LibraryIsAvailable() \
     { \
-        static bool frameworkLibraryIsAvailable = dlopen_preflight("/System/Library/Frameworks/" #framework ".framework/" #framework); \
+        static bool frameworkLibraryIsAvailable = DLOPEN_PREFLIGHT("/System/Library/Frameworks/" #framework ".framework/" #framework); \
         return frameworkLibraryIsAvailable; \
     }
 
@@ -81,19 +88,6 @@
     static void* framework##Library() \
     { \
         static void* frameworkLibrary = dlopen("/System/Library/PrivateFrameworks/" #framework ".framework/" #framework, RTLD_NOW); \
-        return frameworkLibrary; \
-    }
-
-#define SOFT_LINK_STAGED_FRAMEWORK(framework, unstagedLocation, version) \
-    static void* framework##Library() \
-    { \
-        static void* frameworkLibrary = ^{ \
-            void* result = dlopen("/System/Library/" #unstagedLocation "/" #framework ".framework/Versions/" #version "/" #framework, RTLD_LAZY); \
-            if (!result) \
-                result = dlopen("/System/Library/StagedFrameworks/Safari/" #framework ".framework/Versions/" #version "/" #framework, RTLD_LAZY); \
-            RELEASE_ASSERT_WITH_MESSAGE(result, "%s", dlerror()); \
-            return result; \
-        }(); \
         return frameworkLibrary; \
     }
 
@@ -389,7 +383,7 @@
     } \
     }
 
-#define SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT_AND_ASSERTION(functionNamespace, framework, className, export, assertion) \
+#define SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT_AND_IS_OPTIONAL(functionNamespace, framework, className, export, isOptional) \
     @class className; \
     namespace functionNamespace { \
     static Class init##className(); \
@@ -405,28 +399,30 @@
     { \
         static dispatch_once_t once; \
         dispatch_once(&once, ^{ \
-            framework##Library(); \
+            framework##Library(isOptional); \
             class##className = objc_getClass(#className); \
-            assertion(class##className); \
+            if (!isOptional) \
+                RELEASE_ASSERT(class##className); \
             get##className##Class = className##Function; \
         }); \
         return class##className; \
     } \
     }
 
-#define NO_ASSERT(assertion) (void(0))
+#define SOFT_LINK_IS_OPTIONAL true
+#define SOFT_LINK_IS_NOT_OPTIONAL false
 
 #define SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT(functionNamespace, framework, className, export) \
-    SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT_AND_ASSERTION(functionNamespace, framework, className, export, RELEASE_ASSERT)
+    SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT_AND_IS_OPTIONAL(functionNamespace, framework, className, export, SOFT_LINK_IS_NOT_OPTIONAL)
 
 #define SOFT_LINK_CLASS_FOR_SOURCE_OPTIONAL_WITH_EXPORT(functionNamespace, framework, className, export) \
-    SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT_AND_ASSERTION(functionNamespace, framework, className, export, NO_ASSERT)
+    SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT_AND_IS_OPTIONAL(functionNamespace, framework, className, export, SOFT_LINK_IS_OPTIONAL)
 
 #define SOFT_LINK_CLASS_FOR_SOURCE(functionNamespace, framework, className) \
-    SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT_AND_ASSERTION(functionNamespace, framework, className, , RELEASE_ASSERT)
+    SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT_AND_IS_OPTIONAL(functionNamespace, framework, className, , SOFT_LINK_IS_NOT_OPTIONAL)
 
 #define SOFT_LINK_CLASS_FOR_SOURCE_OPTIONAL(functionNamespace, framework, className) \
-    SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT_AND_ASSERTION(functionNamespace, framework, className, , NO_ASSERT)
+    SOFT_LINK_CLASS_FOR_SOURCE_WITH_EXPORT_AND_IS_OPTIONAL(functionNamespace, framework, className, , SOFT_LINK_IS_OPTIONAL)
 
 #define SOFT_LINK_CONSTANT_FOR_HEADER(functionNamespace, framework, variableName, variableType) \
     namespace functionNamespace { \

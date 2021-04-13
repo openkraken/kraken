@@ -129,7 +129,10 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 #ifdef ENABLE_DEBUGGER
 void JSBridge::attachInspector() {
   std::shared_ptr<BridgeProtocolHandler> handler = std::make_shared<BridgeProtocolHandler>(this);
-  JSC::JSObject *globalObject = reinterpret_cast<JSC::JSObject *>(JSContextGetGlobalObject(context->context()));
+  JSC::ExecState* exec = toJS(context->context());
+  JSC::VM& vm = exec->vm();
+  JSC::JSLockHolder locker(vm);
+  JSC::JSGlobalObject* globalObject = vm.vmEntryGlobalObject(exec);
   m_inspector = std::make_shared<debugger::FrontDoor>(contextId, globalObject->globalObject(), handler);
 }
 #endif // ENABLE_DEBUGGER

@@ -1359,4 +1359,7 @@ bool JSCDebuggerAgentImpl::breakpointActionsFromProtocol(Inspector::ErrorString 
   return true;
 }
 
+void JSCDebuggerAgentImpl::willRunMicrotask() {}
+void JSCDebuggerAgentImpl::didRunMicrotask() {}
+
 } // namespace kraken::debugger

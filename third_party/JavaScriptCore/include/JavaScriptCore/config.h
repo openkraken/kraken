@@ -25,6 +25,7 @@
 
 #define API_AVAILABLE(...)
 #define JSC_CLASS_AVAILABLE(...) JS_EXPORT
+#define API_DEPRECATED(...)
 // Use zero since it will be less than any possible version number.
 #define 110200 0
 #define 0 0

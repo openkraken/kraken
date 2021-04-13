@@ -86,7 +86,7 @@ class VM;
 class WeakGCMapBase;
 struct CurrentThreadState;
 
-#if USE(GLIB)
+#ifdef JSC_GLIB_API_ENABLED
 class JSCGLibWrapperObject;
 #endif
 
@@ -123,7 +123,7 @@ public:
     // our scan to run faster. 
     static const unsigned s_timeCheckResolution = 16;
 
-    static bool isMarked(const void*);
+    bool isMarked(const void*);
     static bool testAndSetMarked(HeapVersion, const void*);
     
     static size_t cellSize(const void*);
@@ -139,12 +139,12 @@ public:
     // Take this if you know that from->cellState() < barrierThreshold.
     JS_EXPORT_PRIVATE void writeBarrierSlowPath(const JSCell* from);
 
-    Heap(VM*, HeapType);
+    Heap(VM&, HeapType);
     ~Heap();
     void lastChanceToFinalize();
     void releaseDelayedReleasedObjects();
 
-    VM* vm() const;
+    VM& vm() const;
 
     MarkedSpace& objectSpace() { return m_objectSpace; }
     MachineThreads& machineThreads() { return *m_machineThreads; }
@@ -178,7 +178,7 @@ public:
     
     bool isShuttingDown() const { return m_isShuttingDown; }
 
-    JS_EXPORT_PRIVATE bool isHeapSnapshotting() const;
+    JS_EXPORT_PRIVATE bool isAnalyzingHeap() const;
 
     JS_EXPORT_PRIVATE void sweepSynchronously();
 
@@ -279,7 +279,7 @@ public:
 #if USE(FOUNDATION)
     template<typename T> void releaseSoon(RetainPtr<T>&&);
 #endif
-#if USE(GLIB)
+#ifdef JSC_GLIB_API_ENABLED
     void releaseSoon(std::unique_ptr<JSCGLibWrapperObject>&&);
 #endif
 
@@ -393,7 +393,6 @@ public:
 
     template<typename Func>
     void forEachSlotVisitor(const Func&);
-    unsigned numberOfSlotVisitors();
     
     Seconds totalGCTime() const { return m_totalGCTime; }
 
@@ -426,8 +425,8 @@ private:
     friend class VM;
     friend class WeakSet;
 
-    class Thread;
-    friend class Thread;
+    class HeapThread;
+    friend class HeapThread;
 
     static const size_t minExtraMemory = 256;
     
@@ -531,7 +530,7 @@ private:
     void updateAllocationLimits();
     void didFinishCollection();
     void resumeCompilerThreads();
-    void gatherExtraHeapSnapshotData(HeapProfiler&);
+    void gatherExtraHeapData(HeapProfiler&);
     void removeDeadHeapSnapshotNodes(HeapProfiler&);
     void finalize();
     void sweepInFinalize();
@@ -572,6 +571,8 @@ private:
     void assertMarkStacksEmpty();
 
     void setBonusVisitorTask(RefPtr<SharedTask<void(SlotVisitor&)>>);
+
+    void dumpHeapStatisticsAtVMDestruction();
 
     static bool useGenerationalGC();
     static bool shouldSweepSynchronously();
@@ -641,7 +642,7 @@ private:
 
     unsigned m_barrierThreshold { Options::forceFencedBarrier() ? tautologicalThreshold : blackThreshold };
 
-    VM* m_vm;
+    VM& m_vm;
     Seconds m_lastFullGCLength { 10_ms };
     Seconds m_lastEdenGCLength { 10_ms };
 
@@ -663,7 +664,7 @@ private:
     Vector<RetainPtr<CFTypeRef>> m_delayedReleaseObjects;
     unsigned m_delayedReleaseRecursionCount { 0 };
 #endif
-#if USE(GLIB)
+#ifdef JSC_GLIB_API_ENABLED
     Vector<std::unique_ptr<JSCGLibWrapperObject>> m_delayedReleaseObjects;
     unsigned m_delayedReleaseRecursionCount { 0 };
 #endif
@@ -713,6 +714,7 @@ private:
     CollectorPhase m_lastPhase { CollectorPhase::NotRunning };
     CollectorPhase m_currentPhase { CollectorPhase::NotRunning };
     CollectorPhase m_nextPhase { CollectorPhase::NotRunning };
+    bool m_collectorThreadIsRunning { false };
     bool m_threadShouldStop { false };
     bool m_threadIsStopping { false };
     bool m_mutatorDidRun { true };
@@ -725,7 +727,7 @@ private:
     Ref<AutomaticThreadCondition> m_threadCondition; // The mutator must not wait on this. It would cause a deadlock.
     RefPtr<AutomaticThread> m_thread;
 
-    RefPtr<WTF::Thread> m_collectContinuouslyThread { nullptr };
+    RefPtr<Thread> m_collectContinuouslyThread { nullptr };
     
     MonotonicTime m_lastGCStartTime;
     MonotonicTime m_lastGCEndTime;
@@ -735,7 +737,7 @@ private:
     uintptr_t m_barriersExecuted { 0 };
     
     CurrentThreadState* m_currentThreadState { nullptr };
-    WTF::Thread* m_currentThread { nullptr }; // It's OK if this becomes a dangling pointer.
+    Thread* m_currentThread { nullptr }; // It's OK if this becomes a dangling pointer.
 
 #if PLATFORM(IOS_FAMILY)
     unsigned m_precentAvailableMemoryCachedCallCount;

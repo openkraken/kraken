@@ -132,7 +132,7 @@ void printLog(std::stringstream &stream, std::string level, JSGlobalContextRef c
   JSC::ExecState* exec = toJS(ctx);
   JSC::VM& vm = exec->vm();
   JSC::JSLockHolder locker(vm);
-  JSC::JSGlobalObject *globalObject = exec->lexicalGlobalObject();
+  JSC::JSGlobalObject* globalObject = vm.vmEntryGlobalObject(exec);
   auto client = globalObject->consoleClient();
   if (client && client != ((void *)0x1)) {
     auto client_impl = reinterpret_cast<kraken::debugger::JSCConsoleClientImpl *>(client);

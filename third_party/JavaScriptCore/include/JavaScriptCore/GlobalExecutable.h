@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2016 Apple Inc. All rights reserved.
- * Copyright (C) 2018 Oleksandr Skachkov <gskachkov@gmail.com>.
+ * Copyright (C) 2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,37 +25,37 @@
 
 #pragma once
 
-#if ENABLE(WEBASSEMBLY)
-
-#include "JSDestructibleObject.h"
-#include "JSObject.h"
+#include "ExecutableToCodeBlockEdge.h"
+#include "ScriptExecutable.h"
 
 namespace JSC {
 
-class WebAssemblyPrototype final : public JSNonFinalObject {
+class GlobalExecutable : public ScriptExecutable {
 public:
-    typedef JSNonFinalObject Base;
-    static const unsigned StructureFlags = Base::StructureFlags | HasStaticPropertyTable;
-
-    static WebAssemblyPrototype* create(VM&, JSGlobalObject*, Structure*);
-    static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
-    JS_EXPORT_PRIVATE static void webAssemblyModuleValidateAsync(ExecState*, JSPromiseDeferred*, Vector<uint8_t>&&);
-    JS_EXPORT_PRIVATE static void webAssemblyModuleInstantinateAsync(ExecState*, JSPromiseDeferred*, Vector<uint8_t>&&, JSObject*);
+    using Base = ScriptExecutable;
+    static const unsigned StructureFlags = Base::StructureFlags | StructureIsImmortal;
 
     DECLARE_INFO;
 
-    static JSValue instantiate(ExecState*, JSPromiseDeferred*, const Identifier&, JSValue);
+    unsigned lastLine() const { return m_lastLine; }
+    unsigned endColumn() const { return m_endColumn; }
+
+    void recordParse(CodeFeatures features, bool hasCapturedVariables, int lastLine, unsigned endColumn)
+    {
+        Base::recordParse(features, hasCapturedVariables);
+        m_lastLine = lastLine;
+        m_endColumn = endColumn;
+        ASSERT(endColumn != UINT_MAX);
+    }
 
 protected:
-    void finishCreation(VM&, JSGlobalObject*);
+    GlobalExecutable(Structure* structure, VM& vm, const SourceCode& sourceCode, bool isInStrictContext, DerivedContextType derivedContextType, bool isInArrowFunctionContext, EvalContextType evalContextType, Intrinsic intrinsic)
+        : Base(structure, vm, sourceCode, isInStrictContext, derivedContextType, isInArrowFunctionContext, evalContextType, intrinsic)
+    {
+    }
 
-private:
-    WebAssemblyPrototype(VM&, Structure*);
+    int m_lastLine { -1 };
+    unsigned m_endColumn { UINT_MAX };
 };
 
-EncodedJSValue JSC_HOST_CALL webAssemblyCompileStreamingInternal(ExecState*);
-EncodedJSValue JSC_HOST_CALL webAssemblyInstantiateStreamingInternal(ExecState*);
-
 } // namespace JSC
-
-#endif // ENABLE(WEBASSEMBLY)

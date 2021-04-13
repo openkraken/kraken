@@ -26,6 +26,9 @@
 #pragma once
 
 #include "AlignedMemoryAllocator.h"
+#include <wtf/FastBitVector.h>
+#include <wtf/HashMap.h>
+#include <wtf/Vector.h>
 
 namespace JSC {
 
@@ -38,6 +41,10 @@ public:
     void freeAlignedMemory(void*) override;
 
     void dump(PrintStream&) const override;
+
+    void* tryAllocateMemory(size_t) override;
+    void freeMemory(void*) override;
+    void* tryReallocateMemory(void*, size_t) override;
 
 private:
     Vector<void*> m_blocks;

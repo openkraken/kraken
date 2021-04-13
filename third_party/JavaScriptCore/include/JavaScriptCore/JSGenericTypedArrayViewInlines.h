@@ -77,8 +77,7 @@ JSGenericTypedArrayView<Adaptor>* JSGenericTypedArrayView<Adaptor>::createWithFa
 }
 
 template<typename Adaptor>
-JSGenericTypedArrayView<Adaptor>* JSGenericTypedArrayView<Adaptor>::createUninitialized(
-    ExecState* exec, Structure* structure, unsigned length)
+JSGenericTypedArrayView<Adaptor>* JSGenericTypedArrayView<Adaptor>::createUninitialized(ExecState* exec, Structure* structure, unsigned length)
 {
     VM& vm = exec->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -483,18 +482,20 @@ template<typename Adaptor>
 bool JSGenericTypedArrayView<Adaptor>::deletePropertyByIndex(
     JSCell* cell, ExecState* exec, unsigned propertyName)
 {
-    return cell->methodTable(exec->vm())->deleteProperty(cell, exec, Identifier::from(exec, propertyName));
+    VM& vm = exec->vm();
+    return cell->methodTable(vm)->deleteProperty(cell, exec, Identifier::from(vm, propertyName));
 }
 
 template<typename Adaptor>
 void JSGenericTypedArrayView<Adaptor>::getOwnPropertyNames(
     JSObject* object, ExecState* exec, PropertyNameArray& array, EnumerationMode mode)
 {
+    VM& vm = exec->vm();
     JSGenericTypedArrayView* thisObject = jsCast<JSGenericTypedArrayView*>(object);
 
     if (array.includeStringProperties()) {
         for (unsigned i = 0; i < thisObject->m_length; ++i)
-            array.add(Identifier::from(exec, i));
+            array.add(Identifier::from(vm, i));
     }
     
     return Base::getOwnPropertyNames(object, exec, array, mode);
@@ -507,7 +508,7 @@ size_t JSGenericTypedArrayView<Adaptor>::estimatedSize(JSCell* cell, VM& vm)
 
     if (thisObject->m_mode == OversizeTypedArray)
         return Base::estimatedSize(thisObject, vm) + thisObject->byteSize();
-    if (thisObject->m_mode == FastTypedArray && thisObject->m_vector)
+    if (thisObject->m_mode == FastTypedArray && thisObject->hasVector())
         return Base::estimatedSize(thisObject, vm) + thisObject->byteSize();
 
     return Base::estimatedSize(thisObject, vm);
@@ -517,6 +518,7 @@ template<typename Adaptor>
 void JSGenericTypedArrayView<Adaptor>::visitChildren(JSCell* cell, SlotVisitor& visitor)
 {
     JSGenericTypedArrayView* thisObject = jsCast<JSGenericTypedArrayView*>(cell);
+    ASSERT_GC_OBJECT_INHERITS(thisObject, info());
     Base::visitChildren(thisObject, visitor);
 
     TypedArrayMode mode;
@@ -526,7 +528,7 @@ void JSGenericTypedArrayView<Adaptor>::visitChildren(JSCell* cell, SlotVisitor& 
     {
         auto locker = holdLock(thisObject->cellLock());
         mode = thisObject->m_mode;
-        vector = thisObject->m_vector.getMayBeNull();
+        vector = thisObject->vector();
         byteSize = thisObject->byteSize();
     }
     

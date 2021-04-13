@@ -33,6 +33,7 @@
 #include "DeferGC.h"
 #include "FreeListInlines.h"
 #include "Handle.h"
+#include "HeapInlines.h"
 #include "IsoSubspaceInlines.h"
 #include "JSBigInt.h"
 #include "JSCast.h"
@@ -41,6 +42,7 @@
 #include "JSString.h"
 #include "LocalAllocatorInlines.h"
 #include "MarkedBlock.h"
+#include "SlotVisitorInlines.h"
 #include "Structure.h"
 #include "Symbol.h"
 #include <wtf/CompilationThread.h>
@@ -119,7 +121,7 @@ inline IndexingType JSCell::indexingMode() const
 
 ALWAYS_INLINE Structure* JSCell::structure() const
 {
-    return structure(*vm());
+    return structure(vm());
 }
 
 ALWAYS_INLINE Structure* JSCell::structure(VM& vm) const
@@ -140,10 +142,10 @@ ALWAYS_INLINE VM& ExecState::vm() const
 {
     JSCell* callee = this->callee().asCell();
     ASSERT(callee);
-    ASSERT(callee->vm());
+    ASSERT(&callee->vm());
     ASSERT(!callee->isLargeAllocation());
     // This is an important optimization since we access this so often.
-    return *callee->markedBlock().vm();
+    return callee->markedBlock().vm();
 }
 
 template<typename CellType, SubspaceAccess>
@@ -165,7 +167,7 @@ inline Allocator allocatorForNonVirtualConcurrently(VM& vm, size_t allocationSiz
 template<typename T>
 ALWAYS_INLINE void* tryAllocateCellHelper(Heap& heap, size_t size, GCDeferralContext* deferralContext, AllocationFailureMode failureMode)
 {
-    VM& vm = *heap.vm();
+    VM& vm = heap.vm();
     ASSERT(deferralContext || !DisallowGC::isInEffectOnCurrentThread());
     ASSERT(size >= sizeof(T));
     JSCell* result = static_cast<JSCell*>(subspaceFor<T>(vm)->allocateNonVirtual(vm, size, deferralContext, failureMode));

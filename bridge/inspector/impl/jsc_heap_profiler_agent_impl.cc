@@ -15,7 +15,7 @@ JSCHeapProfilerAgentImpl::JSCHeapProfilerAgentImpl(kraken::debugger::InspectorSe
 DispatchResponse JSCHeapProfilerAgentImpl::collectGarbage() {
   auto &vm = m_environment->vm();
   JSC::JSLockHolder lock(vm);
-  JSC::sanitizeStackForVM(&vm);
+  JSC::sanitizeStackForVM(vm);
   vm.heap.collectSync();
   return DispatchResponse::OK();
 }

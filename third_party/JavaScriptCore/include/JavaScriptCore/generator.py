@@ -48,11 +48,14 @@ _ALWAYS_SPECIALCASED_ENUM_VALUE_LOOKUP_TABLE = dict([(s.upper(), s) for s in _AL
 _ENUM_IDENTIFIER_RENAME_MAP = {
     'canvas-bitmaprenderer': 'CanvasBitmapRenderer',  # Recording.Type.canvas-bitmaprenderer
     'canvas-webgl': 'CanvasWebGL',  # Recording.Type.canvas-webgl
+    'canvas-webgl2': 'CanvasWebGL2',  # Recording.Type.canvas-webgl2
     'webgl': 'WebGL',  # Canvas.ContextType.webgl
     'webgl2': 'WebGL2',  # Canvas.ContextType.webgl2
-    'webmetal': 'WebMetal',  # Canvas.ContextType.webmetal
+    'webgpu': 'WebGPU',  # Canvas.ContextType.gpu
     'bitmaprenderer': 'BitmapRenderer',  # Canvas.ContextType.bitmaprenderer
     'webrtc': 'WebRTC',  # Console.ChannelSource.webrtc
+    'mediasource': 'MediaSource',  # Console.ChannelSource.mediasource
+    'webkit': 'WebKit',  # CPUProfiler.ThreadInfo.type
 }
 
 # These objects are built manually by creating and setting JSON::Value instances.

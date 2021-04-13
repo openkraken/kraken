@@ -33,6 +33,7 @@ namespace JSC { namespace ARM64Disassembler {
 class A64DOpcode {
 private:
     class OpcodeGroup {
+        WTF_MAKE_FAST_ALLOCATED;
     public:
         OpcodeGroup(uint32_t opcodeMask, uint32_t opcodePattern, const char* (*format)(A64DOpcode*))
             : m_opcodeMask(opcodeMask)
@@ -340,6 +341,7 @@ public:
 class A64DOpcodeDataProcessing1Source : public A64DOpcode {
 private:
     static const char* const s_opNames[8];
+    static const char* const s_pacAutOpNames[18];
     
 public:
     static const uint32_t mask = 0x5fe00000;
@@ -358,7 +360,7 @@ public:
 
 class A64DOpcodeDataProcessing2Source : public A64DOpcode {
 private:
-    static const char* const s_opNames[8];
+    static const char* const s_opNames[16];
 
 public:
     static const uint32_t mask = 0x5fe00000;
@@ -371,7 +373,7 @@ public:
     const char* opName() { return s_opNames[opNameIndex()]; }
     unsigned sBit() { return (m_opcode >> 29) & 0x1; }
     unsigned opCode() { return (m_opcode >> 10) & 0x3f; }
-    unsigned opNameIndex() { return ((m_opcode >> 11) & 0x4) | ((m_opcode >> 10) & 0x3); }
+    unsigned opNameIndex() { return (m_opcode >> 10) & 0xf; }
 };
 
 class A64DOpcodeDataProcessing3Source : public A64DOpcode {
@@ -571,7 +573,7 @@ public:
 
 class A64DOpcodeHint : public A64DOpcodeSystem {
 private:
-    static const char* const s_opNames[6];
+    static const char* const s_opNames[32];
 
 public:
     static const uint32_t mask = 0xfffff01f;
@@ -581,7 +583,7 @@ public:
 
     const char* format();
 
-    const char* opName() { return immediate7() <= 5 ? s_opNames[immediate7()] : "hint"; }
+    const char* opName();
     unsigned immediate7() { return (m_opcode >> 5) & 0x7f; }
 };
 
@@ -681,6 +683,32 @@ public:
 
     unsigned option() { return (m_opcode >> 13) & 0x7; }
     int sBit() { return (m_opcode >> 12) & 0x1; }
+};
+
+class A64DOpcodeLoadStoreAuthenticated : public A64DOpcodeLoadStore {
+private:
+    static const char* const s_opNames[2];
+    
+protected:
+    const char* opName()
+    {
+        return s_opNames[opNumber()];
+    }
+
+public:
+    static const uint32_t mask = 0xff200400;
+    static const uint32_t pattern = 0xf8200400;
+    
+    DEFINE_STATIC_FORMAT(A64DOpcodeLoadStoreAuthenticated, thisObj);
+    
+    const char* format();
+
+    unsigned opNum() { return mBit(); }
+    unsigned mBit() { return (m_opcode >> 23) & 0x1; }
+    unsigned sBit() { return (m_opcode >> 22) & 0x1; }
+    unsigned wBit() { return (m_opcode >> 11) & 0x1; }
+    int immediate10() { return (sBit() << 9) | ((m_opcode >> 12) & 0x1ff); }
+    
 };
 
 class A64DOpcodeLoadStoreRegisterPair : public A64DOpcodeLoadStore {
@@ -806,9 +834,10 @@ public:
 class A64DOpcodeUnconditionalBranchRegister : public A64DOpcode {
 private:
     static const char* const s_opNames[8];
+    static const char* const s_AuthOpNames[20];
 
 public:
-    static const uint32_t mask = 0xfe1ffc1f;
+    static const uint32_t mask = 0xfe1f0000;
     static const uint32_t pattern = 0xd61f0000;
 
     DEFINE_STATIC_FORMAT(A64DOpcodeUnconditionalBranchRegister, thisObj);
@@ -816,7 +845,14 @@ public:
     const char* format();
 
     const char* opName() { return s_opNames[opc()]; }
+    const char* authOpName();
     unsigned opc() { return (m_opcode >> 21) & 0xf; }
+    unsigned authOpCode() {return (opc() << 1) | mBit(); }
+    unsigned op2() { return (m_opcode >> 16) & 0x1f; }
+    unsigned op3() { return (m_opcode >> 10) & 0x3f; }
+    unsigned op4() { return m_opcode & 0xf; }
+    unsigned mBit() { return (m_opcode >> 10) & 1; }
+    unsigned rm() { return rd(); }
 };
 
 } } // namespace JSC::ARM64Disassembler
