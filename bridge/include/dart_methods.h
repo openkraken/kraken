@@ -100,10 +100,18 @@ struct DartMethodPointer {
   InitDocument initDocument{nullptr};
 
 #if ENABLE_DEBUGGER
-  InspectorMessage inspectorMessage{nullptr};
-  RegisterInspectorMessageCallback registerInspectorMessageCallback{nullptr};
 #endif
 };
+
+#if ENABLE_DEBUGGER
+struct InspectorDartMethodPointer {
+  InspectorMessage inspectorMessage{nullptr};
+  RegisterInspectorMessageCallback registerInspectorMessageCallback{nullptr};
+};
+std::shared_ptr<InspectorDartMethodPointer> getInspectorDartMethod();
+KRAKEN_EXPORT
+void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length);
+#endif
 
 void registerDartMethods(uint64_t *methodBytes, int32_t length);
 

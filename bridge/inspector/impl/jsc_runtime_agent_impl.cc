@@ -402,8 +402,6 @@ DispatchResponse JSCRuntimeAgentImpl::getProperties(
         (*out_internalProperties).fromJust()->push_back(std::move(internalProp));
       }
     }
-  } else {
-    KRAKEN_LOG(VERBOSE) << "[Runtime.getProperties] internalProperties not found";
   }
 
   return DispatchResponse::OK();

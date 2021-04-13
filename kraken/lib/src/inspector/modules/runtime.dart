@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:kraken/inspector.dart';
@@ -285,7 +284,7 @@ class InspectRuntimeModule extends InspectModule {
         onGetIsolateId(id, params);
         break;
       default:
-        callNativeInspectorMethod(id, name + '.' + method, params);
+        callNativeInspectorMethod(id, method, params);
         break;
     }
   }

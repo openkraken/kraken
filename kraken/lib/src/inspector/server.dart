@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:kraken/inspector.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/kraken.dart';
+import 'package:ffi/ffi.dart';
 import 'inspector.dart';
 
 const String CONTENT_TYPE = 'Content-Type';
@@ -11,11 +15,122 @@ const String CONTENT_LENGTH = 'Content-Length';
 
 typedef MessageCallback = void Function(Map<String, dynamic>);
 
-class InspectServer {
-  InspectServer(this.inspector, { this.port, this.address });
+Map<int, InspectServer> _inspectorServerMap = Map();
 
-  final Inspector inspector;
+typedef Native_InspectorMessageCallback = Void Function(
+    Pointer<Void> rpcSession, Pointer<Utf8> message);
+typedef Dart_InspectorMessageCallback = void Function(
+    Pointer<Void> rpcSession, Pointer<Utf8> message);
+typedef Native_RegisterInspectorMessageCallback = Void Function(
+    Int32 contextId,
+    Pointer<Void> rpcSession,
+    Pointer<NativeFunction<Native_InspectorMessageCallback>>
+        inspectorMessageCallback);
+
+typedef Native_AttachInspector = Void Function(Int32);
+typedef Dart_AttachInspector = void Function(int);
+
+void _registerInspectorMessageCallback(
+    int contextId,
+    Pointer<Void> rpcSession,
+    Pointer<NativeFunction<Native_InspectorMessageCallback>>
+        inspectorMessageCallback) {
+  InspectServer server = _inspectorServerMap[contextId];
+  if (server == null) {
+    print(
+        'Internal error: can not get inspector server from contextId: $contextId');
+    return;
+  }
+
+  Dart_InspectorMessageCallback nativeCallback =
+      inspectorMessageCallback.asFunction();
+  server.nativeInspectorMessageHandler = (String message) {
+    nativeCallback(rpcSession, Utf8.toUtf8(message));
+  };
+}
+
+typedef Native_InspectorMessage = Void Function(Int32 contextId, Pointer<Utf8>);
+
+void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
+  KrakenController controller =
+      KrakenController.getControllerOfJSContextId(contextId);
+  if (controller.view.inspector != null) {
+    controller.view.inspector.serverPort
+        .send(InspectorRawMessage(Utf8.fromUtf8(message)));
+  }
+}
+
+typedef Native_RegisterDartMethods = Void Function(
+    Pointer<Uint64> methodBytes, Int32 length);
+typedef Dart_RegisterDartMethods = void Function(
+    Pointer<Uint64> methodBytes, int length);
+
+void initInspectorServerNativeBinding(int contextId) {
+  final Dart_RegisterDartMethods _registerInspectorServerDartMethods =
+      nativeDynamicLibrary
+          .lookup<NativeFunction<Native_RegisterDartMethods>>(
+              'registerInspectorDartMethods')
+          .asFunction();
+  final Dart_AttachInspector _attachInspector = nativeDynamicLibrary
+      .lookup<NativeFunction<Native_AttachInspector>>('attachInspector')
+      .asFunction();
+  final Pointer<NativeFunction<Native_InspectorMessage>>
+      _nativeInspectorMessage = Pointer.fromFunction(_onInspectorMessage);
+  final Pointer<NativeFunction<Native_RegisterInspectorMessageCallback>>
+      _nativeRegisterInspectorMessageCallback =
+      Pointer.fromFunction(_registerInspectorMessageCallback);
+
+  final List<int> _dartNativeMethods = [
+    _nativeInspectorMessage.address,
+    _nativeRegisterInspectorMessageCallback.address
+  ];
+
+  Pointer<Uint64> bytes = allocate<Uint64>(count: _dartNativeMethods.length);
+  Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
+  nativeMethodList.setAll(0, _dartNativeMethods);
+
+  _attachInspector(contextId);
+  _registerInspectorServerDartMethods(bytes, _dartNativeMethods.length);
+}
+
+void serverIsolateEntryPoint(SendPort isolateToMainStream) {
+  ReceivePort mainToIsolateStream = ReceivePort();
+  isolateToMainStream.send(mainToIsolateStream.sendPort);
+  InspectServer server;
+
+  mainToIsolateStream.listen((data) {
+    if (data is InspectorServerInit) {
+      initInspectorServerNativeBinding(data.contextId);
+      server = InspectServer(data.port, data.address, data.bundleURL);
+      server.onStarted = () {
+        isolateToMainStream.send(InspectorServerStart());
+      };
+      server.onFrontendMessage = (Map<String, dynamic> frontEndMessage) {
+        isolateToMainStream.send(InspectorFrontEndMessage(frontEndMessage));
+      };
+      server.start();
+      _inspectorServerMap[data.contextId] = server;
+    } else if (server != null && server.connected) {
+      if (data is InspectorEvent) {
+        server.sendEventToFrontend(data);
+      } else if (data is InspectorMethodResult) {
+        server.sendToFrontend(data.id, data.result);
+      } else if (data is InspectorRawMessage) {
+        server.sendRawJSONToFrontend(data.message);
+      } else if (data is InspectorNativeMessage) {
+        server.nativeInspectorMessageHandler(data.message);
+      }
+    }
+    print('[mainToIsolateStream] $data');
+  });
+}
+
+class InspectServer {
+  InspectServer(this.port, this.address, this.bundleURL);
+
+  // final Inspector inspector;
   final String address;
+  final String bundleURL;
   int port;
 
   VoidCallback onStarted;
@@ -23,10 +138,13 @@ class InspectServer {
   HttpServer _httpServer;
   WebSocket _ws;
 
+  NativeInspectorMessageHandler nativeInspectorMessageHandler;
+
   /// InspectServer has connected frontend.
   bool get connected => _ws != null;
 
   int _bindServerRetryTime = 0;
+
   void _bindServer(int port) async {
     try {
       _httpServer = await HttpServer.bind(address, port);
@@ -84,7 +202,7 @@ class InspectServer {
     try {
       Map<String, dynamic> data = jsonDecode(message);
       return data;
-    } catch(err) {
+    } catch (err) {
       print('Error while decoding frontend message: $message');
       rethrow;
     }
@@ -131,7 +249,8 @@ class InspectServer {
 
   void _writeJSONObject(HttpRequest request, Object obj) {
     String body = jsonEncode(obj);
-    request.response.headers.set(CONTENT_TYPE, 'application/json; charset=UTF-8');
+    request.response.headers
+        .set(CONTENT_TYPE, 'application/json; charset=UTF-8');
     request.response.headers.set(CONTENT_LENGTH, body.length);
     request.response.write(body);
   }
@@ -148,17 +267,17 @@ class InspectServer {
 
   void onRequestList(HttpRequest request) {
     request.response.headers.clear();
-    String entryURL = '${inspector.address}:${inspector.port}';
-    KrakenController controller = inspector.elementManager.controller;
-    String bundleURL = controller.bundleURL ?? controller.bundlePath ?? '<EmbedBundle>';
-    _writeJSONObject(request, [{
-      'description': '',
-      'devtoolsFrontendUrl': '$INSPECTOR_URL?ws=$entryURL',
-      'title': 'Kraken App',
-      'type': 'page',
-      'url': bundleURL,
-      'webSocketDebuggerUrl': 'ws://$entryURL'
-    }]);
+    String entryURL = '${address}:${port}';
+    _writeJSONObject(request, [
+      {
+        'description': '',
+        'devtoolsFrontendUrl': '$INSPECTOR_URL?ws=$entryURL',
+        'title': 'Kraken App',
+        'type': 'page',
+        'url': bundleURL,
+        'webSocketDebuggerUrl': 'ws://$entryURL'
+      }
+    ]);
   }
 
   void onRequestClose(HttpRequest request) {
@@ -176,7 +295,6 @@ class InspectServer {
   void onRequestProtocol(HttpRequest request) {
     onRequestFallback(request);
   }
-
 
   void onRequestFallback(HttpRequest request) {
     request.response.statusCode = 404;

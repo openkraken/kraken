@@ -208,10 +208,6 @@ class InspectPageModule extends InspectModule {
         sendToFrontend(id, null);
         handleScreencastFrameAck(params);
         break;
-      case 'getResourceTree':
-        FrameResourceTree frameResourceTree = getResourceTree();
-        sendToFrontend(id, JSONEncodableMap({'frameTree': frameResourceTree}));
-        break;
       case 'getResourceContent':
         sendToFrontend(id, JSONEncodableMap({
           'content': inspector.elementManager.controller.bundle.content,
@@ -221,16 +217,10 @@ class InspectPageModule extends InspectModule {
       case 'reload':
         sendToFrontend(id, null);
         handleReloadPage();
+        break;
+      default:
+        sendToFrontend(id, null);
     }
-  }
-
-  FrameResourceTree getResourceTree() {
-    final String frameId = '1'; // TODO: used this id when multiple bundle load supported.
-    final String networkLoaderId = '1'; //TODO: associated with network loader id when Network panel supported.
-    Frame frame = Frame(frameId, networkLoaderId, inspector.elementManager.controller.origin, '', '',
-        'application/javascript', 'sameOrigin', 'Isolated', []);
-    FrameResource resource = FrameResource('kraken://', enumKey(ResourceType.Script.toString()), 'application/javascript');
-    return FrameResourceTree(frame, [resource]);
   }
 
   void handleReloadPage() async {

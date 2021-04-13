@@ -2,12 +2,14 @@
  * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken/bridge.dart';
 import 'server.dart';
 import 'module.dart';
 
@@ -25,17 +27,51 @@ class DOMUpdatedEvent extends InspectorEvent {
 
 typedef NativeInspectorMessageHandler = void Function(String message);
 
+class InspectorServerInit {
+  final int port;
+  final String address;
+  final String bundleURL;
+  final int contextId;
+
+  InspectorServerInit(this.contextId, this.port, this.address, this.bundleURL);
+}
+
+class InspectorServerStart {
+}
+
+class InspectorFrontEndMessage {
+  InspectorFrontEndMessage(this.message);
+  final Map<String, dynamic> message;
+}
+
+class InspectorMethodResult {
+  final int id;
+  final JSONEncodable result;
+  InspectorMethodResult(this.id, this.result);
+}
+
+class InspectorRawMessage {
+  final String message;
+  InspectorRawMessage(this.message);
+}
+
+class InspectorNativeMessage {
+  final String message;
+  InspectorNativeMessage(this.message);
+}
+
 class Inspector {
   /// Design preInspector for reload page,
   /// do not use it in any other place.
   /// More detail see [InspectPageModule.handleReloadPage].
   static Inspector prevInspector;
 
-  String get address => server?.address;
-  int get port => server?.port;
   ElementManager elementManager;
   final Map<String, InspectModule> moduleRegistrar = {};
-  InspectServer server;
+
+  Isolate _serverIsolate;
+  SendPort _serverPort;
+  SendPort get serverPort => _serverPort;
 
   factory Inspector(ElementManager elementManager, { int port = INSPECTOR_DEFAULT_PORT, String address }) {
     if (Inspector.prevInspector != null) {
@@ -58,21 +94,32 @@ class Inspector {
     registerModule(InspectPageModule(this));
     registerModule(InspectCSSModule(this));
     registerModule(InspectRuntimeModule(this));
+    registerModule(InspectDebuggerModule(this));
 
-    // Listen with broadcast address (0.0.0.0), not to restrict incoming ip address.
-    server = InspectServer(this, address: '0.0.0.0', port: port)
-      ..onStarted = onServerStart
-      ..onFrontendMessage = messageRouter
-      ..start();
+    ReceivePort serverIsolateReceivePort = ReceivePort();
+
+    serverIsolateReceivePort.listen((data) {
+      if (data is SendPort) {
+        _serverPort = data;
+        KrakenController controller = elementManager.controller;
+        String bundleURL = controller.bundleURL ?? controller.bundlePath ?? '<EmbedBundle>';
+        _serverPort.send(InspectorServerInit(controller.view.contextId, port, '0.0.0.0', bundleURL));
+      } else if (data is InspectorFrontEndMessage) {
+        messageRouter(data.message);
+        print('[isolateToMainStream] $data');
+      } else if (data is InspectorServerStart) {
+        onServerStart(port);
+      }
+    });
+
+    Isolate.spawn(serverIsolateEntryPoint, serverIsolateReceivePort.sendPort);
   }
-
-  NativeInspectorMessageHandler nativeInspectorMessageHandler;
 
   void registerModule(InspectModule module) {
     moduleRegistrar[module.name] = module;
   }
 
-  void onServerStart() async {
+  void onServerStart(int port) async {
     String remoteAddress = await Inspector.getConnectedLocalNetworkAddress();
     String inspectorURL = '$INSPECTOR_URL?ws=$remoteAddress:$port';
     await ClipBoardModule.writeText(inspectorURL);
@@ -97,14 +144,12 @@ class Inspector {
   }
 
   void onDOMTreeChanged() {
-    if (server.connected) {
-      server.sendEventToFrontend(DOMUpdatedEvent());
-    }
+    _serverPort.send(DOMUpdatedEvent());
   }
 
   void dispose() {
     moduleRegistrar.clear();
-    server?.dispose();
+    _serverIsolate.kill();
   }
 
   static Future<String> getConnectedLocalNetworkAddress() async {
@@ -127,6 +172,9 @@ class Inspector {
 
 abstract class JSONEncodable {
   Map toJson();
+  String toString() {
+    return jsonEncode(toJson());
+  }
 }
 
 abstract class InspectorEvent extends JSONEncodable {

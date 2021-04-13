@@ -120,10 +120,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   Object promiseHandler = context->global().getPropertyAsObject(*context, "__global_unhandled_promise_handler__");
   context->setUnhandledPromiseRejectionHandler(promiseHandler);
 #endif
-
-#if ENABLE_DEBUGGER
-  attachInspector();
-#endif
 }
 
 #ifdef ENABLE_DEBUGGER

@@ -220,6 +220,14 @@ void registerPluginSource(NativeString *code, const char *pluginName) {
   };
 }
 
+#if ENABLE_DEBUGGER
+void attachInspector(int32_t contextId) {
+  assert(checkContext(contextId));
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  context->attachInspector();
+}
+#endif
+
 NativeString *NativeString::clone() {
   NativeString *newNativeString = new NativeString();
   uint16_t *newString = new uint16_t[length];

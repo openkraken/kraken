@@ -40,7 +40,6 @@ void JSCConsoleClientImpl::sendMessageToConsole(MessageLevel level, const std::s
                     .setSource(v8_source)
                     .setText(message)
                     .build();
-
   m_consoleAgent->addMessageToConsole(std::move(logEntry));
 }
 
