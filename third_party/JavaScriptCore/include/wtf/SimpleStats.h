@@ -23,8 +23,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#ifndef SimpleStats_h
-#define SimpleStats_h
+#pragma once
 
 #include <wtf/MathExtras.h>
 #include <wtf/StdLibExtras.h>
@@ -34,6 +33,7 @@ namespace WTF {
 // Simple and cheap way of tracking statistics if you're not worried about chopping on
 // the sum of squares (i.e. the sum of squares is unlikely to exceed 2^52).
 class SimpleStats {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     SimpleStats()
         : m_count(0)
@@ -111,6 +111,3 @@ private:
 } // namespace WTF
 
 using WTF::SimpleStats;
-
-#endif // SimpleStats_h
-
