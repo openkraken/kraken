@@ -42,7 +42,7 @@ namespace Protocol {
 
 // Versions.
 namespace Audit {
-static const unsigned VERSION = 1;
+static const unsigned VERSION = 3;
 } // Audit
 
 namespace Recording {
@@ -60,6 +60,7 @@ class FrameWithManifest;
 
 #if ENABLE(RESOURCE_USAGE)
 namespace CPUProfiler {
+class ThreadInfo;
 class Event;
 } // CPUProfiler
 #endif // ENABLE(RESOURCE_USAGE)
@@ -82,8 +83,9 @@ class CSSPropertyInfo;
 class CSSComputedStyleProperty;
 class CSSStyle;
 class CSSProperty;
-class CSSMedia;
+class Grouping;
 enum class StyleSheetOrigin;
+enum class PseudoId;
 enum class CSSPropertyStatus;
 } // CSS
 
@@ -105,6 +107,7 @@ enum class ChannelLevel;
 
 namespace DOM {
 class Node;
+class DataBinding;
 class EventListener;
 class AccessibilityProperties;
 class RGBAColor;
@@ -187,17 +190,6 @@ class WebSocketFrame;
 class CachedResource;
 class Initiator;
 } // Network
-
-namespace OverlayTypes {
-class Point;
-class Size;
-class Rect;
-class ShapeOutsideData;
-class ElementData;
-class FragmentHighlightData;
-class NodeHighlightData;
-class OverlayConfiguration;
-} // OverlayTypes
 
 namespace Page {
 class Frame;
@@ -337,13 +329,6 @@ typedef double Timestamp;
 typedef double Walltime;
 } // Network
 
-namespace OverlayTypes {
-/* A quad is a collection of 4 points. When initialized from a rect, the points are in clockwise order from top left. */
-typedef JSON::ArrayOf<Inspector::Protocol::OverlayTypes::Point> Quad;
-/* A vector path described using SVG path syntax. */
-typedef JSON::ArrayOf<JSON::Value> DisplayPath;
-} // OverlayTypes
-
 namespace Runtime {
 /* Unique object identifier. */
 typedef String RemoteObjectId;
@@ -419,8 +404,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ApplicationCacheResource) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ApplicationCacheResource>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ApplicationCacheResource>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -509,8 +495,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ApplicationCache) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ApplicationCache>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ApplicationCache>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -585,8 +572,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(FrameWithManifest) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<FrameWithManifest>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<FrameWithManifest>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -608,6 +596,87 @@ public:
 
 #if ENABLE(RESOURCE_USAGE)
 namespace CPUProfiler {
+/* CPU usage for an individual thread. */
+class ThreadInfo : public JSON::ObjectBase {
+public:
+    // Named after property name 'type' while generating ThreadInfo.
+    enum class Type {
+        Main = 0,
+        WebKit = 1,
+    }; // enum class Type
+    enum {
+        NoFieldsSet = 0,
+        NameSet = 1 << 0,
+        UsageSet = 1 << 1,
+        AllFieldsSet = (NameSet | UsageSet)
+    };
+
+    template<int STATE>
+    class Builder {
+    private:
+        RefPtr<JSON::Object> m_result;
+
+        template<int STEP> Builder<STATE | STEP>& castState()
+        {
+            return *reinterpret_cast<Builder<STATE | STEP>*>(this);
+        }
+
+        Builder(Ref</*ThreadInfo*/JSON::Object>&& object)
+            : m_result(WTFMove(object))
+        {
+            COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
+        }
+        friend class ThreadInfo;
+    public:
+
+        Builder<STATE | NameSet>& setName(const String& value)
+        {
+            COMPILE_ASSERT(!(STATE & NameSet), property_name_already_set);
+            m_result->setString("name"_s, value);
+            return castState<NameSet>();
+        }
+
+        Builder<STATE | UsageSet>& setUsage(double value)
+        {
+            COMPILE_ASSERT(!(STATE & UsageSet), property_usage_already_set);
+            m_result->setDouble("usage"_s, value);
+            return castState<UsageSet>();
+        }
+
+        Ref<ThreadInfo> release()
+        {
+            COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
+            COMPILE_ASSERT(sizeof(ThreadInfo) == sizeof(JSON::Object), cannot_cast);
+
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ThreadInfo>*>(&jsonResult));
+            return result;
+        }
+    };
+
+    /*
+     * Synthetic constructor:
+     * Ref<ThreadInfo> result = ThreadInfo::create()
+     *     .setName(...)
+     *     .setUsage(...)
+     *     .release();
+     */
+    static Builder<NoFieldsSet> create()
+    {
+        return Builder<NoFieldsSet>(JSON::Object::create());
+    }
+
+    void setType(Type value)
+    {
+        JSON::ObjectBase::setString("type"_s, Inspector::Protocol::InspectorHelpers::getEnumConstantValue(value));
+    }
+
+    void setTargetId(const String& value)
+    {
+        JSON::ObjectBase::setString("targetId"_s, value);
+    }
+};
+
 class Event : public JSON::ObjectBase {
 public:
     enum {
@@ -654,8 +723,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Event) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Event>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Event>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -669,6 +739,11 @@ public:
     static Builder<NoFieldsSet> create()
     {
         return Builder<NoFieldsSet>(JSON::Object::create());
+    }
+
+    void setThreads(RefPtr<JSON::ArrayOf<Inspector::Protocol::CPUProfiler::ThreadInfo>> value)
+    {
+        JSON::ObjectBase::setArray("threads"_s, WTFMove(value));
     }
 };
 
@@ -723,8 +798,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSStyleId) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSStyleId>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSStyleId>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -743,10 +819,10 @@ public:
 
 /* Stylesheet type: "user" for user stylesheets, "user-agent" for user-agent stylesheets, "inspector" for stylesheets created by the inspector (i.e. those holding the "via inspector" rules), "regular" for regular stylesheets. */
 enum class StyleSheetOrigin {
-    User = 0,
-    UserAgent = 1,
-    Inspector = 2,
-    Regular = 3,
+    User = 2,
+    UserAgent = 3,
+    Inspector = 4,
+    Regular = 5,
 }; // enum class StyleSheetOrigin
 /* This object identifies a CSS rule in a unique way. */
 class CSSRuleId : public JSON::ObjectBase {
@@ -795,8 +871,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSRuleId) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSRuleId>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSRuleId>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -813,6 +890,22 @@ public:
     }
 };
 
+/* Pseudo-style identifier (see <code>enum PseudoId</code> in <code>RenderStyleConstants.h</code>). */
+enum class PseudoId {
+    FirstLine = 6,
+    FirstLetter = 7,
+    Marker = 8,
+    Before = 9,
+    After = 10,
+    Selection = 11,
+    Scrollbar = 12,
+    ScrollbarThumb = 13,
+    ScrollbarButton = 14,
+    ScrollbarTrack = 15,
+    ScrollbarTrackPiece = 16,
+    ScrollbarCorner = 17,
+    Resizer = 18,
+}; // enum class PseudoId
 /* CSS rule collection for a single pseudo style. */
 class PseudoIdMatches : public JSON::ObjectBase {
 public:
@@ -841,10 +934,10 @@ public:
         friend class PseudoIdMatches;
     public:
 
-        Builder<STATE | PseudoIdSet>& setPseudoId(int value)
+        Builder<STATE | PseudoIdSet>& setPseudoId(Inspector::Protocol::CSS::PseudoId value)
         {
             COMPILE_ASSERT(!(STATE & PseudoIdSet), property_pseudoId_already_set);
-            m_result->setInteger("pseudoId"_s, value);
+            m_result->setString("pseudoId"_s, Inspector::Protocol::InspectorHelpers::getEnumConstantValue(value));
             return castState<PseudoIdSet>();
         }
 
@@ -860,8 +953,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(PseudoIdMatches) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<PseudoIdMatches>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<PseudoIdMatches>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -917,8 +1011,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(InheritedStyleEntry) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<InheritedStyleEntry>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<InheritedStyleEntry>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -986,8 +1081,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(RuleMatch) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<RuleMatch>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<RuleMatch>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1043,8 +1139,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSSelector) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSSelector>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSSelector>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1117,8 +1214,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(SelectorList) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<SelectorList>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<SelectorList>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1187,8 +1285,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSStyleAttribute) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSStyleAttribute>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSStyleAttribute>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1308,8 +1407,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSStyleSheetHeader) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSStyleSheetHeader>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSStyleSheetHeader>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1380,8 +1480,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSStyleSheetBody) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSStyleSheetBody>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSStyleSheetBody>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1466,8 +1567,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSRule) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSRule>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSRule>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1495,9 +1597,9 @@ public:
         JSON::ObjectBase::setString("sourceURL"_s, value);
     }
 
-    void setMedia(RefPtr<JSON::ArrayOf<Inspector::Protocol::CSS::CSSMedia>> value)
+    void setGroupings(RefPtr<JSON::ArrayOf<Inspector::Protocol::CSS::Grouping>> value)
     {
-        JSON::ObjectBase::setArray("media"_s, WTFMove(value));
+        JSON::ObjectBase::setArray("groupings"_s, WTFMove(value));
     }
 };
 
@@ -1564,8 +1666,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(SourceRange) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<SourceRange>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<SourceRange>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1630,8 +1733,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ShorthandEntry) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ShorthandEntry>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ShorthandEntry>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1686,8 +1790,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSPropertyInfo) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSPropertyInfo>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSPropertyInfo>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1769,8 +1874,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSComputedStyleProperty) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSComputedStyleProperty>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSComputedStyleProperty>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1834,8 +1940,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSStyle) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSStyle>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSStyle>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1879,10 +1986,10 @@ public:
 
 /* The property status: "active" if the property is effective in the style, "inactive" if the property is overridden by a same-named property in this style later on, "disabled" if the property is disabled by the user, "style" (implied if absent) if the property is reported by the browser rather than by the CSS source parser. */
 enum class CSSPropertyStatus {
-    Active = 4,
-    Inactive = 5,
-    Disabled = 6,
-    Style = 7,
+    Active = 19,
+    Inactive = 20,
+    Disabled = 21,
+    Style = 22,
 }; // enum class CSSPropertyStatus
 /* CSS style effective visual dimensions and source offsets. */
 class CSSProperty : public JSON::Object {
@@ -1931,8 +2038,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSSProperty) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSProperty>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSSProperty>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -1989,21 +2097,22 @@ public:
     JS_EXPORT_PRIVATE static const char* Range;
 };
 
-/* CSS media query descriptor. */
-class CSSMedia : public JSON::ObjectBase {
+/* CSS @media (as well as other users of media queries, like @import, <style>, <link>, etc.) and @supports descriptor. */
+class Grouping : public JSON::ObjectBase {
 public:
-    // Named after property name 'source' while generating CSSMedia.
-    enum class Source {
-        MediaRule = 8,
-        ImportRule = 9,
-        LinkedSheet = 10,
-        InlineSheet = 11,
-    }; // enum class Source
+    // Named after property name 'type' while generating Grouping.
+    enum class Type {
+        MediaRule = 23,
+        MediaImportRule = 24,
+        MediaLinkNode = 25,
+        MediaStyleNode = 26,
+        SupportsRule = 27,
+    }; // enum class Type
     enum {
         NoFieldsSet = 0,
         TextSet = 1 << 0,
-        SourceSet = 1 << 1,
-        AllFieldsSet = (TextSet | SourceSet)
+        TypeSet = 1 << 1,
+        AllFieldsSet = (TextSet | TypeSet)
     };
 
     template<int STATE>
@@ -2016,12 +2125,12 @@ public:
             return *reinterpret_cast<Builder<STATE | STEP>*>(this);
         }
 
-        Builder(Ref</*CSSMedia*/JSON::Object>&& object)
+        Builder(Ref</*Grouping*/JSON::Object>&& object)
             : m_result(WTFMove(object))
         {
             COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
         }
-        friend class CSSMedia;
+        friend class Grouping;
     public:
 
         Builder<STATE | TextSet>& setText(const String& value)
@@ -2031,28 +2140,29 @@ public:
             return castState<TextSet>();
         }
 
-        Builder<STATE | SourceSet>& setSource(Source value)
+        Builder<STATE | TypeSet>& setType(Type value)
         {
-            COMPILE_ASSERT(!(STATE & SourceSet), property_source_already_set);
-            m_result->setString("source"_s, Inspector::Protocol::InspectorHelpers::getEnumConstantValue(value));
-            return castState<SourceSet>();
+            COMPILE_ASSERT(!(STATE & TypeSet), property_type_already_set);
+            m_result->setString("type"_s, Inspector::Protocol::InspectorHelpers::getEnumConstantValue(value));
+            return castState<TypeSet>();
         }
 
-        Ref<CSSMedia> release()
+        Ref<Grouping> release()
         {
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
-            COMPILE_ASSERT(sizeof(CSSMedia) == sizeof(JSON::Object), cannot_cast);
+            COMPILE_ASSERT(sizeof(Grouping) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSSMedia>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Grouping>*>(&jsonResult));
+            return result;
         }
     };
 
     /*
      * Synthetic constructor:
-     * Ref<CSSMedia> result = CSSMedia::create()
+     * Ref<Grouping> result = Grouping::create()
      *     .setText(...)
-     *     .setSource(...)
+     *     .setType(...)
      *     .release();
      */
     static Builder<NoFieldsSet> create()
@@ -2064,11 +2174,6 @@ public:
     {
         JSON::ObjectBase::setString("sourceURL"_s, value);
     }
-
-    void setSourceLine(int value)
-    {
-        JSON::ObjectBase::setInteger("sourceLine"_s, value);
-    }
 };
 
 } // CSS
@@ -2076,16 +2181,16 @@ public:
 namespace Canvas {
 /* The type of rendering context backing the canvas element. */
 enum class ContextType {
-    Canvas2D = 12,
-    BitmapRenderer = 13,
-    WebGL = 14,
-    WebGL2 = 15,
-    WebMetal = 16,
+    Canvas2D = 28,
+    BitmapRenderer = 29,
+    WebGL = 30,
+    WebGL2 = 31,
+    WebGPU = 32,
 }; // enum class ContextType
 /* Shader type. WebGL supports vertex and fragment shaders. */
 enum class ShaderType {
-    Fragment = 17,
-    Vertex = 18,
+    Fragment = 33,
+    Vertex = 34,
 }; // enum class ShaderType
 /* Drawing surface attributes. */
 class ContextAttributes : public JSON::ObjectBase {
@@ -2118,8 +2223,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ContextAttributes) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ContextAttributes>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ContextAttributes>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -2216,8 +2322,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Canvas) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Canvas>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Canvas>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -2264,25 +2371,26 @@ public:
 namespace Console {
 /* Channels for different types of log messages. */
 enum class ChannelSource {
-    XML = 19,
-    JavaScript = 20,
-    Network = 21,
-    ConsoleAPI = 22,
-    Storage = 23,
-    Appcache = 24,
-    Rendering = 25,
-    CSS = 26,
-    Security = 27,
-    ContentBlocker = 28,
-    Media = 29,
-    WebRTC = 30,
-    Other = 31,
+    XML = 35,
+    JavaScript = 36,
+    Network = 37,
+    ConsoleAPI = 38,
+    Storage = 39,
+    Appcache = 40,
+    Rendering = 41,
+    CSS = 42,
+    Security = 43,
+    ContentBlocker = 44,
+    Media = 45,
+    MediaSource = 46,
+    WebRTC = 47,
+    Other = 48,
 }; // enum class ChannelSource
 /* Level of logging. */
 enum class ChannelLevel {
-    Off = 32,
-    Basic = 33,
-    Verbose = 34,
+    Off = 49,
+    Basic = 50,
+    Verbose = 51,
 }; // enum class ChannelLevel
 /* Logging channel. */
 class Channel : public JSON::ObjectBase {
@@ -2331,8 +2439,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Channel) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Channel>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Channel>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -2354,27 +2463,28 @@ class ConsoleMessage : public JSON::ObjectBase {
 public:
     // Named after property name 'level' while generating ConsoleMessage.
     enum class Level {
-        Log = 35,
-        Info = 36,
-        Warning = 37,
-        Error = 38,
-        Debug = 39,
+        Log = 52,
+        Info = 53,
+        Warning = 54,
+        Error = 55,
+        Debug = 56,
     }; // enum class Level
     // Named after property name 'type' while generating ConsoleMessage.
     enum class Type {
-        Log = 35,
-        Dir = 40,
-        DirXML = 41,
-        Table = 42,
-        Trace = 43,
-        Clear = 44,
-        StartGroup = 45,
-        StartGroupCollapsed = 46,
-        EndGroup = 47,
-        Assert = 48,
-        Timing = 49,
-        Profile = 50,
-        ProfileEnd = 51,
+        Log = 52,
+        Dir = 57,
+        DirXML = 58,
+        Table = 59,
+        Trace = 60,
+        Clear = 61,
+        StartGroup = 62,
+        StartGroupCollapsed = 63,
+        EndGroup = 64,
+        Assert = 65,
+        Timing = 66,
+        Profile = 67,
+        ProfileEnd = 68,
+        Image = 69,
     }; // enum class Type
     enum {
         NoFieldsSet = 0,
@@ -2428,8 +2538,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ConsoleMessage) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ConsoleMessage>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ConsoleMessage>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -2558,8 +2669,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CallFrame) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CallFrame>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CallFrame>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -2618,8 +2730,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(StackTrace) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<StackTrace>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<StackTrace>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -2655,27 +2768,27 @@ public:
 namespace DOM {
 /* Pseudo element type. */
 enum class PseudoType {
-    Before = 52,
-    After = 53,
+    Before = 9,
+    After = 10,
 }; // enum class PseudoType
 /* Shadow root type. */
 enum class ShadowRootType {
-    UserAgent = 1,
-    Open = 54,
-    Closed = 55,
+    UserAgent = 3,
+    Open = 70,
+    Closed = 71,
 }; // enum class ShadowRootType
 /* Custom element state. */
 enum class CustomElementState {
-    Builtin = 56,
-    Custom = 57,
-    Waiting = 58,
-    Failed = 59,
+    Builtin = 72,
+    Custom = 73,
+    Waiting = 74,
+    Failed = 75,
 }; // enum class CustomElementState
 /* Token values of @aria-relevant attribute. */
 enum class LiveRegionRelevant {
-    Additions = 60,
-    Removals = 61,
-    Text = 62,
+    Additions = 76,
+    Removals = 77,
+    Text = 78,
 }; // enum class LiveRegionRelevant
 /* DOM interaction is implemented in terms of mirror objects that represent the actual DOM nodes. DOMNode is a base node mirror type. */
 class Node : public JSON::ObjectBase {
@@ -2748,8 +2861,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Node) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Node>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Node>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -2766,6 +2880,11 @@ public:
     static Builder<NoFieldsSet> create()
     {
         return Builder<NoFieldsSet>(JSON::Object::create());
+    }
+
+    void setFrameId(const String& value)
+    {
+        JSON::ObjectBase::setString("frameId"_s, value);
     }
 
     void setChildNodeCount(int value)
@@ -2833,11 +2952,6 @@ public:
         JSON::ObjectBase::setString("customElementState"_s, Inspector::Protocol::InspectorHelpers::getEnumConstantValue(value));
     }
 
-    void setFrameId(const String& value)
-    {
-        JSON::ObjectBase::setString("frameId"_s, value);
-    }
-
     void setContentDocument(RefPtr<Inspector::Protocol::DOM::Node> value)
     {
         JSON::ObjectBase::setObject("contentDocument"_s, WTFMove(value));
@@ -2864,6 +2978,77 @@ public:
     }
 };
 
+/* Relationship between data that is associated with a node and the node itself. */
+class DataBinding : public JSON::ObjectBase {
+public:
+    enum {
+        NoFieldsSet = 0,
+        BindingSet = 1 << 0,
+        ValueSet = 1 << 1,
+        AllFieldsSet = (BindingSet | ValueSet)
+    };
+
+    template<int STATE>
+    class Builder {
+    private:
+        RefPtr<JSON::Object> m_result;
+
+        template<int STEP> Builder<STATE | STEP>& castState()
+        {
+            return *reinterpret_cast<Builder<STATE | STEP>*>(this);
+        }
+
+        Builder(Ref</*DataBinding*/JSON::Object>&& object)
+            : m_result(WTFMove(object))
+        {
+            COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
+        }
+        friend class DataBinding;
+    public:
+
+        Builder<STATE | BindingSet>& setBinding(const String& value)
+        {
+            COMPILE_ASSERT(!(STATE & BindingSet), property_binding_already_set);
+            m_result->setString("binding"_s, value);
+            return castState<BindingSet>();
+        }
+
+        Builder<STATE | ValueSet>& setValue(const String& value)
+        {
+            COMPILE_ASSERT(!(STATE & ValueSet), property_value_already_set);
+            m_result->setString("value"_s, value);
+            return castState<ValueSet>();
+        }
+
+        Ref<DataBinding> release()
+        {
+            COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
+            COMPILE_ASSERT(sizeof(DataBinding) == sizeof(JSON::Object), cannot_cast);
+
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<DataBinding>*>(&jsonResult));
+            return result;
+        }
+    };
+
+    /*
+     * Synthetic constructor:
+     * Ref<DataBinding> result = DataBinding::create()
+     *     .setBinding(...)
+     *     .setValue(...)
+     *     .release();
+     */
+    static Builder<NoFieldsSet> create()
+    {
+        return Builder<NoFieldsSet>(JSON::Object::create());
+    }
+
+    void setType(const String& value)
+    {
+        JSON::ObjectBase::setString("type"_s, value);
+    }
+};
+
 /* A structure holding event listener properties. */
 class EventListener : public JSON::ObjectBase {
 public:
@@ -2873,8 +3058,7 @@ public:
         TypeSet = 1 << 1,
         UseCaptureSet = 1 << 2,
         IsAttributeSet = 1 << 3,
-        NodeIdSet = 1 << 4,
-        AllFieldsSet = (EventListenerIdSet | TypeSet | UseCaptureSet | IsAttributeSet | NodeIdSet)
+        AllFieldsSet = (EventListenerIdSet | TypeSet | UseCaptureSet | IsAttributeSet)
     };
 
     template<int STATE>
@@ -2923,20 +3107,14 @@ public:
             return castState<IsAttributeSet>();
         }
 
-        Builder<STATE | NodeIdSet>& setNodeId(int value)
-        {
-            COMPILE_ASSERT(!(STATE & NodeIdSet), property_nodeId_already_set);
-            m_result->setInteger("nodeId"_s, value);
-            return castState<NodeIdSet>();
-        }
-
         Ref<EventListener> release()
         {
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(EventListener) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<EventListener>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<EventListener>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -2947,12 +3125,21 @@ public:
      *     .setType(...)
      *     .setUseCapture(...)
      *     .setIsAttribute(...)
-     *     .setNodeId(...)
      *     .release();
      */
     static Builder<NoFieldsSet> create()
     {
         return Builder<NoFieldsSet>(JSON::Object::create());
+    }
+
+    void setNodeId(int value)
+    {
+        JSON::ObjectBase::setInteger("nodeId"_s, value);
+    }
+
+    void setOnWindow(bool value)
+    {
+        JSON::ObjectBase::setBoolean("onWindow"_s, value);
     }
 
     void setLocation(RefPtr<Inspector::Protocol::Debugger::Location> value)
@@ -2963,11 +3150,6 @@ public:
     void setHandlerName(const String& value)
     {
         JSON::ObjectBase::setString("handlerName"_s, value);
-    }
-
-    void setHandlerObject(RefPtr<Inspector::Protocol::Runtime::RemoteObject> value)
-    {
-        JSON::ObjectBase::setObject("handlerObject"_s, WTFMove(value));
     }
 
     void setPassive(bool value)
@@ -2996,32 +3178,32 @@ class AccessibilityProperties : public JSON::ObjectBase {
 public:
     // Named after property name 'checked' while generating AccessibilityProperties.
     enum class Checked {
-        True = 63,
-        False = 64,
-        Mixed = 65,
+        True = 79,
+        False = 80,
+        Mixed = 81,
     }; // enum class Checked
     // Named after property name 'current' while generating AccessibilityProperties.
     enum class Current {
-        True = 63,
-        False = 64,
-        Page = 66,
-        Step = 67,
-        Location = 68,
-        Date = 69,
-        Time = 70,
+        True = 79,
+        False = 80,
+        Page = 82,
+        Step = 83,
+        Location = 84,
+        Date = 85,
+        Time = 86,
     }; // enum class Current
     // Named after property name 'invalid' while generating AccessibilityProperties.
     enum class Invalid {
-        True = 63,
-        False = 64,
-        Grammar = 71,
-        Spelling = 72,
+        True = 79,
+        False = 80,
+        Grammar = 87,
+        Spelling = 88,
     }; // enum class Invalid
     // Named after property name 'liveRegionStatus' while generating AccessibilityProperties.
     enum class LiveRegionStatus {
-        Assertive = 73,
-        Polite = 74,
-        Off = 32,
+        Assertive = 89,
+        Polite = 90,
+        Off = 49,
     }; // enum class LiveRegionStatus
     enum {
         NoFieldsSet = 0,
@@ -3083,8 +3265,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(AccessibilityProperties) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<AccessibilityProperties>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<AccessibilityProperties>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -3298,8 +3481,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(RGBAColor) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<RGBAColor>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<RGBAColor>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -3353,8 +3537,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(HighlightConfig) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<HighlightConfig>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<HighlightConfig>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -3399,15 +3584,16 @@ public:
 namespace DOMDebugger {
 /* DOM breakpoint type. */
 enum class DOMBreakpointType {
-    SubtreeModified = 75,
-    AttributeModified = 76,
-    NodeRemoved = 77,
+    SubtreeModified = 91,
+    AttributeModified = 92,
+    NodeRemoved = 93,
 }; // enum class DOMBreakpointType
 /* Event breakpoint type. */
 enum class EventBreakpointType {
-    AnimationFrame = 78,
-    Listener = 79,
-    Timer = 80,
+    AnimationFrame = 94,
+    Interval = 95,
+    Listener = 96,
+    Timeout = 97,
 }; // enum class EventBreakpointType
 } // DOMDebugger
 
@@ -3459,8 +3645,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(StorageId) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<StorageId>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<StorageId>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -3543,8 +3730,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Database) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Database>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Database>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -3610,8 +3798,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Error) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Error>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Error>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -3678,8 +3867,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Location) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Location>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Location>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -3706,10 +3896,10 @@ class BreakpointAction : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating BreakpointAction.
     enum class Type {
-        Log = 35,
-        Evaluate = 81,
-        Sound = 82,
-        Probe = 83,
+        Log = 52,
+        Evaluate = 98,
+        Sound = 99,
+        Probe = 100,
     }; // enum class Type
     enum {
         NoFieldsSet = 0,
@@ -3747,8 +3937,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(BreakpointAction) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<BreakpointAction>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<BreakpointAction>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -3805,8 +3996,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(BreakpointOptions) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<BreakpointOptions>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<BreakpointOptions>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -3880,8 +4072,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(FunctionDetails) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<FunctionDetails>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<FunctionDetails>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -3991,8 +4184,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CallFrame) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CallFrame>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CallFrame>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4018,13 +4212,13 @@ class Scope : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating Scope.
     enum class Type {
-        Global = 84,
-        With = 85,
-        Closure = 86,
-        Catch = 87,
-        FunctionName = 88,
-        GlobalLexicalEnvironment = 89,
-        NestedLexical = 90,
+        Global = 101,
+        With = 102,
+        Closure = 103,
+        Catch = 104,
+        FunctionName = 105,
+        GlobalLexicalEnvironment = 106,
+        NestedLexical = 107,
     }; // enum class Type
     enum {
         NoFieldsSet = 0,
@@ -4070,8 +4264,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Scope) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Scope>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Scope>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4174,8 +4369,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ProbeSample) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ProbeSample>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ProbeSample>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4226,8 +4422,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(AssertPauseReason) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<AssertPauseReason>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<AssertPauseReason>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4286,8 +4483,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(BreakpointPauseReason) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<BreakpointPauseReason>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<BreakpointPauseReason>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4342,8 +4540,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CSPViolationPauseReason) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CSPViolationPauseReason>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CSPViolationPauseReason>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4409,8 +4608,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(SearchMatch) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<SearchMatch>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<SearchMatch>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4435,8 +4635,8 @@ class GarbageCollection : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating GarbageCollection.
     enum class Type {
-        Full = 91,
-        Partial = 92,
+        Full = 108,
+        Partial = 109,
     }; // enum class Type
     enum {
         NoFieldsSet = 0,
@@ -4490,8 +4690,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(GarbageCollection) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<GarbageCollection>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<GarbageCollection>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4568,8 +4769,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(DatabaseWithObjectStores) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<DatabaseWithObjectStores>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<DatabaseWithObjectStores>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4650,8 +4852,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ObjectStore) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ObjectStore>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ObjectStore>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4733,8 +4936,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ObjectStoreIndex) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ObjectStoreIndex>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ObjectStoreIndex>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4758,10 +4962,10 @@ class Key : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating Key.
     enum class Type {
-        Number = 93,
-        String = 94,
-        Date = 69,
-        Array = 95,
+        Number = 110,
+        String = 111,
+        Date = 85,
+        Array = 112,
     }; // enum class Type
     enum {
         NoFieldsSet = 0,
@@ -4799,8 +5003,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Key) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Key>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Key>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4883,8 +5088,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(KeyRange) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<KeyRange>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<KeyRange>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4966,8 +5172,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(DataEntry) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<DataEntry>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<DataEntry>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -4990,9 +5197,9 @@ class KeyPath : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating KeyPath.
     enum class Type {
-        Null = 96,
-        String = 94,
-        Array = 95,
+        Null = 113,
+        String = 111,
+        Array = 112,
     }; // enum class Type
     enum {
         NoFieldsSet = 0,
@@ -5030,8 +5237,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(KeyPath) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<KeyPath>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<KeyPath>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -5124,8 +5332,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(IntRect) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<IntRect>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<IntRect>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -5223,8 +5432,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Layer) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Layer>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Layer>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -5306,8 +5516,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CompositingReasons) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CompositingReasons>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CompositingReasons>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -5507,8 +5718,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Event) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Event>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Event>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -5529,12 +5741,12 @@ class CategoryData : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating CategoryData.
     enum class Type {
-        JavaScript = 20,
-        JIT = 97,
-        Images = 98,
-        Layers = 99,
-        Page = 66,
-        Other = 31,
+        JavaScript = 36,
+        JIT = 114,
+        Images = 115,
+        Layers = 116,
+        Page = 82,
+        Other = 48,
     }; // enum class Type
     enum {
         NoFieldsSet = 0,
@@ -5580,8 +5792,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CategoryData) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CategoryData>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CategoryData>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -5729,8 +5942,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ResourceTiming) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ResourceTiming>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ResourceTiming>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -5812,8 +6026,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Request) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Request>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Request>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -5841,11 +6056,11 @@ class Response : public JSON::Object {
 public:
     // Named after property name 'source' while generating Response.
     enum class Source {
-        Unknown = 100,
-        Network = 21,
-        MemoryCache = 101,
-        DiskCache = 102,
-        ServiceWorker = 103,
+        Unknown = 117,
+        Network = 37,
+        MemoryCache = 118,
+        DiskCache = 119,
+        ServiceWorker = 120,
     }; // enum class Source
     enum {
         NoFieldsSet = 0,
@@ -5923,8 +6138,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Response) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Response>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Response>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -5968,9 +6184,9 @@ class Metrics : public JSON::ObjectBase {
 public:
     // Named after property name 'priority' while generating Metrics.
     enum class Priority {
-        Low = 104,
-        Medium = 105,
-        High = 106,
+        Low = 121,
+        Medium = 122,
+        High = 123,
     }; // enum class Priority
     enum {
         NoFieldsSet = 0,
@@ -6000,8 +6216,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Metrics) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Metrics>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Metrics>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -6110,8 +6327,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(WebSocketRequest) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<WebSocketRequest>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<WebSocketRequest>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -6182,8 +6400,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(WebSocketResponse) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<WebSocketResponse>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<WebSocketResponse>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -6264,8 +6483,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(WebSocketFrame) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<WebSocketFrame>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<WebSocketFrame>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -6339,8 +6559,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CachedResource) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CachedResource>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CachedResource>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -6373,9 +6594,9 @@ class Initiator : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating Initiator.
     enum class Type {
-        Parser = 118,
-        Script = 119,
-        Other = 31,
+        Parser = 135,
+        Script = 136,
+        Other = 48,
     }; // enum class Type
     enum {
         NoFieldsSet = 0,
@@ -6413,8 +6634,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Initiator) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Initiator>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Initiator>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -6452,697 +6674,48 @@ public:
 
 } // Network
 
-namespace OverlayTypes {
-class Point : public JSON::ObjectBase {
-public:
-    enum {
-        NoFieldsSet = 0,
-        XSet = 1 << 0,
-        YSet = 1 << 1,
-        AllFieldsSet = (XSet | YSet)
-    };
-
-    template<int STATE>
-    class Builder {
-    private:
-        RefPtr<JSON::Object> m_result;
-
-        template<int STEP> Builder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<Builder<STATE | STEP>*>(this);
-        }
-
-        Builder(Ref</*Point*/JSON::Object>&& object)
-            : m_result(WTFMove(object))
-        {
-            COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
-        }
-        friend class Point;
-    public:
-
-        Builder<STATE | XSet>& setX(double value)
-        {
-            COMPILE_ASSERT(!(STATE & XSet), property_x_already_set);
-            m_result->setDouble("x"_s, value);
-            return castState<XSet>();
-        }
-
-        Builder<STATE | YSet>& setY(double value)
-        {
-            COMPILE_ASSERT(!(STATE & YSet), property_y_already_set);
-            m_result->setDouble("y"_s, value);
-            return castState<YSet>();
-        }
-
-        Ref<Point> release()
-        {
-            COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
-            COMPILE_ASSERT(sizeof(Point) == sizeof(JSON::Object), cannot_cast);
-
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Point>*>(&result));
-        }
-    };
-
-    /*
-     * Synthetic constructor:
-     * Ref<Point> result = Point::create()
-     *     .setX(...)
-     *     .setY(...)
-     *     .release();
-     */
-    static Builder<NoFieldsSet> create()
-    {
-        return Builder<NoFieldsSet>(JSON::Object::create());
-    }
-};
-
-class Size : public JSON::ObjectBase {
-public:
-    enum {
-        NoFieldsSet = 0,
-        WidthSet = 1 << 0,
-        HeightSet = 1 << 1,
-        AllFieldsSet = (WidthSet | HeightSet)
-    };
-
-    template<int STATE>
-    class Builder {
-    private:
-        RefPtr<JSON::Object> m_result;
-
-        template<int STEP> Builder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<Builder<STATE | STEP>*>(this);
-        }
-
-        Builder(Ref</*Size*/JSON::Object>&& object)
-            : m_result(WTFMove(object))
-        {
-            COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
-        }
-        friend class Size;
-    public:
-
-        Builder<STATE | WidthSet>& setWidth(int value)
-        {
-            COMPILE_ASSERT(!(STATE & WidthSet), property_width_already_set);
-            m_result->setInteger("width"_s, value);
-            return castState<WidthSet>();
-        }
-
-        Builder<STATE | HeightSet>& setHeight(int value)
-        {
-            COMPILE_ASSERT(!(STATE & HeightSet), property_height_already_set);
-            m_result->setInteger("height"_s, value);
-            return castState<HeightSet>();
-        }
-
-        Ref<Size> release()
-        {
-            COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
-            COMPILE_ASSERT(sizeof(Size) == sizeof(JSON::Object), cannot_cast);
-
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Size>*>(&result));
-        }
-    };
-
-    /*
-     * Synthetic constructor:
-     * Ref<Size> result = Size::create()
-     *     .setWidth(...)
-     *     .setHeight(...)
-     *     .release();
-     */
-    static Builder<NoFieldsSet> create()
-    {
-        return Builder<NoFieldsSet>(JSON::Object::create());
-    }
-};
-
-/* A rectangle specified by a reference coordinate and width/height offsets. */
-class Rect : public JSON::ObjectBase {
-public:
-    enum {
-        NoFieldsSet = 0,
-        XSet = 1 << 0,
-        YSet = 1 << 1,
-        WidthSet = 1 << 2,
-        HeightSet = 1 << 3,
-        AllFieldsSet = (XSet | YSet | WidthSet | HeightSet)
-    };
-
-    template<int STATE>
-    class Builder {
-    private:
-        RefPtr<JSON::Object> m_result;
-
-        template<int STEP> Builder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<Builder<STATE | STEP>*>(this);
-        }
-
-        Builder(Ref</*Rect*/JSON::Object>&& object)
-            : m_result(WTFMove(object))
-        {
-            COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
-        }
-        friend class Rect;
-    public:
-
-        Builder<STATE | XSet>& setX(double value)
-        {
-            COMPILE_ASSERT(!(STATE & XSet), property_x_already_set);
-            m_result->setDouble("x"_s, value);
-            return castState<XSet>();
-        }
-
-        Builder<STATE | YSet>& setY(double value)
-        {
-            COMPILE_ASSERT(!(STATE & YSet), property_y_already_set);
-            m_result->setDouble("y"_s, value);
-            return castState<YSet>();
-        }
-
-        Builder<STATE | WidthSet>& setWidth(double value)
-        {
-            COMPILE_ASSERT(!(STATE & WidthSet), property_width_already_set);
-            m_result->setDouble("width"_s, value);
-            return castState<WidthSet>();
-        }
-
-        Builder<STATE | HeightSet>& setHeight(double value)
-        {
-            COMPILE_ASSERT(!(STATE & HeightSet), property_height_already_set);
-            m_result->setDouble("height"_s, value);
-            return castState<HeightSet>();
-        }
-
-        Ref<Rect> release()
-        {
-            COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
-            COMPILE_ASSERT(sizeof(Rect) == sizeof(JSON::Object), cannot_cast);
-
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Rect>*>(&result));
-        }
-    };
-
-    /*
-     * Synthetic constructor:
-     * Ref<Rect> result = Rect::create()
-     *     .setX(...)
-     *     .setY(...)
-     *     .setWidth(...)
-     *     .setHeight(...)
-     *     .release();
-     */
-    static Builder<NoFieldsSet> create()
-    {
-        return Builder<NoFieldsSet>(JSON::Object::create());
-    }
-};
-
-class ShapeOutsideData : public JSON::ObjectBase {
-public:
-    enum {
-        NoFieldsSet = 0,
-        BoundsSet = 1 << 0,
-        AllFieldsSet = (BoundsSet)
-    };
-
-    template<int STATE>
-    class Builder {
-    private:
-        RefPtr<JSON::Object> m_result;
-
-        template<int STEP> Builder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<Builder<STATE | STEP>*>(this);
-        }
-
-        Builder(Ref</*ShapeOutsideData*/JSON::Object>&& object)
-            : m_result(WTFMove(object))
-        {
-            COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
-        }
-        friend class ShapeOutsideData;
-    public:
-
-        Builder<STATE | BoundsSet>& setBounds(RefPtr<Inspector::Protocol::OverlayTypes::Quad> value)
-        {
-            COMPILE_ASSERT(!(STATE & BoundsSet), property_bounds_already_set);
-            m_result->setArray("bounds"_s, value);
-            return castState<BoundsSet>();
-        }
-
-        Ref<ShapeOutsideData> release()
-        {
-            COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
-            COMPILE_ASSERT(sizeof(ShapeOutsideData) == sizeof(JSON::Object), cannot_cast);
-
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ShapeOutsideData>*>(&result));
-        }
-    };
-
-    /*
-     * Synthetic constructor:
-     * Ref<ShapeOutsideData> result = ShapeOutsideData::create()
-     *     .setBounds(...)
-     *     .release();
-     */
-    static Builder<NoFieldsSet> create()
-    {
-        return Builder<NoFieldsSet>(JSON::Object::create());
-    }
-
-    void setShape(RefPtr<Inspector::Protocol::OverlayTypes::DisplayPath> value)
-    {
-        JSON::ObjectBase::setArray("shape"_s, WTFMove(value));
-    }
-
-    void setMarginShape(RefPtr<Inspector::Protocol::OverlayTypes::DisplayPath> value)
-    {
-        JSON::ObjectBase::setArray("marginShape"_s, WTFMove(value));
-    }
-};
-
-/* Data that describes an element to be highlighted. */
-class ElementData : public JSON::ObjectBase {
-public:
-    enum {
-        NoFieldsSet = 0,
-        TagNameSet = 1 << 0,
-        IdValueSet = 1 << 1,
-        AllFieldsSet = (TagNameSet | IdValueSet)
-    };
-
-    template<int STATE>
-    class Builder {
-    private:
-        RefPtr<JSON::Object> m_result;
-
-        template<int STEP> Builder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<Builder<STATE | STEP>*>(this);
-        }
-
-        Builder(Ref</*ElementData*/JSON::Object>&& object)
-            : m_result(WTFMove(object))
-        {
-            COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
-        }
-        friend class ElementData;
-    public:
-
-        Builder<STATE | TagNameSet>& setTagName(const String& value)
-        {
-            COMPILE_ASSERT(!(STATE & TagNameSet), property_tagName_already_set);
-            m_result->setString("tagName"_s, value);
-            return castState<TagNameSet>();
-        }
-
-        Builder<STATE | IdValueSet>& setIdValue(const String& value)
-        {
-            COMPILE_ASSERT(!(STATE & IdValueSet), property_idValue_already_set);
-            m_result->setString("idValue"_s, value);
-            return castState<IdValueSet>();
-        }
-
-        Ref<ElementData> release()
-        {
-            COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
-            COMPILE_ASSERT(sizeof(ElementData) == sizeof(JSON::Object), cannot_cast);
-
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ElementData>*>(&result));
-        }
-    };
-
-    /*
-     * Synthetic constructor:
-     * Ref<ElementData> result = ElementData::create()
-     *     .setTagName(...)
-     *     .setIdValue(...)
-     *     .release();
-     */
-    static Builder<NoFieldsSet> create()
-    {
-        return Builder<NoFieldsSet>(JSON::Object::create());
-    }
-
-    void setClasses(RefPtr<JSON::ArrayOf<String>> value)
-    {
-        JSON::ObjectBase::setArray("classes"_s, WTFMove(value));
-    }
-
-    void setSize(RefPtr<Inspector::Protocol::OverlayTypes::Size> value)
-    {
-        JSON::ObjectBase::setObject("size"_s, WTFMove(value));
-    }
-
-    void setRole(const String& value)
-    {
-        JSON::ObjectBase::setString("role"_s, value);
-    }
-
-    void setPseudoElement(const String& value)
-    {
-        JSON::ObjectBase::setString("pseudoElement"_s, value);
-    }
-
-    void setShapeOutsideData(RefPtr<Inspector::Protocol::OverlayTypes::ShapeOutsideData> value)
-    {
-        JSON::ObjectBase::setObject("shapeOutsideData"_s, WTFMove(value));
-    }
-};
-
-/* Data required to highlight multiple quads. */
-class FragmentHighlightData : public JSON::ObjectBase {
-public:
-    enum {
-        NoFieldsSet = 0,
-        QuadsSet = 1 << 0,
-        ContentColorSet = 1 << 1,
-        ContentOutlineColorSet = 1 << 2,
-        PaddingColorSet = 1 << 3,
-        BorderColorSet = 1 << 4,
-        MarginColorSet = 1 << 5,
-        AllFieldsSet = (QuadsSet | ContentColorSet | ContentOutlineColorSet | PaddingColorSet | BorderColorSet | MarginColorSet)
-    };
-
-    template<int STATE>
-    class Builder {
-    private:
-        RefPtr<JSON::Object> m_result;
-
-        template<int STEP> Builder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<Builder<STATE | STEP>*>(this);
-        }
-
-        Builder(Ref</*FragmentHighlightData*/JSON::Object>&& object)
-            : m_result(WTFMove(object))
-        {
-            COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
-        }
-        friend class FragmentHighlightData;
-    public:
-
-        Builder<STATE | QuadsSet>& setQuads(RefPtr<JSON::ArrayOf<Inspector::Protocol::OverlayTypes::Quad>> value)
-        {
-            COMPILE_ASSERT(!(STATE & QuadsSet), property_quads_already_set);
-            m_result->setArray("quads"_s, value);
-            return castState<QuadsSet>();
-        }
-
-        Builder<STATE | ContentColorSet>& setContentColor(const String& value)
-        {
-            COMPILE_ASSERT(!(STATE & ContentColorSet), property_contentColor_already_set);
-            m_result->setString("contentColor"_s, value);
-            return castState<ContentColorSet>();
-        }
-
-        Builder<STATE | ContentOutlineColorSet>& setContentOutlineColor(const String& value)
-        {
-            COMPILE_ASSERT(!(STATE & ContentOutlineColorSet), property_contentOutlineColor_already_set);
-            m_result->setString("contentOutlineColor"_s, value);
-            return castState<ContentOutlineColorSet>();
-        }
-
-        Builder<STATE | PaddingColorSet>& setPaddingColor(const String& value)
-        {
-            COMPILE_ASSERT(!(STATE & PaddingColorSet), property_paddingColor_already_set);
-            m_result->setString("paddingColor"_s, value);
-            return castState<PaddingColorSet>();
-        }
-
-        Builder<STATE | BorderColorSet>& setBorderColor(const String& value)
-        {
-            COMPILE_ASSERT(!(STATE & BorderColorSet), property_borderColor_already_set);
-            m_result->setString("borderColor"_s, value);
-            return castState<BorderColorSet>();
-        }
-
-        Builder<STATE | MarginColorSet>& setMarginColor(const String& value)
-        {
-            COMPILE_ASSERT(!(STATE & MarginColorSet), property_marginColor_already_set);
-            m_result->setString("marginColor"_s, value);
-            return castState<MarginColorSet>();
-        }
-
-        Ref<FragmentHighlightData> release()
-        {
-            COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
-            COMPILE_ASSERT(sizeof(FragmentHighlightData) == sizeof(JSON::Object), cannot_cast);
-
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<FragmentHighlightData>*>(&result));
-        }
-    };
-
-    /*
-     * Synthetic constructor:
-     * Ref<FragmentHighlightData> result = FragmentHighlightData::create()
-     *     .setQuads(...)
-     *     .setContentColor(...)
-     *     .setContentOutlineColor(...)
-     *     .setPaddingColor(...)
-     *     .setBorderColor(...)
-     *     .setMarginColor(...)
-     *     .release();
-     */
-    static Builder<NoFieldsSet> create()
-    {
-        return Builder<NoFieldsSet>(JSON::Object::create());
-    }
-};
-
-/* Data required to highlight a DOM node. */
-class NodeHighlightData : public JSON::ObjectBase {
-public:
-    enum {
-        NoFieldsSet = 0,
-        ScrollOffsetSet = 1 << 0,
-        FragmentsSet = 1 << 1,
-        AllFieldsSet = (ScrollOffsetSet | FragmentsSet)
-    };
-
-    template<int STATE>
-    class Builder {
-    private:
-        RefPtr<JSON::Object> m_result;
-
-        template<int STEP> Builder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<Builder<STATE | STEP>*>(this);
-        }
-
-        Builder(Ref</*NodeHighlightData*/JSON::Object>&& object)
-            : m_result(WTFMove(object))
-        {
-            COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
-        }
-        friend class NodeHighlightData;
-    public:
-
-        Builder<STATE | ScrollOffsetSet>& setScrollOffset(RefPtr<Inspector::Protocol::OverlayTypes::Point> value)
-        {
-            COMPILE_ASSERT(!(STATE & ScrollOffsetSet), property_scrollOffset_already_set);
-            m_result->setObject("scrollOffset"_s, value);
-            return castState<ScrollOffsetSet>();
-        }
-
-        Builder<STATE | FragmentsSet>& setFragments(RefPtr<JSON::ArrayOf<Inspector::Protocol::OverlayTypes::FragmentHighlightData>> value)
-        {
-            COMPILE_ASSERT(!(STATE & FragmentsSet), property_fragments_already_set);
-            m_result->setArray("fragments"_s, value);
-            return castState<FragmentsSet>();
-        }
-
-        Ref<NodeHighlightData> release()
-        {
-            COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
-            COMPILE_ASSERT(sizeof(NodeHighlightData) == sizeof(JSON::Object), cannot_cast);
-
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<NodeHighlightData>*>(&result));
-        }
-    };
-
-    /*
-     * Synthetic constructor:
-     * Ref<NodeHighlightData> result = NodeHighlightData::create()
-     *     .setScrollOffset(...)
-     *     .setFragments(...)
-     *     .release();
-     */
-    static Builder<NoFieldsSet> create()
-    {
-        return Builder<NoFieldsSet>(JSON::Object::create());
-    }
-
-    void setElementData(RefPtr<Inspector::Protocol::OverlayTypes::ElementData> value)
-    {
-        JSON::ObjectBase::setObject("elementData"_s, WTFMove(value));
-    }
-};
-
-/* Data required to configure the overlay's size and scaling behavior. */
-class OverlayConfiguration : public JSON::ObjectBase {
-public:
-    enum {
-        NoFieldsSet = 0,
-        DeviceScaleFactorSet = 1 << 0,
-        ViewportSizeSet = 1 << 1,
-        PageScaleFactorSet = 1 << 2,
-        PageZoomFactorSet = 1 << 3,
-        ScrollOffsetSet = 1 << 4,
-        ContentInsetSet = 1 << 5,
-        ShowRulersSet = 1 << 6,
-        AllFieldsSet = (DeviceScaleFactorSet | ViewportSizeSet | PageScaleFactorSet | PageZoomFactorSet | ScrollOffsetSet | ContentInsetSet | ShowRulersSet)
-    };
-
-    template<int STATE>
-    class Builder {
-    private:
-        RefPtr<JSON::Object> m_result;
-
-        template<int STEP> Builder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<Builder<STATE | STEP>*>(this);
-        }
-
-        Builder(Ref</*OverlayConfiguration*/JSON::Object>&& object)
-            : m_result(WTFMove(object))
-        {
-            COMPILE_ASSERT(STATE == NoFieldsSet, builder_created_in_non_init_state);
-        }
-        friend class OverlayConfiguration;
-    public:
-
-        Builder<STATE | DeviceScaleFactorSet>& setDeviceScaleFactor(double value)
-        {
-            COMPILE_ASSERT(!(STATE & DeviceScaleFactorSet), property_deviceScaleFactor_already_set);
-            m_result->setDouble("deviceScaleFactor"_s, value);
-            return castState<DeviceScaleFactorSet>();
-        }
-
-        Builder<STATE | ViewportSizeSet>& setViewportSize(RefPtr<Inspector::Protocol::OverlayTypes::Size> value)
-        {
-            COMPILE_ASSERT(!(STATE & ViewportSizeSet), property_viewportSize_already_set);
-            m_result->setObject("viewportSize"_s, value);
-            return castState<ViewportSizeSet>();
-        }
-
-        Builder<STATE | PageScaleFactorSet>& setPageScaleFactor(double value)
-        {
-            COMPILE_ASSERT(!(STATE & PageScaleFactorSet), property_pageScaleFactor_already_set);
-            m_result->setDouble("pageScaleFactor"_s, value);
-            return castState<PageScaleFactorSet>();
-        }
-
-        Builder<STATE | PageZoomFactorSet>& setPageZoomFactor(double value)
-        {
-            COMPILE_ASSERT(!(STATE & PageZoomFactorSet), property_pageZoomFactor_already_set);
-            m_result->setDouble("pageZoomFactor"_s, value);
-            return castState<PageZoomFactorSet>();
-        }
-
-        Builder<STATE | ScrollOffsetSet>& setScrollOffset(RefPtr<Inspector::Protocol::OverlayTypes::Point> value)
-        {
-            COMPILE_ASSERT(!(STATE & ScrollOffsetSet), property_scrollOffset_already_set);
-            m_result->setObject("scrollOffset"_s, value);
-            return castState<ScrollOffsetSet>();
-        }
-
-        Builder<STATE | ContentInsetSet>& setContentInset(RefPtr<Inspector::Protocol::OverlayTypes::Size> value)
-        {
-            COMPILE_ASSERT(!(STATE & ContentInsetSet), property_contentInset_already_set);
-            m_result->setObject("contentInset"_s, value);
-            return castState<ContentInsetSet>();
-        }
-
-        Builder<STATE | ShowRulersSet>& setShowRulers(bool value)
-        {
-            COMPILE_ASSERT(!(STATE & ShowRulersSet), property_showRulers_already_set);
-            m_result->setBoolean("showRulers"_s, value);
-            return castState<ShowRulersSet>();
-        }
-
-        Ref<OverlayConfiguration> release()
-        {
-            COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
-            COMPILE_ASSERT(sizeof(OverlayConfiguration) == sizeof(JSON::Object), cannot_cast);
-
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<OverlayConfiguration>*>(&result));
-        }
-    };
-
-    /*
-     * Synthetic constructor:
-     * Ref<OverlayConfiguration> result = OverlayConfiguration::create()
-     *     .setDeviceScaleFactor(...)
-     *     .setViewportSize(...)
-     *     .setPageScaleFactor(...)
-     *     .setPageZoomFactor(...)
-     *     .setScrollOffset(...)
-     *     .setContentInset(...)
-     *     .setShowRulers(...)
-     *     .release();
-     */
-    static Builder<NoFieldsSet> create()
-    {
-        return Builder<NoFieldsSet>(JSON::Object::create());
-    }
-};
-
-} // OverlayTypes
-
 namespace Page {
 /* List of settings able to be overridden by WebInspector. Keep this in sync with FOR_EACH_INSPECTOR_OVERRIDE_SETTING. */
 enum class Setting {
-    AuthorAndUserStylesEnabled = 120,
-    ICECandidateFilteringEnabled = 121,
-    ImagesEnabled = 122,
-    MediaCaptureRequiresSecureConnection = 123,
-    MockCaptureDevicesEnabled = 124,
-    NeedsSiteSpecificQuirks = 125,
-    ScriptEnabled = 126,
-    WebSecurityEnabled = 127,
+    AuthorAndUserStylesEnabled = 137,
+    ICECandidateFilteringEnabled = 138,
+    ImagesEnabled = 139,
+    MediaCaptureRequiresSecureConnection = 140,
+    MockCaptureDevicesEnabled = 141,
+    NeedsSiteSpecificQuirks = 142,
+    ScriptEnabled = 143,
+    WebRTCEncryptionEnabled = 144,
+    WebSecurityEnabled = 145,
 }; // enum class Setting
 /* Resource type as it was perceived by the rendering engine. */
 enum class ResourceType {
-    Document = 107,
-    Stylesheet = 108,
-    Image = 109,
-    Font = 110,
-    Script = 111,
-    XHR = 112,
-    Fetch = 113,
-    Ping = 114,
-    Beacon = 115,
-    WebSocket = 116,
-    Other = 117,
+    Document = 124,
+    StyleSheet = 125,
+    Image = 126,
+    Font = 127,
+    Script = 128,
+    XHR = 129,
+    Fetch = 130,
+    Ping = 131,
+    Beacon = 132,
+    WebSocket = 133,
+    Other = 134,
 }; // enum class ResourceType
 /* Coordinate system used by supplied coordinates. */
 enum class CoordinateSystem {
-    Viewport = 128,
-    Page = 129,
+    Viewport = 146,
+    Page = 147,
 }; // enum class CoordinateSystem
 /* Same-Site policy of a cookie. */
 enum class CookieSameSitePolicy {
-    None = 130,
-    Lax = 131,
-    Strict = 132,
+    None = 148,
+    Lax = 149,
+    Strict = 150,
 }; // enum class CookieSameSitePolicy
 /* Page appearance name. */
 enum class Appearance {
-    Light = 133,
-    Dark = 134,
+    Light = 151,
+    Dark = 152,
 }; // enum class Appearance
 /* Information about the Frame on the page. */
 class Frame : public JSON::ObjectBase {
@@ -7215,8 +6788,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Frame) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Frame>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Frame>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -7300,8 +6874,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(FrameResource) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<FrameResource>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<FrameResource>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -7386,8 +6961,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(FrameResourceTree) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<FrameResourceTree>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<FrameResourceTree>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -7464,8 +7040,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(SearchResult) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<SearchResult>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<SearchResult>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -7599,8 +7176,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Cookie) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Cookie>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Cookie>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -7630,15 +7208,16 @@ public:
 namespace Recording {
 /* The type of the recording. */
 enum class Type {
-    Canvas2D = 12,
-    CanvasBitmapRenderer = 135,
-    CanvasWebGL = 136,
+    Canvas2D = 28,
+    CanvasBitmapRenderer = 153,
+    CanvasWebGL = 154,
+    CanvasWebGL2 = 155,
 }; // enum class Type
 /*  */
 enum class Initiator {
-    Frontend = 137,
-    Console = 138,
-    AutoCapture = 139,
+    Frontend = 156,
+    Console = 157,
+    AutoCapture = 158,
 }; // enum class Initiator
 /* Information about the initial state of the recorded object. */
 class InitialState : public JSON::ObjectBase {
@@ -7671,8 +7250,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(InitialState) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<InitialState>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<InitialState>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -7746,8 +7326,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Frame) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Frame>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Frame>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -7835,8 +7416,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Recording) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Recording>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Recording>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -7868,29 +7450,30 @@ class RemoteObject : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating RemoteObject.
     enum class Type {
-        Object = 140,
-        Function = 141,
-        Undefined = 142,
-        String = 94,
-        Number = 93,
-        Boolean = 143,
-        Symbol = 144,
+        Object = 159,
+        Function = 160,
+        Undefined = 161,
+        String = 111,
+        Number = 110,
+        Boolean = 162,
+        Symbol = 163,
+        Bigint = 164,
     }; // enum class Type
     // Named after property name 'subtype' while generating RemoteObject.
     enum class Subtype {
-        Array = 95,
-        Null = 96,
-        Node = 145,
-        Regexp = 146,
-        Date = 69,
-        Error = 38,
-        Map = 147,
-        Set = 148,
-        Weakmap = 149,
-        Weakset = 150,
-        Iterator = 151,
-        Class = 152,
-        Proxy = 153,
+        Array = 112,
+        Null = 113,
+        Node = 165,
+        Regexp = 166,
+        Date = 85,
+        Error = 55,
+        Map = 167,
+        Set = 168,
+        Weakmap = 169,
+        Weakset = 170,
+        Iterator = 171,
+        Class = 172,
+        Proxy = 173,
     }; // enum class Subtype
     enum {
         NoFieldsSet = 0,
@@ -7928,8 +7511,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(RemoteObject) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<RemoteObject>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<RemoteObject>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -7990,29 +7574,30 @@ class ObjectPreview : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating ObjectPreview.
     enum class Type {
-        Object = 140,
-        Function = 141,
-        Undefined = 142,
-        String = 94,
-        Number = 93,
-        Boolean = 143,
-        Symbol = 144,
+        Object = 159,
+        Function = 160,
+        Undefined = 161,
+        String = 111,
+        Number = 110,
+        Boolean = 162,
+        Symbol = 163,
+        Bigint = 164,
     }; // enum class Type
     // Named after property name 'subtype' while generating ObjectPreview.
     enum class Subtype {
-        Array = 95,
-        Null = 96,
-        Node = 145,
-        Regexp = 146,
-        Date = 69,
-        Error = 38,
-        Map = 147,
-        Set = 148,
-        Weakmap = 149,
-        Weakset = 150,
-        Iterator = 151,
-        Class = 152,
-        Proxy = 153,
+        Array = 112,
+        Null = 113,
+        Node = 165,
+        Regexp = 166,
+        Date = 85,
+        Error = 55,
+        Map = 167,
+        Set = 168,
+        Weakmap = 169,
+        Weakset = 170,
+        Iterator = 171,
+        Class = 172,
+        Proxy = 173,
     }; // enum class Subtype
     enum {
         NoFieldsSet = 0,
@@ -8058,8 +7643,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ObjectPreview) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ObjectPreview>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ObjectPreview>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8110,30 +7696,31 @@ class PropertyPreview : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating PropertyPreview.
     enum class Type {
-        Object = 140,
-        Function = 141,
-        Undefined = 142,
-        String = 94,
-        Number = 93,
-        Boolean = 143,
-        Symbol = 144,
-        Accessor = 154,
+        Object = 159,
+        Function = 160,
+        Undefined = 161,
+        String = 111,
+        Number = 110,
+        Boolean = 162,
+        Symbol = 163,
+        Bigint = 164,
+        Accessor = 174,
     }; // enum class Type
     // Named after property name 'subtype' while generating PropertyPreview.
     enum class Subtype {
-        Array = 95,
-        Null = 96,
-        Node = 145,
-        Regexp = 146,
-        Date = 69,
-        Error = 38,
-        Map = 147,
-        Set = 148,
-        Weakmap = 149,
-        Weakset = 150,
-        Iterator = 151,
-        Class = 152,
-        Proxy = 153,
+        Array = 112,
+        Null = 113,
+        Node = 165,
+        Regexp = 166,
+        Date = 85,
+        Error = 55,
+        Map = 167,
+        Set = 168,
+        Weakmap = 169,
+        Weakset = 170,
+        Iterator = 171,
+        Class = 172,
+        Proxy = 173,
     }; // enum class Subtype
     enum {
         NoFieldsSet = 0,
@@ -8179,8 +7766,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(PropertyPreview) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<PropertyPreview>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<PropertyPreview>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8255,8 +7843,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(EntryPreview) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<EntryPreview>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<EntryPreview>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8315,8 +7904,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CollectionEntry) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CollectionEntry>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CollectionEntry>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8392,8 +7982,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(PropertyDescriptor) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<PropertyDescriptor>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<PropertyDescriptor>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8490,8 +8081,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(InternalPropertyDescriptor) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<InternalPropertyDescriptor>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<InternalPropertyDescriptor>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8543,8 +8135,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(CallArgument) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<CallArgument>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<CallArgument>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8632,8 +8225,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ExecutionContextDescription) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ExecutionContextDescription>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ExecutionContextDescription>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8654,10 +8248,10 @@ public:
 
 /* Syntax error type: "none" for no error, "irrecoverable" for unrecoverable errors, "unterminated-literal" for when there is an unterminated literal, "recoverable" for when the expression is unfinished but valid so far. */
 enum class SyntaxErrorType {
-    None = 155,
-    Irrecoverable = 156,
-    UnterminatedLiteral = 157,
-    Recoverable = 158,
+    None = 175,
+    Irrecoverable = 176,
+    UnterminatedLiteral = 177,
+    Recoverable = 178,
 }; // enum class SyntaxErrorType
 /* Range of an error in source code. */
 class ErrorRange : public JSON::ObjectBase {
@@ -8706,8 +8300,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ErrorRange) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ErrorRange>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ErrorRange>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8754,8 +8349,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(StructureDescription) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<StructureDescription>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<StructureDescription>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8808,7 +8404,8 @@ public:
         IsStringSet = 1 << 6,
         IsObjectSet = 1 << 7,
         IsSymbolSet = 1 << 8,
-        AllFieldsSet = (IsFunctionSet | IsUndefinedSet | IsNullSet | IsBooleanSet | IsIntegerSet | IsNumberSet | IsStringSet | IsObjectSet | IsSymbolSet)
+        IsBigIntSet = 1 << 9,
+        AllFieldsSet = (IsFunctionSet | IsUndefinedSet | IsNullSet | IsBooleanSet | IsIntegerSet | IsNumberSet | IsStringSet | IsObjectSet | IsSymbolSet | IsBigIntSet)
     };
 
     template<int STATE>
@@ -8892,13 +8489,21 @@ public:
             return castState<IsSymbolSet>();
         }
 
+        Builder<STATE | IsBigIntSet>& setIsBigInt(bool value)
+        {
+            COMPILE_ASSERT(!(STATE & IsBigIntSet), property_isBigInt_already_set);
+            m_result->setBoolean("isBigInt"_s, value);
+            return castState<IsBigIntSet>();
+        }
+
         Ref<TypeSet> release()
         {
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(TypeSet) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<TypeSet>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<TypeSet>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -8914,6 +8519,7 @@ public:
      *     .setIsString(...)
      *     .setIsObject(...)
      *     .setIsSymbol(...)
+     *     .setIsBigInt(...)
      *     .release();
      */
     static Builder<NoFieldsSet> create()
@@ -8961,8 +8567,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(TypeDescription) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<TypeDescription>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<TypeDescription>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9053,8 +8660,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(TypeLocation) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<TypeLocation>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<TypeLocation>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9135,8 +8743,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(BasicBlock) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<BasicBlock>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<BasicBlock>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9160,9 +8769,9 @@ public:
 namespace ScriptProfiler {
 /*  */
 enum class EventType {
-    API = 159,
-    Microtask = 160,
-    Other = 117,
+    API = 179,
+    Microtask = 180,
+    Other = 134,
 }; // enum class EventType
 class Event : public JSON::ObjectBase {
 public:
@@ -9218,8 +8827,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Event) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Event>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Event>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9283,8 +8893,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(ExpressionLocation) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<ExpressionLocation>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<ExpressionLocation>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9371,8 +8982,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(StackFrame) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<StackFrame>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<StackFrame>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9443,8 +9055,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(StackTrace) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<StackTrace>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<StackTrace>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9499,8 +9112,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Samples) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Samples>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Samples>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9550,8 +9164,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Connection) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Connection>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Connection>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9607,8 +9222,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Certificate) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Certificate>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Certificate>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9679,8 +9295,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Security) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Security>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Security>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9771,8 +9388,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(Configuration) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<Configuration>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<Configuration>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9799,10 +9417,10 @@ class TargetInfo : public JSON::ObjectBase {
 public:
     // Named after property name 'type' while generating TargetInfo.
     enum class Type {
-        JavaScript = 20,
-        Page = 66,
-        Worker = 161,
-        ServiceWorker = 162,
+        JavaScript = 36,
+        Page = 82,
+        Worker = 181,
+        ServiceWorker = 182,
     }; // enum class Type
     enum {
         NoFieldsSet = 0,
@@ -9848,8 +9466,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(TargetInfo) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<TargetInfo>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<TargetInfo>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -9871,36 +9490,36 @@ public:
 namespace Timeline {
 /* Timeline record type. */
 enum class EventType {
-    EventDispatch = 163,
-    ScheduleStyleRecalculation = 164,
-    RecalculateStyles = 165,
-    InvalidateLayout = 166,
-    Layout = 167,
-    Paint = 168,
-    Composite = 169,
-    RenderingFrame = 170,
-    TimerInstall = 171,
-    TimerRemove = 172,
-    TimerFire = 173,
-    EvaluateScript = 174,
-    TimeStamp = 175,
-    Time = 176,
-    TimeEnd = 177,
-    FunctionCall = 178,
-    ProbeSample = 179,
-    ConsoleProfile = 180,
-    RequestAnimationFrame = 181,
-    CancelAnimationFrame = 182,
-    FireAnimationFrame = 183,
-    ObserverCallback = 184,
+    EventDispatch = 183,
+    ScheduleStyleRecalculation = 184,
+    RecalculateStyles = 185,
+    InvalidateLayout = 186,
+    Layout = 187,
+    Paint = 188,
+    Composite = 189,
+    RenderingFrame = 190,
+    TimerInstall = 191,
+    TimerRemove = 192,
+    TimerFire = 193,
+    EvaluateScript = 194,
+    TimeStamp = 195,
+    Time = 196,
+    TimeEnd = 197,
+    FunctionCall = 198,
+    ProbeSample = 199,
+    ConsoleProfile = 200,
+    RequestAnimationFrame = 201,
+    CancelAnimationFrame = 202,
+    FireAnimationFrame = 203,
+    ObserverCallback = 204,
 }; // enum class EventType
 /* Instrument types. */
 enum class Instrument {
-    ScriptProfiler = 185,
-    Timeline = 186,
-    CPU = 187,
-    Memory = 188,
-    Heap = 189,
+    ScriptProfiler = 205,
+    Timeline = 206,
+    CPU = 207,
+    Memory = 208,
+    Heap = 209,
 }; // enum class Instrument
 /* Timeline record contains information about the recorded activity. */
 class TimelineEvent : public JSON::Object {
@@ -9949,8 +9568,9 @@ public:
             COMPILE_ASSERT(STATE == AllFieldsSet, result_is_not_ready);
             COMPILE_ASSERT(sizeof(TimelineEvent) == sizeof(JSON::Object), cannot_cast);
 
-            Ref<JSON::Object> result = m_result.releaseNonNull();
-            return WTFMove(*reinterpret_cast<Ref<TimelineEvent>*>(&result));
+            Ref<JSON::Object> jsonResult = m_result.releaseNonNull();
+            auto result = WTFMove(*reinterpret_cast<Ref<TimelineEvent>*>(&jsonResult));
+            return result;
         }
     };
 
@@ -10053,13 +9673,21 @@ namespace InspectorHelpers {
 template<typename ProtocolEnumType>
 Optional<ProtocolEnumType> parseEnumValueFromString(const String&);
 
+#if ENABLE(RESOURCE_USAGE)
+// Enums in the 'CPUProfiler' Domain
+template<>
+JS_EXPORT_PRIVATE Optional<Inspector::Protocol::CPUProfiler::ThreadInfo::Type> parseEnumValueFromString<Inspector::Protocol::CPUProfiler::ThreadInfo::Type>(const String&);
+#endif // ENABLE(RESOURCE_USAGE)
+
 // Enums in the 'CSS' Domain
 template<>
 JS_EXPORT_PRIVATE Optional<Inspector::Protocol::CSS::StyleSheetOrigin> parseEnumValueFromString<Inspector::Protocol::CSS::StyleSheetOrigin>(const String&);
 template<>
+JS_EXPORT_PRIVATE Optional<Inspector::Protocol::CSS::PseudoId> parseEnumValueFromString<Inspector::Protocol::CSS::PseudoId>(const String&);
+template<>
 JS_EXPORT_PRIVATE Optional<Inspector::Protocol::CSS::CSSPropertyStatus> parseEnumValueFromString<Inspector::Protocol::CSS::CSSPropertyStatus>(const String&);
 template<>
-JS_EXPORT_PRIVATE Optional<Inspector::Protocol::CSS::CSSMedia::Source> parseEnumValueFromString<Inspector::Protocol::CSS::CSSMedia::Source>(const String&);
+JS_EXPORT_PRIVATE Optional<Inspector::Protocol::CSS::Grouping::Type> parseEnumValueFromString<Inspector::Protocol::CSS::Grouping::Type>(const String&);
 
 // Enums in the 'Canvas' Domain
 template<>
@@ -10195,6 +9823,10 @@ template<typename T> struct DefaultHash;
 template<>
 struct DefaultHash<Inspector::Protocol::CSS::StyleSheetOrigin> {
     typedef IntHash<Inspector::Protocol::CSS::StyleSheetOrigin> Hash;
+};
+template<>
+struct DefaultHash<Inspector::Protocol::CSS::PseudoId> {
+    typedef IntHash<Inspector::Protocol::CSS::PseudoId> Hash;
 };
 template<>
 struct DefaultHash<Inspector::Protocol::CSS::CSSPropertyStatus> {

@@ -569,6 +569,11 @@ public:
         m_assembler.msub<64>(dest, mulLeft, mulRight, ARM64Registers::zr);
     }
 
+    void multiplySignExtend32(RegisterID left, RegisterID right, RegisterID dest)
+    {
+        m_assembler.smull(dest, left, right);
+    }
+
     void div32(RegisterID dividend, RegisterID divisor, RegisterID dest)
     {
         m_assembler.sdiv<32>(dest, dividend, divisor);
@@ -2459,7 +2464,7 @@ public:
     void moveDoubleConditionally32(RelationalCondition cond, RegisterID left, RegisterID right, FPRegisterID thenCase, FPRegisterID elseCase, FPRegisterID dest)
     {
         m_assembler.cmp<32>(left, right);
-        m_assembler.fcsel<32>(dest, thenCase, elseCase, ARM64Condition(cond));
+        m_assembler.fcsel<64>(dest, thenCase, elseCase, ARM64Condition(cond));
     }
 
     void moveDoubleConditionally32(RelationalCondition cond, RegisterID left, TrustedImm32 right, FPRegisterID thenCase, FPRegisterID elseCase, FPRegisterID dest)
@@ -2524,6 +2529,15 @@ public:
     {
         m_assembler.tst<64>(left, right);
         m_assembler.fcsel<64>(dest, thenCase, elseCase, ARM64Condition(cond));
+    }
+
+    // Bit field operations:
+
+    // destBitOffset is the top bit of the destination where the bits should be copied to. Zero is the lowest order bit.
+    void bitFieldInsert64(RegisterID source, unsigned destBitOffset, unsigned width, RegisterID dest)
+    {
+        ASSERT(width <= 64 - destBitOffset && destBitOffset < 64);
+        m_assembler.bfi<64>(dest, source, destBitOffset, width);
     }
 
     // Forwards / external control flow operations:
@@ -2957,6 +2971,23 @@ public:
         return Jump(makeBranch(cond));
     }
 
+    Jump branchAdd32(ResultCondition cond, TrustedImm32 imm, Address address)
+    {
+        load32(address, getCachedDataTempRegisterIDAndInvalidate());
+
+        if (isUInt12(imm.m_value))
+            m_assembler.add<32, S>(dataTempRegister, dataTempRegister, UInt12(imm.m_value));
+        else if (isUInt12(-imm.m_value))
+            m_assembler.sub<32, S>(dataTempRegister, dataTempRegister, UInt12(-imm.m_value));
+        else {
+            move(imm, getCachedMemoryTempRegisterIDAndInvalidate());
+            m_assembler.add<32, S>(dataTempRegister, dataTempRegister, memoryTempRegister);
+        }
+
+        store32(dataTempRegister, address);
+        return Jump(makeBranch(cond));
+    }
+
     Jump branchAdd64(ResultCondition cond, RegisterID op1, RegisterID op2, RegisterID dest)
     {
         m_assembler.add<64, S>(dest, op1, op2);
@@ -3185,40 +3216,34 @@ public:
         return Jump(label, m_makeJumpPatchable ? Assembler::JumpNoConditionFixedSize : Assembler::JumpNoCondition);
     }
 
-    void jump(RegisterID target, PtrTag)
+    void farJump(RegisterID target, PtrTag)
     {
         m_assembler.br(target);
     }
 
-    void jump(Address address, PtrTag)
+    void farJump(Address address, PtrTag)
     {
         load64(address, getCachedDataTempRegisterIDAndInvalidate());
         m_assembler.br(dataTempRegister);
     }
     
-    void jump(BaseIndex address, PtrTag)
+    void farJump(BaseIndex address, PtrTag)
     {
         load64(address, getCachedDataTempRegisterIDAndInvalidate());
         m_assembler.br(dataTempRegister);
     }
 
-    void jump(AbsoluteAddress address, PtrTag)
+    void farJump(AbsoluteAddress address, PtrTag)
     {
         move(TrustedImmPtr(address.m_ptr), getCachedDataTempRegisterIDAndInvalidate());
         load64(Address(dataTempRegister), dataTempRegister);
         m_assembler.br(dataTempRegister);
     }
 
-    ALWAYS_INLINE void jump(RegisterID target, RegisterID jumpTag) { UNUSED_PARAM(jumpTag), jump(target, NoPtrTag); }
-    ALWAYS_INLINE void jump(Address address, RegisterID jumpTag) { UNUSED_PARAM(jumpTag), jump(address, NoPtrTag); }
-    ALWAYS_INLINE void jump(BaseIndex address, RegisterID jumpTag) { UNUSED_PARAM(jumpTag), jump(address, NoPtrTag); }
-    ALWAYS_INLINE void jump(AbsoluteAddress address, RegisterID jumpTag) { UNUSED_PARAM(jumpTag), jump(address, NoPtrTag); }
-
-    ALWAYS_INLINE Call makeTailRecursiveCall(Jump oldJump)
-    {
-        oldJump.link(this);
-        return tailRecursiveCall();
-    }
+    ALWAYS_INLINE void farJump(RegisterID target, RegisterID jumpTag) { UNUSED_PARAM(jumpTag), farJump(target, NoPtrTag); }
+    ALWAYS_INLINE void farJump(Address address, RegisterID jumpTag) { UNUSED_PARAM(jumpTag), farJump(address, NoPtrTag); }
+    ALWAYS_INLINE void farJump(BaseIndex address, RegisterID jumpTag) { UNUSED_PARAM(jumpTag), farJump(address, NoPtrTag); }
+    ALWAYS_INLINE void farJump(AbsoluteAddress address, RegisterID jumpTag) { UNUSED_PARAM(jumpTag), farJump(address, NoPtrTag); }
 
     ALWAYS_INLINE Call nearCall()
     {
@@ -3243,18 +3268,6 @@ public:
     {
         m_assembler.ret();
     }
-
-    ALWAYS_INLINE Call tailRecursiveCall()
-    {
-        // Like a normal call, but don't link.
-        AssemblerLabel pointerLabel = m_assembler.label();
-        moveWithFixedWidth(TrustedImmPtr(nullptr), getCachedDataTempRegisterIDAndInvalidate());
-        m_assembler.br(dataTempRegister);
-        AssemblerLabel callLabel = m_assembler.label();
-        ASSERT_UNUSED(pointerLabel, Assembler::getDifferenceBetweenLabels(callLabel, pointerLabel) == REPATCH_OFFSET_CALL_TO_POINTER);
-        return Call(callLabel, Call::Linkable);
-    }
-
 
     // Comparisons operations
 

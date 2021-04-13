@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2018 Apple Inc. All rights reserved.
+ * Copyright (C) 2011-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -106,18 +106,6 @@ typedef const char* optionString;
 #define MAXIMUM_NUMBER_OF_FTL_COMPILER_THREADS 8
 #endif
 
-#if ENABLE(EXPERIMENTAL_FEATURES)
-constexpr bool enableIntlNumberFormatToParts = true;
-#else
-constexpr bool enableIntlNumberFormatToParts = false;
-#endif
-
-#if ENABLE(EXPERIMENTAL_FEATURES)
-constexpr bool enableIntlPluralRules = true;
-#else
-constexpr bool enableIntlPluralRules = false;
-#endif
-
 #if ENABLE(WEBASSEMBLY_STREAMING_API)
 constexpr bool enableWebAssemblyStreamingApi = true;
 #else
@@ -125,6 +113,7 @@ constexpr bool enableWebAssemblyStreamingApi = false;
 #endif
 
 #define JSC_OPTIONS(v) \
+    v(bool, useKernTCSM, true, Normal, "Note: this needs to go before other options since they depend on this value.") \
     v(bool, validateOptions, false, Normal, "crashes if mis-typed JSC options were passed to the VM") \
     v(unsigned, dumpOptions, 0, Normal, "dumps JSC options (0 = None, 1 = Overridden only, 2 = All, 3 = Verbose)") \
     v(optionString, configFile, nullptr, Normal, "file to configure JSC options and logging location") \
@@ -210,6 +199,7 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     v(bool, reportTotalCompileTimes, false, Normal, nullptr) \
     v(bool, reportParseTimes, false, Normal, "dumps JS function signature and the time it took to parse") \
     v(bool, reportBytecodeCompileTimes, false, Normal, "dumps JS function signature and the time it took to bytecode compile") \
+    v(bool, countParseTimes, false, Normal, "counts parse times") \
     v(bool, verboseExitProfile, false, Normal, nullptr) \
     v(bool, verboseCFA, false, Normal, nullptr) \
     v(bool, verboseDFGFailure, false, Normal, nullptr) \
@@ -219,7 +209,6 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     v(bool, testTheFTL, false, Normal, nullptr) \
     v(bool, verboseSanitizeStack, false, Normal, nullptr) \
     v(bool, useGenerationalGC, true, Normal, nullptr) \
-    v(bool, useConcurrentBarriers, true, Normal, nullptr) \
     v(bool, useConcurrentGC, true, Normal, nullptr) \
     v(bool, collectContinuously, false, Normal, nullptr) \
     v(double, collectContinuouslyPeriodMS, 1, Normal, nullptr) \
@@ -252,8 +241,8 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     v(bool, dumpSizeClasses, false, Normal, nullptr) \
     v(bool, useBumpAllocator, true, Normal, nullptr) \
     v(bool, stealEmptyBlocksFromOtherAllocators, true, Normal, nullptr) \
-    v(bool, tradeDestructorBlocks, true, Normal, nullptr) \
     v(bool, eagerlyUpdateTopCallFrame, false, Normal, nullptr) \
+    v(bool, dumpZappedCellCrashData, false, Normal, nullptr) \
     \
     v(bool, useOSREntryToDFG, true, Normal, nullptr) \
     v(bool, useOSREntryToFTL, true, Normal, nullptr) \
@@ -284,8 +273,10 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     v(bool, useMovHintRemoval, true, Normal, nullptr) \
     v(bool, usePutStackSinking, true, Normal, nullptr) \
     v(bool, useObjectAllocationSinking, true, Normal, nullptr) \
+    v(bool, useValueRepElimination, true, Normal, nullptr) \
     v(bool, useArityFixupInlining, true, Normal, nullptr) \
     v(bool, logExecutableAllocation, false, Normal, nullptr) \
+    v(unsigned, maxDFGNodesInBasicBlockForPreciseAnalysis, 20000, Normal, "Disable precise but costly analysis and give conservative results if the number of DFG nodes in a block exceeds this threshold") \
     \
     v(bool, useConcurrentJIT, true, Normal, "allows the DFG / FTL compilation in threads other than the executing JS thread") \
     v(unsigned, numberOfDFGCompilerThreads, computeNumberOfWorkerThreads(3, 2) - 1, Normal, nullptr) \
@@ -301,13 +292,13 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     \
     v(bool, breakOnThrow, false, Normal, nullptr) \
     \
-    v(unsigned, maximumOptimizationCandidateInstructionCount, 100000, Normal, nullptr) \
+    v(unsigned, maximumOptimizationCandidateBytecodeCost, 100000, Normal, nullptr) \
     \
-    v(unsigned, maximumFunctionForCallInlineCandidateInstructionCount, 120, Normal, nullptr) \
-    v(unsigned, maximumFunctionForClosureCallInlineCandidateInstructionCount, 100, Normal, nullptr) \
-    v(unsigned, maximumFunctionForConstructInlineCandidateInstructionCount, 100, Normal, nullptr) \
+    v(unsigned, maximumFunctionForCallInlineCandidateBytecodeCost, 120, Normal, nullptr) \
+    v(unsigned, maximumFunctionForClosureCallInlineCandidateBytecodeCost, 100, Normal, nullptr) \
+    v(unsigned, maximumFunctionForConstructInlineCandidateBytecoodeCost, 100, Normal, nullptr) \
     \
-    v(unsigned, maximumFTLCandidateInstructionCount, 20000, Normal, nullptr) \
+    v(unsigned, maximumFTLCandidateBytecodeCost, 20000, Normal, nullptr) \
     \
     /* Depth of inline stack, so 1 = no inlining, 2 = one level, etc. */ \
     v(unsigned, maximumInliningDepth, 5, Normal, "maximum allowed inlining depth.  Depth of 1 means no inlining") \
@@ -315,11 +306,9 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     \
     /* Maximum size of a caller for enabling inlining. This is purely to protect us */\
     /* from super long compiles that take a lot of memory. */\
-    v(unsigned, maximumInliningCallerSize, 10000, Normal, nullptr) \
+    v(unsigned, maximumInliningCallerBytecodeCost, 10000, Normal, nullptr) \
     \
     v(unsigned, maximumVarargsForInlining, 100, Normal, nullptr) \
-    \
-    v(bool, useMaximalFlushInsertionPhase, false, Normal, "Setting to true allows the DFG's MaximalFlushInsertionPhase to run.") \
     \
     v(unsigned, maximumBinaryStringSwitchCaseLength, 50, Normal, nullptr) \
     v(unsigned, maximumBinaryStringSwitchTotalLength, 2000, Normal, nullptr) \
@@ -395,7 +384,7 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     v(unsigned, gcMaxHeapSize, 0, Normal, nullptr) \
     v(unsigned, forceRAMSize, 0, Normal, nullptr) \
     v(bool, recordGCPauseTimes, false, Normal, nullptr) \
-    v(bool, logHeapStatisticsAtExit, false, Normal, nullptr) \
+    v(bool, dumpHeapStatisticsAtVMDestruction, false, Normal, nullptr) \
     v(bool, forceCodeBlockToJettisonDueToOldAge, false, Normal, "If true, this means that anytime we can jettison a CodeBlock due to old age, we do.") \
     v(bool, useEagerCodeBlockJettisonTiming, false, Normal, "If true, the time slices for jettisoning a CodeBlock due to old age are shrunk significantly.") \
     \
@@ -434,6 +423,11 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     v(unsigned, fireOSRExitFuzzAt, 0, Normal, nullptr) \
     v(unsigned, fireOSRExitFuzzAtOrAfter, 0, Normal, nullptr) \
     \
+    v(bool, useRandomizingFuzzerAgent, false, Normal, nullptr) \
+    v(unsigned, seedOfRandomizingFuzzerAgent, 1, Normal, nullptr) \
+    v(bool, dumpRandomizingFuzzerAgentPredictions, false, Normal, nullptr) \
+    v(bool, useDoublePredictionFuzzerAgent, false, Normal, nullptr) \
+    \
     v(bool, logPhaseTimes, false, Normal, nullptr) \
     v(double, rareBlockPenalty, 0.001, Normal, nullptr) \
     v(bool, airLinearScanVerbose, false, Normal, nullptr) \
@@ -441,6 +435,7 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     v(bool, airForceBriggsAllocator, false, Normal, nullptr) \
     v(bool, airForceIRCAllocator, false, Normal, nullptr) \
     v(bool, airRandomizeRegs, false, Normal, nullptr) \
+    v(unsigned, airRandomizeRegsSeed, 0, Normal, nullptr) \
     v(bool, coalesceSpillSlots, true, Normal, nullptr) \
     v(bool, logAirRegisterPressure, false, Normal, nullptr) \
     v(bool, useB3TailDup, true, Normal, nullptr) \
@@ -479,14 +474,16 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     \
     v(bool, failToCompileWebAssemblyCode, false, Normal, "If true, no Wasm::Plan will sucessfully compile a function.") \
     v(size, webAssemblyPartialCompileLimit, 5000, Normal, "Limit on the number of bytes a Wasm::Plan::compile should attempt before checking for other work.") \
-    v(unsigned, webAssemblyBBQOptimizationLevel, 0, Normal, "B3 Optimization level for BBQ Web Assembly module compilations.") \
+    v(unsigned, webAssemblyBBQAirOptimizationLevel, 0, Normal, "Air Optimization level for BBQ Web Assembly module compilations.") \
+    v(unsigned, webAssemblyBBQB3OptimizationLevel, 1, Normal, "B3 Optimization level for BBQ Web Assembly module compilations.") \
     v(unsigned, webAssemblyOMGOptimizationLevel, Options::defaultB3OptLevel(), Normal, "B3 Optimization level for OMG Web Assembly module compilations.") \
     \
     v(bool, useBBQTierUpChecks, true, Normal, "Enables tier up checks for our BBQ code.") \
-    v(unsigned, webAssemblyOMGTierUpCount, 5000, Normal, "The countdown before we tier up a function to OMG.") \
-    v(unsigned, webAssemblyLoopDecrement, 15, Normal, "The amount the tier up countdown is decremented on each loop backedge.") \
-    v(unsigned, webAssemblyFunctionEntryDecrement, 1, Normal, "The amount the tier up countdown is decremented on each function entry.") \
-    \
+    v(bool, useWebAssemblyOSR, true, Normal, nullptr) \
+    v(int32, thresholdForOMGOptimizeAfterWarmUp, 50000, Normal, "The count before we tier up a function to OMG.") \
+    v(int32, thresholdForOMGOptimizeSoon, 500, Normal, nullptr) \
+    v(int32, omgTierUpCounterIncrementForLoop, 1, Normal, "The amount the tier up counter is incremented on each loop backedge.") \
+    v(int32, omgTierUpCounterIncrementForEntry, 15, Normal, "The amount the tier up counter is incremented on each function entry.") \
     /* FIXME: enable fast memories on iOS and pre-allocate them. https://bugs.webkit.org/show_bug.cgi?id=170774 */ \
     v(bool, useWebAssemblyFastMemory, !isIOS(), Normal, "If true, we will try to use a 32-bit address space with a signal handler to bounds check wasm memory.") \
     v(bool, logWebAssemblyMemory, false, Normal, nullptr) \
@@ -495,12 +492,14 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     v(unsigned, maxNumWebAssemblyFastMemories, 4, Normal, nullptr) \
     v(bool, useFastTLSForWasmContext, true, Normal, "If true, we will store context in fast TLS. If false, we will pin it to a register.") \
     v(bool, wasmBBQUsesAir, true, Normal, nullptr) \
+    v(size, webAssemblyBBQAirModeThreshold, isIOS() ? (10 * MB) : 0, Normal, "If 0, we always use BBQ Air. If Wasm module code size hits this threshold, we compile Wasm module with B3 BBQ mode.") \
     v(bool, useWebAssemblyStreamingApi, enableWebAssemblyStreamingApi, Normal, "Allow to run WebAssembly's Streaming API") \
     v(bool, useCallICsForWebAssemblyToJSCalls, true, Normal, "If true, we will use CallLinkInfo to inline cache Wasm to JS calls.") \
     v(bool, useEagerWebAssemblyModuleHashing, false, Normal, "Unnamed WebAssembly modules are identified in backtraces through their hash, if available.") \
+    v(bool, useWebAssemblyReferences, true, Normal, "Allow types from the wasm references spec.") \
+    v(bool, useWeakRefs, false, Normal, "Expose the WeakRef constructor.") \
     v(bool, useBigInt, false, Normal, "If true, we will enable BigInt support.") \
-    v(bool, useIntlNumberFormatToParts, enableIntlNumberFormatToParts, Normal, "If true, we will enable Intl.NumberFormat.prototype.formatToParts") \
-    v(bool, useIntlPluralRules, enableIntlPluralRules, Normal, "If true, we will enable Intl.PluralRules.") \
+    v(bool, useNullishAwareOperators, false, Normal, "Enable support for ?. and ?? operators.") \
     v(bool, useArrayAllocationProfiling, true, Normal, "If true, we will use our normal array allocation profiling. If false, the allocation profile will always claim to be undecided.") \
     v(bool, forcePolyProto, false, Normal, "If true, create_this will always create an object with a poly proto structure.") \
     v(bool, forceMiniVMMode, false, Normal, "If true, it will force mini VM mode on.") \
@@ -511,6 +510,11 @@ constexpr bool enableWebAssemblyStreamingApi = false;
     v(unsigned, thresholdForGlobalLexicalBindingEpoch, UINT_MAX, Normal, "Threshold for global lexical binding epoch. If the epoch reaches to this value, CodeBlock metadata for scope operations will be revised globally. It needs to be greater than 1.") \
     v(optionString, diskCachePath, nullptr, Restricted, nullptr) \
     v(bool, forceDiskCache, false, Restricted, nullptr) \
+    v(bool, validateAbstractInterpreterState, false, Restricted, nullptr) \
+    v(double, validateAbstractInterpreterStateProbability, 0.5, Normal, nullptr) \
+    v(optionString, dumpJITMemoryPath, nullptr, Restricted, nullptr) \
+    v(double, dumpJITMemoryFlushInterval, 10, Restricted, "Maximum time in between flushes of the JIT memory dump in seconds.") \
+    v(bool, useUnlinkedCodeBlockJettisoning, false, Normal, "If true, UnlinkedCodeBlock can be jettisoned.") \
 
 
 enum OptionEquivalence {
@@ -539,7 +543,6 @@ enum OptionEquivalence {
     v(enableArchitectureSpecificOptimizations, useArchitectureSpecificOptimizations, SameOption) \
     v(enablePolyvariantCallInlining, usePolyvariantCallInlining, SameOption) \
     v(enablePolyvariantByIdInlining, usePolyvariantByIdInlining, SameOption) \
-    v(enableMaximalFlushInsertionPhase, useMaximalFlushInsertionPhase, SameOption) \
     v(objectsAreImmortal, useImmortalObjects, SameOption) \
     v(showObjectStatistics, dumpObjectStatistics, SameOption) \
     v(disableGC, useGC, InvertedOption) \
@@ -551,6 +554,12 @@ enum OptionEquivalence {
     v(enableDollarVM, useDollarVM, SameOption) \
     v(enableWebAssembly, useWebAssembly, SameOption) \
     v(verboseDFGByteCodeParsing, verboseDFGBytecodeParsing, SameOption) \
+    v(maximumOptimizationCandidateInstructionCount, maximumOptimizationCandidateBytecodeCost, SameOption) \
+    v(maximumFunctionForCallInlineCandidateInstructionCount, maximumFunctionForCallInlineCandidateBytecodeCost, SameOption) \
+    v(maximumFunctionForClosureCallInlineCandidateInstructionCount, maximumFunctionForClosureCallInlineCandidateBytecodeCost, SameOption) \
+    v(maximumFunctionForConstructInlineCandidateInstructionCount, maximumFunctionForConstructInlineCandidateBytecoodeCost, SameOption) \
+    v(maximumFTLCandidateInstructionCount, maximumFTLCandidateBytecodeCost, SameOption) \
+    v(maximumInliningCallerSize, maximumInliningCallerBytecodeCost, SameOption) \
 
 
 class Options {
@@ -659,7 +668,7 @@ private:
 
     // Declare the singleton instance of the options store:
     JS_EXPORT_PRIVATE static Entry s_options[numberOfOptions];
-    static Entry s_defaultOptions[numberOfOptions];
+    JS_EXPORT_PRIVATE static Entry s_defaultOptions[numberOfOptions];
     static const EntryInfo s_optionsInfo[numberOfOptions];
 
     friend class Option;

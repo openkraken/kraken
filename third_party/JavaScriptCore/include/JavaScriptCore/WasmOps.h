@@ -35,16 +35,17 @@ namespace JSC { namespace Wasm {
 
 static constexpr unsigned expectedVersionNumber = 1;
 
-static constexpr unsigned numTypes = 7;
+static constexpr unsigned numTypes = 8;
 
 #define FOR_EACH_WASM_TYPE(macro) \
-    macro(Anyfunc, -0x10, B3::Void, 0) \
-    macro(I32, -0x1, B3::Int32, 1) \
-    macro(Void, -0x40, B3::Void, 2) \
-    macro(I64, -0x2, B3::Int64, 3) \
-    macro(F32, -0x3, B3::Float, 4) \
-    macro(Func, -0x20, B3::Void, 5) \
-    macro(F64, -0x4, B3::Double, 6)
+    macro(I32, -0x1, B3::Int32, 0) \
+    macro(Void, -0x40, B3::Void, 1) \
+    macro(I64, -0x2, B3::Int64, 2) \
+    macro(F32, -0x3, B3::Float, 3) \
+    macro(Func, -0x20, B3::Void, 4) \
+    macro(Anyref, -0x11, B3::Int64, 5) \
+    macro(Funcref, -0x10, B3::Int64, 6) \
+    macro(F64, -0x4, B3::Double, 7)
 #define CREATE_ENUM_VALUE(name, id, b3type, inc) name = id,
 enum Type : int8_t {
     FOR_EACH_WASM_TYPE(CREATE_ENUM_VALUE)
@@ -111,18 +112,23 @@ inline Type linearizedToType(int i)
 
 #define FOR_EACH_WASM_SPECIAL_OP(macro) \
     macro(F64Const, 0x44, Oops, 0) \
-    macro(GrowMemory, 0x40, Oops, 1) \
-    macro(I64Const, 0x42, Oops, 2) \
-    macro(TeeLocal, 0x22, Oops, 3) \
-    macro(SetLocal, 0x21, Oops, 4) \
-    macro(I32Const, 0x41, Oops, 5) \
-    macro(CurrentMemory, 0x3f, Oops, 6) \
-    macro(F32Const, 0x43, Oops, 7) \
-    macro(SetGlobal, 0x24, Oops, 8) \
-    macro(GetGlobal, 0x23, Oops, 9) \
-    macro(Call, 0x10, Oops, 10) \
-    macro(GetLocal, 0x20, Oops, 11) \
-    macro(CallIndirect, 0x11, Oops, 12)
+    macro(RefNull, 0xd0, Oops, 1) \
+    macro(RefFunc, 0xd2, Oops, 2) \
+    macro(GrowMemory, 0x40, Oops, 3) \
+    macro(I64Const, 0x42, Oops, 4) \
+    macro(TeeLocal, 0x22, Oops, 5) \
+    macro(SetLocal, 0x21, Oops, 6) \
+    macro(I32Const, 0x41, Oops, 7) \
+    macro(CurrentMemory, 0x3f, Oops, 8) \
+    macro(F32Const, 0x43, Oops, 9) \
+    macro(SetGlobal, 0x24, Oops, 10) \
+    macro(GetGlobal, 0x23, Oops, 11) \
+    macro(Call, 0x10, Oops, 12) \
+    macro(TableSet, 0x26, Oops, 13) \
+    macro(TableGet, 0x25, Oops, 14) \
+    macro(RefIsNull, 0xd1, Oops, 15) \
+    macro(GetLocal, 0x20, Oops, 16) \
+    macro(CallIndirect, 0x11, Oops, 17)
 
 #define FOR_EACH_WASM_CONTROL_FLOW_OP(macro) \
     macro(Return, 0xf, Oops, 0) \
@@ -192,13 +198,13 @@ inline Type linearizedToType(int i)
     macro(F32Nearest, 0x90, Oops, 17)
 
 #define FOR_EACH_WASM_SIMPLE_BINARY_OP(macro) \
-    macro(I32Mul, 0x6c, Mul, 0) \
-    macro(I32Sub, 0x6b, Sub, 1) \
-    macro(F64Le, 0x65, LessEqual, 2) \
-    macro(F32Min, 0x96, Select(Equal(@0, @1), BitOr(@0, @1), Select(LessThan(@0, @1), @0, @1)), 3) \
+    macro(I64ShrS, 0x87, SShr(@0, Trunc(@1)), 0) \
+    macro(I32Mul, 0x6c, Mul, 1) \
+    macro(I32Sub, 0x6b, Sub, 2) \
+    macro(F64Le, 0x65, LessEqual, 3) \
     macro(F64Ne, 0x62, NotEqual, 4) \
     macro(F64Lt, 0x63, LessThan, 5) \
-    macro(F32Max, 0x97, Select(Equal(@0, @1), BitAnd(@0, @1), Select(LessThan(@0, @1), @1, @0)), 6) \
+    macro(F32Max, 0x97, Select(Equal(@0, @1), BitAnd(@0, @1), Select(LessThan(@0, @1), @1, Select(GreaterThan(@0, @1), @0, Add(@0, @1)))), 6) \
     macro(F64Mul, 0xa2, Mul, 7) \
     macro(F32Div, 0x95, Div, 8) \
     macro(F32Copysign, 0x98, BitwiseCast(BitOr(BitAnd(BitwiseCast(@1), i32(0x80000000)), BitAnd(BitwiseCast(@0), i32(0x7fffffff)))), 9) \
@@ -231,7 +237,7 @@ inline Type linearizedToType(int i)
     macro(I32GeS, 0x4e, GreaterEqual, 36) \
     macro(I32Shl, 0x74, Shl, 37) \
     macro(I32Xor, 0x73, BitXor, 38) \
-    macro(F64Min, 0xa4, Select(Equal(@0, @1), BitOr(@0, @1), Select(LessThan(@0, @1), @0, @1)), 39) \
+    macro(F64Min, 0xa4, Select(Equal(@0, @1), BitOr(@0, @1), Select(LessThan(@0, @1), @0, Select(GreaterThan(@0, @1), @1, Add(@0, @1)))), 39) \
     macro(F32Mul, 0x94, Mul, 40) \
     macro(I64Sub, 0x7d, Sub, 41) \
     macro(I32Add, 0x6a, Add, 42) \
@@ -241,14 +247,14 @@ inline Type linearizedToType(int i)
     macro(I64LtS, 0x53, LessThan, 46) \
     macro(I64Xor, 0x85, BitXor, 47) \
     macro(I64GeU, 0x5a, AboveEqual, 48) \
-    macro(I64Mul, 0x7e, Mul, 49) \
-    macro(F32Sub, 0x93, Sub, 50) \
-    macro(F64Add, 0xa0, Add, 51) \
-    macro(I64GeS, 0x59, GreaterEqual, 52) \
-    macro(I32Ne, 0x47, NotEqual, 53) \
-    macro(F32Eq, 0x5b, Equal, 54) \
-    macro(I64Eq, 0x51, Equal, 55) \
-    macro(I64ShrS, 0x87, SShr(@0, Trunc(@1)), 56) \
+    macro(F32Min, 0x96, Select(Equal(@0, @1), BitOr(@0, @1), Select(LessThan(@0, @1), @0, Select(GreaterThan(@0, @1), @1, Add(@0, @1)))), 49) \
+    macro(I64Mul, 0x7e, Mul, 50) \
+    macro(F32Sub, 0x93, Sub, 51) \
+    macro(F64Add, 0xa0, Add, 52) \
+    macro(I64GeS, 0x59, GreaterEqual, 53) \
+    macro(I32Ne, 0x47, NotEqual, 54) \
+    macro(F32Eq, 0x5b, Equal, 55) \
+    macro(I64Eq, 0x51, Equal, 56) \
     macro(I64ShrU, 0x88, ZShr(@0, Trunc(@1)), 57) \
     macro(I64Shl, 0x86, Shl(@0, Trunc(@1)), 58) \
     macro(F32Gt, 0x5e, GreaterThan, 59) \
@@ -256,7 +262,7 @@ inline Type linearizedToType(int i)
     macro(I32Rotr, 0x78, RotR, 61) \
     macro(I32GtU, 0x4b, Above, 62) \
     macro(I32GtS, 0x4a, GreaterThan, 63) \
-    macro(F64Max, 0xa5, Select(Equal(@0, @1), BitAnd(@0, @1), Select(LessThan(@0, @1), @1, @0)), 64) \
+    macro(F64Max, 0xa5, Select(Equal(@0, @1), BitAnd(@0, @1), Select(LessThan(@0, @1), @1, Select(GreaterThan(@0, @1), @0, Add(@0, @1)))), 64) \
     macro(I64LeU, 0x58, BelowEqual, 65) \
     macro(I64LeS, 0x57, LessEqual, 66) \
     macro(I64Add, 0x7c, Add, 67)
@@ -299,6 +305,11 @@ inline Type linearizedToType(int i)
     macro(I32Store8, 0x3a, Oops, 7) \
     macro(I64Store32, 0x3e, Oops, 8)
 
+#define FOR_EACH_WASM_EXT_TABLE_OP(macro) \
+    macro(TableFill, 0x11, Oops, 0) \
+    macro(TableGrow, 0x10, Oops, 1) \
+    macro(TableSize, 0xf, Oops, 2)
+
 
 #define FOR_EACH_WASM_OP(macro) \
     FOR_EACH_WASM_SPECIAL_OP(macro) \
@@ -306,7 +317,8 @@ inline Type linearizedToType(int i)
     FOR_EACH_WASM_UNARY_OP(macro) \
     FOR_EACH_WASM_BINARY_OP(macro) \
     FOR_EACH_WASM_MEMORY_LOAD_OP(macro) \
-    FOR_EACH_WASM_MEMORY_STORE_OP(macro)
+    FOR_EACH_WASM_MEMORY_STORE_OP(macro) \
+    macro(ExtTable, 0xFC, Oops, 0)
 
 #define CREATE_ENUM_VALUE(name, id, b3op, inc) name = id,
 
@@ -318,8 +330,8 @@ template<typename Int>
 inline bool isValidOpType(Int i)
 {
     // Bitset of valid ops.
-    static const uint8_t valid[] = { 0x3f, 0xf8, 0x3, 0xc, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
-    return 0 <= i && i <= 191 && (valid[i / 8] & (1 << (i % 8)));
+    static const uint8_t valid[] = { 0x3f, 0xf8, 0x3, 0xc, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0, 0x0, 0x7, 0x0, 0x0, 0x0, 0x0, 0x10 };
+    return 0 <= i && i <= 252 && (valid[i / 8] & (1 << (i % 8)));
 }
 
 enum class BinaryOpType : uint8_t {
@@ -336,6 +348,10 @@ enum class LoadOpType : uint8_t {
 
 enum class StoreOpType : uint8_t {
     FOR_EACH_WASM_MEMORY_STORE_OP(CREATE_ENUM_VALUE)
+};
+
+enum class ExtTableOpType : uint8_t {
+    FOR_EACH_WASM_EXT_TABLE_OP(CREATE_ENUM_VALUE)
 };
 
 #undef CREATE_ENUM_VALUE

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006, 2007, 2008, 2009, 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2006-2019 Apple Inc. All rights reserved.
  * Copyright (C) 2007-2009 Torch Mobile, Inc.
  * Copyright (C) 2010, 2011 Research In Motion Limited. All rights reserved.
  * Copyright (C) 2013 Samsung Electronics. All rights reserved.
@@ -54,8 +54,14 @@
 #if PLATFORM(IOS_FAMILY)
 
 #if !defined(ENABLE_AIRPLAY_PICKER)
-#if !PLATFORM(IOSMAC)
+#if !PLATFORM(MACCATALYST)
 #define ENABLE_AIRPLAY_PICKER 1
+#endif
+#endif
+
+#if !defined(ENABLE_APPLE_PAY_REMOTE_UI)
+#if !PLATFORM(APPLETV) && !PLATFORM(MACCATALYST) && !PLATFORM(WATCHOS)
+#define ENABLE_APPLE_PAY_REMOTE_UI 1
 #endif
 #endif
 
@@ -81,10 +87,6 @@
 
 #if !defined(ENABLE_GEOLOCATION)
 #define ENABLE_GEOLOCATION 1
-#endif
-
-#if !defined(ENABLE_ICONDATABASE)
-#define ENABLE_ICONDATABASE 0
 #endif
 
 #if !defined(ENABLE_INSPECTOR_ALTERNATE_DISPATCHERS)
@@ -165,15 +167,33 @@ the public iOS SDK. See <https://webkit.org/b/179167>. */
 #define ENABLE_DOWNLOAD_ATTRIBUTE 1
 #endif
 
-#if !defined(ENABLE_WKLEGACYPDFVIEW)
-#if PLATFORM(IOS_FAMILY) && !PLATFORM(WATCHOS) && !PLATFORM(APPLETV) && !PLATFORM(IOSMAC) && __IPHONE_OS_VERSION_MIN_REQUIRED < 120000
-#define ENABLE_WKLEGACYPDFVIEW 1
+#if !defined(ENABLE_WKPDFVIEW)
+#if !PLATFORM(WATCHOS) && !PLATFORM(APPLETV) && !PLATFORM(MACCATALYST) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000
+#define ENABLE_WKPDFVIEW 1
 #endif
 #endif
 
-#if !defined(ENABLE_WKPDFVIEW)
-#if PLATFORM(IOS_FAMILY) && !PLATFORM(WATCHOS) && !PLATFORM(APPLETV) && !PLATFORM(IOSMAC) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000
-#define ENABLE_WKPDFVIEW 1
+#if !defined(HAVE_PDFHOSTVIEWCONTROLLER_SNAPSHOTTING)
+#if !PLATFORM(WATCHOS) && !PLATFORM(APPLETV) && !PLATFORM(MACCATALYST) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 130000
+#define HAVE_PDFHOSTVIEWCONTROLLER_SNAPSHOTTING 1
+#endif
+#endif
+
+#if PLATFORM(MACCATALYST) || (PLATFORM(IOS) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 130000)
+#if !defined(USE_UIKIT_KEYBOARD_ADDITIONS)
+#define USE_UIKIT_KEYBOARD_ADDITIONS 1
+#endif
+#endif
+
+#if !defined(HAVE_VISIBILITY_PROPAGATION_VIEW)
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 130000
+#define HAVE_VISIBILITY_PROPAGATION_VIEW 1
+#endif
+#endif
+
+#if !defined(HAVE_UISCENE)
+#if (__IPHONE_OS_VERSION_MIN_REQUIRED >= 130000) || PLATFORM(APPLETV) || PLATFORM(WATCHOS)
+#define HAVE_UISCENE 1
 #endif
 #endif
 
@@ -185,16 +205,24 @@ the public iOS SDK. See <https://webkit.org/b/179167>. */
 #define ENABLE_MEDIA_SOURCE 0
 #endif
 
+#if !defined(HAVE_PASSKIT_GRANULAR_ERRORS)
+#define HAVE_PASSKIT_GRANULAR_ERRORS 1
+#endif
+
+#if !defined(HAVE_PASSKIT_API_TYPE)
+#define HAVE_PASSKIT_API_TYPE 1
+#endif
+
+#if !defined(HAVE_PASSKIT_BOUND_INTERFACE_IDENTIFIER)
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 130000
+#define HAVE_PASSKIT_BOUND_INTERFACE_IDENTIFIER 1
+#endif
+#endif
+
 #endif /* PLATFORM(IOS_FAMILY) */
 
 /* --------- Apple WATCHOS port --------- */
 #if PLATFORM(WATCHOS)
-
-#if !defined(ENABLE_PROXIMITY_NETWORKING)
-#if !TARGET_OS_SIMULATOR && __WATCH_OS_VERSION_MIN_REQUIRED < 60000
-#define ENABLE_PROXIMITY_NETWORKING 1
-#endif
-#endif
 
 #endif /* PLATFORM(WATCHOS) */
 
@@ -203,10 +231,6 @@ the public iOS SDK. See <https://webkit.org/b/179167>. */
 
 #if !defined(ENABLE_CONTENT_EXTENSIONS)
 #define ENABLE_CONTENT_EXTENSIONS 1
-#endif
-
-#if !defined(ENABLE_DASHBOARD_SUPPORT)
-#define ENABLE_DASHBOARD_SUPPORT 1
 #endif
 
 #if !defined(ENABLE_FULLSCREEN_API)
@@ -271,12 +295,26 @@ the public iOS SDK. See <https://webkit.org/b/179167>. */
 #define ENABLE_MEDIA_SOURCE 1
 #endif
 
+#if !defined(HAVE_PASSKIT_GRANULAR_ERRORS)
+#define HAVE_PASSKIT_GRANULAR_ERRORS 1
+#endif
+
+#if !defined(HAVE_PASSKIT_API_TYPE)
+#define HAVE_PASSKIT_API_TYPE 1
+#endif
+
+#if !defined(HAVE_PASSKIT_BOUND_INTERFACE_IDENTIFIER)
+#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 101400
+#define HAVE_PASSKIT_BOUND_INTERFACE_IDENTIFIER 1
+#endif
+#endif
+
 #endif /* PLATFORM(MAC) */
 
 #if PLATFORM(COCOA)
 
 #if !defined(ENABLE_LEGACY_ENCRYPTED_MEDIA)
-#if PLATFORM(IOSMAC)
+#if PLATFORM(MACCATALYST)
 #define ENABLE_LEGACY_ENCRYPTED_MEDIA 0
 #else
 #define ENABLE_LEGACY_ENCRYPTED_MEDIA 1
@@ -368,12 +406,16 @@ the public iOS SDK. See <https://webkit.org/b/179167>. */
 #define ENABLE_3D_TRANSFORMS 0
 #endif
 
+#if !defined(ENABLE_ACCESSIBILITY)
+#define ENABLE_ACCESSIBILITY 1
+#endif
+
 #if !defined(ENABLE_ACCELERATED_2D_CANVAS)
 #define ENABLE_ACCELERATED_2D_CANVAS 0
 #endif
 
-#if !defined(ENABLE_ACCELERATED_OVERFLOW_SCROLLING)
-#define ENABLE_ACCELERATED_OVERFLOW_SCROLLING 0
+#if !defined(ENABLE_OVERFLOW_SCROLLING_TOUCH)
+#define ENABLE_OVERFLOW_SCROLLING_TOUCH 0
 #endif
 
 #if !defined(ENABLE_APNG)
@@ -432,10 +474,6 @@ the public iOS SDK. See <https://webkit.org/b/179167>. */
 #define ENABLE_DARK_MODE_CSS 0
 #endif
 
-#if !defined(ENABLE_DASHBOARD_SUPPORT)
-#define ENABLE_DASHBOARD_SUPPORT 0
-#endif
-
 #if !defined(ENABLE_DATALIST_ELEMENT)
 #define ENABLE_DATALIST_ELEMENT 0
 #endif
@@ -474,10 +512,6 @@ the public iOS SDK. See <https://webkit.org/b/179167>. */
 
 #if !defined(ENABLE_GEOLOCATION)
 #define ENABLE_GEOLOCATION 0
-#endif
-
-#if !defined(ENABLE_ICONDATABASE)
-#define ENABLE_ICONDATABASE 1
 #endif
 
 #if !defined(ENABLE_INDEXED_DATABASE)
@@ -580,10 +614,6 @@ the public iOS SDK. See <https://webkit.org/b/179167>. */
 
 #if !defined(ENABLE_MOUSE_FORCE_EVENTS)
 #define ENABLE_MOUSE_FORCE_EVENTS 1
-#endif
-
-#if !defined(ENABLE_NAVIGATOR_CONTENT_UTILS)
-#define ENABLE_NAVIGATOR_CONTENT_UTILS 0
 #endif
 
 #if !defined(ENABLE_NETSCAPE_PLUGIN_API)

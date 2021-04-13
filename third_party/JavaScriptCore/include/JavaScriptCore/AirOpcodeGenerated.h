@@ -77,6 +77,9 @@ void printInternal(PrintStream& out, Opcode opcode)
     case Opcode::MultiplyNeg64:
         out.print("MultiplyNeg64");
         return;
+    case Opcode::MultiplySignExtend32:
+        out.print("MultiplySignExtend32");
+        return;
     case Opcode::Div32:
         out.print("Div32");
         return;
@@ -581,6 +584,12 @@ void printInternal(PrintStream& out, Opcode opcode)
     case Opcode::BranchTest64:
         out.print("BranchTest64");
         return;
+    case Opcode::BranchTestBit64:
+        out.print("BranchTestBit64");
+        return;
+    case Opcode::BranchTestBit32:
+        out.print("BranchTestBit32");
+        return;
     case Opcode::BranchDouble:
         out.print("BranchDouble");
         return;
@@ -700,7 +709,7 @@ void printInternal(PrintStream& out, Opcode opcode)
 }
 } // namespace WTF
 namespace JSC { namespace B3 { namespace Air {
-const uint8_t g_formTable[4809] = {
+const uint8_t g_formTable[4872] = {
 // Nop 
 
 // Invalid: Nop with numOperands = 1
@@ -1022,6 +1031,20 @@ INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM,
 // Invalid: MultiplyNeg64 with numOperands = 5
 INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
 // Invalid: MultiplyNeg64 with numOperands = 6
+INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
+// Invalid: MultiplySignExtend32 with numOperands = 0
+
+// Invalid: MultiplySignExtend32 with numOperands = 1
+INVALID_INST_FORM, 
+// Invalid: MultiplySignExtend32 with numOperands = 2
+INVALID_INST_FORM, INVALID_INST_FORM, 
+// MultiplySignExtend32 U:G:32, U:G:32, ZD:G:64
+ENCODE_INST_FORM(Arg::Use, GP, Width32), ENCODE_INST_FORM(Arg::Use, GP, Width32), ENCODE_INST_FORM(Arg::ZDef, GP, Width64), 
+// Invalid: MultiplySignExtend32 with numOperands = 4
+INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
+// Invalid: MultiplySignExtend32 with numOperands = 5
+INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
+// Invalid: MultiplySignExtend32 with numOperands = 6
 INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
 // Invalid: Div32 with numOperands = 0
 
@@ -3374,6 +3397,34 @@ INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM,
 // Invalid: BranchTest64 with numOperands = 5
 INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
 // Invalid: BranchTest64 with numOperands = 6
+INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
+// Invalid: BranchTestBit64 with numOperands = 0
+
+// Invalid: BranchTestBit64 with numOperands = 1
+INVALID_INST_FORM, 
+// Invalid: BranchTestBit64 with numOperands = 2
+INVALID_INST_FORM, INVALID_INST_FORM, 
+// BranchTestBit64 U:G:32, U:G:64, U:G:8
+ENCODE_INST_FORM(Arg::Use, GP, Width32), ENCODE_INST_FORM(Arg::Use, GP, Width64), ENCODE_INST_FORM(Arg::Use, GP, Width8), 
+// Invalid: BranchTestBit64 with numOperands = 4
+INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
+// Invalid: BranchTestBit64 with numOperands = 5
+INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
+// Invalid: BranchTestBit64 with numOperands = 6
+INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
+// Invalid: BranchTestBit32 with numOperands = 0
+
+// Invalid: BranchTestBit32 with numOperands = 1
+INVALID_INST_FORM, 
+// Invalid: BranchTestBit32 with numOperands = 2
+INVALID_INST_FORM, INVALID_INST_FORM, 
+// BranchTestBit32 U:G:32, U:G:32, U:G:8
+ENCODE_INST_FORM(Arg::Use, GP, Width32), ENCODE_INST_FORM(Arg::Use, GP, Width32), ENCODE_INST_FORM(Arg::Use, GP, Width8), 
+// Invalid: BranchTestBit32 with numOperands = 4
+INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
+// Invalid: BranchTestBit32 with numOperands = 5
+INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
+// Invalid: BranchTestBit32 with numOperands = 6
 INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, INVALID_INST_FORM, 
 // Invalid: BranchDouble with numOperands = 0
 
@@ -5784,6 +5835,42 @@ break;
 }
 break;
 case Opcode::MultiplyNeg64:
+switch (this->args.size()) {
+case 3:
+switch (this->args[0].kind()) {
+case Arg::Tmp:
+switch (this->args[1].kind()) {
+case Arg::Tmp:
+switch (this->args[2].kind()) {
+case Arg::Tmp:
+#if CPU(ARM64)
+if (!args[0].tmp().isGP())
+OPGEN_RETURN(false);
+if (!args[1].tmp().isGP())
+OPGEN_RETURN(false);
+if (!args[2].tmp().isGP())
+OPGEN_RETURN(false);
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+case Opcode::MultiplySignExtend32:
 switch (this->args.size()) {
 case 3:
 switch (this->args[0].kind()) {
@@ -15809,6 +15896,130 @@ default:
 break;
 }
 break;
+case Opcode::BranchTestBit64:
+switch (this->args.size()) {
+case 3:
+switch (this->args[0].kind()) {
+case Arg::ResCond:
+switch (this->args[1].kind()) {
+case Arg::Tmp:
+switch (this->args[2].kind()) {
+case Arg::Imm:
+#if CPU(X86_64)
+if (!args[1].tmp().isGP())
+OPGEN_RETURN(false);
+if (!Arg::isValidImmForm(args[2].value()))
+OPGEN_RETURN(false);
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+case Arg::Tmp:
+#if CPU(X86_64)
+if (!args[1].tmp().isGP())
+OPGEN_RETURN(false);
+if (!args[2].tmp().isGP())
+OPGEN_RETURN(false);
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+case Arg::Addr:
+case Arg::Stack:
+case Arg::CallArg:
+switch (this->args[2].kind()) {
+case Arg::Imm:
+#if CPU(X86_64)
+if (!Arg::isValidAddrForm(args[1].offset()))
+OPGEN_RETURN(false);
+if (!Arg::isValidImmForm(args[2].value()))
+OPGEN_RETURN(false);
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+case Opcode::BranchTestBit32:
+switch (this->args.size()) {
+case 3:
+switch (this->args[0].kind()) {
+case Arg::ResCond:
+switch (this->args[1].kind()) {
+case Arg::Tmp:
+switch (this->args[2].kind()) {
+case Arg::Imm:
+#if CPU(X86) || CPU(X86_64)
+if (!args[1].tmp().isGP())
+OPGEN_RETURN(false);
+if (!Arg::isValidImmForm(args[2].value()))
+OPGEN_RETURN(false);
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+case Arg::Tmp:
+#if CPU(X86) || CPU(X86_64)
+if (!args[1].tmp().isGP())
+OPGEN_RETURN(false);
+if (!args[2].tmp().isGP())
+OPGEN_RETURN(false);
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+case Arg::Addr:
+case Arg::Stack:
+case Arg::CallArg:
+switch (this->args[2].kind()) {
+case Arg::Imm:
+#if CPU(X86) || CPU(X86_64)
+if (!Arg::isValidAddrForm(args[1].offset()))
+OPGEN_RETURN(false);
+if (!Arg::isValidImmForm(args[2].value()))
+OPGEN_RETURN(false);
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
 case Opcode::BranchDouble:
 switch (this->args.size()) {
 case 3:
@@ -19639,6 +19850,21 @@ break;
 }
 break;
 case Opcode::MultiplyNeg64:
+switch (argIndex) {
+case 0:
+OPGEN_RETURN(false);
+break;
+case 1:
+OPGEN_RETURN(false);
+break;
+case 2:
+OPGEN_RETURN(false);
+break;
+default:
+break;
+}
+break;
+case Opcode::MultiplySignExtend32:
 switch (argIndex) {
 case 0:
 OPGEN_RETURN(false);
@@ -25477,6 +25703,86 @@ default:
 break;
 }
 break;
+case Opcode::BranchTestBit64:
+switch (argIndex) {
+case 0:
+OPGEN_RETURN(false);
+break;
+case 1:
+switch (args[0].kind()) {
+case Arg::ResCond:
+switch (Arg::Addr) {
+case Arg::Tmp:
+break;
+case Arg::Addr:
+case Arg::Stack:
+case Arg::CallArg:
+switch (args[2].kind()) {
+case Arg::Imm:
+#if CPU(X86_64)
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+case 2:
+OPGEN_RETURN(false);
+break;
+default:
+break;
+}
+break;
+case Opcode::BranchTestBit32:
+switch (argIndex) {
+case 0:
+OPGEN_RETURN(false);
+break;
+case 1:
+switch (args[0].kind()) {
+case Arg::ResCond:
+switch (Arg::Addr) {
+case Arg::Tmp:
+break;
+case Arg::Addr:
+case Arg::Stack:
+case Arg::CallArg:
+switch (args[2].kind()) {
+case Arg::Imm:
+#if CPU(X86) || CPU(X86_64)
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+case 2:
+OPGEN_RETURN(false);
+break;
+default:
+break;
+}
+break;
 case Opcode::BranchDouble:
 switch (argIndex) {
 case 0:
@@ -26788,6 +27094,8 @@ case Opcode::Branch64:
 case Opcode::BranchTest8:
 case Opcode::BranchTest32:
 case Opcode::BranchTest64:
+case Opcode::BranchTestBit64:
+case Opcode::BranchTestBit32:
 case Opcode::BranchDouble:
 case Opcode::BranchFloat:
 case Opcode::BranchAdd32:
@@ -27006,6 +27314,8 @@ case Opcode::Branch64:
 case Opcode::BranchTest8:
 case Opcode::BranchTest32:
 case Opcode::BranchTest64:
+case Opcode::BranchTestBit64:
+case Opcode::BranchTestBit32:
 case Opcode::BranchDouble:
 case Opcode::BranchFloat:
 case Opcode::BranchAdd32:
@@ -27988,6 +28298,13 @@ break;
 case Opcode::MultiplyNeg64:
 #if CPU(ARM64)
 jit.multiplyNeg64(args[0].gpr(), args[1].gpr(), args[2].gpr());
+OPGEN_RETURN(result);
+#endif
+break;
+break;
+case Opcode::MultiplySignExtend32:
+#if CPU(ARM64)
+jit.multiplySignExtend32(args[0].gpr(), args[1].gpr(), args[2].gpr());
 OPGEN_RETURN(result);
 #endif
 break;
@@ -32937,6 +33254,76 @@ break;
 case Arg::Index:
 #if CPU(X86_64)
 result = jit.branchTest64(args[0].asResultCondition(), args[1].asBaseIndex(), args[2].asTrustedImm32());
+OPGEN_RETURN(result);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+case Opcode::BranchTestBit64:
+switch (this->args[1].kind()) {
+case Arg::Tmp:
+switch (this->args[2].kind()) {
+case Arg::Imm:
+#if CPU(X86_64)
+result = jit.branchTestBit64(args[0].asResultCondition(), args[1].gpr(), args[2].asTrustedImm32());
+OPGEN_RETURN(result);
+#endif
+break;
+break;
+case Arg::Tmp:
+#if CPU(X86_64)
+result = jit.branchTestBit64(args[0].asResultCondition(), args[1].gpr(), args[2].gpr());
+OPGEN_RETURN(result);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+case Arg::Addr:
+case Arg::Stack:
+case Arg::CallArg:
+#if CPU(X86_64)
+result = jit.branchTestBit64(args[0].asResultCondition(), args[1].asAddress(), args[2].asTrustedImm32());
+OPGEN_RETURN(result);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+case Opcode::BranchTestBit32:
+switch (this->args[1].kind()) {
+case Arg::Tmp:
+switch (this->args[2].kind()) {
+case Arg::Imm:
+#if CPU(X86) || CPU(X86_64)
+result = jit.branchTestBit32(args[0].asResultCondition(), args[1].gpr(), args[2].asTrustedImm32());
+OPGEN_RETURN(result);
+#endif
+break;
+break;
+case Arg::Tmp:
+#if CPU(X86) || CPU(X86_64)
+result = jit.branchTestBit32(args[0].asResultCondition(), args[1].gpr(), args[2].gpr());
+OPGEN_RETURN(result);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+case Arg::Addr:
+case Arg::Stack:
+case Arg::CallArg:
+#if CPU(X86) || CPU(X86_64)
+result = jit.branchTestBit32(args[0].asResultCondition(), args[1].asAddress(), args[2].asTrustedImm32());
 OPGEN_RETURN(result);
 #endif
 break;

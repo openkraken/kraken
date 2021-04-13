@@ -25,25 +25,26 @@
 
 #pragma once
 
+#include <wtf/Threading.h>
+
 namespace WTF {
 
-WTF_EXPORT_PRIVATE bool exchangeIsCompilationThread(bool newValue);
-
-class CompilationScope {
+class CompilationScope final {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     CompilationScope()
-        : m_oldValue(exchangeIsCompilationThread(true))
+        : m_oldValue(Thread::exchangeIsCompilationThread(true))
     {
     }
     
     ~CompilationScope()
     {
-        exchangeIsCompilationThread(m_oldValue);
+        Thread::exchangeIsCompilationThread(m_oldValue);
     }
     
     void leaveEarly()
     {
-        exchangeIsCompilationThread(m_oldValue);
+        Thread::exchangeIsCompilationThread(m_oldValue);
     }
 private:
     bool m_oldValue;
@@ -52,4 +53,3 @@ private:
 } // namespace WTF
 
 using WTF::CompilationScope;
-using WTF::exchangeIsCompilationThread;

@@ -1,7 +1,7 @@
 /*
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
  *  Copyright (C) 2001 Peter Kelly (pmk@post.com)
- *  Copyright (C) 2003-2018 Apple Inc. All rights reserved.
+ *  Copyright (C) 2003-2019 Apple Inc. All rights reserved.
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -124,7 +124,7 @@ public:
         AlignedMemoryAllocator* alignedMemoryAllocator() const;
         Heap* heap() const;
         inline MarkedSpace* space() const;
-        VM* vm() const;
+        VM& vm() const;
         WeakSet& weakSet();
             
         enum SweepMode { SweepOnly, SweepToFreeList };
@@ -145,8 +145,6 @@ public:
         void finishSweepKnowingHeapCellType(FreeList*, const DestroyFunc&);
         
         void unsweepWithNoNewlyAllocated();
-        
-        void zap(const FreeList&);
         
         void shrink();
             
@@ -200,6 +198,10 @@ public:
         void didAddToDirectory(BlockDirectory*, size_t index);
         void didRemoveFromDirectory();
         
+        void* start() const { return &m_block->atoms()[0]; }
+        void* end() const { return &m_block->atoms()[m_endAtom]; }
+        bool contains(void* p) const { return start() <= p && p < end(); }
+
         void dumpState(PrintStream&);
         
     private:
@@ -255,6 +257,8 @@ public:
         friend class MarkedBlock;
         
         Handle& m_handle;
+        // m_vm must remain a pointer (instead of a reference) because JSCLLIntOffsetsExtractor
+        // will fail otherwise.
         VM* m_vm;
         Subspace* m_subspace;
 
@@ -304,14 +308,16 @@ public:
     static constexpr size_t footerSize = blockSize - payloadSize;
 
     static_assert(payloadSize == ((blockSize - sizeof(MarkedBlock::Footer)) & ~(atomSize - 1)), "Payload size computed the alternate way should give the same result");
-    static_assert(footerSize >= minimumDistanceBetweenCellsFromDifferentOrigins, "Footer is not big enough to create the necessary distance between objects from different origins");
+    // Some of JSCell types assume that the last JSCell in a MarkedBlock has a subsequent memory region (Footer) that can still safely accessed.
+    // For example, JSRopeString assumes that it can safely access up to 2 bytes beyond the JSRopeString cell.
+    static_assert(sizeof(Footer) >= sizeof(uint16_t));
     
     static MarkedBlock::Handle* tryCreate(Heap&, AlignedMemoryAllocator*);
         
     Handle& handle();
     const Handle& handle() const;
         
-    VM* vm() const;
+    VM& vm() const;
     inline Heap* heap() const;
     inline MarkedSpace* space() const;
 
@@ -375,6 +381,11 @@ public:
     CountingLock& lock() { return footer().m_lock; }
     
     Subspace* subspace() const { return footer().m_subspace; }
+
+    void populatePage() const
+    {
+        *bitwise_cast<volatile uint8_t*>(&footer());
+    }
     
     static constexpr size_t offsetOfFooter = endAtom * atomSize;
 
@@ -462,14 +473,14 @@ inline Heap* MarkedBlock::Handle::heap() const
     return m_weakSet.heap();
 }
 
-inline VM* MarkedBlock::Handle::vm() const
+inline VM& MarkedBlock::Handle::vm() const
 {
     return m_weakSet.vm();
 }
 
-inline VM* MarkedBlock::vm() const
+inline VM& MarkedBlock::vm() const
 {
-    return footer().m_vm;
+    return *footer().m_vm;
 }
 
 inline WeakSet& MarkedBlock::Handle::weakSet()

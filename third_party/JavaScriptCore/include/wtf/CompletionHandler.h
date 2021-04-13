@@ -26,6 +26,7 @@
 #pragma once
 
 #include <wtf/Function.h>
+#include <wtf/MainThread.h>
 
 namespace WTF {
 
@@ -34,6 +35,7 @@ template<typename> class CompletionHandler;
 // Wraps a Function to make sure it is always called once and only once.
 template <typename Out, typename... In>
 class CompletionHandler<Out(In...)> {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     CompletionHandler() = default;
 
@@ -55,15 +57,38 @@ public:
 
     Out operator()(In... in)
     {
+        ASSERT(m_wasConstructedOnMainThread == isMainThread());
         ASSERT_WITH_MESSAGE(m_function, "Completion handler should not be called more than once");
         return std::exchange(m_function, nullptr)(std::forward<In>(in)...);
     }
 
 private:
     Function<Out(In...)> m_function;
+#if !ASSERT_DISABLED
+    bool m_wasConstructedOnMainThread { isMainThread() };
+#endif
 };
 
-class CompletionHandlerCallingScope {
+namespace Detail {
+
+template<typename Out, typename... In>
+class CallableWrapper<CompletionHandler<Out(In...)>, Out, In...> : public CallableWrapperBase<Out, In...> {
+    WTF_MAKE_FAST_ALLOCATED;
+public:
+    explicit CallableWrapper(CompletionHandler<Out(In...)>&& completionHandler)
+        : m_completionHandler(WTFMove(completionHandler))
+    {
+        RELEASE_ASSERT(m_completionHandler);
+    }
+    Out call(In... in) final { return m_completionHandler(std::forward<In>(in)...); }
+private:
+    CompletionHandler<Out(In...)> m_completionHandler;
+};
+
+} // namespace Detail
+
+class CompletionHandlerCallingScope final {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     CompletionHandlerCallingScope() = default;
 

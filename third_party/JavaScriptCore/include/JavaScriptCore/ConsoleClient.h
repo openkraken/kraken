@@ -55,15 +55,18 @@ public:
     void groupEnd(ExecState*, Ref<Inspector::ScriptArguments>&&);
 
     virtual void messageWithTypeAndLevel(MessageType, MessageLevel, JSC::ExecState*, Ref<Inspector::ScriptArguments>&&) = 0;
-    virtual void count(ExecState*, Ref<Inspector::ScriptArguments>&&) = 0;
+    virtual void count(ExecState*, const String& label) = 0;
+    virtual void countReset(ExecState*, const String& label) = 0;
     virtual void profile(ExecState*, const String& title) = 0;
     virtual void profileEnd(ExecState*, const String& title) = 0;
     virtual void takeHeapSnapshot(ExecState*, const String& title) = 0;
-    virtual void time(ExecState*, const String& title) = 0;
-    virtual void timeEnd(ExecState*, const String& title) = 0;
+    virtual void time(ExecState*, const String& label) = 0;
+    virtual void timeLog(ExecState*, const String& label, Ref<Inspector::ScriptArguments>&&) = 0;
+    virtual void timeEnd(ExecState*, const String& label) = 0;
     virtual void timeStamp(ExecState*, Ref<Inspector::ScriptArguments>&&) = 0;
     virtual void record(ExecState*, Ref<Inspector::ScriptArguments>&&) = 0;
     virtual void recordEnd(ExecState*, Ref<Inspector::ScriptArguments>&&) = 0;
+    virtual void screenshot(ExecState*, Ref<Inspector::ScriptArguments>&&) = 0;
 
 private:
     enum ArgumentRequirement { ArgumentRequired, ArgumentNotRequired };

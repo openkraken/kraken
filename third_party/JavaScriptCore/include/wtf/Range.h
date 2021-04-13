@@ -39,6 +39,7 @@ namespace WTF {
 
 template<typename PassedType>
 class Range {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     typedef PassedType Type;
     
@@ -107,6 +108,11 @@ public:
     bool overlaps(const Range& other) const
     {
         return WTF::rangesOverlap(m_begin, m_end, other.m_begin, other.m_end);
+    }
+
+    bool contains(Type point) const
+    {
+        return m_begin <= point && point < m_end;
     }
 
     void dump(PrintStream& out) const

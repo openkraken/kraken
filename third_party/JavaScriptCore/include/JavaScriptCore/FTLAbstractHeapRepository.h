@@ -57,8 +57,15 @@ namespace JSC { namespace FTL {
     macro(DirectArguments_minCapacity, DirectArguments::offsetOfMinCapacity()) \
     macro(DirectArguments_mappedArguments, DirectArguments::offsetOfMappedArguments()) \
     macro(DirectArguments_modifiedArgumentsDescriptor, DirectArguments::offsetOfModifiedArgumentsDescriptor()) \
-    macro(FunctionRareData_allocator, FunctionRareData::offsetOfObjectAllocationProfile() + ObjectAllocationProfile::offsetOfAllocator()) \
-    macro(FunctionRareData_structure, FunctionRareData::offsetOfObjectAllocationProfile() + ObjectAllocationProfile::offsetOfStructure()) \
+    macro(FunctionRareData_allocator, FunctionRareData::offsetOfObjectAllocationProfile() + ObjectAllocationProfileWithPrototype::offsetOfAllocator()) \
+    macro(FunctionRareData_structure, FunctionRareData::offsetOfObjectAllocationProfile() + ObjectAllocationProfileWithPrototype::offsetOfStructure()) \
+    macro(FunctionRareData_prototype, FunctionRareData::offsetOfObjectAllocationProfile() + ObjectAllocationProfileWithPrototype::offsetOfPrototype()) \
+    macro(FunctionRareData_objectAllocationProfileWatchpoint, FunctionRareData::offsetOfObjectAllocationProfileWatchpoint()) \
+    macro(FunctionRareData_internalFunctionAllocationProfile_structure, FunctionRareData::offsetOfInternalFunctionAllocationProfile() + InternalFunctionAllocationProfile::offsetOfStructure()) \
+    macro(FunctionRareData_boundFunctionStructure, FunctionRareData::offsetOfBoundFunctionStructure()) \
+    macro(FunctionRareData_allocationProfileClearingWatchpoint, FunctionRareData::offsetOfAllocationProfileClearingWatchpoint()) \
+    macro(FunctionRareData_hasReifiedLength, FunctionRareData::offsetOfHasReifiedLength()) \
+    macro(FunctionRareData_hasReifiedName, FunctionRareData::offsetOfHasReifiedName()) \
     macro(GetterSetter_getter, GetterSetter::offsetOfGetter()) \
     macro(GetterSetter_setter, GetterSetter::offsetOfSetter()) \
     macro(JSArrayBufferView_length, JSArrayBufferView::offsetOfLength()) \
@@ -89,18 +96,15 @@ namespace JSC { namespace FTL {
     macro(JSPropertyNameEnumerator_endStructurePropertyIndex, JSPropertyNameEnumerator::endStructurePropertyIndexOffset()) \
     macro(JSPropertyNameEnumerator_indexLength, JSPropertyNameEnumerator::indexedLengthOffset()) \
     macro(JSRopeString_flags, JSRopeString::offsetOfFlags()) \
-    macro(JSRopeString_fiber0, JSRopeString::offsetOfFiber0()) \
     macro(JSRopeString_length, JSRopeString::offsetOfLength()) \
-    macro(JSRopeString_fiber1Lower, JSRopeString::offsetOfFiber1Lower()) \
-    macro(JSRopeString_fiber1Upper, JSRopeString::offsetOfFiber1Upper()) \
-    macro(JSRopeString_fiber2Lower, JSRopeString::offsetOfFiber2Lower()) \
-    macro(JSRopeString_fiber2Upper, JSRopeString::offsetOfFiber2Upper()) \
+    macro(JSRopeString_fiber0, JSRopeString::offsetOfFiber0()) \
+    macro(JSRopeString_fiber1, JSRopeString::offsetOfFiber1()) \
+    macro(JSRopeString_fiber2, JSRopeString::offsetOfFiber2()) \
     macro(JSScope_next, JSScope::offsetOfNext()) \
     macro(JSSymbolTableObject_symbolTable, JSSymbolTableObject::offsetOfSymbolTable()) \
     macro(JSWrapperObject_internalValue, JSWrapperObject::internalValueOffset()) \
-    macro(RegExpObject_regExp, RegExpObject::offsetOfRegExp()) \
+    macro(RegExpObject_regExpAndLastIndexIsNotWritableFlag, RegExpObject::offsetOfRegExpAndLastIndexIsNotWritableFlag()) \
     macro(RegExpObject_lastIndex, RegExpObject::offsetOfLastIndex()) \
-    macro(RegExpObject_lastIndexIsWritable, RegExpObject::offsetOfLastIndexIsWritable()) \
     macro(ShadowChicken_Packet_callee, OBJECT_OFFSETOF(ShadowChicken::Packet, callee)) \
     macro(ShadowChicken_Packet_frame, OBJECT_OFFSETOF(ShadowChicken::Packet, frame)) \
     macro(ShadowChicken_Packet_callerFrame, OBJECT_OFFSETOF(ShadowChicken::Packet, callerFrame)) \

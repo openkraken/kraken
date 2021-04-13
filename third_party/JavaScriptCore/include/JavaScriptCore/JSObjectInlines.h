@@ -26,17 +26,24 @@
 #include "AuxiliaryBarrierInlines.h"
 #include "Error.h"
 #include "JSObject.h"
+#include "JSTypedArrays.h"
 #include "Lookup.h"
 #include "StructureInlines.h"
+#include "TypedArrayType.h"
 
 namespace JSC {
 
 // Section 7.3.17 of the spec.
 template <typename AddFunction> // Add function should have a type like: (JSValue, RuntimeType) -> bool
-void createListFromArrayLike(ExecState* exec, JSValue arrayLikeValue, RuntimeTypeMask legalTypesFilter, const String& errorMessage, AddFunction addFunction)
+void createListFromArrayLike(ExecState* exec, JSValue arrayLikeValue, RuntimeTypeMask legalTypesFilter, const String& notAnObjectErroMessage, const String& illegalTypeErrorMessage, AddFunction addFunction)
 {
     VM& vm = exec->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (!arrayLikeValue.isObject()) {
+        throwTypeError(exec, scope, notAnObjectErroMessage);
+        return;
+    }
     
     Vector<JSValue> result;
     JSValue lengthProperty = arrayLikeValue.get(exec, vm.propertyNames->length);
@@ -51,7 +58,7 @@ void createListFromArrayLike(ExecState* exec, JSValue arrayLikeValue, RuntimeTyp
         
         RuntimeType type = runtimeTypeForValue(vm, next);
         if (!(type & legalTypesFilter)) {
-            throwTypeError(exec, scope, errorMessage);
+            throwTypeError(exec, scope, illegalTypeErrorMessage);
             return;
         }
         
@@ -393,5 +400,67 @@ inline void JSObject::didBecomePrototype()
 {
     setPerCellBit(true);
 }
+
+inline bool JSObject::canGetIndexQuicklyForTypedArray(unsigned i) const
+{
+    switch (type()) {
+#define CASE_TYPED_ARRAY_TYPE(name) \
+    case name ## ArrayType :\
+        return jsCast<const JS ## name ## Array *>(this)->canGetIndexQuickly(i);
+        FOR_EACH_TYPED_ARRAY_TYPE_EXCLUDING_DATA_VIEW(CASE_TYPED_ARRAY_TYPE)
+#undef CASE_TYPED_ARRAY_TYPE
+    default:
+        return false;
+    }
+}
+
+inline bool JSObject::canSetIndexQuicklyForTypedArray(unsigned i, JSValue value) const
+{
+    switch (type()) {
+#define CASE_TYPED_ARRAY_TYPE(name) \
+    case name ## ArrayType :\
+        return jsCast<const JS ## name ## Array *>(this)->canSetIndexQuickly(i, value);
+        FOR_EACH_TYPED_ARRAY_TYPE_EXCLUDING_DATA_VIEW(CASE_TYPED_ARRAY_TYPE)
+#undef CASE_TYPED_ARRAY_TYPE
+    default:
+        return false;
+    }
+}
+
+inline JSValue JSObject::getIndexQuicklyForTypedArray(unsigned i) const
+{
+    switch (type()) {
+#define CASE_TYPED_ARRAY_TYPE(name) \
+    case name ## ArrayType : {\
+        auto* typedArray = jsCast<const JS ## name ## Array *>(this);\
+        RELEASE_ASSERT(typedArray->canGetIndexQuickly(i));\
+        return typedArray->getIndexQuickly(i);\
+    }
+        FOR_EACH_TYPED_ARRAY_TYPE_EXCLUDING_DATA_VIEW(CASE_TYPED_ARRAY_TYPE)
+#undef CASE_TYPED_ARRAY_TYPE
+    default:
+        RELEASE_ASSERT_NOT_REACHED();
+        return JSValue();
+    }
+}
+
+inline void JSObject::setIndexQuicklyForTypedArray(unsigned i, JSValue value)
+{
+    switch (type()) {
+#define CASE_TYPED_ARRAY_TYPE(name) \
+    case name ## ArrayType : {\
+        auto* typedArray = jsCast<JS ## name ## Array *>(this);\
+        RELEASE_ASSERT(typedArray->canSetIndexQuickly(i, value));\
+        typedArray->setIndexQuickly(i, value);\
+        break;\
+    }
+        FOR_EACH_TYPED_ARRAY_TYPE_EXCLUDING_DATA_VIEW(CASE_TYPED_ARRAY_TYPE)
+#undef CASE_TYPED_ARRAY_TYPE
+    default:
+        RELEASE_ASSERT_NOT_REACHED();
+        return;
+    }
+}
+    
 
 } // namespace JSC

@@ -81,7 +81,7 @@ void JSCConsoleClientImpl::messageWithTypeAndLevel(MessageType type, MessageLeve
   m_consoleAgent->addMessageToConsole(std::move(logEntry));
 }
 
-void JSCConsoleClientImpl::count(JSC::ExecState *, Ref<Inspector::ScriptArguments> &&) {
+void JSCConsoleClientImpl::count(JSC::ExecState *, const String& label) {
   warnUnimplemented(ASCIILiteral::fromLiteralUnsafe("console.count"));
 }
 
@@ -136,5 +136,9 @@ void JSCConsoleClientImpl::warnUnimplemented(const String &method) {
 
   m_consoleAgent->addMessageToConsole(std::move(logEntry));
 }
+
+void JSCConsoleClientImpl::countReset(JSC::ExecState *, const String &label) {}
+void JSCConsoleClientImpl::timeLog(JSC::ExecState *, const String &label, Ref<Inspector::ScriptArguments> &&) {}
+void JSCConsoleClientImpl::screenshot(JSC::ExecState *, Ref<Inspector::ScriptArguments> &&) {}
 
 } // namespace kraken

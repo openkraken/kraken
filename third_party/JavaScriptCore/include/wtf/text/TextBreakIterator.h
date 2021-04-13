@@ -43,6 +43,7 @@ typedef NullTextBreakIterator TextBreakIteratorPlatform;
 class TextBreakIteratorCache;
 
 class TextBreakIterator {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     enum class Mode {
         Line,
@@ -81,7 +82,7 @@ private:
     friend class TextBreakIteratorCache;
 
     // Use CachedTextBreakIterator instead of constructing one of these directly.
-    WTF_EXPORT TextBreakIterator(StringView, Mode, const AtomicString& locale);
+    WTF_EXPORT TextBreakIterator(StringView, Mode, const AtomString& locale);
 
     void setText(StringView string)
     {
@@ -95,19 +96,20 @@ private:
         return m_mode;
     }
 
-    const AtomicString& locale() const
+    const AtomString& locale() const
     {
         return m_locale;
     }
 
     Variant<TextBreakIteratorICU, TextBreakIteratorPlatform> m_backing;
     Mode m_mode;
-    AtomicString m_locale;
+    AtomString m_locale;
 };
 
 class CachedTextBreakIterator;
 
 class TextBreakIteratorCache {
+    WTF_MAKE_FAST_ALLOCATED;
 // Use CachedTextBreakIterator instead of dealing with the cache directly.
 private:
     friend class NeverDestroyed<TextBreakIteratorCache>;
@@ -124,7 +126,7 @@ private:
     TextBreakIteratorCache& operator=(const TextBreakIteratorCache&) = delete;
     TextBreakIteratorCache& operator=(TextBreakIteratorCache&&) = delete;
 
-    TextBreakIterator take(StringView string, TextBreakIterator::Mode mode, const AtomicString& locale)
+    TextBreakIterator take(StringView string, TextBreakIterator::Mode mode, const AtomString& locale)
     {
         auto iter = std::find_if(m_unused.begin(), m_unused.end(), [&](TextBreakIterator& candidate) {
             return candidate.mode() == mode && candidate.locale() == locale;
@@ -156,8 +158,9 @@ private:
 
 // RAII for TextBreakIterator and TextBreakIteratorCache.
 class CachedTextBreakIterator {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
-    CachedTextBreakIterator(StringView string, TextBreakIterator::Mode mode, const AtomicString& locale)
+    CachedTextBreakIterator(StringView string, TextBreakIterator::Mode mode, const AtomString& locale)
         : m_backing(TextBreakIteratorCache::singleton().take(string, mode, locale))
     {
     }
@@ -199,21 +202,22 @@ enum class LineBreakIteratorMode { Default, Loose, Normal, Strict };
 WTF_EXPORT_PRIVATE UBreakIterator* wordBreakIterator(StringView);
 WTF_EXPORT_PRIVATE UBreakIterator* sentenceBreakIterator(StringView);
 
-WTF_EXPORT_PRIVATE UBreakIterator* acquireLineBreakIterator(StringView, const AtomicString& locale, const UChar* priorContext, unsigned priorContextLength, LineBreakIteratorMode);
+WTF_EXPORT_PRIVATE UBreakIterator* acquireLineBreakIterator(StringView, const AtomString& locale, const UChar* priorContext, unsigned priorContextLength, LineBreakIteratorMode);
 WTF_EXPORT_PRIVATE void releaseLineBreakIterator(UBreakIterator*);
-UBreakIterator* openLineBreakIterator(const AtomicString& locale);
+UBreakIterator* openLineBreakIterator(const AtomString& locale);
 void closeLineBreakIterator(UBreakIterator*&);
 
 WTF_EXPORT_PRIVATE bool isWordTextBreak(UBreakIterator*);
 
 class LazyLineBreakIterator {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     LazyLineBreakIterator()
     {
         resetPriorContext();
     }
 
-    explicit LazyLineBreakIterator(StringView stringView, const AtomicString& locale = AtomicString(), LineBreakIteratorMode mode = LineBreakIteratorMode::Default)
+    explicit LazyLineBreakIterator(StringView stringView, const AtomString& locale = AtomString(), LineBreakIteratorMode mode = LineBreakIteratorMode::Default)
         : m_stringView(stringView)
         , m_locale(locale)
         , m_mode(mode)
@@ -293,7 +297,7 @@ public:
         return m_iterator;
     }
 
-    void resetStringAndReleaseIterator(StringView stringView, const AtomicString& locale, LineBreakIteratorMode mode)
+    void resetStringAndReleaseIterator(StringView stringView, const AtomString& locale, LineBreakIteratorMode mode)
     {
         if (m_iterator)
             releaseLineBreakIterator(m_iterator);
@@ -308,7 +312,7 @@ public:
 private:
     static constexpr unsigned priorContextCapacity = 2;
     StringView m_stringView;
-    AtomicString m_locale;
+    AtomString m_locale;
     UBreakIterator* m_iterator { nullptr };
     const UChar* m_cachedPriorContext { nullptr };
     LineBreakIteratorMode m_mode { LineBreakIteratorMode::Default };
@@ -322,6 +326,7 @@ private:
 // Use this for general text processing, e.g. string truncation.
 
 class NonSharedCharacterBreakIterator {
+    WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(NonSharedCharacterBreakIterator);
 public:
     WTF_EXPORT_PRIVATE NonSharedCharacterBreakIterator(StringView);

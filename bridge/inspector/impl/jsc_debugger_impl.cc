@@ -9,7 +9,7 @@
 namespace kraken::debugger {
 using namespace JSC;
 JSCDebuggerImpl::JSCDebuggerImpl(JSGlobalObject *globalObject)
-  : Inspector::ScriptDebugServer(globalObject->vm()), m_globalObject(globalObject) {}
+  : Inspector::ScriptDebugServer(globalObject->globalExec()->vm()), m_globalObject(globalObject) {}
 
 void JSCDebuggerImpl::recompileAllJSFunctions() {
   KRAKEN_LOG(VERBOSE) << "recompileAllJSFunctions called";
@@ -32,7 +32,7 @@ void JSCDebuggerImpl::detachDebugger(bool isBeingDestroyed) {
 
 void JSCDebuggerImpl::runEventLoopWhilePaused() {
   // Drop all locks so another thread can work in the VM while we are nested.
-  JSC::JSLock::DropAllLocks dropAllLocks(m_globalObject->vm());
+  JSC::JSLock::DropAllLocks dropAllLocks(m_globalObject->globalExec()->vm());
 
   while (!m_doneProcessingDebuggerEvents) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));

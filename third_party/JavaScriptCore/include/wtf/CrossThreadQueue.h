@@ -36,7 +36,8 @@
 namespace WTF {
 
 template<typename DataType>
-class CrossThreadQueue {
+class CrossThreadQueue final {
+    WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(CrossThreadQueue);
 public:
     CrossThreadQueue() = default;
@@ -51,9 +52,9 @@ public:
     bool isEmpty() const;
 
 private:
+    Deque<DataType> m_queue;
     mutable Lock m_lock;
     Condition m_condition;
-    Deque<DataType> m_queue;
     bool m_killed { false };
 };
 

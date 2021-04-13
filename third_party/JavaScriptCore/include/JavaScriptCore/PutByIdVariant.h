@@ -34,6 +34,7 @@ namespace JSC {
 class CallLinkStatus;
 
 class PutByIdVariant {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     enum Kind {
         NotSet,
@@ -44,8 +45,8 @@ public:
     
     PutByIdVariant()
         : m_kind(NotSet)
-        , m_newStructure(nullptr)
         , m_offset(invalidOffset)
+        , m_newStructure(nullptr)
     {
     }
     
@@ -132,7 +133,7 @@ public:
     bool attemptToMerge(const PutByIdVariant& other);
     
     void markIfCheap(SlotVisitor&);
-    bool finalize();
+    bool finalize(VM&);
     
     void dump(PrintStream&) const;
     void dumpInContext(PrintStream&, DumpContext*) const;
@@ -141,10 +142,10 @@ private:
     bool attemptToMergeTransitionWithReplace(const PutByIdVariant& replace);
     
     Kind m_kind;
+    PropertyOffset m_offset;
     StructureSet m_oldStructure;
     Structure* m_newStructure { nullptr };
     ObjectPropertyConditionSet m_conditionSet;
-    PropertyOffset m_offset;
     std::unique_ptr<CallLinkStatus> m_callLinkStatus;
 };
 

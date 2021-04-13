@@ -53,6 +53,8 @@ inline int32_t formattedTotalExecutionCount(float value)
 
 template<CountingVariant countingVariant>
 class ExecutionCounter {
+    WTF_MAKE_FAST_ALLOCATED;
+    WTF_MAKE_NONMOVABLE(ExecutionCounter);
 public:
     ExecutionCounter();
     void forceSlowPathConcurrently(); // If you use this, checkIfThresholdCrossedAndSet() may still return false.
@@ -87,7 +89,7 @@ public:
     static T clippedThreshold(JSGlobalObject* globalObject, T threshold)
     {
         int32_t maxThreshold;
-        if (Options::randomizeExecutionCountsBetweenCheckpoints())
+        if (Options::randomizeExecutionCountsBetweenCheckpoints() && globalObject)
             maxThreshold = globalObject->weakRandomInteger() % maximumExecutionCountsBetweenCheckpoints();
         else
             maxThreshold = maximumExecutionCountsBetweenCheckpoints();

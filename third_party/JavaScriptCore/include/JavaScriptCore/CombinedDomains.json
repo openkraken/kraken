@@ -49,6 +49,10 @@
             "description": "Enables application cache domain notifications."
         },
         {
+            "name": "disable",
+            "description": "Disable application cache domain notifications."
+        },
+        {
             "name": "getManifestForFrame",
             "description": "Returns manifest URL for document in the given frame.",
             "parameters": [
@@ -90,7 +94,7 @@
 {
     "domain": "Audit",
     "description": "",
-    "version": 1,
+    "version": 3,
     "commands": [
         {
             "name": "setup",
@@ -125,11 +129,23 @@
     "availability": ["web"],
     "types": [
         {
+            "id": "ThreadInfo",
+            "description": "CPU usage for an individual thread.",
+            "type": "object",
+            "properties": [
+                { "name": "name", "type": "string", "description": "Some thread identification information." },
+                { "name": "usage", "type": "number", "description": "CPU usage for this thread. This should not exceed 100% for an individual thread." },
+                { "name": "type", "type": "string", "enum": ["main", "webkit"], "optional": true, "description": "Type of thread. There should be a single main thread." },
+                { "name": "targetId", "type": "string", "optional": true, "description": "A thread may be associated with a target, such as a Worker, in the process." }
+            ]
+        },
+        {
             "id": "Event",
             "type": "object",
             "properties": [
                 { "name": "timestamp", "type": "number" },
-                { "name": "usage", "type": "number", "description": "Percent of total cpu usage. If there are multiple cores the usage may be greater than 100%." }
+                { "name": "usage", "type": "number", "description": "Percent of total cpu usage. If there are multiple cores the usage may be greater than 100%." },
+                { "name": "threads", "type": "array", "items": { "$ref": "ThreadInfo" }, "optional": true, "description": "Per-thread CPU usage information. Does not include the main thread." }
             ]
         }
     ],
@@ -160,7 +176,10 @@
         },
         {
             "name": "trackingComplete",
-            "description": "Tracking stopped. Includes any buffered data during tracking, such as profiling information."
+            "description": "Tracking stopped.",
+            "parameters": [
+                { "name": "timestamp", "type": "number" }
+            ]
         }
     ]
 }
@@ -199,11 +218,31 @@
             ]
         },
         {
+            "id": "PseudoId",
+            "type": "string",
+            "enum": [
+                "first-line",
+                "first-letter",
+                "marker",
+                "before",
+                "after",
+                "selection",
+                "scrollbar",
+                "scrollbar-thumb",
+                "scrollbar-button",
+                "scrollbar-track",
+                "scrollbar-track-piece",
+                "scrollbar-corner",
+                "resizer"
+            ],
+            "description": "Pseudo-style identifier (see <code>enum PseudoId</code> in <code>RenderStyleConstants.h</code>)."
+        },
+        {
             "id": "PseudoIdMatches",
             "type": "object",
             "description": "CSS rule collection for a single pseudo style.",
             "properties": [
-                { "name": "pseudoId", "type": "integer", "description": "Pseudo style identifier (see <code>enum PseudoId</code> in <code>RenderStyleConstants.h</code>)."},
+                { "name": "pseudoId", "$ref": "PseudoId" },
                 { "name": "matches", "type": "array", "items": { "$ref": "RuleMatch" }, "description": "Matches of CSS rules applicable to the pseudo style."}
             ]
         },
@@ -291,7 +330,7 @@
                 { "name": "sourceLine", "type": "integer", "description": "Line ordinal of the rule selector start character in the resource."},
                 { "name": "origin", "$ref": "StyleSheetOrigin", "description": "Parent stylesheet's origin."},
                 { "name": "style", "$ref": "CSSStyle", "description": "Associated style declaration." },
-                { "name": "media", "type": "array", "items": { "$ref": "CSSMedia" }, "optional": true, "description": "Media list array (for rules involving media queries). The array enumerates media queries starting with the innermost one, going outwards." }
+                { "name": "groupings", "type": "array", "items": { "$ref": "Grouping" }, "optional": true, "description": "Grouping list array (for rules involving @media/@supports). The array enumerates CSS groupings starting with the innermost one, going outwards." }
             ]
         },
         {
@@ -368,14 +407,13 @@
             ]
         },
         {
-            "id": "CSSMedia",
+            "id": "Grouping",
             "type": "object",
-            "description": "CSS media query descriptor.",
+            "description": "CSS @media (as well as other users of media queries, like @import, <style>, <link>, etc.) and @supports descriptor.",
             "properties": [
                 { "name": "text", "type": "string", "description": "Media query text." },
-                { "name": "source", "type": "string", "enum": ["mediaRule", "importRule", "linkedSheet", "inlineSheet"], "description": "Source of the media query: \"mediaRule\" if specified by a @media rule, \"importRule\" if specified by an @import rule, \"linkedSheet\" if specified by a \"media\" attribute in a linked stylesheet's LINK tag, \"inlineSheet\" if specified by a \"media\" attribute in an inline stylesheet's STYLE tag." },
-                { "name": "sourceURL", "type": "string", "optional": true, "description": "URL of the document containing the media query description." },
-                { "name": "sourceLine", "type": "integer", "optional": true, "description": "Line in the document containing the media query (not defined for the \"stylesheet\" source)." }
+                { "name": "type", "type": "string", "enum": ["media-rule", "media-import-rule", "media-link-node", "media-style-node", "supports-rule"], "description": "Source of the media query: \"media-rule\" if specified by a @media rule, \"media-import-rule\" if specified by an @import rule, \"media-link-node\" if specified by a \"media\" attribute in a linked style sheet's LINK tag, \"media-style-node\" if specified by a \"media\" attribute in an inline style sheet's STYLE tag, \"supports-rule\" if specified by an @supports rule, ." },
+                { "name": "sourceURL", "type": "string", "optional": true, "description": "URL of the document containing the CSS grouping." }
             ]
         }
     ],
@@ -571,7 +609,7 @@
         {
             "id": "ContextType",
             "type": "string",
-            "enum": ["canvas-2d", "bitmaprenderer", "webgl", "webgl2", "webmetal"],
+            "enum": ["canvas-2d", "bitmaprenderer", "webgl", "webgl2", "webgpu"],
             "description": "The type of rendering context backing the canvas element."
         },
         {
@@ -797,7 +835,7 @@
         {
             "id": "ChannelSource",
             "type": "string",
-            "enum": ["xml", "javascript", "network", "console-api", "storage", "appcache", "rendering", "css", "security", "content-blocker", "media", "webrtc", "other"],
+            "enum": ["xml", "javascript", "network", "console-api", "storage", "appcache", "rendering", "css", "security", "content-blocker", "media", "mediasource", "webrtc", "other"],
             "description": "Channels for different types of log messages."
         },
         {
@@ -823,7 +861,7 @@
                 { "name": "source", "$ref": "ChannelSource"},
                 { "name": "level", "type": "string", "enum": ["log", "info", "warning", "error", "debug"], "description": "Message severity." },
                 { "name": "text", "type": "string", "description": "Message text." },
-                { "name": "type", "type": "string", "optional": true, "enum": ["log", "dir", "dirxml", "table", "trace", "clear", "startGroup", "startGroupCollapsed", "endGroup", "assert", "timing", "profile", "profileEnd"], "description": "Console message type." },
+                { "name": "type", "type": "string", "optional": true, "enum": ["log", "dir", "dirxml", "table", "trace", "clear", "startGroup", "startGroupCollapsed", "endGroup", "assert", "timing", "profile", "profileEnd", "image"], "description": "Console message type." },
                 { "name": "url", "type": "string", "optional": true, "description": "URL of the message origin." },
                 { "name": "line", "type": "integer", "optional": true, "description": "Line number in the resource that generated this message." },
                 { "name": "column", "type": "integer", "optional": true, "description": "Column number on the line in the resource that generated this message." },
@@ -966,6 +1004,7 @@
                 { "name": "nodeName", "type": "string", "description": "<code>Node</code>'s nodeName." },
                 { "name": "localName", "type": "string", "description": "<code>Node</code>'s localName." },
                 { "name": "nodeValue", "type": "string", "description": "<code>Node</code>'s nodeValue." },
+                { "name": "frameId", "$ref": "Network.FrameId", "optional": true, "description": "Identifier of the containing frame." },
                 { "name": "childNodeCount", "type": "integer", "optional": true, "description": "Child count for <code>Container</code> nodes." },
                 { "name": "children", "type": "array", "optional": true, "items": { "$ref": "Node" }, "description": "Child nodes of this node when requested with children." },
                 { "name": "attributes", "type": "array", "optional": true, "items": { "type": "string" }, "description": "Attributes of the <code>Element</code> node in the form of flat array <code>[name1, value1, name2, value2]</code>." },
@@ -979,12 +1018,21 @@
                 { "name": "pseudoType", "$ref": "PseudoType", "optional": true, "description": "Pseudo element type for this node." },
                 { "name": "shadowRootType", "$ref": "ShadowRootType", "optional": true, "description": "Shadow root type." },
                 { "name": "customElementState", "$ref": "CustomElementState", "optional": true, "description": "Custom element state." },
-                { "name": "frameId", "$ref": "Network.FrameId", "optional": true, "description": "Frame ID for frame owner elements." },
                 { "name": "contentDocument", "$ref": "Node", "optional": true, "description": "Content document for frame owner elements." },
                 { "name": "shadowRoots", "type": "array", "optional": true, "items": { "$ref": "Node" }, "description": "Shadow root list for given element host." },
                 { "name": "templateContent", "$ref": "Node", "optional": true, "description": "Content document fragment for template elements" },
                 { "name": "pseudoElements", "type": "array", "items": { "$ref": "Node" }, "optional": true, "description": "Pseudo elements associated with this node." },
                 { "name": "contentSecurityPolicyHash", "type": "string", "optional": true, "description": "Computed SHA-256 Content Security Policy hash source for given element." }
+            ]
+        },
+        {
+            "id": "DataBinding",
+            "type": "object",
+            "description": "Relationship between data that is associated with a node and the node itself.",
+            "properties": [
+                { "name": "binding", "type": "string", "description": "The binding key that is specified." },
+                { "name": "type", "optional": true, "type": "string", "description": "A more descriptive name for the type of binding that represents this paritcular data relationship" },
+                { "name": "value", "type": "string", "description": "The value that is resolved to with this data binding relationship." }
             ]
         },
         {
@@ -996,10 +1044,10 @@
                 { "name": "type", "type": "string", "description": "<code>EventListener</code>'s type." },
                 { "name": "useCapture", "type": "boolean", "description": "<code>EventListener</code>'s useCapture." },
                 { "name": "isAttribute", "type": "boolean", "description": "<code>EventListener</code>'s isAttribute." },
-                { "name": "nodeId", "$ref": "NodeId", "description": "Target <code>DOMNode</code> id." },
+                { "name": "nodeId", "$ref": "NodeId", "optional": true, "description": "The target <code>DOMNode</code> id if the event listener is for a node." },
+                { "name": "onWindow", "type": "boolean", "optional": true, "description": "True if the event listener was added to the window." },
                 { "name": "location", "$ref": "Debugger.Location", "optional": true, "description": "Handler code location." },
                 { "name": "handlerName", "type": "string", "optional": true, "description": "Event handler function name." },
-                { "name": "handlerObject", "$ref": "Runtime.RemoteObject", "optional": true, "description": "Event handler function value." },
                 { "name": "passive", "type": "boolean", "optional": true, "description": "<code>EventListener</code>'s passive." },
                 { "name": "once", "type": "boolean", "optional": true, "description": "<code>EventListener</code>'s once." },
                 { "name": "disabled", "type": "boolean", "optional": true },
@@ -1175,11 +1223,30 @@
             ]
         },
         {
+            "name": "getDataBindingsForNode",
+            "description": "Returns all data binding relationships between data that is associated with the node and the node itself.",
+            "parameters": [
+                { "name": "nodeId", "$ref": "NodeId", "description": "Id of the node to get data bindings for." }
+            ],
+            "returns": [
+                { "name": "dataBindings", "type": "array", "items": { "$ref": "DataBinding"}, "description": "Array of binding relationships between data and node" }
+            ]
+        },
+        {
+            "name": "getAssociatedDataForNode",
+            "description": "Returns all data that has been associated with the node and is available for data binding.",
+            "parameters": [
+                { "name": "nodeId", "$ref": "NodeId", "description": "Id of the node to get associated data for." }
+            ],
+            "returns": [
+                { "name": "associatedData", "type": "string", "optional": true, "description": "Associated data bound to this node. Sent as a JSON string." }
+            ]
+        },
+        {
             "name": "getEventListenersForNode",
             "description": "Returns event listeners relevant to the node.",
             "parameters": [
-                { "name": "nodeId", "$ref": "NodeId", "description": "Id of the node to get listeners for." },
-                { "name": "objectGroup", "type": "string", "optional": true, "description": "Symbolic group name for handler value. Handler value is not returned without this parameter specified." }
+                { "name": "nodeId", "$ref": "NodeId", "description": "Id of the node to get listeners for." }
             ],
             "returns": [
                 { "name": "listeners", "type": "array", "items": { "$ref": "EventListener"}, "description": "Array of relevant listeners." }
@@ -1248,7 +1315,8 @@
             "description": "Searches for a given string in the DOM tree. Use <code>getSearchResults</code> to access search results or <code>cancelSearch</code> to end this search session.",
             "parameters": [
                 { "name": "query", "type": "string", "description": "Plain text or query selector or XPath search query." },
-                { "name": "nodeIds", "type": "array", "items": { "$ref": "NodeId" }, "optional": true, "description": "Ids of nodes to use as starting points for the search." }
+                { "name": "nodeIds", "type": "array", "items": { "$ref": "NodeId" }, "optional": true, "description": "Ids of nodes to use as starting points for the search." },
+                { "name": "caseSensitive", "type": "boolean", "optional": true, "description": "If true, search is case sensitive." }
             ],
             "returns": [
                 { "name": "searchId", "type": "string", "description": "Unique search session identifier." },
@@ -1289,7 +1357,8 @@
             "description": "Enters the 'inspect' mode. In this mode, elements that user is hovering over are highlighted. Backend then generates 'inspect' command upon element selection.",
             "parameters": [
                 { "name": "enabled", "type": "boolean", "description": "True to enable inspection mode, false to disable it." },
-                { "name": "highlightConfig", "$ref": "HighlightConfig", "optional": true, "description": "A descriptor for the highlight appearance of hovered-over nodes. May be omitted if <code>enabled == false</code>." }
+                { "name": "highlightConfig", "$ref": "HighlightConfig", "optional": true, "description": "A descriptor for the highlight appearance of hovered-over nodes. May be omitted if <code>enabled == false</code>." },
+                { "name": "showRulers", "type": "boolean", "optional": true, "description": "Whether the rulers should be shown during element selection. This overrides Page.setShowRulers." }
             ]
         },
         {
@@ -1566,12 +1635,12 @@
             ]
         },
         {
-            "name": "videoLowPowerChanged",
-            "description": "Called when a video element enters/exits low power mode.",
+            "name": "powerEfficientPlaybackStateChanged",
+            "description": "Called when an element enters/exits a power efficient playback state.",
             "parameters": [
                 { "name": "nodeId", "$ref": "NodeId" },
-                { "name": "timestamp", "$ref": "Network.Timestamp", "description": "Time when the video element entered/exited low power mode" },
-                { "name": "isLowPower", "type": "boolean" }
+                { "name": "timestamp", "$ref": "Network.Timestamp" },
+                { "name": "isPowerEfficient", "type": "boolean" }
             ]
         }
     ]
@@ -1591,7 +1660,7 @@
         {
             "id": "EventBreakpointType",
             "type": "string",
-            "enum": ["animation-frame", "listener", "timer"],
+            "enum": ["animation-frame", "interval", "listener", "timeout"],
             "description": "Event breakpoint type."
         }
     ],
@@ -1617,7 +1686,7 @@
             "description": "Sets breakpoint on particular event of given type.",
             "parameters": [
                 { "name": "breakpointType", "$ref": "EventBreakpointType" },
-                { "name": "eventName", "type": "string", "description": "The name of the event to stop on." }
+                { "name": "eventName", "type": "string", "optional": true, "description": "The name of the specific event to stop on." }
             ]
         },
         {
@@ -1625,7 +1694,7 @@
             "description": "Removes breakpoint on particular event of given type.",
             "parameters": [
                 { "name": "breakpointType", "$ref": "EventBreakpointType" },
-                { "name": "eventName", "type": "string", "description": "The name of the event to stop on." }
+                { "name": "eventName", "type": "string", "optional": true, "description": "The name of the specific event to stop on." }
             ]
         },
         {
@@ -2071,6 +2140,13 @@
             ]
         },
         {
+            "name": "setPauseOnMicrotasks",
+            "description": "Pause when running the next JavaScript microtask.",
+            "parameters": [
+                { "name": "enabled", "type": "boolean" }
+            ]
+        },
+        {
             "name": "setPauseForInternalScripts",
             "description": "Change whether to pause in the debugger for internal scripts. The default value is false.",
             "parameters": [
@@ -2088,19 +2164,13 @@
                 { "name": "doNotPauseOnExceptionsAndMuteConsole", "type": "boolean", "optional": true, "description": "Specifies whether evaluation should stop on exceptions and mute console. Overrides setPauseOnException state." },
                 { "name": "returnByValue", "type": "boolean", "optional": true, "description": "Whether the result is expected to be a JSON object that should be sent by value." },
                 { "name": "generatePreview", "type": "boolean", "optional": true, "description": "Whether preview should be generated for the result." },
-                { "name": "saveResult", "type": "boolean", "optional": true, "description": "Whether the resulting value should be considered for saving in the $n history." }
+                { "name": "saveResult", "type": "boolean", "optional": true, "description": "Whether the resulting value should be considered for saving in the $n history." },
+                { "name": "emulateUserGesture", "type": "boolean", "optional": true, "description": "Whether the expression should be considered to be in a user gesture or not." }
             ],
             "returns": [
                 { "name": "result", "$ref": "Runtime.RemoteObject", "description": "Object wrapper for the evaluation result." },
                 { "name": "wasThrown", "type": "boolean", "optional": true, "description": "True if the result was thrown during the evaluation." },
                 { "name": "savedResultIndex", "type": "integer", "optional": true, "description": "If the result was saved, this is the $n index that can be used to access the value." }
-            ]
-        },
-        {
-            "name": "setOverlayMessage",
-            "description": "Sets overlay message.",
-            "parameters": [
-                { "name": "message", "type": "string", "optional": true, "description": "Overlay message to display when paused in debugger." }
             ]
         }
     ],
@@ -2149,7 +2219,7 @@
             "description": "Fired when the virtual machine stopped on breakpoint or exception or any other stop criteria.",
             "parameters": [
                 { "name": "callFrames", "type": "array", "items": { "$ref": "CallFrame" }, "description": "Call stack the virtual machine stopped on." },
-                { "name": "reason", "type": "string", "enum": ["XHR", "Fetch", "DOM", "AnimationFrame", "EventListener", "Timer", "exception", "assert", "CSPViolation", "DebuggerStatement", "Breakpoint", "PauseOnNextStatement", "other"], "description": "Pause reason." },
+                { "name": "reason", "type": "string", "enum": ["XHR", "Fetch", "DOM", "AnimationFrame", "Interval", "Listener", "Timeout", "exception", "assert", "CSPViolation", "DebuggerStatement", "Breakpoint", "PauseOnNextStatement", "Microtask", "other"], "description": "Pause reason." },
                 { "name": "data", "type": "object", "optional": true, "description": "Object containing break-specific auxiliary properties." },
                 { "name": "asyncStackTrace", "$ref": "Console.StackTrace", "optional": true, "description": "Linked list of asynchronous StackTraces." }
             ]
@@ -2658,7 +2728,10 @@
         },
         {
             "name": "trackingComplete",
-            "description": "Tracking stopped."
+            "description": "Tracking stopped.",
+            "parameters": [
+                { "name": "timestamp", "type": "number" }
+            ]
         }
     ]
 }
@@ -3025,112 +3098,6 @@
 }
 ,
 {
-    "domain": "OverlayTypes",
-    "description": "Exposes types to be used by the inspector overlay.",
-    "types": [
-        {
-            "id": "Point",
-            "type": "object",
-            "properties": [
-                { "name": "x", "type": "number" },
-                { "name": "y", "type": "number" }
-            ]
-        },
-        {
-            "id": "Size",
-            "type": "object",
-            "properties": [
-                { "name": "width", "type": "integer" },
-                { "name": "height", "type": "integer" }
-            ]
-        },
-        {
-            "id": "Quad",
-            "description": "A quad is a collection of 4 points. When initialized from a rect, the points are in clockwise order from top left.",
-            "type": "array",
-            "items": { "$ref": "Point" }
-        },
-        {
-            "id": "Rect",
-            "description": "A rectangle specified by a reference coordinate and width/height offsets.",
-            "type": "object",
-            "properties": [
-                { "name": "x", "type": "number" },
-                { "name": "y", "type": "number" },
-                { "name": "width", "type": "number" },
-                { "name": "height", "type": "number" }
-            ]
-        },
-        {
-            "id": "DisplayPath",
-            "description": "A vector path described using SVG path syntax.",
-            "type": "array",
-            "items": { "type": "any" }
-        },
-        {
-            "id": "ShapeOutsideData",
-            "type": "object",
-            "properties": [
-                { "name": "bounds", "$ref": "Quad", "description": "Bounds for the shape-outside paths." },
-                { "name": "shape", "$ref": "DisplayPath", "description": "Path for the element's shape.", "optional": true },
-                { "name": "marginShape", "$ref": "DisplayPath", "description": "Path for the element's margin shape.", "optional": true }
-            ]
-        },
-        {
-            "id": "ElementData",
-            "description": "Data that describes an element to be highlighted.",
-            "type": "object",
-            "properties": [
-                { "name": "tagName", "type": "string" },
-                { "name": "idValue", "type": "string", "description": "The value of the element's 'id' attribute." },
-                { "name": "classes", "type": "array", "items": { "type": "string" }, "optional": true },
-                { "name": "size", "$ref": "Size", "optional": true },
-                { "name": "role", "type": "string", "description": "Computed accessibility role for the element.", "optional": true },
-                { "name": "pseudoElement", "type": "string", "optional": true },
-                { "name": "shapeOutsideData", "$ref": "ShapeOutsideData", "optional": true }
-            ]
-        },
-        {
-            "id": "FragmentHighlightData",
-            "description": "Data required to highlight multiple quads.",
-            "type": "object",
-            "properties": [
-                { "name": "quads", "type": "array", "items": { "$ref": "Quad" }, "description": "Quads for which the highlight should be applied."},
-                { "name": "contentColor", "type": "string" },
-                { "name": "contentOutlineColor", "type": "string" },
-                { "name": "paddingColor", "type": "string" },
-                { "name": "borderColor", "type": "string" },
-                { "name": "marginColor", "type": "string" }
-            ]
-        },
-        {
-            "id": "NodeHighlightData",
-            "description": "Data required to highlight a DOM node.",
-            "type": "object",
-            "properties": [
-                { "name": "scrollOffset", "$ref": "Point", "description": "Scroll offset for the MainFrame's FrameView that is shared across all quads." },
-                { "name": "fragments", "type": "array", "items": { "$ref": "FragmentHighlightData" } },
-                { "name": "elementData", "$ref": "ElementData", "optional": true }
-            ]
-        },
-        {
-            "id": "OverlayConfiguration",
-            "description": "Data required to configure the overlay's size and scaling behavior.",
-            "type": "object",
-            "properties": [
-                { "name": "deviceScaleFactor", "type": "number" },
-                { "name": "viewportSize", "$ref": "Size" },
-                { "name": "pageScaleFactor", "type": "number" },
-                { "name": "pageZoomFactor", "type": "number" },
-                { "name": "scrollOffset", "$ref": "Point" },
-                { "name": "contentInset", "$ref": "Size" },
-                { "name": "showRulers", "type": "boolean" }
-            ]
-        }
-    ]
-}
-,
-{
     "domain": "Page",
     "description": "Actions and events related to the inspected page belong to the page domain.",
     "availability": ["web"],
@@ -3147,13 +3114,14 @@
                 "MockCaptureDevicesEnabled",
                 "NeedsSiteSpecificQuirks",
                 "ScriptEnabled",
+                "WebRTCEncryptionEnabled",
                 "WebSecurityEnabled"
             ]
         },
         {
             "id": "ResourceType",
             "type": "string",
-            "enum": ["Document", "Stylesheet", "Image", "Font", "Script", "XHR", "Fetch", "Ping", "Beacon", "WebSocket", "Other"],
+            "enum": ["Document", "StyleSheet", "Image", "Font", "Script", "XHR", "Fetch", "Ping", "Beacon", "WebSocket", "Other"],
             "description": "Resource type as it was perceived by the rendering engine."
         },
         {
@@ -3489,7 +3457,7 @@
         {
             "id": "Type",
             "type": "string",
-            "enum": ["canvas-2d", "canvas-bitmaprenderer", "canvas-webgl"],
+            "enum": ["canvas-2d", "canvas-bitmaprenderer", "canvas-webgl", "canvas-webgl2"],
             "description": "The type of the recording."
         },
         {
@@ -3546,7 +3514,7 @@
             "type": "object",
             "description": "Mirror object referencing original JavaScript object.",
             "properties": [
-                { "name": "type", "type": "string", "enum": ["object", "function", "undefined", "string", "number", "boolean", "symbol"], "description": "Object type." },
+                { "name": "type", "type": "string", "enum": ["object", "function", "undefined", "string", "number", "boolean", "symbol", "bigint"], "description": "Object type." },
                 { "name": "subtype", "type": "string", "optional": true, "enum": ["array", "null", "node", "regexp", "date", "error", "map", "set", "weakmap", "weakset", "iterator", "class", "proxy"], "description": "Object subtype hint. Specified for <code>object</code> <code>function</code> (for class) type values only." },
                 { "name": "className", "type": "string", "optional": true, "description": "Object class (constructor) name. Specified for <code>object</code> type values only." },
                 { "name": "value", "type": "any", "optional": true, "description": "Remote object value (in case of primitive values or JSON values if it was requested)." },
@@ -3562,7 +3530,7 @@
             "type": "object",
             "description": "Object containing abbreviated remote object value.",
             "properties": [
-                { "name": "type", "type": "string", "enum": ["object", "function", "undefined", "string", "number", "boolean", "symbol"], "description": "Object type." },
+                { "name": "type", "type": "string", "enum": ["object", "function", "undefined", "string", "number", "boolean", "symbol", "bigint"], "description": "Object type." },
                 { "name": "subtype", "type": "string", "optional": true, "enum": ["array", "null", "node", "regexp", "date", "error", "map", "set", "weakmap", "weakset", "iterator", "class", "proxy"], "description": "Object subtype hint. Specified for <code>object</code> type values only." },
                 { "name": "description", "type": "string", "optional": true, "description": "String representation of the object." },
                 { "name": "lossless", "type": "boolean", "description": "Determines whether preview is lossless (contains all information of the original object)." },
@@ -3577,7 +3545,7 @@
             "type": "object",
             "properties": [
                 { "name": "name", "type": "string", "description": "Property name." },
-                { "name": "type", "type": "string", "enum": ["object", "function", "undefined", "string", "number", "boolean", "symbol", "accessor"], "description": "Object type." },
+                { "name": "type", "type": "string", "enum": ["object", "function", "undefined", "string", "number", "boolean", "symbol", "bigint", "accessor"], "description": "Object type." },
                 { "name": "subtype", "type": "string", "optional": true, "enum": ["array", "null", "node", "regexp", "date", "error", "map", "set", "weakmap", "weakset", "iterator", "class", "proxy"], "description": "Object subtype hint. Specified for <code>object</code> type values only." },
                 { "name": "value", "type": "string", "optional": true, "description": "User-friendly property value string." },
                 { "name": "valuePreview", "$ref": "ObjectPreview", "optional": true, "description": "Nested value preview." },
@@ -3690,7 +3658,8 @@
                 { "name": "isNumber", "type": "boolean", "description": "Indicates if this type description has been type Number." },
                 { "name": "isString", "type": "boolean", "description": "Indicates if this type description has been type String." },
                 { "name": "isObject", "type": "boolean", "description": "Indicates if this type description has been type Object." },
-                { "name": "isSymbol", "type": "boolean", "description": "Indicates if this type description has been type Symbol." }
+                { "name": "isSymbol", "type": "boolean", "description": "Indicates if this type description has been type Symbol." },
+                { "name": "isBigInt", "type": "boolean", "description": "Indicates if this type description has been type BigInt." }
             ]
         },
         {
@@ -3751,7 +3720,8 @@
                 { "name": "contextId", "$ref": "Runtime.ExecutionContextId", "optional": true, "description": "Specifies in which isolated context to perform evaluation. Each content script lives in an isolated context and this parameter may be used to specify one of those contexts. If the parameter is omitted or 0 the evaluation will be performed in the context of the inspected page." },
                 { "name": "returnByValue", "type": "boolean", "optional": true, "description": "Whether the result is expected to be a JSON object that should be sent by value." },
                 { "name": "generatePreview", "type": "boolean", "optional": true, "description": "Whether preview should be generated for the result." },
-                { "name": "saveResult", "type": "boolean", "optional": true, "description": "Whether the resulting value should be considered for saving in the $n history." }
+                { "name": "saveResult", "type": "boolean", "optional": true, "description": "Whether the resulting value should be considered for saving in the $n history." },
+                { "name": "emulateUserGesture", "type": "boolean", "optional": true, "description": "Whether the expression should be considered to be in a user gesture or not." }
             ],
             "returns": [
                 { "name": "result", "$ref": "RemoteObject", "description": "Evaluation result." },
@@ -3848,6 +3818,13 @@
             ],
             "returns": [
                 { "name": "savedResultIndex", "type": "integer", "optional": true, "description": "If the value was saved, this is the $n index that can be used to access the value." }
+            ]
+        },
+        {
+            "name": "setSavedResultAlias",
+            "description": "Creates an additional reference to all saved values in the Console using the the given string as a prefix instead of $.",
+            "parameters": [
+                { "name": "alias", "type": "string", "optional": true, "description": "Passing an empty/null string will clear the alias." }
             ]
         },
         {
@@ -4007,16 +3984,9 @@
             "name": "trackingComplete",
             "description": "Tracking stopped. Includes any buffered data during tracking, such as profiling information.",
             "parameters": [
+                { "name": "timestamp", "type": "number" },
                 { "name": "samples", "$ref": "Samples", "optional": true, "description": "Stack traces." }
             ]
-        },
-        {
-            "name": "programmaticCaptureStarted",
-            "description": "Fired when programmatic capture starts (console.profile). JSContext inspection only."
-        },
-        {
-            "name": "programmaticCaptureStopped",
-            "description": "Fired when programmatic capture stops (console.profileEnd). JSContext inspection only."
         }
     ]
 }
@@ -4196,6 +4166,14 @@
     ],
     "commands": [
         {
+            "name": "enable",
+            "description": "Enables Timeline domain events."
+        },
+        {
+            "name": "disable",
+            "description": "Disables Timeline domain events."
+        },
+        {
             "name": "start",
             "description": "Starts capturing instrumentation events.",
             "parameters": [
@@ -4246,14 +4224,6 @@
         {
             "name": "autoCaptureStarted",
             "description": "Fired when auto capture started."
-        },
-        {
-            "name": "programmaticCaptureStarted",
-            "description": "Fired when programmatic capture starts (console.profile)."
-        },
-        {
-            "name": "programmaticCaptureStopped",
-            "description": "Fired when programmatic capture stops (console.profileEnd)."
         }
     ]
 }

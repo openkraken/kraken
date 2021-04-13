@@ -66,8 +66,12 @@ const int numOpcodeIDs = NUMBER_OF_BYTECODE_IDS + NUMBER_OF_BYTECODE_HELPER_IDS;
 
 #if ENABLE(C_LOOP) && !HAVE(COMPUTED_GOTO)
 
-#define OPCODE_ID_ENUM(opcode, length) opcode##_wide = numOpcodeIDs + opcode,
-    enum OpcodeIDWide : unsigned { FOR_EACH_OPCODE_ID(OPCODE_ID_ENUM) };
+#define OPCODE_ID_ENUM(opcode, length) opcode##_wide16 = numOpcodeIDs + opcode,
+    enum OpcodeIDWide16 : unsigned { FOR_EACH_OPCODE_ID(OPCODE_ID_ENUM) };
+#undef OPCODE_ID_ENUM
+
+#define OPCODE_ID_ENUM(opcode, length) opcode##_wide32 = numOpcodeIDs * 2 + opcode,
+    enum OpcodeIDWide32 : unsigned { FOR_EACH_OPCODE_ID(OPCODE_ID_ENUM) };
 #undef OPCODE_ID_ENUM
 #endif
 
@@ -103,6 +107,7 @@ extern const unsigned opcodeLengths[];
     macro(OpBitor) \
     macro(OpBitnot) \
     macro(OpBitxor) \
+    macro(OpLshift) \
 
 #define FOR_EACH_OPCODE_WITH_ARRAY_PROFILE(macro) \
     macro(OpHasIndexedProperty) \
@@ -111,10 +116,6 @@ extern const unsigned opcodeLengths[];
     macro(OpTailCallForwardArguments) \
     macro(OpConstructVarargs) \
     macro(OpGetByVal) \
-    macro(OpCall) \
-    macro(OpTailCall) \
-    macro(OpCallEval) \
-    macro(OpConstruct) \
     macro(OpInByVal) \
     macro(OpPutByVal) \
     macro(OpPutByValDirect) \
@@ -147,20 +148,7 @@ typedef void* Opcode;
 typedef OpcodeID Opcode;
 #endif
 
-#define PADDING_STRING "                                "
-#define PADDING_STRING_LENGTH static_cast<unsigned>(strlen(PADDING_STRING))
-
 extern const char* const opcodeNames[];
-
-inline const char* padOpcodeName(OpcodeID op, unsigned width)
-{
-    unsigned pad = width - strlen(opcodeNames[op]);
-    pad = std::min(pad, PADDING_STRING_LENGTH);
-    return PADDING_STRING;
-}
-
-#undef PADDING_STRING_LENGTH
-#undef PADDING_STRING
 
 #if ENABLE(OPCODE_STATS)
 
@@ -185,6 +173,8 @@ inline bool isBranch(OpcodeID opcodeID)
     case op_jfalse:
     case op_jeq_null:
     case op_jneq_null:
+    case op_jundefined_or_null:
+    case op_jnundefined_or_null:
     case op_jneq_ptr:
     case op_jless:
     case op_jlesseq:

@@ -51,50 +51,50 @@ struct ProtoCallFrame;
 class TrackedReferences;
 class VM;
 
+enum class JITType : uint8_t {
+    None,
+    HostCallThunk,
+    InterpreterThunk,
+    BaselineJIT,
+    DFGJIT,
+    FTLJIT
+};
+
 class JITCode : public ThreadSafeRefCounted<JITCode> {
 public:
     template<PtrTag tag> using CodePtr = MacroAssemblerCodePtr<tag>;
     template<PtrTag tag> using CodeRef = MacroAssemblerCodeRef<tag>;
 
-    enum JITType : uint8_t {
-        None,
-        HostCallThunk,
-        InterpreterThunk,
-        BaselineJIT,
-        DFGJIT,
-        FTLJIT
-    };
-    
     static const char* typeName(JITType);
 
     static JITType bottomTierJIT()
     {
-        return BaselineJIT;
+        return JITType::BaselineJIT;
     }
     
     static JITType topTierJIT()
     {
-        return FTLJIT;
+        return JITType::FTLJIT;
     }
     
     static JITType nextTierJIT(JITType jitType)
     {
         switch (jitType) {
-        case BaselineJIT:
-            return DFGJIT;
-        case DFGJIT:
-            return FTLJIT;
+        case JITType::BaselineJIT:
+            return JITType::DFGJIT;
+        case JITType::DFGJIT:
+            return JITType::FTLJIT;
         default:
             RELEASE_ASSERT_NOT_REACHED();
-            return None;
+            return JITType::None;
         }
     }
     
     static bool isExecutableScript(JITType jitType)
     {
         switch (jitType) {
-        case None:
-        case HostCallThunk:
+        case JITType::None:
+        case JITType::HostCallThunk:
             return false;
         default:
             return true;
@@ -104,8 +104,8 @@ public:
     static bool couldBeInterpreted(JITType jitType)
     {
         switch (jitType) {
-        case InterpreterThunk:
-        case BaselineJIT:
+        case JITType::InterpreterThunk:
+        case JITType::BaselineJIT:
             return true;
         default:
             return false;
@@ -115,9 +115,9 @@ public:
     static bool isJIT(JITType jitType)
     {
         switch (jitType) {
-        case BaselineJIT:
-        case DFGJIT:
-        case FTLJIT:
+        case JITType::BaselineJIT:
+        case JITType::DFGJIT:
+        case JITType::FTLJIT:
             return true;
         default:
             return false;
@@ -148,18 +148,23 @@ public:
     
     static bool isOptimizingJIT(JITType jitType)
     {
-        return jitType == DFGJIT || jitType == FTLJIT;
+        return jitType == JITType::DFGJIT || jitType == JITType::FTLJIT;
     }
     
     static bool isBaselineCode(JITType jitType)
     {
-        return jitType == InterpreterThunk || jitType == BaselineJIT;
+        return jitType == JITType::InterpreterThunk || jitType == JITType::BaselineJIT;
     }
 
     virtual const DOMJIT::Signature* signature() const { return nullptr; }
     
+    enum class ShareAttribute : uint8_t {
+        NotShared,
+        Shared
+    };
+
 protected:
-    JITCode(JITType);
+    JITCode(JITType, JITCode::ShareAttribute = JITCode::ShareAttribute::NotShared);
     
 public:
     virtual ~JITCode();
@@ -173,7 +178,7 @@ public:
     static JITType jitTypeFor(PointerType jitCode)
     {
         if (!jitCode)
-            return None;
+            return JITType::None;
         return jitCode->jitType();
     }
     
@@ -205,8 +210,11 @@ public:
 
     Intrinsic intrinsic() { return m_intrinsic; }
 
+    bool isShared() const { return m_shareAttribute == ShareAttribute::Shared; }
+
 private:
     JITType m_jitType;
+    ShareAttribute m_shareAttribute;
 protected:
     Intrinsic m_intrinsic { NoIntrinsic }; // Effective only in NativeExecutable.
 };
@@ -214,7 +222,7 @@ protected:
 class JITCodeWithCodeRef : public JITCode {
 protected:
     JITCodeWithCodeRef(JITType);
-    JITCodeWithCodeRef(CodeRef<JSEntryPtrTag>, JITType);
+    JITCodeWithCodeRef(CodeRef<JSEntryPtrTag>, JITType, JITCode::ShareAttribute);
 
 public:
     virtual ~JITCodeWithCodeRef();
@@ -232,8 +240,8 @@ protected:
 class DirectJITCode : public JITCodeWithCodeRef {
 public:
     DirectJITCode(JITType);
-    DirectJITCode(CodeRef<JSEntryPtrTag>, CodePtr<JSEntryPtrTag> withArityCheck, JITType);
-    DirectJITCode(CodeRef<JSEntryPtrTag>, CodePtr<JSEntryPtrTag> withArityCheck, JITType, Intrinsic); // For generated thunk.
+    DirectJITCode(CodeRef<JSEntryPtrTag>, CodePtr<JSEntryPtrTag> withArityCheck, JITType, JITCode::ShareAttribute = JITCode::ShareAttribute::NotShared);
+    DirectJITCode(CodeRef<JSEntryPtrTag>, CodePtr<JSEntryPtrTag> withArityCheck, JITType, Intrinsic, JITCode::ShareAttribute = JITCode::ShareAttribute::NotShared); // For generated thunk.
     virtual ~DirectJITCode();
     
     CodePtr<JSEntryPtrTag> addressForCall(ArityCheckMode) override;
@@ -248,7 +256,7 @@ private:
 class NativeJITCode : public JITCodeWithCodeRef {
 public:
     NativeJITCode(JITType);
-    NativeJITCode(CodeRef<JSEntryPtrTag>, JITType, Intrinsic);
+    NativeJITCode(CodeRef<JSEntryPtrTag>, JITType, Intrinsic, JITCode::ShareAttribute = JITCode::ShareAttribute::NotShared);
     virtual ~NativeJITCode();
 
     CodePtr<JSEntryPtrTag> addressForCall(ArityCheckMode) override;
@@ -270,6 +278,6 @@ private:
 namespace WTF {
 
 class PrintStream;
-void printInternal(PrintStream&, JSC::JITCode::JITType);
+void printInternal(PrintStream&, JSC::JITType);
 
 } // namespace WTF

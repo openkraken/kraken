@@ -55,7 +55,7 @@ public:
     CPUProfilerFrontendDispatcher(FrontendRouter& frontendRouter) : m_frontendRouter(frontendRouter) { }
     void trackingStart(double timestamp);
     void trackingUpdate(RefPtr<Inspector::Protocol::CPUProfiler::Event> event);
-    void trackingComplete();
+    void trackingComplete(double timestamp);
 private:
     FrontendRouter& m_frontendRouter;
 };
@@ -84,9 +84,9 @@ public:
     void cssCanvasClientNodesChanged(const String& canvasId);
         // Named after parameter 'initiator' while generating command/event recordingStarted.
         enum class Initiator {
-            Frontend = 137,
-            Console = 138,
-            AutoCapture = 139,
+            Frontend = 156,
+            Console = 157,
+            AutoCapture = 158,
         }; // enum class Initiator
     void recordingStarted(const String& canvasId, Inspector::Protocol::Recording::Initiator initiator);
     void recordingProgress(const String& canvasId, RefPtr<JSON::ArrayOf<Inspector::Protocol::Recording::Frame>> frames, int bufferUsed);
@@ -127,10 +127,10 @@ public:
     void shadowRootPopped(int hostId, int rootId);
         // Named after parameter 'customElementState' while generating command/event customElementStateChanged.
         enum class CustomElementState {
-            Builtin = 56,
-            Custom = 57,
-            Waiting = 58,
-            Failed = 59,
+            Builtin = 72,
+            Custom = 73,
+            Waiting = 74,
+            Failed = 75,
         }; // enum class CustomElementState
     void customElementStateChanged(int nodeId, Inspector::Protocol::DOM::CustomElementState customElementState);
     void pseudoElementAdded(int parentId, RefPtr<Inspector::Protocol::DOM::Node> pseudoElement);
@@ -138,7 +138,7 @@ public:
     void didAddEventListener(int nodeId);
     void willRemoveEventListener(int nodeId);
     void didFireEvent(int nodeId, const String& eventName, double timestamp, RefPtr<JSON::Object> data);
-    void videoLowPowerChanged(int nodeId, double timestamp, bool isLowPower);
+    void powerEfficientPlaybackStateChanged(int nodeId, double timestamp, bool isPowerEfficient);
 private:
     FrontendRouter& m_frontendRouter;
 };
@@ -174,19 +174,21 @@ public:
     void breakpointResolved(const String& breakpointId, RefPtr<Inspector::Protocol::Debugger::Location> location);
         // Named after parameter 'reason' while generating command/event paused.
         enum class Reason {
-            XHR = 112,
-            Fetch = 113,
-            DOM = 190,
-            AnimationFrame = 191,
-            EventListener = 192,
-            Timer = 193,
-            Exception = 194,
-            Assert = 48,
-            CSPViolation = 195,
-            DebuggerStatement = 196,
-            Breakpoint = 197,
-            PauseOnNextStatement = 198,
-            Other = 31,
+            XHR = 129,
+            Fetch = 130,
+            DOM = 210,
+            AnimationFrame = 211,
+            Interval = 212,
+            Listener = 213,
+            Timeout = 214,
+            Exception = 215,
+            Assert = 65,
+            CSPViolation = 216,
+            DebuggerStatement = 217,
+            Breakpoint = 218,
+            PauseOnNextStatement = 219,
+            Microtask = 180,
+            Other = 48,
         }; // enum class Reason
     void paused(RefPtr<JSON::ArrayOf<Inspector::Protocol::Debugger::CallFrame>> callFrames, Reason reason, RefPtr<JSON::Object> data, RefPtr<Inspector::Protocol::Console::StackTrace> asyncStackTrace);
     void resumed();
@@ -234,13 +236,13 @@ public:
     MemoryFrontendDispatcher(FrontendRouter& frontendRouter) : m_frontendRouter(frontendRouter) { }
         // Named after parameter 'severity' while generating command/event memoryPressure.
         enum class Severity {
-            Critical = 199,
-            NonCritical = 200,
+            Critical = 220,
+            NonCritical = 221,
         }; // enum class Severity
     void memoryPressure(double timestamp, Severity severity);
     void trackingStart(double timestamp);
     void trackingUpdate(RefPtr<Inspector::Protocol::Memory::Event> event);
-    void trackingComplete();
+    void trackingComplete(double timestamp);
 private:
     FrontendRouter& m_frontendRouter;
 };
@@ -252,17 +254,17 @@ public:
     NetworkFrontendDispatcher(FrontendRouter& frontendRouter) : m_frontendRouter(frontendRouter) { }
         // Named after parameter 'type' while generating command/event requestWillBeSent.
         enum class Type {
-            Document = 107,
-            Stylesheet = 108,
-            Image = 109,
-            Font = 110,
-            Script = 111,
-            XHR = 112,
-            Fetch = 113,
-            Ping = 114,
-            Beacon = 115,
-            WebSocket = 116,
-            Other = 117,
+            Document = 124,
+            StyleSheet = 125,
+            Image = 126,
+            Font = 127,
+            Script = 128,
+            XHR = 129,
+            Fetch = 130,
+            Ping = 131,
+            Beacon = 132,
+            WebSocket = 133,
+            Other = 134,
         }; // enum class Type
     void requestWillBeSent(const String& requestId, const String& frameId, const String& loaderId, const String& documentURL, RefPtr<Inspector::Protocol::Network::Request> request, double timestamp, double walltime, RefPtr<Inspector::Protocol::Network::Initiator> initiator, RefPtr<Inspector::Protocol::Network::Response> redirectResponse, Inspector::Protocol::Page::ResourceType* type, const String* targetId);
     void responseReceived(const String& requestId, const String& frameId, const String& loaderId, double timestamp, Inspector::Protocol::Page::ResourceType type, RefPtr<Inspector::Protocol::Network::Response> response);
@@ -295,8 +297,8 @@ public:
     void frameClearedScheduledNavigation(const String& frameId);
         // Named after parameter 'appearance' while generating command/event defaultAppearanceDidChange.
         enum class Appearance {
-            Light = 133,
-            Dark = 134,
+            Light = 151,
+            Dark = 152,
         }; // enum class Appearance
     void defaultAppearanceDidChange(Inspector::Protocol::Page::Appearance appearance);
 private:
@@ -318,9 +320,7 @@ public:
     ScriptProfilerFrontendDispatcher(FrontendRouter& frontendRouter) : m_frontendRouter(frontendRouter) { }
     void trackingStart(double timestamp);
     void trackingUpdate(RefPtr<Inspector::Protocol::ScriptProfiler::Event> event);
-    void trackingComplete(RefPtr<Inspector::Protocol::ScriptProfiler::Samples> samples);
-    void programmaticCaptureStarted();
-    void programmaticCaptureStopped();
+    void trackingComplete(double timestamp, RefPtr<Inspector::Protocol::ScriptProfiler::Samples> samples);
 private:
     FrontendRouter& m_frontendRouter;
 };
@@ -344,8 +344,6 @@ public:
     void recordingStarted(double startTime);
     void recordingStopped(double endTime);
     void autoCaptureStarted();
-    void programmaticCaptureStarted();
-    void programmaticCaptureStopped();
 private:
     FrontendRouter& m_frontendRouter;
 };

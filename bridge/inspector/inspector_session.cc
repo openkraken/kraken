@@ -17,6 +17,7 @@
 #include "inspector/protocol/runtime_dispatcher_contract.h"
 
 #include <JavaScriptCore/Completion.h>
+#include <JavaScriptCore/InjectedScriptHost.h>
 
 namespace kraken::debugger {
 
@@ -88,6 +89,9 @@ void InspectorSession::fallThrough(uint64_t callId, const std::string &method, J
 }
 
 void InspectorSession::dispatchProtocolMessage(Request message) {
+  JSC::JSGlobalObject *globalObject = m_debugger->globalObject();
+  JSC::VM &vm = globalObject->globalExec()->vm();
+  JSC::JSLockHolder locker(vm);
   m_dispatcher.dispatch(message.id, message.method, std::move(message.params));
 }
 

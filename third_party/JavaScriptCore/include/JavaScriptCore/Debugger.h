@@ -44,6 +44,7 @@ class VM;
 typedef ExecState CallFrame;
 
 class JS_EXPORT_PRIVATE Debugger {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     Debugger(VM&);
     virtual ~Debugger();
@@ -121,6 +122,8 @@ public:
     void setSuppressAllPauses(bool suppress) { m_suppressAllPauses = suppress; }
 
     virtual void sourceParsed(ExecState*, SourceProvider*, int errorLineNumber, const WTF::String& errorMessage) = 0;
+    virtual void willRunMicrotask() { }
+    virtual void didRunMicrotask() { }
 
     void exception(CallFrame*, JSValue exceptionValue, bool hasCatchHandler);
     void atStatement(CallFrame*);
