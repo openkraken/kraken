@@ -33,8 +33,6 @@
 namespace JSC {
 
 enum class SourceCodeType { EvalType, ProgramType, FunctionType, ModuleType };
-enum class TypeProfilerEnabled { No, Yes };
-enum class ControlFlowProfilerEnabled { No, Yes };
 
 class SourceCodeFlags {
     friend class CachedSourceCodeKey;
@@ -45,11 +43,9 @@ public:
     SourceCodeFlags(
         SourceCodeType codeType, JSParserStrictMode strictMode, JSParserScriptMode scriptMode, 
         DerivedContextType derivedContextType, EvalContextType evalContextType, bool isArrowFunctionContext,
-        DebuggerMode debuggerMode, TypeProfilerEnabled typeProfilerEnabled, ControlFlowProfilerEnabled controlFlowProfilerEnabled)
+        OptionSet<CodeGenerationMode> codeGenerationMode)
         : m_flags(
-            (static_cast<unsigned>(debuggerMode) << 8) |
-            (static_cast<unsigned>(typeProfilerEnabled) << 7) |
-            (static_cast<unsigned>(controlFlowProfilerEnabled) << 6) |
+            (static_cast<unsigned>(codeGenerationMode.toRaw()) << 6) |
             (static_cast<unsigned>(scriptMode) << 5) |
             (static_cast<unsigned>(isArrowFunctionContext) << 4) |
             (static_cast<unsigned>(evalContextType) << 3) |
@@ -82,10 +78,10 @@ public:
     SourceCodeKey(
         const UnlinkedSourceCode& sourceCode, const String& name, SourceCodeType codeType, JSParserStrictMode strictMode, 
         JSParserScriptMode scriptMode, DerivedContextType derivedContextType, EvalContextType evalContextType, bool isArrowFunctionContext,
-        DebuggerMode debuggerMode, TypeProfilerEnabled typeProfilerEnabled, ControlFlowProfilerEnabled controlFlowProfilerEnabled, Optional<int> functionConstructorParametersEndPosition)
+        OptionSet<CodeGenerationMode> codeGenerationMode, Optional<int> functionConstructorParametersEndPosition)
             : m_sourceCode(sourceCode)
             , m_name(name)
-            , m_flags(codeType, strictMode, scriptMode, derivedContextType, evalContextType, isArrowFunctionContext, debuggerMode, typeProfilerEnabled, controlFlowProfilerEnabled)
+            , m_flags(codeType, strictMode, scriptMode, derivedContextType, evalContextType, isArrowFunctionContext, codeGenerationMode)
             , m_functionConstructorParametersEndPosition(functionConstructorParametersEndPosition.valueOr(-1))
             , m_hash(sourceCode.hash() ^ m_flags.bits())
     {
@@ -110,6 +106,8 @@ public:
     // providers cache their strings to make this efficient.
     StringView string() const { return m_sourceCode.view(); }
 
+    StringView host() const { return m_sourceCode.provider().url().host(); }
+
     bool operator==(const SourceCodeKey& other) const
     {
         return m_hash == other.m_hash
@@ -117,6 +115,7 @@ public:
             && m_flags == other.m_flags
             && m_functionConstructorParametersEndPosition == other.m_functionConstructorParametersEndPosition
             && m_name == other.m_name
+            && host() == other.host()
             && string() == other.string();
     }
 

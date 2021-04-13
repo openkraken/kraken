@@ -345,7 +345,6 @@ private:
     };
     
     SymbolTableEntry& copySlow(const SymbolTableEntry&);
-    JS_EXPORT_PRIVATE void notifyWriteSlow(VM&, JSValue, const FireDetail&);
     
     bool isFat() const
     {
@@ -449,6 +448,12 @@ public:
     typedef HashMap<RefPtr<UniquedStringImpl>, RefPtr<TypeSet>, IdentifierRepHash> UniqueTypeSetMap;
     typedef HashMap<VarOffset, RefPtr<UniquedStringImpl>> OffsetToVariableMap;
     typedef Vector<SymbolTableEntry*> LocalToEntryVec;
+
+    template<typename CellType, SubspaceAccess>
+    static IsoSubspace* subspaceFor(VM& vm)
+    {
+        return &vm.symbolTableSpace;
+    }
 
     static SymbolTable* create(VM& vm)
     {
@@ -631,8 +636,9 @@ public:
     void setArgumentsLength(VM& vm, uint32_t length)
     {
         if (UNLIKELY(!m_arguments))
-            m_arguments.set(vm, this, ScopedArgumentsTable::create(vm));
-        m_arguments.set(vm, this, m_arguments->setLength(vm, length));
+            m_arguments.set(vm, this, ScopedArgumentsTable::create(vm, length));
+        else
+            m_arguments.set(vm, this, m_arguments->setLength(vm, length));
     }
     
     ScopeOffset argumentOffset(uint32_t i) const
@@ -686,11 +692,18 @@ public:
     CodeBlock* rareDataCodeBlock();
     void setRareDataCodeBlock(CodeBlock*);
     
-    InferredValue* singletonScope() { return m_singletonScope.get(); }
+    InferredValue<JSScope>& singleton() { return m_singleton; }
+
+    void notifyCreation(VM& vm, JSScope* scope, const char* reason)
+    {
+        m_singleton.notifyWrite(vm, this, scope, reason);
+    }
 
     static void visitChildren(JSCell*, SlotVisitor&);
 
     DECLARE_EXPORT_INFO;
+
+    void finalizeUnconditionally(VM&);
 
 private:
     JS_EXPORT_PRIVATE SymbolTable(VM&);
@@ -708,6 +721,7 @@ private:
     unsigned m_scopeType : 3; // ScopeType
     
     struct SymbolTableRareData {
+        WTF_MAKE_STRUCT_FAST_ALLOCATED;
         UniqueIDMap m_uniqueIDMap;
         OffsetToVariableMap m_offsetToVariableMap;
         UniqueTypeSetMap m_uniqueTypeSetMap;
@@ -716,7 +730,7 @@ private:
     std::unique_ptr<SymbolTableRareData> m_rareData;
 
     WriteBarrier<ScopedArgumentsTable> m_arguments;
-    WriteBarrier<InferredValue> m_singletonScope;
+    InferredValue<JSScope> m_singleton;
     
     std::unique_ptr<LocalToEntryVec> m_localToEntry;
 };

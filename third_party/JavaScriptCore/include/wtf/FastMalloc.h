@@ -201,6 +201,15 @@ struct FastMalloc {
     }
     
     static void* realloc(void* p, size_t size) { return fastRealloc(p, size); }
+
+    static void* tryRealloc(void* p, size_t size)
+    {
+        auto result = tryFastRealloc(p, size);
+        void* realResult;
+        if (result.getValue(realResult))
+            return realResult;
+        return nullptr;
+    }
     
     static void free(void* p) { fastFree(p); }
 };
@@ -288,13 +297,14 @@ using WTF::fastAlignedFree;
         ASSERT(location); \
         return location; \
     } \
+    using webkitFastMalloced = int; \
 
 #define WTF_MAKE_FAST_ALLOCATED \
 public: \
     WTF_MAKE_FAST_ALLOCATED_IMPL \
 private: \
-typedef int __thisIsHereToForceASemicolonAfterThisMacro
+using __thisIsHereToForceASemicolonAfterThisMacro = int
 
 #define WTF_MAKE_STRUCT_FAST_ALLOCATED \
     WTF_MAKE_FAST_ALLOCATED_IMPL \
-typedef int __thisIsHereToForceASemicolonAfterThisMacro
+using __thisIsHereToForceASemicolonAfterThisMacro = int

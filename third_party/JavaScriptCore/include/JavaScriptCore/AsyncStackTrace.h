@@ -28,7 +28,6 @@
 #include "InspectorProtocolObjects.h"
 #include <wtf/Forward.h>
 #include <wtf/RefCounted.h>
-#include "JSExportMacros.h"
 
 namespace Inspector {
 
@@ -36,7 +35,7 @@ class ScriptCallStack;
 
 class JS_EXPORT_PRIVATE AsyncStackTrace : public RefCounted<AsyncStackTrace> {
 public:
-    enum class State {
+    enum class State : uint8_t {
         Pending,
         Active,
         Dispatched,

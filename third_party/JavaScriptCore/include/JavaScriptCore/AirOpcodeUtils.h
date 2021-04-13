@@ -1510,6 +1510,36 @@ default:
 break;
 }
 break;
+case Opcode::MultiplySignExtend32:
+switch (sizeof...(Arguments)) {
+case 3:
+switch (opgenHiddenPtrIdentity(kinds)[0]) {
+case Arg::Tmp:
+switch (opgenHiddenPtrIdentity(kinds)[1]) {
+case Arg::Tmp:
+switch (opgenHiddenPtrIdentity(kinds)[2]) {
+case Arg::Tmp:
+#if CPU(ARM64)
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
 case Opcode::Div32:
 switch (sizeof...(Arguments)) {
 case 3:
@@ -9242,6 +9272,106 @@ default:
 break;
 }
 break;
+case Opcode::BranchTestBit64:
+switch (sizeof...(Arguments)) {
+case 3:
+switch (opgenHiddenPtrIdentity(kinds)[0]) {
+case Arg::ResCond:
+switch (opgenHiddenPtrIdentity(kinds)[1]) {
+case Arg::Tmp:
+switch (opgenHiddenPtrIdentity(kinds)[2]) {
+case Arg::Imm:
+#if CPU(X86_64)
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+case Arg::Tmp:
+#if CPU(X86_64)
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+case Arg::Addr:
+case Arg::Stack:
+case Arg::CallArg:
+switch (opgenHiddenPtrIdentity(kinds)[2]) {
+case Arg::Imm:
+#if CPU(X86_64)
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+case Opcode::BranchTestBit32:
+switch (sizeof...(Arguments)) {
+case 3:
+switch (opgenHiddenPtrIdentity(kinds)[0]) {
+case Arg::ResCond:
+switch (opgenHiddenPtrIdentity(kinds)[1]) {
+case Arg::Tmp:
+switch (opgenHiddenPtrIdentity(kinds)[2]) {
+case Arg::Imm:
+#if CPU(X86) || CPU(X86_64)
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+case Arg::Tmp:
+#if CPU(X86) || CPU(X86_64)
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+case Arg::Addr:
+case Arg::Stack:
+case Arg::CallArg:
+switch (opgenHiddenPtrIdentity(kinds)[2]) {
+case Arg::Imm:
+#if CPU(X86) || CPU(X86_64)
+OPGEN_RETURN(true);
+#endif
+break;
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
+default:
+break;
+}
+break;
 case Opcode::BranchDouble:
 switch (sizeof...(Arguments)) {
 case 3:
@@ -11412,6 +11542,8 @@ case Opcode::Branch64:
 case Opcode::BranchTest8:
 case Opcode::BranchTest32:
 case Opcode::BranchTest64:
+case Opcode::BranchTestBit64:
+case Opcode::BranchTestBit32:
 case Opcode::BranchDouble:
 case Opcode::BranchFloat:
 case Opcode::BranchAdd32:

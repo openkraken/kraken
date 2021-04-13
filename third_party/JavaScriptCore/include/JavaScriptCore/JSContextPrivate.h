@@ -49,6 +49,18 @@
  */
 - (void)context:(JSContext *)context fetchModuleForIdentifier:(JSValue *)identifier withResolveHandler:(JSValue *)resolve andRejectHandler:(JSValue *)reject;
 
+@optional
+
+/*! @abstract This is called before the module with "key" is evaluated.
+ @param key The module key for the module that is about to be evaluated.
+ */
+- (void)willEvaluateModule:(NSURL *)key;
+
+/*! @abstract This is called after the module with "key" is evaluated.
+ @param key The module key for the module that was just evaluated.
+ */
+- (void)didEvaluateModule:(NSURL *)key;
+
 @end
 
 @interface JSContext(Private)
@@ -57,22 +69,42 @@
 @property
 @discussion Remote inspection setting of the JSContext. Default value is YES.
 */
-@property (setter=_setRemoteInspectionEnabled:) BOOL _remoteInspectionEnabled API_AVAILABLE(macosx(10.10), ios(8.0));
+@property (setter=_setRemoteInspectionEnabled:) BOOL _remoteInspectionEnabled API_AVAILABLE(macos(10.10), ios(8.0));
 
 /*!
 @property
 @discussion Set whether or not the native call stack is included when reporting exceptions. Default value is YES.
 */
-@property (setter=_setIncludesNativeCallStackWhenReportingExceptions:) BOOL _includesNativeCallStackWhenReportingExceptions API_AVAILABLE(macosx(10.10), ios(8.0));
+@property (setter=_setIncludesNativeCallStackWhenReportingExceptions:) BOOL _includesNativeCallStackWhenReportingExceptions API_AVAILABLE(macos(10.10), ios(8.0));
 
 /*!
 @property
 @discussion Set the run loop the Web Inspector debugger should use when evaluating JavaScript in the JSContext.
 */
-@property (setter=_setDebuggerRunLoop:) CFRunLoopRef _debuggerRunLoop API_AVAILABLE(macosx(10.10), ios(8.0));
+@property (setter=_setDebuggerRunLoop:) CFRunLoopRef _debuggerRunLoop API_AVAILABLE(macos(10.10), ios(8.0));
 
 /*! @abstract The delegate the context will use when trying to load a module. Note, this delegate will be ignored for contexts returned by UIWebView. */
-@property (nonatomic, weak) id <JSModuleLoaderDelegate> moduleLoaderDelegate API_AVAILABLE(macosx(10.15), ios(NA));
+@property (nonatomic, weak) id <JSModuleLoaderDelegate> moduleLoaderDelegate API_AVAILABLE(macos(10.15), ios(13.0));
+
+/*!
+ @method
+ @abstract Run a JSScript.
+ @param script the JSScript to evaluate.
+ @discussion If the provided JSScript was created with kJSScriptTypeProgram, the script will run synchronously and return the result of evaluation.
+
+ Otherwise, if the script was created with kJSScriptTypeModule, the module will be run asynchronously and will return a promise resolved when the module and any transitive dependencies are loaded. The module loader will treat the script as if it had been returned from a delegate call to moduleLoaderDelegate. This mirrors the JavaScript dynamic import operation.
+ */
+// FIXME: Before making this public need to fix: https://bugs.webkit.org/show_bug.cgi?id=199714
+- (JSValue *)evaluateJSScript:(JSScript *)script API_AVAILABLE(macos(10.15), ios(13.0));
+
+/*!
+ @method
+ @abstract Get the identifiers of the modules a JSScript depends on in this context.
+ @param script the JSScript to determine the dependencies of.
+ @result An Array containing all the identifiers of modules script depends on.
+ @discussion If the provided JSScript was not created with kJSScriptTypeModule, an exception will be thrown. Also, if the script has not already been evaluated in this context an error will be throw.
+ */
+- (JSValue *)dependencyIdentifiersForModuleJSScript:(JSScript *)script API_AVAILABLE(macos(10.15), ios(13.0));
 
 @end
 

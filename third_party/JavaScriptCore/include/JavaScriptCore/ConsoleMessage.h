@@ -55,7 +55,8 @@ public:
     ConsoleMessage(MessageSource, MessageType, MessageLevel, const String& message, unsigned long requestIdentifier = 0);
     ConsoleMessage(MessageSource, MessageType, MessageLevel, const String& message, const String& url, unsigned line, unsigned column, JSC::ExecState* = nullptr, unsigned long requestIdentifier = 0);
     ConsoleMessage(MessageSource, MessageType, MessageLevel, const String& message, Ref<ScriptCallStack>&&, unsigned long requestIdentifier = 0);
-    ConsoleMessage(MessageSource, MessageType, MessageLevel, const String& message, Ref<ScriptArguments>&&, JSC::ExecState*, unsigned long requestIdentifier = 0);
+    ConsoleMessage(MessageSource, MessageType, MessageLevel, const String& message, Ref<ScriptArguments>&&, Ref<ScriptCallStack>&&, unsigned long requestIdentifier = 0);
+    ConsoleMessage(MessageSource, MessageType, MessageLevel, const String& message, Ref<ScriptArguments>&&, JSC::ExecState* = nullptr, unsigned long requestIdentifier = 0);
     ConsoleMessage(MessageSource, MessageType, MessageLevel, Vector<JSONLogValue>&&, JSC::ExecState*, unsigned long requestIdentifier = 0);
     ~ConsoleMessage();
 
@@ -74,6 +75,7 @@ public:
 
     void incrementCount() { ++m_repeatCount; }
 
+    const RefPtr<ScriptArguments>& arguments() const { return m_arguments; }
     unsigned argumentCount() const;
 
     bool isEqual(ConsoleMessage* msg) const;

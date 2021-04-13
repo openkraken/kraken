@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 Apple Inc. All rights reserved.
+ * Copyright (C) 2008-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,6 +26,7 @@
 #pragma once
 
 #include "Options.h"
+#include <wtf/NumberOfCores.h>
 
 namespace JSC {
 
@@ -49,6 +50,15 @@ constexpr bool isARMv7IDIVSupported()
 constexpr bool isARM64()
 {
 #if CPU(ARM64)
+    return true;
+#else
+    return false;
+#endif
+}
+
+constexpr bool isARM64E()
+{
+#if CPU(ARM64E)
     return true;
 #else
     return false;
@@ -130,6 +140,20 @@ inline bool hasSensibleDoubleToInt()
 {
     return optimizeForX86();
 }
+
+#if (CPU(X86) || CPU(X86_64)) && OS(DARWIN)
+bool isKernTCSMAvailable();
+bool enableKernTCSM();
+int kernTCSMAwareNumberOfProcessorCores();
+int64_t hwL3CacheSize();
+int32_t hwPhysicalCPUMax();
+#else
+ALWAYS_INLINE bool isKernTCSMAvailable() { return false; }
+ALWAYS_INLINE bool enableKernTCSM() { return false; }
+ALWAYS_INLINE int kernTCSMAwareNumberOfProcessorCores() { return WTF::numberOfProcessorCores(); }
+ALWAYS_INLINE int64_t hwL3CacheSize() { return 0; }
+ALWAYS_INLINE int32_t hwPhysicalCPUMax() { return kernTCSMAwareNumberOfProcessorCores(); }
+#endif
 
 } // namespace JSC
 

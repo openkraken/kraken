@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2017 Apple Inc. All rights reserved.
+ * Copyright (C) 2011-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -571,6 +571,38 @@ inline int64_t JSValue::asAnyInt() const
     return static_cast<int64_t>(asDouble());
 }
 
+inline bool JSValue::isInt32AsAnyInt() const
+{
+    if (!isAnyInt())
+        return false;
+    int64_t value = asAnyInt();
+    return value >= INT32_MIN && value <= INT32_MAX;
+}
+
+inline int32_t JSValue::asInt32AsAnyInt() const
+{
+    ASSERT(isInt32AsAnyInt());
+    if (isInt32())
+        return asInt32();
+    return static_cast<int32_t>(asDouble());
+}
+
+inline bool JSValue::isUInt32AsAnyInt() const
+{
+    if (!isAnyInt())
+        return false;
+    int64_t value = asAnyInt();
+    return value >= 0 && value <= UINT32_MAX;
+}
+
+inline uint32_t JSValue::asUInt32AsAnyInt() const
+{
+    ASSERT(isUInt32AsAnyInt());
+    if (isUInt32())
+        return asUInt32();
+    return static_cast<uint32_t>(asDouble());
+}
+
 inline bool JSValue::isString() const
 {
     return isCell() && asCell()->isString();
@@ -654,7 +686,9 @@ ALWAYS_INLINE Identifier JSValue::toPropertyKey(ExecState* exec) const
     if (primitive.isSymbol())
         RELEASE_AND_RETURN(scope, Identifier::fromUid(asSymbol(primitive)->privateName()));
 
-    RELEASE_AND_RETURN(scope, primitive.toString(exec)->toIdentifier(exec));
+    auto string = primitive.toString(exec);
+    RETURN_IF_EXCEPTION(scope, { });
+    RELEASE_AND_RETURN(scope, string->toIdentifier(exec));
 }
 
 inline JSValue JSValue::toPrimitive(ExecState* exec, PreferredPrimitiveType preferredType) const
@@ -933,7 +967,7 @@ ALWAYS_INLINE JSValue JSValue::get(ExecState* exec, uint64_t propertyName) const
 {
     if (LIKELY(propertyName <= std::numeric_limits<unsigned>::max()))
         return get(exec, static_cast<unsigned>(propertyName));
-    return get(exec, Identifier::from(exec, static_cast<double>(propertyName)));
+    return get(exec, Identifier::from(exec->vm(), static_cast<double>(propertyName)));
 }
 
 inline bool JSValue::put(ExecState* exec, PropertyName propertyName, JSValue value, PutPropertySlot& slot)

@@ -43,6 +43,7 @@ enum class MessageSource : uint8_t {
     Other,
     Media,
     WebRTC,
+    MediaSource,
 };
 
 enum class MessageType {
@@ -59,6 +60,7 @@ enum class MessageType {
     Timing,
     Profile,
     ProfileEnd,
+    Image,
 };
 
 enum class MessageLevel : uint8_t {
@@ -88,7 +90,8 @@ template<> struct EnumTraits<JSC::MessageSource> {
         JSC::MessageSource::ContentBlocker,
         JSC::MessageSource::Other,
         JSC::MessageSource::Media,
-        JSC::MessageSource::WebRTC
+        JSC::MessageSource::WebRTC,
+        JSC::MessageSource::MediaSource
     >;
 };
 

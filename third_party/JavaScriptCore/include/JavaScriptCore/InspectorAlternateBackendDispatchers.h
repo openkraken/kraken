@@ -52,6 +52,7 @@ public:
     virtual ~AlternateApplicationCacheBackendDispatcher() { }
     virtual void getFramesWithManifests(long callId) = 0;
     virtual void enable(long callId) = 0;
+    virtual void disable(long callId) = 0;
     virtual void getManifestForFrame(long callId, const String& in_frameId) = 0;
     virtual void getApplicationCacheForFrame(long callId, const String& in_frameId) = 0;
 };
@@ -130,7 +131,9 @@ public:
     virtual void setAttributesAsText(long callId, int in_nodeId, const String& in_text, const String* in_name) = 0;
     virtual void removeAttribute(long callId, int in_nodeId, const String& in_name) = 0;
     virtual void getSupportedEventNames(long callId) = 0;
-    virtual void getEventListenersForNode(long callId, int in_nodeId, const String* in_objectGroup) = 0;
+    virtual void getDataBindingsForNode(long callId, int in_nodeId) = 0;
+    virtual void getAssociatedDataForNode(long callId, int in_nodeId) = 0;
+    virtual void getEventListenersForNode(long callId, int in_nodeId) = 0;
     virtual void setEventListenerDisabled(long callId, int in_eventListenerId, bool in_disabled) = 0;
     virtual void setBreakpointForEventListener(long callId, int in_eventListenerId) = 0;
     virtual void removeBreakpointForEventListener(long callId, int in_eventListenerId) = 0;
@@ -138,11 +141,11 @@ public:
     virtual void getOuterHTML(long callId, int in_nodeId) = 0;
     virtual void setOuterHTML(long callId, int in_nodeId, const String& in_outerHTML) = 0;
     virtual void insertAdjacentHTML(long callId, int in_nodeId, const String& in_position, const String& in_html) = 0;
-    virtual void performSearch(long callId, const String& in_query, const JSON::Array* in_nodeIds) = 0;
+    virtual void performSearch(long callId, const String& in_query, const JSON::Array* in_nodeIds, const bool* in_caseSensitive) = 0;
     virtual void getSearchResults(long callId, const String& in_searchId, int in_fromIndex, int in_toIndex) = 0;
     virtual void discardSearchResults(long callId, const String& in_searchId) = 0;
     virtual void requestNode(long callId, const String& in_objectId) = 0;
-    virtual void setInspectModeEnabled(long callId, bool in_enabled, const JSON::Object* in_highlightConfig) = 0;
+    virtual void setInspectModeEnabled(long callId, bool in_enabled, const JSON::Object* in_highlightConfig, const bool* in_showRulers) = 0;
     virtual void highlightRect(long callId, int in_x, int in_y, int in_width, int in_height, const JSON::Object* in_color, const JSON::Object* in_outlineColor, const bool* in_usePageCoordinates) = 0;
     virtual void highlightQuad(long callId, const JSON::Array& in_quad, const JSON::Object* in_color, const JSON::Object* in_outlineColor, const bool* in_usePageCoordinates) = 0;
     virtual void highlightSelector(long callId, const JSON::Object& in_highlightConfig, const String& in_selectorString, const String* in_frameId) = 0;
@@ -165,8 +168,8 @@ public:
     virtual ~AlternateDOMDebuggerBackendDispatcher() { }
     virtual void setDOMBreakpoint(long callId, int in_nodeId, const String& in_type) = 0;
     virtual void removeDOMBreakpoint(long callId, int in_nodeId, const String& in_type) = 0;
-    virtual void setEventBreakpoint(long callId, const String& in_breakpointType, const String& in_eventName) = 0;
-    virtual void removeEventBreakpoint(long callId, const String& in_breakpointType, const String& in_eventName) = 0;
+    virtual void setEventBreakpoint(long callId, const String& in_breakpointType, const String* in_eventName) = 0;
+    virtual void removeEventBreakpoint(long callId, const String& in_breakpointType, const String* in_eventName) = 0;
     virtual void setURLBreakpoint(long callId, const String& in_url, const bool* in_isRegex) = 0;
     virtual void removeURLBreakpoint(long callId, const String& in_url) = 0;
 };
@@ -209,9 +212,9 @@ public:
     virtual void getFunctionDetails(long callId, const String& in_functionId) = 0;
     virtual void setPauseOnExceptions(long callId, const String& in_state) = 0;
     virtual void setPauseOnAssertions(long callId, bool in_enabled) = 0;
+    virtual void setPauseOnMicrotasks(long callId, bool in_enabled) = 0;
     virtual void setPauseForInternalScripts(long callId, bool in_shouldPause) = 0;
-    virtual void evaluateOnCallFrame(long callId, const String& in_callFrameId, const String& in_expression, const String* in_objectGroup, const bool* in_includeCommandLineAPI, const bool* in_doNotPauseOnExceptionsAndMuteConsole, const bool* in_returnByValue, const bool* in_generatePreview, const bool* in_saveResult) = 0;
-    virtual void setOverlayMessage(long callId, const String* in_message) = 0;
+    virtual void evaluateOnCallFrame(long callId, const String& in_callFrameId, const String& in_expression, const String* in_objectGroup, const bool* in_includeCommandLineAPI, const bool* in_doNotPauseOnExceptionsAndMuteConsole, const bool* in_returnByValue, const bool* in_generatePreview, const bool* in_saveResult, const bool* in_emulateUserGesture) = 0;
 };
 class AlternateHeapBackendDispatcher : public AlternateBackendDispatcher {
 public:
@@ -303,7 +306,7 @@ class AlternateRuntimeBackendDispatcher : public AlternateBackendDispatcher {
 public:
     virtual ~AlternateRuntimeBackendDispatcher() { }
     virtual void parse(long callId, const String& in_source) = 0;
-    virtual void evaluate(long callId, const String& in_expression, const String* in_objectGroup, const bool* in_includeCommandLineAPI, const bool* in_doNotPauseOnExceptionsAndMuteConsole, const int* in_contextId, const bool* in_returnByValue, const bool* in_generatePreview, const bool* in_saveResult) = 0;
+    virtual void evaluate(long callId, const String& in_expression, const String* in_objectGroup, const bool* in_includeCommandLineAPI, const bool* in_doNotPauseOnExceptionsAndMuteConsole, const int* in_contextId, const bool* in_returnByValue, const bool* in_generatePreview, const bool* in_saveResult, const bool* in_emulateUserGesture) = 0;
     virtual void awaitPromise(long callId, const String& in_promiseObjectId, const bool* in_returnByValue, const bool* in_generatePreview, const bool* in_saveResult) = 0;
     virtual void callFunctionOn(long callId, const String& in_objectId, const String& in_functionDeclaration, const JSON::Array* in_arguments, const bool* in_doNotPauseOnExceptionsAndMuteConsole, const bool* in_returnByValue, const bool* in_generatePreview) = 0;
     virtual void getPreview(long callId, const String& in_objectId) = 0;
@@ -311,6 +314,7 @@ public:
     virtual void getDisplayableProperties(long callId, const String& in_objectId, const bool* in_generatePreview) = 0;
     virtual void getCollectionEntries(long callId, const String& in_objectId, const String* in_objectGroup, const int* in_startIndex, const int* in_numberToFetch) = 0;
     virtual void saveResult(long callId, const JSON::Object& in_value, const int* in_contextId) = 0;
+    virtual void setSavedResultAlias(long callId, const String* in_alias) = 0;
     virtual void releaseObject(long callId, const String& in_objectId) = 0;
     virtual void releaseObjectGroup(long callId, const String& in_objectGroup) = 0;
     virtual void enable(long callId) = 0;
@@ -342,6 +346,8 @@ public:
 class AlternateTimelineBackendDispatcher : public AlternateBackendDispatcher {
 public:
     virtual ~AlternateTimelineBackendDispatcher() { }
+    virtual void enable(long callId) = 0;
+    virtual void disable(long callId) = 0;
     virtual void start(long callId, const int* in_maxCallStackDepth) = 0;
     virtual void stop(long callId) = 0;
     virtual void setAutoCaptureEnabled(long callId, bool in_enabled) = 0;

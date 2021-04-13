@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, 2016 Apple Inc. All rights reserved.
+ * Copyright (C) 2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,28 +23,33 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// This file contains a deprecated version of std::optional which a released
-// version of Safari uses. Once Safari stops using this, we can remove this.
-// New code should use WTF::Optional.
-
 #pragma once
 
-#include <type_traits>
-#include <wtf/Optional.h>
-
-namespace std {
-
-template <class T>
-class optional : private WTF::OptionalBase<T> {
-public:
-    explicit constexpr operator bool() const __NOEXCEPT { return WTF::OptionalBase<T>::init_; }
-    constexpr T const& value() const& { return WTF::OptionalBase<T>::storage_.value_; }
-};
-
-}
+#include <array>
 
 namespace WTF {
 
-template<typename T> using DeprecatedOptional = std::optional<T>;
+#if PLATFORM(COCOA)
 
-} // namespace WTF
+struct TagInfo {
+    WTF_MAKE_STRUCT_FAST_ALLOCATED;
+    size_t dirty { 0 };
+    size_t reclaimable { 0 };
+    size_t reserved { 0 };
+};
+
+WTF_EXPORT_PRIVATE const char* displayNameForVMTag(unsigned);
+WTF_EXPORT_PRIVATE size_t vmPageSize();
+WTF_EXPORT_PRIVATE std::array<TagInfo, 256> pagesPerVMTag();
+WTF_EXPORT_PRIVATE void logFootprintComparison(const std::array<TagInfo, 256>&, const std::array<TagInfo, 256>&);
+
+#endif
+
+}
+
+#if PLATFORM(COCOA)
+using WTF::TagInfo;
+using WTF::displayNameForVMTag;
+using WTF::vmPageSize;
+using WTF::pagesPerVMTag;
+#endif

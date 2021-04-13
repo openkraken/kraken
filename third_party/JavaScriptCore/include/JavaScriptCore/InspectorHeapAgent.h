@@ -49,8 +49,9 @@ public:
     InspectorHeapAgent(AgentContext&);
     virtual ~InspectorHeapAgent();
 
-    void didCreateFrontendAndBackend(FrontendRouter*, BackendDispatcher*) override;
-    void willDestroyFrontendAndBackend(DisconnectReason) override;
+    // InspectorAgentBase
+    void didCreateFrontendAndBackend(FrontendRouter*, BackendDispatcher*) final;
+    void willDestroyFrontendAndBackend(DisconnectReason) final;
 
     // HeapBackendDispatcherHandler
     void enable(ErrorString&) override;
@@ -62,9 +63,9 @@ public:
     void getPreview(ErrorString&, int heapObjectId, Optional<String>& resultString, RefPtr<Protocol::Debugger::FunctionDetails>&, RefPtr<Protocol::Runtime::ObjectPreview>&) final;
     void getRemoteObject(ErrorString&, int heapObjectId, const String* optionalObjectGroup, RefPtr<Protocol::Runtime::RemoteObject>& result) final;
 
-    // HeapObserver
-    void willGarbageCollect() override;
-    void didGarbageCollect(JSC::CollectionScope) override;
+    // JSC::HeapObserver
+    void willGarbageCollect() final;
+    void didGarbageCollect(JSC::CollectionScope) final;
 
 protected:
     void clearHeapSnapshots();

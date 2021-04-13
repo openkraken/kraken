@@ -33,9 +33,16 @@ namespace WTF {
 template<typename T> class UniqueRef;
 
 template<typename T, class... Args>
-UniqueRef<T> makeUniqueRef(Args&&... args)
+UniqueRef<T> makeUniqueRefWithoutFastMallocCheck(Args&&... args)
 {
     return UniqueRef<T>(*new T(std::forward<Args>(args)...));
+}
+
+template<typename T, class... Args>
+UniqueRef<T> makeUniqueRef(Args&&... args)
+{
+    static_assert(std::is_same<typename T::webkitFastMalloced, int>::value, "T is FastMalloced");
+    return makeUniqueRefWithoutFastMallocCheck<T>(std::forward<Args>(args)...);
 }
 
 template<typename T>
@@ -43,7 +50,7 @@ class UniqueRef {
 public:
     template <typename U>
     UniqueRef(UniqueRef<U>&& other)
-        : m_ref(WTFMove(other.m_ref))
+        : m_ref(other.m_ref.release())
     {
         ASSERT(m_ref);
     }
@@ -60,8 +67,10 @@ public:
     operator T&() { ASSERT(m_ref); return *m_ref; }
     operator const T&() const { ASSERT(m_ref); return *m_ref; }
 
+    std::unique_ptr<T> moveToUniquePtr() { return WTFMove(m_ref); }
+
 private:
-    template<class U, class... Args> friend UniqueRef<U> makeUniqueRef(Args&&...);
+    template<class U, class... Args> friend UniqueRef<U> makeUniqueRefWithoutFastMallocCheck(Args&&...);
     template<class U> friend class UniqueRef;
 
     UniqueRef(T& other)
@@ -77,3 +86,4 @@ private:
 
 using WTF::UniqueRef;
 using WTF::makeUniqueRef;
+using WTF::makeUniqueRefWithoutFastMallocCheck;

@@ -44,7 +44,7 @@ extern "C" {
 @param ctx The JSContext whose backtrace you want to get
 @result A string containing the backtrace
 */
-JS_EXPORT JSStringRef JSContextCreateBacktrace(JSContextRef ctx, unsigned maxStackSize) API_AVAILABLE(macosx(10.6), ios(7.0));
+JS_EXPORT JSStringRef JSContextCreateBacktrace(JSContextRef ctx, unsigned maxStackSize) API_AVAILABLE(macos(10.6), ios(7.0));
     
 
 /*! 
@@ -85,14 +85,14 @@ typedef bool
  need to call JSContextGroupSetExecutionTimeLimit before you start executing
  any scripts.
 */
-JS_EXPORT void JSContextGroupSetExecutionTimeLimit(JSContextGroupRef group, double limit, JSShouldTerminateCallback callback, void* context) API_AVAILABLE(macosx(10.6), ios(7.0));
+JS_EXPORT void JSContextGroupSetExecutionTimeLimit(JSContextGroupRef group, double limit, JSShouldTerminateCallback callback, void* context) API_AVAILABLE(macos(10.6), ios(7.0));
 
 /*!
 @function
 @abstract Clears the script execution time limit.
 @param group The JavaScript context group that the time limit is cleared on.
 */
-JS_EXPORT void JSContextGroupClearExecutionTimeLimit(JSContextGroupRef group) API_AVAILABLE(macosx(10.6), ios(7.0));
+JS_EXPORT void JSContextGroupClearExecutionTimeLimit(JSContextGroupRef group) API_AVAILABLE(macos(10.6), ios(7.0));
 
 /*!
 @function
@@ -101,7 +101,7 @@ JS_EXPORT void JSContextGroupClearExecutionTimeLimit(JSContextGroupRef group) AP
 @result The value of the setting, true if remote inspection is enabled, otherwise false.
 @discussion Remote inspection is true by default.
 */
-JS_EXPORT bool JSGlobalContextGetRemoteInspectionEnabled(JSGlobalContextRef ctx) API_AVAILABLE(macosx(10.10), ios(8.0));
+JS_EXPORT bool JSGlobalContextGetRemoteInspectionEnabled(JSGlobalContextRef ctx) API_AVAILABLE(macos(10.10), ios(8.0));
 
 /*!
 @function
@@ -109,7 +109,7 @@ JS_EXPORT bool JSGlobalContextGetRemoteInspectionEnabled(JSGlobalContextRef ctx)
 @param ctx The JSGlobalContext that you want to change.
 @param enabled The new remote inspection enabled setting for the context.
 */
-JS_EXPORT void JSGlobalContextSetRemoteInspectionEnabled(JSGlobalContextRef ctx, bool enabled) API_AVAILABLE(macosx(10.10), ios(8.0));    
+JS_EXPORT void JSGlobalContextSetRemoteInspectionEnabled(JSGlobalContextRef ctx, bool enabled) API_AVAILABLE(macos(10.10), ios(8.0));    
 
 /*!
 @function
@@ -118,7 +118,7 @@ JS_EXPORT void JSGlobalContextSetRemoteInspectionEnabled(JSGlobalContextRef ctx,
 @result The value of the setting, true if remote inspection is enabled, otherwise false.
 @discussion This setting is true by default.
 */
-JS_EXPORT bool JSGlobalContextGetIncludesNativeCallStackWhenReportingExceptions(JSGlobalContextRef ctx) API_AVAILABLE(macosx(10.10), ios(8.0));
+JS_EXPORT bool JSGlobalContextGetIncludesNativeCallStackWhenReportingExceptions(JSGlobalContextRef ctx) API_AVAILABLE(macos(10.10), ios(8.0));
 
 /*!
 @function
@@ -126,7 +126,17 @@ JS_EXPORT bool JSGlobalContextGetIncludesNativeCallStackWhenReportingExceptions(
 @param ctx The JSGlobalContext that you want to change.
 @param includesNativeCallStack The new value of the setting for the context.
 */
-JS_EXPORT void JSGlobalContextSetIncludesNativeCallStackWhenReportingExceptions(JSGlobalContextRef ctx, bool includesNativeCallStack) API_AVAILABLE(macosx(10.10), ios(8.0));
+JS_EXPORT void JSGlobalContextSetIncludesNativeCallStackWhenReportingExceptions(JSGlobalContextRef ctx, bool includesNativeCallStack) API_AVAILABLE(macos(10.10), ios(8.0));
+
+/*!
+@function
+@abstract Sets the unhandled promise rejection callback for a context.
+@discussion Similar to window.addEventListener('unhandledrejection'), but for contexts not associated with a web view.
+@param ctx The JSGlobalContext to set the callback on.
+@param function The callback function to set, which receives the promise and rejection reason as arguments.
+@param exception A pointer to a JSValueRef in which to store an exception, if any. Pass NULL if you do not care to store an exception.
+*/
+JS_EXPORT void JSGlobalContextSetUnhandledRejectionCallback(JSGlobalContextRef ctx, JSObjectRef function, JSValueRef* exception) API_AVAILABLE(macos(10.15), ios(NA));
 
 #ifdef __cplusplus
 }

@@ -40,14 +40,14 @@ typedef pid_t JSProcessID;
 extern "C" {
 #endif
 
-JS_EXPORT void JSRemoteInspectorDisableAutoStart(void) API_AVAILABLE(macosx(10.11), ios(9.0));
-JS_EXPORT void JSRemoteInspectorStart(void) API_AVAILABLE(macosx(10.11), ios(9.0));
-JS_EXPORT void JSRemoteInspectorSetParentProcessInformation(JSProcessID, const uint8_t* auditData, size_t auditLength) API_AVAILABLE(macosx(10.11), ios(9.0));
+JS_EXPORT void JSRemoteInspectorDisableAutoStart(void) API_AVAILABLE(macos(10.11), ios(9.0));
+JS_EXPORT void JSRemoteInspectorStart(void) API_AVAILABLE(macos(10.11), ios(9.0));
+JS_EXPORT void JSRemoteInspectorSetParentProcessInformation(JSProcessID, const uint8_t* auditData, size_t auditLength) API_AVAILABLE(macos(10.11), ios(9.0));
 
-JS_EXPORT void JSRemoteInspectorSetLogToSystemConsole(bool) API_AVAILABLE(macosx(10.11), ios(9.0));
+JS_EXPORT void JSRemoteInspectorSetLogToSystemConsole(bool) API_AVAILABLE(macos(10.11), ios(9.0));
 
-JS_EXPORT bool JSRemoteInspectorGetInspectionEnabledByDefault(void) API_AVAILABLE(macosx(10.11), ios(9.0));
-JS_EXPORT void JSRemoteInspectorSetInspectionEnabledByDefault(bool) API_AVAILABLE(macosx(10.11), ios(9.0));
+JS_EXPORT bool JSRemoteInspectorGetInspectionEnabledByDefault(void) API_AVAILABLE(macos(10.11), ios(9.0));
+JS_EXPORT void JSRemoteInspectorSetInspectionEnabledByDefault(bool) API_AVAILABLE(macos(10.11), ios(9.0));
 
 #ifdef __cplusplus
 }

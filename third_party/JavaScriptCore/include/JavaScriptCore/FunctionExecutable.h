@@ -33,6 +33,8 @@
 
 namespace JSC {
 
+struct FunctionOverrideInfo;
+
 class FunctionExecutable final : public ScriptExecutable {
     friend class JIT;
     friend class LLIntOffsetsExtractor;
@@ -46,12 +48,10 @@ public:
         return &vm.functionExecutableSpace.space;
     }
 
-    static FunctionExecutable* create(
-        VM& vm, const SourceCode& source, UnlinkedFunctionExecutable* unlinkedExecutable, 
-        unsigned lastLine, unsigned endColumn, Intrinsic intrinsic)
+    static FunctionExecutable* create(VM& vm, ScriptExecutable* topLevelExecutable, const SourceCode& source, UnlinkedFunctionExecutable* unlinkedExecutable, Intrinsic intrinsic)
     {
-        FunctionExecutable* executable = new (NotNull, allocateCell<FunctionExecutable>(vm.heap)) FunctionExecutable(vm, source, unlinkedExecutable, lastLine, endColumn, intrinsic);
-        executable->finishCreation(vm);
+        FunctionExecutable* executable = new (NotNull, allocateCell<FunctionExecutable>(vm.heap)) FunctionExecutable(vm, source, unlinkedExecutable, intrinsic);
+        executable->finishCreation(vm, topLevelExecutable);
         return executable;
     }
     static FunctionExecutable* fromGlobalCode(
@@ -131,6 +131,7 @@ public:
         
     FunctionMode functionMode() { return m_unlinkedExecutable->functionMode(); }
     bool isBuiltinFunction() const { return m_unlinkedExecutable->isBuiltinFunction(); }
+    bool isAnonymousBuiltinFunction() const { return m_unlinkedExecutable->isAnonymousBuiltinFunction(); }
     ConstructAbility constructAbility() const { return m_unlinkedExecutable->constructAbility(); }
     bool isClass() const { return m_unlinkedExecutable->isClass(); }
     bool isArrowFunction() const { return parseMode() == SourceParseMode::ArrowFunctionMode; }
@@ -161,7 +162,6 @@ public:
     bool isClassConstructorFunction() const { return m_unlinkedExecutable->isClassConstructorFunction(); }
     const Identifier& name() { return m_unlinkedExecutable->name(); }
     const Identifier& ecmaName() { return m_unlinkedExecutable->ecmaName(); }
-    const Identifier& inferredName() { return m_unlinkedExecutable->inferredName(); }
     unsigned parameterCount() const { return m_unlinkedExecutable->parameterCount(); } // Excluding 'this'!
     SourceParseMode parseMode() const { return m_unlinkedExecutable->parseMode(); }
     JSParserScriptMode scriptMode() const { return m_unlinkedExecutable->scriptMode(); }
@@ -190,7 +190,36 @@ public:
         return WTF::nullopt;
     }
 
+    int lineCount() const
+    {
+        if (UNLIKELY(m_rareData))
+            return m_rareData->m_lineCount;
+        return m_unlinkedExecutable->lineCount();
+    }
+
+    int endColumn() const
+    {
+        if (UNLIKELY(m_rareData))
+            return m_rareData->m_endColumn;
+        return m_unlinkedExecutable->linkedEndColumn(m_source.startColumn().oneBasedInt());
+    }
+
+    int firstLine() const
+    {
+        return source().firstLine().oneBasedInt();
+    }
+
+    int lastLine() const
+    {
+        return firstLine() + lineCount();
+    }
+
     unsigned typeProfilingStartOffset(VM&) const
+    {
+        return typeProfilingStartOffset();
+    }
+
+    unsigned typeProfilingStartOffset() const
     {
         if (UNLIKELY(m_rareData))
             return m_rareData->m_typeProfilingStartOffset;
@@ -198,6 +227,11 @@ public:
     }
 
     unsigned typeProfilingEndOffset(VM&) const
+    {
+        return typeProfilingEndOffset();
+    }
+
+    unsigned typeProfilingEndOffset() const
     {
         if (UNLIKELY(m_rareData))
             return m_rareData->m_typeProfilingEndOffset;
@@ -211,51 +245,31 @@ public:
         return m_unlinkedExecutable->parametersStartOffset();
     }
 
-    void overrideParameterAndTypeProfilingStartEndOffsets(unsigned parametersStartOffset, unsigned typeProfilingStartOffset, unsigned typeProfilingEndOffset)
-    {
-        auto& rareData = ensureRareData();
-        rareData.m_parametersStartOffset = parametersStartOffset;
-        rareData.m_typeProfilingStartOffset = typeProfilingStartOffset;
-        rareData.m_typeProfilingEndOffset = typeProfilingEndOffset;
-    }
+    void overrideInfo(const FunctionOverrideInfo&);
 
     DECLARE_INFO;
 
-    InferredValue* singletonFunction()
+    InferredValue<JSFunction>& singleton()
     {
-        if (VM::canUseJIT())
-            return m_singletonFunction.get();
-        return nullptr;
+        return m_singleton;
     }
 
-    void notifyCreation(VM& vm, JSValue value, const char* reason)
+    void notifyCreation(VM& vm, JSFunction* function, const char* reason)
     {
-        if (VM::canUseJIT()) {
-            singletonFunction()->notifyWrite(vm, value, reason);
-            return;
-        }
-        switch (m_singletonFunctionState) {
-        case ClearWatchpoint:
-            m_singletonFunctionState = IsWatched;
-            return;
-        case IsWatched:
-            m_singletonFunctionState = IsInvalidated;
-            return;
-        case IsInvalidated:
-            return;
-        }
-    }
-
-    bool singletonFunctionHasBeenInvalidated()
-    {
-        if (VM::canUseJIT())
-            return singletonFunction()->hasBeenInvalidated();
-        return m_singletonFunctionState == IsInvalidated;
+        m_singleton.notifyWrite(vm, this, function, reason);
     }
 
     // Cached poly proto structure for the result of constructing this executable.
-    Structure* cachedPolyProtoStructure() { return m_cachedPolyProtoStructure.get(); }
-    void setCachedPolyProtoStructure(VM& vm, Structure* structure) { m_cachedPolyProtoStructure.set(vm, this, structure); }
+    Structure* cachedPolyProtoStructure()
+    {
+        if (UNLIKELY(m_rareData))
+            return m_rareData->m_cachedPolyProtoStructure.get();
+        return nullptr;
+    }
+    void setCachedPolyProtoStructure(VM& vm, Structure* structure)
+    {
+        ensureRareData().m_cachedPolyProtoStructure.set(vm, this, structure);
+    }
 
     InlineWatchpointSet& ensurePolyProtoWatchpoint()
     {
@@ -266,23 +280,31 @@ public:
 
     Box<InlineWatchpointSet> sharedPolyProtoWatchpoint() const { return m_polyProtoWatchpoint; }
 
+    ScriptExecutable* topLevelExecutable() const { return m_topLevelExecutable.get(); }
+
+    TemplateObjectMap& ensureTemplateObjectMap(VM&);
+
+    void finalizeUnconditionally(VM&);
+
 private:
     friend class ExecutableBase;
-    FunctionExecutable(
-        VM&, const SourceCode&, UnlinkedFunctionExecutable*,
-        unsigned lastLine, unsigned endColumn, Intrinsic);
+    FunctionExecutable(VM&, const SourceCode&, UnlinkedFunctionExecutable*, Intrinsic);
     
-    void finishCreation(VM&);
+    void finishCreation(VM&, ScriptExecutable* topLevelExecutable);
 
     friend class ScriptExecutable;
 
     struct RareData {
         WTF_MAKE_STRUCT_FAST_ALLOCATED;
+        RefPtr<TypeSet> m_returnStatementTypeSet;
+        unsigned m_lineCount;
+        unsigned m_endColumn;
         Markable<int, IntegralMarkableTraits<int, -1>> m_overrideLineNumber;
         unsigned m_parametersStartOffset { 0 };
         unsigned m_typeProfilingStartOffset { UINT_MAX };
         unsigned m_typeProfilingEndOffset { UINT_MAX };
-        RefPtr<TypeSet> m_returnStatementTypeSet;
+        std::unique_ptr<TemplateObjectMap> m_templateObjectMap;
+        WriteBarrier<Structure> m_cachedPolyProtoStructure;
     };
 
     RareData& ensureRareData()
@@ -293,15 +315,15 @@ private:
     }
     RareData& ensureRareDataSlow();
 
+    // FIXME: We can merge rareData pointer and top-level executable pointer. First time, setting parent.
+    // If RareData is required, materialize RareData, swap it, and store top-level executable pointer inside RareData.
+    // https://bugs.webkit.org/show_bug.cgi?id=197625
     std::unique_ptr<RareData> m_rareData;
+    WriteBarrier<ScriptExecutable> m_topLevelExecutable;
     WriteBarrier<UnlinkedFunctionExecutable> m_unlinkedExecutable;
     WriteBarrier<ExecutableToCodeBlockEdge> m_codeBlockForCall;
     WriteBarrier<ExecutableToCodeBlockEdge> m_codeBlockForConstruct;
-    union {
-        WriteBarrier<InferredValue> m_singletonFunction;
-        WatchpointState m_singletonFunctionState;
-    };
-    WriteBarrier<Structure> m_cachedPolyProtoStructure;
+    InferredValue<JSFunction> m_singleton;
     Box<InlineWatchpointSet> m_polyProtoWatchpoint;
 };
 

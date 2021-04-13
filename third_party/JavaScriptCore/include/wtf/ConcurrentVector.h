@@ -36,6 +36,7 @@ namespace WTF {
 // An iterator for ConcurrentVector. It supports only the pre ++ operator
 template <typename T, size_t SegmentSize = 8> class ConcurrentVector;
 template <typename T, size_t SegmentSize = 8> class ConcurrentVectorIterator {
+    WTF_MAKE_FAST_ALLOCATED;
 private:
     friend class ConcurrentVector<T, SegmentSize>;
 public:
@@ -94,7 +95,7 @@ private:
 // works because we guarantee shrinking the vector is impossible and that growing the vector doesn't
 // delete old vector spines.
 template <typename T, size_t SegmentSize>
-class ConcurrentVector {
+class ConcurrentVector final {
     friend class ConcurrentVectorIterator<T, SegmentSize>;
     WTF_MAKE_NONCOPYABLE(ConcurrentVector);
     WTF_MAKE_FAST_ALLOCATED;
@@ -253,7 +254,7 @@ private:
     void allocateSegment()
     {
         m_segments.grow(m_numSegments + 1);
-        m_segments[m_numSegments++] = std::make_unique<Segment>();
+        m_segments[m_numSegments++] = makeUnique<Segment>();
     }
 
     size_t m_size { 0 };

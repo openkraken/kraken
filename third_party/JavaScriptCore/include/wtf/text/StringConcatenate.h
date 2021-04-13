@@ -27,7 +27,7 @@
 
 #include <cstring>
 #include <wtf/CheckedArithmetic.h>
-#include <wtf/text/AtomicString.h>
+#include <wtf/text/AtomString.h>
 #include <wtf/text/StringView.h>
 
 // This macro is helpful for testing how many intermediate Strings are created while evaluating an
@@ -189,9 +189,9 @@ private:
     const String& m_string;
 };
 
-template<> class StringTypeAdapter<AtomicString, void> : public StringTypeAdapter<String, void> {
+template<> class StringTypeAdapter<AtomString, void> : public StringTypeAdapter<String, void> {
 public:
-    StringTypeAdapter(const AtomicString& string)
+    StringTypeAdapter(const AtomString& string)
         : StringTypeAdapter<String, void> { string.string() }
     {
     }
@@ -235,6 +235,58 @@ private:
     StringTypeAdapter<UnderlyingElementType> m_underlyingAdapter;
 };
 
+template<unsigned N>
+struct Indentation {
+    unsigned operator++() { return ++value; }
+    unsigned operator++(int) { return value++; }
+    unsigned operator--() { return --value; }
+    unsigned operator--(int) { return value--; }
+
+    unsigned value { 0 };
+};
+
+
+template<unsigned N>
+struct IndentationScope {
+    IndentationScope(Indentation<N>& indentation)
+        : m_indentation(indentation)
+    {
+        ++m_indentation;
+    }
+    ~IndentationScope()
+    {
+        --m_indentation;
+    }
+
+    Indentation<N>& m_indentation;
+};
+
+template<unsigned N> class StringTypeAdapter<Indentation<N>, void> {
+public:
+    StringTypeAdapter(Indentation<N> indentation)
+        : m_indentation { indentation }
+    {
+    }
+
+    unsigned length()
+    {
+        return m_indentation.value * N;
+    }
+
+    bool is8Bit()
+    {
+        return true;
+    }
+
+    template<typename CharacterType> void writeTo(CharacterType* destination)
+    {
+        std::fill_n(destination, m_indentation.value * N, ' ');
+    }
+
+private:
+    Indentation<N> m_indentation;
+};
+
 template<typename Adapter>
 inline bool are8Bit(Adapter adapter)
 {
@@ -248,16 +300,16 @@ inline bool are8Bit(Adapter adapter, Adapters ...adapters)
 }
 
 template<typename ResultType, typename Adapter>
-inline void makeStringAccumulator(ResultType* result, Adapter adapter)
+inline void stringTypeAdapterAccumulator(ResultType* result, Adapter adapter)
 {
     adapter.writeTo(result);
 }
 
 template<typename ResultType, typename Adapter, typename... Adapters>
-inline void makeStringAccumulator(ResultType* result, Adapter adapter, Adapters ...adapters)
+inline void stringTypeAdapterAccumulator(ResultType* result, Adapter adapter, Adapters ...adapters)
 {
     adapter.writeTo(result);
-    makeStringAccumulator(result + adapter.length(), adapters...);
+    stringTypeAdapterAccumulator(result + adapter.length(), adapters...);
 }
 
 template<typename StringTypeAdapter, typename... StringTypeAdapters>
@@ -276,9 +328,9 @@ String tryMakeStringFromAdapters(StringTypeAdapter adapter, StringTypeAdapters .
         if (!resultImpl)
             return String();
 
-        makeStringAccumulator(buffer, adapter, adapters...);
+        stringTypeAdapterAccumulator(buffer, adapter, adapters...);
 
-        return WTFMove(resultImpl);
+        return resultImpl;
     }
 
     UChar* buffer;
@@ -286,9 +338,9 @@ String tryMakeStringFromAdapters(StringTypeAdapter adapter, StringTypeAdapters .
     if (!resultImpl)
         return String();
 
-    makeStringAccumulator(buffer, adapter, adapters...);
+    stringTypeAdapterAccumulator(buffer, adapter, adapters...);
 
-    return WTFMove(resultImpl);
+    return resultImpl;
 }
 
 template<typename... StringTypes>
@@ -308,6 +360,8 @@ String makeString(StringTypes... strings)
 
 } // namespace WTF
 
+using WTF::Indentation;
+using WTF::IndentationScope;
 using WTF::makeString;
 using WTF::pad;
 using WTF::tryMakeString;

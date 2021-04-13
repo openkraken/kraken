@@ -75,6 +75,7 @@ class JS_EXPORT_PRIVATE ApplicationCacheBackendDispatcherHandler {
 public:
     virtual void getFramesWithManifests(ErrorString&, RefPtr<JSON::ArrayOf<Inspector::Protocol::ApplicationCache::FrameWithManifest>>& out_frameIds) = 0;
     virtual void enable(ErrorString&) = 0;
+    virtual void disable(ErrorString&) = 0;
     virtual void getManifestForFrame(ErrorString&, const String& in_frameId, String* out_manifestURL) = 0;
     virtual void getApplicationCacheForFrame(ErrorString&, const String& in_frameId, RefPtr<Inspector::Protocol::ApplicationCache::ApplicationCache>& out_applicationCache) = 0;
 protected:
@@ -165,7 +166,9 @@ public:
     virtual void setAttributesAsText(ErrorString&, int in_nodeId, const String& in_text, const String* opt_in_name) = 0;
     virtual void removeAttribute(ErrorString&, int in_nodeId, const String& in_name) = 0;
     virtual void getSupportedEventNames(ErrorString&, RefPtr<JSON::ArrayOf<String>>& out_eventNames) = 0;
-    virtual void getEventListenersForNode(ErrorString&, int in_nodeId, const String* opt_in_objectGroup, RefPtr<JSON::ArrayOf<Inspector::Protocol::DOM::EventListener>>& out_listeners) = 0;
+    virtual void getDataBindingsForNode(ErrorString&, int in_nodeId, RefPtr<JSON::ArrayOf<Inspector::Protocol::DOM::DataBinding>>& out_dataBindings) = 0;
+    virtual void getAssociatedDataForNode(ErrorString&, int in_nodeId, Optional<String>& opt_out_associatedData) = 0;
+    virtual void getEventListenersForNode(ErrorString&, int in_nodeId, RefPtr<JSON::ArrayOf<Inspector::Protocol::DOM::EventListener>>& out_listeners) = 0;
     virtual void setEventListenerDisabled(ErrorString&, int in_eventListenerId, bool in_disabled) = 0;
     virtual void setBreakpointForEventListener(ErrorString&, int in_eventListenerId) = 0;
     virtual void removeBreakpointForEventListener(ErrorString&, int in_eventListenerId) = 0;
@@ -173,11 +176,11 @@ public:
     virtual void getOuterHTML(ErrorString&, int in_nodeId, String* out_outerHTML) = 0;
     virtual void setOuterHTML(ErrorString&, int in_nodeId, const String& in_outerHTML) = 0;
     virtual void insertAdjacentHTML(ErrorString&, int in_nodeId, const String& in_position, const String& in_html) = 0;
-    virtual void performSearch(ErrorString&, const String& in_query, const JSON::Array* opt_in_nodeIds, String* out_searchId, int* out_resultCount) = 0;
+    virtual void performSearch(ErrorString&, const String& in_query, const JSON::Array* opt_in_nodeIds, const bool* opt_in_caseSensitive, String* out_searchId, int* out_resultCount) = 0;
     virtual void getSearchResults(ErrorString&, const String& in_searchId, int in_fromIndex, int in_toIndex, RefPtr<JSON::ArrayOf<int>>& out_nodeIds) = 0;
     virtual void discardSearchResults(ErrorString&, const String& in_searchId) = 0;
     virtual void requestNode(ErrorString&, const String& in_objectId, int* out_nodeId) = 0;
-    virtual void setInspectModeEnabled(ErrorString&, bool in_enabled, const JSON::Object* opt_in_highlightConfig) = 0;
+    virtual void setInspectModeEnabled(ErrorString&, bool in_enabled, const JSON::Object* opt_in_highlightConfig, const bool* opt_in_showRulers) = 0;
     virtual void highlightRect(ErrorString&, int in_x, int in_y, int in_width, int in_height, const JSON::Object* opt_in_color, const JSON::Object* opt_in_outlineColor, const bool* opt_in_usePageCoordinates) = 0;
     virtual void highlightQuad(ErrorString&, const JSON::Array& in_quad, const JSON::Object* opt_in_color, const JSON::Object* opt_in_outlineColor, const bool* opt_in_usePageCoordinates) = 0;
     virtual void highlightSelector(ErrorString&, const JSON::Object& in_highlightConfig, const String& in_selectorString, const String* opt_in_frameId) = 0;
@@ -202,8 +205,8 @@ class JS_EXPORT_PRIVATE DOMDebuggerBackendDispatcherHandler {
 public:
     virtual void setDOMBreakpoint(ErrorString&, int in_nodeId, const String& in_type) = 0;
     virtual void removeDOMBreakpoint(ErrorString&, int in_nodeId, const String& in_type) = 0;
-    virtual void setEventBreakpoint(ErrorString&, const String& in_breakpointType, const String& in_eventName) = 0;
-    virtual void removeEventBreakpoint(ErrorString&, const String& in_breakpointType, const String& in_eventName) = 0;
+    virtual void setEventBreakpoint(ErrorString&, const String& in_breakpointType, const String* opt_in_eventName) = 0;
+    virtual void removeEventBreakpoint(ErrorString&, const String& in_breakpointType, const String* opt_in_eventName) = 0;
     virtual void setURLBreakpoint(ErrorString&, const String& in_url, const bool* opt_in_isRegex) = 0;
     virtual void removeURLBreakpoint(ErrorString&, const String& in_url) = 0;
 protected:
@@ -257,15 +260,15 @@ public:
     virtual void getFunctionDetails(ErrorString&, const String& in_functionId, RefPtr<Inspector::Protocol::Debugger::FunctionDetails>& out_details) = 0;
     // Named after parameter 'state' while generating command/event setPauseOnExceptions.
     enum class State {
-        None = 155,
-        Uncaught = 201,
-        All = 202,
+        None = 175,
+        Uncaught = 222,
+        All = 223,
     }; // enum class State
     virtual void setPauseOnExceptions(ErrorString&, const String& in_state) = 0;
     virtual void setPauseOnAssertions(ErrorString&, bool in_enabled) = 0;
+    virtual void setPauseOnMicrotasks(ErrorString&, bool in_enabled) = 0;
     virtual void setPauseForInternalScripts(ErrorString&, bool in_shouldPause) = 0;
-    virtual void evaluateOnCallFrame(ErrorString&, const String& in_callFrameId, const String& in_expression, const String* opt_in_objectGroup, const bool* opt_in_includeCommandLineAPI, const bool* opt_in_doNotPauseOnExceptionsAndMuteConsole, const bool* opt_in_returnByValue, const bool* opt_in_generatePreview, const bool* opt_in_saveResult, RefPtr<Inspector::Protocol::Runtime::RemoteObject>& out_result, Optional<bool>& opt_out_wasThrown, Optional<int>& opt_out_savedResultIndex) = 0;
-    virtual void setOverlayMessage(ErrorString&, const String* opt_in_message) = 0;
+    virtual void evaluateOnCallFrame(ErrorString&, const String& in_callFrameId, const String& in_expression, const String* opt_in_objectGroup, const bool* opt_in_includeCommandLineAPI, const bool* opt_in_doNotPauseOnExceptionsAndMuteConsole, const bool* opt_in_returnByValue, const bool* opt_in_generatePreview, const bool* opt_in_saveResult, const bool* opt_in_emulateUserGesture, RefPtr<Inspector::Protocol::Runtime::RemoteObject>& out_result, Optional<bool>& opt_out_wasThrown, Optional<int>& opt_out_savedResultIndex) = 0;
 protected:
     virtual ~DebuggerBackendDispatcherHandler();
 };
@@ -398,7 +401,7 @@ protected:
 class JS_EXPORT_PRIVATE RuntimeBackendDispatcherHandler {
 public:
     virtual void parse(ErrorString&, const String& in_source, Inspector::Protocol::Runtime::SyntaxErrorType* out_result, Optional<String>& opt_out_message, RefPtr<Inspector::Protocol::Runtime::ErrorRange>& opt_out_range) = 0;
-    virtual void evaluate(ErrorString&, const String& in_expression, const String* opt_in_objectGroup, const bool* opt_in_includeCommandLineAPI, const bool* opt_in_doNotPauseOnExceptionsAndMuteConsole, const int* opt_in_contextId, const bool* opt_in_returnByValue, const bool* opt_in_generatePreview, const bool* opt_in_saveResult, RefPtr<Inspector::Protocol::Runtime::RemoteObject>& out_result, Optional<bool>& opt_out_wasThrown, Optional<int>& opt_out_savedResultIndex) = 0;
+    virtual void evaluate(ErrorString&, const String& in_expression, const String* opt_in_objectGroup, const bool* opt_in_includeCommandLineAPI, const bool* opt_in_doNotPauseOnExceptionsAndMuteConsole, const int* opt_in_contextId, const bool* opt_in_returnByValue, const bool* opt_in_generatePreview, const bool* opt_in_saveResult, const bool* opt_in_emulateUserGesture, RefPtr<Inspector::Protocol::Runtime::RemoteObject>& out_result, Optional<bool>& opt_out_wasThrown, Optional<int>& opt_out_savedResultIndex) = 0;
     class JS_EXPORT_PRIVATE AwaitPromiseCallback : public BackendDispatcher::CallbackBase {
     public:
         AwaitPromiseCallback(Ref<BackendDispatcher>&&, int id);
@@ -411,6 +414,7 @@ public:
     virtual void getDisplayableProperties(ErrorString&, const String& in_objectId, const bool* opt_in_generatePreview, RefPtr<JSON::ArrayOf<Inspector::Protocol::Runtime::PropertyDescriptor>>& out_properties, RefPtr<JSON::ArrayOf<Inspector::Protocol::Runtime::InternalPropertyDescriptor>>& opt_out_internalProperties) = 0;
     virtual void getCollectionEntries(ErrorString&, const String& in_objectId, const String* opt_in_objectGroup, const int* opt_in_startIndex, const int* opt_in_numberToFetch, RefPtr<JSON::ArrayOf<Inspector::Protocol::Runtime::CollectionEntry>>& out_entries) = 0;
     virtual void saveResult(ErrorString&, const JSON::Object& in_value, const int* opt_in_contextId, Optional<int>& opt_out_savedResultIndex) = 0;
+    virtual void setSavedResultAlias(ErrorString&, const String* opt_in_alias) = 0;
     virtual void releaseObject(ErrorString&, const String& in_objectId) = 0;
     virtual void releaseObjectGroup(ErrorString&, const String& in_objectGroup) = 0;
     virtual void enable(ErrorString&) = 0;
@@ -450,6 +454,8 @@ protected:
 
 class JS_EXPORT_PRIVATE TimelineBackendDispatcherHandler {
 public:
+    virtual void enable(ErrorString&) = 0;
+    virtual void disable(ErrorString&) = 0;
     virtual void start(ErrorString&, const int* opt_in_maxCallStackDepth) = 0;
     virtual void stop(ErrorString&) = 0;
     virtual void setAutoCaptureEnabled(ErrorString&, bool in_enabled) = 0;
@@ -475,6 +481,7 @@ public:
 private:
     void getFramesWithManifests(long requestId, RefPtr<JSON::Object>&& parameters);
     void enable(long requestId, RefPtr<JSON::Object>&& parameters);
+    void disable(long requestId, RefPtr<JSON::Object>&& parameters);
     void getManifestForFrame(long requestId, RefPtr<JSON::Object>&& parameters);
     void getApplicationCacheForFrame(long requestId, RefPtr<JSON::Object>&& parameters);
 #if ENABLE(INSPECTOR_ALTERNATE_DISPATCHERS)
@@ -625,6 +632,8 @@ private:
     void setAttributesAsText(long requestId, RefPtr<JSON::Object>&& parameters);
     void removeAttribute(long requestId, RefPtr<JSON::Object>&& parameters);
     void getSupportedEventNames(long requestId, RefPtr<JSON::Object>&& parameters);
+    void getDataBindingsForNode(long requestId, RefPtr<JSON::Object>&& parameters);
+    void getAssociatedDataForNode(long requestId, RefPtr<JSON::Object>&& parameters);
     void getEventListenersForNode(long requestId, RefPtr<JSON::Object>&& parameters);
     void setEventListenerDisabled(long requestId, RefPtr<JSON::Object>&& parameters);
     void setBreakpointForEventListener(long requestId, RefPtr<JSON::Object>&& parameters);
@@ -752,9 +761,9 @@ private:
     void getFunctionDetails(long requestId, RefPtr<JSON::Object>&& parameters);
     void setPauseOnExceptions(long requestId, RefPtr<JSON::Object>&& parameters);
     void setPauseOnAssertions(long requestId, RefPtr<JSON::Object>&& parameters);
+    void setPauseOnMicrotasks(long requestId, RefPtr<JSON::Object>&& parameters);
     void setPauseForInternalScripts(long requestId, RefPtr<JSON::Object>&& parameters);
     void evaluateOnCallFrame(long requestId, RefPtr<JSON::Object>&& parameters);
-    void setOverlayMessage(long requestId, RefPtr<JSON::Object>&& parameters);
 #if ENABLE(INSPECTOR_ALTERNATE_DISPATCHERS)
 public:
     void setAlternateDispatcher(AlternateDebuggerBackendDispatcher* alternateDispatcher) { m_alternateDispatcher = alternateDispatcher; }
@@ -950,6 +959,7 @@ private:
     void getDisplayableProperties(long requestId, RefPtr<JSON::Object>&& parameters);
     void getCollectionEntries(long requestId, RefPtr<JSON::Object>&& parameters);
     void saveResult(long requestId, RefPtr<JSON::Object>&& parameters);
+    void setSavedResultAlias(long requestId, RefPtr<JSON::Object>&& parameters);
     void releaseObject(long requestId, RefPtr<JSON::Object>&& parameters);
     void releaseObjectGroup(long requestId, RefPtr<JSON::Object>&& parameters);
     void enable(long requestId, RefPtr<JSON::Object>&& parameters);
@@ -1029,6 +1039,8 @@ public:
     static Ref<TimelineBackendDispatcher> create(BackendDispatcher&, TimelineBackendDispatcherHandler*);
     void dispatch(long requestId, const String& method, Ref<JSON::Object>&& message) override;
 private:
+    void enable(long requestId, RefPtr<JSON::Object>&& parameters);
+    void disable(long requestId, RefPtr<JSON::Object>&& parameters);
     void start(long requestId, RefPtr<JSON::Object>&& parameters);
     void stop(long requestId, RefPtr<JSON::Object>&& parameters);
     void setAutoCaptureEnabled(long requestId, RefPtr<JSON::Object>&& parameters);

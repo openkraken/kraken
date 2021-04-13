@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "BytecodeStructs.h"
 #include "CodeBlock.h"
 #include "Instruction.h"
 #include <wtf/Forward.h>
@@ -67,7 +68,8 @@ void computeUsesForBytecodeOffset(Block* codeBlock, OpcodeID opcodeID, const Ins
     };
 
     switch (opcodeID) {
-    case op_wide:
+    case op_wide16:
+    case op_wide32:
         RELEASE_ASSERT_NOT_REACHED();
 
     // No uses.
@@ -84,7 +86,6 @@ void computeUsesForBytecodeOffset(Block* codeBlock, OpcodeID opcodeID, const Ins
     case op_create_direct_arguments:
     case op_create_cloned_arguments:
     case op_get_rest_length:
-    case op_check_traps:
     case op_get_argument:
     case op_nop:
     case op_unreachable:
@@ -105,6 +106,8 @@ void computeUsesForBytecodeOffset(Block* codeBlock, OpcodeID opcodeID, const Ins
     USES(OpJfalse, condition)
     USES(OpJeqNull, value)
     USES(OpJneqNull, value)
+    USES(OpJundefinedOrNull, value)
+    USES(OpJnundefinedOrNull, value)
     USES(OpDec, srcDst)
     USES(OpInc, srcDst)
     USES(OpLogShadowChickenPrologue, scope)
@@ -156,7 +159,8 @@ void computeUsesForBytecodeOffset(Block* codeBlock, OpcodeID opcodeID, const Ins
     USES(OpNewGeneratorFuncExp, scope)
     USES(OpNewAsyncFuncExp, scope)
     USES(OpToIndexString, index)
-    USES(OpCreateLexicalEnvironment, scope)
+    USES(OpCreateLexicalEnvironment, scope, symbolTable, initialValue)
+    USES(OpCreateGeneratorFrameEnvironment, scope, symbolTable, initialValue)
     USES(OpResolveScope, scope)
     USES(OpResolveScopeForHoistingFuncDeclInEval, scope)
     USES(OpGetFromScope, scope)
@@ -287,7 +291,8 @@ template<typename Block, typename Functor>
 void computeDefsForBytecodeOffset(Block* codeBlock, OpcodeID opcodeID, const Instruction* instruction, const Functor& functor)
 {
     switch (opcodeID) {
-    case op_wide:
+    case op_wide16:
+    case op_wide32:
         RELEASE_ASSERT_NOT_REACHED();
 
     // These don't define anything.
@@ -295,6 +300,7 @@ void computeDefsForBytecodeOffset(Block* codeBlock, OpcodeID opcodeID, const Ins
     case op_end:
     case op_throw:
     case op_throw_static_error:
+    case op_check_tdz:
     case op_debug:
     case op_ret:
     case op_jmp:
@@ -302,6 +308,8 @@ void computeDefsForBytecodeOffset(Block* codeBlock, OpcodeID opcodeID, const Ins
     case op_jfalse:
     case op_jeq_null:
     case op_jneq_null:
+    case op_jundefined_or_null:
+    case op_jnundefined_or_null:
     case op_jneq_ptr:
     case op_jless:
     case op_jlesseq:
@@ -337,7 +345,6 @@ void computeDefsForBytecodeOffset(Block* codeBlock, OpcodeID opcodeID, const Ins
     case op_profile_control_flow:
     case op_put_to_arguments:
     case op_set_function_name:
-    case op_check_traps:
     case op_log_shadow_chicken_prologue:
     case op_log_shadow_chicken_tail:
     case op_yield:
@@ -363,6 +370,7 @@ void computeDefsForBytecodeOffset(Block* codeBlock, OpcodeID opcodeID, const Ins
     DEFS(OpGetParentScope, dst)
     DEFS(OpPushWithScope, dst)
     DEFS(OpCreateLexicalEnvironment, dst)
+    DEFS(OpCreateGeneratorFrameEnvironment, dst)
     DEFS(OpResolveScope, dst)
     DEFS(OpResolveScopeForHoistingFuncDeclInEval, dst)
     DEFS(OpStrcat, dst)
@@ -448,7 +456,6 @@ void computeDefsForBytecodeOffset(Block* codeBlock, OpcodeID opcodeID, const Ins
     DEFS(OpMov, dst)
     DEFS(OpNewObject, dst)
     DEFS(OpToThis, srcDst)
-    DEFS(OpCheckTdz, targetVirtualRegister)
     DEFS(OpGetScope, dst)
     DEFS(OpCreateDirectArguments, dst)
     DEFS(OpCreateScopedArguments, dst)

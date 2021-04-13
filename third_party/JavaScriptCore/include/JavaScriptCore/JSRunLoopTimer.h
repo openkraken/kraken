@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, 2015-2017 Apple Inc. All rights reserved.
+ * Copyright (C) 2012-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -77,16 +77,15 @@ public:
     private:
         Lock m_lock;
 
-        struct PerVMData {
-            PerVMData() = default;
+        class PerVMData {
+            WTF_MAKE_FAST_ALLOCATED;
+            WTF_MAKE_NONCOPYABLE(PerVMData);
+        public:
 #if USE(CF)
             PerVMData(Manager&) { }
 #else
             PerVMData(Manager&);
 #endif
-            PerVMData(PerVMData&&) = default;
-            PerVMData& operator=(PerVMData&&) = default;
-
             ~PerVMData();
 
 #if USE(CF)
@@ -101,10 +100,10 @@ public:
             Vector<std::pair<Ref<JSRunLoopTimer>, EpochTime>> timers;
         };
 
-        HashMap<Ref<JSLock>, PerVMData> m_mapping;
+        HashMap<Ref<JSLock>, std::unique_ptr<PerVMData>> m_mapping;
     };
 
-    JSRunLoopTimer(VM*);
+    JSRunLoopTimer(VM&);
     JS_EXPORT_PRIVATE virtual ~JSRunLoopTimer();
     virtual void doWork(VM&) = 0;
 

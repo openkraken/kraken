@@ -34,10 +34,6 @@
 #include <wtf/Optional.h>
 #include <wtf/RunLoop.h>
 
-#if USE(GLIB)
-#include <wtf/glib/GRefPtr.h>
-#endif
-
 #if OS(WINDOWS)
 #include <wtf/win/Win32Handle.h>
 #endif
@@ -61,6 +57,7 @@ enum class Synchronous { No, Yes };
 typedef WTF::Function<void(Critical, Synchronous)> LowMemoryHandler;
 
 class MemoryPressureHandler {
+    WTF_MAKE_FAST_ALLOCATED;
     friend class WTF::NeverDestroyed<MemoryPressureHandler>;
 public:
     WTF_EXPORT_PRIVATE static MemoryPressureHandler& singleton();
@@ -99,6 +96,7 @@ public:
 #endif
 
     class ReliefLogger {
+        WTF_MAKE_FAST_ALLOCATED;
     public:
         explicit ReliefLogger(const char *log)
             : m_logString(log)
@@ -126,6 +124,7 @@ public:
 
     private:
         struct MemoryUsage {
+            WTF_MAKE_STRUCT_FAST_ALLOCATED;
             MemoryUsage() = default;
             MemoryUsage(size_t resident, size_t physical)
                 : resident(resident)
@@ -181,19 +180,19 @@ private:
 
     unsigned m_pageCount { 0 };
 
-    bool m_installed { false };
     LowMemoryHandler m_lowMemoryHandler;
 
-    std::atomic<bool> m_underMemoryPressure;
+    std::atomic<bool> m_underMemoryPressure { false };
+    bool m_installed { false };
     bool m_isSimulatingMemoryPressure { false };
     bool m_shouldLogMemoryMemoryPressureEvents { true };
+    bool m_hasInvokedDidExceedInactiveLimitWhileActiveCallback { false };
 
     std::unique_ptr<RunLoop::Timer<MemoryPressureHandler>> m_measurementTimer;
     MemoryUsagePolicy m_memoryUsagePolicy { MemoryUsagePolicy::Unrestricted };
     WTF::Function<void()> m_memoryKillCallback;
     WTF::Function<void(bool)> m_memoryPressureStatusChangedCallback;
     WTF::Function<void()> m_didExceedInactiveLimitWhileActiveCallback;
-    bool m_hasInvokedDidExceedInactiveLimitWhileActiveCallback { false };
 
 #if OS(WINDOWS)
     void windowsMeasurementTimerFired();

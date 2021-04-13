@@ -76,6 +76,16 @@ namespace JSC {
             return (m_bits & TypeBits) == TypeMaybeBigInt;
         }
 
+        constexpr bool definitelyIsNull() const
+        {
+            return (m_bits & TypeBits) == TypeMaybeNull;
+        }
+
+        constexpr bool mightBeUndefinedOrNull() const
+        {
+            return m_bits & (TypeMaybeNull | TypeMaybeOther);
+        }
+
         constexpr bool mightBeNumber() const
         {
             return m_bits & TypeMaybeNumber;
@@ -172,6 +182,15 @@ namespace JSC {
             return unknownType();
         }
 
+        static constexpr ResultType forCoalesce(ResultType op1, ResultType op2)
+        {
+            if (op1.definitelyIsNull())
+                return op2;
+            if (!op1.mightBeUndefinedOrNull())
+                return op1;
+            return unknownType();
+        }
+
         static constexpr ResultType forBitOp()
         {
             return bigIntOrInt32Type();
@@ -194,40 +213,32 @@ namespace JSC {
     {
         OperandTypes(ResultType first = ResultType::unknownType(), ResultType second = ResultType::unknownType())
         {
-            // We have to initialize one of the int to ensure that
-            // the entire struct is initialized.
-            m_u.i = 0;
-            m_u.rds.first = first.m_bits;
-            m_u.rds.second = second.m_bits;
+            m_first = first.m_bits;
+            m_second = second.m_bits;
         }
         
-        union {
-            struct {
-                ResultType::Type first;
-                ResultType::Type second;
-            } rds;
-            int i;
-        } m_u;
+        ResultType::Type m_first;
+        ResultType::Type m_second;
 
         ResultType first() const
         {
-            return ResultType(m_u.rds.first);
+            return ResultType(m_first);
         }
 
         ResultType second() const
         {
-            return ResultType(m_u.rds.second);
+            return ResultType(m_second);
         }
 
-        int toInt()
+        uint16_t bits()
         {
-            return m_u.i;
+            static_assert(sizeof(OperandTypes) == sizeof(uint16_t));
+            return bitwise_cast<uint16_t>(*this);
         }
-        static OperandTypes fromInt(int value)
+
+        static OperandTypes fromBits(uint16_t bits)
         {
-            OperandTypes types;
-            types.m_u.i = value;
-            return types;
+            return bitwise_cast<OperandTypes>(bits);
         }
 
         void dump(PrintStream& out) const

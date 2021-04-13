@@ -37,6 +37,7 @@
 #include "ScriptDebugListener.h"
 #include <wtf/Forward.h>
 #include <wtf/HashMap.h>
+#include <wtf/HashSet.h>
 #include <wtf/Noncopyable.h>
 #include <wtf/Vector.h>
 
@@ -48,20 +49,21 @@ class InjectedScriptManager;
 class ScriptDebugServer;
 typedef String ErrorString;
 
-class JS_EXPORT_PRIVATE InspectorDebuggerAgent : public InspectorAgentBase, public ScriptDebugListener, public DebuggerBackendDispatcherHandler {
+class JS_EXPORT_PRIVATE InspectorDebuggerAgent : public InspectorAgentBase, public DebuggerBackendDispatcherHandler, public ScriptDebugListener {
     WTF_MAKE_NONCOPYABLE(InspectorDebuggerAgent);
     WTF_MAKE_FAST_ALLOCATED;
 public:
-    static const char* backtraceObjectGroup;
-
     virtual ~InspectorDebuggerAgent();
 
+    static const char* backtraceObjectGroup;
+
+    // InspectorAgentBase
     void didCreateFrontendAndBackend(FrontendRouter*, BackendDispatcher*) final;
     void willDestroyFrontendAndBackend(DisconnectReason) final;
 
+    // DebuggerBackendDispatcherHandler
     void enable(ErrorString&) final;
     void disable(ErrorString&) final;
-    void setPauseForInternalScripts(ErrorString&, bool shouldPause) final;
     void setAsyncStackTraceDepth(ErrorString&, int depth) final;
     void setBreakpointsActive(ErrorString&, bool active) final;
     void setBreakpointByUrl(ErrorString&, int lineNumber, const String* optionalURL, const String* optionalURLRegex, const int* optionalColumnNumber, const JSON::Object* options, Protocol::Debugger::BreakpointId*, RefPtr<JSON::ArrayOf<Protocol::Debugger::Location>>& locations) final;
@@ -69,18 +71,29 @@ public:
     void removeBreakpoint(ErrorString&, const String& breakpointIdentifier) final;
     void continueUntilNextRunLoop(ErrorString&) final;
     void continueToLocation(ErrorString&, const JSON::Object& location) final;
-    void searchInContent(ErrorString&, const String& scriptID, const String& query, const bool* optionalCaseSensitive, const bool* optionalIsRegex, RefPtr<JSON::ArrayOf<Protocol::GenericTypes::SearchMatch>>&) final;
-    void getScriptSource(ErrorString&, const String& scriptID, String* scriptSource) final;
-    void getFunctionDetails(ErrorString&, const String& functionId, RefPtr<Protocol::Debugger::FunctionDetails>&) final;
-    void pause(ErrorString&) final;
-    void resume(ErrorString&) final;
     void stepOver(ErrorString&) final;
     void stepInto(ErrorString&) final;
     void stepOut(ErrorString&) final;
+    void pause(ErrorString&) final;
+    void resume(ErrorString&) final;
+    void searchInContent(ErrorString&, const String& scriptID, const String& query, const bool* optionalCaseSensitive, const bool* optionalIsRegex, RefPtr<JSON::ArrayOf<Protocol::GenericTypes::SearchMatch>>&) final;
+    void getScriptSource(ErrorString&, const String& scriptID, String* scriptSource) final;
+    void getFunctionDetails(ErrorString&, const String& functionId, RefPtr<Protocol::Debugger::FunctionDetails>&) final;
     void setPauseOnExceptions(ErrorString&, const String& pauseState) final;
     void setPauseOnAssertions(ErrorString&, bool enabled) final;
-    void evaluateOnCallFrame(ErrorString&, const String& callFrameId, const String& expression, const String* objectGroup, const bool* includeCommandLineAPI, const bool* doNotPauseOnExceptionsAndMuteConsole, const bool* returnByValue, const bool* generatePreview, const bool* saveResult, RefPtr<Protocol::Runtime::RemoteObject>& result, Optional<bool>& wasThrown, Optional<int>& savedResultIndex) final;
-    void setOverlayMessage(ErrorString&, const String*) override;
+    void setPauseOnMicrotasks(ErrorString&, bool enabled) final;
+    void setPauseForInternalScripts(ErrorString&, bool shouldPause) final;
+    void evaluateOnCallFrame(ErrorString&, const String& callFrameId, const String& expression, const String* objectGroup, const bool* includeCommandLineAPI, const bool* doNotPauseOnExceptionsAndMuteConsole, const bool* returnByValue, const bool* generatePreview, const bool* saveResult, const bool* emulateUserGesture, RefPtr<Protocol::Runtime::RemoteObject>& result, Optional<bool>& wasThrown, Optional<int>& savedResultIndex) override;
+
+    // ScriptDebugListener
+    void didParseSource(JSC::SourceID, const Script&) final;
+    void failedToParseSource(const String& url, const String& data, int firstLine, int errorLine, const String& errorMessage) final;
+    void willRunMicrotask() final;
+    void didRunMicrotask() final;
+    void didPause(JSC::ExecState&, JSC::JSValue callFrames, JSC::JSValue exceptionOrCaughtValue) final;
+    void didContinue() final;
+    void breakpointActionSound(int breakpointActionIdentifier) final;
+    void breakpointActionProbe(JSC::ExecState&, const ScriptBreakpointAction&, unsigned batchId, unsigned sampleId, JSC::JSValue sample) final;
 
     bool isPaused() const;
     bool breakpointsActive() const;
@@ -114,7 +127,8 @@ public:
         virtual void debuggerWasEnabled() = 0;
         virtual void debuggerWasDisabled() = 0;
     };
-    void setListener(Listener* listener) { m_listener = listener; }
+    void addListener(Listener& listener) { m_listeners.add(&listener); }
+    void removeListener(Listener& listener) { m_listeners.remove(&listener); }
 
 protected:
     InspectorDebuggerAgent(AgentContext&);
@@ -128,9 +142,7 @@ protected:
     virtual void unmuteConsole() = 0;
 
     virtual void enable();
-    virtual void disable(bool skipRecompile);
-    void didPause(JSC::ExecState&, JSC::JSValue callFrames, JSC::JSValue exceptionOrCaughtValue) final;
-    void didContinue() final;
+    virtual void disable(bool isBeingDestroyed);
 
     virtual String sourceMapURLForScript(const Script&);
 
@@ -139,12 +151,6 @@ protected:
 
 private:
     Ref<JSON::ArrayOf<Protocol::Debugger::CallFrame>> currentCallFrames(const InjectedScript&);
-
-    void didParseSource(JSC::SourceID, const Script&) final;
-    void failedToParseSource(const String& url, const String& data, int firstLine, int errorLine, const String& errorMessage) final;
-
-    void breakpointActionSound(int breakpointActionIdentifier) final;
-    void breakpointActionProbe(JSC::ExecState&, const ScriptBreakpointAction&, unsigned batchId, unsigned sampleId, JSC::JSValue sample) final;
 
     void resolveBreakpoint(const Script&, JSC::Breakpoint&);
     void setBreakpoint(JSC::Breakpoint&, bool& existing);    
@@ -170,37 +176,39 @@ private:
     typedef std::pair<unsigned, int> AsyncCallIdentifier;
     static AsyncCallIdentifier asyncCallIdentifier(AsyncCallType, int callbackId);
 
-    typedef HashMap<JSC::SourceID, Script> ScriptsMap;
-    typedef HashMap<String, Vector<JSC::BreakpointID>> BreakpointIdentifierToDebugServerBreakpointIDsMap;
-    typedef HashMap<String, RefPtr<JSON::Object>> BreakpointIdentifierToBreakpointMap;
-    typedef HashMap<JSC::BreakpointID, String> DebugServerBreakpointIDToBreakpointIdentifier;
-
-    InjectedScriptManager& m_injectedScriptManager;
     std::unique_ptr<DebuggerFrontendDispatcher> m_frontendDispatcher;
     RefPtr<DebuggerBackendDispatcher> m_backendDispatcher;
+
     ScriptDebugServer& m_scriptDebugServer;
-    Listener* m_listener { nullptr };
+    InjectedScriptManager& m_injectedScriptManager;
+    HashMap<JSC::SourceID, Script> m_scripts;
+
+    HashSet<Listener*> m_listeners;
+
     JSC::ExecState* m_pausedScriptState { nullptr };
     JSC::Strong<JSC::Unknown> m_currentCallStack;
-    ScriptsMap m_scripts;
-    BreakpointIdentifierToDebugServerBreakpointIDsMap m_breakpointIdentifierToDebugServerBreakpointIDs;
-    BreakpointIdentifierToBreakpointMap m_javaScriptBreakpoints;
-    DebugServerBreakpointIDToBreakpointIdentifier m_debuggerBreakpointIdentifierToInspectorBreakpointIdentifier;
-    JSC::BreakpointID m_continueToLocationBreakpointID;
+
+    HashMap<String, Vector<JSC::BreakpointID>> m_breakpointIdentifierToDebugServerBreakpointIDs;
+    HashMap<String, RefPtr<JSON::Object>> m_javaScriptBreakpoints;
+    HashMap<JSC::BreakpointID, String> m_debuggerBreakpointIdentifierToInspectorBreakpointIdentifier;
+    JSC::BreakpointID m_continueToLocationBreakpointID { JSC::noBreakpointID };
     DebuggerFrontendDispatcher::Reason m_breakReason;
-    RefPtr<JSON::Object> m_breakAuxData;
+    RefPtr<JSON::Object> m_breakData;
     ShouldDispatchResumed m_conditionToDispatchResumed { ShouldDispatchResumed::No };
-    bool m_enablePauseWhenIdle { false };
+
     HashMap<AsyncCallIdentifier, RefPtr<AsyncStackTrace>> m_pendingAsyncCalls;
-    Optional<AsyncCallIdentifier> m_currentAsyncCallIdentifier { WTF::nullopt };
-    bool m_enabled { false };
-    bool m_javaScriptPauseScheduled { false };
-    bool m_hasExceptionValue { false };
-    bool m_didPauseStopwatch { false };
-    bool m_pauseOnAssertionFailures { false };
-    bool m_pauseForInternalScripts { false };
-    bool m_registeredIdleCallback { false };
+    Optional<AsyncCallIdentifier> m_currentAsyncCallIdentifier;
     int m_asyncStackTraceDepth { 0 };
+
+    bool m_enabled { false };
+    bool m_enablePauseWhenIdle { false };
+    bool m_pauseOnAssertionFailures { false };
+    bool m_pauseOnMicrotasks { false };
+    bool m_pauseForInternalScripts { false };
+    bool m_javaScriptPauseScheduled { false };
+    bool m_didPauseStopwatch { false };
+    bool m_hasExceptionValue { false };
+    bool m_registeredIdleCallback { false };
 };
 
 } // namespace Inspector

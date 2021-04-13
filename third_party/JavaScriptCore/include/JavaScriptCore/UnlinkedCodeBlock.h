@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2016 Apple Inc. All Rights Reserved.
+ * Copyright (C) 2012-2019 Apple Inc. All Rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -163,7 +163,7 @@ public:
     void addSetConstant(IdentifierSet& set)
     {
         createRareDataIfNecessary();
-        VM& vm = *this->vm();
+        VM& vm = this->vm();
         auto locker = lockDuringMarking(vm.heap, cellLock());
         unsigned result = m_constantRegisters.size();
         m_constantRegisters.append(WriteBarrier<Unknown>());
@@ -173,7 +173,7 @@ public:
 
     unsigned addConstant(JSValue v, SourceCodeRepresentation sourceCodeRepresentation = SourceCodeRepresentation::Other)
     {
-        VM& vm = *this->vm();
+        VM& vm = this->vm();
         auto locker = lockDuringMarking(vm.heap, cellLock());
         unsigned result = m_constantRegisters.size();
         m_constantRegisters.append(WriteBarrier<Unknown>());
@@ -183,7 +183,7 @@ public:
     }
     unsigned addConstant(LinkTimeConstant type)
     {
-        VM& vm = *this->vm();
+        VM& vm = this->vm();
         auto locker = lockDuringMarking(vm.heap, cellLock());
         unsigned result = m_constantRegisters.size();
         ASSERT(result);
@@ -246,7 +246,7 @@ public:
 
     unsigned addFunctionDecl(UnlinkedFunctionExecutable* n)
     {
-        VM& vm = *this->vm();
+        VM& vm = this->vm();
         auto locker = lockDuringMarking(vm.heap, cellLock());
         unsigned size = m_functionDecls.size();
         m_functionDecls.append(WriteBarrier<UnlinkedFunctionExecutable>());
@@ -257,7 +257,7 @@ public:
     size_t numberOfFunctionDecls() { return m_functionDecls.size(); }
     unsigned addFunctionExpr(UnlinkedFunctionExecutable* n)
     {
-        VM& vm = *this->vm();
+        VM& vm = this->vm();
         auto locker = lockDuringMarking(vm.heap, cellLock());
         unsigned size = m_functionExprs.size();
         m_functionExprs.append(WriteBarrier<UnlinkedFunctionExecutable>());
@@ -331,10 +331,18 @@ public:
 
     void dumpExpressionRangeInfo(); // For debugging purpose only.
 
-    bool wasCompiledWithDebuggingOpcodes() const { return m_wasCompiledWithDebuggingOpcodes; }
+    bool wasCompiledWithDebuggingOpcodes() const { return m_codeGenerationMode.contains(CodeGenerationMode::Debugger); }
+    bool wasCompiledWithTypeProfilerOpcodes() const { return m_codeGenerationMode.contains(CodeGenerationMode::TypeProfiler); }
+    bool wasCompiledWithControlFlowProfilerOpcodes() const { return m_codeGenerationMode.contains(CodeGenerationMode::ControlFlowProfiler); }
+    OptionSet<CodeGenerationMode> codeGenerationMode() const { return m_codeGenerationMode; }
 
     TriState didOptimize() const { return static_cast<TriState>(m_didOptimize); }
     void setDidOptimize(TriState didOptimize) { m_didOptimize = static_cast<unsigned>(didOptimize); }
+
+    static constexpr unsigned maxAge = 7;
+
+    unsigned age() const { return m_age; }
+    void resetAge() { m_age = 0; }
 
     void dump(PrintStream&) const;
 
@@ -369,7 +377,7 @@ public:
 
 
 protected:
-    UnlinkedCodeBlock(VM*, Structure*, CodeType, const ExecutableInfo&, DebuggerMode);
+    UnlinkedCodeBlock(VM&, Structure*, CodeType, const ExecutableInfo&, OptionSet<CodeGenerationMode>);
 
     template<typename CodeBlockType>
     UnlinkedCodeBlock(Decoder&, Structure*, const CachedCodeBlock<CodeBlockType>&);
@@ -394,12 +402,13 @@ private:
     {
         if (!m_rareData) {
             auto locker = lockDuringMarking(*heap(), cellLock());
-            m_rareData = std::make_unique<RareData>();
+            m_rareData = makeUnique<RareData>();
         }
     }
 
     void getLineAndColumn(const ExpressionRangeInfo&, unsigned& line, unsigned& column) const;
     BytecodeLivenessAnalysis& livenessAnalysisSlow(CodeBlock*);
+
 
     VirtualRegister m_thisRegister;
     VirtualRegister m_scopeRegister;
@@ -415,18 +424,20 @@ private:
     unsigned m_scriptMode: 1;
     unsigned m_isArrowFunctionContext : 1;
     unsigned m_isClassContext : 1;
-    unsigned m_wasCompiledWithDebuggingOpcodes : 1;
+    unsigned m_hasTailCalls : 1;
     unsigned m_constructorKind : 2;
     unsigned m_derivedContextType : 2;
     unsigned m_evalContextType : 2;
-    unsigned m_hasTailCalls : 1;
     unsigned m_codeType : 2;
     unsigned m_didOptimize : 2;
+    unsigned m_age : 3;
+    static_assert(((1U << 3) - 1) >= maxAge);
 public:
     ConcurrentJSLock m_lock;
 private:
     CodeFeatures m_features { 0 };
     SourceParseMode m_parseMode;
+    OptionSet<CodeGenerationMode> m_codeGenerationMode;
 
     unsigned m_lineCount { 0 };
     unsigned m_endColumn { UINT_MAX };

@@ -34,12 +34,13 @@ InspectorBackend.registerEvent("ApplicationCache.applicationCacheStatusUpdated",
 InspectorBackend.registerEvent("ApplicationCache.networkStateUpdated", ["isNowOnline"]);
 InspectorBackend.registerCommand("ApplicationCache.getFramesWithManifests", [], ["frameIds"]);
 InspectorBackend.registerCommand("ApplicationCache.enable", [], []);
+InspectorBackend.registerCommand("ApplicationCache.disable", [], []);
 InspectorBackend.registerCommand("ApplicationCache.getManifestForFrame", [{"name": "frameId", "type": "string", "optional": false}], ["manifestURL"]);
 InspectorBackend.registerCommand("ApplicationCache.getApplicationCacheForFrame", [{"name": "frameId", "type": "string", "optional": false}], ["applicationCache"]);
 InspectorBackend.activateDomain("ApplicationCache", ["web"]);
 
 // Audit.
-InspectorBackend.registerVersion("Audit", 1);
+InspectorBackend.registerVersion("Audit", 3);
 InspectorBackend.registerCommand("Audit.setup", [{"name": "contextId", "type": "number", "optional": true}], []);
 InspectorBackend.registerCommand("Audit.run", [{"name": "test", "type": "string", "optional": false}, {"name": "contextId", "type": "number", "optional": true}], ["result", "wasThrown"]);
 InspectorBackend.registerCommand("Audit.teardown", [], []);
@@ -47,9 +48,10 @@ InspectorBackend.activateDomain("Audit");
 
 // CPUProfiler.
 InspectorBackend.registerCPUProfilerDispatcher = InspectorBackend.registerDomainDispatcher.bind(InspectorBackend, "CPUProfiler");
+InspectorBackend.registerEnum("CPUProfiler.ThreadInfoType", {Main: "main", WebKit: "webkit"});
 InspectorBackend.registerEvent("CPUProfiler.trackingStart", ["timestamp"]);
 InspectorBackend.registerEvent("CPUProfiler.trackingUpdate", ["event"]);
-InspectorBackend.registerEvent("CPUProfiler.trackingComplete", []);
+InspectorBackend.registerEvent("CPUProfiler.trackingComplete", ["timestamp"]);
 InspectorBackend.registerCommand("CPUProfiler.startTracking", [], []);
 InspectorBackend.registerCommand("CPUProfiler.stopTracking", [], []);
 InspectorBackend.activateDomain("CPUProfiler", ["web"]);
@@ -57,8 +59,9 @@ InspectorBackend.activateDomain("CPUProfiler", ["web"]);
 // CSS.
 InspectorBackend.registerCSSDispatcher = InspectorBackend.registerDomainDispatcher.bind(InspectorBackend, "CSS");
 InspectorBackend.registerEnum("CSS.StyleSheetOrigin", {User: "user", UserAgent: "user-agent", Inspector: "inspector", Regular: "regular"});
+InspectorBackend.registerEnum("CSS.PseudoId", {FirstLine: "first-line", FirstLetter: "first-letter", Marker: "marker", Before: "before", After: "after", Selection: "selection", Scrollbar: "scrollbar", ScrollbarThumb: "scrollbar-thumb", ScrollbarButton: "scrollbar-button", ScrollbarTrack: "scrollbar-track", ScrollbarTrackPiece: "scrollbar-track-piece", ScrollbarCorner: "scrollbar-corner", Resizer: "resizer"});
 InspectorBackend.registerEnum("CSS.CSSPropertyStatus", {Active: "active", Inactive: "inactive", Disabled: "disabled", Style: "style"});
-InspectorBackend.registerEnum("CSS.CSSMediaSource", {MediaRule: "mediaRule", ImportRule: "importRule", LinkedSheet: "linkedSheet", InlineSheet: "inlineSheet"});
+InspectorBackend.registerEnum("CSS.GroupingType", {MediaRule: "media-rule", MediaImportRule: "media-import-rule", MediaLinkNode: "media-link-node", MediaStyleNode: "media-style-node", SupportsRule: "supports-rule"});
 InspectorBackend.registerEvent("CSS.mediaQueryResultChanged", []);
 InspectorBackend.registerEvent("CSS.styleSheetChanged", ["styleSheetId"]);
 InspectorBackend.registerEvent("CSS.styleSheetAdded", ["header"]);
@@ -83,7 +86,7 @@ InspectorBackend.activateDomain("CSS", ["web"]);
 
 // Canvas.
 InspectorBackend.registerCanvasDispatcher = InspectorBackend.registerDomainDispatcher.bind(InspectorBackend, "Canvas");
-InspectorBackend.registerEnum("Canvas.ContextType", {Canvas2D: "canvas-2d", BitmapRenderer: "bitmaprenderer", WebGL: "webgl", WebGL2: "webgl2", WebMetal: "webmetal"});
+InspectorBackend.registerEnum("Canvas.ContextType", {Canvas2D: "canvas-2d", BitmapRenderer: "bitmaprenderer", WebGL: "webgl", WebGL2: "webgl2", WebGPU: "webgpu"});
 InspectorBackend.registerEnum("Canvas.ShaderType", {Fragment: "fragment", Vertex: "vertex"});
 InspectorBackend.registerEvent("Canvas.canvasAdded", ["canvas"]);
 InspectorBackend.registerEvent("Canvas.canvasRemoved", ["canvasId"]);
@@ -112,10 +115,10 @@ InspectorBackend.activateDomain("Canvas", ["web"]);
 
 // Console.
 InspectorBackend.registerConsoleDispatcher = InspectorBackend.registerDomainDispatcher.bind(InspectorBackend, "Console");
-InspectorBackend.registerEnum("Console.ChannelSource", {XML: "xml", JavaScript: "javascript", Network: "network", ConsoleAPI: "console-api", Storage: "storage", Appcache: "appcache", Rendering: "rendering", CSS: "css", Security: "security", ContentBlocker: "content-blocker", Media: "media", WebRTC: "webrtc", Other: "other"});
+InspectorBackend.registerEnum("Console.ChannelSource", {XML: "xml", JavaScript: "javascript", Network: "network", ConsoleAPI: "console-api", Storage: "storage", Appcache: "appcache", Rendering: "rendering", CSS: "css", Security: "security", ContentBlocker: "content-blocker", Media: "media", MediaSource: "mediasource", WebRTC: "webrtc", Other: "other"});
 InspectorBackend.registerEnum("Console.ChannelLevel", {Off: "off", Basic: "basic", Verbose: "verbose"});
 InspectorBackend.registerEnum("Console.ConsoleMessageLevel", {Log: "log", Info: "info", Warning: "warning", Error: "error", Debug: "debug"});
-InspectorBackend.registerEnum("Console.ConsoleMessageType", {Log: "log", Dir: "dir", DirXML: "dirxml", Table: "table", Trace: "trace", Clear: "clear", StartGroup: "startGroup", StartGroupCollapsed: "startGroupCollapsed", EndGroup: "endGroup", Assert: "assert", Timing: "timing", Profile: "profile", ProfileEnd: "profileEnd"});
+InspectorBackend.registerEnum("Console.ConsoleMessageType", {Log: "log", Dir: "dir", DirXML: "dirxml", Table: "table", Trace: "trace", Clear: "clear", StartGroup: "startGroup", StartGroupCollapsed: "startGroupCollapsed", EndGroup: "endGroup", Assert: "assert", Timing: "timing", Profile: "profile", ProfileEnd: "profileEnd", Image: "image"});
 InspectorBackend.registerEvent("Console.messageAdded", ["message"]);
 InspectorBackend.registerEvent("Console.messageRepeatCountUpdated", ["count"]);
 InspectorBackend.registerEvent("Console.messagesCleared", []);
@@ -155,7 +158,7 @@ InspectorBackend.registerEvent("DOM.pseudoElementRemoved", ["parentId", "pseudoE
 InspectorBackend.registerEvent("DOM.didAddEventListener", ["nodeId"]);
 InspectorBackend.registerEvent("DOM.willRemoveEventListener", ["nodeId"]);
 InspectorBackend.registerEvent("DOM.didFireEvent", ["nodeId", "eventName", "timestamp", "data"]);
-InspectorBackend.registerEvent("DOM.videoLowPowerChanged", ["nodeId", "timestamp", "isLowPower"]);
+InspectorBackend.registerEvent("DOM.powerEfficientPlaybackStateChanged", ["nodeId", "timestamp", "isPowerEfficient"]);
 InspectorBackend.registerCommand("DOM.getDocument", [], ["root"]);
 InspectorBackend.registerCommand("DOM.requestChildNodes", [{"name": "nodeId", "type": "number", "optional": false}, {"name": "depth", "type": "number", "optional": true}], []);
 InspectorBackend.registerCommand("DOM.querySelector", [{"name": "nodeId", "type": "number", "optional": false}, {"name": "selector", "type": "string", "optional": false}], ["nodeId"]);
@@ -167,7 +170,9 @@ InspectorBackend.registerCommand("DOM.setAttributeValue", [{"name": "nodeId", "t
 InspectorBackend.registerCommand("DOM.setAttributesAsText", [{"name": "nodeId", "type": "number", "optional": false}, {"name": "text", "type": "string", "optional": false}, {"name": "name", "type": "string", "optional": true}], []);
 InspectorBackend.registerCommand("DOM.removeAttribute", [{"name": "nodeId", "type": "number", "optional": false}, {"name": "name", "type": "string", "optional": false}], []);
 InspectorBackend.registerCommand("DOM.getSupportedEventNames", [], ["eventNames"]);
-InspectorBackend.registerCommand("DOM.getEventListenersForNode", [{"name": "nodeId", "type": "number", "optional": false}, {"name": "objectGroup", "type": "string", "optional": true}], ["listeners"]);
+InspectorBackend.registerCommand("DOM.getDataBindingsForNode", [{"name": "nodeId", "type": "number", "optional": false}], ["dataBindings"]);
+InspectorBackend.registerCommand("DOM.getAssociatedDataForNode", [{"name": "nodeId", "type": "number", "optional": false}], ["associatedData"]);
+InspectorBackend.registerCommand("DOM.getEventListenersForNode", [{"name": "nodeId", "type": "number", "optional": false}], ["listeners"]);
 InspectorBackend.registerCommand("DOM.setEventListenerDisabled", [{"name": "eventListenerId", "type": "number", "optional": false}, {"name": "disabled", "type": "boolean", "optional": false}], []);
 InspectorBackend.registerCommand("DOM.setBreakpointForEventListener", [{"name": "eventListenerId", "type": "number", "optional": false}], []);
 InspectorBackend.registerCommand("DOM.removeBreakpointForEventListener", [{"name": "eventListenerId", "type": "number", "optional": false}], []);
@@ -175,11 +180,11 @@ InspectorBackend.registerCommand("DOM.getAccessibilityPropertiesForNode", [{"nam
 InspectorBackend.registerCommand("DOM.getOuterHTML", [{"name": "nodeId", "type": "number", "optional": false}], ["outerHTML"]);
 InspectorBackend.registerCommand("DOM.setOuterHTML", [{"name": "nodeId", "type": "number", "optional": false}, {"name": "outerHTML", "type": "string", "optional": false}], []);
 InspectorBackend.registerCommand("DOM.insertAdjacentHTML", [{"name": "nodeId", "type": "number", "optional": false}, {"name": "position", "type": "string", "optional": false}, {"name": "html", "type": "string", "optional": false}], []);
-InspectorBackend.registerCommand("DOM.performSearch", [{"name": "query", "type": "string", "optional": false}, {"name": "nodeIds", "type": "object", "optional": true}], ["searchId", "resultCount"]);
+InspectorBackend.registerCommand("DOM.performSearch", [{"name": "query", "type": "string", "optional": false}, {"name": "nodeIds", "type": "object", "optional": true}, {"name": "caseSensitive", "type": "boolean", "optional": true}], ["searchId", "resultCount"]);
 InspectorBackend.registerCommand("DOM.getSearchResults", [{"name": "searchId", "type": "string", "optional": false}, {"name": "fromIndex", "type": "number", "optional": false}, {"name": "toIndex", "type": "number", "optional": false}], ["nodeIds"]);
 InspectorBackend.registerCommand("DOM.discardSearchResults", [{"name": "searchId", "type": "string", "optional": false}], []);
 InspectorBackend.registerCommand("DOM.requestNode", [{"name": "objectId", "type": "string", "optional": false}], ["nodeId"]);
-InspectorBackend.registerCommand("DOM.setInspectModeEnabled", [{"name": "enabled", "type": "boolean", "optional": false}, {"name": "highlightConfig", "type": "object", "optional": true}], []);
+InspectorBackend.registerCommand("DOM.setInspectModeEnabled", [{"name": "enabled", "type": "boolean", "optional": false}, {"name": "highlightConfig", "type": "object", "optional": true}, {"name": "showRulers", "type": "boolean", "optional": true}], []);
 InspectorBackend.registerCommand("DOM.highlightRect", [{"name": "x", "type": "number", "optional": false}, {"name": "y", "type": "number", "optional": false}, {"name": "width", "type": "number", "optional": false}, {"name": "height", "type": "number", "optional": false}, {"name": "color", "type": "object", "optional": true}, {"name": "outlineColor", "type": "object", "optional": true}, {"name": "usePageCoordinates", "type": "boolean", "optional": true}], []);
 InspectorBackend.registerCommand("DOM.highlightQuad", [{"name": "quad", "type": "object", "optional": false}, {"name": "color", "type": "object", "optional": true}, {"name": "outlineColor", "type": "object", "optional": true}, {"name": "usePageCoordinates", "type": "boolean", "optional": true}], []);
 InspectorBackend.registerCommand("DOM.highlightSelector", [{"name": "highlightConfig", "type": "object", "optional": false}, {"name": "selectorString", "type": "string", "optional": false}, {"name": "frameId", "type": "string", "optional": true}], []);
@@ -200,11 +205,11 @@ InspectorBackend.activateDomain("DOM", ["web"]);
 
 // DOMDebugger.
 InspectorBackend.registerEnum("DOMDebugger.DOMBreakpointType", {SubtreeModified: "subtree-modified", AttributeModified: "attribute-modified", NodeRemoved: "node-removed"});
-InspectorBackend.registerEnum("DOMDebugger.EventBreakpointType", {AnimationFrame: "animation-frame", Listener: "listener", Timer: "timer"});
+InspectorBackend.registerEnum("DOMDebugger.EventBreakpointType", {AnimationFrame: "animation-frame", Interval: "interval", Listener: "listener", Timeout: "timeout"});
 InspectorBackend.registerCommand("DOMDebugger.setDOMBreakpoint", [{"name": "nodeId", "type": "number", "optional": false}, {"name": "type", "type": "string", "optional": false}], []);
 InspectorBackend.registerCommand("DOMDebugger.removeDOMBreakpoint", [{"name": "nodeId", "type": "number", "optional": false}, {"name": "type", "type": "string", "optional": false}], []);
-InspectorBackend.registerCommand("DOMDebugger.setEventBreakpoint", [{"name": "breakpointType", "type": "string", "optional": false}, {"name": "eventName", "type": "string", "optional": false}], []);
-InspectorBackend.registerCommand("DOMDebugger.removeEventBreakpoint", [{"name": "breakpointType", "type": "string", "optional": false}, {"name": "eventName", "type": "string", "optional": false}], []);
+InspectorBackend.registerCommand("DOMDebugger.setEventBreakpoint", [{"name": "breakpointType", "type": "string", "optional": false}, {"name": "eventName", "type": "string", "optional": true}], []);
+InspectorBackend.registerCommand("DOMDebugger.removeEventBreakpoint", [{"name": "breakpointType", "type": "string", "optional": false}, {"name": "eventName", "type": "string", "optional": true}], []);
 InspectorBackend.registerCommand("DOMDebugger.setURLBreakpoint", [{"name": "url", "type": "string", "optional": false}, {"name": "isRegex", "type": "boolean", "optional": true}], []);
 InspectorBackend.registerCommand("DOMDebugger.removeURLBreakpoint", [{"name": "url", "type": "string", "optional": false}], []);
 InspectorBackend.activateDomain("DOMDebugger", ["web"]);
@@ -239,7 +244,7 @@ InspectorBackend.registerEvent("Debugger.globalObjectCleared", []);
 InspectorBackend.registerEvent("Debugger.scriptParsed", ["scriptId", "url", "startLine", "startColumn", "endLine", "endColumn", "isContentScript", "sourceURL", "sourceMapURL", "module"]);
 InspectorBackend.registerEvent("Debugger.scriptFailedToParse", ["url", "scriptSource", "startLine", "errorLine", "errorMessage"]);
 InspectorBackend.registerEvent("Debugger.breakpointResolved", ["breakpointId", "location"]);
-InspectorBackend.registerEnum("Debugger.PausedReason", {XHR: "XHR", Fetch: "Fetch", DOM: "DOM", AnimationFrame: "AnimationFrame", EventListener: "EventListener", Timer: "Timer", Exception: "exception", Assert: "assert", CSPViolation: "CSPViolation", DebuggerStatement: "DebuggerStatement", Breakpoint: "Breakpoint", PauseOnNextStatement: "PauseOnNextStatement", Other: "other"});
+InspectorBackend.registerEnum("Debugger.PausedReason", {XHR: "XHR", Fetch: "Fetch", DOM: "DOM", AnimationFrame: "AnimationFrame", Interval: "Interval", Listener: "Listener", Timeout: "Timeout", Exception: "exception", Assert: "assert", CSPViolation: "CSPViolation", DebuggerStatement: "DebuggerStatement", Breakpoint: "Breakpoint", PauseOnNextStatement: "PauseOnNextStatement", Microtask: "Microtask", Other: "other"});
 InspectorBackend.registerEvent("Debugger.paused", ["callFrames", "reason", "data", "asyncStackTrace"]);
 InspectorBackend.registerEvent("Debugger.resumed", []);
 InspectorBackend.registerEvent("Debugger.didSampleProbe", ["sample"]);
@@ -263,9 +268,9 @@ InspectorBackend.registerCommand("Debugger.getScriptSource", [{"name": "scriptId
 InspectorBackend.registerCommand("Debugger.getFunctionDetails", [{"name": "functionId", "type": "string", "optional": false}], ["details"]);
 InspectorBackend.registerCommand("Debugger.setPauseOnExceptions", [{"name": "state", "type": "string", "optional": false}], []);
 InspectorBackend.registerCommand("Debugger.setPauseOnAssertions", [{"name": "enabled", "type": "boolean", "optional": false}], []);
+InspectorBackend.registerCommand("Debugger.setPauseOnMicrotasks", [{"name": "enabled", "type": "boolean", "optional": false}], []);
 InspectorBackend.registerCommand("Debugger.setPauseForInternalScripts", [{"name": "shouldPause", "type": "boolean", "optional": false}], []);
-InspectorBackend.registerCommand("Debugger.evaluateOnCallFrame", [{"name": "callFrameId", "type": "string", "optional": false}, {"name": "expression", "type": "string", "optional": false}, {"name": "objectGroup", "type": "string", "optional": true}, {"name": "includeCommandLineAPI", "type": "boolean", "optional": true}, {"name": "doNotPauseOnExceptionsAndMuteConsole", "type": "boolean", "optional": true}, {"name": "returnByValue", "type": "boolean", "optional": true}, {"name": "generatePreview", "type": "boolean", "optional": true}, {"name": "saveResult", "type": "boolean", "optional": true}], ["result", "wasThrown", "savedResultIndex"]);
-InspectorBackend.registerCommand("Debugger.setOverlayMessage", [{"name": "message", "type": "string", "optional": true}], []);
+InspectorBackend.registerCommand("Debugger.evaluateOnCallFrame", [{"name": "callFrameId", "type": "string", "optional": false}, {"name": "expression", "type": "string", "optional": false}, {"name": "objectGroup", "type": "string", "optional": true}, {"name": "includeCommandLineAPI", "type": "boolean", "optional": true}, {"name": "doNotPauseOnExceptionsAndMuteConsole", "type": "boolean", "optional": true}, {"name": "returnByValue", "type": "boolean", "optional": true}, {"name": "generatePreview", "type": "boolean", "optional": true}, {"name": "saveResult", "type": "boolean", "optional": true}, {"name": "emulateUserGesture", "type": "boolean", "optional": true}], ["result", "wasThrown", "savedResultIndex"]);
 InspectorBackend.activateDomain("Debugger");
 
 // Heap.
@@ -322,7 +327,7 @@ InspectorBackend.registerEnum("Memory.MemoryPressureSeverity", {Critical: "criti
 InspectorBackend.registerEvent("Memory.memoryPressure", ["timestamp", "severity"]);
 InspectorBackend.registerEvent("Memory.trackingStart", ["timestamp"]);
 InspectorBackend.registerEvent("Memory.trackingUpdate", ["event"]);
-InspectorBackend.registerEvent("Memory.trackingComplete", []);
+InspectorBackend.registerEvent("Memory.trackingComplete", ["timestamp"]);
 InspectorBackend.registerCommand("Memory.enable", [], []);
 InspectorBackend.registerCommand("Memory.disable", [], []);
 InspectorBackend.registerCommand("Memory.startTracking", [], []);
@@ -359,8 +364,8 @@ InspectorBackend.activateDomain("Network", ["web", "service-worker"]);
 
 // Page.
 InspectorBackend.registerPageDispatcher = InspectorBackend.registerDomainDispatcher.bind(InspectorBackend, "Page");
-InspectorBackend.registerEnum("Page.Setting", {AuthorAndUserStylesEnabled: "AuthorAndUserStylesEnabled", ICECandidateFilteringEnabled: "ICECandidateFilteringEnabled", ImagesEnabled: "ImagesEnabled", MediaCaptureRequiresSecureConnection: "MediaCaptureRequiresSecureConnection", MockCaptureDevicesEnabled: "MockCaptureDevicesEnabled", NeedsSiteSpecificQuirks: "NeedsSiteSpecificQuirks", ScriptEnabled: "ScriptEnabled", WebSecurityEnabled: "WebSecurityEnabled"});
-InspectorBackend.registerEnum("Page.ResourceType", {Document: "Document", Stylesheet: "Stylesheet", Image: "Image", Font: "Font", Script: "Script", XHR: "XHR", Fetch: "Fetch", Ping: "Ping", Beacon: "Beacon", WebSocket: "WebSocket", Other: "Other"});
+InspectorBackend.registerEnum("Page.Setting", {AuthorAndUserStylesEnabled: "AuthorAndUserStylesEnabled", ICECandidateFilteringEnabled: "ICECandidateFilteringEnabled", ImagesEnabled: "ImagesEnabled", MediaCaptureRequiresSecureConnection: "MediaCaptureRequiresSecureConnection", MockCaptureDevicesEnabled: "MockCaptureDevicesEnabled", NeedsSiteSpecificQuirks: "NeedsSiteSpecificQuirks", ScriptEnabled: "ScriptEnabled", WebRTCEncryptionEnabled: "WebRTCEncryptionEnabled", WebSecurityEnabled: "WebSecurityEnabled"});
+InspectorBackend.registerEnum("Page.ResourceType", {Document: "Document", StyleSheet: "StyleSheet", Image: "Image", Font: "Font", Script: "Script", XHR: "XHR", Fetch: "Fetch", Ping: "Ping", Beacon: "Beacon", WebSocket: "WebSocket", Other: "Other"});
 InspectorBackend.registerEnum("Page.CoordinateSystem", {Viewport: "Viewport", Page: "Page"});
 InspectorBackend.registerEnum("Page.CookieSameSitePolicy", {None: "None", Lax: "Lax", Strict: "Strict"});
 InspectorBackend.registerEnum("Page.Appearance", {Light: "Light", Dark: "Dark"});
@@ -398,22 +403,22 @@ InspectorBackend.activateDomain("Page", ["web"]);
 
 // Recording.
 InspectorBackend.registerVersion("Recording", 1);
-InspectorBackend.registerEnum("Recording.Type", {Canvas2D: "canvas-2d", CanvasBitmapRenderer: "canvas-bitmaprenderer", CanvasWebGL: "canvas-webgl"});
+InspectorBackend.registerEnum("Recording.Type", {Canvas2D: "canvas-2d", CanvasBitmapRenderer: "canvas-bitmaprenderer", CanvasWebGL: "canvas-webgl", CanvasWebGL2: "canvas-webgl2"});
 InspectorBackend.registerEnum("Recording.Initiator", {Frontend: "frontend", Console: "console", AutoCapture: "auto-capture"});
 InspectorBackend.activateDomain("Recording", ["web"]);
 
 // Runtime.
 InspectorBackend.registerRuntimeDispatcher = InspectorBackend.registerDomainDispatcher.bind(InspectorBackend, "Runtime");
-InspectorBackend.registerEnum("Runtime.RemoteObjectType", {Object: "object", Function: "function", Undefined: "undefined", String: "string", Number: "number", Boolean: "boolean", Symbol: "symbol"});
+InspectorBackend.registerEnum("Runtime.RemoteObjectType", {Object: "object", Function: "function", Undefined: "undefined", String: "string", Number: "number", Boolean: "boolean", Symbol: "symbol", Bigint: "bigint"});
 InspectorBackend.registerEnum("Runtime.RemoteObjectSubtype", {Array: "array", Null: "null", Node: "node", Regexp: "regexp", Date: "date", Error: "error", Map: "map", Set: "set", Weakmap: "weakmap", Weakset: "weakset", Iterator: "iterator", Class: "class", Proxy: "proxy"});
-InspectorBackend.registerEnum("Runtime.ObjectPreviewType", {Object: "object", Function: "function", Undefined: "undefined", String: "string", Number: "number", Boolean: "boolean", Symbol: "symbol"});
+InspectorBackend.registerEnum("Runtime.ObjectPreviewType", {Object: "object", Function: "function", Undefined: "undefined", String: "string", Number: "number", Boolean: "boolean", Symbol: "symbol", Bigint: "bigint"});
 InspectorBackend.registerEnum("Runtime.ObjectPreviewSubtype", {Array: "array", Null: "null", Node: "node", Regexp: "regexp", Date: "date", Error: "error", Map: "map", Set: "set", Weakmap: "weakmap", Weakset: "weakset", Iterator: "iterator", Class: "class", Proxy: "proxy"});
-InspectorBackend.registerEnum("Runtime.PropertyPreviewType", {Object: "object", Function: "function", Undefined: "undefined", String: "string", Number: "number", Boolean: "boolean", Symbol: "symbol", Accessor: "accessor"});
+InspectorBackend.registerEnum("Runtime.PropertyPreviewType", {Object: "object", Function: "function", Undefined: "undefined", String: "string", Number: "number", Boolean: "boolean", Symbol: "symbol", Bigint: "bigint", Accessor: "accessor"});
 InspectorBackend.registerEnum("Runtime.PropertyPreviewSubtype", {Array: "array", Null: "null", Node: "node", Regexp: "regexp", Date: "date", Error: "error", Map: "map", Set: "set", Weakmap: "weakmap", Weakset: "weakset", Iterator: "iterator", Class: "class", Proxy: "proxy"});
 InspectorBackend.registerEnum("Runtime.SyntaxErrorType", {None: "none", Irrecoverable: "irrecoverable", UnterminatedLiteral: "unterminated-literal", Recoverable: "recoverable"});
 InspectorBackend.registerEvent("Runtime.executionContextCreated", ["context"]);
 InspectorBackend.registerCommand("Runtime.parse", [{"name": "source", "type": "string", "optional": false}], ["result", "message", "range"]);
-InspectorBackend.registerCommand("Runtime.evaluate", [{"name": "expression", "type": "string", "optional": false}, {"name": "objectGroup", "type": "string", "optional": true}, {"name": "includeCommandLineAPI", "type": "boolean", "optional": true}, {"name": "doNotPauseOnExceptionsAndMuteConsole", "type": "boolean", "optional": true}, {"name": "contextId", "type": "number", "optional": true}, {"name": "returnByValue", "type": "boolean", "optional": true}, {"name": "generatePreview", "type": "boolean", "optional": true}, {"name": "saveResult", "type": "boolean", "optional": true}], ["result", "wasThrown", "savedResultIndex"]);
+InspectorBackend.registerCommand("Runtime.evaluate", [{"name": "expression", "type": "string", "optional": false}, {"name": "objectGroup", "type": "string", "optional": true}, {"name": "includeCommandLineAPI", "type": "boolean", "optional": true}, {"name": "doNotPauseOnExceptionsAndMuteConsole", "type": "boolean", "optional": true}, {"name": "contextId", "type": "number", "optional": true}, {"name": "returnByValue", "type": "boolean", "optional": true}, {"name": "generatePreview", "type": "boolean", "optional": true}, {"name": "saveResult", "type": "boolean", "optional": true}, {"name": "emulateUserGesture", "type": "boolean", "optional": true}], ["result", "wasThrown", "savedResultIndex"]);
 InspectorBackend.registerCommand("Runtime.awaitPromise", [{"name": "promiseObjectId", "type": "string", "optional": false}, {"name": "returnByValue", "type": "boolean", "optional": true}, {"name": "generatePreview", "type": "boolean", "optional": true}, {"name": "saveResult", "type": "boolean", "optional": true}], ["result", "wasThrown", "savedResultIndex"]);
 InspectorBackend.registerCommand("Runtime.callFunctionOn", [{"name": "objectId", "type": "string", "optional": false}, {"name": "functionDeclaration", "type": "string", "optional": false}, {"name": "arguments", "type": "object", "optional": true}, {"name": "doNotPauseOnExceptionsAndMuteConsole", "type": "boolean", "optional": true}, {"name": "returnByValue", "type": "boolean", "optional": true}, {"name": "generatePreview", "type": "boolean", "optional": true}], ["result", "wasThrown"]);
 InspectorBackend.registerCommand("Runtime.getPreview", [{"name": "objectId", "type": "string", "optional": false}], ["preview"]);
@@ -421,6 +426,7 @@ InspectorBackend.registerCommand("Runtime.getProperties", [{"name": "objectId", 
 InspectorBackend.registerCommand("Runtime.getDisplayableProperties", [{"name": "objectId", "type": "string", "optional": false}, {"name": "generatePreview", "type": "boolean", "optional": true}], ["properties", "internalProperties"]);
 InspectorBackend.registerCommand("Runtime.getCollectionEntries", [{"name": "objectId", "type": "string", "optional": false}, {"name": "objectGroup", "type": "string", "optional": true}, {"name": "startIndex", "type": "number", "optional": true}, {"name": "numberToFetch", "type": "number", "optional": true}], ["entries"]);
 InspectorBackend.registerCommand("Runtime.saveResult", [{"name": "value", "type": "object", "optional": false}, {"name": "contextId", "type": "number", "optional": true}], ["savedResultIndex"]);
+InspectorBackend.registerCommand("Runtime.setSavedResultAlias", [{"name": "alias", "type": "string", "optional": true}], []);
 InspectorBackend.registerCommand("Runtime.releaseObject", [{"name": "objectId", "type": "string", "optional": false}], []);
 InspectorBackend.registerCommand("Runtime.releaseObjectGroup", [{"name": "objectGroup", "type": "string", "optional": false}], []);
 InspectorBackend.registerCommand("Runtime.enable", [], []);
@@ -438,9 +444,7 @@ InspectorBackend.registerScriptProfilerDispatcher = InspectorBackend.registerDom
 InspectorBackend.registerEnum("ScriptProfiler.EventType", {API: "API", Microtask: "Microtask", Other: "Other"});
 InspectorBackend.registerEvent("ScriptProfiler.trackingStart", ["timestamp"]);
 InspectorBackend.registerEvent("ScriptProfiler.trackingUpdate", ["event"]);
-InspectorBackend.registerEvent("ScriptProfiler.trackingComplete", ["samples"]);
-InspectorBackend.registerEvent("ScriptProfiler.programmaticCaptureStarted", []);
-InspectorBackend.registerEvent("ScriptProfiler.programmaticCaptureStopped", []);
+InspectorBackend.registerEvent("ScriptProfiler.trackingComplete", ["timestamp", "samples"]);
 InspectorBackend.registerCommand("ScriptProfiler.startTracking", [{"name": "includeSamples", "type": "boolean", "optional": true}], []);
 InspectorBackend.registerCommand("ScriptProfiler.stopTracking", [], []);
 InspectorBackend.activateDomain("ScriptProfiler", ["javascript", "web"]);
@@ -467,8 +471,8 @@ InspectorBackend.registerEvent("Timeline.eventRecorded", ["record"]);
 InspectorBackend.registerEvent("Timeline.recordingStarted", ["startTime"]);
 InspectorBackend.registerEvent("Timeline.recordingStopped", ["endTime"]);
 InspectorBackend.registerEvent("Timeline.autoCaptureStarted", []);
-InspectorBackend.registerEvent("Timeline.programmaticCaptureStarted", []);
-InspectorBackend.registerEvent("Timeline.programmaticCaptureStopped", []);
+InspectorBackend.registerCommand("Timeline.enable", [], []);
+InspectorBackend.registerCommand("Timeline.disable", [], []);
 InspectorBackend.registerCommand("Timeline.start", [{"name": "maxCallStackDepth", "type": "number", "optional": true}], []);
 InspectorBackend.registerCommand("Timeline.stop", [], []);
 InspectorBackend.registerCommand("Timeline.setAutoCaptureEnabled", [{"name": "enabled", "type": "boolean", "optional": false}], []);

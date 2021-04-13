@@ -38,6 +38,7 @@ namespace WTF {
 // If you want a set of BasicBlocks, you do IndexSet<BasicBlock>. So, T = BasicBlock.
 template<typename T>
 class IndexSet {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     IndexSet()
     {
@@ -76,11 +77,12 @@ public:
 
     bool isEmpty() const
     {
-        return !size();
+        return m_set.isEmpty();
     }
 
     template<typename CollectionType>
     class Iterable {
+        WTF_MAKE_FAST_ALLOCATED;
     public:
         Iterable(const CollectionType& collection, const BitVector& set)
             : m_collection(collection)
@@ -89,6 +91,7 @@ public:
         }
 
         class iterator {
+            WTF_MAKE_FAST_ALLOCATED;
         public:
             iterator()
                 : m_collection(nullptr)

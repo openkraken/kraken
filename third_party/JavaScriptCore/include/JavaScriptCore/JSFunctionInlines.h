@@ -34,7 +34,7 @@ namespace JSC {
 inline JSFunction* JSFunction::createWithInvalidatedReallocationWatchpoint(
     VM& vm, FunctionExecutable* executable, JSScope* scope)
 {
-    ASSERT(executable->singletonFunctionHasBeenInvalidated());
+    ASSERT(executable->singleton().hasBeenInvalidated());
     return createImpl(vm, executable, scope, selectStructureForNewFuncExp(scope->globalObject(vm), executable));
 }
 
@@ -66,6 +66,11 @@ inline Intrinsic JSFunction::intrinsic() const
 inline bool JSFunction::isBuiltinFunction() const
 {
     return !isHostFunction() && jsExecutable()->isBuiltinFunction();
+}
+
+inline bool JSFunction::isAnonymousBuiltinFunction() const
+{
+    return !isHostFunction() && jsExecutable()->isAnonymousBuiltinFunction();
 }
 
 inline bool JSFunction::isHostOrBuiltinFunction() const

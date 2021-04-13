@@ -26,6 +26,7 @@ enum Opcode : int16_t {
     MultiplySub64,
     MultiplyNeg32,
     MultiplyNeg64,
+    MultiplySignExtend32,
     Div32,
     UDiv32,
     Div64,
@@ -194,6 +195,8 @@ enum Opcode : int16_t {
     BranchTest8,
     BranchTest32,
     BranchTest64,
+    BranchTestBit64,
+    BranchTestBit32,
     BranchDouble,
     BranchFloat,
     BranchAdd32,
@@ -233,7 +236,7 @@ enum Opcode : int16_t {
     ColdCCall,
     WasmBoundsCheck,
 };
-static const unsigned numOpcodes = 229;
+static const unsigned numOpcodes = 232;
 } } } // namespace JSC::B3::Air
 namespace WTF {
 class PrintStream;

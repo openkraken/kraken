@@ -38,6 +38,7 @@
 #include "ExceptionEventLocation.h"
 #include "ExecutableAllocator.h"
 #include "FunctionHasExecutedCache.h"
+#include "FuzzerAgent.h"
 #include "Heap.h"
 #include "Intrinsic.h"
 #include "IsoCellSet.h"
@@ -122,8 +123,9 @@ class JSCustomGetterSetterFunction;
 class JSDestructibleObjectHeapCellType;
 class JSGlobalObject;
 class JSObject;
+class JSPromise;
+class JSPropertyNameEnumerator;
 class JSRunLoopTimer;
-class JSSegmentedVariableObjectHeapCellType;
 class JSStringHeapCellType;
 class JSWebAssemblyCodeBlockHeapCellType;
 class JSWebAssemblyInstance;
@@ -158,6 +160,7 @@ class VMEntryScope;
 class Watchdog;
 class Watchpoint;
 class WatchpointSet;
+class WebAssemblyFunctionHeapCellType;
 
 #if ENABLE(FTL_JIT)
 namespace FTL {
@@ -183,7 +186,6 @@ struct LocalTimeOffsetCache {
         : start(0.0)
         , end(-1.0)
         , increment(0.0)
-        , timeType(WTF::UTCTime)
     {
     }
 
@@ -193,14 +195,12 @@ struct LocalTimeOffsetCache {
         start = 0.0;
         end = -1.0;
         increment = 0.0;
-        timeType = WTF::UTCTime;
     }
 
     LocalTimeOffset offset;
     double start;
     double end;
     double increment;
-    WTF::TimeType timeType;
 };
 
 class QueuedTask {
@@ -295,6 +295,12 @@ public:
     JS_EXPORT_PRIVATE SamplingProfiler& ensureSamplingProfiler(RefPtr<Stopwatch>&&);
 #endif
 
+    FuzzerAgent* fuzzerAgent() const { return m_fuzzerAgent.get(); }
+    void setFuzzerAgent(std::unique_ptr<FuzzerAgent>&& fuzzerAgent)
+    {
+        m_fuzzerAgent = WTFMove(fuzzerAgent);
+    }
+
     static unsigned numberOfIDs() { return s_numberOfIDs.load(); }
     unsigned id() const { return m_id; }
     bool isEntered() const { return !!entryScope; }
@@ -329,9 +335,9 @@ public:
     std::unique_ptr<HeapCellType> destructibleCellHeapCellType;
     std::unique_ptr<JSStringHeapCellType> stringHeapCellType;
     std::unique_ptr<JSDestructibleObjectHeapCellType> destructibleObjectHeapCellType;
-    std::unique_ptr<JSSegmentedVariableObjectHeapCellType> segmentedVariableObjectHeapCellType;
 #if ENABLE(WEBASSEMBLY)
     std::unique_ptr<JSWebAssemblyCodeBlockHeapCellType> webAssemblyCodeBlockHeapCellType;
+    std::unique_ptr<WebAssemblyFunctionHeapCellType> webAssemblyFunctionHeapCellType;
 #endif
     
     CompleteSubspace primitiveGigacageAuxiliarySpace; // Typed arrays, strings, bitvectors, etc go here.
@@ -365,7 +371,6 @@ public:
     CompleteSubspace stringSpace;
     CompleteSubspace destructibleObjectSpace;
     CompleteSubspace eagerlySweptDestructibleObjectSpace;
-    CompleteSubspace segmentedVariableObjectSpace;
     
     IsoSubspace executableToCodeBlockEdgeSpace;
     IsoSubspace functionSpace;
@@ -374,6 +379,7 @@ public:
     IsoSubspace propertyTableSpace;
     IsoSubspace structureRareDataSpace;
     IsoSubspace structureSpace;
+    IsoSubspace symbolTableSpace;
 
 #define DYNAMIC_ISO_SUBSPACE_DEFINE_MEMBER(name) \
     template<SubspaceAccess mode> \
@@ -396,6 +402,7 @@ public:
     DYNAMIC_ISO_SUBSPACE_DEFINE_MEMBER(errorInstanceSpace)
     DYNAMIC_ISO_SUBSPACE_DEFINE_MEMBER(nativeStdFunctionSpace)
     DYNAMIC_ISO_SUBSPACE_DEFINE_MEMBER(proxyRevokeSpace)
+    DYNAMIC_ISO_SUBSPACE_DEFINE_MEMBER(weakObjectRefSpace)
     DYNAMIC_ISO_SUBSPACE_DEFINE_MEMBER(weakSetSpace)
     DYNAMIC_ISO_SUBSPACE_DEFINE_MEMBER(weakMapSpace)
 #if ENABLE(WEBASSEMBLY)
@@ -445,7 +452,6 @@ public:
     };
     
     SpaceAndSet codeBlockSpace;
-    DYNAMIC_SPACE_AND_SET_DEFINE_MEMBER(inferredValueSpace)
 
     template<typename Func>
     void forEachCodeBlockSpace(const Func& func)
@@ -521,7 +527,6 @@ public:
     Strong<Structure> unlinkedFunctionCodeBlockStructure;
     Strong<Structure> unlinkedModuleProgramCodeBlockStructure;
     Strong<Structure> propertyTableStructure;
-    Strong<Structure> inferredValueStructure;
     Strong<Structure> functionRareDataStructure;
     Strong<Structure> exceptionStructure;
     Strong<Structure> promiseDeferredStructure;
@@ -533,22 +538,23 @@ public:
     Strong<Structure> functionCodeBlockStructure;
     Strong<Structure> hashMapBucketSetStructure;
     Strong<Structure> hashMapBucketMapStructure;
-    Strong<Structure> setIteratorStructure;
-    Strong<Structure> mapIteratorStructure;
     Strong<Structure> bigIntStructure;
     Strong<Structure> executableToCodeBlockEdgeStructure;
 
-    Strong<JSCell> emptyPropertyNameEnumerator;
+    Strong<Structure> m_setIteratorStructure;
+    Strong<Structure> m_mapIteratorStructure;
+
+    Strong<JSPropertyNameEnumerator> m_emptyPropertyNameEnumerator;
 
     Strong<JSCell> m_sentinelSetBucket;
     Strong<JSCell> m_sentinelMapBucket;
 
-    std::unique_ptr<PromiseDeferredTimer> promiseDeferredTimer;
+    Ref<PromiseDeferredTimer> promiseDeferredTimer;
     
     JSCell* currentlyDestructingCallbackObject;
     const ClassInfo* currentlyDestructingCallbackObjectClassInfo { nullptr };
 
-    AtomicStringTable* m_atomicStringTable;
+    AtomStringTable* m_atomStringTable;
     WTF::SymbolRegistry m_symbolRegistry;
     CommonIdentifiers* propertyNames;
     const ArgList* emptyList;
@@ -560,8 +566,22 @@ public:
     WeakGCMap<StringImpl*, JSString, PtrHash<StringImpl*>> stringCache;
     Strong<JSString> lastCachedString;
 
-    AtomicStringTable* atomicStringTable() const { return m_atomicStringTable; }
+    AtomStringTable* atomStringTable() const { return m_atomStringTable; }
     WTF::SymbolRegistry& symbolRegistry() { return m_symbolRegistry; }
+
+    Structure* setIteratorStructure()
+    {
+        if (LIKELY(m_setIteratorStructure))
+            return m_setIteratorStructure.get();
+        return setIteratorStructureSlow();
+    }
+
+    Structure* mapIteratorStructure()
+    {
+        if (LIKELY(m_mapIteratorStructure))
+            return m_mapIteratorStructure.get();
+        return mapIteratorStructureSlow();
+    }
 
     JSCell* sentinelSetBucket()
     {
@@ -575,6 +595,13 @@ public:
         if (LIKELY(m_sentinelMapBucket))
             return m_sentinelMapBucket.get();
         return sentinelMapBucketSlow();
+    }
+
+    JSPropertyNameEnumerator* emptyPropertyNameEnumerator()
+    {
+        if (LIKELY(m_emptyPropertyNameEnumerator))
+            return m_emptyPropertyNameEnumerator.get();
+        return emptyPropertyNameEnumeratorSlow();
     }
 
     WeakGCMap<SymbolImpl*, Symbol, PtrHash<SymbolImpl*>> symbolImplToSymbolMap;
@@ -612,8 +639,15 @@ public:
     };
 
     static JS_EXPORT_PRIVATE bool canUseAssembler();
-    static JS_EXPORT_PRIVATE bool canUseRegExpJIT();
-    static JS_EXPORT_PRIVATE bool isInMiniMode();
+    static bool isInMiniMode()
+    {
+        return !canUseJIT() || Options::forceMiniVMMode();
+    }
+
+    static bool useUnlinkedCodeBlockJettisoning()
+    {
+        return Options::useUnlinkedCodeBlockJettisoning() || isInMiniMode();
+    }
 
     static void computeCanUseJIT();
     ALWAYS_INLINE static bool canUseJIT()
@@ -640,7 +674,7 @@ public:
     std::unique_ptr<JITThunks> jitStubs;
     MacroAssemblerCodeRef<JITThunkPtrTag> getCTIStub(ThunkGenerator generator)
     {
-        return jitStubs->ctiStub(this, generator);
+        return jitStubs->ctiStub(*this, generator);
     }
 
 #endif // ENABLE(JIT)
@@ -665,6 +699,16 @@ public:
     static ptrdiff_t topEntryFrameOffset()
     {
         return OBJECT_OFFSETOF(VM, topEntryFrame);
+    }
+
+    static ptrdiff_t offsetOfHeapBarrierThreshold()
+    {
+        return OBJECT_OFFSETOF(VM, heap) + OBJECT_OFFSETOF(Heap, m_barrierThreshold);
+    }
+
+    static ptrdiff_t offsetOfHeapMutatorShouldBeFenced()
+    {
+        return OBJECT_OFFSETOF(VM, heap) + OBJECT_OFFSETOF(Heap, m_mutatorShouldBeFenced);
     }
 
     void restorePreviousException(Exception* exception) { setException(exception); }
@@ -710,6 +754,7 @@ public:
 #if ENABLE(C_LOOP)
     void* cloopStackLimit() { return m_cloopStackLimit; }
     void setCLoopStackLimit(void* limit) { m_cloopStackLimit = limit; }
+    JS_EXPORT_PRIVATE void* currentCLoopStackPointer() const;
 #endif
 
     inline bool isSafeToRecurseSoft() const;
@@ -762,6 +807,7 @@ public:
     JSObject* stringRecursionCheckFirstObject { nullptr };
     HashSet<JSObject*> stringRecursionCheckVisitedObjects;
     
+    LocalTimeOffsetCache utcTimeOffsetCache;
     LocalTimeOffsetCache localTimeOffsetCache;
 
     String cachedDateString;
@@ -779,6 +825,8 @@ public:
     Lock m_regExpPatternContextLock;
     char* acquireRegExpPatternContexBuffer();
     void releaseRegExpPatternContexBuffer();
+#else
+    static constexpr size_t patternContextBufferSize = 0; // Space allocated to save nested parenthesis context
 #endif
 
     Ref<CompactVariableMap> m_compactVariableMap;
@@ -791,8 +839,6 @@ public:
     typedef ListHashSet<RegExp*> RTTraceList;
     RTTraceList* m_rtTraceList;
 #endif
-
-    std::unique_ptr<ValueProfile> noJITValueProfileSingleton;
 
     JS_EXPORT_PRIVATE void resetDateCache();
 
@@ -824,7 +870,7 @@ public:
     WatchpointSet* ensureWatchpointSetForImpureProperty(const Identifier&);
     void registerWatchpointForImpureProperty(const Identifier&, Watchpoint*);
     
-    // FIXME: Use AtomicString once it got merged with Identifier.
+    // FIXME: Use AtomString once it got merged with Identifier.
     JS_EXPORT_PRIVATE void addImpureProperty(const String&);
     
     InlineWatchpointSet& primitiveGigacageEnabled() { return m_primitiveGigacageEnabled; }
@@ -845,7 +891,10 @@ public:
 
     void queueMicrotask(JSGlobalObject&, Ref<Microtask>&&);
     JS_EXPORT_PRIVATE void drainMicrotasks();
-    ALWAYS_INLINE void setOnEachMicrotaskTick(WTF::Function<void(VM&)>&& func) { m_onEachMicrotaskTick = WTFMove(func); }
+    void setOnEachMicrotaskTick(WTF::Function<void(VM&)>&& func) { m_onEachMicrotaskTick = WTFMove(func); }
+    void finalizeSynchronousJSExecution() { ASSERT(currentThreadIsHoldingAPILock()); m_currentWeakRefVersion++; }
+    uintptr_t currentWeakRefVersion() const { return m_currentWeakRefVersion; }
+
     void setGlobalConstRedeclarationShouldThrow(bool globalConstRedeclarationThrow) { m_globalConstRedeclarationShouldThrow = globalConstRedeclarationThrow; }
     ALWAYS_INLINE bool globalConstRedeclarationShouldThrow() const { return m_globalConstRedeclarationShouldThrow; }
 
@@ -874,6 +923,8 @@ public:
     void notifyNeedTermination() { m_traps.fireTrap(VMTraps::NeedTermination); }
     void notifyNeedWatchdogCheck() { m_traps.fireTrap(VMTraps::NeedWatchdogCheck); }
 
+    void promiseRejected(JSPromise*);
+
 #if ENABLE(EXCEPTION_SCOPE_VERIFICATION)
     StackTrace* nativeStackTraceOfLastThrow() const { return m_nativeStackTraceOfLastThrow.get(); }
     Thread* throwingThread() const { return m_throwingThread.get(); }
@@ -884,6 +935,8 @@ public:
     CFRunLoopRef runLoop() const { return m_runLoop.get(); }
     JS_EXPORT_PRIVATE void setRunLoop(CFRunLoopRef);
 #endif // USE(CF)
+
+    static void setCrashOnVMCreation(bool);
 
     class DeferExceptionScope {
     public:
@@ -905,8 +958,11 @@ private:
     static VM*& sharedInstanceInternal();
     void createNativeThunk();
 
+    JS_EXPORT_PRIVATE Structure* setIteratorStructureSlow();
+    JS_EXPORT_PRIVATE Structure* mapIteratorStructureSlow();
     JSCell* sentinelSetBucketSlow();
     JSCell* sentinelMapBucketSlow();
+    JSPropertyNameEnumerator* emptyPropertyNameEnumeratorSlow();
 
     void updateStackLimits();
 
@@ -944,9 +1000,9 @@ private:
     bool isSafeToRecurseSoftCLoop() const;
 #endif // ENABLE(C_LOOP)
 
-    JS_EXPORT_PRIVATE void throwException(ExecState*, Exception*);
-    JS_EXPORT_PRIVATE JSValue throwException(ExecState*, JSValue);
-    JS_EXPORT_PRIVATE JSObject* throwException(ExecState*, JSObject*);
+    JS_EXPORT_PRIVATE Exception* throwException(ExecState*, Exception*);
+    JS_EXPORT_PRIVATE Exception* throwException(ExecState*, JSValue);
+    JS_EXPORT_PRIVATE Exception* throwException(ExecState*, JSObject*);
 
 #if ENABLE(EXCEPTION_SCOPE_VERIFICATION)
     void verifyExceptionCheckNeedIsSatisfied(unsigned depth, ExceptionEventLocation&);
@@ -954,6 +1010,9 @@ private:
     
     static void primitiveGigacageDisabledCallback(void*);
     void primitiveGigacageDisabled();
+
+    void callPromiseRejectionCallback(Strong<JSPromise>&);
+    void didExhaustMicrotaskQueue();
 
 #if ENABLE(GC_VALIDATION)
     const ClassInfo* m_initializingObjectClass;
@@ -1006,10 +1065,15 @@ private:
 #if ENABLE(SAMPLING_PROFILER)
     RefPtr<SamplingProfiler> m_samplingProfiler;
 #endif
+    std::unique_ptr<FuzzerAgent> m_fuzzerAgent;
     std::unique_ptr<ShadowChicken> m_shadowChicken;
     std::unique_ptr<BytecodeIntrinsicRegistry> m_bytecodeIntrinsicRegistry;
 
+    // FIXME: We should remove handled promises from this list at GC flip. <https://webkit.org/b/201005>
+    Vector<Strong<JSPromise>> m_aboutToBeNotifiedRejectedPromises;
+
     WTF::Function<void(VM&)> m_onEachMicrotaskTick;
+    uintptr_t m_currentWeakRefVersion { 0 };
 
 #if ENABLE(JIT)
 #if !ASSERT_DISABLED
@@ -1044,14 +1108,14 @@ inline void VM::setInitializingObjectClass(const ClassInfo* initializingObjectCl
 
 inline Heap* WeakSet::heap() const
 {
-    return &m_vm->heap;
+    return &m_vm.heap;
 }
 
 #if !ENABLE(C_LOOP)
 extern "C" void sanitizeStackForVMImpl(VM*);
 #endif
 
-JS_EXPORT_PRIVATE void sanitizeStackForVM(VM*);
-void logSanitizeStack(VM*);
+JS_EXPORT_PRIVATE void sanitizeStackForVM(VM&);
+void logSanitizeStack(VM&);
 
 } // namespace JSC

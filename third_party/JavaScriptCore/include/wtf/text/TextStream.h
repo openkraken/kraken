@@ -31,8 +31,10 @@
 namespace WTF {
 
 class TextStream {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     struct FormatNumberRespectingIntegers {
+        WTF_MAKE_STRUCT_FAST_ALLOCATED;
         FormatNumberRespectingIntegers(double number)
             : value(number) { }
 
@@ -70,6 +72,10 @@ public:
     // Deprecated. Use the NumberRespectingIntegers FormattingFlag instead.
     WTF_EXPORT_PRIVATE TextStream& operator<<(const FormatNumberRespectingIntegers&);
 
+#ifdef __OBJC__
+    WTF_EXPORT_PRIVATE TextStream& operator<<(id<NSObject>);
+#endif
+
     FormattingFlags formattingFlags() const { return m_formattingFlags; }
     void setFormattingFlags(FormattingFlags flags) { m_formattingFlags = flags; }
 
@@ -91,6 +97,7 @@ public:
     WTF_EXPORT_PRIVATE void nextLine(); // Output newline and indent.
 
     int indent() const { return m_indent; }
+    void setIndent(int indent) { m_indent = indent; }
     void increaseIndent(int amount = 1) { m_indent += amount; }
     void decreaseIndent(int amount = 1) { m_indent -= amount; ASSERT(m_indent >= 0); }
 
@@ -100,6 +107,23 @@ public:
     TextStream& operator<<(TextStream& (*func)(TextStream&))
     {
         return (*func)(*this);
+    }
+
+    struct Repeat {
+        WTF_MAKE_STRUCT_FAST_ALLOCATED;
+        Repeat(unsigned inWidth, char inCharacter)
+            : width(inWidth), character(inCharacter)
+        { }
+        unsigned width { 0 };
+        char character { ' ' };
+    };
+
+    TextStream& operator<<(const Repeat& repeated)
+    {
+        for (unsigned i = 0; i < repeated.width; ++i)
+            m_text.append(repeated.character);
+
+        return *this;
     }
 
     class IndentScope {
@@ -161,6 +185,20 @@ TextStream& operator<<(TextStream& ts, const Vector<Item>& vector)
             ts << ", ";
     }
 
+    return ts << "]";
+}
+
+template<typename Option>
+TextStream& operator<<(TextStream& ts, const OptionSet<Option>& options)
+{
+    ts << "[";
+    bool needComma = false;
+    for (auto option : options) {
+        if (needComma)
+            ts << ", ";
+        needComma = true;
+        ts << option;
+    }
     return ts << "]";
 }
 

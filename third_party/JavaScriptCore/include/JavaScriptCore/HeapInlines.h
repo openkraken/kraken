@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 Apple Inc. All rights reserved.
+ * Copyright (C) 2014-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,7 +29,6 @@
 #include "Heap.h"
 #include "HeapCellInlines.h"
 #include "IndexingHeader.h"
-#include "JSCallee.h"
 #include "JSCast.h"
 #include "Structure.h"
 #include <type_traits>
@@ -39,9 +38,9 @@
 
 namespace JSC {
 
-ALWAYS_INLINE VM* Heap::vm() const
+ALWAYS_INLINE VM& Heap::vm() const
 {
-    return bitwise_cast<VM*>(bitwise_cast<uintptr_t>(this) - OBJECT_OFFSETOF(VM, heap));
+    return *bitwise_cast<VM*>(bitwise_cast<uintptr_t>(this) - OBJECT_OFFSETOF(VM, heap));
 }
 
 ALWAYS_INLINE Heap* Heap::heap(const HeapCell* cell)
@@ -68,15 +67,13 @@ inline bool Heap::worldIsStopped() const
     return m_worldIsStopped;
 }
 
-// FIXME: This should be an instance method, so that it can get the markingVersion() quickly.
-// https://bugs.webkit.org/show_bug.cgi?id=179988
 ALWAYS_INLINE bool Heap::isMarked(const void* rawCell)
 {
     HeapCell* cell = bitwise_cast<HeapCell*>(rawCell);
     if (cell->isLargeAllocation())
         return cell->largeAllocation().isMarked();
     MarkedBlock& block = cell->markedBlock();
-    return block.isMarked(block.vm()->heap.objectSpace().markingVersion(), cell);
+    return block.isMarked(m_objectSpace.markingVersion(), cell);
 }
 
 ALWAYS_INLINE bool Heap::testAndSetMarked(HeapVersion markingVersion, const void* rawCell)
@@ -167,7 +164,7 @@ inline void Heap::releaseSoon(RetainPtr<T>&& object)
 }
 #endif
 
-#if USE(GLIB)
+#ifdef JSC_GLIB_API_ENABLED
 inline void Heap::releaseSoon(std::unique_ptr<JSCGLibWrapperObject>&& object)
 {
     m_delayedReleaseObjects.append(WTFMove(object));
@@ -176,19 +173,19 @@ inline void Heap::releaseSoon(std::unique_ptr<JSCGLibWrapperObject>&& object)
 
 inline void Heap::incrementDeferralDepth()
 {
-    ASSERT(!mayBeGCThread() || m_worldIsStopped);
+    ASSERT(!Thread::mayBeGCThread() || m_worldIsStopped);
     m_deferralDepth++;
 }
 
 inline void Heap::decrementDeferralDepth()
 {
-    ASSERT(!mayBeGCThread() || m_worldIsStopped);
+    ASSERT(!Thread::mayBeGCThread() || m_worldIsStopped);
     m_deferralDepth--;
 }
 
 inline void Heap::decrementDeferralDepthAndGCIfNeeded()
 {
-    ASSERT(!mayBeGCThread() || m_worldIsStopped);
+    ASSERT(!Thread::mayBeGCThread() || m_worldIsStopped);
     m_deferralDepth--;
     
     if (UNLIKELY(m_didDeferGCWork)) {
@@ -220,7 +217,7 @@ inline void Heap::decrementDeferralDepthAndGCIfNeeded()
 inline HashSet<MarkedArgumentBuffer*>& Heap::markListSet()
 {
     if (!m_markListSet)
-        m_markListSet = std::make_unique<HashSet<MarkedArgumentBuffer*>>();
+        m_markListSet = makeUnique<HashSet<MarkedArgumentBuffer*>>();
     return *m_markListSet;
 }
 
@@ -275,17 +272,10 @@ inline void Heap::stopIfNecessary()
 template<typename Func>
 void Heap::forEachSlotVisitor(const Func& func)
 {
-    auto locker = holdLock(m_parallelSlotVisitorLock);
     func(*m_collectorSlotVisitor);
     func(*m_mutatorSlotVisitor);
     for (auto& slotVisitor : m_parallelSlotVisitors)
         func(*slotVisitor);
-}
-
-inline unsigned Heap::numberOfSlotVisitors()
-{
-    auto locker = holdLock(m_parallelSlotVisitorLock);
-    return m_parallelSlotVisitors.size() + 2; // m_collectorSlotVisitor and m_mutatorSlotVisitor
 }
 
 } // namespace JSC

@@ -181,7 +181,7 @@ template <typename Target, typename Source> struct BoundsChecker<Target, Source,
     {
         // When converting value to unsigned Source, value will become a big value if value is negative.
         // Casted value will become bigger than Target::max as Source is bigger than Target.
-        return static_cast<typename std::make_unsigned<Source>::type>(value) <= std::numeric_limits<Target>::max();
+        return static_cast<std::make_unsigned_t<Source>>(value) <= std::numeric_limits<Target>::max();
     }
 };
 
@@ -609,6 +609,13 @@ public:
         : m_value(0)
     {
         this->overflowed();
+    }
+
+    Checked(const Checked& value)
+    {
+        if (value.hasOverflowed())
+            this->overflowed();
+        m_value = static_cast<T>(value.m_value);
     }
 
     template <typename U> Checked(U value)

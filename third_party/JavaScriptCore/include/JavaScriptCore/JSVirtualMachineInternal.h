@@ -48,6 +48,8 @@ JSContextGroupRef getGroupFromVirtualMachine(JSVirtualMachine *);
 - (void)addContext:(JSContext *)wrapper forGlobalContextRef:(JSGlobalContextRef)globalContext;
 - (JSC::VM&)vm;
 
+- (BOOL)isWebThreadAware;
+
 @end
 
 #endif // defined(__OBJC__)
