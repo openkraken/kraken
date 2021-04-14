@@ -4,7 +4,6 @@
  */
 
 #include "object_element.h"
-#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 

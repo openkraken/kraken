@@ -6,9 +6,8 @@
 #include "kraken_bridge.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
-#include "foundation/ui_command_queue.h"
 #include "foundation/ui_task_queue.h"
-#include "foundation/ui_command_callback_queue.h"
+#include "foundation/inspector_task_queue.h"
 
 #ifdef KRAKEN_ENABLE_JSA
 #include "bridge_jsa.h"
@@ -194,7 +193,7 @@ KrakenInfo *getKrakenInfo() {
 }
 
 void flushBridgeTask() {
-  foundation::UITaskMessageQueue::instance()->flushTaskFromUIThread();
+  foundation::UITaskQueue::instance()->flushTask();
 }
 
 UICommandItem *getUICommandItems(int32_t contextId) {
@@ -221,13 +220,21 @@ void registerPluginSource(NativeString *code, const char *pluginName) {
 }
 
 #if ENABLE_DEBUGGER
+std::__thread_id inspectorThreadId;
 void attachInspector(int32_t contextId) {
+  inspectorThreadId = std::this_thread::get_id();
   assert(checkContext(contextId));
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->attachInspector();
 }
 void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length) {
   kraken::registerInspectorDartMethods(methodBytes, length);
+}
+void dispatchInspectorTask(int32_t contextId, int32_t taskId) {
+  foundation::InspectorTaskQueue::instance(contextId)->dispatchTask(taskId);
+}
+std::__thread_id getInspectorThreadId() {
+  return inspectorThreadId;
 }
 #endif
 

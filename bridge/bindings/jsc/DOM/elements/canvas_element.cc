@@ -4,8 +4,6 @@
  */
 
 #include "canvas_element.h"
-#include "foundation/ui_command_callback_queue.h"
-#include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
 

@@ -6,7 +6,6 @@
 #include "document.h"
 #include "comment_node.h"
 #include "element.h"
-#include "foundation/ui_command_callback_queue.h"
 #include "text_node.h"
 #include <mutex>
 #include <regex>

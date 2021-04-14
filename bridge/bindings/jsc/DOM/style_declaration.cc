@@ -4,7 +4,6 @@
  */
 
 #include "style_declaration.h"
-#include "foundation/ui_command_queue.h"
 #include <map>
 #include <vector>
 

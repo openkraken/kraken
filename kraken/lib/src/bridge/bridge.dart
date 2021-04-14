@@ -38,7 +38,7 @@ int initBridge() {
       SchedulerBinding.instance.addPersistentFrameCallback((_) {
         assert(contextId != -1);
 
-        flushBridgeTask();
+        flushUITask();
         flushUICommand();
         flushUICommandCallback();
       });

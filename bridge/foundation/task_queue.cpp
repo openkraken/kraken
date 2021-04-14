@@ -1,21 +1,20 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
-#include "ui_task_queue.h"
-#include "ref_ptr.h"
-#include <mutex>
+#include "task_queue.h"
 
 namespace foundation {
 
-void UITaskMessageQueue::registerTask(const Task &task, void* data) {
+int32_t TaskQueue::registerTask(const Task &task, void *data) {
   std::lock_guard<std::mutex> guard(queue_mutex_);
   auto taskData = new TaskData(task, data);
   queue.emplace_back(taskData);
+  return queue.size() - 1;
 }
 
-void UITaskMessageQueue::flushTaskFromUIThread() {
+void TaskQueue::flushTask() {
   std::lock_guard<std::mutex> guard(queue_mutex_);
   auto begin = std::begin(queue);
   auto end = std::end(queue);
@@ -29,4 +28,11 @@ void UITaskMessageQueue::flushTaskFromUIThread() {
   queue.clear();
 }
 
+void TaskQueue::dispatchTask(int32_t taskId) {
+  std::lock_guard<std::mutex> guard(queue_mutex_);
+  if (queue[taskId]) {
+    queue[taskId]->task(queue[taskId]->data);
+  }
 }
+
+} // namespace foundation
