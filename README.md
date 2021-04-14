@@ -76,7 +76,7 @@ By contributing to Kraken, you agree that your contributions will be licensed un
 
     **Android**
 
-    > For Windows Users, Make sure to run this command under MINGW64 environmen(For Example: Git Bash is a MINGW64 env).
+    > For Windows users, make sure that running this command under MINGW64 environment(eg. Git Bash).
 
     ```shell
     $ npm run build:bridge:android
