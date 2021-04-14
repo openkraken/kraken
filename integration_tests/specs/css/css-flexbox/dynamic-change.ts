@@ -42,9 +42,9 @@ describe('dynamic-change', () => {
     // document.body.offsetTop;
     // document.getElementById('target').style.width = '1px';
 
-    await matchViewportSnapshot();
+    await snapshot();
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('simplified-layout', async () => {
     let child;
@@ -112,12 +112,12 @@ describe('dynamic-change', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
 
     it2.style.width = '50px';
     flex.style.top = '0px';
     child.style.top = '1px';
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

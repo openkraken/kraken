@@ -66,10 +66,10 @@ describe('flexbox_width-change', () => {
 
     requestAnimationFrame(async () => {
       container.style.width = '200px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

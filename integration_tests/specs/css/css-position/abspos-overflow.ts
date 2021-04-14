@@ -43,7 +43,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('001', async () => {
     let control;
@@ -109,7 +109,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('002-ref', async () => {
     let positioned;
@@ -154,7 +154,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('002', async () => {
     let control;
@@ -221,7 +221,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003-ref', async () => {
     let positioned;
@@ -267,7 +267,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let control;
@@ -336,7 +336,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004-ref', async () => {
     let positioned;
@@ -358,7 +358,7 @@ describe('abspos-overflow', () => {
     );
     BODY.appendChild(positioned);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004', async () => {
     let control;
@@ -412,7 +412,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(control);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005-ref', async () => {
     let positioned;
@@ -434,7 +434,7 @@ describe('abspos-overflow', () => {
     );
     BODY.appendChild(positioned);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('005', async () => {
     let control;
@@ -489,7 +489,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(control);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('006-ref', async () => {
     let positioned;
@@ -512,7 +512,7 @@ describe('abspos-overflow', () => {
     );
     BODY.appendChild(positioned);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('006', async () => {
     let control;
@@ -569,7 +569,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(control);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('007', async () => {
     let control;
@@ -623,7 +623,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(control);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('008', async () => {
     let control;
@@ -678,7 +678,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(control);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('009', async () => {
     let control;
@@ -735,7 +735,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(control);
     BODY.appendChild(overflow);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('010-ref', async () => {
     let p;
@@ -761,7 +761,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('010', async () => {
     let p;
@@ -805,7 +805,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(outer);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('011-ref', async () => {
     let p;
@@ -841,7 +841,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('011', async () => {
     let p;
@@ -915,7 +915,7 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(outer);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('012', async () => {
     let p;
@@ -990,6 +990,6 @@ describe('abspos-overflow', () => {
     BODY.appendChild(p);
     BODY.appendChild(outer);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

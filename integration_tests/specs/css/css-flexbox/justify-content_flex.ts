@@ -87,7 +87,7 @@ describe('justify-content_flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('start', async () => {
     let p;
@@ -176,6 +176,6 @@ describe('justify-content_flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

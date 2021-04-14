@@ -10,6 +10,6 @@ describe('Transform matrix3d', function() {
       })
     );
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

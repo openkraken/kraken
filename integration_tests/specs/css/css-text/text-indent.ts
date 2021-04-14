@@ -14,7 +14,7 @@ xdescribe('Text TextIndent', () => {
       );
       append(BODY, cont);
 
-      return matchElementImageSnapshot(cont);
+      return snapshot(cont);
     });
   });
 });

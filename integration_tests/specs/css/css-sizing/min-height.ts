@@ -11,7 +11,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when it has no children and height not exist", async () => {
@@ -25,7 +25,7 @@ describe('min-height', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when it has no children and height not exist", async () => {
@@ -39,7 +39,7 @@ describe('min-height', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when it has no children and height not exist", async () => {
@@ -53,7 +53,7 @@ describe('min-height', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display flex when it has no children and height not exist", async () => {
@@ -67,7 +67,7 @@ describe('min-height', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when child height is larger than min-height", async () => {
@@ -82,7 +82,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when child height is smaller than min-height", async () => {
@@ -97,7 +97,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when child height is larger than min-height", async () => {
@@ -112,7 +112,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when child height is smaller than min-height", async () => {
@@ -127,7 +127,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when child height is larger than min-height", async () => {
@@ -142,7 +142,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when child length is smaller than min-height", async () => {
@@ -157,7 +157,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
 
@@ -173,7 +173,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display flex when child height is smaller than min-height", async () => {
@@ -188,7 +188,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with replaced element when element height is smaller than intrinsic height', async () => {
@@ -217,7 +217,7 @@ describe('min-height', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with replaced element when element height is larger than intrinsic height', async () => {
@@ -246,7 +246,7 @@ describe('min-height', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with percentage in flow layout', async () => {
@@ -282,7 +282,7 @@ describe('min-height', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in row direction', async () => {
@@ -320,7 +320,7 @@ describe('min-height', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in column direction', async () => {
@@ -358,7 +358,7 @@ describe('min-height', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
 });

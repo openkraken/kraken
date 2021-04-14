@@ -8,7 +8,7 @@ describe('background-shorthand', () => {
     });
     document.body.appendChild(div);
     await sleep(0.5);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   it('background gradient', async () => {
@@ -19,7 +19,7 @@ describe('background-shorthand', () => {
       background: 'center/contain repeat radial-gradient(crimson,skyblue)'
     });
     document.body.appendChild(div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   it('background color', async () => {
@@ -30,7 +30,7 @@ describe('background-shorthand', () => {
       background: 'red'
     });
     document.body.appendChild(div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   it('background color rgb', async () => {
@@ -41,7 +41,7 @@ describe('background-shorthand', () => {
       background: 'rgb(255, 0, 0)'
     });
     document.body.appendChild(div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   it("background gradient with space", async () => {
@@ -72,6 +72,6 @@ describe('background-shorthand', () => {
     document.body.appendChild(flexbox);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
 });

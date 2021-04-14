@@ -14,7 +14,7 @@ describe('Text LetterSpacing', () => {
       );
       append(BODY, cont);
 
-      return matchElementImageSnapshot(cont);
+      return snapshot(cont);
     });
   });
 });

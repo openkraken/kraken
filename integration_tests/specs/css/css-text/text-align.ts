@@ -26,7 +26,7 @@ describe('Text TextAlign', () => {
       );
       append(BODY, cont);
 
-      return matchElementImageSnapshot(cont);
+      return snapshot(cont);
     });
   });
 
@@ -55,7 +55,7 @@ describe('Text TextAlign', () => {
     );
     document.body.appendChild(cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
   });
 
@@ -84,7 +84,7 @@ describe('Text TextAlign', () => {
     );
     document.body.appendChild(cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
   });
 });

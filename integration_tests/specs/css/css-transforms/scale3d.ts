@@ -10,6 +10,6 @@ describe('Transform scale3d', () => {
       })
     );
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

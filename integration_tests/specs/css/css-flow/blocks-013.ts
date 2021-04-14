@@ -50,6 +50,6 @@ describe('blocks-013', () => {
     BODY.appendChild(control);
     BODY.appendChild(control_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

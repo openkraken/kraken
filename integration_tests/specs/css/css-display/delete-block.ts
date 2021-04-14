@@ -54,7 +54,7 @@ describe('delete-block', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('in-inlines-beginning-001', async () => {
     let p;
@@ -134,6 +134,6 @@ describe('delete-block', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

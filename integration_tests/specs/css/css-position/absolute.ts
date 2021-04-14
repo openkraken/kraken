@@ -27,7 +27,7 @@ describe('Position absolute', () => {
     container.appendChild(div2);
     document.body.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should be a green square below', async done => {
@@ -44,11 +44,11 @@ describe('Position absolute', () => {
     });
     append(parent, child);
     append(BODY, parent);
-    await matchElementImageSnapshot(parent);
+    await snapshot(parent);
 
     requestAnimationFrame(async () => {
       child.style.left = '150px';
-      await matchElementImageSnapshot(parent);
+      await snapshot(parent);
       done();
     });
   });
@@ -76,7 +76,7 @@ describe('Position absolute', () => {
     append(div2, span);
     append(BODY, div1);
     append(div1, div2);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with no top following inline element', async () => {
@@ -102,7 +102,7 @@ describe('Position absolute', () => {
     append(div2, span);
     append(BODY, div1);
     append(div1, div2);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with no left following block element', async () => {
@@ -130,7 +130,7 @@ describe('Position absolute', () => {
     append(div2, span);
     append(BODY, div1);
     append(div1, div2);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with no top following block element', async () => {
@@ -158,7 +158,7 @@ describe('Position absolute', () => {
     append(div2, span);
     append(BODY, div1);
     append(div1, div2);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with no left in flex layout', async () => {
@@ -203,7 +203,7 @@ describe('Position absolute', () => {
     ]);
 
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with no top in flex layout', async () => {
@@ -248,7 +248,7 @@ describe('Position absolute', () => {
     ]);
 
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with no left and top in flex layout', async () => {
@@ -291,7 +291,7 @@ describe('Position absolute', () => {
     ]);
 
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with dynamic change bottom property', async (done) => {
@@ -303,17 +303,17 @@ describe('Position absolute', () => {
 
     setTimeout(async () => {
       div.style.bottom = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
     }, 100);
 
     setTimeout(async () => {
       div.style.bottom = '-200px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     }, 300);
 
     document.body.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with dynamic change width property', async (done) => {
@@ -325,17 +325,17 @@ describe('Position absolute', () => {
 
     setTimeout(async () => {
       div.style.width = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
     }, 100);
 
     setTimeout(async () => {
       div.style.width = '400px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     }, 300);
 
     document.body.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with dynamic change height property', async (done) => {
@@ -347,17 +347,17 @@ describe('Position absolute', () => {
 
     setTimeout(async () => {
       div.style.height = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
     }, 100);
 
     setTimeout(async () => {
       div.style.height = '400px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     }, 300);
 
     document.body.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with dynamic change top property', async (done) => {
@@ -369,17 +369,17 @@ describe('Position absolute', () => {
 
     setTimeout(async () => {
       div.style.top = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
     }, 100);
 
     setTimeout(async () => {
       div.style.top = '-50px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     }, 300);
 
     document.body.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with dynamic change left property', async (done) => {
@@ -391,17 +391,17 @@ describe('Position absolute', () => {
 
     setTimeout(async () => {
       div.style.left = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
     }, 100);
 
     setTimeout(async () => {
       div.style.left = '-50px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     }, 300);
 
     document.body.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with dynamic change right property', async (done) => {
@@ -413,17 +413,17 @@ describe('Position absolute', () => {
 
     setTimeout(async () => {
       div.style.right = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
     }, 100);
 
     setTimeout(async () => {
       div.style.right = '-50px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     }, 300);
 
     document.body.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with no width and height', async () => {
@@ -450,7 +450,7 @@ describe('Position absolute', () => {
     ]);
 
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with nested children' , async () => {
@@ -491,7 +491,7 @@ describe('Position absolute', () => {
     );
     BODY.appendChild(n1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with no left and width in flex layout', async () => {
@@ -529,7 +529,7 @@ describe('Position absolute', () => {
     ]);
 
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with no top and height in flex layout', async () => {
@@ -567,7 +567,7 @@ describe('Position absolute', () => {
     ]);
 
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with no top left width and height in flex layout', async () => {
@@ -603,7 +603,7 @@ describe('Position absolute', () => {
     ]);
 
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage size in flow layout', async () => {
@@ -639,7 +639,7 @@ describe('Position absolute', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage size in flex layout', async () => {
@@ -676,7 +676,7 @@ describe('Position absolute', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage offset', async () => {
@@ -723,6 +723,6 @@ describe('Position absolute', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -14,6 +14,6 @@ describe('out-of', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -98,6 +98,6 @@ describe('overflow-recalc', () => {
     BODY.appendChild(p);
     BODY.appendChild(scroller);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

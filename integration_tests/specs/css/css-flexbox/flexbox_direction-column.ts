@@ -72,7 +72,7 @@ describe('flexbox_direction-column', () => {
     BODY.appendChild(div);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it('ref', async () => {
     let div;
@@ -143,7 +143,7 @@ describe('flexbox_direction-column', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('reverse-ref', async () => {
     let test;
@@ -216,7 +216,7 @@ describe('flexbox_direction-column', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('reverse', async () => {
     let test;
@@ -291,6 +291,6 @@ describe('flexbox_direction-column', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

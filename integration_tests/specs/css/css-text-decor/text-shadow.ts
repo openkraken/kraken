@@ -22,7 +22,7 @@ describe('Text TextDecoration', () => {
       );
       append(BODY, cont);
 
-      return matchElementImageSnapshot(cont);
+      return snapshot(cont);
     });
   });
 });

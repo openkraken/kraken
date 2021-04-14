@@ -97,6 +97,6 @@ describe('clip-005', () => {
     BODY.appendChild(outer_1);
     BODY.appendChild(outer_2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

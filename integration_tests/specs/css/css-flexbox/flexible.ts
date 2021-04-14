@@ -63,6 +63,6 @@ describe('Flexible', () => {
     );
     BODY.appendChild(box);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

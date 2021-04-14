@@ -15,13 +15,13 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchViewportSnapshot();
+      await snapshot();
       setElementStyle(container1, {
         transform: 'matrix(0,1,1,1,10,10)',
       });
       // Wait for animation finished.
       setTimeout(async () => {
-        await matchViewportSnapshot();
+        await snapshot();
         done();
       }, 1100);
     });
@@ -45,12 +45,12 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchViewportSnapshot();
+      await snapshot();
       setElementStyle(container1, {
         transform: 'matrix3d(0,1,1,1,10,10,1,0,0,1,1,1,1,1,0)',
       });
       setTimeout(async () => {
-        await matchViewportSnapshot();
+        await snapshot();
         done();
       }, 1100);
     });

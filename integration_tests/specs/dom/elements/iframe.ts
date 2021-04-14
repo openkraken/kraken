@@ -22,6 +22,6 @@ describe('IframeElement', () => {
     // There are no load event fired at desktop kraken.
     // MOCK async logic.
     await sleep(2);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

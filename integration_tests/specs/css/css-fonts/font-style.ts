@@ -19,7 +19,7 @@ describe('FontStyle', () => {
     append(BODY, p1);
     append(BODY, p2);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should works with italic', () => {
@@ -42,7 +42,7 @@ describe('FontStyle', () => {
     append(BODY, p1);
     append(BODY, p2);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should works with oblique', () => {
@@ -65,6 +65,6 @@ describe('FontStyle', () => {
     append(BODY, p1);
     append(BODY, p2);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 });

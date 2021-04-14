@@ -33,17 +33,17 @@ describe('insert-inline-in-blocks', () => {
 
     BODY.addEventListener('click', async function onClick() {
       container1.insertBefore(insertBlock, insertPoint);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       container1.removeChild(insertBlock);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
     append(BODY, container1);
     append(BODY, container2);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -80,17 +80,17 @@ describe('insert-inline-in-blocks', () => {
 
     BODY.addEventListener('click', async function onClick() {
       container1.appendChild(insertBlock);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       container1.removeChild(insertBlock);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
     append(BODY, container1);
     append(BODY, container2);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -128,17 +128,17 @@ describe('insert-inline-in-blocks', () => {
 
     BODY.addEventListener('click', async function onClick() {
       container1.insertBefore(insertBlock, insertPoint);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       container1.removeChild(insertBlock);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
     append(BODY, container1);
     append(BODY, container2);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });

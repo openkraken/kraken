@@ -61,6 +61,6 @@ describe('image-items', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });
