@@ -220,10 +220,7 @@ void registerPluginSource(NativeString *code, const char *pluginName) {
 }
 
 #if ENABLE_DEBUGGER
-std::__thread_id inspectorThreadId;
 void attachInspector(int32_t contextId) {
-  inspectorThreadId = std::this_thread::get_id();
-  KRAKEN_LOG(VERBOSE) << "inspector thread id " << inspectorThreadId;
   assert(checkContext(contextId));
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->attachInspector();
@@ -233,9 +230,6 @@ void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length) {
 }
 void dispatchInspectorTask(int32_t contextId, int32_t taskId) {
   foundation::InspectorTaskQueue::instance(contextId)->dispatchTask(taskId);
-}
-std::__thread_id getInspectorThreadId() {
-  return inspectorThreadId;
 }
 #endif
 

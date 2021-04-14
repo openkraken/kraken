@@ -97,6 +97,7 @@ class Inspector {
     registerModule(InspectCSSModule(this));
     registerModule(InspectRuntimeModule(this));
     registerModule(InspectDebuggerModule(this));
+    registerModule(InspectorLogModule(this));
 
     ReceivePort serverIsolateReceivePort = ReceivePort();
 

@@ -29,7 +29,6 @@ private:
     void *data;
   };
 
-  mutable std::mutex queue_mutex_;
   std::unordered_map<int, TaskData *> m_map;
   int64_t id{0};
 
