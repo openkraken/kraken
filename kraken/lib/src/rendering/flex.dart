@@ -1542,11 +1542,16 @@ class RenderFlexLayout extends RenderLayoutBox {
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double totalFlexGrow = metrics.totalFlexGrow;
       final double totalFlexShrink = metrics.totalFlexShrink;
-      final bool canFlex = maxMainSize < double.infinity;
 
-      // Distribute free space to flexible children, and determine baseline.
-      final double initialFreeSpace = mainSizeType == BoxSizeType.automatic ?
-        0 : (canFlex ? maxMainSize : 0.0) - runMainAxisExtent;
+      double initialFreeSpace;
+      if (mainSizeType == BoxSizeType.automatic) {
+        // The main size of container may be larger than some flex line due to
+        // its children auto expanded.
+        initialFreeSpace = constraints.minWidth > runMainAxisExtent ?
+          constraints.minWidth - runMainAxisExtent : 0;
+      } else {
+        initialFreeSpace = maxMainSize - runMainAxisExtent;
+      }
 
       bool isFlexGrow = initialFreeSpace >= 0 && totalFlexGrow > 0;
       bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
@@ -2370,8 +2375,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (relativeOffset != null) {
       childOffsetY -= relativeOffset.dy;
     }
+
     // It needs to subtract margin-top cause offset already includes margin-top
-    lineDistance = childBaseLineDistance + childOffsetY;
+    lineDistance = (childBaseLineDistance ?? 0) + childOffsetY;
     lineDistance += marginTop;
     return lineDistance;
   }
