@@ -127,7 +127,6 @@ KRAKEN_EXPORT_C
 void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length);
 KRAKEN_EXPORT_C
 void dispatchInspectorTask(int32_t contextId, int32_t taskId);
-std::__thread_id getInspectorThreadId();
 #endif
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

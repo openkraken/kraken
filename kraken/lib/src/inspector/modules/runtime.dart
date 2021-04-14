@@ -297,13 +297,6 @@ class InspectRuntimeModule extends InspectModule {
             inspector.elementManager.controller.name,
             inspector.elementManager.controller.name));
     sendEventToFrontend(event);
-
-    ConsoleAPICalledEvent welcome = ConsoleAPICalledEvent(
-        'log',
-        [RemoteObject('string', value: 'Welcome to Kraken inspector.')],
-        inspector.elementManager.contextId,
-        DateTime.now().millisecondsSinceEpoch);
-    sendEventToFrontend(welcome);
   }
 
   void onGetIsolateId(int id, Map<String, dynamic> params) {

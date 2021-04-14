@@ -46,11 +46,14 @@ typedef Native_InspectorMessage = Void Function(Int32 contextId, Pointer<Utf8>);
 
 void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
   InspectServer server = _inspectorServerMap[contextId];
+  print('inspect message called');
   if (server == null) {
     print('Internal error: can not get inspector server from contextId: $contextId');
     return;
   }
-  server.sendRawJSONToFrontend(Utf8.fromUtf8(message));
+  String data = Utf8.fromUtf8(message);
+  print('return message to dev frontend: $data');
+  server.sendRawJSONToFrontend(data);
 }
 
 typedef Native_PostTaskToUIThread = Void Function(Int32 contextId, Int32 taskId);

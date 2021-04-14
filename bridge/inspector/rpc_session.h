@@ -24,7 +24,6 @@ class InspectorSession;
 class DartRPC {
 public:
   void send(int32_t contextId, const std::string &msg) {
-    KRAKEN_LOG(VERBOSE) << "send to dart ws server " << msg.c_str() << std::this_thread::get_id();
     if (std::this_thread::get_id() == getUIThreadId()) {
       auto ctx = new RPCContext{contextId, msg};
       ::foundation::InspectorTaskQueue::instance(contextId)->registerTask([](void *ptr) {
