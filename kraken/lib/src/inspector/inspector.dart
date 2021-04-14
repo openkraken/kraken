@@ -50,11 +50,6 @@ class InspectorMethodResult {
   InspectorMethodResult(this.id, this.result);
 }
 
-class InspectorRawMessage {
-  final String message;
-  InspectorRawMessage(this.message);
-}
-
 class InspectorNativeMessage {
   final String message;
   InspectorNativeMessage(this.message);
@@ -106,7 +101,6 @@ class Inspector {
         _serverPort.send(InspectorServerInit(controller.view.contextId, port, '0.0.0.0', bundleURL));
       } else if (data is InspectorFrontEndMessage) {
         messageRouter(data.message);
-        print('[isolateToMainStream] $data');
       } else if (data is InspectorServerStart) {
         onServerStart(port);
       }
