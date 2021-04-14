@@ -1223,36 +1223,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         );
       }
 
-      // Constrain by min/max width/height
-//      double minConstraintWidth = innerConstraints.minWidth;
-//      double maxConstraintWidth = innerConstraints.maxWidth;
-//      double minConstraintHeight = innerConstraints.minHeight;
-//      double maxConstraintHeight = innerConstraints.maxHeight;
-//      double minWidth = child is RenderBoxModel ? child.renderStyle.minWidth : 0;
-//      double maxWidth = child is RenderBoxModel ? child.renderStyle.maxWidth : double.infinity;
-//      double minHeight = child is RenderBoxModel ? child.renderStyle.minHeight : 0;
-//      double maxHeight = child is RenderBoxModel ? child.renderStyle.maxHeight : double.infinity;
-//
-//      if (maxWidth != null) {
-//        maxConstraintWidth = maxConstraintWidth > maxWidth ? maxWidth : maxConstraintWidth;
-//      }
-//      if (minWidth != null) {
-//        minConstraintWidth = minConstraintWidth < minWidth ? minWidth : minConstraintWidth;
-//      }
-//
-//      if (maxHeight != null) {
-//        maxConstraintHeight = maxConstraintHeight > maxHeight ? maxHeight : maxConstraintHeight;
-//      }
-//      if (minHeight != null) {
-//        minConstraintHeight = minConstraintHeight < minHeight ? minHeight : minConstraintHeight;
-//      }
-//      innerConstraints = BoxConstraints(
-//        minWidth: minConstraintWidth,
-//        maxWidth: maxConstraintWidth,
-//        minHeight: minConstraintHeight,
-//        maxHeight: maxConstraintHeight,
-//      );
-
       BoxConstraints childConstraints = deflateOverflowConstraints(innerConstraints);
 
       // Whether child need to layout
@@ -1269,11 +1239,11 @@ class RenderFlexLayout extends RenderLayoutBox {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = _getChildSize(child);
-          // Need to layout child when width and height both can be calculated from style
+          // Need to layout child only when width and height both can be calculated from style
           // and differ from its previous size
           isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
-              (childOldSize.width != childContentWidth ||
-                  childOldSize.height != childContentHeight);
+            (childOldSize.width != childContentWidth ||
+              childOldSize.height != childContentHeight);
         }
       }
 

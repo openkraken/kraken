@@ -104,8 +104,16 @@ mixin CSSSizingMixin on RenderStyleBase {
         renderStyle.maxWidth = getMaxWidth(value, renderStyle.minWidth);
         break;
     }
+
     if (shouldMarkNeedsLayout) {
       renderBoxModel.markNeedsLayout();
+      // Force relayout of the parent of positioned renderBoxModel to
+      // make the constraints of renderBoxModel in sync with updated sizing.
+      final RenderLayoutParentData childParentData = renderBoxModel.parentData;
+      if (childParentData != null && childParentData.isPositioned &&
+        renderBoxModel.parent is RenderBoxModel) {
+        (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
+      }
     }
   }
 

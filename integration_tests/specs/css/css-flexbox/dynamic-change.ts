@@ -120,4 +120,44 @@ describe('dynamic-change', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('flex item height change', async (done) => {
+    let div;
+    let item1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (item1 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '50px',
+            background: 'red',
+          }
+        })),
+        createElement('div', {
+          style: {
+            flex: 1,
+            background: 'blue',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      item1.style.height = '100px';
+      await matchViewportSnapshot();
+      done();
+    });
+  });
 });

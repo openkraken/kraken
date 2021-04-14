@@ -515,7 +515,6 @@ class RenderStyle
         realHeight = verticalBorderWidth + verticalPaddingWidth > height ? verticalBorderWidth + verticalPaddingWidth : height;
       }
 
-      // Base width when width no exists, inline-block has width of 0
       maxConstraintWidth = realWidth ?? double.infinity;
       if (maxWidth != null && realWidth == null) {
         maxConstraintWidth = maxConstraintWidth > maxWidth ? maxWidth : maxConstraintWidth;
@@ -524,7 +523,6 @@ class RenderStyle
         minConstraintWidth = minConstraintWidth < minWidth ? minWidth : minConstraintWidth;
       }
 
-      // Base height always equals to 0 no matter
       maxConstraintHeight = realHeight ?? double.infinity;;
       if (maxHeight != null && realHeight == null) {
         maxConstraintHeight = maxConstraintHeight > maxHeight ? maxHeight : maxConstraintHeight;
