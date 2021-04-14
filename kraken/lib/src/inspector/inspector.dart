@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ffi';
 
+import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
 import 'package:kraken/kraken.dart';
@@ -100,15 +101,17 @@ class Inspector {
     ReceivePort serverIsolateReceivePort = ReceivePort();
 
     serverIsolateReceivePort.listen((data) {
+      KrakenController controller = elementManager.controller;
       if (data is SendPort) {
         _serverPort = data;
-        KrakenController controller = elementManager.controller;
         String bundleURL = controller.bundleURL ?? controller.bundlePath ?? '<EmbedBundle>';
         _serverPort.send(InspectorServerInit(controller.view.contextId, port, '0.0.0.0', bundleURL));
       } else if (data is InspectorFrontEndMessage) {
         messageRouter(data.message);
       } else if (data is InspectorServerStart) {
         onServerStart(port);
+      } else if (data is InspectorPostTaskMessage) {
+        dispatchUITask(controller.view.contextId, data.taskId);
       }
     });
 

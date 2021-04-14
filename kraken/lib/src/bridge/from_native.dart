@@ -360,6 +360,7 @@ typedef Dart_PostTaskToInspectorThread = void Function(int contextId, int taskId
 
 void _postTaskToInspectorThread(int contextId, int taskId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  print('post task to inspector thread: $contextId, $taskId, ${controller.view.inspector}');
   if (controller.view.inspector != null) {
     controller.view.inspector.serverPort.send(InspectorPostTaskMessage(taskId));
   }

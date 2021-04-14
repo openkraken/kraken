@@ -53,6 +53,17 @@ void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
   server.sendRawJSONToFrontend(Utf8.fromUtf8(message));
 }
 
+typedef Native_PostTaskToUIThread = Void Function(Int32 contextId, Int32 taskId);
+
+void _postTaskToUIThread(int contextId, int taskId) {
+  InspectServer server = _inspectorServerMap[contextId];
+  if (server == null) {
+    print('Internal error: can not get inspector server from contextId: $contextId');
+    return;
+  }
+  server.isolateToMainStream.send(InspectorPostTaskMessage(taskId));
+}
+
 typedef Native_RegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
 typedef Dart_RegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
 
@@ -72,10 +83,12 @@ void initInspectorServerNativeBinding(int contextId) {
       _nativeInspectorMessage = Pointer.fromFunction(_onInspectorMessage);
   final Pointer<NativeFunction<Native_RegisterInspectorMessageCallback>>
       _nativeRegisterInspectorMessageCallback = Pointer.fromFunction(_registerInspectorMessageCallback);
+  final Pointer<NativeFunction<Native_PostTaskToUIThread>> _nativePostTaskToUIThread = Pointer.fromFunction(_postTaskToUIThread);
 
   final List<int> _dartNativeMethods = [
     _nativeInspectorMessage.address,
-    _nativeRegisterInspectorMessageCallback.address
+    _nativeRegisterInspectorMessageCallback.address,
+    _nativePostTaskToUIThread.address
   ];
 
   Pointer<Uint64> bytes = allocate<Uint64>(count: _dartNativeMethods.length);
@@ -95,6 +108,7 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
   mainToIsolateStream.listen((data) {
     if (data is InspectorServerInit) {
       server = InspectServer(data.port, data.address, data.bundleURL);
+      server._isolateToMainStream = isolateToMainStream;
       server.onStarted = () {
         isolateToMainStream.send(InspectorServerStart());
       };
@@ -113,9 +127,9 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
       } else if (data is InspectorNativeMessage) {
         assert(server.nativeInspectorMessageHandler != null);
         server.nativeInspectorMessageHandler(data.message);
+      } else if (data is InspectorPostTaskMessage) {
+        server._dispatchInspectorTask(mainIsolateJSContextId, data.taskId);
       }
-    } else if (data is InspectorPostTaskMessage) {
-      server._dispatchInspectorTask(mainIsolateJSContextId, data.taskId);
     }
   });
 }
@@ -132,6 +146,9 @@ class InspectServer {
   MessageCallback onFrontendMessage;
   HttpServer _httpServer;
   WebSocket _ws;
+
+  SendPort _isolateToMainStream;
+  SendPort get isolateToMainStream => _isolateToMainStream;
 
   NativeInspectorMessageHandler nativeInspectorMessageHandler;
 

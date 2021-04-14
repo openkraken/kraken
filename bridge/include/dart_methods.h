@@ -46,6 +46,7 @@ typedef void (*InspectorMessage)(int32_t contextId, const char* message);
 typedef void (*InspectorMessageCallback)(void *rpcSession, const char *message);
 typedef void (*RegisterInspectorMessageCallback)(int32_t contextId, void *rpcSession, InspectorMessageCallback inspectorMessageCallback);
 typedef void (*PostTaskToInspectorThread)(int32_t contextId, int32_t taskId);
+typedef void (*PostTaskToUIThread)(int32_t contextId, int32_t taskId);
 
 using RefreshPaintCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
 using RefreshPaint = void (*)(void *callbackContext, int32_t contextId, RefreshPaintCallback callback);
@@ -106,6 +107,7 @@ struct DartMethodPointer {
 struct InspectorDartMethodPointer {
   InspectorMessage inspectorMessage{nullptr};
   RegisterInspectorMessageCallback registerInspectorMessageCallback{nullptr};
+  PostTaskToUIThread postTaskToUiThread{nullptr};
 };
 std::shared_ptr<InspectorDartMethodPointer> getInspectorDartMethod();
 void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length);

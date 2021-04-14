@@ -176,16 +176,6 @@ void reloadJSContext(int contextId) async {
   return completer.future;
 }
 
-typedef Native_FlushBridgeTask = Void Function();
-typedef Dart_FlushBridgeTask = void Function();
-
-final Dart_FlushBridgeTask _flushUITask =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_FlushBridgeTask>>('flushUITask').asFunction();
-
-void flushUITask() {
-  _flushUITask();
-}
-
 typedef Native_FlushUICommandCallback = Void Function();
 typedef Dart_FlushUICommandCallback = void Function();
 
@@ -194,6 +184,16 @@ nativeDynamicLibrary.lookup<NativeFunction<Native_FlushUICommandCallback>>('flus
 
 void flushUICommandCallback() {
   _flushUICommandCallback();
+}
+
+typedef Native_DispatchUITask = Void Function(Int32 contextId, Int32 taskId);
+typedef Dart_DispatchUITask = void Function(int contextId, int taskId);
+
+final Dart_DispatchUITask _dispatchUITask =
+  nativeDynamicLibrary.lookup<NativeFunction<Native_DispatchUITask>>('dispatchUITask').asFunction();
+
+void dispatchUITask(int contextId, int taskId) {
+  _dispatchUITask(contextId, taskId);
 }
 
 enum UICommandType {

@@ -21,6 +21,7 @@ void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length) {
   size_t i = 0;
   inspectorMethodPointer->inspectorMessage = reinterpret_cast<InspectorMessage>(methodBytes[i++]);
   inspectorMethodPointer->registerInspectorMessageCallback = reinterpret_cast<RegisterInspectorMessageCallback>(methodBytes[i++]);
+  inspectorMethodPointer->postTaskToUiThread = reinterpret_cast<PostTaskToUIThread>(methodBytes[i++]);
 }
 #endif
 
