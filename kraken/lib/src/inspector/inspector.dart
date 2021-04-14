@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:ffi';
 
 import 'package:kraken/dom.dart';
 import 'package:kraken/inspector.dart';
@@ -53,6 +54,11 @@ class InspectorMethodResult {
 class InspectorNativeMessage {
   final String message;
   InspectorNativeMessage(this.message);
+}
+
+class InspectorPostTaskMessage {
+  final int taskId;
+  InspectorPostTaskMessage(this.taskId);
 }
 
 class Inspector {

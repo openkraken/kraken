@@ -179,11 +179,11 @@ void reloadJSContext(int contextId) async {
 typedef Native_FlushBridgeTask = Void Function();
 typedef Dart_FlushBridgeTask = void Function();
 
-final Dart_FlushBridgeTask _flushBridgeTask =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_FlushBridgeTask>>('flushBridgeTask').asFunction();
+final Dart_FlushBridgeTask _flushUITask =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_FlushBridgeTask>>('flushUITask').asFunction();
 
-void flushBridgeTask() {
-  _flushBridgeTask();
+void flushUITask() {
+  _flushUITask();
 }
 
 typedef Native_FlushUICommandCallback = Void Function();

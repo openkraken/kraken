@@ -56,6 +56,9 @@ void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
 typedef Native_RegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
 typedef Dart_RegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
 
+typedef Native_DispatchInspectorTask = Void Function(Int32 contextId, Int32 taskId);
+typedef Dart_DispatchInspectorTask = void Function(int contextId, int taskId);
+
 void initInspectorServerNativeBinding(int contextId) {
   final Dart_RegisterDartMethods _registerInspectorServerDartMethods =
       nativeDynamicLibrary
@@ -87,6 +90,7 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
   ReceivePort mainToIsolateStream = ReceivePort();
   isolateToMainStream.send(mainToIsolateStream.sendPort);
   InspectServer server;
+  int mainIsolateJSContextId;
 
   mainToIsolateStream.listen((data) {
     if (data is InspectorServerInit) {
@@ -99,6 +103,7 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
       };
       server.start();
       _inspectorServerMap[data.contextId] = server;
+      mainIsolateJSContextId = data.contextId;
       initInspectorServerNativeBinding(data.contextId);
     } else if (server != null && server.connected) {
       if (data is InspectorEvent) {
@@ -109,6 +114,8 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
         assert(server.nativeInspectorMessageHandler != null);
         server.nativeInspectorMessageHandler(data.message);
       }
+    } else if (data is InspectorPostTaskMessage) {
+      server._dispatchInspectorTask(mainIsolateJSContextId, data.taskId);
     }
   });
 }
@@ -127,6 +134,10 @@ class InspectServer {
   WebSocket _ws;
 
   NativeInspectorMessageHandler nativeInspectorMessageHandler;
+
+  final Dart_DispatchInspectorTask _dispatchInspectorTask = nativeDynamicLibrary
+      .lookup<NativeFunction<Native_DispatchInspectorTask>>('dispatchInspectorTask')
+      .asFunction();
 
   /// InspectServer has connected frontend.
   bool get connected => _ws != null;

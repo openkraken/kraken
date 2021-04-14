@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "colors.h"
 #include "logging.h"
+#include "foundation/inspector_task_queue.h"
 
 #if defined(IS_ANDROID)
 #include <android/log.h>
@@ -89,6 +90,18 @@ LogMessage::~LogMessage() {
 #endif
 }
 
+void pipeMessageToInspector(JSGlobalContextRef ctx, const std::string message, const JSC::MessageLevel logLevel) {
+  JSC::ExecState* exec = toJS(ctx);
+  JSC::VM& vm = exec->vm();
+  JSC::JSLockHolder locker(vm);
+  JSC::JSGlobalObject* globalObject = vm.vmEntryGlobalObject(exec);
+  auto client = globalObject->consoleClient();
+  if (client && client != ((void *)0x1)) {
+    auto client_impl = reinterpret_cast<kraken::debugger::JSCConsoleClientImpl *>(client);
+    client_impl->sendMessageToConsole(logLevel, message);
+  }
+};
+
 void printLog(std::stringstream &stream, std::string level, JSGlobalContextRef ctx) {
 #ifdef ENABLE_DEBUGGER
     JSC::MessageLevel _log_level = JSC::MessageLevel::Info;
@@ -129,14 +142,20 @@ void printLog(std::stringstream &stream, std::string level, JSGlobalContextRef c
     }
 
 #ifdef ENABLE_DEBUGGER
-  JSC::ExecState* exec = toJS(ctx);
-  JSC::VM& vm = exec->vm();
-  JSC::JSLockHolder locker(vm);
-  JSC::JSGlobalObject* globalObject = vm.vmEntryGlobalObject(exec);
-  auto client = globalObject->consoleClient();
-  if (client && client != ((void *)0x1)) {
-    auto client_impl = reinterpret_cast<kraken::debugger::JSCConsoleClientImpl *>(client);
-    client_impl->sendMessageToConsole(_log_level, stream.str());
+  struct TaskContext {
+    JSGlobalContextRef ctx;
+    std::string message;
+    JSC::MessageLevel logLevel;
+  };
+
+  if (std::this_thread::get_id() == getInspectorThreadId()) {
+    pipeMessageToInspector(ctx, stream.str(), _log_level);
+  } else {
+    auto context = new TaskContext{ctx, stream.str(), _log_level};
+    foundation::InspectorTaskQueue::instance(0)->registerTask([](void *data) {
+      auto *taskContext = reinterpret_cast<TaskContext *>(data);
+      pipeMessageToInspector(taskContext->ctx, taskContext->message, taskContext->logLevel);
+    }, context);
   }
 #endif
   }
