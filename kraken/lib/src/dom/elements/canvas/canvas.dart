@@ -10,8 +10,10 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/painting.dart';
 import 'package:kraken/css.dart';
+
+import 'canvas_context.dart';
+import 'canvas_context_2d.dart';
 
 const String CANVAS = 'CANVAS';
 const double ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300.0;
@@ -70,7 +72,6 @@ class CanvasElement extends Element {
           repaintSelf: true,
           defaultStyle: _defaultStyle,
           tagName: CANVAS,
-
         ) {
     nativeCanvasElement.ref.getContext = nativeGetContext;
 
@@ -101,7 +102,7 @@ class CanvasElement extends Element {
   }
 
   // RenderingContext? getContext(DOMString contextId, optional any options = null);
-  CanvasRenderingContext getContext(String contextId, {dynamic options}) {
+  CanvasRenderingContext2D getContext(String contextId, {dynamic options}) {
     double viewportWidth = elementManager.viewportWidth;
     double viewportHeight = elementManager.viewportHeight;
     Size viewportSize = Size(viewportWidth, viewportHeight);

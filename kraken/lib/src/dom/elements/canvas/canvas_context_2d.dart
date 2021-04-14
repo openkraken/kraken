@@ -78,7 +78,9 @@ class CanvasRenderingContext2DSettings {
   bool desynchronized = false;
 }
 
-class CanvasRenderingContext2D extends CanvasRenderingContext {
+typedef CanvasAction = void Function(Canvas, Size);
+
+class CanvasRenderingContext2D {
   final Pointer<NativeCanvasRenderingContext2D> nativeCanvasRenderingContext2D;
 
   CanvasRenderingContext2D() : nativeCanvasRenderingContext2D = allocate<NativeCanvasRenderingContext2D>() {
@@ -126,33 +128,16 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
     nativeCanvasRenderingContext2D.ref.translate = nativeTranslate;
   }
 
-  String type = 'CanvasRenderingContext2D';
-
-  Size viewportSize;
-  CanvasElement canvas;
-
-  int get actionCount => _actions.length;
-
-  List<CanvasAction> _actions = [];
-
-  List<CanvasAction> takeActionRecords() => _actions;
-
-  void clearActionRecords() {
-    _actions.clear();
-  }
-
-  void action(CanvasAction action) {
-    _actions.add(action);
-    // Must trigger repaint after action
-    canvas.repaintNotifier.notifyListeners(); // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
-  }
-
   static SplayTreeMap<int, CanvasRenderingContext2D> _nativeMap = SplayTreeMap();
 
   static CanvasRenderingContext2D getCanvasRenderContext2DOfNativePtr(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
     CanvasRenderingContext2D renderingContext = _nativeMap[nativePtr.address];
     assert(renderingContext != null, 'Can not get nativeRenderingContext2D from pointer: $nativePtr');
     return renderingContext;
+  }
+
+  void dispose() {
+    _nativeMap.remove(nativeCanvasRenderingContext2D.address);
   }
 
   static void _setDirection(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> value) {
@@ -358,20 +343,41 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
     canvasRenderingContext2D.translate(x, y);
   }
 
-  // Perform canvas drawing.
-  void performAction(Canvas _canvas, Size _size) {
-    List<CanvasAction> actions = takeActionRecords();
-    for (int i = 0; i < actions.length; i++) {
-      actions[i](_canvas, _size);
-    }
-  }
-
   CanvasRenderingContext2DSettings _settings;
 
   CanvasRenderingContext2DSettings getContextAttributes() => _settings;
 
-  void dispose() {
-    _nativeMap.remove(nativeCanvasRenderingContext2D.address);
+  Size viewportSize;
+  CanvasElement canvas;
+  // HACK: We need record the current matrix state because flutter canvas not export resetTransform now.
+  // https://github.com/flutter/engine/pull/25449
+  Matrix4 _matrix = Matrix4.identity();
+  Matrix4 _lastMatrix = Matrix4.identity();
+
+  int get actionCount => _actions.length;
+
+  List<CanvasAction> _actions = [];
+
+  void addAction(CanvasAction action) {
+    _actions.add(action);
+    // Must trigger repaint after action
+    canvas.repaintNotifier.notifyListeners(); // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+  }
+
+  // Perform canvas drawing.
+  void performActions(Canvas _canvas, Size _size) {
+    // HACK: Must sync transform first because each paint will saveLayer and restore that make the transform not effect
+    if (!_lastMatrix.isIdentity()) {
+      _canvas.transform(_lastMatrix.storage);
+    }
+    for (int i = 0; i < _actions.length; i++) {
+      _actions[i](_canvas, _size);
+    }
+    if (_lastMatrix != _matrix) {
+      _lastMatrix = _matrix.clone();
+    }
+    // Clear actions
+    _actions.clear();
   }
 
   static TextAlign parseTextAlign(String value) {
@@ -390,10 +396,10 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
     return null;
   }
 
-  TextAlign _textAlign = TextAlign.start;// (default: "start")
+  TextAlign _textAlign = TextAlign.start; // (default: "start")
   set textAlign(TextAlign value) {
     if (value == null) return;
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _textAlign = value;
     });
   }
@@ -420,7 +426,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   CanvasTextBaseline _textBaseline = CanvasTextBaseline.alphabetic; // (default: "alphabetic")
   set textBaseline(CanvasTextBaseline value) {
     if (value == null) return;
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _textBaseline = value;
     });
   }
@@ -441,7 +447,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   TextDirection _direction = TextDirection.ltr; // (default: "inherit")
   set direction(TextDirection value) {
     if (value == null) return;
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _direction = value;
     });
   }
@@ -457,7 +463,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   }
   String _font = _DEFAULT_FONT; // (default 10px sans-serif)
   set font(String value) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       // Must lazy parse in action because it has side-effect with _fontProperties.
       if (_parseFont(value)) {
         _font = value;
@@ -469,7 +475,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   List _states = [];
   // push state on state stack
   void restore() {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       var state = _states.last;
       _states.removeLast();
       _strokeStyle = state[0];
@@ -489,7 +495,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
 
   // pop state stack and restore state
   void save() {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _states.add([strokeStyle, fillStyle, lineWidth, lineCap, lineJoin, lineDashOffset, miterLimit, font, textAlign, direction]);
       canvas.save();
     });
@@ -498,20 +504,20 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   Path2D path2d = Path2D();
 
   void beginPath() {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d = Path2D();
     });
   }
 
   void clip(PathFillType fillType) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.path.fillType = fillType;
       canvas.clipPath(path2d.path);
     });
   }
 
   void fill(PathFillType fillType) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.path.fillType = fillType;
       Paint paint = Paint()
         ..color = fillStyle
@@ -521,7 +527,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   }
 
   void stroke() {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       Paint paint = Paint()
         ..color = strokeStyle
         ..strokeJoin = lineJoin
@@ -542,55 +548,55 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   }
 
   void arc(double x, double y, double radius, double startAngle, double endAngle, {bool anticlockwise = false}) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.arc(x, y, radius, startAngle, endAngle, anticlockwise: anticlockwise);
     });
   }
 
   void arcTo(double x1, double y1, double x2, double y2, double radius) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.arcTo(x1, y1, x2, y2, radius);
     });
   }
 
   void bezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
     });
   }
 
   void closePath() {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.closePath();
     });
   }
 
   void ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, {bool anticlockwise = false}) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise: anticlockwise);
     });
   }
 
   void lineTo(double x, double y) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.lineTo(x, y);
     });
   }
 
   void moveTo(double x, double y) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.moveTo(x, y);
     });
   }
 
   void quadraticCurveTo(double cpx, double cpy, double x, double y) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.quadraticCurveTo(cpx, cpy, x, y);
     });
   }
 
   void rect(double x, double y, double w, double h) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       path2d.rect(x, y, w, h);
     });
   }
@@ -611,7 +617,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   StrokeCap _lineCap = StrokeCap.butt; // (default "butt")
   set lineCap(StrokeCap value) {
     if (value == null) return;
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _lineCap = value;
     });
   }
@@ -620,7 +626,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   double _lineDashOffset = 0.0;
   set lineDashOffset(double value) {
     if (value == null) return;
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _lineDashOffset = value;
     });
   }
@@ -642,7 +648,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   StrokeJoin _lineJoin = StrokeJoin.miter;
   set lineJoin(StrokeJoin value) {
     if (value == null) return;
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _lineJoin = value;
     });
   }
@@ -651,7 +657,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   double _lineWidth = 1.0; // (default 1)
   set lineWidth(double value) {
     if (value == null) return;
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _lineWidth = value;
     });
   }
@@ -660,7 +666,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   double _miterLimit = 10.0; // (default 10)
   set miterLimit(double value) {
     if (value == null) return;
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _miterLimit = value;
     });
   }
@@ -676,18 +682,16 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
     _lineDash = segments;
   }
 
-  // HACK: We need record the current matrix state because flutter canvas not export resetTransform now.
-  Matrix4 _matrix = Matrix4.identity();
   void translate(double x, double y) {
     _matrix.translate(x, y);
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       canvas.translate(x, y);
     });
   }
 
   void rotate(double angle) {
     _matrix.setRotationZ(angle);
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       canvas.rotate(angle);
     });
   }
@@ -695,9 +699,13 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   // transformations (default transform is the identity matrix)
   void scale(double x, double y) {
     _matrix.scale(x, y);
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       canvas.scale(x, y);
     });
+  }
+
+  Matrix4 getTransform() {
+    return _matrix;
   }
 
   // https://github.com/WebKit/WebKit/blob/a77a158d4e2086fbe712e488ed147e8a54d44d3c/Source/WebCore/html/canvas/CanvasRenderingContext2DBase.cpp#L843
@@ -710,7 +718,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   void resetTransform() {
     Matrix4 m4 = Matrix4.inverted(_matrix);
     _matrix = Matrix4.identity();
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       canvas.transform(m4.storage);
     });
   }
@@ -745,7 +753,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
     m4storage[15] = 1.0;
 
     _matrix = Matrix4.fromFloat64List(m4storage)..multiply(_matrix);
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       canvas.transform(m4storage);
     });
   }
@@ -754,7 +762,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   Color _strokeStyle = CSSColor.initial; // default black
   set strokeStyle(Color newValue) {
     if (newValue == null) return;
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _strokeStyle = newValue;
     });
   }
@@ -763,7 +771,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   Color _fillStyle = CSSColor.initial; // default black
   set fillStyle(Color newValue) {
     if (newValue == null) return;
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       _fillStyle = newValue;
     });
   }
@@ -786,7 +794,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
 
   void clearRect(double x, double y, double w, double h) {
     Rect rect = Rect.fromLTWH(x, y, w, h);
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       // Must saveLayer before clear avoid there is a "black" background
       Paint paint = Paint()
         ..style = PaintingStyle.fill
@@ -797,7 +805,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
 
   void fillRect(double x, double y, double w, double h) {
     Rect rect = Rect.fromLTWH(x, y, w, h);
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       Paint paint = Paint()..color = fillStyle;
       canvas.drawRect(rect, paint);
     });
@@ -805,7 +813,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
 
   void strokeRect(double x, double y, double w, double h) {
     Rect rect = Rect.fromLTWH(x, y, w, h);
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       Paint paint = Paint()
         ..color = strokeStyle
         ..strokeJoin = lineJoin
@@ -880,7 +888,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
   }
 
   void fillText(String text, double x, double y, {double maxWidth}) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       TextPainter textPainter = _getTextPainter(text, fillStyle);
       if (maxWidth != null) {
         // FIXME: should scale down to a smaller font size in order to fit the text in the specified width.
@@ -896,7 +904,7 @@ class CanvasRenderingContext2D extends CanvasRenderingContext {
 
 
   void strokeText(String text, double x, double y, {double maxWidth}) {
-    action((Canvas canvas, Size size) {
+    addAction((Canvas canvas, Size size) {
       TextPainter textPainter = _getTextPainter(text, strokeStyle, shouldStrokeText: true);
       if (maxWidth != null) {
         // FIXME: should scale down to a smaller font size in order to fit the text in the specified width.

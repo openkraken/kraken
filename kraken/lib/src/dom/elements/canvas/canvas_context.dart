@@ -2,14 +2,9 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:meta/meta.dart';
-
-typedef CanvasAction = void Function(Canvas, Size);
-
-List<CanvasRenderingContext> canvasRenderingContexts = [];
 
 enum ImageSmoothingQuality { low, medium, high }
 
@@ -67,29 +62,6 @@ class TextMetrics {
   final double hangingBaseline;
   final double alphabeticBaseline;
   final double ideographicBaseline;
-}
-
-abstract class CanvasRenderingContext {
-  String type = 'CanvasRenderingContext';
-  List<String> methods = [];
-  List<String> properties = [];
-  int id;
-
-  CanvasRenderingContext() {
-    canvasRenderingContexts.add(this);
-    id = canvasRenderingContexts.indexOf(this);
-  }
-
-  @override
-  String toString() {
-    Map<String, dynamic> descriptor = {
-      'type': type,
-      'id': id,
-      'methods': methods,
-      'properties': properties,
-    };
-    return jsonEncode(descriptor);
-  }
 }
 
 abstract class CanvasCompositing {

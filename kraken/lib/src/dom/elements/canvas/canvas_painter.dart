@@ -5,7 +5,7 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/painting.dart' show CanvasRenderingContext2D;
+import 'canvas_context_2d.dart';
 
 class CanvasPainter extends CustomPainter {
   CanvasPainter({Listenable repaint}): super(repaint: repaint);
@@ -17,7 +17,7 @@ class CanvasPainter extends CustomPainter {
   Canvas _canvas;
 
   bool get _shouldPainting => context != null && context.actionCount > 0;
-  bool get _shouldPaintSnapshot => _picture != null && _picture.approximateBytesUsed > 0;
+  bool get _hasSnapshot => context != null && _picture != null && _picture.approximateBytesUsed > 0;
 
   // Notice: Canvas is stateless, change scaleX or scaleY will case dropping drawn content.
   /// https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-set-bitmap-dimensions
@@ -43,41 +43,46 @@ class CanvasPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (context != null) {
-      // This lets you create composite effects, for example making a group of drawing commands semi-transparent.
-      // Without using saveLayer, each part of the group would be painted individually,
-      // so where they overlap would be darker than where they do not. By using saveLayer to group them together,
-      // they can be drawn with an opaque color at first,
-      // and then the entire group can be made transparent using the saveLayer's paint.
-      canvas.saveLayer(null, _saveLayerPaint);
-
-      // Paint last content
-      if (_shouldPaintSnapshot) {
-        canvas.drawPicture(_picture);
-      }
-
-      // Paint new actions
-      if (_shouldPainting) {
-        _pictureRecorder = PictureRecorder();
-        _canvas = Canvas(_pictureRecorder);
-
-        if (_scaleX != 1.0 || _scaleY != 1.0) {
-          _canvas.scale(_scaleX, _scaleY);
-        }
-
-        context.performAction(_canvas, size);
-
-        /// After calling this function, both the picture recorder
-        /// and the canvas objects are invalid and cannot be used further.
-        _picture = _pictureRecorder.endRecording();
-        context.clearActionRecords();
-
-        canvas.drawPicture(_picture);
-      }
-
-      // Call restore to pop the save stack and apply the paint to the group.
-      canvas.restore();
+    print('-----');
+    print('_shouldPaintSnapshot: ' + _hasSnapshot.toString());
+    print('_shouldPainting: ' + _shouldPainting.toString());
+    if (_hasSnapshot && !_shouldPainting) {
+      return canvas.drawPicture(_picture);
     }
+
+    _pictureRecorder = PictureRecorder();
+    _canvas = Canvas(_pictureRecorder);
+
+    if (_scaleX != 1.0 || _scaleY != 1.0) {
+      _canvas.scale(_scaleX, _scaleY);
+    }
+
+    // This lets you create composite effects, for example making a group of drawing commands semi-transparent.
+    // Without using saveLayer, each part of the group would be painted individually,
+    // so where they overlap would be darker than where they do not. By using saveLayer to group them together,
+    // they can be drawn with an opaque color at first,
+    // and then the entire group can be made transparent using the saveLayer's paint.
+    _canvas.saveLayer(null, _saveLayerPaint);
+
+    // Paint last content
+    if (_hasSnapshot) {
+      _canvas.drawPicture(_picture);
+    }
+
+    // Paint new actions
+    if (_shouldPainting) {
+      context.performActions(_canvas, size);
+    }
+
+    // Must pair each call to save()/saveLayer() with a later matching call to restore().
+    _canvas.restore();
+
+    // After calling this function, both the picture recorder
+    // and the canvas objects are invalid and cannot be used further.
+    _picture = _pictureRecorder.endRecording();
+
+    canvas.drawPicture(_picture);
+
   }
 
   @override
