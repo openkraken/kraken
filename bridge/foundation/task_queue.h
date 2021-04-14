@@ -10,7 +10,7 @@
 #include "ref_counter.h"
 #include "ref_ptr.h"
 #include <mutex>
-#include <vector>
+#include <unordered_map>
 
 namespace foundation {
 
@@ -21,7 +21,6 @@ class TaskQueue : public fml::RefCountedThreadSafe<TaskQueue> {
 public:
   virtual int32_t registerTask(const Task &task, void *data);
   void dispatchTask(int32_t taskId);
-  void flushTask();
 
 private:
   struct TaskData {
@@ -31,7 +30,8 @@ private:
   };
 
   mutable std::mutex queue_mutex_;
-  std::vector<TaskData *> queue;
+  std::unordered_map<int, TaskData *> m_map;
+  int64_t id{0};
 
   FML_FRIEND_MAKE_REF_COUNTED(TaskQueue);
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(TaskQueue);

@@ -175,13 +175,14 @@ bool JSCDebuggerAgentImpl::convertCallFrames(
   for (auto &callframe : *in_callframes) {
     if (callframe.IsObject()) {
       if (callframe.HasMember("location")) {
-        WTF::String scriptId = callframe["location"]["scriptId"].GetString();
-        auto iterator = m_scripts.find(scriptId.toIntPtr());
-        if (iterator != m_scripts.end()) {
-          auto script = iterator->value;
-          WTF::String url = !script.sourceURL.isEmpty() ? script.sourceURL : script.url;
-          callframe.AddMember("url", std::string(url.utf8().data()), in_allocator);
-        }
+////        KRAKEN_LOG(VERBOSE) << callframe["location"].GetString();
+//        WTF::String scriptId = callframe["location"]["scriptId"].GetString();
+//        auto iterator = m_scripts.find(scriptId.toIntPtr());
+//        if (iterator != m_scripts.end()) {
+//          auto script = iterator->value;
+//          WTF::String url = !script.sourceURL.isEmpty() ? script.sourceURL : script.url;
+//          callframe.AddMember("url", std::string(url.utf8().data()), in_allocator);
+//        }
       } else {
         callframe.AddMember("url", "(gart)", in_allocator);
       }
@@ -249,7 +250,7 @@ void JSCDebuggerAgentImpl::didPause(JSC::ExecState &scriptState, JSC::JSValue ca
                                     JSC::JSValue exceptionOrCaughtValue) {
   m_pausedScriptState = &scriptState;
 //  m_currentCallStack = {scriptState.vm(), callFrames};
-  m_currentCallStack = JSC::JSValue(callFrames);
+//  m_currentCallStack = JSC::JSValue(callFrames);
 
   Inspector::InjectedScript injectedScript = m_injectedScriptManager->injectedScriptFor(&scriptState);
 
@@ -362,7 +363,7 @@ void JSCDebuggerAgentImpl::didContinue() {
   }
 
   m_pausedScriptState = nullptr;
-  m_currentCallStack = {};
+//  m_currentCallStack = {};
   m_injectedScriptManager->releaseObjectGroup(JSCDebuggerAgentImpl::backtraceObjectGroup);
   clearBreakDetails();
   clearExceptionValue();

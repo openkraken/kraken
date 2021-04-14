@@ -9,6 +9,8 @@
 #include <JavaScriptCore/JSGlobalObject.h>
 
 #include "foundation/logging.h"
+#include "foundation/ui_task_queue.h"
+#include "foundation/inspector_task_queue.h"
 #include "inspector/service/rpc/object_serializer.h"
 #include "inspector/service/rpc/protocol.h"
 #include "protocol_handler.h"
@@ -21,13 +23,28 @@ class InspectorSession;
 
 class DartRPC {
 public:
-  void send(int32_t contextId, std::string msg) {
-    getInspectorDartMethod()->inspectorMessage(contextId, msg.c_str());
+  void send(int32_t contextId, const std::string &msg) {
+    KRAKEN_LOG(VERBOSE) << "send to dart ws server " << msg.c_str() << std::this_thread::get_id();
+    if (std::this_thread::get_id() == getUIThreadId()) {
+      auto ctx = new RPCContext{contextId, msg};
+      ::foundation::InspectorTaskQueue::instance(contextId)->registerTask([](void *ptr) {
+        auto ctx = reinterpret_cast<RPCContext *>(ptr);
+        getInspectorDartMethod()->inspectorMessage(ctx->contextId, ctx->message.c_str());
+        delete ctx;
+      }, ctx);
+    } else {
+      getInspectorDartMethod()->inspectorMessage(contextId, msg.c_str());
+    }
   };
 
   void setOnMessageCallback(int32_t contextId, void* rpcSession, InspectorMessageCallback callback) {
     getInspectorDartMethod()->registerInspectorMessageCallback(contextId, rpcSession, callback);
   }
+private:
+  struct RPCContext {
+    int32_t contextId;
+    std::string message;
+  };
 };
 
 class RPCSession {
@@ -80,6 +97,11 @@ private:
     }
   }
 
+  struct SessionContext {
+    RPCSession *session;
+    rapidjson::Document doc;
+  };
+
   void _on_message(const std::string &message) {
     KRAKEN_LOG(VERBOSE) << "NATIVE INSPECTOR ON MESSAGE: " << message;
     rapidjson::Document doc;
@@ -88,7 +110,22 @@ private:
       return;
     }
     if (doc.HasMember("method")) {
-      this->handleRequest(serializeRequest(std::move(doc)));
+      std::string method = doc["method"].GetString();
+      auto dotIndex = method.find('.');
+      if (dotIndex == std::string::npos) {
+        return;
+      }
+      std::string domain = method.substr(0, dotIndex);
+      if (domain == "Runtime") {
+        auto *ctx = new SessionContext{this, std::move(doc)};
+        ::foundation::UITaskQueue::instance(_contextId)->registerTask([](void *ptr) {
+          auto *ctx = reinterpret_cast<SessionContext *>(ptr);
+          ctx->session->handleRequest(serializeRequest(std::move(ctx->doc)));
+          delete ctx;
+        }, ctx);
+      } else {
+        this->handleRequest(serializeRequest(std::move(doc)));
+      }
     } else if (doc.HasMember("result")) {
       this->handleResponse(serializeResponse(std::move(doc)));
     } else {

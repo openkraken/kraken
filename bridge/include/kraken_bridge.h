@@ -103,7 +103,7 @@ KRAKEN_EXPORT_C
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT_C
-void flushBridgeTask();
+void dispatchUITask(int32_t contextId, int32_t taskId);
 KRAKEN_EXPORT_C
 void flushUICommandCallback();
 

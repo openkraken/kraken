@@ -192,8 +192,8 @@ KrakenInfo *getKrakenInfo() {
   return krakenInfo;
 }
 
-void flushBridgeTask() {
-  foundation::UITaskQueue::instance()->flushTask();
+void dispatchUITask(int32_t contextId, int32_t taskId) {
+  foundation::UITaskQueue::instance(contextId)->dispatchTask(taskId);
 }
 
 UICommandItem *getUICommandItems(int32_t contextId) {
@@ -223,6 +223,7 @@ void registerPluginSource(NativeString *code, const char *pluginName) {
 std::__thread_id inspectorThreadId;
 void attachInspector(int32_t contextId) {
   inspectorThreadId = std::this_thread::get_id();
+  KRAKEN_LOG(VERBOSE) << "inspector thread id " << inspectorThreadId;
   assert(checkContext(contextId));
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->attachInspector();
