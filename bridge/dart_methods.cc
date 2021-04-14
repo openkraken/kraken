@@ -17,6 +17,11 @@ std::shared_ptr<InspectorDartMethodPointer> getInspectorDartMethod() {
   assert_m(std::this_thread::get_id() != getUIThreadId(), "inspector dart methods should be called on the inspector thread.");
   return inspectorMethodPointer;
 }
+void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length) {
+  size_t i = 0;
+  inspectorMethodPointer->inspectorMessage = reinterpret_cast<InspectorMessage>(methodBytes[i++]);
+  inspectorMethodPointer->registerInspectorMessageCallback = reinterpret_cast<RegisterInspectorMessageCallback>(methodBytes[i++]);
+}
 #endif
 
 std::shared_ptr<DartMethodPointer> getDartMethod() {
@@ -66,13 +71,6 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }
 
-#if ENABLE_DEBUGGER
-void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length) {
-  size_t i = 0;
-  inspectorMethodPointer->inspectorMessage = reinterpret_cast<InspectorMessage>(methodBytes[i++]);
-  inspectorMethodPointer->registerInspectorMessageCallback = reinterpret_cast<RegisterInspectorMessageCallback>(methodBytes[i++]);
-}
-#endif
 
 void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
   size_t i = 0;

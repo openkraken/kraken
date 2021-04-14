@@ -226,6 +226,9 @@ void attachInspector(int32_t contextId) {
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->attachInspector();
 }
+void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length) {
+  kraken::registerInspectorDartMethods(methodBytes, length);
+}
 #endif
 
 NativeString *NativeString::clone() {

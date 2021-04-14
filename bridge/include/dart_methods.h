@@ -109,7 +109,6 @@ struct InspectorDartMethodPointer {
   RegisterInspectorMessageCallback registerInspectorMessageCallback{nullptr};
 };
 std::shared_ptr<InspectorDartMethodPointer> getInspectorDartMethod();
-KRAKEN_EXPORT
 void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length);
 #endif
 

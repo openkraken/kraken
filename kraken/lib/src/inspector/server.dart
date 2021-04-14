@@ -17,15 +17,12 @@ typedef MessageCallback = void Function(Map<String, dynamic>);
 
 Map<int, InspectServer> _inspectorServerMap = Map();
 
-typedef Native_InspectorMessageCallback = Void Function(
-    Pointer<Void> rpcSession, Pointer<Utf8> message);
-typedef Dart_InspectorMessageCallback = void Function(
-    Pointer<Void> rpcSession, Pointer<Utf8> message);
+typedef Native_InspectorMessageCallback = Void Function(Pointer<Void> rpcSession, Pointer<Utf8> message);
+typedef Dart_InspectorMessageCallback = void Function(Pointer<Void> rpcSession, Pointer<Utf8> message);
 typedef Native_RegisterInspectorMessageCallback = Void Function(
     Int32 contextId,
     Pointer<Void> rpcSession,
-    Pointer<NativeFunction<Native_InspectorMessageCallback>>
-        inspectorMessageCallback);
+    Pointer<NativeFunction<Native_InspectorMessageCallback>> inspectorMessageCallback);
 
 typedef Native_AttachInspector = Void Function(Int32);
 typedef Dart_AttachInspector = void Function(int);
@@ -33,17 +30,13 @@ typedef Dart_AttachInspector = void Function(int);
 void _registerInspectorMessageCallback(
     int contextId,
     Pointer<Void> rpcSession,
-    Pointer<NativeFunction<Native_InspectorMessageCallback>>
-        inspectorMessageCallback) {
+    Pointer<NativeFunction<Native_InspectorMessageCallback>> inspectorMessageCallback) {
   InspectServer server = _inspectorServerMap[contextId];
   if (server == null) {
-    print(
-        'Internal error: can not get inspector server from contextId: $contextId');
+    print('Internal error: can not get inspector server from contextId: $contextId');
     return;
   }
-
-  Dart_InspectorMessageCallback nativeCallback =
-      inspectorMessageCallback.asFunction();
+  Dart_InspectorMessageCallback nativeCallback = inspectorMessageCallback.asFunction();
   server.nativeInspectorMessageHandler = (String message) {
     nativeCallback(rpcSession, Utf8.toUtf8(message));
   };
@@ -52,18 +45,16 @@ void _registerInspectorMessageCallback(
 typedef Native_InspectorMessage = Void Function(Int32 contextId, Pointer<Utf8>);
 
 void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
-  KrakenController controller =
-      KrakenController.getControllerOfJSContextId(contextId);
-  if (controller.view.inspector != null) {
-    controller.view.inspector.serverPort
-        .send(InspectorRawMessage(Utf8.fromUtf8(message)));
+  InspectServer server = _inspectorServerMap[contextId];
+  if (server == null) {
+    print('Internal error: can not get inspector server from contextId: $contextId');
+    return;
   }
+  server.sendRawJSONToFrontend(Utf8.fromUtf8(message));
 }
 
-typedef Native_RegisterDartMethods = Void Function(
-    Pointer<Uint64> methodBytes, Int32 length);
-typedef Dart_RegisterDartMethods = void Function(
-    Pointer<Uint64> methodBytes, int length);
+typedef Native_RegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
+typedef Dart_RegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
 
 void initInspectorServerNativeBinding(int contextId) {
   final Dart_RegisterDartMethods _registerInspectorServerDartMethods =
@@ -77,8 +68,7 @@ void initInspectorServerNativeBinding(int contextId) {
   final Pointer<NativeFunction<Native_InspectorMessage>>
       _nativeInspectorMessage = Pointer.fromFunction(_onInspectorMessage);
   final Pointer<NativeFunction<Native_RegisterInspectorMessageCallback>>
-      _nativeRegisterInspectorMessageCallback =
-      Pointer.fromFunction(_registerInspectorMessageCallback);
+      _nativeRegisterInspectorMessageCallback = Pointer.fromFunction(_registerInspectorMessageCallback);
 
   final List<int> _dartNativeMethods = [
     _nativeInspectorMessage.address,
@@ -89,8 +79,8 @@ void initInspectorServerNativeBinding(int contextId) {
   Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
   nativeMethodList.setAll(0, _dartNativeMethods);
 
-  _attachInspector(contextId);
   _registerInspectorServerDartMethods(bytes, _dartNativeMethods.length);
+  _attachInspector(contextId);
 }
 
 void serverIsolateEntryPoint(SendPort isolateToMainStream) {
@@ -100,7 +90,6 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
 
   mainToIsolateStream.listen((data) {
     if (data is InspectorServerInit) {
-      initInspectorServerNativeBinding(data.contextId);
       server = InspectServer(data.port, data.address, data.bundleURL);
       server.onStarted = () {
         isolateToMainStream.send(InspectorServerStart());
@@ -110,18 +99,17 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
       };
       server.start();
       _inspectorServerMap[data.contextId] = server;
+      initInspectorServerNativeBinding(data.contextId);
     } else if (server != null && server.connected) {
       if (data is InspectorEvent) {
         server.sendEventToFrontend(data);
       } else if (data is InspectorMethodResult) {
         server.sendToFrontend(data.id, data.result);
-      } else if (data is InspectorRawMessage) {
-        server.sendRawJSONToFrontend(data.message);
       } else if (data is InspectorNativeMessage) {
+        assert(server.nativeInspectorMessageHandler != null);
         server.nativeInspectorMessageHandler(data.message);
       }
     }
-    print('[mainToIsolateStream] $data');
   });
 }
 

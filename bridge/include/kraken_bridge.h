@@ -123,6 +123,8 @@ void registerPluginSource(NativeString* code, const char *pluginName);
 #if ENABLE_DEBUGGER
 KRAKEN_EXPORT_C
 void attachInspector(int32_t contextId);
+KRAKEN_EXPORT_C
+void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length);
 #endif
 
 #endif // KRAKEN_BRIDGE_EXPORT_H
