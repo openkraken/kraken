@@ -38,9 +38,11 @@ const paths = {
   templates: resolveKraken('scripts/templates')
 };
 
+const pkgVersion = readFileSync(path.join(paths.kraken, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
 const isProfile = process.env.ENABLE_PROFILE === 'true';
 
 exports.paths = paths;
+exports.pkgVersion = pkgVersion;
 
 let winShell = null;
 if (platform == 'win32') {
@@ -328,13 +330,6 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
   execSync(`cp ${plistPath} ${frameworkPath}/Info.plist`, { stdio: 'inherit' });
-  const podspecContent = readFileSync(path.join(paths.templates, 'KrakenSDK.podspec'), 'utf-8');
-  const pkgVersion = readFileSync(path.join(paths.kraken, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
-  writeFileSync(
-    `${targetDynamicSDKPath}/KrakenSDK.podspec`,
-    podspecContent.replace('@VERSION@', `${pkgVersion}-release`),
-    'utf-8'
-  );
 
   if (buildMode == 'Release') {
     execSync(`dsymutil ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
@@ -348,7 +343,6 @@ task(`build-ios-kraken-lib`, (done) => {
 
   const targetStaticSDKPath = `${paths.bridge}/build/ios/framework`;
   execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_${program.jsEngine}.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
-  execSync(`pod ipc spec KrakenSDK.podspec > KrakenSDK.podspec.json`, { cwd: targetDynamicSDKPath });
   done();
 });
 
@@ -361,28 +355,18 @@ task(`build-ios-kraken-lib-profile`, done => {
 });
 
 task('build-ios-frameworks', (done) => {
-  let cmd = `flutter build ios-framework`;
+  let cmd = `flutter build ios-framework --cocoapods`;
   execSync(cmd, {
     env: process.env,
     cwd: paths.sdk,
     stdio: 'inherit'
   });
-  done();
-});
 
-task('build-android-app', (done) => {
-  let cmd;
-  if (buildMode === 'Release') {
-    cmd = 'flutter build apk --release'
-  } else {
-    cmd = 'flutter build apk --debug'
-  }
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.framework ${paths.sdk}/build/ios/framework/Debug`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.dSYM ${paths.sdk}/build/ios/framework/Debug`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.framework ${paths.sdk}/build/ios/framework/Profile`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.framework ${paths.sdk}/build/ios/framework/Release`);
 
-  execSync(cmd, {
-    eng: process.env,
-    cwd: paths.example,
-    stdio: 'inherit'
-  });
   done();
 });
 
@@ -444,19 +428,23 @@ task('build-android-kraken-lib', (done) => {
   done();
 });
 
-task('build-android-sdk', (done) => {
-  let cmd;
-  if (buildMode === 'Release') {
-    cmd = './gradlew assembleRelease'
-  } else {
-    cmd = './gradlew assembleDebug'
-  }
+task('android-so-clean', (done) => {
+  execSync(`rm -rf ${paths.bridge}/build/android`, { stdio: 'inherit' });
+  done();
+});
 
-  execSync(cmd, {
+task('build-android-sdk', (done) => {
+  execSync(`flutter build aar --build-number ${pkgVersion}`, {
     eng: process.env,
-    cwd: path.join(paths.sdk, '.android'),
+    cwd: path.join(paths.sdk),
     stdio: 'inherit'
   });
+  done();
+});
+
+
+task('ios-framework-clean', (done) => {
+  execSync(`rm -rf ${paths.bridge}/build/ios`, { stdio: 'inherit' });
   done();
 });
 

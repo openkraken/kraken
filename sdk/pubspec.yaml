@@ -1,6 +1,6 @@
 name: kraken_sdk_module
 description: Module for build sdk frameworks.
-version: 1.0.0+1
+version: 0.7.1
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -21,5 +21,5 @@ dev_dependencies:
 flutter:
   module:
     androidX: true
-    androidPackage: com.openkraken.kraken
-    iosBundleIdentifier: com.openkraken.kraken
+    androidPackage: com.openkraken.kraken.sdk
+    iosBundleIdentifier: com.openkraken.kraken.sdk
