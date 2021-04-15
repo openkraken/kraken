@@ -218,7 +218,7 @@ private:
   Inspector::InjectedScriptManager *m_injectedScriptManager;
   Listener *m_listener{nullptr};
   JSC::ExecState *m_pausedScriptState{nullptr};
-  JSC::JSValue m_currentCallStack;
+  JSC::Strong<JSC::Unknown> m_currentCallStack;
   ScriptsMap m_scripts;
   BreakpointIdentifierToDebugServerBreakpointIDsMap m_breakpointIdentifierToDebugServerBreakpointIDs;
   BreakpointIdentifierToBreakpointMap m_javaScriptBreakpoints;
