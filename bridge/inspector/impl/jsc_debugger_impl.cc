@@ -5,6 +5,7 @@
 
 #include "jsc_debugger_impl.h"
 #include <JavaScriptCore/JSCJSValueInlines.h>
+#include <JavaScriptCore/EventLoop.h>
 
 namespace kraken::debugger {
 using namespace JSC;
@@ -34,8 +35,9 @@ void JSCDebuggerImpl::runEventLoopWhilePaused() {
   // Drop all locks so another thread can work in the VM while we are nested.
   JSC::JSLock::DropAllLocks dropAllLocks(m_globalObject->globalExec()->vm());
 
-  while (!m_doneProcessingDebuggerEvents) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  Inspector::EventLoop loop;
+  while (!m_doneProcessingDebuggerEvents && !loop.ended()) {
+    loop.cycle();
   }
 }
 

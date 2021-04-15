@@ -174,15 +174,15 @@ bool JSCDebuggerAgentImpl::convertCallFrames(
   *out_callframes = std::make_unique<std::vector<std::unique_ptr<kraken::debugger::CallFrame>>>();
   for (auto &callframe : *in_callframes) {
     if (callframe.IsObject()) {
-      if (callframe.HasMember("location")) {
-////        KRAKEN_LOG(VERBOSE) << callframe["location"].GetString();
-//        WTF::String scriptId = callframe["location"]["scriptId"].GetString();
-//        auto iterator = m_scripts.find(scriptId.toIntPtr());
-//        if (iterator != m_scripts.end()) {
-//          auto script = iterator->value;
-//          WTF::String url = !script.sourceURL.isEmpty() ? script.sourceURL : script.url;
-//          callframe.AddMember("url", std::string(url.utf8().data()), in_allocator);
-//        }
+      if (callframe.HasMember("location") && callframe.HasMember("functionName")) {
+        if (callframe["functionName"].GetStringLength() == 0) continue;
+        WTF::String scriptId = callframe["location"]["scriptId"].GetString();
+        auto iterator = m_scripts.find(scriptId.toIntPtr());
+        if (iterator != m_scripts.end()) {
+          auto script = iterator->value;
+          WTF::String url = !script.sourceURL.isEmpty() ? script.sourceURL : script.url;
+          callframe.AddMember("url", std::string(url.utf8().data()), in_allocator);
+        }
       } else {
         callframe.AddMember("url", "(gart)", in_allocator);
       }
@@ -249,8 +249,7 @@ bool JSCDebuggerAgentImpl::convertStackTrace(const std::string &in_stackTrace_st
 void JSCDebuggerAgentImpl::didPause(JSC::ExecState &scriptState, JSC::JSValue callFrames,
                                     JSC::JSValue exceptionOrCaughtValue) {
   m_pausedScriptState = &scriptState;
-//  m_currentCallStack = {scriptState.vm(), callFrames};
-//  m_currentCallStack = JSC::JSValue(callFrames);
+  m_currentCallStack = {scriptState.vm(), callFrames};
 
   Inspector::InjectedScript injectedScript = m_injectedScriptManager->injectedScriptFor(&scriptState);
 
@@ -306,6 +305,7 @@ void JSCDebuggerAgentImpl::didPause(JSC::ExecState &scriptState, JSC::JSValue ca
   auto _callFrames = currentCallFrames(injectedScript);
   std::string callframes_str = _callFrames->toJSONString().utf8().data(); // jsc call frames
   std::unique_ptr<std::vector<std::unique_ptr<kraken::debugger::CallFrame>>> callFrames_v8;
+  KRAKEN_LOG(VERBOSE) << callframes_str;
   if (!convertCallFrames(callframes_str, &callFrames_v8)) {
     return;
   }
@@ -363,7 +363,7 @@ void JSCDebuggerAgentImpl::didContinue() {
   }
 
   m_pausedScriptState = nullptr;
-//  m_currentCallStack = {};
+  m_currentCallStack = {};
   m_injectedScriptManager->releaseObjectGroup(JSCDebuggerAgentImpl::backtraceObjectGroup);
   clearBreakDetails();
   clearExceptionValue();
@@ -512,7 +512,7 @@ DispatchResponse JSCDebuggerAgentImpl::evaluateOnCallFrame(
   std::unique_ptr<RemoteObject> *out_result, Maybe<ExceptionDetails> *out_exceptionDetails) {
 
   Inspector::ErrorString errorString;
-  if (m_currentCallStack.isEmpty()) {
+  if (!m_currentCallStack) {
     errorString = ASCIILiteral::fromLiteralUnsafe("Not paused");
     return DispatchResponse::Error(errorString.utf8().data());
   }
@@ -534,7 +534,7 @@ DispatchResponse JSCDebuggerAgentImpl::evaluateOnCallFrame(
   WTF::Optional<int> savedResultIndex; // TODO V8不支持
 
   RefPtr<Inspector::Protocol::Runtime::RemoteObject> result;
-  injectedScript.evaluateOnCallFrame(errorString, m_currentCallStack, in_callFrameId.c_str(), in_expression.c_str(),
+  injectedScript.evaluateOnCallFrame(errorString, m_currentCallStack.get(), in_callFrameId.c_str(), in_expression.c_str(),
                                      in_objectGroup.fromMaybe("").c_str(), in_includeCommandLineAPI.fromMaybe(false),
                                      in_returnByValue.fromMaybe(false), in_generatePreview.fromMaybe(false), saveResult,
                                      result, wasThrown, savedResultIndex);
@@ -1142,7 +1142,7 @@ JSCDebuggerAgentImpl::currentCallFrames(const Inspector::InjectedScript &injecte
   if (injectedScript.hasNoValue())
     return JSON::ArrayOf<Inspector::Protocol::Debugger::CallFrame>::create();
 
-  return injectedScript.wrapCallFrames(m_currentCallStack);
+  return injectedScript.wrapCallFrames(m_currentCallStack.get());
 }
 
 void JSCDebuggerAgentImpl::resolveBreakpoint(const Inspector::ScriptDebugListener::Script &script,
@@ -1360,7 +1360,11 @@ bool JSCDebuggerAgentImpl::breakpointActionsFromProtocol(Inspector::ErrorString 
   return true;
 }
 
-void JSCDebuggerAgentImpl::willRunMicrotask() {}
-void JSCDebuggerAgentImpl::didRunMicrotask() {}
+void JSCDebuggerAgentImpl::willRunMicrotask() {
+  KRAKEN_LOG(VERBOSE) << "will Run microtask";
+}
+void JSCDebuggerAgentImpl::didRunMicrotask() {
+  KRAKEN_LOG(VERBOSE) << "did Run microtask";
+}
 
 } // namespace kraken::debugger

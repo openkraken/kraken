@@ -39,11 +39,11 @@ private:
   void recompileAllJSFunctions() override;
 
   void didPause(JSC::JSGlobalObject *) override {
-    //                KRAKEN_LOG(VERBOSE) << "did pause called";
+                    KRAKEN_LOG(VERBOSE) << "did pause called";
   }
 
   void didContinue(JSC::JSGlobalObject *) override {
-    //                KRAKEN_LOG(VERBOSE) << "did continue called";
+                    KRAKEN_LOG(VERBOSE) << "did continue called";
   }
 
   void runEventLoopWhilePaused() override;
