@@ -1,14 +1,9 @@
 import 'package:kraken/inspector.dart';
-import 'package:kraken/dom.dart';
 
 import '../module.dart';
 
-class InspectDebuggerModule extends InspectModule {
-  final Inspector inspector;
-
-  InspectDebuggerModule(this.inspector);
-
-  ElementManager get elementManager => inspector.elementManager;
+class InspectDebuggerModule extends IsolateInspectorModule {
+  InspectDebuggerModule(IsolateInspectorServer server): super(server);
 
   @override
   String get name => 'Debugger';

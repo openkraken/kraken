@@ -8,6 +8,7 @@ import 'dart:ffi';
 import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -47,6 +48,29 @@ void setTargetPlatformForDesktop() {
   if (Platform.isLinux || Platform.isWindows) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
+}
+
+void spawnIsolateInspectorServer(KrakenViewController viewController, { int port = INSPECTOR_DEFAULT_PORT, String address }) {
+  ReceivePort serverIsolateReceivePort = ReceivePort();
+
+  serverIsolateReceivePort.listen((data) {
+    KrakenController controller = viewController.rootController;
+    if (data is SendPort) {
+      viewController._isolateServerPort = data;
+      String bundleURL = controller.bundleURL ?? controller.bundlePath ?? '<EmbedBundle>';
+      viewController._isolateServerPort.send(InspectorServerInit(controller.view.contextId, port, '0.0.0.0', bundleURL));
+    } else if (data is InspectorFrontEndMessage) {
+      viewController.uiInspector.messageRouter(data.id, data.module, data.method, data.params);
+    } else if (data is InspectorServerStart) {
+      viewController.uiInspector.onServerStart(port);
+    } else if (data is InspectorPostTaskMessage) {
+      dispatchUITask(controller.view.contextId, data.taskId);
+    }
+  });
+
+  Isolate.spawn(serverIsolateEntryPoint, serverIsolateReceivePort.sendPort).then((Isolate isolate) {
+    viewController._isolateServerIsolate = isolate;
+  });
 }
 
 // An kraken View Controller designed for multiple kraken view control.
@@ -140,12 +164,12 @@ class KrakenViewController {
   }
 
   /// Used for debugger inspector.
-  Inspector _inspector;
-
-  Inspector get inspector => _inspector;
+  UIInspector _uiInspector;
+  UIInspector get uiInspector => _uiInspector;
 
   // the manager which controller all renderObjects of Kraken
   ElementManager _elementManager;
+  ElementManager get elementManager => _elementManager;
 
   // index value which identify javascript runtime context.
   int _contextId;
@@ -208,12 +232,15 @@ class KrakenViewController {
     // DisposeEventTarget command will created when js context disposed, should flush them all.
     flushUICommand();
 
-    _inspector?.dispose();
-    _inspector = null;
+    _uiInspector?.dispose();
+    _uiInspector = null;
 
     _elementManager.dispose();
     _elementManager = null;
     _disposed = true;
+
+    _isolateServerIsolate?.kill();
+    _isolateServerIsolate = null;
   }
 
   // export Uint8List bytes from rendered result.
@@ -380,9 +407,14 @@ class KrakenViewController {
     return _elementManager.getRootRenderObject();
   }
 
+  Isolate _isolateServerIsolate;
+  SendPort _isolateServerPort;
+  SendPort get isolateServerPort => _isolateServerPort;
+
   void debugStartInspector() {
-    _inspector = Inspector(_elementManager);
-    _elementManager.debugDOMTreeChanged = inspector.onDOMTreeChanged;
+    spawnIsolateInspectorServer(this);
+    _uiInspector = UIInspector(this);
+    _elementManager.debugDOMTreeChanged = uiInspector.onDOMTreeChanged;
   }
 }
 
@@ -535,7 +567,7 @@ class KrakenController {
     }
     _module.dispose();
     _view.detachView();
-    Inspector.prevInspector = view._elementManager.controller.view.inspector;
+    UIInspector.prevInspector = view._elementManager.controller.view.uiInspector;
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         showPerformanceOverlay: _view.showPerformanceOverlay,
         enableDebug: _view.enableDebug,
@@ -565,7 +597,7 @@ class KrakenController {
     // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
     flushUICommand();
 
-    Inspector.prevInspector = view._elementManager.controller.view.inspector;
+    UIInspector.prevInspector = view._elementManager.controller.view.uiInspector;
 
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         background: _view.background,

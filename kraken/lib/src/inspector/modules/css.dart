@@ -2,16 +2,15 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:meta/meta.dart';
+import 'package:kraken/inspector.dart';
 import '../module.dart';
-import '../inspector.dart';
 
 const int INLINED_STYLESHEET_ID = 1;
 const String ZERO_PX = '0px';
 
-class InspectCSSModule extends InspectModule {
-  final Inspector inspector;
-  ElementManager get elementManager => inspector.elementManager;
-  InspectCSSModule(this.inspector);
+class InspectCSSModule extends UIInspectorModule {
+  ElementManager get elementManager => inspector.viewController.elementManager;
+  InspectCSSModule(UIInspector inspector): super(inspector);
 
   @override
   String get name => 'CSS';

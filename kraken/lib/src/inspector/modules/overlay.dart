@@ -3,13 +3,12 @@ import 'package:kraken/inspector.dart';
 import 'package:kraken/dom.dart';
 import '../module.dart';
 
-class InspectOverlayModule extends InspectModule {
+class InspectOverlayModule extends UIInspectorModule {
   @override
   String get name => 'Overlay';
 
-  final Inspector inspector;
-  ElementManager get elementManager => inspector.elementManager;
-  InspectOverlayModule(this.inspector);
+  ElementManager get elementManager => inspector.viewController.elementManager;
+  InspectOverlayModule(UIInspector inspector): super(inspector);
 
   @override
   void receiveFromFrontend(int id, String method, Map<String, dynamic> params) {

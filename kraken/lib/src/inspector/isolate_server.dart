@@ -8,14 +8,15 @@ import 'package:kraken/module.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/kraken.dart';
 import 'package:ffi/ffi.dart';
-import 'inspector.dart';
+import 'ui_inspector.dart';
+import 'module.dart';
 
 const String CONTENT_TYPE = 'Content-Type';
 const String CONTENT_LENGTH = 'Content-Length';
 
 typedef MessageCallback = void Function(Map<String, dynamic>);
 
-Map<int, InspectServer> _inspectorServerMap = Map();
+Map<int, IsolateInspectorServer> _inspectorServerMap = Map();
 
 typedef Native_InspectorMessageCallback = Void Function(Pointer<Void> rpcSession, Pointer<Utf8> message);
 typedef Dart_InspectorMessageCallback = void Function(Pointer<Void> rpcSession, Pointer<Utf8> message);
@@ -31,7 +32,7 @@ void _registerInspectorMessageCallback(
     int contextId,
     Pointer<Void> rpcSession,
     Pointer<NativeFunction<Native_InspectorMessageCallback>> inspectorMessageCallback) {
-  InspectServer server = _inspectorServerMap[contextId];
+  IsolateInspectorServer server = _inspectorServerMap[contextId];
   if (server == null) {
     print('Internal error: can not get inspector server from contextId: $contextId');
     return;
@@ -45,7 +46,7 @@ void _registerInspectorMessageCallback(
 typedef Native_InspectorMessage = Void Function(Int32 contextId, Pointer<Utf8>);
 
 void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
-  InspectServer server = _inspectorServerMap[contextId];
+  IsolateInspectorServer server = _inspectorServerMap[contextId];
   print('inspect message called');
   if (server == null) {
     print('Internal error: can not get inspector server from contextId: $contextId');
@@ -59,7 +60,7 @@ void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
 typedef Native_PostTaskToUIThread = Void Function(Int32 contextId, Int32 taskId);
 
 void _postTaskToUIThread(int contextId, int taskId) {
-  InspectServer server = _inspectorServerMap[contextId];
+  IsolateInspectorServer server = _inspectorServerMap[contextId];
   if (server == null) {
     print('Internal error: can not get inspector server from contextId: $contextId');
     return;
@@ -105,18 +106,31 @@ void initInspectorServerNativeBinding(int contextId) {
 void serverIsolateEntryPoint(SendPort isolateToMainStream) {
   ReceivePort mainToIsolateStream = ReceivePort();
   isolateToMainStream.send(mainToIsolateStream.sendPort);
-  InspectServer server;
+  IsolateInspectorServer server;
   int mainIsolateJSContextId;
 
   mainToIsolateStream.listen((data) {
     if (data is InspectorServerInit) {
-      server = InspectServer(data.port, data.address, data.bundleURL);
+      server = IsolateInspectorServer(data.port, data.address, data.bundleURL);
       server._isolateToMainStream = isolateToMainStream;
       server.onStarted = () {
         isolateToMainStream.send(InspectorServerStart());
       };
       server.onFrontendMessage = (Map<String, dynamic> frontEndMessage) {
-        isolateToMainStream.send(InspectorFrontEndMessage(frontEndMessage));
+        int id = frontEndMessage['id'];
+        String _method = frontEndMessage['method'];
+        Map<String, dynamic> params = frontEndMessage['params'];
+
+        List<String> moduleMethod = _method.split('.');
+        String module = moduleMethod[0];
+        String method = moduleMethod[1];
+
+        // Runtime、Log、Debugger methods should handled on inspector isolate.
+        if (module == 'Runtime' || module == 'Log' || module == 'Debugger') {
+          server.messageRouter(id, module, method, params);
+        } else {
+          isolateToMainStream.send(InspectorFrontEndMessage(id, module, method, params));
+        }
       };
       server.start();
       _inspectorServerMap[data.contextId] = server;
@@ -127,9 +141,6 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
         server.sendEventToFrontend(data);
       } else if (data is InspectorMethodResult) {
         server.sendToFrontend(data.id, data.result);
-      } else if (data is InspectorNativeMessage) {
-        assert(server.nativeInspectorMessageHandler != null);
-        server.nativeInspectorMessageHandler(data.message);
       } else if (data is InspectorPostTaskMessage) {
         server._dispatchInspectorTask(mainIsolateJSContextId, data.taskId);
       }
@@ -137,8 +148,12 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
   });
 }
 
-class InspectServer {
-  InspectServer(this.port, this.address, this.bundleURL);
+class IsolateInspectorServer {
+  IsolateInspectorServer(this.port, this.address, this.bundleURL) {
+    registerModule(InspectRuntimeModule(this));
+    registerModule(InspectDebuggerModule(this));
+    registerModule(InspectorLogModule(this));
+  }
 
   // final Inspector inspector;
   final String address;
@@ -154,6 +169,18 @@ class InspectServer {
   SendPort get isolateToMainStream => _isolateToMainStream;
 
   NativeInspectorMessageHandler nativeInspectorMessageHandler;
+
+  final Map<String, IsolateInspectorModule> moduleRegistrar = {};
+
+  void messageRouter(int id, String module, String method, Map<String, dynamic> params) {
+    if (moduleRegistrar.containsKey(module)) {
+      moduleRegistrar[module].invoke(id, method, params);
+    }
+  }
+
+  void registerModule(IsolateInspectorModule module) {
+    moduleRegistrar[module.name] = module;
+  }
 
   final Dart_DispatchInspectorTask _dispatchInspectorTask = nativeDynamicLibrary
       .lookup<NativeFunction<Native_DispatchInspectorTask>>('dispatchInspectorTask')
@@ -196,7 +223,7 @@ class InspectServer {
     }
   }
 
-  void sendToFrontend(int id, JSONEncodable result) {
+  void sendToFrontend(int id, Map result) {
     assert(_ws != null, 'WebSocket should connect.');
 
     String data = jsonEncode({

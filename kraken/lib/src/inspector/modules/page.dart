@@ -183,12 +183,11 @@ enum ResourceType {
   Other
 }
 
-class InspectPageModule extends InspectModule {
-  final Inspector inspector;
+class InspectPageModule extends UIInspectorModule {
 
-  ElementManager get elementManager => inspector.elementManager;
+  ElementManager get elementManager => inspector.viewController.elementManager;
 
-  InspectPageModule(this.inspector);
+  InspectPageModule(UIInspector inspector): super(inspector);
 
   @override
   String get name => 'Page';
@@ -210,7 +209,7 @@ class InspectPageModule extends InspectModule {
         break;
       case 'getResourceContent':
         sendToFrontend(id, JSONEncodableMap({
-          'content': inspector.elementManager.controller.bundle.content,
+          'content': inspector.viewController.elementManager.controller.bundle.content,
           'base64Encoded': false
         }));
         break;
@@ -225,7 +224,7 @@ class InspectPageModule extends InspectModule {
 
   void handleReloadPage() async {
     try {
-      Inspector.prevInspector = elementManager.controller.view.inspector;
+      UIInspector.prevInspector = elementManager.controller.view.uiInspector;
       await elementManager.controller.reload();
     } catch (e, stack) {
       print('Dart Error: $e\n$stack');
