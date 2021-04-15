@@ -131,7 +131,7 @@ DispatchResponse JSCRuntimeAgentImpl::discardConsoleEntries() {
 DispatchResponse JSCRuntimeAgentImpl::enable() {
   m_enabled = true;
   m_frontend.executionContextCreated(
-    ExecutionContextDescription::create().setId(m_session.rpcSession()->sessionId()).setName("default").setOrigin("default").setAuxData(nullptr).build());
+    ExecutionContextDescription::create().setId(m_session->rpcSession()->sessionId()).setName("default").setOrigin("default").setAuxData(nullptr).build());
   return DispatchResponse::OK();
 }
 
