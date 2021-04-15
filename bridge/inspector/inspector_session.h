@@ -122,6 +122,8 @@ public:
     return m_log_agent.get();
   }
 
+  RPCSession *rpcSession() { return m_rpcSession; }
+
   /*****  FrontendChannel  *******/
   void sendProtocolResponse(uint64_t callId, Response message) override;
 

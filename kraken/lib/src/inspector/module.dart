@@ -13,9 +13,7 @@ export 'modules/profiler.dart';
 export 'modules/runtime.dart';
 export 'modules/debugger.dart';
 
-abstract class InspectModule {
-  Inspector inspector;
-
+abstract class _InspectorModule {
   String get name;
 
   bool _enable = false;
@@ -34,18 +32,43 @@ abstract class InspectModule {
     }
   }
 
+  void sendToFrontend(int id, JSONEncodable result);
+  void sendEventToFrontend(InspectorEvent event);
+  void receiveFromFrontend(int id, String method, Map<String, dynamic> params);
+}
+
+// Inspector modules working on flutter.ui thread.
+abstract class UIInspectorModule extends _InspectorModule {
+  final UIInspector inspector;
+  UIInspectorModule(this.inspector);
+
   void sendToFrontend(int id, JSONEncodable result) {
-    inspector.serverPort.send(InspectorMethodResult(id, result));
+    inspector.viewController.isolateServerPort.send(InspectorMethodResult(id, result?.toJson()));
+  }
+  void sendEventToFrontend(InspectorEvent event) {
+    inspector.viewController.isolateServerPort.send(event);
+  }
+  void receiveFromFrontend(int id, String method, Map<String, dynamic> params);
+}
+
+// Inspector modules working on dart isolates
+abstract class IsolateInspectorModule extends _InspectorModule {
+  IsolateInspectorModule(this.server);
+
+  final IsolateInspectorServer server;
+
+  void sendToFrontend(int id, JSONEncodable result) {
+    server.sendToFrontend(id, result?.toJson());
   }
 
   void sendEventToFrontend(InspectorEvent event) {
-    inspector.serverPort.send(event);
+    server.sendEventToFrontend(event);
   }
 
-  void callNativeInspectorMethod(
-      int id, String method, Map<String, dynamic> params) {
-    inspector.serverPort.send(InspectorNativeMessage(
-        jsonEncode({'id': id, 'method': name + '.' + method, 'params': params})));
+  void callNativeInspectorMethod(int id, String method, Map<String, dynamic> params) {
+    assert(server.nativeInspectorMessageHandler != null);
+    print('id: $id, method: $method');
+    server.nativeInspectorMessageHandler(jsonEncode({'id': id, 'method': name + '.' + method, 'params': params}));
   }
 
   void receiveFromFrontend(int id, String method, Map<String, dynamic> params);

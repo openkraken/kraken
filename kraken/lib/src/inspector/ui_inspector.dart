@@ -4,15 +4,9 @@
  */
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
-import 'dart:ffi';
 
-import 'package:kraken/bridge.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/inspector.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'server.dart';
 import 'module.dart';
 
 const String INSPECTOR_URL = 'devtools://devtools/bundled/inspector.html';
@@ -42,19 +36,17 @@ class InspectorServerStart {
 }
 
 class InspectorFrontEndMessage {
-  InspectorFrontEndMessage(this.message);
-  final Map<String, dynamic> message;
+  InspectorFrontEndMessage(this.id, this.module, this.method, this.params);
+  int id;
+  String module;
+  String method;
+  final Map<String, dynamic> params;
 }
 
 class InspectorMethodResult {
   final int id;
-  final JSONEncodable result;
+  final Map result;
   InspectorMethodResult(this.id, this.result);
-}
-
-class InspectorNativeMessage {
-  final String message;
-  InspectorNativeMessage(this.message);
 }
 
 class InspectorPostTaskMessage {
@@ -62,69 +54,43 @@ class InspectorPostTaskMessage {
   InspectorPostTaskMessage(this.taskId);
 }
 
-class Inspector {
+class UIInspector {
   /// Design preInspector for reload page,
   /// do not use it in any other place.
   /// More detail see [InspectPageModule.handleReloadPage].
-  static Inspector prevInspector;
+  static UIInspector prevInspector;
 
-  ElementManager elementManager;
-  final Map<String, InspectModule> moduleRegistrar = {};
+  KrakenViewController viewController;
+  final Map<String, UIInspectorModule> moduleRegistrar = {};
 
-  Isolate _serverIsolate;
-  SendPort _serverPort;
-  SendPort get serverPort => _serverPort;
-
-  factory Inspector(ElementManager elementManager, { int port = INSPECTOR_DEFAULT_PORT, String address }) {
-    if (Inspector.prevInspector != null) {
+  factory UIInspector(KrakenViewController viewController) {
+    if (UIInspector.prevInspector != null) {
       // Apply reload page, reuse prev inspector instance.
-      Inspector prevInspector = Inspector.prevInspector;
+      UIInspector prevInspector = UIInspector.prevInspector;
 
-      prevInspector.elementManager = elementManager;
-      elementManager.debugDOMTreeChanged = prevInspector.onDOMTreeChanged;
+      prevInspector.viewController = viewController;
+      viewController.elementManager.debugDOMTreeChanged = prevInspector.onDOMTreeChanged;
 
-      Inspector.prevInspector = null;
+      UIInspector.prevInspector = null;
       return prevInspector;
     } else {
-      return Inspector._(elementManager, port: port, address: address);
+      return UIInspector._(viewController);
     }
   }
 
-  Inspector._(this.elementManager, { int port = INSPECTOR_DEFAULT_PORT, String address }) {
+  UIInspector._(this.viewController) {
     registerModule(InspectDOMModule(this));
     registerModule(InspectOverlayModule(this));
     registerModule(InspectPageModule(this));
     registerModule(InspectCSSModule(this));
-    registerModule(InspectRuntimeModule(this));
-    registerModule(InspectDebuggerModule(this));
-    registerModule(InspectorLogModule(this));
-
-    ReceivePort serverIsolateReceivePort = ReceivePort();
-
-    serverIsolateReceivePort.listen((data) {
-      KrakenController controller = elementManager.controller;
-      if (data is SendPort) {
-        _serverPort = data;
-        String bundleURL = controller.bundleURL ?? controller.bundlePath ?? '<EmbedBundle>';
-        _serverPort.send(InspectorServerInit(controller.view.contextId, port, '0.0.0.0', bundleURL));
-      } else if (data is InspectorFrontEndMessage) {
-        messageRouter(data.message);
-      } else if (data is InspectorServerStart) {
-        onServerStart(port);
-      } else if (data is InspectorPostTaskMessage) {
-        dispatchUITask(controller.view.contextId, data.taskId);
-      }
-    });
-
-    Isolate.spawn(serverIsolateEntryPoint, serverIsolateReceivePort.sendPort);
   }
 
-  void registerModule(InspectModule module) {
+  void registerModule(UIInspectorModule module) {
     moduleRegistrar[module.name] = module;
   }
 
   void onServerStart(int port) async {
-    String remoteAddress = await Inspector.getConnectedLocalNetworkAddress();
+    String remoteAddress = await UIInspector.getConnectedLocalNetworkAddress();
     String inspectorURL = '$INSPECTOR_URL?ws=$remoteAddress:$port';
     await ClipBoardModule.writeText(inspectorURL);
 
@@ -133,27 +99,19 @@ class Inspector {
     print('    $inspectorURL');
   }
 
-  void messageRouter(Map<String, dynamic> data) {
-    int id = data['id'];
-    String _method = data['method'];
-    Map<String, dynamic> params = data['params'];
-
-    List<String> moduleMethod = _method.split('.');
-    String module = moduleMethod[0];
-    String method = moduleMethod[1];
-
+  void messageRouter(int id, String module, String method, Map<String, dynamic> params) {
     if (moduleRegistrar.containsKey(module)) {
       moduleRegistrar[module].invoke(id, method, params);
     }
   }
 
   void onDOMTreeChanged() {
-    _serverPort.send(DOMUpdatedEvent());
+    viewController.isolateServerPort.send(DOMUpdatedEvent());
   }
 
   void dispose() {
     moduleRegistrar.clear();
-    _serverIsolate.kill();
+    viewController = null;
   }
 
   static Future<String> getConnectedLocalNetworkAddress() async {

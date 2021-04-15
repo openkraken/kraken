@@ -4,18 +4,17 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:flutter/rendering.dart';
 import '../module.dart';
-import '../inspector.dart';
+import '../ui_inspector.dart';
 
 const int DOCUMENT_NODE_ID = -3;
 const String DEFAULT_FRAME_ID = 'main_frame';
 
-class InspectDOMModule extends InspectModule {
+class InspectDOMModule extends UIInspectorModule {
   @override
   String get name => 'DOM';
 
-  final Inspector inspector;
-  ElementManager get elementManager => inspector.elementManager;
-  InspectDOMModule(this.inspector);
+  ElementManager get elementManager => inspector.viewController.elementManager;
+  InspectDOMModule(UIInspector inspector): super(inspector);
 
   @override
   void receiveFromFrontend(int id, String method, Map<String, dynamic> params) {
