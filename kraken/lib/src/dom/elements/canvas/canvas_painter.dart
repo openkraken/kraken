@@ -43,9 +43,6 @@ class CanvasPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print('-----');
-    print('_shouldPaintSnapshot: ' + _hasSnapshot.toString());
-    print('_shouldPainting: ' + _shouldPainting.toString());
     if (_hasSnapshot && !_shouldPainting) {
       return canvas.drawPicture(_picture);
     }
