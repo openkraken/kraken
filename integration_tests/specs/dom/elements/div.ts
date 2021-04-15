@@ -7,6 +7,6 @@ describe('Tags div', () => {
 
     document.body.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

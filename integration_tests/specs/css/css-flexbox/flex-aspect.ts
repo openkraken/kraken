@@ -42,7 +42,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ratio-img-column-002', async () => {
     let referenceOverlappedRed;
@@ -87,7 +87,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(constrainedFlex);
 
     await sleep(0.1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ratio-img-column-003', async () => {
     let testFlexItemOverlappingGreen;
@@ -118,7 +118,7 @@ describe('flex-aspect', () => {
     );
     BODY.appendChild(constrainedFlex);
     await sleep(0.5);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ratio-img-column-004', async () => {
     let flex;
@@ -156,7 +156,7 @@ describe('flex-aspect', () => {
     );
     BODY.appendChild(flex);
     await sleep(0.1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ratio-img-column-005', async () => {
     let flex;
@@ -185,7 +185,7 @@ describe('flex-aspect', () => {
     );
     BODY.appendChild(flex);
     await sleep(0.1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('ratio-img-column-008', async () => {
     let referenceOverlappedRed;
@@ -240,7 +240,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(div);
     BODY.appendChild(flex);
     await sleep(0.1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ratio-img-row-001', async () => {
     let referenceOverlappedRed;
@@ -281,7 +281,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
     await sleep(0.1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('ratio-img-row-002', async () => {
     let referenceOverlappedRed;
@@ -322,7 +322,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
     await sleep(0.1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ratio-img-row-003', async () => {
     let referenceOverlappedRed;
@@ -363,6 +363,6 @@ describe('flex-aspect', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
     await sleep(0.1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

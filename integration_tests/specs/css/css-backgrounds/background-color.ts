@@ -8,7 +8,7 @@ describe('Background-color', () => {
     });
 
     document.body.appendChild(div);
-    await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(div.toBlob(1.0)).toMatchSnapshot();
   });
 
   xit('red with display none', async () => {
@@ -19,13 +19,13 @@ describe('Background-color', () => {
       height: '100px',
     });
     append(BODY, div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   xit('red with display when window.onload', done => {
     window.onload = async () => {
       div.style.display = 'none';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     };
     const div = createElementWithStyle('div', {
@@ -54,7 +54,7 @@ describe('Background-color', () => {
     append(BODY, red);
     append(BODY, green);
     await sleep(1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('red and remove', async (done) => {
@@ -68,7 +68,7 @@ describe('Background-color', () => {
 
     requestAnimationFrame(async () => {
       div.style.backgroundColor = '';
-      await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot();
+      await expectAsync(div.toBlob(1.0)).toMatchSnapshot();
       done();
     });
   });

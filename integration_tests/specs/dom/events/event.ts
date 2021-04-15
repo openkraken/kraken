@@ -36,7 +36,7 @@ describe('Event', () => {
     wrapper.appendChild(document.createTextNode('Click DIV 2: '));
 
     container2.click();
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('do not trigger click when scrolling', async () => {

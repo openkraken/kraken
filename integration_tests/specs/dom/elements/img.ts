@@ -2,7 +2,7 @@ describe('Tags img', () => {
   it('basic', (done) => {
     const img = document.createElement('img');
     img.addEventListener('load', async () => {
-      await matchElementImageSnapshot(img);
+      await snapshot(img);
       done();
     });
     img.style.width = '60px';
@@ -43,7 +43,7 @@ describe('Tags img', () => {
         );
 
         img.addEventListener('load', async () => {
-          await matchElementImageSnapshot(img);
+          await snapshot(img);
           done();
         });
 
@@ -73,7 +73,7 @@ describe('Tags img', () => {
         );
 
         img.addEventListener('load', async () => {
-          await matchElementImageSnapshot(img);
+          await snapshot(img);
           done();
         });
 
@@ -91,10 +91,10 @@ describe('Tags img', () => {
     expect(src).toBe('assets/rabbit.png');
     // have to wait for asset load?
     await sleep(0.1);
-    await matchViewportSnapshot();
+    await snapshot();
     img.src = 'assets/solidblue.png';
     await sleep(0.1);
-    await matchViewportSnapshot();
+    await snapshot();
     src = img.src;
     expect(src).toBe('assets/solidblue.png');
   });
@@ -104,7 +104,7 @@ describe('Tags img', () => {
     img.onload = async () => {
       expect(img.width).toBe(70);
       expect(img.height).toBe(72);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     };
     img.src = 'assets/rabbit.png';
@@ -116,16 +116,16 @@ describe('Tags img', () => {
       src: 'assets/rabbit.png'
     }) as HTMLImageElement;
     BODY.appendChild(img);
-    await matchViewportSnapshot(0.2);
+    await snapshot(0.2);
     img.src = 'assets/300x150-green.png';
-    await matchViewportSnapshot(0.2);
+    await snapshot(0.2);
   });
 
   it('support base64 data url', async () => {
     var img = document.createElement('img');
     img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAIAAAC0tAIdAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAACJJREFUKFNjZGD4z0AKAKomHpGgFOQK4g0eVY01rEZCCAIAC+rSL3tdVQUAAAAASUVORK5CYII=';
     document.body.appendChild(img);
-    await matchViewportSnapshot(0.2);
+    await snapshot(0.2);
   });
 
   it('minwidth and minheight of image is 0', async () => {
@@ -135,7 +135,7 @@ describe('Tags img', () => {
     img.style.minHeight = '0';
     img.style.display = 'inline';
     document.body.appendChild(img);
-    await matchViewportSnapshot(0.2);
+    await snapshot(0.2);
   });
 
   it('image size and image natural size', (done) => {
@@ -172,7 +172,7 @@ describe('Tags img', () => {
     document.body.appendChild(img);
 
     img.onload = async () => {
-      await matchElementImageSnapshot(img);
+      await snapshot(img);
       done();
     };
   });

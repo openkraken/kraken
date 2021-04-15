@@ -41,6 +41,6 @@ describe('available-height', () => {
     BODY.appendChild(log);
     BODY.appendChild(wrapper);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -36,7 +36,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-end when flex-direction is row', async () => {
@@ -76,7 +76,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with center when flex-direction is row', async () => {
@@ -116,7 +116,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with space-around when flex-direction is row', async () => {
@@ -156,7 +156,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with space-between when flex-direction is row', async () => {
@@ -196,7 +196,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-start when flex-direction is column', async () => {
@@ -236,7 +236,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-end when flex-direction is column', async () => {
@@ -276,7 +276,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with center when flex-direction is column', async () => {
@@ -316,7 +316,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with space-around when flex-direction is column', async () => {
@@ -356,7 +356,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with space-between when flex-direction is column', async () => {
@@ -396,7 +396,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with center when flex-grow exists', async () => {
@@ -465,7 +465,7 @@ describe('flexbox justify-content', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with center when flex-shrink exists', async () => {
@@ -531,7 +531,7 @@ describe('flexbox justify-content', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-start when children width is larger than container', async () => {
@@ -600,7 +600,7 @@ describe('flexbox justify-content', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-end when children width is larger than container', async () => {
@@ -669,7 +669,7 @@ describe('flexbox justify-content', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('should work with center when children width is larger than container', async () => {
     let failFlag;
@@ -737,7 +737,7 @@ describe('flexbox justify-content', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with space-between when children width is larger than container', async () => {
@@ -806,7 +806,7 @@ describe('flexbox justify-content', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with space-around when children width is larger than container', async () => {
@@ -875,7 +875,7 @@ describe('flexbox justify-content', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with space-evenly when children width is larger than container', async () => {
@@ -944,6 +944,6 @@ describe('flexbox justify-content', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

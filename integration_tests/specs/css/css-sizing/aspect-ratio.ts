@@ -71,7 +71,7 @@ describe('aspect-ratio', () => {
       if (container != null) {
         container.style.height = '100px';
       }
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });

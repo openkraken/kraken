@@ -35,7 +35,7 @@ describe('Node API', () => {
     const child_3 = document.createTextNode('fourth child');
     el.replaceChild(child_3, child_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('ChildNode.prototype.remove', () => {
@@ -101,10 +101,10 @@ describe('Node API', () => {
     expect(container.childNodes.length == 3);
     expect(container.textContent).toBe('1234567890');
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
     container.textContent = '';
     expect(container.childNodes.length == 1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with ownerDocument', () => {

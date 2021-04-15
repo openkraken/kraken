@@ -57,7 +57,7 @@ describe('top-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('002', async () => {
     let p;
@@ -104,7 +104,7 @@ describe('top-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003-ref', async () => {
     let p;
@@ -189,7 +189,7 @@ describe('top-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(inlineBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let p;
@@ -249,7 +249,7 @@ describe('top-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('percentage-001-ref', async () => {
     let p;
@@ -299,7 +299,7 @@ describe('top-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('percentage-001', async () => {
     let p;
@@ -371,7 +371,7 @@ describe('top-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('percentage-002', async () => {
     let p;
@@ -456,6 +456,6 @@ describe('top-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(grandParentAbsPos);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

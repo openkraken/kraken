@@ -3,6 +3,6 @@ describe('Cookie', () => {
     document.cookie = "name=oeschger";
     document.cookie = "favorite_food=tripe";
     document.body.appendChild(document.createTextNode(document.cookie));
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

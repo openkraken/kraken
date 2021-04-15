@@ -46,7 +46,7 @@ describe('flexbox flex-wrap', () => {
     );
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with nowrap', async () => {
@@ -96,7 +96,7 @@ describe('flexbox flex-wrap', () => {
     );
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with wrap-reverse', async () => {
@@ -146,7 +146,7 @@ describe('flexbox flex-wrap', () => {
     );
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with wrap when flex-direction is column and height not exists", async () => {
@@ -187,7 +187,7 @@ describe('flexbox flex-wrap', () => {
     );
     BODY.appendChild(flexbox_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with wrap when flex-direction is column and height is smaller than children's height", async () => {
@@ -229,6 +229,6 @@ describe('flexbox flex-wrap', () => {
     );
     BODY.appendChild(flexbox_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

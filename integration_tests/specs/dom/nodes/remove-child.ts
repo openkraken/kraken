@@ -18,6 +18,6 @@ describe('Remove child', () => {
     document.body.appendChild(block2);
     document.body.removeChild(block1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

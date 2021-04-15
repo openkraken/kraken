@@ -377,7 +377,7 @@ describe('tiled-conic', () => {
     BODY.appendChild(bar_3);
     BODY.appendChild(bar_4);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('gradients', async () => {
     let gradient;
@@ -395,6 +395,6 @@ describe('tiled-conic', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

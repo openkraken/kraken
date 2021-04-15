@@ -40,7 +40,7 @@ describe('Position', () => {
 
     container2.appendChild(div2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex', async () => {
@@ -91,7 +91,7 @@ describe('Position', () => {
     container.appendChild(absoluteEl);
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('property static', async () => {
@@ -108,7 +108,7 @@ describe('Position', () => {
 
     document.body.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('proeprty relative', async () => {
@@ -136,7 +136,7 @@ describe('Position', () => {
     div2.appendChild(document.createTextNode('relative bottom & right'));
     document.body.appendChild(div2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('property fixed', async () => {
@@ -164,7 +164,7 @@ describe('Position', () => {
 
     container1.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   xit('peroperty sticky', async () => {
@@ -249,6 +249,6 @@ describe('Position', () => {
     document.body.appendChild(sticky4);
     document.body.appendChild(block4);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

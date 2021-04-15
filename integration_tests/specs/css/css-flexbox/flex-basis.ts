@@ -62,7 +62,7 @@ describe('flex-basis', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('002', async () => {
     let p;
@@ -138,7 +138,7 @@ describe('flex-basis', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('003', async () => {
     let p;
@@ -214,7 +214,7 @@ describe('flex-basis', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('004', async () => {
     let p;
@@ -292,7 +292,7 @@ describe('flex-basis', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -347,7 +347,7 @@ describe('flex-basis', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('007', async () => {
     let p;
@@ -412,7 +412,7 @@ describe('flex-basis', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('item-margins-001', async () => {
     let p;
@@ -501,6 +501,6 @@ describe('flex-basis', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

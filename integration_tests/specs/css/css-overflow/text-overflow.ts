@@ -61,7 +61,7 @@ describe('text-overflow', () => {
     BODY.appendChild(div_1);
     BODY.appendChild(div_2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ellipsis-002', async () => {
     let element;
@@ -96,7 +96,7 @@ describe('text-overflow', () => {
     );
     BODY.appendChild(parent);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ellipsis-editing-input-ref', async () => {
     let p;
@@ -122,7 +122,7 @@ describe('text-overflow', () => {
     BODY.appendChild(inputElement);
     inputElement.setAttribute('value', 'xxxxxxxxxxxxxxxx');
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   
   it('ellipsis-editing-input', async () => {
@@ -149,6 +149,6 @@ describe('text-overflow', () => {
     BODY.appendChild(inputElement);
     inputElement.setAttribute('value', 'xxxxxxxxxxxxxxxx');
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -17,11 +17,11 @@ describe('overflow-change', () => {
 
     setTimeout(async() => {
       cont.style.overflow = 'hidden';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     }, 100);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with overflow change from hidden to visible', async (done) => {
@@ -42,11 +42,11 @@ describe('overflow-change', () => {
 
     setTimeout(async() => {
       cont.style.overflow = 'visible';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     }, 100);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('change from scroll to visible and no transform exists', async (done) => {
@@ -68,11 +68,11 @@ describe('overflow-change', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async() => {
       cont.style.overflow = 'visible';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -97,11 +97,11 @@ describe('overflow-change', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async() => {
       cont.style.overflow = 'visible';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -125,11 +125,11 @@ describe('overflow-change', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async() => {
       cont.style.overflow = 'scroll';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -157,14 +157,14 @@ describe('overflow-change', () => {
     ]);
     BODY.appendChild(inner3);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async() => {
       inner3.style.position = 'static';
       inner3.style.position = 'relative';
       inner3.style.overflowY = 'visible';
       inner3.style.overflowY = 'scroll';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });

@@ -22,10 +22,10 @@ describe('insert-block-in-blocks-n-inlines', () => {
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, firstBlock);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       element.removeChild(inserted);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
@@ -39,7 +39,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
     ]);
 
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -67,10 +67,10 @@ describe('insert-block-in-blocks-n-inlines', () => {
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       element.removeChild(inserted);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
@@ -84,7 +84,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
     ]);
 
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -112,10 +112,10 @@ describe('insert-block-in-blocks-n-inlines', () => {
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       element.removeChild(inserted);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
@@ -130,7 +130,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
     ]);
 
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -158,10 +158,10 @@ describe('insert-block-in-blocks-n-inlines', () => {
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       element.removeChild(inserted);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
@@ -176,7 +176,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
     ]);
 
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -204,10 +204,10 @@ describe('insert-block-in-blocks-n-inlines', () => {
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       element.removeChild(inserted);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
@@ -222,7 +222,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
     ]);
 
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -250,10 +250,10 @@ describe('insert-block-in-blocks-n-inlines', () => {
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       element.removeChild(inserted);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
@@ -268,7 +268,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
     ]);
 
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -296,10 +296,10 @@ describe('insert-block-in-blocks-n-inlines', () => {
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       element.removeChild(inserted);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
@@ -314,7 +314,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
     ]);
 
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -342,10 +342,10 @@ describe('insert-block-in-blocks-n-inlines', () => {
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       element.removeChild(inserted);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
@@ -362,7 +362,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
     ]);
 
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -390,10 +390,10 @@ describe('insert-block-in-blocks-n-inlines', () => {
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       element.removeChild(inserted);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 
@@ -410,7 +410,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
     ]);
 
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });

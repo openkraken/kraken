@@ -221,6 +221,6 @@ describe('overfow-outside', () => {
     BODY.appendChild(container_4);
     BODY.appendChild(container_5);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

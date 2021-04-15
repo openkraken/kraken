@@ -40,7 +40,7 @@ describe('dynamic-bsize', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('change', async () => {
     let myHeightChanges;
@@ -82,10 +82,10 @@ describe('dynamic-bsize', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     myHeightChanges.style.height = '200px';
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

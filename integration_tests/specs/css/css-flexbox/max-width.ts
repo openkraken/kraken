@@ -151,7 +151,7 @@ describe('max-width', () => {
     BODY.appendChild(p_1);
     BODY.appendChild(columns_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-shrink 0', async () => {
@@ -202,7 +202,7 @@ describe('max-width', () => {
     div_1.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-shrink 1 and parent has width set', async () => {
@@ -252,7 +252,7 @@ describe('max-width', () => {
     div_1.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-shrink 1 and parent has max-width set', async () => {
@@ -303,6 +303,6 @@ describe('max-width', () => {
     div_1.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

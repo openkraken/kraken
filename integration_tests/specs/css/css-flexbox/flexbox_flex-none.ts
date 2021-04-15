@@ -148,7 +148,7 @@ describe('flexbox_flex-none', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrappable-content-ref', async () => {
     let div;
@@ -191,7 +191,7 @@ describe('flexbox_flex-none', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrappable-content', async () => {
     let div;
@@ -247,6 +247,6 @@ describe('flexbox_flex-none', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

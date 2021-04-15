@@ -59,7 +59,7 @@ describe('blocks', () => {
     BODY.appendChild(container);
     BODY.appendChild(control);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('012', async () => {
     let p;
@@ -126,7 +126,7 @@ describe('blocks', () => {
     BODY.appendChild(container);
     BODY.appendChild(control);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('014', async () => {
     let p;
@@ -187,7 +187,7 @@ describe('blocks', () => {
     BODY.appendChild(container);
     BODY.appendChild(control);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('015', async () => {
     let p;
@@ -254,7 +254,7 @@ describe('blocks', () => {
     BODY.appendChild(container);
     BODY.appendChild(control);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('018', async () => {
     let control;
@@ -316,7 +316,7 @@ describe('blocks', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('019', async () => {
     let control;
@@ -378,7 +378,7 @@ describe('blocks', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('020', async () => {
     let p;
@@ -439,7 +439,7 @@ describe('blocks', () => {
     BODY.appendChild(p);
     BODY.appendChild(outer);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('021', async () => {
     let p;
@@ -500,7 +500,7 @@ describe('blocks', () => {
     BODY.appendChild(p);
     BODY.appendChild(outer);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('022', async () => {
     let p;
@@ -561,7 +561,7 @@ describe('blocks', () => {
     BODY.appendChild(p);
     BODY.appendChild(outer);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('026', async () => {
     let p;
@@ -652,7 +652,7 @@ describe('blocks', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('027', async () => {
     let p;
@@ -697,7 +697,7 @@ describe('blocks', () => {
     BODY.appendChild(test);
     BODY.appendChild(control);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('028', async () => {
     let p;
@@ -742,6 +742,6 @@ describe('blocks', () => {
     BODY.appendChild(test);
     BODY.appendChild(control);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

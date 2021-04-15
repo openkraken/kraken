@@ -101,7 +101,7 @@ describe('clip', () => {
     BODY.appendChild(outer_1);
     BODY.appendChild(outer_2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let inner;
@@ -347,7 +347,7 @@ describe('clip', () => {
     BODY.appendChild(wrapper_3);
     BODY.appendChild(wrapper_4);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('004', async () => {
     let inner;
@@ -453,7 +453,7 @@ describe('clip', () => {
     BODY.appendChild(outer_1);
     BODY.appendChild(outer_2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('005', async () => {
     let inner;
@@ -562,6 +562,6 @@ describe('clip', () => {
     BODY.appendChild(outer_1);
     BODY.appendChild(outer_2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

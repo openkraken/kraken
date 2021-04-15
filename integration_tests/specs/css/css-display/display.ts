@@ -8,7 +8,7 @@ describe('display', () => {
       createElementWithStyle('div', divStyle, createText('Filter text')),
     ]);
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('002', async () => {
@@ -20,7 +20,7 @@ describe('display', () => {
       createElementWithStyle('div', divStyle, createText('Filter text')),
     ]);
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005', async () => {
     let divdivStyle = {
@@ -31,7 +31,7 @@ describe('display', () => {
       createElementWithStyle('div', divdivStyle, createText('Filter text')),
     ]);
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('016', async () => {
     let divStyle = {
@@ -40,7 +40,7 @@ describe('display', () => {
     };
     let element = createElementWithStyle('div', divStyle, createText('FAIL'));
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('applies-to-001', async () => {
     let spanStyle = {
@@ -52,7 +52,7 @@ describe('display', () => {
       createText('Filter text'),
     ]);
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('none-001', async () => {
     let divStyle = {
@@ -62,7 +62,7 @@ describe('display', () => {
     };
     let element = createElementWithStyle('div', divStyle, createText('Filter Text'));
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('none-002', async () => {
     let divStyle = {
@@ -72,6 +72,6 @@ describe('display', () => {
     };
     let element = createElementWithStyle('div', divStyle, createText('Filter Text'));
     append(BODY, element);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -8,7 +8,7 @@ describe('vmin-vmax', () => {
     let div = <div style={style} />;
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('transition', done => {
@@ -25,7 +25,7 @@ describe('vmin-vmax', () => {
     BODY.appendChild(div);
 
     div.addEventListener('transitionend', async () => {
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
 

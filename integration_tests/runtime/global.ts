@@ -30,17 +30,6 @@ function sleep(second: number) {
   return new Promise(done => setTimeout(done, second * 1000));
 }
 
-function createElementWithStyle(tag: string, style: { [key: string]: string | number }, child?: Node | Array<Node>): any {
-  const el = document.createElement(tag);
-  setElementStyle(el, style);
-  if (Array.isArray(child)) {
-    child.forEach(c => el.appendChild(c));
-  } else if (child) {
-    el.appendChild(child);
-  }
-  return el;
-}
-
 type ElementProps = {
   [key: string]: any;
   style?: {
@@ -62,6 +51,17 @@ function setElementProps(el: HTMLElement, props: ElementProps) {
 function createElement(tag: string, props: ElementProps, child?: Node | Array<Node>) {
   const el = document.createElement(tag);
   setElementProps(el, props);
+  if (Array.isArray(child)) {
+    child.forEach(c => el.appendChild(c));
+  } else if (child) {
+    el.appendChild(child);
+  }
+  return el;
+}
+
+function createElementWithStyle(tag: string, style: { [key: string]: string | number }, child?: Node | Array<Node>): any {
+  const el = document.createElement(tag);
+  setElementStyle(el, style);
   if (Array.isArray(child)) {
     child.forEach(c => el.appendChild(c));
   } else if (child) {
@@ -180,13 +180,13 @@ function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
 
-async function matchViewportSnapshot(wait: number = 0.0) {
-  await sleep(wait);
-  await matchElementImageSnapshot(document.body);
-}
-
-async function matchElementImageSnapshot(element: HTMLElement) {
-  return await expectAsync(element.toBlob(1.0)).toMatchImageSnapshot();
+async function snapshot(target: HTMLElement | number = 0.0) {
+  if (typeof target == 'number') {
+    await sleep(target);
+    await expectAsync(document.body.toBlob(1.0)).toMatchSnapshot();
+  } else {
+    await expectAsync(target.toBlob(1.0)).toMatchSnapshot(); 
+  }
 }
 
 // Compatible to tests that use global variables.
@@ -199,10 +199,9 @@ Object.assign(global, {
   createText,
   createViewElement,
   setElementStyle,
-  matchElementImageSnapshot,
-  matchViewportSnapshot,
   setElementProps,
   simulateSwipe,
   simulateClick,
   sleep,
+  snapshot,
 });

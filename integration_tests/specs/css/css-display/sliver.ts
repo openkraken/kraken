@@ -21,23 +21,23 @@ describe('display sliver', () => {
 
   it('basic', async () => {
     createSliverBasicCase();
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('sliver-direction', async () => {
     const container = createSliverBasicCase();
     (container.style as any).sliverDirection = 'column';
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('scroll works', async () => {
     const container = createSliverBasicCase();
 
     container.scrollBy(0, 200);
-    await matchViewportSnapshot();
+    await snapshot();
 
     container.scrollBy(0, -150);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

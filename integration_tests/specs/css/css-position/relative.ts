@@ -24,7 +24,7 @@ describe('Position relative', () => {
     div2.appendChild(document.createTextNode('relative bottom & right'));
     document.body.appendChild(div2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should be a green square below', async done => {
@@ -41,11 +41,11 @@ describe('Position relative', () => {
     });
     append(parent, child);
     append(BODY, parent);
-    await matchElementImageSnapshot(parent);
+    await snapshot(parent);
 
     requestAnimationFrame(async () => {
       child.style.left = '150px';
-      await matchElementImageSnapshot(parent);
+      await snapshot(parent);
       done();
     });
   });
@@ -74,7 +74,7 @@ describe('Position relative', () => {
 
     document.body.appendChild(parent);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with child remove' , async () => {
@@ -112,7 +112,7 @@ describe('Position relative', () => {
     BODY.appendChild(n1);
     n1.removeChild(n2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with update position relative when comment node exists', async (done) => {
@@ -144,14 +144,14 @@ describe('Position relative', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       row1.style.position = 'static';
       row1.style.position = 'relative';
       row2.style.position = 'static';
       row2.style.position = 'relative';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });

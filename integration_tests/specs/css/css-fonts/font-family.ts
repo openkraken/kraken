@@ -19,7 +19,7 @@ describe('FontFamily', () => {
     append(BODY, p1);
     append(BODY, p2);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should works in chinese', () => {
@@ -42,6 +42,6 @@ describe('FontFamily', () => {
     append(BODY, p1);
     append(BODY, p2);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 });

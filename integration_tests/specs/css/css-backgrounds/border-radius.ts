@@ -24,7 +24,7 @@ describe('border_radius', () => {
 
     document.body.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with image', async () => {
@@ -40,7 +40,7 @@ describe('border_radius', () => {
     );
     BODY.appendChild(image);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with percentage of one value', async () => {
@@ -68,7 +68,7 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage of two values', async () => {
@@ -96,7 +96,7 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage border-radius and percentage sizing in flow layout', async () => {
@@ -124,7 +124,7 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage border-radius and percentage sizing of multiple children in flow layout', async () => {
@@ -159,7 +159,7 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage border-radius and percentage sizing in flex layout', async () => {
@@ -188,7 +188,7 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage border-radius and percentage sizing of multiple children in flex layout', async () => {
@@ -224,7 +224,7 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with border and percentage border-radius', async () => {
@@ -254,6 +254,6 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

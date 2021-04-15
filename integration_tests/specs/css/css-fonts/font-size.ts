@@ -9,7 +9,7 @@ describe('FontSize', () => {
     );
     append(BODY, p1);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should work with chinese', () => {
@@ -22,7 +22,7 @@ describe('FontSize', () => {
     );
     append(BODY, p1);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should work with less than 12px', () => {
@@ -44,7 +44,7 @@ describe('FontSize', () => {
     append(BODY, p1);
     append(BODY, p2);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should work with percentage', async () => {
@@ -75,6 +75,6 @@ describe('FontSize', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });
