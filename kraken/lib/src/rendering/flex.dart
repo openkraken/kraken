@@ -172,6 +172,10 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Flex line boxs of flex layout
   List<_RunMetrics> flexLineBoxMetrics = <_RunMetrics>[];
 
+  /// Cache the intrinsic size of children before flex-grow/flex-shrink
+  /// to avoid relayout when style of flex items changes
+  Map<int, double> childrenIntrinsicMainSizes = {};
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
@@ -548,7 +552,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
-  double _getMainAxisExtent(RenderBox child) {
+  double _getMainAxisExtent(RenderBox child, {bool shouldUseIntrinsicMainSize = false} ) {
     double marginHorizontal = 0;
     double marginVertical = 0;
 
@@ -566,7 +570,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       marginVertical = childRenderBoxModel.renderStyle.marginTop.length + childRenderBoxModel.renderStyle.marginBottom.length;
     }
 
-    double baseSize = _getMainSize(child);
+    double baseSize = _getMainSize(child, shouldUseIntrinsicMainSize: shouldUseIntrinsicMainSize);
     if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
       return baseSize + marginHorizontal;
     } else {
@@ -673,8 +677,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     return baseSize;
   }
 
-  double _getMainSize(RenderBox child) {
-    Size childSize = _getChildSize(child);
+  double _getMainSize(RenderBox child, {bool shouldUseIntrinsicMainSize = false}) {
+    Size childSize = _getChildSize(child, shouldUseIntrinsicMainSize: shouldUseIntrinsicMainSize);
     if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
       return childSize.width;
     } else {
@@ -1258,12 +1262,17 @@ class RenderFlexLayout extends RenderLayoutBox {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
         }
+        Size childSize = _getChildSize(child);
+        childrenIntrinsicMainSizes[child.hashCode] = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)
+          ? childSize.width : childSize.height;
+
       }
 
-      double childMainAxisExtent = _getMainAxisExtent(child);
+      Size childSize = _getChildSize(child, shouldUseIntrinsicMainSize: true);
+
+      double childMainAxisExtent = _getMainAxisExtent(child, shouldUseIntrinsicMainSize: true);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
 
-      Size childSize = _getChildSize(child);
       // update max scrollable size
       if (child is RenderBoxModel) {
         maxScrollableWidthMap[child.targetId] = math.max(child.scrollableSize.width, childSize.width);
@@ -1311,7 +1320,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         double childAscent = _getChildAscent(child);
         double lineHeight = _getLineHeight(child);
 
-        Size childSize = _getChildSize(child);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (lineHeight != null) {
@@ -1339,7 +1347,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       runChildren[childNodeId] = _RunChild(
         child,
-        _getMainSize(child),
+        _getMainSize(child, shouldUseIntrinsicMainSize: true),
         0,
         false,
       );
@@ -1411,13 +1419,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         return;
       }
       RenderBox child = runChild.child;
-      final double mainSize = _getMainSize(child);
-
-      double computedSize = mainSize; /// Computed size by flex factor
-      double adjustedSize = mainSize; /// Adjusted size after min and max size clamp
-      double flexGrow = _getFlexGrow(child);
-      double flexShrink = _getFlexShrink(child);
-
       int childNodeId;
       if (child is RenderTextBox) {
         childNodeId = child.targetId;
@@ -1425,20 +1426,27 @@ class RenderFlexLayout extends RenderLayoutBox {
         childNodeId = child.targetId;
       }
 
+      _RunChild current = runChildren[childNodeId];
+      double originalMainSize = current.originalMainSize;
+
+      double computedSize = originalMainSize; /// Computed size by flex factor
+      double adjustedSize = originalMainSize; /// Adjusted size after min and max size clamp
+      double flexGrow = _getFlexGrow(child);
+      double flexShrink = _getFlexShrink(child);
+
       double remainingFreeSpace = runMetric.remainingFreeSpace;
       if (isFlexGrow && flexGrow != null && flexGrow > 0) {
         final double spacePerFlex = totalFlexGrow > 0 ? (remainingFreeSpace / totalFlexGrow) : double.nan;
         final double flexGrow = _getFlexGrow(child);
-        computedSize = mainSize + spacePerFlex * flexGrow;
+        computedSize = originalMainSize + spacePerFlex * flexGrow;
       } else if (isFlexShrink && flexShrink != null && flexShrink > 0) {
-        _RunChild current = runChildren[childNodeId];
         /// If child's mainAxis have clips, it will create a new format context in it's children's.
         /// so we do't need to care about child's size.
         if (child is RenderBoxModel && _isChildMainAxisClip(child)) {
-          computedSize = current.originalMainSize + remainingFreeSpace;
+          computedSize = originalMainSize + remainingFreeSpace;
         } else {
           double shrinkValue = _getShrinkConstraints(child, runChildren, remainingFreeSpace);
-          computedSize = current.originalMainSize + shrinkValue;
+          computedSize = originalMainSize + shrinkValue;
         }
       }
 
@@ -2383,15 +2391,30 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   /// Get child size through boxSize to avoid flutter error when parentUsesSize is set to false
-  Size _getChildSize(RenderBox child) {
+  Size _getChildSize(RenderBox child, {bool shouldUseIntrinsicMainSize = false}) {
+    Size childSize;
     if (child is RenderBoxModel) {
-      return child.boxSize;
+      childSize = child.boxSize;
     } else if (child is RenderPositionHolder) {
-      return child.boxSize;
+      childSize = child.boxSize;
     } else if (child is RenderTextBox) {
-      return child.boxSize;
+      childSize = child.boxSize;
     }
-    return null;
+    if (shouldUseIntrinsicMainSize) {
+      double childIntrinsicMainSize = childrenIntrinsicMainSizes[child.hashCode];
+      if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
+        childSize = Size(
+          childIntrinsicMainSize,
+          childSize.height
+        );
+      } else {
+        childSize = Size(
+          childSize.width,
+          childIntrinsicMainSize
+        );
+      }
+    }
+    return childSize;
   }
 
   // Get distance from top to baseline of child incluing margin

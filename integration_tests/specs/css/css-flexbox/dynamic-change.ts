@@ -160,4 +160,84 @@ describe('dynamic-change', () => {
       done();
     });
   });
+
+  it('flex grow exists when its sibling main size changes', async (done) => {
+    let div;
+    let item1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (item1 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '50px',
+            background: 'red',
+          }
+        })),
+        createElement('div', {
+          style: {
+            flex: 1,
+            background: 'blue',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      item1.style.width = '200px';
+      await matchViewportSnapshot();
+      done();
+    });
+  });
+
+  it('flex shrink exists when its sibling main size changes', async (done) => {
+    let div;
+    let item1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (item1 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '50px',
+            background: 'red',
+          }
+        })),
+        createElement('div', {
+          style: {
+            width: '500px',
+            background: 'blue',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      item1.style.width = '200px';
+      await matchViewportSnapshot();
+      done();
+    });
+  });
 });

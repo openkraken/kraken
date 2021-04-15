@@ -109,8 +109,8 @@ mixin CSSSizingMixin on RenderStyleBase {
       renderBoxModel.markNeedsLayout();
       // Force relayout of the parent of positioned renderBoxModel to
       // make the constraints of renderBoxModel in sync with updated sizing.
-      final RenderLayoutParentData childParentData = renderBoxModel.parentData;
-      if (childParentData != null && childParentData.isPositioned &&
+      if (renderBoxModel.parentData is RenderLayoutParentData &&
+        (renderBoxModel.parentData as RenderLayoutParentData).isPositioned &&
         renderBoxModel.parent is RenderBoxModel) {
         (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
       }
