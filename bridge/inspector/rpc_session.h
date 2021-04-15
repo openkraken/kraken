@@ -98,7 +98,7 @@ private:
 
   struct SessionContext {
     RPCSession *session;
-    rapidjson::Document doc;
+    const std::string message;
   };
 
   void _on_message(const std::string &message) {
@@ -115,11 +115,14 @@ private:
         return;
       }
       std::string domain = method.substr(0, dotIndex);
-      if (domain == "Runtime") {
-        auto *ctx = new SessionContext{this, std::move(doc)};
+      std::string subMethod = method.substr(dotIndex + 1);
+      if ((domain == "Runtime" && subMethod == "evaluate") || domain == "Debugger" && subMethod == "evaluateOnCallFrame") {
+        auto *ctx = new SessionContext{this, message};
         ::foundation::UITaskQueue::instance(_contextId)->registerTask([](void *ptr) {
           auto *ctx = reinterpret_cast<SessionContext *>(ptr);
-          ctx->session->handleRequest(serializeRequest(std::move(ctx->doc)));
+          rapidjson::Document doc;
+          doc.Parse(ctx->message.c_str());
+          ctx->session->handleRequest(serializeRequest(std::move(doc)));
           delete ctx;
         }, ctx);
       } else {

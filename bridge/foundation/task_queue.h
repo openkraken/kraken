@@ -21,6 +21,7 @@ class TaskQueue : public fml::RefCountedThreadSafe<TaskQueue> {
 public:
   virtual int32_t registerTask(const Task &task, void *data);
   void dispatchTask(int32_t taskId);
+  void flushTask();
 
 private:
   struct TaskData {
@@ -29,6 +30,7 @@ private:
     void *data;
   };
 
+  mutable std::mutex queue_mutex_;
   std::unordered_map<int, TaskData *> m_map;
   int64_t id{0};
 

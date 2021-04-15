@@ -6,6 +6,7 @@
 #include "jsc_debugger_impl.h"
 #include <JavaScriptCore/JSCJSValueInlines.h>
 #include <JavaScriptCore/EventLoop.h>
+#include "foundation/ui_task_queue.h"
 
 namespace kraken::debugger {
 using namespace JSC;

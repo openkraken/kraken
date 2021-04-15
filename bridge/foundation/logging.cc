@@ -102,7 +102,7 @@ void pipeMessageToInspector(JSGlobalContextRef ctx, const std::string message, c
   }
 };
 
-void printLog(std::stringstream &stream, std::string level, JSGlobalContextRef ctx) {
+void printLog(int32_t contextId, std::stringstream &stream, std::string level, JSGlobalContextRef ctx) {
 #ifdef ENABLE_DEBUGGER
     JSC::MessageLevel _log_level = JSC::MessageLevel::Info;
 #endif
@@ -148,15 +148,7 @@ void printLog(std::stringstream &stream, std::string level, JSGlobalContextRef c
     JSC::MessageLevel logLevel;
   };
 
-  if (std::this_thread::get_id() == getUIThreadId()) {
-    auto context = new TaskContext{ctx, stream.str(), _log_level};
-    foundation::InspectorTaskQueue::instance(0)->registerTask([](void *data) {
-      auto *taskContext = reinterpret_cast<TaskContext *>(data);
-      pipeMessageToInspector(taskContext->ctx, taskContext->message, taskContext->logLevel);
-    }, context);
-  } else {
-    pipeMessageToInspector(ctx, stream.str(), _log_level);
-  }
+  pipeMessageToInspector(ctx, stream.str(), _log_level);
 #endif
   }
 
