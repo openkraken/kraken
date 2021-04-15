@@ -50,7 +50,7 @@ describe('auto-height', () => {
     await matchViewportSnapshot();
   });
 
-  it("with flex", async () => {
+  xit("with flex", async () => {
     let div;
     div = createElement(
       'div',

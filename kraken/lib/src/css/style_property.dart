@@ -665,15 +665,6 @@ class CSSStyleProperty {
       } else {
         return null;
       }
-
-      // Mordern browsers intepretes flex-basis to '0%' instead of '0px' when flex-basis
-      // is not explicitly set in flex shorthand which eventually resolves as 'auto' by browsers.
-      // Note this behavior violates the lastest flexbox spec which intepretes it as '0px'.
-      // [https://www.w3.org/TR/css-flexbox-1/#flex-property]
-      // Kraken adhere to the same behavior as browsers for compatibility reason.
-      if (values.length != 3) {
-        basis = AUTO;
-      }
     }
 
     return [grow ?? _1, shrink ?? _1, basis ?? _0];

@@ -589,14 +589,13 @@ class RenderFlexLayout extends RenderLayoutBox {
       RenderStyle childRenderStyle = child.renderStyle;
       double flexBasis = _getFlexBasis(child);
 
-      // Main axis size of child's content
-      double childContentMainSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
-        child.autoMinWidth : child.autoMinHeight;
-
-      double baseSize = childContentMainSize ;
-      // When flex-basis is smaller than its base content size, it will not take effects.
-      if (flexBasis != null && flexBasis >= childContentMainSize) {
-        baseSize = flexBasis;
+      double baseSize;
+      // @FIXME: By default, flex items won’t shrink below their minimum content size
+      // https://drafts.csswg.org/css-flexbox/#flex-common
+      // And flex basis should compare with its minimum content size which cannot get
+      // before its children layout, so set baseSize logic should move to child layout stage.
+      if (flexBasis != null) {
+        baseSize = flexBasis ?? 0;
       }
 
       if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
@@ -643,38 +642,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         maxHeight: maxHeight,
       );
     }
-  }
-
-  double _getBaseSize(RenderObject child) {
-    // set default value
-    double baseSize;
-    if (child is RenderTextBox) {
-      return baseSize;
-    } else if (child is RenderBoxModel) {
-      double flexBasis = _getFlexBasis(child);
-      RenderStyle childRenderStyle = child.renderStyle;
-
-      if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-        double width = childRenderStyle.width;
-        if (flexBasis == null) {
-          if (width != null) {
-            baseSize = width ?? 0;
-          }
-        } else {
-          baseSize = childRenderStyle.flexBasis ?? 0;
-        }
-      } else {
-        double height = childRenderStyle.height;
-        if (flexBasis == null) {
-          if (height != null) {
-            baseSize = height ?? 0;
-          }
-        } else {
-          baseSize = childRenderStyle.flexBasis ?? 0;
-        }
-      }
-    }
-    return baseSize;
   }
 
   double _getMainSize(RenderBox child, {bool shouldUseIntrinsicMainSize = false}) {
@@ -1140,7 +1107,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
 
-      double baseSize = _getBaseSize(child);
       BoxConstraints innerConstraints;
 
       int childNodeId;
@@ -1221,10 +1187,6 @@ class RenderFlexLayout extends RenderLayoutBox {
           maxHeight: baseConstraints.maxHeight,
           maxWidth: maxCrossAxisSize,
         );
-      } else {
-        innerConstraints = BoxConstraints(
-          minHeight: baseSize != null ? baseSize : 0
-        );
       }
 
       BoxConstraints childConstraints = deflateOverflowConstraints(innerConstraints);
@@ -1256,7 +1218,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
-
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
