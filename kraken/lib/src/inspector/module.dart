@@ -67,7 +67,6 @@ abstract class IsolateInspectorModule extends _InspectorModule {
 
   void callNativeInspectorMethod(int id, String method, Map<String, dynamic> params) {
     assert(server.nativeInspectorMessageHandler != null);
-    print('id: $id, method: $method');
     server.nativeInspectorMessageHandler(jsonEncode({'id': id, 'method': name + '.' + method, 'params': params}));
   }
 

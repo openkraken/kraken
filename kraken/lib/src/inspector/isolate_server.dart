@@ -47,13 +47,11 @@ typedef Native_InspectorMessage = Void Function(Int32 contextId, Pointer<Utf8>);
 
 void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
   IsolateInspectorServer server = _inspectorServerMap[contextId];
-  print('inspect message called');
   if (server == null) {
     print('Internal error: can not get inspector server from contextId: $contextId');
     return;
   }
   String data = Utf8.fromUtf8(message);
-  print('return message to dev frontend: $data');
   server.sendRawJSONToFrontend(data);
 }
 
@@ -142,7 +140,6 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
       } else if (data is InspectorMethodResult) {
         server.sendToFrontend(data.id, data.result);
       } else if (data is InspectorPostTaskMessage) {
-        print('InspectorPostTaskMessage: ${data.context}');
         server._dispatchInspectorTask(mainIsolateJSContextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));
       }
     }
