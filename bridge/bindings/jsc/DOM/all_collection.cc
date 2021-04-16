@@ -18,7 +18,7 @@ JSValueRef JSAllCollection::getProperty(std::string &name, JSValueRef *exception
     case AllCollectionProperty::add:
     case AllCollectionProperty::item:
     case AllCollectionProperty::remove:
-      return JSObjectGetProperty(ctx, jsObject, nameStringHolder.getString(), exception);
+      return nullptr;
     case AllCollectionProperty::length:
       return JSValueMakeNumber(ctx, m_nodes.size());
     }
