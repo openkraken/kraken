@@ -399,7 +399,7 @@ describe('max-height', () => {
       createText('max-height')
     ]);
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('max-height is larger than height in flow layout', async () => {
@@ -414,7 +414,7 @@ describe('max-height', () => {
       createText('max-height')
     ]);
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('max-height smaller than height in flow layout', async () => {
@@ -429,6 +429,68 @@ describe('max-height', () => {
       createText('max-height')
     ]);
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
+  });
+
+  it('max-height exists and height does not exist in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        maxHeight: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('max-height')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
+
+  it('max-height is larger than height in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        maxHeight: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('max-height')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
+
+  it('max-height smaller than height in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        maxWidth: '50px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('max-height')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
   });
 });

@@ -736,7 +736,7 @@ describe('flex-grow', () => {
       ]);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   xit("automatic flex container size is smaller than its content size", async () => {
@@ -808,6 +808,6 @@ describe('flex-grow', () => {
       ]);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

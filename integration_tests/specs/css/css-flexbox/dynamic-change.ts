@@ -152,11 +152,11 @@ describe('dynamic-change', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       item1.style.height = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -192,11 +192,11 @@ describe('dynamic-change', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       item1.style.width = '200px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -232,11 +232,11 @@ describe('dynamic-change', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       item1.style.width = '200px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -273,11 +273,11 @@ describe('dynamic-change', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       item1.style.width = '200px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -315,11 +315,11 @@ describe('dynamic-change', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       item1.style.height = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -357,11 +357,11 @@ describe('dynamic-change', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       item1.style.height = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
