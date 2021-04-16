@@ -26,7 +26,6 @@ DispatchResponse JSCPageAgentImpl::disable() {
 
 DispatchResponse JSCPageAgentImpl::reload(kraken::debugger::Maybe<bool> in_ignoreCache,
                                           kraken::debugger::Maybe<std::string> in_scriptToEvaluateOnLoad) {
-  KRAKEN_LOG(VERBOSE) << "handle reload...";
   if (m_session && m_session->protocolHandler()) {
     m_session->protocolHandler()->handlePageReload();
     return DispatchResponse::OK();

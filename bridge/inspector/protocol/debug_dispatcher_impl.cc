@@ -40,7 +40,6 @@ void DebugDispatcherImpl::dispatch(uint64_t callId, const std::string &method, d
  * */
 void DebugDispatcherImpl::continueToLocation(uint64_t callId, const std::string &method,
                                              debugger::JSONObject message, debugger::ErrorSupport *errors) {
-  KRAKEN_LOG(VERBOSE) << "received [continueToLocation] message: " << callId;
   // Prepare input parameters.
   errors->push();
   errors->setName("location");
@@ -86,7 +85,6 @@ void DebugDispatcherImpl::continueToLocation(uint64_t callId, const std::string 
  * */
 void DebugDispatcherImpl::disable(uint64_t callId, const std::string &method, JSONObject message,
                                   ErrorSupport *) {
-  KRAKEN_LOG(VERBOSE) << "received [disable] message: " << callId;
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->disable();
   if (response.status() == DispatchResponse::kFallThrough) {
@@ -110,8 +108,6 @@ void DebugDispatcherImpl::disable(uint64_t callId, const std::string &method, JS
  * **/
 void DebugDispatcherImpl::enable(uint64_t callId, const std::string &method, JSONObject message,
                                  ErrorSupport *) {
-  KRAKEN_LOG(VERBOSE) << "received [enable] message: " << callId;
-
   double maxScriptsCacheSize = -1;
   if (message.HasMember("maxScriptsCacheSize")) {
     maxScriptsCacheSize = message["maxScriptsCacheSize"].GetDouble();
@@ -1012,8 +1008,6 @@ void DebugDispatcherImpl::setBreakpointOnFunctionCall(uint64_t callId, const std
 
 void DebugDispatcherImpl::setBreakpointsActive(uint64_t callId, const std::string &method, JSONObject message,
                                                ErrorSupport *errors) {
-  KRAKEN_LOG(VERBOSE) << "received [setBreakpointsActive] message: " << callId;
-
   // Prepare input parameters.
   errors->push();
   bool in_active = false;
@@ -1042,8 +1036,6 @@ void DebugDispatcherImpl::setBreakpointsActive(uint64_t callId, const std::strin
 
 void DebugDispatcherImpl::setPauseOnExceptions(uint64_t callId, const std::string &method, JSONObject message,
                                                ErrorSupport *errors) {
-  KRAKEN_LOG(VERBOSE) << "received [setPauseOnExceptions] message: " << callId;
-
   // Prepare input parameters.
   errors->push();
   std::string in_state;
@@ -1270,8 +1262,6 @@ void DebugDispatcherImpl::setVariableValue(uint64_t callId, const std::string &m
 
 void DebugDispatcherImpl::stepInto(uint64_t callId, const std::string &method, JSONObject message,
                                    ErrorSupport *errors) {
-  KRAKEN_LOG(VERBOSE) << "received [stepInto] message: " << callId;
-
   // Prepare input parameters.
   errors->push();
 
@@ -1303,7 +1293,6 @@ void DebugDispatcherImpl::stepInto(uint64_t callId, const std::string &method, J
 
 void DebugDispatcherImpl::stepOut(uint64_t callId, const std::string &method, JSONObject message,
                                   ErrorSupport *) {
-  KRAKEN_LOG(VERBOSE) << "received [stepOut] message: " << callId;
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->stepOut();
   if (response.status() == DispatchResponse::kFallThrough) {
@@ -1316,7 +1305,6 @@ void DebugDispatcherImpl::stepOut(uint64_t callId, const std::string &method, JS
 
 void DebugDispatcherImpl::stepOver(uint64_t callId, const std::string &method, JSONObject message,
                                    ErrorSupport *) {
-  KRAKEN_LOG(VERBOSE) << "received [stepOver] message: " << callId;
   std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
   DispatchResponse response = m_backend->stepOver();
   if (response.status() == DispatchResponse::kFallThrough) {

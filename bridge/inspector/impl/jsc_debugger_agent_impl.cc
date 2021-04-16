@@ -377,7 +377,6 @@ void JSCDebuggerAgentImpl::breakpointActionLog(JSC::ExecState &state, const WTF:
 }
 
 void JSCDebuggerAgentImpl::breakpointActionSound(int breakpointActionIdentifier) {
-  KRAKEN_LOG(VERBOSE) << "breakpointActionSound called: " << breakpointActionIdentifier;
 }
 
 void JSCDebuggerAgentImpl::breakpointActionProbe(JSC::ExecState &scriptState,
@@ -392,7 +391,6 @@ void JSCDebuggerAgentImpl::breakpointActionProbe(JSC::ExecState &scriptState,
                   .setTimestamp(m_injectedScriptManager->inspectorEnvironment().executionStopwatch()->elapsedTime().milliseconds())
                   .setPayload(WTFMove(payload))
                   .release();
-  KRAKEN_LOG(VERBOSE) << "breakpointActionProbe called:" << result->toJSONString().utf8().data();
 }
 
 /////////////////////Backend Interface////////////////////////////////
@@ -1360,10 +1358,8 @@ bool JSCDebuggerAgentImpl::breakpointActionsFromProtocol(Inspector::ErrorString 
 }
 
 void JSCDebuggerAgentImpl::willRunMicrotask() {
-  KRAKEN_LOG(VERBOSE) << "will Run microtask";
 }
 void JSCDebuggerAgentImpl::didRunMicrotask() {
-  KRAKEN_LOG(VERBOSE) << "did Run microtask";
 }
 
 } // namespace kraken::debugger

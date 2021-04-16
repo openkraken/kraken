@@ -382,7 +382,6 @@ DispatchResponse JSCRuntimeAgentImpl::getProperties(
   if (internalProperties != nullptr) {
     *out_internalProperties = std::make_unique<std::vector<std::unique_ptr<InternalPropertyDescriptor>>>();
     std::string internalPropStr = internalProperties->toJSONString().utf8().data();
-    //                KRAKEN_LOG(VERBOSE) << "[Runtime.getProperties] internalProperties: " << internalPropStr;
 
     rapidjson::Document internal_prop_obj;
     internal_prop_obj.Parse(internalPropStr.c_str());

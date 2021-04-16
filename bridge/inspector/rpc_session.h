@@ -45,7 +45,6 @@ public:
   }
 
   ~RPCSession() {
-    KRAKEN_LOG(VERBOSE) << "--------- RPCSession Destroyed --------- ";
   }
 
   void handleRequest(Request req);
