@@ -492,15 +492,24 @@ class RenderStyle
 
   /// Calculate renderBoxModel constraints based on style
   BoxConstraints getConstraints() {
-    CSSDisplay transformedDisplay = renderBoxModel.renderStyle.transformedDisplay;
-    bool isInline = transformedDisplay == CSSDisplay.inline;
+    bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
+    bool isDisplayNone = transformedDisplay == CSSDisplay.none;
+
+    if (isDisplayNone) {
+      return BoxConstraints(
+        minWidth: 0,
+        maxWidth: 0,
+        minHeight: 0,
+        maxHeight: 0
+      );
+    }
 
     double minConstraintWidth = 0;
     double maxConstraintWidth = double.infinity;
     double minConstraintHeight = 0;
     double maxConstraintHeight = double.infinity;;
 
-    if (!isInline) {
+    if (!isDisplayInline) {
       double horizontalBorderWidth = borderEdge != null ? borderEdge.horizontal : 0;
       double verticalBorderWidth = borderEdge != null ? borderEdge.vertical : 0;
       double horizontalPaddingWidth = padding != null ? padding.horizontal : 0;

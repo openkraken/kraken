@@ -629,7 +629,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       return;
     }
 
-    BoxConstraints childConstraints = BoxConstraints();
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
@@ -646,7 +645,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
     }
-    assert(childConstraints != null);
     assert(mainAxisLimit != null);
     final double spacing = this.spacing;
     final double runSpacing = this.runSpacing;
@@ -702,6 +700,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
+        BoxConstraints childConstraints = BoxConstraints();
         if (child is RenderBoxModel) {
           childConstraints = child.renderStyle.getConstraints();
         }
