@@ -21,7 +21,7 @@
 
 namespace kraken::debugger {
 
-InspectorSession::InspectorSession(RPCSession *rpcSession, JSC::JSGlobalObject *globalObject,
+InspectorSession::InspectorSession(RPCSession *rpcSession, JSGlobalContextRef ctx, JSC::JSGlobalObject *globalObject,
                                            std::shared_ptr<ProtocolHandler> handler)
   : m_rpcSession(rpcSession), m_dispatcher(this), m_protocol_handler(handler),
     m_executionStopwatch(Stopwatch::create()) {
@@ -46,6 +46,9 @@ InspectorSession::InspectorSession(RPCSession *rpcSession, JSC::JSGlobalObject *
   m_console_client = new JSCConsoleClientImpl(m_log_agent.get());
   globalObject->setConsoleClient(m_console_client); // bind console client
 
+  JSObjectRef globalObjectRef = JSContextGetGlobalObject(ctx);
+  JSObjectSetPrivate(globalObjectRef, m_console_client);
+
   m_heap_profiler_agent.reset(new JSCHeapProfilerAgentImpl(this, context));
   HeapProfilerDispatcherContract::wire(&m_dispatcher, m_heap_profiler_agent.get());
 }
@@ -54,7 +57,6 @@ InspectorSession::~InspectorSession() {
 }
 
 void InspectorSession::onSessionClosed(int, const std::string &) {
-  //            JSC::JSLockHolder holder(vm());
   if (m_debugger->globalObject()) {
     m_debugger->globalObject()->setConsoleClient(nullptr);
   }

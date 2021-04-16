@@ -91,11 +91,8 @@ LogMessage::~LogMessage() {
 }
 
 void pipeMessageToInspector(JSGlobalContextRef ctx, const std::string message, const JSC::MessageLevel logLevel) {
-  JSC::ExecState* exec = toJS(ctx);
-  JSC::VM& vm = exec->vm();
-  JSC::JSLockHolder locker(vm);
-  JSC::JSGlobalObject* globalObject = vm.vmEntryGlobalObject(exec);
-  auto client = globalObject->consoleClient();
+  JSObjectRef globalObjectRef = JSContextGetGlobalObject(ctx);
+  auto client = JSObjectGetPrivate(globalObjectRef);
   if (client && client != ((void *)0x1)) {
     auto client_impl = reinterpret_cast<kraken::debugger::JSCConsoleClientImpl *>(client);
     client_impl->sendMessageToConsole(logLevel, message);
