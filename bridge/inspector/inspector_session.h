@@ -12,6 +12,7 @@
 #include "inspector/protocol/uber_dispatcher.h"
 #include "inspector/protocol_handler.h"
 #include "foundation/logging.h"
+#include "foundation/task_queue.h"
 
 #include <JavaScriptCore/InjectedScriptManager.h>
 #include <JavaScriptCore/InspectorEnvironment.h>
@@ -120,6 +121,10 @@ public:
 
   JSCLogAgentImpl *logAgent() {
     return m_log_agent.get();
+  }
+
+  bool isDebuggerPaused() {
+    return m_debugger->isPaused();
   }
 
   RPCSession *rpcSession() { return m_rpcSession; }

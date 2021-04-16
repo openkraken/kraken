@@ -26,7 +26,6 @@ public:
   int32_t registerTask(const Task &task, void *data) override {
     int32_t taskId = TaskQueue::registerTask(task, data);
     assert(std::this_thread::get_id() == getUIThreadId());
-    kraken::getDartMethod()->postTaskToInspectorThread(m_contextId, taskId);
     return taskId;
   }
 private:

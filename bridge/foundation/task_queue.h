@@ -14,7 +14,6 @@
 
 namespace foundation {
 
-class TaskQueue;
 using Task = void (*)(void *);
 
 class TaskQueue : public fml::RefCountedThreadSafe<TaskQueue> {

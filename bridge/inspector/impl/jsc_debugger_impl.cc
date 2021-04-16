@@ -39,6 +39,7 @@ void JSCDebuggerImpl::runEventLoopWhilePaused() {
   Inspector::EventLoop loop;
   while (!m_doneProcessingDebuggerEvents && !loop.ended()) {
     loop.cycle();
+    foundation::UITaskQueue::instance(0)->flushTask();
   }
 }
 

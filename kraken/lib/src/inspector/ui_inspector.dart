@@ -4,6 +4,7 @@
  */
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ffi';
 
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
@@ -50,8 +51,9 @@ class InspectorMethodResult {
 }
 
 class InspectorPostTaskMessage {
-  final int taskId;
-  InspectorPostTaskMessage(this.taskId);
+  int context;
+  int callback;
+  InspectorPostTaskMessage(this.context, this.callback);
 }
 
 class UIInspector {

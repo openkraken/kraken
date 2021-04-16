@@ -23,22 +23,8 @@ class InspectorSession;
 
 class DartRPC {
 public:
-  void send(int32_t contextId, const std::string &msg) {
-    if (std::this_thread::get_id() == getUIThreadId()) {
-      auto ctx = new RPCContext{contextId, msg};
-      ::foundation::InspectorTaskQueue::instance(contextId)->registerTask([](void *ptr) {
-        auto ctx = reinterpret_cast<RPCContext *>(ptr);
-        getInspectorDartMethod()->inspectorMessage(ctx->contextId, ctx->message.c_str());
-        delete ctx;
-      }, ctx);
-    } else {
-      getInspectorDartMethod()->inspectorMessage(contextId, msg.c_str());
-    }
-  };
-
-  void setOnMessageCallback(int32_t contextId, void* rpcSession, InspectorMessageCallback callback) {
-    getInspectorDartMethod()->registerInspectorMessageCallback(contextId, rpcSession, callback);
-  }
+  void send(int32_t contextId, const std::string &msg);
+  void setOnMessageCallback(int32_t contextId, void* rpcSession, InspectorMessageCallback callback);
 private:
   struct RPCContext {
     int32_t contextId;
@@ -63,7 +49,6 @@ public:
   }
 
   void handleRequest(Request req);
-  void handleResponse(Response response);
 
   void sendRequest(Request req) {
     auto message = deserializeRequest(std::move(req));
@@ -101,39 +86,7 @@ private:
     const std::string message;
   };
 
-  void _on_message(const std::string &message) {
-    KRAKEN_LOG(VERBOSE) << "NATIVE INSPECTOR ON MESSAGE: " << message;
-    rapidjson::Document doc;
-    doc.Parse(message.c_str());
-    if (doc.HasParseError() || !doc.IsObject()) {
-      return;
-    }
-    if (doc.HasMember("method")) {
-      std::string method = doc["method"].GetString();
-      auto dotIndex = method.find('.');
-      if (dotIndex == std::string::npos) {
-        return;
-      }
-      std::string domain = method.substr(0, dotIndex);
-      std::string subMethod = method.substr(dotIndex + 1);
-      if ((domain == "Runtime" && subMethod == "evaluate") || domain == "Debugger" && subMethod == "evaluateOnCallFrame") {
-        auto *ctx = new SessionContext{this, message};
-        ::foundation::UITaskQueue::instance(_contextId)->registerTask([](void *ptr) {
-          auto *ctx = reinterpret_cast<SessionContext *>(ptr);
-          rapidjson::Document doc;
-          doc.Parse(ctx->message.c_str());
-          ctx->session->handleRequest(serializeRequest(std::move(doc)));
-          delete ctx;
-        }, ctx);
-      } else {
-        this->handleRequest(serializeRequest(std::move(doc)));
-      }
-    } else if (doc.HasMember("result")) {
-      this->handleResponse(serializeResponse(std::move(doc)));
-    } else {
-      KRAKEN_LOG(ERROR) << "[rpc] session " << _contextId << ":unknown JSON-RPC message -> " << message;
-    }
-  }
+  void _on_message(const std::string &message);
 
 private:
   std::shared_ptr<DartRPC> m_handler;

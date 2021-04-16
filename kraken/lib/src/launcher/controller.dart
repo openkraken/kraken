@@ -64,7 +64,7 @@ void spawnIsolateInspectorServer(KrakenViewController viewController, { int port
     } else if (data is InspectorServerStart) {
       viewController.uiInspector.onServerStart(port);
     } else if (data is InspectorPostTaskMessage) {
-      dispatchUITask(controller.view.contextId, data.taskId);
+      dispatchUITask(controller.view.contextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));
     }
   });
 

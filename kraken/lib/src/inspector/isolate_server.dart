@@ -57,22 +57,22 @@ void _onInspectorMessage(int contextId, Pointer<Utf8> message) {
   server.sendRawJSONToFrontend(data);
 }
 
-typedef Native_PostTaskToUIThread = Void Function(Int32 contextId, Int32 taskId);
+typedef Native_PostTaskToUIThread = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
 
-void _postTaskToUIThread(int contextId, int taskId) {
+void _postTaskToUIThread(int contextId, Pointer<Void> context, Pointer<Void> callback) {
   IsolateInspectorServer server = _inspectorServerMap[contextId];
   if (server == null) {
     print('Internal error: can not get inspector server from contextId: $contextId');
     return;
   }
-  server.isolateToMainStream.send(InspectorPostTaskMessage(taskId));
+  server.isolateToMainStream.send(InspectorPostTaskMessage(context.address, callback.address));
 }
 
 typedef Native_RegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
 typedef Dart_RegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
 
-typedef Native_DispatchInspectorTask = Void Function(Int32 contextId, Int32 taskId);
-typedef Dart_DispatchInspectorTask = void Function(int contextId, int taskId);
+typedef Native_DispatchInspectorTask = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
+typedef Dart_DispatchInspectorTask = void Function(int contextId, Pointer<Void> context, Pointer<Void> callback);
 
 void initInspectorServerNativeBinding(int contextId) {
   final Dart_RegisterDartMethods _registerInspectorServerDartMethods =
@@ -142,7 +142,8 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
       } else if (data is InspectorMethodResult) {
         server.sendToFrontend(data.id, data.result);
       } else if (data is InspectorPostTaskMessage) {
-        server._dispatchInspectorTask(mainIsolateJSContextId, data.taskId);
+        print('InspectorPostTaskMessage: ${data.context}');
+        server._dispatchInspectorTask(mainIsolateJSContextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));
       }
     }
   });

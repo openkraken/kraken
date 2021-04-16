@@ -192,8 +192,9 @@ KrakenInfo *getKrakenInfo() {
   return krakenInfo;
 }
 
-void dispatchUITask(int32_t contextId, int32_t taskId) {
-  foundation::UITaskQueue::instance(contextId)->dispatchTask(taskId);
+void dispatchUITask(int32_t contextId, void *context, void *callback) {
+  assert(std::this_thread::get_id() == getUIThreadId());
+  reinterpret_cast<void(*)(void*)>(callback)(context);
 }
 
 UICommandItem *getUICommandItems(int32_t contextId) {
@@ -228,8 +229,9 @@ void attachInspector(int32_t contextId) {
 void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length) {
   kraken::registerInspectorDartMethods(methodBytes, length);
 }
-void dispatchInspectorTask(int32_t contextId, int32_t taskId) {
-  foundation::InspectorTaskQueue::instance(contextId)->dispatchTask(taskId);
+void dispatchInspectorTask(int32_t contextId, void *context, void *callback) {
+  assert(std::this_thread::get_id() != getUIThreadId());
+  reinterpret_cast<void(*)(void*)>(callback)(context);
 }
 #endif
 
