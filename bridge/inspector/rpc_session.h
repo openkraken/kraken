@@ -34,8 +34,8 @@ private:
 
 class RPCSession {
 public:
-  explicit RPCSession(size_t contextId, JSC::JSGlobalObject *globalObject, std::shared_ptr<ProtocolHandler> handler) : _contextId(contextId) {
-    m_debug_session = std::make_unique<InspectorSession>(this, globalObject, handler);
+  explicit RPCSession(size_t contextId, JSGlobalContextRef ctx, JSC::JSGlobalObject *globalObject, std::shared_ptr<ProtocolHandler> handler) : _contextId(contextId) {
+    m_debug_session = std::make_unique<InspectorSession>(this, ctx, globalObject, handler);
     m_handler = std::make_shared<DartRPC>();
     InspectorMessageCallback callback = [](void *rpcSession, const char *message) -> void {
       auto session = reinterpret_cast_ptr<RPCSession *>(rpcSession);

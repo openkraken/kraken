@@ -18,8 +18,8 @@ namespace kraken::debugger {
 class FrontDoor final {
 public:
   ~FrontDoor() = default;
-  FrontDoor(int32_t contextId, JSC::JSGlobalObject *globalObject, const std::shared_ptr<ProtocolHandler> handler) {
-    m_rpc_session = std::make_shared<RPCSession>(contextId, globalObject, handler);
+  FrontDoor(int32_t contextId, JSGlobalContextRef ctx, JSC::JSGlobalObject *globalObject, const std::shared_ptr<ProtocolHandler> handler) {
+    m_rpc_session = std::make_shared<RPCSession>(contextId, ctx, globalObject, handler);
   }
 
 private:

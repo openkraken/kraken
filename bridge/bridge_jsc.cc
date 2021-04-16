@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <memory>
 
+#include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/DOM/comment_node.h"
 #include "bindings/jsc/DOM/custom_event.h"
 #include "bindings/jsc/DOM/document.h"
@@ -75,6 +76,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_START);
 #endif
 
+  bindTimer(context);
   bindKraken(context);
   bindUIManager(context);
   bindConsole(context);
@@ -129,7 +131,7 @@ void JSBridge::attachInspector() {
   JSC::VM& vm = exec->vm();
   JSC::JSLockHolder locker(vm);
   JSC::JSGlobalObject* globalObject = vm.vmEntryGlobalObject(exec);
-  m_inspector = std::make_shared<debugger::FrontDoor>(contextId, globalObject->globalObject(), handler);
+  m_inspector = std::make_shared<debugger::FrontDoor>(contextId, context->context(), globalObject->globalObject(), handler);
 }
 #endif // ENABLE_DEBUGGER
 
