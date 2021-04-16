@@ -305,7 +305,6 @@ void JSCDebuggerAgentImpl::didPause(JSC::ExecState &scriptState, JSC::JSValue ca
   auto _callFrames = currentCallFrames(injectedScript);
   std::string callframes_str = _callFrames->toJSONString().utf8().data(); // jsc call frames
   std::unique_ptr<std::vector<std::unique_ptr<kraken::debugger::CallFrame>>> callFrames_v8;
-  KRAKEN_LOG(VERBOSE) << callframes_str;
   if (!convertCallFrames(callframes_str, &callFrames_v8)) {
     return;
   }

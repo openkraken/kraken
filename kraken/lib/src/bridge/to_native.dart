@@ -186,14 +186,14 @@ void flushUICommandCallback() {
   _flushUICommandCallback();
 }
 
-typedef Native_DispatchUITask = Void Function(Int32 contextId, Int32 taskId);
-typedef Dart_DispatchUITask = void Function(int contextId, int taskId);
+typedef Native_DispatchUITask = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
+typedef Dart_DispatchUITask = void Function(int contextId, Pointer<Void> context, Pointer<Void> callback);
 
 final Dart_DispatchUITask _dispatchUITask =
   nativeDynamicLibrary.lookup<NativeFunction<Native_DispatchUITask>>('dispatchUITask').asFunction();
 
-void dispatchUITask(int contextId, int taskId) {
-  _dispatchUITask(contextId, taskId);
+void dispatchUITask(int contextId, Pointer<Void> context, Pointer<Void> callback) {
+  _dispatchUITask(contextId, context, callback);
 }
 
 enum UICommandType {

@@ -22,7 +22,7 @@ public:
     }
     return instance_;
   };
-  int32_t registerTask(const Task &task, void *data) override;
+  int32_t registerTask(const Task &task, void *data);
 private:
   static std::mutex ui_task_creation_mutex_;
   static fml::RefPtr<UITaskQueue> instance_;

@@ -103,7 +103,7 @@ KRAKEN_EXPORT_C
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT_C
-void dispatchUITask(int32_t contextId, int32_t taskId);
+void dispatchUITask(int32_t contextId, void *context, void *callback);
 KRAKEN_EXPORT_C
 void flushUICommandCallback();
 
@@ -126,7 +126,7 @@ void attachInspector(int32_t contextId);
 KRAKEN_EXPORT_C
 void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length);
 KRAKEN_EXPORT_C
-void dispatchInspectorTask(int32_t contextId, int32_t taskId);
+void dispatchInspectorTask(int32_t contextId, void *context, void *callback);
 #endif
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

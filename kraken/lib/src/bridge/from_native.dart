@@ -355,14 +355,13 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<Native_JSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
-typedef Native_PostTaskToInspectorThread = Void Function(Int32 contextId, Int32 taskId);
-typedef Dart_PostTaskToInspectorThread = void Function(int contextId, int taskId);
+typedef Native_PostTaskToInspectorThread = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
+typedef Dart_PostTaskToInspectorThread = void Function(int contextId, Pointer<Void> context, Pointer<Void> callback);
 
-void _postTaskToInspectorThread(int contextId, int taskId) {
+void _postTaskToInspectorThread(int contextId, Pointer<Void> context, Pointer<Void> callback) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  print('post task to inspector thread: $contextId, $taskId, ${controller.view.uiInspector}');
   if (controller.view.uiInspector != null) {
-    controller.view.uiInspector.viewController.isolateServerPort.send(InspectorPostTaskMessage(taskId));
+    controller.view.uiInspector.viewController.isolateServerPort.send(InspectorPostTaskMessage(context.address, callback.address));
   }
 }
 
