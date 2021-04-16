@@ -51,7 +51,6 @@ InspectorSession::InspectorSession(RPCSession *rpcSession, JSC::JSGlobalObject *
 }
 
 InspectorSession::~InspectorSession() {
-  KRAKEN_LOG(VERBOSE) << "InspectorSession Will Destroyed";
 }
 
 void InspectorSession::onSessionClosed(int, const std::string &) {

@@ -14,7 +14,6 @@ JSCDebuggerImpl::JSCDebuggerImpl(JSGlobalObject *globalObject)
   : Inspector::ScriptDebugServer(globalObject->globalExec()->vm()), m_globalObject(globalObject) {}
 
 void JSCDebuggerImpl::recompileAllJSFunctions() {
-  KRAKEN_LOG(VERBOSE) << "recompileAllJSFunctions called";
   JSC::JSLockHolder holder(vm());
   JSC::Debugger::recompileAllJSFunctions();
 }
@@ -24,9 +23,6 @@ void JSCDebuggerImpl::attachDebugger() {
 }
 
 void JSCDebuggerImpl::detachDebugger(bool isBeingDestroyed) {
-
-  KRAKEN_LOG(VERBOSE) << "[debugger] JS debugger detached!";
-
   detach(m_globalObject,
          isBeingDestroyed ? Debugger::GlobalObjectIsDestructing : Debugger::TerminatingDebuggingSession);
   if (!isBeingDestroyed) recompileAllJSFunctions();
