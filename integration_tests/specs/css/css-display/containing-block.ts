@@ -54,7 +54,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let div1;
@@ -91,7 +91,7 @@ describe('containing-block', () => {
     );
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('004', async () => {
     let p;
@@ -147,7 +147,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('006', async () => {
     let p;
@@ -203,7 +203,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('007-ref', async () => {
     let p;
@@ -231,7 +231,7 @@ describe('containing-block', () => {
     );
     BODY.appendChild(p);
 
-    await matchViewportSnapshot(0.5);
+    await snapshot(0.5);
   });
   it('007', async () => {
     let p;
@@ -277,7 +277,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('008-ref', async () => {
     let p;
@@ -329,7 +329,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.5);
+    await snapshot(0.5);
   });
   it('008', async () => {
     let p;
@@ -405,7 +405,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('009-ref', async () => {
     let div;
@@ -432,7 +432,7 @@ describe('containing-block', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.5);
+    await snapshot(0.5);
   });
   it('009', async () => {
     let p;
@@ -506,7 +506,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('010', async () => {
     let p;
@@ -580,7 +580,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('011', async () => {
     let p;
@@ -647,7 +647,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('013', async () => {
     let p;
@@ -714,7 +714,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('015', async () => {
     let p;
@@ -781,7 +781,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('017', async () => {
     let p;
@@ -914,10 +914,10 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('018', async () => {
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('019-ref', async () => {
     let div;
@@ -945,7 +945,7 @@ describe('containing-block', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.5);
+    await snapshot(0.5);
   });
   it('019', async () => {
     let p;
@@ -1016,7 +1016,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('020-ref', async () => {
     let p;
@@ -1063,7 +1063,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.5);
+    await snapshot(0.5);
   });
   it('020', async () => {
     let p;
@@ -1134,7 +1134,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('021', async () => {
     let p;
@@ -1205,7 +1205,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('022', async () => {
     let p;
@@ -1276,7 +1276,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('023', async () => {
     let p;
@@ -1345,7 +1345,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('026', async () => {
     let p;
@@ -1397,7 +1397,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('027', async () => {
     let p;
@@ -1445,7 +1445,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('028', async () => {
     let p;
@@ -1495,7 +1495,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('030', async () => {
     let p;
@@ -1539,7 +1539,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with transform', async () => {
@@ -1583,7 +1583,7 @@ describe('containing-block', () => {
     BODY.appendChild(root);
     root.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('without transform', async () => {
@@ -1626,6 +1626,6 @@ describe('containing-block', () => {
     BODY.appendChild(root);
     root.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

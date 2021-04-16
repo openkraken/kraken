@@ -54,7 +54,7 @@ describe('Overflow', () => {
 
     document.body.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('scrollTo', async (done) => {
@@ -79,7 +79,7 @@ describe('Overflow', () => {
 
     requestAnimationFrame(async () => {
       div1.scroll(20, 20);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
     document.body.appendChild(container);
@@ -103,11 +103,11 @@ describe('Overflow', () => {
       ],
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       div.scroll(0, 20);
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -131,11 +131,11 @@ describe('Overflow', () => {
       ],
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       div.scroll(0, 20);
-      await matchViewportSnapshot();
+      await snapshot();
     });
   });
 
@@ -163,7 +163,7 @@ describe('Overflow', () => {
     requestAnimationFrame(async () => {
       div1.scrollLeft = 20;
       div1.scrollTop = 20;
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -184,7 +184,7 @@ describe('Overflow', () => {
     container.style.overflow = 'hidden';
     document.body.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('overflow with absolute positioned elements', async (done) => {
@@ -223,11 +223,11 @@ describe('Overflow', () => {
     ]);
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       scroller.scroll(20, 550);
-      await matchViewportSnapshot(0.2);
+      await snapshot(0.2);
       done();
     });
   });
@@ -268,14 +268,14 @@ describe('Overflow', () => {
 
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       container.scrollTop = 30;
-      await matchViewportSnapshot();
+      await snapshot();
       requestAnimationFrame(async () => {
         container.scrollTop = 10000;
-        await matchViewportSnapshot();
+        await snapshot();
 
         done();
       });
@@ -308,12 +308,12 @@ describe('Overflow', () => {
 
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       document.body.scrollLeft = 50;
       document.body.scrollTop = 300;
-      await matchViewportSnapshot();
+      await snapshot();
       doneFn();
     });
   });

@@ -21,7 +21,7 @@ describe('Color text', () => {
       append(container, p2);
       append(container, p3);
       append(BODY, container);
-      await matchElementImageSnapshot(container);
+      await snapshot(container);
     });
   }
 
@@ -203,6 +203,6 @@ describe('Color text', () => {
     });
     append(test, div);
     append(BODY, test);
-    await matchElementImageSnapshot(test);
+    await snapshot(test);
   });
 });

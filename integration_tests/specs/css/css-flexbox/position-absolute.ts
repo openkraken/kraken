@@ -34,7 +34,7 @@ describe('flexbox-position-absolute', () => {
     );
     BODY.appendChild(flex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('007', async () => {
     let p;
@@ -87,7 +87,7 @@ describe('flexbox-position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('010', async () => {
     let p;
@@ -154,7 +154,7 @@ describe('flexbox-position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('015', async () => {
     let abspos;
@@ -189,6 +189,6 @@ describe('flexbox-position-absolute', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

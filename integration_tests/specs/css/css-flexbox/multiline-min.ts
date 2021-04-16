@@ -1135,6 +1135,6 @@ describe('multiline-min', () => {
     BODY.appendChild(flexbox_12);
     BODY.appendChild(flexbox_13);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

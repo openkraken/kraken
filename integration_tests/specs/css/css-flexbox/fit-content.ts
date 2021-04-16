@@ -51,7 +51,7 @@ describe('fit-content', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('item-002', async () => {
     let p;
@@ -98,6 +98,6 @@ describe('fit-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

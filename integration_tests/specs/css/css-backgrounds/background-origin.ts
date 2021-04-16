@@ -21,7 +21,7 @@ describe('Background-origin', () => {
       ]
     );
     append(BODY, div);
-    await matchViewportSnapshot(0.2);
+    await snapshot(0.2);
   });
 
   it('works with border-box', async () => {
@@ -47,7 +47,7 @@ describe('Background-origin', () => {
       ]
     );
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with padding-box', async () => {
@@ -73,7 +73,7 @@ describe('Background-origin', () => {
       ]
     );
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with content-box', async () => {
@@ -99,6 +99,6 @@ describe('Background-origin', () => {
       ]
     );
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

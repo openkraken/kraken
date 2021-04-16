@@ -9,7 +9,7 @@ describe('Transform translate', () => {
       })
     );
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage with one value', async () => {
@@ -37,7 +37,7 @@ describe('Transform translate', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage with two values', async () => {
@@ -65,7 +65,7 @@ describe('Transform translate', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage translate and percentage sizing in flow layout', async () => {
@@ -93,7 +93,7 @@ describe('Transform translate', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage translate and percentage sizing in flex layout', async () => {
@@ -122,6 +122,6 @@ describe('Transform translate', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

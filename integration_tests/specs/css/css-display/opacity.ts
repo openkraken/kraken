@@ -31,7 +31,7 @@ describe('Opacity', () => {
         opacity: 0.5,
       });
 
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });

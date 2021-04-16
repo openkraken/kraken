@@ -128,7 +128,7 @@ describe('abspos-paged', () => {
     BODY.appendChild(div_2);
     BODY.appendChild(div_3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('002', async () => {
     let div;
@@ -301,6 +301,6 @@ describe('abspos-paged', () => {
     BODY.appendChild(div_3);
     BODY.appendChild(div_4);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

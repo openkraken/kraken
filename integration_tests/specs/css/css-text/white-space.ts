@@ -6,7 +6,7 @@ describe('Text WhiteSpace', () => {
     );
     document.body.appendChild(document.createTextNode(' new line'));
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should work with default value', () => {
@@ -24,7 +24,7 @@ describe('Text WhiteSpace', () => {
 
     append(BODY, cont);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should work with normal', () => {
@@ -43,7 +43,7 @@ describe('Text WhiteSpace', () => {
 
     append(BODY, cont);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should work with no-wrap', () => {
@@ -62,7 +62,7 @@ describe('Text WhiteSpace', () => {
 
     append(BODY, cont);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
 
@@ -81,11 +81,11 @@ describe('Text WhiteSpace', () => {
 
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       cont.style.whiteSpace = 'nowrap';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -105,11 +105,11 @@ describe('Text WhiteSpace', () => {
 
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       cont.style.whiteSpace = 'normal';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -201,7 +201,7 @@ describe('Inline level element', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with normal", async () => {
@@ -288,7 +288,7 @@ describe('Inline level element', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with change from nowrap to normal", async (done) => {
@@ -376,11 +376,11 @@ describe('Inline level element', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       div.style.whiteSpace = 'normal';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -470,11 +470,11 @@ describe('Inline level element', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       div.style.whiteSpace = 'nowrap';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });

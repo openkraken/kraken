@@ -10,6 +10,6 @@ line breaks
     `));
 
     document.body.appendChild(pre);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

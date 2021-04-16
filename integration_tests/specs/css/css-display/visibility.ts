@@ -9,7 +9,7 @@ describe('Visibility', () => {
       height: '200px',
     });
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     const container2 = document.createElement('div');
     container2.appendChild(document.createTextNode('visibility test'));
@@ -21,7 +21,7 @@ describe('Visibility', () => {
 
     container1.appendChild(container2);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     container1.addEventListener('click', () => {
       console.log('container clicked');
@@ -34,6 +34,6 @@ describe('Visibility', () => {
       visibility: 'hidden',
     });
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

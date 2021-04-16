@@ -18,7 +18,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with unit of number', async () => {
@@ -40,7 +40,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with block element', async () => {
@@ -75,7 +75,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with inline element', async () => {
@@ -110,7 +110,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with flex item', async () => {
@@ -161,7 +161,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with multiple lines', async () => {
@@ -210,7 +210,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with text of multiple lines', async () => {
@@ -231,7 +231,7 @@ describe('line-height', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage', async () => {
@@ -261,7 +261,7 @@ describe('line-height', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
 });

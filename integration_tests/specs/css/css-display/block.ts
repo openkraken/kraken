@@ -12,7 +12,7 @@ describe('Display block', () => {
 
     container.appendChild(box);
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('002', async () => {
@@ -22,6 +22,6 @@ describe('Display block', () => {
     container.style.backgroundColor = 'red';
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

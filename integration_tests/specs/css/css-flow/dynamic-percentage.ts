@@ -56,6 +56,6 @@ describe('dynamic-percentage', () => {
     container = document.getElementById('container');
     container.style.height = '100px';
     document.body.offsetTop;
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -31,6 +31,6 @@ describe('flexbox_nested', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

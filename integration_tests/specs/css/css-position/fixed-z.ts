@@ -44,7 +44,7 @@ describe('fixed-z', () => {
       });
     });
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('index-blend-ref', async () => {
     let div;
@@ -67,6 +67,6 @@ describe('fixed-z', () => {
       });
     });
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

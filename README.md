@@ -1,6 +1,6 @@
 ![kraken Post](https://user-images.githubusercontent.com/677114/101163298-6264ae80-366e-11eb-9151-f560d18c2ceb.png)
 
-# Kraken [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken) [![Integration Test WorkFlow](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml/badge.svg)](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml)
+# Kraken [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken) [![Integration Test WorkFlow](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml/badge.svg?branch=main)](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml)
 
 ## 💁 Have a try
 
@@ -76,7 +76,7 @@ By contributing to Kraken, you agree that your contributions will be licensed un
 
     **Android**
 
-    > For Windows Users, Make sure to run this command under MINGW64 environmen(For Example: Git Bash is a MINGW64 env).
+    > For Windows users, make sure that running this command under MINGW64 environment(eg. Git Bash).
 
     ```shell
     $ npm run build:bridge:android

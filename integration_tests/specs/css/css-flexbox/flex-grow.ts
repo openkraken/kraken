@@ -87,7 +87,7 @@ describe('flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let p;
@@ -166,7 +166,7 @@ describe('flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('001', async () => {
     let child1;
@@ -217,7 +217,7 @@ describe('flex-grow', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004', async () => {
     let p;
@@ -295,7 +295,7 @@ describe('flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -369,7 +369,7 @@ describe('flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('006', async () => {
     let p;
@@ -452,7 +452,7 @@ describe('flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('007', async () => {
     let p;
@@ -566,7 +566,7 @@ describe('flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with image load', async () => {
@@ -623,7 +623,7 @@ describe('flex-grow', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with flex-item content change', async (done) => {
@@ -659,7 +659,7 @@ describe('flex-grow', () => {
 
     requestAnimationFrame(async () => {
       text.data = 6000;
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
 

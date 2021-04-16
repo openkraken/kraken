@@ -25,7 +25,7 @@ describe('border-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
   it('to-009', async () => {
     let p;
@@ -63,7 +63,7 @@ describe('border-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
   xit('to-012', async () => {
     let p;
@@ -135,6 +135,6 @@ describe('border-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 });

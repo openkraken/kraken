@@ -31,6 +31,6 @@ describe('fixed-z-index', () => {
       ])
     ]);
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -6,7 +6,7 @@ describe('TextNode', () => {
     document.body.appendChild(div);
     div.appendChild(text);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with text update', async () => {
@@ -18,7 +18,7 @@ describe('TextNode', () => {
 
     text.data = 'after modified';
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with style update of non empty text', async () => {
@@ -35,7 +35,7 @@ describe('TextNode', () => {
     div.style.color = 'blue';
     document.body.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with style update of empty text', async () => {
@@ -52,7 +52,7 @@ describe('TextNode', () => {
     div.style.color = 'blue';
     document.body.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with set textContent', async () => {
@@ -64,7 +64,7 @@ describe('TextNode', () => {
 
     text.textContent = 'after modified';
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('createTextNode should not has height when the text is a empty string', async () => {
@@ -82,7 +82,7 @@ describe('TextNode', () => {
     child2.style.backgroundColor = 'red';
     document.body.appendChild(child2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('createTextNode should not has height when the text is a empty string and flex layout', async () => {
@@ -106,6 +106,6 @@ describe('TextNode', () => {
     child2.style.backgroundColor = 'red';
     div.appendChild(child2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

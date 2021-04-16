@@ -45,6 +45,6 @@ describe('flexbox_box-clear', () => {
     BODY.appendChild(float);
     BODY.appendChild(flex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

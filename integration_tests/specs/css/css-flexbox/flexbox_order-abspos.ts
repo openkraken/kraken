@@ -67,6 +67,6 @@ describe('flexbox_order-abspos', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

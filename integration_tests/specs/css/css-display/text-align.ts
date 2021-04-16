@@ -15,6 +15,6 @@ describe('text-align', () => {
     append(container, text);
     append(container, div);
     append(BODY, container);
-    await matchElementImageSnapshot(container);
+    await snapshot(container);
   });
 });

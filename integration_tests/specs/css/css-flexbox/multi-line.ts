@@ -136,7 +136,7 @@ describe('multi-line', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-reverse-row-reverse', async () => {
     let row3Col1;
@@ -268,7 +268,7 @@ describe('multi-line', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-with-column-reverse', async () => {
     let col1Row3;
@@ -400,7 +400,7 @@ describe('multi-line', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-with-row-reverse', async () => {
     let row1Col3;
@@ -517,6 +517,6 @@ describe('multi-line', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

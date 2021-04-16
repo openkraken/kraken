@@ -348,6 +348,6 @@ describe('inline-static', () => {
     //   checkLayout('.tests .abs');
     // });
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

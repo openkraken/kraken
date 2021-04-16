@@ -77,7 +77,7 @@ describe('flexbox_flow-column', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('reverse-wrap', async () => {
     let div;
@@ -156,7 +156,7 @@ describe('flexbox_flow-column', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('wrap-reverse', async () => {
     let div;
@@ -231,7 +231,7 @@ describe('flexbox_flow-column', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('wrap', async () => {
     let div;
@@ -306,6 +306,6 @@ describe('flexbox_flow-column', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });
