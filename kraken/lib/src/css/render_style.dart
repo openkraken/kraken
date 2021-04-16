@@ -515,20 +515,26 @@ class RenderStyle
         realHeight = verticalBorderWidth + verticalPaddingWidth > height ? verticalBorderWidth + verticalPaddingWidth : height;
       }
 
-      maxConstraintWidth = realWidth ?? double.infinity;
-      if (maxWidth != null && realWidth == null) {
-        maxConstraintWidth = maxConstraintWidth > maxWidth ? maxWidth : maxConstraintWidth;
-      }
-      if (minWidth != null && realWidth == null) {
+      minConstraintWidth = realWidth ?? minConstraintWidth;
+      if (minWidth != null) {
         minConstraintWidth = minConstraintWidth < minWidth ? minWidth : minConstraintWidth;
       }
-
-      maxConstraintHeight = realHeight ?? double.infinity;;
-      if (maxHeight != null && realHeight == null) {
-        maxConstraintHeight = maxConstraintHeight > maxHeight ? maxHeight : maxConstraintHeight;
+      if (maxWidth != null) {
+        maxConstraintWidth = maxWidth;
+        if (maxConstraintWidth < minConstraintWidth) {
+          minConstraintWidth = maxConstraintWidth;
+        }
       }
-      if (minHeight != null && realHeight == null) {
+
+      minConstraintHeight = realHeight ?? minConstraintHeight;
+      if (minHeight != null) {
         minConstraintHeight = minConstraintHeight < minHeight ? minHeight : minConstraintHeight;
+      }
+      if (maxHeight != null) {
+        maxConstraintHeight = maxHeight;
+        if (maxConstraintHeight < minConstraintHeight) {
+          minConstraintHeight = maxConstraintHeight;
+        }
       }
     }
 
