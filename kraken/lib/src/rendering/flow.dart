@@ -700,10 +700,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
-        BoxConstraints childConstraints = BoxConstraints();
-        if (child is RenderBoxModel) {
-          childConstraints = child.renderStyle.getConstraints();
-        }
+        final BoxConstraints childConstraints = child is RenderBoxModel ?
+          child.renderStyle.getConstraints() : BoxConstraints();
+
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();

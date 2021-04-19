@@ -7,6 +7,14 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
+// Constraints of element whose display style is none
+final _displayNoneConstraints = BoxConstraints(
+  minWidth: 0,
+  maxWidth: 0,
+  minHeight: 0,
+  maxHeight: 0
+);
+
 class RenderStyle
   with
     RenderStyleBase,
@@ -496,12 +504,7 @@ class RenderStyle
     bool isDisplayNone = transformedDisplay == CSSDisplay.none;
 
     if (isDisplayNone) {
-      return BoxConstraints(
-        minWidth: 0,
-        maxWidth: 0,
-        minHeight: 0,
-        maxHeight: 0
-      );
+      return _displayNoneConstraints;
     }
 
     double minConstraintWidth = 0;
