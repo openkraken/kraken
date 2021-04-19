@@ -44,8 +44,8 @@ private:
 
 class WindowInstance : public EventTargetInstance {
 public:
-  DEFINE_OBJECT_PROPERTY(Window, 8, devicePixelRatio, colorScheme, __location__, window, history, parent,  scrollX, scrollY)
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Window, 4, open, scroll, scrollBy, scrollTo)
+  DEFINE_OBJECT_PROPERTY(Window, 8, devicePixelRatio, colorScheme, __location__, window, history, parent,  scrollX, scrollY);
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Window, 4, open, scroll, scrollBy, scrollTo);
 
   WindowInstance() = delete;
   explicit WindowInstance(JSWindow *window);

@@ -253,7 +253,10 @@ class CSSText {
   }
 
   static double getLineHeight(CSSStyleDeclaration style, Size viewportSize) {
-    String value = style[LINE_HEIGHT];
+    return parseLineHeight(style[LINE_HEIGHT], getFontSize(style, viewportSize), viewportSize);
+  }
+
+  static double parseLineHeight(String value, double fontSize, Size viewportSize) {
     double lineHeight;
     if (value.isNotEmpty) {
       if (CSSLength.isLength(value)) {
@@ -264,7 +267,7 @@ class CSSText {
       } else {
         double multipliedNumber = double.tryParse(value);
         if (multipliedNumber != null && multipliedNumber > 0) {
-          lineHeight = getFontSize(style, viewportSize) * multipliedNumber;
+          lineHeight = fontSize * multipliedNumber;
         }
       }
     }
@@ -404,7 +407,10 @@ class CSSText {
       case 'bolder':
         return FontWeight.w900;
       default:
-        int fontWeightValue = int.tryParse(fontWeight);
+        int fontWeightValue;
+        if (fontWeight != null) {
+          fontWeightValue = int.tryParse(fontWeight);
+        }
         // See: https://drafts.csswg.org/css-fonts-4/#font-weight-numeric-values
         // Only values greater than or equal to 1, and less than or equal to 1000, are valid,
         // and all other values are invalid.
@@ -461,7 +467,10 @@ class CSSText {
 
   static List<String> DEFAULT_FONT_FAMILY_FALLBACK;
   static List<String> getFontFamilyFallback(CSSStyleDeclaration style) {
-    String fontFamily = style[FONT_FAMILY];
+    return parseFontFamilyFallback(style[FONT_FAMILY]);
+  }
+
+  static List<String> parseFontFamilyFallback(String fontFamily) {
     if (fontFamily.isNotEmpty) {
       List<String> values = fontFamily.split(_commaRegExp);
       List<String> resolvedFamily = List();

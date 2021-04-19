@@ -23,7 +23,7 @@ public:
   OBJECT_INSTANCE(JSMediaElement)
   class MediaElementInstance : public ElementInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(MediaElement, 4, src, autoPlay, loop, currentSrc)
+    DEFINE_OBJECT_PROPERTY(MediaElement, 4, src, autoPlay, loop, currentSrc);
     DEFINE_PROTOTYPE_OBJECT_PROPERTY(MediaElement, 3, play, pause, fastSeek);
 
     MediaElementInstance() = delete;
