@@ -25,7 +25,7 @@ describe('Canvas context 2d', () => {
 
     document.body.appendChild(div);
 
-    await expectAsync(canvas.toBlob(1.0)).toMatchSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with lineWidth', async () => {
@@ -41,7 +41,7 @@ describe('Canvas context 2d', () => {
     ctx.lineTo(130, 130);
     ctx.rect(40, 40, 70, 70);
     ctx.stroke();
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with lineJoin', async () => {
@@ -58,7 +58,7 @@ describe('Canvas context 2d', () => {
     ctx.lineTo(280, 20);
     ctx.lineTo(280, 150);
     ctx.stroke();
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
 
@@ -74,7 +74,7 @@ describe('Canvas context 2d', () => {
     ctx.lineCap = 'round';
     ctx.lineTo(100, 100);
     ctx.stroke();
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with textAlign', async () => {
@@ -100,7 +100,7 @@ describe('Canvas context 2d', () => {
     
     ctx.textAlign = 'right';
     ctx.fillText('right-aligned', x, 130);
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
 
@@ -128,7 +128,7 @@ describe('Canvas context 2d', () => {
     }
     ctx.stroke();
 
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with ellipse', async () => {
@@ -145,7 +145,7 @@ describe('Canvas context 2d', () => {
     ctx.moveTo(0, 200);
     ctx.lineTo(200, 0);
     ctx.stroke();
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with save and restore', async () => {
@@ -163,7 +163,7 @@ describe('Canvas context 2d', () => {
     ctx.restore();
 
     ctx.fillRect(150, 40, 100, 100);
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with moveTO and lineTo', async () => {
@@ -175,7 +175,7 @@ describe('Canvas context 2d', () => {
     ctx.moveTo(0, 200);
     ctx.lineTo(200, 0);
     ctx.stroke();
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with rotate and translate', async () => {
@@ -194,7 +194,7 @@ describe('Canvas context 2d', () => {
     // Rotated rectangle
     ctx.fillStyle = 'red';
     ctx.fillRect(80, 60, 140, 30);
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with transform and resetTransform', async () => {
@@ -213,7 +213,7 @@ describe('Canvas context 2d', () => {
     ctx.fillStyle = 'red';
     ctx.fillRect(40, 40, 50, 20);
     ctx.fillRect(40, 90, 50, 20);
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with strokeText', async () => {
@@ -223,7 +223,7 @@ describe('Canvas context 2d', () => {
     const ctx = canvas.getContext('2d');
     ctx.font = '50px serif';
     ctx.strokeText('Hello world', 50, 90);
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with fillText', async () => {
@@ -233,7 +233,7 @@ describe('Canvas context 2d', () => {
     const ctx = canvas.getContext('2d');
     ctx.font = '50px serif';
     ctx.fillText('Hello world', 50, 90);
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with rect and fill', async () => {
@@ -243,7 +243,7 @@ describe('Canvas context 2d', () => {
     const ctx = canvas.getContext('2d');
     ctx.rect(10, 20, 150, 100);
     ctx.fill();
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with bezierCurveTo', async () => {
@@ -276,7 +276,7 @@ describe('Canvas context 2d', () => {
     ctx.arc(cp1.x, cp1.y, 5, 0, 2 * Math.PI);  // Control point one
     ctx.arc(cp2.x, cp2.y, 5, 0, 2 * Math.PI);  // Control point two
     ctx.fill();
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with quadraticCurveTo', async () => {
@@ -302,7 +302,7 @@ describe('Canvas context 2d', () => {
     ctx.beginPath();
     ctx.arc(230, 30, 5, 0, 2 * Math.PI);
     ctx.fill();
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with fill and fillRect and clearRect', async () => {
@@ -326,7 +326,7 @@ describe('Canvas context 2d', () => {
 
     // Clear part of the canvas
     ctx.clearRect(10, 10, 120, 100);
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with clip', async () => {
@@ -344,7 +344,7 @@ describe('Canvas context 2d', () => {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'orange';
     ctx.fillRect(0, 0, 100, 100);
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await snapshot(canvas);
   });
 
   it('should work with setTransform', async () => {
@@ -366,7 +366,7 @@ describe('Canvas context 2d', () => {
     ctx2.arc(50, 50, 50, 0, 2 * Math.PI);
     ctx2.fill();
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
 });
