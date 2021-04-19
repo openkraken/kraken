@@ -72,15 +72,19 @@ typedef Dart_RegisterDartMethods = void Function(Pointer<Uint64> methodBytes, in
 typedef Native_DispatchInspectorTask = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
 typedef Dart_DispatchInspectorTask = void Function(int contextId, Pointer<Void> context, Pointer<Void> callback);
 
+void attachInspector(int contextId) {
+  final Dart_AttachInspector _attachInspector = nativeDynamicLibrary
+      .lookup<NativeFunction<Native_AttachInspector>>('attachInspector')
+      .asFunction();
+  _attachInspector(contextId);
+}
+
 void initInspectorServerNativeBinding(int contextId) {
   final Dart_RegisterDartMethods _registerInspectorServerDartMethods =
       nativeDynamicLibrary
           .lookup<NativeFunction<Native_RegisterDartMethods>>(
               'registerInspectorDartMethods')
           .asFunction();
-  final Dart_AttachInspector _attachInspector = nativeDynamicLibrary
-      .lookup<NativeFunction<Native_AttachInspector>>('attachInspector')
-      .asFunction();
   final Pointer<NativeFunction<Native_InspectorMessage>>
       _nativeInspectorMessage = Pointer.fromFunction(_onInspectorMessage);
   final Pointer<NativeFunction<Native_RegisterInspectorMessageCallback>>
@@ -98,7 +102,6 @@ void initInspectorServerNativeBinding(int contextId) {
   nativeMethodList.setAll(0, _dartNativeMethods);
 
   _registerInspectorServerDartMethods(bytes, _dartNativeMethods.length);
-  _attachInspector(contextId);
 }
 
 void serverIsolateEntryPoint(SendPort isolateToMainStream) {
@@ -134,6 +137,7 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
       _inspectorServerMap[data.contextId] = server;
       mainIsolateJSContextId = data.contextId;
       initInspectorServerNativeBinding(data.contextId);
+      attachInspector(data.contextId);
     } else if (server != null && server.connected) {
       if (data is InspectorEvent) {
         server.sendEventToFrontend(data);
@@ -141,6 +145,8 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
         server.sendToFrontend(data.id, data.result);
       } else if (data is InspectorPostTaskMessage) {
         server._dispatchInspectorTask(mainIsolateJSContextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));
+      } else if (data is InspectorReload) {
+        attachInspector(data.contextId);
       }
     }
   });

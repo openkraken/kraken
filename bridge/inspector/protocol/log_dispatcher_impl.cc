@@ -8,8 +8,6 @@
 namespace kraken {
 namespace debugger {
 
-static const char *welcome = "welcome to kraken inspector";
-
 bool LogDispatcherImpl::canDispatch(const std::string &method) {
   return m_dispatchMap.find(method) != m_dispatchMap.end();
 }
@@ -35,16 +33,6 @@ void LogDispatcherImpl::enable(uint64_t callId, const std::string &method,
     return;
   }
   if (weak->get()) weak->get()->sendResponse(callId, response);
-
-  auto now = std::chrono::high_resolution_clock::now();
-  // welcome message
-  auto logEntry = LogEntry::create()
-                    .setLevel(LogEntry::LevelEnum::Verbose)
-                    .setTimestamp(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count())
-                    .setSource(LogEntry::SourceEnum::Javascript)
-                    .setText(welcome)
-                    .build();
-  m_backend->addMessageToConsole(std::move(logEntry));
   return;
 }
 

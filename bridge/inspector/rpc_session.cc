@@ -35,6 +35,7 @@ void RPCSession::_on_message(const std::string &message) {
           auto *ctx = reinterpret_cast<SessionContext *>(ptr);
           rapidjson::Document doc;
           doc.Parse(ctx->message.c_str());
+          if (ctx->session->dispose()) return;
           ctx->session->handleRequest(serializeRequest(std::move(doc)));
         }, ctx);
       } else {
@@ -47,6 +48,7 @@ void RPCSession::_on_message(const std::string &message) {
           auto *ctx = reinterpret_cast<SessionContext *>(ptr);
           rapidjson::Document doc;
           doc.Parse(ctx->message.c_str());
+          if (ctx->session->dispose()) return;
           ctx->session->handleRequest(serializeRequest(std::move(doc)));
         });
       } else {

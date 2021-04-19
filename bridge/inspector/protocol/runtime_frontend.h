@@ -32,7 +32,7 @@ public:
   void exceptionThrown(double timestamp, std::unique_ptr<ExceptionDetails> exceptionDetails);
   void executionContextCreated(std::unique_ptr<ExecutionContextDescription> context);
   void executionContextDestroyed(int executionContextId);
-  void executionContextsCleared();
+  void executionContextsCleared(std::unique_ptr<ExecutionContextDescription> context);
   void inspectRequested(std::unique_ptr<RemoteObject> object, std::unique_ptr<rapidjson::Value> hints);
 
 private:

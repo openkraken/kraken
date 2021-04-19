@@ -56,6 +56,11 @@ class InspectorPostTaskMessage {
   InspectorPostTaskMessage(this.context, this.callback);
 }
 
+class InspectorReload {
+  int contextId;
+  InspectorReload(this.contextId);
+}
+
 class UIInspector {
   /// Design preInspector for reload page,
   /// do not use it in any other place.
@@ -65,22 +70,7 @@ class UIInspector {
   KrakenViewController viewController;
   final Map<String, UIInspectorModule> moduleRegistrar = {};
 
-  factory UIInspector(KrakenViewController viewController) {
-    if (UIInspector.prevInspector != null) {
-      // Apply reload page, reuse prev inspector instance.
-      UIInspector prevInspector = UIInspector.prevInspector;
-
-      prevInspector.viewController = viewController;
-      viewController.elementManager.debugDOMTreeChanged = prevInspector.onDOMTreeChanged;
-
-      UIInspector.prevInspector = null;
-      return prevInspector;
-    } else {
-      return UIInspector._(viewController);
-    }
-  }
-
-  UIInspector._(this.viewController) {
+  UIInspector(this.viewController) {
     registerModule(InspectDOMModule(this));
     registerModule(InspectOverlayModule(this));
     registerModule(InspectPageModule(this));

@@ -461,7 +461,10 @@ DispatchResponse JSCRuntimeAgentImpl::removeBinding(const std::string &in_name) 
   return DispatchResponse::Error("not implement yet");
 }
 
-JSCRuntimeAgentImpl::~JSCRuntimeAgentImpl() {}
+JSCRuntimeAgentImpl::~JSCRuntimeAgentImpl() {
+  m_frontend.executionContextsCleared(
+      ExecutionContextDescription::create().setId(m_session->rpcSession()->sessionId()).setName("default").setOrigin("default").setAuxData(nullptr).build());
+}
 
 /// Own
 
