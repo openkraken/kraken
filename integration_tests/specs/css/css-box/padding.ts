@@ -20,7 +20,7 @@ describe('Box padding', () => {
     container1.appendChild(container2);
     container1.style.padding = '20px';
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with background-color', async () => {
@@ -38,7 +38,7 @@ describe('Box padding', () => {
       backgroundColor: 'red',
     });
     append(div, box);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
 
@@ -51,10 +51,10 @@ describe('Box padding', () => {
     });
 
     document.body.appendChild(container1);
-    await matchViewportSnapshot();
+    await snapshot();
 
     container1.style.padding = '';
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage', async () => {
@@ -90,7 +90,7 @@ describe('Box padding', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage of parents width and height not equal', async () => {
@@ -126,7 +126,7 @@ describe('Box padding', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
 });

@@ -18,6 +18,6 @@ describe('Display inline-flex', () => {
       )
     );
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -11,7 +11,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when it has no children and width not exist", async () => {
@@ -25,7 +25,7 @@ describe('max-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when it has no children and width not exist", async () => {
@@ -39,7 +39,7 @@ describe('max-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when it has no children and width not exist", async () => {
@@ -53,7 +53,7 @@ describe('max-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display flex when it has no children and width not exist", async () => {
@@ -67,7 +67,7 @@ describe('max-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when child length is larger than max-width", async () => {
@@ -82,7 +82,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when child length is smaller than max-width", async () => {
@@ -97,7 +97,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when child length is larger than max-width", async () => {
@@ -112,7 +112,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when child length is smaller than max-width", async () => {
@@ -127,7 +127,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when child length is larger than max-width", async () => {
@@ -142,7 +142,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when child length is smaller than max-width", async () => {
@@ -157,7 +157,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
 
@@ -173,7 +173,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display flex when child length is smaller than max-width", async () => {
@@ -188,7 +188,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with replaced element when element width is smaller than intrinsic width', async () => {
@@ -217,7 +217,7 @@ describe('max-width', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with replaced element when element width is larger than intrinsic width', async () => {
@@ -246,7 +246,7 @@ describe('max-width', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with percentage in flow layout', async () => {
@@ -281,7 +281,7 @@ describe('max-width', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in row direction', async () => {
@@ -319,7 +319,7 @@ describe('max-width', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in column direction', async () => {
@@ -356,7 +356,7 @@ describe('max-width', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('change from not none to none', async (done) => {
@@ -374,11 +374,11 @@ describe('max-width', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       cont.style.maxWidth = 'none';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });

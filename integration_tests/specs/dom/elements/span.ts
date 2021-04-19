@@ -22,6 +22,6 @@ describe('Tags span', () => {
     span2.style.fontFamily = 'georgia';
     document.body.appendChild(span2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

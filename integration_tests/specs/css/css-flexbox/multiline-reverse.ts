@@ -96,7 +96,7 @@ describe('multiline-reverse', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('wrap-baseline with margin-bottom', async () => {
@@ -195,7 +195,7 @@ describe('multiline-reverse', () => {
     );
     BODY.appendChild(flexbox_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   xit('wrap-baseline with more than 2 flex-item', async () => {
@@ -267,7 +267,7 @@ describe('multiline-reverse', () => {
     );
     // BODY.appendChild(flexbox_2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with align-items flex-start', async () => {
@@ -366,7 +366,7 @@ describe('multiline-reverse', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with align-items flex-end', async () => {
@@ -465,7 +465,7 @@ describe('multiline-reverse', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with align-items center', async () => {
@@ -564,7 +564,7 @@ describe('multiline-reverse', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with align-items baseline', async () => {
@@ -663,7 +663,7 @@ describe('multiline-reverse', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with align-items stretch', async () => {
@@ -762,6 +762,6 @@ describe('multiline-reverse', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

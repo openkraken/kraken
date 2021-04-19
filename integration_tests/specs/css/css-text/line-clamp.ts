@@ -14,7 +14,7 @@ describe('Text LineClamp', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with none', async () => {
@@ -32,7 +32,7 @@ describe('Text LineClamp', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with none to positive number', async (done) => {
@@ -53,11 +53,11 @@ describe('Text LineClamp', () => {
     setTimeout(async () => {
       // @ts-ignore
       cont.style.lineClamp = 3;
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     }, 100);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with positive number to none', async (done) => {
@@ -78,10 +78,10 @@ describe('Text LineClamp', () => {
     setTimeout(async () => {
       // @ts-ignore
       cont.style.lineClamp = 'none';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     }, 100);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -67,9 +67,9 @@ describe('auto-margins', () => {
     BODY.appendChild(div_1);
 
     img.onload = async () => {
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     };
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

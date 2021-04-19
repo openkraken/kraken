@@ -33,7 +33,7 @@ describe('flexbox flex-basis', () => {
     child3.appendChild(document.createTextNode('Item Three'));
     container1.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with width', async () => {
@@ -71,6 +71,6 @@ describe('flexbox flex-basis', () => {
     child3.appendChild(document.createTextNode('Item Three'));
     container1.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -7,6 +7,6 @@ describe('Tags p', () => {
     p.appendChild(document.createTextNode('This is a paragraph.'));
 
     document.body.appendChild(p);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

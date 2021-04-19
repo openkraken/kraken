@@ -35,7 +35,7 @@ describe('auto-position', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('rtl-child-viewport-scrollbar', async () => {
     let p;
@@ -88,6 +88,6 @@ describe('auto-position', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

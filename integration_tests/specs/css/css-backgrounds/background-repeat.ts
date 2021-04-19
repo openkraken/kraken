@@ -19,7 +19,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
+    await expectAsync(repeat.toBlob(1.0)).toMatchSnapshot(0.5);
   });
 
   it('none-repeat', async () => {
@@ -43,7 +43,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
+    await expectAsync(repeat.toBlob(1.0)).toMatchSnapshot(0.5);
   });
 
   it('repeat-x', async () => {
@@ -67,7 +67,7 @@ describe('background-repeat', () => {
     repeat.appendChild(div2);
     append(BODY, repeat);
 
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
+    await expectAsync(repeat.toBlob(1.0)).toMatchSnapshot(0.5);
   });
 
   it('repeat-y', async () => {
@@ -90,7 +90,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div3);
     append(BODY, repeat);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
+    await expectAsync(repeat.toBlob(1.0)).toMatchSnapshot(0.5);
   });
 
   it('repeat', async () => {
@@ -113,7 +113,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div4);
     append(BODY, repeat);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
+    await expectAsync(repeat.toBlob(1.0)).toMatchSnapshot(0.5);
   });
 
   xit('round', async () => {
@@ -127,7 +127,7 @@ describe('background-repeat', () => {
     });
     append(BODY, div);
     await sleep(0.5);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   xit('no-repeat will stop round to repeat', async () => {
@@ -141,6 +141,6 @@ describe('background-repeat', () => {
     });
     append(BODY, div);
     await sleep(0.5);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 });

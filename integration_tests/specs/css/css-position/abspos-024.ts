@@ -43,6 +43,6 @@ describe('abspos-024', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 });

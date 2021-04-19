@@ -74,6 +74,6 @@ describe('flex-box', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexBox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

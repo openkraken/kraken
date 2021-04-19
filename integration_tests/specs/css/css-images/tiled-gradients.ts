@@ -136,6 +136,6 @@ describe('tiled-gradients', () => {
     BODY.appendChild(bar);
     BODY.appendChild(bar_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

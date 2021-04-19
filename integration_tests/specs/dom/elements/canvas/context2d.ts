@@ -25,7 +25,7 @@ describe('Canvas context 2d', () => {
 
     document.body.appendChild(div);
 
-    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(canvas.toBlob(1.0)).toMatchSnapshot();
   });
 
   it('should work with lineWidth', async () => {

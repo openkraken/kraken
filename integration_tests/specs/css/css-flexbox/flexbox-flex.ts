@@ -48,7 +48,7 @@ describe('flexbox-flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexWrapper);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-flexing-ref', async () => {
     let p;
@@ -74,7 +74,7 @@ describe('flexbox-flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-flexing', async () => {
     let p;
@@ -131,7 +131,7 @@ describe('flexbox-flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-nowrap', async () => {
     let p;
@@ -182,6 +182,6 @@ describe('flexbox-flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexWrapper);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

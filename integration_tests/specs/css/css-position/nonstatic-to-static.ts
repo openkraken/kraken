@@ -57,13 +57,13 @@ describe('Position non-static', () => {
     div4.appendChild(document.createTextNode('sticky to static'));
     container.appendChild(div4);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     div1.style.position = 'static';
     div2.style.position = 'static';
     div3.style.position = 'static';
     div4.style.position = 'static';
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

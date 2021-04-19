@@ -4037,7 +4037,7 @@ getJasmineRequireObj().toBeResolvedTo = function (j$) {
   };
 };
 
-getJasmineRequireObj().toMatchImageSnapshot = function (j$) {
+getJasmineRequireObj().toMatchSnapshot = function (j$) {
   const _matchImageSnapshotCounter = {};
   /**
    * Expect a element to be equal with it's screenshot image.
@@ -4046,11 +4046,11 @@ getJasmineRequireObj().toMatchImageSnapshot = function (j$) {
    * @name async-matchers#toBeResolvedTo
    * @param {Object} expected - DOM element
    * @example
-   * await expectAsync(document.body).toMatchImageSnapshot();
+   * await expectAsync(document.body).toMatchSnapshot();
    * @example
-   * await expectAsync(document.body).toMatchImageSnapshot('imageName');
+   * await expectAsync(document.body).toMatchSnapshot('imageName');
    */
-  return function toMatchImageSnapshot(util, customEqualityTesters) {
+  return function toMatchSnapshot(util, customEqualityTesters) {
     return {
       compare: function (blobP, snapshotName) {
         const currentSpec = j$.getEnv().currentRunnable();
@@ -4680,7 +4680,7 @@ getJasmineRequireObj().requireAsyncMatchers = function (jRequire, j$) {
     'toBeResolved',
     'toBeRejected',
     'toBeResolvedTo',
-    'toMatchImageSnapshot',
+    'toMatchSnapshot',
     'toBeRejectedWith',
     'toBeRejectedWithError'
   ],

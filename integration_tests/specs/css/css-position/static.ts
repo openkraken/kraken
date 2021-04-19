@@ -13,6 +13,6 @@ describe('Position static', () => {
 
     document.body.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

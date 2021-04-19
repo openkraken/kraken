@@ -148,6 +148,6 @@ describe('flexbox_flex-auto', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

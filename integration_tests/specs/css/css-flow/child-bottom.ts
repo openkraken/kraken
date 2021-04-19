@@ -72,6 +72,6 @@ describe('child-bottom', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

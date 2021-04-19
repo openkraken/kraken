@@ -41,6 +41,6 @@ describe('left-rtl', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

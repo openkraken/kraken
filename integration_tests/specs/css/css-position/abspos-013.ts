@@ -17,6 +17,6 @@ describe('abspos-013', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

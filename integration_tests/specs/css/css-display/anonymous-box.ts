@@ -40,7 +40,7 @@ describe('anonymous-box', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('generation-001', async () => {
     let child;
@@ -73,6 +73,6 @@ describe('anonymous-box', () => {
     );
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

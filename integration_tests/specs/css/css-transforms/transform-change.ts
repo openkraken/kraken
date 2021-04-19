@@ -18,11 +18,11 @@ describe('transform change', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       cont.style.transform = 'none';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -47,11 +47,11 @@ describe('transform change', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       cont.style.transform = 'none';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -75,11 +75,11 @@ describe('transform change', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       cont.style.transform = 'translate(100px, 0)';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -104,11 +104,11 @@ describe('transform change', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       cont.style.transform = 'translate(100px, 0)';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });

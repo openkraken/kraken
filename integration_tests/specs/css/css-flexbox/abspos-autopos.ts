@@ -31,7 +31,7 @@ describe('abspos-autopos', () => {
     );
     BODY.appendChild(flex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('htb-rtl', async () => {
     let flex;
@@ -64,6 +64,6 @@ describe('abspos-autopos', () => {
     );
     BODY.appendChild(flex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

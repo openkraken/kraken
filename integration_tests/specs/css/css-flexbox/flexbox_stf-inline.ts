@@ -91,6 +91,6 @@ describe('flexbox_stf-inline', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

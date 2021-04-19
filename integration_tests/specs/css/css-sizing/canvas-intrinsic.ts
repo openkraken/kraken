@@ -37,6 +37,6 @@ describe('canvas-intrinsic', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -47,7 +47,7 @@ describe('flexbox_margin', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ref', async () => {
     let div;
@@ -61,7 +61,7 @@ describe('flexbox_margin', () => {
     });
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('', async () => {
     let div;
@@ -77,6 +77,6 @@ describe('flexbox_margin', () => {
     });
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

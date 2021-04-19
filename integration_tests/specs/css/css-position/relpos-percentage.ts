@@ -60,6 +60,6 @@ describe('relpos-percentage', () => {
     BODY.appendChild(container);
 
     container.scrollLeft = 123456;
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -49,6 +49,6 @@ describe('right-100', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.5);
+    await snapshot(0.5);
   });
 });

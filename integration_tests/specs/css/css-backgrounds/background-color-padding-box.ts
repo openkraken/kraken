@@ -19,6 +19,6 @@ describe('Background-color-padding-box', function() {
     let div = createElementWithStyle('div', divStyle);
     append(parent, div);
     append(BODY, parent);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

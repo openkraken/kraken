@@ -82,7 +82,7 @@ describe('bottom-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(inlineBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('001', async () => {
     let p;
@@ -141,7 +141,7 @@ describe('bottom-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('002', async () => {
     let p;
@@ -189,7 +189,7 @@ describe('bottom-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let p;
@@ -247,7 +247,7 @@ describe('bottom-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('percentage-001-ref', async () => {
     let p;
@@ -296,7 +296,7 @@ describe('bottom-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.5);
+    await snapshot(0.5);
   });
   xit('percentage-001', async () => {
     let p;
@@ -368,6 +368,6 @@ describe('bottom-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

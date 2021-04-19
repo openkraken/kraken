@@ -22,7 +22,7 @@ describe('Display block in inline', () => {
     div2.appendChild(div3);
     div3.appendChild(document.createTextNode('There should be no red.'));
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('style changes 001', async () => {
@@ -49,7 +49,7 @@ describe('Display block in inline', () => {
     div1.addEventListener('click', () => {
       div3.style.display = div3.style.display == 'inline' ? 'block' : 'inline';
     });
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('style changes 002', async () => {
@@ -79,7 +79,7 @@ describe('Display block in inline', () => {
       div2.style.display = div2.style.display == 'inline' ? 'block' : 'inline';
       div3.style.display = div3.style.display == 'inline' ? 'block' : 'inline';
     });
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('relative positioning', async () => {
@@ -115,7 +115,7 @@ describe('Display block in inline', () => {
     });
     div3.appendChild(div4);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   xit('there should be no red', async () => {
@@ -137,7 +137,7 @@ describe('Display block in inline', () => {
     append(inline, innerBlock);
     append(block, inline);
     append(BODY, block);
-    await matchElementImageSnapshot(block);
+    await snapshot(block);
   });
 
   it('text should all coolapse into one line when click', async done => {
@@ -160,12 +160,12 @@ describe('Display block in inline', () => {
 
     document.body.addEventListener('click', async function listener() {
       toggleBlock.style.display = 'inline';
-      await matchElementImageSnapshot(block);
+      await snapshot(block);
       document.body.removeEventListener('click', listener);
       done();
     });
 
-    await matchElementImageSnapshot(block);
+    await snapshot(block);
 
     document.body.click();
   });
@@ -190,12 +190,12 @@ describe('Display block in inline', () => {
 
     document.body.addEventListener('click', async function listener() {
       toggleBlock.style.display = 'block';
-      await matchViewportSnapshot();
+      await snapshot();
       document.body.removeEventListener('click', listener);
       done();
     });
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     document.body.click();
   });
@@ -227,7 +227,7 @@ describe('Display block in inline', () => {
     append(wrap, inline);
     append(BODY, control);
     append(BODY, wrap);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('sliver boxs', async () => {
@@ -269,6 +269,6 @@ describe('Display block in inline', () => {
     append(container, bControl2);
     append(BODY, container);
 
-    await matchElementImageSnapshot(container);
+    await snapshot(container);
   });
 });

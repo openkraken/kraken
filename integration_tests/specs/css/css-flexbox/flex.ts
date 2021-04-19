@@ -53,7 +53,7 @@ describe('flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('002', async () => {
     let p;
@@ -134,7 +134,7 @@ describe('flex', () => {
     BODY.appendChild(ref1);
     BODY.appendChild(ref2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let p;
@@ -216,7 +216,7 @@ describe('flex', () => {
     BODY.appendChild(ref1);
     BODY.appendChild(ref2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004', async () => {
     let p;
@@ -298,7 +298,7 @@ describe('flex', () => {
     BODY.appendChild(ref1);
     BODY.appendChild(ref2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('direction', async () => {
     let flexItem;
@@ -574,7 +574,7 @@ describe('flex', () => {
     BODY.appendChild(flexContainer_2);
     BODY.appendChild(flexContainer_3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('direction_column', async () => {
     let test01;
@@ -644,7 +644,7 @@ describe('flex', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('direction_row', async () => {
     let test01;
@@ -714,7 +714,7 @@ describe('flex', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with initial', async () => {
@@ -759,7 +759,7 @@ describe('flex', () => {
     );
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with auto', async () => {
@@ -804,7 +804,7 @@ describe('flex', () => {
     );
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with none', async () => {
@@ -849,7 +849,7 @@ describe('flex', () => {
     );
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('flex items with inner padding and no specify width', async () => {
@@ -879,7 +879,7 @@ describe('flex', () => {
       )
     ]);
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("column flex child with overflow scroll", async () => {
@@ -980,7 +980,7 @@ describe('flex', () => {
     BODY.appendChild(flexbox);
     BODY.appendChild(flexbox_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('change from not none to none', async (done) => {
@@ -1009,11 +1009,11 @@ describe('flex', () => {
     );
     append(BODY, cont);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       item.style.flex = 'none';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
