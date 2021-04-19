@@ -218,6 +218,7 @@ mixin CSSTextMixin on RenderStyleBase {
     fontStyle = CSSText.getFontStyle(style);
     fontFamily = CSSText.getFontFamilyFallback(style);
     fontSize = CSSText.getFontSize(style, viewportSize);
+    lineHeight = CSSText.getLineHeight(style, viewportSize);
     letterSpacing = CSSText.getLetterSpacing(style, viewportSize);
     wordSpacing = CSSText.getWordSpacing(style, viewportSize);
     textShadow = CSSText.getTextShadow(style, viewportSize);
