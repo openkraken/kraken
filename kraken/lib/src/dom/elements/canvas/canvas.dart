@@ -12,7 +12,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-import 'canvas_context.dart';
 import 'canvas_context_2d.dart';
 
 const String CANVAS = 'CANVAS';
