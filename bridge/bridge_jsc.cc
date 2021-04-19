@@ -200,7 +200,11 @@ void JSBridge::reportError(const char *errmsg) {
 }
 
 #if ENABLE_DEBUGGER
-void BridgeProtocolHandler::handlePageReload() {}
+void BridgeProtocolHandler::handlePageReload() {
+  // FIXME: reload with devtolls are not full working yet (debugger not working).
+  // getDartMethod()->flushUICommand();
+  // getDartMethod()->reloadApp(m_bridge->contextId);
+}
 #endif
 
 } // namespace kraken

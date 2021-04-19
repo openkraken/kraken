@@ -82,10 +82,13 @@ void RuntimeFrontend::executionContextDestroyed(int executionContextId) {
   //            std::move(messageData)));
 }
 
-void RuntimeFrontend::executionContextsCleared() {
-  //            if (!m_frontendChannel)
-  //                return;
-  //            m_frontendChannel->sendProtocolNotification(InternalResponse::createNotification("Runtime.executionContextsCleared"));
+void RuntimeFrontend::executionContextsCleared(std::unique_ptr<ExecutionContextDescription> context) {
+  if (!m_frontendChannel) return;
+  std::unique_ptr<ExecutionContextCreatedNotification> messageData =
+      ExecutionContextCreatedNotification::create().setContext(std::move(context)).build();
+  rapidjson::Document doc;
+  m_frontendChannel->sendProtocolNotification(
+      {"Runtime.executionContextCreated", messageData->toValue(doc.GetAllocator())});
 }
 
 void RuntimeFrontend::inspectRequested(std::unique_ptr<RemoteObject> object, std::unique_ptr<rapidjson::Value> hints) {

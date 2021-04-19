@@ -35,16 +35,24 @@ private:
 class RPCSession {
 public:
   explicit RPCSession(size_t contextId, JSGlobalContextRef ctx, JSC::JSGlobalObject *globalObject, std::shared_ptr<ProtocolHandler> handler) : _contextId(contextId) {
-    m_debug_session = std::make_unique<InspectorSession>(this, ctx, globalObject, handler);
+    m_debug_session = std::make_shared<InspectorSession>(this, ctx, globalObject, handler);
     m_handler = std::make_shared<DartRPC>();
     InspectorMessageCallback callback = [](void *rpcSession, const char *message) -> void {
       auto session = reinterpret_cast_ptr<RPCSession *>(rpcSession);
+      if (session->dispose()) {
+        return;
+      }
       session->_on_message(message);
     };
     this->m_handler->setOnMessageCallback(contextId, this, callback);
   }
 
   ~RPCSession() {
+    m_disposed = true;
+  }
+
+  bool dispose() {
+    return m_disposed;
   }
 
   void handleRequest(Request req);
@@ -91,6 +99,7 @@ private:
   std::shared_ptr<DartRPC> m_handler;
   std::shared_ptr<InspectorSession> m_debug_session;
   size_t _contextId;
+  std::atomic<bool> m_disposed{false};
 };
 
 } // namespace kraken::debugger::jsonRpc

@@ -412,9 +412,21 @@ class KrakenViewController {
   SendPort get isolateServerPort => _isolateServerPort;
 
   void debugStartInspector() {
-    spawnIsolateInspectorServer(this);
-    _uiInspector = UIInspector(this);
-    _elementManager.debugDOMTreeChanged = uiInspector.onDOMTreeChanged;
+    // Apply reload page, reuse prev inspector instance.
+    if (UIInspector.prevInspector != null) {
+      UIInspector prevInspector = UIInspector.prevInspector;
+      _isolateServerPort = prevInspector.viewController._isolateServerPort;
+      _isolateServerIsolate = prevInspector.viewController._isolateServerIsolate;
+      prevInspector.viewController = this;
+      _uiInspector = prevInspector;
+      elementManager.debugDOMTreeChanged = prevInspector.onDOMTreeChanged;
+      UIInspector.prevInspector = null;
+      _isolateServerPort.send(InspectorReload(contextId));
+    } else {
+      spawnIsolateInspectorServer(this);
+      _uiInspector = UIInspector(this);
+      elementManager.debugDOMTreeChanged = uiInspector.onDOMTreeChanged;
+    }
   }
 }
 
@@ -597,7 +609,9 @@ class KrakenController {
     // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
     flushUICommand();
 
-    UIInspector.prevInspector = view._elementManager.controller.view.uiInspector;
+    UIInspector.prevInspector = view.uiInspector;
+
+    print('reload prev inspector: ${UIInspector.prevInspector}');
 
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         background: _view.background,
@@ -612,6 +626,7 @@ class KrakenController {
   // reload current kraken view.
   void reload() async {
     await unload();
+    print('success reload page');
     await loadBundle();
     await evalBundle();
   }
