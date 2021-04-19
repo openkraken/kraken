@@ -4146,8 +4146,7 @@ getJasmineRequireObj().toMatchSnapshot = function (j$) {
               if (_currentSpec.id !== specId) {
                 reject(new Error(`Expected toMatchSnapshot to be resolved before "${this.description})" done.`));
               }
-              
-              console.log(`${this.description} ${filename}`);
+
               if (status) {
                 return resolve({ pass: true });
               } else {
