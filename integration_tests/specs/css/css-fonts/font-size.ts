@@ -77,4 +77,42 @@ describe('FontSize', () => {
     BODY.appendChild(div);
     await snapshot();
   });
+
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          fontSize: '50px',
+          position: 'relative',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+          }
+        }, [
+          createText('Kraken')
+        ]))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div2.style.fontSize = '50%';
+       await snapshot();
+       done();
+    });
+  });
 });

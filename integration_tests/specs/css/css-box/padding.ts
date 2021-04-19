@@ -129,4 +129,46 @@ describe('Box padding', () => {
     await snapshot();
   });
 
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '100px',
+          height: '200px',
+          padding: '20px',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'yellow',
+          }
+        }, [
+            createElement('div', {
+              style: {
+                  width: '20px',
+                  height: '20px',
+                  backgroundColor: 'red'
+              }
+              })
+        ]))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div2.style.padding = '30%';
+       await snapshot();
+       done();
+    });
+  });
 });

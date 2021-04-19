@@ -256,4 +256,39 @@ describe('border_radius', () => {
     BODY.appendChild(div);
     await snapshot();
   });
+
+  it('should work with percentage after element is attached', async (done) => {
+    let div;
+    let div2;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div2.style.borderRadius = '100%';
+       await snapshot();
+       done();
+    });
+  });
 });

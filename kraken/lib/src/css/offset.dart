@@ -88,6 +88,9 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   void _markParentNeedsLayout() {
+    // Should mark positioned element's containing block needs layout directly
+    // cause RelayoutBoundary of positioned element will prevent the needsLayout flag
+    // to bubble up in the RenderObject tree.
     if (renderBoxModel.parentData is RenderLayoutParentData) {
       RenderStyle renderStyle = renderBoxModel.renderStyle;
       if (renderStyle.position != CSSPositionType.static) {

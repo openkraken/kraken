@@ -621,30 +621,14 @@ class Element extends Node
     /// Calculate font-size which is percentage when node attached
     /// where it can access the font-size of its parent element
     if (renderBoxModel.shouldLazyCalFontSize) {
-      RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
-      double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
-      double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
-      renderBoxModel.renderStyle.fontSize = parsedFontSize;
-      for (Node node in childNodes) {
-        if (node is TextNode) {
-          node.updateTextStyle();
-        }
-      }
+      _updatePercentageFontSize();
       renderBoxModel.shouldLazyCalFontSize = false;
     }
 
     /// Calculate line-height which is percentage when node attached
     /// where it can access the font-size of its own element
     if (renderBoxModel.shouldLazyCalLineHeight) {
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
-      double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
-      double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
-      renderBoxModel.renderStyle.lineHeight = parsedLineHeight;
-      for (Node node in childNodes) {
-        if (node is TextNode) {
-          node.updateTextStyle();
-        }
-      }
+      _updatePercentageLineHeight();
       renderBoxModel.shouldLazyCalLineHeight = false;
     }
 
@@ -1063,7 +1047,16 @@ class Element extends Node
   void _styleOffsetChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
     if (CSSLength.isPercentage(present)) {
-      renderBoxModel.markNeedsLayout();
+      // Should mark positioned element's containing block needs layout directly
+      // cause RelayoutBoundary of positioned element will prevent the needsLayout flag
+      // to bubble up in the RenderObject tree.
+      if (renderBoxModel.parentData is RenderLayoutParentData) {
+        RenderStyle renderStyle = renderBoxModel.renderStyle;
+        if (renderStyle.position != CSSPositionType.static) {
+          RenderBoxModel parent = renderBoxModel.parent;
+          parent.markNeedsLayout();
+        }
+      }
       return;
     }
 
@@ -1207,15 +1200,7 @@ class Element extends Node
     /// cause it needs to know its parents style
     if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
       if (renderBoxModel.attached) {
-        RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
-        double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
-        double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
-        renderBoxModel.renderStyle.fontSize = parsedFontSize;
-        for (Node node in childNodes) {
-          if (node is TextNode) {
-            node.updateTextStyle();
-          }
-        }
+        _updatePercentageFontSize();
       } else {
         renderBoxModel.shouldLazyCalFontSize = true;
       }
@@ -1226,15 +1211,7 @@ class Element extends Node
     /// cause it needs to know other style in its own element
     if (property == LINE_HEIGHT && CSSLength.isPercentage(style[LINE_HEIGHT])) {
       if (renderBoxModel.attached) {
-        RenderStyle renderStyle = renderBoxModel.renderStyle;
-        double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
-        double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
-        renderBoxModel.renderStyle.lineHeight = parsedLineHeight;
-        for (Node node in childNodes) {
-          if (node is TextNode) {
-            node.updateTextStyle();
-          }
-        }
+        _updatePercentageLineHeight();
       } else {
         renderBoxModel.shouldLazyCalLineHeight = true;
       }
@@ -1242,6 +1219,32 @@ class Element extends Node
     }
 
     renderBoxModel.renderStyle.updateTextStyle();
+    for (Node node in childNodes) {
+      if (node is TextNode) {
+        node.updateTextStyle();
+      }
+    }
+  }
+
+  /// Percentage font size is set relative to parent's font size.
+  void _updatePercentageFontSize() {
+    RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
+    double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
+    double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
+    renderBoxModel.renderStyle.fontSize = parsedFontSize;
+    for (Node node in childNodes) {
+      if (node is TextNode) {
+        node.updateTextStyle();
+      }
+    }
+  }
+
+  /// Percentage line height is set relative to its own font size.
+  void _updatePercentageLineHeight() {
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
+    double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
+    renderBoxModel.renderStyle.lineHeight = parsedLineHeight;
     for (Node node in childNodes) {
       if (node is TextNode) {
         node.updateTextStyle();
