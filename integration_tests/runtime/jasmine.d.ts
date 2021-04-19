@@ -669,9 +669,9 @@ declare namespace jasmine {
     interface AsyncMatchers<T, U> {
         /**
          * Expect a element to match a image.
-         * @param screenShotName
+         * @param snapshotName
          */
-        toMatchSnapshot(screenShotName?: any): Promise<boolean>;
+        toMatchSnapshot(snapshotName?: any): Promise<boolean>;
 
         /**
          * Expect a promise to be resolved.

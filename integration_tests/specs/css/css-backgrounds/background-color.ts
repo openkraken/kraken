@@ -8,7 +8,7 @@ describe('Background-color', () => {
     });
 
     document.body.appendChild(div);
-    await expectAsync(div.toBlob(1.0)).toMatchSnapshot();
+    await snapshot(div);
   });
 
   xit('red with display none', async () => {
@@ -68,7 +68,7 @@ describe('Background-color', () => {
 
     requestAnimationFrame(async () => {
       div.style.backgroundColor = '';
-      await expectAsync(div.toBlob(1.0)).toMatchSnapshot();
+      await snapshot(div);
       done();
     });
   });

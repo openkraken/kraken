@@ -25,7 +25,7 @@ describe('Background linear-gradient', () => {
     await snapshot(div1);
     requestAnimationFrame(async () => {
       div1.style.backgroundImage = '';
-      await expectAsync(div1.toBlob(1.0)).toMatchSnapshot();
+      await snapshot(div1);
       done();
     });
   });
