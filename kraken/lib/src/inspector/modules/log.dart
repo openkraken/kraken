@@ -1,5 +1,4 @@
 import 'package:kraken/inspector.dart';
-import 'package:kraken/dom.dart';
 import '../module.dart';
 
 class InspectorLogModule extends IsolateInspectorModule {

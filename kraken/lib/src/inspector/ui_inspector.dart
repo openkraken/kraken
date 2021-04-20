@@ -4,7 +4,6 @@
  */
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ffi';
 
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
