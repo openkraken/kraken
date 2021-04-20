@@ -171,8 +171,8 @@ class CSSPositionedLayout {
     RenderBoxModel child,
     {bool needsRelayout = false}
   ) {
-    // Default to no constraints. (0 - infinite)
-    BoxConstraints childConstraints = const BoxConstraints();
+    BoxConstraints childConstraints = child.renderStyle.getConstraints();
+
     // Scrolling element has two repaint boundary box, the inner box has constraints of inifinity
     // so it needs to find the upper box for querying content constraints
     RenderBoxModel containerBox = parent.isScrollingContentBox ? parent.parent : parent;
@@ -226,12 +226,11 @@ class CSSPositionedLayout {
         isChildNeedsLayout = true;
       } else {
         Size childOldSize = _getChildSize(child);
-        /// No need to layout child when both width and height of child can be calculated from style
-        /// and be the same as old size, in other cases always relayout.
-        bool childSizeCalculatedSame = childContentWidth != null && childContentHeight != null &&
-          (childOldSize.width == childContentWidth ||
-            childOldSize.height == childContentHeight);
-        isChildNeedsLayout = !childSizeCalculatedSame;
+        // Need to layout child only when width and height both can be calculated from style
+        // and differ from its previous size
+        isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
+          (childOldSize.width != childContentWidth ||
+            childOldSize.height != childContentHeight);
       }
     }
 
@@ -241,10 +240,6 @@ class CSSPositionedLayout {
         childLayoutStartTime = DateTime.now();
       }
 
-      // Relayout child after percentage size is resolved
-      if (needsRelayout) {
-        childConstraints = child.renderStyle.getConstraints();
-      }
       // Should create relayoutBoundary for positioned child.
       child.layout(childConstraints, parentUsesSize: false);
 

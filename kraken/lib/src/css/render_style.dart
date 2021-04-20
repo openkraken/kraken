@@ -7,6 +7,14 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
+// Constraints of element whose display style is none
+final _displayNoneConstraints = BoxConstraints(
+  minWidth: 0,
+  maxWidth: 0,
+  minHeight: 0,
+  maxHeight: 0
+);
+
 class RenderStyle
   with
     RenderStyleBase,
@@ -492,33 +500,61 @@ class RenderStyle
 
   /// Calculate renderBoxModel constraints based on style
   BoxConstraints getConstraints() {
-    double constraintWidth = width ?? double.infinity;
-    double constraintHeight = height ?? double.infinity;
-    CSSDisplay transformedDisplay = renderBoxModel.renderStyle.transformedDisplay;
-    bool isInline = transformedDisplay == CSSDisplay.inline;
-    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
+    bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
+    bool isDisplayNone = transformedDisplay == CSSDisplay.none;
 
-    if (!isInline) {
-      // Base width when width no exists, inline-block has width of 0
-      double baseWidth = isInlineBlock ? 0 : constraintWidth;
-      if (maxWidth != null && width == null) {
-        constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
-      } else if (minWidth != null && width == null) {
-        constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
+    if (isDisplayNone) {
+      return _displayNoneConstraints;
+    }
+
+    double minConstraintWidth = 0;
+    double maxConstraintWidth = double.infinity;
+    double minConstraintHeight = 0;
+    double maxConstraintHeight = double.infinity;;
+
+    if (!isDisplayInline) {
+      double horizontalBorderWidth = borderEdge != null ? borderEdge.horizontal : 0;
+      double verticalBorderWidth = borderEdge != null ? borderEdge.vertical : 0;
+      double horizontalPaddingWidth = padding != null ? padding.horizontal : 0;
+      double verticalPaddingWidth = padding != null ? padding.vertical : 0;
+
+      double realWidth = width;
+      double realHeight = height;
+      if (width != null) {
+        realWidth = horizontalBorderWidth + horizontalPaddingWidth > width ? horizontalBorderWidth + horizontalPaddingWidth : width;
       }
-      // Base height always equals to 0 no matter
-      double baseHeight = 0;
-      if (maxHeight != null && height == null) {
-        constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
-      } else if (minHeight != null && height == null) {
-        constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
+      if (height != null) {
+        realHeight = verticalBorderWidth + verticalPaddingWidth > height ? verticalBorderWidth + verticalPaddingWidth : height;
+      }
+
+      minConstraintWidth = realWidth ?? minConstraintWidth;
+      if (minWidth != null) {
+        minConstraintWidth = minConstraintWidth < minWidth ? minWidth : minConstraintWidth;
+      }
+      if (maxWidth != null) {
+        maxConstraintWidth = maxWidth;
+        if (maxConstraintWidth < minConstraintWidth) {
+          minConstraintWidth = maxConstraintWidth;
+        }
+      }
+
+      minConstraintHeight = realHeight ?? minConstraintHeight;
+      if (minHeight != null) {
+        minConstraintHeight = minConstraintHeight < minHeight ? minHeight : minConstraintHeight;
+      }
+      if (maxHeight != null) {
+        maxConstraintHeight = maxHeight;
+        if (maxConstraintHeight < minConstraintHeight) {
+          minConstraintHeight = maxConstraintHeight;
+        }
       }
     }
+
     return BoxConstraints(
-      minWidth: 0,
-      maxWidth: constraintWidth,
-      minHeight: 0,
-      maxHeight: constraintHeight,
+      minWidth: minConstraintWidth,
+      maxWidth: maxConstraintWidth,
+      minHeight: minConstraintHeight,
+      maxHeight: maxConstraintHeight,
     );
   }
 }

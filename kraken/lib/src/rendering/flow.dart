@@ -596,6 +596,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // If no child exists, stop layout.
     if (childCount == 0) {
+
       double constraintWidth = logicalContentWidth ?? 0;
       double constraintHeight = logicalContentHeight ?? 0;
       bool isInline = transformedDisplay == CSSDisplay.inline;
@@ -628,9 +629,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       return;
     }
 
-    // @NOTE: Child size could be larger than parent's content, give
-    // an infinite box constraint to flow layout children.
-    BoxConstraints childConstraints = BoxConstraints();
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
@@ -647,7 +645,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
     }
-    assert(childConstraints != null);
     assert(mainAxisLimit != null);
     final double spacing = this.spacing;
     final double runSpacing = this.runSpacing;
@@ -690,12 +687,11 @@ class RenderFlowLayout extends RenderLayoutBox {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = _getChildSize(child);
-          /// No need to layout child when both width and height of child can be calculated from style
-          /// and be the same as old size, in other cases always relayout.
-          bool childSizeCalculatedSame = childContentWidth != null && childContentHeight != null &&
-            (childOldSize.width == childContentWidth ||
-              childOldSize.height == childContentHeight);
-          isChildNeedsLayout = !childSizeCalculatedSame;
+          // Need to layout child only when width and height both can be calculated from style
+          // and differ from its previous size
+          isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
+            (childOldSize.width != childContentWidth ||
+              childOldSize.height != childContentHeight);
         }
       }
 
@@ -704,10 +700,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
-        // Relayout child after percentage size is resolved
-        if (needsRelayout && child is RenderBoxModel) {
-          childConstraints = child.renderStyle.getConstraints();
-        }
+        final BoxConstraints childConstraints = child is RenderBoxModel ?
+          child.renderStyle.getConstraints() : BoxConstraints();
+
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();

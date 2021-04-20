@@ -120,4 +120,249 @@ describe('dynamic-change', () => {
 
     await snapshot();
   });
+
+  it('flex item height change', async (done) => {
+    let div;
+    let item1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (item1 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '50px',
+            background: 'red',
+          }
+        })),
+        createElement('div', {
+          style: {
+            flex: 1,
+            background: 'blue',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item1.style.height = '100px';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('flex grow exists when its sibling main size changes when flex direction is row', async (done) => {
+    let div;
+    let item1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (item1 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '50px',
+            background: 'red',
+          }
+        })),
+        createElement('div', {
+          style: {
+            flex: 1,
+            background: 'blue',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item1.style.width = '200px';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('flex shrink exists when its sibling main size changes when flex direction is row', async (done) => {
+    let div;
+    let item1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (item1 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '50px',
+            background: 'red',
+          }
+        })),
+        createElement('div', {
+          style: {
+            width: '500px',
+            background: 'blue',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item1.style.width = '200px';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('flex shorthand exists when its sibling main size changes when flex direction is row', async (done) => {
+    let div;
+    let item1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (item1 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '50px',
+            background: 'red',
+          }
+        })),
+        createElement('div', {
+          style: {
+            flex: 1,
+            width: '500px',
+            background: 'blue',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item1.style.width = '200px';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('flex grow exists when its sibling main size changes when flex direction is column', async (done) => {
+    let div;
+    let item1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '300px',
+          height: '200px',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (item1 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '50px',
+            background: 'red',
+          }
+        })),
+        createElement('div', {
+          style: {
+            flex: 1,
+            background: 'blue',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item1.style.height = '100px';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('flex shrink exists when its sibling main size changes when flex direction is column', async (done) => {
+    let div;
+    let item1;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          height: '200px',
+          flexDirection: 'column',
+          background: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (item1 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '50px',
+            background: 'red',
+          }
+        })),
+        createElement('div', {
+          style: {
+            height: '500px',
+            background: 'blue',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item1.style.height = '100px';
+      await snapshot();
+      done();
+    });
+  });
 });
