@@ -180,12 +180,14 @@ function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
 
-async function snapshot(target: HTMLElement | number = 0.0) {
-  if (typeof target == 'number') {
-    await sleep(target);
-    await expectAsync(document.body.toBlob(1.0)).toMatchSnapshot();
+async function snapshot(target: any, filename ?: String) {
+  if (target && target.toBlob) {
+    await expectAsync(target.toBlob(1.0)).toMatchSnapshot(filename); 
   } else {
-    await expectAsync(target.toBlob(1.0)).toMatchSnapshot(); 
+    if (typeof target == 'number') {
+      await sleep(target);
+    }
+    await expectAsync(document.body.toBlob(1.0)).toMatchSnapshot(filename);
   }
 }
 
