@@ -10,8 +10,9 @@ const fs = require('fs');
 const del = require('del');
 const os = require('os');
 
-program.
-option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
+program
+.option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
+.option('-i, --inspector', 'Support JavaScript inspector with Chrome DevTools')
 .parse(process.argv);
 
 const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
@@ -149,13 +150,54 @@ task('clean', () => {
 
 const libOutputPath = join(TARGET_PATH, platform, 'lib');
 
+function findDebugJSEngine(platform) {
+  if (platform == 'macos' || platform == 'ios') {
+    let packageConfigFilePath = path.join(paths.kraken, '.dart_tool/package_config.json');
+
+    if (!fs.existsSync(packageConfigFilePath)) {
+      execSync('flutter pub get', {
+        cwd: paths.kraken,
+        stdio: 'inherit'
+      });
+    }
+
+    let packageConfig = require(packageConfigFilePath);
+    let packages = packageConfig.packages;
+
+    let jscPackageInfo = packages.find((i) => i.name === 'jsc');
+    if (!jscPackageInfo) {
+      throw new Error('Can not locate `jsc` dart package, please add jsc deps before build kraken libs with inspector.');
+    }
+
+    let rootUri = jscPackageInfo.rootUri;
+    let jscPackageLocation = path.join(paths.kraken, '.dart_tool', rootUri);
+    return path.join(jscPackageLocation, platform, 'JavaScriptCore.framework');
+  }
+}
+
 task('build-darwin-kraken-lib', done => {
   let buildType = 'Debug';
   if (process.env.KRAKEN_BUILD === 'Release') {
     buildType = 'RelWithDebInfo';
   }
 
-  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} -DENABLE_TEST=true ${isProfile ? '-DENABLE_PROFILE=TRUE' : ''} \
+  let enableInspector = !!program.inspector;
+
+  let externCmakeArgs = [];
+
+  if (isProfile) {
+    externCmakeArgs.push('-DENABLE_PROFILE=TRUE');
+  }
+
+  if (enableInspector) {
+
+    let debugJsEngine = findDebugJSEngine(platform == 'darwin' ? 'macos' : platform);
+    externCmakeArgs.push(`-DDEBUG_JSC_ENGINE=${debugJsEngine}`)
+  }
+
+  console.log(externCmakeArgs);
+
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} ${enableInspector ? '' : ''} -DENABLE_TEST=true ${externCmakeArgs.join(' ')} \
     -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-macos-x86_64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
