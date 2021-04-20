@@ -607,7 +607,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    bool isInline = renderBoxModel.renderStyle.display == CSSDisplay.inline;
+    bool isInline = renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.inline;
 
     // min-width and max-width doesn't work on inline element
     if (!isInline) {
@@ -621,17 +621,8 @@ class RenderBoxModel extends RenderBox with
           width = minWidth;
         }
       }
-
       if (maxWidth != null) {
-        if (width == null) {
-          if (intrinsicWidth == null || intrinsicWidth > maxWidth) {
-            // When intrinsicWidth is null, use max-width as max constraints,
-            // real width should be compared with its children width when performLayout
-            width = maxWidth;
-          } else {
-            width = intrinsicWidth;
-          }
-        } else if (width > maxWidth) {
+        if (width != null && width > maxWidth)  {
           width = maxWidth;
         }
       }
@@ -709,7 +700,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    bool isInline = renderBoxModel.renderStyle.display == CSSDisplay.inline;
+    bool isInline = renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.inline;
 
     // max-height and min-height doesn't work on inline element
     if (!isInline) {
@@ -723,21 +714,11 @@ class RenderBoxModel extends RenderBox with
           height = minHeight;
         }
       }
-
       if (maxHeight != null) {
-        if (height == null) {
-          // When intrinsicHeight is null, use max-height as max constraints,
-          // real height should be compared with its children height when performLayout
-          if (intrinsicHeight == null || intrinsicHeight > maxHeight) {
-            height = maxHeight;
-          } else {
-            height = intrinsicHeight;
-          }
-        } else if (height > maxHeight) {
+        if (height != null && height > maxHeight)  {
           height = maxHeight;
         }
       }
-
     }
 
     if (height != null) {

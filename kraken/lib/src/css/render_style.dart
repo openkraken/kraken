@@ -520,11 +520,22 @@ class RenderStyle
 
       double realWidth = width;
       double realHeight = height;
-      if (width != null) {
-        realWidth = horizontalBorderWidth + horizontalPaddingWidth > width ? horizontalBorderWidth + horizontalPaddingWidth : width;
+
+      if (renderBoxModel.parent is RenderFlexLayout) {
+        RenderBoxModel parentRenderBoxModel = renderBoxModel.parent;
+        // In flex layout, flex basis takes priority over width/height if set
+        if (flexBasis != null) {
+          if (CSSFlex.isHorizontalFlexDirection(parentRenderBoxModel.renderStyle.flexDirection)) {
+            realWidth = flexBasis;
+          } else {
+            realHeight = flexBasis;
+          }
+        }
       }
-      if (height != null) {
-        realHeight = verticalBorderWidth + verticalPaddingWidth > height ? verticalBorderWidth + verticalPaddingWidth : height;
+
+      // Width cannot be smaller than its horizontal border and padding width
+      if (realWidth != null) {
+        realWidth = horizontalBorderWidth + horizontalPaddingWidth > realWidth ? horizontalBorderWidth + horizontalPaddingWidth : realWidth;
       }
 
       minConstraintWidth = realWidth ?? minConstraintWidth;
@@ -536,6 +547,11 @@ class RenderStyle
         if (maxConstraintWidth < minConstraintWidth) {
           minConstraintWidth = maxConstraintWidth;
         }
+      }
+
+      // Height cannot be smaller than its vertical border and padding width
+      if (realHeight != null) {
+        realHeight = verticalBorderWidth + verticalPaddingWidth > realHeight ? verticalBorderWidth + verticalPaddingWidth : realHeight;
       }
 
       minConstraintHeight = realHeight ?? minConstraintHeight;
