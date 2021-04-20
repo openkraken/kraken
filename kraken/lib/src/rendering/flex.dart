@@ -1099,7 +1099,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       flexLineLimit = logicalContentWidth != null ? logicalContentWidth : maxConstraintWidth;
     } else {
       // Children in vertical direction should not wrap if height no exists
-      double maxContentHeight = double.infinity;
+      double maxContentHeight = renderStyle.maxHeight ?? double.infinity;
       flexLineLimit = logicalContentHeight != null ? logicalContentHeight : maxContentHeight;
     }
 
