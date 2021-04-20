@@ -5,7 +5,7 @@
  * - setElementProps: Apply attrs object to a specfic DOM.
  * - sleep: wait for several seconds.
  * - create: create element.
- * - matchViewportSnapshot: match snapshot of body's image.
+ * - snapshot: match snapshot of body's image.
  */
 const BODY = document.body;
 

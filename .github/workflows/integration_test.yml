@@ -12,7 +12,7 @@ jobs:
     - name: Echo branch name
       run: echo ${BRANCH_NAME}
     - name: Clone the Code
-      run: git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/${BRANCH_NAME}";
+      run: rm -rf "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/${BRANCH_NAME}";
     - name: Run Test
       run: cd "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && npm test
       id: test
@@ -24,6 +24,5 @@ jobs:
       run: rm -rf "${RUNNER_WORKSPACE}/${BRANCH_NAME}"
       continue-on-error: true
     - name: Check on failures
-      continue-on-error: true
       if: steps.test.outcome != 'success'
       run: exit 1
