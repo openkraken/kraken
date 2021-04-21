@@ -22,8 +22,7 @@ describe('Position fixed', () => {
     });
     div1.appendChild(document.createTextNode('fixed element'));
     container1.appendChild(div1);
-
-    await expectAsync(container1.toBlob(1)).toMatchSnapshot();
+    await snapshot(container1);
   });
 
   it('works with scroller container', async (done) => {
