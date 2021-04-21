@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-// MUST READ:
+// MUST READ: 
 // All the struct which prefix with NativeXXX struct (exp: NativeElement) has a corresponding struct in Dart code.
 // All struct members include variables and functions must be follow the same order with Dart class, to keep the same memory layout cross dart and C++ code.
 
@@ -586,14 +586,13 @@ public:
   void refer();
   void unrefer();
 
-  inline DocumentInstance *document() { return m_document; }
-
   int32_t _referenceCount{0};
+
+  DocumentInstance *document{nullptr};
   virtual void _notifyNodeRemoved(NodeInstance *node);
   virtual void _notifyNodeInsert(NodeInstance *node);
 
 private:
-  DocumentInstance *m_document{nullptr};
   void ensureDetached(NodeInstance *node);
 };
 
