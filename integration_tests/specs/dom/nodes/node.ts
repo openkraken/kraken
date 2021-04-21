@@ -116,7 +116,5 @@ describe('Node API', () => {
     let commentNode = document.createComment('comment');
     expect(commentNode.ownerDocument === document);
     expect(document.ownerDocument === null);
-    let img = new Image();
-    expect(img.ownerDocument).toBe(document);
   });
 });
