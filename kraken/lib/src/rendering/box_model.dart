@@ -281,7 +281,7 @@ class RenderLayoutBox extends RenderBoxModel
     return result;
   }
 
-  /// Calculate layout size from style and content size
+  /// Common layout size (including flow and flexbox layout) calculation logic
   Size getLayoutSize({
     double logicalContentWidth,
     double logicalContentHeight,
@@ -294,8 +294,7 @@ class RenderLayoutBox extends RenderBoxModel
     // Size which is specified by sizing styles
     double specifiedWidth = logicalContentWidth;
     double specifiedHeight = logicalContentHeight;
-
-    // Flex basis takes priority over main size in flex item
+    // Flex basis takes priority over main size in flex item.
     if (parent is RenderFlexLayout) {
       RenderBoxModel parentRenderBoxModel = parent;
       double flexBasis = renderStyle.flexBasis;
@@ -318,7 +317,6 @@ class RenderLayoutBox extends RenderBoxModel
     CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
     bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
     bool isNotInline = transformedDisplay != CSSDisplay.inline;
-
     double width = renderStyle.width;
     double height = renderStyle.height;
     double minWidth = renderStyle.minWidth;

@@ -739,7 +739,7 @@ describe('flex-grow', () => {
     await snapshot();
   });
 
-  xit("automatic flex container size is smaller than its content size", async () => {
+  it("automatic flex container size is smaller than its content size", async () => {
     let p;
     let relpos;
     let flex;

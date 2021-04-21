@@ -444,7 +444,7 @@ describe('flex-direction', () => {
 
     await snapshot();
   });
-  xit("column-overlap-001", async () => {
+  it("column-overlap-001", async () => {
     let p;
     let relpos;
     let flex;
