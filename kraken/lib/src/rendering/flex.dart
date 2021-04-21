@@ -1265,7 +1265,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     Map<int, _RunChild> runChildren = runMetric.runChildren;
     double totalFlexGrow = runMetric.totalFlexGrow;
     double totalFlexShrink = runMetric.totalFlexShrink;
-    bool isFlexGrow = initialFreeSpace >= 0 && totalFlexGrow > 0;
+    bool isFlexGrow = initialFreeSpace > 0 && totalFlexGrow > 0;
     bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
 
     double sumFlexFactors = isFlexGrow ? totalFlexGrow : totalFlexShrink;
@@ -1455,7 +1455,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         initialFreeSpace = maxMainSize - totalSpace;
       }
 
-      bool isFlexGrow = initialFreeSpace >= 0 && totalFlexGrow > 0;
+      bool isFlexGrow = initialFreeSpace > 0 && totalFlexGrow > 0;
       bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
 
       if (isFlexGrow || isFlexShrink) {
@@ -1923,7 +1923,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final Map<int, _RunChild> runChildren = metrics.runChildren;
 
       final double mainContentSizeDelta = mainAxisContentSize - runMainAxisExtent;
-      bool isFlexGrow = mainContentSizeDelta >= 0 && totalFlexGrow > 0;
+      bool isFlexGrow = mainContentSizeDelta > 0 && totalFlexGrow > 0;
       bool isFlexShrink = mainContentSizeDelta < 0 && totalFlexShrink > 0;
 
       _overflow = math.max(0.0, - mainContentSizeDelta);
