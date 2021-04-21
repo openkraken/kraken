@@ -244,9 +244,11 @@ DocumentInstance *DocumentInstance::instance(JSContext *context) {
 DocumentInstance::DocumentInstance(JSDocument *document)
   : NodeInstance(document, NodeType::DOCUMENT_NODE, DOCUMENT_TARGET_ID),
     nativeDocument(new NativeDocument(nativeNode)) {
+  m_document = this;
   JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
   auto Element = JSElement::instance(document->context);
   body = new ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
+  body->m_document = this;
   JSStringHolder bodyStringHolder = JSStringHolder(context, "body");
   JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
   JSObjectSetProperty(ctx, object, bodyStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);

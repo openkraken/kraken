@@ -595,6 +595,7 @@ public:
 private:
   DocumentInstance *m_document{nullptr};
   void ensureDetached(NodeInstance *node);
+  friend DocumentInstance;
 };
 
 struct NativeNode {
@@ -687,6 +688,7 @@ public:
 
 private:
   DocumentCookie m_cookie;
+  friend NodeInstance;
 };
 
 class JSElementAttributes : public HostObject {
