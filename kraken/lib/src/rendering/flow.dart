@@ -585,50 +585,16 @@ class RenderFlowLayout extends RenderLayoutBox {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
-    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
-    bool isNotInline = transformedDisplay != CSSDisplay.inline;
-
-    double width = renderStyle.width;
-    double height = renderStyle.height;
-    double minWidth = renderStyle.minWidth;
-    double minHeight = renderStyle.minHeight;
-    double maxWidth = renderStyle.maxWidth;
-    double maxHeight = renderStyle.maxHeight;
-
     // If no child exists, stop layout.
     if (childCount == 0) {
-      double specifiedWidth = logicalContentWidth;
-      double specifiedHeight = logicalContentHeight;
-
-      if (parent is RenderFlexLayout) {
-        RenderBoxModel parentRenderBoxModel = parent;
-        double flexBasis = renderStyle.flexBasis;
-        if (flexBasis != null) {
-          if (CSSFlex.isHorizontalFlexDirection(parentRenderBoxModel.renderStyle.flexDirection)) {
-            specifiedWidth = flexBasis;
-          } else {
-            specifiedHeight = flexBasis;
-          }
-        }
-      }
-
-      double constraintWidth = specifiedWidth ?? 0;
-      double constraintHeight = specifiedHeight ?? 0;
-
-      // Constrain to min-width or max-width if width not exists
-      if (isInlineBlock && maxWidth != null && width == null) {
-        constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
-      } else if (isInlineBlock && minWidth != null && width == null) {
-        constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
-      }
-
-      // Constrain to min-height or max-height if width not exists
-      if (isNotInline && maxHeight != null && height == null) {
-        constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
-      } else if (isNotInline && minHeight != null && height == null) {
-        constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
-      }
+      Size layoutSize = getLayoutSize(
+        logicalContentWidth: logicalContentWidth,
+        logicalContentHeight: logicalContentHeight,
+        contentWidth: 0,
+        contentHeight: 0,
+      );
+      double constraintWidth = layoutSize.width;
+      double constraintHeight = layoutSize.height;
 
       setMaxScrollableSize(constraintWidth, constraintHeight);
       size = getBoxSize(Size(
@@ -828,50 +794,14 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     final int runCount = runMetrics.length;
 
-    // Default to children's width
-    double constraintWidth = mainAxisExtent;
-
-    // Default to children's height
-    double constraintHeight = crossAxisExtent;
-
-    double specifiedWidth = logicalContentWidth;
-    double specifiedHeight = logicalContentHeight;
-
-    if (parent is RenderFlexLayout) {
-      RenderBoxModel parentRenderBoxModel = parent;
-      double flexBasis = renderStyle.flexBasis;
-      if (flexBasis != null) {
-        if (CSSFlex.isHorizontalFlexDirection(parentRenderBoxModel.renderStyle.flexDirection)) {
-          specifiedWidth = flexBasis;
-        } else {
-          specifiedHeight = flexBasis;
-        }
-      }
-    }
-
-    double contentWidth = mainAxisExtent;
-    if (specifiedWidth != null) {
-      constraintWidth = math.max(specifiedWidth, contentWidth);
-    }
-    double contentHeight = crossAxisExtent;
-    if (specifiedHeight != null) {
-      constraintHeight = math.max(specifiedHeight, contentHeight);
-    }
-
-
-    // Constrain to min-width or max-width if width not exists
-    if (isInlineBlock && maxWidth != null && width == null) {
-      constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
-    } else if (isInlineBlock && minWidth != null && width == null) {
-      constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
-    }
-
-    // Constrain to min-height or max-height if width not exists
-    if (isNotInline && maxHeight != null && height == null) {
-      constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
-    } else if (isNotInline && minHeight != null && height == null) {
-      constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
-    }
+    Size layoutSize = getLayoutSize(
+      logicalContentWidth: logicalContentWidth,
+      logicalContentHeight: logicalContentHeight,
+      contentWidth: mainAxisExtent,
+      contentHeight: crossAxisExtent,
+    );
+    double constraintWidth = layoutSize.width;
+    double constraintHeight = layoutSize.height;
 
     // Main and cross content size of flow layout
     double mainAxisContentSize = 0.0;
