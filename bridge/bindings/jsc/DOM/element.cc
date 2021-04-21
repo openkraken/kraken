@@ -721,7 +721,7 @@ void ElementInstance::_notifyChildRemoved() {
   if (attributes->hasAttribute(idString)) {
     JSStringRef idRef = attributes->getAttribute(idString);
     std::string id = JSStringToStdString(idRef);
-    document->removeElementById(id, this);
+    document()->removeElementById(id, this);
   }
 }
 void ElementInstance::_notifyNodeInsert(NodeInstance *insertNode) {
@@ -743,7 +743,7 @@ void ElementInstance::_notifyChildInsert() {
   if (attributes->hasAttribute(idKey)) {
     JSStringRef idRef = attributes->getAttribute(idKey);
     std::string id = JSStringToStdString(idRef);
-    document->addElementById(id, this);
+    document()->addElementById(id, this);
   }
 }
 void ElementInstance::_didModifyAttribute(std::string &name, std::string &oldId, std::string &newId) {
@@ -755,11 +755,11 @@ void ElementInstance::_beforeUpdateId(std::string &oldId, std::string &newId) {
   if (oldId == newId) return;
 
   if (!oldId.empty()) {
-    document->removeElementById(oldId, this);
+    document()->removeElementById(oldId, this);
   }
 
   if (!newId.empty()) {
-    document->addElementById(newId, this);
+    document()->addElementById(newId, this);
   }
 }
 

@@ -180,9 +180,9 @@ function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
 
-async function snapshot(target: any, filename ?: String) {
+async function snapshot(target?: any, filename ?: String) {
   if (target && target.toBlob) {
-    await expectAsync(target.toBlob(1.0)).toMatchSnapshot(filename); 
+    await expectAsync(target.toBlob(1.0)).toMatchSnapshot(filename);
   } else {
     if (typeof target == 'number') {
       await sleep(target);
@@ -196,7 +196,7 @@ Object.assign(global, {
   BODY,
   append,
   setAttributes,
-  createElement, 
+  createElement,
   createElementWithStyle,
   createText,
   createViewElement,
