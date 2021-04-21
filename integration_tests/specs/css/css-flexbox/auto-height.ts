@@ -50,7 +50,7 @@ describe('auto-height', () => {
     await snapshot();
   });
 
-  xit("with flex", async () => {
+  it("with flex", async () => {
     let div;
     div = createElement(
       'div',
