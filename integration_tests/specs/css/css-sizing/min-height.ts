@@ -205,13 +205,13 @@ describe('min-height', () => {
       },
       [
         createElement('img', {
-            src: 'assets/100x100-green.png',
-            style: {
-              'background-color': 'green',
-              minHeight: '50px',
-              'box-sizing': 'border-box',
-            },
+          src: 'assets/100x100-green.png',
+          style: {
+            'background-color': 'green',
+            minHeight: '50px',
+            'box-sizing': 'border-box',
           },
+        },
         )
       ]
     );
@@ -234,13 +234,13 @@ describe('min-height', () => {
       },
       [
         createElement('img', {
-            src: 'assets/100x100-green.png',
-            style: {
-              'background-color': 'green',
-              minHeight: '200px',
-              'box-sizing': 'border-box',
-            },
+          src: 'assets/100x100-green.png',
+          style: {
+            'background-color': 'green',
+            minHeight: '200px',
+            'box-sizing': 'border-box',
           },
+        },
         )
       ]
     );
@@ -263,21 +263,21 @@ describe('min-height', () => {
         },
       },
       [
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100px',
-                backgroundColor: 'yellow',
-            }
-          }),
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100%',
-                backgroundColor: 'blue',
-            }
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100px',
+            backgroundColor: 'yellow',
           }
-         )
+        }),
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100%',
+            backgroundColor: 'blue',
+          }
+        }
+        )
       ]
     );
 
@@ -301,21 +301,21 @@ describe('min-height', () => {
         },
       },
       [
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100px',
-                backgroundColor: 'yellow',
-            }
-          }),
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100%',
-                backgroundColor: 'blue',
-            }
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100px',
+            backgroundColor: 'yellow',
           }
-         )
+        }),
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100%',
+            backgroundColor: 'blue',
+          }
+        }
+        )
       ]
     );
 
@@ -339,21 +339,21 @@ describe('min-height', () => {
         },
       },
       [
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100px',
-                backgroundColor: 'yellow',
-            }
-          }),
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100%',
-                backgroundColor: 'blue',
-            }
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100px',
+            backgroundColor: 'yellow',
           }
-         )
+        }),
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100%',
+            backgroundColor: 'blue',
+          }
+        }
+        )
       ]
     );
 
@@ -361,4 +361,109 @@ describe('min-height', () => {
     await snapshot();
   });
 
+  it('min-height exists and height does not exist in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        minHeight: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('min-height is larger than height in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minHeight: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('min-height smaller than height in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minHeight: '50px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('min-height exists and height does not exist in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        minHeight: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
+
+  it('min-height is larger than height in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minHeight: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
+
+  it('min-height smaller than height in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minHeight: '50px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
 });

@@ -4038,7 +4038,79 @@ getJasmineRequireObj().toBeResolvedTo = function (j$) {
 };
 
 getJasmineRequireObj().toMatchSnapshot = function (j$) {
-  const _matchImageSnapshotCounter = {};
+  const _matchSnapshotCounter = {};
+  
+  // The md5 copy from https://github.com/jbt/tiny-hashes/tree/master/md5
+  var k = [], i = 0;
+  for (; i < 64;) {
+    k[i] = 0 | Math.sin(++i % Math.PI) * 4294967296;
+  }
+  function md5(s) {
+    var b, c, d,
+      h = [ b = 0x67452301, c = 0xEFCDAB89, ~b, ~c ],
+      words = [],
+      j = unescape(encodeURI(s)) + '\x80',
+      a = j.length;
+
+    s = (--a / 4 + 2) | 15;
+
+    // See "Length bits" in notes
+    words[--s] = a * 8;
+
+    for (; ~a;) {
+      words[a >> 2] |= j.charCodeAt(a) << 8 * a--;
+    }
+
+
+    for (i = j = 0; i < s; i += 16) {
+      a = h;
+
+      for (; j < 64;
+        a = [
+          d = a[3],
+          (
+            b +
+            ((d =
+              a[0] +
+              [
+                b & c | ~b & d,
+                d & b | ~d & c,
+                b ^ c ^ d,
+                c ^ (b | ~d)
+              ][a = j >> 4] +
+              k[j] +
+              ~~words[i | [
+                j,
+                5 * j + 1,
+                3 * j + 5,
+                7 * j
+              ][a] & 15]
+            ) << (a = [
+              7, 12, 17, 22,
+              5,  9, 14, 20,
+              4, 11, 16, 23,
+              6, 10, 15, 21
+            ][4 * a + j++ % 4]) | d >>> -a)
+          ),
+          b,
+          c
+        ]
+      ) {
+        b = a[1] | 0;
+        c = a[2];
+      }
+
+      // See "Integer safety" in notes
+      for (j = 4; j;) h[--j] += a[j];
+    }
+
+    for (s = ''; j < 32;) {
+      s += ((h[j >> 3] >> ((1 ^ j++) * 4)) & 15).toString(16);
+    }
+
+    return s;
+  }
+
   /**
    * Expect a element to be equal with it's screenshot image.
    * @function
@@ -4046,41 +4118,39 @@ getJasmineRequireObj().toMatchSnapshot = function (j$) {
    * @name async-matchers#toBeResolvedTo
    * @param {Object} expected - DOM element
    * @example
-   * await expectAsync(document.body).toMatchSnapshot();
+   * await expectAsync(document.body.toBlob()).toMatchSnapshot('filename');
    * @example
-   * await expectAsync(document.body).toMatchSnapshot('imageName');
+   * await expectAsync(document.body.toBlob()).toMatchSnapshot('filename');
    */
   return function toMatchSnapshot(util, customEqualityTesters) {
     return {
-      compare: function (blobP, snapshotName) {
+      compare: function (actualPromise, filename) {
+        if (!j$.isPromiseLike(actualPromise)) {
+          throw new Error('Expected toMatchSnapshot to be called on a promise.');
+        }
+
         const currentSpec = j$.getEnv().currentRunnable();
         const specId = currentSpec.id;
-        if (_matchImageSnapshotCounter[specId] === undefined) _matchImageSnapshotCounter[specId] = 0;
+        if (_matchSnapshotCounter[specId] === undefined) _matchSnapshotCounter[specId] = 0;
 
-        const countWithinSameSpec = ++_matchImageSnapshotCounter[specId];
-        if (!snapshotName) {
-          snapshotName = countWithinSameSpec;
-        }
+        const countWithinSameSpec = ++_matchSnapshotCounter[specId];
 
-        if (!j$.isPromiseLike(blobP)) {
-          throw new Error('Expected blob to be a promise.');
-        }
+        filename = `${filename}.${md5(this.description).slice(0, 8)}${countWithinSameSpec}`;
 
-        return blobP.then(blob => {
-          const name = `${this.description}.${snapshotName}`;
+        return actualPromise.then(blob => {
           return new Promise((resolve, reject) => {
             // @TODO: the C++ HostingObject of Blob, need to removed when jsa support constructor operation.
-            __kraken_match_image_snapshot__(blob, name, (status) => {
+            __kraken_match_image_snapshot__(blob, filename, (status) => {
               // @NOTE: toMatchSnapshot should resolve before spec done.
               const _currentSpec = j$.getEnv().currentRunnable();
               if (_currentSpec.id !== specId) {
-                reject(new Error(`Expected toMatchSnapshot to be resolved before spec(${name}) done.`));
+                reject(new Error(`Expected toMatchSnapshot to be resolved before "${this.description})" done.`));
               }
 
               if (status) {
                 return resolve({ pass: true });
               } else {
-                return resolve({ pass: false, message: `Expected an screenshot is not equal with ${name}.png` });
+                return resolve({ pass: false, message: `Expected an screenshot is not equal with "${filename}" snapshot.` });
               }
             });
           });

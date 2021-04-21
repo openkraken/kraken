@@ -9,7 +9,8 @@ describe('Height', () => {
 
     document.body.appendChild(div);
     div.style.height = '200px';
-    await expectAsync(div.toBlob(1)).toMatchSnapshot('');
+
+    await snapshot(div);
   });
 
   describe('element style has height', () => {
