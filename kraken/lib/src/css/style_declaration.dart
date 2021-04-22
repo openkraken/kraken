@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:kraken/css.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/src/css/animation.dart';
 
@@ -422,25 +423,25 @@ class CSSStyleDeclaration {
             String defaultValue = func.args.length > 1 ? func.args[1] : null;
             switch (func.args.first) {
               case SAFE_AREA_INSET_TOP:
-                normalizedFunctionValue += '${window.viewPadding.top / window.devicePixelRatio}${CSSLength.PX},';
+                normalizedFunctionValue += '${window.viewPadding.top / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
                 break;
               case SAFE_AREA_INSET_RIGHT:
-                normalizedFunctionValue += '${window.viewPadding.right / window.devicePixelRatio}${CSSLength.PX},';
+                normalizedFunctionValue += '${window.viewPadding.right / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
                 break;
               case SAFE_AREA_INSET_BOTTOM:
-                normalizedFunctionValue += '${window.viewPadding.bottom / window.devicePixelRatio}${CSSLength.PX},';
+                normalizedFunctionValue += '${window.viewPadding.bottom / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
                 break;
               case SAFE_AREA_INSET_LEFT:
-                normalizedFunctionValue += '${window.viewPadding.left / window.devicePixelRatio}${CSSLength.PX},';
+                normalizedFunctionValue += '${window.viewPadding.left / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
                 break;
               default:
-                normalizedFunctionValue += '$defaultValue,';
+                normalizedFunctionValue += '$defaultValue$FUNCTION_SPLIT';
                 break;
             }
           } else if (loweredFuncName == 'var') {
             // TODO: impl CSS Variables.
           } else {
-            normalizedFunctionValue += '${func.name}(${func.args.join(',')}),';
+            normalizedFunctionValue += '${func.name}(${func.args.join(FUNCTION_ARGS_SPLIT)})$FUNCTION_SPLIT';
           }
         }
         result = normalizedFunctionValue.substring(0, normalizedFunctionValue.length - 1);
