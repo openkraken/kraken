@@ -68,6 +68,22 @@ class NativeCustomEvent extends Struct {
   Pointer<NativeString> detail;
 }
 
+class NativeMouseEvent extends Struct {
+  Pointer<NativeEvent> nativeEvent;
+
+  @Int64()
+  int clientX;
+
+  @Int64()
+  int clientY;
+
+  @Int64()
+  int offsetX;
+
+  @Int64()
+  int offsetY;
+}
+
 class NativeGestureEvent extends Struct {
   Pointer<NativeEvent> nativeEvent;
 
