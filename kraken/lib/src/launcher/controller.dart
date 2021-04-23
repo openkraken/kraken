@@ -8,7 +8,6 @@ import 'dart:ffi';
 import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:async';
-import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
