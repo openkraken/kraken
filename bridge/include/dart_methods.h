@@ -42,11 +42,6 @@ typedef void (*FlushUICommand)();
 typedef void (*InitBody)(int32_t contextId, void *nativePtr);
 typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
 typedef void (*InitDocument)(int32_t contextId, void *nativePtr);
-typedef void (*InspectorMessage)(int32_t contextId, const char* message);
-typedef void (*InspectorMessageCallback)(void *rpcSession, const char *message);
-typedef void (*RegisterInspectorMessageCallback)(int32_t contextId, void *rpcSession, InspectorMessageCallback inspectorMessageCallback);
-typedef void (*PostTaskToInspectorThread)(int32_t contextId, void *context, void (*)(void *));
-typedef void (*PostTaskToUIThread)(int32_t contextId, void *context, void (*)(void *));
 
 using RefreshPaintCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
 using RefreshPaint = void (*)(void *callbackContext, int32_t contextId, RefreshPaintCallback callback);
@@ -100,18 +95,7 @@ struct DartMethodPointer {
   InitBody initBody{nullptr};
   InitWindow initWindow{nullptr};
   InitDocument initDocument{nullptr};
-  PostTaskToInspectorThread postTaskToInspectorThread{nullptr};
 };
-
-#if ENABLE_DEBUGGER
-struct InspectorDartMethodPointer {
-  InspectorMessage inspectorMessage{nullptr};
-  RegisterInspectorMessageCallback registerInspectorMessageCallback{nullptr};
-  PostTaskToUIThread postTaskToUiThread{nullptr};
-};
-std::shared_ptr<InspectorDartMethodPointer> getInspectorDartMethod();
-void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length);
-#endif
 
 void registerDartMethods(uint64_t *methodBytes, int32_t length);
 
@@ -120,7 +104,6 @@ KRAKEN_EXPORT
 void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length);
 #endif
 
-KRAKEN_EXPORT
 std::shared_ptr<DartMethodPointer> getDartMethod();
 
 } // namespace kraken

@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_INSPECTOR_TASK_QUEUE_H
 
 #include "task_queue.h"
+#include "kraken_foundation.h"
 
 namespace foundation {
 

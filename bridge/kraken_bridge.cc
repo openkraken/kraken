@@ -197,6 +197,18 @@ void dispatchUITask(int32_t contextId, void *context, void *callback) {
   reinterpret_cast<void(*)(void*)>(callback)(context);
 }
 
+void flushUITask(int32_t contextId) {
+  foundation::UITaskQueue::instance(contextId)->flushTask();
+}
+
+void registerUITask(int32_t contextId, Task task, void *data) {
+  foundation::UITaskQueue::instance(contextId)->registerTask(task, data);
+};
+
+void flushUICommandCallback() {
+  foundation::UICommandCallbackQueue::instance()->flushCallbacks();
+}
+
 UICommandItem *getUICommandItems(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->data();
 }
@@ -209,8 +221,10 @@ void clearUICommandItems(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
 }
 
-void flushUICommandCallback() {
-  foundation::UICommandCallbackQueue::instance()->flushCallbacks();
+void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data) {
+  assert(checkContext(contextId));
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+
 }
 
 void registerPluginSource(NativeString *code, const char *pluginName) {
@@ -219,21 +233,6 @@ void registerPluginSource(NativeString *code, const char *pluginName) {
     code->length
   };
 }
-
-#if ENABLE_DEBUGGER
-void attachInspector(int32_t contextId) {
-  assert(checkContext(contextId));
-  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
-  context->attachInspector();
-}
-void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length) {
-  kraken::registerInspectorDartMethods(methodBytes, length);
-}
-void dispatchInspectorTask(int32_t contextId, void *context, void *callback) {
-  assert(std::this_thread::get_id() != getUIThreadId());
-  reinterpret_cast<void(*)(void*)>(callback)(context);
-}
-#endif
 
 NativeString *NativeString::clone() {
   NativeString *newNativeString = new NativeString();

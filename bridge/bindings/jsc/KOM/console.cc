@@ -7,11 +7,6 @@
 #include "foundation/logging.h"
 #include <sstream>
 
-#ifdef ENABLE_DEBUGGER
-#include "JavaScriptCore/JSGlobalObject.h"
-#include "JavaScriptCore/ConsoleTypes.h"
-#endif
-
 namespace kraken::binding::jsc {
 namespace {
 
