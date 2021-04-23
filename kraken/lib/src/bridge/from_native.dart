@@ -12,7 +12,6 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken/inspector.dart';
 import 'package:kraken/src/module/performance_timing.dart';
 import 'platform.dart';
 import 'native_types.dart';
@@ -354,18 +353,6 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<Native_JSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
-typedef Native_PostTaskToInspectorThread = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
-typedef Dart_PostTaskToInspectorThread = void Function(int contextId, Pointer<Void> context, Pointer<Void> callback);
-
-void _postTaskToInspectorThread(int contextId, Pointer<Void> context, Pointer<Void> callback) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  if (controller.view.uiInspector != null) {
-    controller.view.uiInspector.viewController.isolateServerPort.send(InspectorPostTaskMessage(context.address, callback.address));
-  }
-}
-
-final Pointer<NativeFunction<Native_PostTaskToInspectorThread>> _nativePostTaskToInspectorThread = Pointer.fromFunction(_postTaskToInspectorThread);
-
 final List<int> _dartNativeMethods = [
   _nativeInvokeModule.address,
   _nativeRequestBatchUpdate.address,
@@ -385,7 +372,6 @@ final List<int> _dartNativeMethods = [
   _nativeInitDocument.address,
   _nativeGetEntries.address,
   _nativeOnJsError.address,
-  _nativePostTaskToInspectorThread.address
 ];
 
 typedef Native_RegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);

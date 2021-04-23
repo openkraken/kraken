@@ -17,7 +17,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/inspector.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/src/module/module_manager.dart';
 import 'bundle.dart';
@@ -50,27 +49,10 @@ void setTargetPlatformForDesktop() {
   }
 }
 
-void spawnIsolateInspectorServer(KrakenViewController viewController, { int port = INSPECTOR_DEFAULT_PORT, String address }) {
-  ReceivePort serverIsolateReceivePort = ReceivePort();
-
-  serverIsolateReceivePort.listen((data) {
-    KrakenController controller = viewController.rootController;
-    if (data is SendPort) {
-      viewController._isolateServerPort = data;
-      String bundleURL = controller.bundleURL ?? controller.bundlePath ?? '<EmbedBundle>';
-      viewController._isolateServerPort.send(InspectorServerInit(controller.view.contextId, port, '0.0.0.0', bundleURL));
-    } else if (data is InspectorFrontEndMessage) {
-      viewController.uiInspector.messageRouter(data.id, data.module, data.method, data.params);
-    } else if (data is InspectorServerStart) {
-      viewController.uiInspector.onServerStart(port);
-    } else if (data is InspectorPostTaskMessage) {
-      dispatchUITask(controller.view.contextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));
-    }
-  });
-
-  Isolate.spawn(serverIsolateEntryPoint, serverIsolateReceivePort.sendPort).then((Isolate isolate) {
-    viewController._isolateServerIsolate = isolate;
-  });
+abstract class KrakenDevToolsInterface {
+  void init(KrakenController controller);
+  void reload(KrakenController controller);
+  void dispose(KrakenController controller);
 }
 
 // An kraken View Controller designed for multiple kraken view control.
@@ -156,16 +138,7 @@ class KrakenViewController {
     if (kProfileMode) {
       PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_END);
     }
-
-    // Enable DevTool in debug/profile mode, but disable in release.
-    if ((kDebugMode || kProfileMode) && rootController.debugEnableInspector != false) {
-      debugStartInspector();
-    }
   }
-
-  /// Used for debugger inspector.
-  UIInspector _uiInspector;
-  UIInspector get uiInspector => _uiInspector;
 
   // the manager which controller all renderObjects of Kraken
   ElementManager _elementManager;
@@ -232,15 +205,9 @@ class KrakenViewController {
     // DisposeEventTarget command will created when js context disposed, should flush them all.
     flushUICommand();
 
-    _uiInspector?.dispose();
-    _uiInspector = null;
-
     _elementManager.dispose();
     _elementManager = null;
     _disposed = true;
-
-    _isolateServerIsolate?.kill();
-    _isolateServerIsolate = null;
   }
 
   // export Uint8List bytes from rendered result.
@@ -407,27 +374,23 @@ class KrakenViewController {
     return _elementManager.getRootRenderObject();
   }
 
-  Isolate _isolateServerIsolate;
-  SendPort _isolateServerPort;
-  SendPort get isolateServerPort => _isolateServerPort;
-
-  void debugStartInspector() {
-    // Apply reload page, reuse prev inspector instance.
-    if (UIInspector.prevInspector != null) {
-      UIInspector prevInspector = UIInspector.prevInspector;
-      _isolateServerPort = prevInspector.viewController._isolateServerPort;
-      _isolateServerIsolate = prevInspector.viewController._isolateServerIsolate;
-      prevInspector.viewController = this;
-      _uiInspector = prevInspector;
-      elementManager.debugDOMTreeChanged = prevInspector.onDOMTreeChanged;
-      UIInspector.prevInspector = null;
-      _isolateServerPort.send(InspectorReload(contextId));
-    } else {
-      spawnIsolateInspectorServer(this);
-      _uiInspector = UIInspector(this);
-      elementManager.debugDOMTreeChanged = uiInspector.onDOMTreeChanged;
-    }
-  }
+  // void debugStartInspector() {
+  //   // Apply reload page, reuse prev inspector instance.
+  //   if (UIInspector.prevInspector != null) {
+  //     UIInspector prevInspector = UIInspector.prevInspector;
+  //     _isolateServerPort = prevInspector.viewController._isolateServerPort;
+  //     _isolateServerIsolate = prevInspector.viewController._isolateServerIsolate;
+  //     prevInspector.viewController = this;
+  //     _uiInspector = prevInspector;
+  //     elementManager.debugDOMTreeChanged = prevInspector.onDOMTreeChanged;
+  //     UIInspector.prevInspector = null;
+  //     _isolateServerPort.send(InspectorReload(contextId));
+  //   } else {
+  //     spawnIsolateInspectorServer(this);
+  //     _uiInspector = UIInspector(this);
+  //     elementManager.debugDOMTreeChanged = uiInspector.onDOMTreeChanged;
+  //   }
+  // }
 }
 
 // An controller designed to control kraken's functional modules.
@@ -476,6 +439,8 @@ class KrakenController {
   // Error handler when got javascript error when evaluate javascript codes.
   JSErrorHandler onJSError;
 
+  KrakenDevToolsInterface devToolsInterface;
+
   KrakenMethodChannel _methodChannel;
 
   KrakenMethodChannel get methodChannel => _methodChannel;
@@ -512,6 +477,7 @@ class KrakenController {
     this.onLoadError,
     this.onJSError,
     this.debugEnableInspector,
+    this.devToolsInterface
   })  : _name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
@@ -544,6 +510,10 @@ class KrakenController {
     _controllerMap[_view.contextId] = this;
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
+
+    if (devToolsInterface != null) {
+      devToolsInterface.init(this);
+    }
   }
 
   KrakenViewController _view;
@@ -579,7 +549,6 @@ class KrakenController {
     }
     _module.dispose();
     _view.detachView();
-    UIInspector.prevInspector = view._elementManager.controller.view.uiInspector;
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         showPerformanceOverlay: _view.showPerformanceOverlay,
         enableDebug: _view.enableDebug,
@@ -609,10 +578,6 @@ class KrakenController {
     // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
     flushUICommand();
 
-    UIInspector.prevInspector = view.uiInspector;
-
-    print('reload prev inspector: ${UIInspector.prevInspector}');
-
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         background: _view.background,
         showPerformanceOverlay: _view.showPerformanceOverlay,
@@ -626,9 +591,12 @@ class KrakenController {
   // reload current kraken view.
   void reload() async {
     await unload();
-    print('success reload page');
     await loadBundle();
     await evalBundle();
+
+    if (devToolsInterface != null) {
+      devToolsInterface.reload(this);
+    }
   }
 
   void reloadUrl(String url) async {
@@ -643,6 +611,10 @@ class KrakenController {
     _controllerMap[_view.contextId] = null;
     _controllerMap.remove(_view.contextId);
     _nameIdMap.remove(name);
+
+    if (devToolsInterface != null) {
+      devToolsInterface.dispose(this);
+    }
   }
 
   String _bundleContent;

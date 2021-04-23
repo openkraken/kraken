@@ -49,6 +49,8 @@ class Kraken extends StatelessWidget {
 
   final JSErrorHandler onJSError;
 
+  final KrakenDevToolsInterface devTools;
+
   final bool debugEnableInspector;
 
   final GestureClient gestureClient;
@@ -100,6 +102,7 @@ class Kraken extends StatelessWidget {
     this.javaScriptChannel,
     this.background,
     this.gestureClient,
+    this.devTools,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -160,6 +163,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       debugEnableInspector: _krakenWidget.debugEnableInspector,
       gestureClient: _krakenWidget.gestureClient,
       navigationDelegate: _krakenWidget.navigationDelegate,
+      devToolsInterface: _krakenWidget.devTools
     );
 
     if (kProfileMode) {
