@@ -5,7 +5,6 @@
 import 'dart:ui';
 
 import 'package:kraken/css.dart';
-import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/src/css/animation.dart';
 
