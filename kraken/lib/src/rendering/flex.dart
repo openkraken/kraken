@@ -1028,8 +1028,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       BoxSizeType heightSizeType = _getChildHeightSizeType(child);
 
-      innerConstraints = child is RenderBoxModel ?
-        child.renderStyle.getConstraints() : BoxConstraints();
 
       if (child is RenderPositionHolder) {
         RenderBoxModel realDisplayedBox = child.realDisplayedBox;
@@ -1043,60 +1041,9 @@ class RenderFlexLayout extends RenderLayoutBox {
           minHeight: realDisplayedBoxHeight,
           maxHeight: realDisplayedBoxHeight,
         );
-      } else if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-        double maxCrossAxisSize;
-        // Calculate max height constraints
-        if (heightSizeType == BoxSizeType.specified && child is RenderBoxModel && child.renderStyle.height != null) {
-          maxCrossAxisSize = child.renderStyle.height;
-        } else if (child is RenderBoxModel && child.renderStyle.maxHeight != null) {
-          maxCrossAxisSize = child.renderStyle.maxHeight;
-        } else {
-          // Child in flex line expand automatic when height is not specified
-          if (renderStyle.flexWrap == FlexWrap.wrap || renderStyle.flexWrap == FlexWrap.wrapReverse) {
-            maxCrossAxisSize = double.infinity;
-          } else if (child is RenderTextBox) {
-            maxCrossAxisSize = double.infinity;
-          } else {
-            // Should substract margin when layout child
-            double marginVertical = 0;
-            if (child is RenderBoxModel) {
-              marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
-            }
-            maxCrossAxisSize = logicalContentHeight != null ? logicalContentHeight - marginVertical : double.infinity;
-          }
-        }
-
-        innerConstraints = BoxConstraints(
-          minWidth: innerConstraints.minWidth,
-          maxHeight: maxCrossAxisSize,
-        );
-      } else if (CSSFlex.isVerticalFlexDirection(renderStyle.flexDirection)) {
-        double maxCrossAxisSize;
-        // Calculate max width constraints
-        if (child is RenderBoxModel && child.renderStyle.width != null) {
-          maxCrossAxisSize = child.renderStyle.width;
-        } else if (child is RenderBoxModel && child.renderStyle.maxWidth != null) {
-          maxCrossAxisSize = child.renderStyle.maxWidth;
-        } else {
-          // Child in flex line expand automatic when height is not specified
-          if (renderStyle.flexWrap == FlexWrap.wrap || renderStyle.flexWrap == FlexWrap.wrapReverse) {
-            maxCrossAxisSize = double.infinity;
-          } else if (child is RenderTextBox) {
-            maxCrossAxisSize = double.infinity;
-          } else {
-            // Should substract margin when layout child
-            double marginHorizontal = 0;
-            if (child is RenderBoxModel) {
-              marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
-            }
-            maxCrossAxisSize = logicalContentWidth != null ? logicalContentWidth - marginHorizontal : double.infinity;
-          }
-        }
-
-        innerConstraints = BoxConstraints(
-          minHeight: innerConstraints.minHeight,
-          maxWidth: maxCrossAxisSize,
-        );
+      } else {
+        innerConstraints = child is RenderBoxModel ?
+          child.renderStyle.getConstraints() : BoxConstraints();
       }
 
       BoxConstraints childConstraints = deflateOverflowConstraints(innerConstraints);

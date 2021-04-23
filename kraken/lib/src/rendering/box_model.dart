@@ -338,7 +338,9 @@ class RenderLayoutBox extends RenderBoxModel
       layoutHeight = layoutHeight < minHeight ? minHeight : layoutHeight;
     }
 
-    return Size(layoutWidth, layoutHeight);
+    Size layoutSize = Size(layoutWidth, layoutHeight);
+//    print('set size-------------- $this $constraints $layoutSize');
+    return layoutSize;
   }
 }
 

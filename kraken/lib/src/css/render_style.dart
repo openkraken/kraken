@@ -507,71 +507,105 @@ class RenderStyle
       return _displayNoneConstraints;
     }
 
+    double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
+    double verticalBorderLength = borderEdge != null ? borderEdge.vertical : 0;
+    double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+    double verticalPaddingLength = padding != null ? padding.vertical : 0;
+
+    // Content size calculated from style
+    double logicalContentWidth = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
+    double logicalContentHeight = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
+
+    // Box size calculated from style
+    double logicalWidth = logicalContentWidth != null ?
+      logicalContentWidth + horizontalPaddingLength + horizontalBorderLength : null;
+    double logicalHeight = logicalContentHeight != null ?
+      logicalContentHeight + verticalPaddingLength + verticalBorderLength : null;
+
+    // Constraints
     double minConstraintWidth = 0;
-    double maxConstraintWidth = double.infinity;
+    double maxConstraintWidth = logicalWidth ?? double.infinity;
     double minConstraintHeight = 0;
-    double maxConstraintHeight = double.infinity;;
+    double maxConstraintHeight = logicalHeight ?? double.infinity;
 
-    if (!isDisplayInline) {
-      double horizontalBorderWidth = borderEdge != null ? borderEdge.horizontal : 0;
-      double verticalBorderWidth = borderEdge != null ? borderEdge.vertical : 0;
-      double horizontalPaddingWidth = padding != null ? padding.horizontal : 0;
-      double verticalPaddingWidth = padding != null ? padding.vertical : 0;
-
-      double realWidth = width;
-      double realHeight = height;
-
-      if (renderBoxModel.parent is RenderFlexLayout) {
-        RenderBoxModel parentRenderBoxModel = renderBoxModel.parent;
-        // In flex layout, flex basis takes priority over width/height if set
-        if (flexBasis != null) {
-          if (CSSFlex.isHorizontalFlexDirection(parentRenderBoxModel.renderStyle.flexDirection)) {
-            realWidth = flexBasis;
-          } else {
-            realHeight = flexBasis;
+    if (renderBoxModel.parent is RenderFlexLayout) {
+      RenderBoxModel parentRenderBoxModel = renderBoxModel.parent;
+      // In flex layout, flex basis takes priority over width/height if set.
+      // Flex-basis cannot be smaller than its content size which happens can not be known
+      // in constraints apply stage, so flex-basis acts as min-width in constraints apply stage.
+      if (flexBasis != null) {
+        if (CSSFlex.isHorizontalFlexDirection(parentRenderBoxModel.renderStyle.flexDirection)) {
+          minConstraintWidth = flexBasis;
+          // Clamp flex-basis by minWidth and maxWidth
+          if (minWidth != null && flexBasis < minWidth) {
+            maxConstraintWidth = minWidth;
           }
-        }
-      }
-
-      // Width cannot be smaller than its horizontal border and padding width
-      if (realWidth != null) {
-        realWidth = horizontalBorderWidth + horizontalPaddingWidth > realWidth ? horizontalBorderWidth + horizontalPaddingWidth : realWidth;
-      }
-
-      minConstraintWidth = realWidth ?? minConstraintWidth;
-      if (minWidth != null) {
-        minConstraintWidth = minConstraintWidth < minWidth ? minWidth : minConstraintWidth;
-      }
-      if (maxWidth != null) {
-        maxConstraintWidth = maxWidth;
-        if (maxConstraintWidth < minConstraintWidth) {
-          minConstraintWidth = maxConstraintWidth;
-        }
-      }
-
-      // Height cannot be smaller than its vertical border and padding width
-      if (realHeight != null) {
-        realHeight = verticalBorderWidth + verticalPaddingWidth > realHeight ? verticalBorderWidth + verticalPaddingWidth : realHeight;
-      }
-
-      minConstraintHeight = realHeight ?? minConstraintHeight;
-      if (minHeight != null) {
-        minConstraintHeight = minConstraintHeight < minHeight ? minHeight : minConstraintHeight;
-      }
-      if (maxHeight != null) {
-        maxConstraintHeight = maxHeight;
-        if (maxConstraintHeight < minConstraintHeight) {
-          minConstraintHeight = maxConstraintHeight;
+          if (maxWidth != null && flexBasis > maxWidth) {
+            minConstraintWidth = maxWidth;
+          }
+        } else {
+          minConstraintHeight = flexBasis;
+          // Clamp flex-basis by minHeight and maxHeight
+          if (minHeight != null && flexBasis < minHeight) {
+            maxConstraintHeight = minHeight;
+          }
+          if (maxHeight != null && flexBasis > maxHeight) {
+            minConstraintHeight = maxHeight;
+          }
         }
       }
     }
 
-    return BoxConstraints(
+    // min/max size does not apply for inline element
+    if (!isDisplayInline) {
+      if (minWidth != null) {
+        minConstraintWidth = minConstraintWidth < minWidth ? minWidth : minConstraintWidth;
+      }
+      if (maxWidth != null) {
+        maxConstraintWidth = maxConstraintWidth > maxWidth ? maxWidth : maxConstraintWidth;
+      }
+      if (minHeight != null) {
+        minConstraintHeight = minConstraintHeight < minHeight ? minHeight : minConstraintHeight;
+      }
+      if (maxHeight != null) {
+        maxConstraintHeight = maxConstraintHeight > maxHeight ? maxHeight : maxConstraintHeight;
+      }
+    }
+
+    BoxConstraints constraints = BoxConstraints(
       minWidth: minConstraintWidth,
       maxWidth: maxConstraintWidth,
       minHeight: minConstraintHeight,
       maxHeight: maxConstraintHeight,
     );
+
+    print('get constraints----------- $renderBoxModel $constraints');
+
+    return constraints;
+  }
+
+  /// Get width if specified from style which cannot be smaller than horizontal padding plus border length
+  double getSpecifiedWidth() {
+    double specifiedWidth = width;
+    double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
+    double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+
+    if (specifiedWidth != null && horizontalBorderLength + horizontalPaddingLength > specifiedWidth) {
+      specifiedWidth = horizontalBorderLength + horizontalPaddingLength;
+    }
+    return specifiedWidth;
+  }
+
+  /// Get height if specified from style which cannot be smaller than vertical padding plus border length
+  double getSpecifiedHeight() {
+    double specifiedHeight = height;
+    double verticalBorderLength = borderEdge != null ? borderEdge.vertical : 0;
+    double verticalPaddingLength = padding != null ? padding.vertical : 0;
+
+    if (specifiedHeight != null && verticalBorderLength + verticalPaddingLength > specifiedHeight) {
+      specifiedHeight = verticalBorderLength + verticalPaddingLength;
+    }
+    return specifiedHeight;
   }
 }
 
