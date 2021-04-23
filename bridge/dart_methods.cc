@@ -11,20 +11,6 @@ namespace kraken {
 
 std::shared_ptr<DartMethodPointer> methodPointer = std::make_shared<DartMethodPointer>();
 
-#if ENABLE_DEBUGGER
-std::shared_ptr<InspectorDartMethodPointer> inspectorMethodPointer = std::make_shared<InspectorDartMethodPointer>();
-std::shared_ptr<InspectorDartMethodPointer> getInspectorDartMethod() {
-  assert_m(std::this_thread::get_id() != getUIThreadId(), "inspector dart methods should be called on the inspector thread.");
-  return inspectorMethodPointer;
-}
-void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length) {
-  size_t i = 0;
-  inspectorMethodPointer->inspectorMessage = reinterpret_cast<InspectorMessage>(methodBytes[i++]);
-  inspectorMethodPointer->registerInspectorMessageCallback = reinterpret_cast<RegisterInspectorMessageCallback>(methodBytes[i++]);
-  inspectorMethodPointer->postTaskToUiThread = reinterpret_cast<PostTaskToUIThread>(methodBytes[i++]);
-}
-#endif
-
 std::shared_ptr<DartMethodPointer> getDartMethod() {
   std::__thread_id currentThread = std::this_thread::get_id();
 
@@ -68,7 +54,6 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
 #endif
 
   methodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
-  methodPointer->postTaskToInspectorThread = reinterpret_cast<PostTaskToInspectorThread>(methodBytes[i++]);
 
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }

@@ -214,6 +214,7 @@ task('build-darwin-kraken-lib', done => {
 
   const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken_${program.jsEngine}.dylib`);
 
+  execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
   if (buildMode == 'Release') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
     execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit' });

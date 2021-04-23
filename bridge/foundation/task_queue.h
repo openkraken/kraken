@@ -14,8 +14,6 @@
 
 namespace foundation {
 
-using Task = void (*)(void *);
-
 class TaskQueue : public fml::RefCountedThreadSafe<TaskQueue> {
 public:
   virtual int32_t registerTask(const Task &task, void *data);

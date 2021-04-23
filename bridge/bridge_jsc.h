@@ -15,11 +15,6 @@
 #include <deque>
 #include <vector>
 
-#ifdef ENABLE_DEBUGGER
-#include "inspector/frontdoor.h"
-#include "inspector/protocol_handler.h"
-#endif // ENABLE_DEBUGGER
-
 namespace kraken {
 
 class JSBridge final {
@@ -27,9 +22,6 @@ public:
   JSBridge() = delete;
   JSBridge(int32_t jsContext, const JSExceptionHandler &handler);
   ~JSBridge();
-#ifdef ENABLE_DEBUGGER
-  void attachInspector();
-#endif // ENABLE_DEBUGGER
 
   static std::unordered_map<std::string, NativeString> pluginSourceCode;
 
@@ -44,20 +36,20 @@ public:
   KRAKEN_EXPORT void evaluateScript(const std::u16string &script, const char *url, int startLine);
 
   const std::unique_ptr<kraken::binding::jsc::JSContext> &getContext() const {
-    return context;
+    return m_context;
   }
 
   void invokeModuleEvent(NativeString *moduleName, const char *eventType, void *event, NativeString *extra);
   void reportError(const char *errmsg);
+  void setDisposeCallback(Task task, void *data);
 
   std::atomic<bool> event_registered = false;
 
-  #ifdef ENABLE_DEBUGGER
-    std::shared_ptr<debugger::FrontDoor> m_inspector;
-  #endif // ENABLE_DEBUGGER
 private:
-  std::unique_ptr<binding::jsc::JSContext> context;
-  JSExceptionHandler handler_;
+  std::unique_ptr<binding::jsc::JSContext> m_context;
+  JSExceptionHandler m_handler;
+  Task m_disposeCallback{nullptr};
+  void *m_disposePrivateData{nullptr};
 };
 
 #if ENABLE_DEBUGGER

@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <thread>
 
-#include "kraken_foundation.h"
 #include "dart_methods.h"
+#include "kraken_foundation.h"
 
 #if KRAKEN_JSC_ENGINE
 #include "kraken_bridge_jsc.h"
@@ -19,8 +19,6 @@
 #define KRAKEN_EXPORT_C extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
-KRAKEN_EXPORT_C
-void *getJSContext(int32_t contextId);
 std::__thread_id getUIThreadId();
 
 struct KRAKEN_EXPORT NativeString {
@@ -80,53 +78,48 @@ struct KRAKEN_EXPORT UICommandItem {
   int64_t nativePtr{0};
 };
 
+typedef void (*Task)(void *);
+
 KRAKEN_EXPORT_C
 void initJSContextPool(int poolSize);
 KRAKEN_EXPORT_C
 void disposeContext(int32_t contextId);
 KRAKEN_EXPORT_C
 int32_t allocateNewContext();
-
+KRAKEN_EXPORT_C
+void *getJSContext(int32_t contextId);
+bool checkContext(int32_t contextId);
+bool checkContext(int32_t contextId, void *context);
+KRAKEN_EXPORT_C
+void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
+KRAKEN_EXPORT_C
+void reloadJsContext(int32_t contextId);
+KRAKEN_EXPORT_C
+void invokeModuleEvent(int32_t contextId, NativeString *module, const char *eventType, void *event,
+                       NativeString *extra);
+KRAKEN_EXPORT_C
+void registerDartMethods(uint64_t *methodBytes, int32_t length);
+KRAKEN_EXPORT_C
+Screen *createScreen(double width, double height);
 KRAKEN_EXPORT_C
 KrakenInfo *getKrakenInfo();
-
+KRAKEN_EXPORT_C
+void dispatchUITask(int32_t contextId, void *context, void *callback);
+KRAKEN_EXPORT_C
+void flushUITask(int32_t contextId);
+KRAKEN_EXPORT_C
+void registerUITask(int32_t contextId, Task task, void *data);
+KRAKEN_EXPORT_C
+void flushUICommandCallback();
 KRAKEN_EXPORT_C
 UICommandItem *getUICommandItems(int32_t contextId);
 KRAKEN_EXPORT_C
 int64_t getUICommandItemSize(int32_t contextId);
 KRAKEN_EXPORT_C
 void clearUICommandItems(int32_t contextId);
-
-bool checkContext(int32_t contextId);
-bool checkContext(int32_t contextId, void *context);
 KRAKEN_EXPORT_C
-void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
-
-KRAKEN_EXPORT_C
-void dispatchUITask(int32_t contextId, void *context, void *callback);
-KRAKEN_EXPORT_C
-void flushUICommandCallback();
-
-KRAKEN_EXPORT_C
-void reloadJsContext(int32_t contextId);
-KRAKEN_EXPORT_C
-void invokeModuleEvent(int32_t contextId, NativeString *module, const char *eventType, void* event, NativeString *extra);
-KRAKEN_EXPORT_C
-Screen *createScreen(double width, double height);
-
-KRAKEN_EXPORT_C
-void registerDartMethods(uint64_t *methodBytes, int32_t length);
-
+void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data);
 KRAKEN_EXPORT_C
 void registerPluginSource(NativeString* code, const char *pluginName);
-
-#if ENABLE_DEBUGGER
-KRAKEN_EXPORT_C
-void attachInspector(int32_t contextId);
-KRAKEN_EXPORT_C
-void registerInspectorDartMethods(uint64_t *methodBytes, int32_t length);
-KRAKEN_EXPORT_C
-void dispatchInspectorTask(int32_t contextId, void *context, void *callback);
-#endif
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

@@ -67,41 +67,41 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 #endif
   bridgeCallback = new foundation::BridgeCallback();
 
-  context = binding::jsc::createJSContext(contextId, errorHandler, this);
+  m_context = binding::jsc::createJSContext(contextId, errorHandler, this);
 
 #if ENABLE_PROFILE
-  auto nativePerformance = binding::jsc::NativePerformance::instance(context->uniqueId);
+  auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
   nativePerformance->mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
   nativePerformance->mark(PERF_JS_CONTEXT_INIT_END);
   nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_START);
 #endif
 
-  bindTimer(context);
-  bindKraken(context);
-  bindUIManager(context);
-  bindConsole(context);
-  bindEvent(context);
-  bindCustomEvent(context);
-  bindCloseEvent(context);
-  bindGestureEvent(context);
-  bindMediaErrorEvent(context);
-  bindTouchEvent(context);
-  bindInputEvent(context);
-  bindIntersectionChangeEvent(context);
-  bindMessageEvent(context);
-  bindEventTarget(context);
-  bindDocument(context);
-  bindNode(context);
-  bindTextNode(context);
-  bindCommentNode(context);
-  bindElement(context);
-  bindImageElement(context);
-  bindInputElement(context);
-  bindWindow(context);
-  bindPerformance(context);
-  bindCSSStyleDeclaration(context);
-  bindScreen(context);
-  bindBlob(context);
+  bindTimer(m_context);
+  bindKraken(m_context);
+  bindUIManager(m_context);
+  bindConsole(m_context);
+  bindEvent(m_context);
+  bindCustomEvent(m_context);
+  bindCloseEvent(m_context);
+  bindGestureEvent(m_context);
+  bindMediaErrorEvent(m_context);
+  bindTouchEvent(m_context);
+  bindInputEvent(m_context);
+  bindIntersectionChangeEvent(m_context);
+  bindMessageEvent(m_context);
+  bindEventTarget(m_context);
+  bindDocument(m_context);
+  bindNode(m_context);
+  bindTextNode(m_context);
+  bindCommentNode(m_context);
+  bindElement(m_context);
+  bindImageElement(m_context);
+  bindInputElement(m_context);
+  bindWindow(m_context);
+  bindPerformance(m_context);
+  bindCSSStyleDeclaration(m_context);
+  bindScreen(m_context);
+  bindBlob(m_context);
 
 #if ENABLE_PROFILE
   nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_END);
@@ -119,24 +119,13 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 #endif
 
 #ifdef KRAKEN_ENABLE_JSA
-  Object promiseHandler = context->global().getPropertyAsObject(*context, "__global_unhandled_promise_handler__");
-  context->setUnhandledPromiseRejectionHandler(promiseHandler);
+  Object promiseHandler = m_context->global().getPropertyAsObject(*m_context, "__global_unhandled_promise_handler__");
+  m_context->setUnhandledPromiseRejectionHandler(promiseHandler);
 #endif
 }
 
-#ifdef ENABLE_DEBUGGER
-void JSBridge::attachInspector() {
-  std::shared_ptr<BridgeProtocolHandler> handler = std::make_shared<BridgeProtocolHandler>(this);
-  JSC::ExecState* exec = toJS(context->context());
-  JSC::VM& vm = exec->vm();
-  JSC::JSLockHolder locker(vm);
-  JSC::JSGlobalObject* globalObject = vm.vmEntryGlobalObject(exec);
-  m_inspector = std::make_shared<debugger::FrontDoor>(contextId, context->context(), globalObject->globalObject(), handler);
-}
-#endif // ENABLE_DEBUGGER
-
 void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *event, NativeString *extra) {
-  if (!context->isValid()) return;
+  if (!m_context->isValid()) return;
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[invokeModuleEvent VERBOSE]: moduleName " << moduleName << " event: " << event;
@@ -146,67 +135,74 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
   JSObjectRef eventObjectRef = nullptr;
   if (event != nullptr) {
     std::string type = std::string(eventType);
-    EventInstance *eventInstance = JSEvent::buildEventInstance(type, context.get(), event, false);
+    EventInstance *eventInstance = JSEvent::buildEventInstance(type, m_context.get(), event, false);
     eventObjectRef = eventInstance->object;
   }
 
   for (const auto &callback : krakenModuleListenerList) {
     if (exception != nullptr) {
-      context->handleException(exception);
+      m_context->handleException(exception);
       return;
     }
 
     JSStringRef moduleNameStringRef = JSStringCreateWithCharacters(moduleName->string, moduleName->length);
     JSStringRef moduleExtraDataRef = JSStringCreateWithCharacters(extra->string, extra->length);
     const JSValueRef args[] = {
-      JSValueMakeString(context->context(), moduleNameStringRef),
-      eventObjectRef == nullptr ? JSValueMakeNull(context->context()) : eventObjectRef,
-      JSValueMakeFromJSONString(context->context(), moduleExtraDataRef)
+      JSValueMakeString(m_context->context(), moduleNameStringRef),
+      eventObjectRef == nullptr ? JSValueMakeNull(m_context->context()) : eventObjectRef,
+      JSValueMakeFromJSONString(m_context->context(), moduleExtraDataRef)
     };
-    JSObjectCallAsFunction(context->context(), callback, context->global(), 3, args, &exception);
+    JSObjectCallAsFunction(m_context->context(), callback, m_context->global(), 3, args, &exception);
   }
 
-  context->handleException(exception);
+  m_context->handleException(exception);
 }
 
 void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
-  if (!context->isValid()) return;
+  if (!m_context->isValid()) return;
   binding::jsc::updateLocation(url);
-  context->evaluateJavaScript(script->string, script->length, url, startLine);
+  m_context->evaluateJavaScript(script->string, script->length, url, startLine);
 }
 
 void JSBridge::evaluateScript(const std::u16string &script, const char *url, int startLine) {
-  if (!context->isValid()) return;
+  if (!m_context->isValid()) return;
   binding::jsc::updateLocation(url);
-  context->evaluateJavaScript(script.c_str(), script.size(), url, startLine);
+  m_context->evaluateJavaScript(script.c_str(), script.size(), url, startLine);
 }
 
 JSBridge::~JSBridge() {
-  if (!context->isValid()) return;
+  if (!m_context->isValid()) return;
 
   for (auto &callback : krakenModuleListenerList) {
-    JSValueUnprotect(context->context(), callback);
+    JSValueUnprotect(m_context->context(), callback);
   }
 
   krakenModuleListenerList.clear();
 
   delete bridgeCallback;
 
-  binding::jsc::NativePerformance::disposeInstance(context->uniqueId);
+  if (m_disposeCallback != nullptr) {
+    this->m_disposeCallback(m_disposePrivateData);
+  }
+
+  binding::jsc::NativePerformance::disposeInstance(m_context->uniqueId);
 }
 
 void JSBridge::reportError(const char *errmsg) {
-  handler_(context->getContextId(), errmsg);
+  m_handler(m_context->getContextId(), errmsg);
 }
 
-#if ENABLE_DEBUGGER
-void BridgeProtocolHandler::handlePageReload() {
-  // FIXME: reload with devtolls are not full working yet (debugger not working).
-  // getDartMethod()->flushUICommand();
-  // getDartMethod()->reloadApp(m_bridge->contextId);
+void JSBridge::setDisposeCallback(Task task, void *data) {
+  m_disposeCallback = task;
+  m_disposePrivateData = data;
 }
-#endif
 
 } // namespace kraken
+
+JSGlobalContextRef getGlobalContextRef(int32_t contextId) {
+  assert(checkContext(contextId));
+  auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  return bridge->getContext()->context();
+};
 
 #endif
