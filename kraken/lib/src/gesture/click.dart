@@ -46,7 +46,18 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// instead.
   void handleTapUp( PointerDownEvent down, PointerUpEvent up ) {
     if (onClick != null)
-      onClick(MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true)));
+      onClick(
+          MouseEvent(EVENT_CLICK,
+              MouseEventInit(
+                  bubbles: true,
+                  cancelable: true,
+                  clientX: down.localPosition.dx,
+                  clientY: down.localPosition.dy,
+                  offsetX: down.position.dx,
+                  offsetY: down.position.dy,
+              )
+          )
+      );
   }
 
   GestureCallback onClick;
