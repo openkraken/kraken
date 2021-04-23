@@ -1,27 +1,22 @@
 name: Integration Test WorkFlow
 
-on: [push, workflow_dispatch]
+on: [push, workflow_dispatch, pull_request]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   integration_test:
     runs-on: self-hosted
     steps:
-    - name: Set branch name
-      run: echo >>$GITHUB_ENV BRANCH_NAME=${GITHUB_REF#refs/heads/}
-    - name: Echo branch name
-      run: echo ${BRANCH_NAME}
-    - name: Clone the Code
-      run: rm -rf "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && git clone -b "${BRANCH_NAME}" git@github.com:openkraken/kraken.git --depth=1 "${RUNNER_WORKSPACE}/${BRANCH_NAME}";
+    - uses: actions/checkout@v2
     - name: Run Test
-      run: cd "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && npm test
+      run: npm test
       id: test
       continue-on-error: true
     - name: Upload Snapshots
-      run: cd "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && node scripts/upload_snapshots.js
+      run: node scripts/upload_snapshots.js
       continue-on-error: true
     - name: Clean
-      run: rm -rf "${RUNNER_WORKSPACE}/${BRANCH_NAME}"
+      run: rm -rf ./
       continue-on-error: true
     - name: Check on failures
       if: steps.test.outcome != 'success'
