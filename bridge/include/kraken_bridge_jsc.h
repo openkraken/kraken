@@ -1032,13 +1032,13 @@ struct NativeMouseEvent {
 
   NativeEvent *nativeEvent;
 
-  int64_t clientX;
+  double_t clientX;
 
-  int64_t clientY;
+  double_t clientY;
 
-  int64_t offsetX;
+  double_t offsetX;
 
-  int64_t offsetY;
+  double_t offsetY;
 };
 
 class JSMouseEvent : public JSEvent {
