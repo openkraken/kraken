@@ -652,8 +652,14 @@ class RenderFlowLayout extends RenderLayoutBox {
         childNodeId = child.targetId;
       }
 
-      final BoxConstraints childConstraints = child is RenderBoxModel ?
-        child.renderStyle.getConstraints() : BoxConstraints();
+      BoxConstraints childConstraints;
+      if (child is RenderBoxModel) {
+        childConstraints = child.renderStyle.getConstraints();
+      } else if (child is RenderTextBox) {
+        childConstraints = child.getConstraints();
+      } else {
+        childConstraints = BoxConstraints();
+      }
 
       DateTime childLayoutStart;
       if (kProfileMode) {

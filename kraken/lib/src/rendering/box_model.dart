@@ -587,7 +587,6 @@ class RenderBoxModel extends RenderBox with
     CSSDisplay display = renderBoxModel.renderStyle.transformedDisplay;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
     double width = renderStyle.width;
-    double height = renderStyle.height;
     double minWidth = renderStyle.minWidth;
     double maxWidth = renderStyle.maxWidth;
     double intrinsicRatio = renderBoxModel.intrinsicRatio;
@@ -689,7 +688,6 @@ class RenderBoxModel extends RenderBox with
     RenderBoxModel originalRenderBoxModel = renderBoxModel;
     CSSDisplay display = renderBoxModel.renderStyle.transformedDisplay;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
-    double width = renderStyle.width;
     double height = renderStyle.height;
     double cropHeight = 0;
 

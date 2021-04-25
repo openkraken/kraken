@@ -498,7 +498,7 @@ class RenderStyle
     return isPercentageExist;
   }
 
-  /// Calculate renderBoxModel constraints based on style
+  /// Calculate renderBoxModel constraints
   BoxConstraints getConstraints() {
     bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
     bool isDisplayNone = transformedDisplay == CSSDisplay.none;

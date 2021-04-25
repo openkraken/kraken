@@ -1038,9 +1038,12 @@ class RenderFlexLayout extends RenderLayoutBox {
           minHeight: realDisplayedBoxHeight,
           maxHeight: realDisplayedBoxHeight,
         );
+      } else if (child is RenderBoxModel) {
+        innerConstraints = child.renderStyle.getConstraints();
+      } else if (child is RenderTextBox) {
+        innerConstraints = child.getConstraints();
       } else {
-        innerConstraints = child is RenderBoxModel ?
-          child.renderStyle.getConstraints() : BoxConstraints();
+        innerConstraints = BoxConstraints();
       }
 
       BoxConstraints childConstraints = deflateOverflowConstraints(innerConstraints);

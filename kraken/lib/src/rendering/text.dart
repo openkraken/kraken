@@ -97,33 +97,27 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
+  BoxConstraints getConstraints() {
+    RenderBoxModel parentRenderBoxModel = parent;
+    double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel) ?? double.infinity;
+    if (whiteSpace == WhiteSpace.nowrap && _renderParagraph.overflow != TextOverflow.ellipsis) {
+      return BoxConstraints();
+    }
+    return BoxConstraints(
+      minWidth: 0,
+      maxWidth: maxConstraintWidth,
+      minHeight: 0,
+      maxHeight: double.infinity
+    );
+  }
+
   @override
   void performLayout() {
     if (child != null) {
-      BoxConstraints boxConstraints;
-      RenderBoxModel parentRenderBoxModel = parent;
-      double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel);
-
-      if (parentRenderBoxModel.renderStyle.display == CSSDisplay.none) {
-        boxConstraints = BoxConstraints(
-          minWidth: 0,
-          maxWidth: 0,
-          minHeight: 0,
-          maxHeight: 0,
-        );
-      } else if (maxConstraintWidth != null && (whiteSpace != WhiteSpace.nowrap || _renderParagraph.overflow == TextOverflow.ellipsis)) {
-        boxConstraints = BoxConstraints(
-          minWidth: 0,
-          maxWidth: maxConstraintWidth,
-          minHeight: 0,
-          maxHeight: double.infinity
-        );
-      } else {
-        boxConstraints = constraints;
-      }
-      child.layout(boxConstraints, parentUsesSize: true);
+      child.layout(constraints, parentUsesSize: true);
       size = child.size;
 
+      // @FIXME: minimum size of text is wrong
       autoMinWidth = size.width;
       autoMinHeight = size.height;
     } else {
