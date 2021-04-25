@@ -579,33 +579,41 @@ class RenderStyle
       maxHeight: maxConstraintHeight,
     );
 
-//    print('get constraints----------- $renderBoxModel $constraints');
+//    print('get constraints----------- $renderBoxModel $constraints $logicalWidth $logicalHeight');
 
     return constraints;
   }
 
-  /// Get width if specified from style which cannot be smaller than horizontal padding plus border length
-  double getSpecifiedWidth() {
-    double specifiedWidth = width;
-    double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
-    double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
-
-    if (specifiedWidth != null && horizontalBorderLength + horizontalPaddingLength > specifiedWidth) {
-      specifiedWidth = horizontalBorderLength + horizontalPaddingLength;
+  /// Get height of replaced element by intrinsic ratio if height is not defined
+  double getHeightByIntrinsicRatio() {
+    // @TODO: move intrinsic width/height to renderStyle
+    double intrinsicWidth = renderBoxModel.intrinsicWidth;
+    double intrinsicRatio = renderBoxModel.intrinsicRatio;
+    double realWidth = width ?? intrinsicWidth;
+    if (minWidth != null && realWidth < minWidth) {
+      realWidth = minWidth;
     }
-    return specifiedWidth;
+    if (maxWidth != null && realWidth > maxWidth) {
+      realWidth = maxWidth;
+    }
+    double realHeight = realWidth * intrinsicRatio;
+    return realHeight;
   }
 
-  /// Get height if specified from style which cannot be smaller than vertical padding plus border length
-  double getSpecifiedHeight() {
-    double specifiedHeight = height;
-    double verticalBorderLength = borderEdge != null ? borderEdge.vertical : 0;
-    double verticalPaddingLength = padding != null ? padding.vertical : 0;
-
-    if (specifiedHeight != null && verticalBorderLength + verticalPaddingLength > specifiedHeight) {
-      specifiedHeight = verticalBorderLength + verticalPaddingLength;
+  /// Get width of replaced element by intrinsic ratio if width is not defined
+  double getWidthByIntrinsicRatio() {
+    // @TODO: move intrinsic width/height to renderStyle
+    double intrinsicHeight = renderBoxModel.intrinsicHeight;
+    double intrinsicRatio = renderBoxModel.intrinsicRatio;
+    double realHeight = height ?? intrinsicHeight;
+    if (minHeight != null && realHeight < minHeight) {
+      realHeight = minHeight;
     }
-    return specifiedHeight;
+    if (maxHeight != null && realHeight > maxHeight) {
+      realHeight = maxHeight;
+    }
+    double realWidth = realHeight / intrinsicRatio;
+    return realWidth;
   }
 }
 

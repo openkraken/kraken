@@ -652,37 +652,18 @@ class RenderFlowLayout extends RenderLayoutBox {
         childNodeId = child.targetId;
       }
 
-      // Whether child need to layout
-      bool isChildNeedsLayout = true;
-      if (child is RenderBoxModel && child.hasSize) {
-        double childContentWidth = RenderBoxModel.getLogicalContentWidth(child);
-        double childContentHeight = RenderBoxModel.getLogicalContentHeight(child);
-        // Always layout child when parent is not laid out yet or child is marked as needsLayout
-        if (!hasSize || child.needsLayout || needsRelayout) {
-          isChildNeedsLayout = true;
-        } else {
-          Size childOldSize = _getChildSize(child);
-          // Need to layout child only when width and height both can be calculated from style
-          // and differ from its previous size
-          isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
-            (childOldSize.width != childContentWidth ||
-              childOldSize.height != childContentHeight);
-        }
+      final BoxConstraints childConstraints = child is RenderBoxModel ?
+        child.renderStyle.getConstraints() : BoxConstraints();
+
+      DateTime childLayoutStart;
+      if (kProfileMode) {
+        childLayoutStart = DateTime.now();
       }
 
-      if (isChildNeedsLayout) {
-        DateTime childLayoutStart;
-        if (kProfileMode) {
-          childLayoutStart = DateTime.now();
-        }
-        final BoxConstraints childConstraints = child is RenderBoxModel ?
-          child.renderStyle.getConstraints() : BoxConstraints();
-
-        child.layout(childConstraints, parentUsesSize: true);
-        if (kProfileMode) {
-          DateTime childLayoutEnd = DateTime.now();
-          childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
-        }
+      child.layout(childConstraints, parentUsesSize: true);
+      if (kProfileMode) {
+        DateTime childLayoutEnd = DateTime.now();
+        childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
       }
 
       double childMainAxisExtent = _getMainAxisExtent(child);
