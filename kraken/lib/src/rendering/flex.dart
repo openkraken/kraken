@@ -1026,9 +1026,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         childNodeId = child.targetId;
       }
 
-      BoxSizeType heightSizeType = _getChildHeightSizeType(child);
-
-
       if (child is RenderPositionHolder) {
         RenderBoxModel realDisplayedBox = child.realDisplayedBox;
         // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size

@@ -4,6 +4,7 @@
  */
 import 'dart:ui';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 class CSSMargin {
@@ -81,7 +82,7 @@ mixin CSSMarginMixin on RenderStyleBase {
       bottom: 0.0,
       left: 0.0
     );
-    
+
     double left = prevMargin.left;
     double top = prevMargin.top;
     double right = prevMargin.right;
@@ -110,7 +111,9 @@ mixin CSSMarginMixin on RenderStyleBase {
     );
 
     if (shouldMarkNeedsLayout) {
-      renderBoxModel.markNeedsLayout();
+      if (renderBoxModel.parent is RenderBoxModel) {
+        (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
+      }
     }
   }
   void debugMarginProperties(DiagnosticPropertiesBuilder properties) {
