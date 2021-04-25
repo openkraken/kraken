@@ -181,33 +181,21 @@ function traverseNode(node, handle) {
 }
 
 function clearAllEventsListeners() {
-  window.__clearListeners__();
+  window.__kraken_clear_event_listeners__();
   traverseNode(document.body, (node) => {
-    node.__clearListeners__();
+    node.__kraken_clear_event_listeners__();
   });
 }
 
-__kraken_executeTest__((done) => {
+__kraken_execute_test__((done) => {
   jasmineTracker.onSpecDone = (result) => {
     return new Promise((resolve, reject) => {
       try {
-        if (window.notNeedInitEnv) {
-          resolve();
-        } else {
-          clearAllTimer();
-          clearAllEventsListeners();
-          clearAllNodes();
-          kraken.methodChannel.clearMethodCallHandler();
-          requestAnimationFrame(() => {
-            __kraken_refresh_paint__(function (e) {
-              if (e) {
-                reject(e);
-              } else {
-                resolve();
-              }
-            });
-          });
-        }
+        clearAllTimer();
+        clearAllEventsListeners();
+        clearAllNodes();
+        kraken.methodChannel.clearMethodCallHandler();
+        resolve();
       } catch (e) {
         console.log(e);
         reject(e);

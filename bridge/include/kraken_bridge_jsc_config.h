@@ -22,7 +22,7 @@
   TypeName() = delete;                                                                                                 \
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(TypeName)
 
-#define BODY_TARGET_ID -1
+#define HTML_TARGET_ID -1
 #define WINDOW_TARGET_ID -2
 #define DOCUMENT_TARGET_ID -3
 

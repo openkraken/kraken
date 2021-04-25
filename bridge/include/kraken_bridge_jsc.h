@@ -419,8 +419,13 @@ public:
   static std::unordered_map<JSContext *, JSEventTarget *> instanceMap;
   static JSEventTarget *instance(JSContext *context);
   DEFINE_OBJECT_PROPERTY(EventTarget, 1, eventTargetId);
+
+  #if defined(IS_TEST)
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(EventTarget, 4, addEventListener, removeEventListener, dispatchEvent,
-                                   __clearListeners__);
+                                   __kraken_clear_event_listeners__);
+  #else
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(EventTarget, 3, addEventListener, removeEventListener, dispatchEvent);
+  #endif
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -449,8 +454,10 @@ private:
 
   JSFunctionHolder m_removeEventListener{context, prototypeObject, nullptr, "removeEventListener", removeEventListener};
   JSFunctionHolder m_dispatchEvent{context, prototypeObject, nullptr, "dispatchEvent", dispatchEvent};
-  JSFunctionHolder m_clearListeners{context, prototypeObject, nullptr, "__clearListeners__", clearListeners};
   JSFunctionHolder m_addEventListener{context, prototypeObject, nullptr, "addEventListener", addEventListener};
+  #ifdef IS_TEST
+  JSFunctionHolder m_clearListeners{context, prototypeObject, nullptr, "__kraken_clear_event_listeners__", clearListeners};
+  #endif
 };
 
 class EventTargetInstance : public HostClass::Instance {
@@ -663,7 +670,7 @@ struct NativeDocument {
 
 class DocumentInstance : public NodeInstance {
 public:
-  DEFINE_OBJECT_PROPERTY(Document, 5, nodeName, all, cookie, body, documentElement);
+  DEFINE_OBJECT_PROPERTY(Document, 4, nodeName, all, cookie, documentElement);
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 6, createElement, createTextNode, createComment, getElementById,
                                    getElementsByTagName, createEvent);
 
@@ -682,7 +689,7 @@ public:
   NativeDocument *nativeDocument;
   std::unordered_map<std::string, std::vector<ElementInstance *>> elementMapById;
 
-  ElementInstance *body;
+  ElementInstance *documentElement;
 
 private:
   DocumentCookie m_cookie;
@@ -786,23 +793,6 @@ public:
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(Element, 10, getBoundingClientRect, getAttribute, setAttribute, hasAttribute,
                                    removeAttribute, toBlob, click, scroll, scrollBy, scrollTo);
 
-  enum class ElementTagName {
-    kDiv,
-    kSpan,
-    kAnchor,
-    kAnimationPlayer,
-    kAudio,
-    kVideo,
-    kStrong,
-    kPre,
-    kParagraph,
-    kIframe,
-    kObject,
-    kImage,
-    kCanvas,
-    kInput,
-  };
-
   static std::unordered_map<JSContext *, JSElement *> instanceMap;
   static std::unordered_map<std::string, ElementCreator> elementCreatorMap;
   OBJECT_INSTANCE(JSElement)
@@ -859,8 +849,8 @@ private:
 class KRAKEN_EXPORT ElementInstance : public NodeInstance {
 public:
   ElementInstance() = delete;
-  explicit ElementInstance(JSElement *element, const char *tagName, bool sendUICommand);
-  explicit ElementInstance(JSElement *element, JSStringRef tagName, double targetId);
+  explicit ElementInstance(JSElement *element, const char *tagName);
+  explicit ElementInstance(JSElement *element, double targetId);
   ~ElementInstance();
 
   JSValueRef getStringValueProperty(std::string &name);

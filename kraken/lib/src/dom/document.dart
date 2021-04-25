@@ -4,12 +4,13 @@ import 'package:kraken/bridge.dart';
 
 class Document extends Node {
   final Pointer<NativeDocument> nativeDocumentPtr;
+  final HTMLElement documentElement;
 
-  final BodyElement body;
-
-  Document(int targetId, this.nativeDocumentPtr, ElementManager elementManager, this.body)
+  Document(int targetId, this.nativeDocumentPtr, ElementManager elementManager, this.documentElement)
       : assert(targetId != null),
-        super(NodeType.DOCUMENT_NODE, targetId, nativeDocumentPtr.ref.nativeNode, elementManager, '#document');
+        super(NodeType.DOCUMENT_NODE, targetId, nativeDocumentPtr.ref.nativeNode, elementManager, '#document') {
+    appendChild(documentElement);
+  }
 
   void _handleEvent(Event event) {
     emitUIEvent(elementManager.controller.view.contextId, nativeDocumentPtr.ref.nativeNode.ref.nativeEventTarget, event);

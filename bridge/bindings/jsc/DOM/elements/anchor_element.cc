@@ -23,14 +23,8 @@ JSObjectRef JSAnchorElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
   return instance->object;
 }
 
-JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *jsAnchorElement)
-  : ElementInstance(jsAnchorElement, "a", false), nativeAnchorElement(new NativeAnchorElement(nativeElement)) {
-  std::string tagName = "a";
-  NativeString args_01{};
-  buildUICommandArgs(tagName, args_01);
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeAnchorElement);
-}
+JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *jsElement)
+  : ElementInstance(jsElement, "a"), nativeAnchorElement(new NativeAnchorElement(nativeElement)) {}
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getAnchorElementPropertyMap();

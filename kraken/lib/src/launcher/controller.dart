@@ -217,7 +217,7 @@ class KrakenViewController {
   }
 
   // export Uint8List bytes from rendered result.
-  Future<Uint8List> toImage(double devicePixelRatio, [int eventTargetId = BODY_ID]) {
+  Future<Uint8List> toImage(double devicePixelRatio, [int eventTargetId = HTML_ID]) {
     assert(!_disposed, "Kraken have already disposed");
     Completer<Uint8List> completer = Completer();
     try {
@@ -491,9 +491,6 @@ class KrakenController {
       PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
 
-    // Should clear previous page cached ui commands
-    clearUICommand(_view.contextId);
-
     _module = KrakenModuleController(this, _view.contextId);
     assert(!_controllerMap.containsKey(_view.contextId),
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
@@ -520,28 +517,6 @@ class KrakenController {
   void setNavigationDelegate(KrakenNavigationDelegate delegate) {
     assert(_view != null);
     _view.navigationDelegate = delegate;
-  }
-
-  // regenerate generate renderObject created by kraken but not affect jsBridge context.
-  // test used only.
-  testRefreshPaint() async {
-    assert(!_view._disposed, "Kraken have already disposed");
-    RenderObject root = _view.getRootRenderObject();
-    RenderObject parent = root.parent;
-    RenderObject previousSibling;
-    if (parent is ContainerRenderObjectMixin) {
-      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
-    }
-    _module.dispose();
-    _view.detachView();
-    Inspector.prevInspector = view._elementManager.controller.view.inspector;
-    _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
-        showPerformanceOverlay: _view.showPerformanceOverlay,
-        enableDebug: _view.enableDebug,
-        contextId: _view.contextId,
-        rootController: this,
-        navigationDelegate: _view.navigationDelegate);
-    _view.attachView(parent, previousSibling);
   }
 
   void unload() async {

@@ -1,4 +1,4 @@
-import {kraken} from "../kom/kraken";
+import { kraken } from './kraken';
 
 type MethodCallHandler = (method: string, args: any[]) => void;
 

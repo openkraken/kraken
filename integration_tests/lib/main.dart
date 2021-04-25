@@ -22,7 +22,6 @@ String err = (AnsiPen()..red())('[TEST FAILED]');
 
 final String __dirname = path.dirname(Platform.script.path);
 final String testDirectory = Platform.environment['KRAKEN_TEST_DIR'] ?? __dirname;
-// final String testDirectory = '/Users/yuanyan/Kraken/kraken/integration_tests/';
 final Directory specsDirectory = Directory(path.join(testDirectory, '.specs'));
 
 const int KRAKEN_NUM = 1;
@@ -42,7 +41,7 @@ class NativeGestureClient implements GestureClient {
   @override
   void dragStartCallback(DragStartDetails details) {
     var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
-    kraken[gestureClientID].controller.view.document.body.dispatchEvent(event);
+    kraken[gestureClientID].controller.view.document.documentElement.dispatchEvent(event);
   }
 
   @override
@@ -113,8 +112,7 @@ void main() async {
     ),
   ));
 
-  WidgetsBinding.instance
-      .addPostFrameCallback((_) async {
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();
 
     List<Future<String>> testResults = [];

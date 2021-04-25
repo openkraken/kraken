@@ -183,6 +183,9 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     JSElement::defineElement("object", [](JSContext *context) -> ElementInstance* {
       return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
     });
+    JSElement::defineElement("script", [](JSContext *context) -> ElementInstance * {
+      return new JSScriptElement::ScriptElementInstance(JSScriptElement::instance(context));
+    });
   }
 }
 
@@ -247,15 +250,13 @@ DocumentInstance *DocumentInstance::instance(JSContext *context) {
 DocumentInstance::DocumentInstance(JSDocument *document)
   : NodeInstance(document, NodeType::DOCUMENT_NODE, DOCUMENT_TARGET_ID),
     nativeDocument(new NativeDocument(nativeNode)) {
-  JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
-  auto Element = JSElement::instance(document->context);
-  body = new ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
-  body->document = this;
-  JSStringHolder bodyStringHolder = JSStringHolder(context, "body");
+
+  documentElement = new ElementInstance(JSElement::instance(document->context), HTML_TARGET_ID);
+  documentElement->document = this;
   JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
-  JSObjectSetProperty(ctx, object, bodyStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);
-  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly,
-                      nullptr);
+  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), 
+                      documentElement->object, kJSPropertyAttributeReadOnly, nullptr);
+
   instanceMap[document->context] = this;
   getDartMethod()->initDocument(contextId, nativeDocument);
 }
@@ -276,14 +277,13 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
   DocumentProperty property = propertyMap[name];
 
   switch (property) {
-  case DocumentProperty::documentElement:
-  case DocumentProperty::body: {
+  case DocumentProperty::documentElement: {
     return nullptr;
   }
   case DocumentProperty::all: {
     auto all = new JSAllCollection(context);
 
-    traverseNode(body, [&all](NodeInstance *node) {
+    traverseNode(documentElement, [&all](NodeInstance *node) {
       all->internalAdd(node, nullptr);
       return false;
     });
@@ -383,7 +383,7 @@ JSValueRef JSDocument::getElementsByTagName(JSContextRef ctx, JSObjectRef functi
 
   std::vector<ElementInstance *> elements;
 
-  traverseNode(document->body, [tagName, &elements](NodeInstance *node) {
+  traverseNode(document->documentElement, [tagName, &elements](NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = reinterpret_cast<ElementInstance *>(node);
       if (element->tagName() == tagName) {

@@ -21,15 +21,8 @@ JSObjectRef JSObjectElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
   return instance->object;
 }
 
-JSObjectElement::ObjectElementInstance::ObjectElementInstance(JSObjectElement *jsAnchorElement)
-  : ElementInstance(jsAnchorElement, "object", false), nativeObjectElement(new NativeObjectElement(nativeElement)) {
-  std::string tagName = "object";
-  NativeString args_01{};
-  buildUICommandArgs(tagName, args_01);
-
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeObjectElement);
-}
+JSObjectElement::ObjectElementInstance::ObjectElementInstance(JSObjectElement *jsElement)
+  : ElementInstance(jsElement, "object"), nativeObjectElement(new NativeObjectElement(nativeElement)) {}
 
 JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getObjectElementPropertyMap();

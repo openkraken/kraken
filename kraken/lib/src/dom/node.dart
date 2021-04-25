@@ -100,7 +100,8 @@ abstract class Node extends EventTarget implements RenderObjectNode {
     while (parent.parentNode != null) {
       parent = parent.parentNode;
     }
-    return parent == elementManager.getRootElement();
+    Document document = elementManager.document;
+    return this == document || parent == document;
   }
 
   Node get firstChild => childNodes?.first;

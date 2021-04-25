@@ -16,8 +16,8 @@ JSMediaElement::~JSMediaElement() {
 
 JSMediaElement::JSMediaElement(JSContext *context) : JSElement(context) {}
 
-JSMediaElement::MediaElementInstance::MediaElementInstance(JSMediaElement *jsMediaElement, const char *tagName)
-  : ElementInstance(jsMediaElement, tagName, false), nativeMediaElement(new NativeMediaElement(nativeElement)) {}
+JSMediaElement::MediaElementInstance::MediaElementInstance(JSMediaElement *jsElement, const char *tagName)
+  : ElementInstance(jsElement, tagName), nativeMediaElement(new NativeMediaElement(nativeElement)) {}
 
 JSMediaElement::MediaElementInstance::~MediaElementInstance() {
   if (_src != nullptr) JSStringRelease(_src);

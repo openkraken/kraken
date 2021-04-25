@@ -44,60 +44,6 @@ JSValueRef executeTest(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
   return nullptr;
 }
 
-JSValueRef refreshPaint(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                        const JSValueRef *arguments, JSValueRef *exception) {
-  const JSValueRef &callback = arguments[0];
-
-  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
-  if (!JSValueIsObject(ctx, callback)) {
-    binding::jsc::throwJSError(ctx, "Failed to execute '_kraken_refresh_paint__': parameter 1 (callback) is not an function.",
-                    exception);
-    return nullptr;
-  }
-
-  JSObjectRef callbackObjectRef = JSValueToObject(ctx, callback, exception);
-
-  if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    binding::jsc::throwJSError(ctx, "Failed to execute '_kraken_refresh_paint__': parameter 1 (callback) is not an function.",
-                    exception);
-    return nullptr;
-  }
-
-  auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
-
-  auto fn = [](void *ptr, int32_t contextId, const char *errmsg) {
-    auto callbackContext = static_cast<BridgeCallback::Context *>(ptr);
-    binding::jsc::JSContext &_context = callbackContext->_context;
-    JSContextRef ctx = _context.context();
-
-    JSValueRef exception = nullptr;
-
-    if (errmsg != nullptr) {
-      JSStringRef errorStringRef = JSStringCreateWithUTF8CString(errmsg);
-      const JSValueRef errorArgs[] = {JSValueMakeString(ctx, errorStringRef)};
-      JSObjectRef errorObject = JSObjectMakeError(ctx, 1, errorArgs, &exception);
-      const JSValueRef arguments[] = {errorObject};
-      JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
-      JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 1, arguments, &exception);
-    } else {
-      JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
-      JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 0, nullptr, &exception);
-    }
-
-    _context.handleException(exception);
-    auto bridge = static_cast<JSBridge *>(callbackContext->_context.getOwner());
-    bridge->bridgeCallback->freeBridgeCallbackContext(callbackContext);
-  };
-
-  auto bridge = static_cast<JSBridge *>(context->getOwner());
-  bridge->bridgeCallback->registerCallback<void>(std::move(callbackContext),
-                                                 [&fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
-                                                   getDartMethod()->refreshPaint(callbackContext, contextId, fn);
-                                                 });
-
-  return nullptr;
-}
-
 JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                               const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef blobValueRef = arguments[0];
@@ -270,8 +216,7 @@ JSValueRef simulateKeyPress(JSContextRef ctx, JSObjectRef function, JSObjectRef 
 
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   bridge->owner = this;
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_executeTest__", executeTest);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_refresh_paint__", refreshPaint);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_execute_test__", executeTest);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_match_image_snapshot__", matchImageSnapshot);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_environment__", environment);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_simulate_pointer__", simulatePointer);

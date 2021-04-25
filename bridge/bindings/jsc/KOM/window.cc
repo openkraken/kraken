@@ -68,16 +68,16 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
     case WindowProperty::scrollX: {
       getDartMethod()->flushUICommand();
       auto document = DocumentInstance::instance(_hostClass->context);
-      assert_m(document->body->nativeElement->getViewModuleProperty != nullptr, "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      assert_m(document->documentElement->nativeElement->getViewModuleProperty != nullptr, "Failed to execute getViewModuleProperty(): dart method is nullptr.");
       return JSValueMakeNumber(_hostClass->ctx,
-                               document->body->nativeElement->getViewModuleProperty(document->body->nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollLeft)));
+                               document->documentElement->nativeElement->getViewModuleProperty(document->documentElement->nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollLeft)));
     }
     case WindowProperty::scrollY: {
       getDartMethod()->flushUICommand();
       auto document = DocumentInstance::instance(_hostClass->context);
-      assert_m(document->body->nativeElement->getViewModuleProperty != nullptr, "Failed to execute getViewModuleProperty(): dart method is nullptr.");
+      assert_m(document->documentElement->nativeElement->getViewModuleProperty != nullptr, "Failed to execute getViewModuleProperty(): dart method is nullptr.");
       return JSValueMakeNumber(_hostClass->ctx,
-                               document->body->nativeElement->getViewModuleProperty(document->body->nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollTop)));
+                               document->documentElement->nativeElement->getViewModuleProperty(document->documentElement->nativeElement, static_cast<int64_t>(ViewModuleProperty::scrollTop)));
     }
     }
   }
@@ -149,8 +149,8 @@ JSValueRef JSWindow::scroll(JSContextRef ctx, JSObjectRef function, JSObjectRef 
   auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
   auto document = DocumentInstance::instance(window->context);
-  assert_m( document->body->nativeElement->scroll != nullptr, "Failed to execute scroll(): dart method is nullptr.");
-  document->body->nativeElement->scroll(document->body->nativeElement, x, y);
+  assert_m( document->documentElement->nativeElement->scroll != nullptr, "Failed to execute scroll(): dart method is nullptr.");
+  document->documentElement->nativeElement->scroll(document->documentElement->nativeElement, x, y);
 
   return nullptr;
 }
@@ -174,8 +174,8 @@ JSValueRef JSWindow::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectRe
   auto window = reinterpret_cast<WindowInstance *>(JSObjectGetPrivate(thisObject));
   getDartMethod()->flushUICommand();
   auto document = DocumentInstance::instance(window->context);
-  assert_m( document->body->nativeElement->scrollBy != nullptr, "Failed to execute scroll(): dart method is nullptr.");
-  document->body->nativeElement->scrollBy(document->body->nativeElement, x, y);
+  assert_m( document->documentElement->nativeElement->scrollBy != nullptr, "Failed to execute scroll(): dart method is nullptr.");
+  document->documentElement->nativeElement->scrollBy(document->documentElement->nativeElement, x, y);
 
   return nullptr;
 }

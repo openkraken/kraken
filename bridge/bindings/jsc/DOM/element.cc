@@ -151,38 +151,22 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
 
   JSStringRef tagNameStrRef = JSValueToStringCopy(ctx, arguments[0], exception);
   std::string tagName = JSStringToStdString(tagNameStrRef);
-  auto instance = new ElementInstance(this, tagName.c_str(), true);
+  auto instance = new ElementInstance(this, tagName.c_str());
   return instance->object;
 }
 
-ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool sendUICommand)
+ElementInstance::ElementInstance(JSElement *element, const char *tagName)
   : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)) {
-
   m_tagName.setString(JSStringCreateWithUTF8CString(tagName));
-
-  if (sendUICommand) {
-    std::string t = std::string(tagName);
-    NativeString args_01{};
-    buildUICommandArgs(t, args_01);
-    ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
-  }
 }
 
-ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRef, double targetId)
+ElementInstance::ElementInstance(JSElement *element, double targetId)
   : NodeInstance(element, NodeType::ELEMENT_NODE, targetId), nativeElement(new NativeElement(nativeNode)) {
-  m_tagName.setString(tagNameStringRef);
 
-  NativeString args_01{};
-  buildUICommandArgs(tagNameStringRef, args_01);
-
-  // No needs to send create element for BODY element.
-  if (targetId == BODY_TARGET_ID) {
-    assert_m(getDartMethod()->initBody != nullptr, "Failed to execute initBody(): dart method is nullptr.");
-    getDartMethod()->initBody(element->contextId, nativeElement);
-  } else {
-    ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(targetId, UICommand::createElement, args_01, nativeElement);
+  // Do not needs to send create element for HTML element.
+  if (targetId == HTML_TARGET_ID) {
+    assert_m(getDartMethod()->initHTML != nullptr, "Failed to execute initHTML(): dart method is nullptr.");
+    getDartMethod()->initHTML(element->contextId, nativeElement);
   }
 }
 
@@ -681,8 +665,15 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
     elementInstance = elementCreatorMap[name](context);
   } else {
     // Fallback to default Element class
-    elementInstance = new ElementInstance(JSElement::instance(context), name.c_str(), true);
+    elementInstance = new ElementInstance(JSElement::instance(context), name.c_str());
   }
+  // Send createElement command to dart
+  NativeString args_01{};
+  buildUICommandArgs(name, args_01);
+  ::foundation::UICommandTaskMessageQueue::instance(context->getContextId())
+    ->registerCommand(elementInstance->eventTargetId, UICommand::createElement, args_01,
+                      elementInstance->nativeElement);
+
   return elementInstance;
 }
 

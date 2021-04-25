@@ -132,12 +132,12 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
   std::string &&eventType = JSStringToStdString(eventTypeStringRef);
 
-  // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and
+  // This is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and
   // no one can stop element to trigger event from dart side. this can led to significant performance improvement when
   // using Front-End frameworks such as Rax, or cause some overhead performance issue when some event trigger more
   // frequently.
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0 ||
-      eventTargetInstance->eventTargetId == BODY_TARGET_ID) {
+      eventTargetInstance->eventTargetId == HTML_TARGET_ID) {
     eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 

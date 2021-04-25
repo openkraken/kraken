@@ -26,8 +26,6 @@ const String UNKNOWN = 'UNKNOWN';
 typedef ElementCreator = Element Function(int id, Pointer nativePtr, ElementManager elementManager);
 
 Element _createElement(int id, Pointer nativePtr, String type, ElementManager elementManager) {
-  if (type == BODY) return null;
-
   if (!ElementManager._elementCreator.containsKey(type)) {
     print('ERROR: unexpected element type "$type"');
     return Element(id, nativePtr.cast<NativeElement>(), elementManager, tagName: UNKNOWN);
@@ -37,7 +35,7 @@ Element _createElement(int id, Pointer nativePtr, String type, ElementManager el
   return element;
 }
 
-const int BODY_ID = -1;
+const int HTML_ID = -1;
 const int WINDOW_ID = -2;
 const int DOCUMENT_ID = -3;
 
@@ -57,7 +55,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     }
   }
 
-  static Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
+  static Map<int, Pointer<NativeElement>> htmlNativePtrMap = Map();
   static Map<int, Pointer<NativeDocument>> documentNativePtrMap = Map();
   static Map<int, Pointer<NativeWindow>> windowNativePtrMap = Map();
 
@@ -74,7 +72,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
 
   RenderViewportBox viewport;
-  Element _rootElement;
+  Document document;
+  Element documentElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
   KrakenController controller;
@@ -87,20 +86,15 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   final List<VoidCallback> _detachCallbacks = [];
 
   ElementManager({this.contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
-
     if (kProfileMode) {
       PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
-      PerformanceTiming.instance(contextId).mark(PERF_BODY_ELEMENT_INIT_START);
+      PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_INIT_START);
     }
 
-    _rootElement = BodyElement(viewportWidth, viewportHeight, BODY_ID, bodyNativePtrMap[contextId], this)
-      ..attachBody();
+    documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId], this);
+    setEventTarget(documentElement);
 
-    if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_BODY_ELEMENT_INIT_END);
-    }
-
-    RenderBoxModel rootRenderBoxModel = _rootElement.renderBoxModel;
+    RenderBoxModel rootRenderBoxModel = documentElement.renderBoxModel;
     if (viewport != null) {
       viewport.controller = controller;
       viewport.child = rootRenderBoxModel;
@@ -112,13 +106,15 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     _setupObserver();
 
-    setEventTarget(_rootElement);
-
     Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this);
     setEventTarget(window);
 
-    Document document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, _rootElement);
+    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, documentElement);
     setEventTarget(document);
+
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_INIT_END);
+    }
 
     if (!inited) {
       // Inline text
@@ -179,7 +175,11 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       // Edits
       defineElement(DEL, (id, nativePtr, elementManager) => DelElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(INS, (id, nativePtr, elementManager) => InsElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      // Metadata
+      defineElement(SCRIPT, (id, nativePtr, elementManager) => ScriptElement(id, nativePtr.cast<NativeElement>(), elementManager));
       // Others
+      defineElement(BODY, (id, nativePtr, elementManager) => BodyElement(id, nativePtr.cast<NativeElement>(), elementManager));
+      defineElement(HEAD, (id, nativePtr, elementManager) => HeadElement(id, nativePtr.cast<NativeElement>(), elementManager));
       defineElement(IMAGE, (id, nativePtr, elementManager) => ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager));
       defineElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager));
       defineElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager));
@@ -228,7 +228,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void setEventTarget(EventTarget target) {
     assert(target != null);
-
     _eventTargets[target.targetId] = target;
   }
 
@@ -349,7 +348,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   /// <!-- afterend -->
   void insertAdjacentNode(int targetId, String position, int newTargetId) {
     assert(existsTarget(targetId), 'targetId: $targetId position: $position newTargetId: $newTargetId');
-    assert(existsTarget(newTargetId), 'newtargetId: $newTargetId position: $position');
+    assert(existsTarget(newTargetId), 'newTargetId: $newTargetId position: $position');
 
     Node target = getEventTargetByTargetId<Node>(targetId);
     Node newNode = getEventTargetByTargetId<Node>(newTargetId);
@@ -412,7 +411,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   Element getRootElement() {
-    return _rootElement;
+    return documentElement;
   }
 
   bool showPerformanceOverlay = false;
@@ -468,7 +467,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (parent == null) return;
 
     // Detach renderObjects
-    _rootElement.detach();
+    documentElement.detach();
 
     // run detachCallbacks
     for (var callback in _detachCallbacks) {
@@ -476,7 +475,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     }
     _detachCallbacks.clear();
 
-    _rootElement = null;
+    documentElement = null;
+    document = null;
   }
 
   // Hooks for DevTools.
@@ -527,7 +527,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
         viewport.bottomInset = bottomInset;
         if (shouldScrollByToCenter) {
           SchedulerBinding.instance.addPostFrameCallback((_) {
-            _rootElement.scrollBy(dy: bottomInset);
+            documentElement.scrollBy(dy: bottomInset);
           });
         }
       }

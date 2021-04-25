@@ -1,6 +1,6 @@
 // Impl by W3C vibration API.
 // https://w3c.github.io/vibration/
-import {kraken} from "../kom/kraken";
+import { kraken } from './kraken';
 
 type VibratePattern = number | number[];
 type _ValidVibratePattern = number[];

@@ -1,4 +1,4 @@
-import { kraken } from "../kom/kraken";
+import { kraken } from './kraken';
 
 const TRUE = 'true';
 export const asyncStorage = {
