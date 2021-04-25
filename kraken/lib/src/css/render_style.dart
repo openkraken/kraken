@@ -523,9 +523,9 @@ class RenderStyle
       logicalContentHeight + verticalPaddingLength + verticalBorderLength : null;
 
     // Constraints
-    double minConstraintWidth = 0;
+    double minConstraintWidth = logicalWidth ?? 0;
     double maxConstraintWidth = logicalWidth ?? double.infinity;
-    double minConstraintHeight = 0;
+    double minConstraintHeight = logicalHeight ?? 0;
     double maxConstraintHeight = logicalHeight ?? double.infinity;
 
     if (renderBoxModel.parent is RenderFlexLayout) {
