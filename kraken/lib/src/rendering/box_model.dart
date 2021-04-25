@@ -637,13 +637,8 @@ class RenderBoxModel extends RenderBox with
                 cropPaddingBorder(renderBoxModel);
                 break;
               } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex || display == CSSDisplay.sliver) {
-                if (renderStyle.minWidth != null) {
-                  width = renderStyle.minWidth;
-                  cropPaddingBorder(renderBoxModel);
-                } else {
-                  // Collapse width to children
-                  width = null;
-                }
+                // Collapse width to children
+                width = null;
                 break;
               }
             }
@@ -654,9 +649,6 @@ class RenderBoxModel extends RenderBox with
       case CSSDisplay.inlineFlex:
         if (renderStyle.width != null) {
           width = renderStyle.width;
-          cropPaddingBorder(renderBoxModel);
-        } else if (renderStyle.minWidth != null) {
-          width = renderStyle.minWidth;
           cropPaddingBorder(renderBoxModel);
         } else {
           width = null;
