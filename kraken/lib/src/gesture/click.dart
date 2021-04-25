@@ -51,10 +51,10 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
               MouseEventInit(
                   bubbles: true,
                   cancelable: true,
-                  clientX: down.localPosition.dx,
-                  clientY: down.localPosition.dy,
-                  offsetX: down.position.dx,
-                  offsetY: down.position.dy,
+                  clientX: down.position.dx,
+                  clientY: down.position.dy,
+                  offsetX: down.localPosition.dx,
+                  offsetY: down.localPosition.dy,
               )
           )
       );
@@ -77,7 +77,18 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// If this recognizer wins the arena, [handleTapUp] is called instead.
   void handleTapCancel( PointerDownEvent down, PointerCancelEvent cancel, String reason ) {
     if (onClick != null)
-      onClick(Event(EVENT_CANCEL, EventInit(bubbles: true, cancelable: true)));
+      onClick(
+          MouseEvent(EVENT_CANCEL,
+              MouseEventInit(
+                bubbles: true,
+                cancelable: true,
+                clientX: down.position.dx,
+                clientY: down.position.dy,
+                offsetX: down.localPosition.dx,
+                offsetY: down.localPosition.dy,
+              )
+          )
+      );
   }
 
   @override
