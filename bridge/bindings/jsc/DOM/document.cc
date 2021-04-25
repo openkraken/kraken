@@ -79,7 +79,6 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
 
   auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   auto element = JSElement::buildElementInstance(document->context, tagName);
-  element->document = document;
   return element->object;
 }
 
@@ -95,7 +94,6 @@ JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JS
   auto TextNode = JSTextNode::instance(document->context);
   auto textNodeInstance = JSObjectCallAsConstructor(ctx, TextNode->classObject, 1, arguments, exception);
   auto textNode = reinterpret_cast<JSTextNode::TextNodeInstance *>(JSObjectGetPrivate(textNodeInstance));
-  textNode->document = document;
   return textNodeInstance;
 }
 
@@ -106,7 +104,6 @@ JSValueRef JSDocument::createComment(JSContextRef ctx, JSObjectRef function, JSO
   auto commentNodeInstance =
     JSObjectCallAsConstructor(ctx, CommentNode->classObject, argumentCount, arguments, exception);
   auto commentNode = reinterpret_cast<JSCommentNode::CommentNodeInstance *>(JSObjectGetPrivate(commentNodeInstance));
-  commentNode->document = document;
   return commentNodeInstance;
 }
 
@@ -250,9 +247,9 @@ DocumentInstance *DocumentInstance::instance(JSContext *context) {
 DocumentInstance::DocumentInstance(JSDocument *document)
   : NodeInstance(document, NodeType::DOCUMENT_NODE, DOCUMENT_TARGET_ID),
     nativeDocument(new NativeDocument(nativeNode)) {
-
+  m_document = this;
   documentElement = new ElementInstance(JSElement::instance(document->context), HTML_TARGET_ID);
-  documentElement->document = this;
+  documentElement->m_document = this;
   JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
   JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), 
                       documentElement->object, kJSPropertyAttributeReadOnly, nullptr);
