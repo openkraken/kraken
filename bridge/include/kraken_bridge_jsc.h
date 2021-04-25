@@ -1072,7 +1072,7 @@ private:
 class MouseEventInstance : public EventInstance {
 public:
   MouseEventInstance() = delete;
-  explicit MouseEventInstance(JSMouseEvent *jsGestureEvent, std::string MouseEventType, JSValueRef eventInit,
+  explicit MouseEventInstance(JSMouseEvent *jsMouseEvent, std::string MouseEventType, JSValueRef eventInit,
                                 JSValueRef *exception);
   explicit MouseEventInstance(JSMouseEvent *jsMouseEvent, NativeMouseEvent *nativeMouseEvent);
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
