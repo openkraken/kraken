@@ -16,17 +16,6 @@ class ScriptElement extends Element {
   ScriptElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr, elementManager, tagName: SCRIPT, defaultStyle: _defaultStyle);
 
-  void _handleEventAfterLoaded() {
-    // `load` event is a simple event.
-    if (isConnected) {
-      // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
-      SchedulerBinding.instance.scheduleFrame();
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        dispatchEvent(Event(EVENT_LOAD));
-      });
-    }
-  }
-
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
@@ -37,9 +26,20 @@ class ScriptElement extends Element {
 
   void _fetchBundle(String src) async {
     if (src != null && src.isNotEmpty && isConnected) {
-      KrakenBundle bundle = await KrakenBundle.getBundle(src);
-      bundle.eval(elementManager.contextId);
-      _handleEventAfterLoaded();
+      try {
+        KrakenBundle bundle = await KrakenBundle.getBundle(src);
+        await bundle.eval(elementManager.contextId);
+        // Successful load.
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          dispatchEvent(Event(EVENT_LOAD));
+        });
+      } catch(e) {
+        // An error occurred.
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          dispatchEvent(Event(EVENT_ERROR));
+        });
+      }
+      SchedulerBinding.instance.scheduleFrame();
     }
   }
 
