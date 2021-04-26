@@ -281,6 +281,65 @@ class RenderLayoutBox extends RenderBoxModel
     return result;
   }
 
+  /// Common layout size (including flow and flexbox layout) calculation logic
+  Size getLayoutSize({
+    double logicalContentWidth,
+    double logicalContentHeight,
+    double contentWidth,
+    double contentHeight,
+  }) {
+    double layoutWidth = contentWidth;
+    double layoutHeight = contentHeight;
+
+    // Size which is specified by sizing styles
+    double specifiedWidth = logicalContentWidth;
+    double specifiedHeight = logicalContentHeight;
+    // Flex basis takes priority over main size in flex item.
+    if (parent is RenderFlexLayout) {
+      RenderBoxModel parentRenderBoxModel = parent;
+      double flexBasis = renderStyle.flexBasis;
+      if (flexBasis != null) {
+        if (CSSFlex.isHorizontalFlexDirection(parentRenderBoxModel.renderStyle.flexDirection)) {
+          specifiedWidth = flexBasis;
+        } else {
+          specifiedHeight = flexBasis;
+        }
+      }
+    }
+
+    if (specifiedWidth != null) {
+      layoutWidth = math.max(specifiedWidth, contentWidth);
+    }
+    if (specifiedHeight != null) {
+      layoutHeight = math.max(specifiedHeight, contentHeight);
+    }
+
+    CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
+    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
+    bool isNotInline = transformedDisplay != CSSDisplay.inline;
+    double width = renderStyle.width;
+    double height = renderStyle.height;
+    double minWidth = renderStyle.minWidth;
+    double minHeight = renderStyle.minHeight;
+    double maxWidth = renderStyle.maxWidth;
+    double maxHeight = renderStyle.maxHeight;
+
+    // Constrain to min-width or max-width if width not exists.
+    if (isInlineBlock && maxWidth != null && width == null) {
+      layoutWidth = layoutWidth > maxWidth ? maxWidth : layoutWidth;
+    } else if (isInlineBlock && minWidth != null && width == null) {
+      layoutWidth = layoutWidth < minWidth ? minWidth : layoutWidth;
+    }
+
+    // Constrain to min-height or max-height if height not exists.
+    if (isNotInline && maxHeight != null && height == null) {
+      layoutHeight = layoutHeight > maxHeight ? maxHeight : layoutHeight;
+    } else if (isNotInline && minHeight != null && height == null) {
+      layoutHeight = layoutHeight < minHeight ? minHeight : layoutHeight;
+    }
+
+    return Size(layoutWidth, layoutHeight);
+  }
 }
 
 mixin RenderBoxModelBase on RenderBox {
@@ -607,7 +666,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    bool isInline = renderBoxModel.renderStyle.display == CSSDisplay.inline;
+    bool isInline = renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.inline;
 
     // min-width and max-width doesn't work on inline element
     if (!isInline) {
@@ -621,17 +680,8 @@ class RenderBoxModel extends RenderBox with
           width = minWidth;
         }
       }
-
       if (maxWidth != null) {
-        if (width == null) {
-          if (intrinsicWidth == null || intrinsicWidth > maxWidth) {
-            // When intrinsicWidth is null, use max-width as max constraints,
-            // real width should be compared with its children width when performLayout
-            width = maxWidth;
-          } else {
-            width = intrinsicWidth;
-          }
-        } else if (width > maxWidth) {
+        if (width != null && width > maxWidth)  {
           width = maxWidth;
         }
       }
@@ -709,7 +759,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    bool isInline = renderBoxModel.renderStyle.display == CSSDisplay.inline;
+    bool isInline = renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.inline;
 
     // max-height and min-height doesn't work on inline element
     if (!isInline) {
@@ -723,21 +773,11 @@ class RenderBoxModel extends RenderBox with
           height = minHeight;
         }
       }
-
       if (maxHeight != null) {
-        if (height == null) {
-          // When intrinsicHeight is null, use max-height as max constraints,
-          // real height should be compared with its children height when performLayout
-          if (intrinsicHeight == null || intrinsicHeight > maxHeight) {
-            height = maxHeight;
-          } else {
-            height = intrinsicHeight;
-          }
-        } else if (height > maxHeight) {
+        if (height != null && height > maxHeight)  {
           height = maxHeight;
         }
       }
-
     }
 
     if (height != null) {
