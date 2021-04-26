@@ -372,24 +372,6 @@ class KrakenViewController {
   RenderObject getRootRenderObject() {
     return _elementManager.getRootRenderObject();
   }
-
-  // void debugStartInspector() {
-  //   // Apply reload page, reuse prev inspector instance.
-  //   if (UIInspector.prevInspector != null) {
-  //     UIInspector prevInspector = UIInspector.prevInspector;
-  //     _isolateServerPort = prevInspector.viewController._isolateServerPort;
-  //     _isolateServerIsolate = prevInspector.viewController._isolateServerIsolate;
-  //     prevInspector.viewController = this;
-  //     _uiInspector = prevInspector;
-  //     elementManager.debugDOMTreeChanged = prevInspector.onDOMTreeChanged;
-  //     UIInspector.prevInspector = null;
-  //     _isolateServerPort.send(InspectorReload(contextId));
-  //   } else {
-  //     spawnIsolateInspectorServer(this);
-  //     _uiInspector = UIInspector(this);
-  //     elementManager.debugDOMTreeChanged = uiInspector.onDOMTreeChanged;
-  //   }
-  // }
 }
 
 // An controller designed to control kraken's functional modules.
@@ -438,7 +420,7 @@ class KrakenController {
   // Error handler when got javascript error when evaluate javascript codes.
   JSErrorHandler onJSError;
 
-  KrakenDevToolsInterface devToolsInterface;
+  KrakenDevToolsInterface devTools;
 
   KrakenMethodChannel _methodChannel;
 
@@ -476,7 +458,7 @@ class KrakenController {
     this.onLoadError,
     this.onJSError,
     this.debugEnableInspector,
-    this.devToolsInterface
+    this.devTools
   })  : _name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
@@ -510,8 +492,8 @@ class KrakenController {
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
 
-    if (devToolsInterface != null) {
-      devToolsInterface.init(this);
+    if (devTools != null) {
+      devTools.init(this);
     }
   }
 
@@ -593,8 +575,8 @@ class KrakenController {
     await loadBundle();
     await evalBundle();
 
-    if (devToolsInterface != null) {
-      devToolsInterface.reload(this);
+    if (devTools != null) {
+      devTools.reload(this);
     }
   }
 
@@ -611,8 +593,8 @@ class KrakenController {
     _controllerMap.remove(_view.contextId);
     _nameIdMap.remove(name);
 
-    if (devToolsInterface != null) {
-      devToolsInterface.dispose(this);
+    if (devTools != null) {
+      devTools.dispose(this);
     }
   }
 
