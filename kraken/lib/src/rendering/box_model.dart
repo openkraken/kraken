@@ -615,30 +615,34 @@ class RenderBoxModel extends RenderBox with
         if (renderStyle.width != null) {
           cropPaddingBorder(renderBoxModel);
         } else {
-          while (true) {
-            if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
-              cropMargin(renderBoxModel);
-              cropPaddingBorder(renderBoxModel);
-              renderBoxModel = renderBoxModel.parent;
-            } else {
-              break;
-            }
-
-            CSSDisplay display = renderBoxModel.renderStyle.transformedDisplay;
-
-            RenderStyle renderStyle = renderBoxModel.renderStyle;
-            // Set width of element according to parent display
-            if (display != CSSDisplay.inline) {
-              // Skip to find upper parent
-              if (renderStyle.width != null) {
-                // Use style width
-                width = renderStyle.width;
+          // @TODO: flexbox stretch alignment will stretch replaced element in the cross axis
+          // Block level element will spread to its parent's width except for replaced element
+          if (renderBoxModel is! RenderIntrinsic) {
+            while (true) {
+              if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
+                cropMargin(renderBoxModel);
                 cropPaddingBorder(renderBoxModel);
+                renderBoxModel = renderBoxModel.parent;
+              } else {
                 break;
-              } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex || display == CSSDisplay.sliver) {
-                // Collapse width to children
-                width = null;
-                break;
+              }
+
+              CSSDisplay display = renderBoxModel.renderStyle.transformedDisplay;
+
+              RenderStyle renderStyle = renderBoxModel.renderStyle;
+              // Set width of element according to parent display
+              if (display != CSSDisplay.inline) {
+                // Skip to find upper parent
+                if (renderStyle.width != null) {
+                  // Use style width
+                  width = renderStyle.width;
+                  cropPaddingBorder(renderBoxModel);
+                  break;
+                } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex || display == CSSDisplay.sliver) {
+                  // Collapse width to children
+                  width = null;
+                  break;
+                }
               }
             }
           }
@@ -659,7 +663,6 @@ class RenderBoxModel extends RenderBox with
       default:
         break;
     }
-
     // Get height by intrinsic ratio for replaced elemnent if height is not defined
     if (width == null && intrinsicRatio != null) {
       width = originalRenderBoxModel.renderStyle.getWidthByIntrinsicRatio();
