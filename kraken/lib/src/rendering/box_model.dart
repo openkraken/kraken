@@ -665,7 +665,7 @@ class RenderBoxModel extends RenderBox with
     }
     // Get height by intrinsic ratio for replaced elemnent if height is not defined
     if (width == null && intrinsicRatio != null) {
-      width = originalRenderBoxModel.renderStyle.getWidthByIntrinsicRatio();
+      width = originalRenderBoxModel.renderStyle.getWidthByIntrinsicRatio() + cropWidth;
     }
 
     if (minWidth != null) {
@@ -745,7 +745,7 @@ class RenderBoxModel extends RenderBox with
 
     // Get height by intrinsic ratio for replaced elemnent if height is not defined
     if (height == null && intrinsicRatio != null) {
-      height = originalRenderBoxModel.renderStyle.getHeightByIntrinsicRatio();
+      height = originalRenderBoxModel.renderStyle.getHeightByIntrinsicRatio() + cropHeight;
     }
 
     if (minHeight != null) {
