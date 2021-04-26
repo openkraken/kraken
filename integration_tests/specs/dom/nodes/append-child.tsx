@@ -178,4 +178,11 @@ describe('Append child', () => {
 
     expect(container.appendChild(child)).toEqual(child);
   });
+
+  it('should work with elements created by new operator', () => {
+    let img = new Image();
+    let container = document.createElement('div');
+    expect(img.ownerDocument).toBe(document);
+    container.appendChild(img);
+  });
 });

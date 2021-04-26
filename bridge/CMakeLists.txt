@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.2.0)
+cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
 project(KrakenBridge)
 
-set(CMAKE_CXX_FLAGS "-std=c++17 -stdlib=libc++ -flto")
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_FLAGS -flto)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
