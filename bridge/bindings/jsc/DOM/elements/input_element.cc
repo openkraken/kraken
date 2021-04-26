@@ -55,8 +55,15 @@ JSValueRef JSInputElement::blur(JSContextRef ctx, JSObjectRef function, JSObject
   return nullptr;
 }
 
-JSInputElement::InputElementInstance::InputElementInstance(JSInputElement *jsElement)
-  : ElementInstance(jsElement, "input"), nativeInputElement(new NativeInputElement(nativeElement)) {}
+JSInputElement::InputElementInstance::InputElementInstance(JSInputElement *jsAnchorElement)
+  : ElementInstance(jsAnchorElement, "input", false), nativeInputElement(new NativeInputElement(nativeElement)) {
+  std::string tagName = "input";
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
+
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeInputElement);
+}
 
 JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getInputElementPropertyMap();

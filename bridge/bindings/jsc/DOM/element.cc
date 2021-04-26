@@ -151,13 +151,21 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
 
   JSStringRef tagNameStrRef = JSValueToStringCopy(ctx, arguments[0], exception);
   std::string tagName = JSStringToStdString(tagNameStrRef);
-  auto instance = new ElementInstance(this, tagName.c_str());
+  auto instance = new ElementInstance(this, tagName.c_str(), true);
   return instance->object;
 }
 
-ElementInstance::ElementInstance(JSElement *element, const char *tagName)
+ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool sendUICommand)
   : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)) {
   m_tagName.setString(JSStringCreateWithUTF8CString(tagName));
+
+  if (sendUICommand) {
+    std::string t = std::string(tagName);
+    NativeString args_01{};
+    buildUICommandArgs(t, args_01);
+    ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
+        ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
+  }
 }
 
 ElementInstance::ElementInstance(JSElement *element, double targetId)
@@ -665,14 +673,8 @@ ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string
     elementInstance = elementCreatorMap[name](context);
   } else {
     // Fallback to default Element class
-    elementInstance = new ElementInstance(JSElement::instance(context), name.c_str());
+    elementInstance = new ElementInstance(JSElement::instance(context), name.c_str(), true);
   }
-  // Send createElement command to dart
-  NativeString args_01{};
-  buildUICommandArgs(name, args_01);
-  ::foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(elementInstance->eventTargetId, UICommand::createElement, args_01,
-                      elementInstance->nativeElement);
 
   return elementInstance;
 }

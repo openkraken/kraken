@@ -23,8 +23,16 @@ JSObjectRef JSCanvasElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
   return instance->object;
 }
 
-JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *jsElement)
-  : ElementInstance(jsElement, "canvas"), nativeCanvasElement(new NativeCanvasElement(nativeElement)) {}
+JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *jsCanvasElement)
+  : ElementInstance(jsCanvasElement, "canvas", false), nativeCanvasElement(new NativeCanvasElement(nativeElement)) {
+
+  std::string tagName = "canvas";
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
+
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeCanvasElement);
+}
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
   ::foundation::UICommandCallbackQueue::instance()->registerCallback(

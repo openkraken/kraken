@@ -852,7 +852,7 @@ private:
 class KRAKEN_EXPORT ElementInstance : public NodeInstance {
 public:
   ElementInstance() = delete;
-  explicit ElementInstance(JSElement *element, const char *tagName);
+  explicit ElementInstance(JSElement *element, const char *tagName, bool sendUICommand);
   explicit ElementInstance(JSElement *element, double targetId);
   ~ElementInstance();
 

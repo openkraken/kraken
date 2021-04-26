@@ -27,8 +27,15 @@ JSObjectRef JSImageElement::instanceConstructor(JSContextRef ctx, JSObjectRef co
   return instance->object;
 }
 
-JSImageElement::ImageElementInstance::ImageElementInstance(JSImageElement *jsElement)
-  : ElementInstance(jsElement, "img"), nativeImageElement(new NativeImageElement(nativeElement)) {}
+JSImageElement::ImageElementInstance::ImageElementInstance(JSImageElement *jsAnchorElement)
+  : ElementInstance(jsAnchorElement, "img", false), nativeImageElement(new NativeImageElement(nativeElement)) {
+  std::string tagName = "img";
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
+
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
+    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeImageElement);
+}
 
 JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getImageElementPropertyMap();

@@ -24,7 +24,14 @@ JSObjectRef JSScriptElement::instanceConstructor(JSContextRef ctx, JSObjectRef c
 }
 
 JSScriptElement::ScriptElementInstance::ScriptElementInstance(JSScriptElement *jsElement)
-  : ElementInstance(jsElement, "script"), nativeScriptElement(new NativeScriptElement(nativeElement)) {}
+  : ElementInstance(jsElement, "script", false) {
+  std::string tagName = "script";
+  NativeString args_01{};
+  buildUICommandArgs(tagName, args_01);
+
+  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
+      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
+}
 
 JSValueRef JSScriptElement::ScriptElementInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto propertyMap = getScriptElementPropertyMap();
@@ -71,9 +78,6 @@ void JSScriptElement::ScriptElementInstance::getPropertyNames(JSPropertyNameAccu
 }
 
 JSScriptElement::ScriptElementInstance::~ScriptElementInstance() {
-  ::foundation::UICommandCallbackQueue::instance()->registerCallback([](void *ptr) {
-    delete reinterpret_cast<NativeScriptElement *>(ptr);
-  }, nativeScriptElement);
   if (_src != nullptr) JSStringRelease(_src);
 }
 

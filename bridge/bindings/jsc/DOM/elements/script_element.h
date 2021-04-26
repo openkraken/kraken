@@ -29,8 +29,6 @@ public:
     JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
     bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
     void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-
-    NativeScriptElement *nativeScriptElement{nullptr};
   private:
     JSStringRef _src{JSStringCreateWithUTF8CString("")};
   };
@@ -39,13 +37,6 @@ protected:
   ~JSScriptElement();
   static std::unordered_map<JSContext *, JSScriptElement *> instanceMap;
   explicit JSScriptElement(JSContext *context);
-};
-
-struct NativeScriptElement {
-  NativeScriptElement() = delete;
-  explicit NativeScriptElement(NativeElement *nativeElement) : nativeElement(nativeElement) {};
-
-  NativeElement *nativeElement;
 };
 
 }

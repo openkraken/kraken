@@ -56,10 +56,10 @@ struct NativeImageElement {
 
   NativeElement *nativeElement;
 
-  GetImageWidth getImageWidth;
-  GetImageHeight getImageHeight;
-  GetImageNaturalWidth getImageNaturalWidth;
-  GetImageNaturalHeight getImageNaturalHeight;
+  GetImageWidth getImageWidth{nullptr};
+  GetImageHeight getImageHeight{nullptr};
+  GetImageNaturalWidth getImageNaturalWidth{nullptr};
+  GetImageNaturalHeight getImageNaturalHeight{nullptr};
 };
 
 } // namespace kraken::binding::jsc
