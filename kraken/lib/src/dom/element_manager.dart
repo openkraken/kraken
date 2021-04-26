@@ -88,7 +88,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   ElementManager({this.contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
     if (kProfileMode) {
       PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
-      PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_INIT_START);
+      PerformanceTiming.instance(contextId).mark(PERF_ROOT_ELEMENT_INIT_START);
     }
 
     documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId], this);
@@ -104,6 +104,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       _root = rootRenderBoxModel;
     }
 
+    if (kProfileMode) {
+      PerformanceTiming.instance(contextId).mark(PERF_ROOT_ELEMENT_INIT_END);
+    }
+
     _setupObserver();
 
     Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this);
@@ -111,10 +115,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, documentElement);
     setEventTarget(document);
-
-    if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_INIT_END);
-    }
 
     if (!inited) {
       // Inline text

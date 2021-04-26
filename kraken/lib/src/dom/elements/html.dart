@@ -4,9 +4,11 @@
  */
 
 import 'dart:ffi';
+import 'package:flutter/foundation.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/kraken.dart';
 
 const String HTML = 'HTML';
 
@@ -25,6 +27,10 @@ class HTMLElement extends Element {
         DISPLAY: BLOCK,
       }
   ) {
+    if (kProfileMode) {
+      PerformanceTiming.instance(elementManager.contextId).mark(PERF_ROOT_ELEMENT_PROPERTY_INIT);
+    }
+
     // Attach body
     willAttachRenderer();
     style.applyTargetProperties();
