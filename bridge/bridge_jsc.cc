@@ -50,6 +50,7 @@ namespace kraken {
 using namespace binding::jsc;
 
 std::unordered_map<std::string, NativeString> JSBridge::pluginSourceCode {};
+ConsoleMessageHandler JSBridge::consoleMessageHandler {nullptr};
 
 /**
  * JSRuntime

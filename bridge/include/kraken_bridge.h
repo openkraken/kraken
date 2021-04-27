@@ -79,6 +79,7 @@ struct KRAKEN_EXPORT UICommandItem {
 };
 
 typedef void (*Task)(void *);
+typedef void (*ConsoleMessageHandler)(void* ctx, const std::string &message, int logLevel);
 
 KRAKEN_EXPORT_C
 void initJSContextPool(int poolSize);
@@ -121,5 +122,8 @@ KRAKEN_EXPORT_C
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data);
 KRAKEN_EXPORT_C
 void registerPluginSource(NativeString* code, const char *pluginName);
+
+KRAKEN_EXPORT
+void setConsoleMessageHandler(ConsoleMessageHandler handler);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H
