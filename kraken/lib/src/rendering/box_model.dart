@@ -589,7 +589,8 @@ class RenderBoxModel extends RenderBox with
 
   /// Calculate renderBoxModel constraints
   BoxConstraints getConstraints() {
-    // Scrolling content box should allow children to overflow
+    // Inner scrolling content box of overflow element inherits constraints from parent
+    // but has indefinite max constraints to allow children overflow
     if (isScrollingContentBox) {
       BoxConstraints parentConstraints = (parent as RenderBoxModel).constraints;
       BoxConstraints constraints = BoxConstraints(
