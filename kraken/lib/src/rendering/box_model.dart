@@ -589,6 +589,18 @@ class RenderBoxModel extends RenderBox with
 
   /// Calculate renderBoxModel constraints
   BoxConstraints getConstraints() {
+    // Scrolling content box should allow children to overflow
+    if (isScrollingContentBox) {
+      BoxConstraints parentConstraints = (parent as RenderBoxModel).constraints;
+      BoxConstraints constraints = BoxConstraints(
+        minWidth: parentConstraints.minWidth,
+        maxWidth: double.infinity,
+        minHeight: parentConstraints.minHeight,
+        maxHeight: double.infinity,
+      );
+      return constraints;
+    }
+
     CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
     bool isDisplayNone = transformedDisplay == CSSDisplay.none;
@@ -676,16 +688,6 @@ class RenderBoxModel extends RenderBox with
       minHeight: minConstraintHeight,
       maxHeight: maxConstraintHeight,
     );
-
-    // Scrolling content box should allow children to overflow from its size
-    if (isScrollingContentBox) {
-      constraints = BoxConstraints(
-        minWidth: maxConstraintWidth,
-        maxWidth: double.infinity,
-        minHeight: maxConstraintHeight,
-        maxHeight: double.infinity,
-      );
-    }
 
 //    print('get constraints----------- $this ${isScrollingContentBox} $constraints');
 
