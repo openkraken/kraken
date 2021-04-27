@@ -659,7 +659,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
         bool percentageToOwnFound = child.renderStyle.isPercentageToOwnExist();
-        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
+        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(this, logicalContentWidth, logicalContentHeight);
 
         /// When percentage exists in sizing styles(width/height) and styles relies on its own size,
         /// it needs to relayout twice cause the latter relies on the size calculated in the first relayout
@@ -860,7 +860,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     /// Make sure it will not trigger relayout again when in relayout stage
     if (!needsRelayout) {
-      bool percentageOfSizingFound = isChildrenPercentageOfSizingExist(placeholderChild);
+      bool percentageOfSizingFound = _isChildrenPercentageOfSizingExist(placeholderChild);
       bool percentageToOwnFound = _isChildrenPercentageToOwnExist(placeholderChild);
       bool percentageToContainingBlockFound = _resolveChildrenPercentageToContainingBlock(placeholderChild);
 
@@ -891,7 +891,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(this, logicalContentWidth, logicalContentHeight);
         if (percentageExist) {
           percentageFound = true;
         }
@@ -922,7 +922,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   /// Check whether percentage sizing styles of child exists
-  bool isChildrenPercentageOfSizingExist(RenderPositionHolder placeholderChild) {
+  bool _isChildrenPercentageOfSizingExist(RenderPositionHolder placeholderChild) {
     bool percentageFound = false;
     RenderBox child = firstChild;
     while (child != null) {
@@ -1039,7 +1039,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           maxHeight: realDisplayedBoxHeight,
         );
       } else if (child is RenderBoxModel) {
-        innerConstraints = child.renderStyle.getConstraints();
+        innerConstraints = child.getConstraints();
       } else if (child is RenderTextBox) {
         innerConstraints = child.getConstraints();
       } else {

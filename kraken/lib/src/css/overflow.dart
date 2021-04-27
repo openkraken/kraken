@@ -160,6 +160,9 @@ mixin CSSOverflowMixin on ElementBase {
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
     scrollingContentLayoutBox = element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
+    // Copy renderStyle from original renderBoxModel
+    scrollingContentLayoutBox.renderStyle = element.renderBoxModel.renderStyle;
+
     scrollingContentLayoutBox.isScrollingContentBox = true;
     scrollingElement.renderBoxModel = scrollingContentLayoutBox;
     element.scrollingElement = scrollingElement;

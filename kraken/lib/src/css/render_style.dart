@@ -7,14 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-// Constraints of element whose display style is none
-final _displayNoneConstraints = BoxConstraints(
-  minWidth: 0,
-  maxWidth: 0,
-  minHeight: 0,
-  maxHeight: 0
-);
-
 class RenderStyle
   with
     RenderStyleBase,
@@ -41,12 +33,11 @@ class RenderStyle
 
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
-  bool resolvePercentageToContainingBlock(double parentLogicalContentWidth, double parentLogicalContentHeight) {
+  bool resolvePercentageToContainingBlock(RenderBoxModel parent, double parentLogicalContentWidth, double parentLogicalContentHeight) {
     if (!renderBoxModel.hasSize) {
       return false;
     }
 
-    RenderBoxModel parent = renderBoxModel.parent;
     RenderStyle parentRenderStyle = parent.renderStyle;
     bool isPercentageExist = false;
     Size parentSize = parent.size;
@@ -496,92 +487,6 @@ class RenderStyle
       }
     }
     return isPercentageExist;
-  }
-
-  /// Calculate renderBoxModel constraints
-  BoxConstraints getConstraints() {
-    bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
-    bool isDisplayNone = transformedDisplay == CSSDisplay.none;
-
-    if (isDisplayNone) {
-      return _displayNoneConstraints;
-    }
-
-    double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
-    double verticalBorderLength = borderEdge != null ? borderEdge.vertical : 0;
-    double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
-    double verticalPaddingLength = padding != null ? padding.vertical : 0;
-
-    // Content size calculated from style
-    double logicalContentWidth = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
-    double logicalContentHeight = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
-
-    // Box size calculated from style
-    double logicalWidth = logicalContentWidth != null ?
-      logicalContentWidth + horizontalPaddingLength + horizontalBorderLength : null;
-    double logicalHeight = logicalContentHeight != null ?
-      logicalContentHeight + verticalPaddingLength + verticalBorderLength : null;
-
-    // Constraints
-    double minConstraintWidth = logicalWidth ?? 0;
-    double maxConstraintWidth = logicalWidth ?? double.infinity;
-    double minConstraintHeight = logicalHeight ?? 0;
-    double maxConstraintHeight = logicalHeight ?? double.infinity;
-
-    if (renderBoxModel.parent is RenderFlexLayout) {
-      RenderBoxModel parentRenderBoxModel = renderBoxModel.parent;
-      // In flex layout, flex basis takes priority over width/height if set.
-      // Flex-basis cannot be smaller than its content size which happens can not be known
-      // in constraints apply stage, so flex-basis acts as min-width in constraints apply stage.
-      if (flexBasis != null) {
-        if (CSSFlex.isHorizontalFlexDirection(parentRenderBoxModel.renderStyle.flexDirection)) {
-          minConstraintWidth = flexBasis;
-          // Clamp flex-basis by minWidth and maxWidth
-          if (minWidth != null && flexBasis < minWidth) {
-            maxConstraintWidth = minWidth;
-          }
-          if (maxWidth != null && flexBasis > maxWidth) {
-            minConstraintWidth = maxWidth;
-          }
-        } else {
-          minConstraintHeight = flexBasis;
-          // Clamp flex-basis by minHeight and maxHeight
-          if (minHeight != null && flexBasis < minHeight) {
-            maxConstraintHeight = minHeight;
-          }
-          if (maxHeight != null && flexBasis > maxHeight) {
-            minConstraintHeight = maxHeight;
-          }
-        }
-      }
-    }
-
-    // min/max size does not apply for inline element
-    if (!isDisplayInline) {
-      if (minWidth != null) {
-        minConstraintWidth = minConstraintWidth < minWidth ? minWidth : minConstraintWidth;
-      }
-      if (maxWidth != null) {
-        maxConstraintWidth = maxConstraintWidth > maxWidth ? maxWidth : maxConstraintWidth;
-      }
-      if (minHeight != null) {
-        minConstraintHeight = minConstraintHeight < minHeight ? minHeight : minConstraintHeight;
-      }
-      if (maxHeight != null) {
-        maxConstraintHeight = maxConstraintHeight > maxHeight ? maxHeight : maxConstraintHeight;
-      }
-    }
-
-    BoxConstraints constraints = BoxConstraints(
-      minWidth: minConstraintWidth,
-      maxWidth: maxConstraintWidth,
-      minHeight: minConstraintHeight,
-      maxHeight: maxConstraintHeight,
-    );
-
-//    print('get constraints----------- $renderBoxModel $constraints $logicalWidth $logicalHeight');
-
-    return constraints;
   }
 
   /// Get height of replaced element by intrinsic ratio if height is not defined

@@ -159,7 +159,7 @@ class CSSPositionedLayout {
     RenderBoxModel child,
     {bool needsRelayout = false}
   ) {
-    BoxConstraints childConstraints = child.renderStyle.getConstraints();
+    BoxConstraints childConstraints = child.getConstraints();
 
     // Scrolling element has two repaint boundary box, the inner box has constraints of inifinity
     // so it needs to find the upper box for querying content constraints

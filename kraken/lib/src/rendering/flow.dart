@@ -557,7 +557,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
         bool percentageToOwnFound = child.renderStyle.isPercentageToOwnExist();
-        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
+        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(this, logicalContentWidth, logicalContentHeight);
 
         /// When percentage exists in sizing styles(width/height) and styles relies on its own size,
         /// it needs to relayout twice cause the latter relies on the size calculated in the first relayout
@@ -654,7 +654,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       BoxConstraints childConstraints;
       if (child is RenderBoxModel) {
-        childConstraints = child.renderStyle.getConstraints();
+        childConstraints = child.getConstraints();
       } else if (child is RenderTextBox) {
         childConstraints = child.getConstraints();
       } else {
@@ -1092,7 +1092,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(this, logicalContentWidth, logicalContentHeight);
         if (percentageExist) {
           percentageFound = true;
         }
