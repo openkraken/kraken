@@ -155,11 +155,11 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
   return instance->object;
 }
 
-ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool sendUICommand)
+ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool shouldSendUICommand)
   : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)) {
   m_tagName.setString(JSStringCreateWithUTF8CString(tagName));
 
-  if (sendUICommand) {
+  if (shouldSendUICommand) {
     std::string t = std::string(tagName);
     NativeString args_01{};
     buildUICommandArgs(t, args_01);
