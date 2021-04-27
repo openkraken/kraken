@@ -638,9 +638,12 @@ class RenderFlowLayout extends RenderLayoutBox {
     WhiteSpace whiteSpace = renderStyle.whiteSpace;
 
     while (child != null) {
+
       final RenderLayoutParentData childParentData = child.parentData;
 
-      if (childParentData.isPositioned) {
+      if (childParentData.isPositioned ||
+          // Skip child that display is none
+          (child is RenderBoxModel && child.renderStyle.transformedDisplay == CSSDisplay.none)) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -893,7 +896,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       while (child != null) {
         final RenderLayoutParentData childParentData = child.parentData;
 
-        if (childParentData.isPositioned) {
+        if (childParentData.isPositioned ||
+            // Skip child that display is none
+            (child is RenderBoxModel && child.renderStyle.transformedDisplay == CSSDisplay.none)) {
           child = childParentData.nextSibling;
           continue;
         }
@@ -1067,7 +1072,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           child.computeDistanceToFirstLineBaseline();
       }
       if (childBaseLineDistance != null) {
-        // Baseline of relative positioned element equals its originial position
+        // Baseline of relative positioned element equals its original position
         // so it needs to subtract its vertical offset
         Offset relativeOffset;
         double childOffsetY = childParentData.offset.dy - childMarginTop;

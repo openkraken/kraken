@@ -25,7 +25,7 @@ fdescribe('Position fixed', () => {
     await snapshot(container1);
   });
 
-  it('works with scroller container', async (done) => {
+  it('works with scroller container', async () => {
     let container = createElement('div',
       {
         style: {
@@ -58,18 +58,14 @@ fdescribe('Position fixed', () => {
     );
 
     BODY.appendChild(container);
-    await snapshot();
+    await snapshot(0.1);
 
-    requestAnimationFrame( () => {
-      container.scroll(0, 200);
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 100);
-    });
+    container.scroll(0, 200);
+    await snapshot(0.1);
+
   });
 
-  it('works with window scroll', async (done) => {
+  it('works with window scroll', async () => {
     let container = createElement('div',
       {
         style: {
@@ -100,18 +96,14 @@ fdescribe('Position fixed', () => {
     );
 
     BODY.appendChild(container);
-    await snapshot();
+    await snapshot(0.1);
 
-    requestAnimationFrame( () => {
-      window.scroll(0, 200);
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 100);
-    });
+    window.scroll(0, 200);
+    await snapshot(0.1);
+
   });
 
-  it('works with single frame image in window scroll', async (done) => {
+  it('works with single frame image in window scroll', async () => {
     let container = createElement('div',
       {
         style: {
@@ -144,15 +136,10 @@ fdescribe('Position fixed', () => {
     );
 
     BODY.appendChild(container);
-    await snapshot();
+    await snapshot(0.5);
 
-    requestAnimationFrame(async () => {
-      window.scroll(100, 200);
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 100);
-    });
+    window.scroll(100, 200);
+    await snapshot(0.1);
   });
 
   it('hitTest with position fixed elements', async () => {
@@ -199,6 +186,7 @@ fdescribe('Position fixed', () => {
 
     await simulateClick(10, 10);
 
+    await sleep(0.1);
     expect(clickCount).toBe(2);
 
   });
@@ -251,7 +239,7 @@ fdescribe('Position fixed', () => {
     await snapshot();
   });
 
-  it('change from fixed to static and transform exists', async (done) => {
+  it('change from fixed to static and transform exists', async () => {
     const cont = createElement(
       'div',
       {
@@ -270,17 +258,13 @@ fdescribe('Position fixed', () => {
       ]
     );
     append(BODY, cont);
+    await snapshot(0.1);
 
-    await snapshot();
-
-    requestAnimationFrame(async() => {
-      cont.style.position = 'static';
-      await snapshot(0.1);
-      done();
-    });
+    cont.style.position = 'static';
+    await snapshot(0.1);
   });
 
-  it('change from fixed to static and no transform exists', async (done) => {
+  it('change from fixed to static and no transform exists', async () => {
     const cont = createElement(
       'div',
       {
@@ -298,13 +282,9 @@ fdescribe('Position fixed', () => {
       ]
     );
     append(BODY, cont);
+    await snapshot(0.1);
 
-    await snapshot();
-
-    requestAnimationFrame(async() => {
-      cont.style.position = 'static';
-      await snapshot(0.1);
-      done();
-    });
+    cont.style.position = 'static';
+    await snapshot(0.1);
   });
 });
