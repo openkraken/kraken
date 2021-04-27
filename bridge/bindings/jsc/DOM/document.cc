@@ -248,7 +248,9 @@ DocumentInstance::DocumentInstance(JSDocument *document)
   : NodeInstance(document, NodeType::DOCUMENT_NODE, DOCUMENT_TARGET_ID),
     nativeDocument(new NativeDocument(nativeNode)) {
   m_document = this;
-  documentElement = new ElementInstance(JSElement::instance(document->context), HTML_TARGET_ID);
+
+  JSStringRef tagName = JSStringCreateWithUTF8CString("HTML");
+  documentElement = new ElementInstance(JSElement::instance(document->context), tagName, HTML_TARGET_ID);
   documentElement->m_document = this;
   JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
   JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), 

@@ -852,8 +852,8 @@ private:
 class KRAKEN_EXPORT ElementInstance : public NodeInstance {
 public:
   ElementInstance() = delete;
-  explicit ElementInstance(JSElement *element, const char *tagName, bool shouldSendUICommand);
-  explicit ElementInstance(JSElement *element, double targetId);
+  explicit ElementInstance(JSElement *element, const char *tagName, bool shouldAddUICommand);
+  explicit ElementInstance(JSElement *element, JSStringRef tagName, double targetId);
   ~ElementInstance();
 
   JSValueRef getStringValueProperty(std::string &name);

@@ -155,11 +155,11 @@ JSObjectRef JSElement::instanceConstructor(JSContextRef ctx, JSObjectRef constru
   return instance->object;
 }
 
-ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool shouldSendUICommand)
+ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool shouldAddUICommand)
   : NodeInstance(element, NodeType::ELEMENT_NODE), nativeElement(new NativeElement(nativeNode)) {
   m_tagName.setString(JSStringCreateWithUTF8CString(tagName));
 
-  if (shouldSendUICommand) {
+  if (shouldAddUICommand) {
     std::string t = std::string(tagName);
     NativeString args_01{};
     buildUICommandArgs(t, args_01);
@@ -167,10 +167,10 @@ ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool s
         ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
   }
 }
-
-ElementInstance::ElementInstance(JSElement *element, double targetId)
+// Only for init HTML element
+ElementInstance::ElementInstance(JSElement *element, JSStringRef tagNameStringRef, double targetId)
   : NodeInstance(element, NodeType::ELEMENT_NODE, targetId), nativeElement(new NativeElement(nativeNode)) {
-
+  m_tagName.setString(tagNameStringRef);
   // Do not needs to send create element for HTML element.
   if (targetId == HTML_TARGET_ID) {
     assert_m(getDartMethod()->initHTML != nullptr, "Failed to execute initHTML(): dart method is nullptr.");

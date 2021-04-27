@@ -71,7 +71,7 @@ class EventTarget {
   @mustCallSuper
   void dispose() {
     elementManager.removeTarget(this);
-    // @remove reference to elementManager.
+    // Remove elementManager reference.
     elementManager = null;
     eventHandlers.clear();
   }

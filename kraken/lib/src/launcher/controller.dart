@@ -344,10 +344,6 @@ class KrakenViewController {
     return _elementManager.getEventTargetByTargetId<EventTarget>(id);
   }
 
-  void removeEventTargetById(int id) {
-    _elementManager.removeTarget(getEventTargetById(id));
-  }
-
   void handleNavigationAction(String sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
     KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
 

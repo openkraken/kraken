@@ -218,8 +218,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void removeTarget(EventTarget target) {
     assert(target.targetId != null);
-    assert(_eventTargets.containsKey(target.targetId));
-    _eventTargets.remove(target.targetId);
+    // FIXME: when the shadow scrollingElement dispose that has not targetId
+    if (_eventTargets.containsKey(target.targetId)) {
+      _eventTargets.remove(target.targetId);
+    }
   }
 
   void setDetachCallback(VoidCallback callback) {

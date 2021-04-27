@@ -1,4 +1,4 @@
-describe('Position fixed', () => {
+fdescribe('Position fixed', () => {
   it('001', async () => {
     const container1 = document.createElement('div');
     setElementStyle(container1, {
@@ -69,7 +69,7 @@ describe('Position fixed', () => {
     });
   });
 
-  it('works with body scroll', async (done) => {
+  it('works with window scroll', async (done) => {
     let container = createElement('div',
       {
         style: {
@@ -103,7 +103,7 @@ describe('Position fixed', () => {
     await snapshot();
 
     requestAnimationFrame( () => {
-      BODY.scroll(0, 200);
+      window.scroll(0, 200);
       setTimeout(async () => {
         await snapshot();
         done();
@@ -111,7 +111,7 @@ describe('Position fixed', () => {
     });
   });
 
-  it('works with single frame image in body scroll', async (done) => {
+  it('works with single frame image in window scroll', async (done) => {
     let container = createElement('div',
       {
         style: {
@@ -146,8 +146,8 @@ describe('Position fixed', () => {
     BODY.appendChild(container);
     await snapshot();
 
-    requestAnimationFrame( () => {
-      BODY.scroll(100, 200);
+    requestAnimationFrame(async () => {
+      window.scroll(100, 200);
       setTimeout(async () => {
         await snapshot();
         done();
@@ -200,6 +200,7 @@ describe('Position fixed', () => {
     await simulateClick(10, 10);
 
     expect(clickCount).toBe(2);
+
   });
 
   it('works with left, right and no width', async () => {
