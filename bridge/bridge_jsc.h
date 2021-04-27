@@ -19,6 +19,7 @@ namespace kraken {
 
 class JSBridge final {
 public:
+  static ConsoleMessageHandler consoleMessageHandler;
   JSBridge() = delete;
   JSBridge(int32_t jsContext, const JSExceptionHandler &handler);
   ~JSBridge();
@@ -51,20 +52,6 @@ private:
   Task m_disposeCallback{nullptr};
   void *m_disposePrivateData{nullptr};
 };
-
-#if ENABLE_DEBUGGER
-class BridgeProtocolHandler : public debugger::ProtocolHandler {
-public:
-  BridgeProtocolHandler(JSBridge *bridge): m_bridge(bridge) {};
-  ~BridgeProtocolHandler(){
-
-  };
-  void handlePageReload() override;
-
-private:
-  JSBridge *m_bridge{nullptr};
-};
-#endif
 
 } // namespace kraken
 

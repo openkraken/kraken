@@ -6,7 +6,7 @@
 #include <algorithm>
 #include "colors.h"
 #include "logging.h"
-#include "foundation/inspector_task_queue.h"
+#include "bridge_jsc.h"
 
 #if defined(IS_ANDROID)
 #include <android/log.h>
@@ -101,54 +101,44 @@ void pipeMessageToInspector(JSGlobalContextRef ctx, const std::string message, c
 };
 #endif
 
+enum class MessageLevel : uint8_t {
+  Log = 1,
+  Warning = 2,
+  Error = 3,
+  Debug = 4,
+  Info = 5,
+};
+
 void printLog(int32_t contextId, std::stringstream &stream, std::string level, JSGlobalContextRef ctx) {
-#ifdef ENABLE_DEBUGGER
-    JSC::MessageLevel _log_level = JSC::MessageLevel::Info;
-#endif
+    MessageLevel _log_level = MessageLevel::Info;
     switch (level[0]) {
       case 'l':
         KRAKEN_LOG(VERBOSE) << stream.str();
-#ifdef ENABLE_DEBUGGER
-        _log_level = JSC::MessageLevel::Log;
-#endif
+        _log_level = MessageLevel::Log;
         break;
       case 'i':
         KRAKEN_LOG(INFO) << stream.str();
-#ifdef ENABLE_DEBUGGER
-        _log_level = JSC::MessageLevel::Info;
-#endif
+        _log_level = MessageLevel::Info;
         break;
       case 'd':
         KRAKEN_LOG(DEBUG_) << stream.str();
-#ifdef ENABLE_DEBUGGER
-        _log_level = JSC::MessageLevel::Debug;
-#endif
+        _log_level = MessageLevel::Debug;
         break;
       case 'w':
         KRAKEN_LOG(WARN) << stream.str();
-#ifdef ENABLE_DEBUGGER
-        _log_level = JSC::MessageLevel::Warning;
-#endif
+        _log_level = MessageLevel::Warning;
         break;
       case 'e':
         KRAKEN_LOG(ERROR) << stream.str();
-#ifdef ENABLE_DEBUGGER
-        _log_level = JSC::MessageLevel::Error;
-#endif
+        _log_level = MessageLevel::Error;
         break;
       default:
         KRAKEN_LOG(VERBOSE) << stream.str();
     }
 
-#ifdef ENABLE_DEBUGGER
-  struct TaskContext {
-    JSGlobalContextRef ctx;
-    std::string message;
-    JSC::MessageLevel logLevel;
-  };
-
-  pipeMessageToInspector(ctx, stream.str(), _log_level);
-#endif
+    if (kraken::JSBridge::consoleMessageHandler != nullptr) {
+      kraken::JSBridge::consoleMessageHandler(ctx, stream.str(), static_cast<int>(_log_level));
+    }
   }
 
 } // namespace foundation

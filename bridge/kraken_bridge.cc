@@ -192,6 +192,10 @@ KrakenInfo *getKrakenInfo() {
   return krakenInfo;
 }
 
+void setConsoleMessageHandler(ConsoleMessageHandler handler) {
+  kraken::JSBridge::consoleMessageHandler = handler;
+}
+
 void dispatchUITask(int32_t contextId, void *context, void *callback) {
   assert(std::this_thread::get_id() == getUIThreadId());
   reinterpret_cast<void(*)(void*)>(callback)(context);
