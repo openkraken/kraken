@@ -48,7 +48,7 @@ void setTargetPlatformForDesktop() {
   }
 }
 
-abstract class KrakenDevToolsInterface {
+abstract class DevToolService {
   void init(KrakenController controller);
   void reload(KrakenController controller);
   void dispose(KrakenController controller);
@@ -420,7 +420,7 @@ class KrakenController {
   // Error handler when got javascript error when evaluate javascript codes.
   JSErrorHandler onJSError;
 
-  KrakenDevToolsInterface devTools;
+  DevToolService devTools;
 
   KrakenMethodChannel _methodChannel;
 
