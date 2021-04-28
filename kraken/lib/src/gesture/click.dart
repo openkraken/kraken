@@ -5,6 +5,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
 
 import 'package:flutter/gestures.dart';
 
@@ -46,21 +47,10 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// instead.
   void handleTapUp( PointerDownEvent down, PointerUpEvent up ) {
     if (onClick != null)
-      onClick(
-          MouseEvent(EVENT_CLICK,
-              MouseEventInit(
-                  bubbles: true,
-                  cancelable: true,
-                  clientX: down.position.dx,
-                  clientY: down.position.dy,
-                  offsetX: down.localPosition.dx,
-                  offsetY: down.localPosition.dy,
-              )
-          )
-      );
+      onClick(down);
   }
 
-  GestureCallback onClick;
+  ClickEventListener onClick;
 
   /// A pointer that previously triggered [handleTapDown] will not end up
   /// causing a tap.
@@ -77,18 +67,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// If this recognizer wins the arena, [handleTapUp] is called instead.
   void handleTapCancel( PointerDownEvent down, PointerCancelEvent cancel, String reason ) {
     if (onClick != null)
-      onClick(
-          MouseEvent(EVENT_CANCEL,
-              MouseEventInit(
-                bubbles: true,
-                cancelable: true,
-                clientX: down.position.dx,
-                clientY: down.position.dy,
-                offsetX: down.localPosition.dx,
-                offsetY: down.localPosition.dy,
-              )
-          )
-      );
+      onClick(down);
   }
 
   @override

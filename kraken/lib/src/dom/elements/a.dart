@@ -22,8 +22,8 @@ class AnchorElement extends Element {
     addEvent(EVENT_CLICK);
   }
 
-  void handleClick(Event event) {
-    super.handleClick(event);
+  void dispatchClick(Event event) {
+    super.dispatchClick(event);
     if (_href == null) return;
 
     Uri uri = Uri.parse(_href);
