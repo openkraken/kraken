@@ -104,18 +104,17 @@ bool MouseEventInstance::setProperty(std::string &name, JSValueRef value, JSValu
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 
-    if (property == JSMouseEvent::MouseEventProperty::clientX) {
-      m_clientX.setValue(value);
+    switch (property) {
+      case JSMouseEvent::MouseEventProperty::clientX:
+        m_clientX.setValue(value);
+      case JSMouseEvent::MouseEventProperty::clientY:
+        m_clientY.setValue(value);
+      case JSMouseEvent::MouseEventProperty::offsetX:
+        m_offsetX.setValue(value);
+      case JSMouseEvent::MouseEventProperty::offsetY:
+        m_offsetY.setValue(value);
     }
-    if (property == JSMouseEvent::MouseEventProperty::clientY) {
-      m_clientY.setValue(value);
-    }
-    if (property == JSMouseEvent::MouseEventProperty::offsetX) {
-      m_offsetX.setValue(value);
-    }
-    if (property == JSMouseEvent::MouseEventProperty::offsetY) {
-      m_offsetY.setValue(value);
-    }
+
     return true;
   } else {
     return EventInstance::setProperty(name, value, exception);
