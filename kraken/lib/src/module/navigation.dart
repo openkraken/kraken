@@ -39,8 +39,9 @@ class NavigationModule extends BaseModule {
   @override
   String invoke(String method, dynamic params, callback) {
     if (method == 'goTo') {
-      String url = params[0];
-      String sourceUrl = moduleManager.controller.bundleURL;
+      assert(params is String, 'URL must be string.');
+      String url = params;
+      String sourceUrl = moduleManager.controller.bundlePath ?? moduleManager.controller.bundleURL;
 
       Uri targetUri = Uri.parse(url);
       Uri sourceUri = Uri.parse(sourceUrl);
