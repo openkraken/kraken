@@ -782,7 +782,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       child = childParentData.nextSibling;
     }
 
-
     if (runChildren.length > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
@@ -1209,9 +1208,11 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Calculate the max main size of all runs
     runMetrics.forEach(iterateRunMetrics);
 
-    autoMinSize = runMainSize.reduce((double curr, double next) {
-      return curr > next ? curr : next;
-    });
+    if (runMainSize.isNotEmpty) {
+      autoMinSize = runMainSize.reduce((double curr, double next) {
+        return curr > next ? curr : next;
+      });
+    }
 
     return autoMinSize;
   }

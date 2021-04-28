@@ -7,7 +7,13 @@
  * - create: create element.
  * - snapshot: match snapshot of body's image.
  */
-const BODY = document.body;
+
+// Should by getter because body will reset before each spec
+Object.defineProperty(global, 'BODY', {
+  get() {
+    return document.body;
+  }
+});
 
 function setElementStyle(dom: HTMLElement, object: any) {
   if (object == null) return;
@@ -193,7 +199,6 @@ async function snapshot(target?: any, filename?: String) {
 
 // Compatible to tests that use global variables.
 Object.assign(global, {
-  BODY,
   append,
   setAttributes,
   createElement,

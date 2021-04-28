@@ -18,8 +18,11 @@ class HTMLElement extends Element {
       targetId,
       nativePtr,
       elementManager,
+      repaintSelf: false,
       tagName: HTML,
       defaultStyle: {
+        WIDTH: '${elementManager.viewportWidth}px',
+        HEIGHT: '${elementManager.viewportHeight}px',
         OVERFLOW: AUTO,
         DISPLAY: BLOCK,
       }

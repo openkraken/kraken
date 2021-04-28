@@ -10,9 +10,8 @@ import 'package:kraken/dom.dart';
 
 const String BODY = 'BODY';
 
-// FIXME: make display block and could scrolling
 const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE_BLOCK,
+  DISPLAY: BLOCK,
 };
 
 class BodyElement extends Element {

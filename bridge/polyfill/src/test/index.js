@@ -1,4 +1,4 @@
-const jasmineCore = require('./jasmine.js');
+const jasmineCore = require('./jasmine');
 const ConsoleReporter = require('./console-reporter');
 const jasmine = jasmineCore.core(jasmineCore);
 const env = jasmine.getEnv({ suppressLoadErrors: true });
@@ -48,6 +48,7 @@ global.setInterval = function (fn, timeout) {
   return timer;
 };
 
+// https://jasmine.github.io/api/edge/Reporter.html
 class JasmineTracker {
   onJasmineStarted() { }
   onJasmineDone() { }
@@ -62,8 +63,17 @@ class JasmineTracker {
   }
 
   specStarted(result) {
-    return new Promise((resolve) => {
-      requestAnimationFrame(resolve);
+    return new Promise((resolve, reject) => {
+      try {
+        clearAllTimer();
+        clearAllEventsListeners();
+        resetDocumentElement();
+        kraken.methodChannel.clearMethodCallHandler();
+        resolve();
+      } catch (e) {
+        console.log(e);
+        reject(e);
+      }
     });
   }
   specDone(result) {
@@ -89,12 +99,6 @@ function createPrinter(logger) {
   }
 }
 
-let config = {
-  oneFailurePerSpec: true,
-  failFast: environment.KRAKEN_STOP_ON_FAIL === 'true',
-  random: false
-};
-
 function HtmlSpecFilter(options) {
   var filterString =
     options &&
@@ -113,8 +117,13 @@ var specFilter = new HtmlSpecFilter({
   }
 });
 
-config.specFilter = function (spec) {
-  return specFilter.matches(spec.getFullName());
+let config = {
+  oneFailurePerSpec: true,
+  failFast: environment.KRAKEN_STOP_ON_FAIL === 'true',
+  random: false,
+  specFilter: function (spec) {
+    return specFilter.matches(spec.getFullName());
+  }
 };
 
 env.configure(config);
@@ -163,10 +172,8 @@ global.simulatePointer = function simulatePointer(list) {
 
 global.simulateKeyPress = __kraken_simulate_keypress__;
 
-function clearAllNodes() {
-  while (document.body.firstChild) {
-    document.body.firstChild.remove();
-  }
+function resetDocumentElement() {
+  document.body = document.createElement('body');
 }
 
 function traverseNode(node, handle) {
@@ -188,21 +195,6 @@ function clearAllEventsListeners() {
 }
 
 __kraken_execute_test__((done) => {
-  jasmineTracker.onSpecDone = (result) => {
-    return new Promise((resolve, reject) => {
-      try {
-        clearAllTimer();
-        clearAllEventsListeners();
-        clearAllNodes();
-        kraken.methodChannel.clearMethodCallHandler();
-        resolve();
-      } catch (e) {
-        console.log(e);
-        reject(e);
-      }
-    });
-  };
-
   jasmineTracker.onJasmineDone = (result) => {
     done(result.overallStatus);
   };
