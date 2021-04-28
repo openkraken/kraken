@@ -9,6 +9,7 @@
 
 namespace kraken::binding::jsc {
 
+// https://developer.mozilla.org/zh-CN/docs/Web/API/MouseEvent
 void bindMouseEvent(std::unique_ptr<JSContext> &context) {
   auto MouseEvent = JSMouseEvent::instance(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "MouseEvent", MouseEvent->classObject);
