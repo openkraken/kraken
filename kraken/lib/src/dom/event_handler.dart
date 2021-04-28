@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -92,7 +93,22 @@ mixin EventHandlerMixin on Node {
     return event;
   }
 
-  void handleClick(Event event) {
+  void handleClick(PointerDownEvent down) {
+    Offset globalOffset = (elementManager.getRootElement().renderBoxModel).globalToLocal(Offset(down.position.dx, down.position.dy));
+
+    dispatchClick(MouseEvent(EVENT_CLICK,
+      MouseEventInit(
+        bubbles: true,
+        cancelable: true,
+        clientX: globalOffset.dx,
+        clientY: globalOffset.dy,
+        offsetX: down.localPosition.dx,
+        offsetY: down.localPosition.dy,
+      )
+    ));
+  }
+
+  void dispatchClick(Event event) {
     dispatchEvent(event);
   }
 
