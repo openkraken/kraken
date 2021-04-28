@@ -49,9 +49,9 @@ class Kraken extends StatelessWidget {
 
   final JSErrorHandler onJSError;
 
-  // Create a WebSocket services which work with Chrome DevTools.
+  // Open a service to support Chrome DevTools for debugging.
   // https://github.com/openkraken/devtools
-  final DevToolService devToolService;
+  final DevToolsService devToolsService;
 
   final bool debugEnableInspector;
 
@@ -104,7 +104,7 @@ class Kraken extends StatelessWidget {
     this.javaScriptChannel,
     this.background,
     this.gestureClient,
-    this.devToolService,
+    this.devToolsService,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -165,7 +165,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       debugEnableInspector: _krakenWidget.debugEnableInspector,
       gestureClient: _krakenWidget.gestureClient,
       navigationDelegate: _krakenWidget.navigationDelegate,
-      devTools: _krakenWidget.devToolService
+      devTools: _krakenWidget.devToolsService
     );
 
     if (kProfileMode) {
