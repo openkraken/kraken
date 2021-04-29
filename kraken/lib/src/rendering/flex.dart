@@ -1073,16 +1073,13 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (isNotNeedLayout) {
           isChildNeedsLayout = false;
         }
-        print('flex layout 1 -------------- $child ${childConstraints}');
-//      if (isNotNeedLayout) {
-//        isChildNeedsLayout = false;
-//      }
 
       if (isChildNeedsLayout) {
         DateTime childLayoutStart;
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
+        print('flex layout 1 -------------- $child ${childConstraints}');
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
@@ -1522,12 +1519,12 @@ class RenderFlexLayout extends RenderLayoutBox {
 //            }
 //          }
 //        }
+//        isChildNeedsLayout = false;
 
         if (!isChildNeedsLayout) {
           child = childParentData.nextSibling;
           continue;
         }
-//print('needslayout---------------- $child ${isFlexGrow && flexGrow > 0} ${isFlexShrink && flexShrink > 0} $isStretchSelf');
 //        double maxChildExtent;
 //        double minChildExtent;
 
