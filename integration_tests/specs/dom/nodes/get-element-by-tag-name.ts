@@ -95,7 +95,7 @@ describe('Document getElementsByTagName', () => {
   });
 
   it('not work with head', () => {
-    expect(document.getElementsByTagName('head').length).toBe(0);
+    expect(document.getElementsByTagName('head').length).toBe(1);
   });
 
   it('not work with script', () => {

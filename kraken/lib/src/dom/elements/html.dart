@@ -21,8 +21,6 @@ class HTMLElement extends Element {
       repaintSelf: false,
       tagName: HTML,
       defaultStyle: {
-        WIDTH: '${elementManager.viewportWidth}px',
-        HEIGHT: '${elementManager.viewportHeight}px',
         OVERFLOW: AUTO,
         DISPLAY: BLOCK,
       }
@@ -30,10 +28,13 @@ class HTMLElement extends Element {
     if (kProfileMode) {
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_ROOT_ELEMENT_PROPERTY_INIT);
     }
-
-    // Attach body
+    // Init renderer
     willAttachRenderer();
+    // Init default render style value
     style.applyTargetProperties();
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    renderStyle.width = elementManager.viewportWidth;
+    renderStyle.height = elementManager.viewportHeight;
     didAttachRenderer();
   }
 }

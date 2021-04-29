@@ -17,4 +17,12 @@ const Map<String, dynamic> _defaultStyle = {
 class BodyElement extends Element {
   BodyElement(int targetId, Pointer<NativeElement> nativePtr, ElementManager elementManager)
       : super( targetId, nativePtr, elementManager, tagName: BODY, defaultStyle: _defaultStyle);
+
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    renderStyle.width = elementManager.viewportWidth;
+    renderStyle.height = elementManager.viewportHeight;
+  }
 }

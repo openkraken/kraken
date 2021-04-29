@@ -174,6 +174,10 @@ global.simulateKeyPress = __kraken_simulate_keypress__;
 
 function resetDocumentElement() {
   document.body = document.createElement('body');
+
+  while (document.head.firstChild) {
+    document.head.firstChild.remove();
+  }
 }
 
 function traverseNode(node, handle) {
