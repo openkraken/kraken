@@ -661,17 +661,30 @@ class RenderFlowLayout extends RenderLayoutBox {
         childConstraints = BoxConstraints();
       }
 
-      DateTime childLayoutStart;
-      if (kProfileMode) {
-        childLayoutStart = DateTime.now();
+
+      // Whether child need to layout
+      bool isChildNeedsLayout = true;
+      if (child.hasSize &&
+        !needsRelayout &&
+        ((child is RenderBoxModel && !child.needsLayout) ||
+          (child is RenderTextBox && !child.needsLayout))
+      ) {
+        isChildNeedsLayout = false;
       }
 
-print('flow layout --------------------- $child $childConstraints');
+      if (isChildNeedsLayout) {
+        DateTime childLayoutStart;
+        if (kProfileMode) {
+          childLayoutStart = DateTime.now();
+        }
 
-      child.layout(childConstraints, parentUsesSize: true);
-      if (kProfileMode) {
-        DateTime childLayoutEnd = DateTime.now();
-        childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
+        print('flow layout --------------------- $child $childConstraints');
+        child.layout(childConstraints, parentUsesSize: true);
+
+        if (kProfileMode) {
+          DateTime childLayoutEnd = DateTime.now();
+          childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
+        }
       }
 
       double childMainAxisExtent = _getMainAxisExtent(child);

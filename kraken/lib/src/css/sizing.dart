@@ -106,6 +106,9 @@ mixin CSSSizingMixin on RenderStyleBase {
     }
 
     if (shouldMarkNeedsLayout) {
+      renderBoxModel.markNeedsLayout();
+      // Sizing may affect parent size, mark parent as needsLayout in case
+      // renderBoxModel has tight constraints which will prevent parent from marking.
       if (renderBoxModel.parent is RenderBoxModel) {
         (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
       }

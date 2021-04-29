@@ -97,6 +97,19 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
+  // Mirror debugNeedsLayout flag in Flutter to use in layout performance optimization
+  bool needsLayout = false;
+
+  @override
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+    needsLayout = true;
+  }
+
+  void markOwnNeedsLayout() {
+    needsLayout = true;
+  }
+
   BoxConstraints getConstraints() {
     if (whiteSpace == WhiteSpace.nowrap && _renderParagraph.overflow != TextOverflow.ellipsis) {
       return BoxConstraints();

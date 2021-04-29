@@ -204,17 +204,29 @@ class CSSPositionedLayout {
       childConstraints = childConstraints.tighten(height: constraintHeight);
     }
 
-    DateTime childLayoutStartTime;
-    if (kProfileMode) {
-      childLayoutStartTime = DateTime.now();
+    // Whether child need to layout
+    bool isChildNeedsLayout = true;
+    if (child.hasSize &&
+      !needsRelayout &&
+      ((child is RenderBoxModel && !child.needsLayout) ||
+        (child is RenderTextBox && !child.needsLayout))
+    ) {
+      isChildNeedsLayout = false;
     }
 
-    // Should create relayoutBoundary for positioned child.
-    child.layout(childConstraints, parentUsesSize: false);
+    if (isChildNeedsLayout) {
+      DateTime childLayoutStartTime;
+      if (kProfileMode) {
+        childLayoutStartTime = DateTime.now();
+      }
 
-    if (kProfileMode) {
-      DateTime childLayoutEndTime = DateTime.now();
-      parent.childLayoutDuration += (childLayoutEndTime.microsecondsSinceEpoch - childLayoutStartTime.microsecondsSinceEpoch);
+      // Should create relayoutBoundary for positioned child.
+      child.layout(childConstraints, parentUsesSize: false);
+
+      if (kProfileMode) {
+        DateTime childLayoutEndTime = DateTime.now();
+        parent.childLayoutDuration += (childLayoutEndTime.microsecondsSinceEpoch - childLayoutStartTime.microsecondsSinceEpoch);
+      }
     }
   }
 

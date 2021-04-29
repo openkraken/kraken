@@ -559,6 +559,7 @@ class RenderBoxModel extends RenderBox with
   // Auto value for min-height
   double autoMinHeight = 0;
 
+  // Mirror debugNeedsLayout flag in Flutter to use in layout performance optimization
   bool needsLayout = false;
 
   @override
@@ -567,25 +568,51 @@ class RenderBoxModel extends RenderBox with
     needsLayout = true;
   }
 
+  /// Mark children needs layout when drop child as Flutter did
   @override
   void dropChild(RenderBox child) {
     super.dropChild(child);
     // Loop to mark all the children to needsLayout as flutter did
     if (child is RenderBoxModel) {
-      child.cleanRelayoutBoundary();
+      child.markOwnNeedsLayout();
+    } else if (child is RenderTextBox) {
+      child.markOwnNeedsLayout();
     }
   }
 
-  void cleanRelayoutBoundary() {
+  void markOwnNeedsLayout() {
     needsLayout = true;
-    visitChildren(_cleanChildRelayoutBoundary);
+    visitChildren(markChildrenNeedsLayout);
   }
 
-  static void _cleanChildRelayoutBoundary(RenderObject child) {
+  void markChildrenNeedsLayout(RenderObject child) {
     if (child is RenderBoxModel) {
-      child.cleanRelayoutBoundary();
+      child.markOwnNeedsLayout();
+    } else if (child is RenderTextBox) {
+      child.markOwnNeedsLayout();
     }
   }
+
+  @override
+  void layout(Constraints newConstraints, { bool parentUsesSize = false }) {
+    if (hasSize) {
+      // Constraints changes between tight and no tight will cause reLayoutBoundary change
+      // which will then cause its children to be marked as needsLayout in Flutter
+      if ((newConstraints.isTight && !constraints.isTight) ||
+        (!newConstraints.isTight && constraints.isTight)
+      ) {
+        visitChildren((RenderObject child) {
+          if (child is RenderBoxModel) {
+            child.markOwnNeedsLayout();
+          } else if (child is RenderTextBox) {
+            child.markOwnNeedsLayout();
+          }
+        });
+      }
+    }
+    super.layout(newConstraints, parentUsesSize: parentUsesSize);
+  }
+
 
   /// Calculate renderBoxModel constraints
   BoxConstraints getConstraints() {
