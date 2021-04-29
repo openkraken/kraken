@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 
 typedef GestureCallback = void Function(Event);
 
-typedef ClickEventListener = void Function(PointerDownEvent);
+typedef ClickEventListener = void Function(String, PointerDownEvent);
 
 mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer comes into contact with the screen (for touch
