@@ -486,35 +486,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     return minusConstraints;
   }
 
-//  BoxSizeType _getChildWidthSizeType(RenderBox child) {
-//    if (child is RenderTextBox) {
-//      return child.widthSizeType;
-//    } else if (child is RenderBoxModel) {
-//      return child.widthSizeType;
-//    }
-//    return null;
-//  }
-
-//  BoxSizeType _getChildHeightSizeType(RenderBox child) {
-//    if (child is RenderTextBox) {
-//      return child.heightSizeType;
-//    } else if (child is RenderBoxModel) {
-//      return child.heightSizeType;
-//    }
-//    return null;
-//  }
-
-//  bool _isCrossAxisDefinedSize(RenderBox child) {
-//    BoxSizeType widthSizeType = _getChildWidthSizeType(child);
-//    BoxSizeType heightSizeType = _getChildHeightSizeType(child);
-//
-//    if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-//      return heightSizeType != null && heightSizeType == BoxSizeType.specified;
-//    } else {
-//      return widthSizeType != null && widthSizeType == BoxSizeType.specified;
-//    }
-//  }
-
   double _getCrossAxisExtent(RenderBox child) {
     double marginHorizontal = 0;
     double marginVertical = 0;
@@ -1700,8 +1671,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         double runChildMainSize = isHorizontalFlexDirection ? child.size.width : child.size.height;
         if (child is RenderTextBox) {
           runChildMainSize = isHorizontalFlexDirection ? child.autoMinWidth : child.autoMinHeight;
-        } else if (child is RenderBoxModel) {
-          runChildMainSize = isHorizontalFlexDirection ? child.autoMinWidth : child.autoMinHeight;
         }
         runMainExtent += runChildMainSize;
       }
@@ -1737,8 +1706,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         RenderBox child = runChild.child;
         double runChildCrossSize = isHorizontalFlexDirection ? child.size.height : child.size.width;
         if (child is RenderTextBox) {
-          runChildCrossSize = isHorizontalFlexDirection ? child.autoMinHeight : child.autoMinWidth;
-        } else if (child is RenderBoxModel) {
           runChildCrossSize = isHorizontalFlexDirection ? child.autoMinHeight : child.autoMinWidth;
         }
         runChildrenCrossSize.add(runChildCrossSize);

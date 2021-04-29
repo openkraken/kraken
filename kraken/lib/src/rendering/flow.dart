@@ -1199,8 +1199,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         double runChildMainSize = runChild.size.width;
         if (runChild is RenderTextBox) {
           runChildMainSize = runChild.autoMinWidth;
-        } else if (runChild is RenderBoxModel) {
-          runChildMainSize = runChild.autoMinWidth;
         }
         runMainExtent += runChildMainSize;
       }
@@ -1234,8 +1232,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       void iterateRunChildren(int targetId, RenderBox runChild) {
         double runChildCrossSize = runChild.size.height;
         if (runChild is RenderTextBox) {
-          runChildCrossSize = runChild.autoMinHeight;
-        } else if (runChild is RenderBoxModel) {
           runChildCrossSize = runChild.autoMinHeight;
         }
         runChildrenCrossSize.add(runChildCrossSize);
