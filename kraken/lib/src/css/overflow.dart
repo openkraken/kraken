@@ -64,87 +64,87 @@ mixin CSSOverflowMixin on ElementBase {
   void updateRenderOverflow(Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
     RenderBoxModel renderBoxModel = element.renderBoxModel;
-    if (style != null) {
-      List<CSSOverflowType> overflow = getOverflowTypes(style);
-      CSSOverflowType overflowX = overflow[0];
-      CSSOverflowType overflowY = overflow[1];
-      bool shouldRepaintSelf = false;
 
-      switch(overflowX) {
-        case CSSOverflowType.hidden:
-          _scrollableX = null;
-          renderBoxModel.clipX = true;
-          // overflow hidden can be scrolled programmatically
-          renderBoxModel.enableScrollX = true;
-          break;
-        case CSSOverflowType.clip:
-          _scrollableX = null;
-          renderBoxModel.clipX = true;
-          // overflow clip can't scrolled programmatically
-          renderBoxModel.enableScrollX = false;
-          break;
-        case CSSOverflowType.auto:
-        case CSSOverflowType.scroll:
-          _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
-          shouldRepaintSelf = true;
-          renderBoxModel.clipX = true;
-          renderBoxModel.enableScrollX = true;
-          renderBoxModel.scrollOffsetX = _scrollableX.position;
+    List<CSSOverflowType> overflow = getOverflowTypes(style);
+    CSSOverflowType overflowX = overflow[0];
+    CSSOverflowType overflowY = overflow[1];
+    bool shouldRepaintSelf = false;
 
-          _scrollableX.position.isScrollingNotifier.removeListener(_onScrollXStart);
-          _scrollableX.position.isScrollingNotifier.addListener(_onScrollXStart);
-          break;
-        case CSSOverflowType.visible:
-        default:
-          _scrollableX = null;
-          renderBoxModel.clipX = false;
-          renderBoxModel.enableScrollX = false;
-          break;
-      }
+    switch(overflowX) {
+      case CSSOverflowType.hidden:
+        _scrollableX = null;
+        renderBoxModel.clipX = true;
+        // overflow hidden can be scrolled programmatically
+        renderBoxModel.enableScrollX = true;
+        break;
+      case CSSOverflowType.clip:
+        _scrollableX = null;
+        renderBoxModel.clipX = true;
+        // overflow clip can't scrolled programmatically
+        renderBoxModel.enableScrollX = false;
+        break;
+      case CSSOverflowType.auto:
+      case CSSOverflowType.scroll:
+        _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
+        shouldRepaintSelf = true;
+        renderBoxModel.clipX = true;
+        renderBoxModel.enableScrollX = true;
+        renderBoxModel.scrollOffsetX = _scrollableX.position;
 
-      switch(overflowY) {
-        case CSSOverflowType.hidden:
-          _scrollableY = null;
-          renderBoxModel.clipY = true;
-          // overflow hidden can be scrolled programmatically
-          renderBoxModel.enableScrollY = true;
-          break;
-        case CSSOverflowType.clip:
-          _scrollableY = null;
-          renderBoxModel.clipY = true;
-          // overflow clip can't scrolled programmatically
-          renderBoxModel.enableScrollY = false;
-          break;
-        case CSSOverflowType.auto:
-        case CSSOverflowType.scroll:
-          _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
-          shouldRepaintSelf = true;
-          renderBoxModel.clipY = true;
-          renderBoxModel.enableScrollY = true;
-          renderBoxModel.scrollOffsetY = _scrollableY.position;
+        _scrollableX.position.isScrollingNotifier.removeListener(_onScrollXStart);
+        _scrollableX.position.isScrollingNotifier.addListener(_onScrollXStart);
+        break;
+      case CSSOverflowType.visible:
+      default:
+        _scrollableX = null;
+        renderBoxModel.clipX = false;
+        renderBoxModel.enableScrollX = false;
+        break;
+    }
 
-          _scrollableY.position.isScrollingNotifier.removeListener(_onScrollYStart);
-          _scrollableY.position.isScrollingNotifier.addListener(_onScrollYStart);
-          break;
-        case CSSOverflowType.visible:
-        default:
-          _scrollableY = null;
-          renderBoxModel.clipY = false;
-          renderBoxModel.enableScrollY = false;
-          break;
-      }
+    switch(overflowY) {
+      case CSSOverflowType.hidden:
+        _scrollableY = null;
+        renderBoxModel.clipY = true;
+        // overflow hidden can be scrolled programmatically
+        renderBoxModel.enableScrollY = true;
+        break;
+      case CSSOverflowType.clip:
+        _scrollableY = null;
+        renderBoxModel.clipY = true;
+        // overflow clip can't scrolled programmatically
+        renderBoxModel.enableScrollY = false;
+        break;
+      case CSSOverflowType.auto:
+      case CSSOverflowType.scroll:
+        _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
+        shouldRepaintSelf = true;
+        renderBoxModel.clipY = true;
+        renderBoxModel.enableScrollY = true;
+        renderBoxModel.scrollOffsetY = _scrollableY.position;
 
-      renderBoxModel.scrollListener = scrollListener;
-      renderBoxModel.pointerListener = _pointerListener;
+        _scrollableY.position.isScrollingNotifier.removeListener(_onScrollYStart);
+        _scrollableY.position.isScrollingNotifier.addListener(_onScrollYStart);
+        break;
+      case CSSOverflowType.visible:
+      default:
+        _scrollableY = null;
+        renderBoxModel.clipY = false;
+        renderBoxModel.enableScrollY = false;
+        break;
+    }
 
-      if (renderBoxModel is RenderLayoutBox) {
-        if (shouldRepaintSelf) {
-          _upgradeToSelfRepaint(element);
-        } else {
-          _downgradeToParentRepaint(element);
-        }
+    renderBoxModel.scrollListener = scrollListener;
+    renderBoxModel.pointerListener = _pointerListener;
+
+    if (renderBoxModel is RenderLayoutBox) {
+      if (shouldRepaintSelf) {
+        _upgradeToSelfRepaint(element);
+      } else {
+        _downgradeToParentRepaint(element);
       }
     }
+
   }
 
   void _createScrollingLayoutBox(Element element) {

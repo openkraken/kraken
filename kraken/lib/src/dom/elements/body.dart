@@ -12,6 +12,7 @@ const String BODY = 'BODY';
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: BLOCK,
+  OVERFLOW: AUTO,
 };
 
 class BodyElement extends Element {
@@ -22,6 +23,7 @@ class BodyElement extends Element {
   void willAttachRenderer() {
     super.willAttachRenderer();
     RenderStyle renderStyle = renderBoxModel.renderStyle;
+    renderStyle.width = elementManager.viewportWidth;
     renderStyle.minHeight = elementManager.viewportHeight;
   }
 }
