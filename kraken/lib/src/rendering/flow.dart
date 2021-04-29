@@ -666,6 +666,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         childLayoutStart = DateTime.now();
       }
 
+print('flow layout --------------------- $child $childConstraints');
+
       child.layout(childConstraints, parentUsesSize: true);
       if (kProfileMode) {
         DateTime childLayoutEnd = DateTime.now();
@@ -1182,6 +1184,11 @@ class RenderFlowLayout extends RenderLayoutBox {
       double runMainExtent = 0;
       void iterateRunChildren(int targetId, RenderBox runChild) {
         double runChildMainSize = runChild.size.width;
+        if (runChild is RenderTextBox) {
+          runChildMainSize = runChild.autoMinWidth;
+        } else if (runChild is RenderBoxModel) {
+          runChildMainSize = runChild.autoMinWidth;
+        }
         runMainExtent += runChildMainSize;
       }
       runChildren.forEach(iterateRunChildren);
@@ -1204,10 +1211,38 @@ class RenderFlowLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double autoMinSize = 0;
-    // Get the sum of lines
-    for (_RunMetrics curr in runMetrics) {
-      autoMinSize += curr.crossAxisExtent;
+    // Cross size of each run
+    List<double> runCrossSize = [];
+
+    void iterateRunMetrics(_RunMetrics runMetrics) {
+      Map<int, RenderBox> runChildren = runMetrics.runChildren;
+      double runCrossExtent = 0;
+      List<double> runChildrenCrossSize = [];
+      void iterateRunChildren(int targetId, RenderBox runChild) {
+        double runChildCrossSize = runChild.size.height;
+        if (runChild is RenderTextBox) {
+          runChildCrossSize = runChild.autoMinHeight;
+        } else if (runChild is RenderBoxModel) {
+          runChildCrossSize = runChild.autoMinHeight;
+        }
+        runChildrenCrossSize.add(runChildCrossSize);
+      }
+      runChildren.forEach(iterateRunChildren);
+      runCrossExtent = runChildrenCrossSize.reduce((double curr, double next) {
+        return curr > next ? curr : next;
+      });
+
+      runCrossSize.add(runCrossExtent);
     }
+
+    // Calculate the max main size of all runs
+    runMetrics.forEach(iterateRunMetrics);
+
+    // Get the sum of lines
+    for (double crossSize in runCrossSize) {
+      autoMinSize += crossSize;
+    }
+
     return autoMinSize;
   }
 

@@ -98,11 +98,38 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
   }
 
   BoxConstraints getConstraints() {
-    RenderBoxModel parentRenderBoxModel = parent;
-    double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel) ?? double.infinity;
     if (whiteSpace == WhiteSpace.nowrap && _renderParagraph.overflow != TextOverflow.ellipsis) {
       return BoxConstraints();
     }
+    double maxConstraintWidth = double.infinity;
+    if (parent is RenderBoxModel) {
+      RenderBoxModel parentRenderBoxModel = parent;
+      BoxConstraints parentConstraints = parentRenderBoxModel.constraints;
+
+      // Scrolling content box has indefinite max constraints to allow children overflow
+      if (parentRenderBoxModel.isScrollingContentBox) {
+        // Border and padding defined on the outer box of scroll box
+        RenderBoxModel outerScrollBox = parentRenderBoxModel.parent;
+        EdgeInsets borderEdge = outerScrollBox.renderStyle.borderEdge;
+        EdgeInsetsGeometry padding = outerScrollBox.renderStyle.padding;
+        double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
+        double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+
+        maxConstraintWidth = parentConstraints.minWidth - horizontalPaddingLength - horizontalBorderLength;
+      } else if (parentConstraints.maxWidth == double.infinity) {
+        maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel) ?? double.infinity;
+      } else if (parentConstraints.maxWidth != null) {
+        EdgeInsets borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
+        EdgeInsetsGeometry padding = parentRenderBoxModel.renderStyle.padding;
+        double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
+        double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+
+        maxConstraintWidth = parentConstraints.maxWidth - horizontalPaddingLength - horizontalBorderLength;
+      }
+
+    }
+    // Text will not overflow from container, so it can inherit
+    // constraints from parents
     return BoxConstraints(
       minWidth: 0,
       maxWidth: maxConstraintWidth,
@@ -117,9 +144,10 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
       child.layout(constraints, parentUsesSize: true);
       size = child.size;
 
-      // @FIXME: minimum size of text is wrong
-      autoMinWidth = size.width;
-      autoMinHeight = size.height;
+      // @FIXME: Minimum size of text equals to single word in browser
+      // which cannot be calculated in Flutter currently.
+      autoMinWidth = 0;
+      autoMinHeight = 0;
     } else {
       performResize();
     }
