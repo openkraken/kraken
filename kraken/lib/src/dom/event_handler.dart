@@ -93,11 +93,11 @@ mixin EventHandlerMixin on Node {
     return event;
   }
 
-  void handleClick(PointerDownEvent down) {
+  void handleClick(String eventType, PointerDownEvent down) {
     RenderBoxModel root = elementManager.getRootElement().renderBoxModel;
     Offset globalOffset = root.globalToLocal(Offset(down.position.dx, down.position.dy));
 
-    dispatchEvent(MouseEvent(EVENT_CLICK,
+    dispatchEvent(MouseEvent(eventType,
       MouseEventInit(
         bubbles: true,
         cancelable: true,
