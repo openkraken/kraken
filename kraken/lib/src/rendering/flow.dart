@@ -661,7 +661,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         childConstraints = BoxConstraints();
       }
 
-
       // Whether child need to layout
       bool isChildNeedsLayout = true;
 
@@ -681,7 +680,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
 
         child.layout(childConstraints, parentUsesSize: true);
-//        print('flow layout --------------------- $child $childConstraints ${child.size}');
 
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();

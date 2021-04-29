@@ -1023,7 +1023,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       bool isChildNeedsLayout = true;
       if (child.hasSize &&
         !needsRelayout &&
-        (childConstraints == child.constraints) &&
+//        (childConstraints == child.constraints) &&
         ((child is RenderBoxModel && !child.needsLayout) ||
           (child is RenderTextBox && !child.needsLayout))
       ) {
@@ -1035,7 +1035,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
-//        print('flex layout 1 -------------- $child ${childConstraints}');
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
@@ -1044,7 +1043,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         Size childSize = _getChildSize(child);
         childrenIntrinsicMainSizes[child.hashCode] = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)
           ? childSize.width : childSize.height;
-
       }
 
       Size childSize = _getChildSize(child, shouldUseIntrinsicMainSize: true);
@@ -1474,7 +1472,6 @@ class RenderFlexLayout extends RenderLayoutBox {
           isStretchSelf: isStretchSelf
         );
 
-//        print('flex layout 2 -------------- $child $childConstraints');
         child.layout(childConstraints, parentUsesSize: true);
 
         // @FIXME: need to update runMetrics cause child relayout may affect container size
