@@ -1388,7 +1388,7 @@ class Element extends Node
     }
 
     // If element not in tree, click is fired and only response to itself.
-    dispatchClick(clickEvent);
+    dispatchEvent(clickEvent);
   }
 
   Future<Uint8List> toBlob({double devicePixelRatio}) {
