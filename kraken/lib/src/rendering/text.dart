@@ -159,8 +159,8 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
 
       // @FIXME: Minimum size of text equals to single word in browser
       // which cannot be calculated in Flutter currently.
-      autoMinWidth = 0;
-      autoMinHeight = 0;
+      autoMinWidth = size.width;
+      autoMinHeight = size.height;
     } else {
       performResize();
     }

@@ -664,8 +664,10 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       // Whether child need to layout
       bool isChildNeedsLayout = true;
+
       if (child.hasSize &&
         !needsRelayout &&
+        (childConstraints == child.constraints) &&
         ((child is RenderBoxModel && !child.needsLayout) ||
           (child is RenderTextBox && !child.needsLayout))
       ) {
@@ -678,8 +680,8 @@ class RenderFlowLayout extends RenderLayoutBox {
           childLayoutStart = DateTime.now();
         }
 
-        print('flow layout --------------------- $child $childConstraints');
         child.layout(childConstraints, parentUsesSize: true);
+//        print('flow layout --------------------- $child $childConstraints ${child.size}');
 
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
@@ -1197,9 +1199,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       double runMainExtent = 0;
       void iterateRunChildren(int targetId, RenderBox runChild) {
         double runChildMainSize = runChild.size.width;
-        if (runChild is RenderTextBox) {
-          runChildMainSize = runChild.autoMinWidth;
-        }
+//        if (runChild is RenderTextBox) {
+//          runChildMainSize = runChild.autoMinWidth;
+//        }
         runMainExtent += runChildMainSize;
       }
       runChildren.forEach(iterateRunChildren);
@@ -1231,9 +1233,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       List<double> runChildrenCrossSize = [];
       void iterateRunChildren(int targetId, RenderBox runChild) {
         double runChildCrossSize = runChild.size.height;
-        if (runChild is RenderTextBox) {
-          runChildCrossSize = runChild.autoMinHeight;
-        }
+//        if (runChild is RenderTextBox) {
+//          runChildCrossSize = runChild.autoMinHeight;
+//        }
         runChildrenCrossSize.add(runChildCrossSize);
       }
       runChildren.forEach(iterateRunChildren);

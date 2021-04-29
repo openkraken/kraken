@@ -1023,6 +1023,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       bool isChildNeedsLayout = true;
       if (child.hasSize &&
         !needsRelayout &&
+        (childConstraints == child.constraints) &&
         ((child is RenderBoxModel && !child.needsLayout) ||
           (child is RenderTextBox && !child.needsLayout))
       ) {
@@ -1034,7 +1035,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
-        print('flex layout 1 -------------- $child ${childConstraints}');
+//        print('flex layout 1 -------------- $child ${childConstraints}');
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
@@ -1326,7 +1327,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     for (int i = 0; i < runMetrics.length; ++i) {
       final _RunMetrics metrics = runMetrics[i];
-      final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double totalFlexGrow = metrics.totalFlexGrow;
       final double totalFlexShrink = metrics.totalFlexShrink;
       final Map<int, _RunChild> runChildren = metrics.runChildren;
@@ -1474,7 +1474,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           isStretchSelf: isStretchSelf
         );
 
-        print('flex layout 2 -------------- $child $childConstraints');
+//        print('flex layout 2 -------------- $child $childConstraints');
         child.layout(childConstraints, parentUsesSize: true);
 
         // @FIXME: need to update runMetrics cause child relayout may affect container size
