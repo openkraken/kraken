@@ -31,7 +31,7 @@ class EventTarget {
   void addEvent(String eventType) {}
 
   void addEventListener(String eventType, EventHandler eventHandler) {
-    if (!eventHandlers.containsKey(eventHandler)) {
+    if (!eventHandlers.containsKey(eventType)) {
       eventHandlers[eventType] = [];
     }
     eventHandlers[eventType].add(eventHandler);

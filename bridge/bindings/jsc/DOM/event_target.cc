@@ -134,8 +134,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   // no one can stop element to trigger event from dart side. this can led to significant performance improvement when
   // using Front-End frameworks such as Rax, or cause some overhead performance issue when some event trigger more
   // frequently.
-  if (eventTargetInstance->_eventHandlers.count(eventType) == 0 ||
-      eventTargetInstance->eventTargetId == BODY_TARGET_ID) {
+  if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
     eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
