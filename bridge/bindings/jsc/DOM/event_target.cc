@@ -130,7 +130,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   }
 
   JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
-    std::string &&eventType = JSStringToStdString(eventTypeStringRef);
+  std::string &&eventType = JSStringToStdString(eventTypeStringRef);
 
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
     eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
