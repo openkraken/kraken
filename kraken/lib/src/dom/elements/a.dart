@@ -23,7 +23,7 @@ class AnchorElement extends Element {
   }
 
   void dispatchClick(Event event) {
-    super.dispatchClick(event);
+    dispatchEvent(event);
     if (_href == null) return;
 
     Uri uri = Uri.parse(_href);

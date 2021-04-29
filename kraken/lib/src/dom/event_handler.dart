@@ -94,9 +94,10 @@ mixin EventHandlerMixin on Node {
   }
 
   void handleClick(PointerDownEvent down) {
-    Offset globalOffset = (elementManager.getRootElement().renderBoxModel).globalToLocal(Offset(down.position.dx, down.position.dy));
+    RenderBoxModel root = elementManager.getRootElement().renderBoxModel;
+    Offset globalOffset = root.globalToLocal(Offset(down.position.dx, down.position.dy));
 
-    dispatchClick(MouseEvent(EVENT_CLICK,
+    dispatchEvent(MouseEvent(EVENT_CLICK,
       MouseEventInit(
         bubbles: true,
         cancelable: true,
@@ -106,10 +107,6 @@ mixin EventHandlerMixin on Node {
         offsetY: down.localPosition.dy,
       )
     ));
-  }
-
-  void dispatchClick(Event event) {
-    dispatchEvent(event);
   }
 
   void handleAppear() {
