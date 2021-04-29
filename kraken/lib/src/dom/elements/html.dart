@@ -18,7 +18,6 @@ class HTMLElement extends Element {
       targetId,
       nativePtr,
       elementManager,
-      repaintSelf: false,
       tagName: HTML,
       defaultStyle: {
         OVERFLOW: AUTO,
@@ -33,7 +32,6 @@ class HTMLElement extends Element {
     // Init default render style value
     style.applyTargetProperties();
     RenderStyle renderStyle = renderBoxModel.renderStyle;
-    renderStyle.width = elementManager.viewportWidth;
     renderStyle.height = elementManager.viewportHeight;
     didAttachRenderer();
   }

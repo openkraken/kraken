@@ -7,7 +7,7 @@ describe('script element', () => {
     x.src = 'assets/hello.js';
     document.head.appendChild(x);
     x.onload = async () => {
-      await snapshot(document.body);
+      await snapshot();
       done();
     };
   });
