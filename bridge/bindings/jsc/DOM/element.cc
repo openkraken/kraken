@@ -8,7 +8,6 @@
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "event_target.h"
-#include "foundation/ui_command_queue.h"
 #include "text_node.h"
 
 namespace kraken::binding::jsc {

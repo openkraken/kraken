@@ -7,8 +7,6 @@
 #include "document.h"
 #include "event.h"
 #include <codecvt>
-#include "foundation/ui_command_queue.h"
-#include "foundation/ui_command_callback_queue.h"
 
 namespace kraken::binding::jsc {
 

@@ -23,8 +23,6 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
   JSClassDefinition contextDefinition = kJSClassDefinitionEmpty;
 
-  bindTimer();
-
   const JSStaticFunction functionEnd = {nullptr};
   const JSStaticValue valueEnd = {nullptr};
 
@@ -39,7 +37,6 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   ctx_ = JSGlobalContextCreateInGroup(nullptr, contextClass);
 
   JSObjectRef global = JSContextGetGlobalObject(ctx_);
-  JSObjectSetPrivate(global, this);
 
   JSStringRef windowName = JSStringCreateWithUTF8CString("window");
   JSStringRef globalThis = JSStringCreateWithUTF8CString("globalThis");

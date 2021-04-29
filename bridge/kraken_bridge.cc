@@ -6,9 +6,8 @@
 #include "kraken_bridge.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
-#include "foundation/ui_command_queue.h"
 #include "foundation/ui_task_queue.h"
-#include "foundation/ui_command_callback_queue.h"
+#include "foundation/inspector_task_queue.h"
 
 #ifdef KRAKEN_ENABLE_JSA
 #include "bridge_jsa.h"
@@ -193,8 +192,25 @@ KrakenInfo *getKrakenInfo() {
   return krakenInfo;
 }
 
-void flushBridgeTask() {
-  foundation::UITaskMessageQueue::instance()->flushTaskFromUIThread();
+void setConsoleMessageHandler(ConsoleMessageHandler handler) {
+  kraken::JSBridge::consoleMessageHandler = handler;
+}
+
+void dispatchUITask(int32_t contextId, void *context, void *callback) {
+  assert(std::this_thread::get_id() == getUIThreadId());
+  reinterpret_cast<void(*)(void*)>(callback)(context);
+}
+
+void flushUITask(int32_t contextId) {
+  foundation::UITaskQueue::instance(contextId)->flushTask();
+}
+
+void registerUITask(int32_t contextId, Task task, void *data) {
+  foundation::UITaskQueue::instance(contextId)->registerTask(task, data);
+};
+
+void flushUICommandCallback() {
+  foundation::UICommandCallbackQueue::instance()->flushCallbacks();
 }
 
 UICommandItem *getUICommandItems(int32_t contextId) {
@@ -209,8 +225,10 @@ void clearUICommandItems(int32_t contextId) {
   return foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
 }
 
-void flushUICommandCallback() {
-  foundation::UICommandCallbackQueue::instance()->flushCallbacks();
+void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data) {
+  assert(checkContext(contextId));
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+
 }
 
 void registerPluginSource(NativeString *code, const char *pluginName) {
