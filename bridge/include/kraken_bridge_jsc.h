@@ -1026,6 +1026,7 @@ private:
 
 } // namespace kraken::binding::jsc
 
+KRAKEN_EXPORT
 JSGlobalContextRef getGlobalContextRef(int32_t contextId);
 
 #endif
