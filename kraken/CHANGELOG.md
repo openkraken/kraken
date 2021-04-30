@@ -1,3 +1,9 @@
+## 0.7.2+2
+
+fix: export getUIThreadId and getGlobalContextRef symbols.
+## 0.7.2+1
+
+fix: export getDartMethod() symbols.
 ## 0.7.2
 
 **Break Changes**
