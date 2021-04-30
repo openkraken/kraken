@@ -174,10 +174,6 @@ JSValueRef JSGestureEvent::initGestureEvent(JSContextRef ctx, JSObjectRef functi
   }
   auto eventInstance = static_cast<GestureEventInstance *>(JSObjectGetPrivate(thisObject));
 
-  if (eventInstance->_dispatchFlag) {
-    return nullptr;
-  }
-
   JSStringRef typeStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
   eventInstance->nativeEvent->type = stringRefToNativeString(typeStringRef);
 

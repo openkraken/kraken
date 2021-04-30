@@ -390,12 +390,9 @@ public:
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   ~EventInstance() override;
   NativeEvent *nativeEvent;
-  bool _dispatchFlag{false};
-  bool _canceledFlag{false};
-  bool _initializedFlag{true};
-  bool _stopPropagationFlag{false};
-  bool _stopImmediatePropagationFlag{false};
-  bool _inPassiveListenerFlag{false};
+  bool _cancelled{false};
+  bool _propagationStopped{false};
+  bool _propagationImmediatelyStopped{false};
 
 private:
   friend JSEvent;
