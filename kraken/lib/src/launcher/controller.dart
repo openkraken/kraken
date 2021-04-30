@@ -16,7 +16,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/inspector.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/src/module/module_manager.dart';
 import 'bundle.dart';
@@ -47,6 +46,12 @@ void setTargetPlatformForDesktop() {
   if (Platform.isLinux || Platform.isWindows) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
+}
+
+abstract class DevToolsService {
+  void init(KrakenController controller);
+  void reload(KrakenController controller);
+  void dispose(KrakenController controller);
 }
 
 // An kraken View Controller designed for multiple kraken view control.
@@ -132,20 +137,11 @@ class KrakenViewController {
     if (kProfileMode) {
       PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_END);
     }
-
-    // Enable DevTool in debug/profile mode, but disable in release.
-    if ((kDebugMode || kProfileMode) && rootController.debugEnableInspector != false) {
-      debugStartInspector();
-    }
   }
-
-  /// Used for debugger inspector.
-  Inspector _inspector;
-
-  Inspector get inspector => _inspector;
 
   // the manager which controller all renderObjects of Kraken
   ElementManager _elementManager;
+  ElementManager get elementManager => _elementManager;
 
   // index value which identify javascript runtime context.
   int _contextId;
@@ -207,9 +203,6 @@ class KrakenViewController {
 
     // DisposeEventTarget command will created when js context disposed, should flush them all.
     flushUICommand();
-
-    _inspector?.dispose();
-    _inspector = null;
 
     _elementManager.dispose();
     _elementManager = null;
@@ -379,11 +372,6 @@ class KrakenViewController {
   RenderObject getRootRenderObject() {
     return _elementManager.getRootRenderObject();
   }
-
-  void debugStartInspector() {
-    _inspector = Inspector(_elementManager);
-    _elementManager.debugDOMTreeChanged = inspector.onDOMTreeChanged;
-  }
 }
 
 // An controller designed to control kraken's functional modules.
@@ -432,6 +420,8 @@ class KrakenController {
   // Error handler when got javascript error when evaluate javascript codes.
   JSErrorHandler onJSError;
 
+  DevToolsService devTools;
+
   KrakenMethodChannel _methodChannel;
 
   KrakenMethodChannel get methodChannel => _methodChannel;
@@ -468,6 +458,7 @@ class KrakenController {
     this.onLoadError,
     this.onJSError,
     this.debugEnableInspector,
+    this.devTools
   })  : _name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
@@ -500,6 +491,10 @@ class KrakenController {
     _controllerMap[_view.contextId] = this;
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
+
+    if (devTools != null) {
+      devTools.init(this);
+    }
   }
 
   KrakenViewController _view;
@@ -516,6 +511,7 @@ class KrakenController {
 
   // the bundle manager which used to download javascript source and run.
   KrakenBundle _bundle;
+  KrakenBundle get bundle => _bundle;
 
   void setNavigationDelegate(KrakenNavigationDelegate delegate) {
     assert(_view != null);
@@ -534,7 +530,6 @@ class KrakenController {
     }
     _module.dispose();
     _view.detachView();
-    Inspector.prevInspector = view._elementManager.controller.view.inspector;
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         showPerformanceOverlay: _view.showPerformanceOverlay,
         enableDebug: _view.enableDebug,
@@ -564,8 +559,6 @@ class KrakenController {
     // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
     flushUICommand();
 
-    Inspector.prevInspector = view._elementManager.controller.view.inspector;
-
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         background: _view.background,
         showPerformanceOverlay: _view.showPerformanceOverlay,
@@ -581,6 +574,10 @@ class KrakenController {
     await unload();
     await loadBundle();
     await evalBundle();
+
+    if (devTools != null) {
+      devTools.reload(this);
+    }
   }
 
   void reloadUrl(String url) async {
@@ -595,6 +592,10 @@ class KrakenController {
     _controllerMap[_view.contextId] = null;
     _controllerMap.remove(_view.contextId);
     _nameIdMap.remove(name);
+
+    if (devTools != null) {
+      devTools.dispose(this);
+    }
   }
 
   String _bundleContent;
@@ -623,6 +624,8 @@ class KrakenController {
     if (value == null) return;
     _bundleURL = value;
   }
+
+  String get origin => _bundleURL ?? _bundlePath ?? 'vm://' + name;
 
   // preload javascript source and cache it.
   void loadBundle({

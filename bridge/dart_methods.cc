@@ -58,6 +58,7 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }
 
+
 void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
   size_t i = 0;
 

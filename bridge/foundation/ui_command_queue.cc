@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-#include "ui_command_queue.h"
 #include "dart_methods.h"
 #include "include/kraken_bridge.h"
 

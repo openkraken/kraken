@@ -13,8 +13,8 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/inspector.dart';
 import 'package:kraken/gesture.dart';
+import 'debug_overlay.dart';
 
 // Constraints of element whose display style is none
 final _displayNoneConstraints = BoxConstraints(

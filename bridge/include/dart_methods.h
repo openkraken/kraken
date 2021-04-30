@@ -16,6 +16,7 @@
 
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
+struct NativeString;
 struct Screen;
 
 using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
@@ -103,7 +104,6 @@ KRAKEN_EXPORT
 void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length);
 #endif
 
-KRAKEN_EXPORT
 std::shared_ptr<DartMethodPointer> getDartMethod();
 
 } // namespace kraken
