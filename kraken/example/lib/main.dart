@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
 import 'dart:ui';
+import 'package:kraken_websocket/kraken_websocket.dart';
 
 void main() {
   KrakenWebsocket.initialize();
