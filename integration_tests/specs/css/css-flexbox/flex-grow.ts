@@ -810,4 +810,79 @@ describe('flex-grow', () => {
 
     await snapshot();
   });
+
+  it('flex item height should not exceed container when flex-wrap is nowrap', async () => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '100px',
+          height: '30px',
+          display: 'flex',
+          margin: '20px 0 ',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            backgroundColor: '#f00',
+            width: '50px',
+            height: '50px',
+            padding: '10px',
+          }
+        }),
+        createElement('div', {
+          style: {
+            backgroundColor: '#00f',
+            flex: '1 1 0',
+          }
+        })
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('flex item height can exceed container when flex-wrap is wrap', async () => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '100px',
+          height: '30px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          margin: '20px 0',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            backgroundColor: '#f00',
+            width: '50px',
+            height: '50px',
+            padding: '10px',
+          }
+        }),
+        createElement('div', {
+          style: {
+            backgroundColor: '#00f',
+            flex: '1 1 0',
+          }
+        })
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
 });

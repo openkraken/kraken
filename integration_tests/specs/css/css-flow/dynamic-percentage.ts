@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('dynamic-percentage', () => {
-  xit('height', async () => {
+  it('height', async () => {
     let p;
     let block;
     let target;

@@ -1547,15 +1547,20 @@ class RenderFlexLayout extends RenderLayoutBox {
             double flexLineHeight = _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
             // Should substract margin when layout child
             double marginVertical = marginTop.length + marginBottom.length;
-
             double childCrossSize = flexLineHeight - marginVertical;
-            if (isFlexWrap) {
-              minConstraintHeight = maxConstraintHeight = childCrossSize;
+            double stretchedHeight;
+            // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
+            if (!isFlexWrap && crossConstraintsTight) {
+              double verticalBorderLength = renderStyle.borderEdge != null ? renderStyle.borderEdge.vertical : 0;
+              double verticalPaddingLength = renderStyle.padding != null ? renderStyle.padding.vertical : 0;
+              stretchedHeight = math.min(
+                constraints.maxHeight - verticalBorderLength - verticalPaddingLength,
+                childCrossSize
+              );
             } else {
-              // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
-              minConstraintHeight = maxConstraintHeight = crossConstraintsTight ?
-              math.min(logicalContentHeight, childCrossSize) : childCrossSize;
+              stretchedHeight = childCrossSize;
             }
+            minConstraintHeight = maxConstraintHeight = stretchedHeight;
           }
         } else {
           CSSMargin marginLeft = childRenderStyle.marginLeft;
@@ -1570,13 +1575,19 @@ class RenderFlexLayout extends RenderLayoutBox {
             // Should substract margin when layout child
             double marginHorizontal = marginLeft.length + marginRight.length;
             double childCrossSize = flexLineHeight - marginHorizontal;
-            if (isFlexWrap) {
-              minConstraintWidth = maxConstraintWidth = childCrossSize;
+            double stretchedWidth;
+            // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
+            if (!isFlexWrap && crossConstraintsTight) {
+              double horizontalBorderLength = renderStyle.borderEdge != null ? renderStyle.borderEdge.horizontal : 0;
+              double horizontalPaddingLength = renderStyle.padding != null ? renderStyle.padding.horizontal : 0;
+              stretchedWidth = math.min(
+                constraints.maxWidth - horizontalBorderLength - horizontalPaddingLength,
+                childCrossSize
+              );
             } else {
-              // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
-              minConstraintWidth = maxConstraintWidth = crossConstraintsTight ?
-              math.min(logicalContentWidth, childCrossSize) : childCrossSize;
+              stretchedWidth = childCrossSize;
             }
+            minConstraintWidth = maxConstraintWidth = stretchedWidth;
           }
         }
       }
