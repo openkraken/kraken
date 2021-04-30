@@ -16,7 +16,7 @@ else()
 endif()
 
 execute_process(
-  COMMAND bash "-c" "read dart_sdk < <(type -p dart) && echo $\{dart_sdk%/*\}/cache/dart-sdk | xargs"
+  COMMAND bash "-c" "read dart_sdk < <(type -p dart) && echo $\{dart_sdk%/*\}/cache/dart-sdk/include | xargs"
   OUTPUT_VARIABLE DART_SDK
 )
 string(REGEX REPLACE "\n$" "" DART_SDK "${DART_SDK}")
@@ -203,10 +203,9 @@ target_include_directories(kraken PRIVATE
 target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
-  set(CMAKE_C_FLAGS -flto)
   ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
   ### remove dynamic_cast and exceptions
-  target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden -flto)
+  target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden)
 else()
   ### remove dynamic_cast and exceptions
   target_compile_options(kraken PRIVATE -fno-exceptions)
