@@ -93,10 +93,12 @@ EventTargetInstance::~EventTargetInstance() {
   }, nativeEventTarget);
 }
 
+// target.addEventListener(type, listener [, options]);
+// target.addEventListener(type, listener [, useCapture]);
 JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount < 2) {
-    throwJSError(ctx, "Failed to addEventListener: eventName and function parameter are required.", exception);
+    throwJSError(ctx, "Failed to addEventListener: type and listener are required.", exception);
     return nullptr;
   }
 
@@ -128,12 +130,8 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   }
 
   JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
-  std::string &&eventType = JSStringToStdString(eventTypeStringRef);
+    std::string &&eventType = JSStringToStdString(eventTypeStringRef);
 
-  // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and
-  // no one can stop element to trigger event from dart side. this can led to significant performance improvement when
-  // using Front-End frameworks such as Rax, or cause some overhead performance issue when some event trigger more
-  // frequently.
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
     eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
@@ -172,11 +170,13 @@ JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *ex
   return HostClass::prototypeGetProperty(name, exception);
 }
 
+// removeEventListener(type, listener[, options]);
+// removeEventListener(type, listener[, useCapture]);
 JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                               size_t argumentCount, const JSValueRef *arguments,
                                               JSValueRef *exception) {
-  if (argumentCount != 2) {
-    throwJSError(ctx, "Failed to removeEventListener: eventName and function parameter are required.", exception);
+  if (argumentCount < 2) {
+    throwJSError(ctx, "Failed to removeEventListener: at least type and listener are required.", exception);
     return nullptr;
   }
 
@@ -253,28 +253,22 @@ bool EventTargetInstance::dispatchEvent(EventInstance *event) {
                                             event->nativeEvent->type->length);
   std::string eventType = toUTF8(u16EventType);
 
-  if (_eventHandlers.count(eventType) == 0) {
-    return false;
-  }
+  // Modify the currentTarget to this.
+  event->nativeEvent->currentTarget = this;
+  
+  internalDispatchEvent(event);
 
-  event->nativeEvent->target = event->nativeEvent->currentTarget = this;
-
-  // event has been dispatched, then do not dispatch
-  event->_dispatchFlag = true;
-  bool cancelled = internalDispatchEvent(event);
-
-  if (event->nativeEvent->bubbles == 1 && !cancelled && !event->_stopPropagationFlag) {
+  // Bubble event to root event target.
+  if (event->nativeEvent->bubbles == 1 && !event->_propagationStopped) {
     auto node = reinterpret_cast<NodeInstance *>(event->nativeEvent->currentTarget);
-    event->nativeEvent->currentTarget = node->parentNode;
+    NodeInstance* parent = node->parentNode;
 
-    auto parent = reinterpret_cast<NodeInstance *>(event->nativeEvent->currentTarget);
     if (parent != nullptr) {
       parent->dispatchEvent(event);
     }
   }
 
-  event->_dispatchFlag = false;
-  return event->_canceledFlag;
+  return event->_cancelled;
 }
 
 JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -379,21 +373,23 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
   auto stack = _eventHandlers[eventType];
 
   for (auto &handler : stack) {
-    if (eventInstance->_stopImmediatePropagationFlag) break;
+    if (eventInstance->_propagationImmediatelyStopped) break;
 
     JSValueRef exception = nullptr;
     const JSValueRef arguments[] = {eventInstance->object};
-    JSObjectCallAsFunction(_hostClass->ctx, handler, handler, 1, arguments, &exception);
+    // The third params `thisObject` to null equals global object.
+    JSObjectCallAsFunction(_hostClass->ctx, handler, nullptr, 1, arguments, &exception);
     context->handleException(exception);
   }
 
   // do not dispatch event when event has been canceled
   // true is prevented.
-  return eventInstance->_canceledFlag;
+  return eventInstance->_cancelled;
 }
 
 // This function will be called back by dart side when trigger events.
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent, int32_t isCustomEvent) {
+        
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
   JSContext *context = eventTargetInstance->context;
