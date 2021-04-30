@@ -12,7 +12,7 @@ const os = require('os');
 
 program
 .option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
-.option('-i, --inspector', 'Support JavaScript inspector with Chrome DevTools')
+.option('--built-with-debug-jsc', 'Built bridge binary with debuggable JSC.')
 .parse(process.argv);
 
 const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
@@ -166,7 +166,7 @@ function findDebugJSEngine(platform) {
 
     let jscPackageInfo = packages.find((i) => i.name === 'jsc');
     if (!jscPackageInfo) {
-      throw new Error('Can not locate `jsc` dart package, please add jsc deps before build kraken libs with inspector.');
+      throw new Error('Can not locate `jsc` dart package, please add jsc deps before build kraken libs.');
     }
 
     let rootUri = jscPackageInfo.rootUri;
@@ -181,7 +181,7 @@ task('build-darwin-kraken-lib', done => {
     buildType = 'RelWithDebInfo';
   }
 
-  let enableInspector = !!program.inspector;
+  let builtWithDebugJsc = program.jsEngine === 'jsc' && !!program.builtWithDebugJsc;
 
   let externCmakeArgs = [];
 
@@ -189,15 +189,12 @@ task('build-darwin-kraken-lib', done => {
     externCmakeArgs.push('-DENABLE_PROFILE=TRUE');
   }
 
-  if (enableInspector) {
-
+  if (builtWithDebugJsc) {
     let debugJsEngine = findDebugJSEngine(platform == 'darwin' ? 'macos' : platform);
     externCmakeArgs.push(`-DDEBUG_JSC_ENGINE=${debugJsEngine}`)
   }
 
-  console.log(externCmakeArgs);
-
-  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} ${enableInspector ? '' : ''} -DENABLE_TEST=true ${externCmakeArgs.join(' ')} \
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} -DENABLE_TEST=true ${externCmakeArgs.join(' ')} \
     -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-macos-x86_64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
