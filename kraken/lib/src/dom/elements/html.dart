@@ -21,7 +21,6 @@ class HTMLElement extends Element {
       tagName: HTML,
       defaultStyle: {
         DISPLAY: BLOCK,
-        OVERFLOW: AUTO,
       }
   ) {
     if (kProfileMode) {
@@ -34,7 +33,7 @@ class HTMLElement extends Element {
     RenderStyle renderStyle = renderBoxModel.renderStyle;
     // Must init with viewport width
     renderStyle.width = elementManager.viewportWidth;
-    renderStyle.height = elementManager.viewportHeight;
+    renderStyle.minHeight = elementManager.viewportHeight;
     didAttachRenderer();
   }
 }

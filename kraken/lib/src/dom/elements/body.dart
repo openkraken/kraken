@@ -12,7 +12,6 @@ const String BODY = 'BODY';
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: BLOCK,
-  OVERFLOW: AUTO,
 };
 
 class BodyElement extends Element {

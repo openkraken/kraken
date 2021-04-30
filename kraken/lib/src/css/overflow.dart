@@ -148,9 +148,10 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void _createScrollingLayoutBox(Element element) {
-    int shadowElementTargetId = -100 - element.targetId; // Shawow element id start from -100
-    if (element.targetId == HTML_ID) {
-      shadowElementTargetId = -99;
+    int shadowElementTargetId = -100 - element.targetId; // Shadow element id start from -100
+    // Inner element target id is less than 0
+    if (element.targetId < 0) {
+      shadowElementTargetId = element.targetId - 50;
     }
     // @HACK: create shadow element for scrollingLayoutBox
     // @TODO: remove this after rendering phase are working without element and targetId required

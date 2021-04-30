@@ -120,7 +120,12 @@ class KrakenViewController {
       PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEWPORT_START);
     }
 
-    createViewport();
+    viewport = RenderViewportBox(
+      background: background,
+      viewportSize: Size(viewportWidth, viewportHeight),
+      gestureClient: gestureClient,
+      controller: rootController,
+    );
 
     if (kProfileMode) {
       PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEWPORT_END);
@@ -162,14 +167,6 @@ class KrakenViewController {
   bool get disposed => _disposed;
 
   RenderViewportBox viewport;
-
-  void createViewport() {
-    viewport = RenderViewportBox(
-      background: background,
-      viewportSize: Size(viewportWidth, viewportHeight),
-      gestureClient: gestureClient,
-    );
-  }
 
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
     assert(!_disposed, "Kraken have already disposed");
