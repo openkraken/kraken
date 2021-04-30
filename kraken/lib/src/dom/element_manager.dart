@@ -47,7 +47,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   // Alias defineElement export for karken plugin
-  static void defineElement(String type, ElementCreator creator) {
+  static void defineElement(String type, element_registry.ElementCreator creator) {
     element_registry.defineElement(type, creator);
   }
 
