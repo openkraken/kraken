@@ -124,7 +124,7 @@ class KrakenViewController {
       background: background,
       viewportSize: Size(viewportWidth, viewportHeight),
       gestureClient: gestureClient,
-      controller: rootController,
+      controller: rootController
     );
 
     if (kProfileMode) {

@@ -1256,15 +1256,7 @@ class Element extends Node
   }
 
   BoundingClientRect get boundingClientRect {
-    BoundingClientRect boundingClientRect = BoundingClientRect(
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0);
+    BoundingClientRect boundingClientRect = BoundingClientRect(0, 0, 0, 0, 0, 0, 0, 0);
     RenderBox sizedBox = renderBoxModel;
     if (isRendererAttached) {
       // need to flush layout to get correct size
