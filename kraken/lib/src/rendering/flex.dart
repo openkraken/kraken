@@ -175,6 +175,8 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Cache the intrinsic size of children before flex-grow/flex-shrink
   /// to avoid relayout when style of flex items changes
   Map<int, double> childrenIntrinsicMainSizes = {};
+  /// Cache original constraints of children on the first layout
+  Map<int, BoxConstraints> childrenOldConstraints = {};
 
   @override
   void setupParentData(RenderBox child) {
@@ -988,7 +990,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
 
-      BoxConstraints innerConstraints;
+      BoxConstraints childConstraints;
 
       int childNodeId;
       if (child is RenderTextBox) {
@@ -1003,27 +1005,25 @@ class RenderFlexLayout extends RenderLayoutBox {
         Size realDisplayedBoxSize = realDisplayedBox.getBoxSize(realDisplayedBox.contentSize);
         double realDisplayedBoxWidth = realDisplayedBoxSize.width;
         double realDisplayedBoxHeight = realDisplayedBoxSize.height;
-        innerConstraints = BoxConstraints(
+        childConstraints = BoxConstraints(
           minWidth: realDisplayedBoxWidth,
           maxWidth: realDisplayedBoxWidth,
           minHeight: realDisplayedBoxHeight,
           maxHeight: realDisplayedBoxHeight,
         );
       } else if (child is RenderBoxModel) {
-        innerConstraints = child.getConstraints();
+        childConstraints = child.getConstraints();
       } else if (child is RenderTextBox) {
-        innerConstraints = child.getConstraints();
+        childConstraints = child.getConstraints();
       } else {
-        innerConstraints = BoxConstraints();
+        childConstraints = BoxConstraints();
       }
-
-      BoxConstraints childConstraints = innerConstraints;
 
       // Whether child need to layout
       bool isChildNeedsLayout = true;
       if (child.hasSize &&
         !needsRelayout &&
-//        (childConstraints == child.constraints) &&
+        (childConstraints == childrenOldConstraints[child.hashCode]) &&
         ((child is RenderBoxModel && !child.needsLayout) ||
           (child is RenderTextBox && !child.needsLayout))
       ) {
@@ -1035,6 +1035,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
+        childrenOldConstraints[child.hashCode] = childConstraints;
+
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
