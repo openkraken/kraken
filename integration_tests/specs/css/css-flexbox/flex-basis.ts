@@ -64,7 +64,7 @@ describe('flex-basis', () => {
 
     await snapshot();
   });
-  xit('002', async () => {
+  it('002', async () => {
     let p;
     let test;
     let ref;
@@ -140,7 +140,7 @@ describe('flex-basis', () => {
 
     await snapshot();
   });
-  xit('003', async () => {
+  it('003', async () => {
     let p;
     let test;
     let ref;
@@ -216,7 +216,7 @@ describe('flex-basis', () => {
 
     await snapshot();
   });
-  xit('004', async () => {
+  it('004', async () => {
     let p;
     let test;
     let ref;
@@ -499,6 +499,233 @@ describe('flex-basis', () => {
     );
     BODY.appendChild(p);
     BODY.appendChild(referenceOverlappedRed);
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+
+  it("works with flex-basis larger than content main size in flex row direction", async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          border: '1px solid purple',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              flexBasis: '100px',
+              width: '200px',
+              padding: '10px 0',
+              backgroundColor: 'green'
+            },
+          },
+          [
+            createElement('div', {
+              style: {
+                width: '50px',
+                height: '50px',
+                backgroundColor: 'yellow'
+              }
+            }),
+          ]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it("works with flex-basis smaller than content main size in flex row direction", async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          border: '1px solid purple',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              flexBasis: '0',
+              width: '200px',
+              padding: '10px 0',
+              backgroundColor: 'green'
+            },
+          },
+          [
+            createElement('div', {
+              style: {
+                width: '50px',
+                height: '50px',
+                backgroundColor: 'yellow'
+              }
+            }),
+          ]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it("works with flex-basis not exists and width smaller than content main size in flex row direction", async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          border: '1px solid purple',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              width: '30px',
+              padding: '10px 0',
+              backgroundColor: 'green'
+            },
+          },
+          [
+            createElement('div', {
+              style: {
+                width: '50px',
+                height: '50px',
+                backgroundColor: 'yellow'
+              }
+            }),
+          ]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it("works with flex-basis larger than content main size in flex column direction", async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          border: '1px solid purple',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              flexBasis: '100px',
+              height: '200px',
+              backgroundColor: 'green'
+            },
+          },
+          [
+            createElement('div', {
+              style: {
+                width: '50px',
+                height: '50px',
+                backgroundColor: 'yellow'
+              }
+            }),
+          ]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it("works with flex-basis smaller than content size in flex column direction", async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          border: '1px solid purple',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              flexBasis: '0',
+              height: '200px',
+              backgroundColor: 'green'
+            },
+          },
+          [
+            createElement('div', {
+              style: {
+                width: '50px',
+                height: '50px',
+                backgroundColor: 'yellow'
+              }
+            }),
+          ]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it("works with flex-basis not exists and height smaller than content main size in flex row direction", async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          border: '1px solid purple',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              height: '30px',
+              backgroundColor: 'green'
+            },
+          },
+          [
+            createElement('div', {
+              style: {
+                width: '50px',
+                height: '50px',
+                backgroundColor: 'yellow'
+              }
+            }),
+          ]
+        ),
+      ]
+    );
     BODY.appendChild(div);
 
     await snapshot();

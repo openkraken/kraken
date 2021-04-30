@@ -3,8 +3,10 @@
 final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
 final _functionStart = '(';
 final _functionEnd = ')';
-final _functionArgsSplit = ',';
 final _functionNotationUrl = 'url';
+
+const String FUNCTION_SPLIT = ',';
+const String FUNCTION_ARGS_SPLIT = ',';
 
 // ignore: public_member_api_docs
 class CSSFunction {
@@ -31,7 +33,7 @@ class CSSFunction {
       while (argsBeginIndex < value.length) {
         // url() function notation should not be splitted cause it only accept one URL.
         // https://drafts.csswg.org/css-values-3/#urls
-        if (fn != _functionNotationUrl && value[argsBeginIndex] == _functionArgsSplit) {
+        if (fn != _functionNotationUrl && value[argsBeginIndex] == FUNCTION_ARGS_SPLIT) {
           if (containLeftCount == 0 && argBeginIndex < argsBeginIndex) {
             argList.add(value.substring(argBeginIndex, argsBeginIndex));
             argBeginIndex = argsBeginIndex + 1;
@@ -55,7 +57,11 @@ class CSSFunction {
       }
       if (match) {
         // only add the right function
-        notations.add(CSSFunctionalNotation(fn.trim(), argList));
+        fn = fn.trim();
+        if (fn.startsWith(FUNCTION_SPLIT)) {
+          fn = fn.substring(1, ).trim();
+        }
+        notations.add(CSSFunctionalNotation(fn, argList));
       }
       start = argsBeginIndex + 1;
       if (start >= value.length) {

@@ -101,10 +101,10 @@ mixin CSSPaddingMixin on RenderStyleBase {
   }
 
   BoxConstraints deflatePaddingConstraints(BoxConstraints constraints) {
-    if (_resolvedPadding == null) return constraints;
-
-    _resolve();
-    return constraints.deflate(_resolvedPadding);
+    if (padding != null) {
+      return constraints.deflate(padding);
+    }
+    return constraints;
   }
 
   Size wrapPaddingSize(Size innerSize) {

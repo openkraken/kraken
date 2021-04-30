@@ -175,6 +175,8 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// Cache the intrinsic size of children before flex-grow/flex-shrink
   /// to avoid relayout when style of flex items changes
   Map<int, double> childrenIntrinsicMainSizes = {};
+  /// Cache original constraints of children on the first layout
+  Map<int, BoxConstraints> childrenOldConstraints = {};
 
   @override
   void setupParentData(RenderBox child) {
@@ -486,35 +488,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     return minusConstraints;
   }
 
-  BoxSizeType _getChildWidthSizeType(RenderBox child) {
-    if (child is RenderTextBox) {
-      return child.widthSizeType;
-    } else if (child is RenderBoxModel) {
-      return child.widthSizeType;
-    }
-    return null;
-  }
-
-  BoxSizeType _getChildHeightSizeType(RenderBox child) {
-    if (child is RenderTextBox) {
-      return child.heightSizeType;
-    } else if (child is RenderBoxModel) {
-      return child.heightSizeType;
-    }
-    return null;
-  }
-
-  bool _isCrossAxisDefinedSize(RenderBox child) {
-    BoxSizeType widthSizeType = _getChildWidthSizeType(child);
-    BoxSizeType heightSizeType = _getChildHeightSizeType(child);
-
-    if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-      return heightSizeType != null && heightSizeType == BoxSizeType.specified;
-    } else {
-      return widthSizeType != null && widthSizeType == BoxSizeType.specified;
-    }
-  }
-
   double _getCrossAxisExtent(RenderBox child) {
     double marginHorizontal = 0;
     double marginVertical = 0;
@@ -575,72 +548,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       return baseSize + marginHorizontal;
     } else {
       return baseSize + marginVertical;
-    }
-  }
-
-  /// Get constraints of flex item in the main axis
-  BoxConstraints _getBaseConstraints(RenderBox child, bool needsRelayout) {
-    double minWidth = 0;
-    double maxWidth = double.infinity;
-    double minHeight = 0;
-    double maxHeight = double.infinity;
-
-    if (child is RenderBoxModel) {
-      RenderStyle childRenderStyle = child.renderStyle;
-      double flexBasis = _getFlexBasis(child);
-
-      double baseSize;
-      // @FIXME: By default, flex items won’t shrink below their minimum content size
-      // https://drafts.csswg.org/css-flexbox/#flex-common
-      // And flex basis should compare with its minimum content size which cannot get
-      // before its children layout, so set baseSize logic should move to child layout stage.
-      if (flexBasis != null) {
-        baseSize = flexBasis ?? 0;
-      }
-
-      if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-        minWidth = childRenderStyle.minWidth != null ? childRenderStyle.minWidth : 0;
-        maxWidth = childRenderStyle.maxWidth != null ? childRenderStyle.maxWidth : double.infinity;
-
-        if (flexBasis == null) {
-          baseSize = childRenderStyle.width;
-        }
-        if (baseSize != null) {
-          if (childRenderStyle.minWidth != null && baseSize < childRenderStyle.minWidth) {
-            baseSize = childRenderStyle.minWidth;
-          } else if (childRenderStyle.maxWidth != null && baseSize > childRenderStyle.maxWidth) {
-            baseSize = childRenderStyle.maxWidth;
-          }
-          minWidth = maxWidth = baseSize;
-        }
-      } else {
-        minHeight = childRenderStyle.minHeight != null ? childRenderStyle.minHeight : 0;
-        maxHeight = childRenderStyle.maxHeight != null ? childRenderStyle.maxHeight : double.infinity;
-
-        if (flexBasis == null) {
-          baseSize = childRenderStyle.height;
-        }
-        if (baseSize != null) {
-          if (childRenderStyle.minHeight != null && baseSize < childRenderStyle.minHeight) {
-            baseSize = childRenderStyle.minHeight;
-          } else if (childRenderStyle.maxHeight != null && baseSize > childRenderStyle.maxHeight) {
-            baseSize = childRenderStyle.maxHeight;
-          }
-          minHeight = maxHeight = baseSize;
-        }
-      }
-    }
-
-    if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-      return BoxConstraints(
-        minWidth: minWidth,
-        maxWidth: maxWidth,
-      );
-    } else {
-      return BoxConstraints(
-        minHeight: minHeight,
-        maxHeight: maxHeight,
-      );
     }
   }
 
@@ -725,7 +632,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
         bool percentageToOwnFound = child.renderStyle.isPercentageToOwnExist();
-        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
+        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(this, logicalContentWidth, logicalContentHeight);
 
         /// When percentage exists in sizing styles(width/height) and styles relies on its own size,
         /// it needs to relayout twice cause the latter relies on the size calculated in the first relayout
@@ -777,40 +684,17 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// 3. Set flex container size according to children size
   /// 4. Align children according to justify-content, align-items and align-self properties
   void _layoutChildren(RenderPositionHolder placeholderChild, {bool needsRelayout = false}) {
-    CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
-
-    double width = renderStyle.width;
-    double height = renderStyle.height;
-    double minWidth = renderStyle.minWidth;
-    double minHeight = renderStyle.minHeight;
-    double maxWidth = renderStyle.maxWidth;
-    double maxHeight = renderStyle.maxHeight;
 
     /// If no child exists, stop layout.
     if (childCount == 0) {
-      double constraintWidth = logicalContentWidth ?? 0;
-      double constraintHeight = logicalContentHeight ?? 0;
-
-      bool isInline = transformedDisplay == CSSDisplay.inline;
-      bool isInlineFlex = transformedDisplay == CSSDisplay.inlineFlex;
-
-      if (!isInline) {
-        // Base width when width no exists, inline-flex has width of 0
-        double baseWidth = isInlineFlex ? 0 : constraintWidth;
-        if (maxWidth != null && width == null) {
-          constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
-        } else if (minWidth != null && width == null) {
-          constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
-        }
-
-        // Base height always equals to 0 no matter
-        double baseHeight = 0;
-        if (maxHeight != null && height == null) {
-          constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
-        } else if (minHeight != null && height == null) {
-          constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
-        }
-      }
+      Size layoutSize = getLayoutSize(
+        logicalContentWidth: logicalContentWidth,
+        logicalContentHeight: logicalContentHeight,
+        contentWidth: 0,
+        contentHeight: 0,
+      );
+      double constraintWidth = layoutSize.width;
+      double constraintHeight = layoutSize.height;
 
       setMaxScrollableSize(constraintWidth, constraintHeight);
 
@@ -943,14 +827,13 @@ class RenderFlexLayout extends RenderLayoutBox {
       runBetweenSpace,
       runLeadingSpace,
       placeholderChild,
-      containerSizeMap,
       maxScrollableWidthMap,
       maxScrollableHeightMap,
     );
 
     /// Make sure it will not trigger relayout again when in relayout stage
     if (!needsRelayout) {
-      bool percentageOfSizingFound = isChildrenPercentageOfSizingExist(placeholderChild);
+      bool percentageOfSizingFound = _isChildrenPercentageOfSizingExist(placeholderChild);
       bool percentageToOwnFound = _isChildrenPercentageToOwnExist(placeholderChild);
       bool percentageToContainingBlockFound = _resolveChildrenPercentageToContainingBlock(placeholderChild);
 
@@ -981,7 +864,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(this, logicalContentWidth, logicalContentHeight);
         if (percentageExist) {
           percentageFound = true;
         }
@@ -1012,7 +895,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   /// Check whether percentage sizing styles of child exists
-  bool isChildrenPercentageOfSizingExist(RenderPositionHolder placeholderChild) {
+  bool _isChildrenPercentageOfSizingExist(RenderPositionHolder placeholderChild) {
     bool percentageFound = false;
     RenderBox child = firstChild;
     while (child != null) {
@@ -1089,7 +972,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       flexLineLimit = logicalContentWidth != null ? logicalContentWidth : maxConstraintWidth;
     } else {
       // Children in vertical direction should not wrap if height no exists
-      double maxContentHeight = double.infinity;
+      double maxContentHeight = renderStyle.maxHeight ?? double.infinity;
       flexLineLimit = logicalContentHeight != null ? logicalContentHeight : maxContentHeight;
     }
 
@@ -1107,7 +990,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
 
-      BoxConstraints innerConstraints;
+      BoxConstraints childConstraints;
 
       int childNodeId;
       if (child is RenderTextBox) {
@@ -1116,101 +999,35 @@ class RenderFlexLayout extends RenderLayoutBox {
         childNodeId = child.targetId;
       }
 
-      BoxSizeType heightSizeType = _getChildHeightSizeType(child);
-      BoxConstraints baseConstraints = _getBaseConstraints(child, needsRelayout);
-
       if (child is RenderPositionHolder) {
         RenderBoxModel realDisplayedBox = child.realDisplayedBox;
         // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
         Size realDisplayedBoxSize = realDisplayedBox.getBoxSize(realDisplayedBox.contentSize);
         double realDisplayedBoxWidth = realDisplayedBoxSize.width;
         double realDisplayedBoxHeight = realDisplayedBoxSize.height;
-        innerConstraints = BoxConstraints(
+        childConstraints = BoxConstraints(
           minWidth: realDisplayedBoxWidth,
           maxWidth: realDisplayedBoxWidth,
           minHeight: realDisplayedBoxHeight,
           maxHeight: realDisplayedBoxHeight,
         );
-      } else if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-        double maxCrossAxisSize;
-        // Calculate max height constraints
-        if (heightSizeType == BoxSizeType.specified && child is RenderBoxModel && child.renderStyle.height != null) {
-          maxCrossAxisSize = child.renderStyle.height;
-        } else if (child is RenderBoxModel && child.renderStyle.maxHeight != null) {
-          maxCrossAxisSize = child.renderStyle.maxHeight;
-        } else {
-          // Child in flex line expand automatic when height is not specified
-          if (renderStyle.flexWrap == FlexWrap.wrap || renderStyle.flexWrap == FlexWrap.wrapReverse) {
-            maxCrossAxisSize = double.infinity;
-          } else if (child is RenderTextBox) {
-            maxCrossAxisSize = double.infinity;
-          } else {
-            // Should substract margin when layout child
-            double marginVertical = 0;
-            if (child is RenderBoxModel) {
-              marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
-            }
-            maxCrossAxisSize = logicalContentHeight != null ? logicalContentHeight - marginVertical : double.infinity;
-          }
-        }
-
-        innerConstraints = BoxConstraints(
-          minWidth: baseConstraints.minWidth,
-          maxWidth: baseConstraints.maxWidth,
-          maxHeight: maxCrossAxisSize,
-        );
-      } else if (CSSFlex.isVerticalFlexDirection(renderStyle.flexDirection)) {
-        double maxCrossAxisSize;
-        // Calculate max width constraints
-        if (child is RenderBoxModel && child.renderStyle.width != null) {
-          maxCrossAxisSize = child.renderStyle.width;
-        } else if (child is RenderBoxModel && child.renderStyle.maxWidth != null) {
-          maxCrossAxisSize = child.renderStyle.maxWidth;
-        } else {
-          // Child in flex line expand automatic when height is not specified
-          if (renderStyle.flexWrap == FlexWrap.wrap || renderStyle.flexWrap == FlexWrap.wrapReverse) {
-            maxCrossAxisSize = double.infinity;
-          } else if (child is RenderTextBox) {
-            maxCrossAxisSize = double.infinity;
-          } else {
-            // Should substract margin when layout child
-            double marginHorizontal = 0;
-            if (child is RenderBoxModel) {
-              marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
-            }
-            maxCrossAxisSize = logicalContentWidth != null ? logicalContentWidth - marginHorizontal : double.infinity;
-          }
-        }
-
-        innerConstraints = BoxConstraints(
-          minHeight: baseConstraints.minHeight,
-          maxHeight: baseConstraints.maxHeight,
-          maxWidth: maxCrossAxisSize,
-        );
+      } else if (child is RenderBoxModel) {
+        childConstraints = child.getConstraints();
+      } else if (child is RenderTextBox) {
+        childConstraints = child.getConstraints();
+      } else {
+        childConstraints = BoxConstraints();
       }
-
-      BoxConstraints childConstraints = deflateOverflowConstraints(innerConstraints);
 
       // Whether child need to layout
       bool isChildNeedsLayout = true;
-      if (child is RenderBoxModel && child.hasSize) {
-        double childContentWidth = RenderBoxModel.getLogicalContentWidth(child);
-        double childContentHeight = RenderBoxModel.getLogicalContentHeight(child);
-
-        // Always layout child in following cases
-        // 1. Parent is not laid out yet
-        // 2. Child is marked as needsLayout
-        // 3. Needs relayout when percentage sizing is parsed
-        if (!hasSize || child.needsLayout || needsRelayout) {
-          isChildNeedsLayout = true;
-        } else {
-          Size childOldSize = _getChildSize(child);
-          // Need to layout child only when width and height both can be calculated from style
-          // and differ from its previous size
-          isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
-            (childOldSize.width != childContentWidth ||
-              childOldSize.height != childContentHeight);
-        }
+      if (child.hasSize &&
+        !needsRelayout &&
+        (childConstraints == childrenOldConstraints[child.hashCode]) &&
+        ((child is RenderBoxModel && !child.needsLayout) ||
+          (child is RenderTextBox && !child.needsLayout))
+      ) {
+        isChildNeedsLayout = false;
       }
 
       if (isChildNeedsLayout) {
@@ -1218,6 +1035,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
+        childrenOldConstraints[child.hashCode] = childConstraints;
+
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
@@ -1226,7 +1045,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         Size childSize = _getChildSize(child);
         childrenIntrinsicMainSizes[child.hashCode] = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)
           ? childSize.width : childSize.height;
-
       }
 
       Size childSize = _getChildSize(child, shouldUseIntrinsicMainSize: true);
@@ -1355,7 +1173,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     Map<int, _RunChild> runChildren = runMetric.runChildren;
     double totalFlexGrow = runMetric.totalFlexGrow;
     double totalFlexShrink = runMetric.totalFlexShrink;
-    bool isFlexGrow = initialFreeSpace >= 0 && totalFlexGrow > 0;
+    bool isFlexGrow = initialFreeSpace > 0 && totalFlexGrow > 0;
     bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
 
     double sumFlexFactors = isFlexGrow ? totalFlexGrow : totalFlexShrink;
@@ -1388,7 +1206,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
 
       _RunChild current = runChildren[childNodeId];
-      double originalMainSize = current.originalMainSize;
+
+      double flexBasis = _getFlexBasis(child);
+      double originalMainSize = flexBasis != null ? flexBasis : current.originalMainSize;
 
       double computedSize = originalMainSize; /// Computed size by flex factor
       double adjustedSize = originalMainSize; /// Adjusted size after min and max size clamp
@@ -1507,22 +1327,42 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     for (int i = 0; i < runMetrics.length; ++i) {
       final _RunMetrics metrics = runMetrics[i];
-      final double runMainAxisExtent = metrics.mainAxisExtent;
-      final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double totalFlexGrow = metrics.totalFlexGrow;
       final double totalFlexShrink = metrics.totalFlexShrink;
+      final Map<int, _RunChild> runChildren = metrics.runChildren;
+
+      double totalSpace = 0;
+      // Flex factor calculation depends on flex-basis if exists.
+      void calTotalSpace(int targetId, _RunChild runChild) {
+        double childSpace = runChild.originalMainSize;
+        RenderBox child = runChild.child;
+        double marginHorizontal = 0;
+        double marginVertical = 0;
+        if (child is RenderBoxModel) {
+          double flexBasis = _getFlexBasis(child);
+          marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
+          marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
+          if (flexBasis != null) {
+            childSpace = flexBasis;
+          }
+        }
+        double mainAxisMargin = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
+          marginHorizontal : marginVertical;
+        totalSpace += childSpace + mainAxisMargin;
+      }
+      runChildren.forEach(calTotalSpace);
 
       double initialFreeSpace;
       if (mainSizeType == BoxSizeType.automatic) {
         // The main size of container may be larger than some flex line due to
         // its children auto expanded.
-        initialFreeSpace = constraints.minWidth > runMainAxisExtent ?
-          constraints.minWidth - runMainAxisExtent : 0;
+        initialFreeSpace = constraints.minWidth > totalSpace ?
+          constraints.minWidth - totalSpace : 0;
       } else {
-        initialFreeSpace = maxMainSize - runMainAxisExtent;
+        initialFreeSpace = maxMainSize - totalSpace;
       }
 
-      bool isFlexGrow = initialFreeSpace >= 0 && totalFlexGrow > 0;
+      bool isFlexGrow = initialFreeSpace > 0 && totalFlexGrow > 0;
       bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
 
       if (isFlexGrow || isFlexShrink) {
@@ -1596,43 +1436,21 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         if (childParentData.runIndex != i) break;
 
-        // Whether child need to layout
-        bool isChildNeedsLayout = true;
-        if (child is RenderBoxModel && child.hasSize) {
-          double childContentWidth = RenderBoxModel.getLogicalContentWidth(child);
-          double childContentHeight = RenderBoxModel.getLogicalContentHeight(child);
-
-          // Always layout child when parent is not laid out yet or child is marked as needsLayout
-          if (!hasSize || child.needsLayout) {
-            isChildNeedsLayout = true;
-          } else {
-            double flexGrow = _getFlexGrow(child);
-            double flexShrink = _getFlexShrink(child);
-
-            // Need to relayout child when flex factor exists
-            if ((isFlexGrow && flexGrow > 0) ||
-              (isFlexShrink && flexShrink > 0)) {
-              isChildNeedsLayout = true;
-            } else if (isStretchSelf) {
-              Size childOldSize = _getChildSize(child);
-              /// No need to layout child when both width and height of child can be calculated from style
-              /// and be the same as old size, in other cases always relayout.
-              /// In some cases such as flex-wrap: wrap, child cross size depends on remaining spaces of flex lines
-              /// which also depends on the size of its siblings so it cannot be calculated from style without layout.
-              bool childSizeCalculatedSame = childContentWidth != null && childContentHeight != null &&
-                childOldSize.width == childContentWidth && childOldSize.height == childContentHeight;
-              isChildNeedsLayout = !childSizeCalculatedSame;
-            }
-          }
+        // Skip scrolling content box
+        if (child is RenderBoxModel && child.isScrollingContentBox) {
+          child = childParentData.nextSibling;
+          continue;
         }
+
+        double flexGrow = _getFlexGrow(child);
+        double flexShrink = _getFlexShrink(child);
+        // Whether child need to layout
+        bool isChildNeedsLayout = (isFlexGrow && flexGrow > 0) || (isFlexShrink && flexShrink > 0) || isStretchSelf;
 
         if (!isChildNeedsLayout) {
           child = childParentData.nextSibling;
           continue;
         }
-
-        double maxChildExtent;
-        double minChildExtent;
 
         if (_isChildDisplayNone(child)) {
           // Skip No Grow and unsized child.
@@ -1642,166 +1460,23 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         Size childSize = _getChildSize(child);
 
-        int childNodeId;
-        if (child is RenderTextBox) {
-          childNodeId = child.targetId;
-        } else if (child is RenderBoxModel) {
-          childNodeId = child.targetId;
-        }
-
-        double mainSize = isFlexGrow || isFlexShrink ?
-          metrics.runChildren[childNodeId].adjustedMainSize : _getMainSize(child);
-        maxChildExtent = minChildExtent = mainSize;
-
-        BoxConstraints innerConstraints;
-        if (isStretchSelf) {
-          switch (renderStyle.flexDirection) {
-            case FlexDirection.row:
-            case FlexDirection.rowReverse:
-              double minMainAxisSize = minChildExtent ?? childSize.width;
-              double maxMainAxisSize = maxChildExtent ?? double.infinity;
-              double minCrossAxisSize;
-              double maxCrossAxisSize;
-
-              // if child have predefined size
-              if (_isCrossAxisDefinedSize(child)) {
-                BoxSizeType sizeType = _getChildHeightSizeType(child);
-
-                // child have predefined height, use previous layout height.
-                if (sizeType == BoxSizeType.specified) {
-                  // for empty child width, maybe it's unloaded image, set constraints range.
-                  if (childSize.isEmpty) {
-                    minCrossAxisSize = 0.0;
-                    maxCrossAxisSize = contentConstraints.maxHeight;
-                  } else {
-                    minCrossAxisSize = childSize.height;
-                    maxCrossAxisSize = double.infinity;
-                  }
-                } else {
-                  // expand child's height to contentConstraints.maxHeight;
-                  minCrossAxisSize = contentConstraints.maxHeight;
-                  maxCrossAxisSize = contentConstraints.maxHeight;
-                }
-              } else if (child is! RenderTextBox) {
-                CSSMargin marginTop;
-                CSSMargin marginBottom;
-                if (child is RenderBoxModel) {
-                  RenderStyle childRenderStyle = child.renderStyle;
-                  marginTop = childRenderStyle.marginTop;
-                  marginBottom = childRenderStyle.marginBottom;
-                }
-                // Margin auto alignment takes priority over align-items stretch,
-                // it will not stretch child in vertical direction
-                if (marginTop.isAuto || marginBottom.isAuto) {
-                  minCrossAxisSize = childSize.height;
-                  maxCrossAxisSize = double.infinity;
-                } else {
-                  double flexLineHeight = _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
-                  // Should substract margin when layout child
-                  double marginVertical = 0;
-                  if (child is RenderBoxModel) {
-                    marginVertical = marginTop.length + marginBottom.length;
-                  }
-                  minCrossAxisSize = flexLineHeight - marginVertical;
-                  maxCrossAxisSize = double.infinity;
-                }
-              } else {
-                minCrossAxisSize = 0.0;
-                maxCrossAxisSize = double.infinity;
-              }
-              innerConstraints = BoxConstraints(
-                minWidth: minMainAxisSize,
-                maxWidth: maxMainAxisSize,
-                minHeight: minCrossAxisSize,
-                maxHeight: maxCrossAxisSize);
-              break;
-            case FlexDirection.column:
-            case FlexDirection.columnReverse:
-              double mainAxisMinSize = minChildExtent ?? childSize.height;
-              double mainAxisMaxSize = maxChildExtent ?? double.infinity;
-              double minCrossAxisSize;
-              double maxCrossAxisSize;
-
-              // if child have predefined size
-              if (_isCrossAxisDefinedSize(child)) {
-                BoxSizeType sizeType = _getChildWidthSizeType(child);
-
-                // child have predefined width, use previous layout width.
-                if (sizeType == BoxSizeType.specified) {
-                  // for empty child width, maybe it's unloaded image, set contentConstraints range.
-                  if (childSize.isEmpty) {
-                    minCrossAxisSize = 0.0;
-                    maxCrossAxisSize = contentConstraints.maxWidth;
-                  } else {
-                    minCrossAxisSize = childSize.width;
-                    maxCrossAxisSize = double.infinity;
-                  }
-                } else {
-                  // expand child's height to contentConstraints.maxWidth;
-                  minCrossAxisSize = contentConstraints.maxWidth;
-                  maxCrossAxisSize = contentConstraints.maxWidth;
-                }
-              } else if (child is! RenderTextBox) {
-                CSSMargin marginLeft;
-                CSSMargin marginRight;
-                if (child is RenderBoxModel) {
-                  RenderStyle childRenderStyle = child.renderStyle;
-                  marginLeft = childRenderStyle.marginLeft;
-                  marginRight = childRenderStyle.marginRight;
-                }
-                // Margin auto alignment takes priority over align-items stretch,
-                // it will not stretch child in horizontal direction
-                if (marginLeft.isAuto || marginRight.isAuto) {
-                  minCrossAxisSize = childSize.width;
-                  maxCrossAxisSize = double.infinity;
-                } else {
-                  double flexLineHeight = _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
-                  // Should substract margin when layout child
-                  double marginHorizontal = 0;
-                  if (child is RenderBoxModel) {
-                    marginHorizontal = marginLeft.length + marginRight.length;
-                  }
-
-                  minCrossAxisSize = flexLineHeight - marginHorizontal;
-                  maxCrossAxisSize = double.infinity;
-                }
-              } else {
-                // for RenderTextBox, there are no cross Axis contentConstraints.
-                minCrossAxisSize = 0.0;
-                maxCrossAxisSize = double.infinity;
-              }
-              innerConstraints = BoxConstraints(
-                minHeight: mainAxisMinSize,
-                maxHeight: mainAxisMaxSize,
-                minWidth: minCrossAxisSize,
-                maxWidth: maxCrossAxisSize);
-              break;
-          }
-        } else {
-          switch (renderStyle.flexDirection) {
-            case FlexDirection.row:
-            case FlexDirection.rowReverse:
-              innerConstraints = BoxConstraints(
-                minWidth: minChildExtent,
-                maxWidth: maxChildExtent,
-              );
-              break;
-            case FlexDirection.column:
-            case FlexDirection.columnReverse:
-              innerConstraints = BoxConstraints(
-                minHeight: minChildExtent,
-                maxHeight: maxChildExtent
-              );
-              break;
-          }
-        }
-
         DateTime childLayoutStart;
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
 
-        child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
+        BoxConstraints childConstraints = getChildConstraints(
+          child,
+          metrics,
+          runBetweenSpace,
+          isFlexGrow: isFlexGrow,
+          isFlexShrink: isFlexShrink,
+          isStretchSelf: isStretchSelf
+        );
+
+        child.layout(childConstraints, parentUsesSize: true);
+
+        // @FIXME: need to update runMetrics cause child relayout may affect container size
 
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
@@ -1823,13 +1498,118 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  /// Get constraints of flex items which needs to change size due to
+  /// flex-grow/flex-shrink or align-items stretch
+  BoxConstraints getChildConstraints(
+    RenderBox child,
+    _RunMetrics metrics,
+    double runBetweenSpace,
+    {
+    bool isFlexGrow = false,
+    bool isFlexShrink = false,
+    bool isStretchSelf = false,
+  }) {
+    BoxConstraints oldConstraints = child.constraints;
+    double minConstraintWidth = oldConstraints.minWidth;
+    double maxConstraintWidth = oldConstraints.maxWidth;
+    double minConstraintHeight = oldConstraints.minHeight;
+    double maxConstraintHeight = oldConstraints.maxHeight;
+    bool isHorizontalFlexDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
+
+    if (child is RenderBoxModel) {
+      RenderStyle childRenderStyle = child.renderStyle;
+      Size childSize = _getChildSize(child);
+      double flexGrow = _getFlexGrow(child);
+      double flexShrink = _getFlexShrink(child);
+      // Change main axis constraints
+      if ((isFlexGrow && flexGrow > 0) || (isFlexShrink && flexShrink > 0)) {
+        double mainSize = metrics.runChildren[child.targetId].adjustedMainSize;
+        if (isHorizontalFlexDirection) {
+          minConstraintWidth = maxConstraintWidth = mainSize;
+        } else {
+          minConstraintHeight = maxConstraintHeight = mainSize;
+        }
+      }
+      // Change cross axis constraints
+      if (isStretchSelf) {
+        bool isFlexWrap = renderStyle.flexWrap == FlexWrap.wrap || renderStyle.flexWrap == FlexWrap.wrapReverse;
+        final double runCrossAxisExtent = metrics.crossAxisExtent;
+        if (isHorizontalFlexDirection) {
+          CSSMargin marginTop = childRenderStyle.marginTop;
+          CSSMargin marginBottom = childRenderStyle.marginBottom;
+          bool crossConstraintsTight = constraints.minHeight == constraints.maxHeight;
+
+          // Margin auto alignment takes priority over align-items stretch,
+          // it will not stretch child in vertical direction
+          if (marginTop.isAuto || marginBottom.isAuto) {
+            minConstraintHeight = maxConstraintHeight = childSize.height;
+          } else {
+            double flexLineHeight = _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
+            // Should substract margin when layout child
+            double marginVertical = marginTop.length + marginBottom.length;
+            double childCrossSize = flexLineHeight - marginVertical;
+            double stretchedHeight;
+            // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
+            if (!isFlexWrap && crossConstraintsTight) {
+              double verticalBorderLength = renderStyle.borderEdge != null ? renderStyle.borderEdge.vertical : 0;
+              double verticalPaddingLength = renderStyle.padding != null ? renderStyle.padding.vertical : 0;
+              stretchedHeight = math.min(
+                constraints.maxHeight - verticalBorderLength - verticalPaddingLength,
+                childCrossSize
+              );
+            } else {
+              stretchedHeight = childCrossSize;
+            }
+            minConstraintHeight = maxConstraintHeight = stretchedHeight;
+          }
+        } else {
+          CSSMargin marginLeft = childRenderStyle.marginLeft;
+          CSSMargin marginRight = childRenderStyle.marginRight;
+          bool crossConstraintsTight = constraints.minWidth == constraints.maxWidth;
+          // Margin auto alignment takes priority over align-items stretch,
+          // it will not stretch child in horizontal direction
+          if (marginLeft.isAuto || marginRight.isAuto) {
+            minConstraintWidth = maxConstraintWidth = childSize.width;
+          } else {
+            double flexLineHeight = _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
+            // Should substract margin when layout child
+            double marginHorizontal = marginLeft.length + marginRight.length;
+            double childCrossSize = flexLineHeight - marginHorizontal;
+            double stretchedWidth;
+            // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
+            if (!isFlexWrap && crossConstraintsTight) {
+              double horizontalBorderLength = renderStyle.borderEdge != null ? renderStyle.borderEdge.horizontal : 0;
+              double horizontalPaddingLength = renderStyle.padding != null ? renderStyle.padding.horizontal : 0;
+              stretchedWidth = math.min(
+                constraints.maxWidth - horizontalBorderLength - horizontalPaddingLength,
+                childCrossSize
+              );
+            } else {
+              stretchedWidth = childCrossSize;
+            }
+            minConstraintWidth = maxConstraintWidth = stretchedWidth;
+          }
+        }
+      }
+    }
+
+    BoxConstraints childConstraints = BoxConstraints(
+      minWidth: minConstraintWidth,
+      maxWidth: maxConstraintWidth,
+      minHeight: minConstraintHeight,
+      maxHeight: maxConstraintHeight,
+    );
+
+    return childConstraints;
+  }
+
   /// Stage 3: Set flex container size according to children size
   void _setContainerSize(
     List<_RunMetrics> runMetrics,
     Map<String, double> containerSizeMap,
     Map<int, double> maxScrollableWidthMap,
     Map<int, double> maxScrollableHeightMap,
-  ) {
+    ) {
 
     // Find max size of flex lines
     _RunMetrics maxMainSizeMetrics = runMetrics.reduce((_RunMetrics curr, _RunMetrics next) {
@@ -1838,41 +1618,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Actual main axis size of flex items
     double maxAllocatedMainSize = maxMainSizeMetrics.mainAxisExtent;
 
-    CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
-    // Get layout width from children's width by flex axis
-    double constraintWidth = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ? containerSizeMap['main'] : containerSizeMap['cross'];
-    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
-
-    double width = renderStyle.width;
-    double height = renderStyle.height;
-    double minWidth = renderStyle.minWidth;
-    double minHeight = renderStyle.minHeight;
-    double maxWidth = renderStyle.maxWidth;
-    double maxHeight = renderStyle.maxHeight;
-
-    // Constrain to min-width or max-width if width not exists
-    double childrenWidth = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ? maxAllocatedMainSize : containerSizeMap['cross'];
-    if (isInlineBlock && maxWidth != null && width == null) {
-      constraintWidth = childrenWidth > maxWidth ? maxWidth : childrenWidth;
-    } else if (isInlineBlock && minWidth != null && width == null) {
-      constraintWidth = childrenWidth < minWidth ? minWidth : childrenWidth;
-    } else if (logicalContentWidth != null) {
-      constraintWidth = math.max(constraintWidth, logicalContentWidth);
-    }
-
-    // Get layout height from children's height by flex axis
-    double constraintHeight = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ? containerSizeMap['cross'] : containerSizeMap['main'];
-    bool isNotInline = transformedDisplay != CSSDisplay.inline;
-
-    // Constrain to min-height or max-height if width not exists
-    double childrenHeight = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ? containerSizeMap['cross'] : maxAllocatedMainSize;
-    if (isNotInline && maxHeight != null && height == null) {
-      constraintHeight = childrenHeight > maxHeight ? maxHeight : childrenHeight;
-    } else if (isNotInline && minHeight != null && height == null) {
-      constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
-    } else if (logicalContentHeight != null) {
-      constraintHeight = math.max(constraintHeight, logicalContentHeight);
-    }
 
     double maxScrollableWidth = 0.0;
     double maxScrollableHeight = 0.0;
@@ -1886,6 +1631,19 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     /// Stage 3: Set flex container size
+    double contentWidth = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
+      maxAllocatedMainSize : containerSizeMap['cross'];
+    double contentHeight = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
+      containerSizeMap['cross'] : maxAllocatedMainSize;
+    Size layoutSize = getLayoutSize(
+      logicalContentWidth: logicalContentWidth,
+      logicalContentHeight: logicalContentHeight,
+      contentWidth: contentWidth,
+      contentHeight: contentHeight,
+    );
+    double constraintWidth = layoutSize.width;
+    double constraintHeight = layoutSize.height;
+
     Size contentSize = Size(constraintWidth, constraintHeight);
     if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
       setMaxScrollableSize(math.max(contentSize.width, maxScrollableWidth), math.max(contentSize.height, maxScrollableHeight));
@@ -1910,6 +1668,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double autoMinSize = 0;
+    bool isHorizontalFlexDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
 
     // Main size of each run
     List<double> runMainSize = [];
@@ -1918,19 +1677,10 @@ class RenderFlexLayout extends RenderLayoutBox {
       Map<int, _RunChild> runChildren = runMetrics.runChildren;
       double runMainExtent = 0;
       void iterateRunChildren(int targetId, _RunChild runChild) {
-        double runChildMainSize = runChild.originalMainSize;
         RenderBox child = runChild.child;
-        // Decendants with percentage main size should not include in auto main size
-        if (child is RenderBoxModel) {
-//          String mainSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
-//            child.style[WIDTH] : child.style[HEIGHT];
-//          String mainMinSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
-//            child.style[MIN_WIDTH] : child.style[MIN_HEIGHT];
-//          if (CSSLength.isPercentage(mainSize) ||
-//            (mainSize.isEmpty && CSSLength.isPercentage(mainMinSize))
-//          ) {
-//            runChildMainSize = 0;
-//          }
+        double runChildMainSize = isHorizontalFlexDirection ? child.size.width : child.size.height;
+        if (child is RenderTextBox) {
+          runChildMainSize = isHorizontalFlexDirection ? child.autoMinWidth : child.autoMinHeight;
         }
         runMainExtent += runChildMainSize;
       }
@@ -1953,10 +1703,39 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double autoMinSize = 0;
-    // Get the sum size of flex lines
-    for (_RunMetrics curr in runMetrics) {
-      autoMinSize += curr.crossAxisExtent;
+    bool isHorizontalFlexDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
+
+    // Cross size of each run
+    List<double> runCrossSize = [];
+
+    void iterateRunMetrics(_RunMetrics runMetrics) {
+      Map<int, _RunChild> runChildren = runMetrics.runChildren;
+      double runCrossExtent = 0;
+      List<double> runChildrenCrossSize = [];
+      void iterateRunChildren(int targetId, _RunChild runChild) {
+        RenderBox child = runChild.child;
+        double runChildCrossSize = isHorizontalFlexDirection ? child.size.height : child.size.width;
+        if (child is RenderTextBox) {
+          runChildCrossSize = isHorizontalFlexDirection ? child.autoMinHeight : child.autoMinWidth;
+        }
+        runChildrenCrossSize.add(runChildCrossSize);
+      }
+      runChildren.forEach(iterateRunChildren);
+      runCrossExtent = runChildrenCrossSize.reduce((double curr, double next) {
+        return curr > next ? curr : next;
+      });
+
+      runCrossSize.add(runCrossExtent);
     }
+
+    // Calculate the max main size of all runs
+    runMetrics.forEach(iterateRunMetrics);
+
+    // Get the sum of lines
+    for (double crossSize in runCrossSize) {
+      autoMinSize += crossSize;
+    }
+
     return autoMinSize;
   }
 
@@ -1970,6 +1749,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     if (isSingleLine) {
       // Use content size if container size is not set yet
+//      return !hasSize ? runCrossAxisExtent : _getContentCrossSize();
       return beforeSetSize ? runCrossAxisExtent : _getContentCrossSize();
     } else if (isMultiLineStretch) {
       return runCrossAxisExtent + runBetweenSpace;
@@ -1984,7 +1764,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     double runBetweenSpace,
     double runLeadingSpace,
     RenderPositionHolder placeholderChild,
-    Map<String, double> containerSizeMap,
     Map<int, double> maxScrollableWidthMap,
     Map<int, double> maxScrollableHeightMap,
     ) {
@@ -2013,7 +1792,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final Map<int, _RunChild> runChildren = metrics.runChildren;
 
       final double mainContentSizeDelta = mainAxisContentSize - runMainAxisExtent;
-      bool isFlexGrow = mainContentSizeDelta >= 0 && totalFlexGrow > 0;
+      bool isFlexGrow = mainContentSizeDelta > 0 && totalFlexGrow > 0;
       bool isFlexShrink = mainContentSizeDelta < 0 && totalFlexShrink > 0;
 
       _overflow = math.max(0.0, - mainContentSizeDelta);

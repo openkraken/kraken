@@ -282,6 +282,13 @@ class ImageElement extends Element {
     double width = renderStyle.width ?? _propertyWidth;
     double height = renderStyle.height ?? _propertyHeight;
 
+    if (renderStyle.width == null && _propertyWidth != null) {
+      renderBoxModel.renderStyle.updateSizing(WIDTH, _propertyWidth);
+    }
+    if (renderStyle.height == null && _propertyHeight != null) {
+      renderBoxModel.renderStyle.updateSizing(HEIGHT, _propertyHeight);
+    }
+
     if (width == null && height == null) {
       width = naturalWidth;
       height = naturalHeight;

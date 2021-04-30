@@ -3,10 +3,13 @@
  * Author: Kraken Team.
  */
 
-// MUST READ: 
+#ifndef KRAKEN_BRIDGE_JSC_H
+#define KRAKEN_BRIDGE_JSC_H
+
+// MUST READ:
 // All the struct which prefix with NativeXXX struct (exp: NativeElement) has a corresponding struct in Dart code.
 // All struct members include variables and functions must be follow the same order with Dart class, to keep the same memory layout cross dart and C++ code.
-
+#include "kraken_foundation.h"
 #include <JavaScriptCore/JavaScript.h>
 #include <chrono>
 #include <deque>
@@ -15,8 +18,6 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
-
-#include "kraken_bridge_jsc_config.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg)>;
 
@@ -101,7 +102,7 @@ public:
                                           JSObjectCallAsFunctionCallback callback);
 
 private:
-  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
 };
 
 class KRAKEN_EXPORT JSStringHolder {
@@ -125,7 +126,7 @@ public:
 private:
   JSContext *m_context;
   JSStringRef m_string{nullptr};
-  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSStringHolder);
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(JSStringHolder);
 };
 
 class KRAKEN_EXPORT JSValueHolder {
@@ -139,7 +140,7 @@ public:
 private:
   JSContext *m_context;
   JSValueRef m_value{nullptr};
-  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSValueHolder);
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(JSValueHolder);
 };
 
 void KRAKEN_EXPORT buildUICommandArgs(JSStringRef key, NativeString &args_01);
@@ -586,14 +587,16 @@ public:
   void refer();
   void unrefer();
 
-  int32_t _referenceCount{0};
+  inline DocumentInstance *document() { return m_document; }
 
-  DocumentInstance *document{nullptr};
+  int32_t _referenceCount{0};
   virtual void _notifyNodeRemoved(NodeInstance *node);
   virtual void _notifyNodeInsert(NodeInstance *node);
 
 private:
+  DocumentInstance *m_document{nullptr};
   void ensureDetached(NodeInstance *node);
+  friend DocumentInstance;
 };
 
 struct NativeNode {
@@ -686,6 +689,7 @@ public:
 
 private:
   DocumentCookie m_cookie;
+  friend NodeInstance;
 };
 
 class JSElementAttributes : public HostObject {
@@ -1024,3 +1028,7 @@ private:
 };
 
 } // namespace kraken::binding::jsc
+
+JSGlobalContextRef getGlobalContextRef(int32_t contextId);
+
+#endif

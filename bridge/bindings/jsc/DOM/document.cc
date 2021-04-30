@@ -6,7 +6,6 @@
 #include "document.h"
 #include "comment_node.h"
 #include "element.h"
-#include "foundation/ui_command_callback_queue.h"
 #include "text_node.h"
 #include <mutex>
 #include <regex>
@@ -79,7 +78,6 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
 
   auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   auto element = JSElement::buildElementInstance(document->context, tagName);
-  element->document = document;
   return element->object;
 }
 
@@ -95,7 +93,6 @@ JSValueRef JSDocument::createTextNode(JSContextRef ctx, JSObjectRef function, JS
   auto TextNode = JSTextNode::instance(document->context);
   auto textNodeInstance = JSObjectCallAsConstructor(ctx, TextNode->classObject, 1, arguments, exception);
   auto textNode = reinterpret_cast<JSTextNode::TextNodeInstance *>(JSObjectGetPrivate(textNodeInstance));
-  textNode->document = document;
   return textNodeInstance;
 }
 
@@ -106,7 +103,6 @@ JSValueRef JSDocument::createComment(JSContextRef ctx, JSObjectRef function, JSO
   auto commentNodeInstance =
     JSObjectCallAsConstructor(ctx, CommentNode->classObject, argumentCount, arguments, exception);
   auto commentNode = reinterpret_cast<JSCommentNode::CommentNodeInstance *>(JSObjectGetPrivate(commentNodeInstance));
-  commentNode->document = document;
   return commentNodeInstance;
 }
 
@@ -247,10 +243,11 @@ DocumentInstance *DocumentInstance::instance(JSContext *context) {
 DocumentInstance::DocumentInstance(JSDocument *document)
   : NodeInstance(document, NodeType::DOCUMENT_NODE, DOCUMENT_TARGET_ID),
     nativeDocument(new NativeDocument(nativeNode)) {
+  m_document = this;
   JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
   auto Element = JSElement::instance(document->context);
   body = new ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
-  body->document = this;
+  body->m_document = this;
   JSStringHolder bodyStringHolder = JSStringHolder(context, "body");
   JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
   JSObjectSetProperty(ctx, object, bodyStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);

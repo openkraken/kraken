@@ -81,7 +81,7 @@ private:
   mutable bool destruction_started_;
 #endif
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafeBase);
+  KRAKEN_DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafeBase);
 };
 
 inline RefCountedThreadSafeBase::RefCountedThreadSafeBase()

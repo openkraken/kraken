@@ -104,7 +104,7 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   const JSValueRef &callbackValueRef = arguments[0];
   const JSValueRef &timeoutValueRef = arguments[1];
@@ -161,7 +161,7 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   const JSValueRef &callbackValueRef = arguments[0];
   const JSValueRef &timeoutValueRef = arguments[1];
@@ -218,7 +218,7 @@ JSValueRef clearTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef this
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   const JSValueRef timerIdValueRef = arguments[0];
   if (!JSValueIsNumber(ctx, timerIdValueRef)) {
@@ -244,7 +244,7 @@ JSValueRef cancelAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObject
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   const JSValueRef requestIdValueRef = arguments[0];
   if (!JSValueIsNumber(ctx, requestIdValueRef)) {
@@ -275,7 +275,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
   const JSValueRef &callbackValueRef = arguments[0];
 
   if (!JSValueIsObject(ctx, callbackValueRef)) {
@@ -329,22 +329,13 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   return JSValueMakeNumber(ctx, requestId);
 }
 
-void bindTimer() {
-  const JSStaticFunction _setTimeout = {"setTimeout", setTimeout, kJSPropertyAttributeNone};
-  const JSStaticFunction _setInterval = {"setInterval", setInterval, kJSPropertyAttributeNone};
-  const JSStaticFunction _requestAnimationFrame = {"requestAnimationFrame", requestAnimationFrame,
-                                                   kJSPropertyAttributeNone};
-  const JSStaticFunction _clearTimeout = {"clearTimeout", clearTimeout, kJSPropertyAttributeNone};
-  const JSStaticFunction _clearInterval = {"clearInterval", clearTimeout, kJSPropertyAttributeNone};
-  const JSStaticFunction _cancelAnimationFrame = {"cancelAnimationFrame", cancelAnimationFrame,
-                                                  kJSPropertyAttributeNone};
-
-  JSContext::globalFunctions.emplace_back(_setTimeout);
-  JSContext::globalFunctions.emplace_back(_setInterval);
-  JSContext::globalFunctions.emplace_back(_requestAnimationFrame);
-  JSContext::globalFunctions.emplace_back(_clearTimeout);
-  JSContext::globalFunctions.emplace_back(_clearInterval);
-  JSContext::globalFunctions.emplace_back(_cancelAnimationFrame);
+void bindTimer(std::unique_ptr<JSContext> &context) {
+  JSC_GLOBAL_BINDING_FUNCTION(context, "setTimeout", setTimeout);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "setInterval", setInterval);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "requestAnimationFrame", requestAnimationFrame);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "clearTimeout", clearTimeout);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "clearInterval", clearTimeout);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "cancelAnimationFrame", cancelAnimationFrame);
 }
 
 } // namespace kraken::binding::jsc

@@ -4,7 +4,7 @@
 
 ## 💁 Have a try
 
-1. Install Kraken CLI
+1. Install Kraken CLI (macOS only currently)
 
     ```shell
     $ npm i @openkraken/cli -g
