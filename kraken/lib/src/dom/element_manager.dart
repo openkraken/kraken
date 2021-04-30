@@ -46,6 +46,11 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     }
   }
 
+  // Alias defineElement export for karken plugin
+  static void defineElement(String type, ElementCreator creator) {
+    element_registry.defineElement(type, creator);
+  }
+
   static Map<int, Pointer<NativeElement>> htmlNativePtrMap = Map();
   static Map<int, Pointer<NativeDocument>> documentNativePtrMap = Map();
   static Map<int, Pointer<NativeWindow>> windowNativePtrMap = Map();
