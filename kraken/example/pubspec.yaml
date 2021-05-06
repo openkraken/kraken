@@ -22,9 +22,6 @@ dependencies:
 dependency_overrides:
   kraken:
     path: ../
-  kraken_websocket:
-    path: ../../../plugins/packages/kraken_websocket
-
 
 # The following section is specific to Flutter.
 flutter:
