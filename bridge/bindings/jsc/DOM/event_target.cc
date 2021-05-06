@@ -397,6 +397,7 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, 
                                                nativeEventType->length);
   std::string eventType = toUTF8(u16EventType);
   EventInstance *eventInstance = JSEvent::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
+  eventInstance->nativeEvent->target = eventTargetInstance;
   eventTargetInstance->dispatchEvent(eventInstance);
 }
 

@@ -100,7 +100,6 @@ class Event {
     event.ref.timeStamp = timeStamp;
     event.ref.defaultPrevented = defaultPrevented ? 1 : 0;
     event.ref.target = target != null ? target.nativeEventTargetPtr : nullptr;
-    event.ref.currentTarget = currentTarget != null ? currentTarget.nativeEventTargetPtr : nullptr;
 
     return event.cast<Pointer>();
   }
@@ -214,7 +213,7 @@ class CustomEvent extends Event {
 class InputEvent extends Event {
   // A String containing the type of input that was made.
   // There are many possible values, such as insertText,
-  // deleteContentBackward, insertFromPaste, and formatBold. 
+  // deleteContentBackward, insertFromPaste, and formatBold.
   final String inputType;
   final String data;
 
