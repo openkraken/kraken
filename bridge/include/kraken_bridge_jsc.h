@@ -947,21 +947,13 @@ struct NativeGestureEvent {
   explicit NativeGestureEvent(NativeEvent *nativeEvent) : nativeEvent(nativeEvent){};
 
   NativeEvent *nativeEvent;
-
   NativeString *state;
-
   NativeString *direction;
-
   double_t deltaX;
-
   double_t deltaY;
-
   double_t velocityX;
-
   double_t velocityY;
-
   double_t scale;
-
   double_t rotation;
 };
 

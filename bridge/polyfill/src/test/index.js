@@ -50,19 +50,13 @@ global.setInterval = function (fn, timeout) {
 
 // https://jasmine.github.io/api/edge/Reporter.html
 class JasmineTracker {
-  onJasmineStarted() { }
   onJasmineDone() { }
-  onSpecDone() { }
-
-  jasmineStarted(result) {
-    return this.onJasmineStarted(result);
-  }
 
   jasmineDone(result) {
     return this.onJasmineDone(result);
   }
 
-  specStarted(result) {
+  specDone(result) {
     return new Promise((resolve, reject) => {
       try {
         clearAllTimer();
@@ -75,9 +69,6 @@ class JasmineTracker {
         reject(e);
       }
     });
-  }
-  specDone(result) {
-    return this.onSpecDone(result);
   }
 }
 

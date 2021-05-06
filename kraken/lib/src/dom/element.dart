@@ -151,7 +151,7 @@ class Element extends Node
         this.repaintSelf = false,
         // @HACK: overflow scroll needs to create an shadow element to create an scrolling renderBox for better scrolling performance.
         // we needs to prevent this shadow element override real element in nativeMap.
-        bool isScrollingElement = false})
+        bool isHiddenElement = false})
       : assert(targetId != null),
         assert(tagName != null),
         _isIntrinsicBox = isIntrinsicBox,
@@ -159,7 +159,7 @@ class Element extends Node
         super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
 
-    if (!isScrollingElement) {
+    if (!isHiddenElement) {
       _nativeMap[nativeElementPtr.address] = this;
     }
 
@@ -236,11 +236,12 @@ class Element extends Node
     }
   }
 
+  // TODO: debounce scroll listener
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
     layoutStickyChildren(scrollOffset, axisDirection);
     paintFixedChildren(scrollOffset, axisDirection);
 
-    if (eventHandlers.containsKey(SCROLL)) {
+    if (eventHandlers.containsKey(EVENT_SCROLL)) {
       _fireScrollEvent();
     }
   }
@@ -254,7 +255,7 @@ class Element extends Node
   /// So it needs to manually mark element needs paint and add scroll offset in paint stage
   void paintFixedChildren(double scrollOffset, AxisDirection axisDirection) {
     // Only root element has fixed children
-    if (targetId == -1) {
+    if (tagName == '#viewport') {
       for (RenderBoxModel child in scrollingContentLayoutBox.fixedChildren) {
         // Save scrolling offset for paint
         if (axisDirection == AxisDirection.down) {
@@ -1389,40 +1390,42 @@ class Element extends Node
     }
 
     Completer<Uint8List> completer = Completer();
+    if (nodeName != 'HTML') {
+      RenderObject parent = renderBoxModel.parent;
+      if (!renderBoxModel.isRepaintBoundary) {
+        RenderBoxModel renderReplacedBoxModel;
+        if (renderBoxModel is RenderLayoutBox) {
+          renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
+        } else {
+          renderReplacedBoxModel = createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
+        }
 
-    RenderObject parent = renderBoxModel.parent;
-    if (!renderBoxModel.isRepaintBoundary) {
-      RenderBoxModel renderReplacedBoxModel;
-      if (renderBoxModel is RenderLayoutBox) {
-        renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
-      } else {
-        renderReplacedBoxModel = createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
-      }
-
-      if (parent is RenderObjectWithChildMixin<RenderBox>) {
-        parent.child = null;
-        parent.child = renderReplacedBoxModel;
-      } else if (parent is ContainerRenderObjectMixin) {
-        ContainerBoxParentData parentData = renderBoxModel.parentData;
-        RenderObject previousSibling = parentData.previousSibling;
-        parent.remove(renderBoxModel);
+        if (parent is RenderObjectWithChildMixin<RenderBox>) {
+          parent.child = null;
+          parent.child = renderReplacedBoxModel;
+        } else if (parent is ContainerRenderObjectMixin) {
+          ContainerBoxParentData parentData = renderBoxModel.parentData;
+          RenderObject previousSibling = parentData.previousSibling;
+          parent.remove(renderBoxModel);
+          renderBoxModel = renderReplacedBoxModel;
+          this.parent.addChildRenderObject(this, after: previousSibling);
+        }
         renderBoxModel = renderReplacedBoxModel;
-        this.parent.addChildRenderObject(this, after: previousSibling);
+        // Update renderBoxModel reference in renderStyle
+        renderBoxModel.renderStyle.renderBoxModel = renderBoxModel;
       }
-      renderBoxModel = renderReplacedBoxModel;
-      // Update renderBoxModel reference in renderStyle
-      renderBoxModel.renderStyle.renderBoxModel = renderBoxModel;
     }
 
     renderBoxModel.owner.flushLayout();
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
-      if (renderBoxModel.hasSize && renderBoxModel.size == Size.zero) {
+      RenderBoxModel renderObject = nodeName == 'HTML' ? elementManager.viewportElement.renderBoxModel : renderBoxModel;
+      if (renderObject.hasSize && renderObject.size == Size.zero) {
         // Return a blob with zero length.
         captured = Uint8List(0);
       } else {
-        Image image = await renderBoxModel.toImage(pixelRatio: devicePixelRatio);
+        Image image = await renderObject.toImage(pixelRatio: devicePixelRatio);
         ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
         captured = byteData.buffer.asUint8List();
       }

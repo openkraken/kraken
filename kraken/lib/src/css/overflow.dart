@@ -144,7 +144,6 @@ mixin CSSOverflowMixin on ElementBase {
         _downgradeToParentRepaint(element);
       }
     }
-
   }
 
   void _createScrollingLayoutBox(Element element) {
@@ -156,7 +155,7 @@ mixin CSSOverflowMixin on ElementBase {
     // @HACK: create shadow element for scrollingLayoutBox
     // @TODO: remove this after rendering phase are working without element and targetId required
     Element scrollingElement = Element(shadowElementTargetId, element.nativeElementPtr, element.elementManager,
-        defaultStyle: element.defaultStyle, isIntrinsicBox: element.isInlineBox, tagName: element.tagName, isScrollingElement: true);
+        defaultStyle: element.defaultStyle, isIntrinsicBox: element.isInlineBox, tagName: element.tagName, isHiddenElement: true);
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
     scrollingContentLayoutBox = element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
@@ -282,6 +281,12 @@ mixin CSSOverflowMixin on ElementBase {
   List<Element> _findStickyChildren(Element element) {
     assert(element != null);
     List<Element> result = [];
+
+    // Viewport element is not in visible dom tree
+    if (element.tagName == '#viewport') {
+      element = elementManager.document.documentElement;
+    }
+
     for (Element child in element.children) {
       List<CSSOverflowType> overflow = getOverflowTypes(child.style);
       CSSOverflowType overflowX = overflow[0];
@@ -341,14 +346,6 @@ mixin CSSOverflowMixin on ElementBase {
   get scrollWidth {
     Size scrollContainerSize = renderBoxModel.scrollableSize;
     return scrollContainerSize.width;
-  }
-
-  void handleMethodScroll(num x, num y, { bool diff = false }) {
-    if (diff) {
-      scrollBy(dx: x, dy: y, withAnimation: false);
-    } else {
-      scrollTo(x: x, y: y, withAnimation: false);
-    }
   }
 
   void scrollBy({ num dx = 0.0, num dy = 0.0, bool withAnimation }) {

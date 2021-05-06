@@ -46,7 +46,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     }
   }
 
-  // Alias defineElement export for karken plugin
+  // Alias defineElement export for kraken plugin
   static void defineElement(String type, element_registry.ElementCreator creator) {
     element_registry.defineElement(type, creator);
   }
@@ -59,7 +59,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   RenderViewportBox viewport;
   Document document;
-  Element documentElement;
+  RenderObject _viewportRenderObject;
+  Element viewportElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
   KrakenController controller;
@@ -77,24 +78,24 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       PerformanceTiming.instance(contextId).mark(PERF_ROOT_ELEMENT_INIT_START);
     }
 
-    documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId], this);
+    Element documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId], this);
     setEventTarget(documentElement);
 
-    var rootElement = Element(-10, htmlNativePtrMap[contextId], this, defaultStyle: {
+    viewportElement = Element(-10, htmlNativePtrMap[contextId], this, defaultStyle: {
       DISPLAY: BLOCK,
       OVERFLOW: AUTO,
-    }, tagName: '#root', isScrollingElement: true);
+    }, tagName: '#viewport', isHiddenElement: true);
 
-    rootElement.willAttachRenderer();
-    rootElement.style.applyTargetProperties();
-    RenderStyle renderStyle = rootElement.renderBoxModel.renderStyle;
+    viewportElement.willAttachRenderer();
+    viewportElement.style.applyTargetProperties();
+    RenderStyle renderStyle = viewportElement.renderBoxModel.renderStyle;
     renderStyle.width = viewportWidth;
     renderStyle.height = viewportHeight;
-    rootElement.didAttachRenderer();
-    rootElement.addChild(documentElement.renderer);
+    viewportElement.didAttachRenderer();
+    viewportElement.addChild(documentElement.renderer);
 
-    viewport.child = rootElement.renderBoxModel;
-    _root = viewport;
+    viewport.child = viewportElement.renderBoxModel;
+    _viewportRenderObject = viewport;
 
     if (kProfileMode) {
       PerformanceTiming.instance(contextId).mark(PERF_ROOT_ELEMENT_INIT_END);
@@ -102,7 +103,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     _setupObserver();
 
-    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this);
+    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this, viewportElement);
     setEventTarget(window);
 
     document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, documentElement);
@@ -322,22 +323,12 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     target.removeEvent(eventType);
   }
 
-  RenderObject _root;
-
-  RenderObject get root => _root;
-
-  set root(RenderObject root) {
-    assert(() {
-      throw FlutterError('Can not set root to ElementManagerActionDelegate.');
-    }());
-  }
-
   RenderObject getRootRenderObject() {
-    return root;
+    return _viewportRenderObject;
   }
 
   Element getRootElement() {
-    return documentElement;
+    return viewportElement;
   }
 
   bool showPerformanceOverlay = false;
@@ -388,12 +379,12 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void detach() {
-    RenderObject parent = root.parent;
+    RenderObject parent = _viewportRenderObject.parent;
 
     if (parent == null) return;
 
     // Detach renderObjects
-    documentElement.detach();
+    viewportElement.detach();
 
     // run detachCallbacks
     for (var callback in _detachCallbacks) {
@@ -401,7 +392,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     }
     _detachCallbacks.clear();
 
-    documentElement = null;
+    viewportElement = null;
     document = null;
   }
 
@@ -453,7 +444,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
         viewport.bottomInset = bottomInset;
         if (shouldScrollByToCenter) {
           SchedulerBinding.instance.addPostFrameCallback((_) {
-            documentElement.scrollBy(dy: bottomInset);
+            viewportElement.scrollBy(dy: bottomInset);
           });
         }
       }

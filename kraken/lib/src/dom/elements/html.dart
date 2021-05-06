@@ -36,4 +36,7 @@ class HTMLElement extends Element {
     renderStyle.minHeight = elementManager.viewportHeight;
     didAttachRenderer();
   }
+
+  @override
+  Element get parent => elementManager.getRootElement();
 }
