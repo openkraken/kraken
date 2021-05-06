@@ -1,3 +1,7 @@
+## 0.7.2+3
+
+feat: add willReload and didReload hooks for devTools.
+
 ## 0.7.2+2
 
 fix: export getUIThreadId and getGlobalContextRef symbols.
