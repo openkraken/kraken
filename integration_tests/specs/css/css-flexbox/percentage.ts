@@ -48,7 +48,7 @@ describe('percentage', () => {
                 fontSize: '16px'
               }
             }, [
-              createText('我的回答')
+              createText('Main title')
             ]),
             createElement('div', {
               style: {
@@ -64,7 +64,7 @@ describe('percentage', () => {
                 "lineClamp": "1"
               }
             }, [
-              createText('暂时没有问答动态哦asdfas阿斯顿空军飞机阿克琉斯的风景阿娇的事阿克琉斯解放军卡拉斯地方～')
+              createText('The end of this line should display an ellipsis instead of clipped text.')
             ]),
           ]
         )
