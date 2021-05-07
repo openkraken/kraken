@@ -784,7 +784,7 @@ class Element extends Node
         containingBlockElement = _findContainingBlock(child);
         break;
       case CSSPositionType.fixed:
-        containingBlockElement = elementManager.getRootElement();
+        containingBlockElement = elementManager.viewportElement;
         break;
       default:
         return;
@@ -838,7 +838,7 @@ class Element extends Node
 
   /// Cache fixed renderObject to root element
   void _addFixedChild(RenderBoxModel childRenderBoxModel) {
-    Element rootEl = elementManager.getRootElement();
+    Element rootEl = elementManager.viewportElement;
     RenderLayoutBox rootRenderLayoutBox = rootEl.scrollingContentLayoutBox;
     List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
     if (fixedChildren.indexOf(childRenderBoxModel) == -1) {
@@ -848,7 +848,7 @@ class Element extends Node
 
   /// Remove non fixed renderObject to root element
   void _removeFixedChild(RenderBoxModel childRenderBoxModel) {
-    Element rootEl = elementManager.getRootElement();
+    Element rootEl = elementManager.viewportElement;
     RenderLayoutBox rootRenderLayoutBox = rootEl.scrollingContentLayoutBox;
     List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
     if (fixedChildren.indexOf(childRenderBoxModel) != -1) {
@@ -1315,7 +1315,7 @@ class Element extends Node
 
     Element element = _findContainingBlock(this);
     if (element == null) {
-      element = elementManager.getRootElement();
+      element = elementManager.viewportElement;
     }
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderBoxModel);
   }
@@ -1646,7 +1646,7 @@ class Element extends Node
 
 Element _findContainingBlock(Element element) {
   Element _el = element?.parent;
-  Element rootEl = element.elementManager.getRootElement();
+  Element rootEl = element.elementManager.viewportElement;
 
   while (_el != null) {
     bool isElementNonStatic = _el.style[POSITION] != STATIC && _el.style[POSITION].isNotEmpty;
@@ -1662,7 +1662,7 @@ Element _findContainingBlock(Element element) {
 
 Element _findScrollContainer(Element element) {
   Element _el = element?.parent;
-  Element rootEl = element.elementManager.getRootElement();
+  Element rootEl = element.elementManager.viewportElement;
 
   while (_el != null) {
     List<CSSOverflowType> overflow = getOverflowTypes(_el.style);

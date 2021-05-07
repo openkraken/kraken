@@ -332,10 +332,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     return _viewportRenderObject;
   }
 
-  Element getRootElement() {
-    return viewportElement;
-  }
-
   bool showPerformanceOverlay = false;
 
   RenderBox buildRenderBox({bool showPerformanceOverlay}) {

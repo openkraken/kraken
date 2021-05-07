@@ -23,6 +23,5 @@ class BodyElement extends Element {
     super.willAttachRenderer();
     RenderStyle renderStyle = renderBoxModel.renderStyle;
     renderStyle.width = elementManager.viewportWidth;
-    renderStyle.minHeight = elementManager.viewportHeight;
   }
 }

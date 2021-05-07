@@ -33,10 +33,41 @@ class HTMLElement extends Element {
     RenderStyle renderStyle = renderBoxModel.renderStyle;
     // Must init with viewport width
     renderStyle.width = elementManager.viewportWidth;
-    renderStyle.minHeight = elementManager.viewportHeight;
     didAttachRenderer();
   }
 
-  @override
-  Element get parent => elementManager.getRootElement();
+  Element get parent => elementManager.viewportElement;
+
+  // https://www.w3.org/TR/cssom-view-1/#dom-element-scrolltop
+  // If the element is the root element return the value of scrollY on Window (viewport).
+  double get scrollTop {
+    return parent.scrollTop;
+  }
+  set scrollTop(double value) {
+    parent.scrollTo(y: value);
+  }
+
+  double get scrollLeft {
+    return parent.scrollLeft;
+  }
+  set scrollLeft(double value) {
+    parent.scrollTo(x: value);
+  }
+
+  get scrollHeight {
+    return parent.scrollHeight;
+  }
+
+  get scrollWidth {
+    return parent.scrollWidth;
+  }
+
+  void scrollBy({ num dx = 0.0, num dy = 0.0, bool withAnimation }) {
+    parent.scrollBy(dx: dx, dy: dy, withAnimation: withAnimation);
+  }
+
+  void scrollTo({ num x, num y, bool withAnimation }) {
+    parent.scrollTo(x: x, y: x, withAnimation: withAnimation);
+  }
+
 }
