@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
@@ -26,7 +25,7 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerMove = handlePointMove;
     renderBoxModel.onPointerUp = handlePointUp;
     renderBoxModel.onPointerCancel = handlePointCancel;
-    renderBoxModel.onClick = handleClick;
+    renderBoxModel.onClick = handleMouseClick;
     renderBoxModel.onSwipe = dispatchEvent;
     renderBoxModel.onPan = dispatchEvent;
     renderBoxModel.onScale = dispatchEvent;
@@ -93,7 +92,7 @@ mixin EventHandlerMixin on Node {
     return event;
   }
 
-  void handleClick(String eventType, PointerDownEvent down) {
+  void handleMouseClick(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
     RenderBoxModel root = elementManager.getRootElement().renderBoxModel;
     Offset globalOffset = root.globalToLocal(Offset(down.position.dx, down.position.dy));
 
