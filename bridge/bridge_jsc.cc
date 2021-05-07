@@ -105,7 +105,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindCSSStyleDeclaration(m_context);
   bindScreen(m_context);
   bindBlob(m_context);
-  bindMouseEvent(m_context);
 
 #if ENABLE_PROFILE
   nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_END);
