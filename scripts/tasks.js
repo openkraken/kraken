@@ -290,8 +290,8 @@ task('integration-test', (done) => {
   });
 });
 
-task('sdk-clean', (done) => {
-  execSync(`rm -rf ${paths.sdk}/build`, { stdio: 'inherit' });
+task('bridge-clean', (done) => {
+  execSync(`rm -rf ${paths.bridge}/build`, { stdio: 'inherit' });
   done();
 });
 
@@ -432,7 +432,7 @@ task('build-android-kraken-lib', (done) => {
   }
 
   const archs = ['arm64-v8a', 'armeabi-v7a'];
-  const buildType = buildMode == 'Release' ? 'Relwithdebinfo' : 'Debug';
+  const buildType = buildMode == 'Release' ? 'RelWithDebInfo' : 'Debug';
 
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
   archs.forEach(arch => {

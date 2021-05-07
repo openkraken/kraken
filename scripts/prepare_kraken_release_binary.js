@@ -4,7 +4,7 @@ const { series } = require('gulp');
 const os = require('os');
 
 let buildTasks = [
-  'sdk-clean',
+  'bridge-clean',
   'compile-polyfill',
   'build-android-kraken-lib',
 ];
