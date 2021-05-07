@@ -127,6 +127,46 @@ class EventInit {
   });
 }
 
+/// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/MouseEvent
+class MouseEvent extends Event {
+  final MouseEventInit _mouseEventInit;
+
+  double get clientX => _mouseEventInit?.clientX;
+  double get clientY => _mouseEventInit?.clientY;
+  double get offsetX => _mouseEventInit?.offsetX;
+  double get offsetY => _mouseEventInit?.offsetY;
+
+  MouseEvent(String type, [MouseEventInit mouseEventInit])
+      : _mouseEventInit = mouseEventInit, super(type, mouseEventInit);
+
+  Pointer<NativeMouseEvent> toNative() {
+    Pointer<NativeMouseEvent> nativeMouseEventPointer = allocate<NativeMouseEvent>();
+    nativeMouseEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
+    nativeMouseEventPointer.ref.clientX = clientX;
+    nativeMouseEventPointer.ref.clientY = clientY;
+    nativeMouseEventPointer.ref.offsetX = offsetX;
+    nativeMouseEventPointer.ref.offsetY = offsetY;
+    return nativeMouseEventPointer;
+  }
+}
+
+class MouseEventInit extends EventInit {
+  final double clientX;
+  final double clientY;
+  final double offsetX;
+  final double offsetY;
+
+  MouseEventInit({
+    bool bubbles = false,
+    bool cancelable = false,
+    this.clientX = 0.0,
+    this.clientY = 0.0,
+    this.offsetX = 0.0,
+    this.offsetY = 0.0,
+  })
+      : super(bubbles: bubbles, cancelable: cancelable);
+}
+
 
 class GestureEventInit extends EventInit {
   final String state;
