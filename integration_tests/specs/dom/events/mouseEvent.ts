@@ -1,5 +1,5 @@
 describe('MouseEvent', () => {
-  it('should exist CustomEvent global object', () => {
+  it('should exist MouseEvent global object', () => {
     expect(MouseEvent).toBeDefined();
     expect(() => {
       new MouseEvent('click');
