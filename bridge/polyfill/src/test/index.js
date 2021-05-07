@@ -164,9 +164,8 @@ global.simulatePointer = function simulatePointer(list) {
 global.simulateKeyPress = __kraken_simulate_keypress__;
 
 function resetDocumentElement() {
-  document.documentElement.scrollTo(0, 0);
+  window.scrollTo(0, 0);
   document.body = document.createElement('body');
-
   while (document.head.firstChild) {
     document.head.firstChild.remove();
   }
