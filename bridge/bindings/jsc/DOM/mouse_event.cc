@@ -131,10 +131,6 @@ JSValueRef JSMouseEvent::initMouseEvent(JSContextRef ctx, JSObjectRef function, 
   }
   auto eventInstance = static_cast<MouseEventInstance *>(JSObjectGetPrivate(thisObject));
 
-  if (eventInstance->_dispatchFlag) {
-    return nullptr;
-  }
-
   JSStringRef typeStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
   eventInstance->nativeEvent->type = stringRefToNativeString(typeStringRef);
 
