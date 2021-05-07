@@ -176,7 +176,7 @@ JSValueRef JSEvent::stopPropagation(JSContextRef ctx, JSObjectRef function, JSOb
                                                    JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
   eventInstance->_propagationStopped = true;
-  return nullptr;
+  return JSValueMakeUndefined(ctx);
 }
 
 JSValueRef JSEvent::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
