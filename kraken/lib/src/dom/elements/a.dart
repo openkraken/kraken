@@ -23,8 +23,8 @@ class AnchorElement extends Element {
     addEvent(EVENT_CLICK);
   }
 
-  void handleMouseClick(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
-    super.handleMouseClick(eventType, down: down, up: up);
+  void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
+    super.handleMouseEvent(eventType, down: down, up: up);
 
     if (_href == null) return;
 

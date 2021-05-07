@@ -50,7 +50,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
       onClick(EVENT_CLICK, down: down, up: up);
   }
 
-  ClickEventListener onClick;
+  MouseEventListener onClick;
 
   /// A pointer that previously triggered [handleTapDown] will not end up
   /// causing a tap.
@@ -67,7 +67,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// If this recognizer wins the arena, [handleTapUp] is called instead.
   void handleTapCancel( PointerDownEvent down, PointerCancelEvent cancel, String reason ) {
     if (onClick != null)
-      onClick(EVENT_CANCEL, down: down );
+      onClick(EVENT_CANCEL, down: down);
   }
 
   @override
