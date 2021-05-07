@@ -83,6 +83,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindUIManager(m_context);
   bindConsole(m_context);
   bindEvent(m_context);
+  bindMouseEvent(m_context);
   bindCustomEvent(m_context);
   bindCloseEvent(m_context);
   bindGestureEvent(m_context);
