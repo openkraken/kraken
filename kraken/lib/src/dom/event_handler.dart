@@ -25,7 +25,7 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerMove = handlePointMove;
     renderBoxModel.onPointerUp = handlePointUp;
     renderBoxModel.onPointerCancel = handlePointCancel;
-    renderBoxModel.onClick = handleMouseClick;
+    renderBoxModel.onClick = handleMouseEvent;
     renderBoxModel.onSwipe = dispatchEvent;
     renderBoxModel.onPan = dispatchEvent;
     renderBoxModel.onScale = dispatchEvent;
@@ -92,7 +92,7 @@ mixin EventHandlerMixin on Node {
     return event;
   }
 
-  void handleMouseClick(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
+  void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
     RenderBoxModel root = elementManager.getRootElement().renderBoxModel;
     Offset globalOffset = root.globalToLocal(Offset(down.position.dx, down.position.dy));
 
