@@ -108,4 +108,16 @@ describe('TextNode', () => {
 
     await snapshot();
   });
+
+  describe('nodeValue', () => {
+    it('assign nodeValue to update.', async () => {
+      const text = document.createTextNode('');
+      document.body.appendChild(text);
+
+      const TEXT = 'HELLO WORLD!';
+      text.nodeValue = TEXT;
+      await snapshot();
+      expect(text.nodeValue).toEqual(TEXT);
+    });
+  });
 });

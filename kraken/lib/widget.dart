@@ -165,7 +165,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       debugEnableInspector: _krakenWidget.debugEnableInspector,
       gestureClient: _krakenWidget.gestureClient,
       navigationDelegate: _krakenWidget.navigationDelegate,
-      devTools: _krakenWidget.devToolsService
+      devToolsService: _krakenWidget.devToolsService
     );
 
     if (kProfileMode) {

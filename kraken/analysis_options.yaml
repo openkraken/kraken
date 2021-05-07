@@ -1,3 +1,7 @@
+analyzer:
+  exclude:
+    - "example/**"
+
 linter:
   rules:
     # STYLE

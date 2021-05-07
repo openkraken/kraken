@@ -221,10 +221,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     assert(target != null);
 
     if (target is Element) {
-      // Only Element has properties
+      // Only Element has properties.
       target.setProperty(key, value);
-    } else if (target is TextNode && key == 'data') {
-      target.data = value;
+    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
+      (target as TextNode).data = value;
     } else {
       debugPrint('Only element has properties, try setting $key to Node(#$targetId).');
     }
@@ -238,8 +238,11 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (target is Element) {
       // Only Element has properties
       return target.getProperty(key);
+    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
+      return (target as TextNode).data;
+    } else {
+      return null;
     }
-    return null;
   }
 
   void removeProperty(int targetId, String key) {
@@ -249,6 +252,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     if (target is Element) {
       target.removeProperty(key);
+    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
+      (target as TextNode).data = '';
     } else {
       debugPrint('Only element has properties, try removing $key from Node(#$targetId).');
     }

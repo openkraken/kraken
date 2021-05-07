@@ -101,6 +101,7 @@ KRAKEN_EXPORT
 void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length);
 #endif
 
+KRAKEN_EXPORT
 std::shared_ptr<DartMethodPointer> getDartMethod();
 
 } // namespace kraken
