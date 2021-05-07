@@ -81,19 +81,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     Element documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId], this);
     setEventTarget(documentElement);
 
-    viewportElement = Element(-10, htmlNativePtrMap[contextId], this, defaultStyle: {
-      DISPLAY: BLOCK,
-      OVERFLOW: AUTO,
-    }, tagName: '#viewport', isHiddenElement: true);
-
-    viewportElement.willAttachRenderer();
-    viewportElement.style.applyTargetProperties();
-    RenderStyle renderStyle = viewportElement.renderBoxModel.renderStyle;
-    renderStyle.width = viewportWidth;
-    renderStyle.height = viewportHeight;
-    viewportElement.didAttachRenderer();
-    viewportElement.addChild(documentElement.renderer);
-
+    viewportElement = documentElement;
     viewport.child = viewportElement.renderBoxModel;
     _viewportRenderObject = viewport;
 

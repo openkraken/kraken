@@ -255,7 +255,7 @@ class Element extends Node
   /// So it needs to manually mark element needs paint and add scroll offset in paint stage
   void paintFixedChildren(double scrollOffset, AxisDirection axisDirection) {
     // Only root element has fixed children
-    if (tagName == '#viewport') {
+    if (tagName == 'HTML') {
       for (RenderBoxModel child in scrollingContentLayoutBox.fixedChildren) {
         // Save scrolling offset for paint
         if (axisDirection == AxisDirection.down) {
@@ -267,10 +267,12 @@ class Element extends Node
     }
   }
 
-  // Set sticky child offset according to scroll offset and direction
-  void layoutStickyChild(Element child, double scrollOffset, AxisDirection axisDirection) {
+  // Set sticky child offset according to scroll offset and direction.
+  // When axisDirection param is null compute the both axis direction.
+  void layoutStickyChild(Element child, double scrollOffset, [AxisDirection axisDirection]) {
     CSSStyleDeclaration childStyle = child.style;
-    bool isFixed = false;
+    bool isVerticalFixed = false;
+    bool isHorizontalFixed = false;
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
     RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
 
@@ -284,7 +286,10 @@ class Element extends Node
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
-      if (axisDirection == AxisDirection.down) {
+      if (axisDirection == null) {
+        offsetY += scrollOffset;
+        offsetX += scrollOffset;
+      } else if (axisDirection == AxisDirection.down) {
         offsetY += scrollOffset;
       } else if (axisDirection == AxisDirection.right) {
         offsetX += scrollOffset;
@@ -319,15 +324,15 @@ class Element extends Node
     double minOffsetX = 0;
     double maxOffsetX = parentContainer.size.width - childWidth;
 
-    if (axisDirection == AxisDirection.down) {
+    if (axisDirection == AxisDirection.down || axisDirection == null) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
       double viewPortHeight = renderBoxModel?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
         double top = childRenderStyle.top.length + resolvedPadding.top;
-        isFixed = offsetTop < top;
-        if (isFixed) {
+        isVerticalFixed = offsetTop < top;
+        if (isVerticalFixed) {
           offsetY += top - offsetTop;
           if (offsetY > maxOffsetY) {
             offsetY = maxOffsetY;
@@ -335,8 +340,8 @@ class Element extends Node
         }
       } else if (childStyle.contains(BOTTOM)) {
         double bottom = childRenderStyle.bottom.length + resolvedPadding.bottom;
-        isFixed = offsetBottom < bottom;
-        if (isFixed) {
+        isVerticalFixed = offsetBottom < bottom;
+        if (isVerticalFixed) {
           offsetY += offsetBottom - bottom;
           if (offsetY < minOffsetY) {
             offsetY = minOffsetY;
@@ -344,7 +349,7 @@ class Element extends Node
         }
       }
 
-      if (isFixed) {
+      if (isVerticalFixed) {
         boxParentData.offset = Offset(
           boxParentData.offset.dx,
           offsetY,
@@ -355,15 +360,17 @@ class Element extends Node
           child.originalOffset.dy,
         );
       }
-    } else if (axisDirection == AxisDirection.right) {
+    }
+
+    if (axisDirection == AxisDirection.right || axisDirection == null) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
       double viewPortWidth = renderBoxModel?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
         double left = childRenderStyle.left.length + resolvedPadding.left;
-        isFixed = offsetLeft < left;
-        if (isFixed) {
+        isHorizontalFixed = offsetLeft < left;
+        if (isHorizontalFixed) {
           offsetX += left - offsetLeft;
           if (offsetX > maxOffsetX) {
             offsetX = maxOffsetX;
@@ -371,8 +378,8 @@ class Element extends Node
         }
       } else if (childStyle.contains(RIGHT)) {
         double right = childRenderStyle.right.length + resolvedPadding.right;
-        isFixed = offsetRight < right;
-        if (isFixed) {
+        isHorizontalFixed = offsetRight < right;
+        if (isHorizontalFixed) {
           offsetX += offsetRight - right;
           if (offsetX < minOffsetX) {
             offsetX = minOffsetX;
@@ -380,7 +387,7 @@ class Element extends Node
         }
       }
 
-      if (isFixed) {
+      if (isHorizontalFixed) {
         boxParentData.offset = Offset(
           offsetX,
           boxParentData.offset.dy,
@@ -393,7 +400,7 @@ class Element extends Node
       }
     }
 
-    if (isFixed) {
+    if (isVerticalFixed || isHorizontalFixed) {
       // Change sticky status to fixed
       child.stickyStatus = StickyPositionType.fixed;
       boxParentData.isOffsetSet = true;
@@ -831,9 +838,7 @@ class Element extends Node
       childRenderBoxModel.owner.flushLayout();
     }
     // Set sticky child offset manually
-    scrollContainer.layoutStickyChild(child, 0, AxisDirection.down);
-    scrollContainer.layoutStickyChild(child, 0, AxisDirection.right);
-
+    scrollContainer.layoutStickyChild(child, 0);
   }
 
   /// Cache fixed renderObject to root element

@@ -282,11 +282,6 @@ mixin CSSOverflowMixin on ElementBase {
     assert(element != null);
     List<Element> result = [];
 
-    // Viewport element is not in visible dom tree
-    if (element.tagName == '#viewport') {
-      element = elementManager.document.documentElement;
-    }
-
     for (Element child in element.children) {
       List<CSSOverflowType> overflow = getOverflowTypes(child.style);
       CSSOverflowType overflowX = overflow[0];
