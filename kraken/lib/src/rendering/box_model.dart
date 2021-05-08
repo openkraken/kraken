@@ -580,12 +580,14 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
+  /// Mark own and its children (if exist) needs layout
   void markOwnNeedsLayout() {
     needsLayout = true;
-    visitChildren(markChildrenNeedsLayout);
+    visitChildren(markChildNeedsLayout);
   }
 
-  void markChildrenNeedsLayout(RenderObject child) {
+  /// Mark specified renderBoxModel needs layout
+  void markChildNeedsLayout(RenderObject child) {
     if (child is RenderBoxModel) {
       child.markOwnNeedsLayout();
     } else if (child is RenderTextBox) {

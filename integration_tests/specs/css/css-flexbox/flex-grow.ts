@@ -811,6 +811,154 @@ describe('flex-grow', () => {
     await snapshot();
   });
 
+  it("automatic flex container size is larger than its content size in flex column direction", async () => {
+    let p;
+    let relpos;
+    let flex;
+    let layoutColumn;
+    let layoutRow;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        style: {
+          display: 'inline-flex',
+          'flex-direction': 'row',
+          justifyContent: 'space-between',
+        },
+      },
+      [
+
+        createElement('div', {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: 'grey',
+          }
+        }, [
+          (flex = createElement(
+            'div',
+            {
+              style: {
+                backgroundColor:'green',
+                'box-sizing': 'border-box',
+              },
+            },
+            [
+              createText(`XXX`),
+            ]
+          )),
+          createElement(
+            'div',
+            {
+              style: {
+                flex: 1,
+                backgroundColor:'yellow',
+                'box-sizing': 'border-box',
+              },
+            },
+            [createText(`YYY`)]
+          ),
+          createElement(
+            'div',
+            {
+              style: {
+                backgroundColor:'red',
+                'box-sizing': 'border-box',
+              },
+            },
+            [createText(`ZZZ`)]
+          ),
+        ]
+        ),
+        createElement('div', {
+          style: {
+            border: '100px solid blue',
+            flexDirection: 'row',
+          }
+        }),
+      ]);
+    BODY.appendChild(container);
+
+    await snapshot();
+  });
+
+  it("automatic flex container size is smaller than its content size in flex column direction", async () => {
+    let p;
+    let relpos;
+    let flex;
+    let layoutColumn;
+    let layoutRow;
+    let container;
+
+    container = createElement(
+      'div',
+      {
+        style: {
+          display: 'inline-flex',
+          'flex-direction': 'row',
+          justifyContent: 'space-between',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: 'grey',
+          }
+        }, [
+          (flex = createElement(
+            'div',
+            {
+              style: {
+                width:'30px',
+                backgroundColor:'green',
+                'box-sizing': 'border-box',
+              },
+            },
+            [
+              createText(`X X X X X X X`),
+            ]
+          )),
+          createElement(
+            'div',
+            {
+              style: {
+                flex: 1,
+                width:'30px',
+                backgroundColor:'yellow',
+                'box-sizing': 'border-box',
+              },
+            },
+            [createText(`Y Y Y Y Y Y Y`)]
+          ),
+          createElement(
+            'div',
+            {
+              style: {
+                width: '30px',
+                backgroundColor:'red',
+                'box-sizing': 'border-box',
+              },
+            },
+            [createText(`Z Z Z Z Z Z Z`)]
+          ),
+        ]
+        ),
+        createElement('div', {
+          style: {
+            border: '50px solid blue',
+            flexDirection: 'row',
+          }
+        }),
+      ]);
+    BODY.appendChild(container);
+
+    await snapshot();
+  });
+
   it('flex item height should not exceed container when flex-wrap is nowrap', async () => {
     let div2;
     let div;

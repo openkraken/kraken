@@ -106,6 +106,7 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     needsLayout = true;
   }
 
+  /// Mark own needs layout
   void markOwnNeedsLayout() {
     needsLayout = true;
   }
