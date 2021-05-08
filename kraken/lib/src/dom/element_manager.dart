@@ -14,14 +14,12 @@ import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserve
 import 'dart:ffi';
 
 import 'package:kraken/bridge.dart';
-import 'package:kraken/css.dart';
 import 'package:kraken/launcher.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/css/render_style.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
 
 const String UNKNOWN = 'UNKNOWN';
@@ -327,7 +325,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       this.showPerformanceOverlay = showPerformanceOverlay;
     }
 
-    RenderBox result = getRootRenderObject();
+    RenderBox renderBox = getRootRenderObject();
 
     // We need to add PerformanceOverlay of it's needed.
     if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride;
@@ -344,9 +342,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       );
       RenderFpsOverlay renderFpsOverlayBox = RenderFpsOverlay();
 
-      result = RenderStack(
+      renderBox = RenderStack(
         children: [
-          result,
+          renderBox,
           renderConstrainedPerformanceOverlayBox,
           renderFpsOverlayBox,
         ],
@@ -354,7 +352,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       );
     }
 
-    return result;
+    return renderBox;
   }
 
   void attach(RenderObject parent, RenderObject previousSibling, {bool showPerformanceOverlay}) {

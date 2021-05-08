@@ -2190,7 +2190,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           crossOffset
         );
 
-        /// Apply position relative offset change
+        // Apply position relative offset change
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
 
         // Need to substract start margin of main axis when calculating next child's start position

@@ -511,6 +511,10 @@ class RenderFlowLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
       if (childParentData.isPositioned) {
         CSSPositionedLayout.layoutPositionedChild(this, child);
+      } else if (!childParentData.isOffsetCalculated && child is RenderBoxModel) {
+        if (CSSPositionedLayout.isSticky(child)) {
+          CSSPositionedLayout.layoutStickyChild(this, child);
+        }
       }
       child = childParentData.nextSibling;
     }
@@ -992,7 +996,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           childMainPosition + renderStyle.paddingLeft + renderStyle.borderLeft + childMarginLeft,
           crossAxisOffset + childLineExtent + renderStyle.paddingTop + renderStyle.borderTop + childMarginTop
         );
-        /// Apply position relative offset change.
+        // Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
 
         if (flipMainAxis)

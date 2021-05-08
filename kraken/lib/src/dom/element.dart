@@ -267,9 +267,12 @@ class Element extends Node
     }
   }
 
-  // Set sticky child offset according to scroll offset and direction.
-  // When axisDirection param is null compute the both axis direction.
-  void layoutStickyChild(Element child, double scrollOffset, [AxisDirection axisDirection]) {
+  // Set sticky child offset according to scroll offset and direction,
+  // when axisDirection param is null compute the both axis direction.
+  void layoutStickyChild(Element child, double scrollOffset, AxisDirection axisDirection) {
+    // https://www.w3.org/TR/css-position-3/#stickypos-insets
+    // Sticky positioning is similar to relative positioning except
+    // the offsets are automatically calculated in reference to the nearest scrollport.
     CSSStyleDeclaration childStyle = child.style;
     bool isVerticalFixed = false;
     bool isHorizontalFixed = false;
@@ -277,19 +280,17 @@ class Element extends Node
     RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
 
     if (child.originalScrollContainerOffset == null) {
+      RenderObject rootRenderObject = child.elementManager.getRootRenderObject();
       Offset horizontalScrollContainerOffset =
-          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject()) -
-              renderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
+              renderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject);
       Offset verticalScrollContainerOffset =
-          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject()) -
-              renderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
+              renderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject);
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
-      if (axisDirection == null) {
-        offsetY += scrollOffset;
-        offsetX += scrollOffset;
-      } else if (axisDirection == AxisDirection.down) {
+      if (axisDirection == AxisDirection.down) {
         offsetY += scrollOffset;
       } else if (axisDirection == AxisDirection.right) {
         offsetX += scrollOffset;
@@ -318,18 +319,18 @@ class Element extends Node
     double childHeight = childRenderBoxModel?.size?.height;
     double childWidth = childRenderBoxModel?.size?.width;
     // Sticky element cannot exceed the boundary of its parent element container
-    RenderBox parentContainer = child.parent._renderLayoutBox;
+    RenderBox parentContainer = child.parent.renderBoxModel;
     double minOffsetY = 0;
     double maxOffsetY = parentContainer.size.height - childHeight;
     double minOffsetX = 0;
     double maxOffsetX = parentContainer.size.width - childWidth;
 
-    if (axisDirection == AxisDirection.down || axisDirection == null) {
+    if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
       double viewPortHeight = renderBoxModel?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
-      if (childStyle.contains(TOP)) {
+      if (childRenderStyle.top != null) {
         double top = childRenderStyle.top.length + resolvedPadding.top;
         isVerticalFixed = offsetTop < top;
         if (isVerticalFixed) {
@@ -338,7 +339,7 @@ class Element extends Node
             offsetY = maxOffsetY;
           }
         }
-      } else if (childStyle.contains(BOTTOM)) {
+      } else if (childRenderStyle.bottom != null) {
         double bottom = childRenderStyle.bottom.length + resolvedPadding.bottom;
         isVerticalFixed = offsetBottom < bottom;
         if (isVerticalFixed) {
@@ -362,7 +363,7 @@ class Element extends Node
       }
     }
 
-    if (axisDirection == AxisDirection.right || axisDirection == null) {
+    if (axisDirection == AxisDirection.right) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
       double viewPortWidth = renderBoxModel?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
@@ -403,12 +404,13 @@ class Element extends Node
     if (isVerticalFixed || isHorizontalFixed) {
       // Change sticky status to fixed
       child.stickyStatus = StickyPositionType.fixed;
-      boxParentData.isOffsetSet = true;
+      boxParentData.isOffsetCalculated = true;
       childRenderBoxModel.markNeedsPaint();
     } else {
       // Change sticky status to relative
       if (child.stickyStatus == StickyPositionType.fixed) {
         child.stickyStatus = StickyPositionType.relative;
+        boxParentData.isOffsetCalculated = false;
         // Reset child offset to its original offset
         childRenderBoxModel.markNeedsPaint();
       }
@@ -584,8 +586,6 @@ class Element extends Node
         _addPositionedChild(child, positionType);
         break;
       case CSSPositionType.sticky:
-        _addStickyChild(child, after);
-        break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
         RenderLayoutBox parentRenderLayoutBox = scrollingContentLayoutBox != null ?
@@ -823,22 +823,6 @@ class Element extends Node
     /// Placeholder of flexbox needs to inherit size from its real display box,
     /// so it needs to layout after real box layout
     child.parent.addChild(childPositionHolder);
-  }
-
-  void _addStickyChild(Element child, RenderObject after) {
-    RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-    RenderLayoutBox parentRenderLayoutBox = scrollingContentLayoutBox != null ?
-      scrollingContentLayoutBox : renderBoxModel;
-    parentRenderLayoutBox.insert(childRenderBoxModel, after: after);
-
-    // Set sticky element offset
-    Element scrollContainer = _findScrollContainer(child);
-    // Flush layout first to calculate sticky offset
-    if (!childRenderBoxModel.hasSize) {
-      childRenderBoxModel.owner.flushLayout();
-    }
-    // Set sticky child offset manually
-    scrollContainer.layoutStickyChild(child, 0);
   }
 
   /// Cache fixed renderObject to root element
@@ -1658,23 +1642,6 @@ Element _findContainingBlock(Element element) {
     bool hasTransform = _el.style[TRANSFORM].isNotEmpty;
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
     if (_el == rootEl || isElementNonStatic || hasTransform) {
-      break;
-    }
-    _el = _el.parent;
-  }
-  return _el;
-}
-
-Element _findScrollContainer(Element element) {
-  Element _el = element?.parent;
-  Element rootEl = element.elementManager.viewportElement;
-
-  while (_el != null) {
-    List<CSSOverflowType> overflow = getOverflowTypes(_el.style);
-    CSSOverflowType overflowX = overflow[0];
-    CSSOverflowType overflowY = overflow[1];
-
-    if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible || _el == rootEl) {
       break;
     }
     _el = _el.parent;
