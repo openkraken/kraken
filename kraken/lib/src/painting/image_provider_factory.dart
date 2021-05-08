@@ -125,7 +125,7 @@ ImageProvider defaultCachedProviderFactory(String url, [dynamic param]) {
 /// default ImageProviderFactory implementation of [ImageType.network]
 ImageProvider defaultNetworkProviderFactory(String url, [dynamic param]) {
   NetworkImage networkImage = NetworkImage(url, headers: {
-    HttpHeaders.userAgentHeader: getKrakenInfo().userAgent
+    HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
   });
   return networkImage;
 }
