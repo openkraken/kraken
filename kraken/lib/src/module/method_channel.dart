@@ -38,14 +38,6 @@ class MethodChannelModule extends BaseModule {
   }
 }
 
-void setJSMethodCallCallback(KrakenController controller) {
-  if (controller.methodChannel == null) return;
-
-  controller.methodChannel._onJSMethodCall = (String method, dynamic arguments) async {
-    controller.module.moduleManager.emitModuleEvent(METHOD_CHANNEL_NAME, data: [method, arguments]);
-  };
-}
-
 class KrakenMethodChannel {
   MethodCallCallback _onJSMethodCallCallback;
 
@@ -55,6 +47,14 @@ class KrakenMethodChannel {
   }
 
   Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) async {}
+
+  static void setJSMethodCallCallback(KrakenController controller) {
+    if (controller.methodChannel == null) return;
+
+    controller.methodChannel._onJSMethodCall = (String method, dynamic arguments) async {
+      controller.module.moduleManager.emitModuleEvent(METHOD_CHANNEL_NAME, data: [method, arguments]);
+    };
+  }
 }
 
 class KrakenJavaScriptChannel extends KrakenMethodChannel {

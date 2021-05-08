@@ -471,7 +471,7 @@ class KrakenController {
     }
 
     _methodChannel = methodChannel;
-    setJSMethodCallCallback(this);
+    KrakenMethodChannel.setJSMethodCallCallback(this);
 
     _view = KrakenViewController(viewportWidth, viewportHeight,
         background: background,
