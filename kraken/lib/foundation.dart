@@ -4,3 +4,6 @@
  */
 
 export 'src/foundation/environment.dart';
+export 'src/foundation/http.dart';
+export 'src/foundation/http_client.dart';
+export 'src/foundation/http_overrides.dart';

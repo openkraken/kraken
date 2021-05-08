@@ -6,5 +6,6 @@
 library kraken;
 
 export 'widget.dart';
+export 'foundation.dart';
 export 'launcher.dart';
 export 'module.dart';
