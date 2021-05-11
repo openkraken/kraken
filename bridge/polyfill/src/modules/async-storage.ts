@@ -1,6 +1,5 @@
-import { kraken } from "../kom/kraken";
+import { kraken } from '../kom/kraken';
 
-const TRUE = 'true';
 export const asyncStorage = {
   getItem(key: number | string) {
     return new Promise((resolve, reject) => {
@@ -37,6 +36,14 @@ export const asyncStorage = {
   getAllKeys() {
     return new Promise((resolve, reject) => {
       kraken.invokeModule('AsyncStorage', 'getAllKeys', '', (e, data) => {
+        if (e) return reject(e);
+        resolve(data);
+      });
+    });
+  },
+  length(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      kraken.invokeModule('AsyncStorage', 'length', '', (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });
