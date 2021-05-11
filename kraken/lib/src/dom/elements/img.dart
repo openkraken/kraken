@@ -107,8 +107,8 @@ class ImageElement extends Element {
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
-    _resize();
     _renderImage();
+    _resize();
   }
 
   @override
