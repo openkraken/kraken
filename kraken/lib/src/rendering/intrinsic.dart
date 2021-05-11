@@ -142,7 +142,6 @@ class RenderIntrinsic extends RenderBoxModel
   @override
   void performResize() {
     double width = 0, height = 0;
-    final BoxConstraints constraints = contentConstraints;
     if (constraints != null) {
       final Size attempingSize = constraints.biggest;
       if (attempingSize.width.isFinite) {

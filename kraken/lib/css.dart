@@ -27,6 +27,8 @@ export 'src/css/transition.dart';
 export 'src/css/visibility.dart';
 export 'src/css/offset.dart';
 export 'src/css/display.dart';
+export 'src/css/object_fit.dart';
+export 'src/css/object_position.dart';
 export 'src/css/sliver.dart';
 
 // CSS Values

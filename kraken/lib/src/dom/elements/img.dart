@@ -102,13 +102,13 @@ class ImageElement extends Element {
   void willAttachRenderer() {
     super.willAttachRenderer();
     style.addStyleChangeListener(_stylePropertyChanged);
-    _renderImage();
   }
 
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
     _resize();
+    _renderImage();
   }
 
   @override
@@ -327,82 +327,15 @@ class ImageElement extends Element {
     _imageStream = null;
   }
 
-  BoxFit _getBoxFit(String fit) {
-    switch (fit) {
-      case 'contain':
-        return BoxFit.contain;
-
-      case 'cover':
-        return BoxFit.cover;
-
-      case 'none':
-        return BoxFit.none;
-
-      case 'scaleDown':
-      case 'scale-down':
-        return BoxFit.scaleDown;
-
-      case 'fitWidth':
-      case 'fit-width':
-        return BoxFit.fitWidth;
-
-      case 'fitHeight':
-      case 'fit-height':
-        return BoxFit.fitHeight;
-
-      case 'fill':
-      default:
-        return BoxFit.fill;
-    }
-  }
-
-  Alignment _getAlignment(String position) {
-    // Syntax: object-position: <position>
-    // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
-    // <position> = [ [ left | center | right ] || [ top | center | bottom ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]? | [ [ left | right ] <length-percentage> ] && [ [ top | bottom ] <length-percentage> ] ]
-
-    if (position != null) {
-      List<String> values = CSSStyleProperty.getPositionValues(position);
-      return Alignment(_getAlignmentValueFromString(values[0]), _getAlignmentValueFromString(values[1]));
-    }
-
-    // The default value for object-position is 50% 50%
-    return Alignment.center;
-  }
-
-  static double _getAlignmentValueFromString(String value) {
-    assert(value != null);
-
-    // Support percentage
-    if (value.endsWith('%')) {
-      // 0% equal to -1.0
-      // 50% equal to 0.0
-      // 100% equal to 1.0
-      return double.tryParse(value.substring(0, value.length - 1)) / 50 - 1;
-    }
-
-    switch (value) {
-      case 'top':
-      case 'left':
-        return -1;
-
-      case 'bottom':
-      case 'right':
-        return 1;
-
-      case 'center':
-      default:
-        return 0;
-    }
-  }
-
   RenderImage createRenderImageBox() {
-    BoxFit fit = _getBoxFit(style[OBJECT_FIT]);
-    Alignment alignment = _getAlignment(style[OBJECT_POSITION]);
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    BoxFit objectFit = renderStyle.objectFit;
+    Alignment objectPosition = renderStyle.objectPosition;
+
     return RenderImage(
       image: _imageInfo?.image,
-      fit: fit,
-      alignment: alignment,
+      fit: objectFit,
+      alignment: objectPosition,
     );
   }
 
@@ -483,10 +416,10 @@ class ImageElement extends Element {
   void _stylePropertyChanged(String property, String original, String present) {
     if (property == WIDTH || property == HEIGHT) {
       _resize();
-    } else if (property == OBJECT_FIT) {
-      _imageBox.fit = _getBoxFit(present);
-    } else if (property == OBJECT_POSITION) {
-      _imageBox.alignment = _getAlignment(present);
+    } else if (property == OBJECT_FIT && _imageBox != null) {
+      _imageBox.fit = renderBoxModel.renderStyle.objectFit;
+    } else if (property == OBJECT_POSITION && _imageBox != null) {
+      _imageBox.alignment = renderBoxModel.renderStyle.objectPosition;
     }
   }
 }

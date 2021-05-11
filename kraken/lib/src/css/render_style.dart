@@ -22,6 +22,8 @@ class RenderStyle
     CSSFlowMixin,
     CSSDisplayMixin,
     CSSInlineMixin,
+    CSSObjectFitMixin,
+    CSSObjectPositionMixin,
     CSSSliverMixin,
     CSSOpacityMixin {
 
