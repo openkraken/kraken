@@ -36,6 +36,7 @@ final Pointer<NativeFunction<Native_RenderingContextBezierCurveTo>> nativeBezier
 final Pointer<NativeFunction<Native_RenderingContextClip>> nativeClip = Pointer.fromFunction(CanvasRenderingContext2D._clip);
 final Pointer<NativeFunction<Native_RenderingContextClearRect>> nativeClearRect = Pointer.fromFunction(CanvasRenderingContext2D._clearRect);
 final Pointer<NativeFunction<Native_RenderingContextClosePath>> nativeClosePath = Pointer.fromFunction(CanvasRenderingContext2D._closePath);
+final Pointer<NativeFunction<Native_RenderingContextDrawImage>> nativeDrawImage = Pointer.fromFunction(CanvasRenderingContext2D._drawImage);
 final Pointer<NativeFunction<Native_RenderingContextEllipse>> nativeEllipse = Pointer.fromFunction(CanvasRenderingContext2D._ellipse);
 final Pointer<NativeFunction<Native_RenderingContextFill>> nativeFill = Pointer.fromFunction(CanvasRenderingContext2D._fill);
 final Pointer<NativeFunction<Native_RenderingContextFillText>> nativeFillText = Pointer.fromFunction(CanvasRenderingContext2D._fillText);
@@ -107,6 +108,7 @@ class CanvasRenderingContext2D {
     nativeCanvasRenderingContext2D.ref.clearRect = nativeClearRect;
     nativeCanvasRenderingContext2D.ref.clip = nativeClip;
     nativeCanvasRenderingContext2D.ref.closePath = nativeClosePath;
+    nativeCanvasRenderingContext2D.ref.drawImage = nativeDrawImage;
     nativeCanvasRenderingContext2D.ref.ellipse = nativeEllipse;
     nativeCanvasRenderingContext2D.ref.fill = nativeFill;
     nativeCanvasRenderingContext2D.ref.fillRect = nativeFillRect;
@@ -270,6 +272,14 @@ class CanvasRenderingContext2D {
   static void _closePath(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2DOfNativePtr(nativePtr);
     canvasRenderingContext2D.closePath();
+  }
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+  // TODO: drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+  static void _drawImage(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeImgElement> imagePtr, double dx, double dy) {
+    ImageElement imageElement = ImageElement.getImageElementOfNativePtr(imagePtr);
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2DOfNativePtr(nativePtr);
+    canvasRenderingContext2D.drawImage(imageElement.image, dx, dy);
   }
 
   static void _ellipse(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y,
@@ -568,6 +578,12 @@ class CanvasRenderingContext2D {
   void closePath() {
     addAction((Canvas canvas, Size size) {
       path2d.closePath();
+    });
+  }
+
+  void drawImage(Image image, double dx, double dy) {
+    addAction((Canvas canvas, Size size) {
+      canvas.drawImage(image, Offset(dx, dy), Paint());
     });
   }
 

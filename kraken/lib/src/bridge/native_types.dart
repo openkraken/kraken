@@ -334,6 +334,7 @@ typedef Native_RenderingContextArcTo = Void Function(Pointer<NativeCanvasRenderi
 typedef Native_RenderingContextBeginPath = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
 typedef Native_RenderingContextClosePath = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
 typedef Native_RenderingContextClearRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
+typedef Native_RenderingContextDrawImage = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeImgElement> image, Double dx, Double dy);
 typedef Native_RenderingContextStrokeRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
 typedef Native_RenderingContextStrokeText = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text, Double x, Double y, Double maxWidth);
 typedef Native_RenderingContextSave = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
@@ -375,6 +376,7 @@ class NativeCanvasRenderingContext2D extends Struct {
   Pointer<NativeFunction<Native_RenderingContextClearRect>> clearRect;
   Pointer<NativeFunction<Native_RenderingContextClip>> clip;
   Pointer<NativeFunction<Native_RenderingContextClosePath>> closePath;
+  Pointer<NativeFunction<Native_RenderingContextDrawImage>> drawImage;
   Pointer<NativeFunction<Native_RenderingContextEllipse>> ellipse;
   Pointer<NativeFunction<Native_RenderingContextFill>> fill;
   Pointer<NativeFunction<Native_RenderingContextFillRect>> fillRect;

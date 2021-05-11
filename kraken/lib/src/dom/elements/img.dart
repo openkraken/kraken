@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'dart:ui' as ui show Image;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/dom.dart';
@@ -97,6 +99,8 @@ class ImageElement extends Element {
     nativeImgElement.ref.getImageNaturalWidth = nativeGetImageNaturalWidth;
     nativeImgElement.ref.getImageNaturalHeight = nativeGetImageNaturalHeight;
   }
+
+  ui.Image get image => _imageInfo.image;
 
   @override
   void willAttachRenderer() {
