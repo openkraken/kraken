@@ -25,7 +25,7 @@ public:
 
   class TextNodeInstance : public NodeInstance {
   public:
-    DEFINE_OBJECT_PROPERTY(TextNode, 3, data, textContent, nodeName)
+    DEFINE_OBJECT_PROPERTY(TextNode, 4, data, textContent, nodeValue, nodeName)
 
     TextNodeInstance() = delete;
     ~TextNodeInstance();

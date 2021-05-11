@@ -1,3 +1,30 @@
+## 0.7.2+3
+
+feat: add willReload and didReload hooks for devTools.
+
+## 0.7.2+2
+
+fix: export getUIThreadId and getGlobalContextRef symbols.
+
+## 0.7.2+1
+
+fix: export getDartMethod() symbols.
+
+## 0.7.2
+
+**Break Changes**
+
+fix: change default font size from 14px to 16px https://github.com/openkraken/kraken/pull/145
+
+**Bug Fixed**
+fix: modify customevent to event https://github.com/openkraken/kraken/pull/138
+fix: layout performance  https://github.com/openkraken/kraken/pull/155
+fix: fix elements created by new operator didn't have ownerDocument. https://github.com/openkraken/kraken/pull/178
+fix: flex-basis rule https://github.com/openkraken/kraken/pull/176
+fix: transform functions split error when more than one.  https://github.com/openkraken/kraken/pull/196
+fix: Fix the crash caused by navigation in dart https://github.com/openkraken/kraken/pull/249
+fix update device_info 1.0.0  https://github.com/openkraken/kraken/pull/262
+
 ## 0.7.1
 
 **Bug Fixed**

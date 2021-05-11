@@ -15,15 +15,12 @@ Future<dynamic> _invokeMethodFromJavaScript(KrakenController controller, String 
   return controller.methodChannel._invokeMethodFromJavaScript(method, args);
 }
 
+const METHOD_CHANNEL_NAME = 'MethodChannel';
+
 class MethodChannelModule extends BaseModule {
   @override
-  String get name => 'MethodChannel';
-  MethodChannelModule(ModuleManager moduleManager) : super(moduleManager) {
-    if (moduleManager == null) return;
-    moduleManager.controller.methodChannel._onJSMethodCall = (String method, dynamic arguments) async {
-      moduleManager.emitModuleEvent(name, data: [method, arguments]);
-    };
-  }
+  String get name => METHOD_CHANNEL_NAME;
+  MethodChannelModule(ModuleManager moduleManager) : super(moduleManager);
 
   @override
   void dispose() {}
@@ -50,6 +47,14 @@ class KrakenMethodChannel {
   }
 
   Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) async {}
+
+  static void setJSMethodCallCallback(KrakenController controller) {
+    if (controller.methodChannel == null) return;
+
+    controller.methodChannel._onJSMethodCall = (String method, dynamic arguments) async {
+      controller.module.moduleManager.emitModuleEvent(METHOD_CHANNEL_NAME, data: [method, arguments]);
+    };
+  }
 }
 
 class KrakenJavaScriptChannel extends KrakenMethodChannel {

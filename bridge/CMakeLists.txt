@@ -74,7 +74,12 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     list(APPEND BRIDGE_LINK_LIBS
             JavaScriptCore
             )
-  else ()
+  elseif (EXISTS ${DEBUG_JSC_ENGINE})
+    list(APPEND BRIDGE_INCLUDE ${DEBUG_JSC_ENGINE}/Headers)
+    add_library(JavaScriptCore SHARED IMPORTED)
+    set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION ${DEBUG_JSC_ENGINE}/JavaScriptCore)
+    list(APPEND BRIDGE_LINK_LIBS JavaScriptCore)
+  else()
     add_compile_options(-DIS_APPLE=1)
     list(APPEND BRIDGE_LINK_LIBS "-framework JavaScriptCore")
   endif ()
@@ -121,6 +126,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/event.h
     bindings/jsc/DOM/event.cc
     bindings/jsc/DOM/custom_event.h
+    bindings/jsc/DOM/mouse_event.cc
+    bindings/jsc/DOM/mouse_event.h
     bindings/jsc/DOM/gesture_event.cc
     bindings/jsc/DOM/gesture_event.h
     bindings/jsc/DOM/custom_event.cc

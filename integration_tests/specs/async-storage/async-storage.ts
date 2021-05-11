@@ -4,6 +4,7 @@ interface AsyncStorage {
   removeItem(key: number | string): Promise<void>;
   getAllKeys(): Promise<Array<string>>;
   clear(): Promise<void>;
+  length(): Promise<number>;
 }
 
 declare const asyncStorage: AsyncStorage;
@@ -89,5 +90,14 @@ describe('AsyncStorage', () => {
     await asyncStorage.clear();
     let keys = await asyncStorage.getAllKeys();
     expect(keys.length).toBe(0);
+  });
+
+  it('should work with length', async () => {
+    const zero = await asyncStorage.length();
+    expect(zero).toBe(0);
+
+    await asyncStorage.setItem(333, 666);
+    const one = await asyncStorage.length();
+    expect(one).toBe(1);
   });
 });

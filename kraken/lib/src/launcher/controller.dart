@@ -50,8 +50,9 @@ void setTargetPlatformForDesktop() {
 
 abstract class DevToolsService {
   void init(KrakenController controller);
-  void reload(KrakenController controller);
-  void dispose(KrakenController controller);
+  void willReload();
+  void didReload();
+  void dispose();
 }
 
 // An kraken View Controller designed for multiple kraken view control.
@@ -420,7 +421,7 @@ class KrakenController {
   // Error handler when got javascript error when evaluate javascript codes.
   JSErrorHandler onJSError;
 
-  DevToolsService devTools;
+  DevToolsService devToolsService;
 
   KrakenMethodChannel _methodChannel;
 
@@ -458,7 +459,7 @@ class KrakenController {
     this.onLoadError,
     this.onJSError,
     this.debugEnableInspector,
-    this.devTools
+    this.devToolsService
   })  : _name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
@@ -470,6 +471,8 @@ class KrakenController {
     }
 
     _methodChannel = methodChannel;
+    KrakenMethodChannel.setJSMethodCallCallback(this);
+
     _view = KrakenViewController(viewportWidth, viewportHeight,
         background: background,
         showPerformanceOverlay: showPerformanceOverlay,
@@ -492,8 +495,8 @@ class KrakenController {
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
 
-    if (devTools != null) {
-      devTools.init(this);
+    if (devToolsService != null) {
+      devToolsService.init(this);
     }
   }
 
@@ -571,12 +574,16 @@ class KrakenController {
 
   // reload current kraken view.
   void reload() async {
+    if (devToolsService != null) {
+      devToolsService.willReload();
+    }
+
     await unload();
     await loadBundle();
     await evalBundle();
 
-    if (devTools != null) {
-      devTools.reload(this);
+    if (devToolsService != null) {
+      devToolsService.didReload();
     }
   }
 
@@ -593,8 +600,8 @@ class KrakenController {
     _controllerMap.remove(_view.contextId);
     _nameIdMap.remove(name);
 
-    if (devTools != null) {
-      devTools.dispose(this);
+    if (devToolsService != null) {
+      devToolsService.dispose();
     }
   }
 

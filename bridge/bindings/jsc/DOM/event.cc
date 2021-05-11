@@ -122,7 +122,7 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
   case JSEvent::EventProperty::timestamp:
     return JSValueMakeNumber(_hostClass->ctx, nativeEvent->timeStamp);
   case JSEvent::EventProperty::defaultPrevented:
-    return JSValueMakeBoolean(_hostClass->ctx, _canceledFlag);
+    return JSValueMakeBoolean(_hostClass->ctx, _cancelled);
   case JSEvent::EventProperty::target:
   case JSEvent::EventProperty::srcElement:
     if (nativeEvent->target != nullptr) {
@@ -137,9 +137,9 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
     }
     return JSValueMakeNull(_hostClass->ctx);
   case JSEvent::EventProperty::returnValue:
-    return JSValueMakeBoolean(_hostClass->ctx, !_canceledFlag);
+    return JSValueMakeBoolean(_hostClass->ctx, !_cancelled);
   case JSEvent::EventProperty::cancelBubble:
-    return JSValueMakeBoolean(_hostClass->ctx, _stopPropagationFlag);
+    return JSValueMakeBoolean(_hostClass->ctx, _cancelled);
   }
   return nullptr;
 }
@@ -175,25 +175,26 @@ JSValueRef JSEvent::stopPropagation(JSContextRef ctx, JSObjectRef function, JSOb
                                                    size_t argumentCount, const JSValueRef *arguments,
                                                    JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
-  eventInstance->_stopPropagationFlag = true;
-  return nullptr;
+  eventInstance->_propagationStopped = true;
+  return JSValueMakeUndefined(ctx);
 }
 
 JSValueRef JSEvent::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
                                                             JSObjectRef thisObject, size_t argumentCount,
                                                             const JSValueRef *arguments, JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
-  eventInstance->_stopPropagationFlag = true;
-  eventInstance->_stopImmediatePropagationFlag = true;
+  eventInstance->_propagationStopped = true;
+  eventInstance->_propagationImmediatelyStopped = true;
   return nullptr;
 }
 
+// The preventDefault() method cancels the event if it is cancelable.
 JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                   size_t argumentCount, const JSValueRef *arguments,
                                                   JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
-  if (eventInstance->nativeEvent->cancelable && !eventInstance->_inPassiveListenerFlag) {
-    eventInstance->_canceledFlag = true;
+  if (eventInstance->nativeEvent->cancelable) {
+    eventInstance->_cancelled = true;
   }
   return nullptr;
 }
@@ -210,7 +211,7 @@ bool EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef 
     if (property == JSEvent::EventProperty::cancelBubble) {
       bool v = JSValueToBoolean(_hostClass->ctx, value);
       if (v) {
-        _stopPropagationFlag = true;
+        _cancelled = true;
       }
     }
     return true;

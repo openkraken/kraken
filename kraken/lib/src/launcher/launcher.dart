@@ -21,6 +21,7 @@ void launch({
   String bundleContent,
   bool debugEnableInspector,
   Color background,
+  DevToolsService devToolsService,
 }) async {
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
@@ -30,6 +31,7 @@ void launch({
     showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
     methodChannel: KrakenNativeChannel(),
     debugEnableInspector: debugEnableInspector,
+    devToolsService: devToolsService
   );
 
   controller.view.attachView(RendererBinding.instance.renderView);

@@ -9,7 +9,7 @@ namespace kraken::binding::jsc {
 
 void bindTextNode(std::unique_ptr<JSContext> &context) {
   auto textNode = JSTextNode::instance(context.get());
-  JSC_GLOBAL_SET_PROPERTY(context, "TextNode", textNode->classObject);
+  JSC_GLOBAL_SET_PROPERTY(context, "Text", textNode->classObject);
 }
 
 std::unordered_map<JSContext *, JSTextNode *> JSTextNode::instanceMap{};
@@ -24,7 +24,7 @@ JSTextNode::~JSTextNode() {
   instanceMap.erase(context);
 }
 
-JSTextNode::JSTextNode(JSContext *context) : JSNode(context, "TextNode") {}
+JSTextNode::JSTextNode(JSContext *context) : JSNode(context, "Text") {}
 
 JSObjectRef JSTextNode::instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                             const JSValueRef *arguments, JSValueRef *exception) {
@@ -53,6 +53,7 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueR
 
   auto property = propertyMap[name];
   switch (property) {
+  case TextNodeProperty::nodeValue:
   case TextNodeProperty::textContent:
   case TextNodeProperty::data: {
     return m_data.makeString();
@@ -65,7 +66,7 @@ JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueR
 }
 
 bool JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  if (name == "data") {
+  if (name == "data" || name == "nodeValue") {
     JSStringRef data = JSValueToStringCopy(_hostClass->ctx, value, exception);
     m_data.setString(data);
 
