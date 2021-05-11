@@ -21,28 +21,34 @@ class AsyncStorageModule extends BaseModule {
   }
 
   static Future<bool> setItem(String key, String value) async {
-    SharedPreferences prefs = await _getPrefs();
+    final SharedPreferences prefs = await _getPrefs();
     return prefs.setString(key, value);
   }
 
   static Future<String> getItem(String key) async {
-    SharedPreferences prefs = await _getPrefs();
+    final SharedPreferences prefs = await _getPrefs();
     return prefs.getString(key);
   }
 
   static Future<bool> removeItem(String key) async {
-    SharedPreferences prefs = await _getPrefs();
+    final SharedPreferences prefs = await _getPrefs();
     return prefs.remove(key);
   }
 
   static Future<Set<String>> getAllKeys() async {
-    SharedPreferences prefs = await _getPrefs();
+    final SharedPreferences prefs = await _getPrefs();
     return prefs.getKeys();
   }
 
   static Future<bool> clear() async {
-    SharedPreferences prefs = await _getPrefs();
+    final SharedPreferences prefs = await _getPrefs();
     return prefs.clear();
+  }
+
+  static Future<int> length() async {
+    final SharedPreferences prefs = await _getPrefs();
+    final Set<String> keys = prefs.getKeys();
+    return keys != null ? keys.length : 0;
   }
 
   @override
@@ -86,6 +92,13 @@ class AsyncStorageModule extends BaseModule {
       case 'clear':
         AsyncStorageModule.clear().then((bool isSuccess) {
           callback(data: isSuccess.toString());
+        }).catchError((e, stack) {
+          callback(errmsg: 'Error: $e\n$stack');
+        });
+        break;
+      case 'length':
+        AsyncStorageModule.length().then((int length) {
+          callback(data: length);
         }).catchError((e, stack) {
           callback(errmsg: 'Error: $e\n$stack');
         });
