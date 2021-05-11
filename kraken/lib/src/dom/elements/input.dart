@@ -214,6 +214,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     addChild(createRenderObject());
 
+    if(properties.containsKey('value')) {
+      setProperty('value', properties['value']);
+    }
+
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (_autoFocus) {
         InputElement.setFocus(this);
