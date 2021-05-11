@@ -176,4 +176,65 @@ describe('Tags img', () => {
       done();
     };
   });
+        
+  fit('should work with loading=lazy and transform', (done) => {
+    const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    const img = document.createElement('img');
+    img.style.width = img.style.height = '300px';
+    img.style.border = '3px solid #000';
+    img.style.transform = 'translate(0, 100px)';
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute(
+      'src',
+      imageURL
+    );
+
+    img.addEventListener('load', async () => {
+      await snapshot();
+      done();
+    });
+
+    document.body.appendChild(img);
+  });
+
+  fit('should work with loading=lazy and objectFit', (done) => {
+    const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    const img = document.createElement('img');
+    img.style.width = img.style.height = '300px';
+    img.style.border = '3px solid #000';
+    img.style.objectFit = 'contain';
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute(
+      'src',
+      imageURL
+    );
+
+    img.addEventListener('load', async () => {
+      await snapshot();
+      done();
+    });
+
+    document.body.appendChild(img);
+  });
+
+  fit('should work with loading=lazy and objectPosition', (done) => {
+    const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    const img = document.createElement('img');
+    img.style.width = img.style.height = '300px';
+    img.style.border = '3px solid #000';
+    img.style.objectFit = 'contain';
+    img.style.objectPosition = 'center bottom';
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute(
+      'src',
+      imageURL
+    );
+
+    img.addEventListener('load', async () => {
+      await snapshot();
+      done();
+    });
+
+    document.body.appendChild(img);
+  });
 });
