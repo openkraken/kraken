@@ -1099,6 +1099,7 @@ class Element extends Node
   void _stylePaddingChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
     if (CSSLength.isPercentage(present)) {
+      // Mark parent needs layout to resolve percentage of child
       if (renderBoxModel.parent is RenderBoxModel) {
         (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
       }
@@ -1112,6 +1113,7 @@ class Element extends Node
   void _styleSizeChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
     if (CSSLength.isPercentage(present)) {
+      // Mark parent needs layout to resolve percentage of child
       if (renderBoxModel.parent is RenderBoxModel) {
         (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
       }
@@ -1125,6 +1127,7 @@ class Element extends Node
   void _styleMarginChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
     if (CSSLength.isPercentage(present)) {
+      // Mark parent needs layout to resolve percentage of child
       if (renderBoxModel.parent is RenderBoxModel) {
         (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
       }
@@ -1177,6 +1180,7 @@ class Element extends Node
   void _styleBorderRadiusChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its own element's size
     if (RenderStyle.isBorderRadiusPercentage(present)) {
+      // Mark parent needs layout to resolve percentage of child
       if (renderBoxModel.parent is RenderBoxModel) {
         (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
       }
@@ -1203,6 +1207,7 @@ class Element extends Node
   void _styleTransformChangedListener(String property, String original, String present) {
     /// Percentage transform translate should be resolved in layout stage cause it needs to know its own element's size
     if (RenderStyle.isTransformTranslatePercentage(present)) {
+      // Mark parent needs layout to resolve percentage of child
       if (renderBoxModel.parent is RenderBoxModel) {
         (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
       }
