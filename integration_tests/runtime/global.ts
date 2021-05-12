@@ -7,7 +7,13 @@
  * - create: create element.
  * - snapshot: match snapshot of body's image.
  */
-const BODY = document.body;
+
+// Should by getter because body will reset before each spec
+Object.defineProperty(global, 'BODY', {
+  get() {
+    return document.body;
+  }
+});
 
 function setElementStyle(dom: HTMLElement, object: any) {
   if (object == null) return;
@@ -180,20 +186,19 @@ function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
 
-async function snapshot(target?: any, filename ?: String) {
+async function snapshot(target?: any, filename?: String) {
   if (target && target.toBlob) {
     await expectAsync(target.toBlob(1.0)).toMatchSnapshot(filename);
   } else {
     if (typeof target == 'number') {
       await sleep(target);
     }
-    await expectAsync(document.body.toBlob(1.0)).toMatchSnapshot(filename);
+    await expectAsync(document.documentElement.toBlob(1.0)).toMatchSnapshot(filename);
   }
 }
 
 // Compatible to tests that use global variables.
 Object.assign(global, {
-  BODY,
   append,
   setAttributes,
   createElement,

@@ -32,7 +32,7 @@ public:
   foundation::BridgeCallback *bridgeCallback;
   // the owner pointer which take JSBridge as property.
   void *owner;
-  /// evaluate JavaScript source codes in standard mode.
+  // evaluate JavaScript source codes in standard mode.
   KRAKEN_EXPORT void evaluateScript(const NativeString *script, const char *url, int startLine);
   KRAKEN_EXPORT void evaluateScript(const std::u16string &script, const char *url, int startLine);
 
@@ -45,7 +45,6 @@ public:
   void setDisposeCallback(Task task, void *data);
 
   std::atomic<bool> event_registered = false;
-
 private:
   std::unique_ptr<binding::jsc::JSContext> m_context;
   JSExceptionHandler m_handler;

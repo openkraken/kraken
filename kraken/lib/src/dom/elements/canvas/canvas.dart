@@ -113,7 +113,6 @@ class CanvasElement extends Element {
           context2d.canvas = this;
           context2d.viewportSize = viewportSize;
           painter.context = context2d;
-
         }
         return painter.context;
       default:
@@ -223,7 +222,10 @@ class CanvasElement extends Element {
   void dispose() {
     super.dispose();
     _nativeMap.remove(nativeCanvasElement.address);
-    painter.context.dispose();
+    // If not getContext and element is disposed that context is not existed.
+    if (painter.context != null) {
+      painter.context.dispose();
+    }
   }
 
   @override

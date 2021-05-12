@@ -105,13 +105,13 @@ mixin ElementNativeMethods on Node {
   static void _scroll(Pointer<NativeElement> nativeElement, int x, int y) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
-    element.handleMethodScroll(x, y);
+    element.scrollTo(x: x, y: y, withAnimation: false);
   }
 
   static void _scrollBy(Pointer<NativeElement> nativeElement, int x, int y) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
-    element.handleMethodScroll(x, y, diff: true);
+    element.scrollBy(dx: x, dy: y, withAnimation: false);
   }
 
   void bindNativeMethods(Pointer<NativeElement> nativeElement) {

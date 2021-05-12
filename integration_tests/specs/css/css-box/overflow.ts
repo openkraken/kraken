@@ -311,8 +311,7 @@ describe('Overflow', () => {
     await snapshot();
 
     requestAnimationFrame(async () => {
-      document.body.scrollLeft = 50;
-      document.body.scrollTop = 300;
+      document.documentElement.scrollTop = 300;
       await snapshot();
       doneFn();
     });
