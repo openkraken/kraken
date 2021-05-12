@@ -1,6 +1,6 @@
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
-#define BODY_TARGET_ID -1
+#define HTML_TARGET_ID -1
 #define WINDOW_TARGET_ID -2
 #define DOCUMENT_TARGET_ID -3
 

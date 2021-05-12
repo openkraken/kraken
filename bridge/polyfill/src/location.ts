@@ -1,6 +1,6 @@
-import { krakenInvokeModule } from '../bridge';
+import { krakenInvokeModule } from './bridge';
 import { URL } from './url';
-import {kraken} from "./kraken";
+import { kraken } from './kraken';
 
 // @ts-ignore
 const krakenLocation = window.__location__;

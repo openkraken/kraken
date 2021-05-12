@@ -1,5 +1,5 @@
 // https://console.spec.whatwg.org/
-import { krakenPrint } from '../bridge';
+import { krakenPrint } from './bridge';
 
 const SEPARATOR = ' ';
 const INTERPOLATE = /%[sdifoO]/g;

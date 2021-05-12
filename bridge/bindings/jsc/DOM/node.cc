@@ -56,11 +56,11 @@ NodeInstance::NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId)
 
 // Returns true if node is connected and false otherwise.
 bool NodeInstance::isConnected() {
-  bool _isConnected = eventTargetId == BODY_TARGET_ID;
+  bool _isConnected = eventTargetId == HTML_TARGET_ID;
   auto parent = parentNode;
 
   while (parent != nullptr && !_isConnected) {
-    _isConnected = parent->eventTargetId == BODY_TARGET_ID;
+    _isConnected = parent->eventTargetId == HTML_TARGET_ID;
     parent = parent->parentNode;
   }
 
@@ -257,7 +257,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
     return nullptr;
   }
 
-  if (nodeInstance->eventTargetId == BODY_TARGET_ID || nodeInstance == selfInstance) {
+  if (nodeInstance->eventTargetId == HTML_TARGET_ID || nodeInstance == selfInstance) {
     throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.",
                  exception);
     return nullptr;

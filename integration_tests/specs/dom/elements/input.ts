@@ -17,6 +17,15 @@ describe('Tags input', () => {
 
     await snapshot();
   });
+  
+  it('with value first', async () => {
+    const input = document.createElement('input');
+    input.setAttribute('value', 'Hello World Hello World Hello World Hello World');
+    input.style.fontSize = '16px';
+    document.body.appendChild(input);
+
+    await snapshot();
+  });
 
   it('event blur', (done) => {
     const input1 = document.createElement('input');

@@ -142,8 +142,8 @@ class CSSPositionedLayout {
   static void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox) {
     RenderLayoutParentData boxParentData = renderBox?.parentData;
 
-    // Don't set offset if it was already set
-    if (boxParentData.isOffsetSet) {
+    // Don't set offset if it was already calculated.
+    if (boxParentData.isOffsetCalculated) {
       return;
     }
 
@@ -164,6 +164,19 @@ class CSSPositionedLayout {
         boxParentData.offset = styleOffset;
       }
     }
+  }
+
+  static bool isSticky(RenderBoxModel child) {
+    final renderStyle = child.renderStyle;
+    return renderStyle.position == CSSPositionType.sticky &&
+        (renderStyle.top != null ||
+        renderStyle.left != null ||
+        renderStyle.bottom != null ||
+        renderStyle.right != null);
+  }
+
+  static void layoutStickyChild(RenderBoxModel parent, RenderBoxModel child) {
+    // TODO
   }
 
   static void layoutPositionedChild(

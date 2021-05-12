@@ -1,7 +1,7 @@
-import { addKrakenModuleListener, krakenInvokeModule, privateKraken } from '../bridge';
-import {methodChannel, triggerMethodCallHandler} from '../modules/method-channel';
-import {dispatchConnectivityChangeEvent} from "../modules/connection";
-import {dispatchWebSocketEvent} from "../modules/websocket";
+import { addKrakenModuleListener, krakenInvokeModule, privateKraken } from './bridge';
+import { methodChannel, triggerMethodCallHandler } from './method-channel';
+import { dispatchConnectivityChangeEvent } from "./connection";
+import { dispatchWebSocketEvent } from "./websocket";
 
 function krakenModuleListener(moduleName: string, event: Event, data: any) {
   switch (moduleName) {

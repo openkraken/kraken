@@ -1,4 +1,4 @@
-describe('Position sticky', () => {
+xdescribe('Position sticky', () => {
   it('001', async () => {
     const sticky1 = document.createElement('div');
     sticky1.appendChild(document.createTextNode('sticky top 1'));

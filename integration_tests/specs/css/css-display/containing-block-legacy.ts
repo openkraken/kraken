@@ -122,7 +122,7 @@ describe('containing-block legacy', () => {
     append(div2, div3);
     append(div1, div2);
     append(BODY, div1);
-    await snapshot(BODY);
+    await snapshot();
   });
   it('010', async () => {
     let div1 = createElementWithStyle('div', {
@@ -147,7 +147,7 @@ describe('containing-block legacy', () => {
     append(div2, div3);
     append(div1, div2);
     append(BODY, div1);
-    await snapshot(BODY);
+    await snapshot();
   });
   xit('011', async () => {
     let div2 = createElementWithStyle('div', {
@@ -164,7 +164,7 @@ describe('containing-block legacy', () => {
     });
     append(div2, span);
     append(BODY, div2);
-    await snapshot(BODY);
+    await snapshot();
   });
   xit('013', async () => {
     let div2 = createElementWithStyle('div', {
@@ -181,7 +181,7 @@ describe('containing-block legacy', () => {
     });
     append(div2, span);
     append(BODY, div2);
-    await snapshot(BODY);
+    await snapshot();
   });
   xit('015', async () => {
     let div2 = createElementWithStyle('div', {
@@ -198,7 +198,7 @@ describe('containing-block legacy', () => {
     });
     append(div2, span);
     append(BODY, div2);
-    await snapshot(BODY);
+    await snapshot();
   });
 
   xit('017', async () => {

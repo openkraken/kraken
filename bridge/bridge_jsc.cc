@@ -60,7 +60,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
     handler(contextId, errmsg);
     // trigger window.onerror handler.
-    // TODO: trigger oneror event.
+    // TODO: trigger onerror event.
   };
 
 #if ENABLE_PROFILE

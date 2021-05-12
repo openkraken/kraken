@@ -461,7 +461,6 @@ class CSSStyleDeclaration {
 
     String normalizedValue = _normalizeValue(value);
 
-
     // Illegal value like '   ' after trim is '' should do nothing.
     if (normalizedValue.isEmpty) return;
 
