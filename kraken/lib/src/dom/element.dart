@@ -980,6 +980,13 @@ class Element extends Node
         _styleTransitionChangedListener(property, original, present);
         break;
 
+      case OBJECT_FIT:
+        _styleObjectFitChangedListener(property, original, present);
+        break;
+      case OBJECT_POSITION:
+        _styleObjectPositionChangedListener(property, original, present);
+        break;
+
       case FILTER:
         _styleFilterChangedListener(property, original, present);
         break;
@@ -1067,6 +1074,14 @@ class Element extends Node
 
   void _styleTextAlignChangedListener(String property, String original, String present) {
     renderBoxModel.renderStyle.updateFlow();
+  }
+
+  void _styleObjectFitChangedListener(String property, String original, String present) {
+    renderBoxModel.renderStyle.updateObjectFit(property, present);
+  }
+
+  void _styleObjectPositionChangedListener(String property, String original, String present) {
+    renderBoxModel.renderStyle.updateObjectPosition(property, present);
   }
 
   void _styleFilterChangedListener(String property, String original, String present) {
@@ -1424,7 +1439,7 @@ class Element extends Node
   }
 
   void handleMethodClick() {
-    Event clickEvent = Event(EVENT_CLICK, EventInit(bubbles: true, cancelable: true));
+    Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
 
     if (isRendererAttached) {
       final RenderBox box = renderBoxModel;
@@ -1443,7 +1458,7 @@ class Element extends Node
     }
 
     // If element not in tree, click is fired and only response to itself.
-    handleClick(clickEvent);
+    dispatchEvent(clickEvent);
   }
 
   Future<Uint8List> toBlob({double devicePixelRatio}) {
@@ -1453,29 +1468,7 @@ class Element extends Node
 
     Completer<Uint8List> completer = Completer();
 
-    RenderObject parent = renderBoxModel.parent;
-    if (!renderBoxModel.isRepaintBoundary) {
-      RenderBoxModel renderReplacedBoxModel;
-      if (renderBoxModel is RenderLayoutBox) {
-        renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
-      } else {
-        renderReplacedBoxModel = createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
-      }
-
-      if (parent is RenderObjectWithChildMixin<RenderBox>) {
-        parent.child = null;
-        parent.child = renderReplacedBoxModel;
-      } else if (parent is ContainerRenderObjectMixin) {
-        ContainerBoxParentData parentData = renderBoxModel.parentData;
-        RenderObject previousSibling = parentData.previousSibling;
-        parent.remove(renderBoxModel);
-        renderBoxModel = renderReplacedBoxModel;
-        this.parent.addChildRenderObject(this, after: previousSibling);
-      }
-      renderBoxModel = renderReplacedBoxModel;
-      // Update renderBoxModel reference in renderStyle
-      renderBoxModel.renderStyle.renderBoxModel = renderBoxModel;
-    }
+    convertToRepaintBoundary();
 
     renderBoxModel.owner.flushLayout();
 

@@ -24,6 +24,7 @@
 #include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/DOM/custom_event.h"
 #include "bindings/jsc/DOM/gesture_event.h"
+#include "bindings/jsc/DOM/mouse_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/DOM/events/close_event.h"
@@ -82,6 +83,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindUIManager(m_context);
   bindConsole(m_context);
   bindEvent(m_context);
+  bindMouseEvent(m_context);
   bindCustomEvent(m_context);
   bindCloseEvent(m_context);
   bindGestureEvent(m_context);

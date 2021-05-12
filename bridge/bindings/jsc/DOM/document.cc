@@ -160,6 +160,10 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
       return new GestureEventInstance(JSGestureEvent::instance(context),
                                       reinterpret_cast<NativeGestureEvent *>(nativeEvent));
     });
+    JSEvent::defineEvent(EVENT_CLICK, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new MouseEventInstance(JSMouseEvent::instance(context),
+                                      reinterpret_cast<NativeMouseEvent *>(nativeEvent));
+    });
   }
   if (!document_registered) {
     document_registered = true;

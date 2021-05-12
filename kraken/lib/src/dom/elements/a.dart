@@ -8,6 +8,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
+import 'package:flutter/rendering.dart';
 
 const String ANCHOR = 'A';
 
@@ -22,8 +23,9 @@ class AnchorElement extends Element {
     addEvent(EVENT_CLICK);
   }
 
-  void handleClick(Event event) {
-    super.handleClick(event);
+  void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
+    super.handleMouseEvent(eventType, down: down, up: up);
+
     if (_href == null) return;
 
     Uri uri = Uri.parse(_href);
