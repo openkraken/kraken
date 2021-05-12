@@ -177,7 +177,7 @@ describe('Tags img', () => {
     };
   });
         
-  fit('should work with loading=lazy and transform', (done) => {
+  it('should work with loading=lazy and transform', (done) => {
     const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
     const img = document.createElement('img');
     img.style.width = img.style.height = '300px';
@@ -197,7 +197,7 @@ describe('Tags img', () => {
     document.body.appendChild(img);
   });
 
-  fit('should work with loading=lazy and objectFit', (done) => {
+  it('should work with loading=lazy and objectFit', (done) => {
     const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
     const img = document.createElement('img');
     img.style.width = img.style.height = '300px';
@@ -217,7 +217,7 @@ describe('Tags img', () => {
     document.body.appendChild(img);
   });
 
-  fit('should work with loading=lazy and objectPosition', (done) => {
+  it('should work with loading=lazy and objectPosition', (done) => {
     const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
     const img = document.createElement('img');
     img.style.width = img.style.height = '300px';

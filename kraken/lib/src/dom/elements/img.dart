@@ -107,6 +107,8 @@ class ImageElement extends Element {
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
+    // Should add image box after style has applied to ensure intersection observer
+    // attached to correct renderBoxModel
     _renderImage();
     _resize();
   }
