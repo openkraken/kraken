@@ -24,18 +24,6 @@ BoxSizeType _getChildHeightSizeType(RenderBox child) {
   return null;
 }
 
-/// Get child size through boxSize to avoid flutter error when parentUsesSize is set to false
-Size _getChildSize(RenderBox child) {
-  if (child is RenderBoxModel) {
-    return child.boxSize;
-  } else if (child is RenderPositionHolder) {
-    return child.boxSize;
-  } else if (child is RenderTextBox) {
-    return child.boxSize;
-  }
-  return null;
-}
-
 // RenderPositionHolder may be affected by overflow: scroller offset.
 // We need to reset these offset to keep positioned elements render at their original position.
 Offset _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, RenderObject root) {
@@ -184,7 +172,7 @@ class CSSPositionedLayout {
     RenderBoxModel child,
     {bool needsRelayout = false}
   ) {
-    BoxConstraints childConstraints = child.renderStyle.getConstraints();
+    BoxConstraints childConstraints = child.getConstraints();
 
     // Scrolling element has two repaint boundary box, the inner box has constraints of inifinity
     // so it needs to find the upper box for querying content constraints
@@ -231,20 +219,13 @@ class CSSPositionedLayout {
 
     // Whether child need to layout
     bool isChildNeedsLayout = true;
-    if (child is RenderBoxModel && child.hasSize) {
-      double childContentWidth = RenderBoxModel.getLogicalContentWidth(child);
-      double childContentHeight = RenderBoxModel.getLogicalContentHeight(child);
-      // Always layout child when parent is not laid out yet or child is marked as needsLayout
-      if (!parent.hasSize || child.needsLayout || needsRelayout) {
-        isChildNeedsLayout = true;
-      } else {
-        Size childOldSize = _getChildSize(child);
-        // Need to layout child only when width and height both can be calculated from style
-        // and differ from its previous size
-        isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
-          (childOldSize.width != childContentWidth ||
-            childOldSize.height != childContentHeight);
-      }
+    if (child.hasSize &&
+      !needsRelayout &&
+      (childConstraints == child.constraints) &&
+      ((child is RenderBoxModel && !child.needsLayout) ||
+        (child is RenderTextBox && !child.needsLayout))
+    ) {
+      isChildNeedsLayout = false;
     }
 
     if (isChildNeedsLayout) {
