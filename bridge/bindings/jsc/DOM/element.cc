@@ -404,8 +404,6 @@ JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   std::string &&name = JSStringToStdString(nameStringRef);
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
-  getDartMethod()->flushUICommand();
-
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
 
   JSStringRetain(valueStringRef);
