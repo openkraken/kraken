@@ -1216,9 +1216,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     List<double> runMainSize = [];
 
     // Calculate the max main size of all runs
-    runMetrics.forEach((_RunMetrics runMetrics) {
+    for (_RunMetrics runMetrics in runMetrics) {
       _recordRunsMainSize(runMetrics, runMainSize);
-    });
+    }
 
     if (runMainSize.isNotEmpty) {
       autoMinSize = runMainSize.reduce((double curr, double next) {
@@ -1259,9 +1259,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     List<double> runCrossSize = [];
 
     // Calculate the max cross size of all runs
-    runMetrics.forEach((_RunMetrics runMetrics) {
+    for (_RunMetrics runMetrics in runMetrics) {
       _recordRunsCrossSize(runMetrics, runCrossSize);
-    });
+    }
 
     // Get the sum of lines
     for (double crossSize in runCrossSize) {
