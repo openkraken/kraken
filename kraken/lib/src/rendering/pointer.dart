@@ -68,30 +68,30 @@ mixin RenderPointerListenerMixin on RenderBox {
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    onLongPress(GestureEvent(EVENT_Long_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+    onLongPress(GestureEvent(EVENT_LONG_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
   }
 
   /// Called when a pointer signal this object.
   void initGestureRecognizer(Map<String, List<EventHandler>> eventHandlers) {
-    if (eventHandlers.containsKey('click')) {
+    if (eventHandlers.containsKey(EVENT_CLICK)) {
       gestures[ClickGestureRecognizer] = ClickGestureRecognizer();
       (gestures[ClickGestureRecognizer] as ClickGestureRecognizer).onClick = onClick;
     }
-    if (eventHandlers.containsKey('swipe')) {
+    if (eventHandlers.containsKey(EVENT_SWIPE)) {
       gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer();
       (gestures[SwipeGestureRecognizer] as SwipeGestureRecognizer).onSwipe = onSwipe;
     }
-    if (eventHandlers.containsKey('pan')) {
+    if (eventHandlers.containsKey(EVENT_PAN)) {
       gestures[PanGestureRecognizer] = PanGestureRecognizer();
       (gestures[PanGestureRecognizer] as PanGestureRecognizer).onStart = onPanStart;
       (gestures[PanGestureRecognizer] as PanGestureRecognizer).onUpdate = onPanUpdate;
       (gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = onPanEnd;
     }
-    if (eventHandlers.containsKey('longpress')) {
+    if (eventHandlers.containsKey(EVENT_LONG_PRESS)) {
       gestures[LongPressGestureRecognizer] = LongPressGestureRecognizer();
       (gestures[LongPressGestureRecognizer] as LongPressGestureRecognizer).onLongPressEnd = onLongPressEnd;
     }
-    if (eventHandlers.containsKey('scale')) {
+    if (eventHandlers.containsKey(EVENT_SCALE)) {
       gestures[ScaleGestureRecognizer] = ScaleGestureRecognizer();
       (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onStart = onScaleStart;
       (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onUpdate = onScaleUpdate;
