@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'http_client_interceptor.dart';
 import 'http_overrides.dart';
 
@@ -129,7 +130,6 @@ class ProxyHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> openUrl(String method, Uri url) {
-    print('openUrl $method $url');
     return nativeHttpClient.openUrl(method, url).then(_proxyClientRequest);
   }
 
@@ -213,6 +213,33 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     return _clientRequest.addStream(stream);
   }
 
+  Future<HttpClientRequest> _beforeRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
+    try {
+      return await _clientInterceptor.beforeRequest(_clientRequest);
+    } catch (err, stack) {
+      print('$err $stack');
+    }
+    return null;
+  }
+
+  Future<HttpClientResponse> _afterResponse(HttpClientInterceptor _clientInterceptor, HttpClientResponse _clientResponse) async {
+    try {
+      return await _clientInterceptor.afterResponse(_clientResponse);
+    } catch (err, stack) {
+      print('$err $stack');
+    }
+    return null;
+  }
+
+  Future<HttpClientResponse> _shouldInterceptRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
+    try {
+      return await _clientInterceptor.shouldInterceptRequest(_clientRequest);
+    } catch (err, stack) {
+      print('$err $stack');
+    }
+    return null;
+  }
+
   @override
   Future<HttpClientResponse> close() async {
     if (_httpOverrides != null && _httpOverrides.shouldInterceptRequest(_clientRequest)) {
@@ -221,13 +248,15 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         _clientRequest.headers.removeAll(HttpHeaderContextID);
         HttpClientInterceptor _clientInterceptor = _httpOverrides.getInterceptor(contextId);
         if (_clientInterceptor != null) {
-          HttpClientRequest _request = await _clientInterceptor.beforeRequest(_clientRequest);
-          HttpClientResponse _clientResponse = await _clientInterceptor.shouldInterceptRequest(_request);
-          if (_clientResponse == null) {
-            _clientResponse = await (_request ?? _clientRequest).close();
+          HttpClientRequest _request = await _beforeRequest(_clientInterceptor, _clientRequest) ?? _clientRequest;
+          HttpClientResponse simpleHttpResponse = await _shouldInterceptRequest(_clientInterceptor, _request);
+          if (simpleHttpResponse != null) {
+            return simpleHttpResponse;
+          } else {
+            HttpClientResponse _clientResponse = await _request.close();
+            HttpClientResponse _response = await _afterResponse(_clientInterceptor, _clientResponse) ?? _clientResponse;
+            return _response;
           }
-          HttpClientResponse _response = await _clientInterceptor.afterResponse(ProxyHttpClientResponse(_clientResponse));
-          return Future.value(_response ?? _clientResponse);
         }
       }
     }
@@ -242,13 +271,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   List<Cookie> get cookies => _clientRequest.cookies;
 
   @override
-  Future<HttpClientResponse> get done => _clientRequest.done.then((clientResponse) {
-    if (clientResponse is ProxyHttpClientResponse) {
-      return clientResponse;
-    } else {
-      return ProxyHttpClientResponse(clientResponse);
-    }
-  });
+  Future<HttpClientResponse> get done => _clientRequest.done;
 
   @override
   Future flush() {
@@ -285,225 +308,239 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 }
 
-class ProxyHttpClientResponse implements HttpClientResponse {
-  final HttpClientResponse _clientResponse;
-  ProxyHttpClientResponse(HttpClientResponse clientResponse)
-      : assert(clientResponse != null), _clientResponse = clientResponse;
+class _HttpConnectionInfo implements HttpConnectionInfo {
+  int localPort;
+  InternetAddress remoteAddress;
+  int remotePort;
+  _HttpConnectionInfo(this.localPort, this.remoteAddress, this.remotePort);
+}
+
+class SimpleHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
+  String mime;
+  String encoding;
+  Uint8List data;
+
+  int statusCode;
+  String reasonPhrase;
+  Map<String, String> responseHeaders;
+
+  SimpleHttpClientResponse(this.mime, this.encoding, this.data, {
+    this.statusCode = 200,
+    this.reasonPhrase = '',
+    this.responseHeaders = const {},
+  }) : assert(mime != null),
+      assert(encoding != null),
+      assert(data != null);
 
   @override
-  Future<bool> any(bool Function(List<int> element) test) {
-    return _clientResponse.any(test);
+  X509Certificate get certificate => null;
+
+  @override
+  HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.notCompressed;
+
+  @override
+  HttpConnectionInfo get connectionInfo => _HttpConnectionInfo(80, InternetAddress.loopbackIPv4, 80);
+
+  @override
+  int get contentLength => -1;
+
+  @override
+  List<Cookie> get cookies => null;
+
+  @override
+  Future<Socket> detachSocket() async {
+    return null;
   }
 
   @override
-  Stream<List<int>> asBroadcastStream({void Function(StreamSubscription<List<int>> subscription) onListen, void Function(StreamSubscription<List<int>> subscription) onCancel}) {
-    return _clientResponse.asBroadcastStream(onListen: onListen, onCancel: onCancel);
-  }
+  HttpHeaders get headers => SingleHttpHeaders(initialHeaders: responseHeaders);
 
   @override
-  Stream<E> asyncExpand<E>(Stream<E> Function(List<int> event) convert) {
-    return _clientResponse.asyncExpand(convert);
-  }
+  bool get isRedirect => statusCode >= 300 && statusCode < 400;
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> Function(List<int> event) convert) {
-    return _clientResponse.asyncMap(convert);
-  }
-
-  @override
-  Stream<R> cast<R>() {
-    return _clientResponse.cast();
-  }
-
-  @override
-  X509Certificate get certificate => _clientResponse.certificate;
-
-  @override
-  HttpClientResponseCompressionState get compressionState => _clientResponse.compressionState;
-
-  @override
-  HttpConnectionInfo get connectionInfo => _clientResponse.connectionInfo;
-
-  @override
-  Future<bool> contains(Object needle) {
-    return _clientResponse.contains(needle);
-  }
-
-  @override
-  int get contentLength => _clientResponse.contentLength;
-
-  @override
-  List<Cookie> get cookies => _clientResponse.cookies;
-
-  @override
-  Future<Socket> detachSocket() {
-    return _clientResponse.detachSocket();
-  }
-
-  @override
-  Stream<List<int>> distinct([bool Function(List<int> previous, List<int> next) equals]) {
-    return _clientResponse.distinct(equals);
-  }
-
-  @override
-  Future<E> drain<E>([E futureValue]) {
-    return _clientResponse.drain(futureValue);
-  }
-
-  @override
-  Future<List<int>> elementAt(int index) {
-    return _clientResponse.elementAt(index);
-  }
-
-  @override
-  Future<bool> every(bool Function(List<int> element) test) {
-    return _clientResponse.every(test);
-  }
-
-  @override
-  Stream<S> expand<S>(Iterable<S> Function(List<int> element) convert) {
-    return _clientResponse.expand(convert);
-  }
-
-  @override
-  Future<List<int>> get first => _clientResponse.first;
-
-  @override
-  Future<List<int>> firstWhere(bool Function(List<int> element) test, {List<int> Function() orElse}) {
-    return _clientResponse.firstWhere(test, orElse: orElse);
-  }
-
-  @override
-  Future<S> fold<S>(S initialValue, S Function(S previous, List<int> element) combine) {
-    return _clientResponse.fold(initialValue, combine);
-  }
-
-  @override
-  Future forEach(void Function(List<int> element) action) {
-    return _clientResponse.forEach(action);
-  }
-
-  @override
-  Stream<List<int>> handleError(Function onError, {bool Function(Error error) test}) {
-    return _clientResponse.handleError(onError, test: test);
-  }
-
-  @override
-  HttpHeaders get headers => _clientResponse.headers;
-
-  @override
-  bool get isBroadcast => _clientResponse.isBroadcast;
-
-  @override
-  Future<bool> get isEmpty => _clientResponse.isEmpty;
-
-  @override
-  bool get isRedirect => _clientResponse.isRedirect;
-
-  @override
-  Future<String> join([String separator = ""]) {
-    return _clientResponse.join(separator);
-  }
-
-  @override
-  Future<List<int>> get last => _clientResponse.last;
-
-  @override
-  Future<List<int>> lastWhere(bool Function(List<int> element) test, {List<int> Function() orElse}) {
-    return _clientResponse.lastWhere(test, orElse: orElse);
-  }
-
-  @override
-  Future<int> get length => _clientResponse.length;
-
-  @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
-    return _clientResponse.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
-  }
-
-  @override
-  Stream<S> map<S>(S Function(List<int> event) convert) {
-    return _clientResponse.map(convert);
-  }
-
-  @override
-  bool get persistentConnection => _clientResponse.persistentConnection;
-
-  @override
-  Future pipe(StreamConsumer<List<int>> streamConsumer) {
-    return _clientResponse.pipe(streamConsumer);
-  }
-
-  @override
-  String get reasonPhrase => _clientResponse.reasonPhrase;
+  bool get persistentConnection => false;
 
   @override
   Future<HttpClientResponse> redirect([String method, Uri url, bool followLoops]) {
-    return _clientResponse.redirect(method, url, followLoops);
+    return Future.error(RedirectException('Redirect is unsupported.', redirects));
   }
 
   @override
-  List<RedirectInfo> get redirects => _clientResponse.redirects;
+  List<RedirectInfo> get redirects => [];
 
   @override
-  Future<List<int>> reduce(List<int> Function(List<int> previous, List<int> element) combine) {
-    return _clientResponse.reduce(combine);
+  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
+    return Stream<Uint8List>.value(data).listen(onData, onDone: onDone, cancelOnError: cancelOnError);
+  }
+}
+
+class SingleHttpHeaders implements HttpHeaders {
+  final Map<String, String> _headers = Map<String, String>();
+  SingleHttpHeaders({ Map<String, String> initialHeaders }) {
+    if (initialHeaders != null) {
+      _headers.addAll(initialHeaders);
+    }
   }
 
   @override
-  Future<List<int>> get single => _clientResponse.single;
+  bool chunkedTransferEncoding = false;
 
   @override
-  Future<List<int>> singleWhere(bool Function(List<int> element) test, {List<int> Function() orElse}) {
-    return _clientResponse.singleWhere(test, orElse: orElse);
+  int get contentLength {
+    String val = value(HttpHeaders.contentLengthHeader);
+    if (val != null) {
+      return int.tryParse(val) ?? -1;
+    } else {
+      return -1;
+    }
   }
 
   @override
-  Stream<List<int>> skip(int count) {
-    return _clientResponse.skip(count);
+  set contentLength(int contentLength) {
+    if (contentLength == -1) {
+      removeAll(HttpHeaders.contentLengthHeader);
+    } else {
+      set(HttpHeaders.contentLengthHeader, contentLength.toString());
+    }
   }
 
   @override
-  Stream<List<int>> skipWhile(bool Function(List<int> element) test) {
-    return _clientResponse.skipWhile(test);
+  ContentType get contentType {
+    String value = _headers[HttpHeaders.contentTypeHeader];
+    if (value != null) {
+      return ContentType.parse(value);
+    } else {
+      return null;
+    }
   }
 
   @override
-  int get statusCode => _clientResponse.statusCode;
-
-  @override
-  Stream<List<int>> take(int count) {
-    return _clientResponse.take(count);
+  set contentType(ContentType contentType) {
+    if (contentType == null) {
+      removeAll(HttpHeaders.contentTypeHeader);
+    } else {
+      set(HttpHeaders.contentTypeHeader, contentType.toString());
+    }
   }
 
   @override
-  Stream<List<int>> takeWhile(bool Function(List<int> element) test) {
-    return _clientResponse.takeWhile(test);
+  DateTime get date {
+    String value = _headers[HttpHeaders.dateHeader];
+    if (String != null) {
+      try {
+        return HttpDate.parse(value);
+      } on Exception {
+        return null;
+      }
+    }
+    return null;
   }
 
   @override
-  Stream<List<int>> timeout(Duration timeLimit, {void Function(EventSink<List<int>> sink) onTimeout}) {
-    return _clientResponse.timeout(timeLimit, onTimeout: onTimeout);
+  set date(DateTime date) {
+    if (date == null) {
+      removeAll(HttpHeaders.dateHeader);
+    } else {
+      // Format "DateTime" header with date in Greenwich Mean Time (GMT).
+      String formatted = HttpDate.format(date.toUtc());
+      set(HttpHeaders.dateHeader, formatted);
+    }
   }
 
   @override
-  Future<List<List<int>>> toList() {
-    return _clientResponse.toList();
+  DateTime get expires => DateTime.tryParse(_headers[HttpHeaders.expiresHeader]);
+
+  @override
+  set expires(DateTime _expires) {
+    String formatted = HttpDate.format(_expires.toUtc());
+    set(HttpHeaders.expiresHeader, formatted);
   }
 
   @override
-  Future<Set<List<int>>> toSet() {
-    return _clientResponse.toSet();
+  String get host => _headers[HttpHeaders.hostHeader];
+
+  @override
+  set host(String _host) {
+    set(HttpHeaders.hostHeader, _host);
   }
 
   @override
-  Stream<S> transform<S>(StreamTransformer<List<int>, S> streamTransformer) {
-    return _clientResponse.transform(streamTransformer);
+  DateTime get ifModifiedSince {
+    String value = _headers[HttpHeaders.ifModifiedSinceHeader];
+    if (value != null) {
+      try {
+        return HttpDate.parse(value);
+      } on Exception {
+        return null;
+      }
+    }
+    return null;
   }
 
   @override
-  Stream<List<int>> where(bool Function(List<int> event) test) {
-    return _clientResponse.where(test);
+  set ifModifiedSince(DateTime _ifModifiedSince) {
+    if (_ifModifiedSince == null) {
+      _headers.remove(HttpHeaders.ifModifiedSinceHeader);
+    } else {
+      // Format "ifModifiedSince" header with date in Greenwich Mean Time (GMT).
+      String formatted = HttpDate.format(_ifModifiedSince.toUtc());
+      set(HttpHeaders.ifModifiedSinceHeader, formatted);
+    }
   }
 
+
+  @override
+  bool persistentConnection = false;
+
+  @override
+  int port = 80;
+
+  @override
+  List<String> operator [](String name) {
+    return [_headers[name]];
+  }
+
+  @override
+  void add(String name, Object value, {bool preserveHeaderCase = false}) {
+    set(name, value, preserveHeaderCase: preserveHeaderCase);
+  }
+
+  @override
+  void clear() {
+    _headers.clear();
+  }
+
+  @override
+  void forEach(void Function(String name, List<String> values) action) {
+    _headers.forEach((key, value) {
+      action(key, [value]);
+    });
+  }
+
+  @override
+  void noFolding(String name) {}
+
+  @override
+  void remove(String name, Object value) {
+    removeAll(name);
+  }
+
+  @override
+  void removeAll(String name) {
+    _headers.remove(name);
+  }
+
+  @override
+  void set(String name, Object value, {bool preserveHeaderCase = false}) {
+    if (!preserveHeaderCase) {
+      name = name.toLowerCase();
+    }
+    _headers[name] = value;
+  }
+
+  @override
+  String value(String name) {
+    return _headers[name];
+  }
 }

@@ -323,7 +323,7 @@ class CustomHttpHeaders implements HttpHeaders {
   CustomHttpHeaders() : _headers = HashMap<String, String>();
 
   @override
-  bool chunkedTransferEncoding;
+  bool chunkedTransferEncoding = false;
 
   @override
   int contentLength;
