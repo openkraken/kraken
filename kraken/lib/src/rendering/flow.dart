@@ -513,7 +513,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         CSSPositionedLayout.layoutPositionedChild(this, child);
       } else if (!childParentData.isOffsetCalculated && child is RenderBoxModel) {
         if (CSSPositionedLayout.isSticky(child)) {
-          CSSPositionedLayout.layoutStickyChild(this, child);
+          CSSPositionedLayout.layoutStickyChild(child);
         }
       }
       child = childParentData.nextSibling;
