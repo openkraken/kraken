@@ -6,11 +6,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'http_client_interceptor.dart';
+import 'http_overrides.dart';
+
+typedef ShouldInterceptRequest = bool Function(HttpClientRequest request);
 
 class ProxyHttpClient implements HttpClient {
-  ProxyHttpClient({ this.nativeHttpClient, this.httpRequestInterceptor });
+  ProxyHttpClient({ this.nativeHttpClient, this.httpOverrides });
 
-  final HttpClientInterceptor httpRequestInterceptor;
+  final KrakenHttpOverrides httpOverrides;
   final HttpClient nativeHttpClient;
 
   @override
@@ -161,8 +164,8 @@ class ProxyHttpClient implements HttpClient {
   }
 
   Future<HttpClientRequest> _proxyClientRequest(HttpClientRequest request) async {
-    if (httpRequestInterceptor != null) {
-      return ProxyHttpClientRequest(request, httpRequestInterceptor);
+    if (httpOverrides != null) {
+      return ProxyHttpClientRequest(request, httpOverrides);
     }
     return request;
   }
@@ -170,10 +173,17 @@ class ProxyHttpClient implements HttpClient {
 
 class ProxyHttpClientRequest extends HttpClientRequest {
   final HttpClientRequest _clientRequest;
-  final HttpClientInterceptor _clientInterceptor;
-  ProxyHttpClientRequest(HttpClientRequest clientRequest, HttpClientInterceptor clientInterceptor)
+  final KrakenHttpOverrides _httpOverrides;
+  ProxyHttpClientRequest(HttpClientRequest clientRequest, KrakenHttpOverrides httpOverrides)
       : assert(clientRequest != null), _clientRequest = clientRequest,
-        _clientInterceptor = clientInterceptor;
+        _httpOverrides = httpOverrides;
+
+  String _getContextId(HttpClientRequest request) {
+    if (request != null) {
+      return request.headers.value(HttpHeaderContextID);
+    }
+    return null;
+  }
 
   @override
   Encoding get encoding => _clientRequest.encoding;
@@ -205,13 +215,24 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() async {
-    HttpClientRequest _request = await _clientInterceptor.beforeRequest(null, _clientRequest);
-    HttpClientResponse _clientResponse = await _clientInterceptor.shouldInterceptRequest(null, _request);
-    if (_clientResponse == null) {
-      _clientResponse = await (_request ?? _clientRequest).close();
+    if (_httpOverrides != null && _httpOverrides.shouldInterceptRequest(_clientRequest)) {
+      String contextId = _getContextId(_clientRequest);
+      if (contextId != null) {
+        _clientRequest.headers.removeAll(HttpHeaderContextID);
+        HttpClientInterceptor _clientInterceptor = _httpOverrides.getInterceptor(contextId);
+        if (_clientInterceptor != null) {
+          HttpClientRequest _request = await _clientInterceptor.beforeRequest(_clientRequest);
+          HttpClientResponse _clientResponse = await _clientInterceptor.shouldInterceptRequest(_request);
+          if (_clientResponse == null) {
+            _clientResponse = await (_request ?? _clientRequest).close();
+          }
+          HttpClientResponse _response = await _clientInterceptor.afterResponse(ProxyHttpClientResponse(_clientResponse));
+          return Future.value(_response ?? _clientResponse);
+        }
+      }
     }
-    HttpClientResponse _response = await _clientInterceptor.afterResponse(null, _clientResponse);
-    return ProxyHttpClientResponse(_response, _clientInterceptor);
+
+    return _clientRequest.close();
   }
 
   @override
@@ -225,7 +246,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     if (clientResponse is ProxyHttpClientResponse) {
       return clientResponse;
     } else {
-      return ProxyHttpClientResponse(clientResponse, _clientInterceptor);
+      return ProxyHttpClientResponse(clientResponse);
     }
   });
 
@@ -266,10 +287,8 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
 class ProxyHttpClientResponse implements HttpClientResponse {
   final HttpClientResponse _clientResponse;
-  final HttpClientInterceptor _clientInterceptor;
-  ProxyHttpClientResponse(HttpClientResponse clientResponse, HttpClientInterceptor clientInterceptor)
-      : assert(clientResponse != null), _clientResponse = clientResponse,
-        _clientInterceptor = clientInterceptor;
+  ProxyHttpClientResponse(HttpClientResponse clientResponse)
+      : assert(clientResponse != null), _clientResponse = clientResponse;
 
   @override
   Future<bool> any(bool Function(List<int> element) test) {

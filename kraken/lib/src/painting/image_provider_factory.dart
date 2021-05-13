@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 
 /// This class allows user to customize Kraken's image loading.
@@ -124,8 +125,11 @@ ImageProvider defaultCachedProviderFactory(String url, [dynamic param]) {
 
 /// default ImageProviderFactory implementation of [ImageType.network]
 ImageProvider defaultNetworkProviderFactory(String url, [dynamic param]) {
+  String contextId;
+  if (param is List) contextId = param[0]?.toString();
   NetworkImage networkImage = NetworkImage(url, headers: {
     HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
+    HttpHeaderContextID: contextId,
   });
   return networkImage;
 }
