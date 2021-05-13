@@ -12,21 +12,30 @@ import 'package:kraken/module.dart';
 
 const String WINDOW = 'WINDOW';
 
-final Pointer<NativeFunction<Native_Open>> nativeOpen = Pointer.fromFunction(Window._open);
+final Pointer<NativeFunction<Native_Window_Open>> nativeOpen = Pointer.fromFunction(Window._open);
+final Pointer<NativeFunction<Native_Window_ScrollX>> nativeScrollX = Pointer.fromFunction(Window._scrollX, 0.0);
+final Pointer<NativeFunction<Native_Window_ScrollY>> nativeScrollY = Pointer.fromFunction(Window._scrollY, 0.0);
+final Pointer<NativeFunction<Native_Window_ScrollTo>> nativeScrollTo = Pointer.fromFunction(Window._scrollTo);
+final Pointer<NativeFunction<Native_Window_ScrollBy>> nativeScrollBy = Pointer.fromFunction(Window._scrollBy);
 
 class Window extends EventTarget {
   final Pointer<NativeWindow> nativeWindowPtr;
+  final Element viewportElement;
   static SplayTreeMap<int, Window> _nativeMap = SplayTreeMap();
 
-  Window(int targetId, this.nativeWindowPtr, ElementManager elementManager) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
+  Window(int targetId, this.nativeWindowPtr, ElementManager elementManager, this.viewportElement) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
       dispatchEvent(event);
     };
-    
+
     // Bind window methods in dart to cpp
     nativeWindowPtr.ref.open = nativeOpen;
-    // Store currunt native window pointer in dart
+    nativeWindowPtr.ref.scrollX = nativeScrollX;
+    nativeWindowPtr.ref.scrollY = nativeScrollY;
+    nativeWindowPtr.ref.scrollTo = nativeScrollTo;
+    nativeWindowPtr.ref.scrollBy = nativeScrollBy;
+    // Store current native window pointer in dart
     _nativeMap[nativeWindowPtr.address] = this;
   }
 
@@ -38,13 +47,55 @@ class Window extends EventTarget {
     emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
   }
 
+  void _handleScroll(Event event) {
+    emitUIEvent(elementManager.controller.view.contextId, nativeWindowPtr.ref.nativeEventTarget, event);
+  }
+
   static void _open(Pointer<NativeWindow> nativeWindowPtr, Pointer<NativeString> urlPtr) {
     String url = nativeStringToString(urlPtr);
 
     ElementManager elementManager = _nativeMap[nativeWindowPtr.address].elementManager;
     String sourceUrl = elementManager.controller.view.rootController.bundleURL;
-    
+
     elementManager.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.navigate);
+  }
+
+  static double _scrollX(Pointer<NativeWindow> nativeWindowPtr) {
+    Window window = _nativeMap[nativeWindowPtr.address];
+    return window.scrollX();
+  }
+
+  static double _scrollY(Pointer<NativeWindow> nativeWindowPtr) {
+    Window window = _nativeMap[nativeWindowPtr.address];
+    return window.scrollY();
+  }
+
+  static void _scrollTo(Pointer<NativeWindow> nativeWindowPtr, int x, int y) {
+    Window window = _nativeMap[nativeWindowPtr.address];
+    window.viewportElement.flushLayout();
+    window.scrollTo(x, y);
+  }
+
+  static void _scrollBy(Pointer<NativeWindow> nativeWindowPtr, int x, int y) {
+    Window window = _nativeMap[nativeWindowPtr.address];
+    window.viewportElement.flushLayout();
+    window.scrollBy(x, y);
+  }
+
+  double scrollX() {
+    return viewportElement.scrollLeft;
+  }
+
+  double scrollY() {
+    return viewportElement.scrollTop;
+  }
+
+  void scrollTo(num x, num y) {
+    viewportElement.scrollTo(x: x, y: y, withAnimation: false);
+  }
+
+  void scrollBy(num x, num y) {
+    viewportElement.scrollBy(dx: x, dy: y, withAnimation: false);
   }
 
   @override
@@ -57,6 +108,8 @@ class Window extends EventTarget {
         return addEventListener(eventName, _handleColorSchemeChange);
       case EVENT_LOAD:
         return addEventListener(eventName, _handleLoad);
+      case EVENT_SCROLL:
+        return viewportElement.addEventListener(eventName, _handleScroll);
       default:
         break;
     }

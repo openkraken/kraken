@@ -28,4 +28,6 @@ export 'src/dom/elements/canvas/canvas.dart';
 export 'src/dom/elements/img.dart';
 export 'src/dom/elements/input.dart';
 export 'src/dom/elements/object.dart';
-
+export 'src/dom/elements/script.dart';
+export 'src/dom/elements/head.dart';
+export 'src/dom/elements/html.dart';

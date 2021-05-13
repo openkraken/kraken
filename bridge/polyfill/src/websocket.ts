@@ -1,5 +1,5 @@
-import { initPropertyHandlersForEventTargets } from "../helpers";
-import { kraken } from '../kom/kraken';
+import { initPropertyHandlersForEventTargets } from './helpers';
+import { kraken } from './kraken';
 
 function validateUrl(url: string) {
   let protocol = url.substring(0, url.indexOf(':'));

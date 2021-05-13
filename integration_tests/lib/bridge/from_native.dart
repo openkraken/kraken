@@ -48,23 +48,6 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<Native_JSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
-typedef Native_RefreshPaintCallback = Void Function(Pointer<JSCallbackContext>, Int32 contextId, Pointer<Utf8>);
-typedef Dart_RefreshPaintCallback = void Function(Pointer<JSCallbackContext>, int contextId, Pointer<Utf8>);
-typedef Native_RefreshPaint = Void Function(Pointer<JSCallbackContext>, Int32 contextId, Pointer<NativeFunction<Native_RefreshPaintCallback>>);
-
-void _refreshPaint(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<Native_RefreshPaintCallback>> pointer) async {
-  Dart_RefreshPaintCallback callback = pointer.asFunction();
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  try {
-    await controller.testRefreshPaint();
-    callback(callbackContext, contextId, nullptr);
-  } catch (e, stack) {
-    print('$e\n$stack');
-  }
-}
-
-final Pointer<NativeFunction<Native_RefreshPaint>> _nativeRefreshPaint = Pointer.fromFunction(_refreshPaint);
-
 typedef Native_MatchImageSnapshotCallback = Void Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId, Int8);
 typedef Dart_MatchImageSnapshotCallback = void Function(Pointer<JSCallbackContext> callbackContext, int contextId, int);
 typedef Native_MatchImageSnapshot = Void Function(
@@ -121,6 +104,7 @@ void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int lengt
 
     double change = mousePointerList[i].ref.change;
     data.add(PointerData(
+      // TODO: remove hardcode '360' width that for double testing in one flutter window
       physicalX: (360 * contextId + x) * window.devicePixelRatio,
       physicalY: (56.0 + y) * window.devicePixelRatio,
       // MouseEvent will trigger [RendererBinding.dispatchEvent] -> [BaseMouseTracker.updateWithEvent]
@@ -162,7 +146,6 @@ final Pointer<NativeFunction<Native_SimulateKeyPress>> _nativeSimulateKeyPress =
 
 final List<int> _dartNativeMethods = [
   _nativeOnJsError.address,
-  _nativeRefreshPaint.address,
   _nativeMatchImageSnapshot.address,
   _nativeEnvironment.address,
   _nativeSimulatePointer.address,
