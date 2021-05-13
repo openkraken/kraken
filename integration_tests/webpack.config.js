@@ -5,6 +5,7 @@ const bableTransformSnapshotPlugin = require('./scripts/babel_transform_snapshot
 const context = path.join(__dirname);
 const runtimePath = path.join(context, 'runtime');
 const globalRuntimePath = path.join(context, 'runtime/global');
+const resetRuntimePath = path.join(context, 'runtime/reset');
 const buildPath = path.join(context, '.specs');
 const testPath = path.join(context, 'specs');
 const snapshotPath = path.join(context, 'snapshots');
@@ -15,6 +16,7 @@ const entryFiles = glob.sync('specs/**/*.{js,jsx,ts,tsx}', {
 
 // Add global vars
 entryFiles.unshift(globalRuntimePath);
+entryFiles.unshift(resetRuntimePath);
 
 module.exports = {
   context: context,

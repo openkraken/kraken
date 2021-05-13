@@ -93,7 +93,7 @@ mixin EventHandlerMixin on Node {
   }
 
   void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
-    RenderBoxModel root = elementManager.getRootElement().renderBoxModel;
+    RenderBoxModel root = elementManager.viewportElement.renderBoxModel;
     Offset globalOffset = root.globalToLocal(Offset(down.position.dx, down.position.dy));
 
     dispatchEvent(MouseEvent(eventType,

@@ -27,11 +27,10 @@ final _displayNoneConstraints = BoxConstraints(
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   bool isPositioned = false;
 
-  /// Row index of child when wrapping
+  // Row index of child when wrapping
   int runIndex = 0;
-
-  // Whether offset is already set
-  bool isOffsetSet = false;
+  // Whether offset is already calculated.
+  bool isOffsetCalculated = false;
 
   @override
   String toString() {

@@ -1,6 +1,6 @@
 import { kraken } from './kraken';
-import connection from '../modules/connection';
-import { vibrate } from '../modules/vibration';
+import connection from './connection';
+import { vibrate } from './vibration';
 
 export const navigator = {
   vibrate,

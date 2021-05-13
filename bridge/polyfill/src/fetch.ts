@@ -1,4 +1,4 @@
-import {kraken} from "../kom/kraken";
+import { kraken } from './kraken';
 
 function normalizeName(name: any) {
   if (typeof name !== 'string') {
