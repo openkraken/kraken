@@ -163,6 +163,7 @@ describe('Overflow', () => {
     requestAnimationFrame(async () => {
       div1.scrollLeft = 20;
       div1.scrollTop = 20;
+
       await snapshot(0.1);
       done();
     });
