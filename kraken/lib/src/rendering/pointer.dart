@@ -8,6 +8,7 @@ import 'package:kraken/dom.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 
 typedef GestureCallback = void Function(Event);
 
@@ -73,33 +74,8 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   /// Called when a pointer signal this object.
   void initGestureRecognizer(Map<String, List<EventHandler>> eventHandlers) {
-    if (eventHandlers.containsKey(EVENT_CLICK)) {
-      gestures[ClickGestureRecognizer] = ClickGestureRecognizer();
-      (gestures[ClickGestureRecognizer] as ClickGestureRecognizer).onClick = onClick;
-    }
-    if (eventHandlers.containsKey(EVENT_SWIPE)) {
-      gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer();
-      (gestures[SwipeGestureRecognizer] as SwipeGestureRecognizer).onSwipe = onSwipe;
-    }
-    if (eventHandlers.containsKey(EVENT_PAN)) {
-      gestures[PanGestureRecognizer] = PanGestureRecognizer();
-      (gestures[PanGestureRecognizer] as PanGestureRecognizer).onStart = onPanStart;
-      (gestures[PanGestureRecognizer] as PanGestureRecognizer).onUpdate = onPanUpdate;
-      (gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = onPanEnd;
-    }
-    if (eventHandlers.containsKey(EVENT_LONG_PRESS)) {
-      gestures[LongPressGestureRecognizer] = LongPressGestureRecognizer();
-      (gestures[LongPressGestureRecognizer] as LongPressGestureRecognizer).onLongPressEnd = onLongPressEnd;
-    }
-    if (eventHandlers.containsKey(EVENT_SCALE)) {
-      gestures[ScaleGestureRecognizer] = ScaleGestureRecognizer();
-      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onStart = onScaleStart;
-      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onUpdate = onScaleUpdate;
-      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onEnd = onScaleEnd;
-    }
-  }
 
-  final Map<Type, GestureRecognizer> gestures = <Type, GestureRecognizer>{};
+  }
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
@@ -109,9 +85,9 @@ mixin RenderPointerListenerMixin on RenderBox {
     /// pointers), or has its button pressed (for mouse pointers) at this widget's
     /// location.
     if (event is PointerDownEvent) {
-      gestures.forEach((key, gesture) {
-        gesture.addPointer(event);
-      });
+      if (entry.target is RenderBoxModel) {
+        GestureManager.getInstance().renderBoxModelList.add(entry.target as RenderBoxModel);
+      }
     }
 
     if (onPointerDown != null && event is PointerDownEvent)

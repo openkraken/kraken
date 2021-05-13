@@ -5,6 +5,8 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:kraken/launcher.dart';
+import 'package:kraken/gesture.dart';
+import 'package:kraken/rendering.dart';
 import 'dart:ui';
 import 'package:meta/meta.dart';
 
@@ -74,6 +76,10 @@ class RenderViewportBox extends RenderProxyBox
     super.handleEvent(event, entry);
     if (event is PointerDownEvent) {
       _verticalDragGestureRecognizer.addPointer(event);
+      GestureManager.getInstance().addPointer(event);
+    }
+    if (event is PointerUpEvent) {
+      GestureManager.getInstance().triggerGesture();
     }
   }
 
