@@ -3,11 +3,9 @@
  * Author: Kraken Team.
  */
 import 'dart:io';
-import 'package:path/path.dart';
-
+import 'package:kraken/launcher.dart';
 import 'http_client_interceptor.dart';
 import 'http_client.dart';
-import 'package:kraken/launcher.dart';
 
 const String HttpHeaderContextID = 'x-kraken-context-id';
 class KrakenHttpOverrides extends HttpOverrides {
@@ -25,7 +23,6 @@ class KrakenHttpOverrides extends HttpOverrides {
     request.headers.set(HttpHeaderContextID, contextId);
   }
 
-  // final HttpClientInterceptor interceptor;
   final HttpOverrides parentHttpOverrides = HttpOverrides.current;
   final Map<String, HttpClientInterceptor> _contextIdToHttpClientInterceptorMap = Map<String, HttpClientInterceptor>();
 

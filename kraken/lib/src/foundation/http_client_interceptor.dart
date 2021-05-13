@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'dart:io';
-import 'package:kraken/widget.dart';
 
 abstract class HttpClientInterceptor {
   /**
