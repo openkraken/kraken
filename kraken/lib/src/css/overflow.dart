@@ -48,6 +48,33 @@ CSSOverflowType _getOverflowType(String definition) {
 
 typedef ScrollListener = void Function(double scrollTop, AxisDirection axisDirection);
 
+mixin CSSOverflowStyleMixin on RenderStyleBase {
+  CSSOverflowType _overflowX;
+  CSSOverflowType get overflowX {
+    return _overflowX;
+  }
+  set overflowX(CSSOverflowType value) {
+    if (_overflowX == value) return;
+    _overflowX = value;
+  }
+
+  CSSOverflowType _overflowY;
+  CSSOverflowType get overflowY {
+    return _overflowY;
+  }
+  set overflowY(CSSOverflowType value) {
+    if (_overflowY == value) return;
+    _overflowY = value;
+  }
+
+  void updateOverflow(CSSStyleDeclaration style) {
+    RenderStyle renderStyle = this;
+    List<CSSOverflowType> overflow = getOverflowTypes(style);
+    renderStyle.overflowX = overflow[0];
+    renderStyle.overflowY = overflow[1];
+  }
+}
+
 mixin CSSOverflowMixin on ElementBase {
   // The duration time for element scrolling to a significant place.
   static const SCROLL_DURATION = Duration(milliseconds: 250);
@@ -64,10 +91,11 @@ mixin CSSOverflowMixin on ElementBase {
   void updateRenderOverflow(Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
     RenderBoxModel renderBoxModel = element.renderBoxModel;
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
 
-    List<CSSOverflowType> overflow = getOverflowTypes(style);
-    CSSOverflowType overflowX = overflow[0];
-    CSSOverflowType overflowY = overflow[1];
+    renderStyle.updateOverflow(style);
+    CSSOverflowType overflowX = renderStyle.overflowX;
+    CSSOverflowType overflowY = renderStyle.overflowY;
     bool shouldRepaintSelf = false;
 
     switch(overflowX) {

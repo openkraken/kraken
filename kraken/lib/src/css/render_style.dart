@@ -25,6 +25,7 @@ class RenderStyle
     CSSObjectFitMixin,
     CSSObjectPositionMixin,
     CSSSliverMixin,
+    CSSOverflowStyleMixin,
     CSSOpacityMixin {
 
   RenderBoxModel renderBoxModel;

@@ -483,6 +483,15 @@ class RenderBoxModel extends RenderBox with
   // Cache all the fixed children of renderBoxModel of root element
   List<RenderBoxModel> fixedChildren = [];
 
+  // Position of sticky element changes between relative and fixed of scroll container
+  StickyPositionType stickyStatus = StickyPositionType.relative;
+
+  // Original offset to scroll container of sticky element
+  Offset originalScrollContainerOffset;
+
+  // Original offset of sticky element
+  Offset originalOffset;
+
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;
 
