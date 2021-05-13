@@ -1697,7 +1697,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double autoMinSize = 0;
-    bool isHorizontalFlexDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
 
     // Main size of each run
     List<double> runMainSize = [];
