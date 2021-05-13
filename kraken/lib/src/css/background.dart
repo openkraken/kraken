@@ -86,7 +86,7 @@ class CSSBackground {
     return style[BACKGROUND_IMAGE].isNotEmpty && (attachment.isEmpty || attachment == SCROLL);
   }
 
-  static DecorationImage getDecorationImage(CSSStyleDeclaration style, CSSFunctionalNotation method) {
+  static DecorationImage getDecorationImage(CSSStyleDeclaration style, CSSFunctionalNotation method, { int contextId }) {
     DecorationImage backgroundImage;
 
     String url = method.args.length > 0 ? method.args[0] : '';
@@ -134,7 +134,7 @@ class CSSBackground {
     }
 
     backgroundImage = DecorationImage(
-        image: CSSUrl.parseUrl(url),
+        image: CSSUrl.parseUrl(url, contextId: contextId),
         repeat: imageRepeat,
         alignment: CSSPosition.parsePosition(style[BACKGROUND_POSITION]),
         fit: boxFit);
