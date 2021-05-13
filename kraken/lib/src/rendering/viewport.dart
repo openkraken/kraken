@@ -78,9 +78,6 @@ class RenderViewportBox extends RenderProxyBox
       _verticalDragGestureRecognizer.addPointer(event);
       GestureManager.getInstance().addPointer(event);
     }
-    if (event is PointerUpEvent) {
-      GestureManager.getInstance().triggerGesture();
-    }
   }
 
   void paint(PaintingContext context, Offset offset) {
