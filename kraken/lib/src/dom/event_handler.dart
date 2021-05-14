@@ -25,11 +25,6 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerMove = handlePointMove;
     renderBoxModel.onPointerUp = handlePointUp;
     renderBoxModel.onPointerCancel = handlePointCancel;
-    renderBoxModel.onClick = handleMouseEvent;
-    renderBoxModel.onSwipe = dispatchEvent;
-    renderBoxModel.onPan = dispatchEvent;
-    renderBoxModel.onScale = dispatchEvent;
-    renderBoxModel.onLongPress = dispatchEvent;
     renderBoxModel.initGestureRecognizer(eventHandlers);
   }
 
@@ -38,11 +33,6 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerMove = null;
     renderBoxModel.onPointerUp = null;
     renderBoxModel.onPointerCancel = null;
-    renderBoxModel.onClick = null;
-    renderBoxModel.onSwipe = null;
-    renderBoxModel.onPan = null;
-    renderBoxModel.onScale = null;
-    renderBoxModel.onLongPress = null;
   }
 
   void handlePointDown(PointerDownEvent pointEvent) {
@@ -90,22 +80,6 @@ mixin EventHandlerMixin on Node {
     event.targetTouches.items.add(touch);
     event.touches.items.add(touch);
     return event;
-  }
-
-  void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
-    RenderBoxModel root = elementManager.getRootElement().renderBoxModel;
-    Offset globalOffset = root.globalToLocal(Offset(up.position.dx, up.position.dy));
-
-    dispatchEvent(MouseEvent(eventType,
-      MouseEventInit(
-        bubbles: true,
-        cancelable: true,
-        clientX: globalOffset.dx,
-        clientY: globalOffset.dy,
-        offsetX: up.localPosition.dx,
-        offsetY: up.localPosition.dy,
-      )
-    ));
   }
 
   void handleAppear() {

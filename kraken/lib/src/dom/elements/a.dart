@@ -4,11 +4,12 @@
  */
 
 import 'dart:ffi';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 
 const String ANCHOR = 'A';
 
@@ -24,7 +25,19 @@ class AnchorElement extends Element {
   }
 
   void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
-    super.handleMouseEvent(eventType, down: down, up: up);
+    RenderBoxModel root = elementManager.getRootElement().renderBoxModel;
+    Offset globalOffset = root.globalToLocal(Offset(up.position.dx, up.position.dy));
+
+    super.dispatchEvent(MouseEvent(eventType,
+        MouseEventInit(
+          bubbles: true,
+          cancelable: true,
+          clientX: globalOffset.dx,
+          clientY: globalOffset.dy,
+          offsetX: up.localPosition.dx,
+          offsetY: up.localPosition.dy,
+        )
+    ));
 
     if (_href == null) return;
 
