@@ -173,4 +173,16 @@ class SingleHttpHeaders implements HttpHeaders {
   String value(String name) {
     return _headers[name];
   }
+
+  @override
+  String toString() {
+    StringBuffer sb = StringBuffer();
+    _headers.forEach((String name, String value) {
+      sb..write(name)
+        ..write(': ')
+        ..write(value)
+        ..write('\n');
+    });
+    return sb.toString();
+  }
 }
