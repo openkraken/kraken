@@ -119,4 +119,56 @@ describe('MouseEvent', () => {
     })
     await simulateClick(1.0, 10.0);
   });
+
+  it('should work width target', async (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'red';
+    div.style.width = '100px';
+    div.style.height = '100px';
+
+    const span = document.createElement('span');
+
+    span.appendChild(document.createTextNode('123'))
+
+    const p = document.createElement('p');
+    p.style.backgroundColor = 'blue';
+    p.style.width = '50px';
+    p.style.height = '50px';
+
+    p.appendChild(span);
+    div.appendChild(p);
+    document.body.appendChild(div);
+
+    div.addEventListener('click', function handler(e) {
+        expect(e.target).toBe(span);
+    });
+  
+    span.click();
+  });
+
+  it('should work width target', async (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'red';
+    div.style.width = '100px';
+    div.style.height = '100px';
+
+    const span = document.createElement('span');
+
+    span.appendChild(document.createTextNode('123'))
+
+    const p = document.createElement('p');
+    p.style.backgroundColor = 'blue';
+    p.style.width = '50px';
+    p.style.height = '50px';
+
+    p.appendChild(span);
+    div.appendChild(p);
+    document.body.appendChild(div);
+
+    div.addEventListener('click', function handler(e) {
+        expect(e.currentTarget).toBe(div);
+    });
+  
+    span.click();
+  });
 });
