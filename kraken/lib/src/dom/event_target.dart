@@ -46,14 +46,11 @@ class EventTarget {
   }
 
   /// return whether event is cancelled.
-  bool dispatchEvent(Event event) {
-    bool cancelled = true;
+  void dispatchEvent(Event event) {
     event.currentTarget = event.target = this;
-    if (event.currentTarget != null) {
-      List<EventHandler> handlers = event.currentTarget.getEventHandlers(event.type);
-      cancelled = _dispatchEventToTarget(event.currentTarget, handlers, event);
+    if (event.currentTarget != null && this is Element) {
+      (this as Element).eventResponder(event);
     }
-    return cancelled;
   }
 
   bool _dispatchEventToTarget(EventTarget target, List<EventHandler> handlers, Event event) {
