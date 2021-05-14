@@ -91,15 +91,6 @@ class Element extends Node
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
 
-  // Position of sticky element changes between relative and fixed of scroll container
-  StickyPositionType stickyStatus = StickyPositionType.relative;
-
-  // Original offset to scroll container of sticky element
-  Offset originalScrollContainerOffset;
-
-  // Original offset of sticky element
-  Offset originalOffset;
-
   final String tagName;
 
   final Map<String, dynamic> defaultStyle;
@@ -120,8 +111,6 @@ class Element extends Node
   RenderObject renderPositionedPlaceholder;
 
   Element scrollingElement;
-
-  bool get isValidSticky => style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
 
   Size get viewportSize => elementManager.viewport.viewportSize;
 

@@ -312,11 +312,14 @@ mixin CSSOverflowMixin on ElementBase {
     List<Element> result = [];
 
     for (Element child in element.children) {
-      List<CSSOverflowType> overflow = getOverflowTypes(child.style);
-      CSSOverflowType overflowX = overflow[0];
-      CSSOverflowType overflowY = overflow[1];
+      RenderBoxModel childRenderBoxModel = child.renderBoxModel;
+      RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
+      CSSOverflowType overflowX = childRenderStyle.overflowX;
+      CSSOverflowType overflowY = childRenderStyle.overflowY;
 
-      if (child.isValidSticky) result.add(child);
+      if (CSSPositionedLayout.isSticky(childRenderBoxModel)) {
+        result.add(child);
+      }
 
       // No need to loop scrollable container children
       if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
