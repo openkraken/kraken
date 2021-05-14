@@ -58,9 +58,12 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     return null;
   }
 
-  Future<HttpClientResponse> _afterResponse(HttpClientInterceptor _clientInterceptor, HttpClientResponse _clientResponse) async {
+  Future<HttpClientResponse> _afterResponse(
+      HttpClientInterceptor _clientInterceptor,
+      HttpClientRequest _clientRequest,
+      HttpClientResponse _clientResponse) async {
     try {
-      return await _clientInterceptor.afterResponse(_clientResponse);
+      return await _clientInterceptor.afterResponse(_clientRequest, _clientResponse);
     } catch (err, stack) {
       print('$err $stack');
     }
@@ -85,14 +88,8 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         HttpClientInterceptor _clientInterceptor = _httpOverrides.getInterceptor(contextId);
         if (_clientInterceptor != null) {
           HttpClientRequest _request = await _beforeRequest(_clientInterceptor, _clientRequest) ?? _clientRequest;
-          HttpClientResponse simpleHttpResponse = await _shouldInterceptRequest(_clientInterceptor, _request);
-          if (simpleHttpResponse != null) {
-            return simpleHttpResponse;
-          } else {
-            HttpClientResponse _clientResponse = await _request.close();
-            HttpClientResponse _response = await _afterResponse(_clientInterceptor, _clientResponse) ?? _clientResponse;
-            return _response;
-          }
+          HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(_clientInterceptor, _request) ?? await _request.close();
+          return await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
         }
       }
     }

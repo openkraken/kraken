@@ -4,7 +4,6 @@
  */
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'http_headers.dart';
 
 class _HttpConnectionInfo implements HttpConnectionInfo {
@@ -17,7 +16,7 @@ class _HttpConnectionInfo implements HttpConnectionInfo {
 class SimpleHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
   String mime;
   String encoding;
-  Uint8List data;
+  Stream data;
 
   int statusCode;
   String reasonPhrase;
@@ -69,7 +68,7 @@ class SimpleHttpClientResponse extends Stream<List<int>> implements HttpClientRe
   List<RedirectInfo> get redirects => [];
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
-    return Stream<Uint8List>.value(data).listen(onData, onDone: onDone, cancelOnError: cancelOnError);
+  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, { Function onError, void Function() onDone, bool cancelOnError }) {
+    return data.listen(onData, onDone: onDone, cancelOnError: cancelOnError);
   }
 }
