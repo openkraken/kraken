@@ -53,18 +53,6 @@ class EventTarget {
     }
   }
 
-  bool _dispatchEventToTarget(EventTarget target, List<EventHandler> handlers, Event event) {
-    if (handlers != null) {
-      for (var handler in handlers) {
-        handler(event);
-        if (event.defaultPrevented || !event.canBubble()) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   @mustCallSuper
   void dispose() {
     elementManager.removeTarget(this);
