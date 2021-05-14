@@ -21,6 +21,7 @@ class SimpleHttpClientResponse extends Stream<List<int>> implements HttpClientRe
   int statusCode;
   String reasonPhrase;
   Map<String, String> responseHeaders;
+  SingleHttpHeaders _singleHttpHeaders;
 
   SimpleHttpClientResponse(this.mime, this.encoding, this.data, {
     this.statusCode = 200,
@@ -51,7 +52,7 @@ class SimpleHttpClientResponse extends Stream<List<int>> implements HttpClientRe
   }
 
   @override
-  HttpHeaders get headers => SingleHttpHeaders(initialHeaders: responseHeaders);
+  HttpHeaders get headers => _singleHttpHeaders ?? (_singleHttpHeaders = SingleHttpHeaders(initialHeaders: responseHeaders));
 
   @override
   bool get isRedirect => statusCode >= 300 && statusCode < 400;
