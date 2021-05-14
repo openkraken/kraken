@@ -33,76 +33,63 @@ class GestureManager {
 
   void onClick(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
     if (renderBoxModelList.length != 0) {
-      Element ele = (renderBoxModelList[0] as Element);
-      RenderBoxModel root = ele.elementManager.getRootElement().renderBoxModel;
-      Offset globalOffset = root.globalToLocal(Offset(up.position.dx, up.position.dy));
-
-      (renderBoxModelList[0] as Element).dispatchEvent(MouseEvent(eventType,
-          MouseEventInit(
-            bubbles: true,
-            cancelable: true,
-            clientX: globalOffset.dx,
-            clientY: globalOffset.dy,
-            offsetX: up.localPosition.dx,
-            offsetY: up.localPosition.dy,
-          )
-      ));
+      renderBoxModelList[0].onClick(eventType, up: up);
     }
     renderBoxModelList = [];
   }
 
   void onSwipe(Event event) {
     if (renderBoxModelList.length != 0) {
-      (renderBoxModelList[0] as Element).dispatchEvent(event);
+      renderBoxModelList[0].onSwipe(event);
     }
     renderBoxModelList = [];
   }
 
   void onPanStart(DragStartDetails details) {
     if (renderBoxModelList.length != 0) {
-      (renderBoxModelList[0] as Element).dispatchEvent(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+      renderBoxModelList[0].onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
     }
     renderBoxModelList = [];
   }
 
   void onPanUpdate(DragUpdateDetails details) {
     if (renderBoxModelList.length != 0) {
-      (renderBoxModelList[0] as Element).dispatchEvent(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+      renderBoxModelList[0].onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
     }
     renderBoxModelList = [];
   }
 
   void onPanEnd(DragEndDetails details) {
     if (renderBoxModelList.length != 0) {
-      (renderBoxModelList[0] as Element).dispatchEvent(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy )));
+      renderBoxModelList[0].onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy )));
     }
     renderBoxModelList = [];
   }
 
   void onScaleStart(ScaleStartDetails details) {
     if (renderBoxModelList.length != 0) {
-      (renderBoxModelList[0] as Element).dispatchEvent(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_START )));
+      renderBoxModelList[0].onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_START )));
     }
     renderBoxModelList = [];
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
     if (renderBoxModelList.length != 0) {
-      (renderBoxModelList[0] as Element).dispatchEvent(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale )));
+      renderBoxModelList[0].onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale )));
     }
     renderBoxModelList = [];
   }
 
   void onScaleEnd(ScaleEndDetails details) {
     if (renderBoxModelList.length != 0) {
-      (renderBoxModelList[0] as Element).dispatchEvent(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_END )));
+      renderBoxModelList[0].onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_END )));
     }
     renderBoxModelList = [];
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
     if (renderBoxModelList.length != 0) {
-      (renderBoxModelList[0] as Element).dispatchEvent(GestureEvent(EVENT_LONG_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+      renderBoxModelList[0].onLongPress(GestureEvent(EVENT_LONG_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
     }
     renderBoxModelList = [];
   }
