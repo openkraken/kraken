@@ -341,6 +341,74 @@ void clearUICommand(int contextId) {
   _clearUICommandItems(contextId);
 }
 
+class UICommandIterator extends Iterator<UICommand> {
+  final Uint64List rawMemory;
+  final int commandLength;
+  int _i = 0;
+
+  UICommandIterator(this.rawMemory, this.commandLength);
+
+  @override
+  UICommand get current {
+    UICommand command = UICommand();
+
+    int typeIdCombine = rawMemory[_i + typeAndIdMemOffset];
+
+    // int32_t  int32_t
+    // +-------+-------+
+    // |  id   | type  |
+    // +-------+-------+
+    int id = typeIdCombine >> 32;
+    int type = typeIdCombine ^ (id << 32);
+
+    command.type = UICommandType.values[type];
+    command.id = id;
+    int nativePtrValue = rawMemory[_i + nativePtrMemOffset];
+    command.nativePtr = nativePtrValue != 0 ? Pointer.fromAddress(rawMemory[_i + nativePtrMemOffset]) : nullptr;
+    command.args = List(2);
+
+    int args01And02Length = rawMemory[_i + args01And02LengthMemOffset];
+    int args01Length;
+    int args02Length;
+
+    if (args01And02Length == 0) {
+      args01Length = args02Length = 0;
+    } else {
+      args02Length = args01And02Length >> 32;
+      args01Length = args01And02Length ^ (args02Length << 32);
+    }
+
+    int args01StringMemory = rawMemory[_i + args01StringMemOffset];
+    if (args01StringMemory != 0) {
+      Pointer<Uint16> args_01 = Pointer.fromAddress(args01StringMemory);
+      command.args[0] = uint16ToString(args_01, args01Length);
+
+      int args02StringMemory = rawMemory[_i + args02StringMemOffset];
+      if (args02StringMemory != 0) {
+        Pointer<Uint16> args_02 = Pointer.fromAddress(args02StringMemory);
+        command.args[1] = uint16ToString(args_02, args02Length);
+      }
+    }
+
+    if (kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_LOG'] == 'true') {
+      String printMsg = '${command.type}, id: ${command.id}';
+      for (int i = 0; i < command.args.length; i ++) {
+        printMsg += ' args[$i]: ${command.args[i]}';
+      };
+      printMsg += ' nativePtr: ${command.nativePtr}';
+      print(printMsg);
+    }
+
+    _i += nativeCommandSize;
+    return command;
+  }
+
+  @override
+  bool moveNext() {
+    return _i < commandLength * nativeCommandSize;
+  }
+}
+
 void flushUICommand() {
   Map<int, KrakenController> controllerMap = KrakenController.getControllerMap();
   for (KrakenController controller in controllerMap.values) {
@@ -351,25 +419,22 @@ void flushUICommand() {
       continue;
     }
 
-    if (kProfileMode) {
-      PerformanceTiming.instance(controller.view.contextId).mark(PERF_FLUSH_UI_COMMAND_START);
-    }
-
-    List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength, controller.view.contextId);
+    Uint64List rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize);
+    UICommandIterator iterator = UICommandIterator(rawMemory, commandLength);
 
     SchedulerBinding.instance.scheduleFrame();
 
-    if (kProfileMode) {
-      PerformanceTiming.instance(controller.view.contextId).mark(PERF_FLUSH_UI_COMMAND_END);
-    }
-
-    // For new ui commands, we needs to tell engine to update frames.
-    for (int i = 0; i < commandLength; i++) {
-      UICommand command = commands[i];
+    while(iterator.moveNext()) {
+      if (kProfileMode) {
+        PerformanceTiming.instance(controller.view.contextId).mark(PERF_FLUSH_UI_COMMAND_START);
+      }
+      UICommand command = iterator.current;
+      if (kProfileMode) {
+        PerformanceTiming.instance(controller.view.contextId).mark(PERF_FLUSH_UI_COMMAND_END);
+      }
       UICommandType commandType = command.type;
       int id = command.id;
       Pointer nativePtr = command.nativePtr;
-
       try {
         switch (commandType) {
           case UICommandType.createElement:
@@ -420,5 +485,7 @@ void flushUICommand() {
         print('$e\n$stack');
       }
     }
+
+    _clearUICommandItems(controller.view.contextId);
   }
 }
