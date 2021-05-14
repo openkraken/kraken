@@ -45,7 +45,6 @@ class EventTarget {
     currentHandlers.remove(eventHandler);
   }
 
-  /// return whether event is cancelled.
   void dispatchEvent(Event event) {
     event.currentTarget = event.target = this;
     if (event.currentTarget != null && this is Element) {
@@ -59,10 +58,5 @@ class EventTarget {
     // Remove elementManager reference.
     elementManager = null;
     eventHandlers.clear();
-  }
-
-  List<EventHandler> getEventHandlers(String type) {
-    assert(type != null);
-    return eventHandlers[type];
   }
 }
