@@ -61,7 +61,7 @@ class KrakenHttpOverrides extends HttpOverrides {
     return httpClient;
   }
 
-  bool shouldInterceptRequest(HttpClientRequest request) {
+  bool shouldOverride(HttpClientRequest request) {
     String contextId = request.headers.value(HttpHeaderContextID);
     return contextId != null && _contextIdToHttpClientInterceptorMap.containsKey(contextId);
   }

@@ -81,7 +81,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() async {
-    if (_httpOverrides != null && _httpOverrides.shouldInterceptRequest(_clientRequest)) {
+    if (_httpOverrides != null && _httpOverrides.shouldOverride(_clientRequest)) {
       String contextId = _getContextId(_clientRequest);
       if (contextId != null) {
         _clientRequest.headers.removeAll(HttpHeaderContextID);
