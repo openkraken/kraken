@@ -89,7 +89,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     context.pushLayer(intersectionObserverLayer, callback, offset);
   }
 }
-int _id = 0;
+
 class IntersectionObserverLayer extends ContainerLayer {
   IntersectionObserverLayer(
       {@required Size elementSize, @required Offset paintOffset, @required this.onIntersectionChange, @required this.rootRenderObject})
