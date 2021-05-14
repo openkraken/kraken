@@ -49,14 +49,12 @@ class GestureManager {
     if (renderBoxModelList.length != 0) {
       renderBoxModelList[0].onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
     }
-    renderBoxModelList = [];
   }
 
   void onPanUpdate(DragUpdateDetails details) {
     if (renderBoxModelList.length != 0) {
       renderBoxModelList[0].onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
     }
-    renderBoxModelList = [];
   }
 
   void onPanEnd(DragEndDetails details) {
@@ -70,14 +68,12 @@ class GestureManager {
     if (renderBoxModelList.length != 0) {
       renderBoxModelList[0].onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_START )));
     }
-    renderBoxModelList = [];
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
     if (renderBoxModelList.length != 0) {
       renderBoxModelList[0].onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale )));
     }
-    renderBoxModelList = [];
   }
 
   void onScaleEnd(ScaleEndDetails details) {
