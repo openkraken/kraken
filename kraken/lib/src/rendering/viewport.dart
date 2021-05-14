@@ -6,7 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/gesture.dart';
-import 'package:kraken/rendering.dart';
 import 'dart:ui';
 import 'package:meta/meta.dart';
 
