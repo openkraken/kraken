@@ -1,4 +1,4 @@
-xdescribe('position-sticky', () => {
+describe('position-sticky', () => {
   it('bottom', async () => {
     let prepadding;
     let filter;
