@@ -313,6 +313,10 @@ mixin CSSOverflowMixin on ElementBase {
 
     for (Element child in element.children) {
       RenderBoxModel childRenderBoxModel = child.renderBoxModel;
+      // Children of sliver element may be destoried on scroll
+      if (childRenderBoxModel == null) {
+        break;
+      }
       RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
       CSSOverflowType overflowX = childRenderStyle.overflowX;
       CSSOverflowType overflowY = childRenderStyle.overflowY;
