@@ -141,12 +141,13 @@ describe('MouseEvent', () => {
 
     div.addEventListener('click', function handler(e) {
         expect(e.target).toBe(span);
+        done();
     });
   
     span.click();
   });
 
-  it('should work width target', async (done) => {
+  it('should work width currentTarget', async (done) => {
     const div = document.createElement('div');
     div.style.backgroundColor = 'red';
     div.style.width = '100px';
@@ -167,6 +168,7 @@ describe('MouseEvent', () => {
 
     div.addEventListener('click', function handler(e) {
         expect(e.currentTarget).toBe(div);
+        done();
     });
   
     span.click();
