@@ -162,13 +162,6 @@ class CSSPositionedLayout {
   static bool _applyStickyChildHorizontalOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
     bool isHorizontalFixed = false;
     RenderStyle childRenderStyle = child.renderStyle;
-    // Sticky offset to scroll container must include padding
-    EdgeInsetsGeometry padding = scrollContainer.renderStyle.padding;
-    EdgeInsets resolvedPadding = EdgeInsets.all(0);
-    if (padding != null) {
-      resolvedPadding = padding.resolve(TextDirection.ltr);
-    }
-
     RenderLayoutParentData boxParentData = child?.parentData;
     double offsetX = child.baseOffsetX;
     double childWidth = child?.size?.width;
@@ -183,7 +176,7 @@ class CSSPositionedLayout {
     double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
     if (childRenderStyle.left != null) {
-      double left = childRenderStyle.left.length + resolvedPadding.left;
+      double left = childRenderStyle.left.length;
       isHorizontalFixed = offsetLeft < left;
       if (isHorizontalFixed) {
         offsetX += left - offsetLeft;
@@ -192,7 +185,7 @@ class CSSPositionedLayout {
         }
       }
     } else if (childRenderStyle.left != null) {
-      double right = childRenderStyle.right.length + resolvedPadding.right;
+      double right = childRenderStyle.right.length;
       isHorizontalFixed = offsetRight < right;
       if (isHorizontalFixed) {
         offsetX += offsetRight - right;
@@ -220,13 +213,6 @@ class CSSPositionedLayout {
   static bool _applyStickyChildVerticalOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
     bool isVerticalFixed = false;
     RenderStyle childRenderStyle = child.renderStyle;
-    // Sticky offset to scroll container must include padding
-    EdgeInsetsGeometry padding = scrollContainer.renderStyle.padding;
-    EdgeInsets resolvedPadding = EdgeInsets.all(0);
-    if (padding != null) {
-      resolvedPadding = padding.resolve(TextDirection.ltr);
-    }
-
     RenderLayoutParentData boxParentData = child?.parentData;
     double offsetY = child.baseOffsetY;
     double childHeight = child?.size?.height;
@@ -241,7 +227,7 @@ class CSSPositionedLayout {
     double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
     if (childRenderStyle.top != null) {
-      double top = childRenderStyle.top.length + resolvedPadding.top;
+      double top = childRenderStyle.top.length;
       isVerticalFixed = offsetTop < top;
       if (isVerticalFixed) {
         offsetY += top - offsetTop;
@@ -250,7 +236,7 @@ class CSSPositionedLayout {
         }
       }
     } else if (childRenderStyle.bottom != null) {
-      double bottom = childRenderStyle.bottom.length + resolvedPadding.bottom;
+      double bottom = childRenderStyle.bottom.length;
       isVerticalFixed = offsetBottom < bottom;
       if (isVerticalFixed) {
         offsetY += offsetBottom - bottom;
