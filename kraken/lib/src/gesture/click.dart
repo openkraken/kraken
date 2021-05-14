@@ -52,24 +52,6 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   MouseEventListener onClick;
 
-  /// A pointer that previously triggered [handleTapDown] will not end up
-  /// causing a tap.
-  ///
-  /// This triggers once the gesture loses the arena if [handleTapDown] has
-  /// been previously triggered.
-  ///
-  /// The parameter `down` is the down event of the primary pointer that started
-  /// the tap sequence; `cancel` is the cancel event, which might be null;
-  /// `reason` is a short description of the cause if `cancel` is null, which
-  /// can be "forced" if other gestures won the arena, or "spontaneous"
-  /// otherwise.
-  ///
-  /// If this recognizer wins the arena, [handleTapUp] is called instead.
-  void handleTapCancel( PointerDownEvent down, PointerCancelEvent cancel, String reason ) {
-    if (onClick != null)
-      onClick(EVENT_CANCEL, down: down);
-  }
-
   @override
   void addAllowedPointer(PointerDownEvent event) {
     assert(event != null);
@@ -104,9 +86,6 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
       _checkUp();
     } else if (event is PointerCancelEvent) {
       resolve(GestureDisposition.rejected);
-      if (_sentTapDown) {
-        _checkCancel(event, '');
-      }
       _reset();
     } else if (event.buttons != _down.buttons) {
       resolve(GestureDisposition.rejected);
@@ -121,7 +100,6 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
       // the pointer has exceeded the touch slop, the buttons have been changed,
       // or if the recognizer is disposed.
       assert(_sentTapDown);
-      _checkCancel(null, 'spontaneous');
       _reset();
     }
     super.resolve(disposition);
@@ -148,8 +126,6 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (pointer == primaryPointer) {
       // Another gesture won the arena.
       assert(state != GestureRecognizerState.possible);
-      if (_sentTapDown)
-        _checkCancel(null, 'forced');
       _reset();
     }
   }
@@ -168,10 +144,6 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
     handleTapUp(_down, _up);
     _reset();
-  }
-
-  void _checkCancel(PointerCancelEvent event, String note) {
-    handleTapCancel(_down, event, note);
   }
 
   void _reset() {
