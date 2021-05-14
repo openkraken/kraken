@@ -1667,6 +1667,23 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  /// Record the main size of all lines
+  void _recordRunsMainSize(_RunMetrics runMetrics, List<double> runMainSize) {
+    bool isHorizontalFlexDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
+    Map<int, _RunChild> runChildren = runMetrics.runChildren;
+    double runMainExtent = 0;
+    void iterateRunChildren(int targetId, _RunChild runChild) {
+      RenderBox child = runChild.child;
+      double runChildMainSize = isHorizontalFlexDirection ? child.size.width : child.size.height;
+      if (child is RenderTextBox) {
+        runChildMainSize = isHorizontalFlexDirection ? child.autoMinWidth : child.autoMinHeight;
+      }
+      runMainExtent += runChildMainSize;
+    }
+    runChildren.forEach(iterateRunChildren);
+    runMainSize.add(runMainExtent);
+  }
+
   /// Get auto min size in the main axis which equals the main axis size of its contents
   /// https://www.w3.org/TR/css-sizing-3/#automatic-minimum-size
   double _getMainAxisAutoSize(
@@ -1678,28 +1695,37 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Main size of each run
     List<double> runMainSize = [];
 
-    void iterateRunMetrics(_RunMetrics runMetrics) {
-      Map<int, _RunChild> runChildren = runMetrics.runChildren;
-      double runMainExtent = 0;
-      void iterateRunChildren(int targetId, _RunChild runChild) {
-        RenderBox child = runChild.child;
-        double runChildMainSize = isHorizontalFlexDirection ? child.size.width : child.size.height;
-        if (child is RenderTextBox) {
-          runChildMainSize = isHorizontalFlexDirection ? child.autoMinWidth : child.autoMinHeight;
-        }
-        runMainExtent += runChildMainSize;
-      }
-      runChildren.forEach(iterateRunChildren);
-      runMainSize.add(runMainExtent);
-    }
-
     // Calculate the max main size of all runs
-    runMetrics.forEach(iterateRunMetrics);
+    for (_RunMetrics runMetrics in runMetrics) {
+      _recordRunsMainSize(runMetrics, runMainSize);
+    }
 
     autoMinSize = runMainSize.reduce((double curr, double next) {
       return curr > next ? curr : next;
     });
     return autoMinSize;
+  }
+
+  /// Record the cross size of all lines
+  void _recordRunsCrossSize(_RunMetrics runMetrics, List<double> runCrossSize) {
+    bool isHorizontalFlexDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
+    Map<int, _RunChild> runChildren = runMetrics.runChildren;
+    double runCrossExtent = 0;
+    List<double> runChildrenCrossSize = [];
+    void iterateRunChildren(int targetId, _RunChild runChild) {
+      RenderBox child = runChild.child;
+      double runChildCrossSize = isHorizontalFlexDirection ? child.size.height : child.size.width;
+      if (child is RenderTextBox) {
+        runChildCrossSize = isHorizontalFlexDirection ? child.autoMinHeight : child.autoMinWidth;
+      }
+      runChildrenCrossSize.add(runChildCrossSize);
+    }
+    runChildren.forEach(iterateRunChildren);
+    runCrossExtent = runChildrenCrossSize.reduce((double curr, double next) {
+      return curr > next ? curr : next;
+    });
+
+    runCrossSize.add(runCrossExtent);
   }
 
   /// Get auto min size in the cross axis which equals the cross axis size of its contents
@@ -1708,33 +1734,14 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double autoMinSize = 0;
-    bool isHorizontalFlexDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
 
     // Cross size of each run
     List<double> runCrossSize = [];
 
-    void iterateRunMetrics(_RunMetrics runMetrics) {
-      Map<int, _RunChild> runChildren = runMetrics.runChildren;
-      double runCrossExtent = 0;
-      List<double> runChildrenCrossSize = [];
-      void iterateRunChildren(int targetId, _RunChild runChild) {
-        RenderBox child = runChild.child;
-        double runChildCrossSize = isHorizontalFlexDirection ? child.size.height : child.size.width;
-        if (child is RenderTextBox) {
-          runChildCrossSize = isHorizontalFlexDirection ? child.autoMinHeight : child.autoMinWidth;
-        }
-        runChildrenCrossSize.add(runChildCrossSize);
-      }
-      runChildren.forEach(iterateRunChildren);
-      runCrossExtent = runChildrenCrossSize.reduce((double curr, double next) {
-        return curr > next ? curr : next;
-      });
-
-      runCrossSize.add(runCrossExtent);
+    // Calculate the max cross size of all runs
+    for (_RunMetrics runMetrics in runMetrics) {
+      _recordRunsCrossSize(runMetrics, runCrossSize);
     }
-
-    // Calculate the max main size of all runs
-    runMetrics.forEach(iterateRunMetrics);
 
     // Get the sum of lines
     for (double crossSize in runCrossSize) {
@@ -1754,7 +1761,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     if (isSingleLine) {
       // Use content size if container size is not set yet
-//      return !hasSize ? runCrossAxisExtent : _getContentCrossSize();
       return beforeSetSize ? runCrossAxisExtent : _getContentCrossSize();
     } else if (isMultiLineStretch) {
       return runCrossAxisExtent + runBetweenSpace;

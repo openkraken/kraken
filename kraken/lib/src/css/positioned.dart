@@ -90,15 +90,6 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBoxModel 
   return Offset(x ?? 0, y ?? 0);
 }
 
-// Get parent renderBoxModel which is not scrolling content box
-RenderBoxModel _getParentRenderBoxModel(RenderBoxModel renderBoxModel) {
-  RenderBoxModel parentRenderBoxModel = renderBoxModel.parent;
-  if (parentRenderBoxModel.isScrollingContentBox) {
-    return parentRenderBoxModel.parent;
-  }
-  return parentRenderBoxModel;
-}
-
 class CSSPositionedLayout {
   static RenderLayoutParentData getPositionParentData(RenderBoxModel renderBoxModel, RenderLayoutParentData parentData) {
     CSSPositionType positionType = renderBoxModel.renderStyle.position;
@@ -332,12 +323,10 @@ class CSSPositionedLayout {
 
   /// Set sticky child offset according to scroll offset and direction,
   /// when axisDirection param is null compute the both axis direction.
+  /// Sticky positioning is similar to relative positioning except
+  /// the offsets are automatically calculated in reference to the nearest scrollport.
+  /// https://www.w3.org/TR/css-position-3/#stickypos-insets
   static void applyStickyChildOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
-    // https://www.w3.org/TR/css-position-3/#stickypos-insets
-    // Sticky positioning is similar to relative positioning except
-    // the offsets are automatically calculated in reference to the nearest scrollport.
-    RenderStyle childRenderStyle = child.renderStyle;
-    RenderLayoutParentData boxParentData = child?.parentData;
     bool isVerticalFixed = _applyStickyChildVerticalOffset(scrollContainer, child);
     bool isHorizontalFixed = _applyStickyChildHorizontalOffset(scrollContainer, child);
 

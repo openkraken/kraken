@@ -75,14 +75,14 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
   };
 
   if (propertyMap.count(name) > 0) {
-    getDartMethod()->flushUICommand();
-
     auto property = propertyMap[name];
     switch (property) {
     case InputElementProperty::width: {
+      getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeInputElement->getInputWidth(nativeInputElement));
     }
     case InputElementProperty::height: {
+      getDartMethod()->flushUICommand();
       return JSValueMakeNumber(_hostClass->ctx, nativeInputElement->getInputHeight(nativeInputElement));
     }
     default: {
