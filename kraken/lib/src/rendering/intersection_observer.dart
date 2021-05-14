@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/rendering.dart';
 
 /// Returns a sequence containing the specified [Layer] and all of its
@@ -88,7 +89,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     context.pushLayer(intersectionObserverLayer, callback, offset);
   }
 }
-
+int _id = 0;
 class IntersectionObserverLayer extends ContainerLayer {
   IntersectionObserverLayer(
       {@required Size elementSize, @required Offset paintOffset, @required this.onIntersectionChange, @required this.rootRenderObject})
@@ -103,6 +104,7 @@ class IntersectionObserverLayer extends ContainerLayer {
 
   /// The size of the corresponding element.
   Size _elementSize;
+  int id = _id++;
 
   /// Offset to the start of the element, in local coordinates.
   Offset _elementOffset;
@@ -201,8 +203,7 @@ class IntersectionObserverLayer extends ContainerLayer {
     if (!_isScheduled) {
       _isScheduled = true;
       scheduleMicrotask(() {
-        _processCallbacks();
-        _isScheduled = false;
+        SchedulerBinding.instance.scheduleTask<void>(_processCallbacks, Priority.touch);
       });
     }
   }
@@ -233,7 +234,7 @@ class IntersectionObserverLayer extends ContainerLayer {
 
       if (curClipRect != null) {
         // This is O(n^2) WRT the depth of the tree since `_localRectToGlobal`
-        // also walks up the tree.  In practice there probably will be a small
+        // also walks up the tree. In practice there probably will be a small
         // number of clipping layers in the chain, so it might not be a problem.
         // Alternatively we could cache transformations and clipping rectangles.
         curClipRect = _localRectToGlobal(parentLayer, curClipRect);
@@ -279,6 +280,7 @@ class IntersectionObserverLayer extends ContainerLayer {
 
   /// Executes visibility callbacks for all updated.
   void _processCallbacks() {
+    _isScheduled = false;
     if (!attached) {
       _fireCallback(IntersectionObserverEntry(size: Size.zero));
       return;
