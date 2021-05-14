@@ -49,7 +49,7 @@ CSSOverflowType _getOverflowType(String definition) {
 typedef ScrollListener = void Function(double scrollTop, AxisDirection axisDirection);
 
 mixin CSSOverflowStyleMixin on RenderStyleBase {
-  CSSOverflowType _overflowX;
+  CSSOverflowType _overflowX = CSSOverflowType.visible;
   CSSOverflowType get overflowX {
     return _overflowX;
   }
@@ -58,7 +58,7 @@ mixin CSSOverflowStyleMixin on RenderStyleBase {
     _overflowX = value;
   }
 
-  CSSOverflowType _overflowY;
+  CSSOverflowType _overflowY = CSSOverflowType.visible;
   CSSOverflowType get overflowY {
     return _overflowY;
   }
@@ -316,7 +316,6 @@ mixin CSSOverflowMixin on ElementBase {
       RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
       CSSOverflowType overflowX = childRenderStyle.overflowX;
       CSSOverflowType overflowY = childRenderStyle.overflowY;
-
       if (CSSPositionedLayout.isSticky(childRenderBoxModel)) {
         result.add(child);
       }

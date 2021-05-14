@@ -221,7 +221,6 @@ class CSSPositionedLayout {
     RenderBox parentContainer = child.parent;
     double minOffsetY = 0;
     double maxOffsetY = parentContainer.size.height - childHeight;
-
     double offsetTop = child.baseScrollContainerOffsetY - scrollContainer.scrollTop;
     double viewPortHeight = scrollContainer?.size?.height;
     double offsetBottom = viewPortHeight - childHeight - offsetTop;
@@ -260,10 +259,19 @@ class CSSPositionedLayout {
     return isVerticalFixed;
   }
 
+  // Get parent renderBoxModel which is not scrolling content box
+  static RenderBoxModel _getParentRenderBoxModel(RenderBoxModel renderBoxModel) {
+    RenderBoxModel parentRenderBoxModel = renderBoxModel.parent;
+    if (parentRenderBoxModel.isScrollingContentBox) {
+      return parentRenderBoxModel.parent;
+    }
+    return parentRenderBoxModel;
+  }
+
   /// Find scroll container of sticky renderBoxModel
   static RenderBoxModel findScrollContainer(RenderBoxModel renderBoxModel) {
     RenderBoxModel child = renderBoxModel;
-    RenderBoxModel parent = child.parent;
+    RenderBoxModel parent = _getParentRenderBoxModel(child);
 
     while (parent != null) {
       RenderStyle parentRenderStyle = parent.renderStyle;
@@ -276,33 +284,31 @@ class CSSPositionedLayout {
         break;
       }
       child = parent;
-      parent = child.parent;
+      parent = _getParentRenderBoxModel(child);
     }
 
     // Get HTML node as scroll container
     if (parent is RenderViewportBox) {
       parent = child;
     }
-
-    RenderObject rootRenderObject = child.elementManager.getRootRenderObject();
+    RenderObject rootRenderObject = renderBoxModel.elementManager.getRootRenderObject();
     Offset horizontalScrollContainerOffset =
-      child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
+      renderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
         parent.localToGlobal(Offset.zero, ancestor: rootRenderObject);
     Offset verticalScrollContainerOffset =
-      child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
+      renderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
         parent.localToGlobal(Offset.zero, ancestor: rootRenderObject);
 
     // Cache original offset to scroll container to act as base offset
     // to compute dynamic sticky offset later on scroll
-    child.baseScrollContainerOffsetY = verticalScrollContainerOffset.dy + parent.scrollTop;
-    child.baseScrollContainerOffsetX = horizontalScrollContainerOffset.dx + parent.scrollLeft;
-
-    RenderLayoutParentData boxParentData = child?.parentData;
+    renderBoxModel.baseScrollContainerOffsetY = verticalScrollContainerOffset.dy + parent.scrollTop;
+    renderBoxModel.baseScrollContainerOffsetX = horizontalScrollContainerOffset.dx + parent.scrollLeft;
+    RenderLayoutParentData boxParentData = renderBoxModel?.parentData;
 
     // Cache original offset to parent to act as base offset
     // to compute dynamic sticky offset later on scroll
-    child.baseOffsetX = boxParentData.offset.dx;
-    child.baseOffsetY = boxParentData.offset.dy;
+    renderBoxModel.baseOffsetX = boxParentData.offset.dx;
+    renderBoxModel.baseOffsetY = boxParentData.offset.dy;
 
     return parent;
   }
