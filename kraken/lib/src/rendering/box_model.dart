@@ -29,8 +29,6 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
 
   // Row index of child when wrapping
   int runIndex = 0;
-  // Whether offset is already calculated.
-  bool isOffsetCalculated = false;
 
   @override
   String toString() {
@@ -486,11 +484,19 @@ class RenderBoxModel extends RenderBox with
   // Position of sticky element changes between relative and fixed of scroll container
   StickyPositionType stickyStatus = StickyPositionType.relative;
 
-  // Original offset to scroll container of sticky element
-  Offset originalScrollContainerOffset;
+  // Cache base horizontal offset to scroll container of sticky element
+  // to calculate dynamic offset on scroll
+  double baseScrollContainerOffsetX;
+  // Cache base vertical offset to scroll container of sticky element
+  // to calculate dynamic offset on scroll
+  double baseScrollContainerOffsetY;
 
-  // Original offset of sticky element
-  Offset originalOffset;
+  // Cache base horizontal offset to parent of sticky element
+  // to calculate dynamic offset on scroll
+  double baseOffsetX;
+  // Cache base vertical offset to parent of sticky element
+  // to calculate dynamic offset on scroll
+  double baseOffsetY;
 
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;

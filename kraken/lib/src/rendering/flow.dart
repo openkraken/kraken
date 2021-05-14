@@ -511,10 +511,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
       if (childParentData.isPositioned) {
         CSSPositionedLayout.layoutPositionedChild(this, child);
-      } else if (!childParentData.isOffsetCalculated && child is RenderBoxModel) {
-        if (CSSPositionedLayout.isSticky(child)) {
-          CSSPositionedLayout.layoutStickyChild(child);
-        }
       }
       child = childParentData.nextSibling;
     }
@@ -522,7 +518,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Layout non positioned element
     _layoutChildren();
 
-    // Set offset of positioned element
+    // Set offset of positioned and sticky element
     child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
@@ -536,6 +532,9 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (isScrollingContentBox) {
           ensureBoxSizeLargerThanScrollableSize();
         }
+      } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
+        RenderBoxModel scrollContainer = CSSPositionedLayout.findScrollContainer(child);
+        CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
       }
       child = childParentData.nextSibling;
     }

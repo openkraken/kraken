@@ -594,7 +594,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Layout non positioned element and its placeholder
     _layoutChildren(null);
 
-    // Set offset of positioned element
+    // Set offset of positioned and sticky element
     child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
@@ -608,6 +608,9 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (isScrollingContentBox) {
           ensureBoxSizeLargerThanScrollableSize();
         }
+      } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
+        RenderBoxModel scrollContainer = CSSPositionedLayout.findScrollContainer(child);
+        CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
       }
       child = childParentData.nextSibling;
     }
