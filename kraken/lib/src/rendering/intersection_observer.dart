@@ -104,7 +104,6 @@ class IntersectionObserverLayer extends ContainerLayer {
 
   /// The size of the corresponding element.
   Size _elementSize;
-  int id = _id++;
 
   /// Offset to the start of the element, in local coordinates.
   Offset _elementOffset;
