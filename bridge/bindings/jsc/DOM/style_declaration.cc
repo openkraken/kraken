@@ -88,7 +88,7 @@ StyleDeclarationInstance::~StyleDeclarationInstance() {
 }
 
 JSValueRef StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto prototypePropertyMap = getCSSStyleDeclarationPrototypePropertyMap();
+  auto &prototypePropertyMap = getCSSStyleDeclarationPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypePropertyMap.count(name) > 0) {
@@ -109,7 +109,7 @@ bool StyleDeclarationInstance::setProperty(std::string &name, JSValueRef value,
 
 bool StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef value,
                                                                         JSValueRef *exception) {
-  auto prototypePropertyMap = getCSSStyleDeclarationPrototypePropertyMap();
+  auto &prototypePropertyMap = getCSSStyleDeclarationPrototypePropertyMap();
   if (prototypePropertyMap.count(name) > 0) return false;
 
   JSStringRef valueStr;

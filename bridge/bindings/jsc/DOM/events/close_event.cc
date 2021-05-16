@@ -68,11 +68,11 @@ CloseEventInstance::CloseEventInstance(JSCloseEvent *jsCloseEvent, JSStringRef d
 }
 
 JSValueRef CloseEventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSCloseEvent::getCloseEventPropertyMap();
+  auto &propertyMap = JSCloseEvent::getCloseEventPropertyMap();
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
   switch(property) {
   case JSCloseEvent::CloseEventProperty::code:
     return JSValueMakeNumber(ctx, code);
@@ -86,9 +86,9 @@ JSValueRef CloseEventInstance::getProperty(std::string &name, JSValueRef *except
 }
 
 bool CloseEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSCloseEvent::getCloseEventPropertyMap();
+  auto &propertyMap = JSCloseEvent::getCloseEventPropertyMap();
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch (property) {
 

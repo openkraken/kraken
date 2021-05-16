@@ -22,14 +22,14 @@ std::vector<JSStringRef> &JSElementAttributes::getAttributePropertyNames() {
   static std::vector<JSStringRef> propertyMaps{JSStringCreateWithUTF8CString("length")};
   return propertyMaps;
 }
-const std::unordered_map<std::string, JSElementAttributes::AttributeProperty> &
+std::unordered_map<std::string, JSElementAttributes::AttributeProperty> &
 JSElementAttributes::getAttributePropertyMap() {
   static std::unordered_map<std::string, AttributeProperty> propertyMap{{"length", AttributeProperty::kLength}};
   return propertyMap;
 }
 
 JSValueRef JSElementAttributes::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getAttributePropertyMap();
+  auto &propertyMap = getAttributePropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
     switch (property) {
@@ -195,8 +195,8 @@ JSValueRef JSElement::getBoundingClientRect(JSContextRef ctx, JSObjectRef functi
 }
 
 JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSElement::getElementPropertyMap();
-  auto prototypePropertyMap = JSElement::getElementPrototypePropertyMap();
+  auto &propertyMap = JSElement::getElementPropertyMap();
+  auto &prototypePropertyMap = JSElement::getElementPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypePropertyMap.count(name) > 0) {
@@ -207,7 +207,7 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
     return NodeInstance::getProperty(name, exception);
   }
 
-  JSElement::ElementProperty property = propertyMap[name];
+  JSElement::ElementProperty &property = propertyMap[name];
 
   switch (property) {
   case JSElement::ElementProperty::nodeName:
@@ -318,15 +318,15 @@ JSValueRef ElementInstance::getProperty(std::string &name, JSValueRef *exception
 }
 
 bool ElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSElement::getElementPropertyMap();
-  auto prototypePropertyMap = JSElement::getElementPrototypePropertyMap();
+  auto &propertyMap = JSElement::getElementPropertyMap();
+  auto &prototypePropertyMap = JSElement::getElementPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) {
     return false;
   }
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch (property) {
     case JSElement::ElementProperty::style:
@@ -683,8 +683,8 @@ void JSElement::defineElement(std::string tagName, ElementCreator creator) {
 }
 
 JSValueRef JSElement::prototypeGetProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getElementPropertyMap();
-  auto prototypePropertyMap = getElementPrototypePropertyMap();
+  auto &propertyMap = getElementPropertyMap();
+  auto &prototypePropertyMap = getElementPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) return nullptr;
   if (propertyMap.count(name) == 0) return JSNode::prototypeGetProperty(name, exception);
@@ -802,10 +802,10 @@ JSValueRef ElementInstance::getStringValueProperty(std::string &name) {
 }
 
 JSValueRef BoundingClientRect::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getPropertyMap();
+  auto &propertyMap = getPropertyMap();
 
   if (propertyMap.count(name) == 0) return nullptr;
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
 
   switch (property) {
   case kX:
@@ -839,9 +839,9 @@ std::array<JSStringRef, 8> &BoundingClientRect::getBoundingClientRectPropertyNam
   return propertyNames;
 }
 
-const std::unordered_map<std::string, BoundingClientRect::BoundingClientRectProperty> &
+std::unordered_map<std::string, BoundingClientRect::BoundingClientRectProperty> &
 BoundingClientRect::getPropertyMap() {
-  static const std::unordered_map<std::string, BoundingClientRectProperty> propertyMap{
+  static std::unordered_map<std::string, BoundingClientRectProperty> propertyMap{
     {"x", BoundingClientRectProperty::kX},         {"y", BoundingClientRectProperty::kY},
     {"width", BoundingClientRectProperty::kWidth}, {"height", BoundingClientRectProperty::kHeight},
     {"top", BoundingClientRectProperty::kTop},     {"left", BoundingClientRectProperty::kLeft},

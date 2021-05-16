@@ -45,13 +45,13 @@ JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringR
 }
 
 JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getTextNodePropertyMap();
+  auto &propertyMap = getTextNodePropertyMap();
 
   if (propertyMap.count(name) == 0) {
     return NodeInstance::getProperty(name, exception);
   }
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
   switch (property) {
   case TextNodeProperty::nodeValue:
   case TextNodeProperty::textContent:

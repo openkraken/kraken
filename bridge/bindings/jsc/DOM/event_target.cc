@@ -156,10 +156,10 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
 }
 
 JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getEventTargetPropertyMap();
+  auto &propertyMap = getEventTargetPropertyMap();
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch (property) {
     default:
@@ -255,7 +255,7 @@ bool EventTargetInstance::dispatchEvent(EventInstance *event) {
 
   // Modify the currentTarget to this.
   event->nativeEvent->currentTarget = this;
-  
+
   internalDispatchEvent(event);
 
   // Bubble event to root event target.
@@ -287,8 +287,8 @@ JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function,
 }
 
 JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSEventTarget::getEventTargetPropertyMap();
-  auto prototypePropertyMap = JSEventTarget::getEventTargetPrototypePropertyMap();
+  auto &propertyMap = JSEventTarget::getEventTargetPropertyMap();
+  auto &prototypePropertyMap = JSEventTarget::getEventTargetPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) {
     JSStringHolder nameStringHolder = JSStringHolder(context, name);
@@ -296,7 +296,7 @@ JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *excep
   }
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch (property) {
     case JSEventTarget::EventTargetProperty::eventTargetId: {
@@ -311,7 +311,7 @@ JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *excep
 }
 
 bool EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto staticPropertyMap = JSEventTarget::getEventTargetPrototypePropertyMap();
+  auto &staticPropertyMap = JSEventTarget::getEventTargetPrototypePropertyMap();
 
   if (staticPropertyMap.count(name) > 0) return false;
 
@@ -389,7 +389,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
 
 // This function will be called back by dart side when trigger events.
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent, int32_t isCustomEvent) {
-        
+
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
   JSContext *context = eventTargetInstance->context;

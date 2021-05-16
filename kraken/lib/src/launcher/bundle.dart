@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ffi';
 
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:ffi/ffi.dart';
 
 import 'manifest.dart';
 
@@ -30,7 +32,19 @@ abstract class KrakenBundle {
   // Unique resource locator.
   final Uri url;
   // JS Content
-  String content;
+  String _content;
+  set content(String value) {
+    _content = value;
+  }
+  String get content {
+    if (_content != null) return _content;
+    if (rawContentBytes != null) {
+      return utf8.decode(rawContentBytes.buffer.asUint8List(rawContentBytes.offsetInBytes, rawContentBytes.lengthInBytes));
+    }
+    return null;
+  }
+  // JS raw byte data content
+  Uint8List rawContentBytes;
   // JS line offset, default to 0.
   List<String> assets = [];
   int lineOffset = 0;
@@ -71,7 +85,9 @@ abstract class KrakenBundle {
       PerformanceTiming.instance(contextId).mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
-    evaluateScripts(contextId, content, url.toString(), lineOffset);
+    Pointer<Uint8> buffer = allocate<Uint8>(count: rawContentBytes.length);
+    buffer.asTypedList(rawContentBytes.length).setAll(0, rawContentBytes);
+    evaluateScripts(contextId, buffer, url.toString(), lineOffset);
 
     if (kProfileMode) {
       PerformanceTiming.instance(contextId).mark(PERF_JS_BUNDLE_EVAL_END);
@@ -84,6 +100,7 @@ class RawBundle extends KrakenBundle {
       : assert(content != null),
         super(url) {
     this.content = content;
+    rawContentBytes = Uint8List.fromList(this.content.codeUnits);
   }
 
   @override
@@ -92,7 +109,7 @@ class RawBundle extends KrakenBundle {
   }
 }
 
-class NetworkBundle extends KrakenBundle with BundleMixin {
+class NetworkBundle extends KrakenBundle {
   // Unique identifier.
   String bundleId;
   NetworkBundle(Uri url)
@@ -104,8 +121,8 @@ class NetworkBundle extends KrakenBundle with BundleMixin {
     NetworkAssetBundle bundle = NetworkAssetBundle(url);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
-    ByteData data = await bundle.load(absoluteURL);
-    content = await _resolveStringFromData(data, absoluteURL);
+    ByteData bytes = await bundle.load(absoluteURL);
+    rawContentBytes = bytes.buffer.asUint8List();
     isResolved = true;
   }
 }
@@ -158,7 +175,7 @@ class NetworkAssetBundle extends AssetBundle {
   String toString() => '${describeIdentity(this)}($_baseUrl)';
 }
 
-class AssetsBundle extends KrakenBundle with BundleMixin {
+class AssetsBundle extends KrakenBundle {
   AssetsBundle(Uri url)
       : assert(url != null),
         super(url);
@@ -168,16 +185,8 @@ class AssetsBundle extends KrakenBundle with BundleMixin {
     // JSBundle get default bundle manifest.
     manifest = AppManifest();
     String localPath = url.toString();
-    ByteData data = await rootBundle.load(localPath);
-    content = await _resolveStringFromData(data, localPath);
+    ByteData bytes = await rootBundle.load(localPath);
+    rawContentBytes = bytes.buffer.asUint8List();
     isResolved = true;
-  }
-}
-
-mixin BundleMixin on KrakenBundle {
-  Future<String> _resolveStringFromData(ByteData data, String key) async {
-    if (data == null) throw FlutterError('Unable to load asset: $key');
-    // Utf8 decode is fast enough with dart 2.10
-    return utf8.decode(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
   }
 }

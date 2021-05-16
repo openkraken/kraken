@@ -37,9 +37,9 @@ JSImageElement::ImageElementInstance::ImageElementInstance(JSImageElement *jsAnc
 }
 
 JSValueRef JSImageElement::ImageElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getImageElementPropertyMap();
+  auto &propertyMap = getImageElementPropertyMap();
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &&property = propertyMap[name];
     switch (property) {
     case ImageElementProperty::width: {
       getDartMethod()->flushUICommand();

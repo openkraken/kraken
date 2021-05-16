@@ -71,6 +71,7 @@ public:
 
   KRAKEN_EXPORT bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
   KRAKEN_EXPORT bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
+  KRAKEN_EXPORT bool evaluateJavaScript(const char *code, const char *sourceURL, int startLine);
 
   KRAKEN_EXPORT bool isValid();
 
@@ -102,8 +103,9 @@ public:
   JSFunctionHolder() = delete;
   KRAKEN_EXPORT explicit JSFunctionHolder(JSContext *context, JSObjectRef root, void *data, const std::string &name,
                                           JSObjectCallAsFunctionCallback callback);
-
+  JSObjectRef function();
 private:
+  JSObjectRef m_function{nullptr};
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
 };
 
@@ -548,13 +550,15 @@ protected:
   explicit JSNode(JSContext *context, const char *name);
   ~JSNode();
 
-private:
   JSFunctionHolder m_cloneNode{context, prototypeObject, this, "cloneNode", cloneNode};
   JSFunctionHolder m_removeChild{context, prototypeObject, this, "removeChild", removeChild};
   JSFunctionHolder m_appendChild{context, prototypeObject, this, "appendChild", appendChild};
   JSFunctionHolder m_remove{context, prototypeObject, this, "remove", remove};
   JSFunctionHolder m_insertBefore{context, prototypeObject, this, "insertBefore", insertBefore};
   JSFunctionHolder m_replaceChild{context, prototypeObject, this, "replaceChild", replaceChild};
+
+private:
+  friend NodeInstance;
   static void traverseCloneNode(JSContextRef ctx, NodeInstance* element, NodeInstance* parentElement);
   static JSValueRef copyNodeValue(JSContextRef ctx, NodeInstance* element);
 };
@@ -603,6 +607,7 @@ private:
   DocumentInstance *m_document{nullptr};
   void ensureDetached(NodeInstance *node);
   friend DocumentInstance;
+  friend JSNode;
 };
 
 struct NativeNode {
@@ -707,7 +712,7 @@ public:
   enum class AttributeProperty { kLength };
 
   static std::vector<JSStringRef> &getAttributePropertyNames();
-  static const std::unordered_map<std::string, AttributeProperty> &getAttributePropertyMap();
+  static std::unordered_map<std::string, AttributeProperty> &getAttributePropertyMap();
 
   KRAKEN_EXPORT JSStringRef getAttribute(std::string &name);
   KRAKEN_EXPORT void setAttribute(std::string &name, JSStringRef value);
@@ -913,7 +918,7 @@ public:
   enum BoundingClientRectProperty { kX, kY, kWidth, kHeight, kLeft, kTop, kRight, kBottom };
 
   static std::array<JSStringRef, 8> &getBoundingClientRectPropertyNames();
-  static const std::unordered_map<std::string, BoundingClientRectProperty> &getPropertyMap();
+  static std::unordered_map<std::string, BoundingClientRectProperty> &getPropertyMap();
 
   BoundingClientRect() = delete;
   ~BoundingClientRect() override;

@@ -48,11 +48,11 @@ MediaErrorEventInstance::MediaErrorEventInstance(JSMediaErrorEvent *jsMediaError
 }
 
 JSValueRef MediaErrorEventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSMediaErrorEvent::getMediaErrorPropertyMap();
+  auto &propertyMap = JSMediaErrorEvent::getMediaErrorPropertyMap();
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
 
   if (property == JSMediaErrorEvent::MediaErrorProperty::code) {
     return JSValueMakeNumber(ctx, code);
@@ -64,9 +64,9 @@ JSValueRef MediaErrorEventInstance::getProperty(std::string &name, JSValueRef *e
 }
 
 bool MediaErrorEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSMediaErrorEvent::getMediaErrorPropertyMap();
+  auto &propertyMap = JSMediaErrorEvent::getMediaErrorPropertyMap();
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &&property = propertyMap[name];
 
     switch (property) {
     case JSMediaErrorEvent::MediaErrorProperty::message: {

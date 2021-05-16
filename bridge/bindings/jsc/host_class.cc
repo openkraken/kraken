@@ -5,6 +5,7 @@
 
 #include "host_class.h"
 #include "foundation/logging.h"
+#include "KOM/performance.h"
 
 #define PRIVATE_PROTO_KEY "__private_proto__"
 
@@ -123,8 +124,15 @@ JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSS
 JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                                JSValueRef *exception) {
   auto hostClassInstance = reinterpret_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
+  auto nativePerformance = binding::jsc::NativePerformance::instance(hostClassInstance->context->uniqueId);
+#if ENABLE_PROFILE
+  nativePerformance->mark(PERF_JS_HOST_CLASS_GET_PROPERTY_START);
+#endif
   std::string &&name = JSStringToStdString(propertyName);
   JSValueRef result = hostClassInstance->getProperty(name, exception);
+#if ENABLE_PROFILE
+  nativePerformance->mark(PERF_JS_HOST_CLASS_GET_PROPERTY_END);
+#endif
   return result;
 }
 
@@ -139,9 +147,13 @@ JSValueRef HostClass::proxyPrototypeGetProperty(JSContextRef ctx, JSObjectRef ob
 bool HostClass::proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                          JSValueRef value, JSValueRef *exception) {
   auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
+  auto nativePerformance = binding::jsc::NativePerformance::instance(hostClassInstance->context->uniqueId);
+  nativePerformance->mark(PERF_JS_HOST_CLASS_SET_PROPERTY_START);
   std::string &&name = JSStringToStdString(propertyName);
   bool handledBySelf = hostClassInstance->setProperty(name, value, exception);
-  return !hostClassInstance->context->handleException(*exception) || handledBySelf;
+  bool result = !hostClassInstance->context->handleException(*exception) || handledBySelf;
+  nativePerformance->mark(PERF_JS_HOST_CLASS_SET_PROPERTY_END);
+  return result;
 }
 
 void HostClass::proxyInstanceGetPropertyNames(JSContextRef ctx, JSObjectRef object,

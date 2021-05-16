@@ -128,10 +128,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/event.h
     bindings/jsc/DOM/event.cc
     bindings/jsc/DOM/custom_event.h
-    bindings/jsc/DOM/mouse_event.cc
-    bindings/jsc/DOM/mouse_event.h
-    bindings/jsc/DOM/gesture_event.cc
-    bindings/jsc/DOM/gesture_event.h
+    bindings/jsc/DOM/events/mouse_event.cc
+    bindings/jsc/DOM/events/mouse_event.h
+    bindings/jsc/DOM/events/gesture_event.cc
+    bindings/jsc/DOM/events/gesture_event.h
     bindings/jsc/DOM/custom_event.cc
     bindings/jsc/DOM/events/input_event.cc
     bindings/jsc/DOM/events/input_event.h
