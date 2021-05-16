@@ -93,7 +93,7 @@ void *getJSContext(int32_t contextId);
 bool checkContext(int32_t contextId);
 bool checkContext(int32_t contextId, void *context);
 KRAKEN_EXPORT_C
-void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
+void evaluateScripts(int32_t contextId, const char*code, const char *bundleFilename, int startLine);
 KRAKEN_EXPORT_C
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT_C

@@ -66,8 +66,8 @@ JSInputElement::InputElementInstance::InputElementInstance(JSInputElement *jsAnc
 }
 
 JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getInputElementPropertyMap();
-  auto propertyPropertyMap = getInputElementPrototypePropertyMap();
+  auto &propertyMap = getInputElementPropertyMap();
+  auto &propertyPropertyMap = getInputElementPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (propertyPropertyMap.count(name) > 0) {
@@ -75,7 +75,7 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
   };
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &&property = propertyMap[name];
     switch (property) {
     case InputElementProperty::width: {
       getDartMethod()->flushUICommand();
@@ -95,8 +95,8 @@ JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, 
 }
 
 bool JSInputElement::InputElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getInputElementPropertyMap();
-  auto prototypePropertyMap = getInputElementPrototypePropertyMap();
+  auto &propertyMap = getInputElementPropertyMap();
+  auto &prototypePropertyMap = getInputElementPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) return false;
 

@@ -380,6 +380,8 @@ JSValueRef JSPerformance::__kraken_navigation_summary__(JSContextRef ctx, JSObje
   GET_COST(jsPolyfillInit, PERF_JS_POLYFILL_INIT_COST);
   GET_COST(jsBundleLoad, PERF_JS_BUNDLE_LOAD_COST);
   GET_COST(jsBundleEval, PERF_JS_BUNDLE_EVAL_COST);
+  GET_COST(jsHostClassGetProperty, PERF_JS_HOST_CLASS_GET_PROPERTY_COST)
+  GET_COST(jsHostClassSetProperty, PERF_JS_HOST_CLASS_SET_PROPERTY_COST)
   GET_COST(flushUiCommand, PERF_FLUSH_UI_COMMAND_COST);
   GET_COST(createElement, PERF_CREATE_ELEMENT_COST);
   GET_COST(createTextNode, PERF_CREATE_TEXT_NODE_COST);
@@ -436,6 +438,8 @@ First Bundle Load: %.*fms
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
+  + %s %.*fms avg: %.*fms count: %zu
 Rendering: %.*fms
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
@@ -462,6 +466,8 @@ Rendering: %.*fms
     PERF_JS_BUNDLE_EVAL_COST, 2, jsBundleEvalCost,
     PERF_FLUSH_UI_COMMAND_COST, 2, flushUiCommandCost, 2, flushUiCommandAvg, flushUiCommandCount,
     PERF_CREATE_ELEMENT_COST, 2, createElementCost, 2, createElementAvg, createElementCount,
+    PERF_JS_HOST_CLASS_GET_PROPERTY_COST, 2, jsHostClassGetPropertyCost, 2, jsHostClassGetPropertyAvg, jsHostClassGetPropertyCount,
+    PERF_JS_HOST_CLASS_SET_PROPERTY_COST, 2, jsHostClassSetPropertyCost, 2, jsHostClassSetPropertyAvg, jsHostClassSetPropertyCount,
     PERF_CREATE_TEXT_NODE_COST, 2, createTextNodeCost, 2, createTextNodeAvg, createTextNodeCount,
     PERF_CREATE_COMMENT_COST, 2, createCommentCost, 2, createCommentAvg, createCommentCount,
     PERF_DISPOSE_EVENT_TARGET_COST, 2, disposeEventTargetCost, 2, disposeEventTargetAvg, disposeEventTargetCount,
@@ -502,6 +508,8 @@ void JSPerformance::measureSummary() {
   internalMeasure(PERF_ROOT_ELEMENT_PROPERTIES_INIT_COST, PERF_ROOT_ELEMENT_INIT_START, PERF_ROOT_ELEMENT_PROPERTY_INIT,
                   nullptr);
   internalMeasure(PERF_JS_CONTEXT_INIT_COST, PERF_JS_CONTEXT_INIT_START, PERF_JS_CONTEXT_INIT_END, nullptr);
+  internalMeasure(PERF_JS_HOST_CLASS_GET_PROPERTY_COST, PERF_JS_HOST_CLASS_GET_PROPERTY_START, PERF_JS_HOST_CLASS_GET_PROPERTY_END, nullptr);
+  internalMeasure(PERF_JS_HOST_CLASS_SET_PROPERTY_COST, PERF_JS_HOST_CLASS_SET_PROPERTY_START, PERF_JS_HOST_CLASS_SET_PROPERTY_END, nullptr);
   internalMeasure(PERF_JS_NATIVE_METHOD_INIT_COST, PERF_JS_NATIVE_METHOD_INIT_START, PERF_JS_NATIVE_METHOD_INIT_END,
                   nullptr);
   internalMeasure(PERF_JS_POLYFILL_INIT_COST, PERF_JS_POLYFILL_INIT_START, PERF_JS_POLYFILL_INIT_END, nullptr);

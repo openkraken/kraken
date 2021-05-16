@@ -90,6 +90,24 @@ bool JSContext::evaluateJavaScript(const char16_t *code, size_t length, const ch
   return handleException(exc);
 }
 
+bool JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
+  JSStringRef sourceRef = JSStringCreateWithUTF8CString(code);
+  JSStringRef sourceURLRef = nullptr;
+  if (sourceURL != nullptr) {
+    sourceURLRef = JSStringCreateWithUTF8CString(sourceURL);
+  }
+
+  JSValueRef exc = nullptr; // exception
+  JSEvaluateScript(ctx_, sourceRef, nullptr /*null means global*/, sourceURLRef, startLine, &exc);
+
+  JSStringRelease(sourceRef);
+  if (sourceURLRef) {
+    JSStringRelease(sourceURLRef);
+  }
+
+  return handleException(exc);
+}
+
 bool JSContext::isValid() {
   return !ctxInvalid_;
 }
@@ -232,15 +250,17 @@ NativeString *stringRefToNativeString(JSStringRef string) {
 JSFunctionHolder::JSFunctionHolder(JSContext *context, JSObjectRef root, void *data, const std::string& name,
                                    JSObjectCallAsFunctionCallback callback) {
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
-  JSObjectRef function;
   // If context is nullptr, create normal js function without private data
   if (data == nullptr) {
-    function = JSObjectMakeFunctionWithCallback(context->context(), nameStringHolder.getString(), callback);
+    m_function = JSObjectMakeFunctionWithCallback(context->context(), nameStringHolder.getString(), callback);
   } else {
-    function = makeObjectFunctionWithPrivateData(context, data, name.c_str(), callback);
+    m_function = makeObjectFunctionWithPrivateData(context, data, name.c_str(), callback);
   }
+  JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), m_function, kJSPropertyAttributeNone, nullptr);
+}
 
-  JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), function, kJSPropertyAttributeNone, nullptr);
+JSObjectRef JSFunctionHolder::function() {
+  return m_function;
 }
 
 JSStringHolder::JSStringHolder(JSContext *context, const std::string &string)

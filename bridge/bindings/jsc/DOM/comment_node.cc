@@ -51,11 +51,11 @@ bool JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueR
 }
 
 JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getCommentNodePropertyMap();
+  auto &propertyMap = getCommentNodePropertyMap();
 
   if (propertyMap.count(name) == 0) return NodeInstance::getProperty(name, exception);
 
-  CommentNodeProperty property = propertyMap[name];
+  CommentNodeProperty &property = propertyMap[name];
 
   switch (property) {
   case CommentNodeProperty::data:

@@ -111,22 +111,21 @@ Pointer<ScreenSize> createScreen(double width, double height) {
 
 // Register evaluateScripts
 typedef Native_EvaluateScripts = Void Function(
-    Int32 contextId, Pointer<NativeString> code, Pointer<Utf8> url, Int32 startLine);
+    Int32 contextId, Pointer<Utf8> code, Pointer<Utf8> url, Int32 startLine);
 typedef Dart_EvaluateScripts = void Function(
-    int contextId, Pointer<NativeString> code, Pointer<Utf8> url, int startLine);
+    int contextId, Pointer<Utf8> code, Pointer<Utf8> url, int startLine);
 
 final Dart_EvaluateScripts _evaluateScripts =
     nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
 
-void evaluateScripts(int contextId, String code, String url, int line) {
-  Pointer<NativeString> nativeString = stringToNativeString(code);
+void evaluateScripts(int contextId, Pointer<Uint8> buffer, String url, int line) {
   Pointer<Utf8> _url = Utf8.toUtf8(url);
   try {
-    _evaluateScripts(contextId, nativeString, _url, line);
+    _evaluateScripts(contextId, buffer.cast(), _url, line);
   } catch (e, stack) {
     print('$e\n$stack');
   }
-  freeNativeString(nativeString);
+  free(buffer);
 }
 
 // Register initJsEngine

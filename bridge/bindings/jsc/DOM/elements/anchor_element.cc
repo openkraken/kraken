@@ -31,9 +31,9 @@ JSAnchorElement::AnchorElementInstance::AnchorElementInstance(JSAnchorElement *j
 }
 
 JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getAnchorElementPropertyMap();
+  auto &propertyMap = getAnchorElementPropertyMap();
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
     switch (property) {
     case AnchorElementProperty::href:
       return JSValueMakeString(_hostClass->ctx, _href);
@@ -46,11 +46,11 @@ JSValueRef JSAnchorElement::AnchorElementInstance::getProperty(std::string &name
 }
 
 bool JSAnchorElement::AnchorElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getAnchorElementPropertyMap();
+  auto &propertyMap = getAnchorElementPropertyMap();
 
   if (propertyMap.count(name) == 0) return ElementInstance::setProperty(name, value, exception);
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
   if (property == AnchorElementProperty::href) {
     _href = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_href);

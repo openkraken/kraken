@@ -534,8 +534,8 @@ JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception
 }
 
 JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSNode::getNodePropertyMap();
-  auto prototypePropertyMap = JSNode::getNodePrototypePropertyMap();
+  auto &propertyMap = JSNode::getNodePropertyMap();
+  auto &prototypePropertyMap = JSNode::getNodePrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) {
     JSStringHolder nameStringHolder = JSStringHolder(context, name);

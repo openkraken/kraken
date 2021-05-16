@@ -31,9 +31,9 @@ JSObjectElement::ObjectElementInstance::ObjectElementInstance(JSObjectElement *j
 }
 
 JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getObjectElementPropertyMap();
+  auto &propertyMap = getObjectElementPropertyMap();
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
     switch (property) {
     case ObjectElementProperty::type:
     case ObjectElementProperty::currentType: {
@@ -50,10 +50,10 @@ JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name
 }
 
 bool JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getObjectElementPropertyMap();
+  auto &propertyMap = getObjectElementPropertyMap();
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
     switch (property) {
     case ObjectElementProperty::data: {
       JSStringRef dataStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
