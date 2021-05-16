@@ -21,8 +21,8 @@ WindowInstance::~WindowInstance() {
 }
 
 JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getWindowPropertyMap();
-  auto prototypePropertyMap = getWindowPrototypePropertyMap();
+  auto &propertyMap = getWindowPropertyMap();
+  auto &prototypePropertyMap = getWindowPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypePropertyMap.count(name) > 0) {
@@ -30,7 +30,7 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
   }
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch (property) {
     case WindowProperty::devicePixelRatio: {
@@ -87,8 +87,8 @@ JSValueRef WindowInstance::getProperty(std::string &name, JSValueRef *exception)
 }
 
 bool WindowInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getWindowPropertyMap();
-  auto prototypePropertyMap = getWindowPrototypePropertyMap();
+  auto &propertyMap = getWindowPropertyMap();
+  auto &prototypePropertyMap = getWindowPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   // Key is prototype property, return false to handled by engine itself.

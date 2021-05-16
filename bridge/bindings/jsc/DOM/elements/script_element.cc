@@ -32,9 +32,9 @@ JSScriptElement::ScriptElementInstance::ScriptElementInstance(JSScriptElement *j
 }
 
 JSValueRef JSScriptElement::ScriptElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getScriptElementPropertyMap();
+  auto &propertyMap = getScriptElementPropertyMap();
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
     switch (property) {
     case ScriptElementProperty::src:
       return JSValueMakeString(_hostClass->ctx, _src);
@@ -45,11 +45,11 @@ JSValueRef JSScriptElement::ScriptElementInstance::getProperty(std::string &name
 }
 
 bool JSScriptElement::ScriptElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getScriptElementPropertyMap();
+  auto &propertyMap = getScriptElementPropertyMap();
 
   if (propertyMap.count(name) == 0) return ElementInstance::setProperty(name, value, exception);
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
   if (property == ScriptElementProperty::src) {
     _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_src);

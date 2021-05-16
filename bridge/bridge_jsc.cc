@@ -24,8 +24,8 @@
 #include "bindings/jsc/DOM/elements/svg_element.h"
 #include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/DOM/custom_event.h"
-#include "bindings/jsc/DOM/gesture_event.h"
-#include "bindings/jsc/DOM/mouse_event.h"
+#include "bindings/jsc/DOM/events/gesture_event.h"
+#include "bindings/jsc/DOM/events/mouse_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/DOM/events/close_event.h"
@@ -167,6 +167,12 @@ void JSBridge::evaluateScript(const NativeString *script, const char *url, int s
   if (!m_context->isValid()) return;
   binding::jsc::updateLocation(url);
   m_context->evaluateJavaScript(script->string, script->length, url, startLine);
+}
+
+void JSBridge::evaluateScript(const char *script, const char *url, int startLine) {
+  if (!m_context->isValid()) return;
+  binding::jsc::updateLocation(url);
+  m_context->evaluateJavaScript(script, url, startLine);
 }
 
 void JSBridge::evaluateScript(const std::u16string &script, const char *url, int startLine) {

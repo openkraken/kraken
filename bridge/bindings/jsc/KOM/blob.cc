@@ -232,8 +232,8 @@ int32_t JSBlob::BlobInstance::size() {
 }
 
 JSValueRef JSBlob::BlobInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getBlobPropertyMap();
-  auto prototypePropertyMap = getBlobPrototypePropertyMap();
+  auto &propertyMap = getBlobPropertyMap();
+  auto &prototypePropertyMap = getBlobPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypePropertyMap.count(name) > 0) {

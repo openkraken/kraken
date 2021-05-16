@@ -260,7 +260,7 @@ DocumentInstance::DocumentInstance(JSDocument *document)
   documentElement = new ElementInstance(JSElement::instance(document->context), tagName, HTML_TARGET_ID);
   documentElement->m_document = this;
   JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
-  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), 
+  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(),
                       documentElement->object, kJSPropertyAttributeReadOnly, nullptr);
 
   instanceMap[document->context] = this;
@@ -268,8 +268,8 @@ DocumentInstance::DocumentInstance(JSDocument *document)
 }
 
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getDocumentPropertyMap();
-  auto prototypePropertyMap = getDocumentPrototypePropertyMap();
+  auto &propertyMap = getDocumentPropertyMap();
+  auto &prototypePropertyMap = getDocumentPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypePropertyMap.count(name) > 0) {
@@ -280,7 +280,7 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
     return NodeInstance::getProperty(name, exception);
   }
 
-  DocumentProperty property = propertyMap[name];
+  DocumentProperty &property = propertyMap[name];
 
   switch (property) {
   case DocumentProperty::documentElement: {
@@ -410,13 +410,13 @@ JSValueRef JSDocument::getElementsByTagName(JSContextRef ctx, JSObjectRef functi
 }
 
 bool DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getDocumentPropertyMap();
-  auto prototypePropertyMap = getDocumentPrototypePropertyMap();
+  auto &propertyMap = getDocumentPropertyMap();
+  auto &prototypePropertyMap = getDocumentPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     if (property == DocumentProperty::cookie) {
       JSStringRef str = JSValueToStringCopy(ctx, value, exception);

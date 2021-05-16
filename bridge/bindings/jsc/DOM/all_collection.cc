@@ -8,11 +8,11 @@
 namespace kraken::binding::jsc {
 
 JSValueRef JSAllCollection::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getAllCollectionPropertyMap();
+  auto &propertyMap = getAllCollectionPropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch(property) {
     case AllCollectionProperty::add:

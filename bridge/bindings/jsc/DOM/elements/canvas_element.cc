@@ -38,8 +38,8 @@ JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
 }
 
 JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getCanvasElementPropertyMap();
-  auto prototypePropertyMap = getCanvasElementPrototypePropertyMap();
+  auto &propertyMap = getCanvasElementPropertyMap();
+  auto &prototypePropertyMap = getCanvasElementPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypePropertyMap.count(name) > 0) {
@@ -47,7 +47,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
   };
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch (property) {
     case CanvasElementProperty::width: {
@@ -62,13 +62,13 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
 }
 
 bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getCanvasElementPropertyMap();
-  auto prototypePropertyMap = getCanvasElementPrototypePropertyMap();
+  auto &propertyMap = getCanvasElementPropertyMap();
+  auto &prototypePropertyMap = getCanvasElementPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &&property = propertyMap[name];
 
     switch (property) {
     case CanvasElementProperty::width: {
@@ -165,8 +165,8 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingCont
 
 JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProperty(std::string &name,
                                                                                    JSValueRef *exception) {
-  auto propertyMap = getCanvasRenderingContext2DPropertyMap();
-  auto prototypePropertyMap = getCanvasRenderingContext2DPrototypePropertyMap();
+  auto &propertyMap = getCanvasRenderingContext2DPropertyMap();
+  auto &prototypePropertyMap = getCanvasRenderingContext2DPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypePropertyMap.count(name) > 0) {
@@ -174,7 +174,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
   }
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
     switch (property) {
     case CanvasRenderingContext2DProperty::direction: {
       return m_direction.makeString();
