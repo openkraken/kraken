@@ -16,7 +16,7 @@ jobs:
     - name: Run Test
       run: cd "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && npm test
       id: test
-      continue-on-error: true
+      continue-on-error: false
     - name: Upload Snapshots
       run: cd "${RUNNER_WORKSPACE}/${BRANCH_NAME}" && node scripts/upload_snapshots.js
       continue-on-error: true
