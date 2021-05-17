@@ -21,10 +21,6 @@ class GestureManager {
 
   List<RenderBoxModel> renderBoxModelList = [];
 
-  void clearList() {
-    renderBoxModelList = [];
-  }
-
   void addPointer(PointerEvent event) {
     gestures.forEach((key, gesture) {
       gesture.addPointer(event);
