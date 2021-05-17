@@ -48,7 +48,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
       bool shouldReattach = element.isRendererAttached && element.parent != null && prevRenderLayoutBox != renderBoxModel;
 
       if (shouldReattach) {
-        RenderLayoutBox parentRenderObject = element.parent.renderBoxModel;
+        RenderLayoutBox parentRenderObject = element.parentElement.renderBoxModel;
         Element previousSibling = element.previousSibling;
         RenderObject previous = previousSibling != null ? previousSibling.renderer : null;
 

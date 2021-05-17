@@ -42,7 +42,7 @@ class TextNode extends Node {
   String get data {
     if (_data == null || _data.isEmpty) return '';
 
-    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parent?.style);
+    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parentElement?.style);
 
     /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
@@ -103,12 +103,11 @@ class TextNode extends Node {
 
   void _updateTextStyle() {
     // parentNode must be an element.
-    Element parentElement = parent;
     _renderTextBox.style = parentElement.style;
     _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
     // Update paragraph line height
     KrakenRenderParagraph renderParagraph = _renderTextBox.child;
-    renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
+    renderParagraph.lineHeight = parentElement.renderBoxModel.renderStyle.lineHeight;
     renderParagraph.markNeedsLayout();
 
     _setTextNodeProperties(parentElement.style);
@@ -158,17 +157,17 @@ class TextNode extends Node {
   @override
   void willAttachRenderer() {
     createRenderer();
-    CSSStyleDeclaration parentStyle = parent.style;
+    CSSStyleDeclaration parentStyle = parentElement.style;
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
-    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parent);
+    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
     // TextNode's style is inherited from parent style
     _renderTextBox.style = parentStyle;
     // Update paragraph line height
     KrakenRenderParagraph renderParagraph = _renderTextBox.child;
-    renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
+    renderParagraph.lineHeight = parentElement.renderBoxModel.renderStyle.lineHeight;
 
-    _setTextNodeProperties(parent.style);
+    _setTextNodeProperties(parentElement.style);
   }
 
   @override

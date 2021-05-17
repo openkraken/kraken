@@ -75,9 +75,17 @@ abstract class Node extends EventTarget implements RenderObjectNode {
   NodeType nodeType;
   String nodeName;
 
-  Element get parent => parentNode;
+  /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
+  Node get parent => parentNode;
 
-  Element get parentElement => parent;
+  /// The Node.parentElement read-only property returns the DOM node's parent Element,
+  /// or null if the node either has no parent, or its parent isn't a DOM Element.
+  Element get parentElement {
+    if (parentNode != null && parentNode.nodeType == NodeType.ELEMENT_NODE) {
+      return parentNode;
+    }
+    return null;
+  }
 
   List<Element> get children {
     List<Element> _children = [];

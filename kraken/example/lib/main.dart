@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
+import 'package:kraken_devtools/kraken_devtools.dart';
 import 'dart:ui';
 
 void main() {
@@ -90,7 +91,8 @@ class _MyHomePageState extends State<MyBrowser> {
         child: _kraken = Kraken(
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-          bundlePath: 'assets/bundle.js',
+          bundlePath: 'assets/sliver.js',
+          devToolsService: ChromeDevToolsService(),
         ),
     ));
   }

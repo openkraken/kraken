@@ -260,7 +260,7 @@ mixin CSSOverflowMixin on ElementBase {
     } else if (parent is ContainerRenderObjectMixin) {
       // Update renderBoxModel reference before move to its containing block
       element.renderBoxModel = newRenderObject;
-      element.parent.addChildRenderObject(element, after: previousSibling);
+      element.parentElement.addChildRenderObject(element, after: previousSibling);
     }
   }
 
