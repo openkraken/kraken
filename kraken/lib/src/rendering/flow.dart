@@ -645,9 +645,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       final RenderLayoutParentData childParentData = child.parentData;
 
-      if (childParentData.isPositioned ||
-          // Skip child that display is none
-          (child is RenderBoxModel && child.renderStyle.transformedDisplay == CSSDisplay.none)) {
+      if (childParentData.isPositioned) {
         child = childParentData.nextSibling;
         continue;
       }
