@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
@@ -177,6 +178,10 @@ class RenderFlexLayout extends RenderLayoutBox {
   Map<int, double> childrenIntrinsicMainSizes = {};
   /// Cache original constraints of children on the first layout
   Map<int, BoxConstraints> childrenOldConstraints = {};
+
+  /// Cache sticky children to wait for next frame to calculate sticky offset
+  /// cause it depends on offset of its parent which is not know at layout stage.
+  List<RenderBoxModel> stickyChildren = [];
 
   @override
   void setupParentData(RenderBox child) {
@@ -609,11 +614,21 @@ class RenderFlexLayout extends RenderLayoutBox {
           ensureBoxSizeLargerThanScrollableSize();
         }
       } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
-        RenderBoxModel scrollContainer = CSSPositionedLayout.findScrollContainer(child);
-        CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
+        stickyChildren.add(child);
       }
       child = childParentData.nextSibling;
     }
+
+    SchedulerBinding.instance.scheduleFrame();
+    // Delay offset calculation of sticky child to next frame for it depends on the offset of its parent
+    // which is not know at parent layout stage.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      for (RenderBoxModel stickyChild in stickyChildren) {
+        RenderBoxModel scrollContainer = CSSPositionedLayout.findScrollContainer(stickyChild);
+        CSSPositionedLayout.applyStickyChildOffset(scrollContainer, stickyChild);
+      }
+      stickyChildren.clear();
+    });
 
     _relayoutPositionedChildren();
 
