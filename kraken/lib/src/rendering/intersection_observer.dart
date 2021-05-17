@@ -220,8 +220,6 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// [Timer] callback.  Defers visibility callbacks to execute after the next
   /// frame.
   static void _handleUpdateTimer() {
-    print(DateTime.now());
-    print(DateTime.now().millisecond);
     // Ensure that work is done between frames so that calculations are
     // performed from a consistent state.  We use `scheduleTask<T>` here instead
     // of `addPostFrameCallback` or `scheduleFrameCallback` so that work will
