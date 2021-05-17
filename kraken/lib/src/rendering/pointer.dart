@@ -72,11 +72,6 @@ mixin RenderPointerListenerMixin on RenderBox {
     onLongPress(GestureEvent(EVENT_LONG_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
   }
 
-  /// Called when a pointer signal this object.
-  void initGestureRecognizer(Map<String, List<EventHandler>> eventHandlers) {
-
-  }
-
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
