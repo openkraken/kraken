@@ -13,7 +13,7 @@ class _HttpConnectionInfo implements HttpConnectionInfo {
   _HttpConnectionInfo(this.localPort, this.remoteAddress, this.remotePort);
 }
 
-class SimpleHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
+class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientResponse {
   String mime;
   String encoding;
   Stream data;
@@ -23,7 +23,7 @@ class SimpleHttpClientResponse extends Stream<List<int>> implements HttpClientRe
   Map<String, String> responseHeaders;
   SingleHttpHeaders _singleHttpHeaders;
 
-  SimpleHttpClientResponse(this.mime, this.encoding, this.data, {
+  HttpClientStreamResponse(this.mime, this.encoding, this.data, {
     this.statusCode = 200,
     this.reasonPhrase = '',
     this.responseHeaders = const {},

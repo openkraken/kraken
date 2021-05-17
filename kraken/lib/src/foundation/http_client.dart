@@ -120,7 +120,6 @@ class ProxyHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> open(String method, String host, int port, String path) {
-    print('open $method $host $port $path');
     return nativeHttpClient.open(method, host, port, path).then(_proxyClientRequest);
   }
 
