@@ -104,7 +104,15 @@ class IntersectionObserverLayer extends ContainerLayer {
 
   /// The size of the corresponding element.
   Size _elementSize;
+
+  static int _id = 0;
   int id = _id++;
+
+  /// Keeps track of [IntersectionObserverLayer] objects that have been recently
+  /// updated and that might need to report visibility changes.
+  static final _updated = <int, IntersectionObserverLayer>{};
+  /// 300ms delay compute layer offset
+  static Duration _updateInterval = Duration(milliseconds: 300);
 
   /// Offset to the start of the element, in local coordinates.
   Offset _elementOffset;
@@ -198,14 +206,28 @@ class IntersectionObserverLayer extends ContainerLayer {
       ..add(DiagnosticsProperty<Rect>('rootBounds', _rootBounds));
   }
 
-  bool _isScheduled = false;
   void _scheduleIntersectionObservationUpdate() {
-    if (!_isScheduled) {
-      _isScheduled = true;
-      scheduleMicrotask(() {
-        SchedulerBinding.instance.scheduleTask<void>(_processCallbacks, Priority.touch);
-      });
+    final isUpdateScheduled = _updated.isNotEmpty;
+    _updated[id] = this;
+
+    if (!isUpdateScheduled) {
+      // We use a normal [Timer] instead of a [RestartableTimer] so that changes
+      // to the update duration will be picked up automatically.
+      Timer(_updateInterval, _handleUpdateTimer);
     }
+  }
+
+  /// [Timer] callback.  Defers visibility callbacks to execute after the next
+  /// frame.
+  static void _handleUpdateTimer() {
+    print(DateTime.now());
+    print(DateTime.now().millisecond);
+    // Ensure that work is done between frames so that calculations are
+    // performed from a consistent state.  We use `scheduleTask<T>` here instead
+    // of `addPostFrameCallback` or `scheduleFrameCallback` so that work will
+    // be done even if a new frame isn't scheduled and without unnecessarily
+    // scheduling a new frame.
+    SchedulerBinding.instance.scheduleTask<void>(_processCallbacks, Priority.touch);
   }
 
   /// Computes the bounds for the corresponding element in
@@ -279,18 +301,20 @@ class IntersectionObserverLayer extends ContainerLayer {
   int previousLayerHash = 0;
 
   /// Executes visibility callbacks for all updated.
-  void _processCallbacks() {
-    _isScheduled = false;
-    if (!attached) {
-      _fireCallback(IntersectionObserverEntry(size: Size.zero));
-      return;
+  static void _processCallbacks() {
+    for (final layer in _updated.values) {
+      if (!layer.attached) {
+        layer._fireCallback(IntersectionObserverEntry(size: Size.zero));
+        return;
+      }
+
+      Rect elementBounds = layer._computeElementBounds();
+      Rect rootBounds = layer._computeClipRect();
+
+      final info = IntersectionObserverEntry.fromRects(boundingClientRect: elementBounds, rootBounds: rootBounds);
+      layer._fireCallback(info);
     }
-
-    Rect elementBounds = _computeElementBounds();
-    Rect rootBounds = _computeClipRect();
-
-    final info = IntersectionObserverEntry.fromRects(boundingClientRect: elementBounds, rootBounds: rootBounds);
-    _fireCallback(info);
+    _updated.clear();
   }
 }
 
