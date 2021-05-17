@@ -334,7 +334,8 @@ typedef Native_RenderingContextArcTo = Void Function(Pointer<NativeCanvasRenderi
 typedef Native_RenderingContextBeginPath = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
 typedef Native_RenderingContextClosePath = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
 typedef Native_RenderingContextClearRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
-typedef Native_RenderingContextDrawImage = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeImgElement> image, Double dx, Double dy);
+typedef Native_RenderingContextDrawImage = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeImgElement> image,
+    Double sx, Double sy, Double sWidth, Double sHeight, Double dx, Double dy, Double dWidth, Double dHeight);
 typedef Native_RenderingContextStrokeRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
 typedef Native_RenderingContextStrokeText = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text, Double x, Double y, Double maxWidth);
 typedef Native_RenderingContextSave = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);

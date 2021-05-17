@@ -275,11 +275,11 @@ class CanvasRenderingContext2D {
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-  // TODO: drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-  static void _drawImage(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeImgElement> imagePtr, double dx, double dy) {
+  static void _drawImage(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeImgElement> imagePtr,
+      double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
     ImageElement imageElement = ImageElement.getImageElementOfNativePtr(imagePtr);
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2DOfNativePtr(nativePtr);
-    canvasRenderingContext2D.drawImage(imageElement.image, dx, dy);
+    canvasRenderingContext2D.drawImage(imageElement.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
 
   static void _ellipse(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y,
@@ -581,8 +581,12 @@ class CanvasRenderingContext2D {
     });
   }
 
-  void drawImage(Image image, double dx, double dy) {
+  void drawImage(Image image, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
     addAction((Canvas canvas, Size size) {
+      // TODO
+      // ctx.drawImage(image, dx, dy);
+      // ctx.drawImage(image, dx, dy, dWidth, dHeight);
+      // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
       canvas.drawImage(image, Offset(dx, dy), Paint());
     });
   }

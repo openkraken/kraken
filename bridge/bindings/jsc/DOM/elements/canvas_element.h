@@ -77,7 +77,8 @@ using ClearRect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRendering
                            double width, double height);
 using Clip = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *fillRule);
 using ClosePath = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
-using DrawImage = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeImageElement *nativeImage, double dx, double dy);
+using DrawImage = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeImageElement *nativeImage,
+                           double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight);
 using Ellipse = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
                         double radiusX, double radiusY, double rotation, double startAngle, double endAngle, double counterclockwise);
 using Fill = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *fillRule);
