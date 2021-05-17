@@ -164,12 +164,12 @@ class CSSPositionedLayout {
     RenderStyle childRenderStyle = child.renderStyle;
     RenderLayoutParentData boxParentData = child?.parentData;
     double offsetX = child.baseOffsetX;
-    double childWidth = child?.size?.width;
+    double childWidth = child?.boxSize?.width;
 
     // Sticky element cannot exceed the boundary of its parent element container
-    RenderBox parentContainer = child.parent;
+    RenderBoxModel parentContainer = child.parent;
     double minOffsetX = 0;
-    double maxOffsetX = parentContainer.size.width - childWidth;
+    double maxOffsetX = parentContainer.boxSize.width - childWidth;
     double offsetLeft = child.baseScrollContainerOffsetX - scrollContainer.scrollLeft;
     // Retrieve scroll container width from constraints cause scroll container always has tight
     // constaints and scroll container may not have size in layout stage so can not retrieve from size.
@@ -216,12 +216,12 @@ class CSSPositionedLayout {
     RenderStyle childRenderStyle = child.renderStyle;
     RenderLayoutParentData boxParentData = child?.parentData;
     double offsetY = child.baseOffsetY;
-    double childHeight = child?.size?.height;
+    double childHeight = child?.boxSize?.height;
 
     // Sticky element cannot exceed the boundary of its parent element container
-    RenderBox parentContainer = child.parent;
+    RenderBoxModel parentContainer = child.parent;
     double minOffsetY = 0;
-    double maxOffsetY = parentContainer.size.height - childHeight;
+    double maxOffsetY = parentContainer.boxSize.height - childHeight;
 
     double offsetTop = child.baseScrollContainerOffsetY - scrollContainer.scrollTop;
     // Retrieve scroll container height from constraints cause scroll container always has tight
@@ -277,26 +277,29 @@ class CSSPositionedLayout {
       parent = parent.parent;
     }
 
-    RenderObject rootRenderObject = renderBoxModel.elementManager.getRootRenderObject();
+    return scrollContainer;
+  }
+
+  /// Set base offset to scroll container after sticky child is layouted
+  static void setStickyChildBaseOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
+    RenderObject rootRenderObject = child.elementManager.getRootRenderObject();
     Offset horizontalScrollContainerOffset =
-      renderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
+      child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
         scrollContainer.localToGlobal(Offset.zero, ancestor: rootRenderObject);
     Offset verticalScrollContainerOffset =
-      renderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
+      child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
         scrollContainer.localToGlobal(Offset.zero, ancestor: rootRenderObject);
 
     // Cache original offset to scroll container to act as base offset
     // to compute dynamic sticky offset later on scroll
-    renderBoxModel.baseScrollContainerOffsetY = verticalScrollContainerOffset.dy + scrollContainer.scrollTop;
-    renderBoxModel.baseScrollContainerOffsetX = horizontalScrollContainerOffset.dx + scrollContainer.scrollLeft;
-    RenderLayoutParentData boxParentData = renderBoxModel?.parentData;
+    child.baseScrollContainerOffsetY = verticalScrollContainerOffset.dy + scrollContainer.scrollTop;
+    child.baseScrollContainerOffsetX = horizontalScrollContainerOffset.dx + scrollContainer.scrollLeft;
+    RenderLayoutParentData boxParentData = child?.parentData;
 
     // Cache original offset to parent to act as base offset
     // to compute dynamic sticky offset later on scroll
-    renderBoxModel.baseOffsetX = boxParentData.offset.dx;
-    renderBoxModel.baseOffsetY = boxParentData.offset.dy;
-
-    return scrollContainer;
+    child.baseOffsetX = boxParentData.offset.dx;
+    child.baseOffsetY = boxParentData.offset.dy;
   }
 
   /// Set sticky child offset according to scroll offset and direction,

@@ -445,6 +445,9 @@ class RenderBoxModel extends RenderBox with
   // When RenderBoxModel is scrolling box, contentConstraints are always equal to BoxConstraints();
   bool isScrollingContentBox = false;
 
+  // Cache sticky children to calculate the base offset of sticky children
+  List<RenderBoxModel> stickyChildren = [];
+
   BoxSizeType get widthSizeType {
     bool widthDefined = renderStyle.width != null;
     return widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
