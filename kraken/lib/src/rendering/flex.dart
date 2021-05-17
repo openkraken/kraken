@@ -657,10 +657,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   bool _isChildDisplayNone(RenderObject child) {
-    if (child is RenderTextBox) {
-      return false;
-    }
-
     if (child is RenderBoxModel) {
       return child.renderStyle.display == CSSDisplay.none;
     }
