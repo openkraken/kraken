@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
@@ -9,7 +9,7 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/bridge.dart';
-import 'dart:async';
+import 'dart:sync';
 import 'dart:ffi';
 import 'dart:collection';
 
@@ -54,7 +54,7 @@ class ImageElement extends Element {
 
   static Element getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement element = _nativeMap[nativeImageElement.address];
-    assert(element != 0, 'Can not get element from nativeElement: $nativeImageElement');
+    assert(element != null, 'Can not get element from nativeElement: $nativeImageElement');
     return element;
   }
 
