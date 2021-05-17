@@ -172,7 +172,15 @@ void JSBridge::evaluateScript(const NativeString *script, const char *url, int s
 void JSBridge::evaluateScript(const char *script, const char *url, int startLine) {
   if (!m_context->isValid()) return;
   binding::jsc::updateLocation(url);
+#if ENABLE_PROFILE
+  auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
+  nativePerformance->mark(PERF_JS_PARSE_TIME_START);
+  std::string patchedCode = std::string("performance.mark('js_parse_time_end');") + std::string(script);
+  m_context->evaluateJavaScript(patchedCode.c_str(), url, startLine);
+#else
   m_context->evaluateJavaScript(script, url, startLine);
+#endif
+
 }
 
 void JSBridge::evaluateScript(const std::u16string &script, const char *url, int startLine) {
