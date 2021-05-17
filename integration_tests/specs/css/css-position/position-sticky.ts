@@ -61,7 +61,7 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 
   it('change-top-ref', async () => {
@@ -724,7 +724,7 @@ describe('position-sticky', () => {
     BODY.appendChild(scroller2);
     BODY.appendChild(scroller3);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('inflow-position', async () => {
     let before;
@@ -771,7 +771,7 @@ describe('position-sticky', () => {
     BODY.appendChild(scroller);
 
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('inline-ref', async () => {
     let indicator;
@@ -2538,7 +2538,7 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('offset-top-left', async () => {
     let sticky;
@@ -2572,7 +2572,7 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('overflow-hidden', async () => {
     let div;

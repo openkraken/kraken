@@ -81,6 +81,6 @@ describe('Position sticky', () => {
     document.body.appendChild(sticky4);
     document.body.appendChild(block4);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });
