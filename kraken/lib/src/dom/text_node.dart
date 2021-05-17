@@ -61,12 +61,12 @@ class TextNode extends Node {
       return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_data) : _data;
     } else {
       String collapsedData = collapseWhitespace(_data);
-      // TODO: 
+      // TODO:
       // Remove the leading space while prev element have space too:
       //   <p><span>foo </span> bar</p>
-      // Refs: 
+      // Refs:
       //   https://github.com/WebKit/WebKit/blob/6a970b217d59f36e64606ed03f5238d572c23c48/Source/WebCore/layout/inlineformatting/InlineLineBuilder.cpp#L295
-      
+
       if (previousSibling == null) {
         collapsedData = collapsedData.trimLeft();
       }
@@ -109,7 +109,8 @@ class TextNode extends Node {
     // Update paragraph line height
     KrakenRenderParagraph renderParagraph = _renderTextBox.child;
     renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
-    
+    renderParagraph.markNeedsLayout();
+
     _setTextNodeProperties(parentElement.style);
 
     RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
