@@ -173,8 +173,8 @@ class CSSPositionedLayout {
     double offsetLeft = child.baseScrollContainerOffsetX - scrollContainer.scrollLeft;
     // Retrieve scroll container width from constraints cause scroll container always has tight
     // constaints and scroll container may not have size in layout stage so can not retrieve from size.
-    double viewPortWidth = scrollContainer.constraints.maxWidth;
-    double offsetRight = viewPortWidth - childWidth - offsetLeft;
+    double scrollContainerWidth = scrollContainer.constraints.maxWidth;
+    double offsetRight = scrollContainerWidth - childWidth - offsetLeft;
 
     if (childRenderStyle.left != null) {
       double left = childRenderStyle.left.length;
@@ -222,11 +222,12 @@ class CSSPositionedLayout {
     RenderBox parentContainer = child.parent;
     double minOffsetY = 0;
     double maxOffsetY = parentContainer.size.height - childHeight;
+
     double offsetTop = child.baseScrollContainerOffsetY - scrollContainer.scrollTop;
     // Retrieve scroll container height from constraints cause scroll container always has tight
     // constaints and scroll container may not have size in layout stage so can not retrieve from size.
-    double viewPortHeight = scrollContainer.constraints.maxHeight;
-    double offsetBottom = viewPortHeight - childHeight - offsetTop;
+    double scrollContainerHeight = scrollContainer.constraints.maxHeight;
+    double offsetBottom = scrollContainerHeight - childHeight - offsetTop;
 
     if (childRenderStyle.top != null) {
       double top = childRenderStyle.top.length;
