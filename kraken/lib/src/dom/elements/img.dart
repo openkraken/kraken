@@ -54,7 +54,7 @@ class ImageElement extends Element {
 
   static Element getImageElementOfNativePtr(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement element = _nativeMap[nativeImageElement.address];
-    assert(element != null, 'Can not get element from nativeElement: $nativeImageElement');
+    assert(element != 0, 'Can not get element from nativeElement: $nativeImageElement');
     return element;
   }
 
