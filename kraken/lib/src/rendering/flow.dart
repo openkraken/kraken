@@ -490,7 +490,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   void performLayout() {
     if (kProfileMode) {
       childLayoutDuration = 0;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_FLOW_LAYOUT_START, uniqueId: targetId);
     }
 
     beforeLayout();
@@ -538,7 +538,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (kProfileMode) {
       DateTime flowLayoutEndTime = DateTime.now();
       int amendEndTime = flowLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
-      PerformanceTiming.instance(elementManager.contextId)
+      PerformanceTiming.instance()
           .mark(PERF_FLOW_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }

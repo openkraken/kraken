@@ -47,14 +47,14 @@ class RenderIntrinsic extends RenderBoxModel
   void performLayout() {
     if (kProfileMode) {
       childLayoutDuration = 0;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: targetId);
     }
 
     CSSDisplay display = renderStyle.display;
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {
-        PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
+        PerformanceTiming.instance().mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
       }
       return;
     }
@@ -135,7 +135,7 @@ class RenderIntrinsic extends RenderBoxModel
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
     }
   }
 

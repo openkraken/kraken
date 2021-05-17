@@ -351,7 +351,7 @@ void flushUICommand() {
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(controller.view.contextId).mark(PERF_FLUSH_UI_COMMAND_START);
+      PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_START);
     }
 
     List<UICommand> commands = readNativeUICommandToDart(nativeCommandItems, commandLength, controller.view.contextId);
@@ -359,7 +359,7 @@ void flushUICommand() {
     SchedulerBinding.instance.scheduleFrame();
 
     if (kProfileMode) {
-      PerformanceTiming.instance(controller.view.contextId).mark(PERF_FLUSH_UI_COMMAND_END);
+      PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_END);
     }
 
     // For new ui commands, we needs to tell engine to update frames.

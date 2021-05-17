@@ -25,7 +25,7 @@ class HTMLElement extends Element {
       }
   ) {
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_ROOT_ELEMENT_PROPERTY_INIT);
+      PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_PROPERTY_INIT);
     }
     // Init renderer
     willAttachRenderer();

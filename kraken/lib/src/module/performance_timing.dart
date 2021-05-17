@@ -44,6 +44,10 @@ final String PERF_REMOVE_NODE_START = 'remove_node_start';
 final String PERF_REMOVE_NODE_END = 'remove_node_end';
 final String PERF_SET_STYLE_START = 'set_style_start';
 final String PERF_SET_STYLE_END = 'set_style_end';
+final String PERF_DOM_FORCE_LAYOUT_START = 'dom_force_layout_start';
+final String PERF_DOM_FORCE_LAYOUT_END = 'dom_force_layout_end';
+final String PERF_DOM_FLUSH_UI_COMMAND_START = 'dom_flush_ui_command_start';
+final String PERF_DOM_FLUSH_UI_COMMAND_END = 'dom_flush_ui_command_end';
 final String PERF_SET_PROPERTIES_START = 'set_properties_start';
 final String PERF_SET_PROPERTIES_END = 'set_properties_end';
 final String PERF_REMOVE_PROPERTIES_START = 'remove_properties_start';
@@ -70,13 +74,13 @@ class PerformanceEntry {
 final int PERFORMANCE_NONE_UNIQUE_ID = -1024;
 
 class PerformanceTiming {
-  static SplayTreeMap<int, PerformanceTiming> _instanceMap = SplayTreeMap();
+  static PerformanceTiming _instance;
 
-  static PerformanceTiming instance(int contextId) {
-    if (!_instanceMap.containsKey(contextId)) {
-      _instanceMap[contextId] = PerformanceTiming();
+  static PerformanceTiming instance() {
+    if (_instance == null) {
+      _instance = PerformanceTiming();
     }
-    return _instanceMap[contextId];
+    return _instance;
   }
 
   int entriesSize = 0;
