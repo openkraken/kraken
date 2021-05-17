@@ -319,7 +319,7 @@ class Element extends Node
     double childHeight = childRenderBoxModel?.size?.height;
     double childWidth = childRenderBoxModel?.size?.width;
     // Sticky element cannot exceed the boundary of its parent element container
-    RenderBox parentContainer = child.parent.renderBoxModel;
+    RenderBox parentContainer = child.parentElement.renderBoxModel;
     double minOffsetY = 0;
     double maxOffsetY = parentContainer.size.height - childHeight;
     double minOffsetX = 0;
@@ -451,7 +451,7 @@ class Element extends Node
     // Append new renderObject
     if (parent is ContainerRenderObjectMixin) {
       renderBoxModel = targetRenderBox;
-      this.parent.addChildRenderObject(this, after: previousSibling);
+      this.parentElement.addChildRenderObject(this, after: previousSibling);
     } else if (parent is RenderObjectWithChildMixin) {
       parent.child = targetRenderBox;
     }
@@ -497,7 +497,7 @@ class Element extends Node
       } else if (parentRenderBoxModel is RenderProxyBox) {
         parentRenderBoxModel.child = null;
       }
-      parent.addChildRenderObject(this, after: prev);
+      parentElement.addChildRenderObject(this, after: prev);
     }
 
     if (shouldConvertToRepaintBoundary) {
@@ -806,7 +806,7 @@ class Element extends Node
 
     /// Placeholder of flexbox needs to inherit size from its real display box,
     /// so it needs to layout after real box layout
-    child.parent.addChild(childPositionHolder);
+    child.parentElement.addChild(childPositionHolder);
   }
 
   /// Cache fixed renderObject to root element
@@ -1141,13 +1141,13 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
-    CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
+    CSSDisplay parentDisplayValue = parentElement.renderBoxModel.renderStyle.display;
     bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
 
     // Flex factor change will cause flex item self and its siblings relayout.
     if (isParentFlexDisplayType) {
       for (Element child in parent.children) {
-        if (parent.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
+        if (parentElement.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
           child.renderBoxModel.renderStyle.updateFlexItem();
           child.renderBoxModel.markNeedsLayout();
         }
@@ -1248,7 +1248,7 @@ class Element extends Node
 
   /// Percentage font size is set relative to parent's font size.
   void _updatePercentageFontSize() {
-    RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
+    RenderStyle parentRenderStyle = parentElement.renderBoxModel.renderStyle;
     double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
     double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
     renderBoxModel.renderStyle.fontSize = parsedFontSize;
@@ -1336,9 +1336,10 @@ class Element extends Node
         sizedBox.owner.flushLayout();
       }
 
-      Offset offset = getOffset(sizedBox);
-      Size size = sizedBox.size;
-      boundingClientRect = BoundingClientRect(
+      if (sizedBox.hasSize) {
+        Offset offset = getOffset(sizedBox);
+        Size size = sizedBox.size;
+        boundingClientRect = BoundingClientRect(
           offset.dx,
           offset.dy,
           size.width,
@@ -1347,6 +1348,7 @@ class Element extends Node
           offset.dx + size.width,
           offset.dy + size.height,
           offset.dx);
+      }
     }
 
     return boundingClientRect;
@@ -1686,7 +1688,7 @@ class Element extends Node
 
 
 Element _findContainingBlock(Element element) {
-  Element _el = element?.parent;
+  Element _el = element.parentElement;
   Element rootEl = element.elementManager.viewportElement;
 
   while (_el != null) {
