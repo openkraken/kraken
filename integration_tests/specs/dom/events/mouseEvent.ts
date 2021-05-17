@@ -167,8 +167,8 @@ describe('MouseEvent', () => {
     document.body.appendChild(div);
 
     div.addEventListener('click', function handler(e) {
-        expect(e.currentTarget).toBe(div);
-        done();
+      expect(e.currentTarget).toBe(div);
+      done();
     });
   
     span.click();
