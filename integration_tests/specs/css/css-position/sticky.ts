@@ -81,7 +81,7 @@ describe('Position sticky', () => {
     document.body.appendChild(sticky4);
     document.body.appendChild(block4);
 
-    await snapshot(0.1);
+    await snapshot();
   });
 
   it('should work with scroll container padding change in flow layout', (done) => {
