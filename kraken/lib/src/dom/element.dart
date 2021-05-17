@@ -433,6 +433,16 @@ class Element extends Node
         parentRenderLayoutBox.insert(child.renderBoxModel, after: after);
         break;
     }
+
+    RenderBoxModel childRenderBoxModel = child.renderBoxModel;
+    if (positionType == CSSPositionType.sticky && !childRenderBoxModel.hasSize) {
+      // Sticky offset calculation depends on the offset of its containing block cause it
+      // can not exceed the boundary of its containing block, so it needs to wait for its
+      // containing block layout complete before calculating sticky offset.
+      childRenderBoxModel.owner.flushLayout();
+      RenderBoxModel scrollContainer = CSSPositionedLayout.findScrollContainer(childRenderBoxModel);
+      CSSPositionedLayout.applyStickyChildOffset(scrollContainer, childRenderBoxModel);
+    }
   }
 
   // Attach renderObject of current node to parent

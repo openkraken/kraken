@@ -268,10 +268,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Line boxes of flow layout
   List<_RunMetrics> lineBoxMetrics = <_RunMetrics>[];
 
-  /// Cache sticky children to wait for next frame to calculate sticky offset
-  /// cause it depends on offset of its parent which is not know at layout stage.
-  List<RenderBoxModel> stickyChildren = [];
-
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
@@ -537,21 +533,11 @@ class RenderFlowLayout extends RenderLayoutBox {
           ensureBoxSizeLargerThanScrollableSize();
         }
       } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
-        stickyChildren.add(child);
+        RenderBoxModel scrollContainer = CSSPositionedLayout.findScrollContainer(child);
+        CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
       }
       child = childParentData.nextSibling;
     }
-
-    SchedulerBinding.instance.scheduleFrame();
-    // Delay offset calculation of sticky child to next frame for it depends on the offset of its parent
-    // which is not know at parent layout stage.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      for (RenderBoxModel stickyChild in stickyChildren) {
-        RenderBoxModel scrollContainer = CSSPositionedLayout.findScrollContainer(stickyChild);
-        CSSPositionedLayout.applyStickyChildOffset(scrollContainer, stickyChild);
-      }
-      stickyChildren.clear();
-    });
 
     _relayoutPositionedChildren();
 
