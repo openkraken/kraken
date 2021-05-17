@@ -14,7 +14,7 @@ jobs:
       continue-on-error: false
     - name: Upload Snapshots
       run: node scripts/upload_snapshots.js
-      continue-on-error: true
+      continue-on-error: false
     - name: Check on failures
       if: steps.test.outcome != 'success'
       run: exit 1
