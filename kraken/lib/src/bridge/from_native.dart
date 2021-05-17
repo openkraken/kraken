@@ -296,7 +296,13 @@ typedef Native_FlushUICommand = Void Function();
 typedef Dart_FlushUICommand = void Function();
 
 void _flushUICommand() {
+  if (kProfileMode) {
+    PerformanceTiming.instance().mark(PERF_DOM_FLUSH_UI_COMMAND_START);
+  }
   flushUICommand();
+  if (kProfileMode) {
+    PerformanceTiming.instance().mark(PERF_DOM_FLUSH_UI_COMMAND_END);
+  }
 }
 
 final Pointer<NativeFunction<Native_FlushUICommand>> _nativeFlushUICommand = Pointer.fromFunction(_flushUICommand);
@@ -331,7 +337,7 @@ typedef Dart_Performance_GetEntries = Pointer<NativePerformanceEntryList> Functi
 
 Pointer<NativePerformanceEntryList> _performanceGetEntries(int contextId) {
   if (kProfileMode) {
-    return PerformanceTiming.instance(contextId).toNative();
+    return PerformanceTiming.instance().toNative();
   }
   return nullptr;
 }

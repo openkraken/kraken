@@ -9,6 +9,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 import 'package:ffi/ffi.dart';
 
 import 'manifest.dart';
@@ -82,7 +83,7 @@ abstract class KrakenBundle {
     if (!isResolved) await resolve();
 
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_JS_BUNDLE_EVAL_START);
+      PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
     Pointer<Uint8> buffer = allocate<Uint8>(count: rawContentBytes.length);
@@ -90,7 +91,11 @@ abstract class KrakenBundle {
     evaluateScripts(contextId, buffer, url.toString(), lineOffset);
 
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_JS_BUNDLE_EVAL_END);
+      PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
+      Timer(Duration(seconds: 10), () {
+        print('flutter total layout cost: $kFlutterLayoutTimeCost');
+        print('flutter total paint cost: $kFlutterPaintTimeCost');
+      });
     }
   }
 }

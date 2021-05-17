@@ -564,14 +564,14 @@ class RenderFlexLayout extends RenderLayoutBox {
   void performLayout() {
     if (kProfileMode) {
       childLayoutDuration = 0;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_START, uniqueId: targetId);
     }
 
     CSSDisplay display = renderStyle.display;
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {
-        PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId);
+        PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId);
       }
       return;
     }
@@ -619,7 +619,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (kProfileMode) {
       DateTime flexLayoutEndTime = DateTime.now();
       int amendEndTime = flexLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
+      PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 

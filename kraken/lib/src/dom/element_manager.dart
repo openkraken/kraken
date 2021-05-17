@@ -32,7 +32,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: id);
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: id);
     }
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
     EventTarget eventTarget = controller.view.getEventTargetById(id);
@@ -40,7 +40,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     eventTarget.dispose();
 
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: id);
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: id);
     }
   }
 
@@ -72,8 +72,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   ElementManager({this.contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
-      PerformanceTiming.instance(contextId).mark(PERF_ROOT_ELEMENT_INIT_START);
+      PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
+      PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
     }
 
     Element documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId], this);
@@ -84,7 +84,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     _viewportRenderObject = viewport;
 
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_ROOT_ELEMENT_INIT_END);
+      PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_END);
     }
 
     _setupObserver();
