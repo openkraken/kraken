@@ -1062,10 +1062,10 @@ class RenderFlexLayout extends RenderLayoutBox {
         // cause Flutter will skip child layout if its constraints not changed between two layouts.
         if (child is RenderBoxModel && needsRelayout) {
           childConstraints = BoxConstraints(
-            minWidth: 0,
-            maxWidth: childConstraints.maxWidth,
-            minHeight: 0,
-            maxHeight: childConstraints.maxHeight,
+            minWidth: childConstraints.maxWidth != double.infinity ? childConstraints.maxWidth : 0,
+            maxWidth: double.infinity,
+            minHeight: childConstraints.maxHeight != double.infinity ? childConstraints.maxHeight : 0,
+            maxHeight: double.infinity,
           );
         }
         child.layout(childConstraints, parentUsesSize: true);
@@ -1570,7 +1570,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (isHorizontalFlexDirection) {
           CSSMargin marginTop = childRenderStyle.marginTop;
           CSSMargin marginBottom = childRenderStyle.marginBottom;
-          bool crossConstraintsTight = constraints.minHeight == constraints.maxHeight;
+          bool hasMaxConstraints = constraints.maxHeight != double.infinity;
 
           // Margin auto alignment takes priority over align-items stretch,
           // it will not stretch child in vertical direction
@@ -1583,7 +1583,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             double childCrossSize = flexLineHeight - marginVertical;
             double stretchedHeight;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
-            if (!isFlexWrap && crossConstraintsTight) {
+            if (!isFlexWrap && hasMaxConstraints) {
               double verticalBorderLength = renderStyle.borderEdge != null ? renderStyle.borderEdge.vertical : 0;
               double verticalPaddingLength = renderStyle.padding != null ? renderStyle.padding.vertical : 0;
               stretchedHeight = math.min(
@@ -1598,7 +1598,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else {
           CSSMargin marginLeft = childRenderStyle.marginLeft;
           CSSMargin marginRight = childRenderStyle.marginRight;
-          bool crossConstraintsTight = constraints.minWidth == constraints.maxWidth;
+          bool hasMaxConstraints = constraints.maxHeight != double.infinity;
           // Margin auto alignment takes priority over align-items stretch,
           // it will not stretch child in horizontal direction
           if (marginLeft.isAuto || marginRight.isAuto) {
@@ -1610,7 +1610,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             double childCrossSize = flexLineHeight - marginHorizontal;
             double stretchedWidth;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
-            if (!isFlexWrap && crossConstraintsTight) {
+            if (!isFlexWrap && hasMaxConstraints) {
               double horizontalBorderLength = renderStyle.borderEdge != null ? renderStyle.borderEdge.horizontal : 0;
               double horizontalPaddingLength = renderStyle.padding != null ? renderStyle.padding.horizontal : 0;
               stretchedWidth = math.min(

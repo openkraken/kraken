@@ -679,9 +679,9 @@ class RenderBoxModel extends RenderBox with
     if (isScrollingContentBox) {
       BoxConstraints parentConstraints = (parent as RenderBoxModel).constraints;
       BoxConstraints constraints = BoxConstraints(
-        minWidth: parentConstraints.minWidth,
+        minWidth: parentConstraints.maxWidth != double.infinity ? parentConstraints.maxWidth : 0,
         maxWidth: double.infinity,
-        minHeight: parentConstraints.minHeight,
+        minHeight: parentConstraints.maxHeight != double.infinity ? parentConstraints.maxHeight : 0,
         maxHeight: double.infinity,
       );
       return constraints;
@@ -719,7 +719,9 @@ class RenderBoxModel extends RenderBox with
 
     // Constraints
     double minConstraintWidth = logicalWidth ?? 0;
+//    double minConstraintWidth = 0;
     double maxConstraintWidth = logicalWidth ?? double.infinity;
+//    double minConstraintHeight = 0;
     double minConstraintHeight = logicalHeight ?? 0;
     double maxConstraintHeight = logicalHeight ?? double.infinity;
 

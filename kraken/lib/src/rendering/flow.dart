@@ -706,10 +706,10 @@ class RenderFlowLayout extends RenderLayoutBox {
         // cause Flutter will skip child layout if its constraints not changed between two layouts.
         if (child is RenderBoxModel && needsRelayout) {
           childConstraints = BoxConstraints(
-            minWidth: 0,
-            maxWidth: childConstraints.maxWidth,
-            minHeight: 0,
-            maxHeight: childConstraints.maxHeight,
+            minWidth: childConstraints.maxWidth != double.infinity ? childConstraints.maxWidth : 0,
+            maxWidth: double.infinity,
+            minHeight: childConstraints.maxHeight != double.infinity ? childConstraints.maxHeight : 0,
+            maxHeight: double.infinity,
           );
         }
         child.layout(childConstraints, parentUsesSize: true);
