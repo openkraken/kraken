@@ -303,7 +303,7 @@ class IntersectionObserverLayer extends ContainerLayer {
     for (final layer in _updated.values) {
       if (!layer.attached) {
         layer._fireCallback(IntersectionObserverEntry(size: Size.zero));
-        return;
+        continue;
       }
 
       Rect elementBounds = layer._computeElementBounds();
