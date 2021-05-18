@@ -6,6 +6,7 @@
 #include "js_context_internal.h"
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/kraken.h"
+#include "bindings/jsc/KOM/performance.h"
 #include "dart_methods.h"
 #include <memory>
 #include <mutex>
@@ -247,6 +248,19 @@ NativeString *stringRefToNativeString(JSStringRef string) {
   return tmp.clone();
 }
 
+#if ENABLE_PROFILE
+JSValueRef proxyFunctionCall(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef *arguments, JSValueRef *exception) {
+  auto *targetFunction = reinterpret_cast<JSObjectRef>(JSObjectGetPrivate(function));
+  auto nativePerformance = binding::jsc::NativePerformance::instance(0);
+  nativePerformance->mark(PERF_JS_NATIVE_FUNCTION_CALL_START);
+  JSValueRef value = JSObjectCallAsFunction(ctx, targetFunction, thisObject, argumentCount, arguments, exception);
+  nativePerformance->mark(PERF_JS_NATIVE_FUNCTION_CALL_END);
+  JSValueUnprotect(ctx, targetFunction);
+  return value;
+}
+#endif
+
 JSFunctionHolder::JSFunctionHolder(JSContext *context, JSObjectRef root, void *data, const std::string& name,
                                    JSObjectCallAsFunctionCallback callback) {
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
@@ -256,7 +270,14 @@ JSFunctionHolder::JSFunctionHolder(JSContext *context, JSObjectRef root, void *d
   } else {
     m_function = makeObjectFunctionWithPrivateData(context, data, name.c_str(), callback);
   }
+
+#if ENABLE_PROFILE
+  JSValueProtect(context->context(), m_function);
+  m_function = makeObjectFunctionWithPrivateData(context, m_function, name.c_str(), proxyFunctionCall);
   JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), m_function, kJSPropertyAttributeNone, nullptr);
+#else
+  JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), m_function, kJSPropertyAttributeNone, nullptr);
+#endif
 }
 
 JSObjectRef JSFunctionHolder::function() {

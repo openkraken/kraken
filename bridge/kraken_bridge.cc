@@ -8,6 +8,7 @@
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
 #include "foundation/inspector_task_queue.h"
+#include "bindings/jsc/KOM/performance.h"
 
 #ifdef KRAKEN_ENABLE_JSA
 #include "bridge_jsa.h"
@@ -106,6 +107,11 @@ void disposeContext(int32_t contextId) {
   delete context;
   contextPool[contextId] = nullptr;
   foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
+
+#if ENABLE_PROFILE
+  auto nativePerformance = kraken::binding::jsc::NativePerformance::instance(contextId);
+  nativePerformance->entries.clear();
+#endif
 }
 
 int32_t allocateNewContext() {

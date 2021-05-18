@@ -29,6 +29,8 @@ namespace kraken::binding::jsc {
 #define PERF_JS_BUNDLE_LOAD_COST "js_bundle_load_cost"
 #define PERF_JS_BUNDLE_EVAL_COST "js_bundle_eval_cost"
 #define PERF_JS_PARSE_TIME_COST "js_parse_time_cost"
+#define PERF_JS_HOST_CLASS_INIT_COST "js_host_class_init_cost"
+#define PERF_JS_NATIVE_FUNCTION_CALL_COST "js_native_function_call_cost"
 #define PERF_JS_HOST_CLASS_GET_PROPERTY_COST "js_host_class_get_property_cost"
 #define PERF_JS_HOST_CLASS_SET_PROPERTY_COST "js_host_class_set_property_cost"
 #define PERF_FLUSH_UI_COMMAND_COST "flush_ui_command_cost"
@@ -73,6 +75,10 @@ namespace kraken::binding::jsc {
 #define PERF_JS_HOST_CLASS_GET_PROPERTY_END "js_host_class_get_property_end"
 #define PERF_JS_HOST_CLASS_SET_PROPERTY_START "js_host_class_set_property_start"
 #define PERF_JS_HOST_CLASS_SET_PROPERTY_END "js_host_class_set_property_end"
+#define PERF_JS_HOST_CLASS_INIT_START "js_host_class_init_start"
+#define PERF_JS_HOST_CLASS_INIT_END "js_host_class_init_end"
+#define PERF_JS_NATIVE_FUNCTION_CALL_START "js_native_function_call_start"
+#define PERF_JS_NATIVE_FUNCTION_CALL_END "js_native_function_call_end"
 #define PERF_JS_NATIVE_METHOD_INIT_START "init_native_method_start"
 #define PERF_JS_NATIVE_METHOD_INIT_END "init_native_method_end"
 #define PERF_JS_POLYFILL_INIT_START "init_js_polyfill_start"
@@ -222,7 +228,13 @@ public:
 #endif
 
   JSPerformance(JSContext *context, NativePerformance *nativePerformance)
-    : HostObject(context, JSPerformanceName), nativePerformance(nativePerformance) {}
+    : HostObject(context, JSPerformanceName), nativePerformance(nativePerformance) {
+#if ENABLE_PROFILE
+    JSStringHolder nameStringHolder = JSStringHolder(context, "__kraken_navigation_summary__");
+    m_summary = JSObjectMakeFunctionWithCallback(context->context(), nameStringHolder.getString(), __kraken_navigation_summary__);
+    JSObjectSetProperty(context->context(), jsObject, nameStringHolder.getString(), m_summary, kJSPropertyAttributeNone, nullptr);
+#endif
+  }
   ~JSPerformance() override;
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
@@ -240,7 +252,7 @@ private:
   JSFunctionHolder m_measure{context, jsObject, this, "measure", measure};
 
 #if ENABLE_PROFILE
-  JSFunctionHolder m_summary{context, jsObject, nullptr, "__kraken_navigation_summary__", __kraken_navigation_summary__};
+  JSObjectRef m_summary{nullptr};
   void measureSummary();
 #endif
   void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark,
