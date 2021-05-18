@@ -718,11 +718,9 @@ class RenderBoxModel extends RenderBox with
     logicalContentHeight + verticalPaddingLength + verticalBorderLength : null;
 
     // Constraints
-    double minConstraintWidth = logicalWidth ?? 0;
-//    double minConstraintWidth = 0;
+    double minConstraintWidth = 0;
     double maxConstraintWidth = logicalWidth ?? double.infinity;
-//    double minConstraintHeight = 0;
-    double minConstraintHeight = logicalHeight ?? 0;
+    double minConstraintHeight = 0;
     double maxConstraintHeight = logicalHeight ?? double.infinity;
 
     if (parent is RenderFlexLayout) {

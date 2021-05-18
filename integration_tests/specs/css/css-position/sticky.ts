@@ -223,4 +223,65 @@ describe('Position sticky', () => {
     });
   });
 
+  it('children size in scroll container changes', async (done) => {
+    let prepadding;
+    let filter;
+    let sticky;
+    let container;
+    let coantents;
+    let scroller;
+    scroller = createElementWithStyle(
+      'div',
+      {
+        'box-sizing': 'border-box',
+        position: 'relative',
+        width: '100px',
+        height: '200px',
+        overflow: 'scroll',
+        background: 'yellow',
+        border: '1px solid #fff',
+      },
+      [
+        (contents = createElementWithStyle(
+          'div',
+          {
+            'box-sizing': 'border-box',
+            height: '200px',
+            width: '100px',
+          },
+          [
+            (prepadding = createElementWithStyle('div', {
+              'box-sizing': 'border-box',
+              height: '100px',
+              width: '100px',
+              'background-color': 'red',
+            })),
+            createElementWithStyle('div', {
+              height: '100px',
+              width: '100px',
+              'background-color': 'blue',
+            }, [
+              (sticky = createElementWithStyle('div', {
+                position: 'sticky',
+                top: '50px',
+                height: '50px',
+                width: '100px',
+                'background-color': 'green',
+              })),
+            ])
+
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(scroller);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      prepadding.style.height = '10px';
+      await snapshot();
+      done();
+    });
+  });
 });
