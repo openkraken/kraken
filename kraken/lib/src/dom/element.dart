@@ -439,21 +439,21 @@ class Element extends Node
   }
 
   /// Toggle renderBoxModel between repaint boundary and non repaint boundary
-  void toggleRepaintSelf({bool repaintSelf}) {
-    RenderObject parent = renderBoxModel.parent;
+  void toggleRepaintSelf({ bool repaintSelf }) {
+    RenderObject parentRenderObject = renderBoxModel.parent;
     RenderObject previousSibling;
     // Remove old renderObject
-    if (parent is ContainerRenderObjectMixin) {
+    if (parentRenderObject is ContainerRenderObjectMixin) {
       previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
-      parent.remove(renderBoxModel);
+      parentRenderObject.remove(renderBoxModel);
     }
     RenderBoxModel targetRenderBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: repaintSelf);
     // Append new renderObject
-    if (parent is ContainerRenderObjectMixin) {
+    if (parentRenderObject is ContainerRenderObjectMixin) {
       renderBoxModel = targetRenderBox;
-      this.parentElement.addChildRenderObject(this, after: previousSibling);
-    } else if (parent is RenderObjectWithChildMixin) {
-      parent.child = targetRenderBox;
+      parentElement.addChildRenderObject(this, after: previousSibling);
+    } else if (parentRenderObject is RenderObjectWithChildMixin) {
+      parentRenderObject.child = targetRenderBox;
     }
 
     renderBoxModel = targetRenderBox;
