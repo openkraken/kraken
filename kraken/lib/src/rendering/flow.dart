@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'package:kraken/css.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';

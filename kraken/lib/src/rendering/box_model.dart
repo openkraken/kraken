@@ -1187,7 +1187,7 @@ class RenderBoxModel extends RenderBox with
     RenderObject rootRenderObject = child.elementManager.getRootRenderObject();
     Offset toScrollContainerOffset =
       child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
-        this.localToGlobal(Offset.zero, ancestor: rootRenderObject);
+        localToGlobal(Offset.zero, ancestor: rootRenderObject);
     // Cache original offset to scroll container to act as base offset
     // to compute dynamic sticky offset later on scroll
     child.baseScrollContainerOffsetY = toScrollContainerOffset.dy + scrollTop;
