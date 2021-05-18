@@ -621,7 +621,9 @@ class RenderFlexLayout extends RenderLayoutBox {
       child = childParentData.nextSibling;
     }
 
-    if (isScrollingContentBox) {
+    bool isScrollContainer = renderStyle.overflowX != CSSOverflowType.visible ||
+      renderStyle.overflowY != CSSOverflowType.visible;
+    if (isScrollContainer) {
       // Find all the sticky children when scroll container is layouted
       stickyChildren = findStickyChildren();
       // Calculate the offset of its sticky children
