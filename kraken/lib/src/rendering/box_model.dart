@@ -236,7 +236,7 @@ class RenderLayoutBox extends RenderBoxModel
 
   /// Find all the children whose position is sticky to this element
   List<RenderBoxModel> findStickyChildren() {
-    List<RenderBoxModel> result = [];
+    List<RenderBoxModel> stickyChildren = [];
 
     RenderBox child = firstChild;
 
@@ -258,19 +258,19 @@ class RenderLayoutBox extends RenderBoxModel
         continue;
       }
       if (CSSPositionedLayout.isSticky(childRenderBoxModel)) {
-        result.add(child);
+        stickyChildren.add(child);
       }
 
       if (child is RenderLayoutBox) {
         List<RenderBoxModel> mergedChildren = child.findStickyChildren();
         for (RenderBoxModel child in mergedChildren) {
-          result.add(child);
+          stickyChildren.add(child);
         }
       }
       child = childParentData.nextSibling;
     }
 
-    return result;
+    return stickyChildren;
   }
 
   @override
@@ -1185,17 +1185,13 @@ class RenderBoxModel extends RenderBox with
   /// Set base offset to scroll container after sticky child is layouted
   void setStickyChildBaseOffset(RenderBoxModel child) {
     RenderObject rootRenderObject = child.elementManager.getRootRenderObject();
-    Offset horizontalScrollContainerOffset =
+    Offset toScrollContainerOffset =
       child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
         this.localToGlobal(Offset.zero, ancestor: rootRenderObject);
-    Offset verticalScrollContainerOffset =
-      child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
-        this.localToGlobal(Offset.zero, ancestor: rootRenderObject);
-
     // Cache original offset to scroll container to act as base offset
     // to compute dynamic sticky offset later on scroll
-    child.baseScrollContainerOffsetY = verticalScrollContainerOffset.dy + scrollTop;
-    child.baseScrollContainerOffsetX = horizontalScrollContainerOffset.dx + scrollLeft;
+    child.baseScrollContainerOffsetY = toScrollContainerOffset.dy + scrollTop;
+    child.baseScrollContainerOffsetX = toScrollContainerOffset.dx + scrollLeft;
     RenderLayoutParentData boxParentData = child?.parentData;
 
     // Cache original offset to parent to act as base offset

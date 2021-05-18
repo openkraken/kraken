@@ -194,17 +194,10 @@ class CSSPositionedLayout {
       }
     }
 
-    if (isHorizontalFixed) {
-      boxParentData.offset = Offset(
-        offsetX,
-        boxParentData.offset.dy,
-      );
-    } else {
-      boxParentData.offset = Offset(
-        child.baseOffsetX,
-        boxParentData.offset.dy,
-      );
-    }
+    boxParentData.offset = Offset(
+      isHorizontalFixed ? offsetX : child.baseOffsetX,
+      boxParentData.offset.dy,
+    );
     return isHorizontalFixed;
   }
 
@@ -245,17 +238,10 @@ class CSSPositionedLayout {
       }
     }
 
-    if (isVerticalFixed) {
-      boxParentData.offset = Offset(
-        boxParentData.offset.dx,
-        offsetY,
-      );
-    } else {
-      boxParentData.offset = Offset(
-        boxParentData.offset.dx,
-        child.baseOffsetY,
-      );
-    }
+    boxParentData.offset = Offset(
+      boxParentData.offset.dx,
+      isVerticalFixed ? offsetY : child.baseOffsetY,
+    );
     return isVerticalFixed;
   }
 

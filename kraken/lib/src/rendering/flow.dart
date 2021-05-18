@@ -545,12 +545,14 @@ class RenderFlowLayout extends RenderLayoutBox {
       child = childParentData.nextSibling;
     }
 
-    // Find all the sticky children when scroll container is layouted
-    stickyChildren = findStickyChildren();
-    // Calculate the offset of its sticky children
-    for (RenderBoxModel stickyChild in stickyChildren) {
-      setStickyChildBaseOffset(stickyChild);
-      CSSPositionedLayout.applyStickyChildOffset(this, stickyChild);
+    if (isScrollingContentBox) {
+      // Find all the sticky children when scroll container is layouted
+      stickyChildren = findStickyChildren();
+      // Calculate the offset of its sticky children
+      for (RenderBoxModel stickyChild in stickyChildren) {
+        setStickyChildBaseOffset(stickyChild);
+        CSSPositionedLayout.applyStickyChildOffset(this, stickyChild);
+      }
     }
 
     _relayoutPositionedChildren();
