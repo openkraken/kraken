@@ -258,9 +258,9 @@ class Element extends Node
 
   // Calculate sticky status according to scroll offset and scroll direction
   void applyStickyChildrenOffset() {
-    for (Element el in stickyChildren) {
-      RenderBoxModel scrollContainer = renderBoxModel;
-      CSSPositionedLayout.applyStickyChildOffset(scrollContainer, el.renderBoxModel);
+    RenderLayoutBox scrollContainer = renderBoxModel;
+    for (RenderBoxModel stickyChild in scrollContainer.stickyChildren) {
+      CSSPositionedLayout.applyStickyChildOffset(scrollContainer, stickyChild);
     }
   }
 

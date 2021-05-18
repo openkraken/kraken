@@ -82,9 +82,6 @@ mixin CSSOverflowMixin on ElementBase {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
-  /// All the children whose position is sticky to this element
-  List<Element> stickyChildren = [];
-
   // House content which can be scrolled.
   RenderLayoutBox scrollingContentLayoutBox;
 
@@ -118,9 +115,6 @@ mixin CSSOverflowMixin on ElementBase {
         renderBoxModel.clipX = true;
         renderBoxModel.enableScrollX = true;
         renderBoxModel.scrollOffsetX = _scrollableX.position;
-
-        _scrollableX.position.isScrollingNotifier.removeListener(_onScrollXStart);
-        _scrollableX.position.isScrollingNotifier.addListener(_onScrollXStart);
         break;
       case CSSOverflowType.visible:
       default:
@@ -150,9 +144,6 @@ mixin CSSOverflowMixin on ElementBase {
         renderBoxModel.clipY = true;
         renderBoxModel.enableScrollY = true;
         renderBoxModel.scrollOffsetY = _scrollableY.position;
-
-        _scrollableY.position.isScrollingNotifier.removeListener(_onScrollYStart);
-        _scrollableY.position.isScrollingNotifier.addListener(_onScrollYStart);
         break;
       case CSSOverflowType.visible:
       default:
@@ -292,51 +283,6 @@ mixin CSSOverflowMixin on ElementBase {
     }
   }
 
-  /// Cache sticky children when axis X starts scroll
-  void _onScrollXStart() {
-    if(_scrollableX.position.isScrollingNotifier.value) {
-      stickyChildren = _findStickyChildren(this);
-    }
-  }
-
-  /// Cache sticky children when axis Y starts scroll
-  void _onScrollYStart() {
-    if(_scrollableY.position.isScrollingNotifier.value) {
-      stickyChildren = _findStickyChildren(this);
-    }
-  }
-
-  /// Find all the children whose position is sticky to this element
-  List<Element> _findStickyChildren(Element element) {
-    assert(element != null);
-    List<Element> result = [];
-
-    for (Element child in element.children) {
-      RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-      // Children of sliver element may be destoried on scroll
-      if (childRenderBoxModel == null) {
-        break;
-      }
-      RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
-      CSSOverflowType overflowX = childRenderStyle.overflowX;
-      CSSOverflowType overflowY = childRenderStyle.overflowY;
-      if (CSSPositionedLayout.isSticky(childRenderBoxModel)) {
-        result.add(child);
-      }
-
-      // No need to loop scrollable container children
-      if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
-        break;
-      }
-
-      List<Element> mergedChildren = _findStickyChildren(child);
-      for (Element child in mergedChildren) {
-        result.add(child);
-      }
-    }
-    return result;
-  }
-
   void _pointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       if (_scrollableX != null) {
@@ -379,8 +325,6 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void scrollBy({ num dx = 0.0, num dy = 0.0, bool withAnimation }) {
-    stickyChildren = _findStickyChildren(this);
-
     if (dx != 0) {
       _scroll(scrollLeft + dx, Axis.horizontal, withAnimation: withAnimation);
     }
@@ -390,8 +334,6 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void scrollTo({ num x, num y, bool withAnimation }) {
-    stickyChildren = _findStickyChildren(this);
-
     if (x != null) {
       _scroll(x, Axis.horizontal, withAnimation: withAnimation);
     }

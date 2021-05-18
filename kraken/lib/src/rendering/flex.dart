@@ -610,27 +610,25 @@ class RenderFlexLayout extends RenderLayoutBox {
           ensureBoxSizeLargerThanScrollableSize();
         }
       } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
-        RenderBoxModel scrollContainer = CSSPositionedLayout.findScrollContainer(child);
+        RenderBoxModel scrollContainer = child.findScrollContainer();
         // Sticky offset depends on the layout of scroll container, delay the calculation of
-        // sticky offset to the layout stage of  scroll container if its not layouted yet.
+        // sticky offset to the layout stage of  scroll container if its not layouted yet
+        // due to the layout order of Flutter renderObject tree is from down to up.
         if (scrollContainer.hasSize) {
-          CSSPositionedLayout.setStickyChildBaseOffset(scrollContainer, child);
+          scrollContainer.setStickyChildBaseOffset(child);
           CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
-        } else {
-          // The scroll container is not layouted yet when child is first layouted
-          // due to the layout order of Flutter renderObject tree is from down to up.
-          scrollContainer.stickyChildren.add(child);
         }
       }
       child = childParentData.nextSibling;
     }
 
+    // Find all the sticky children when scroll container is layouted
+    stickyChildren = findStickyChildren();
     // Calculate the offset of its sticky children
     for (RenderBoxModel stickyChild in stickyChildren) {
-      CSSPositionedLayout.setStickyChildBaseOffset(this, stickyChild);
+      setStickyChildBaseOffset(stickyChild);
       CSSPositionedLayout.applyStickyChildOffset(this, stickyChild);
     }
-    stickyChildren.clear();
 
     _relayoutPositionedChildren();
 

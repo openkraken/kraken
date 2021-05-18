@@ -231,6 +231,48 @@ class RenderLayoutBox extends RenderBoxModel
     return children;
   }
 
+  // Cache sticky children to calculate the base offset of sticky children
+  List<RenderBoxModel> stickyChildren = [];
+
+  /// Find all the children whose position is sticky to this element
+  List<RenderBoxModel> findStickyChildren() {
+    List<RenderBoxModel> result = [];
+
+    RenderBox child = firstChild;
+
+    // Layout positioned element
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+      if (child is! RenderBoxModel) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+
+      RenderBoxModel childRenderBoxModel = child;
+      RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
+      CSSOverflowType overflowX = childRenderStyle.overflowX;
+      CSSOverflowType overflowY = childRenderStyle.overflowY;
+      // No need to loop scrollable container children
+      if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+      if (CSSPositionedLayout.isSticky(childRenderBoxModel)) {
+        result.add(child);
+      }
+
+      if (child is RenderLayoutBox) {
+        List<RenderBoxModel> mergedChildren = child.findStickyChildren();
+        for (RenderBoxModel child in mergedChildren) {
+          result.add(child);
+        }
+      }
+      child = childParentData.nextSibling;
+    }
+
+    return result;
+  }
+
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     return computeDistanceToBaseline();
@@ -444,9 +486,6 @@ class RenderBoxModel extends RenderBox with
 
   // When RenderBoxModel is scrolling box, contentConstraints are always equal to BoxConstraints();
   bool isScrollingContentBox = false;
-
-  // Cache sticky children to calculate the base offset of sticky children
-  List<RenderBoxModel> stickyChildren = [];
 
   BoxSizeType get widthSizeType {
     bool widthDefined = renderStyle.width != null;
@@ -1125,6 +1164,44 @@ class RenderBoxModel extends RenderBox with
     }
 
     return _contentConstraints;
+  }
+
+  /// Find scroll container
+  RenderBoxModel findScrollContainer() {
+    RenderLayoutBox scrollContainer;
+    RenderLayoutBox parent = this.parent;
+
+    while (parent != null) {
+      if (parent.isScrollingContentBox) {
+        // Scroll container should has definite constraints
+        scrollContainer = parent.parent;
+        break;
+      }
+      parent = parent.parent;
+    }
+    return scrollContainer;
+  }
+
+  /// Set base offset to scroll container after sticky child is layouted
+  void setStickyChildBaseOffset(RenderBoxModel child) {
+    RenderObject rootRenderObject = child.elementManager.getRootRenderObject();
+    Offset horizontalScrollContainerOffset =
+      child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
+        this.localToGlobal(Offset.zero, ancestor: rootRenderObject);
+    Offset verticalScrollContainerOffset =
+      child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
+        this.localToGlobal(Offset.zero, ancestor: rootRenderObject);
+
+    // Cache original offset to scroll container to act as base offset
+    // to compute dynamic sticky offset later on scroll
+    child.baseScrollContainerOffsetY = verticalScrollContainerOffset.dy + scrollTop;
+    child.baseScrollContainerOffsetX = horizontalScrollContainerOffset.dx + scrollLeft;
+    RenderLayoutParentData boxParentData = child?.parentData;
+
+    // Cache original offset to parent to act as base offset
+    // to compute dynamic sticky offset later on scroll
+    child.baseOffsetX = boxParentData.offset.dx;
+    child.baseOffsetY = boxParentData.offset.dy;
   }
 
   @override

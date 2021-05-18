@@ -164,16 +164,14 @@ class CSSPositionedLayout {
     RenderStyle childRenderStyle = child.renderStyle;
     RenderLayoutParentData boxParentData = child?.parentData;
     double offsetX = child.baseOffsetX;
-    double childWidth = child?.boxSize?.width;
+    double childWidth = child.boxSize.width;
 
     // Sticky element cannot exceed the boundary of its parent element container
     RenderBoxModel parentContainer = child.parent;
     double minOffsetX = 0;
     double maxOffsetX = parentContainer.boxSize.width - childWidth;
     double offsetLeft = child.baseScrollContainerOffsetX - scrollContainer.scrollLeft;
-    // Retrieve scroll container width from constraints cause scroll container always has tight
-    // constaints and scroll container may not have size in layout stage so can not retrieve from size.
-    double scrollContainerWidth = scrollContainer.constraints.maxWidth;
+    double scrollContainerWidth = scrollContainer.boxSize.width;
     double offsetRight = scrollContainerWidth - childWidth - offsetLeft;
 
     if (childRenderStyle.left != null) {
@@ -216,7 +214,7 @@ class CSSPositionedLayout {
     RenderStyle childRenderStyle = child.renderStyle;
     RenderLayoutParentData boxParentData = child?.parentData;
     double offsetY = child.baseOffsetY;
-    double childHeight = child?.boxSize?.height;
+    double childHeight = child.boxSize.height;
 
     // Sticky element cannot exceed the boundary of its parent element container
     RenderBoxModel parentContainer = child.parent;
@@ -224,9 +222,7 @@ class CSSPositionedLayout {
     double maxOffsetY = parentContainer.boxSize.height - childHeight;
 
     double offsetTop = child.baseScrollContainerOffsetY - scrollContainer.scrollTop;
-    // Retrieve scroll container height from constraints cause scroll container always has tight
-    // constaints and scroll container may not have size in layout stage so can not retrieve from size.
-    double scrollContainerHeight = scrollContainer.constraints.maxHeight;
+    double scrollContainerHeight = scrollContainer.boxSize.height;
     double offsetBottom = scrollContainerHeight - childHeight - offsetTop;
 
     if (childRenderStyle.top != null) {
@@ -261,45 +257,6 @@ class CSSPositionedLayout {
       );
     }
     return isVerticalFixed;
-  }
-
-  /// Find scroll container of sticky renderBoxModel
-  static RenderBoxModel findScrollContainer(RenderBoxModel renderBoxModel) {
-    RenderBoxModel scrollContainer;
-    RenderBoxModel parent = renderBoxModel.parent;
-
-    while (parent != null) {
-      if (parent.isScrollingContentBox) {
-        // Scroll container should has definite constraints
-        scrollContainer = parent.parent;
-        break;
-      }
-      parent = parent.parent;
-    }
-
-    return scrollContainer;
-  }
-
-  /// Set base offset to scroll container after sticky child is layouted
-  static void setStickyChildBaseOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
-    RenderObject rootRenderObject = child.elementManager.getRootRenderObject();
-    Offset horizontalScrollContainerOffset =
-      child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
-        scrollContainer.localToGlobal(Offset.zero, ancestor: rootRenderObject);
-    Offset verticalScrollContainerOffset =
-      child.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
-        scrollContainer.localToGlobal(Offset.zero, ancestor: rootRenderObject);
-
-    // Cache original offset to scroll container to act as base offset
-    // to compute dynamic sticky offset later on scroll
-    child.baseScrollContainerOffsetY = verticalScrollContainerOffset.dy + scrollContainer.scrollTop;
-    child.baseScrollContainerOffsetX = horizontalScrollContainerOffset.dx + scrollContainer.scrollLeft;
-    RenderLayoutParentData boxParentData = child?.parentData;
-
-    // Cache original offset to parent to act as base offset
-    // to compute dynamic sticky offset later on scroll
-    child.baseOffsetX = boxParentData.offset.dx;
-    child.baseOffsetY = boxParentData.offset.dy;
   }
 
   /// Set sticky child offset according to scroll offset and direction,
