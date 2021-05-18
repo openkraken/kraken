@@ -701,6 +701,16 @@ class RenderFlowLayout extends RenderLayoutBox {
           childLayoutStart = DateTime.now();
         }
 
+        // Inflate constraints of percentage renderBoxModel to force it layout after percentage resolved
+        // cause Flutter will skip child layout if its constraints not changed between two layouts.
+        if (child is RenderBoxModel && needsRelayout) {
+          childConstraints = BoxConstraints(
+            minWidth: 0,
+            maxWidth: childConstraints.maxWidth,
+            minHeight: 0,
+            maxHeight: childConstraints.maxHeight,
+          );
+        }
         child.layout(childConstraints, parentUsesSize: true);
 
         if (kProfileMode) {

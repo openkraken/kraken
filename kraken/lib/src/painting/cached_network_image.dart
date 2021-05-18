@@ -82,7 +82,6 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     try {
       final Uri resolved = Uri.base.resolve(key.url);
       final HttpClientRequest request = await _httpClient.getUrl(resolved);
-      ;
       headers?.forEach((String name, String value) {
         request.headers.add(name, value);
       });

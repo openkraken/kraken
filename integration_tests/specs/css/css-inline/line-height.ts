@@ -68,9 +68,9 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
-            createText(`line height 2`),
-          ])
+          }, [
+          createText(`line height 2`),
+        ])
       ]
     );
     BODY.appendChild(div);
@@ -103,9 +103,9 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
-            createText(`line height 2`),
-          ])
+          }, [
+          createText(`line height 2`),
+        ])
       ]
     );
     BODY.appendChild(div);
@@ -140,9 +140,9 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
-            createText(`line height 2`),
-          ]),
+          }, [
+          createText(`line height 2`),
+        ]),
         createElement(
           'div',
           {
@@ -154,9 +154,9 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
-            createText(`line height 2`),
-          ])
+          }, [
+          createText(`line height 2`),
+        ])
       ]
     );
     BODY.appendChild(div);
@@ -189,9 +189,9 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
-            createText(`line height 2`),
-          ]),
+          }, [
+          createText(`line height 2`),
+        ]),
         createElement(
           'div',
           {
@@ -203,9 +203,9 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
-            createText(`line height 2`),
-          ])
+          }, [
+          createText(`line height 2`),
+        ])
       ]
     );
     BODY.appendChild(div);
@@ -262,6 +262,31 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
     await snapshot();
+  });
+
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+
+    div2 = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        backgroundColor: 'green',
+        fontSize: '16px',
+      }
+    }, [
+      createText('percentage line height works. ')
+    ]);
+
+    BODY.appendChild(div2);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      div2.style.lineHeight = '200%';
+      await snapshot();
+      done();
+    });
   });
 
 });
