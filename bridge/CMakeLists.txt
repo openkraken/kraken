@@ -119,6 +119,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/elements/input_element.h
     bindings/jsc/DOM/elements/object_element.cc
     bindings/jsc/DOM/elements/object_element.h
+    bindings/jsc/DOM/elements/svg_element.cc
+    bindings/jsc/DOM/elements/svg_element.h
     bindings/jsc/DOM/elements/script_element.cc
     bindings/jsc/DOM/elements/script_element.h
     bindings/jsc/KOM/performance.cc
