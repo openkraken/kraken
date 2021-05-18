@@ -305,7 +305,6 @@ public:
   JSObjectRef _call{nullptr};
 
 private:
-  void initPrototype() const;
 
   // The class template of javascript constructor function.
   JSClassRef jsClass{nullptr};

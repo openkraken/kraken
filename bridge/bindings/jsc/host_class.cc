@@ -124,8 +124,8 @@ JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSS
 JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                                JSValueRef *exception) {
   auto hostClassInstance = reinterpret_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
-  auto nativePerformance = binding::jsc::NativePerformance::instance(hostClassInstance->context->uniqueId);
 #if ENABLE_PROFILE
+  auto nativePerformance = binding::jsc::NativePerformance::instance(hostClassInstance->context->uniqueId);
   nativePerformance->mark(PERF_JS_HOST_CLASS_GET_PROPERTY_START);
 #endif
   std::string &&name = JSStringToStdString(propertyName);
@@ -147,8 +147,8 @@ JSValueRef HostClass::proxyPrototypeGetProperty(JSContextRef ctx, JSObjectRef ob
 bool HostClass::proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                          JSValueRef value, JSValueRef *exception) {
   auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
-  auto nativePerformance = binding::jsc::NativePerformance::instance(hostClassInstance->context->uniqueId);
 #if ENABLE_PROFILE
+  auto nativePerformance = binding::jsc::NativePerformance::instance(hostClassInstance->context->uniqueId);
   nativePerformance->mark(PERF_JS_HOST_CLASS_SET_PROPERTY_START);
 #endif
   std::string &&name = JSStringToStdString(propertyName);
@@ -188,17 +188,6 @@ HostClass::~HostClass() {
 
 JSValueRef HostClass::getProperty(std::string &name, JSValueRef *exception) {
   return nullptr;
-}
-
-void HostClass::initPrototype() const {
-  JSClassDefinition prototypeDefinition = kJSClassDefinitionEmpty;
-  prototypeDefinition.getProperty = proxyPrototypeGetProperty;
-  JSClassRef prototypeClass = JSClassCreate(&prototypeDefinition);
-  JSObjectRef prototype = JSObjectMake(ctx, prototypeClass, (void*)this);
-  JSStringRef constructorString = JSStringCreateWithUTF8CString("constructor");
-  JSObjectSetProperty(ctx, prototype, constructorString, classObject, kJSClassAttributeNone, nullptr);
-  JSStringRelease(constructorString);
-  JSObjectSetPrototype(ctx, classObject, prototype);
 }
 
 JSValueRef HostClass::prototypeGetProperty(std::string &name, JSValueRef *exception) {
