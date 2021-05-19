@@ -18,7 +18,8 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
-import 'package:kraken/src/module/module_manager.dart';
+import 'package:kraken/foundation.dart';
+
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -415,7 +416,8 @@ class KrakenController {
   // Error handler when got javascript error when evaluate javascript codes.
   JSErrorHandler onJSError;
 
-  DevToolsService devToolsService;
+  final DevToolsService devToolsService;
+  final HttpClientInterceptor httpClientInterceptor;
 
   KrakenMethodChannel _methodChannel;
 
@@ -453,6 +455,7 @@ class KrakenController {
     this.onLoadError,
     this.onJSError,
     this.debugEnableInspector,
+    this.httpClientInterceptor,
     this.devToolsService
   })  : _name = name,
         _bundleURL = bundleURL,
@@ -485,6 +488,10 @@ class KrakenController {
     _controllerMap[_view.contextId] = this;
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
+
+    if (httpClientInterceptor != null) {
+      setupHttpOverrides(httpClientInterceptor, controller: this);
+    }
 
     if (devToolsService != null) {
       devToolsService.init(this);
@@ -627,12 +634,12 @@ class KrakenController {
 
     if (onLoadError != null) {
       try {
-        _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent);
+        _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
       } catch (e, stack) {
         onLoadError(FlutterError(e.toString()), stack);
       }
     } else {
-      _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent);
+      _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
     }
 
     if (kProfileMode) {

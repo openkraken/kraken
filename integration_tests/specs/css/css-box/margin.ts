@@ -152,4 +152,38 @@ describe('Box margin', () => {
     await snapshot();
   });
 
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '100px',
+          height: '200px',
+          padding: '20px',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            height: '50px',
+            width: '50px',
+            backgroundColor: 'yellow',
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div2.style.marginTop = '100%';
+       await snapshot();
+       done();
+    });
+  });
 });

@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:ffi';
 
 import 'package:kraken/bridge.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -55,7 +56,7 @@ abstract class KrakenBundle {
 
   Future<void> resolve();
 
-  static Future<KrakenBundle> getBundle(String path, {String contentOverride}) async {
+  static Future<KrakenBundle> getBundle(String path, { String contentOverride, int contextId }) async {
     KrakenBundle bundle;
     Uri uri = path != null ? Uri.parse(path) : null;
     if (contentOverride != null && contentOverride.isNotEmpty) {
@@ -65,7 +66,7 @@ abstract class KrakenBundle {
       if (path.startsWith('//')) path = 'https' + path;
 
       if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
-        bundle = NetworkBundle(uri);
+        bundle = NetworkBundle(uri, contextId: contextId);
       } else {
         bundle = AssetsBundle(uri);
       }
@@ -112,13 +113,14 @@ class RawBundle extends KrakenBundle {
 class NetworkBundle extends KrakenBundle {
   // Unique identifier.
   String bundleId;
-  NetworkBundle(Uri url)
+  int contextId;
+  NetworkBundle(Uri url, { this.contextId })
       : assert(url != null),
         super(url);
 
   @override
   Future<void> resolve() async {
-    NetworkAssetBundle bundle = NetworkAssetBundle(url);
+    NetworkAssetBundle bundle = NetworkAssetBundle(url, contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData bytes = await bundle.load(absoluteURL);
@@ -134,11 +136,12 @@ class NetworkBundle extends KrakenBundle {
 class NetworkAssetBundle extends AssetBundle {
   /// Creates an network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl)
+  NetworkAssetBundle(Uri baseUrl, { this.contextId })
       : _baseUrl = baseUrl,
         httpClient = HttpClient();
 
   final Uri _baseUrl;
+  final int contextId;
   final HttpClient httpClient;
 
   Uri _urlFromKey(String key) => _baseUrl.resolve(key);
@@ -146,6 +149,7 @@ class NetworkAssetBundle extends AssetBundle {
   @override
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await httpClient.getUrl(_urlFromKey(key));
+    KrakenHttpOverrides.markHttpRequest(request, contextId.toString());
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok)
       throw FlutterError.fromParts(<DiagnosticsNode>[

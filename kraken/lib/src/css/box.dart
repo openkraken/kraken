@@ -235,7 +235,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
     for (CSSFunctionalNotation method in methods) {
       if (method.name == 'url') {
-        decorationImage = CSSBackground.getDecorationImage(style, method);
+        decorationImage = CSSBackground.getDecorationImage(style, method, contextId: renderBoxModel.elementManager.contextId);
       } else {
         gradient = CSSBackground.getBackgroundGradient(style, renderBoxModel, method);
       }

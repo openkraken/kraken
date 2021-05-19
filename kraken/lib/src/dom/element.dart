@@ -319,7 +319,7 @@ class Element extends Node
     double childHeight = childRenderBoxModel?.size?.height;
     double childWidth = childRenderBoxModel?.size?.width;
     // Sticky element cannot exceed the boundary of its parent element container
-    RenderBox parentContainer = child.parent.renderBoxModel;
+    RenderBox parentContainer = child.parentElement.renderBoxModel;
     double minOffsetY = 0;
     double maxOffsetY = parentContainer.size.height - childHeight;
     double minOffsetX = 0;
@@ -439,21 +439,21 @@ class Element extends Node
   }
 
   /// Toggle renderBoxModel between repaint boundary and non repaint boundary
-  void toggleRepaintSelf({bool repaintSelf}) {
-    RenderObject parent = renderBoxModel.parent;
+  void toggleRepaintSelf({ bool repaintSelf }) {
+    RenderObject parentRenderObject = renderBoxModel.parent;
     RenderObject previousSibling;
     // Remove old renderObject
-    if (parent is ContainerRenderObjectMixin) {
+    if (parentRenderObject is ContainerRenderObjectMixin) {
       previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
-      parent.remove(renderBoxModel);
+      parentRenderObject.remove(renderBoxModel);
     }
     RenderBoxModel targetRenderBox = createRenderBoxModel(this, prevRenderBoxModel: renderBoxModel, repaintSelf: repaintSelf);
     // Append new renderObject
-    if (parent is ContainerRenderObjectMixin) {
+    if (parentRenderObject is ContainerRenderObjectMixin) {
       renderBoxModel = targetRenderBox;
-      this.parent.addChildRenderObject(this, after: previousSibling);
-    } else if (parent is RenderObjectWithChildMixin) {
-      parent.child = targetRenderBox;
+      parentElement.addChildRenderObject(this, after: previousSibling);
+    } else if (parentRenderObject is RenderObjectWithChildMixin) {
+      parentRenderObject.child = targetRenderBox;
     }
 
     renderBoxModel = targetRenderBox;
@@ -497,7 +497,7 @@ class Element extends Node
       } else if (parentRenderBoxModel is RenderProxyBox) {
         parentRenderBoxModel.child = null;
       }
-      parent.addChildRenderObject(this, after: prev);
+      parentElement.addChildRenderObject(this, after: prev);
     }
 
     if (shouldConvertToRepaintBoundary) {
@@ -598,69 +598,57 @@ class Element extends Node
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
-    willAttachRenderer();
-    style.applyTargetProperties();
+    CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
+    if (display != CSSDisplay.none) {
+      willAttachRenderer();
+      style.applyTargetProperties();
 
-    CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
-    // InlineFlex or Flex
-    bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
+      CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
+      // InlineFlex or Flex
+      bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex ||
+          parentDisplayValue == CSSDisplay.inlineFlex;
 
-    parent.addChildRenderObject(this, after: after);
+      parent.addChildRenderObject(this, after: after);
 
-    ensureChildAttached();
+      ensureChildAttached();
 
-    /// Update flex siblings.
-    if (isParentFlexDisplayType) {
-      for (Element child in parent.children) {
-        if (parent.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
-          child.renderBoxModel.renderStyle.updateFlexItem();
-          child.renderBoxModel.markNeedsLayout();
+      /// Update flex siblings.
+      if (isParentFlexDisplayType) {
+        for (Element child in parent.children) {
+          if (parent.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
+            child.renderBoxModel.renderStyle.updateFlexItem();
+            child.renderBoxModel.markNeedsLayout();
+          }
         }
       }
-    }
 
-    /// Recalculate gradient after node attached when gradient length cannot be obtained from style
-    if (renderBoxModel.shouldRecalGradient) {
-      String backgroundImage = style[BACKGROUND_IMAGE];
-      renderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage);
-      renderBoxModel.shouldRecalGradient = false;
-    }
-
-    /// Calculate font-size which is percentage when node attached
-    /// where it can access the font-size of its parent element
-    if (renderBoxModel.shouldLazyCalFontSize) {
-      RenderStyle parentRenderStyle = parent.renderBoxModel.renderStyle;
-      double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
-      double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
-      renderBoxModel.renderStyle.fontSize = parsedFontSize;
-      for (Node node in childNodes) {
-        if (node is TextNode) {
-          node.updateTextStyle();
-        }
+      /// Recalculate gradient after node attached when gradient length cannot be obtained from style
+      if (renderBoxModel.shouldRecalGradient) {
+        String backgroundImage = style[BACKGROUND_IMAGE];
+        renderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage);
+        renderBoxModel.shouldRecalGradient = false;
       }
-      renderBoxModel.shouldLazyCalFontSize = false;
-    }
 
-    /// Calculate line-height which is percentage when node attached
-    /// where it can access the font-size of its own element
-    if (renderBoxModel.shouldLazyCalLineHeight) {
+      /// Calculate font-size which is percentage when node attached
+      /// where it can access the font-size of its parent element
+      if (renderBoxModel.shouldLazyCalFontSize) {
+        _updatePercentageFontSize();
+        renderBoxModel.shouldLazyCalFontSize = false;
+      }
+
+      /// Calculate line-height which is percentage when node attached
+      /// where it can access the font-size of its own element
+      if (renderBoxModel.shouldLazyCalLineHeight) {
+        _updatePercentageLineHeight();
+        renderBoxModel.shouldLazyCalLineHeight = false;
+      }
+
       RenderStyle renderStyle = renderBoxModel.renderStyle;
-      double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
-      double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
-      renderBoxModel.renderStyle.lineHeight = parsedLineHeight;
-      for (Node node in childNodes) {
-        if (node is TextNode) {
-          node.updateTextStyle();
-        }
-      }
-      renderBoxModel.shouldLazyCalLineHeight = false;
+
+      /// Set display and transformedDisplay when display is not set in style
+      renderStyle.initDisplay(style, defaultDisplay);
+      didAttachRenderer();
     }
-
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
-
-    /// Set display and transformedDisplay when display is not set in style
-    renderStyle.initDisplay(style, defaultDisplay);
-    didAttachRenderer();
   }
 
   // Detach renderObject of current node from parent
@@ -822,7 +810,7 @@ class Element extends Node
 
     /// Placeholder of flexbox needs to inherit size from its real display box,
     /// so it needs to layout after real box layout
-    child.parent.addChild(childPositionHolder);
+    child.parentElement.addChild(childPositionHolder);
   }
 
   /// Cache fixed renderObject to root element
@@ -1059,7 +1047,19 @@ class Element extends Node
 
   void _styleOffsetChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) return;
+    if (CSSLength.isPercentage(present)) {
+      // Should mark positioned element's containing block needs layout directly
+      // cause RelayoutBoundary of positioned element will prevent the needsLayout flag
+      // to bubble up in the RenderObject tree.
+      if (renderBoxModel.parentData is RenderLayoutParentData) {
+        RenderStyle renderStyle = renderBoxModel.renderStyle;
+        if (renderStyle.position != CSSPositionType.static) {
+          RenderBoxModel parent = renderBoxModel.parent;
+          parent.markNeedsLayout();
+        }
+      }
+      return;
+    }
 
     double presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
     if (presentValue == null) return;
@@ -1092,7 +1092,13 @@ class Element extends Node
 
   void _stylePaddingChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) return;
+    if (CSSLength.isPercentage(present)) {
+      // Mark parent needs layout to resolve percentage of child
+      if (renderBoxModel.parent is RenderBoxModel) {
+        (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
+      }
+      return;
+    }
 
     double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
     renderBoxModel.renderStyle.updatePadding(property, presentValue);
@@ -1100,7 +1106,13 @@ class Element extends Node
 
   void _styleSizeChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) return;
+    if (CSSLength.isPercentage(present)) {
+      // Mark parent needs layout to resolve percentage of child
+      if (renderBoxModel.parent is RenderBoxModel) {
+        (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
+      }
+      return;
+    }
 
     double presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
     renderBoxModel.renderStyle.updateSizing(property, presentValue);
@@ -1108,7 +1120,13 @@ class Element extends Node
 
   void _styleMarginChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its containing block's size
-    if (CSSLength.isPercentage(present)) return;
+    if (CSSLength.isPercentage(present)) {
+      // Mark parent needs layout to resolve percentage of child
+      if (renderBoxModel.parent is RenderBoxModel) {
+        (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
+      }
+      return;
+    }
 
     double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
@@ -1127,13 +1145,13 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
-    CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
+    CSSDisplay parentDisplayValue = parentElement.renderBoxModel.renderStyle.display;
     bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
 
     // Flex factor change will cause flex item self and its siblings relayout.
     if (isParentFlexDisplayType) {
       for (Element child in parent.children) {
-        if (parent.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
+        if (parentElement.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
           child.renderBoxModel.renderStyle.updateFlexItem();
           child.renderBoxModel.markNeedsLayout();
         }
@@ -1155,7 +1173,13 @@ class Element extends Node
 
   void _styleBorderRadiusChangedListener(String property, String original, String present) {
     /// Percentage size should be resolved in layout stage cause it needs to know its own element's size
-    if (RenderStyle.isBorderRadiusPercentage(present)) return;
+    if (RenderStyle.isBorderRadiusPercentage(present)) {
+      // Mark parent needs layout to resolve percentage of child
+      if (renderBoxModel.parent is RenderBoxModel) {
+        (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
+      }
+      return;
+    }
 
     renderBoxModel.renderStyle.updateBorderRadius(property, present);
   }
@@ -1176,7 +1200,13 @@ class Element extends Node
 
   void _styleTransformChangedListener(String property, String original, String present) {
     /// Percentage transform translate should be resolved in layout stage cause it needs to know its own element's size
-    if (RenderStyle.isTransformTranslatePercentage(present)) return;
+    if (RenderStyle.isTransformTranslatePercentage(present)) {
+      // Mark parent needs layout to resolve percentage of child
+      if (renderBoxModel.parent is RenderBoxModel) {
+        (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
+      }
+      return;
+    }
 
     Matrix4 matrix4 = CSSTransform.parseTransform(present, viewportSize);
     // @FIXME support `none` value
@@ -1193,18 +1223,52 @@ class Element extends Node
     /// Percentage font-size should be resolved when node attached
     /// cause it needs to know its parents style
     if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
-      renderBoxModel.shouldLazyCalFontSize = true;
+      if (renderBoxModel.attached) {
+        _updatePercentageFontSize();
+      } else {
+        renderBoxModel.shouldLazyCalFontSize = true;
+      }
       return;
     }
 
     /// Percentage line-height should be resolved when node attached
     /// cause it needs to know other style in its own element
     if (property == LINE_HEIGHT && CSSLength.isPercentage(style[LINE_HEIGHT])) {
-      renderBoxModel.shouldLazyCalLineHeight = true;
+      if (renderBoxModel.attached) {
+        _updatePercentageLineHeight();
+      } else {
+        renderBoxModel.shouldLazyCalLineHeight = true;
+      }
       return;
     }
 
     renderBoxModel.renderStyle.updateTextStyle();
+    for (Node node in childNodes) {
+      if (node is TextNode) {
+        node.updateTextStyle();
+      }
+    }
+  }
+
+  /// Percentage font size is set relative to parent's font size.
+  void _updatePercentageFontSize() {
+    RenderStyle parentRenderStyle = parentElement.renderBoxModel.renderStyle;
+    double parentFontSize = parentRenderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
+    double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
+    renderBoxModel.renderStyle.fontSize = parsedFontSize;
+    for (Node node in childNodes) {
+      if (node is TextNode) {
+        node.updateTextStyle();
+      }
+    }
+  }
+
+  /// Percentage line height is set relative to its own font size.
+  void _updatePercentageLineHeight() {
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    double fontSize = renderStyle.fontSize ?? CSSText.DEFAULT_FONT_SIZE;
+    double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
+    renderBoxModel.renderStyle.lineHeight = parsedLineHeight;
     for (Node node in childNodes) {
       if (node is TextNode) {
         node.updateTextStyle();
@@ -1264,21 +1328,16 @@ class Element extends Node
     BoundingClientRect boundingClientRect = BoundingClientRect(0, 0, 0, 0, 0, 0, 0, 0);
     RenderBox sizedBox = renderBoxModel;
     if (isRendererAttached) {
-      // need to flush layout to get correct size
-      elementManager
-          .getRootRenderObject()
-          .owner
-          .flushLayout();
-
       // Force flush layout.
       if (!sizedBox.hasSize) {
         sizedBox.markNeedsLayout();
         sizedBox.owner.flushLayout();
       }
 
-      Offset offset = getOffset(sizedBox);
-      Size size = sizedBox.size;
-      boundingClientRect = BoundingClientRect(
+      if (sizedBox.hasSize) {
+        Offset offset = getOffset(sizedBox);
+        Size size = sizedBox.size;
+        boundingClientRect = BoundingClientRect(
           offset.dx,
           offset.dy,
           size.width,
@@ -1287,6 +1346,7 @@ class Element extends Node
           offset.dx + size.width,
           offset.dy + size.height,
           offset.dx);
+      }
     }
 
     return boundingClientRect;
@@ -1397,7 +1457,6 @@ class Element extends Node
     if (nodeName != 'HTML') {
       convertToRepaintBoundary();
     }
-
     renderBoxModel.owner.flushLayout();
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
@@ -1431,7 +1490,7 @@ class Element extends Node
     }
   }
 
-  RenderBoxModel createRenderBoxModel(Element element, {RenderBoxModel prevRenderBoxModel, bool repaintSelf = false}) {
+  static RenderBoxModel createRenderBoxModel(Element element, {RenderBoxModel prevRenderBoxModel, bool repaintSelf = false}) {
     RenderBoxModel renderBoxModel = prevRenderBoxModel ?? element.renderBoxModel;
 
     if (renderBoxModel is RenderIntrinsic) {
@@ -1441,7 +1500,7 @@ class Element extends Node
     }
   }
 
-  RenderLayoutBox createRenderLayout(Element element, {CSSStyleDeclaration style, RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
+  static RenderLayoutBox createRenderLayout(Element element, {CSSStyleDeclaration style, RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
     style = style ?? element.style;
     CSSDisplay display = CSSDisplayMixin.getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]
@@ -1589,10 +1648,10 @@ class Element extends Node
     }
   }
 
-  RenderIntrinsic createRenderIntrinsic(Element element,
+  static RenderIntrinsic createRenderIntrinsic(Element element,
     {RenderIntrinsic prevRenderIntrinsic, bool repaintSelf = false}) {
     RenderIntrinsic intrinsic;
-    RenderStyle renderStyle = RenderStyle(style: style);
+    RenderStyle renderStyle = RenderStyle(style: element.style);
 
     if (prevRenderIntrinsic == null) {
       if (repaintSelf) {
@@ -1627,7 +1686,7 @@ class Element extends Node
 
 
 Element _findContainingBlock(Element element) {
-  Element _el = element?.parent;
+  Element _el = element.parentElement;
   Element rootEl = element.elementManager.viewportElement;
 
   while (_el != null) {

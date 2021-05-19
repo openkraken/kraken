@@ -392,4 +392,38 @@ describe('Width', function() {
     BODY.appendChild(div);
     await snapshot();
   });
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+    let div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexWrap: 'wrap',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            height: '100px',
+            backgroundColor: 'yellow',
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div2.style.width = '50%';
+       await snapshot();
+       done();
+    });
+  });
 });

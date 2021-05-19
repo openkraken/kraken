@@ -42,7 +42,7 @@ class TextNode extends Node {
   String get data {
     if (_data == null || _data.isEmpty) return '';
 
-    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parent?.style);
+    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parentElement?.style);
 
     /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
@@ -61,12 +61,12 @@ class TextNode extends Node {
       return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_data) : _data;
     } else {
       String collapsedData = collapseWhitespace(_data);
-      // TODO: 
+      // TODO:
       // Remove the leading space while prev element have space too:
       //   <p><span>foo </span> bar</p>
-      // Refs: 
+      // Refs:
       //   https://github.com/WebKit/WebKit/blob/6a970b217d59f36e64606ed03f5238d572c23c48/Source/WebCore/layout/inlineformatting/InlineLineBuilder.cpp#L295
-      
+
       if (previousSibling == null) {
         collapsedData = collapsedData.trimLeft();
       }
@@ -103,13 +103,13 @@ class TextNode extends Node {
 
   void _updateTextStyle() {
     // parentNode must be an element.
-    Element parentElement = parent;
     _renderTextBox.style = parentElement.style;
     _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
     // Update paragraph line height
     KrakenRenderParagraph renderParagraph = _renderTextBox.child;
-    renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
-    
+    renderParagraph.lineHeight = parentElement.renderBoxModel.renderStyle.lineHeight;
+    renderParagraph.markNeedsLayout();
+
     _setTextNodeProperties(parentElement.style);
 
     RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
@@ -157,17 +157,17 @@ class TextNode extends Node {
   @override
   void willAttachRenderer() {
     createRenderer();
-    CSSStyleDeclaration parentStyle = parent.style;
+    CSSStyleDeclaration parentStyle = parentElement.style;
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
-    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parent);
+    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
     // TextNode's style is inherited from parent style
     _renderTextBox.style = parentStyle;
     // Update paragraph line height
     KrakenRenderParagraph renderParagraph = _renderTextBox.child;
-    renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
+    renderParagraph.lineHeight = parentElement.renderBoxModel.renderStyle.lineHeight;
 
-    _setTextNodeProperties(parent.style);
+    _setTextNodeProperties(parentElement.style);
   }
 
   @override

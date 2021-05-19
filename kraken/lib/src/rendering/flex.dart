@@ -567,15 +567,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_START, uniqueId: targetId);
     }
 
-    CSSDisplay display = renderStyle.display;
-    if (display == CSSDisplay.none) {
-      size = constraints.smallest;
-      if (kProfileMode) {
-        PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId);
-      }
-      return;
-    }
-
     beforeLayout();
 
     RenderBox child = firstChild;
@@ -657,10 +648,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   bool _isChildDisplayNone(RenderObject child) {
-    if (child is RenderTextBox) {
-      return false;
-    }
-
     if (child is RenderBoxModel) {
       return child.renderStyle.display == CSSDisplay.none;
     }
@@ -1037,6 +1024,16 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
         childrenOldConstraints[child.hashCode] = childConstraints;
 
+        // Inflate constraints of percentage renderBoxModel to force it layout after percentage resolved
+        // cause Flutter will skip child layout if its constraints not changed between two layouts.
+        if (child is RenderBoxModel && needsRelayout) {
+          childConstraints = BoxConstraints(
+            minWidth: 0,
+            maxWidth: childConstraints.maxWidth,
+            minHeight: 0,
+            maxHeight: childConstraints.maxHeight,
+          );
+        }
         child.layout(childConstraints, parentUsesSize: true);
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();

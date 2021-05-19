@@ -176,6 +176,30 @@ describe('Tags img', () => {
       done();
     };
   });
+
+  it ('lazy loading should work with scroll', (done) => {
+    const img = document.createElement('img');
+    img.setAttribute('loading', 'lazy'); 
+    img.style.width = '60px';
+    img.style.height = '60px';
+    img.style.background = 'red';
+
+    let div = document.createElement('div');
+    div.style.width = '60px';
+    div.style.height = '2000px';
+    div.style.background = 'yellow';
+
+    document.body.appendChild(div);
+    document.body.appendChild(img);
+
+    img.onload = async () => {
+      await snapshot();
+      done();
+    };
+    img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+
+    window.scroll(0, 2000);
+  })
         
   it('should work with loading=lazy and transform', (done) => {
     const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';

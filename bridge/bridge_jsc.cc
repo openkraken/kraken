@@ -21,6 +21,7 @@
 #include "bindings/jsc/DOM/element.h"
 #include "bindings/jsc/DOM/elements/image_element.h"
 #include "bindings/jsc/DOM/elements/input_element.h"
+#include "bindings/jsc/DOM/elements/svg_element.h"
 #include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/DOM/custom_event.h"
 #include "bindings/jsc/DOM/events/gesture_event.h"
@@ -100,6 +101,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindElement(m_context);
   bindImageElement(m_context);
   bindInputElement(m_context);
+  bindSVGElement(m_context);
   bindWindow(m_context);
   bindPerformance(m_context);
   bindCSSStyleDeclaration(m_context);
@@ -173,7 +175,7 @@ void JSBridge::evaluateScript(const char *script, const char *url, int startLine
 #if ENABLE_PROFILE
   auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
   nativePerformance->mark(PERF_JS_PARSE_TIME_START);
-  std::string patchedCode = std::string(";performance.mark('js_parse_time_end');") + std::string(script);
+  std::string patchedCode = std::string("performance.mark('js_parse_time_end');") + std::string(script);
   m_context->evaluateJavaScript(patchedCode.c_str(), url, startLine);
 #else
   m_context->evaluateJavaScript(script, url, startLine);
