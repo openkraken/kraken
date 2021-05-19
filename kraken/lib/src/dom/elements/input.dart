@@ -468,7 +468,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     textInputConnection.setEditingState(localValue);
   }
 
-  void formatAndSetValue(TextEditingValue value) {
+  void formatAndSetValue(TextEditingValue value, bool NeedDispatchEvent) {
     final bool textChanged = textSelectionDelegate.textEditingValue?.text != value?.text;
     textSelectionDelegate.textEditingValue = value;
 
@@ -482,13 +482,15 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
           renderEditable.text = textSpan;
         }
       }
-      // Sync value to input element property 
+      // Sync value to input element property
       properties[VALUE] = value.text;
-      // TODO: return the string containing the data that was added to the element,
-      // which MAY be null if it doesn't apply.
-      String inputData = '';
-      InputEvent inputEvent = InputEvent(inputData);
-      dispatchEvent(inputEvent);
+      if (NeedDispatchEvent) {
+        // TODO: return the string containing the data that was added to the element,
+        // which MAY be null if it doesn't apply.
+        String inputData = '';
+        InputEvent inputEvent = InputEvent(inputData);
+        dispatchEvent(inputEvent);
+      }
     }
 
     if (renderEditable != null) {
@@ -503,7 +505,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _showCaretOnScreen();
     }
     _lastKnownRemoteTextEditingValue = value;
-    formatAndSetValue(value);
+    formatAndSetValue(value, true);
     // To keep the cursor from blinking while typing, we want to restart the
     // cursor timer every time a new character is typed.
     _stopCursorTimer(resetCharTicks: false);
@@ -531,7 +533,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         selection: selection,
         composing: composing,
       );
-      formatAndSetValue(newTextEditingValue);
+      formatAndSetValue(newTextEditingValue, false);
     } else if (key == 'placeholder') {
       // Update placeholder text.
       updateTextSpan();
