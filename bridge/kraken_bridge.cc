@@ -144,7 +144,7 @@ bool checkContext(int32_t contextId, void *context) {
   return bridge->getContext().get() == context;
 }
 
-void evaluateScripts(int32_t contextId, const char* code, const char *bundleFilename, int startLine) {
+void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine) {
   assert(checkContext(contextId) && "evaluateScripts: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->evaluateScript(code, bundleFilename, startLine);

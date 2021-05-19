@@ -173,7 +173,7 @@ class KrakenViewController {
 
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
     assert(!_disposed, "Kraken have already disposed");
-    evaluateScripts(_contextId, Utf8.toUtf8(code).cast(), source, 0);
+    evaluateScripts(_contextId, code, source, 0);
   }
 
   // attach kraken's renderObject to an renderObject.

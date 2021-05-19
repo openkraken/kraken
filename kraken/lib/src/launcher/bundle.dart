@@ -33,19 +33,7 @@ abstract class KrakenBundle {
   // Unique resource locator.
   final Uri url;
   // JS Content
-  String _content;
-  set content(String value) {
-    _content = value;
-  }
-  String get content {
-    if (_content != null) return _content;
-    if (rawContentBytes != null) {
-      return utf8.decode(rawContentBytes.buffer.asUint8List(rawContentBytes.offsetInBytes, rawContentBytes.lengthInBytes));
-    }
-    return null;
-  }
-  // JS raw byte data content
-  Uint8List rawContentBytes;
+  String content;
   // JS line offset, default to 0.
   List<String> assets = [];
   int lineOffset = 0;
@@ -86,9 +74,7 @@ abstract class KrakenBundle {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
-    Pointer<Uint8> buffer = allocate<Uint8>(count: rawContentBytes.length);
-    buffer.asTypedList(rawContentBytes.length).setAll(0, rawContentBytes);
-    evaluateScripts(contextId, buffer, url.toString(), lineOffset);
+    evaluateScripts(contextId, content, url.toString(), lineOffset);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
@@ -101,7 +87,6 @@ class RawBundle extends KrakenBundle {
       : assert(content != null),
         super(url) {
     this.content = content;
-    rawContentBytes = Uint8List.fromList(this.content.codeUnits);
   }
 
   @override
@@ -124,9 +109,15 @@ class NetworkBundle extends KrakenBundle {
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData bytes = await bundle.load(absoluteURL);
-    rawContentBytes = bytes.buffer.asUint8List();
+    content = await _resolveStringFromData(bytes, absoluteURL);
     isResolved = true;
   }
+}
+
+String _resolveStringFromData(ByteData data, String key) {
+  if (data == null) throw FlutterError('Unable to load asset: $key');
+  // Utf8 decode is fast enough with dart 2.10
+  return utf8.decode(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
 }
 
 /// An [AssetBundle] that loads resources over the network.
@@ -190,7 +181,7 @@ class AssetsBundle extends KrakenBundle {
     manifest = AppManifest();
     String localPath = url.toString();
     ByteData bytes = await rootBundle.load(localPath);
-    rawContentBytes = bytes.buffer.asUint8List();
+    content = await _resolveStringFromData(bytes, localPath);
     isResolved = true;
   }
 }

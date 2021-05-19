@@ -99,24 +99,6 @@ bool JSContext::evaluateJavaScript(const char16_t *code, size_t length, const ch
   return handleException(exc);
 }
 
-bool JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
-  JSStringRef sourceRef = JSStringCreateWithUTF8CString(code);
-  JSStringRef sourceURLRef = nullptr;
-  if (sourceURL != nullptr) {
-    sourceURLRef = JSStringCreateWithUTF8CString(sourceURL);
-  }
-
-  JSValueRef exc = nullptr; // exception
-  JSEvaluateScript(ctx_, sourceRef, nullptr /*null means global*/, sourceURLRef, startLine, &exc);
-
-  JSStringRelease(sourceRef);
-  if (sourceURLRef) {
-    JSStringRelease(sourceURLRef);
-  }
-
-  return handleException(exc);
-}
-
 bool JSContext::isValid() {
   return !ctxInvalid_;
 }

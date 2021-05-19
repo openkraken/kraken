@@ -80,7 +80,6 @@ public:
 
   KRAKEN_EXPORT bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
   KRAKEN_EXPORT bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
-  KRAKEN_EXPORT bool evaluateJavaScript(const char *code, const char *sourceURL, int startLine);
 
   KRAKEN_EXPORT bool isValid();
 
