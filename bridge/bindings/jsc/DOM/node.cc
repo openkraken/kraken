@@ -155,8 +155,8 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
     JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
     auto mAttributes = reinterpret_cast<JSElementAttributes *>(JSObjectGetPrivate(attributeObjectRef));
 
-    std::map<std::string, JSStringRef> &attributesMap = mAttributes->getAttributesMap();
-    std::vector<JSStringRef> &attributesVector = mAttributes->getAttributesVector();
+    std::map<std::string, JSValueRef> &attributesMap = mAttributes->getAttributesMap();
+    std::vector<JSValueRef> &attributesVector = mAttributes->getAttributesVector();
 
     (*newElement->getAttributes())->setAttributesMap(attributesMap);
     (*newElement->getAttributes())->setAttributesVector(attributesVector);
