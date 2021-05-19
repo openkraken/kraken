@@ -18,6 +18,7 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
+#include <forward_list>
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg)>;
 
@@ -60,6 +61,14 @@ class GestureEventInstance;
 struct NativeMouseEvent;
 class MouseEventInstance;
 
+class SharedStringCache {
+public:
+  SharedStringCache() {};
+  void getString(std::string *string, JSContextRef ctx, JSValueRef value, JSValueRef *exception);
+private:
+  std::unordered_map<JSValueRef, std::string> m_string_cache;
+};
+
 class JSContext {
 public:
   static std::vector<JSStaticFunction> globalFunctions;
@@ -89,6 +98,8 @@ public:
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 
   int32_t uniqueId;
+
+  SharedStringCache sharedStringCache;
 
 private:
   int32_t contextId;
@@ -150,6 +161,8 @@ private:
 void KRAKEN_EXPORT buildUICommandArgs(JSStringRef key, NativeString &args_01);
 void KRAKEN_EXPORT buildUICommandArgs(std::string &key, NativeString &args_01);
 void KRAKEN_EXPORT buildUICommandArgs(std::string &key, JSStringRef value, NativeString &args_01,
+                                      NativeString &args_02);
+void KRAKEN_EXPORT buildUICommandArgs(std::string &key, JSValueRef value, NativeString &args_01,
                                       NativeString &args_02);
 void KRAKEN_EXPORT buildUICommandArgs(std::string &key, std::string &value, NativeString &args_01,
                                       NativeString &args_02);
@@ -480,7 +493,7 @@ public:
 private:
   friend JSEventTarget;
   // TODO: use std::u16string for better performance.
-  std::unordered_map<std::string, std::deque<JSObjectRef>> _eventHandlers;
+  std::unordered_map<std::string, std::forward_list<JSObjectRef>> _eventHandlers;
   bool internalDispatchEvent(EventInstance *eventInstance);
 };
 
@@ -689,8 +702,8 @@ public:
   KRAKEN_EXPORT bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   KRAKEN_EXPORT void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
-  void removeElementById(std::string &id, ElementInstance *element);
-  void addElementById(std::string &id, ElementInstance *element);
+  void removeElementById(JSValueRef id, ElementInstance *element);
+  void addElementById(JSValueRef id, ElementInstance *element);
 
   NativeDocument *nativeDocument;
   std::unordered_map<std::string, std::vector<ElementInstance *>> elementMapById;
@@ -713,24 +726,24 @@ public:
   static std::vector<JSStringRef> &getAttributePropertyNames();
   static std::unordered_map<std::string, AttributeProperty> &getAttributePropertyMap();
 
-  KRAKEN_EXPORT JSStringRef getAttribute(std::string &name);
-  KRAKEN_EXPORT void setAttribute(std::string &name, JSStringRef value);
+  KRAKEN_EXPORT JSValueRef getAttribute(std::string &name);
+  KRAKEN_EXPORT void setAttribute(std::string &name, JSValueRef value);
   KRAKEN_EXPORT bool hasAttribute(std::string &name);
   KRAKEN_EXPORT void removeAttribute(std::string &name);
 
-  KRAKEN_EXPORT std::map<std::string, JSStringRef>& getAttributesMap();
-  KRAKEN_EXPORT void setAttributesMap(std::map<std::string, JSStringRef>& attributes);
+  KRAKEN_EXPORT std::map<std::string, JSValueRef>& getAttributesMap();
+  KRAKEN_EXPORT void setAttributesMap(std::map<std::string, JSValueRef>& attributes);
 
-  KRAKEN_EXPORT std::vector<JSStringRef>& getAttributesVector();
-  KRAKEN_EXPORT void setAttributesVector(std::vector<JSStringRef>& attributes);
+  KRAKEN_EXPORT std::vector<JSValueRef>& getAttributesVector();
+  KRAKEN_EXPORT void setAttributesVector(std::vector<JSValueRef>& attributes);
 
   KRAKEN_EXPORT JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   KRAKEN_EXPORT bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   KRAKEN_EXPORT void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:
-  std::map<std::string, JSStringRef> m_attributes;
-  std::vector<JSStringRef> v_attributes;
+  std::map<std::string, JSValueRef> m_attributes;
+  std::vector<JSValueRef> v_attributes;
 };
 
 struct NativeBoundingClientRect {
@@ -781,11 +794,11 @@ public:
   bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   bool internalSetProperty(std::string &name, JSValueRef value, JSValueRef *exception);
-  void internalRemoveProperty(JSStringRef name, JSValueRef *exception);
-  JSValueRef internalGetPropertyValue(JSStringRef name, JSValueRef *exception);
+  void internalRemoveProperty(std::string &name, JSValueRef *exception);
+  JSValueRef internalGetPropertyValue(std::string &name, JSValueRef *exception);
 
 private:
-  std::unordered_map<std::string, JSStringRef> properties;
+  std::unordered_map<std::string, JSValueRef> properties;
   const EventTargetInstance *ownerEventTarget;
 };
 
@@ -883,8 +896,8 @@ private:
   void _notifyChildRemoved();
   KRAKEN_EXPORT void _notifyNodeInsert(NodeInstance *insertNode) override;
   void _notifyChildInsert();
-  void _didModifyAttribute(std::string &name, std::string &oldId, std::string &newId);
-  void _beforeUpdateId(std::string &oldId, std::string &newId);
+  void _didModifyAttribute(std::string &name, JSValueRef oldId, JSValueRef newId);
+  void _beforeUpdateId(JSValueRef oldId, JSValueRef newId);
   JSHostObjectHolder<JSElementAttributes> m_attributes{context, object, "attributes", new JSElementAttributes(context)};
   JSHostClassHolder m_style{context, object, "style",
                             new StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this)};

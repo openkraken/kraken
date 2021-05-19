@@ -121,16 +121,35 @@ JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSS
   return hostClass->getProperty(name, exception);
 }
 
+#if ENABLE_PROFILE
+std::unordered_map<std::string, double> m_get_property_call_time;
+std::unordered_map<std::string, int> m_get_property_call_count;
+std::unordered_map<std::string, double> *getHostClassPropertyCallTime() {
+  return &m_get_property_call_time;
+}
+std::unordered_map<std::string, int> *getHostClassPropertyCallCount() {
+  return &m_get_property_call_count;
+}
+#endif
+
 JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                                JSValueRef *exception) {
   auto hostClassInstance = reinterpret_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
 #if ENABLE_PROFILE
   auto nativePerformance = binding::jsc::NativePerformance::instance(hostClassInstance->context->uniqueId);
+  auto startTime = std::chrono::system_clock::now().time_since_epoch().count();
   nativePerformance->mark(PERF_JS_HOST_CLASS_GET_PROPERTY_START);
 #endif
   std::string &&name = JSStringToStdString(propertyName);
   JSValueRef result = hostClassInstance->getProperty(name, exception);
 #if ENABLE_PROFILE
+  auto endTime = std::chrono::system_clock::now().time_since_epoch().count();
+  if (m_get_property_call_time.count(name) == 0) {
+    m_get_property_call_time[name] = 0.0;
+    m_get_property_call_time[name] = 0;
+  }
+  m_get_property_call_time[name] += (endTime - startTime);
+  m_get_property_call_count[name]++;
   nativePerformance->mark(PERF_JS_HOST_CLASS_GET_PROPERTY_END);
 #endif
   return result;
@@ -144,17 +163,36 @@ JSValueRef HostClass::proxyPrototypeGetProperty(JSContextRef ctx, JSObjectRef ob
   return result;
 }
 
+#if ENABLE_PROFILE
+std::unordered_map<std::string, double> m_set_property_call_time;
+std::unordered_map<std::string, int> m_set_property_call_count;
+std::unordered_map<std::string, double> *setHostClassPropertyCallTime() {
+  return &m_set_property_call_time;
+}
+std::unordered_map<std::string, int> *setHostClassPropertyCallCount() {
+  return &m_set_property_call_count;
+}
+#endif
+
 bool HostClass::proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                          JSValueRef value, JSValueRef *exception) {
   auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
 #if ENABLE_PROFILE
   auto nativePerformance = binding::jsc::NativePerformance::instance(hostClassInstance->context->uniqueId);
   nativePerformance->mark(PERF_JS_HOST_CLASS_SET_PROPERTY_START);
+  auto startTime = std::chrono::system_clock::now().time_since_epoch().count();
 #endif
   std::string &&name = JSStringToStdString(propertyName);
   bool handledBySelf = hostClassInstance->setProperty(name, value, exception);
   bool result = !hostClassInstance->context->handleException(*exception) || handledBySelf;
 #if ENABLE_PROFILE
+  auto endTime = std::chrono::system_clock::now().time_since_epoch().count();
+  if (m_set_property_call_time.count(name) == 0) {
+    m_set_property_call_time[name] = 0.0;
+    m_set_property_call_time[name] = 0;
+  }
+  m_set_property_call_time[name] += (endTime - startTime);
+  m_set_property_call_count[name]++;
   nativePerformance->mark(PERF_JS_HOST_CLASS_SET_PROPERTY_END);
 #endif
   return result;

@@ -5,8 +5,10 @@
 
 #include "bindings/jsc/host_object_internal.h"
 #include "bindings/jsc/js_context_internal.h"
+#include "bindings/jsc/host_class.h"
 #include <unordered_map>
 #include <vector>
+#include <list>
 
 namespace kraken::binding::jsc {
 
@@ -185,7 +187,7 @@ public:
 
   void mark(const std::string &markName);
   void mark(const std::string &markName, int64_t startTime);
-  std::vector<NativePerformanceEntry *> entries;
+  std::list<NativePerformanceEntry *> entries;
 };
 
 class JSPerformance : public HostObject {
