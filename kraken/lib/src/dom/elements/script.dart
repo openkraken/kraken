@@ -44,8 +44,8 @@ class ScriptElement extends Element {
   }
 
   @override
-  void didAttachRenderer() async {
-    super.didAttachRenderer();
+  void connectedCallback() {
+    super.connectedCallback();
     String src = getProperty('src');
     _fetchBundle(src);
   }
