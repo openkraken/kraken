@@ -10,6 +10,14 @@
 #include <unordered_map>
 
 namespace kraken::binding::jsc {
+
+#if ENABLE_PROFILE
+std::unordered_map<std::string, double> *getHostClassPropertyCallTime();
+std::unordered_map<std::string, int> *getHostClassPropertyCallCount();
+std::unordered_map<std::string, double> *setHostClassPropertyCallTime();
+std::unordered_map<std::string, int> *setHostClassPropertyCallCount();
+#endif
+
 } // namespace kraken::binding::jsc
 
 #endif // KRAKENBRIDGE_HOST_CLASS_H

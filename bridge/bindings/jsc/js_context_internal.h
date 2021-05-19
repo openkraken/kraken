@@ -9,7 +9,6 @@
 #include "include/kraken_bridge.h"
 #include <chrono>
 #include <codecvt>
-#include <deque>
 #include <locale>
 #include <map>
 #include <string>
@@ -72,6 +71,11 @@ inline std::string trim(std::string &str) {
 }
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
+
+#if ENABLE_PROFILE
+std::unordered_map<std::string, double> *getNativeFunctionCallTime();
+std::unordered_map<std::string, int> *getNativeFunctionCallCount();
+#endif
 
 } // namespace kraken::binding::jsc
 

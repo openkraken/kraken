@@ -19,6 +19,14 @@ std::vector<JSStaticValue> JSContext::globalValue{};
 
 static std::atomic<int32_t> context_unique_id{0};
 
+void SharedStringCache::getString(std::string *string, JSContextRef ctx, JSValueRef value, JSValueRef *exception) {
+  if (m_string_cache.count(value) == 0) {
+    JSStringRef str = JSValueToStringCopy(ctx, value, exception);
+    m_string_cache[value] = JSStringToStdString(str);
+  }
+  *string = m_string_cache[value];
+}
+
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
 
@@ -249,14 +257,34 @@ NativeString *stringRefToNativeString(JSStringRef string) {
 }
 
 #if ENABLE_PROFILE
+std::unordered_map<std::string, double> m_f_call_time;
+std::unordered_map<std::string, int> m_f_call_count;
+std::unordered_map<std::string, double> *getNativeFunctionCallTime() {
+  return &m_f_call_time;
+}
+std::unordered_map<std::string, int> *getNativeFunctionCallCount() {
+  return &m_f_call_count;
+}
+
+struct ProxyContext {
+  std::string name;
+  JSObjectRef function{nullptr};
+};
 JSValueRef proxyFunctionCall(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                  const JSValueRef *arguments, JSValueRef *exception) {
-  auto *targetFunction = reinterpret_cast<JSObjectRef>(JSObjectGetPrivate(function));
+  auto *proxyContext = reinterpret_cast<ProxyContext*>(JSObjectGetPrivate(function));
   auto nativePerformance = binding::jsc::NativePerformance::instance(0);
   nativePerformance->mark(PERF_JS_NATIVE_FUNCTION_CALL_START);
-  JSValueRef value = JSObjectCallAsFunction(ctx, targetFunction, thisObject, argumentCount, arguments, exception);
+  double startTime = std::chrono::system_clock::now().time_since_epoch().count();
+  JSValueRef value = JSObjectCallAsFunction(ctx, proxyContext->function, thisObject, argumentCount, arguments, exception);
+  double endTime = std::chrono::system_clock::now().time_since_epoch().count();
+  if (m_f_call_time.count(proxyContext->name) == 0) {
+    m_f_call_time[proxyContext->name] = 0.0;
+    m_f_call_count[proxyContext->name] = 0;
+  }
+  m_f_call_time[proxyContext->name] += ((endTime - startTime) / 1000);
+  m_f_call_count[proxyContext->name]++;
   nativePerformance->mark(PERF_JS_NATIVE_FUNCTION_CALL_END);
-  JSValueUnprotect(ctx, targetFunction);
   return value;
 }
 #endif
@@ -273,7 +301,10 @@ JSFunctionHolder::JSFunctionHolder(JSContext *context, JSObjectRef root, void *d
 
 #if ENABLE_PROFILE
   JSValueProtect(context->context(), m_function);
-  m_function = makeObjectFunctionWithPrivateData(context, m_function, name.c_str(), proxyFunctionCall);
+  auto *proxyContext = new ProxyContext();
+  proxyContext->name = name;
+  proxyContext->function = m_function;
+  m_function = makeObjectFunctionWithPrivateData(context, proxyContext, name.c_str(), proxyFunctionCall);
   JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), m_function, kJSPropertyAttributeNone, nullptr);
 #else
   JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), m_function, kJSPropertyAttributeNone, nullptr);

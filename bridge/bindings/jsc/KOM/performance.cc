@@ -342,6 +342,75 @@ double getMeasureTotalDuration(const std::vector<NativePerformanceEntry *> &meas
   return duration / 1000;
 }
 
+struct FunctionCallTime {
+  FunctionCallTime(std::string name, double duration): name(std::move(name)), duration(duration) {}
+  std::string name;
+  double duration;
+};
+
+void printFunctionCallTime() {
+  auto *functionCallTime = getNativeFunctionCallTime();
+  auto *functionCallCount = getNativeFunctionCallCount();
+  std::string buf = "\nNative Function Time Rank\n\n";
+  std::vector<FunctionCallTime> rankList;
+  for (auto &e : *functionCallTime) {
+    rankList.emplace_back(FunctionCallTime(e.first, e.second));
+  }
+
+  std::sort(rankList.begin(), rankList.end(), [](FunctionCallTime &left, FunctionCallTime &right) {
+    return left.duration > right.duration;
+  });
+
+  for (auto &i : rankList) {
+    int count = (*functionCallCount)[i.name];
+    buf += "  -" + i.name + " " + std::to_string(i.duration) + "ms count: " + std::to_string(count) + " avg: " + std::to_string(i.duration /count) +"\n";
+  }
+
+  KRAKEN_LOG(VERBOSE) << buf;
+}
+
+void printHostClassGetPropertyCallTime() {
+  auto *callTime = getHostClassPropertyCallTime();
+  auto *callCount = getHostClassPropertyCallCount();
+  std::string buf = "\nHost Class GetProperty Time Rank\n\n";
+  std::vector<FunctionCallTime> rankList;
+  for (auto &e : *callTime) {
+    rankList.emplace_back(FunctionCallTime(e.first, e.second));
+  }
+
+  std::sort(rankList.begin(), rankList.end(), [](FunctionCallTime &left, FunctionCallTime &right) {
+    return left.duration > right.duration;
+  });
+
+  for (auto &i : rankList) {
+    int count = (*callCount)[i.name];
+    buf += "  -" + i.name + " " + std::to_string(i.duration) + "us count: " + std::to_string(count) + " avg: " + std::to_string(i.duration /count) +"\n";
+  }
+
+  KRAKEN_LOG(VERBOSE) << buf;
+}
+
+void printHostClassSetPropertyCallTime() {
+  auto *callTime = setHostClassPropertyCallTime();
+  auto *callCount = setHostClassPropertyCallCount();
+  std::string buf = "\nHost Class SetProperty Time Rank\n\n";
+  std::vector<FunctionCallTime> rankList;
+  for (auto &e : *callTime) {
+    rankList.emplace_back(FunctionCallTime(e.first, e.second));
+  }
+
+  std::sort(rankList.begin(), rankList.end(), [](FunctionCallTime &left, FunctionCallTime &right) {
+    return left.duration > right.duration;
+  });
+
+  for (auto &i : rankList) {
+    int count = (*callCount)[i.name];
+    buf += "  -" + i.name + " " + std::to_string(i.duration) + "us count: " + std::to_string(count) + " avg: " + std::to_string(i.duration /count) +"\n";
+  }
+
+  KRAKEN_LOG(VERBOSE) << buf;
+}
+
 JSValueRef JSPerformance::__kraken_navigation_summary__(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                         size_t argumentCount, JSValueRef const *arguments,
                                                         JSValueRef *exception) {
@@ -493,6 +562,9 @@ First Bundle Load: %.*fms
     PERF_REMOVE_PROPERTIES_COST, 2, removePropertiesCost, 2, removePropertiesAvg, removePropertiesCount
 );
   // clang-format on
+  printFunctionCallTime();
+  printHostClassGetPropertyCallTime();
+  printHostClassSetPropertyCallTime();
 
   JSStringRef resultStringRef = JSStringCreateWithUTF8CString(buffer);
   return JSValueMakeString(ctx, resultStringRef);
