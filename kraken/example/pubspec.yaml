@@ -23,8 +23,6 @@ dependencies:
 dependency_overrides:
   kraken:
     path: ../
-  kraken_devtools:
-    path: ../../../devtools
 
 # The following section is specific to Flutter.
 flutter:
