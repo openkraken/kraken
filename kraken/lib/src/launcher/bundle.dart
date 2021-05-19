@@ -9,7 +9,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/rendering.dart';
 import 'package:ffi/ffi.dart';
 
 import 'manifest.dart';
@@ -92,10 +91,6 @@ abstract class KrakenBundle {
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
-      Timer(Duration(seconds: 10), () {
-        print('flutter total layout cost: $kFlutterLayoutTimeCost');
-        print('flutter total paint cost: $kFlutterPaintTimeCost');
-      });
     }
   }
 }
