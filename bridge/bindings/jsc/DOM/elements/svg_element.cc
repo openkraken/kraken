@@ -27,8 +27,8 @@ JSObjectRef JSSVGElement::instanceConstructor(JSContextRef ctx, JSObjectRef cons
   return instance->object;
 }
 
-JSSVGElement::SVGElementInstance::SVGElementInstance(JSSVGElement *jsAnchorElement)
-  : ElementInstance(jsAnchorElement, "svg", false), nativeSVGElement(new NativeSVGElement(nativeElement)) {
+JSSVGElement::SVGElementInstance::SVGElementInstance(JSSVGElement *jsSVGElement)
+  : ElementInstance(jsSVGElement, "svg", false), nativeSVGElement(new NativeSVGElement(nativeElement)) {
   std::string tagName = "svg";
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
