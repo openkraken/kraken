@@ -1328,12 +1328,6 @@ class Element extends Node
     BoundingClientRect boundingClientRect = BoundingClientRect(0, 0, 0, 0, 0, 0, 0, 0);
     RenderBox sizedBox = renderBoxModel;
     if (isRendererAttached) {
-      // need to flush layout to get correct size
-      elementManager
-          .getRootRenderObject()
-          .owner
-          .flushLayout();
-
       // Force flush layout.
       if (!sizedBox.hasSize) {
         sizedBox.markNeedsLayout();
