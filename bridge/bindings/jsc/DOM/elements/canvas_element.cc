@@ -28,8 +28,8 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
 
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeCanvasElement);
+  foundation::UICommandBuffer::instance(context->getContextId())
+    ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeCanvasElement);
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
@@ -81,8 +81,8 @@ bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
 
       buildUICommandArgs(name, widthString, args_01, args_02);
 
-      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+      foundation::UICommandBuffer::instance(_hostClass->contextId)
+        ->addCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     case CanvasElementProperty::height: {
@@ -94,8 +94,8 @@ bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
       NativeString args_02{};
 
       buildUICommandArgs(name, heightString, args_01, args_02);
-      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+      foundation::UICommandBuffer::instance(_hostClass->contextId)
+        ->addCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     default:

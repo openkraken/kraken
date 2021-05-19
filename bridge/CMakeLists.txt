@@ -41,9 +41,9 @@ list(APPEND BRIDGE_SOURCE
     foundation/ui_task_queue.cc
     foundation/inspector_task_queue.h
     foundation/inspector_task_queue.cc
-    foundation/task_queue.cpp
+    foundation/task_queue.cc
     foundation/task_queue.h
-    foundation/ui_command_queue.cc
+    foundation/ui_command_buffer.cc
     foundation/ui_command_callback_queue.cc
     foundation/closure.h
     foundation/bridge_callback.h

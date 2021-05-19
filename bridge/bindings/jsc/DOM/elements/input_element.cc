@@ -61,8 +61,8 @@ JSInputElement::InputElementInstance::InputElementInstance(JSInputElement *jsAnc
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
 
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeInputElement);
+  foundation::UICommandBuffer::instance(context->getContextId())
+    ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeInputElement);
 }
 
 JSValueRef JSInputElement::InputElementInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -106,8 +106,8 @@ bool JSInputElement::InputElementInstance::setProperty(std::string &name, JSValu
     NativeString args_01{};
     NativeString args_02{};
     buildUICommandArgs(name, string, args_01, args_02);
-    foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    foundation::UICommandBuffer::instance(_hostClass->contextId)
+      ->addCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
     return true;
   } else {
     return ElementInstance::setProperty(name, value, exception);

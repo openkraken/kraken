@@ -121,8 +121,8 @@ bool StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef
   NativeString args_01{};
   NativeString args_02{};
   buildUICommandArgs(name, valueStr, args_01, args_02);
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
+  foundation::UICommandBuffer::instance(_hostClass->contextId)
+    ->addCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
 
   return true;
 }
@@ -141,8 +141,8 @@ void StyleDeclarationInstance::internalRemoveProperty(std::string &name, JSValue
   std::string empty;
   buildUICommandArgs(name, empty, args_01, args_02);
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
+  foundation::UICommandBuffer::instance(_hostClass->contextId)
+    ->addCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
 }
 
 JSValueRef StyleDeclarationInstance::internalGetPropertyValue(std::string &name,

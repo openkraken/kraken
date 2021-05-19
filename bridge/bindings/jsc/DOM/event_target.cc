@@ -76,8 +76,8 @@ EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, int64_t id)
 
 EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
+  foundation::UICommandBuffer::instance(_hostClass->contextId)
+      ->addCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
 
   // Release handler callbacks.
   if (context->isValid()) {
@@ -144,7 +144,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
       std::find(EventTarget->m_jsOnlyEvents.begin(), EventTarget->m_jsOnlyEvents.end(), eventType) != EventTarget->m_jsOnlyEvents.end();
 
     if (!isJsOnlyEvent) {
-      foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(
+      foundation::UICommandBuffer::instance(contextId)->addCommand(
         eventTargetInstance->eventTargetId, UICommand::addEvent, args_01, nullptr);
     };
   }
@@ -352,7 +352,7 @@ void EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value
   int32_t contextId = _hostClass->contextId;
   NativeString args_01{};
   buildUICommandArgs(eventType, args_01);
-  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommand::addEvent, args_01, nullptr);
+  foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetId, UICommand::addEvent, args_01, nullptr);
 }
 
 void EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

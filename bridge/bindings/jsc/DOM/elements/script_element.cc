@@ -27,8 +27,8 @@ JSScriptElement::ScriptElementInstance::ScriptElementInstance(JSScriptElement *j
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
 
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
+  foundation::UICommandBuffer::instance(context->getContextId())
+      ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
 }
 
 JSValueRef JSScriptElement::ScriptElementInstance::getProperty(std::string &name, JSValueRef *exception) {
@@ -59,8 +59,8 @@ bool JSScriptElement::ScriptElementInstance::setProperty(std::string &name, JSVa
     NativeString args_01{};
     NativeString args_02{};
     buildUICommandArgs(name, srcString, args_01, args_02);
-    foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    foundation::UICommandBuffer::instance(_hostClass->contextId)
+      ->addCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
     return true;
   }
 

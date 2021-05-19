@@ -152,8 +152,8 @@ ElementInstance::ElementInstance(JSElement *element, const char *tagName, bool s
     std::string t = std::string(tagName);
     NativeString args_01{};
     buildUICommandArgs(t, args_01);
-    ::foundation::UICommandTaskMessageQueue::instance(element->context->getContextId())
-        ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
+    ::foundation::UICommandBuffer::instance(element->context->getContextId())
+        ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
   }
 }
 // Only for init HTML element
@@ -410,8 +410,8 @@ JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   NativeString args_02{};
   buildUICommandArgs(name, valueStringRef, args_01, args_02);
 
-  ::foundation::UICommandTaskMessageQueue::instance(elementInstance->_hostClass->contextId)
-    ->registerCommand(elementInstance->eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+  ::foundation::UICommandBuffer::instance(elementInstance->_hostClass->contextId)
+    ->addCommand(elementInstance->eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
 
   return nullptr;
 }
@@ -494,8 +494,8 @@ JSValueRef JSElement::removeAttribute(JSContextRef ctx, JSObjectRef function, JS
 
     NativeString args_01{};
     buildUICommandArgs(name, args_01);
-    ::foundation::UICommandTaskMessageQueue::instance(element->_hostClass->contextId)
-      ->registerCommand(element->eventTargetId, UICommand::removeProperty, args_01, nullptr);
+    ::foundation::UICommandBuffer::instance(element->_hostClass->contextId)
+      ->addCommand(element->eventTargetId, UICommand::removeProperty, args_01, nullptr);
   }
 
   return nullptr;

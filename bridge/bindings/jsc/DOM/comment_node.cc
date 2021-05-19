@@ -42,8 +42,8 @@ JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsComment
   NativeString args_01{};
   buildUICommandArgs(str, args_01);
 
-  ::foundation::UICommandTaskMessageQueue::instance(jsCommentNode->contextId)
-    ->registerCommand(eventTargetId, UICommand::createComment, args_01, nativeComment);
+  ::foundation::UICommandBuffer::instance(jsCommentNode->contextId)
+    ->addCommand(eventTargetId, UICommand::createComment, args_01, nativeComment);
 }
 
 bool JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
