@@ -52,8 +52,8 @@ JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef con
 
     for (size_t i = 0; i < length; i++) {
       JSValueRef jsOnlyEvent = JSObjectGetPropertyAtIndex(ctx, jsOnlyEvents, i, exception);
-      JSStringRef e = JSValueToStringCopy(ctx, jsOnlyEvent, exception);
-      std::string event = JSStringToStdString(e);
+      std::string event;
+      context->sharedStringCache.getString(&event, ctx, jsOnlyEvent, exception);
       m_jsOnlyEvents.emplace_back(event);
     }
   }
@@ -129,11 +129,11 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     return nullptr;
   }
 
-  JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
-    std::string &&eventType = JSStringToStdString(eventTypeStringRef);
+  std::string eventType;
+  eventTargetInstance->context->sharedStringCache.getString(&eventType, ctx, eventNameValueRef, exception);
 
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
-    eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
+    eventTargetInstance->_eventHandlers[eventType] = std::forward_list<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
     NativeString args_01{};
@@ -148,9 +148,9 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
         eventTargetInstance->eventTargetId, UICommand::addEvent, args_01, nullptr);
     };
   }
-  std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
+  std::forward_list<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
   JSValueProtect(ctx, callbackObjectRef);
-  handlers.emplace_back(callbackObjectRef);
+  handlers.emplace_after(handlers.cbefore_begin(), callbackObjectRef);
 
   return nullptr;
 }
@@ -206,23 +206,22 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
     return nullptr;
   }
 
-  JSStringRef eventNameStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
-  std::string &&eventType = JSStringToStdString(eventNameStringRef);
+  std::string eventType;
+  eventTargetInstance->context->sharedStringCache.getString(&eventType, ctx, eventNameValueRef, exception);
 
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
     return nullptr;
   }
 
-  std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
+  std::forward_list<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
 
-  for (auto it = handlers.begin(); it != handlers.end();) {
-    if (*it == callbackObjectRef) {
+  handlers.remove_if([&callbackObjectRef, &ctx](JSObjectRef function) {
+    if (function == callbackObjectRef) {
       JSValueUnprotect(ctx, callbackObjectRef);
-      it = handlers.erase(it);
-    } else {
-      ++it;
+      return true;
     }
-  }
+    return false;
+  });
 
   return nullptr;
 }
@@ -337,12 +336,12 @@ void EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value
   std::string eventType = name.substr(2);
 
   if (_eventHandlers.count(eventType) == 0) {
-    _eventHandlers[eventType] = std::deque<JSObjectRef>();
+    _eventHandlers[eventType] = std::forward_list<JSObjectRef>();
   }
 
   JSObjectRef handlerObjectRef = JSValueToObject(_hostClass->ctx, value, exception);
   JSValueProtect(_hostClass->ctx, handlerObjectRef);
-  _eventHandlers[eventType].emplace_back(handlerObjectRef);
+  _eventHandlers[eventType].emplace_after(_eventHandlers[eventType].cbefore_begin(), handlerObjectRef);
 
   auto Event = reinterpret_cast<JSEventTarget *>(_hostClass);
   auto isJsOnlyEvent = std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), name.substr(2)) !=

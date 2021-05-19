@@ -81,11 +81,7 @@ StyleDeclarationInstance::StyleDeclarationInstance(
   CSSStyleDeclaration *cssStyleDeclaration, EventTargetInstance *ownerEventTarget)
   : Instance(cssStyleDeclaration), ownerEventTarget(ownerEventTarget) {}
 
-StyleDeclarationInstance::~StyleDeclarationInstance() {
-  for (auto &string : properties) {
-    JSStringRelease(string.second);
-  }
-}
+StyleDeclarationInstance::~StyleDeclarationInstance() {}
 
 JSValueRef StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *exception) {
   auto &prototypePropertyMap = getCSSStyleDeclarationPrototypePropertyMap();
@@ -96,7 +92,7 @@ JSValueRef StyleDeclarationInstance::getProperty(std::string &name, JSValueRef *
   }
 
   if (properties.count(name) > 0) {
-    return JSValueMakeString(_hostClass->ctx, properties[name]);
+    return properties[name];
   }
 
   return JSValueMakeString(_hostClass->ctx, JSStringCreateWithUTF8CString(""));
@@ -119,11 +115,8 @@ bool StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef
     valueStr = JSValueToStringCopy(_hostClass->ctx, value, exception);
   }
 
-  JSStringRetain(valueStr);
-
   name = parseJavaScriptCSSPropertyName(name);
-
-  properties[name] = valueStr;
+  properties[name] = value;
 
   NativeString args_01{};
   NativeString args_02{};
@@ -134,34 +127,29 @@ bool StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef
   return true;
 }
 
-void StyleDeclarationInstance::internalRemoveProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
+void StyleDeclarationInstance::internalRemoveProperty(std::string &name, JSValueRef *exception) {
   name = parseJavaScriptCSSPropertyName(name);
 
   if (properties.count(name) == 0) {
     return;
   }
 
-  JSStringRef emptyStringRef = JSStringCreateWithUTF8CString("");
-  JSStringRetain(emptyStringRef);
-  properties[name] = emptyStringRef;
-
+  properties.erase(name);
 
   NativeString args_01{};
   NativeString args_02{};
-
-  buildUICommandArgs(name, emptyStringRef, args_01, args_02);
+  std::string empty;
+  buildUICommandArgs(name, empty, args_01, args_02);
 
   foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
     ->registerCommand(ownerEventTarget->eventTargetId, UICommand::setStyle, args_01, args_02, nullptr);
 }
 
-JSValueRef StyleDeclarationInstance::internalGetPropertyValue(JSStringRef nameRef,
+JSValueRef StyleDeclarationInstance::internalGetPropertyValue(std::string &name,
                                                                                    JSValueRef *exception) {
-  std::string &&name = JSStringToStdString(nameRef);
   name = parseJavaScriptCSSPropertyName(name);
 
-  return JSValueMakeString(_hostClass->ctx, properties[name]);
+  return properties[name];
 }
 
 JSValueRef CSSStyleDeclaration::setProperty(JSContextRef ctx, JSObjectRef function,
@@ -181,15 +169,14 @@ JSValueRef CSSStyleDeclaration::setProperty(JSContextRef ctx, JSObjectRef functi
     return nullptr;
   }
 
-  JSStringRef propertyStringRef = JSValueToStringCopy(ctx, propertyValueRef, exception);
-
   if (!JSValueIsString(ctx, valueValueRef)) {
     throwJSError(ctx, "Failed to execute setProperty: value type is not a string.", exception);
     return nullptr;
   }
 
   auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(thisObject));
-  std::string name = JSStringToStdString(propertyStringRef);
+  std::string name;
+  styleInstance->context->sharedStringCache.getString(&name, ctx, propertyValueRef, exception);
   styleInstance->internalSetProperty(name, valueValueRef, exception);
 
   return nullptr;
@@ -204,16 +191,17 @@ JSValueRef CSSStyleDeclaration::removeProperty(JSContextRef ctx, JSObjectRef fun
     return nullptr;
   }
 
-  const JSValueRef propertyValueRef = arguments[0];
+  const JSValueRef propertyNameRef = arguments[0];
 
-  if (!JSValueIsString(ctx, propertyValueRef)) {
+  if (!JSValueIsString(ctx, propertyNameRef)) {
     throwJSError(ctx, "Failed to execute removeProperty: property value type is not a string.", exception);
     return nullptr;
   }
 
-  JSStringRef propertyStringRef = JSValueToStringCopy(ctx, propertyValueRef, exception);
   auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(thisObject));
-  styleInstance->internalRemoveProperty(propertyStringRef, exception);
+  std::string name;
+  styleInstance->context->sharedStringCache.getString(&name, ctx, propertyNameRef, exception);
+  styleInstance->internalRemoveProperty(name, exception);
   return nullptr;
 }
 
@@ -226,16 +214,17 @@ JSValueRef CSSStyleDeclaration::getPropertyValue(JSContextRef ctx, JSObjectRef f
     return nullptr;
   }
 
-  const JSValueRef propertyValueRef = arguments[0];
+  const JSValueRef propertyNameRef = arguments[0];
 
-  if (!JSValueIsString(ctx, propertyValueRef)) {
+  if (!JSValueIsString(ctx, propertyNameRef)) {
     throwJSError(ctx, "Failed to execute getPropertyValue: property value type is not a string.", exception);
     return nullptr;
   }
 
-  JSStringRef propertyStringRef = JSValueToStringCopy(ctx, propertyValueRef, exception);
   auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(thisObject));
-  return styleInstance->internalGetPropertyValue(propertyStringRef, exception);
+  std::string name;
+  styleInstance->context->sharedStringCache.getString(&name, ctx, propertyNameRef, exception);
+  return styleInstance->internalGetPropertyValue(name, exception);
 }
 
 void StyleDeclarationInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {

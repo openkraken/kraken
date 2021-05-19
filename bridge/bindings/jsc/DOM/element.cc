@@ -37,14 +37,13 @@ JSValueRef JSElementAttributes::getProperty(std::string &name, JSValueRef *excep
       return JSValueMakeNumber(ctx, m_attributes.size());
     }
   } else if (hasAttribute(name)) {
-    return JSValueMakeString(ctx, getAttribute(name));
+    return getAttribute(name);
   }
   return nullptr;
 }
 
 bool JSElementAttributes::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  JSStringRef stringValue = JSValueToStringCopy(ctx, value, exception);
-  setAttribute(name, stringValue);
+  setAttribute(name, value);
   return false;
 }
 void JSElementAttributes::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -53,12 +52,12 @@ void JSElementAttributes::getPropertyNames(JSPropertyNameAccumulatorRef accumula
   }
 
   for (auto &property : m_attributes) {
-    JSPropertyNameAccumulatorAddName(accumulator, property.second);
+    JSPropertyNameAccumulatorAddName(accumulator, JSValueToStringCopy(ctx, property.second, nullptr));
   }
 }
 JSElementAttributes::~JSElementAttributes() {}
 
-JSStringRef JSElementAttributes::getAttribute(std::string &name) {
+JSValueRef JSElementAttributes::getAttribute(std::string &name) {
   bool numberIndex = isNumberIndex(name);
 
   if (numberIndex) {
@@ -69,23 +68,15 @@ JSStringRef JSElementAttributes::getAttribute(std::string &name) {
   return m_attributes[name];
 }
 
-void JSElementAttributes::setAttribute(std::string &name, JSStringRef value) {
+void JSElementAttributes::setAttribute(std::string &name, JSValueRef value) {
   bool numberIndex = isNumberIndex(name);
 
   if (numberIndex) {
     int64_t index = std::stoi(name);
 
-    if (v_attributes[index] != nullptr) {
-      JSStringRelease(v_attributes[index]);
-    }
-
     v_attributes[index] = value;
   } else {
     v_attributes.emplace_back(value);
-  }
-
-  if (m_attributes.count(name) > 0) {
-    JSStringRelease(m_attributes[name]);
   }
 
   m_attributes[name] = value;
@@ -103,7 +94,7 @@ bool JSElementAttributes::hasAttribute(std::string &name) {
 }
 
 void JSElementAttributes::removeAttribute(std::string &name) {
-  JSStringRef value = m_attributes[name];
+  JSValueRef value = m_attributes[name];
 
   auto index = std::find(v_attributes.begin(), v_attributes.end(), value);
   v_attributes.erase(index);
@@ -111,24 +102,23 @@ void JSElementAttributes::removeAttribute(std::string &name) {
   m_attributes.erase(name);
 }
 
-std::map<std::string, JSStringRef> &JSElementAttributes::getAttributesMap() {
+std::map<std::string, JSValueRef> &JSElementAttributes::getAttributesMap() {
   return m_attributes;
 }
 
-void JSElementAttributes::setAttributesMap(std::map<std::string, JSStringRef> &attributes) {
-  // std::copy(attributes.begin(),attributes.end(), inserter(m_attributes, m_attributes.begin()));
-  std::map<std::string, JSStringRef>::iterator iter = attributes.begin();
+void JSElementAttributes::setAttributesMap(std::map<std::string, JSValueRef> &attributes) {
+  auto &&iter = attributes.begin();
   while (iter != attributes.end()) {
-    m_attributes[iter->first] = JSValueToStringCopy(ctx, JSValueMakeString(ctx, iter->second), nullptr);
+    m_attributes[iter->first] = iter->second;
     iter++;
   }
 }
 
-std::vector<JSStringRef> &JSElementAttributes::getAttributesVector() {
+std::vector<JSValueRef> &JSElementAttributes::getAttributesVector() {
   return v_attributes;
 }
 
-void JSElementAttributes::setAttributesVector(std::vector<JSStringRef> &attributes) {
+void JSElementAttributes::setAttributesVector(std::vector<JSValueRef> &attributes) {
   v_attributes.assign(attributes.begin(), attributes.end());
 }
 
@@ -399,34 +389,26 @@ JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObj
     return nullptr;
   }
 
-  JSStringRef nameStringRef = JSValueToStringCopy(ctx, nameValueRef, exception);
-  JSStringRef valueStringRef = JSValueToStringCopy(ctx, attributeValueRef, exception);
-  std::string &&name = JSStringToStdString(nameStringRef);
-  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
-
-  JSStringRetain(valueStringRef);
-
-  std::string valueString = JSStringToStdString(valueStringRef);
+  std::string name;
+  elementInstance->context->sharedStringCache.getString(&name, ctx, nameValueRef, exception);
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
   auto attributes = *elementInstance->m_attributes;
 
   if (attributes->hasAttribute(name)) {
-    JSStringRef oldValueRef = attributes->getAttribute(name);
-    std::string oldValue = JSStringToStdString(oldValueRef);
-    JSStringRelease(oldValueRef);
-    attributes->setAttribute(name, valueStringRef);
-    elementInstance->_didModifyAttribute(name, oldValue, valueString);
+    JSValueRef oldValueRef = attributes->getAttribute(name);
+    attributes->setAttribute(name, attributeValueRef);
+    elementInstance->_didModifyAttribute(name, oldValueRef, attributeValueRef);
   } else {
-    attributes->setAttribute(name, valueStringRef);
-    std::string empty;
-    elementInstance->_didModifyAttribute(name, empty, valueString);
+    attributes->setAttribute(name, attributeValueRef);
+    elementInstance->_didModifyAttribute(name, nullptr, attributeValueRef);
   }
 
+  JSStringRef valueStringRef = JSValueToStringCopy(ctx, attributeValueRef, exception);
   NativeString args_01{};
   NativeString args_02{};
-  buildUICommandArgs(name, valueString, args_01, args_02);
+  buildUICommandArgs(name, valueStringRef, args_01, args_02);
 
   ::foundation::UICommandTaskMessageQueue::instance(elementInstance->_hostClass->contextId)
     ->registerCommand(elementInstance->eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
@@ -449,13 +431,14 @@ JSValueRef JSElement::getAttribute(JSContextRef ctx, JSObjectRef function, JSObj
     return nullptr;
   }
 
-  JSStringRef nameStringRef = JSValueToStringCopy(ctx, nameValueRef, exception);
-  std::string &&name = JSStringToStdString(nameStringRef);
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
+  std::string name;
+  elementInstance->context->sharedStringCache.getString(&name, ctx, nameValueRef, exception);
+
   auto attributes = *elementInstance->m_attributes;
 
   if (attributes->hasAttribute(name)) {
-    return JSValueMakeString(ctx, attributes->getAttribute(name));
+    return attributes->getAttribute(name);
   }
 
   return nullptr;
@@ -476,9 +459,9 @@ JSValueRef JSElement::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObj
     return nullptr;
   }
 
-  JSStringRef nameStringRef = JSValueToStringCopy(ctx, nameValueRef, exception);
-  std::string &&name = JSStringToStdString(nameStringRef);
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
+  std::string name;
+  elementInstance->context->sharedStringCache.getString(&name, ctx, nameValueRef, exception);
   auto attributes = *elementInstance->m_attributes;
 
   return JSValueMakeBoolean(ctx, attributes->hasAttribute(name));
@@ -499,18 +482,15 @@ JSValueRef JSElement::removeAttribute(JSContextRef ctx, JSObjectRef function, JS
     return nullptr;
   }
 
-  JSStringRef nameStringRef = JSValueToStringCopy(ctx, nameValueRef, exception);
-  std::string &&name = JSStringToStdString(nameStringRef);
   auto element = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
+  std::string name;
+  element->context->sharedStringCache.getString(&name, ctx, nameValueRef, exception);
   auto attributes = *element->m_attributes;
 
   if (attributes->hasAttribute(name)) {
-    JSStringRef idRef = attributes->getAttribute(name);
-    std::string id = JSStringToStdString(idRef);
-    std::string empty;
-
+    JSValueRef idRef = attributes->getAttribute(name);
     (*element->m_attributes)->removeAttribute(name);
-    element->_didModifyAttribute(name, id, empty);
+    element->_didModifyAttribute(name, idRef, nullptr);
 
     NativeString args_01{};
     buildUICommandArgs(name, args_01);
@@ -709,9 +689,8 @@ void ElementInstance::_notifyChildRemoved() {
   auto attributes = *m_attributes;
   std::string idString = "id";
   if (attributes->hasAttribute(idString)) {
-    JSStringRef idRef = attributes->getAttribute(idString);
-    std::string id = JSStringToStdString(idRef);
-    document()->removeElementById(id, this);
+    JSValueRef idRef = attributes->getAttribute(idString);
+    document()->removeElementById(idRef, this);
   }
 }
 void ElementInstance::_notifyNodeInsert(NodeInstance *insertNode) {
@@ -731,24 +710,23 @@ void ElementInstance::_notifyChildInsert() {
   std::string idKey = "id";
   auto attributes = *m_attributes;
   if (attributes->hasAttribute(idKey)) {
-    JSStringRef idRef = attributes->getAttribute(idKey);
-    std::string id = JSStringToStdString(idRef);
-    document()->addElementById(id, this);
+    JSValueRef idRef = attributes->getAttribute(idKey);
+    document()->addElementById(idRef, this);
   }
 }
-void ElementInstance::_didModifyAttribute(std::string &name, std::string &oldId, std::string &newId) {
+void ElementInstance::_didModifyAttribute(std::string &name, JSValueRef oldId, JSValueRef newId) {
   if (name == "id") {
     _beforeUpdateId(oldId, newId);
   }
 }
-void ElementInstance::_beforeUpdateId(std::string &oldId, std::string &newId) {
-  if (oldId == newId) return;
+void ElementInstance::_beforeUpdateId(JSValueRef oldId, JSValueRef newId) {
+  if (oldId == newId || JSValueIsStrictEqual(ctx, oldId, newId)) return;
 
-  if (!oldId.empty()) {
+  if (oldId != nullptr) {
     document()->removeElementById(oldId, this);
   }
 
-  if (!newId.empty()) {
+  if (newId != nullptr) {
     document()->addElementById(newId, this);
   }
 }

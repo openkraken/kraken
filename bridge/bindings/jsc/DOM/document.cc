@@ -73,10 +73,9 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
     return nullptr;
   }
 
-  JSStringRef tagNameStringRef = JSValueToStringCopy(ctx, tagNameValue, exception);
-  std::string tagName = JSStringToStdString(tagNameStringRef);
-
   auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
+  std::string tagName;
+  document->context->sharedStringCache.getString(&tagName, ctx, tagNameValue, exception);
   auto element = JSElement::buildElementInstance(document->context, tagName);
   return element->object;
 }
@@ -323,14 +322,18 @@ void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator
   }
 }
 
-void DocumentInstance::removeElementById(std::string &id, ElementInstance *element) {
+void DocumentInstance::removeElementById(JSValueRef idRef, ElementInstance *element) {
+  std::string id;
+  context->sharedStringCache.getString(&id, ctx, idRef, nullptr);
   if (elementMapById.count(id) > 0) {
     auto &list = elementMapById[id];
     list.erase(std::find(list.begin(), list.end(), element));
   }
 }
 
-void DocumentInstance::addElementById(std::string &id, ElementInstance *element) {
+void DocumentInstance::addElementById(JSValueRef idRef, ElementInstance *element) {
+  std::string id;
+  context->sharedStringCache.getString(&id, ctx, idRef, nullptr);
   if (elementMapById.count(id) == 0) {
     elementMapById[id] = std::vector<ElementInstance *>();
   }
@@ -353,11 +356,11 @@ JSValueRef JSDocument::getElementById(JSContextRef ctx, JSObjectRef function, JS
     return nullptr;
   }
 
-  JSStringRef idStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
-  std::string id = JSStringToStdString(idStringRef);
+  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
+  std::string id;
+  document->context->sharedStringCache.getString(&id, ctx, arguments[0], exception);
   if (id.empty()) return nullptr;
 
-  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   if (document->elementMapById.count(id) == 0) {
     return nullptr;
   }
