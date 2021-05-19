@@ -177,7 +177,7 @@ mixin CSSOverflowMixin on ElementBase {
         defaultStyle: element.defaultStyle, isIntrinsicBox: element.isInlineBox, tagName: element.tagName, isHiddenElement: true);
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
-    scrollingContentLayoutBox = element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
+    scrollingContentLayoutBox = Element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
 
     scrollingContentLayoutBox.isScrollingContentBox = true;
     scrollingElement.renderBoxModel = scrollingContentLayoutBox;
@@ -201,7 +201,7 @@ mixin CSSOverflowMixin on ElementBase {
     }
     RenderObject layoutBoxParent = renderBoxModel.parent;
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox outerLayoutBox = element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
+    RenderLayoutBox outerLayoutBox = Element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
 
     _createScrollingLayoutBox(element);
 
@@ -231,7 +231,7 @@ mixin CSSOverflowMixin on ElementBase {
     if (scrollingContentLayoutBox == null) return;
     RenderObject layoutBoxParent = renderBoxModel.parent;
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox newLayoutBox = element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
+    RenderLayoutBox newLayoutBox = Element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
     element.renderBoxModel = newLayoutBox;
@@ -279,7 +279,7 @@ mixin CSSOverflowMixin on ElementBase {
     } else if (parent is ContainerRenderObjectMixin) {
       // Update renderBoxModel reference before move to its containing block
       element.renderBoxModel = newRenderObject;
-      element.parent.addChildRenderObject(element, after: previousSibling);
+      element.parentElement.addChildRenderObject(element, after: previousSibling);
     }
   }
 

@@ -567,15 +567,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_START, uniqueId: targetId);
     }
 
-    CSSDisplay display = renderStyle.display;
-    if (display == CSSDisplay.none) {
-      size = constraints.smallest;
-      if (kProfileMode) {
-        PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId);
-      }
-      return;
-    }
-
     beforeLayout();
 
     RenderBox child = firstChild;
@@ -676,10 +667,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   bool _isChildDisplayNone(RenderObject child) {
-    if (child is RenderTextBox) {
-      return false;
-    }
-
     if (child is RenderBoxModel) {
       return child.renderStyle.display == CSSDisplay.none;
     }
