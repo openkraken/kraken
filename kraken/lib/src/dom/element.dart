@@ -106,10 +106,6 @@ class Element extends Node
   /// Style declaration from user input.
   CSSStyleDeclaration style;
 
-  // Placeholder renderObject of positioned element(absolute/fixed)
-  // used to get original coordinate before move away from document flow.
-  RenderObject renderPositionedPlaceholder;
-
   Element scrollingElement;
 
   Size get viewportSize => elementManager.viewport.viewportSize;
@@ -431,6 +427,10 @@ class Element extends Node
         RenderLayoutBox parentRenderLayoutBox = scrollingContentLayoutBox != null ?
           scrollingContentLayoutBox : _renderLayoutBox;
         parentRenderLayoutBox.insert(child.renderBoxModel, after: after);
+
+        if (positionType == CSSPositionType.sticky) {
+          _addPositionHolder(parentRenderLayoutBox, child);
+        }
         break;
     }
   }
@@ -600,14 +600,6 @@ class Element extends Node
     return node;
   }
 
-  // Add placeholder to positioned element for calculate original
-  // coordinate before moved away
-  void addPositionPlaceholder() {
-    if (renderPositionedPlaceholder == null || !renderPositionedPlaceholder.attached) {
-      addChild(renderPositionedPlaceholder);
-    }
-  }
-
   void _addPositionedChild(Element child, CSSPositionType position) {
     Element containingBlockElement;
     switch (position) {
@@ -623,30 +615,39 @@ class Element extends Node
 
     RenderLayoutBox parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox != null ?
       containingBlockElement.scrollingContentLayoutBox : containingBlockElement._renderLayoutBox;
+    RenderBoxModel childRenderBoxModel = child.renderBoxModel;
+    _setPositionedChildParentData(parentRenderLayoutBox, child);
+    parentRenderLayoutBox.add(childRenderBoxModel);
 
+    _addPositionHolder(parentRenderLayoutBox, child);
+  }
+
+  void _addPositionHolder(RenderLayoutBox parentRenderLayoutBox, Element child) {
     Size preferredSize = Size.zero;
-    CSSDisplay childDisplay = child.renderBoxModel.renderStyle.display;
     RenderStyle childRenderStyle = child.renderBoxModel.renderStyle;
-    if (childDisplay != CSSDisplay.inline || (position != CSSPositionType.static)) {
+    if (childRenderStyle.position == CSSPositionType.sticky) {
+      preferredSize = Size(0, 0);
+    } else if (childRenderStyle.display != CSSDisplay.inline) {
       preferredSize = Size(
         childRenderStyle.width ?? 0,
         childRenderStyle.height ?? 0,
       );
     }
-
     RenderPositionHolder childPositionHolder = RenderPositionHolder(preferredSize: preferredSize);
-
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-
     childRenderBoxModel.renderPositionHolder = childPositionHolder;
-    _setPositionedChildParentData(parentRenderLayoutBox, child);
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
 
-    parentRenderLayoutBox.add(childRenderBoxModel);
-
-    /// Placeholder of flexbox needs to inherit size from its real display box,
-    /// so it needs to layout after real box layout
-    child.parent.addChild(childPositionHolder);
+    if (childRenderStyle.position == CSSPositionType.sticky) {
+      // Placeholder of sticky renderBox need to inherit offset from original renderBox,
+      // so it needs to layout before original renderBox
+      RenderBox preSibling = parentRenderLayoutBox.childBefore(childRenderBoxModel);
+      parentRenderLayoutBox.insert(childPositionHolder, after: preSibling);
+    } else {
+      /// Placeholder of flexbox needs to inherit size from its real display box,
+      /// so it needs to layout after real box layout
+      child.parent.addChild(childPositionHolder);
+    }
   }
 
   /// Cache fixed renderObject to root element

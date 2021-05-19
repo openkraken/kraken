@@ -537,7 +537,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         // sticky offset to the layout stage of  scroll container if its not layouted yet
         // due to the layout order of Flutter renderObject tree is from down to up.
         if (scrollContainer.hasSize) {
-          scrollContainer.setStickyChildBaseOffset(child);
           CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
         }
       }
@@ -551,7 +550,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       stickyChildren = findStickyChildren();
       // Calculate the offset of its sticky children
       for (RenderBoxModel stickyChild in stickyChildren) {
-        setStickyChildBaseOffset(stickyChild);
         CSSPositionedLayout.applyStickyChildOffset(this, stickyChild);
       }
     }

@@ -159,88 +159,113 @@ class CSSPositionedLayout {
   }
 
   /// Set horizontal offset of sticky element
-  static bool _applyStickyChildHorizontalOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
+  static bool _applyStickyChildHorizontalOffset(
+    RenderBoxModel scrollContainer,
+    RenderBoxModel child,
+    Offset childOriginalOffset,
+    Offset childToScrollContainerOffset,
+  ) {
     bool isHorizontalFixed = false;
-    RenderStyle childRenderStyle = child.renderStyle;
-    RenderLayoutParentData boxParentData = child?.parentData;
-    double offsetX = child.baseOffsetX;
+    double offsetX = childOriginalOffset.dx;
     double childWidth = child.boxSize.width;
-
-    // Sticky element cannot exceed the boundary of its parent element container
-    RenderBoxModel parentContainer = child.parent;
-    double minOffsetX = 0;
-    double maxOffsetX = parentContainer.boxSize.width - childWidth;
-    double offsetLeft = child.baseScrollContainerOffsetX - scrollContainer.scrollLeft;
     double scrollContainerWidth = scrollContainer.boxSize.width;
-    double offsetRight = scrollContainerWidth - childWidth - offsetLeft;
+    // Dynamic offset to scroll container
+    double offsetLeftToScrollContainer = childToScrollContainerOffset.dx - scrollContainer.scrollLeft;
+    double offsetRightToScrollContainer = scrollContainerWidth - childWidth - offsetLeftToScrollContainer;
+    RenderStyle childRenderStyle = child.renderStyle;
+    RenderStyle scrollContainerRenderStyle = scrollContainer.renderStyle;
 
     if (childRenderStyle.left != null) {
-      double left = childRenderStyle.left.length;
-      isHorizontalFixed = offsetLeft < left;
+      // Sticky offset to scroll container must include padding and border
+      double stickyLeft = childRenderStyle.left.length +
+        scrollContainerRenderStyle.paddingLeft +
+        scrollContainerRenderStyle.borderLeft;
+      isHorizontalFixed = offsetLeftToScrollContainer < stickyLeft;
       if (isHorizontalFixed) {
-        offsetX += left - offsetLeft;
+        offsetX += stickyLeft - offsetLeftToScrollContainer;
+        // Sticky child can not exceed the left boundary of its parent container
+        RenderBoxModel parentContainer = child.parent;
+        double maxOffsetX = parentContainer.boxSize.width - childWidth;
         if (offsetX > maxOffsetX) {
           offsetX = maxOffsetX;
         }
       }
     } else if (childRenderStyle.left != null) {
-      double right = childRenderStyle.right.length;
-      isHorizontalFixed = offsetRight < right;
+      // Sticky offset to scroll container must include padding and border
+      double stickyRight = childRenderStyle.right.length +
+        scrollContainerRenderStyle.paddingRight +
+        scrollContainerRenderStyle.borderRight;
+      isHorizontalFixed = offsetRightToScrollContainer < stickyRight;
       if (isHorizontalFixed) {
-        offsetX += offsetRight - right;
+        offsetX += offsetRightToScrollContainer - stickyRight;
+        // Sticky element can not exceed the right boundary of its parent container
+        double minOffsetX = 0;
         if (offsetX < minOffsetX) {
           offsetX = minOffsetX;
         }
       }
     }
 
+    RenderLayoutParentData boxParentData = child?.parentData;
     boxParentData.offset = Offset(
-      isHorizontalFixed ? offsetX : child.baseOffsetX,
+      offsetX,
       boxParentData.offset.dy,
     );
     return isHorizontalFixed;
   }
 
   /// Set vertical offset of sticky element
-  static bool _applyStickyChildVerticalOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
+  static bool _applyStickyChildVerticalOffset(
+    RenderBoxModel scrollContainer,
+    RenderBoxModel child,
+    Offset childOriginalOffset,
+    Offset childToScrollContainerOffset,
+  ) {
     bool isVerticalFixed = false;
-    RenderStyle childRenderStyle = child.renderStyle;
-    RenderLayoutParentData boxParentData = child?.parentData;
-    double offsetY = child.baseOffsetY;
+    double offsetY = childOriginalOffset.dy;
     double childHeight = child.boxSize.height;
-
-    // Sticky element cannot exceed the boundary of its parent element container
-    RenderBoxModel parentContainer = child.parent;
-    double minOffsetY = 0;
-    double maxOffsetY = parentContainer.boxSize.height - childHeight;
-
-    double offsetTop = child.baseScrollContainerOffsetY - scrollContainer.scrollTop;
     double scrollContainerHeight = scrollContainer.boxSize.height;
-    double offsetBottom = scrollContainerHeight - childHeight - offsetTop;
+    // Dynamic offset to scroll container
+    double offsetTopToScrollContainer = childToScrollContainerOffset.dy;
+    double offsetBottomToScrollContainer = scrollContainerHeight - childHeight - offsetTopToScrollContainer;
+    RenderStyle childRenderStyle = child.renderStyle;
+    RenderStyle scrollContainerRenderStyle = scrollContainer.renderStyle;
 
     if (childRenderStyle.top != null) {
-      double top = childRenderStyle.top.length;
-      isVerticalFixed = offsetTop < top;
+      // Sticky offset to scroll container must include padding and border
+      double stickyTop = childRenderStyle.top.length +
+        scrollContainerRenderStyle.paddingTop +
+        scrollContainerRenderStyle.borderTop;
+      isVerticalFixed = offsetTopToScrollContainer < stickyTop;
       if (isVerticalFixed) {
-        offsetY += top - offsetTop;
+        offsetY += stickyTop - offsetTopToScrollContainer;
+        // Sticky child can not exceed the bottom boundary of its parent container
+        RenderBoxModel parentContainer = child.parent;
+        double maxOffsetY = parentContainer.boxSize.height - childHeight;
         if (offsetY > maxOffsetY) {
           offsetY = maxOffsetY;
         }
       }
     } else if (childRenderStyle.bottom != null) {
-      double bottom = childRenderStyle.bottom.length;
-      isVerticalFixed = offsetBottom < bottom;
+      // Sticky offset to scroll container must include padding and border
+      double stickyBottom = childRenderStyle.bottom.length +
+        scrollContainerRenderStyle.paddingBottom +
+        scrollContainerRenderStyle.borderBottom;
+      isVerticalFixed = offsetBottomToScrollContainer < stickyBottom;
       if (isVerticalFixed) {
-        offsetY += offsetBottom - bottom;
+        offsetY += offsetBottomToScrollContainer - stickyBottom;
+        // Sticky child can not exceed the upper boundary of its parent container
+        double minOffsetY = 0;
         if (offsetY < minOffsetY) {
           offsetY = minOffsetY;
         }
       }
     }
 
+    RenderLayoutParentData boxParentData = child?.parentData;
     boxParentData.offset = Offset(
       boxParentData.offset.dx,
-      isVerticalFixed ? offsetY : child.baseOffsetY,
+      offsetY,
     );
     return isVerticalFixed;
   }
@@ -251,8 +276,31 @@ class CSSPositionedLayout {
   /// the offsets are automatically calculated in reference to the nearest scrollport.
   /// https://www.w3.org/TR/css-position-3/#stickypos-insets
   static void applyStickyChildOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
-    bool isVerticalFixed = _applyStickyChildVerticalOffset(scrollContainer, child);
-    bool isHorizontalFixed = _applyStickyChildHorizontalOffset(scrollContainer, child);
+    RenderPositionHolder childRenderPositionHolder = child.renderPositionHolder;
+    RenderLayoutParentData childPlaceHolderParentData = childRenderPositionHolder.parentData;
+    // Original offset of sticky child in relative status
+    Offset childOriginalOffset = childPlaceHolderParentData.offset;
+
+    RenderObject rootRenderObject = child.elementManager.getRootRenderObject();
+    // Offset of sticky child to scroll container
+    Offset childToScrollContainerOffset =
+      childRenderPositionHolder.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
+        scrollContainer.localToGlobal(Offset.zero, ancestor: rootRenderObject);
+
+    bool isVerticalFixed = false;
+    bool isHorizontalFixed = false;
+    RenderStyle childRenderStyle = child.renderStyle;
+
+    if (childRenderStyle.left != null || childRenderStyle.right != null) {
+      isHorizontalFixed = _applyStickyChildHorizontalOffset(
+        scrollContainer, child, childOriginalOffset, childToScrollContainerOffset
+      );
+    }
+    if (childRenderStyle.top != null || childRenderStyle.bottom != null) {
+      isVerticalFixed = _applyStickyChildVerticalOffset(
+        scrollContainer, child, childOriginalOffset, childToScrollContainerOffset
+      );
+    }
 
     if (isVerticalFixed || isHorizontalFixed) {
       // Change sticky status to fixed

@@ -1285,7 +1285,7 @@ describe('position-sticky', () => {
 
     await snapshot();
   });
-  // @TODO: <span> nest <div> case does not work
+  // @TODO: inline nest none-inline case does not work
   xit('large-top-2.tentative', async () => {
     let sticky;
     let sticky_1;
@@ -1646,7 +1646,7 @@ describe('position-sticky', () => {
 
     await snapshot();
   });
-  xit('nested-bottom', async () => {
+  it('nested-bottom', async () => {
     let prepadding;
     let filter;
     let sticky;
@@ -1934,6 +1934,8 @@ describe('position-sticky', () => {
 
     await snapshot();
   });
+
+  // @TODO: inline nest none-inline case does not work
   xit('nested-inline', async () => {
     let outerIndicator;
     let outerIndicator_1;
@@ -2265,6 +2267,7 @@ describe('position-sticky', () => {
 
     await snapshot();
   });
+  // @TODO: nested children size does not count into scroll container size
   xit('nested-left', async () => {
     let prepadding;
     let filter;
@@ -2349,6 +2352,8 @@ describe('position-sticky', () => {
 
     await snapshot();
   });
+
+  // @TODO: nested children size does not count into scroll container size
   xit('nested-right', async () => {
     let prepadding;
     let filter;
@@ -2439,7 +2444,7 @@ describe('position-sticky', () => {
 
     await snapshot();
   });
-  xit('nested-top', async () => {
+  it('nested-top', async () => {
     let prepadding;
     let filter;
     let sticky;
