@@ -493,15 +493,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_START, uniqueId: targetId);
     }
 
-    CSSDisplay display = renderStyle.display;
-    if (display == CSSDisplay.none) {
-      size = constraints.smallest;
-      if (kProfileMode) {
-        PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_END, uniqueId: targetId);
-      }
-      return;
-    }
-
     beforeLayout();
 
     RenderBox child = firstChild;
@@ -909,9 +900,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       while (child != null) {
         final RenderLayoutParentData childParentData = child.parentData;
 
-        if (childParentData.isPositioned ||
-            // Skip child that display is none
-            (child is RenderBoxModel && child.renderStyle.transformedDisplay == CSSDisplay.none)) {
+        if (childParentData.isPositioned) {
           child = childParentData.nextSibling;
           continue;
         }

@@ -598,53 +598,57 @@ class Element extends Node
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
-    willAttachRenderer();
-    style.applyTargetProperties();
+    CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
+    if (display != CSSDisplay.none) {
+      willAttachRenderer();
+      style.applyTargetProperties();
 
-    CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
-    // InlineFlex or Flex
-    bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
+      CSSDisplay parentDisplayValue = parent.renderBoxModel.renderStyle.display;
+      // InlineFlex or Flex
+      bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex ||
+          parentDisplayValue == CSSDisplay.inlineFlex;
 
-    parent.addChildRenderObject(this, after: after);
+      parent.addChildRenderObject(this, after: after);
 
-    ensureChildAttached();
+      ensureChildAttached();
 
-    /// Update flex siblings.
-    if (isParentFlexDisplayType) {
-      for (Element child in parent.children) {
-        if (parent.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
-          child.renderBoxModel.renderStyle.updateFlexItem();
-          child.renderBoxModel.markNeedsLayout();
+      /// Update flex siblings.
+      if (isParentFlexDisplayType) {
+        for (Element child in parent.children) {
+          if (parent.renderBoxModel is RenderFlexLayout && child.renderBoxModel != null) {
+            child.renderBoxModel.renderStyle.updateFlexItem();
+            child.renderBoxModel.markNeedsLayout();
+          }
         }
       }
+
+      /// Recalculate gradient after node attached when gradient length cannot be obtained from style
+      if (renderBoxModel.shouldRecalGradient) {
+        String backgroundImage = style[BACKGROUND_IMAGE];
+        renderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage);
+        renderBoxModel.shouldRecalGradient = false;
+      }
+
+      /// Calculate font-size which is percentage when node attached
+      /// where it can access the font-size of its parent element
+      if (renderBoxModel.shouldLazyCalFontSize) {
+        _updatePercentageFontSize();
+        renderBoxModel.shouldLazyCalFontSize = false;
+      }
+
+      /// Calculate line-height which is percentage when node attached
+      /// where it can access the font-size of its own element
+      if (renderBoxModel.shouldLazyCalLineHeight) {
+        _updatePercentageLineHeight();
+        renderBoxModel.shouldLazyCalLineHeight = false;
+      }
+
+      RenderStyle renderStyle = renderBoxModel.renderStyle;
+
+      /// Set display and transformedDisplay when display is not set in style
+      renderStyle.initDisplay(style, defaultDisplay);
+      didAttachRenderer();
     }
-
-    /// Recalculate gradient after node attached when gradient length cannot be obtained from style
-    if (renderBoxModel.shouldRecalGradient) {
-      String backgroundImage = style[BACKGROUND_IMAGE];
-      renderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage);
-      renderBoxModel.shouldRecalGradient = false;
-    }
-
-    /// Calculate font-size which is percentage when node attached
-    /// where it can access the font-size of its parent element
-    if (renderBoxModel.shouldLazyCalFontSize) {
-      _updatePercentageFontSize();
-      renderBoxModel.shouldLazyCalFontSize = false;
-    }
-
-    /// Calculate line-height which is percentage when node attached
-    /// where it can access the font-size of its own element
-    if (renderBoxModel.shouldLazyCalLineHeight) {
-      _updatePercentageLineHeight();
-      renderBoxModel.shouldLazyCalLineHeight = false;
-    }
-
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
-
-    /// Set display and transformedDisplay when display is not set in style
-    renderStyle.initDisplay(style, defaultDisplay);
-    didAttachRenderer();
   }
 
   // Detach renderObject of current node from parent
@@ -1492,7 +1496,7 @@ class Element extends Node
     }
   }
 
-  RenderBoxModel createRenderBoxModel(Element element, {RenderBoxModel prevRenderBoxModel, bool repaintSelf = false}) {
+  static RenderBoxModel createRenderBoxModel(Element element, {RenderBoxModel prevRenderBoxModel, bool repaintSelf = false}) {
     RenderBoxModel renderBoxModel = prevRenderBoxModel ?? element.renderBoxModel;
 
     if (renderBoxModel is RenderIntrinsic) {
@@ -1502,7 +1506,7 @@ class Element extends Node
     }
   }
 
-  RenderLayoutBox createRenderLayout(Element element, {CSSStyleDeclaration style, RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
+  static RenderLayoutBox createRenderLayout(Element element, {CSSStyleDeclaration style, RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
     style = style ?? element.style;
     CSSDisplay display = CSSDisplayMixin.getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]
@@ -1650,10 +1654,10 @@ class Element extends Node
     }
   }
 
-  RenderIntrinsic createRenderIntrinsic(Element element,
+  static RenderIntrinsic createRenderIntrinsic(Element element,
     {RenderIntrinsic prevRenderIntrinsic, bool repaintSelf = false}) {
     RenderIntrinsic intrinsic;
-    RenderStyle renderStyle = RenderStyle(style: style);
+    RenderStyle renderStyle = RenderStyle(style: element.style);
 
     if (prevRenderIntrinsic == null) {
       if (repaintSelf) {
