@@ -276,7 +276,7 @@ const int nativePtrMemOffset = 4;
 // To ensure the fastest subsequent random access.
 List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
   List<UICommand> results = List(commandLength);
-  Uint64List rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize);
+  List<int> rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize).toList(growable: false);
 
   for (int i = 0; i < commandLength * nativeCommandSize; i += nativeCommandSize) {
     UICommand command = UICommand();
