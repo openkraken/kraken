@@ -45,7 +45,11 @@ class ImageElement extends Element {
   /// Number of image frame, used to identify gif after image loaded
   int _frameNumber = 0;
 
-  bool _hasLazyLoading = false;
+  bool _isInLazyLoading = false;
+
+  bool get _shouldLazyLoading {
+    return properties['loading'] == 'lazy';
+  }
 
   // Whether is multiframe image
   bool isMultiframe = false;
@@ -168,11 +172,10 @@ class ImageElement extends Element {
   }
 
   void _renderImage() {
-    if (_hasLazyLoading) return;
-    String loading = properties['loading'];
+    if (_isInLazyLoading) return;
     // Image dimensions(width/height) should specified for performance when lazy-load.
-    if (loading == 'lazy') {
-      _hasLazyLoading = true;
+    if (_shouldLazyLoading) {
+      _isInLazyLoading = true;
       renderBoxModel.addIntersectionChangeListener(_handleIntersectionChange);
     } else {
       _constructImageChild();
@@ -185,11 +188,13 @@ class ImageElement extends Element {
       // Once appear remove the listener
       _resetLazyLoading();
       _constructImageChild();
+      _loadImage();
+
     }
   }
 
   void _resetLazyLoading() {
-    _hasLazyLoading = false;
+    _isInLazyLoading = false;
     renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);
   }
 
@@ -257,7 +262,7 @@ class ImageElement extends Element {
   }
 
   // Delay image size setting to next frame to make sure image has been layouted
-  // to wait for percentage size to be caculated correctly in the case of image has been cached
+  // to wait for percentage size to be calculated correctly in the case of image has been cached
   bool _hasImageLayoutCallbackPending = false;
   void _handleImageResizeAfterLayout() {
     if (_hasImageLayoutCallbackPending) return;
@@ -346,7 +351,7 @@ class ImageElement extends Element {
     super.removeProperty(key);
     if (key == 'src') {
       _removeImage();
-    } else if (key == 'loading' && _hasLazyLoading && _image == null) {
+    } else if (key == 'loading' && _isInLazyLoading && _image == null) {
       _resetLazyLoading();
     }
   }
@@ -360,9 +365,10 @@ class ImageElement extends Element {
 
     // Reset frame number to zero when image needs to reload
     _frameNumber = 0;
-    if (key == 'src') {
-      _setImage(value);
-    } else if (key == 'loading' && _hasLazyLoading) {
+    if (key == 'src' && !_shouldLazyLoading) {
+      // Loads the image immediately.
+      _loadImage();
+    } else if (key == 'loading' && _isInLazyLoading) {
       // Should reset lazy when value change.
       _resetLazyLoading();
     } else if (key == WIDTH) {
@@ -382,7 +388,8 @@ class ImageElement extends Element {
     }
   }
 
-  void _setImage(String source) {
+  void _loadImage() {
+    String source = properties['src'];
     if (_source == null || _source != source) {
       _source = source;
       if (source != null && source.isNotEmpty) {
