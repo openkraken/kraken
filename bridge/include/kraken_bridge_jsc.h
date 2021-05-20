@@ -161,8 +161,6 @@ void KRAKEN_EXPORT buildUICommandArgs(JSStringRef key, NativeString &args_01);
 void KRAKEN_EXPORT buildUICommandArgs(std::string &key, NativeString &args_01);
 void KRAKEN_EXPORT buildUICommandArgs(std::string &key, JSStringRef value, NativeString &args_01,
                                       NativeString &args_02);
-void KRAKEN_EXPORT buildUICommandArgs(std::string &key, JSValueRef value, NativeString &args_01,
-                                      NativeString &args_02);
 void KRAKEN_EXPORT buildUICommandArgs(std::string &key, std::string &value, NativeString &args_01,
                                       NativeString &args_02);
 
@@ -317,7 +315,6 @@ public:
   JSObjectRef _call{nullptr};
 
 private:
-
   // The class template of javascript constructor function.
   JSClassRef jsClass{nullptr};
   HostClass *_parentHostClass{nullptr};
