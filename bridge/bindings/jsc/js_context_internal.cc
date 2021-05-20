@@ -19,14 +19,6 @@ std::vector<JSStaticValue> JSContext::globalValue{};
 
 static std::atomic<int32_t> context_unique_id{0};
 
-void SharedStringCache::getString(std::string *string, JSContextRef ctx, JSValueRef value, JSValueRef *exception) {
-  if (m_string_cache.count(value) == 0) {
-    JSStringRef str = JSValueToStringCopy(ctx, value, exception);
-    m_string_cache[value] = JSStringToStdString(str);
-  }
-  *string = m_string_cache[value];
-}
-
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
 

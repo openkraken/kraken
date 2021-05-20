@@ -390,8 +390,7 @@ JSValueRef JSElement::setAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   }
 
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
-  std::string name;
-  elementInstance->context->sharedStringCache.getString(&name, ctx, nameValueRef, exception);
+  std::string name = JSStringToStdString(JSValueToStringCopy(ctx, nameValueRef, exception));
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
   auto attributes = *elementInstance->m_attributes;
@@ -432,8 +431,7 @@ JSValueRef JSElement::getAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   }
 
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
-  std::string name;
-  elementInstance->context->sharedStringCache.getString(&name, ctx, nameValueRef, exception);
+  std::string name = JSStringToStdString(JSValueToStringCopy(ctx, nameValueRef, exception));
 
   auto attributes = *elementInstance->m_attributes;
 
@@ -460,8 +458,7 @@ JSValueRef JSElement::hasAttribute(JSContextRef ctx, JSObjectRef function, JSObj
   }
 
   auto elementInstance = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
-  std::string name;
-  elementInstance->context->sharedStringCache.getString(&name, ctx, nameValueRef, exception);
+  std::string name = JSStringToStdString(JSValueToStringCopy(ctx, nameValueRef, exception));
   auto attributes = *elementInstance->m_attributes;
 
   return JSValueMakeBoolean(ctx, attributes->hasAttribute(name));
@@ -483,8 +480,7 @@ JSValueRef JSElement::removeAttribute(JSContextRef ctx, JSObjectRef function, JS
   }
 
   auto element = reinterpret_cast<ElementInstance *>(JSObjectGetPrivate(thisObject));
-  std::string name;
-  element->context->sharedStringCache.getString(&name, ctx, nameValueRef, exception);
+  std::string name = JSStringToStdString(JSValueToStringCopy(ctx, nameValueRef, exception));
   auto attributes = *element->m_attributes;
 
   if (attributes->hasAttribute(name)) {

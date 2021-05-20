@@ -175,8 +175,7 @@ JSValueRef CSSStyleDeclaration::setProperty(JSContextRef ctx, JSObjectRef functi
   }
 
   auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(thisObject));
-  std::string name;
-  styleInstance->context->sharedStringCache.getString(&name, ctx, propertyValueRef, exception);
+  std::string name = JSStringToStdString(JSValueToStringCopy(ctx, propertyValueRef, exception));
   styleInstance->internalSetProperty(name, valueValueRef, exception);
 
   return nullptr;
@@ -199,8 +198,7 @@ JSValueRef CSSStyleDeclaration::removeProperty(JSContextRef ctx, JSObjectRef fun
   }
 
   auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(thisObject));
-  std::string name;
-  styleInstance->context->sharedStringCache.getString(&name, ctx, propertyNameRef, exception);
+  std::string name = JSStringToStdString(JSValueToStringCopy(ctx, propertyNameRef, exception));
   styleInstance->internalRemoveProperty(name, exception);
   return nullptr;
 }
@@ -222,8 +220,7 @@ JSValueRef CSSStyleDeclaration::getPropertyValue(JSContextRef ctx, JSObjectRef f
   }
 
   auto styleInstance = static_cast<StyleDeclarationInstance *>(JSObjectGetPrivate(thisObject));
-  std::string name;
-  styleInstance->context->sharedStringCache.getString(&name, ctx, propertyNameRef, exception);
+  std::string name = JSStringToStdString(JSValueToStringCopy(ctx, propertyNameRef, exception));
   return styleInstance->internalGetPropertyValue(name, exception);
 }
 

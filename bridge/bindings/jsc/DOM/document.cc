@@ -74,8 +74,7 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
   }
 
   auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
-  std::string tagName;
-  document->context->sharedStringCache.getString(&tagName, ctx, tagNameValue, exception);
+  std::string tagName = JSStringToStdString(JSValueToStringCopy(ctx, tagNameValue, exception));
   auto element = JSElement::buildElementInstance(document->context, tagName);
   return element->object;
 }
@@ -323,8 +322,7 @@ void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator
 }
 
 void DocumentInstance::removeElementById(JSValueRef idRef, ElementInstance *element) {
-  std::string id;
-  context->sharedStringCache.getString(&id, ctx, idRef, nullptr);
+  std::string id = JSStringToStdString(JSValueToStringCopy(ctx, idRef, nullptr));
   if (elementMapById.count(id) > 0) {
     auto &list = elementMapById[id];
     list.erase(std::find(list.begin(), list.end(), element));
@@ -332,8 +330,7 @@ void DocumentInstance::removeElementById(JSValueRef idRef, ElementInstance *elem
 }
 
 void DocumentInstance::addElementById(JSValueRef idRef, ElementInstance *element) {
-  std::string id;
-  context->sharedStringCache.getString(&id, ctx, idRef, nullptr);
+  std::string id = JSStringToStdString(JSValueToStringCopy(ctx, idRef, nullptr));
   if (elementMapById.count(id) == 0) {
     elementMapById[id] = std::vector<ElementInstance *>();
   }
@@ -357,8 +354,8 @@ JSValueRef JSDocument::getElementById(JSContextRef ctx, JSObjectRef function, JS
   }
 
   auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
-  std::string id;
-  document->context->sharedStringCache.getString(&id, ctx, arguments[0], exception);
+  JSStringRef idStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
+  std::string id = JSStringToStdString(idStringRef);
   if (id.empty()) return nullptr;
 
   if (document->elementMapById.count(id) == 0) {

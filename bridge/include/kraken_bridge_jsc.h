@@ -61,14 +61,6 @@ class GestureEventInstance;
 struct NativeMouseEvent;
 class MouseEventInstance;
 
-class SharedStringCache {
-public:
-  SharedStringCache() {};
-  void getString(std::string *string, JSContextRef ctx, JSValueRef value, JSValueRef *exception);
-private:
-  std::unordered_map<JSValueRef, std::string> m_string_cache;
-};
-
 class JSContext {
 public:
   static std::vector<JSStaticFunction> globalFunctions;
@@ -97,8 +89,6 @@ public:
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 
   int32_t uniqueId;
-
-  SharedStringCache sharedStringCache;
 
 private:
   int32_t contextId;
