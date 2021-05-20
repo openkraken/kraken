@@ -91,15 +91,6 @@ class Element extends Node
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
 
-  // Position of sticky element changes between relative and fixed of scroll container
-  StickyPositionType stickyStatus = StickyPositionType.relative;
-
-  // Original offset to scroll container of sticky element
-  Offset originalScrollContainerOffset;
-
-  // Original offset of sticky element
-  Offset originalOffset;
-
   final String tagName;
 
   final Map<String, dynamic> defaultStyle;
@@ -115,13 +106,7 @@ class Element extends Node
   /// Style declaration from user input.
   CSSStyleDeclaration style;
 
-  // Placeholder renderObject of positioned element(absolute/fixed)
-  // used to get original coordinate before move away from document flow.
-  RenderObject renderPositionedPlaceholder;
-
   Element scrollingElement;
-
-  bool get isValidSticky => style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
 
   Size get viewportSize => elementManager.viewport.viewportSize;
 
@@ -238,7 +223,7 @@ class Element extends Node
 
   // TODO: debounce scroll listener
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
-    layoutStickyChildren(scrollOffset, axisDirection);
+    applyStickyChildrenOffset();
     paintFixedChildren(scrollOffset, axisDirection);
 
     if (eventHandlers.containsKey(EVENT_SCROLL)) {
@@ -267,160 +252,11 @@ class Element extends Node
     }
   }
 
-  // Set sticky child offset according to scroll offset and direction,
-  // when axisDirection param is null compute the both axis direction.
-  void layoutStickyChild(Element child, double scrollOffset, AxisDirection axisDirection) {
-    // https://www.w3.org/TR/css-position-3/#stickypos-insets
-    // Sticky positioning is similar to relative positioning except
-    // the offsets are automatically calculated in reference to the nearest scrollport.
-    CSSStyleDeclaration childStyle = child.style;
-    bool isVerticalFixed = false;
-    bool isHorizontalFixed = false;
-    RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-    RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
-
-    if (child.originalScrollContainerOffset == null) {
-      RenderObject rootRenderObject = child.elementManager.getRootRenderObject();
-      Offset horizontalScrollContainerOffset =
-          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
-              renderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject);
-      Offset verticalScrollContainerOffset =
-          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
-              renderBoxModel.localToGlobal(Offset.zero, ancestor: rootRenderObject);
-
-      double offsetY = verticalScrollContainerOffset.dy;
-      double offsetX = horizontalScrollContainerOffset.dx;
-      if (axisDirection == AxisDirection.down) {
-        offsetY += scrollOffset;
-      } else if (axisDirection == AxisDirection.right) {
-        offsetX += scrollOffset;
-      }
-      // Save original offset to scroll container in element tree to
-      // act as base offset to compute dynamic sticky offset later
-      child.originalScrollContainerOffset = Offset(offsetX, offsetY);
-    }
-
-    // Sticky offset to scroll container must include padding
-    EdgeInsetsGeometry padding = _renderLayoutBox.renderStyle.padding;
-    EdgeInsets resolvedPadding = EdgeInsets.all(0);
-    if (padding != null) {
-      resolvedPadding = padding.resolve(TextDirection.ltr);
-    }
-
-    RenderLayoutParentData boxParentData = childRenderBoxModel?.parentData;
-
-    if (child.originalOffset == null) {
-      child.originalOffset = boxParentData.offset;
-    }
-
-    double offsetY = child.originalOffset.dy;
-    double offsetX = child.originalOffset.dx;
-
-    double childHeight = childRenderBoxModel?.size?.height;
-    double childWidth = childRenderBoxModel?.size?.width;
-    // Sticky element cannot exceed the boundary of its parent element container
-    RenderBox parentContainer = child.parentElement.renderBoxModel;
-    double minOffsetY = 0;
-    double maxOffsetY = parentContainer.size.height - childHeight;
-    double minOffsetX = 0;
-    double maxOffsetX = parentContainer.size.width - childWidth;
-
-    if (axisDirection == AxisDirection.down) {
-      double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
-      double viewPortHeight = renderBoxModel?.size?.height;
-      double offsetBottom = viewPortHeight - childHeight - offsetTop;
-
-      if (childRenderStyle.top != null) {
-        double top = childRenderStyle.top.length + resolvedPadding.top;
-        isVerticalFixed = offsetTop < top;
-        if (isVerticalFixed) {
-          offsetY += top - offsetTop;
-          if (offsetY > maxOffsetY) {
-            offsetY = maxOffsetY;
-          }
-        }
-      } else if (childRenderStyle.bottom != null) {
-        double bottom = childRenderStyle.bottom.length + resolvedPadding.bottom;
-        isVerticalFixed = offsetBottom < bottom;
-        if (isVerticalFixed) {
-          offsetY += offsetBottom - bottom;
-          if (offsetY < minOffsetY) {
-            offsetY = minOffsetY;
-          }
-        }
-      }
-
-      if (isVerticalFixed) {
-        boxParentData.offset = Offset(
-          boxParentData.offset.dx,
-          offsetY,
-        );
-      } else {
-        boxParentData.offset = Offset(
-          boxParentData.offset.dx,
-          child.originalOffset.dy,
-        );
-      }
-    }
-
-    if (axisDirection == AxisDirection.right) {
-      double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
-      double viewPortWidth = renderBoxModel?.size?.width;
-      double offsetRight = viewPortWidth - childWidth - offsetLeft;
-
-      if (childStyle.contains(LEFT)) {
-        double left = childRenderStyle.left.length + resolvedPadding.left;
-        isHorizontalFixed = offsetLeft < left;
-        if (isHorizontalFixed) {
-          offsetX += left - offsetLeft;
-          if (offsetX > maxOffsetX) {
-            offsetX = maxOffsetX;
-          }
-        }
-      } else if (childStyle.contains(RIGHT)) {
-        double right = childRenderStyle.right.length + resolvedPadding.right;
-        isHorizontalFixed = offsetRight < right;
-        if (isHorizontalFixed) {
-          offsetX += offsetRight - right;
-          if (offsetX < minOffsetX) {
-            offsetX = minOffsetX;
-          }
-        }
-      }
-
-      if (isHorizontalFixed) {
-        boxParentData.offset = Offset(
-          offsetX,
-          boxParentData.offset.dy,
-        );
-      } else {
-        boxParentData.offset = Offset(
-          child.originalOffset.dx,
-          boxParentData.offset.dy,
-        );
-      }
-    }
-
-    if (isVerticalFixed || isHorizontalFixed) {
-      // Change sticky status to fixed
-      child.stickyStatus = StickyPositionType.fixed;
-      boxParentData.isOffsetCalculated = true;
-      childRenderBoxModel.markNeedsPaint();
-    } else {
-      // Change sticky status to relative
-      if (child.stickyStatus == StickyPositionType.fixed) {
-        child.stickyStatus = StickyPositionType.relative;
-        boxParentData.isOffsetCalculated = false;
-        // Reset child offset to its original offset
-        childRenderBoxModel.markNeedsPaint();
-      }
-    }
-  }
-
   // Calculate sticky status according to scroll offset and scroll direction
-  void layoutStickyChildren(double scrollOffset, AxisDirection axisDirection) {
-    for (Element el in stickyChildren) {
-      layoutStickyChild(el, scrollOffset, axisDirection);
+  void applyStickyChildrenOffset() {
+    RenderLayoutBox scrollContainer = renderBoxModel;
+    for (RenderBoxModel stickyChild in scrollContainer.stickyChildren) {
+      CSSPositionedLayout.applyStickyChildOffset(scrollContainer, stickyChild);
     }
   }
 
@@ -591,6 +427,10 @@ class Element extends Node
         RenderLayoutBox parentRenderLayoutBox = scrollingContentLayoutBox != null ?
           scrollingContentLayoutBox : _renderLayoutBox;
         parentRenderLayoutBox.insert(child.renderBoxModel, after: after);
+
+        if (positionType == CSSPositionType.sticky) {
+          _addPositionHolder(parentRenderLayoutBox, child);
+        }
         break;
     }
   }
@@ -764,14 +604,6 @@ class Element extends Node
     return node;
   }
 
-  // Add placeholder to positioned element for calculate original
-  // coordinate before moved away
-  void addPositionPlaceholder() {
-    if (renderPositionedPlaceholder == null || !renderPositionedPlaceholder.attached) {
-      addChild(renderPositionedPlaceholder);
-    }
-  }
-
   void _addPositionedChild(Element child, CSSPositionType position) {
     Element containingBlockElement;
     switch (position) {
@@ -787,30 +619,39 @@ class Element extends Node
 
     RenderLayoutBox parentRenderLayoutBox = containingBlockElement.scrollingContentLayoutBox != null ?
       containingBlockElement.scrollingContentLayoutBox : containingBlockElement._renderLayoutBox;
+    RenderBoxModel childRenderBoxModel = child.renderBoxModel;
+    _setPositionedChildParentData(parentRenderLayoutBox, child);
+    parentRenderLayoutBox.add(childRenderBoxModel);
 
+    _addPositionHolder(parentRenderLayoutBox, child);
+  }
+
+  void _addPositionHolder(RenderLayoutBox parentRenderLayoutBox, Element child) {
     Size preferredSize = Size.zero;
-    CSSDisplay childDisplay = child.renderBoxModel.renderStyle.display;
     RenderStyle childRenderStyle = child.renderBoxModel.renderStyle;
-    if (childDisplay != CSSDisplay.inline || (position != CSSPositionType.static)) {
+    if (childRenderStyle.position == CSSPositionType.sticky) {
+      preferredSize = Size(0, 0);
+    } else if (childRenderStyle.display != CSSDisplay.inline) {
       preferredSize = Size(
         childRenderStyle.width ?? 0,
         childRenderStyle.height ?? 0,
       );
     }
-
     RenderPositionHolder childPositionHolder = RenderPositionHolder(preferredSize: preferredSize);
-
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-
     childRenderBoxModel.renderPositionHolder = childPositionHolder;
-    _setPositionedChildParentData(parentRenderLayoutBox, child);
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
 
-    parentRenderLayoutBox.add(childRenderBoxModel);
-
-    /// Placeholder of flexbox needs to inherit size from its real display box,
-    /// so it needs to layout after real box layout
-    child.parentElement.addChild(childPositionHolder);
+    if (childRenderStyle.position == CSSPositionType.sticky) {
+      // Placeholder of sticky renderBox need to inherit offset from original renderBox,
+      // so it needs to layout before original renderBox
+      RenderBox preSibling = parentRenderLayoutBox.childBefore(childRenderBoxModel);
+      parentRenderLayoutBox.insert(childPositionHolder, after: preSibling);
+    } else {
+      // Placeholder of flexbox needs to inherit size from its real display box,
+      // so it needs to layout after real box layout
+      child.parentElement.addChild(childPositionHolder);
+    }
   }
 
   /// Cache fixed renderObject to root element
