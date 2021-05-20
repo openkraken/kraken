@@ -120,6 +120,60 @@ describe('MouseEvent', () => {
     await simulateClick(1.0, 10.0);
   });
 
+  it('should work width target when click', async (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'red';
+    div.style.width = '100px';
+    div.style.height = '100px';
+
+    const span = document.createElement('span');
+
+    span.appendChild(document.createTextNode('123'))
+
+    const div2 = document.createElement('div');
+    div2.style.backgroundColor = 'blue';
+    div2.style.width = '50px';
+    div2.style.height = '50px';
+
+    div2.appendChild(span);
+    div.appendChild(div2);
+    document.body.appendChild(div);
+
+    div.addEventListener('click', function handler(e) {
+      expect(e.target).toBe(span);
+      done();
+    });
+  
+    await simulateClick(10.0, 10.0);
+  });
+
+  it('should work width currentTarget when click', async (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'red';
+    div.style.width = '100px';
+    div.style.height = '100px';
+
+    const span = document.createElement('span');
+
+    span.appendChild(document.createTextNode('123'))
+
+    const div2 = document.createElement('div');
+    div2.style.backgroundColor = 'blue';
+    div2.style.width = '50px';
+    div2.style.height = '50px';
+
+    div2.appendChild(span);
+    div.appendChild(div2);
+    document.body.appendChild(div);
+
+    div.addEventListener('click', function handler(e) {
+      expect(e.currentTarget).toBe(div);
+      done();
+    });
+  
+    await simulateClick(10.0, 10.0);
+  });
+
   it('should work width target', async (done) => {
     const div = document.createElement('div');
     div.style.backgroundColor = 'red';
