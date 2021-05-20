@@ -29,8 +29,6 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
 
   // Row index of child when wrapping
   int runIndex = 0;
-  // Whether offset is already calculated.
-  bool isOffsetCalculated = false;
 
   @override
   String toString() {
@@ -231,6 +229,48 @@ class RenderLayoutBox extends RenderBoxModel
     List<RenderObject> children = getChildrenAsList();
     removeAll();
     return children;
+  }
+
+  // Cache sticky children to calculate the base offset of sticky children
+  List<RenderBoxModel> stickyChildren = [];
+
+  /// Find all the children whose position is sticky to this element
+  List<RenderBoxModel> findStickyChildren() {
+    List<RenderBoxModel> stickyChildren = [];
+
+    RenderBox child = firstChild;
+
+    // Layout positioned element
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+      if (child is! RenderBoxModel) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+
+      RenderBoxModel childRenderBoxModel = child;
+      RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
+      CSSOverflowType overflowX = childRenderStyle.overflowX;
+      CSSOverflowType overflowY = childRenderStyle.overflowY;
+      // No need to loop scrollable container children
+      if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+      if (CSSPositionedLayout.isSticky(childRenderBoxModel)) {
+        stickyChildren.add(child);
+      }
+
+      if (child is RenderLayoutBox) {
+        List<RenderBoxModel> mergedChildren = child.findStickyChildren();
+        for (RenderBoxModel child in mergedChildren) {
+          stickyChildren.add(child);
+        }
+      }
+      child = childParentData.nextSibling;
+    }
+
+    return stickyChildren;
   }
 
   @override
@@ -483,6 +523,9 @@ class RenderBoxModel extends RenderBox with
   // Cache all the fixed children of renderBoxModel of root element
   List<RenderBoxModel> fixedChildren = [];
 
+  // Position of sticky element changes between relative and fixed of scroll container
+  StickyPositionType stickyStatus = StickyPositionType.relative;
+
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;
 
@@ -622,9 +665,9 @@ class RenderBoxModel extends RenderBox with
     if (isScrollingContentBox) {
       BoxConstraints parentConstraints = (parent as RenderBoxModel).constraints;
       BoxConstraints constraints = BoxConstraints(
-        minWidth: parentConstraints.minWidth,
+        minWidth: parentConstraints.maxWidth != double.infinity ? parentConstraints.maxWidth : 0,
         maxWidth: double.infinity,
-        minHeight: parentConstraints.minHeight,
+        minHeight: parentConstraints.maxHeight != double.infinity ? parentConstraints.maxHeight : 0,
         maxHeight: double.infinity,
       );
       return constraints;
@@ -661,9 +704,9 @@ class RenderBoxModel extends RenderBox with
     logicalContentHeight + verticalPaddingLength + verticalBorderLength : null;
 
     // Constraints
-    double minConstraintWidth = logicalWidth ?? 0;
+    double minConstraintWidth = 0;
     double maxConstraintWidth = logicalWidth ?? double.infinity;
-    double minConstraintHeight = logicalHeight ?? 0;
+    double minConstraintHeight = 0;
     double maxConstraintHeight = logicalHeight ?? double.infinity;
 
     if (parent is RenderFlexLayout) {
@@ -1109,6 +1152,22 @@ class RenderBoxModel extends RenderBox with
     return _contentConstraints;
   }
 
+  /// Find scroll container
+  RenderBoxModel findScrollContainer() {
+    RenderLayoutBox scrollContainer;
+    RenderLayoutBox parent = this.parent;
+
+    while (parent != null) {
+      if (parent.isScrollingContentBox) {
+        // Scroll container should has definite constraints
+        scrollContainer = parent.parent;
+        break;
+      }
+      parent = parent.parent;
+    }
+    return scrollContainer;
+  }
+
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     super.applyPaintTransform(child, transform);
@@ -1137,8 +1196,8 @@ class RenderBoxModel extends RenderBox with
       setUpOverflowScroller(scrollableSize, scrollableViewportSize);
     }
 
-    if (positionedHolder != null) {
-      // Make position holder preferred size equal to current element boundary size.
+    if (positionedHolder != null && renderStyle.position != CSSPositionType.sticky) {
+      // Make position holder preferred size equal to current element boundary size except sticky element.
       positionedHolder.preferredSize = Size.copy(size);
     }
 
