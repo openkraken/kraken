@@ -3,14 +3,12 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ffi';
 
 import 'package:kraken/bridge.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:ffi/ffi.dart';
 
 import 'manifest.dart';
 

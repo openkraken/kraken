@@ -9,7 +9,6 @@ import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:async';
 
-import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
