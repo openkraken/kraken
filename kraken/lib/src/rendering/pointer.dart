@@ -81,7 +81,7 @@ mixin RenderPointerListenerMixin on RenderBox {
     /// location.
     if (event is PointerDownEvent) {
       if (entry.target is RenderBoxModel) {
-        GestureManager.getInstance().renderBoxModelList.add(entry.target as RenderBoxModel);
+        GestureManager.instance().addTargetToList(entry.target as RenderBoxModel);
       }
     }
 

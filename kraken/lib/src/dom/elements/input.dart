@@ -468,7 +468,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     textInputConnection.setEditingState(localValue);
   }
 
-  void formatAndSetValue(TextEditingValue value, bool NeedDispatchEvent) {
+  void formatAndSetValue(TextEditingValue value, { bool shouldDispatchEvent = false }) {
     final bool textChanged = textSelectionDelegate.textEditingValue?.text != value?.text;
     textSelectionDelegate.textEditingValue = value;
 
@@ -484,7 +484,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       }
       // Sync value to input element property
       properties[VALUE] = value.text;
-      if (NeedDispatchEvent) {
+      if (shouldDispatchEvent) {
         // TODO: return the string containing the data that was added to the element,
         // which MAY be null if it doesn't apply.
         String inputData = '';
@@ -505,7 +505,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _showCaretOnScreen();
     }
     _lastKnownRemoteTextEditingValue = value;
-    formatAndSetValue(value, true);
+    formatAndSetValue(value, shouldDispatchEvent: true);
     // To keep the cursor from blinking while typing, we want to restart the
     // cursor timer every time a new character is typed.
     _stopCursorTimer(resetCharTicks: false);
@@ -533,7 +533,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         selection: selection,
         composing: composing,
       );
-      formatAndSetValue(newTextEditingValue, false);
+      formatAndSetValue(newTextEditingValue);
     } else if (key == 'placeholder') {
       // Update placeholder text.
       updateTextSpan();
