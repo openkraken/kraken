@@ -8,9 +8,9 @@
 
 namespace foundation {
 
-UICommandTaskMessageQueue::UICommandTaskMessageQueue(int32_t contextId) : contextId(contextId) {}
+UICommandBuffer::UICommandBuffer(int32_t contextId) : contextId(contextId) {}
 
-void UICommandTaskMessageQueue::registerCommand(int32_t id, int32_t type, void *nativePtr, bool batchedUpdate) {
+void UICommandBuffer::addCommand(int32_t id, int32_t type, void *nativePtr, bool batchedUpdate) {
   if (batchedUpdate) {
     kraken::getDartMethod()->requestBatchUpdate(contextId);
     update_batched = true;
@@ -20,7 +20,7 @@ void UICommandTaskMessageQueue::registerCommand(int32_t id, int32_t type, void *
   queue.emplace_back(item);
 }
 
-void UICommandTaskMessageQueue::registerCommand(int32_t id, int32_t type, void *nativePtr) {
+void UICommandBuffer::addCommand(int32_t id, int32_t type, void *nativePtr) {
   if (!update_batched) {
     kraken::getDartMethod()->requestBatchUpdate(contextId);
     update_batched = true;
@@ -30,7 +30,7 @@ void UICommandTaskMessageQueue::registerCommand(int32_t id, int32_t type, void *
   queue.emplace_back(item);
 }
 
-void UICommandTaskMessageQueue::registerCommand(int32_t id, int32_t type, NativeString &args_01, void *nativePtr) {
+void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString &args_01, void *nativePtr) {
   if (!update_batched) {
     kraken::getDartMethod()->requestBatchUpdate(contextId);
     update_batched = true;
@@ -40,7 +40,7 @@ void UICommandTaskMessageQueue::registerCommand(int32_t id, int32_t type, Native
   queue.emplace_back(item);
 }
 
-void UICommandTaskMessageQueue::registerCommand(int32_t id, int32_t type, NativeString &args_01, NativeString &args_02,
+void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString &args_01, NativeString &args_02,
                                                 void *nativePtr) {
   if (!update_batched) {
     kraken::getDartMethod()->requestBatchUpdate(contextId);
@@ -50,25 +50,25 @@ void UICommandTaskMessageQueue::registerCommand(int32_t id, int32_t type, Native
   queue.emplace_back(item);
 }
 
-UICommandTaskMessageQueue *UICommandTaskMessageQueue::instance(int32_t contextId) {
-  static std::unordered_map<int32_t, UICommandTaskMessageQueue *> instanceMap;
+UICommandBuffer *UICommandBuffer::instance(int32_t contextId) {
+  static std::unordered_map<int32_t, UICommandBuffer *> instanceMap;
 
   if (instanceMap.count(contextId) == 0) {
-    instanceMap[contextId] = new UICommandTaskMessageQueue(contextId);
+    instanceMap[contextId] = new UICommandBuffer(contextId);
   }
 
   return instanceMap[contextId];
 }
 
-UICommandItem *UICommandTaskMessageQueue::data() {
+UICommandItem *UICommandBuffer::data() {
   return queue.data();
 }
 
-int64_t UICommandTaskMessageQueue::size() {
+int64_t UICommandBuffer::size() {
   return queue.size();
 }
 
-void UICommandTaskMessageQueue::clear() {
+void UICommandBuffer::clear() {
   for (auto command : queue) {
     delete[] reinterpret_cast<const uint16_t *>(command.string_01);
     delete[] reinterpret_cast<const uint16_t *>(command.string_02);

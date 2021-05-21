@@ -40,18 +40,18 @@ JSTextNode::TextNodeInstance::TextNodeInstance(JSTextNode *jsTextNode, JSStringR
 
   NativeString args_01{};
   buildUICommandArgs(data, args_01);
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(eventTargetId, UICommand::createTextNode, args_01, nativeTextNode);
+  foundation::UICommandBuffer::instance(_hostClass->contextId)
+    ->addCommand(eventTargetId, UICommand::createTextNode, args_01, nativeTextNode);
 }
 
 JSValueRef JSTextNode::TextNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getTextNodePropertyMap();
+  auto &propertyMap = getTextNodePropertyMap();
 
   if (propertyMap.count(name) == 0) {
     return NodeInstance::getProperty(name, exception);
   }
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
   switch (property) {
   case TextNodeProperty::nodeValue:
   case TextNodeProperty::textContent:
@@ -74,8 +74,8 @@ bool JSTextNode::TextNodeInstance::setProperty(std::string &name, JSValueRef val
     NativeString args_01{};
     NativeString args_02{};
     buildUICommandArgs(name, dataString, args_01, args_02);
-    foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    foundation::UICommandBuffer::instance(_hostClass->contextId)
+      ->addCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
     return true;
   } else {
     return NodeInstance::setProperty(name, value, exception);
@@ -107,8 +107,8 @@ void JSTextNode::TextNodeInstance::internalSetTextContent(JSStringRef content, J
   NativeString args_01{};
   NativeString args_02{};
   buildUICommandArgs(key, content, args_01, args_02);
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+  foundation::UICommandBuffer::instance(context->getContextId())
+    ->addCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
 }
 
 } // namespace kraken::binding::jsc

@@ -50,11 +50,11 @@ MessageEventInstance::MessageEventInstance(JSMessageEvent *jsMessageEvent, JSStr
 }
 
 JSValueRef MessageEventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSMessageEvent::getMessageEventPropertyMap();
+  auto &propertyMap = JSMessageEvent::getMessageEventPropertyMap();
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
 
   switch(property) {
   case JSMessageEvent::MessageEventProperty::data:
@@ -67,9 +67,9 @@ JSValueRef MessageEventInstance::getProperty(std::string &name, JSValueRef *exce
 }
 
 bool MessageEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSMessageEvent::getMessageEventPropertyMap();
+  auto &propertyMap = JSMessageEvent::getMessageEventPropertyMap();
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch(property) {
     case JSMessageEvent::MessageEventProperty::data: {

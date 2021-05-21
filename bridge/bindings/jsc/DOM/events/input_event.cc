@@ -66,11 +66,11 @@ InputEventInstance::InputEventInstance(JSInputEvent *jsInputEvent, JSStringRef d
 }
 
 JSValueRef InputEventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSInputEvent::getInputEventPropertyMap();
+  auto &propertyMap = JSInputEvent::getInputEventPropertyMap();
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
   if (property == JSInputEvent::InputEventProperty::inputType) {
     return m_inputType.makeString();
   } else if (property == JSInputEvent::InputEventProperty::data) {
@@ -81,9 +81,9 @@ JSValueRef InputEventInstance::getProperty(std::string &name, JSValueRef *except
 }
 
 bool InputEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSInputEvent::getInputEventPropertyMap();
+  auto &propertyMap = JSInputEvent::getInputEventPropertyMap();
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch (property) {
     case JSInputEvent::InputEventProperty::inputType: {

@@ -52,8 +52,7 @@ JSObjectRef JSEventTarget::instanceConstructor(JSContextRef ctx, JSObjectRef con
 
     for (size_t i = 0; i < length; i++) {
       JSValueRef jsOnlyEvent = JSObjectGetPropertyAtIndex(ctx, jsOnlyEvents, i, exception);
-      JSStringRef e = JSValueToStringCopy(ctx, jsOnlyEvent, exception);
-      std::string event = JSStringToStdString(e);
+      std::string event = JSStringToStdString(JSValueToStringCopy(ctx, jsOnlyEvent, exception));
       m_jsOnlyEvents.emplace_back(event);
     }
   }
@@ -76,8 +75,8 @@ EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, int64_t id)
 
 EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
+  foundation::UICommandBuffer::instance(_hostClass->contextId)
+      ->addCommand(eventTargetId, UICommand::disposeEventTarget, nullptr, false);
 
   // Release handler callbacks.
   if (context->isValid()) {
@@ -129,11 +128,10 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     return nullptr;
   }
 
-  JSStringRef eventTypeStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
-    std::string &&eventType = JSStringToStdString(eventTypeStringRef);
+  std::string eventType = JSStringToStdString(JSValueToStringCopy(ctx, eventNameValueRef, exception));
 
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
-    eventTargetInstance->_eventHandlers[eventType] = std::deque<JSObjectRef>();
+    eventTargetInstance->_eventHandlers[eventType] = std::forward_list<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
     NativeString args_01{};
@@ -144,22 +142,22 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
       std::find(EventTarget->m_jsOnlyEvents.begin(), EventTarget->m_jsOnlyEvents.end(), eventType) != EventTarget->m_jsOnlyEvents.end();
 
     if (!isJsOnlyEvent) {
-      foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(
+      foundation::UICommandBuffer::instance(contextId)->addCommand(
         eventTargetInstance->eventTargetId, UICommand::addEvent, args_01, nullptr);
     };
   }
-  std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
+  std::forward_list<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
   JSValueProtect(ctx, callbackObjectRef);
-  handlers.emplace_back(callbackObjectRef);
+  handlers.emplace_after(handlers.cbefore_begin(), callbackObjectRef);
 
   return nullptr;
 }
 
 JSValueRef JSEventTarget::prototypeGetProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getEventTargetPropertyMap();
+  auto &propertyMap = getEventTargetPropertyMap();
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch (property) {
     default:
@@ -206,23 +204,21 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
     return nullptr;
   }
 
-  JSStringRef eventNameStringRef = JSValueToStringCopy(ctx, eventNameValueRef, exception);
-  std::string &&eventType = JSStringToStdString(eventNameStringRef);
+  std::string eventType = JSStringToStdString(JSValueToStringCopy(ctx, eventNameValueRef, exception));
 
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
     return nullptr;
   }
 
-  std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
+  std::forward_list<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
 
-  for (auto it = handlers.begin(); it != handlers.end();) {
-    if (*it == callbackObjectRef) {
+  handlers.remove_if([&callbackObjectRef, &ctx](JSObjectRef function) {
+    if (function == callbackObjectRef) {
       JSValueUnprotect(ctx, callbackObjectRef);
-      it = handlers.erase(it);
-    } else {
-      ++it;
+      return true;
     }
-  }
+    return false;
+  });
 
   return nullptr;
 }
@@ -255,7 +251,7 @@ bool EventTargetInstance::dispatchEvent(EventInstance *event) {
 
   // Modify the currentTarget to this.
   event->nativeEvent->currentTarget = this;
-  
+
   internalDispatchEvent(event);
 
   // Bubble event to root event target.
@@ -287,8 +283,8 @@ JSValueRef JSEventTarget::clearListeners(JSContextRef ctx, JSObjectRef function,
 }
 
 JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSEventTarget::getEventTargetPropertyMap();
-  auto prototypePropertyMap = JSEventTarget::getEventTargetPrototypePropertyMap();
+  auto &propertyMap = JSEventTarget::getEventTargetPropertyMap();
+  auto &prototypePropertyMap = JSEventTarget::getEventTargetPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) {
     JSStringHolder nameStringHolder = JSStringHolder(context, name);
@@ -296,7 +292,7 @@ JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *excep
   }
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch (property) {
     case JSEventTarget::EventTargetProperty::eventTargetId: {
@@ -311,7 +307,7 @@ JSValueRef EventTargetInstance::getProperty(std::string &name, JSValueRef *excep
 }
 
 bool EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto staticPropertyMap = JSEventTarget::getEventTargetPrototypePropertyMap();
+  auto &staticPropertyMap = JSEventTarget::getEventTargetPrototypePropertyMap();
 
   if (staticPropertyMap.count(name) > 0) return false;
 
@@ -337,12 +333,12 @@ void EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value
   std::string eventType = name.substr(2);
 
   if (_eventHandlers.count(eventType) == 0) {
-    _eventHandlers[eventType] = std::deque<JSObjectRef>();
+    _eventHandlers[eventType] = std::forward_list<JSObjectRef>();
   }
 
   JSObjectRef handlerObjectRef = JSValueToObject(_hostClass->ctx, value, exception);
   JSValueProtect(_hostClass->ctx, handlerObjectRef);
-  _eventHandlers[eventType].emplace_back(handlerObjectRef);
+  _eventHandlers[eventType].emplace_after(_eventHandlers[eventType].cbefore_begin(), handlerObjectRef);
 
   auto Event = reinterpret_cast<JSEventTarget *>(_hostClass);
   auto isJsOnlyEvent = std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), name.substr(2)) !=
@@ -353,7 +349,7 @@ void EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value
   int32_t contextId = _hostClass->contextId;
   NativeString args_01{};
   buildUICommandArgs(eventType, args_01);
-  foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetId, UICommand::addEvent, args_01, nullptr);
+  foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetId, UICommand::addEvent, args_01, nullptr);
 }
 
 void EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
@@ -389,7 +385,7 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
 
 // This function will be called back by dart side when trigger events.
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType, void *nativeEvent, int32_t isCustomEvent) {
-        
+
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTargetInstance *eventTargetInstance = nativeEventTarget->instance;
   JSContext *context = eventTargetInstance->context;
