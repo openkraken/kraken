@@ -1019,8 +1019,8 @@ class RenderBoxModel extends RenderBox with
     assert(height != null);
 
     scrollableSize = Size(
-      width + renderStyle.paddingLeft + renderStyle.paddingRight,
-      height + renderStyle.paddingTop + renderStyle.paddingBottom
+      width + renderStyle.paddingLeft,
+      height + renderStyle.paddingTop
     );
   }
 
