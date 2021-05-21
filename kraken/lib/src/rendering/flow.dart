@@ -1309,9 +1309,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       void iterateRunChildren(int targetId, RenderBox child) {
         // Total width of previous siblings
         double preSiblingsWidth = 0;
-        runChildrenList.forEach((RenderBox sibling) {
+        for (RenderBox sibling in runChildrenList) {
           preSiblingsWidth += sibling.size.width;
-        });
+        }
 
         Size childScrollableSize = child.size;
         double childMarginTop = 0;
