@@ -1,3 +1,6 @@
+## 0.7.3+1
+
+* Fix: fix prebuilt binary.
 ## 0.7.3
 
 **Features**
