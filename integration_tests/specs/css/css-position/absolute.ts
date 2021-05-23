@@ -725,4 +725,58 @@ describe('Position absolute', () => {
     BODY.appendChild(div);
     await snapshot();
   });
+
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100%',
+            width: '100%',
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              height: '50px',
+              width: '50px',
+              backgroundColor: 'red',
+            }
+          }),
+          (div2 = createElement('div', {
+            style: {
+              position: 'absolute',
+              width: '40%',
+              height: '40%',
+              backgroundColor: 'green',
+            }
+          }))
+        ]),
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div2.style.top = '10%';
+       div2.style.left = '10%';
+       div2.style.right = '10%';
+       div2.style.bottom = '20%';
+       await snapshot();
+       done();
+    });
+  });
 });

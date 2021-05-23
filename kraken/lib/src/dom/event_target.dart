@@ -45,27 +45,11 @@ class EventTarget {
     currentHandlers.remove(eventHandler);
   }
 
-  /// return whether event is cancelled.
-  bool dispatchEvent(Event event) {
-    bool cancelled = true;
+  void dispatchEvent(Event event) {
     event.currentTarget = event.target = this;
-    if (event.currentTarget != null) {
-      List<EventHandler> handlers = event.currentTarget.getEventHandlers(event.type);
-      cancelled = _dispatchEventToTarget(event.currentTarget, handlers, event);
+    if (event.currentTarget != null && this is Element) {
+      (this as Element).eventResponder(event);
     }
-    return cancelled;
-  }
-
-  bool _dispatchEventToTarget(EventTarget target, List<EventHandler> handlers, Event event) {
-    if (handlers != null) {
-      for (var handler in handlers) {
-        handler(event);
-        if (event.defaultPrevented || !event.canBubble()) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   @mustCallSuper
@@ -74,10 +58,5 @@ class EventTarget {
     // Remove elementManager reference.
     elementManager = null;
     eventHandlers.clear();
-  }
-
-  List<EventHandler> getEventHandlers(String type) {
-    assert(type != null);
-    return eventHandlers[type];
   }
 }

@@ -485,21 +485,11 @@ class RenderFlowLayout extends RenderLayoutBox {
     return lineHeight;
   }
 
-
   @override
   void performLayout() {
     if (kProfileMode) {
       childLayoutDuration = 0;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_START, uniqueId: targetId);
-    }
-
-    CSSDisplay display = renderStyle.display;
-    if (display == CSSDisplay.none) {
-      size = constraints.smallest;
-      if (kProfileMode) {
-        PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_END, uniqueId: targetId);
-      }
-      return;
+      PerformanceTiming.instance().mark(PERF_FLOW_LAYOUT_START, uniqueId: targetId);
     }
 
     beforeLayout();
@@ -511,10 +501,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
       if (childParentData.isPositioned) {
         CSSPositionedLayout.layoutPositionedChild(this, child);
-      } else if (!childParentData.isOffsetCalculated && child is RenderBoxModel) {
-        if (CSSPositionedLayout.isSticky(child)) {
-          CSSPositionedLayout.layoutStickyChild(this, child);
-        }
       }
       child = childParentData.nextSibling;
     }
@@ -522,7 +508,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Layout non positioned element
     _layoutChildren();
 
-    // Set offset of positioned element
+    // Set offset of positioned and sticky element
     child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
@@ -536,8 +522,27 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (isScrollingContentBox) {
           ensureBoxSizeLargerThanScrollableSize();
         }
+      } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
+        RenderBoxModel scrollContainer = child.findScrollContainer();
+        // Sticky offset depends on the layout of scroll container, delay the calculation of
+        // sticky offset to the layout stage of  scroll container if its not layouted yet
+        // due to the layout order of Flutter renderObject tree is from down to up.
+        if (scrollContainer.hasSize) {
+          CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
+        }
       }
       child = childParentData.nextSibling;
+    }
+
+    bool isScrollContainer = renderStyle.overflowX != CSSOverflowType.visible ||
+      renderStyle.overflowY != CSSOverflowType.visible;
+    if (isScrollContainer) {
+      // Find all the sticky children when scroll container is layouted
+      stickyChildren = findStickyChildren();
+      // Calculate the offset of its sticky children
+      for (RenderBoxModel stickyChild in stickyChildren) {
+        CSSPositionedLayout.applyStickyChildOffset(this, stickyChild);
+      }
     }
 
     _relayoutPositionedChildren();
@@ -547,7 +552,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (kProfileMode) {
       DateTime flowLayoutEndTime = DateTime.now();
       int amendEndTime = flowLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
-      PerformanceTiming.instance(elementManager.contextId)
+      PerformanceTiming.instance()
           .mark(PERF_FLOW_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
@@ -645,9 +650,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       final RenderLayoutParentData childParentData = child.parentData;
 
-      if (childParentData.isPositioned ||
-          // Skip child that display is none
-          (child is RenderBoxModel && child.renderStyle.transformedDisplay == CSSDisplay.none)) {
+      if (childParentData.isPositioned) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -686,6 +689,16 @@ class RenderFlowLayout extends RenderLayoutBox {
           childLayoutStart = DateTime.now();
         }
 
+        // Inflate constraints of percentage renderBoxModel to force it layout after percentage resolved
+        // cause Flutter will skip child layout if its constraints not changed between two layouts.
+        if (child is RenderBoxModel && needsRelayout) {
+          childConstraints = BoxConstraints(
+            minWidth: childConstraints.maxWidth != double.infinity ? childConstraints.maxWidth : 0,
+            maxWidth: double.infinity,
+            minHeight: childConstraints.maxHeight != double.infinity ? childConstraints.maxHeight : 0,
+            maxHeight: double.infinity,
+          );
+        }
         child.layout(childConstraints, parentUsesSize: true);
 
         if (kProfileMode) {
@@ -901,9 +914,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       while (child != null) {
         final RenderLayoutParentData childParentData = child.parentData;
 
-        if (childParentData.isPositioned ||
-            // Skip child that display is none
-            (child is RenderBoxModel && child.renderStyle.transformedDisplay == CSSDisplay.none)) {
+        if (childParentData.isPositioned) {
           child = childParentData.nextSibling;
           continue;
         }

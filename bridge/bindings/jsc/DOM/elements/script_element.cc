@@ -27,14 +27,14 @@ JSScriptElement::ScriptElementInstance::ScriptElementInstance(JSScriptElement *j
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
 
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
+  foundation::UICommandBuffer::instance(context->getContextId())
+      ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeElement);
 }
 
 JSValueRef JSScriptElement::ScriptElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getScriptElementPropertyMap();
+  auto &propertyMap = getScriptElementPropertyMap();
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
     switch (property) {
     case ScriptElementProperty::src:
       return JSValueMakeString(_hostClass->ctx, _src);
@@ -45,11 +45,11 @@ JSValueRef JSScriptElement::ScriptElementInstance::getProperty(std::string &name
 }
 
 bool JSScriptElement::ScriptElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getScriptElementPropertyMap();
+  auto &propertyMap = getScriptElementPropertyMap();
 
   if (propertyMap.count(name) == 0) return ElementInstance::setProperty(name, value, exception);
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
   if (property == ScriptElementProperty::src) {
     _src = JSValueToStringCopy(_hostClass->ctx, value, exception);
     JSStringRetain(_src);
@@ -59,8 +59,8 @@ bool JSScriptElement::ScriptElementInstance::setProperty(std::string &name, JSVa
     NativeString args_01{};
     NativeString args_02{};
     buildUICommandArgs(name, srcString, args_01, args_02);
-    foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-      ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+    foundation::UICommandBuffer::instance(_hostClass->contextId)
+      ->addCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
     return true;
   }
 

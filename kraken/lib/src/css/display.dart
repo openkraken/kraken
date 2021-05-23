@@ -44,11 +44,11 @@ mixin CSSDisplayMixin on RenderStyleBase {
     transformedDisplay = getTransformedDisplay();
     if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox prevRenderLayoutBox = renderBoxModel;
-      renderBoxModel = element.createRenderLayout(element, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: element.repaintSelf);
+      renderBoxModel = Element.createRenderLayout(element, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: element.repaintSelf);
       bool shouldReattach = element.isRendererAttached && element.parent != null && prevRenderLayoutBox != renderBoxModel;
 
       if (shouldReattach) {
-        RenderLayoutBox parentRenderObject = element.parent.renderBoxModel;
+        RenderLayoutBox parentRenderObject = element.parentElement.renderBoxModel;
         Element previousSibling = element.previousSibling;
         RenderObject previous = previousSibling != null ? previousSibling.renderer : null;
 

@@ -48,6 +48,33 @@ CSSOverflowType _getOverflowType(String definition) {
 
 typedef ScrollListener = void Function(double scrollTop, AxisDirection axisDirection);
 
+mixin CSSOverflowStyleMixin on RenderStyleBase {
+  CSSOverflowType _overflowX = CSSOverflowType.visible;
+  CSSOverflowType get overflowX {
+    return _overflowX;
+  }
+  set overflowX(CSSOverflowType value) {
+    if (_overflowX == value) return;
+    _overflowX = value;
+  }
+
+  CSSOverflowType _overflowY = CSSOverflowType.visible;
+  CSSOverflowType get overflowY {
+    return _overflowY;
+  }
+  set overflowY(CSSOverflowType value) {
+    if (_overflowY == value) return;
+    _overflowY = value;
+  }
+
+  void updateOverflow(CSSStyleDeclaration style) {
+    RenderStyle renderStyle = this;
+    List<CSSOverflowType> overflow = getOverflowTypes(style);
+    renderStyle.overflowX = overflow[0];
+    renderStyle.overflowY = overflow[1];
+  }
+}
+
 mixin CSSOverflowMixin on ElementBase {
   // The duration time for element scrolling to a significant place.
   static const SCROLL_DURATION = Duration(milliseconds: 250);
@@ -55,19 +82,17 @@ mixin CSSOverflowMixin on ElementBase {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
-  /// All the children whose position is sticky to this element
-  List<Element> stickyChildren = [];
-
   // House content which can be scrolled.
   RenderLayoutBox scrollingContentLayoutBox;
 
   void updateRenderOverflow(Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
     RenderBoxModel renderBoxModel = element.renderBoxModel;
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
 
-    List<CSSOverflowType> overflow = getOverflowTypes(style);
-    CSSOverflowType overflowX = overflow[0];
-    CSSOverflowType overflowY = overflow[1];
+    renderStyle.updateOverflow(style);
+    CSSOverflowType overflowX = renderStyle.overflowX;
+    CSSOverflowType overflowY = renderStyle.overflowY;
     bool shouldRepaintSelf = false;
 
     switch(overflowX) {
@@ -90,9 +115,6 @@ mixin CSSOverflowMixin on ElementBase {
         renderBoxModel.clipX = true;
         renderBoxModel.enableScrollX = true;
         renderBoxModel.scrollOffsetX = _scrollableX.position;
-
-        _scrollableX.position.isScrollingNotifier.removeListener(_onScrollXStart);
-        _scrollableX.position.isScrollingNotifier.addListener(_onScrollXStart);
         break;
       case CSSOverflowType.visible:
       default:
@@ -122,9 +144,6 @@ mixin CSSOverflowMixin on ElementBase {
         renderBoxModel.clipY = true;
         renderBoxModel.enableScrollY = true;
         renderBoxModel.scrollOffsetY = _scrollableY.position;
-
-        _scrollableY.position.isScrollingNotifier.removeListener(_onScrollYStart);
-        _scrollableY.position.isScrollingNotifier.addListener(_onScrollYStart);
         break;
       case CSSOverflowType.visible:
       default:
@@ -158,7 +177,7 @@ mixin CSSOverflowMixin on ElementBase {
         defaultStyle: element.defaultStyle, isIntrinsicBox: element.isInlineBox, tagName: element.tagName, isHiddenElement: true);
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
-    scrollingContentLayoutBox = element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
+    scrollingContentLayoutBox = Element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
 
     scrollingContentLayoutBox.isScrollingContentBox = true;
     scrollingElement.renderBoxModel = scrollingContentLayoutBox;
@@ -182,7 +201,7 @@ mixin CSSOverflowMixin on ElementBase {
     }
     RenderObject layoutBoxParent = renderBoxModel.parent;
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox outerLayoutBox = element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
+    RenderLayoutBox outerLayoutBox = Element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
 
     _createScrollingLayoutBox(element);
 
@@ -212,7 +231,7 @@ mixin CSSOverflowMixin on ElementBase {
     if (scrollingContentLayoutBox == null) return;
     RenderObject layoutBoxParent = renderBoxModel.parent;
     RenderObject previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox newLayoutBox = element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
+    RenderLayoutBox newLayoutBox = Element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
     element.renderBoxModel = newLayoutBox;
@@ -260,47 +279,8 @@ mixin CSSOverflowMixin on ElementBase {
     } else if (parent is ContainerRenderObjectMixin) {
       // Update renderBoxModel reference before move to its containing block
       element.renderBoxModel = newRenderObject;
-      element.parent.addChildRenderObject(element, after: previousSibling);
+      element.parentElement.addChildRenderObject(element, after: previousSibling);
     }
-  }
-
-  /// Cache sticky children when axis X starts scroll
-  void _onScrollXStart() {
-    if(_scrollableX.position.isScrollingNotifier.value) {
-      stickyChildren = _findStickyChildren(this);
-    }
-  }
-
-  /// Cache sticky children when axis Y starts scroll
-  void _onScrollYStart() {
-    if(_scrollableY.position.isScrollingNotifier.value) {
-      stickyChildren = _findStickyChildren(this);
-    }
-  }
-
-  /// Find all the children whose position is sticky to this element
-  List<Element> _findStickyChildren(Element element) {
-    assert(element != null);
-    List<Element> result = [];
-
-    for (Element child in element.children) {
-      List<CSSOverflowType> overflow = getOverflowTypes(child.style);
-      CSSOverflowType overflowX = overflow[0];
-      CSSOverflowType overflowY = overflow[1];
-
-      if (child.isValidSticky) result.add(child);
-
-      // No need to loop scrollable container children
-      if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
-        break;
-      }
-
-      List<Element> mergedChildren = _findStickyChildren(child);
-      for (Element child in mergedChildren) {
-        result.add(child);
-      }
-    }
-    return result;
   }
 
   void _pointerListener(PointerEvent event) {
@@ -345,8 +325,6 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void scrollBy({ num dx = 0.0, num dy = 0.0, bool withAnimation }) {
-    stickyChildren = _findStickyChildren(this);
-
     if (dx != 0) {
       _scroll(scrollLeft + dx, Axis.horizontal, withAnimation: withAnimation);
     }
@@ -356,8 +334,6 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void scrollTo({ num x, num y, bool withAnimation }) {
-    stickyChildren = _findStickyChildren(this);
-
     if (x != null) {
       _scroll(x, Axis.horizontal, withAnimation: withAnimation);
     }

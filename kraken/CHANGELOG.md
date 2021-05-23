@@ -1,3 +1,11 @@
+## 0.7.2+4
+
+feat: support mouse event https://github.com/openkraken/kraken/pull/220
+fix: event bubble not works properly https://github.com/openkraken/kraken/pull/264
+fix: return value of Event.stopPropagation() should be undefined https://github.com/openkraken/kraken/pull/284
+fix/text node value https://github.com/openkraken/kraken/pull/279
+fix: fix kraken.methodChannel.setMethodCallHandler did't get called before kraken.invokeMethod called https://github.com/openkraken/kraken/pull/289
+
 ## 0.7.2+3
 
 feat: add willReload and didReload hooks for devTools.

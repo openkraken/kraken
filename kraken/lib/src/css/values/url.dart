@@ -10,7 +10,7 @@ import 'package:kraken/painting.dart';
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#urls
 class CSSUrl {
 
-  static ImageProvider parseUrl(String rawInput, {cache = 'auto'}) {
+  static ImageProvider parseUrl(String rawInput, { cache = 'auto', int contextId }) {
     // support input string enclosed in quotation marks
     if ((rawInput.startsWith('\'') && rawInput.endsWith('\'')) ||
         (rawInput.startsWith('\"') && rawInput.endsWith('\"'))) {
@@ -25,7 +25,7 @@ class CSSUrl {
       if (cache == 'store' || cache == 'auto') {
         imageProvider = getImageProviderFactory(ImageType.cached)(url);
       } else {
-        imageProvider = getImageProviderFactory(ImageType.network)(url);
+        imageProvider = getImageProviderFactory(ImageType.network)(url, [contextId]);
       }
     } else if (rawInput.startsWith('file://')) {
       File file = File.fromUri(Uri.parse(rawInput));

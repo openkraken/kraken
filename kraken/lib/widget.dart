@@ -57,6 +57,8 @@ class Kraken extends StatelessWidget {
 
   final GestureClient gestureClient;
 
+  final HttpClientInterceptor httpClientInterceptor;
+
   KrakenController get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
@@ -105,6 +107,8 @@ class Kraken extends StatelessWidget {
     this.background,
     this.gestureClient,
     this.devToolsService,
+    // Kraken's http client interceptor.
+    this.httpClientInterceptor,
     // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
     // Maybe got unexpected error when change to other values, use this at your own risk!
     // We will fixed this on next version released. (v0.6.0)
@@ -146,7 +150,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     if (kProfileMode) {
-      PerformanceTiming.instance(0).mark(PERF_CONTROLLER_INIT_START);
+      PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_START);
     }
 
     double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
@@ -165,11 +169,12 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       debugEnableInspector: _krakenWidget.debugEnableInspector,
       gestureClient: _krakenWidget.gestureClient,
       navigationDelegate: _krakenWidget.navigationDelegate,
-      devToolsService: _krakenWidget.devToolsService
+      devToolsService: _krakenWidget.devToolsService,
+      httpClientInterceptor: _krakenWidget.httpClientInterceptor,
     );
 
     if (kProfileMode) {
-      PerformanceTiming.instance(controller.view.contextId).mark(PERF_CONTROLLER_INIT_END);
+      PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);
     }
 
     return controller.view.getRootRenderObject();

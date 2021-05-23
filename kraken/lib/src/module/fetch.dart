@@ -8,7 +8,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/src/module/module_manager.dart';
+import 'package:kraken/module.dart';
+import 'package:kraken/foundation.dart';
 
 String EMPTY_STRING = '';
 
@@ -26,7 +27,7 @@ class FetchModule extends BaseModule {
     String url = method;
     Map<String, dynamic> options = params;
 
-    _fetch(url, options).then((Response response) {
+    _fetch(url, options, contextId: moduleManager.contextId).then((Response response) {
       callback(data: ['', response.statusCode, response.data]);
     }).catchError((e, stack) {
       if (e is DioError && e.type == DioErrorType.RESPONSE) {
@@ -40,7 +41,7 @@ class FetchModule extends BaseModule {
   }
 }
 
-Future<Response> _fetch(String url, Map<String, dynamic> map) async {
+Future<Response> _fetch(String url, Map<String, dynamic> map, { int contextId }) async {
   Future<Response> future;
   String method = map['method'] ?? 'GET';
 
@@ -51,6 +52,9 @@ Future<Response> _fetch(String url, Map<String, dynamic> map) async {
   var headers = map['headers'];
   if (headers[HttpHeaders.userAgentHeader] == null) {
     headers[HttpHeaders.userAgentHeader] = getKrakenInfo().userAgent;
+  }
+  if (contextId != null) {
+    headers[HttpHeaderContextID] = contextId.toString();
   }
 
   BaseOptions options =
