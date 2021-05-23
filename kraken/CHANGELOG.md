@@ -1,3 +1,24 @@
+## 0.7.3
+
+**Features**
+
++ Feat: add network proxy interface in dart widget API https://github.com/openkraken/kraken/pull/292
++ Feat: add AsyncStorage.length method https://github.com/openkraken/kraken/pull/298
++ Feat: improve bridge call performance. https://github.com/openkraken/kraken/pull/328
++ feat: add SVGElement https://github.com/openkraken/kraken/pull/338
+
+
+**Bug Fixed**
++ Fix input setting value does not take effect before adding the dom tree. https://github.com/openkraken/kraken/pull/297/files
++ Fix: remove unnecessary flushUICommand https://github.com/openkraken/kraken/pull/318
++ Fix: img lazy loading not work https://github.com/openkraken/kraken/pull/319
++ Fix: touchend crash caused by bridge https://github.com/openkraken/kraken/pull/320
++ Fix: fix target of the event agent does not point to the clicked Node https://github.com/openkraken/kraken/pull/322
+
+**Refactor**
+
++ refactor: position sticky https://github.com/openkraken/kraken/pull/324
+
 ## 0.7.2+4
 
 feat: support mouse event https://github.com/openkraken/kraken/pull/220
