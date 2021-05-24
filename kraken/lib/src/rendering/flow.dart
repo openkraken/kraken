@@ -516,6 +516,10 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
         extendMaxScrollableSize(child);
+        // For scrolling box, the minimum width and height should not less than scrollableSize
+        if (isScrollingContentBox) {
+          ensureBoxSizeLargerThanScrollableSize();
+        }
       } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
         RenderBoxModel scrollContainer = child.findScrollContainer();
         // Sticky offset depends on the layout of scroll container, delay the calculation of
@@ -610,15 +614,22 @@ class RenderFlowLayout extends RenderLayoutBox {
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
+
+    // Use scrolling container to calculate flex line limit for scrolling content box
+    RenderBoxModel containerBox = isScrollingContentBox ? parent : this;
     switch (direction) {
       case Axis.horizontal:
-        double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(this);
-        mainAxisLimit = logicalContentWidth != null ? logicalContentWidth : maxConstraintWidth;
+        double logicalConstraintWidth = containerBox.contentConstraints.maxWidth;
+        double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(containerBox);
+        mainAxisLimit = logicalConstraintWidth ??  maxConstraintWidth;
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
       case Axis.vertical:
-        mainAxisLimit = contentConstraints.maxHeight;
+        double logicalConstraintHeight = containerBox.contentConstraints.maxHeight;
+        // Children in vertical direction should not wrap if height no exists
+        double maxConstraintHeight = double.infinity;
+        mainAxisLimit = logicalConstraintHeight ?? maxConstraintHeight;
         if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
@@ -1279,27 +1290,27 @@ class RenderFlowLayout extends RenderLayoutBox {
   /// Set the size of scrollable overflow area for flow layout
   /// https://drafts.csswg.org/css-overflow-3/#scrollable
   void _setMaxScrollableSizeForFlow(List<_RunMetrics> runMetrics) {
-    // Scrollable width collection of each line
-    List<double> scrollableWidthOfLines = [];
-    // Scrollable width collection of each line
-    List<double> scrollableHeightOfLines = [];
-    // Total height of previous lines
-    double preLinesHeight = 0;
+    // Scrollable main size collection of each line
+    List<double> scrollableMainSizeOfLines = [];
+    // Scrollable cross size collection of each line
+    List<double> scrollableCrossSizeOfLines = [];
+    // Total cross size of previous lines
+    double preLinesCrossSize = 0;
 
     for (_RunMetrics runMetric in runMetrics) {
       Map<int, RenderBox> runChildren = runMetric.runChildren;
 
       List<RenderBox> runChildrenList = [];
-      // Scrollable width collection of each child in the line
-      List<double> scrollableWidthOfChildren = [];
-      // Scrollable height collection of each child in the line
-      List<double> scrollableHeightOfChildren = [];
+      // Scrollable main size collection of each child in the line
+      List<double> scrollableMainSizeOfChildren = [];
+      // Scrollable cross size collection of each child in the line
+      List<double> scrollableCrossSizeOfChildren = [];
 
       void iterateRunChildren(int targetId, RenderBox child) {
-        // Total width of previous siblings
-        double preSiblingsWidth = 0;
+        // Total main size of previous siblings
+        double preSiblingsMainSize = 0;
         for (RenderBox sibling in runChildrenList) {
-          preSiblingsWidth += sibling.size.width;
+          preSiblingsMainSize += sibling.size.width;
         }
 
         Size childScrollableSize = child.size;
@@ -1317,58 +1328,57 @@ class RenderFlowLayout extends RenderLayoutBox {
           childMarginLeft = childRenderStyle.marginLeft.length;
         }
 
-        scrollableWidthOfChildren.add(preSiblingsWidth + childScrollableSize.width + childMarginLeft);
-        scrollableHeightOfChildren.add(childScrollableSize.height + childMarginTop);
+        scrollableMainSizeOfChildren.add(preSiblingsMainSize + childScrollableSize.width + childMarginLeft);
+        scrollableCrossSizeOfChildren.add(childScrollableSize.height + childMarginTop);
         runChildrenList.add(child);
       }
       runChildren.forEach(iterateRunChildren);
 
-      // Max scrollable width of all the children in the line
-      double maxScrollableWidthOfLine = scrollableWidthOfChildren.reduce((double curr, double next) {
+      // Max scrollable main size of all the children in the line
+      double maxScrollableMainSizeOfLine = scrollableMainSizeOfChildren.reduce((double curr, double next) {
         return curr > next ? curr : next;
       });
 
-      // Max scrollable height of all the children in the line
-      double maxScrollableHeightOfLine = preLinesHeight + scrollableHeightOfChildren.reduce((double curr, double next) {
+      // Max scrollable cross size of all the children in the line
+      double maxScrollableCrossSizeOfLine = preLinesCrossSize + scrollableCrossSizeOfChildren.reduce((double curr, double next) {
         return curr > next ? curr : next;
       });
 
-      scrollableWidthOfLines.add(maxScrollableWidthOfLine);
-      scrollableHeightOfLines.add(maxScrollableHeightOfLine);
-      preLinesHeight += runMetric.crossAxisExtent;
+      scrollableMainSizeOfLines.add(maxScrollableMainSizeOfLine);
+      scrollableCrossSizeOfLines.add(maxScrollableCrossSizeOfLine);
+      preLinesCrossSize += runMetric.crossAxisExtent;
     }
 
-
-    // Max scrollable width of all lines
-    double maxScrollableWidthOfLines = scrollableWidthOfLines.reduce((double curr, double next) {
+    // Max scrollable main size of all lines
+    double maxScrollableMainSizeOfLines = scrollableMainSizeOfLines.reduce((double curr, double next) {
       return curr > next ? curr : next;
     });
 
     bool isScrollContainer = renderStyle.overflowX != CSSOverflowType.visible ||
       renderStyle.overflowY != CSSOverflowType.visible;
     // No need to add padding for scrolling content box
-    double maxScrollableWidthOfChildren = isScrollContainer ? maxScrollableWidthOfLines :
-      renderStyle.paddingLeft + maxScrollableWidthOfLines;
+    double maxScrollableMainSizeOfChildren = isScrollContainer ? maxScrollableMainSizeOfLines :
+      renderStyle.paddingLeft + maxScrollableMainSizeOfLines;
 
-    // Max scrollable height of all lines
-    double maxScrollableHeightOfLines = scrollableHeightOfLines.reduce((double curr, double next) {
+    // Max scrollable cross size of all lines
+    double maxScrollableCrossSizeOfLines = scrollableCrossSizeOfLines.reduce((double curr, double next) {
       return curr > next ? curr : next;
     });
     // No need to add padding for scrolling content box
-    double maxScrollableHeightOfChildren = isScrollContainer ? maxScrollableHeightOfLines :
-      renderStyle.paddingTop + maxScrollableHeightOfLines;
+    double maxScrollableCrossSizeOfChildren = isScrollContainer ? maxScrollableCrossSizeOfLines :
+      renderStyle.paddingTop + maxScrollableCrossSizeOfLines;
 
     RenderBoxModel container = isScrollingContentBox ? parent : this;
-    double maxScrollableWidth = math.max(
+    double maxScrollableMainSize = math.max(
       size.width - container.renderStyle.borderLeft - container.renderStyle.borderRight,
-      maxScrollableWidthOfChildren
+      maxScrollableMainSizeOfChildren
     );
-    double maxScrollableHeight = math.max(
+    double maxScrollableCrossSize = math.max(
       size.height - container.renderStyle.borderTop - container.renderStyle.borderBottom,
-      maxScrollableHeightOfChildren
+      maxScrollableCrossSizeOfChildren
     );
 
-    scrollableSize = Size(maxScrollableWidth, maxScrollableHeight);
+    scrollableSize = Size(maxScrollableMainSize, maxScrollableCrossSize);
   }
 
   // Get distance from top to baseline of child incluing margin
