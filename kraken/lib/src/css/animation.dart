@@ -21,9 +21,7 @@ enum FillMode { none, forwards, backwards, both, auto }
 // https://drafts.csswg.org/web-animations/#enumdef-playbackdirection
 enum PlaybackDirection { normal, reverse, alternate, alternateReverse }
 
-Curve _parseEasing(String function) {
-  if (function == null) return null;
-
+Curve? _parseEasing(String function) {
   switch (function) {
     case LINEAR:
       return Curves.linear;
@@ -41,24 +39,25 @@ Curve _parseEasing(String function) {
       return Threshold(1);
   }
   List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(function);
-  if (methods != null && methods.length > 0) {
+  if (methods.length > 0) {
     CSSFunctionalNotation method = methods.first;
-    if (method != null) {
-      if (method.name == 'steps') {
-        if (method.args.length >= 1) {
-          var step = int.tryParse(method.args[0]);
-          var isStart = false;
-          if (method.args.length == 2) {
-            isStart = method.args[1] == 'start';
-          }
-          return CSSStepCurve(step, isStart);
+    if (method.name == 'steps') {
+      if (method.args.length >= 1) {
+        int? step = int.tryParse(method.args[0]);
+        if (step == null) return null;
+        var isStart = false;
+        if (method.args.length == 2) {
+          isStart = method.args[1] == 'start';
         }
-      } else if (method.name == 'cubic-bezier') {
-        if (method.args.length == 4) {
-          var first = double.tryParse(method.args[0]);
-          var sec = double.tryParse(method.args[1]);
-          var third = double.tryParse(method.args[2]);
-          var forth = double.tryParse(method.args[3]);
+        return CSSStepCurve(step, isStart);
+      }
+    } else if (method.name == 'cubic-bezier') {
+      if (method.args.length == 4) {
+        double? first = double.tryParse(method.args[0]);
+        double? sec = double.tryParse(method.args[1]);
+        double? third = double.tryParse(method.args[2]);
+        double? forth = double.tryParse(method.args[3]);
+        if (first != null && sec != null && third != null && forth != null) {
           return Cubic(first, sec, third, forth);
         }
       }
@@ -69,8 +68,8 @@ Curve _parseEasing(String function) {
 
 class AnimationTimeline {
   List<Animation> _animations = [];
-  double _currentTime;
-  Ticker _ticker;
+  double _currentTime = 0.0;
+  late final Ticker _ticker;
 
   AnimationTimeline() {
     _ticker = Ticker(_onTick);
@@ -125,8 +124,8 @@ class AnimationTimeline {
 AnimationTimeline _documentTimeline = AnimationTimeline();
 
 class Animation {
-  double _startTime;
-  double _currentTime = 0;
+  double? _startTime;
+  double? _currentTime = 0.0;
   double _playbackRate = 1;
 
   bool _isPaused = false;
@@ -143,18 +142,18 @@ class Animation {
   // Although in the future other effects such as SequenceEffects or GroupEffects might be possible,
   // the only kind of effect currently available is KeyframeEffect.
   // This can be null (which is the default) to indicate that there should be no effect applied.
-  KeyframeEffect _effect;
-  AnimationTimeline _timeline;
-  AnimationReplaceState _replaceState;
+  late KeyframeEffect _effect;
+  late AnimationTimeline _timeline;
+  AnimationReplaceState? _replaceState;
 
-  Function onfinish;
-  Function oncancel;
-  Function onremove;
+  Function? onfinish;
+  Function? oncancel;
+  Function? onremove;
 
   // For transitionstart event
-  Function onstart;
+  Function? onstart;
 
-  Animation(KeyframeEffect effect, [AnimationTimeline timeline]) {
+  Animation(KeyframeEffect effect, [AnimationTimeline? timeline]) {
     if (timeline == null) {
       _timeline = _documentTimeline;
     }
@@ -163,21 +162,19 @@ class Animation {
 
   void _setInEffect(bool flag) {
     if (_inEffect == false && flag == true && onstart != null) {
-      onstart();
+      onstart!();
     }
     _inEffect = flag;
   }
 
-  double get currentTime {
+  double? get currentTime {
     if (_isIdle || _isCurrentTimePending) return null;
     return _currentTime;
   }
 
-  set currentTime(double newTime) {
-    if (newTime == null) return;
-
+  set currentTime(double? newTime) {
     if (!_isPaused && _startTime != null) {
-      _startTime = _timeline.currentTime - newTime / _playbackRate;
+      _startTime = _timeline.currentTime - newTime! / _playbackRate;
     }
 
     _isCurrentTimePending = false;
@@ -191,7 +188,7 @@ class Animation {
     _tickCurrentTime(newTime, true);
   }
 
-  _tickCurrentTime(double newTime, [bool ignoreLimit = false]) {
+  _tickCurrentTime(double? newTime, [bool ignoreLimit = false]) {
 
     if (newTime != _currentTime) {
       _currentTime = newTime;
@@ -203,11 +200,11 @@ class Animation {
     }
   }
 
-  AnimationEffect get effect {
+  KeyframeEffect get effect {
     return _effect;
   }
 
-  set effect(AnimationEffect effect) {
+  set effect(KeyframeEffect effect) {
     _effect = effect;
   }
 
@@ -230,7 +227,7 @@ class Animation {
 
     _playbackRate = value;
 
-    double oldCurrentTime = currentTime;
+    double oldCurrentTime = currentTime!;
     _startTime = null;
     if (playState != AnimationPlayState.paused && playState != AnimationPlayState.idle) {
       _finishedFlag = false;
@@ -242,16 +239,13 @@ class Animation {
     }
   }
 
-  double get startTime {
-    return _startTime;
-  }
+  double? get startTime => _startTime;
 
-  set startTime(double value) {
+  set startTime(double? value) {
     if (value == null) return;
-
     if (_isPaused || _isIdle) return;
     _startTime = value;
-    _tickCurrentTime((_timeline.currentTime - _startTime) * playbackRate);
+    _tickCurrentTime((_timeline.currentTime - _startTime!) * playbackRate);
   }
 
   AnimationPlayState get playState {
@@ -267,7 +261,7 @@ class Animation {
     return AnimationPlayState.running;
   }
 
-  AnimationReplaceState get replaceState {
+  AnimationReplaceState? get replaceState {
     return _replaceState;
   }
 
@@ -277,8 +271,8 @@ class Animation {
   }
 
   bool get _isFinished {
-    return !_isIdle && (_playbackRate > 0 && _currentTime >= _totalDuration ||
-        _playbackRate < 0 && _currentTime <= 0);
+    return !_isIdle && (_playbackRate > 0 && _currentTime! >= _totalDuration ||
+        _playbackRate < 0 && _currentTime! <= 0);
   }
 
   double get _totalDuration {
@@ -302,10 +296,11 @@ class Animation {
     _startTime = null;
     _effect._calculateTiming(null);
 
-    if (oncancel != null) {
+    Function? _oncancel = oncancel;
+    if (_oncancel != null) {
       var event = AnimationPlaybackEvent(EVENT_CANCEL);
       event.timelineTime = _timeline.currentTime;
-      oncancel(event);
+      _oncancel(event);
     }
   }
 
@@ -313,7 +308,7 @@ class Animation {
     if (_isIdle)
       return;
     currentTime = _playbackRate > 0 ? _totalDuration : 0;
-    _startTime = _totalDuration - currentTime;
+    _startTime = _totalDuration - currentTime!;
     _isCurrentTimePending = false;
   }
 
@@ -375,10 +370,10 @@ class Animation {
 
   void _tick(double timelineTime) {
     if (!_isIdle && !_isPaused) {
-      if (_startTime == null) {
-        startTime = timelineTime - _currentTime / playbackRate;
+      if (_startTime == null && _currentTime != null) {
+        startTime = timelineTime - _currentTime! / playbackRate;
       } else if (!_isFinished) {
-        _tickCurrentTime((timelineTime - _startTime) * playbackRate);
+        _tickCurrentTime((timelineTime - _startTime!) * playbackRate);
       }
     }
     _isCurrentTimePending = false;
@@ -391,7 +386,8 @@ class Animation {
         AnimationPlaybackEvent event = AnimationPlaybackEvent(EVENT_FINISH);
         event.currentTime = currentTime;
         event.timelineTime = timelineTime;
-        if (onfinish != null) onfinish(event);
+        Function? _onfinish = onfinish;
+        if (_onfinish != null) _onfinish(event);
         _finishedFlag = true;
       }
     } else {
@@ -403,8 +399,8 @@ class Animation {
 class AnimationPlaybackEvent extends Event {
   AnimationPlaybackEvent(String type) : super(type);
 
-  num currentTime;
-  num timelineTime;
+  num? currentTime;
+  num? timelineTime;
 }
 
 class Keyframe {
@@ -412,7 +408,7 @@ class Keyframe {
   String value;
   double offset;
   String easing;
-  Keyframe(this.property, this.value, this.offset, [this.easing]);
+  Keyframe(this.property, this.value, this.offset, [this.easing = '']);
 }
 
 class _Interpolation {
@@ -423,11 +419,7 @@ class _Interpolation {
   var begin;
   var end;
   Function lerp;
-  _Interpolation(this.property, this.startOffset, this.endOffset, this.easing, this.begin, this.end, this.lerp) {
-    if (easing == null) {
-      easing = Curves.linear;
-    }
-  }
+  _Interpolation(this.property, this.startOffset, this.endOffset, this.easing, this.begin, this.end, this.lerp);
 
   @override
   String toString() => '_Interpolation('
@@ -443,10 +435,10 @@ class _Interpolation {
 class KeyframeEffect extends AnimationEffect {
   CSSStyleDeclaration style;
   Element target;
-  List<_Interpolation> _interpolations;
-  double _progress;
-  double _activeTime;
-  Map<String, List<Keyframe>> _propertySpecificKeyframeGroups;
+  List<_Interpolation> _interpolations = List.empty();
+  double? _progress;
+  double? _activeTime;
+  Map<String, List<Keyframe>> _propertySpecificKeyframeGroups = Map();
 
   // Speed control.
   // The rate of play of an animation can be controlled by setting its playback rate.
@@ -454,7 +446,7 @@ class KeyframeEffect extends AnimationEffect {
   // Similarly, a playback rate of -1 will cause the animation’s current time to decrease at the same rate as the time values from its timeline increase.
   double _playbackRate = 1;
 
-  KeyframeEffect(this.style, this.target, List<Keyframe> keyframes, EffectTiming options, this.viewportSize) {
+  KeyframeEffect(this.style, this.target, List<Keyframe>? keyframes, EffectTiming? options, this.viewportSize) {
     timing = options == null ? EffectTiming() : options;
 
     if (keyframes != null) {
@@ -500,7 +492,7 @@ class KeyframeEffect extends AnimationEffect {
 
         if (left == right) continue;
 
-        List handlers = CSSTransformHandlers[property];
+        List<Function>? handlers = CSSTransformHandlers[property];
         if (handlers == null) {
           handlers = [_defaultParse, _defaultLerp];
         }
@@ -510,7 +502,7 @@ class KeyframeEffect extends AnimationEffect {
           property,
           startOffset,
           endOffset,
-          _parseEasing(keyframes[startIndex].easing),
+          _parseEasing(keyframes[startIndex].easing) ?? Curves.linear,
           parseProperty(left, viewportSize),
           parseProperty(right, viewportSize),
           handlers[1]
@@ -544,7 +536,7 @@ class KeyframeEffect extends AnimationEffect {
       if (propertySpecificKeyframeGroups[property] == null) {
         propertySpecificKeyframeGroups[property] = [keyframe];
       } else {
-        propertySpecificKeyframeGroups[property].add(keyframe);
+        propertySpecificKeyframeGroups[property]!.add(keyframe);
       }
     }
 
@@ -553,7 +545,7 @@ class KeyframeEffect extends AnimationEffect {
 
   static double _timeEpsilon = 0.00001;
 
-  void _runIteration(double localTime) {
+  void _runIteration(double? localTime) {
     if (_progress == null) {
       // If fill is backwards that will be null when animation finished
       _propertySpecificKeyframeGroups.forEach((String propertyName, value) {
@@ -567,9 +559,9 @@ class KeyframeEffect extends AnimationEffect {
         _Interpolation interpolation = _interpolations[i];
         double startOffset = interpolation.startOffset;
         double endOffset = interpolation.endOffset;
-        Curve easingCurve = interpolation.easing;
+        Curve? easingCurve = interpolation.easing;
         String property = interpolation.property;
-        double offsetFraction = _progress - startOffset;
+        double offsetFraction = _progress! - startOffset;
         double localDuration = endOffset - startOffset;
         double scaledLocalTime = localDuration == 0 ? 0 : easingCurve.transform(offsetFraction / localDuration);
 
@@ -609,7 +601,7 @@ class KeyframeEffect extends AnimationEffect {
   }
 
   // https://drafts.csswg.org/web-animations/#animation-effect-phases-and-states
-  AnimationEffectPhase _calculatePhase(double activeDuration, double localTime) {
+  AnimationEffectPhase _calculatePhase(double activeDuration, double? localTime) {
 
     bool animationIsBackwards = _playbackRate < 0;
 
@@ -651,8 +643,11 @@ class KeyframeEffect extends AnimationEffect {
 
   // https://drafts.csswg.org/web-animations/#calculating-the-active-time
   // ignore: missing_return
-  double _calculateActiveTime(double activeDuration, double localTime, AnimationEffectPhase phase) {
+  double? _calculateActiveTime(double activeDuration, double? localTime, AnimationEffectPhase phase) {
     FillMode fillMode = timing.fill;
+
+    if (localTime == null) return null;
+
     switch (phase) {
       case AnimationEffectPhase.before:
         // If the fill mode is backwards or both, return the result of evaluating
@@ -680,7 +675,7 @@ class KeyframeEffect extends AnimationEffect {
 
   // 3.8.3.2. Calculating the overall progress
   // https://drafts.csswg.org/web-animations-1/#calculating-the-overall-progress
-  double _calculateOverallProgress(AnimationEffectPhase phase, double activeTime) {
+  double? _calculateOverallProgress(AnimationEffectPhase phase, double? activeTime) {
     // The overall progress describes the number of iterations that have completed (including partial iterations) and is defined as follows:
 
     // 1. If the active time is unresolved, return unresolved.
@@ -706,7 +701,7 @@ class KeyframeEffect extends AnimationEffect {
 
   // 3.8.3.3. Calculating the simple iteration progress
   // https://drafts.csswg.org/web-animations-1/#calculating-the-simple-iteration-progress
-  double _calculateSimpleIterationProgress(double overallProgress, AnimationEffectPhase phase, double activeTime, double activeDuration) {
+  double? _calculateSimpleIterationProgress(double? overallProgress, AnimationEffectPhase phase, double? activeTime, double activeDuration) {
 
     // The simple iteration progress is a fraction of the progress through the current iteration that
     // ignores transformations to the time introduced by the playback direction or timing functions
@@ -740,7 +735,7 @@ class KeyframeEffect extends AnimationEffect {
 
   // 3.8.4. Calculating the current iteration
   // https://drafts.csswg.org/web-animations-1/#calculating-the-current-iteration
-  double _calculateCurrentIteration(AnimationEffectPhase phase, double activeTime, double simpleIterationProgress, double overallProgress) {
+  double? _calculateCurrentIteration(AnimationEffectPhase phase, double? activeTime, double? simpleIterationProgress, double? overallProgress) {
     // The current iteration can be calculated using the following steps:
 
     // 1. If the active time is unresolved, return unresolved.
@@ -755,22 +750,22 @@ class KeyframeEffect extends AnimationEffect {
 
     // 3. If the simple iteration progress is 1.0, return floor(overall progress) - 1.
     if (simpleIterationProgress == 1) {
-      return overallProgress.floor().toDouble() - 1;
+      return overallProgress!.floor().toDouble() - 1;
     }
     // 4. Otherwise, return floor(overall progress).
-    return overallProgress.floor().toDouble();
+    return overallProgress!.floor().toDouble();
   }
 
-  PlaybackDirection _calculateCurrentDirection(double currentIteration) {
+  PlaybackDirection _calculateCurrentDirection(double? currentIteration) {
     PlaybackDirection playbackDirection = timing.direction;
     PlaybackDirection currentDirection = playbackDirection;
     if (playbackDirection != PlaybackDirection.normal && playbackDirection != PlaybackDirection.reverse) {
       var d = currentIteration;
-      if (playbackDirection == PlaybackDirection.alternateReverse) {
+      if (d != null && playbackDirection == PlaybackDirection.alternateReverse) {
         d += 1;
       }
       currentDirection = PlaybackDirection.normal;
-      if (d != double.infinity && d % 2 != 0) {
+      if (d != double.infinity && d != null && d % 2 != 0) {
         currentDirection = PlaybackDirection.reverse;
       }
     }
@@ -779,7 +774,7 @@ class KeyframeEffect extends AnimationEffect {
 
   // 3.9.1. Calculating the directed progress
   // https://drafts.csswg.org/web-animations-1/#calculating-the-directed-progress
-  double _calculateDirectedProgress(double currentIteration, PlaybackDirection currentDirection, double simpleIterationProgress) {
+  double? _calculateDirectedProgress(double? currentIteration, PlaybackDirection currentDirection, double? simpleIterationProgress) {
     // The directed progress is calculated from the simple iteration progress using the following steps:
 
 
@@ -806,7 +801,7 @@ class KeyframeEffect extends AnimationEffect {
 
   // 3.10.1. Calculating the transformed progress
   // https://drafts.csswg.org/web-animations-1/#calculating-the-transformed-progress
-  double _calculateTransformedProgress(AnimationEffectPhase phase, double activeTime, double directedProgress, PlaybackDirection currentDirection) {
+  double? _calculateTransformedProgress(AnimationEffectPhase phase, double? activeTime, double? directedProgress, PlaybackDirection currentDirection) {
     // The transformed progress is calculated from the directed progress using the following steps:
     //
     // 1. If the directed progress is unresolved, return unresolved.
@@ -819,27 +814,28 @@ class KeyframeEffect extends AnimationEffect {
       bool isCurrentDirectionForward = currentDirection == PlaybackDirection.normal;
       if (isCurrentDirectionForward && (directedProgress - 1).abs() <= _calculationEpsilon) {
         directedProgress = 1;
-      } else if (!isCurrentDirectionForward && (activeTime - 0).abs() <= _calculationEpsilon) {
+      } else if (!isCurrentDirectionForward && (activeTime! - 0).abs() <= _calculationEpsilon) {
         directedProgress = 0;
       }
     }
 
     // Return the result of evaluating the animation effect’s timing function
     // passing directed progress as the input progress value.
-    Curve easingCurve = timing._getEasingCurve();
+    Curve? easingCurve = timing._getEasingCurve();
+    if (easingCurve == null) return null;
     return easingCurve.transform(directedProgress);
   }
 
-  void _calculateTiming(double localTime) {
+  void _calculateTiming(double? localTime) {
     double activeDuration = _calculateActiveDuration();
     AnimationEffectPhase phase = _calculatePhase(activeDuration, localTime);
-    double activeTime = _calculateActiveTime(activeDuration, localTime, phase);
-    double overallProgress = _calculateOverallProgress(phase, activeTime);
-    double simpleIterationProgress = _calculateSimpleIterationProgress(overallProgress, phase, activeTime, activeDuration);
-    double currentIteration = _calculateCurrentIteration(phase, activeTime, simpleIterationProgress, overallProgress);
+    double? activeTime = _calculateActiveTime(activeDuration, localTime, phase);
+    double? overallProgress = _calculateOverallProgress(phase, activeTime);
+    double? simpleIterationProgress = _calculateSimpleIterationProgress(overallProgress, phase, activeTime, activeDuration);
+    double? currentIteration = _calculateCurrentIteration(phase, activeTime, simpleIterationProgress, overallProgress);
     PlaybackDirection currentDirection = _calculateCurrentDirection(currentIteration);
-    double directedProgress = _calculateDirectedProgress(currentIteration, currentDirection, simpleIterationProgress);
-    double progress = _calculateTransformedProgress(phase, activeTime, directedProgress, currentDirection);
+    double? directedProgress = _calculateDirectedProgress(currentIteration, currentDirection, simpleIterationProgress);
+    double? progress = _calculateTransformedProgress(phase, activeTime, directedProgress, currentDirection);
 
     _activeTime = activeTime;
     _progress = progress;
@@ -847,7 +843,7 @@ class KeyframeEffect extends AnimationEffect {
 }
 
 class AnimationEffect {
-  EffectTiming timing;
+  late EffectTiming timing;
 
   Map getComputedTiming() {
     throw UnsupportedError('Not supported');
@@ -893,43 +889,43 @@ class EffectTiming {
   // The number of milliseconds each iteration of the animation takes to complete.
   // Defaults to 0. Although this is technically optional,
   // keep in mind that your animation will not run if this value is 0.
-  double _duration;
+  double _duration = 0.0;
   // The number of milliseconds to delay the start of the animation.
   // Defaults to 0.
-  double _delay;
+  double _delay = 0;
   // The rate of the animation's change over time.
   // Accepts the pre-defined values "linear", "ease", "ease-in", "ease-out", and "ease-in-out",
   // or a custom "cubic-bezier" value like "cubic-bezier(0.42, 0, 0.58, 1)".
   // Defaults to "linear".
-  String _easing;
-  Curve _easingCurve;
+  String _easing = 'linear';
+  Curve _easingCurve = Curves.linear;
   // Whether the animation runs forwards (normal), backwards (reverse),
   // switches direction after each iteration (alternate),
   // or runs backwards and switches direction after each iteration (alternate-reverse).
   // Defaults to "normal".
-  PlaybackDirection _direction;
+  PlaybackDirection _direction = PlaybackDirection.normal;
   // The number of milliseconds to delay after the end of an animation.
   // This is primarily of use when sequencing animations based on the end time of another animation.
   // Defaults to 0.
-  double _endDelay;
+  double _endDelay = 0.0;
   // Dictates whether the animation's effects should be reflected by the element(s) prior to playing ("backwards"),
   // retained after the animation has completed playing ("forwards"), or both. Defaults to "none".
-  FillMode _fill;
+  FillMode _fill = FillMode.auto;
   // Describes at what point in the iteration the animation should start.
   // 0.5 would indicate starting halfway through the first iteration for example,
   // and with this value set, an animation with 2 iterations would end halfway through a third iteration.
   // Defaults to 0.0.
-  double _iterationStart;
+  double _iterationStart = 0.0;
   // The number of times the animation should repeat.
   // Defaults to 1, and can also take a value of Infinity to make it repeat for as long as the element exists.
-  double _iterations;
+  double _iterations = 1.0;
 
   EffectTiming({
     double duration = 0,
     double delay = 0,
     double endDelay = 0,
     double iterationStart = 0,
-    double iterations = 1,
+    double iterations = 1.0,
     String easing = 'linear',
     PlaybackDirection direction = PlaybackDirection.normal,
     FillMode fill = FillMode.auto
@@ -942,10 +938,7 @@ class EffectTiming {
     _easing = easing;
     _direction = direction;
     _fill = fill;
-
-    if (_easing != null) {
-      _easingCurve = _parseEasing(_easing);
-    }
+    _easingCurve = _parseEasing(_easing)!;
   }
 
   double get delay {
@@ -977,11 +970,14 @@ class EffectTiming {
   }
 
   set easing(String value) {
-    _easingCurve = _parseEasing(value);
-    _easing = value;
+    Curve? cv = _parseEasing(value);
+    if (cv != null) {
+      _easingCurve = cv;
+      _easing = value;
+    }
   }
 
-  Curve _getEasingCurve() {
+  Curve? _getEasingCurve() {
     return _easingCurve;
   }
 
