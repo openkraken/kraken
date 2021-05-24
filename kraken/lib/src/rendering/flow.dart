@@ -838,7 +838,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         break;
     }
 
-    scrollableSize = _getMaxScrollableSize(runMetrics);
+    _setMaxScrollableSizeForFlow(runMetrics);
+
     autoMinWidth = _getMainAxisAutoSize(runMetrics);
     autoMinHeight = _getCrossAxisAutoSize(runMetrics);
 
@@ -1275,9 +1276,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     return autoMinSize;
   }
 
-  /// Calculate the size of scrollable overflow area
+  /// Set the size of scrollable overflow area for flow layout
   /// https://drafts.csswg.org/css-overflow-3/#scrollable
-  Size _getMaxScrollableSize(List<_RunMetrics> runMetrics) {
+  void _setMaxScrollableSizeForFlow(List<_RunMetrics> runMetrics) {
     // Scrollable width collection of each line
     List<double> scrollableWidthOfLines = [];
     // Scrollable width collection of each line
@@ -1367,7 +1368,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       maxScrollableHeightOfChildren
     );
 
-    return Size(maxScrollableWidth, maxScrollableHeight);
+    scrollableSize = Size(maxScrollableWidth, maxScrollableHeight);
   }
 
   // Get distance from top to baseline of child incluing margin
