@@ -8,11 +8,11 @@ describe('window scroll API', () => {
     div.appendChild(text);
     document.body.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       window.scrollTo(0, 55);
-      await matchViewportSnapshot();
+      await snapshot();
       expect(window.scrollX).toBe(0);
       expect(window.scrollY).toBe(55);
       doneFn();
@@ -28,11 +28,11 @@ describe('window scroll API', () => {
     div.appendChild(text);
     document.body.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       window.scroll(0, 40);
-      await matchViewportSnapshot();
+      await snapshot();
 
       expect(window.scrollX).toBe(0);
       expect(window.scrollY).toBe(40);
@@ -49,12 +49,12 @@ describe('window scroll API', () => {
     div.appendChild(text);
     document.body.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       window.scroll(0, 5);
       window.scrollBy(0, 20);
-      await matchViewportSnapshot();
+      await snapshot();
 
       expect(window.scrollX).toBe(0);
       expect(window.scrollY).toBe(25);

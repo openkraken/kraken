@@ -11,7 +11,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when it has no children and width not exist", async () => {
@@ -25,7 +25,7 @@ describe('max-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when it has no children and width not exist", async () => {
@@ -39,7 +39,7 @@ describe('max-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when it has no children and width not exist", async () => {
@@ -53,7 +53,7 @@ describe('max-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display flex when it has no children and width not exist", async () => {
@@ -67,7 +67,7 @@ describe('max-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when child length is larger than max-width", async () => {
@@ -82,7 +82,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when child length is smaller than max-width", async () => {
@@ -97,7 +97,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when child length is larger than max-width", async () => {
@@ -112,7 +112,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when child length is smaller than max-width", async () => {
@@ -127,7 +127,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when child length is larger than max-width", async () => {
@@ -142,7 +142,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when child length is smaller than max-width", async () => {
@@ -157,7 +157,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
 
@@ -173,7 +173,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display flex when child length is smaller than max-width", async () => {
@@ -188,7 +188,7 @@ describe('max-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with replaced element when element width is smaller than intrinsic width', async () => {
@@ -205,19 +205,19 @@ describe('max-width', () => {
       },
       [
         createElement('img', {
-            src: 'assets/100x100-green.png',
-            style: {
-              'background-color': 'green',
-              maxWidth: '50px',
-              'box-sizing': 'border-box',
-            },
+          src: 'assets/100x100-green.png',
+          style: {
+            'background-color': 'green',
+            maxWidth: '50px',
+            'box-sizing': 'border-box',
           },
+        },
         )
       ]
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with replaced element when element width is larger than intrinsic width', async () => {
@@ -234,19 +234,19 @@ describe('max-width', () => {
       },
       [
         createElement('img', {
-            src: 'assets/100x100-green.png',
-            style: {
-              'background-color': 'green',
-              maxWidth: '200px',
-              'box-sizing': 'border-box',
-            },
+          src: 'assets/100x100-green.png',
+          style: {
+            'background-color': 'green',
+            maxWidth: '200px',
+            'box-sizing': 'border-box',
           },
+        },
         )
       ]
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with percentage in flow layout', async () => {
@@ -281,7 +281,7 @@ describe('max-width', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in row direction', async () => {
@@ -319,7 +319,7 @@ describe('max-width', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in column direction', async () => {
@@ -356,6 +356,136 @@ describe('max-width', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
+  });
+
+  it('change from not none to none', async (done) => {
+    const cont = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          maxWidth: '100px',
+          height: '100px',
+          backgroundColor: 'green',
+          fontSize: '18px',
+        }
+      }
+    );
+    append(BODY, cont);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      cont.style.maxWidth = 'none';
+      await snapshot(0.1);
+      done();
+    });
+  });
+
+  it('max-width exists and width does not exist in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        height: '100px',
+        maxWidth: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('max-width')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('max-width is larger than width in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        maxWidth: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('max-width')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('max-width smaller than width in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        maxWidth: '50px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('max-width')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('max-width exists and width does not exist in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        height: '100px',
+        maxWidth: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('max-width')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
+
+  it('max-width is larger than width in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        maxWidth: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('max-width')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
+
+  it('max-width smaller than width in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        maxWidth: '50px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('max-width')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
   });
 });

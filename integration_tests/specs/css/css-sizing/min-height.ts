@@ -11,7 +11,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when it has no children and height not exist", async () => {
@@ -25,7 +25,7 @@ describe('min-height', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when it has no children and height not exist", async () => {
@@ -39,7 +39,7 @@ describe('min-height', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when it has no children and height not exist", async () => {
@@ -53,7 +53,7 @@ describe('min-height', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display flex when it has no children and height not exist", async () => {
@@ -67,7 +67,7 @@ describe('min-height', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when child height is larger than min-height", async () => {
@@ -82,7 +82,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when child height is smaller than min-height", async () => {
@@ -97,7 +97,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when child height is larger than min-height", async () => {
@@ -112,7 +112,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when child height is smaller than min-height", async () => {
@@ -127,7 +127,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when child height is larger than min-height", async () => {
@@ -142,7 +142,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when child length is smaller than min-height", async () => {
@@ -157,7 +157,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
 
@@ -173,7 +173,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display flex when child height is smaller than min-height", async () => {
@@ -188,7 +188,7 @@ describe('min-height', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with replaced element when element height is smaller than intrinsic height', async () => {
@@ -205,19 +205,19 @@ describe('min-height', () => {
       },
       [
         createElement('img', {
-            src: 'assets/100x100-green.png',
-            style: {
-              'background-color': 'green',
-              minHeight: '50px',
-              'box-sizing': 'border-box',
-            },
+          src: 'assets/100x100-green.png',
+          style: {
+            'background-color': 'green',
+            minHeight: '50px',
+            'box-sizing': 'border-box',
           },
+        },
         )
       ]
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with replaced element when element height is larger than intrinsic height', async () => {
@@ -234,19 +234,19 @@ describe('min-height', () => {
       },
       [
         createElement('img', {
-            src: 'assets/100x100-green.png',
-            style: {
-              'background-color': 'green',
-              minHeight: '200px',
-              'box-sizing': 'border-box',
-            },
+          src: 'assets/100x100-green.png',
+          style: {
+            'background-color': 'green',
+            minHeight: '200px',
+            'box-sizing': 'border-box',
           },
+        },
         )
       ]
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with percentage in flow layout', async () => {
@@ -263,26 +263,26 @@ describe('min-height', () => {
         },
       },
       [
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100px',
-                backgroundColor: 'yellow',
-            }
-          }),
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100%',
-                backgroundColor: 'blue',
-            }
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100px',
+            backgroundColor: 'yellow',
           }
-         )
+        }),
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100%',
+            backgroundColor: 'blue',
+          }
+        }
+        )
       ]
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in row direction', async () => {
@@ -301,26 +301,26 @@ describe('min-height', () => {
         },
       },
       [
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100px',
-                backgroundColor: 'yellow',
-            }
-          }),
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100%',
-                backgroundColor: 'blue',
-            }
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100px',
+            backgroundColor: 'yellow',
           }
-         )
+        }),
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100%',
+            backgroundColor: 'blue',
+          }
+        }
+        )
       ]
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in column direction', async () => {
@@ -339,26 +339,131 @@ describe('min-height', () => {
         },
       },
       [
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100px',
-                backgroundColor: 'yellow',
-            }
-          }),
-          createElement('div', {
-            style: {
-                minHeight: '50%',
-                width: '100%',
-                backgroundColor: 'blue',
-            }
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100px',
+            backgroundColor: 'yellow',
           }
-         )
+        }),
+        createElement('div', {
+          style: {
+            minHeight: '50%',
+            width: '100%',
+            backgroundColor: 'blue',
+          }
+        }
+        )
       ]
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
+  it('min-height exists and height does not exist in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        minHeight: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('min-height is larger than height in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minHeight: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('min-height smaller than height in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minHeight: '50px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('min-height exists and height does not exist in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        minHeight: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
+
+  it('min-height is larger than height in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minHeight: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
+
+  it('min-height smaller than height in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minHeight: '50px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-height')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
 });

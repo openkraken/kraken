@@ -19,7 +19,7 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  final Pointer<NativeTextNode> nativeTextNodePtr;
+  final Pointer<NativeTextNode> _nativePtr;
 
   static SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
 
@@ -29,9 +29,9 @@ class TextNode extends Node {
     return textNode;
   }
 
-  TextNode(int targetId, this.nativeTextNodePtr, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, nativeTextNodePtr.ref.nativeNode, elementManager, '#text') {
-    _nativeMap[nativeTextNodePtr.address] = this;
+  TextNode(int targetId, this._nativePtr, this._data, ElementManager elementManager)
+      : super(NodeType.TEXT_NODE, targetId, _nativePtr.ref.nativeNode, elementManager, '#text') {
+    _nativeMap[_nativePtr.address] = this;
   }
 
   RenderTextBox _renderTextBox;
@@ -42,18 +42,18 @@ class TextNode extends Node {
   String get data {
     if (_data == null || _data.isEmpty) return '';
 
-    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parent?.style);
+    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parentElement?.style);
 
     /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
     //
-    // New lines	Spaces and tabs	Text wrapping	End-of-line spaces
-    // normal	Collapse	Collapse	Wrap	Remove
-    // nowrap	Collapse	Collapse	No wrap	Remove
-    // pre	Preserve	Preserve	No wrap	Preserve
-    // pre-wrap	Preserve	Preserve	Wrap	Hang
-    // pre-line	Preserve	Collapse	Wrap	Remove
-    // break-spaces	Preserve	Preserve	Wrap	Wrap
+    //       New lines / Spaces and tabs / Text wrapping / End-of-line spaces
+    // normal    Collapse  Collapse  Wrap     Remove
+    // nowrap    Collapse  Collapse  No wrap  Remove
+    // pre       Preserve  Preserve  No wrap  Preserve
+    // pre-wrap  Preserve  Preserve  Wrap     Hang
+    // pre-line  Preserve  Collapse  Wrap     Remove
+    // break-spaces  Preserve  Preserve  Wrap  Wrap
     if (whiteSpace == WhiteSpace.pre ||
         whiteSpace == WhiteSpace.preLine ||
         whiteSpace == WhiteSpace.preWrap ||
@@ -61,12 +61,12 @@ class TextNode extends Node {
       return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_data) : _data;
     } else {
       String collapsedData = collapseWhitespace(_data);
-      // TODO: 
+      // TODO:
       // Remove the leading space while prev element have space too:
       //   <p><span>foo </span> bar</p>
-      // Refs: 
+      // Refs:
       //   https://github.com/WebKit/WebKit/blob/6a970b217d59f36e64606ed03f5238d572c23c48/Source/WebCore/layout/inlineformatting/InlineLineBuilder.cpp#L295
-      
+
       if (previousSibling == null) {
         collapsedData = collapsedData.trimLeft();
       }
@@ -103,13 +103,13 @@ class TextNode extends Node {
 
   void _updateTextStyle() {
     // parentNode must be an element.
-    Element parentElement = parent;
     _renderTextBox.style = parentElement.style;
     _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
     // Update paragraph line height
     KrakenRenderParagraph renderParagraph = _renderTextBox.child;
-    renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
-    
+    renderParagraph.lineHeight = parentElement.renderBoxModel.renderStyle.lineHeight;
+    renderParagraph.markNeedsLayout();
+
     _setTextNodeProperties(parentElement.style);
 
     RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
@@ -157,17 +157,17 @@ class TextNode extends Node {
   @override
   void willAttachRenderer() {
     createRenderer();
-    CSSStyleDeclaration parentStyle = parent.style;
+    CSSStyleDeclaration parentStyle = parentElement.style;
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
-    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parent);
+    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
     // TextNode's style is inherited from parent style
     _renderTextBox.style = parentStyle;
     // Update paragraph line height
     KrakenRenderParagraph renderParagraph = _renderTextBox.child;
-    renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
+    renderParagraph.lineHeight = parentElement.renderBoxModel.renderStyle.lineHeight;
 
-    _setTextNodeProperties(parent.style);
+    _setTextNodeProperties(parentElement.style);
   }
 
   @override
@@ -193,7 +193,7 @@ class TextNode extends Node {
     }
 
     assert(_renderTextBox == null);
-    _nativeMap.remove(nativeTextNodePtr.address);
+    _nativeMap.remove(_nativePtr.address);
   }
 }
 

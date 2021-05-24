@@ -5,8 +5,6 @@
 
 #include "node.h"
 #include "document.h"
-#include "foundation/ui_command_callback_queue.h"
-#include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -47,18 +45,22 @@ NodeInstance::~NodeInstance() {
 }
 
 NodeInstance::NodeInstance(JSNode *node, NodeType nodeType)
-  : EventTargetInstance(node), nativeNode(new NativeNode(nativeEventTarget)), nodeType(nodeType) {}
+  : EventTargetInstance(node), nativeNode(new NativeNode(nativeEventTarget)), nodeType(nodeType) {
+  m_document = DocumentInstance::instance(context);
+}
 
 NodeInstance::NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId)
-  : EventTargetInstance(node, targetId), nativeNode(new NativeNode(nativeEventTarget)), nodeType(nodeType) {}
+  : EventTargetInstance(node, targetId), nativeNode(new NativeNode(nativeEventTarget)), nodeType(nodeType) {
+  m_document = DocumentInstance::instance(context);
+}
 
 // Returns true if node is connected and false otherwise.
 bool NodeInstance::isConnected() {
-  bool _isConnected = eventTargetId == BODY_TARGET_ID;
+  bool _isConnected = eventTargetId == HTML_TARGET_ID;
   auto parent = parentNode;
 
   while (parent != nullptr && !_isConnected) {
-    _isConnected = parent->eventTargetId == BODY_TARGET_ID;
+    _isConnected = parent->eventTargetId == HTML_TARGET_ID;
     parent = parent->parentNode;
   }
 
@@ -73,7 +75,7 @@ DocumentInstance *NodeInstance::ownerDocument() {
     return nullptr;
   }
 
-  return document;
+  return document();
 }
 
 NodeInstance *NodeInstance::firstChild() {
@@ -100,7 +102,7 @@ NodeInstance *NodeInstance::previousSibling() {
     return nullptr;
   }
 
-  if ((it - 1) != parentChildNodes.end()) {
+  if (it != parentChildNodes.begin()) {
     return *(it - 1);
   }
 
@@ -144,18 +146,17 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
 
     /* createElement */
     std::string tagName = element->tagName();
-    auto newElement = JSElement::buildElementInstance(element->document->context, tagName);
-    newElement->document = element->document;
+    auto newElement = JSElement::buildElementInstance(element->document()->context, tagName);
 
     /* copy attributes */
-    JSStringHolder attributesStringHolder = JSStringHolder(element->document->context, "attributes");
+    JSStringHolder attributesStringHolder = JSStringHolder(element->document()->context, "attributes");
     JSValueRef attributeValueRef =
       JSObjectGetProperty(ctx, element->object, attributesStringHolder.getString(), nullptr);
     JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
     auto mAttributes = reinterpret_cast<JSElementAttributes *>(JSObjectGetPrivate(attributeObjectRef));
 
-    std::map<std::string, JSStringRef> &attributesMap = mAttributes->getAttributesMap();
-    std::vector<JSStringRef> &attributesVector = mAttributes->getAttributesVector();
+    std::map<std::string, JSValueRef> &attributesMap = mAttributes->getAttributesMap();
+    std::vector<JSValueRef> &attributesVector = mAttributes->getAttributesVector();
 
     (*newElement->getAttributes())->setAttributesMap(attributesMap);
     (*newElement->getAttributes())->setAttributesVector(attributesVector);
@@ -168,18 +169,16 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
     NativeString args_01{};
     buildUICommandArgs(newNodeEventTargetId, args_01);
 
-    foundation::UICommandTaskMessageQueue::instance(newElement->contextId)
-      ->registerCommand(element->eventTargetId, UICommand::cloneNode, args_01, nullptr);
+    foundation::UICommandBuffer::instance(newElement->contextId)
+      ->addCommand(element->eventTargetId, UICommand::cloneNode, args_01, nullptr);
 
     return newElement->object;
   } else if (node->nodeType == TEXT_NODE) {
     JSTextNode::TextNodeInstance *textNode = reinterpret_cast<JSTextNode::TextNodeInstance *>(node);
 
     std::string content = textNode->internalGetTextContent();
-    auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(textNode->document->context),
+    auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(textNode->document()->context),
                                                                 JSStringCreateWithUTF8CString(content.c_str()));
-    newTextNodeInstance->document = textNode->document;
-
     return newTextNodeInstance->object;
   }
 
@@ -253,12 +252,12 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   JSObjectRef nodeObjectRef = JSValueToObject(ctx, nodeValueRef, exception);
   auto nodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
-  if (nodeInstance == nullptr || nodeInstance->document != selfInstance->document) {
+  if (nodeInstance == nullptr || nodeInstance->document() != selfInstance->document()) {
     throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': first arguments should be an Node type.", exception);
     return nullptr;
   }
 
-  if (nodeInstance->eventTargetId == BODY_TARGET_ID || nodeInstance == selfInstance) {
+  if (nodeInstance->eventTargetId == HTML_TARGET_ID || nodeInstance == selfInstance) {
     throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.",
                  exception);
     return nullptr;
@@ -300,7 +299,7 @@ JSValueRef JSNode::insertBefore(JSContextRef ctx, JSObjectRef function, JSObject
   auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
   auto nodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
-  if (nodeInstance == nullptr || nodeInstance->document != selfInstance->document) {
+  if (nodeInstance == nullptr || nodeInstance->document() != selfInstance->document()) {
     throwJSError(ctx, "Failed to execute 'insertBefore' on 'Node': parameter 1 is not of type 'Node'", exception);
     return nullptr;
   }
@@ -343,14 +342,14 @@ JSValueRef JSNode::replaceChild(JSContextRef ctx, JSObjectRef function, JSObject
   auto oldChildInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(oldChildObjectRef));
 
   if (oldChildInstance == nullptr || oldChildInstance->parentNode != selfInstance ||
-      oldChildInstance->document != selfInstance->document) {
+      oldChildInstance->document() != selfInstance->document()) {
     throwJSError(ctx,
                  "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.",
                  exception);
     return nullptr;
   }
 
-  if (newChildInstance == nullptr || newChildInstance->document != selfInstance->document) {
+  if (newChildInstance == nullptr || newChildInstance->document() != selfInstance->document()) {
     throwJSError(ctx, "Failed to execute 'replaceChild' on 'Node': The new node is not a type of node.", exception);
     return nullptr;
   }
@@ -397,8 +396,8 @@ void NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *refere
       NativeString args_02{};
       buildUICommandArgs(nodeEventTargetId, position, args_01, args_02);
 
-      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(referenceNode->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
+      foundation::UICommandBuffer::instance(_hostClass->contextId)
+        ->addCommand(referenceNode->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
     }
   }
 }
@@ -436,7 +435,7 @@ JSValueRef JSNode::removeChild(JSContextRef ctx, JSObjectRef function, JSObjectR
   auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
   auto nodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(nodeObjectRef));
 
-  if (nodeInstance == nullptr || nodeInstance->document != selfInstance->document) {
+  if (nodeInstance == nullptr || nodeInstance->document() != selfInstance->document()) {
     throwJSError(ctx, "Failed to execute 'removeChild' on 'Node': 1st arguments is not a Node object.", exception);
     return nullptr;
   }
@@ -462,8 +461,8 @@ void NodeInstance::internalAppendChild(NodeInstance *node) {
 
   buildUICommandArgs(nodeEventTargetId, position, args_01, args_02);
 
-  foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
-    ->registerCommand(eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
+  foundation::UICommandBuffer::instance(node->_hostClass->contextId)
+    ->addCommand(eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
 }
 
 void NodeInstance::internalRemove(JSValueRef *exception) {
@@ -479,8 +478,8 @@ NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node, JSValueRef *
     node->parentNode = nullptr;
     node->unrefer();
     node->_notifyNodeRemoved(this);
-    foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
-      ->registerCommand(node->eventTargetId, UICommand::removeNode, nullptr);
+    foundation::UICommandBuffer::instance(node->_hostClass->contextId)
+      ->addCommand(node->eventTargetId, UICommand::removeNode, nullptr);
   }
 
   return node;
@@ -515,11 +514,11 @@ NodeInstance *NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeIns
 
   buildUICommandArgs(newChildEventTargetId, position, args_01, args_02);
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(oldChild->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
+  foundation::UICommandBuffer::instance(_hostClass->contextId)
+    ->addCommand(oldChild->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(oldChild->eventTargetId, UICommand::removeNode, nullptr);
+  foundation::UICommandBuffer::instance(_hostClass->contextId)
+    ->addCommand(oldChild->eventTargetId, UICommand::removeNode, nullptr);
 
   return oldChild;
 }
@@ -535,8 +534,8 @@ JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception
 }
 
 JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSNode::getNodePropertyMap();
-  auto prototypePropertyMap = JSNode::getNodePrototypePropertyMap();
+  auto &propertyMap = JSNode::getNodePropertyMap();
+  auto &prototypePropertyMap = JSNode::getNodePrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) {
     JSStringHolder nameStringHolder = JSStringHolder(context, name);

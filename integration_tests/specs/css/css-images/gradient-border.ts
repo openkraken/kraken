@@ -14,7 +14,7 @@ describe('gradient-border', () => {
     });
     BODY.appendChild(x);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('box', async () => {
     let x;
@@ -34,6 +34,6 @@ describe('gradient-border', () => {
     });
     BODY.appendChild(x);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

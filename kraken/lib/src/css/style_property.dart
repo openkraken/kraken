@@ -367,6 +367,9 @@ class CSSStyleProperty {
     List shadows = property.split(_commaRegExp);
     List<List<String>> values = List();
     for (String shadow in shadows) {
+      if (shadow == NONE) {
+        continue;
+      }
       List<String> parts = shadow.trim().split(_spaceRegExp);
 
       String inset;

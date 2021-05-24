@@ -44,7 +44,7 @@ describe('anonymous-boxes', () => {
     BODY.appendChild(blue);
     BODY.appendChild(orange);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('inheritance-001', async () => {
     let p;
@@ -101,6 +101,6 @@ describe('anonymous-boxes', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

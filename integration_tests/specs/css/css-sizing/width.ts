@@ -9,7 +9,7 @@ describe('Width', function() {
 
     document.body.appendChild(div);
     div.style.width = '200px';
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   describe('element style has width', () => {
@@ -22,7 +22,7 @@ describe('Width', function() {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('element is inline-block', async () => {
@@ -34,7 +34,7 @@ describe('Width', function() {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('element is inline-flex', async () => {
@@ -46,7 +46,7 @@ describe('Width', function() {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('element is block', async () => {
@@ -58,7 +58,7 @@ describe('Width', function() {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('element is flex', async () => {
@@ -70,7 +70,7 @@ describe('Width', function() {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchViewportSnapshot();
+      await snapshot();
     });
   });
 
@@ -95,7 +95,7 @@ describe('Width', function() {
       ]);
 
       append(BODY, container);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('parent is inline-block and has width', async () => {
@@ -113,7 +113,7 @@ describe('Width', function() {
       ]);
 
       append(BODY, container);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('parent is inline-block and has no width', async () => {
@@ -130,7 +130,7 @@ describe('Width', function() {
       ]);
 
       append(BODY, container);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('parent is block and has width', async () => {
@@ -148,7 +148,7 @@ describe('Width', function() {
       ]);
 
       append(BODY, container);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('parent is block and has no width', async () => {
@@ -165,7 +165,7 @@ describe('Width', function() {
       ]);
 
       append(BODY, container);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('set element\'s width to auto', async () => {
@@ -177,10 +177,10 @@ describe('Width', function() {
       }, [createText('1234')]);
       BODY.appendChild(container);
 
-      await matchViewportSnapshot();
+      await snapshot();
 
       container.style.width = 'auto';
-      await matchViewportSnapshot();
+      await snapshot();
     });
   });
 
@@ -225,7 +225,43 @@ describe('Width', function() {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
+  });
+
+  it('should work with percentage and multiple children in flow layout', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '100px',
+            backgroundColor: 'blue',
+          }
+        }
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in row direction', async () => {
@@ -270,7 +306,7 @@ describe('Width', function() {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in column direction', async () => {
@@ -316,6 +352,78 @@ describe('Width', function() {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
+  });
+
+  it('should work with percentage and multiple children in flex layout ', async () => {
+    let div;
+    let foo;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexWrap: 'wrap',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '50%',
+            backgroundColor: 'yellow',
+          }
+        }),
+        createElement('div', {
+          style: {
+            height: '100px',
+            width: '150px',
+            backgroundColor: 'blue',
+          }
+        }
+        )
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+  });
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+    let div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexWrap: 'wrap',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            height: '100px',
+            backgroundColor: 'yellow',
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div2.style.width = '50%';
+       await snapshot();
+       done();
+    });
   });
 });

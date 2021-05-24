@@ -87,6 +87,6 @@ describe('flexbox_width-wrapping', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

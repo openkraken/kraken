@@ -16,9 +16,9 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/inspector.dart';
 import 'package:kraken/gesture.dart';
-import 'package:kraken/src/module/module_manager.dart';
+import 'package:kraken/foundation.dart';
+
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -47,6 +47,13 @@ void setTargetPlatformForDesktop() {
   if (Platform.isLinux || Platform.isWindows) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
+}
+
+abstract class DevToolsService {
+  void init(KrakenController controller);
+  void willReload();
+  void didReload();
+  void dispose();
 }
 
 // An kraken View Controller designed for multiple kraken view control.
@@ -91,7 +98,7 @@ class KrakenViewController {
     this.gestureClient,
   }) : _contextId = contextId {
     if (kProfileMode) {
-      PerformanceTiming.instance(0).mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
+      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
     }
 
     if (enableDebug) {
@@ -100,7 +107,7 @@ class KrakenViewController {
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(0).mark(PERF_BRIDGE_INIT_START);
+      PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_START);
     }
 
     if (_contextId == null) {
@@ -108,18 +115,23 @@ class KrakenViewController {
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_BRIDGE_INIT_END);
+      PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_END);
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEWPORT_START);
+      PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_START);
     }
 
-    createViewport();
+    viewport = RenderViewportBox(
+      background: background,
+      viewportSize: Size(viewportWidth, viewportHeight),
+      gestureClient: gestureClient,
+      controller: rootController
+    );
 
     if (kProfileMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_CREATE_VIEWPORT_END);
-      PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_START);
+      PerformanceTiming.instance().mark(PERF_CREATE_VIEWPORT_END);
+      PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_INIT_START);
     }
 
     _elementManager = ElementManager(
@@ -130,22 +142,13 @@ class KrakenViewController {
     );
 
     if (kProfileMode) {
-      PerformanceTiming.instance(_contextId).mark(PERF_ELEMENT_MANAGER_INIT_END);
-    }
-
-    // Enable DevTool in debug/profile mode, but disable in release.
-    if ((kDebugMode || kProfileMode) && rootController.debugEnableInspector != false) {
-      debugStartInspector();
+      PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_INIT_END);
     }
   }
 
-  /// Used for debugger inspector.
-  Inspector _inspector;
-
-  Inspector get inspector => _inspector;
-
   // the manager which controller all renderObjects of Kraken
   ElementManager _elementManager;
+  ElementManager get elementManager => _elementManager;
 
   // index value which identify javascript runtime context.
   int _contextId;
@@ -166,14 +169,6 @@ class KrakenViewController {
   bool get disposed => _disposed;
 
   RenderViewportBox viewport;
-
-  void createViewport() {
-    viewport = RenderViewportBox(
-      background: background,
-      viewportSize: Size(viewportWidth, viewportHeight),
-      gestureClient: gestureClient,
-    );
-  }
 
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
     assert(!_disposed, "Kraken have already disposed");
@@ -208,16 +203,13 @@ class KrakenViewController {
     // DisposeEventTarget command will created when js context disposed, should flush them all.
     flushUICommand();
 
-    _inspector?.dispose();
-    _inspector = null;
-
     _elementManager.dispose();
     _elementManager = null;
     _disposed = true;
   }
 
   // export Uint8List bytes from rendered result.
-  Future<Uint8List> toImage(double devicePixelRatio, [int eventTargetId = BODY_ID]) {
+  Future<Uint8List> toImage(double devicePixelRatio, [int eventTargetId = HTML_ID]) {
     assert(!_disposed, "Kraken have already disposed");
     Completer<Uint8List> completer = Completer();
     try {
@@ -247,62 +239,62 @@ class KrakenViewController {
 
   Element createElement(int id, Pointer nativePtr, String tagName) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_ELEMENT_START, uniqueId: id);
+      PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_START, uniqueId: id);
     }
     Element result = _elementManager.createElement(id, nativePtr, tagName.toUpperCase(), null, null);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_ELEMENT_END, uniqueId: id);
+      PerformanceTiming.instance().mark(PERF_CREATE_ELEMENT_END, uniqueId: id);
     }
     return result;
   }
 
   void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_TEXT_NODE_START, uniqueId: id);
+      PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_START, uniqueId: id);
     }
     _elementManager.createTextNode(id, nativePtr, data);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_TEXT_NODE_END, uniqueId: id);
+      PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_END, uniqueId: id);
     }
   }
 
   void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_COMMENT_START, uniqueId: id);
+      PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_START, uniqueId: id);
     }
     _elementManager.createComment(id, nativePtr, data);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_CREATE_COMMENT_END, uniqueId: id);
+      PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_END, uniqueId: id);
     }
   }
 
   void addEvent(int targetId, String eventType) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_ADD_EVENT_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_ADD_EVENT_START, uniqueId: targetId);
     }
     _elementManager.addEvent(targetId, eventType);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_ADD_EVENT_END, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_ADD_EVENT_END, uniqueId: targetId);
     }
   }
 
   void insertAdjacentNode(int targetId, String position, int childId) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_INSERT_ADJACENT_NODE_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_INSERT_ADJACENT_NODE_START, uniqueId: targetId);
     }
     _elementManager.insertAdjacentNode(targetId, position, childId);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_INSERT_ADJACENT_NODE_END, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_INSERT_ADJACENT_NODE_END, uniqueId: targetId);
     }
   }
 
   void removeNode(int targetId) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_REMOVE_NODE_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_REMOVE_NODE_START, uniqueId: targetId);
     }
     _elementManager.removeNode(targetId);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_REMOVE_NODE_END, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_REMOVE_NODE_END, uniqueId: targetId);
     }
   }
 
@@ -312,40 +304,36 @@ class KrakenViewController {
 
   void setStyle(int targetId, String key, String value) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_SET_STYLE_START, uniqueId: targetId);
     }
     _elementManager.setStyle(targetId, key, value);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_STYLE_END, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_SET_STYLE_END, uniqueId: targetId);
     }
   }
 
   void setProperty(int targetId, String key, String value) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
     }
     _elementManager.setProperty(targetId, key, value);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
     }
   }
 
   void removeProperty(int targetId, String key) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_START, uniqueId: targetId);
     }
     _elementManager.removeProperty(targetId, key);
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_SET_PROPERTIES_END, uniqueId: targetId);
     }
   }
 
   EventTarget getEventTargetById(int id) {
     return _elementManager.getEventTargetByTargetId<EventTarget>(id);
-  }
-
-  void removeEventTargetById(int id) {
-    _elementManager.removeTarget(getEventTargetById(id));
   }
 
   void handleNavigationAction(String sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
@@ -378,11 +366,6 @@ class KrakenViewController {
 
   RenderObject getRootRenderObject() {
     return _elementManager.getRootRenderObject();
-  }
-
-  void debugStartInspector() {
-    _inspector = Inspector(_elementManager);
-    _elementManager.debugDOMTreeChanged = inspector.onDOMTreeChanged;
   }
 }
 
@@ -432,6 +415,9 @@ class KrakenController {
   // Error handler when got javascript error when evaluate javascript codes.
   JSErrorHandler onJSError;
 
+  final DevToolsService devToolsService;
+  final HttpClientInterceptor httpClientInterceptor;
+
   KrakenMethodChannel _methodChannel;
 
   KrakenMethodChannel get methodChannel => _methodChannel;
@@ -468,17 +454,21 @@ class KrakenController {
     this.onLoadError,
     this.onJSError,
     this.debugEnableInspector,
+    this.httpClientInterceptor,
+    this.devToolsService
   })  : _name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent,
         _gestureClient = gestureClient {
     if (kProfileMode) {
-      PerformanceTiming.instance(0).mark(PERF_CONTROLLER_PROPERTY_INIT);
-      PerformanceTiming.instance(0).mark(PERF_VIEW_CONTROLLER_INIT_START);
+      PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
+      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
     }
 
     _methodChannel = methodChannel;
+    KrakenMethodChannel.setJSMethodCallCallback(this);
+
     _view = KrakenViewController(viewportWidth, viewportHeight,
         background: background,
         showPerformanceOverlay: showPerformanceOverlay,
@@ -488,11 +478,8 @@ class KrakenController {
         gestureClient: _gestureClient);
 
     if (kProfileMode) {
-      PerformanceTiming.instance(view.contextId).mark(PERF_VIEW_CONTROLLER_INIT_END);
+      PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_END);
     }
-
-    // Should clear previous page cached ui commands
-    clearUICommand(_view.contextId);
 
     _module = KrakenModuleController(this, _view.contextId);
     assert(!_controllerMap.containsKey(_view.contextId),
@@ -500,6 +487,14 @@ class KrakenController {
     _controllerMap[_view.contextId] = this;
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
+
+    if (httpClientInterceptor != null) {
+      setupHttpOverrides(httpClientInterceptor, controller: this);
+    }
+
+    if (devToolsService != null) {
+      devToolsService.init(this);
+    }
   }
 
   KrakenViewController _view;
@@ -516,32 +511,11 @@ class KrakenController {
 
   // the bundle manager which used to download javascript source and run.
   KrakenBundle _bundle;
+  KrakenBundle get bundle => _bundle;
 
   void setNavigationDelegate(KrakenNavigationDelegate delegate) {
     assert(_view != null);
     _view.navigationDelegate = delegate;
-  }
-
-  // regenerate generate renderObject created by kraken but not affect jsBridge context.
-  // test used only.
-  testRefreshPaint() async {
-    assert(!_view._disposed, "Kraken have already disposed");
-    RenderObject root = _view.getRootRenderObject();
-    RenderObject parent = root.parent;
-    RenderObject previousSibling;
-    if (parent is ContainerRenderObjectMixin) {
-      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
-    }
-    _module.dispose();
-    _view.detachView();
-    Inspector.prevInspector = view._elementManager.controller.view.inspector;
-    _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
-        showPerformanceOverlay: _view.showPerformanceOverlay,
-        enableDebug: _view.enableDebug,
-        contextId: _view.contextId,
-        rootController: this,
-        navigationDelegate: _view.navigationDelegate);
-    _view.attachView(parent, previousSibling);
   }
 
   void unload() async {
@@ -564,8 +538,6 @@ class KrakenController {
     // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
     flushUICommand();
 
-    Inspector.prevInspector = view._elementManager.controller.view.inspector;
-
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         background: _view.background,
         showPerformanceOverlay: _view.showPerformanceOverlay,
@@ -578,9 +550,17 @@ class KrakenController {
 
   // reload current kraken view.
   void reload() async {
+    if (devToolsService != null) {
+      devToolsService.willReload();
+    }
+
     await unload();
     await loadBundle();
     await evalBundle();
+
+    if (devToolsService != null) {
+      devToolsService.didReload();
+    }
   }
 
   void reloadUrl(String url) async {
@@ -595,6 +575,10 @@ class KrakenController {
     _controllerMap[_view.contextId] = null;
     _controllerMap.remove(_view.contextId);
     _nameIdMap.remove(name);
+
+    if (devToolsService != null) {
+      devToolsService.dispose();
+    }
   }
 
   String _bundleContent;
@@ -624,6 +608,8 @@ class KrakenController {
     _bundleURL = value;
   }
 
+  String get origin => _bundleURL ?? _bundlePath ?? 'vm://' + name;
+
   // preload javascript source and cache it.
   void loadBundle({
     String bundleContent,
@@ -633,7 +619,7 @@ class KrakenController {
     assert(!_view._disposed, "Kraken have already disposed");
 
     if (kProfileMode) {
-      PerformanceTiming.instance(view.contextId).mark(PERF_JS_BUNDLE_LOAD_START);
+      PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
     _bundleContent = _bundleContent ?? bundleContent;
@@ -647,16 +633,16 @@ class KrakenController {
 
     if (onLoadError != null) {
       try {
-        _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent);
+        _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
       } catch (e, stack) {
         onLoadError(FlutterError(e.toString()), stack);
       }
     } else {
-      _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent);
+      _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
     }
 
     if (kProfileMode) {
-      PerformanceTiming.instance(view.contextId).mark(PERF_JS_BUNDLE_LOAD_END);
+      PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_END);
     }
   }
 

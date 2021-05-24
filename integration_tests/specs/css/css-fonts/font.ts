@@ -47,6 +47,6 @@ describe('Font', () => {
     append(BODY, p4);
     append(BODY, p5);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 });

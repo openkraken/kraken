@@ -46,7 +46,7 @@ describe('nested-orthogonal', () => {
     );
     BODY.appendChild(column);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('flexbox-relayout', async () => {
     let item;
@@ -94,6 +94,6 @@ describe('nested-orthogonal', () => {
     );
     BODY.appendChild(column);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

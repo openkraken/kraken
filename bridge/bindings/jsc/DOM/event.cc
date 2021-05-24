@@ -6,7 +6,7 @@
 #include "event.h"
 #include "event_target.h"
 #include "bindings/jsc/DOM/custom_event.h"
-#include "bindings/jsc/DOM/gesture_event.h"
+#include "bindings/jsc/DOM/events/gesture_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
@@ -97,8 +97,8 @@ EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType, JSValueRef
 }
 
 JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSEvent::getEventPropertyMap();
-  auto prototypeProperty = JSEvent::getEventPrototypePropertyMap();
+  auto &propertyMap = JSEvent::getEventPropertyMap();
+  auto &prototypeProperty = JSEvent::getEventPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypeProperty.count(name) > 0) {
@@ -107,7 +107,7 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
 
   if (propertyMap.count(name) == 0) return Instance::getProperty(name, exception);
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
   switch (property) {
   case JSEvent::EventProperty::type: {
     JSStringRef eventStringRef = JSStringCreateWithCharacters(nativeEvent->type->string, nativeEvent->type->length);
@@ -122,7 +122,7 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
   case JSEvent::EventProperty::timestamp:
     return JSValueMakeNumber(_hostClass->ctx, nativeEvent->timeStamp);
   case JSEvent::EventProperty::defaultPrevented:
-    return JSValueMakeBoolean(_hostClass->ctx, _canceledFlag);
+    return JSValueMakeBoolean(_hostClass->ctx, _cancelled);
   case JSEvent::EventProperty::target:
   case JSEvent::EventProperty::srcElement:
     if (nativeEvent->target != nullptr) {
@@ -137,10 +137,37 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
     }
     return JSValueMakeNull(_hostClass->ctx);
   case JSEvent::EventProperty::returnValue:
-    return JSValueMakeBoolean(_hostClass->ctx, !_canceledFlag);
+    return JSValueMakeBoolean(_hostClass->ctx, !_cancelled);
   case JSEvent::EventProperty::cancelBubble:
-    return JSValueMakeBoolean(_hostClass->ctx, _stopPropagationFlag);
+    return JSValueMakeBoolean(_hostClass->ctx, _cancelled);
   }
+  return nullptr;
+}
+
+JSValueRef JSEvent::initEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef *arguments,
+                                    JSValueRef *exception) {
+  if (argumentCount < 1) {
+    throwJSError(ctx, "Failed to initEvent required, but only 0 present.", exception);
+    return nullptr;
+  }
+
+  const JSValueRef typeValueRef = arguments[0];
+  const JSValueRef bubblesValueRef = arguments[1];
+  const JSValueRef cancelableValueRef = arguments[2];
+  if (!JSValueIsString(ctx, typeValueRef)) {
+    throwJSError(ctx, "Failed to createElement: type should be a string.", exception);
+    return nullptr;
+  }
+
+  JSStringRef typeStringRef = JSValueToStringCopy(ctx, typeValueRef, exception);
+  std::string type = JSStringToStdString(typeStringRef);
+
+  auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
+  eventInstance->nativeEvent->type = stringToNativeString(type);
+  eventInstance->nativeEvent->bubbles = JSValueToBoolean(ctx, bubblesValueRef) ? 1 : 0;
+  eventInstance->nativeEvent->cancelable = JSValueToBoolean(ctx, cancelableValueRef) ? 1 : 0;
+
   return nullptr;
 }
 
@@ -148,42 +175,43 @@ JSValueRef JSEvent::stopPropagation(JSContextRef ctx, JSObjectRef function, JSOb
                                                    size_t argumentCount, const JSValueRef *arguments,
                                                    JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
-  eventInstance->_stopPropagationFlag = true;
-  return nullptr;
+  eventInstance->_propagationStopped = true;
+  return JSValueMakeUndefined(ctx);
 }
 
 JSValueRef JSEvent::stopImmediatePropagation(JSContextRef ctx, JSObjectRef function,
                                                             JSObjectRef thisObject, size_t argumentCount,
                                                             const JSValueRef *arguments, JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
-  eventInstance->_stopPropagationFlag = true;
-  eventInstance->_stopImmediatePropagationFlag = true;
+  eventInstance->_propagationStopped = true;
+  eventInstance->_propagationImmediatelyStopped = true;
   return nullptr;
 }
 
+// The preventDefault() method cancels the event if it is cancelable.
 JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                   size_t argumentCount, const JSValueRef *arguments,
                                                   JSValueRef *exception) {
   auto eventInstance = static_cast<EventInstance *>(JSObjectGetPrivate(thisObject));
-  if (eventInstance->nativeEvent->cancelable && !eventInstance->_inPassiveListenerFlag) {
-    eventInstance->_canceledFlag = true;
+  if (eventInstance->nativeEvent->cancelable) {
+    eventInstance->_cancelled = true;
   }
   return nullptr;
 }
 
 bool EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSEvent::getEventPropertyMap();
-  auto prototypePropertyMap = JSEvent::getEventPrototypePropertyMap();
+  auto &propertyMap = JSEvent::getEventPropertyMap();
+  auto &prototypePropertyMap = JSEvent::getEventPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     if (property == JSEvent::EventProperty::cancelBubble) {
       bool v = JSValueToBoolean(_hostClass->ctx, value);
       if (v) {
-        _stopPropagationFlag = true;
+        _cancelled = true;
       }
     }
     return true;

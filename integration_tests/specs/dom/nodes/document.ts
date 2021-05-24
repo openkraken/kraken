@@ -12,7 +12,7 @@ describe('Document api', () => {
     container.appendChild(document.createComment('This is a comment'));
     document.body.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('documentElement', async () => {
@@ -25,7 +25,7 @@ describe('Document api', () => {
     const text2 = document.createTextNode('documentElement height: ' + documentElementHeight + '\n');
     document.body.appendChild(text2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('document.all', () => {

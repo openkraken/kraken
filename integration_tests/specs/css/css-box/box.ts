@@ -31,6 +31,6 @@ describe('Box', () => {
     container2.appendChild(container3);
     container3.appendChild(textNode);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

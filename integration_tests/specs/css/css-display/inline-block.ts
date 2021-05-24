@@ -15,7 +15,7 @@ describe('Display inline-block', () => {
       )
     );
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   xit('inline-block box constraint is tight', async () => {
@@ -33,7 +33,7 @@ describe('Display inline-block', () => {
     });
     append(magenta, box);
     append(BODY, magenta);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   xit('inline-block nest inline-block should behavior like inline-block', async () => {
@@ -50,7 +50,7 @@ describe('Display inline-block', () => {
     });
     append(magenta, box);
     append(BODY, magenta);
-    await matchElementImageSnapshot(magenta);
+    await snapshot(magenta);
   });
 
   xit('inline-block nest block should behavior like inline-block', async () => {
@@ -67,7 +67,7 @@ describe('Display inline-block', () => {
     });
     append(magenta, box);
     append(BODY, magenta);
-    await matchElementImageSnapshot(magenta);
+    await snapshot(magenta);
   });
 
   xit('textNode only if have one space', async () => {
@@ -97,6 +97,6 @@ describe('Display inline-block', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -45,7 +45,7 @@ describe('flexbox flex-flow', () => {
     );
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with wrap column', async () => {
@@ -94,7 +94,7 @@ describe('flexbox flex-flow', () => {
     );
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with row', async () => {
@@ -143,7 +143,7 @@ describe('flexbox flex-flow', () => {
     );
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with column', async () => {
@@ -192,7 +192,7 @@ describe('flexbox flex-flow', () => {
     );
 
     document.body.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("001", async () => {
@@ -277,7 +277,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("002", async () => {
     let p;
@@ -372,7 +372,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("003", async () => {
     let p;
@@ -467,7 +467,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("004", async () => {
     let p;
@@ -551,7 +551,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("005", async () => {
     let p;
@@ -646,7 +646,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("006", async () => {
     let p;
@@ -741,7 +741,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("007-ref", async () => {
     let p;
@@ -817,7 +817,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(div_3);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("007", async () => {
     let p;
@@ -899,7 +899,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("008", async () => {
     let p;
@@ -994,7 +994,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("009", async () => {
     let p;
@@ -1089,7 +1089,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("010", async () => {
     let p;
@@ -1171,7 +1171,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("011", async () => {
     let p;
@@ -1266,7 +1266,7 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("012", async () => {
     let p;
@@ -1361,6 +1361,6 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
 });

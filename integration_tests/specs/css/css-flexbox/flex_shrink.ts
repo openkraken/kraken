@@ -37,7 +37,7 @@ describe('flexbox flex-shrink', () => {
     child3.appendChild(document.createTextNode('flex-shrink: 1'));
     container1.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work when flex-direction is column', async () => {
@@ -78,7 +78,7 @@ describe('flexbox flex-shrink', () => {
     child6.appendChild(document.createTextNode('flex-shrink: 1'));
     container2.appendChild(child6);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('not shrink no defined size elements', async () => {
     let element = createElement('div', {
@@ -113,7 +113,7 @@ describe('flexbox flex-shrink', () => {
       })
     ]);
     BODY.appendChild(element);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('scrollable height auto computed by flex container', async (done) => {
@@ -149,11 +149,11 @@ describe('flexbox flex-shrink', () => {
 
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       scroller.scrollTop = 400;
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -181,7 +181,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with intrinsic element with min-height', async () => {
@@ -210,7 +210,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with intrinsic element with width and no height', async () => {
@@ -239,7 +239,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex layout in the column direction with children and height is not larger than children height', async () => {
@@ -284,7 +284,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex layout in the column direction with children and height is larger than children height', async () => {
@@ -329,7 +329,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex layout in the column direction with children and min-height', async () => {
@@ -375,7 +375,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex layout in the row direction with children and height is not larger than children height', async () => {
@@ -426,7 +426,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex layout in the row direction with children and height is larger than children height', async () => {
@@ -477,7 +477,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex layout in the row direction with children and min-height', async () => {
@@ -529,7 +529,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flow layout with children and height is not larger than children height', async () => {
@@ -572,7 +572,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flow layout with children and height is larger than children height', async () => {
@@ -615,7 +615,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flow layout with children and min-height', async () => {
@@ -659,7 +659,7 @@ describe('flexbox flex-shrink', () => {
     );
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with min violation', async () => {
@@ -726,7 +726,7 @@ describe('flexbox flex-shrink', () => {
     BODY.appendChild(container);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with flex factor sum less than 1', async () => {
@@ -794,6 +794,6 @@ describe('flexbox flex-shrink', () => {
     BODY.appendChild(container);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

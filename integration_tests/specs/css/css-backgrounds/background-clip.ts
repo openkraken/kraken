@@ -19,7 +19,7 @@ describe('Background-clip', () => {
       ]
     );
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with border-box', async () => {
@@ -43,7 +43,7 @@ describe('Background-clip', () => {
       ]
     );
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with padding-box', async () => {
@@ -67,7 +67,7 @@ describe('Background-clip', () => {
       ]
     );
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with content-box', async () => {
@@ -91,6 +91,6 @@ describe('Background-clip', () => {
       ]
     );
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

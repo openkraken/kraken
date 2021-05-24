@@ -13,7 +13,7 @@ describe('px', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('transition', done => {
@@ -41,7 +41,7 @@ describe('px', () => {
 
       // Wait for animation finished.
       setTimeout(async () => {
-        await matchViewportSnapshot();
+        await snapshot();
         done();
       }, 600);
     });

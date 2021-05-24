@@ -32,6 +32,6 @@ describe('overflow-abpos', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

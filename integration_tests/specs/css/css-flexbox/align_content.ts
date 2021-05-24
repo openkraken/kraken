@@ -45,7 +45,7 @@ describe('flexbox align-content', () => {
     });
     container.appendChild(child4);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with end when flex-direction is row', async () => {
@@ -93,7 +93,7 @@ describe('flexbox align-content', () => {
       backgroundColor: 'yellow',
     });
     container.appendChild(child4);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with center when flex-direction is row', async () => {
@@ -141,7 +141,7 @@ describe('flexbox align-content', () => {
       backgroundColor: 'yellow',
     });
     container.appendChild(child4);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with space-around when flex-direction is row', async () => {
@@ -189,7 +189,7 @@ describe('flexbox align-content', () => {
       backgroundColor: 'yellow',
     });
     container.appendChild(child4);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with space-between when flex-direction is row', async () => {
@@ -237,7 +237,7 @@ describe('flexbox align-content', () => {
       backgroundColor: 'yellow',
     });
     container.appendChild(child4);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with space-evenly when flex-direction is row', async () => {
@@ -285,6 +285,6 @@ describe('flexbox align-content', () => {
       backgroundColor: 'yellow',
     });
     container.appendChild(child4);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

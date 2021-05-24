@@ -47,7 +47,7 @@ describe('auto-height', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("with flex", async () => {
@@ -88,6 +88,6 @@ describe('auto-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

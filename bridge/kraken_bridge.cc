@@ -6,9 +6,9 @@
 #include "kraken_bridge.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
-#include "foundation/ui_command_queue.h"
 #include "foundation/ui_task_queue.h"
-#include "foundation/ui_command_callback_queue.h"
+#include "foundation/inspector_task_queue.h"
+#include "bindings/jsc/KOM/performance.h"
 
 #ifdef KRAKEN_ENABLE_JSA
 #include "bridge_jsa.h"
@@ -88,7 +88,7 @@ void initJSContextPool(int poolSize) {
   // When dart hot restarted, should dispose previous bridge and clear task message queue.
   if (inited) {
     disposeAllBridge();
-    foundation::UICommandTaskMessageQueue::instance(0)->clear();
+    foundation::UICommandBuffer::instance(0)->clear();
   };
   contextPool = new kraken::JSBridge *[poolSize];
   for (int i = 1; i < poolSize; i++) {
@@ -106,6 +106,12 @@ void disposeContext(int32_t contextId) {
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
   contextPool[contextId] = nullptr;
+  foundation::UICommandBuffer::instance(contextId)->clear();
+
+#if ENABLE_PROFILE
+  auto nativePerformance = kraken::binding::jsc::NativePerformance::instance(contextId);
+  nativePerformance->entries.clear();
+#endif
 }
 
 int32_t allocateNewContext() {
@@ -193,24 +199,43 @@ KrakenInfo *getKrakenInfo() {
   return krakenInfo;
 }
 
-void flushBridgeTask() {
-  foundation::UITaskMessageQueue::instance()->flushTaskFromUIThread();
+void setConsoleMessageHandler(ConsoleMessageHandler handler) {
+  kraken::JSBridge::consoleMessageHandler = handler;
 }
 
-UICommandItem *getUICommandItems(int32_t contextId) {
-  return foundation::UICommandTaskMessageQueue::instance(contextId)->data();
+void dispatchUITask(int32_t contextId, void *context, void *callback) {
+  assert(std::this_thread::get_id() == getUIThreadId());
+  reinterpret_cast<void(*)(void*)>(callback)(context);
 }
 
-int64_t getUICommandItemSize(int32_t contextId) {
-  return foundation::UICommandTaskMessageQueue::instance(contextId)->size();
+void flushUITask(int32_t contextId) {
+  foundation::UITaskQueue::instance(contextId)->flushTask();
 }
 
-void clearUICommandItems(int32_t contextId) {
-  return foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
-}
+void registerUITask(int32_t contextId, Task task, void *data) {
+  foundation::UITaskQueue::instance(contextId)->registerTask(task, data);
+};
 
 void flushUICommandCallback() {
   foundation::UICommandCallbackQueue::instance()->flushCallbacks();
+}
+
+UICommandItem *getUICommandItems(int32_t contextId) {
+  return foundation::UICommandBuffer::instance(contextId)->data();
+}
+
+int64_t getUICommandItemSize(int32_t contextId) {
+  return foundation::UICommandBuffer::instance(contextId)->size();
+}
+
+void clearUICommandItems(int32_t contextId) {
+  return foundation::UICommandBuffer::instance(contextId)->clear();
+}
+
+void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data) {
+  assert(checkContext(contextId));
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+
 }
 
 void registerPluginSource(NativeString *code, const char *pluginName) {

@@ -27,14 +27,6 @@ public:
     contextList.clear();
   }
 
-#ifdef KRAKEN_ENABLE_JSA
-  struct Context {
-    Context(JSContext &context, std::shared_ptr<Value> callback) : _context(context), _callback(std::move(callback)){};
-    ~Context() {}
-    JSContext &_context;
-    std::shared_ptr<Value> _callback;
-  };
-#elif KRAKEN_JSC_ENGINE
   struct Context {
     Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef *exception)
       : _context(context), _callback(callback) {
@@ -57,7 +49,7 @@ public:
     JSValueRef _callback{nullptr};
     JSValueRef _secondaryCallback{nullptr};
   };
-#endif
+
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.
   template <typename T>
   T registerCallback(std::unique_ptr<Context> &&context, std::function<T(BridgeCallback::Context *, int32_t)> fn) {

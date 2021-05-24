@@ -81,6 +81,6 @@ describe('Horizontal formatting', () => {
     document.body.appendChild(bottomRuler);
 
     await Promise.all([ruleImgP, ruleImg2P]);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

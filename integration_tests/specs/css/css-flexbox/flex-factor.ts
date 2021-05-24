@@ -871,6 +871,6 @@ describe('flex-factor', () => {
     BODY.appendChild(flexbox_20);
     BODY.appendChild(flexbox_21);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

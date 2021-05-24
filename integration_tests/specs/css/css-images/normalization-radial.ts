@@ -13,7 +13,7 @@ describe('normalization-radial', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('degenerate', async () => {
     let gradient;
@@ -28,6 +28,6 @@ describe('normalization-radial', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

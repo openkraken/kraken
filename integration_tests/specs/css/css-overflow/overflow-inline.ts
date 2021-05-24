@@ -48,6 +48,6 @@ describe('overflow-inline', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

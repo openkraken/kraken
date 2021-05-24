@@ -4,10 +4,6 @@ import 'dart:async';
 import 'package:path/path.dart' as path;
 import 'package:image/image.dart';
 
-final String __dirname = path.dirname(Platform.script.path);
-final String testDirectory = Platform.environment['KRAKEN_TEST_DIR'] ?? __dirname;
-final Directory snapshots = Directory(path.join(testDirectory, 'snapshots'));
-
 ///Check if [firstImg] and [secondImg] have the same width and height
 bool haveSameSize(Image firstImg, Image secondImg) {
   if (firstImg.width != secondImg.width || firstImg.height != secondImg.height) {
@@ -92,7 +88,7 @@ bool matchImage(Uint8List imageA, List<int> imageB, String filename) {
   diff /= height * width;
 
   if (diff > 0) {
-    final newSnap = File(path.join(snapshots.path, '$filename.diff.png'));
+    final newSnap = File('$filename.diff.png');
     newSnap.writeAsBytesSync(encodePng(diffImg));
   }
 
@@ -114,21 +110,26 @@ bool matchFile(List<int> left, List<int> right) {
 }
 
 Future<bool> matchImageSnapshot(Uint8List bytes, String filename) async {
-  List<int> screenPixels = bytes.toList();
-  final snap = File(path.join(snapshots.path, '$filename.png'));
+  final dirname = path.dirname(filename);
+  var dir = Directory(dirname);
+  if (!dir.existsSync()) {
+    dir.createSync(recursive: true);
+  }
+  List<int> currentPixels = bytes.toList();
+  final snap = File('$filename.png');
   if (snap.existsSync()) {
     Uint8List snapPixels = snap.readAsBytesSync();
-    bool match = matchFile(snapPixels, screenPixels);
+    bool match = matchFile(snapPixels, currentPixels);
     if (!match) {
-      match = matchImage(snapPixels, screenPixels, filename);
+      match = matchImage(snapPixels, currentPixels, filename);
     }
     if (!match) {
-      final newSnap = File(path.join(snapshots.path, '$filename.current.png'));
-      newSnap.writeAsBytes(screenPixels);
+      final newSnap = File('$filename.current.png');
+      newSnap.writeAsBytes(currentPixels);
     }
     return match;
   } else {
-    await snap.writeAsBytes(screenPixels);
+    await snap.writeAsBytes(currentPixels);
     return true;
   }
 }

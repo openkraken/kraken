@@ -1,3 +1,89 @@
+## 0.7.3+1
+
+* Fix: fix prebuilt binary.
+## 0.7.3
+
+**Features**
+
++ Feat: add network proxy interface in dart widget API https://github.com/openkraken/kraken/pull/292
++ Feat: add AsyncStorage.length method https://github.com/openkraken/kraken/pull/298
++ Feat: improve bridge call performance. https://github.com/openkraken/kraken/pull/328
++ feat: add SVGElement https://github.com/openkraken/kraken/pull/338
+
+
+**Bug Fixed**
++ Fix input setting value does not take effect before adding the dom tree. https://github.com/openkraken/kraken/pull/297/files
++ Fix: remove unnecessary flushUICommand https://github.com/openkraken/kraken/pull/318
++ Fix: img lazy loading not work https://github.com/openkraken/kraken/pull/319
++ Fix: touchend crash caused by bridge https://github.com/openkraken/kraken/pull/320
++ Fix: fix target of the event agent does not point to the clicked Node https://github.com/openkraken/kraken/pull/322
+
+**Refactor**
+
++ refactor: position sticky https://github.com/openkraken/kraken/pull/324
+
+## 0.7.2+4
+
+feat: support mouse event https://github.com/openkraken/kraken/pull/220
+fix: event bubble not works properly https://github.com/openkraken/kraken/pull/264
+fix: return value of Event.stopPropagation() should be undefined https://github.com/openkraken/kraken/pull/284
+fix/text node value https://github.com/openkraken/kraken/pull/279
+fix: fix kraken.methodChannel.setMethodCallHandler did't get called before kraken.invokeMethod called https://github.com/openkraken/kraken/pull/289
+
+## 0.7.2+3
+
+feat: add willReload and didReload hooks for devTools.
+
+## 0.7.2+2
+
+fix: export getUIThreadId and getGlobalContextRef symbols.
+
+## 0.7.2+1
+
+fix: export getDartMethod() symbols.
+
+## 0.7.2
+
+**Break Changes**
+
+fix: change default font size from 14px to 16px https://github.com/openkraken/kraken/pull/145
+
+**Bug Fixed**
+fix: modify customevent to event https://github.com/openkraken/kraken/pull/138
+fix: layout performance  https://github.com/openkraken/kraken/pull/155
+fix: fix elements created by new operator didn't have ownerDocument. https://github.com/openkraken/kraken/pull/178
+fix: flex-basis rule https://github.com/openkraken/kraken/pull/176
+fix: transform functions split error when more than one.  https://github.com/openkraken/kraken/pull/196
+fix: Fix the crash caused by navigation in dart https://github.com/openkraken/kraken/pull/249
+fix update device_info 1.0.0  https://github.com/openkraken/kraken/pull/262
+
+## 0.7.1
+
+**Bug Fixed**
+
+- fix: resize img wainting for img layouted[#86](https://github.com/openkraken/kraken/pull/86)
+- fix: fix: encoding snapshots filename to compact with windows. [#69](https://github.com/openkraken/kraken/pull/69)
+- fix: fix insertBefore crash when passing none node object. [#70](https://github.com/openkraken/kraken/pull/70)
+- fix: windows platform support build target to Android. [#88](https://github.com/openkraken/kraken/pull/88)
+- fix: element size not change when widget size change [#90](https://github.com/openkraken/kraken/pull/90)
+- fix: fix navigation failed of anchor element. [#95](https://github.com/openkraken/kraken/pull/95)
+- fix: 'kraken.methodChannel.setMethodCallHandler' override previous handler [#96](https://github.com/openkraken/kraken/pull/96)
+- fix: repaintBoundary convert logic [#111](https://github.com/openkraken/kraken/pull/111)
+- fix: element append order wrong with comment node exists [#116](https://github.com/openkraken/kraken/pull/116)
+- fix: fix access Node.previousSibling crashed when target node at top of childNodes. [#126](https://github.com/openkraken/kraken/pull/126)
+- fix: fix access Element.children crashed when contains non-element nodes in childNodes. [#126](https://github.com/openkraken/kraken/pull/126)
+- fix: percentage resolve fail with multiple sibling exists [#144](https://github.com/openkraken/kraken/pull/144)
+- fix: default unknow element display change to inline [#133](https://github.com/openkraken/kraken/pull/133)
+
+**Feature**
+
+- feat: support Node.ownerDocument [#107](https://github.com/openkraken/kraken/pull/107)
+- feat: support vmin and vmax [#109](https://github.com/openkraken/kraken/pull/109)
+- feat: support css none value [#129](https://github.com/openkraken/kraken/pull/129)
+- feat: suport Event.initEvent() and Document.createEvent() [#130](https://github.com/openkraken/kraken/pull/131)
+- feat: Add block element: h1-h6 main header aside. [#133](https://github.com/openkraken/kraken/pull/133)
+- feat: Add inline element: small i code samp... [#133](https://github.com/openkraken/kraken/pull/133)
+
 ## 0.7.0
 
 **Bug Fixed**

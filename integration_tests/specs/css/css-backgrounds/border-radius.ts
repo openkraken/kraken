@@ -24,7 +24,7 @@ describe('border_radius', () => {
 
     document.body.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with image', async () => {
@@ -40,7 +40,7 @@ describe('border_radius', () => {
     );
     BODY.appendChild(image);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with percentage of one value', async () => {
@@ -68,7 +68,7 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage of two values', async () => {
@@ -96,7 +96,7 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage border-radius and percentage sizing in flow layout', async () => {
@@ -124,7 +124,42 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
+  });
+
+  it('should work with percentage border-radius and percentage sizing of multiple children in flow layout', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '50%',
+            height: '50%',
+            borderRadius: '100% 50%',
+            backgroundColor: 'green',
+          }
+        }),
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
   });
 
   it('should work with percentage border-radius and percentage sizing in flex layout', async () => {
@@ -153,7 +188,43 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
+  });
+
+  it('should work with percentage border-radius and percentage sizing of multiple children in flex layout', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '50%',
+            height: '50%',
+            borderRadius: '100% 50%',
+            backgroundColor: 'green',
+          }
+        }),
+        createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+          }
+        }),
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
   });
 
   it('should work with border and percentage border-radius', async () => {
@@ -183,6 +254,41 @@ describe('border_radius', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
+  });
+
+  it('should work with percentage after element is attached', async (done) => {
+    let div;
+    let div2;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          position: 'relative',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div2.style.borderRadius = '100%';
+       await snapshot();
+       done();
+    });
   });
 });

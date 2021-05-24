@@ -72,7 +72,7 @@ describe('flexbox_flow-row', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap', async () => {
     let div;
@@ -146,6 +146,6 @@ describe('flexbox_flow-row', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

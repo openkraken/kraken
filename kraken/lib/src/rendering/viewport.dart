@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:kraken/launcher.dart';
+import 'package:kraken/gesture.dart';
 import 'dart:ui';
 import 'package:meta/meta.dart';
 
@@ -15,12 +16,14 @@ class RenderViewportBox extends RenderProxyBox
     RenderBox child,
     gestureClient,
     this.background,
+    @required KrakenController controller,
   }) : _viewportSize = viewportSize, super(child) {
     if (gestureClient != null) {
       _verticalDragGestureRecognizer.onUpdate = _horizontalDragRecognizer.onUpdate = gestureClient.dragUpdateCallback;
       _verticalDragGestureRecognizer.onStart = _horizontalDragRecognizer.onStart = gestureClient.dragStartCallback;
       _verticalDragGestureRecognizer.onEnd = _horizontalDragRecognizer.onEnd = gestureClient.dragEndCallback;
     }
+    this.controller = controller;
   }
 
   @override
@@ -72,6 +75,9 @@ class RenderViewportBox extends RenderProxyBox
     super.handleEvent(event, entry);
     if (event is PointerDownEvent) {
       _verticalDragGestureRecognizer.addPointer(event);
+      GestureManager.instance().addPointer(event);
+    } else if (event is PointerUpEvent) {
+      GestureManager.instance().clearTargetList();
     }
   }
 

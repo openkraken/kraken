@@ -97,34 +97,69 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
+  // Mirror debugNeedsLayout flag in Flutter to use in layout performance optimization
+  bool needsLayout = false;
+
+  @override
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+    needsLayout = true;
+  }
+
+  /// Mark own needs layout
+  void markOwnNeedsLayout() {
+    needsLayout = true;
+  }
+
+  BoxConstraints getConstraints() {
+    if (whiteSpace == WhiteSpace.nowrap && _renderParagraph.overflow != TextOverflow.ellipsis) {
+      return BoxConstraints();
+    }
+    double maxConstraintWidth = double.infinity;
+    if (parent is RenderBoxModel) {
+      RenderBoxModel parentRenderBoxModel = parent;
+      BoxConstraints parentConstraints = parentRenderBoxModel.constraints;
+
+      // Scrolling content box has indefinite max constraints to allow children overflow
+      if (parentRenderBoxModel.isScrollingContentBox) {
+        // Border and padding defined on the outer box of scroll box
+        RenderBoxModel outerScrollBox = parentRenderBoxModel.parent;
+        EdgeInsets borderEdge = outerScrollBox.renderStyle.borderEdge;
+        EdgeInsetsGeometry padding = outerScrollBox.renderStyle.padding;
+        double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
+        double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+
+        maxConstraintWidth = parentConstraints.minWidth - horizontalPaddingLength - horizontalBorderLength;
+      } else if (parentConstraints.maxWidth == double.infinity) {
+        maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel) ?? double.infinity;
+      } else if (parentConstraints.maxWidth != null) {
+        EdgeInsets borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
+        EdgeInsetsGeometry padding = parentRenderBoxModel.renderStyle.padding;
+        double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
+        double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+
+        maxConstraintWidth = parentConstraints.maxWidth - horizontalPaddingLength - horizontalBorderLength;
+      }
+
+    }
+    // Text will not overflow from container, so it can inherit
+    // constraints from parents
+    return BoxConstraints(
+      minWidth: 0,
+      maxWidth: maxConstraintWidth,
+      minHeight: 0,
+      maxHeight: double.infinity
+    );
+  }
+
   @override
   void performLayout() {
     if (child != null) {
-      BoxConstraints boxConstraints;
-      Node hostTextNode = elementManager.getEventTargetByTargetId<EventTarget>(targetId);
-      Element parentElement = hostTextNode.parent;
-      double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentElement.renderBoxModel);
-
-      if (parentElement.style[DISPLAY] == NONE) {
-        boxConstraints = BoxConstraints(
-          minWidth: 0,
-          maxWidth: 0,
-          minHeight: 0,
-          maxHeight: 0,
-        );
-      } else if (maxConstraintWidth != null && (whiteSpace != WhiteSpace.nowrap || _renderParagraph.overflow == TextOverflow.ellipsis)) {
-        boxConstraints = BoxConstraints(
-          minWidth: 0,
-          maxWidth: maxConstraintWidth,
-          minHeight: 0,
-          maxHeight: double.infinity
-        );
-      } else {
-        boxConstraints = constraints;
-      }
-      child.layout(boxConstraints, parentUsesSize: true);
+      child.layout(constraints, parentUsesSize: true);
       size = child.size;
 
+      // @FIXME: Minimum size of text equals to single word in browser
+      // which cannot be calculated in Flutter currently.
       autoMinWidth = size.width;
       autoMinHeight = size.height;
     } else {

@@ -78,7 +78,7 @@ describe('abspos-width', () => {
     BODY.appendChild(a);
     BODY.appendChild(b);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let p;
@@ -158,7 +158,7 @@ describe('abspos-width', () => {
     BODY.appendChild(a);
     BODY.appendChild(b);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('004', async () => {
     let p;
@@ -217,7 +217,7 @@ describe('abspos-width', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('005-ref', async () => {
     let p;
@@ -265,7 +265,7 @@ describe('abspos-width', () => {
     BODY.appendChild(p);
     BODY.appendChild(parent);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('005', async () => {
     let p;
@@ -319,7 +319,7 @@ describe('abspos-width', () => {
     BODY.appendChild(p);
     BODY.appendChild(relative);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('change-inline-container-001-ref', async () => {
     let abspos;
@@ -367,7 +367,7 @@ describe('abspos-width', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('change-inline-container-001', async () => {
     let abspos;
@@ -421,6 +421,6 @@ describe('abspos-width', () => {
       container.style.width = '100px';
     }
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

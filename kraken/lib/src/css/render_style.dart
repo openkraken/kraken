@@ -22,7 +22,10 @@ class RenderStyle
     CSSFlowMixin,
     CSSDisplayMixin,
     CSSInlineMixin,
+    CSSObjectFitMixin,
+    CSSObjectPositionMixin,
     CSSSliverMixin,
+    CSSOverflowStyleMixin,
     CSSOpacityMixin {
 
   RenderBoxModel renderBoxModel;
@@ -33,12 +36,11 @@ class RenderStyle
 
   /// Resolve percentage size to px base on size of its containing block
   /// https://www.w3.org/TR/css-sizing-3/#percentage-sizing
-  bool resolvePercentageToContainingBlock(double parentLogicalContentWidth, double parentLogicalContentHeight) {
+  bool resolvePercentageToContainingBlock(RenderBoxModel parent, double parentLogicalContentWidth, double parentLogicalContentHeight) {
     if (!renderBoxModel.hasSize) {
       return false;
     }
 
-    RenderBoxModel parent = renderBoxModel.parent;
     RenderStyle parentRenderStyle = parent.renderStyle;
     bool isPercentageExist = false;
     Size parentSize = parent.size;
@@ -280,7 +282,7 @@ class RenderStyle
     if (transformValue != null) {
       updateTransform(
         transformValue,
-        shouldConvertToRepaintBoundary: false,
+        shouldToggleRepaintBoundary: false,
         shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
@@ -341,7 +343,7 @@ class RenderStyle
     if (transformValue != null) {
       updateTransform(
         transformValue,
-        shouldConvertToRepaintBoundary: false,
+        shouldToggleRepaintBoundary: false,
         shouldMarkNeedsLayout: false
       );
       isPercentageExist = true;
@@ -490,36 +492,36 @@ class RenderStyle
     return isPercentageExist;
   }
 
-  /// Calculate renderBoxModel constraints based on style
-  BoxConstraints getConstraints() {
-    double constraintWidth = width ?? double.infinity;
-    double constraintHeight = height ?? double.infinity;
-    CSSDisplay transformedDisplay = renderBoxModel.renderStyle.transformedDisplay;
-    bool isInline = transformedDisplay == CSSDisplay.inline;
-    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
-
-    if (!isInline) {
-      // Base width when width no exists, inline-block has width of 0
-      double baseWidth = isInlineBlock ? 0 : constraintWidth;
-      if (maxWidth != null && width == null) {
-        constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
-      } else if (minWidth != null && width == null) {
-        constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
-      }
-      // Base height always equals to 0 no matter
-      double baseHeight = 0;
-      if (maxHeight != null && height == null) {
-        constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
-      } else if (minHeight != null && height == null) {
-        constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
-      }
+  /// Get height of replaced element by intrinsic ratio if height is not defined
+  double getHeightByIntrinsicRatio() {
+    // @TODO: move intrinsic width/height to renderStyle
+    double intrinsicWidth = renderBoxModel.intrinsicWidth;
+    double intrinsicRatio = renderBoxModel.intrinsicRatio;
+    double realWidth = width ?? intrinsicWidth;
+    if (minWidth != null && realWidth < minWidth) {
+      realWidth = minWidth;
     }
-    return BoxConstraints(
-      minWidth: 0,
-      maxWidth: constraintWidth,
-      minHeight: 0,
-      maxHeight: constraintHeight,
-    );
+    if (maxWidth != null && realWidth > maxWidth) {
+      realWidth = maxWidth;
+    }
+    double realHeight = realWidth * intrinsicRatio;
+    return realHeight;
+  }
+
+  /// Get width of replaced element by intrinsic ratio if width is not defined
+  double getWidthByIntrinsicRatio() {
+    // @TODO: move intrinsic width/height to renderStyle
+    double intrinsicHeight = renderBoxModel.intrinsicHeight;
+    double intrinsicRatio = renderBoxModel.intrinsicRatio;
+    double realHeight = height ?? intrinsicHeight;
+    if (minHeight != null && realHeight < minHeight) {
+      realHeight = minHeight;
+    }
+    if (maxHeight != null && realHeight > maxHeight) {
+      realHeight = maxHeight;
+    }
+    double realWidth = realHeight / intrinsicRatio;
+    return realWidth;
   }
 }
 

@@ -53,6 +53,6 @@ describe('flexitem-no', () => {
     BODY.appendChild(log);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -65,7 +65,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('002', async () => {
     let test;
@@ -132,7 +132,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004', async () => {
     let test;
@@ -180,7 +180,7 @@ describe('align-self', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -263,7 +263,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('006', async () => {
     let p;
@@ -352,7 +352,7 @@ describe('align-self', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('007', async () => {
     let test;
@@ -420,7 +420,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('008', async () => {
     let p;
@@ -502,7 +502,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('009', async () => {
     let p;
@@ -595,7 +595,7 @@ describe('align-self', () => {
     BODY.appendChild(top);
     BODY.appendChild(bottom);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('010', async () => {
     let p;
@@ -729,7 +729,7 @@ describe('align-self', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('011', async () => {
     let p;
@@ -796,7 +796,7 @@ describe('align-self', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('012', async () => {
     let p;
@@ -863,7 +863,7 @@ describe('align-self', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('013', async () => {
     let test;
@@ -928,7 +928,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   xit("015-ref", async () => {
@@ -1180,7 +1180,7 @@ describe('align-self', () => {
     BODY.appendChild(flexbox);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
 
   it("should work with center when flex-direction is column and flex-wrap is wrap", async () => {
@@ -1300,7 +1300,7 @@ describe('align-self', () => {
     BODY.appendChild(div_1);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
 
   it("should work with center when flex-direction is column and flex-wrap is nowrap", async () => {
@@ -1420,7 +1420,7 @@ describe('align-self', () => {
     BODY.appendChild(div_1);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("should work with center when flex-direction is row and flex-wrap is wrap", async () => {
     let p;
@@ -1539,7 +1539,7 @@ describe('align-self', () => {
     BODY.appendChild(div_1);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
 
   it("should work with center when flex-direction is row and flex-wrap is nowrap", async () => {
@@ -1659,6 +1659,40 @@ describe('align-self', () => {
     BODY.appendChild(div_1);
 
 
-    await matchViewportSnapshot();
-  })
+    await snapshot();
+  });
+
+  it('change from center to flex-end', async (done) => {
+    let foo;
+    const cont = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          height: '100px',
+          width: '100px',
+          backgroundColor: 'green',
+          fontSize: '18px',
+        }
+      }, [
+          (foo = createElement('div', {
+            style: {
+              alignSelf: 'center',
+              height: '50px',
+              width: '50px',
+              backgroundColor: 'red'
+            }
+          }))
+      ]
+    );
+    append(BODY, cont);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      foo.style.alignSelf = 'flex-end';
+      await snapshot(0.1);
+      done();
+    });
+  });
 });

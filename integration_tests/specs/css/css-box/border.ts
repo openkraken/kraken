@@ -10,7 +10,7 @@ describe('Box border', () => {
 
     document.body.appendChild(div);
     div.style.border = '4px solid blue';
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('test pass if there is a hollow black square', async () => {
@@ -22,7 +22,7 @@ describe('Box border', () => {
       borderColor: 'black',
     });
     append(BODY, div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   xit('dashed border', async () => {
@@ -32,7 +32,7 @@ describe('Box border', () => {
       border: '2px dashed red',
     });
     append(BODY, div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   xit('dashed with backgroundColor', async () => {
@@ -43,7 +43,7 @@ describe('Box border', () => {
       backgroundColor: 'green',
     });
     append(BODY, div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   it('border-bottom-left-radius', async () => {
@@ -54,7 +54,7 @@ describe('Box border', () => {
       backgroundColor: 'red',
     });
     append(BODY, div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   it('border-bottom-right-radius', async () => {
@@ -65,7 +65,7 @@ describe('Box border', () => {
       backgroundColor: 'red',
     });
     append(BODY, div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   it('border-top-left-radius', async () => {
@@ -76,7 +76,7 @@ describe('Box border', () => {
       backgroundColor: 'red',
     });
     append(BODY, div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   it('border-top-right-radius', async () => {
@@ -87,7 +87,7 @@ describe('Box border', () => {
       backgroundColor: 'red',
     });
     append(BODY, div);
-    await matchElementImageSnapshot(div);
+    await snapshot(div);
   });
 
   it('border radius with absolute', async () => {
@@ -116,6 +116,6 @@ describe('Box border', () => {
     append(container, red);
     append(container, green);
     append(BODY, container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

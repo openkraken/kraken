@@ -29,6 +29,6 @@ describe('orthogonal-flow', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

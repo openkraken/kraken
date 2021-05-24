@@ -59,10 +59,10 @@ describe('relayout-image', () => {
 
     requestAnimationFrame(async () => {
       image.src = 'assets/100x100-green.png';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -51,6 +51,6 @@ describe('flex-container', () => {
     );
     BODY.appendChild(flexContainer);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

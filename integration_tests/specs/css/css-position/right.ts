@@ -54,7 +54,7 @@ describe('right', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -110,7 +110,7 @@ describe('right', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('006', async () => {
     let p;
@@ -166,7 +166,7 @@ describe('right', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('007', async () => {
     let p;
@@ -223,7 +223,7 @@ describe('right', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('008', async () => {
     let p;
@@ -280,7 +280,7 @@ describe('right', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('016', async () => {
     let p;
@@ -336,7 +336,7 @@ describe('right', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('017', async () => {
     let p;
@@ -392,7 +392,7 @@ describe('right', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('018', async () => {
     let p;
@@ -448,7 +448,7 @@ describe('right', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('019', async () => {
     let p;
@@ -505,7 +505,7 @@ describe('right', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('020', async () => {
     let p;
@@ -562,6 +562,6 @@ describe('right', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -15,12 +15,12 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchViewportSnapshot();
+      await snapshot();
       setElementStyle(container1, {
         transform: 'scale(2,2)',
       });
       setTimeout(async () => {
-        await matchViewportSnapshot();
+        await snapshot();
         done();
       }, 1100);
     });
@@ -44,12 +44,12 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchViewportSnapshot();
+      await snapshot();
       setElementStyle(container1, {
         transform: 'scale3d(2, 2, 2)',
       });
       setTimeout(async () => {
-        await matchViewportSnapshot();
+        await snapshot();
         done();
       }, 1100);
     });
@@ -73,12 +73,12 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-          await matchViewportSnapshot();
+          await snapshot();
       setElementStyle(container1, {
         transform: 'scaleX(2)',
       });
       setTimeout(async () => {
-        await matchViewportSnapshot();
+        await snapshot();
         done();
       }, 1100);
     });
@@ -102,12 +102,12 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchViewportSnapshot();
+      await snapshot();
       setElementStyle(container1, {
         transform: 'scaleY(2)',
       });
       setTimeout(async () => {
-        await matchViewportSnapshot();
+        await snapshot();
         done();
       }, 1100);
     });

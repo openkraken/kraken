@@ -87,7 +87,7 @@ describe('justify-content_space', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('between-001', async () => {
     let p;
@@ -176,7 +176,7 @@ describe('justify-content_space', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('between-002', async () => {
     let flexbox;
@@ -216,6 +216,6 @@ describe('justify-content_space', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

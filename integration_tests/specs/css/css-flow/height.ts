@@ -40,7 +40,7 @@ describe('height', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('002', async () => {
     let p;
@@ -82,7 +82,7 @@ describe('height', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let p;
@@ -108,7 +108,7 @@ describe('height', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004', async () => {
     let p;
@@ -150,7 +150,7 @@ describe('height', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -192,7 +192,7 @@ describe('height', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('006', async () => {
     let p;
@@ -246,7 +246,7 @@ describe('height', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('007', async () => {
     let p;
@@ -300,7 +300,7 @@ describe('height', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should auto compute height when remove height property', async () => {
@@ -319,10 +319,10 @@ describe('height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     div.style.height = null;
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

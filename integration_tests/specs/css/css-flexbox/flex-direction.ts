@@ -74,7 +74,7 @@ describe('flex-direction', () => {
     );
     BODY.appendChild(flexContainer);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('with-element-insert', async () => {
     let flexItem;
@@ -442,9 +442,9 @@ describe('flex-direction', () => {
     BODY.appendChild(flexContainer_2);
     BODY.appendChild(flexContainer_3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
-  it("column-overlap-001", async () => {
+  xit("column-overlap-001", async () => {
     let p;
     let relpos;
     let flex;
@@ -538,7 +538,7 @@ describe('flex-direction', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("row-001-visual", async () => {
@@ -629,7 +629,7 @@ describe('flex-direction', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it("row-reverse-001-visual", async () => {
     let p;
@@ -719,6 +719,6 @@ describe('flex-direction', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

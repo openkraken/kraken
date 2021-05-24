@@ -61,7 +61,7 @@ describe('layout-algorithm_algo', () => {
     BODY.appendChild(p);
     BODY.appendChild(flex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('cross-line-002', async () => {
     let p;
@@ -126,6 +126,6 @@ describe('layout-algorithm_algo', () => {
     BODY.appendChild(p);
     BODY.appendChild(flex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -31,8 +31,8 @@ public:
 
   class BlobInstance : public Instance {
   public:
-    DEFINE_OBJECT_PROPERTY(Blob, 2, type, size)
-    DEFINE_PROTOTYPE_OBJECT_PROPERTY(Blob, 4, stream, arrayBuffer, slice, text)
+    DEFINE_OBJECT_PROPERTY(Blob, 2, type, size);
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(Blob, 4, stream, arrayBuffer, slice, text);
 
     BlobInstance() = delete;
     explicit BlobInstance(JSBlob *jsBlob) : _size(0), Instance(jsBlob){};

@@ -13,9 +13,9 @@ describe('multiple-position', () => {
     });
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('color-stop-conic-2', async () => {
     let div;
@@ -31,7 +31,7 @@ describe('multiple-position', () => {
     });
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('color-stop-conic', async () => {
     let target;
@@ -47,7 +47,7 @@ describe('multiple-position', () => {
     });
     BODY.appendChild(target);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('color-stop-linear-2-ref', async () => {
     let div;
@@ -62,7 +62,7 @@ describe('multiple-position', () => {
     });
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('color-stop-linear-2', async () => {
     let div;
@@ -77,7 +77,7 @@ describe('multiple-position', () => {
     });
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('color-stop-linear', async () => {
     let target;
@@ -93,7 +93,7 @@ describe('multiple-position', () => {
     });
     BODY.appendChild(target);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('color-stop-radial-2-ref', async () => {
     let div;
@@ -108,7 +108,7 @@ describe('multiple-position', () => {
     });
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('color-stop-radial-2', async () => {
     let div;
@@ -124,7 +124,7 @@ describe('multiple-position', () => {
     });
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('color-stop-radial', async () => {
     let target;
@@ -141,6 +141,6 @@ describe('multiple-position', () => {
     });
     BODY.appendChild(target);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

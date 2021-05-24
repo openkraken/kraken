@@ -43,7 +43,7 @@ describe('vertical-align', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with top', async () => {
@@ -89,7 +89,7 @@ describe('vertical-align', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with bottom', async () => {
@@ -135,7 +135,7 @@ describe('vertical-align', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with baseline in nested inline elements", async () => {
@@ -180,7 +180,7 @@ describe('vertical-align', () => {
       ]
     );
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("work with baseline in nested block elements", async () => {
@@ -224,7 +224,7 @@ describe('vertical-align', () => {
       ]
     );
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("work with baseline in nested block elements and contain text", async () => {
@@ -272,6 +272,6 @@ describe('vertical-align', () => {
       ]
     );
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

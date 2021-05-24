@@ -38,7 +38,7 @@ describe('auto-scrollbar', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('inside-stf-abspos', async () => {
     let p;
@@ -88,6 +88,6 @@ describe('auto-scrollbar', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

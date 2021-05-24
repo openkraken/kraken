@@ -52,7 +52,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('height-flex-items-002', async () => {
     let referenceOverlappedRed;
@@ -105,7 +105,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('height-flex-items-003', async () => {
     let p;
@@ -182,7 +182,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('height-flex-items-004', async () => {
     let referenceOverlappedRed;
@@ -220,7 +220,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('height-flex-items-005', async () => {
     let referenceOverlappedRed;
@@ -262,7 +262,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('height-flex-items-006', async () => {
     let referenceOverlappedRed;
@@ -304,7 +304,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('height-flex-items-007', async () => {
     let p;
@@ -366,7 +366,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('height-flex-items-008', async () => {
     let p;
@@ -428,7 +428,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('height-flex-items-009', async () => {
     let p;
@@ -649,7 +649,7 @@ describe('flex-minimum', () => {
     //   checkLayout('.container');
     // }
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit("width-flex-items-001", async () => {
     let p;
@@ -716,7 +716,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   xit("width-flex-items-002", async () => {
     let p;
@@ -790,7 +790,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   xit("width-flex-items-003", async () => {
     let p;
@@ -858,7 +858,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
 
   xit("width-flex-items-004", async () => {
@@ -917,7 +917,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   xit("width-flex-items-005", async () => {
     let p;
@@ -978,7 +978,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   xit("width-flex-items-006", async () => {
     let p;
@@ -1040,7 +1040,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   xit("width-flex-items-007", async () => {
     let p;
@@ -1101,7 +1101,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   xit("width-flex-items-008", async () => {
     let p;
@@ -1163,7 +1163,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   xit("width-flex-items-009", async () => {
     let p;
@@ -1228,7 +1228,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   xit("width-flex-items-010", async () => {
     let p;
@@ -1294,7 +1294,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it("width-flex-items-011", async () => {
     let p;
@@ -1342,7 +1342,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(div_1);
 
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   })
   it("width-flex-items-012", async () => {
     let p;
@@ -1391,7 +1391,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(div_1);
 
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   })
   xit("width-flex-items-013", async () => {
     let p;
@@ -1465,6 +1465,6 @@ describe('flex-minimum', () => {
     BODY.appendChild(div_1);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
 });

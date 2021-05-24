@@ -4,12 +4,22 @@ const path = require('path');
 const { readFileSync, writeFileSync, mkdirSync } = require('fs');
 const { spawnSync, execSync, fork, spawn } = require('child_process');
 const { join, resolve } = require('path');
+const { program } = require('commander');
 const chalk = require('chalk');
 const fs = require('fs');
 const del = require('del');
 const os = require('os');
 
-const SUPPORTED_JS_ENGINES = ['jsc'];
+program
+.option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
+.option('--built-with-debug-jsc', 'Built bridge binary with debuggable JSC.')
+.parse(process.argv);
+
+const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
+
+if (SUPPORTED_JS_ENGINES.indexOf(program.jsEngine) < 0) {
+  throw new Error('Unsupported js engine:' + program.jsEngine);
+}
 
 const KRAKEN_ROOT = join(__dirname, '..');
 const TARGET_PATH = join(KRAKEN_ROOT, 'targets');
@@ -29,9 +39,11 @@ const paths = {
   templates: resolveKraken('scripts/templates')
 };
 
+const pkgVersion = readFileSync(path.join(paths.kraken, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
 const isProfile = process.env.ENABLE_PROFILE === 'true';
 
 exports.paths = paths;
+exports.pkgVersion = pkgVersion;
 
 let winShell = null;
 if (platform == 'win32') {
@@ -138,19 +150,57 @@ task('clean', () => {
 
 const libOutputPath = join(TARGET_PATH, platform, 'lib');
 
+function findDebugJSEngine(platform) {
+  if (platform == 'macos' || platform == 'ios') {
+    let packageConfigFilePath = path.join(paths.kraken, '.dart_tool/package_config.json');
+
+    if (!fs.existsSync(packageConfigFilePath)) {
+      execSync('flutter pub get', {
+        cwd: paths.kraken,
+        stdio: 'inherit'
+      });
+    }
+
+    let packageConfig = require(packageConfigFilePath);
+    let packages = packageConfig.packages;
+
+    let jscPackageInfo = packages.find((i) => i.name === 'jsc');
+    if (!jscPackageInfo) {
+      throw new Error('Can not locate `jsc` dart package, please add jsc deps before build kraken libs.');
+    }
+
+    let rootUri = jscPackageInfo.rootUri;
+    let jscPackageLocation = path.join(paths.kraken, '.dart_tool', rootUri);
+    return path.join(jscPackageLocation, platform, 'JavaScriptCore.framework');
+  }
+}
+
 task('build-darwin-kraken-lib', done => {
   let buildType = 'Debug';
   if (process.env.KRAKEN_BUILD === 'Release') {
     buildType = 'RelWithDebInfo';
   }
 
-  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} -DENABLE_TEST=true ${isProfile ? '-DENABLE_PROFILE=TRUE' : ''} \
+  let builtWithDebugJsc = program.jsEngine === 'jsc' && !!program.builtWithDebugJsc;
+
+  let externCmakeArgs = [];
+
+  if (isProfile) {
+    externCmakeArgs.push('-DENABLE_PROFILE=TRUE');
+  }
+
+  if (builtWithDebugJsc) {
+    let debugJsEngine = findDebugJSEngine(platform == 'darwin' ? 'macos' : platform);
+    externCmakeArgs.push(`-DDEBUG_JSC_ENGINE=${debugJsEngine}`)
+  }
+
+  execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} -DENABLE_TEST=true ${externCmakeArgs.join(' ')} \
     -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-macos-x86_64 -S ${paths.bridge}`, {
     cwd: paths.bridge,
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: 'jsc',
+      KRAKEN_JS_ENGINE: program.jsEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/macos/lib/x86_64')
     }
   });
@@ -159,8 +209,9 @@ task('build-darwin-kraken-lib', done => {
     stdio: 'inherit'
   });
 
-  const binaryPath = path.join(paths.bridge, 'build/macos/lib/x86_64/libkraken_jsc.dylib');
+  const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken_${program.jsEngine}.dylib`);
 
+  execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
   if (buildMode == 'Release') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
     execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit' });
@@ -179,7 +230,10 @@ task('compile-polyfill', (done) => {
 
   let result = spawnSync('npm', ['run', buildMode === 'Release' ? 'build:release' : 'build'], {
     cwd: paths.polyfill,
-    env: process.env,
+    env: {
+      ...process.env,
+      KRAKEN_JS_ENGINE: program.jsEngine
+    },
     stdio: 'inherit'
   });
 
@@ -254,7 +308,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: 'jsc',
+      KRAKEN_JS_ENGINE: program.jsEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/x86_64')
     }
   });
@@ -274,7 +328,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: 'jsc',
+      KRAKEN_JS_ENGINE: program.jsEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm')
     }
   });
@@ -294,7 +348,7 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: 'jsc',
+      KRAKEN_JS_ENGINE: program.jsEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm64')
     }
   });
@@ -316,13 +370,6 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit'
   });
   execSync(`cp ${plistPath} ${frameworkPath}/Info.plist`, { stdio: 'inherit' });
-  const podspecContent = readFileSync(path.join(paths.templates, 'KrakenSDK.podspec'), 'utf-8');
-  const pkgVersion = readFileSync(path.join(paths.kraken, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
-  writeFileSync(
-    `${targetDynamicSDKPath}/KrakenSDK.podspec`,
-    podspecContent.replace('@VERSION@', `${pkgVersion}-release`),
-    'utf-8'
-  );
 
   if (buildMode == 'Release') {
     execSync(`dsymutil ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
@@ -330,13 +377,12 @@ task(`build-ios-kraken-lib`, (done) => {
     execSync(`strip -S -X -x ${frameworkPath}/kraken_bridge`, { stdio: 'inherit', cwd: targetDynamicSDKPath });
   }
 
-  const armStaticSDKPath = path.join(paths.bridge, 'build/ios/lib/arm/libkraken_jsc.a');
-  const arm64StaticSDKPath = path.join(paths.bridge, 'build/ios/lib/arm64/libkraken_jsc.a');
-  const x64StaticSDKPath = path.join(paths.bridge, 'build/ios/lib/x86_64/libkraken_jsc.a');
+  const armStaticSDKPath = path.join(paths.bridge, `build/ios/lib/arm/libkraken_${program.jsEngine}.a`);
+  const arm64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/arm64/libkraken_${program.jsEngine}.a`);
+  const x64StaticSDKPath = path.join(paths.bridge, `build/ios/lib/x86_64/libkraken_${program.jsEngine}.a`);
 
   const targetStaticSDKPath = `${paths.bridge}/build/ios/framework`;
-  execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_jsc.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
-  execSync(`pod ipc spec KrakenSDK.podspec > KrakenSDK.podspec.json`, { cwd: targetDynamicSDKPath });
+  execSync(`libtool -static -o ${targetStaticSDKPath}/libkraken_${program.jsEngine}.a ${armStaticSDKPath} ${arm64StaticSDKPath} ${x64StaticSDKPath}`);
   done();
 });
 
@@ -349,28 +395,18 @@ task(`build-ios-kraken-lib-profile`, done => {
 });
 
 task('build-ios-frameworks', (done) => {
-  let cmd = `flutter build ios-framework`;
+  let cmd = `flutter build ios-framework --cocoapods`;
   execSync(cmd, {
     env: process.env,
     cwd: paths.sdk,
     stdio: 'inherit'
   });
-  done();
-});
 
-task('build-android-app', (done) => {
-  let cmd;
-  if (buildMode === 'Release') {
-    cmd = 'flutter build apk --release'
-  } else {
-    cmd = 'flutter build apk --debug'
-  }
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.framework ${paths.sdk}/build/ios/framework/Debug`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.dSYM ${paths.sdk}/build/ios/framework/Debug`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.framework ${paths.sdk}/build/ios/framework/Profile`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.framework ${paths.sdk}/build/ios/framework/Release`);
 
-  execSync(cmd, {
-    eng: process.env,
-    cwd: paths.example,
-    stdio: 'inherit'
-  });
   done();
 });
 
@@ -418,7 +454,7 @@ task('build-android-kraken-lib', (done) => {
         stdio: 'inherit',
         env: {
           ...process.env,
-          KRAKEN_JS_ENGINE: 'jsc',
+          KRAKEN_JS_ENGINE: program.jsEngine,
           LIBRARY_OUTPUT_DIR: soBinaryDirectory
         }
       });
@@ -432,19 +468,23 @@ task('build-android-kraken-lib', (done) => {
   done();
 });
 
-task('build-android-sdk', (done) => {
-  let cmd;
-  if (buildMode === 'Release') {
-    cmd = './gradlew assembleRelease'
-  } else {
-    cmd = './gradlew assembleDebug'
-  }
+task('android-so-clean', (done) => {
+  execSync(`rm -rf ${paths.bridge}/build/android`, { stdio: 'inherit' });
+  done();
+});
 
-  execSync(cmd, {
+task('build-android-sdk', (done) => {
+  execSync(`flutter build aar --build-number ${pkgVersion}`, {
     eng: process.env,
-    cwd: path.join(paths.sdk, '.android'),
+    cwd: path.join(paths.sdk),
     stdio: 'inherit'
   });
+  done();
+});
+
+
+task('ios-framework-clean', (done) => {
+  execSync(`rm -rf ${paths.bridge}/build/ios`, { stdio: 'inherit' });
   done();
 });
 
@@ -453,6 +493,7 @@ task('macos-dylib-clean', (done) => {
   done();
 });
 
+// TODO: support patch windows symbol of quickjs engine.
 task('patch-windows-symbol-link-for-android', done => {
   const jniLibsDir = path.join(paths.kraken, 'android/jniLibs');
   const archs = ['arm64-v8a', 'armeabi-v7a'];

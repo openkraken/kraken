@@ -79,7 +79,7 @@ describe('flex-align', () => {
     BODY.appendChild(failFlag);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('item-center space-around', async () => {
@@ -201,7 +201,7 @@ describe('flex-align', () => {
     BODY.appendChild(failFlag);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('align-items start', async () => {
@@ -323,7 +323,7 @@ describe('flex-align', () => {
     BODY.appendChild(failFlag);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('align-items flex-end', async () => {
@@ -445,6 +445,6 @@ describe('flex-align', () => {
     BODY.appendChild(failFlag);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

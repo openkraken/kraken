@@ -20,7 +20,6 @@ class ClipBoardModule extends BaseModule {
 
   @override
   String invoke(String method, dynamic params, callback) {
-    print(1234);
     if (method == 'readText') {
       ClipBoardModule.readText().then((String value) {
         callback(data: value ?? '');

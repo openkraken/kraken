@@ -68,7 +68,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('baseline', async () => {
     let div;
@@ -137,7 +137,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('center-2-ref', async () => {
     let div;
@@ -207,7 +207,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('center-2', async () => {
     let div;
@@ -275,7 +275,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('center-ref', async () => {
     let div;
@@ -345,7 +345,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('center', async () => {
     let div;
@@ -413,7 +413,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('flexend-2-ref', async () => {
     let div;
@@ -482,7 +482,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('flexend-2', async () => {
     let div;
@@ -549,7 +549,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('flexend-ref', async () => {
     let div;
@@ -616,7 +616,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('flexend', async () => {
     let div;
@@ -681,7 +681,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('flexstart-2-ref', async () => {
     let div;
@@ -750,7 +750,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('flexstart-2', async () => {
     let div;
@@ -817,7 +817,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('flexstart-ref', async () => {
     let div;
@@ -884,7 +884,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('flexstart', async () => {
     let div;
@@ -949,7 +949,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('stretch-2-ref', async () => {
     let div;
@@ -976,7 +976,7 @@ describe('flexbox_align-items', () => {
     BODY.appendChild(div);
     BODY.appendChild(span);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('stretch-2', async () => {
     let div;
@@ -1031,7 +1031,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('stretch-ref', async () => {
     let div;
@@ -1104,7 +1104,7 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('stretch', async () => {
     let div;
@@ -1170,6 +1170,6 @@ describe('flexbox_align-items', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

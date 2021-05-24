@@ -34,7 +34,7 @@ describe('position-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('to-009', async () => {
     let p;
@@ -78,7 +78,7 @@ describe('position-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('to-010', async () => {
     let p;
@@ -112,7 +112,7 @@ describe('position-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('to-012', async () => {
     let p;
@@ -181,6 +181,6 @@ describe('position-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

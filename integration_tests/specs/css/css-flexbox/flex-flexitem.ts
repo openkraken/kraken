@@ -82,7 +82,7 @@ describe('flex-flexitem', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
   it('childmargin-ref', async () => {
     let fixed;
@@ -172,7 +172,7 @@ describe('flex-flexitem', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('percentage-prescation-ref', async () => {
     let test;
@@ -241,7 +241,7 @@ describe('flex-flexitem', () => {
     );
     BODY.appendChild(test_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it("percentage-prescation", async () => {
     let test;
@@ -289,6 +289,6 @@ describe('flex-flexitem', () => {
     BODY.appendChild(test);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   })
 });

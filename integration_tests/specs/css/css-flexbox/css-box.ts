@@ -111,6 +111,6 @@ describe('css-box', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -36,7 +36,7 @@ describe('Baseline-rules flexbox', () => {
     append(wrapper, box);
     append(BODY, wrapper);
 
-    await matchElementImageSnapshot(wrapper);
+    await snapshot(wrapper);
   });
 
   it('synthesized-baseline-flexbox-002', async () => {
@@ -54,7 +54,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('synthesized-baseline-flexbox-003', async () => {
@@ -72,7 +72,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchElementImageSnapshot(wrapper);
+    await snapshot(wrapper);
   });
 
   it('synthesized-baseline-flexbox-004', async () => {
@@ -89,7 +89,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchElementImageSnapshot(wrapper);
+    await snapshot(wrapper);
   });
 
   it('synthesized-baseline-flexbox-005', async () => {
@@ -107,7 +107,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchElementImageSnapshot(wrapper);
+    await snapshot(wrapper);
   });
 
   it('synthesized-baseline-flexbox-006', async () => {
@@ -128,7 +128,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchElementImageSnapshot(wrapper);
+    await snapshot(wrapper);
   });
 
   it('synthesized-baseline-flexbox-007', async () => {
@@ -149,7 +149,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchElementImageSnapshot(wrapper);
+    await snapshot(wrapper);
   });
 
   it('flex layout nest flow layout', async () => {
@@ -276,7 +276,7 @@ describe('Baseline-rules flexbox', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('flex layout nest flex layout', async () => {
@@ -403,7 +403,7 @@ describe('Baseline-rules flexbox', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('flow layout nest flex layout', async () => {
@@ -528,7 +528,7 @@ describe('Baseline-rules flexbox', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('flow layout nest flow layout', async () => {
@@ -653,47 +653,47 @@ describe('Baseline-rules flexbox', () => {
     );
     BODY.appendChild(test);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 });
 
 // @TODO: deps on inline-block features.
-// describe('Baseline-rules inline-block', () => {
-//   const wrapperStyle = {
-//     border: '1px solid block',
-//     position: 'relative',
-//     width: '200px',
-//     height: '150px',
-//     margin: '10px'
-//   };
-//
-//   const canvasStyle = {
-//     width: '50px',
-//     height: '50px',
-//     backgroundColor: 'blue'
-//   };
-//
-//   const magentaBorderStyle = {
-//     border: '5px solid magenta'
-//   };
-//
-//   const borderPaddingMargin = {
-//     border: '10px solid cyan',
-//     padding: '15px',
-//     margin: '20px 0px',
-//     backgroundColor: 'yellow'
-//   };
-//
-//   xit('synthesized-baseline-inline-block-001', async () => {
-//     let wrapper = create('div', wrapperStyle);
-//     let left = create('canvas', canvasStyle);
-//     let box = create('div', {
-//       borderPaddingMargin,
-//       display: 'inline-flex'
-//     });
-//     append(wrapper, left);
-//     append(wrapper, box);
-//     append(BODY, wrapper);
-//     await matchViewportSnapshot();
-//   });
-// });
+xdescribe('Baseline-rules inline-block', () => {
+  const wrapperStyle = {
+    border: '1px solid block',
+    position: 'relative',
+    width: '200px',
+    height: '150px',
+    margin: '10px'
+  };
+
+  const canvasStyle = {
+    width: '50px',
+    height: '50px',
+    backgroundColor: 'blue'
+  };
+
+  const magentaBorderStyle = {
+    border: '5px solid magenta'
+  };
+
+  const borderPaddingMargin = {
+    border: '10px solid cyan',
+    padding: '15px',
+    margin: '20px 0px',
+    backgroundColor: 'yellow'
+  };
+
+  xit('synthesized-baseline-inline-block-001', async () => {
+    let wrapper = create('div', wrapperStyle);
+    let left = create('canvas', canvasStyle);
+    let box = create('div', {
+      borderPaddingMargin,
+      display: 'inline-flex'
+    });
+    append(wrapper, left);
+    append(wrapper, box);
+    append(BODY, wrapper);
+    await snapshot();
+  });
+});

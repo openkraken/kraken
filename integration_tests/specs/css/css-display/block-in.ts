@@ -14,7 +14,7 @@ describe('block-in', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('inline-003', async () => {
     let block;
@@ -67,7 +67,7 @@ describe('block-in', () => {
     BODY.appendChild(block);
     BODY.appendChild(block_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('inline-004', async () => {
     let block;
@@ -123,7 +123,7 @@ describe('block-in', () => {
     BODY.appendChild(block);
     BODY.appendChild(block_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('inline-005', async () => {
     let test;
@@ -178,7 +178,7 @@ describe('block-in', () => {
     );
     BODY.appendChild(block);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('inline-008-ref', async () => {
     let p;
@@ -202,7 +202,7 @@ describe('block-in', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('inline-008', async () => {
     let p;
@@ -269,7 +269,7 @@ describe('block-in', () => {
     BODY.appendChild(control);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('inline-relpos-001-ref', async () => {
     let p;
@@ -413,7 +413,7 @@ describe('block-in', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('inline-relpos-001', async () => {
     let p;
@@ -557,6 +557,6 @@ describe('block-in', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

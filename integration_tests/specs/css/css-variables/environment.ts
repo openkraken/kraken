@@ -12,7 +12,7 @@ describe('CSS Environment', () => {
       container.style.background = 'red';
       document.body.appendChild(document.createTextNode('PASS if no red appears.'));
       document.body.appendChild(container);
-      await matchViewportSnapshot();
+      await snapshot();
   });
 
   it('work with safe-area-inset fallback', async () => {
@@ -28,6 +28,6 @@ describe('CSS Environment', () => {
       container.style.background = 'red';
       document.body.appendChild(document.createTextNode('PASS if no red appears.'));
       document.body.appendChild(container);
-      await matchViewportSnapshot();
+      await snapshot();
   });
 });

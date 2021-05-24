@@ -219,12 +219,12 @@ describe('relayout-align', () => {
     BODY.appendChild(fromStretch);
     BODY.appendChild(toStretch);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       fromStretch.style.alignItems = 'flex-end';
       toStretch.style.alignItems = 'stretch';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     }); 
   });

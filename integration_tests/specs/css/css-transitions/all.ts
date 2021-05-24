@@ -19,7 +19,7 @@ describe('Transition all', () => {
 
       // Wait for animation finished.
       setTimeout(async () => {
-        await matchViewportSnapshot();
+        await snapshot();
         done();
       }, 1100);
     });
@@ -36,10 +36,10 @@ describe('Transition all', () => {
       createText('1234')
     ]);
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
     requestAnimationFrame(async () => {
       container.style.height = '50px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -54,10 +54,10 @@ describe('Transition all', () => {
       createText('1234')
     ]);
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
     requestAnimationFrame(async () => {
       container.style.width = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -73,10 +73,10 @@ describe('Transition all', () => {
       createText('1234')
     ]);
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
     requestAnimationFrame(async () => {
       container.style.top = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -92,10 +92,10 @@ describe('Transition all', () => {
       createText('1234')
     ]);
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
     requestAnimationFrame(async () => {
       container.style.left = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -111,10 +111,10 @@ describe('Transition all', () => {
       createText('1234')
     ]);
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
     requestAnimationFrame(async () => {
       container.style.right = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -130,10 +130,10 @@ describe('Transition all', () => {
       createText('1234')
     ]);
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
     requestAnimationFrame(async () => {
       container.style.bottom = '100px';
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     });
   });
@@ -151,18 +151,18 @@ describe('Transition all', () => {
     ]);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
     requestAnimationFrame(() => {
       container.style.width = '200px';
 
       setTimeout(() => {
         container.style.transition = 'height 0.5s ease 0.5s';
         requestAnimationFrame(async () => {
-          await matchViewportSnapshot();
+          await snapshot();
           container.style.height = '200px';
 
           setTimeout(async () => {
-            await matchViewportSnapshot();
+            await snapshot();
             doneFn();
           }, 1200);
         });
@@ -185,11 +185,11 @@ describe('Transition all', () => {
     );
 
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
 
     // background color will not change anymore.
     setTimeout(async () => {
-      await matchViewportSnapshot();
+      await snapshot();
       doneFn();
     }, 100);
   });

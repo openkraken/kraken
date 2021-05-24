@@ -19,7 +19,7 @@ describe('Append child', () => {
     let n1 = <div style={style} />;
     BODY.appendChild(n1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with orphan textNode', async () => {
@@ -27,7 +27,7 @@ describe('Append child', () => {
     n1 = createText('foobar');
     BODY.appendChild(n1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with element which has parent and connected', async () => {
@@ -55,7 +55,7 @@ describe('Append child', () => {
     BODY.appendChild(n2);
     n1.appendChild(n2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with textNode which has parent and connected', async () => {
@@ -76,7 +76,7 @@ describe('Append child', () => {
     BODY.appendChild(n2);
     n1.appendChild(n2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with element which has parent but not connected', async () => {
@@ -102,7 +102,7 @@ describe('Append child', () => {
     );
     BODY.appendChild(n2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with textNode which has parent but not connected', async () => {
@@ -121,7 +121,7 @@ describe('Append child', () => {
     );
     BODY.appendChild(n2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with connected and not connected children which has parent', async () => {
@@ -168,7 +168,7 @@ describe('Append child', () => {
     BODY.appendChild(n2);
     BODY.appendChild(n4);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   // https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild
@@ -177,5 +177,12 @@ describe('Append child', () => {
     const child = document.createElement('span');
 
     expect(container.appendChild(child)).toEqual(child);
+  });
+
+  it('should work with elements created by new operator', () => {
+    let img = new Image();
+    let container = document.createElement('div');
+    expect(img.ownerDocument).toBe(document);
+    container.appendChild(img);
   });
 });

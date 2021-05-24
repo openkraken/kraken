@@ -27,7 +27,7 @@ describe('infinite-radial', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('gradient-refcrash', async () => {
     let p;
@@ -58,6 +58,6 @@ describe('infinite-radial', () => {
     BODY.appendChild(p);
     BODY.appendChild(crash);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

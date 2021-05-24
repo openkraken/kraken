@@ -47,7 +47,7 @@ describe('gradients-with', () => {
     BODY.appendChild(gradient2);
     BODY.appendChild(gradient3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('transparent-ref', async () => {
     let p;
@@ -76,7 +76,7 @@ describe('gradients-with', () => {
     BODY.appendChild(p);
     BODY.appendChild(gradient1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('transparent', async () => {
     let p;
@@ -130,6 +130,6 @@ describe('gradients-with', () => {
     BODY.appendChild(gradient1);
     BODY.appendChild(gradient2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

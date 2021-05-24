@@ -43,7 +43,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('context-height-003-ref', async () => {
     let p;
@@ -71,7 +71,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('context-height-003', async () => {
     let p;
@@ -143,7 +143,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('contexts-001', async () => {
     let p;
@@ -201,7 +201,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('contexts-004-ref', async () => {
     let p;
@@ -236,7 +236,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('contexts-005-ref', async () => {
     let p;
@@ -271,7 +271,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('contexts-005', async () => {
     let div1;
@@ -298,7 +298,7 @@ describe('block-formatting', () => {
     );
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('contexts-006-ref', async () => {
     let p;
@@ -334,7 +334,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('contexts-006', async () => {
     let child;
@@ -364,7 +364,7 @@ describe('block-formatting', () => {
     );
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('contexts-008-ref', async () => {
     let p;
@@ -400,7 +400,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot(0.2);
+    await snapshot(0.2);
   });
   xit('contexts-009', async () => {
     let p;
@@ -446,7 +446,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('contexts-010', async () => {
     let p;
@@ -506,7 +506,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('contexts-015-ref', async () => {
     let p;
@@ -557,6 +557,6 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -15,7 +15,7 @@ describe('Text Overflow', () => {
 
     append(BODY, cont);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should work with clip with overflow no visible', () => {
@@ -36,7 +36,7 @@ describe('Text Overflow', () => {
 
     append(BODY, cont);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should not work with clip with overflow visible', () => {
@@ -57,7 +57,7 @@ describe('Text Overflow', () => {
 
     append(BODY, cont);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should work with ellipsis when overflow not visible and whiteSpace nowrap', () => {
@@ -78,7 +78,7 @@ describe('Text Overflow', () => {
 
     append(BODY, cont);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should not work with ellipsis when overflow visible', () => {
@@ -99,7 +99,7 @@ describe('Text Overflow', () => {
 
     append(BODY, cont);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should not work with ellipsis when whiteSpace normal', () => {
@@ -120,7 +120,7 @@ describe('Text Overflow', () => {
 
     append(BODY, cont);
 
-    return matchViewportSnapshot();
+    return snapshot();
   });
 
   it('should work with text-overflow: ellipsis', async () => {
@@ -158,6 +158,6 @@ describe('Text Overflow', () => {
     container.appendChild(child1);
     child1.appendChild(document.createTextNode('block with no height'));
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

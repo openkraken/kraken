@@ -57,6 +57,6 @@ describe('Position static', () => {
     div3.style.position = 'fixed';
     div4.style.position = 'sticky';
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

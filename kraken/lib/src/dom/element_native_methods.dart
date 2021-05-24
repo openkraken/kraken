@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/bridge.dart';
 import 'dart:ffi';
+
+import 'package:kraken/kraken.dart';
 
 final Pointer<NativeFunction<Native_GetViewModuleProperty>> nativeGetViewModuleProperty = Pointer.fromFunction(ElementNativeMethods._getViewModuleProperty, 0.0);
 final Pointer<NativeFunction<Native_SetViewModuleProperty>> nativeSetViewModuleProperty = Pointer.fromFunction(ElementNativeMethods._setViewModuleProperty);
@@ -31,8 +34,16 @@ enum ViewModuleProperty {
 mixin ElementNativeMethods on Node {
 
   static double _getViewModuleProperty(Pointer<NativeElement> nativeElement, int property) {
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_DOM_FORCE_LAYOUT_START);
+    }
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
+
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_DOM_FORCE_LAYOUT_END);
+    }
+
     ViewModuleProperty kind = ViewModuleProperty.values[property];
     switch(kind) {
       case ViewModuleProperty.offsetTop:
@@ -105,13 +116,13 @@ mixin ElementNativeMethods on Node {
   static void _scroll(Pointer<NativeElement> nativeElement, int x, int y) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
-    element.handleMethodScroll(x, y);
+    element.scrollTo(x: x, y: y, withAnimation: false);
   }
 
   static void _scrollBy(Pointer<NativeElement> nativeElement, int x, int y) {
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
-    element.handleMethodScroll(x, y, diff: true);
+    element.scrollBy(dx: x, dy: y, withAnimation: false);
   }
 
   void bindNativeMethods(Pointer<NativeElement> nativeElement) {

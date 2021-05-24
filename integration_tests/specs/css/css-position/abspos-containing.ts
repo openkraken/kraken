@@ -24,7 +24,7 @@ describe('abspos-containing', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('block-001', async () => {
     let div;
@@ -61,7 +61,7 @@ describe('abspos-containing', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('block-002', async () => {
     let div;
@@ -98,7 +98,7 @@ describe('abspos-containing', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('block-003', async () => {
     let div;
@@ -135,7 +135,7 @@ describe('abspos-containing', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('block-004', async () => {
     let div;
@@ -172,7 +172,7 @@ describe('abspos-containing', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('block-005', async () => {
     let div;
@@ -209,7 +209,7 @@ describe('abspos-containing', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('block-006', async () => {
     let div;
@@ -246,7 +246,7 @@ describe('abspos-containing', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('block-007', async () => {
     let div;
@@ -283,7 +283,7 @@ describe('abspos-containing', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('block-008', async () => {
     let div;
@@ -320,7 +320,7 @@ describe('abspos-containing', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('block-009', async () => {
     let div;
@@ -357,7 +357,7 @@ describe('abspos-containing', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('block-010', async () => {
     let p;
@@ -420,6 +420,6 @@ describe('abspos-containing', () => {
     BODY.appendChild(p_1);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

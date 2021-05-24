@@ -72,7 +72,7 @@ describe('align-baseline', () => {
     BODY.appendChild(flexbox_1);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('ref', async () => {
@@ -146,6 +146,6 @@ describe('align-baseline', () => {
     BODY.appendChild(flexbox);
     BODY.appendChild(flexbox_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

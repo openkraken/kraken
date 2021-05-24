@@ -1,19 +1,25 @@
-cmake_minimum_required(VERSION 3.2.0)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
+cmake_minimum_required(VERSION 3.10.0)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
 project(KrakenBridge)
 
-set(CMAKE_CXX_FLAGS "-std=c++17 -stdlib=libc++")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_FLAGS -flto)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
-
-#set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(${ENABLE_PROFILE})
   add_definitions(-DENABLE_PROFILE=1)
 else()
   add_definitions(-DENABLE_PROFILE=0)
 endif()
+
+execute_process(
+  COMMAND bash "-c" "read dart_sdk < <(type -p dart) && echo $\{dart_sdk%/*\}/cache/dart-sdk/include | xargs"
+  OUTPUT_VARIABLE DART_SDK
+)
+string(REGEX REPLACE "\n$" "" DART_SDK "${DART_SDK}")
 
 list(APPEND PUBLIC_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
@@ -32,16 +38,27 @@ list(APPEND BRIDGE_SOURCE
     foundation/ref_ptr.h
     foundation/ref_ptr_internal.h
     foundation/ui_task_queue.h
-    foundation/ui_task_queue.cpp
-    foundation/ui_command_queue.h
-    foundation/ui_command_queue.cc
+    foundation/ui_task_queue.cc
+    foundation/inspector_task_queue.h
+    foundation/inspector_task_queue.cc
+    foundation/task_queue.cc
+    foundation/task_queue.h
+    foundation/ui_command_buffer.cc
     foundation/ui_command_callback_queue.cc
-    foundation/ui_command_callback_queue.h
     foundation/closure.h
     foundation/bridge_callback.h
     dart_methods.cc
     polyfill/dist/polyfill.cc
 )
+
+list(APPEND BRIDGE_INCLUDE
+  ./foundation
+  ./
+  ./include
+  ./polyfill/dist
+  ${DART_SDK}
+  ${ADDITIONAL_INCLUDE_DIRS}
+  )
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   add_compile_options(-DKRAKEN_JSC_ENGINE=1)
@@ -57,15 +74,14 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     list(APPEND BRIDGE_LINK_LIBS
             JavaScriptCore
             )
-  else ()
-    if (EXISTS ${DEBUG_JSC_ENGINE})
-      list(APPEND BRIDGE_INCLUDE ${DEBUG_JSC_ENGINE}/Headers)
-      add_library(JavaScriptCore SHARED IMPORTED)
-      set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION ${DEBUG_JSC_ENGINE}/JavaScriptCore)
-      list(APPEND BRIDGE_LINK_LIBS JavaScriptCore)
-    else()
-      list(APPEND BRIDGE_LINK_LIBS "-framework JavaScriptCore")
-    endif()
+  elseif (EXISTS ${DEBUG_JSC_ENGINE})
+    list(APPEND BRIDGE_INCLUDE ${DEBUG_JSC_ENGINE}/Headers)
+    add_library(JavaScriptCore SHARED IMPORTED)
+    set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION ${DEBUG_JSC_ENGINE}/JavaScriptCore)
+    list(APPEND BRIDGE_LINK_LIBS JavaScriptCore)
+  else()
+    add_compile_options(-DIS_APPLE=1)
+    list(APPEND BRIDGE_LINK_LIBS "-framework JavaScriptCore")
   endif ()
 
   list(APPEND BRIDGE_SOURCE
@@ -103,6 +119,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/elements/input_element.h
     bindings/jsc/DOM/elements/object_element.cc
     bindings/jsc/DOM/elements/object_element.h
+    bindings/jsc/DOM/elements/svg_element.cc
+    bindings/jsc/DOM/elements/svg_element.h
+    bindings/jsc/DOM/elements/script_element.cc
+    bindings/jsc/DOM/elements/script_element.h
     bindings/jsc/KOM/performance.cc
     bindings/jsc/KOM/performance.h
     bindings/jsc/DOM/element.cc
@@ -110,8 +130,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/event.h
     bindings/jsc/DOM/event.cc
     bindings/jsc/DOM/custom_event.h
-    bindings/jsc/DOM/gesture_event.cc
-    bindings/jsc/DOM/gesture_event.h
+    bindings/jsc/DOM/events/mouse_event.cc
+    bindings/jsc/DOM/events/mouse_event.h
+    bindings/jsc/DOM/events/gesture_event.cc
+    bindings/jsc/DOM/events/gesture_event.h
     bindings/jsc/DOM/custom_event.cc
     bindings/jsc/DOM/events/input_event.cc
     bindings/jsc/DOM/events/input_event.h
@@ -142,16 +164,33 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bridge_jsc.cc
     bridge_jsc.h
   )
+elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+  add_compile_options(-DKRAKEN_QUICK_JS_ENGINE=1)
+
+  execute_process(
+      COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/VERSION
+      OUTPUT_VARIABLE QUICKJS_VERSION
+  )
+
+  list(APPEND QUICK_JS_SOURCE
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp-opcode.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode-table.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/list.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.c
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
+  )
+  add_library(quickjs SHARED ${QUICK_JS_SOURCE})
+
+  target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
 endif()
-
-list(APPEND BRIDGE_INCLUDE
-    ./foundation
-    ./
-    ./include
-    ./polyfill/dist
-    ${ADDITIONAL_INCLUDE_DIRS}
-)
-
 
 list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h

@@ -16,7 +16,7 @@ describe('Color currentColor', () => {
     });
     container1.appendChild(text1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it(`should update currentColor value`, async () => {
@@ -41,7 +41,7 @@ describe('Color currentColor', () => {
       });
     });
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
 });

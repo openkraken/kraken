@@ -13,7 +13,7 @@ describe('linear-gradient', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('2', async () => {
     let gradient;
@@ -28,7 +28,7 @@ describe('linear-gradient', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ref', async () => {
     let gradient;
@@ -44,6 +44,6 @@ describe('linear-gradient', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

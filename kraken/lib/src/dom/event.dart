@@ -47,7 +47,7 @@ const String EVENT_SCROLL = 'scroll';
 const String EVENT_SWIPE = 'swipe';
 const String EVENT_PAN = 'pan';
 const String EVENT_SCALE = 'scale';
-const String EVENT_Long_PRESS = 'longpress';
+const String EVENT_LONG_PRESS = 'longpress';
 
 const String EVENT_STATE_START = 'start';
 const String EVENT_STATE_UPDATE = 'update';
@@ -100,7 +100,6 @@ class Event {
     event.ref.timeStamp = timeStamp;
     event.ref.defaultPrevented = defaultPrevented ? 1 : 0;
     event.ref.target = target != null ? target.nativeEventTargetPtr : nullptr;
-    event.ref.currentTarget = currentTarget != null ? currentTarget.nativeEventTargetPtr : nullptr;
 
     return event.cast<Pointer>();
   }
@@ -126,6 +125,46 @@ class EventInit {
     this.bubbles = false,
     this.cancelable = false,
   });
+}
+
+/// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/MouseEvent
+class MouseEvent extends Event {
+  final MouseEventInit _mouseEventInit;
+
+  double get clientX => _mouseEventInit?.clientX;
+  double get clientY => _mouseEventInit?.clientY;
+  double get offsetX => _mouseEventInit?.offsetX;
+  double get offsetY => _mouseEventInit?.offsetY;
+
+  MouseEvent(String type, [MouseEventInit mouseEventInit])
+      : _mouseEventInit = mouseEventInit, super(type, mouseEventInit);
+
+  Pointer<NativeMouseEvent> toNative() {
+    Pointer<NativeMouseEvent> nativeMouseEventPointer = allocate<NativeMouseEvent>();
+    nativeMouseEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
+    nativeMouseEventPointer.ref.clientX = clientX;
+    nativeMouseEventPointer.ref.clientY = clientY;
+    nativeMouseEventPointer.ref.offsetX = offsetX;
+    nativeMouseEventPointer.ref.offsetY = offsetY;
+    return nativeMouseEventPointer;
+  }
+}
+
+class MouseEventInit extends EventInit {
+  final double clientX;
+  final double clientY;
+  final double offsetX;
+  final double offsetY;
+
+  MouseEventInit({
+    bool bubbles = false,
+    bool cancelable = false,
+    this.clientX = 0.0,
+    this.clientY = 0.0,
+    this.offsetX = 0.0,
+    this.offsetY = 0.0,
+  })
+      : super(bubbles: bubbles, cancelable: cancelable);
 }
 
 
@@ -214,7 +253,7 @@ class CustomEvent extends Event {
 class InputEvent extends Event {
   // A String containing the type of input that was made.
   // There are many possible values, such as insertText,
-  // deleteContentBackward, insertFromPaste, and formatBold. 
+  // deleteContentBackward, insertFromPaste, and formatBold.
   final String inputType;
   final String data;
 

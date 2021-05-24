@@ -1,9 +1,10 @@
-var text = document.createTextNode('Hello World!');
+var text1 = document.createTextNode('Hello World!');
+var br = document.createElement('br');
+var text2 = document.createTextNode('你好，世界！');
 var p = document.createElement('p');
 p.style.textAlign = 'center';
-p.style.width = '200px';
-p.style.height = '100px';
-p.style.border = '1px solid #000';
-p.style.margin = '0 auto';
-p.appendChild(text);
+p.appendChild(text1);
+p.appendChild(br); 
+p.appendChild(text2);
+
 document.body.appendChild(p);

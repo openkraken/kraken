@@ -9,6 +9,6 @@ describe('Transform matrix', () => {
       })
     );
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

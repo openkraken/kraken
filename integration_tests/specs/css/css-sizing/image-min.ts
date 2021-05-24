@@ -13,6 +13,6 @@ describe('image-min', () => {
     });
     BODY.appendChild(img);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 });

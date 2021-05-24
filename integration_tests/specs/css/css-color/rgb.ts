@@ -21,7 +21,7 @@ describe('Color RGB and RGBA', () => {
       );
       append(BODY, div);
 
-      return matchElementImageSnapshot(div);
+      return snapshot(div);
     });
   });
 });

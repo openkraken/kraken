@@ -75,7 +75,7 @@ describe('flexbox_margin-left', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('ex', async () => {
     let div;
@@ -147,6 +147,6 @@ describe('flexbox_margin-left', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

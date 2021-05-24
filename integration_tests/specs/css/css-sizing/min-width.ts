@@ -11,7 +11,7 @@ describe('min-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when it has no children and width not exist", async () => {
@@ -25,7 +25,7 @@ describe('min-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when it has no children and width not exist", async () => {
@@ -39,7 +39,7 @@ describe('min-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when it has no children and width not exist", async () => {
@@ -53,7 +53,7 @@ describe('min-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display flex when it has no children and width not exist", async () => {
@@ -67,7 +67,7 @@ describe('min-width', () => {
     });
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when child length is larger than min-width", async () => {
@@ -82,7 +82,7 @@ describe('min-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-block when child length is smaller than min-width", async () => {
@@ -97,7 +97,7 @@ describe('min-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when child length is larger than min-width", async () => {
@@ -112,7 +112,7 @@ describe('min-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display inline-flex when child length is smaller than min-width", async () => {
@@ -127,7 +127,7 @@ describe('min-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when child length is larger than min-width", async () => {
@@ -142,7 +142,7 @@ describe('min-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display block when child length is smaller than min-width", async () => {
@@ -157,7 +157,7 @@ describe('min-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
 
@@ -173,7 +173,7 @@ describe('min-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("should work with display flex when child length is smaller than min-width", async () => {
@@ -188,7 +188,7 @@ describe('min-width', () => {
     ]);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with replaced element when element width is smaller than intrinsic width', async () => {
@@ -217,7 +217,7 @@ describe('min-width', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with replaced element when element width is larger than intrinsic width', async () => {
@@ -246,7 +246,7 @@ describe('min-width', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('should work with percentage in flow layout', async () => {
@@ -284,7 +284,7 @@ describe('min-width', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in row direction', async () => {
@@ -323,7 +323,7 @@ describe('min-width', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in column direction', async () => {
@@ -363,6 +363,112 @@ describe('min-width', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
+  });
+
+  it('min-width exists and width does not exist in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        height: '100px',
+        minWidth: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-width')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('min-width is larger than width in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minWidth: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-width')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('min-width smaller than width in flow layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minWidth: '50px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-width')
+    ]);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('min-width exists and width does not exist in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        height: '100px',
+        minWidth: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-width')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
+
+  it('min-width is larger than width in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minWidth: '200px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-width')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
+  });
+
+  it('min-width smaller than width in flex layout', async () => {
+    const container = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        minWidth: '50px',
+        backgroundColor: 'lightblue'
+      }
+    }, [
+      createText('min-width')
+    ]);
+    const root = createElement('div', {
+      style: {
+        display: 'flex',
+      }
+    });
+    root.appendChild(container);
+    document.body.appendChild(root);
+    await snapshot();
   });
 });

@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('dynamic-percentage', () => {
-  xit('height', async () => {
+  it('height', async (done) => {
     let p;
     let block;
     let target;
@@ -52,10 +52,10 @@ describe('dynamic-percentage', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    document.body.offsetTop;
-    container = document.getElementById('container');
-    container.style.height = '100px';
-    document.body.offsetTop;
-    await matchViewportSnapshot();
+    requestAnimationFrame(async () => {
+      container.style.height = '100px';
+      await snapshot();
+      done();
+    });
   });
 });

@@ -80,7 +80,7 @@ describe('flex-items', () => {
     BODY.appendChild(failFlag);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with multiple relative item', async () => {
@@ -116,7 +116,7 @@ describe('flex-items', () => {
      );
     BODY.appendChild(n1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('childmargin', async () => {
@@ -199,6 +199,6 @@ describe('flex-items', () => {
       ]
     );
     BODY.appendChild(test);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

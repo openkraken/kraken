@@ -29,6 +29,6 @@ describe('Box position', () => {
     container.appendChild(div2);
     document.body.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

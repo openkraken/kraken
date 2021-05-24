@@ -71,6 +71,6 @@ describe('flexbox_justifycontent-center', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "colors.h"
 #include "logging.h"
+#include "bridge_jsc.h"
 
 #if defined(IS_ANDROID)
 #include <android/log.h>
@@ -13,6 +14,13 @@
 #include <syslog.h>
 #else
 #include <iostream>
+#endif
+
+#if ENABLE_DEBUGGER
+#include <JavaScriptCore/ConsoleTypes.h>
+#include <JavaScriptCore/JSGlobalObject.h>
+#include <JavaScriptCore/APICast.h>
+#include "inspector/impl/jsc_console_client_impl.h"
 #endif
 
 namespace foundation {
@@ -82,52 +90,55 @@ LogMessage::~LogMessage() {
 #endif
 }
 
-void printLog(std::stringstream &stream, std::string level) {
 #ifdef ENABLE_DEBUGGER
-    JSC::MessageLevel _log_level = JSC::MessageLevel::Log;
+void pipeMessageToInspector(JSGlobalContextRef ctx, const std::string message, const JSC::MessageLevel logLevel) {
+  JSObjectRef globalObjectRef = JSContextGetGlobalObject(ctx);
+  auto client = JSObjectGetPrivate(globalObjectRef);
+  if (client && client != ((void *)0x1)) {
+    auto client_impl = reinterpret_cast<kraken::debugger::JSCConsoleClientImpl *>(client);
+    client_impl->sendMessageToConsole(logLevel, message);
+  }
+};
 #endif
+
+enum class MessageLevel : uint8_t {
+  Log = 1,
+  Warning = 2,
+  Error = 3,
+  Debug = 4,
+  Info = 5,
+};
+
+void printLog(int32_t contextId, std::stringstream &stream, std::string level, JSGlobalContextRef ctx) {
+    MessageLevel _log_level = MessageLevel::Info;
     switch (level[0]) {
       case 'l':
         KRAKEN_LOG(VERBOSE) << stream.str();
-#ifdef ENABLE_DEBUGGER
-        _log_level = JSC::MessageLevel::Log;
-#endif
+        _log_level = MessageLevel::Log;
         break;
       case 'i':
         KRAKEN_LOG(INFO) << stream.str();
-#ifdef ENABLE_DEBUGGER
-        _log_level = JSC::MessageLevel::Info;
-#endif
+        _log_level = MessageLevel::Info;
         break;
       case 'd':
         KRAKEN_LOG(DEBUG_) << stream.str();
-#ifdef ENABLE_DEBUGGER
-        _log_level = JSC::MessageLevel::Debug;
-#endif
+        _log_level = MessageLevel::Debug;
         break;
       case 'w':
         KRAKEN_LOG(WARN) << stream.str();
-#ifdef ENABLE_DEBUGGER
-        _log_level = JSC::MessageLevel::Warning;
-#endif
+        _log_level = MessageLevel::Warning;
         break;
       case 'e':
         KRAKEN_LOG(ERROR) << stream.str();
-#ifdef ENABLE_DEBUGGER
-        _log_level = JSC::MessageLevel::Error;
-#endif
+        _log_level = MessageLevel::Error;
         break;
       default:
         KRAKEN_LOG(VERBOSE) << stream.str();
     }
 
-#ifdef ENABLE_DEBUGGER
-    auto client = reinterpret_cast<JSC::JSGlobalObject *>(context.globalImpl())->consoleClient();
-  if (client && client != ((void *)0x1)) {
-    auto client_impl = reinterpret_cast<kraken::Debugger::JSCConsoleClientImpl *>(client);
-    client_impl->sendMessageToConsole(_log_level, stream.str());
-  }
-#endif
+    if (kraken::JSBridge::consoleMessageHandler != nullptr) {
+      kraken::JSBridge::consoleMessageHandler(ctx, stream.str(), static_cast<int>(_log_level));
+    }
   }
 
 } // namespace foundation

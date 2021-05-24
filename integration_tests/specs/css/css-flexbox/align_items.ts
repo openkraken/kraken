@@ -36,7 +36,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-end when flex-direction is row', async () => {
@@ -76,7 +76,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with center when flex-direction is row', async () => {
@@ -116,7 +116,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with stretch when flex-direction is row', async () => {
@@ -156,7 +156,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with baseline when flex-direction is row', async () => {
@@ -207,7 +207,7 @@ describe('flexbox align-items', () => {
     child3.appendChild(text3);
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-start when flex-direction is column', async () => {
@@ -247,7 +247,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-end when flex-direction is column', async () => {
@@ -287,7 +287,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with center when flex-direction is column', async () => {
@@ -327,7 +327,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with stretch when flex-direction is column', async () => {
@@ -367,6 +367,6 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

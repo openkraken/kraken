@@ -21,7 +21,6 @@ class CustomObjectElement implements ObjectElementClient {
   String get src => _src;
 
   set src(String value) {
-    print("current CustomObjectElement hash" + this.hashCode.toString());
     if (_src != value) {
       bool needDispose = _src != null;
       _src = value;

@@ -20,24 +20,11 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/src/dom/element_registry.dart' as element_registry;
 
 const String UNKNOWN = 'UNKNOWN';
 
-typedef ElementCreator = Element Function(int id, Pointer nativePtr, ElementManager elementManager);
-
-Element _createElement(int id, Pointer nativePtr, String type, ElementManager elementManager) {
-  if (type == BODY) return null;
-
-  if (!ElementManager._elementCreator.containsKey(type)) {
-    print('ERROR: unexpected element type "$type"');
-    return Element(id, nativePtr.cast<NativeElement>(), elementManager, tagName: UNKNOWN);
-  }
-
-  Element element = ElementManager._elementCreator[type](id, nativePtr, elementManager);
-  return element;
-}
-
-const int BODY_ID = -1;
+const int HTML_ID = -1;
 const int WINDOW_ID = -2;
 const int DOCUMENT_ID = -3;
 
@@ -45,7 +32,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: id);
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: id);
     }
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
     EventTarget eventTarget = controller.view.getEventTargetById(id);
@@ -53,28 +40,25 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     eventTarget.dispose();
 
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: id);
+      PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: id);
     }
   }
 
-  static Map<int, Pointer<NativeElement>> bodyNativePtrMap = Map();
+  // Alias defineElement export for kraken plugin
+  static void defineElement(String type, element_registry.ElementCreator creator) {
+    element_registry.defineElement(type, creator);
+  }
+
+  static Map<int, Pointer<NativeElement>> htmlNativePtrMap = Map();
   static Map<int, Pointer<NativeDocument>> documentNativePtrMap = Map();
   static Map<int, Pointer<NativeWindow>> windowNativePtrMap = Map();
-
-  static Map<String, ElementCreator> _elementCreator = Map();
-  static bool inited = false;
-
-  static void defineElement(String type, ElementCreator creator) {
-    if (_elementCreator.containsKey(type)) {
-      throw Exception('ElementManager: redefined element of type: $type');
-    }
-    _elementCreator[type] = creator;
-  }
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
 
   RenderViewportBox viewport;
-  Element _rootElement;
+  Document document;
+  RenderObject _viewportRenderObject;
+  Element viewportElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
   KrakenController controller;
@@ -87,52 +71,31 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   final List<VoidCallback> _detachCallbacks = [];
 
   ElementManager({this.contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
-
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
-      PerformanceTiming.instance(contextId).mark(PERF_BODY_ELEMENT_INIT_START);
+      PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
+      PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
     }
 
-    _rootElement = BodyElement(viewportWidth, viewportHeight, BODY_ID, bodyNativePtrMap[contextId], this)
-      ..attachBody();
+    Element documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId], this);
+    setEventTarget(documentElement);
+
+    viewportElement = documentElement;
+    viewport.child = viewportElement.renderBoxModel;
+    _viewportRenderObject = viewport;
 
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_BODY_ELEMENT_INIT_END);
-    }
-
-    RenderBoxModel rootRenderBoxModel = _rootElement.renderBoxModel;
-    if (viewport != null) {
-      viewport.controller = controller;
-      viewport.child = rootRenderBoxModel;
-      _root = viewport;
-    } else {
-      rootRenderBoxModel.controller = controller;
-      _root = rootRenderBoxModel;
+      PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_END);
     }
 
     _setupObserver();
 
-    setEventTarget(_rootElement);
-
-    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this);
+    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this, viewportElement);
     setEventTarget(window);
 
-    Document document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, _rootElement);
+    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, documentElement);
     setEventTarget(document);
 
-    if (!inited) {
-        defineElement(DIV, (id, nativePtr, elementManager) => DivElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineElement(SPAN, (id, nativePtr, elementManager) => SpanElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineElement(ANCHOR, (id, nativePtr, elementManager) => AnchorElement(id, nativePtr.cast<NativeAnchorElement>(), elementManager));
-      defineElement(STRONG, (id, nativePtr, elementManager) => StrongElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineElement(IMAGE, (id, nativePtr, elementManager) => ImageElement(id, nativePtr.cast<NativeImgElement>(), elementManager));
-      defineElement(PARAGRAPH, (id, nativePtr, elementManager) => ParagraphElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineElement(INPUT, (id, nativePtr, elementManager) => InputElement(id, nativePtr.cast<NativeInputElement>(), elementManager));
-      defineElement(PRE, (id, nativePtr, elementManager) => PreElement(id, nativePtr.cast<NativeElement>(), elementManager));
-      defineElement(CANVAS, (id, nativePtr, elementManager) => CanvasElement(id, nativePtr.cast<NativeCanvasElement>(), elementManager));
-      defineElement(OBJECT, (id, nativePtr, elementManager) => ObjectElement(id, nativePtr.cast<NativeObjectElement>(), elementManager));
-      inited = true;
-    }
+    element_registry.defineBuiltInElements();
   }
 
   void _setupObserver() {
@@ -166,8 +129,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void removeTarget(EventTarget target) {
     assert(target.targetId != null);
-    assert(_eventTargets.containsKey(target.targetId));
-    _eventTargets.remove(target.targetId);
+    // FIXME: when the shadow scrollingElement dispose that has not targetId
+    if (_eventTargets.containsKey(target.targetId)) {
+      _eventTargets.remove(target.targetId);
+    }
   }
 
   void setDetachCallback(VoidCallback callback) {
@@ -176,7 +141,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void setEventTarget(EventTarget target) {
     assert(target != null);
-
     _eventTargets[target.targetId] = target;
   }
 
@@ -197,7 +161,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       }
     }
 
-    Element element = _createElement(id, nativePtr, type, this);
+    Element element = element_registry.createElement(id, nativePtr, type, this);
     setEventTarget(element);
     return element;
   }
@@ -243,10 +207,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     assert(target != null);
 
     if (target is Element) {
-      // Only Element has properties
+      // Only Element has properties.
       target.setProperty(key, value);
-    } else if (target is TextNode && key == 'data') {
-      target.data = value;
+    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
+      (target as TextNode).data = value;
     } else {
       debugPrint('Only element has properties, try setting $key to Node(#$targetId).');
     }
@@ -260,8 +224,11 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (target is Element) {
       // Only Element has properties
       return target.getProperty(key);
+    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
+      return (target as TextNode).data;
+    } else {
+      return null;
     }
-    return null;
   }
 
   void removeProperty(int targetId, String key) {
@@ -271,6 +238,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     if (target is Element) {
       target.removeProperty(key);
+    } else if (target is TextNode && key == 'data' || key == 'nodeValue') {
+      (target as TextNode).data = '';
     } else {
       debugPrint('Only element has properties, try removing $key from Node(#$targetId).');
     }
@@ -297,7 +266,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   /// <!-- afterend -->
   void insertAdjacentNode(int targetId, String position, int newTargetId) {
     assert(existsTarget(targetId), 'targetId: $targetId position: $position newTargetId: $newTargetId');
-    assert(existsTarget(newTargetId), 'newtargetId: $newTargetId position: $position');
+    assert(existsTarget(newTargetId), 'newTargetId: $newTargetId position: $position');
 
     Node target = getEventTargetByTargetId<Node>(targetId);
     Node newNode = getEventTargetByTargetId<Node>(newTargetId);
@@ -345,22 +314,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     target.removeEvent(eventType);
   }
 
-  RenderObject _root;
-
-  RenderObject get root => _root;
-
-  set root(RenderObject root) {
-    assert(() {
-      throw FlutterError('Can not set root to ElementManagerActionDelegate.');
-    }());
-  }
-
   RenderObject getRootRenderObject() {
-    return root;
-  }
-
-  Element getRootElement() {
-    return _rootElement;
+    return _viewportRenderObject;
   }
 
   bool showPerformanceOverlay = false;
@@ -370,7 +325,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       this.showPerformanceOverlay = showPerformanceOverlay;
     }
 
-    RenderBox result = getRootRenderObject();
+    RenderBox renderBox = getRootRenderObject();
 
     // We need to add PerformanceOverlay of it's needed.
     if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride;
@@ -387,9 +342,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       );
       RenderFpsOverlay renderFpsOverlayBox = RenderFpsOverlay();
 
-      result = RenderStack(
+      renderBox = RenderStack(
         children: [
-          result,
+          renderBox,
           renderConstrainedPerformanceOverlayBox,
           renderFpsOverlayBox,
         ],
@@ -397,7 +352,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       );
     }
 
-    return result;
+    return renderBox;
   }
 
   void attach(RenderObject parent, RenderObject previousSibling, {bool showPerformanceOverlay}) {
@@ -411,12 +366,12 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void detach() {
-    RenderObject parent = root.parent;
+    RenderObject parent = _viewportRenderObject.parent;
 
     if (parent == null) return;
 
     // Detach renderObjects
-    _rootElement.detach();
+    viewportElement.detach();
 
     // run detachCallbacks
     for (var callback in _detachCallbacks) {
@@ -424,7 +379,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     }
     _detachCallbacks.clear();
 
-    _rootElement = null;
+    viewportElement = null;
+    document = null;
   }
 
   // Hooks for DevTools.
@@ -475,7 +431,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
         viewport.bottomInset = bottomInset;
         if (shouldScrollByToCenter) {
           SchedulerBinding.instance.addPostFrameCallback((_) {
-            _rootElement.scrollBy(dy: bottomInset);
+            viewportElement.scrollBy(dy: bottomInset);
           });
         }
       }

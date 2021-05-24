@@ -25,6 +25,12 @@ const String XX_LARGE = 'xx-large';
 // Font relative size keyword
 const String SMALLER = 'smaller';
 const String LARGER = 'larger';
+// Font style
+const String ITALIC = 'italic';
+// Text decoration
+const String LINE_THROUGH = 'line-through';
+const String UNDERLINE = 'underline';
+const String DOTTED = 'dotted';
 
 // Display
 const String INLINE = 'inline';

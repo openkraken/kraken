@@ -18,14 +18,14 @@ bool _firstView = true;
 /// Init bridge
 int initBridge() {
   if (kProfileMode) {
-    PerformanceTiming.instance(0).mark(PERF_BRIDGE_REGISTER_DART_METHOD_START);
+    PerformanceTiming.instance().mark(PERF_BRIDGE_REGISTER_DART_METHOD_START);
   }
 
   // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
 
   if (kProfileMode) {
-    PerformanceTiming.instance(0).mark(PERF_BRIDGE_REGISTER_DART_METHOD_END);
+    PerformanceTiming.instance().mark(PERF_BRIDGE_REGISTER_DART_METHOD_END);
   }
 
   int contextId = -1;
@@ -37,8 +37,6 @@ int initBridge() {
       // Port flutter's frame callback into bridge.
       SchedulerBinding.instance.addPersistentFrameCallback((_) {
         assert(contextId != -1);
-
-        flushBridgeTask();
         flushUICommand();
         flushUICommandCallback();
       });
@@ -52,7 +50,7 @@ int initBridge() {
   } else {
     contextId = allocateNewContext();
     if (contextId == -1) {
-      throw Exception('can\' allocate new kraken js Bridge: bridge count had reach the maximum size.');
+      throw Exception('Can\' allocate new kraken bridge: bridge count had reach the maximum size.');
     }
   }
 

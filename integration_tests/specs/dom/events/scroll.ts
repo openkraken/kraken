@@ -20,7 +20,7 @@ describe('Event scroll', () => {
     function scrollListener(event) {
       if (event.currentTarget.scrollTop === 50) {
         container.removeEventListener('scroll', scrollListener);
-        matchViewportSnapshot().then(() => done());
+        snapshot().then(() => done());
       }
     }
 

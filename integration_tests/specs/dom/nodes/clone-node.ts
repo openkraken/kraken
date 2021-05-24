@@ -10,7 +10,7 @@ describe('Clone node', () => {
     const div2 = div.cloneNode(true);
     document.body.appendChild(div2)
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with a div when deep is false', async () => {
@@ -24,7 +24,7 @@ describe('Clone node', () => {
     const div2 = div.cloneNode(true);
     document.body.appendChild(div2)
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with Multi-level div nesting when deep is true', async () => {
@@ -52,7 +52,7 @@ describe('Clone node', () => {
     const div2 = div.cloneNode(true);
     document.body.appendChild(div2)
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with Multi-level div nesting when deep is false', async () => {
@@ -80,7 +80,7 @@ describe('Clone node', () => {
     const div2 = div.cloneNode(false);
     document.body.appendChild(div2)
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('text node', async () => {
@@ -90,7 +90,7 @@ describe('Clone node', () => {
     const text2 = text.cloneNode(true);
     document.body.appendChild(text2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('element node nested text node', async () => {
@@ -103,7 +103,7 @@ describe('Clone node', () => {
     const div2 = div.cloneNode(true);
     document.body.appendChild(div2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });
   

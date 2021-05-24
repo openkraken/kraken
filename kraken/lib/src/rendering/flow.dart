@@ -485,21 +485,11 @@ class RenderFlowLayout extends RenderLayoutBox {
     return lineHeight;
   }
 
-
   @override
   void performLayout() {
     if (kProfileMode) {
       childLayoutDuration = 0;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_START, uniqueId: targetId);
-    }
-
-    CSSDisplay display = renderStyle.display;
-    if (display == CSSDisplay.none) {
-      size = constraints.smallest;
-      if (kProfileMode) {
-        PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLOW_LAYOUT_END, uniqueId: targetId);
-      }
-      return;
+      PerformanceTiming.instance().mark(PERF_FLOW_LAYOUT_START, uniqueId: targetId);
     }
 
     beforeLayout();
@@ -518,22 +508,39 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Layout non positioned element
     _layoutChildren();
 
-    // Set offset of positioned element
+    // Set offset of positioned and sticky element
     child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
-
-        setScrollableSize(childParentData, child);
-
+        extendMaxScrollableSize(child);
         // For scrolling box, the minimum width and height should not less than scrollableSize
         if (isScrollingContentBox) {
           ensureBoxSizeLargerThanScrollableSize();
         }
+      } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
+        RenderBoxModel scrollContainer = child.findScrollContainer();
+        // Sticky offset depends on the layout of scroll container, delay the calculation of
+        // sticky offset to the layout stage of  scroll container if its not layouted yet
+        // due to the layout order of Flutter renderObject tree is from down to up.
+        if (scrollContainer.hasSize) {
+          CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
+        }
       }
       child = childParentData.nextSibling;
+    }
+
+    bool isScrollContainer = renderStyle.overflowX != CSSOverflowType.visible ||
+      renderStyle.overflowY != CSSOverflowType.visible;
+    if (isScrollContainer) {
+      // Find all the sticky children when scroll container is layouted
+      stickyChildren = findStickyChildren();
+      // Calculate the offset of its sticky children
+      for (RenderBoxModel stickyChild in stickyChildren) {
+        CSSPositionedLayout.applyStickyChildOffset(this, stickyChild);
+      }
     }
 
     _relayoutPositionedChildren();
@@ -543,7 +550,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (kProfileMode) {
       DateTime flowLayoutEndTime = DateTime.now();
       int amendEndTime = flowLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
-      PerformanceTiming.instance(elementManager.contextId)
+      PerformanceTiming.instance()
           .mark(PERF_FLOW_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
@@ -557,7 +564,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
         bool percentageToOwnFound = child.renderStyle.isPercentageToOwnExist();
-        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
+        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(this, logicalContentWidth, logicalContentHeight);
 
         /// When percentage exists in sizing styles(width/height) and styles relies on its own size,
         /// it needs to relayout twice cause the latter relies on the size calculated in the first relayout
@@ -570,7 +577,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         } else if (percentageToContainingBlockFound == true || percentageToOwnFound == true ) {
           _layoutPositionedChild(child);
         }
-        setScrollableSize(childParentData, child);
+        extendMaxScrollableSize(child);
       }
       child = childParentData.nextSibling;
     }
@@ -585,42 +592,18 @@ class RenderFlowLayout extends RenderLayoutBox {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
-
-    double width = renderStyle.width;
-    double height = renderStyle.height;
-    double minWidth = renderStyle.minWidth;
-    double minHeight = renderStyle.minHeight;
-    double maxWidth = renderStyle.maxWidth;
-    double maxHeight = renderStyle.maxHeight;
-
     // If no child exists, stop layout.
     if (childCount == 0) {
-      double constraintWidth = logicalContentWidth ?? 0;
-      double constraintHeight = logicalContentHeight ?? 0;
-      bool isInline = transformedDisplay == CSSDisplay.inline;
-      bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
-
-      if (!isInline) {
-        // Base width when width no exists, inline-block has width of 0
-        double baseWidth = isInlineBlock ? 0 : constraintWidth;
-        if (maxWidth != null && width == null) {
-          constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
-        } else if (minWidth != null && width == null) {
-          constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
-        }
-
-        // Base height always equals to 0 no matter
-        double baseHeight = 0;
-        if (maxHeight != null && height == null) {
-          constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
-        } else if (minHeight != null && height == null) {
-          constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
-        }
-      }
+      Size layoutSize = getLayoutSize(
+        logicalContentWidth: logicalContentWidth,
+        logicalContentHeight: logicalContentHeight,
+        contentWidth: 0,
+        contentHeight: 0,
+      );
+      double constraintWidth = layoutSize.width;
+      double constraintHeight = layoutSize.height;
 
       setMaxScrollableSize(constraintWidth, constraintHeight);
-
       size = getBoxSize(Size(
         constraintWidth,
         constraintHeight,
@@ -628,26 +611,27 @@ class RenderFlowLayout extends RenderLayoutBox {
       return;
     }
 
-    // @NOTE: Child size could be larger than parent's content, give
-    // an infinite box constraint to flow layout children.
-    BoxConstraints childConstraints = BoxConstraints();
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
+
+    // Use scrolling container to calculate flex line limit for scrolling content box
+    RenderBoxModel containerBox = isScrollingContentBox ? parent : this;
     switch (direction) {
       case Axis.horizontal:
-        double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(this);
-        mainAxisLimit = logicalContentWidth != null ? logicalContentWidth : maxConstraintWidth;
+        mainAxisLimit = containerBox.contentConstraints.maxWidth;
+        if (mainAxisLimit == double.infinity) {
+          mainAxisLimit = RenderBoxModel.getMaxConstraintWidth(containerBox);
+        }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
       case Axis.vertical:
-        mainAxisLimit = contentConstraints.maxHeight;
+        mainAxisLimit = containerBox.contentConstraints.maxHeight;
         if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
     }
-    assert(childConstraints != null);
     assert(mainAxisLimit != null);
     final double spacing = this.spacing;
     final double runSpacing = this.runSpacing;
@@ -666,6 +650,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     WhiteSpace whiteSpace = renderStyle.whiteSpace;
 
     while (child != null) {
+
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (childParentData.isPositioned) {
@@ -680,23 +665,25 @@ class RenderFlowLayout extends RenderLayoutBox {
         childNodeId = child.targetId;
       }
 
+      BoxConstraints childConstraints;
+      if (child is RenderBoxModel) {
+        childConstraints = child.getConstraints();
+      } else if (child is RenderTextBox) {
+        childConstraints = child.getConstraints();
+      } else {
+        childConstraints = BoxConstraints();
+      }
+
       // Whether child need to layout
       bool isChildNeedsLayout = true;
-      if (child is RenderBoxModel && child.hasSize) {
-        double childContentWidth = RenderBoxModel.getLogicalContentWidth(child);
-        double childContentHeight = RenderBoxModel.getLogicalContentHeight(child);
-        // Always layout child when parent is not laid out yet or child is marked as needsLayout
-        if (!hasSize || child.needsLayout || needsRelayout) {
-          isChildNeedsLayout = true;
-        } else {
-          Size childOldSize = _getChildSize(child);
-          /// No need to layout child when both width and height of child can be calculated from style
-          /// and be the same as old size, in other cases always relayout.
-          bool childSizeCalculatedSame = childContentWidth != null && childContentHeight != null &&
-            (childOldSize.width == childContentWidth ||
-              childOldSize.height == childContentHeight);
-          isChildNeedsLayout = !childSizeCalculatedSame;
-        }
+
+      if (child.hasSize &&
+        !needsRelayout &&
+        (childConstraints == child.constraints) &&
+        ((child is RenderBoxModel && !child.needsLayout) ||
+          (child is RenderTextBox && !child.needsLayout))
+      ) {
+        isChildNeedsLayout = false;
       }
 
       if (isChildNeedsLayout) {
@@ -704,11 +691,19 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
         }
-        // Relayout child after percentage size is resolved
-        if (needsRelayout && child is RenderBoxModel) {
-          childConstraints = child.renderStyle.getConstraints();
+
+        // Inflate constraints of percentage renderBoxModel to force it layout after percentage resolved
+        // cause Flutter will skip child layout if its constraints not changed between two layouts.
+        if (child is RenderBoxModel && needsRelayout) {
+          childConstraints = BoxConstraints(
+            minWidth: childConstraints.maxWidth != double.infinity ? childConstraints.maxWidth : 0,
+            maxWidth: double.infinity,
+            minHeight: childConstraints.maxHeight != double.infinity ? childConstraints.maxHeight : 0,
+            maxHeight: double.infinity,
+          );
         }
         child.layout(childConstraints, parentUsesSize: true);
+
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
@@ -809,7 +804,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       child = childParentData.nextSibling;
     }
 
-
     if (runChildren.length > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
@@ -824,31 +818,14 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     final int runCount = runMetrics.length;
 
-    // Default to children's width
-    double constraintWidth = mainAxisExtent;
-    bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
-
-    // Constrain to min-width or max-width if width not exists
-    if (isInlineBlock && maxWidth != null && width == null) {
-      constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
-    } else if (isInlineBlock && minWidth != null && width == null) {
-      constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
-    } else if (logicalContentWidth != null) {
-      constraintWidth = math.max(constraintWidth, logicalContentWidth);
-    }
-
-    // Default to children's height
-    double constraintHeight = crossAxisExtent;
-    bool isNotInline = transformedDisplay != CSSDisplay.inline;
-
-    // Constrain to min-height or max-height if width not exists
-    if (isNotInline && maxHeight != null && height == null) {
-      constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
-    } else if (isNotInline && minHeight != null && height == null) {
-      constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
-    } else if (logicalContentHeight != null) {
-      constraintHeight = math.max(constraintHeight, logicalContentHeight);
-    }
+    Size layoutSize = getLayoutSize(
+      logicalContentWidth: logicalContentWidth,
+      logicalContentHeight: logicalContentHeight,
+      contentWidth: mainAxisExtent,
+      contentHeight: crossAxisExtent,
+    );
+    double constraintWidth = layoutSize.width;
+    double constraintHeight = layoutSize.height;
 
     // Main and cross content size of flow layout
     double mainAxisContentSize = 0.0;
@@ -857,21 +834,20 @@ class RenderFlowLayout extends RenderLayoutBox {
     switch (direction) {
       case Axis.horizontal:
         Size logicalSize = Size(constraintWidth, constraintHeight);
-        setMaxScrollableSize(logicalSize.width, logicalSize.height);
         size = getBoxSize(logicalSize);
-
         mainAxisContentSize = contentSize.width;
         crossAxisContentSize = contentSize.height;
         break;
       case Axis.vertical:
         Size logicalSize = Size(crossAxisExtent, mainAxisExtent);
-        setMaxScrollableSize(logicalSize.width, logicalSize.height);
         size = getBoxSize(logicalSize);
 
         mainAxisContentSize = contentSize.height;
         crossAxisContentSize = contentSize.width;
         break;
     }
+
+    _setMaxScrollableSizeForFlow(runMetrics);
 
     autoMinWidth = _getMainAxisAutoSize(runMetrics);
     autoMinHeight = _getCrossAxisAutoSize(runMetrics);
@@ -1036,7 +1012,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           childMainPosition + renderStyle.paddingLeft + renderStyle.borderLeft + childMarginLeft,
           crossAxisOffset + childLineExtent + renderStyle.paddingTop + renderStyle.borderTop + childMarginTop
         );
-        /// Apply position relative offset change.
+        // Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
 
         if (flipMainAxis)
@@ -1115,7 +1091,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           child.computeDistanceToFirstLineBaseline();
       }
       if (childBaseLineDistance != null) {
-        // Baseline of relative positioned element equals its originial position
+        // Baseline of relative positioned element equals its original position
         // so it needs to subtract its vertical offset
         Offset relativeOffset;
         double childOffsetY = childParentData.offset.dy - childMarginTop;
@@ -1153,7 +1129,10 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.resolvePercentageToContainingBlock(logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(this, logicalContentWidth, logicalContentHeight);
+        if (percentageExist) {
+          percentageFound = true;
+        }
       }
       child = childParentData.nextSibling;
     }
@@ -1191,7 +1170,11 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
+        if (percentageExist) {
+          percentageFound = true;
+          break;
+        }
       }
       child = childParentData.nextSibling;
     }
@@ -1210,11 +1193,30 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        percentageFound = child.renderStyle.isPercentageToOwnExist();
+        bool percentageExist = child.renderStyle.isPercentageToOwnExist();
+        if (percentageExist) {
+          percentageFound = true;
+          break;
+        }
       }
       child = childParentData.nextSibling;
     }
     return percentageFound;
+  }
+
+  /// Record the main size of all lines
+  void _recordRunsMainSize(_RunMetrics runMetrics, List<double> runMainSize) {
+    Map<int, RenderBox> runChildren = runMetrics.runChildren;
+    double runMainExtent = 0;
+    void iterateRunChildren(int targetId, RenderBox runChild) {
+      double runChildMainSize = runChild.size.width;
+      if (runChild is RenderTextBox) {
+        runChildMainSize = runChild.autoMinWidth;
+      }
+      runMainExtent += runChildMainSize;
+    }
+    runChildren.forEach(iterateRunChildren);
+    runMainSize.add(runMainExtent);
   }
 
   /// Get auto min size in the main axis which equals the main axis size of its contents
@@ -1227,25 +1229,38 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Main size of each run
     List<double> runMainSize = [];
 
-    void iterateRunMetrics(_RunMetrics runMetrics) {
-      Map<int, RenderBox> runChildren = runMetrics.runChildren;
-      double runMainExtent = 0;
-      void iterateRunChildren(int targetId, RenderBox runChild) {
-        double runChildMainSize = runChild.size.width;
-        runMainExtent += runChildMainSize;
-      }
-      runChildren.forEach(iterateRunChildren);
-      runMainSize.add(runMainExtent);
+    // Calculate the max main size of all runs
+    for (_RunMetrics runMetrics in runMetrics) {
+      _recordRunsMainSize(runMetrics, runMainSize);
     }
 
-    // Calculate the max main size of all runs
-    runMetrics.forEach(iterateRunMetrics);
+    if (runMainSize.isNotEmpty) {
+      autoMinSize = runMainSize.reduce((double curr, double next) {
+        return curr > next ? curr : next;
+      });
+    }
 
-    autoMinSize = runMainSize.reduce((double curr, double next) {
+    return autoMinSize;
+  }
+
+  /// Record the cross size of all lines
+  void _recordRunsCrossSize(_RunMetrics runMetrics, List<double> runCrossSize) {
+    Map<int, RenderBox> runChildren = runMetrics.runChildren;
+    double runCrossExtent = 0;
+    List<double> runChildrenCrossSize = [];
+    void iterateRunChildren(int targetId, RenderBox runChild) {
+      double runChildCrossSize = runChild.size.height;
+      if (runChild is RenderTextBox) {
+        runChildCrossSize = runChild.autoMinHeight;
+      }
+      runChildrenCrossSize.add(runChildCrossSize);
+    }
+    runChildren.forEach(iterateRunChildren);
+    runCrossExtent = runChildrenCrossSize.reduce((double curr, double next) {
       return curr > next ? curr : next;
     });
 
-    return autoMinSize;
+    runCrossSize.add(runCrossExtent);
   }
 
   /// Get auto min size in the cross axis which equals the cross axis size of its contents
@@ -1254,11 +1269,114 @@ class RenderFlowLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     ) {
     double autoMinSize = 0;
-    // Get the sum of lines
-    for (_RunMetrics curr in runMetrics) {
-      autoMinSize += curr.crossAxisExtent;
+    // Cross size of each run
+    List<double> runCrossSize = [];
+
+    // Calculate the max cross size of all runs
+    for (_RunMetrics runMetrics in runMetrics) {
+      _recordRunsCrossSize(runMetrics, runCrossSize);
     }
+
+    // Get the sum of lines
+    for (double crossSize in runCrossSize) {
+      autoMinSize += crossSize;
+    }
+
     return autoMinSize;
+  }
+
+  /// Set the size of scrollable overflow area for flow layout
+  /// https://drafts.csswg.org/css-overflow-3/#scrollable
+  void _setMaxScrollableSizeForFlow(List<_RunMetrics> runMetrics) {
+    // Scrollable main size collection of each line
+    List<double> scrollableMainSizeOfLines = [];
+    // Scrollable cross size collection of each line
+    List<double> scrollableCrossSizeOfLines = [];
+    // Total cross size of previous lines
+    double preLinesCrossSize = 0;
+
+    for (_RunMetrics runMetric in runMetrics) {
+      Map<int, RenderBox> runChildren = runMetric.runChildren;
+
+      List<RenderBox> runChildrenList = [];
+      // Scrollable main size collection of each child in the line
+      List<double> scrollableMainSizeOfChildren = [];
+      // Scrollable cross size collection of each child in the line
+      List<double> scrollableCrossSizeOfChildren = [];
+
+      void iterateRunChildren(int targetId, RenderBox child) {
+        // Total main size of previous siblings
+        double preSiblingsMainSize = 0;
+        for (RenderBox sibling in runChildrenList) {
+          preSiblingsMainSize += sibling.size.width;
+        }
+
+        Size childScrollableSize = child.size;
+        double childMarginTop = 0;
+        double childMarginLeft = 0;
+        if (child is RenderBoxModel) {
+          RenderStyle childRenderStyle = child.renderStyle;
+          CSSOverflowType overflowX = childRenderStyle.overflowX;
+          CSSOverflowType overflowY = childRenderStyle.overflowY;
+          // Only non scroll container need to use scrollable size, otherwise use its own size
+          if (overflowX == CSSOverflowType.visible && overflowY == CSSOverflowType.visible) {
+            childScrollableSize = child.scrollableSize;
+          }
+          childMarginTop = childRenderStyle.marginTop.length;
+          childMarginLeft = childRenderStyle.marginLeft.length;
+        }
+
+        scrollableMainSizeOfChildren.add(preSiblingsMainSize + childScrollableSize.width + childMarginLeft);
+        scrollableCrossSizeOfChildren.add(childScrollableSize.height + childMarginTop);
+        runChildrenList.add(child);
+      }
+      runChildren.forEach(iterateRunChildren);
+
+      // Max scrollable main size of all the children in the line
+      double maxScrollableMainSizeOfLine = scrollableMainSizeOfChildren.reduce((double curr, double next) {
+        return curr > next ? curr : next;
+      });
+
+      // Max scrollable cross size of all the children in the line
+      double maxScrollableCrossSizeOfLine = preLinesCrossSize + scrollableCrossSizeOfChildren.reduce((double curr, double next) {
+        return curr > next ? curr : next;
+      });
+
+      scrollableMainSizeOfLines.add(maxScrollableMainSizeOfLine);
+      scrollableCrossSizeOfLines.add(maxScrollableCrossSizeOfLine);
+      preLinesCrossSize += runMetric.crossAxisExtent;
+    }
+
+    // Max scrollable main size of all lines
+    double maxScrollableMainSizeOfLines = scrollableMainSizeOfLines.reduce((double curr, double next) {
+      return curr > next ? curr : next;
+    });
+
+    bool isScrollContainer = renderStyle.overflowX != CSSOverflowType.visible ||
+      renderStyle.overflowY != CSSOverflowType.visible;
+    // No need to add padding for scrolling content box
+    double maxScrollableMainSizeOfChildren = isScrollContainer ? maxScrollableMainSizeOfLines :
+      renderStyle.paddingLeft + maxScrollableMainSizeOfLines;
+
+    // Max scrollable cross size of all lines
+    double maxScrollableCrossSizeOfLines = scrollableCrossSizeOfLines.reduce((double curr, double next) {
+      return curr > next ? curr : next;
+    });
+    // No need to add padding for scrolling content box
+    double maxScrollableCrossSizeOfChildren = isScrollContainer ? maxScrollableCrossSizeOfLines :
+      renderStyle.paddingTop + maxScrollableCrossSizeOfLines;
+
+    RenderBoxModel container = isScrollingContentBox ? parent : this;
+    double maxScrollableMainSize = math.max(
+      size.width - container.renderStyle.borderLeft - container.renderStyle.borderRight,
+      maxScrollableMainSizeOfChildren
+    );
+    double maxScrollableCrossSize = math.max(
+      size.height - container.renderStyle.borderTop - container.renderStyle.borderBottom,
+      maxScrollableCrossSizeOfChildren
+    );
+
+    scrollableSize = Size(maxScrollableMainSize, maxScrollableCrossSize);
   }
 
   // Get distance from top to baseline of child incluing margin

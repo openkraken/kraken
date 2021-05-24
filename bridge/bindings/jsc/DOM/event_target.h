@@ -11,7 +11,6 @@
 #include "bindings/jsc/js_context_internal.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
-#include "foundation/ui_command_queue.h"
 #include "foundation/ui_task_queue.h"
 #include "include/kraken_bridge.h"
 #include <array>

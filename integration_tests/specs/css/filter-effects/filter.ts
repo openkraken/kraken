@@ -9,7 +9,7 @@ describe('CSS Filter Effects', () => {
     document.body.appendChild(div);
     div.style.filter = 'grayscale(1)';
     await sleep(0.5);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('blur', async () => {
@@ -22,6 +22,6 @@ describe('CSS Filter Effects', () => {
     document.body.appendChild(div);
     div.style.filter = 'blur(2px)';
     await sleep(0.5);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

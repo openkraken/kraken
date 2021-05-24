@@ -9,7 +9,8 @@ describe('Height', () => {
 
     document.body.appendChild(div);
     div.style.height = '200px';
-    await expectAsync(div.toBlob(1)).toMatchImageSnapshot('');
+
+    await snapshot(div);
   });
 
   describe('element style has height', () => {
@@ -22,7 +23,7 @@ describe('Height', () => {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('element is inline-block', async () => {
@@ -34,7 +35,7 @@ describe('Height', () => {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('element is inline-flex', async () => {
@@ -46,7 +47,7 @@ describe('Height', () => {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('element is block', async () => {
@@ -58,7 +59,7 @@ describe('Height', () => {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('element is flex', async () => {
@@ -70,7 +71,7 @@ describe('Height', () => {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchViewportSnapshot();
+      await snapshot();
     });
   });
 
@@ -113,7 +114,7 @@ describe('Height', () => {
       });
       container.appendChild(child3);
 
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('when parent is flex with no height and align-items stretch', async () => {
@@ -152,7 +153,7 @@ describe('Height', () => {
       });
       container.appendChild(child3);
 
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('when nested in flex parents with align-items stretch', async () => {
@@ -203,7 +204,7 @@ describe('Height', () => {
       });
       container.appendChild(child3);
 
-      await matchViewportSnapshot();
+      await snapshot();
     });
 
     it('set element\'s height to auto', async () => {
@@ -215,10 +216,10 @@ describe('Height', () => {
       }, [createText('1234')]);
       BODY.appendChild(container);
 
-      await matchViewportSnapshot();
+      await snapshot();
 
       container.style.height = 'auto';
-      await matchViewportSnapshot();
+      await snapshot();
     });
   });
 
@@ -263,7 +264,7 @@ describe('Height', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in row direction', async () => {
@@ -308,7 +309,7 @@ describe('Height', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage in flex layout in column direction', async () => {
@@ -354,7 +355,7 @@ describe('Height', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage and flow layout of no height', async (done) => {
@@ -394,11 +395,11 @@ describe('Height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       text.data = 'three';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -441,11 +442,11 @@ describe('Height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       text.data = 'three';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -489,11 +490,11 @@ describe('Height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       text.data = 'three';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -538,12 +539,48 @@ describe('Height', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       text.data = 'three';
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
+
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+    let div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexWrap: 'wrap',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          position: 'relative',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            width: '100px',
+            backgroundColor: 'yellow',
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div2.style.height = '50%';
+       await snapshot();
+       done();
+    });
+  });
+
 });

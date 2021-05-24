@@ -5,9 +5,15 @@
  * - setElementProps: Apply attrs object to a specfic DOM.
  * - sleep: wait for several seconds.
  * - create: create element.
- * - matchViewportSnapshot: match snapshot of body's image.
+ * - snapshot: match snapshot of body's image.
  */
-const BODY = document.body;
+
+// Should by getter because body will reset before each spec
+Object.defineProperty(global, 'BODY', {
+  get() {
+    return document.body;
+  }
+});
 
 function setElementStyle(dom: HTMLElement, object: any) {
   if (object == null) return;
@@ -28,17 +34,6 @@ function setAttributes(dom: any, object: any) {
 
 function sleep(second: number) {
   return new Promise(done => setTimeout(done, second * 1000));
-}
-
-function createElementWithStyle(tag: string, style: { [key: string]: string | number }, child?: Node | Array<Node>): any {
-  const el = document.createElement(tag);
-  setElementStyle(el, style);
-  if (Array.isArray(child)) {
-    child.forEach(c => el.appendChild(c));
-  } else if (child) {
-    el.appendChild(child);
-  }
-  return el;
 }
 
 type ElementProps = {
@@ -62,6 +57,17 @@ function setElementProps(el: HTMLElement, props: ElementProps) {
 function createElement(tag: string, props: ElementProps, child?: Node | Array<Node>) {
   const el = document.createElement(tag);
   setElementProps(el, props);
+  if (Array.isArray(child)) {
+    child.forEach(c => el.appendChild(c));
+  } else if (child) {
+    el.appendChild(child);
+  }
+  return el;
+}
+
+function createElementWithStyle(tag: string, style: { [key: string]: string | number }, child?: Node | Array<Node>): any {
+  const el = document.createElement(tag);
+  setElementStyle(el, style);
   if (Array.isArray(child)) {
     child.forEach(c => el.appendChild(c));
   } else if (child) {
@@ -180,29 +186,29 @@ function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
 
-async function matchViewportSnapshot(wait: number = 0.0) {
-  await sleep(wait);
-  await matchElementImageSnapshot(document.body);
-}
-
-async function matchElementImageSnapshot(element: HTMLElement) {
-  return await expectAsync(element.toBlob(1.0)).toMatchImageSnapshot();
+async function snapshot(target?: any, filename?: String) {
+  if (target && target.toBlob) {
+    await expectAsync(target.toBlob(1.0)).toMatchSnapshot(filename);
+  } else {
+    if (typeof target == 'number') {
+      await sleep(target);
+    }
+    await expectAsync(document.documentElement.toBlob(1.0)).toMatchSnapshot(filename);
+  }
 }
 
 // Compatible to tests that use global variables.
 Object.assign(global, {
-  BODY,
   append,
   setAttributes,
-  createElement, 
+  createElement,
   createElementWithStyle,
   createText,
   createViewElement,
   setElementStyle,
-  matchElementImageSnapshot,
-  matchViewportSnapshot,
   setElementProps,
   simulateSwipe,
   simulateClick,
   sleep,
+  snapshot,
 });

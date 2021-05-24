@@ -70,6 +70,6 @@ describe('flexbox_width', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

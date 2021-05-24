@@ -7,12 +7,6 @@
 #include "foundation/logging.h"
 #include <sstream>
 
-#ifdef ENABLE_DEBUGGER
-#include "JavaScriptCore/JSGlobalObject.h"
-#include "JavaScriptCore/runtime/ConsoleTypes.h"
-#include <devtools/impl/jsc_console_client_impl.h>
-#endif
-
 namespace kraken::binding::jsc {
 namespace {
 
@@ -32,13 +26,15 @@ JSValueRef print(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
     return JSValueMakeUndefined(ctx);
   }
 
-  std::string logLevel = "log";
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+
+  std::string logLevel = "info";
   const JSValueRef &level = arguments[1];
   if (JSValueIsString(ctx, level)) {
     logLevel = std::move(JSStringToStdString(JSValueToStringCopy(ctx, level, nullptr)));
   }
 
-  foundation::printLog(stream, logLevel);
+  foundation::printLog(context->getContextId(), stream, logLevel, JSContextGetGlobalContext(ctx));
 
   return JSValueMakeUndefined(ctx);
 }

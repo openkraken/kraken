@@ -46,7 +46,7 @@ describe('align-items', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('002', async () => {
     let p;
@@ -94,7 +94,7 @@ describe('align-items', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let p;
@@ -142,7 +142,7 @@ describe('align-items', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004', async () => {
     let div1;
@@ -280,7 +280,7 @@ describe('align-items', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -326,7 +326,7 @@ describe('align-items', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('006', async () => {
     let p;
@@ -394,7 +394,7 @@ describe('align-items', () => {
     BODY.appendChild(block);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('007', async () => {
     let div;
@@ -433,7 +433,7 @@ describe('align-items', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('baseline-overflow-non-visible', async () => {
     let overflow;
@@ -482,7 +482,7 @@ describe('align-items', () => {
     );
     BODY.appendChild(flex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with baseline in nested elements", async () => {
@@ -530,7 +530,7 @@ describe('align-items', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("work with baseline in nested block elements", async () => {
@@ -577,7 +577,7 @@ describe('align-items', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("work with baseline in nested block elements and contain text", async () => {
@@ -628,7 +628,7 @@ describe('align-items', () => {
     );
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with stretch in row flex direction when flex-grow is set", async () => {
@@ -665,7 +665,7 @@ describe('align-items', () => {
       ]
     );
     BODY.appendChild(containingBlock);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with flex-start in row flex direction when flex-grow is set", async () => {
@@ -703,7 +703,7 @@ describe('align-items', () => {
       ]
     );
     BODY.appendChild(containingBlock);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with center in row flex direction when flex-grow is set", async () => {
@@ -741,7 +741,7 @@ describe('align-items', () => {
       ]
     );
     BODY.appendChild(containingBlock);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with flex-end in row flex direction when flex-grow is set", async () => {
@@ -779,7 +779,7 @@ describe('align-items', () => {
       ]
     );
     BODY.appendChild(containingBlock);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with stretch in column flex direction when flex-grow is set", async () => {
@@ -817,7 +817,7 @@ describe('align-items', () => {
       ]
     );
     BODY.appendChild(containingBlock);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with flex-start in column flex direction when flex-grow is set", async () => {
@@ -856,7 +856,7 @@ describe('align-items', () => {
       ]
     );
     BODY.appendChild(containingBlock);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with center in column flex direction when flex-grow is set", async () => {
@@ -895,7 +895,7 @@ describe('align-items', () => {
       ]
     );
     BODY.appendChild(containingBlock);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with flex-end in column flex direction when flex-grow is set", async () => {
@@ -935,7 +935,7 @@ describe('align-items', () => {
     );
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("works with stretch in row direction when flex-wrap is nowrap", async () => {
@@ -961,7 +961,7 @@ describe('align-items', () => {
     );
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it("does not work with stretch in row direction when flex-wrap is wrap", async () => {
@@ -988,7 +988,7 @@ describe('align-items', () => {
     );
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('does work with stretch when min-height exists and height does not exist', async () => {
@@ -1022,7 +1022,7 @@ describe('align-items', () => {
     BODY.appendChild(flexbox);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('does not work with stretch when height exists', async () => {
@@ -1056,7 +1056,7 @@ describe('align-items', () => {
     BODY.appendChild(flexbox);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('does work with stretch when min-width exists and width does not exist', async () => {
@@ -1091,7 +1091,7 @@ describe('align-items', () => {
     BODY.appendChild(flexbox);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('does not work with stretch when width exists', async () => {
@@ -1126,7 +1126,7 @@ describe('align-items', () => {
     BODY.appendChild(flexbox);
 
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });
 

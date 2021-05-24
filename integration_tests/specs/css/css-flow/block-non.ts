@@ -37,7 +37,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-height-001', async () => {
     let p;
@@ -97,7 +97,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-height-002', async () => {
     let p;
@@ -149,7 +149,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-height-003', async () => {
     let p;
@@ -220,7 +220,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-height-004', async () => {
     let p;
@@ -291,7 +291,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-height-005-ref', async () => {
     let p;
@@ -352,7 +352,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-height-005', async () => {
     let p;
@@ -436,7 +436,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-height-006', async () => {
     let p;
@@ -520,11 +520,11 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
-    await matchViewportSnapshot();
+    await snapshot();
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-height-007', async () => {
     let p;
@@ -592,7 +592,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-height-008', async () => {
     let p;
@@ -660,7 +660,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-height-009-ref', async () => {
     let p;
@@ -684,7 +684,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-height-009', async () => {
     let p;
@@ -768,7 +768,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-height-010', async () => {
     let p;
@@ -852,7 +852,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-height-013', async () => {
     let p;
@@ -907,7 +907,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-height-014', async () => {
     let p;
@@ -962,7 +962,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-height-015', async () => {
     let p;
@@ -1034,7 +1034,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-height-016', async () => {
     let p;
@@ -1106,7 +1106,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-width-001-ref', async () => {
     let p;
@@ -1154,7 +1154,7 @@ describe('block-non', () => {
     BODY.appendChild(orange);
     BODY.appendChild(blue);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-width-001', async () => {
     let p;
@@ -1241,7 +1241,7 @@ describe('block-non', () => {
     BODY.appendChild(div1);
     BODY.appendChild(d3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-width-002', async () => {
     let p;
@@ -1324,7 +1324,7 @@ describe('block-non', () => {
     BODY.appendChild(div1);
     BODY.appendChild(div2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-width-003', async () => {
     let p;
@@ -1413,7 +1413,7 @@ describe('block-non', () => {
     BODY.appendChild(div1);
     BODY.appendChild(div2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-width-004-ref', async () => {
     let p;
@@ -1462,7 +1462,7 @@ describe('block-non', () => {
     BODY.appendChild(orange);
     BODY.appendChild(blue);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-width-004', async () => {
     let p;
@@ -1545,7 +1545,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-width-005-ref', async () => {
     let p;
@@ -1581,7 +1581,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-width-006', async () => {
     let p;
@@ -1643,7 +1643,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('replaced-width-007-ref', async () => {
     let p;
@@ -1701,7 +1701,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-width-007', async () => {
     let p;
@@ -1767,7 +1767,7 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('replaced-width-008', async () => {
     let p;
@@ -1817,6 +1817,6 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(containingBlock);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

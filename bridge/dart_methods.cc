@@ -43,7 +43,7 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
   methodPointer->platformBrightness = reinterpret_cast<PlatformBrightness>(methodBytes[i++]);
   methodPointer->toBlob = reinterpret_cast<ToBlob>(methodBytes[i++]);
   methodPointer->flushUICommand = reinterpret_cast<FlushUICommand>(methodBytes[i++]);
-  methodPointer->initBody = reinterpret_cast<InitBody>(methodBytes[i++]);
+  methodPointer->initHTML = reinterpret_cast<InitHTML>(methodBytes[i++]);
   methodPointer->initWindow = reinterpret_cast<InitWindow>(methodBytes[i++]);
   methodPointer->initDocument = reinterpret_cast<InitDocument>(methodBytes[i++]);
 
@@ -58,11 +58,11 @@ void registerDartMethods(uint64_t *methodBytes, int32_t length) {
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }
 
+
 void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
   size_t i = 0;
 
   methodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
-  methodPointer->refreshPaint = reinterpret_cast<RefreshPaint>(methodBytes[i++]);
   methodPointer->matchImageSnapshot = reinterpret_cast<MatchImageSnapshot>(methodBytes[i++]);
   methodPointer->environment = reinterpret_cast<Environment>(methodBytes[i++]);
   methodPointer->simulatePointer = reinterpret_cast<SimulatePointer>(methodBytes[i++]);

@@ -8,8 +8,6 @@ import 'dart:ffi';
 import 'package:kraken/bridge.dart';
 import 'package:meta/meta.dart';
 
-const String DATA = 'data';
-
 enum NodeType {
   ELEMENT_NODE,
   TEXT_NODE,
@@ -64,7 +62,26 @@ abstract class RenderObjectNode {
   void didDetachRenderer();
 }
 
-abstract class Node extends EventTarget implements RenderObjectNode {
+/// Lifecycles that triggered when NodeTree changes.
+/// Ref: https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-lifecycle-callbacks
+abstract class LifecycleCallbacks {
+  // Invoked each time the custom element is appended into a document-connected element.
+  // This will happen each time the node is moved, and may happen before the element's
+  // contents have been fully parsed.
+  void connectedCallback();
+
+  // Invoked each time the custom element is disconnected from the document's DOM.
+  void disconnectedCallback();
+
+// Invoked each time the custom element is moved to a new document.
+// @TODO: Currently only single document exists, this callback will never be triggered.
+// void adoptedCallback();
+
+// @TODO: [attributeChangedCallback] works with static getter [observedAttributes].
+// void attributeChangedCallback();
+}
+
+abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCallbacks {
   RenderObject _renderer;
 
   final Pointer<NativeNode> nativeNodePtr;
@@ -77,9 +94,17 @@ abstract class Node extends EventTarget implements RenderObjectNode {
   NodeType nodeType;
   String nodeName;
 
-  Element get parent => parentNode;
+  /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
+  Node get parent => parentNode;
 
-  Element get parentElement => parent;
+  /// The Node.parentElement read-only property returns the DOM node's parent Element,
+  /// or null if the node either has no parent, or its parent isn't a DOM Element.
+  Element get parentElement {
+    if (parentNode != null && parentNode.nodeType == NodeType.ELEMENT_NODE) {
+      return parentNode;
+    }
+    return null;
+  }
 
   List<Element> get children {
     List<Element> _children = [];
@@ -102,7 +127,8 @@ abstract class Node extends EventTarget implements RenderObjectNode {
     while (parent.parentNode != null) {
       parent = parent.parentNode;
     }
-    return parent == elementManager.getRootElement();
+    Document document = elementManager.document;
+    return this == document || parent == document;
   }
 
   Node get firstChild => childNodes?.first;
@@ -166,6 +192,10 @@ abstract class Node extends EventTarget implements RenderObjectNode {
     child.parentNode = this;
     childNodes.add(child);
 
+    if (child.isConnected) {
+      child.connectedCallback();
+    }
+
     return child;
   }
 
@@ -190,6 +220,7 @@ abstract class Node extends EventTarget implements RenderObjectNode {
     } else {
       newNode.parentNode = this;
       childNodes.insert(referenceIndex, newNode);
+      if (newNode.isConnected) newNode.connectedCallback();
       return newNode;
     }
   }
@@ -199,6 +230,7 @@ abstract class Node extends EventTarget implements RenderObjectNode {
     if (childNodes.contains(child)) {
       childNodes.remove(child);
       child.parentNode = null;
+      child.disconnectedCallback();
     }
     return child;
   }
@@ -211,6 +243,10 @@ abstract class Node extends EventTarget implements RenderObjectNode {
       oldNode.parentNode = null;
       replacedNode = oldNode;
       childNodes[referenceIndex] = newNode;
+      if (newNode.isConnected) {
+        newNode.disconnectedCallback();
+        newNode.connectedCallback();
+      }
     } else {
       appendChild(newNode);
     }
@@ -226,6 +262,12 @@ abstract class Node extends EventTarget implements RenderObjectNode {
 
   /// Ensure child and child's child render object is attached.
   void ensureChildAttached() {}
+
+  @override
+  void connectedCallback() {}
+
+  @override
+  void disconnectedCallback() {}
 }
 
 /// https://dom.spec.whatwg.org/#dom-node-nodetype

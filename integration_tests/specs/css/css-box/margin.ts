@@ -20,7 +20,7 @@ describe('Box margin', () => {
 
     document.body.appendChild(div3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with basic samples', async () => {
@@ -34,7 +34,7 @@ describe('Box margin', () => {
 
     document.body.appendChild(div);
     div.style.margin = '20px';
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with basic samples', async () => {
@@ -48,7 +48,7 @@ describe('Box margin', () => {
 
     document.body.appendChild(div);
     div.style.margin = '20px';
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with shorthand', async () => {
@@ -62,7 +62,7 @@ describe('Box margin', () => {
     });
 
     document.body.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should can be removed', async () => {
@@ -75,10 +75,10 @@ describe('Box margin', () => {
     });
 
     document.body.appendChild(container1);
-    await matchViewportSnapshot();
+    await snapshot();
 
     container1.style.margin = '';
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage', async () => {
@@ -121,7 +121,7 @@ describe('Box margin', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with percentage of parents width and height not equal', async () => {
@@ -149,7 +149,41 @@ describe('Box margin', () => {
     );
 
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '100px',
+          height: '200px',
+          padding: '20px',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            height: '50px',
+            width: '50px',
+            backgroundColor: 'yellow',
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div2.style.marginTop = '100%';
+       await snapshot();
+       done();
+    });
+  });
 });

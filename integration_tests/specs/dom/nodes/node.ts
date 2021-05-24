@@ -35,7 +35,7 @@ describe('Node API', () => {
     const child_3 = document.createTextNode('fourth child');
     el.replaceChild(child_3, child_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('ChildNode.prototype.remove', () => {
@@ -62,6 +62,21 @@ describe('Node API', () => {
     expect(child.isConnected).toBe(true, 'child is connected');
   });
 
+  it('previousSibling should to null when child is firstChild and children.size() > 2', () => {
+    let container = document.createElement('div');
+    let a = document.createElement('div');
+    let b = document.createElement('div');
+    let c = document.createElement('div');
+    let d = document.createElement('div');
+    container.appendChild(a);
+    container.appendChild(b);
+    container.appendChild(c);
+    container.appendChild(d);
+    document.body.appendChild(container);
+    expect(a.previousSibling).toBe(null, 'firstChild should be null');
+    expect(a.isConnected).toBe(true, 'isConnected should be true');
+  });
+
   it('next sibling should to null when child is lastChild of multiple children list', () => {
     let container = document.createElement('div');
     let child = document.createElement('div');
@@ -86,10 +101,10 @@ describe('Node API', () => {
     expect(container.childNodes.length == 3);
     expect(container.textContent).toBe('1234567890');
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
     container.textContent = '';
     expect(container.childNodes.length == 1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with ownerDocument', () => {
@@ -101,5 +116,7 @@ describe('Node API', () => {
     let commentNode = document.createComment('comment');
     expect(commentNode.ownerDocument === document);
     expect(document.ownerDocument === null);
+    let img = new Image();
+    expect(img.ownerDocument).toBe(document);
   });
 });

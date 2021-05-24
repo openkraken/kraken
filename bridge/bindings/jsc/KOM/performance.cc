@@ -255,9 +255,8 @@ JSValueRef JSPerformance::getEntries(JSContextRef ctx, JSObjectRef function, JSO
 JSValueRef JSPerformance::getEntriesByName(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount == 0) {
-    throwJSError(ctx,
-                    "Failed to execute 'getEntriesByName' on 'Performance': 1 argument required, but only 0 present.",
-                    exception);
+    throwJSError(ctx, "Failed to execute 'getEntriesByName' on 'Performance': 1 argument required, but only 0 present.",
+                 exception);
     return nullptr;
   }
 
@@ -282,9 +281,8 @@ JSValueRef JSPerformance::getEntriesByName(JSContextRef ctx, JSObjectRef functio
 JSValueRef JSPerformance::getEntriesByType(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                            size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount == 0) {
-    throwJSError(ctx,
-                    "Failed to execute 'getEntriesByName' on 'Performance': 1 argument required, but only 0 present.",
-                    exception);
+    throwJSError(ctx, "Failed to execute 'getEntriesByName' on 'Performance': 1 argument required, but only 0 present.",
+                 exception);
     return nullptr;
   }
 
@@ -308,8 +306,7 @@ JSValueRef JSPerformance::getEntriesByType(JSContextRef ctx, JSObjectRef functio
 JSValueRef JSPerformance::mark(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
-    throwJSError(ctx, "Failed to execute 'mark' on 'Performance': 1 argument required, but only 0 present.",
-                    exception);
+    throwJSError(ctx, "Failed to execute 'mark' on 'Performance': 1 argument required, but only 0 present.", exception);
     return nullptr;
   }
 
@@ -345,6 +342,75 @@ double getMeasureTotalDuration(const std::vector<NativePerformanceEntry *> &meas
   return duration / 1000;
 }
 
+struct FunctionCallTime {
+  FunctionCallTime(std::string name, double duration): name(std::move(name)), duration(duration) {}
+  std::string name;
+  double duration;
+};
+
+void printFunctionCallTime() {
+  auto *functionCallTime = getNativeFunctionCallTime();
+  auto *functionCallCount = getNativeFunctionCallCount();
+  std::string buf = "\nNative Function Time Rank\n\n";
+  std::vector<FunctionCallTime> rankList;
+  for (auto &e : *functionCallTime) {
+    rankList.emplace_back(FunctionCallTime(e.first, e.second));
+  }
+
+  std::sort(rankList.begin(), rankList.end(), [](FunctionCallTime &left, FunctionCallTime &right) {
+    return left.duration > right.duration;
+  });
+
+  for (auto &i : rankList) {
+    int count = (*functionCallCount)[i.name];
+    buf += "  -" + i.name + " " + std::to_string(i.duration) + "ms count: " + std::to_string(count) + " avg: " + std::to_string(i.duration /count) +"\n";
+  }
+
+  KRAKEN_LOG(VERBOSE) << buf;
+}
+
+void printHostClassGetPropertyCallTime() {
+  auto *callTime = getHostClassPropertyCallTime();
+  auto *callCount = getHostClassPropertyCallCount();
+  std::string buf = "\nHost Class GetProperty Time Rank\n\n";
+  std::vector<FunctionCallTime> rankList;
+  for (auto &e : *callTime) {
+    rankList.emplace_back(FunctionCallTime(e.first, e.second));
+  }
+
+  std::sort(rankList.begin(), rankList.end(), [](FunctionCallTime &left, FunctionCallTime &right) {
+    return left.duration > right.duration;
+  });
+
+  for (auto &i : rankList) {
+    int count = (*callCount)[i.name];
+    buf += "  -" + i.name + " " + std::to_string(i.duration) + "us count: " + std::to_string(count) + " avg: " + std::to_string(i.duration /count) +"\n";
+  }
+
+  KRAKEN_LOG(VERBOSE) << buf;
+}
+
+void printHostClassSetPropertyCallTime() {
+  auto *callTime = setHostClassPropertyCallTime();
+  auto *callCount = setHostClassPropertyCallCount();
+  std::string buf = "\nHost Class SetProperty Time Rank\n\n";
+  std::vector<FunctionCallTime> rankList;
+  for (auto &e : *callTime) {
+    rankList.emplace_back(FunctionCallTime(e.first, e.second));
+  }
+
+  std::sort(rankList.begin(), rankList.end(), [](FunctionCallTime &left, FunctionCallTime &right) {
+    return left.duration > right.duration;
+  });
+
+  for (auto &i : rankList) {
+    int count = (*callCount)[i.name];
+    buf += "  -" + i.name + " " + std::to_string(i.duration) + "us count: " + std::to_string(count) + " avg: " + std::to_string(i.duration /count) +"\n";
+  }
+
+  KRAKEN_LOG(VERBOSE) << buf;
+}
+
 JSValueRef JSPerformance::__kraken_navigation_summary__(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                                         size_t argumentCount, JSValueRef const *arguments,
                                                         JSValueRef *exception) {
@@ -358,6 +424,12 @@ JSValueRef JSPerformance::__kraken_navigation_summary__(JSContextRef ctx, JSObje
       measures.emplace_back(m_entries);
     }
   }
+
+#define GET_COST_WITH_DECREASE(NAME, MACRO, DECREASE)                                                                  \
+  auto NAME##Measures = findAllMeasures(measures, MACRO);                                                              \
+  size_t NAME##Count = NAME##Measures.size();                                                                          \
+  double NAME##Cost = getMeasureTotalDuration(NAME##Measures) - (DECREASE);                                            \
+  auto NAME##Avg = NAME##Measures.empty() ? 0 : (NAME##Cost) / NAME##Measures.size();
 
 #define GET_COST(NAME, MACRO)                                                                                          \
   auto NAME##Measures = findAllMeasures(measures, MACRO);                                                              \
@@ -373,13 +445,13 @@ JSValueRef JSPerformance::__kraken_navigation_summary__(JSContextRef ctx, JSObje
   GET_COST(createViewport, PERF_CREATE_VIEWPORT_COST);
   GET_COST(elementManagerInit, PERF_ELEMENT_MANAGER_INIT_COST);
   GET_COST(elementManagerPropertiesInit, PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST);
-  GET_COST(bodyElementInit, PERF_BODY_ELEMENT_INIT_COST);
-  GET_COST(bodyElementPropertiesInit, PERF_BODY_ELEMENT_PROPERTIES_INIT_COST);
+  GET_COST(rootElementInit, PERF_ROOT_ELEMENT_INIT_COST);
+  GET_COST(rootElementPropertiesInit, PERF_ROOT_ELEMENT_PROPERTIES_INIT_COST);
   GET_COST(jsContextInit, PERF_JS_CONTEXT_INIT_COST);
   GET_COST(jsNativeMethodInit, PERF_JS_NATIVE_METHOD_INIT_COST);
   GET_COST(jsPolyfillInit, PERF_JS_POLYFILL_INIT_COST);
   GET_COST(jsBundleLoad, PERF_JS_BUNDLE_LOAD_COST);
-  GET_COST(jsBundleEval, PERF_JS_BUNDLE_EVAL_COST);
+  GET_COST(jsParseTime, PERF_JS_PARSE_TIME_COST);
   GET_COST(flushUiCommand, PERF_FLUSH_UI_COMMAND_COST);
   GET_COST(createElement, PERF_CREATE_ELEMENT_COST);
   GET_COST(createTextNode, PERF_CREATE_TEXT_NODE_COST);
@@ -396,18 +468,27 @@ JSValueRef JSPerformance::__kraken_navigation_summary__(JSContextRef ctx, JSObje
   GET_COST(intrinsicLayout, PERF_INTRINSIC_LAYOUT_COST);
   GET_COST(silverLayout, PERF_SILVER_LAYOUT_COST);
   GET_COST(paint, PERF_PAINT_COST);
+  GET_COST(domForceLayout, PERF_DOM_FORCE_LAYOUT_COST);
+  GET_COST(domFlushUICommand, PERF_DOM_FLUSH_UI_COMMAND_COST);
+  GET_COST_WITH_DECREASE(jsHostClassGetProperty, PERF_JS_HOST_CLASS_GET_PROPERTY_COST,
+                         domForceLayoutCost + domFlushUICommandCost)
+  GET_COST(jsHostClassSetProperty, PERF_JS_HOST_CLASS_SET_PROPERTY_COST);
+  GET_COST(jsHostClassInit, PERF_JS_HOST_CLASS_INIT_COST);
+  GET_COST(jsNativeFunction, PERF_JS_NATIVE_FUNCTION_CALL_COST);
+  GET_COST_WITH_DECREASE(jsBundleEval, PERF_JS_BUNDLE_EVAL_COST, domForceLayoutCost + domFlushUICommandCost);
 
   double initBundleCost = jsBundleLoadCost + jsBundleEvalCost + flushUiCommandCost + createElementCost +
                           createTextNodeCost + createCommentCost + disposeEventTargetCost + addEventCost +
                           insertAdjacentNodeCost + removeNodeCost + setStyleCost + setPropertiesCost +
                           removePropertiesCost;
-  double renderingCost = flexLayoutCost + flowLayoutCost + intrinsicLayoutCost + silverLayoutCost + paintCost;
-  double totalCost = widgetCreationCost + initBundleCost + renderingCost;
+  // layout and paint measure are not correct.
+  //  double renderingCost = flexLayoutCost + flowLayoutCost + intrinsicLayoutCost + silverLayoutCost + paintCost;
+  double totalCost = widgetCreationCost + initBundleCost;
 
   char buffer[5000];
   // clang-format off
   sprintf(buffer, R"(
-Total time cost: %.*fms
+Total time cost(without paint and layout): %.*fms
 
 + %s %.*fms
   + %s %.*fms
@@ -425,6 +506,7 @@ Total time cost: %.*fms
 First Bundle Load: %.*fms
   + %s %.*fms
   + %s %.*fms
+  + %s %.*fms
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
@@ -436,7 +518,7 @@ First Bundle Load: %.*fms
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
-Rendering: %.*fms
+  + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
   + %s %.*fms avg: %.*fms count: %zu
@@ -449,8 +531,8 @@ Rendering: %.*fms
       PERF_VIEW_CONTROLLER_PROPERTIES_INIT_COST, 2, viewControllerPropertiesInitCost,
       PERF_ELEMENT_MANAGER_INIT_COST, 2, elementManagerInitCost,
       PERF_ELEMENT_MANAGER_PROPERTY_INIT, 2, elementManagerPropertiesInitCost,
-      PERF_BODY_ELEMENT_PROPERTIES_INIT_COST, 2, bodyElementPropertiesInitCost,
-      PERF_BODY_ELEMENT_INIT_COST, 2, bodyElementInitCost,
+      PERF_ROOT_ELEMENT_PROPERTIES_INIT_COST, 2, rootElementPropertiesInitCost,
+      PERF_ROOT_ELEMENT_INIT_COST, 2, rootElementInitCost,
       PERF_CREATE_VIEWPORT_COST, 2, createViewportCost,
       PERF_BRIDGE_INIT_COST, 2, bridgeInitCost,
       PERF_BRIDGE_REGISTER_DART_METHOD_COST, 2, bridgeRegisterDartMethodCost,
@@ -460,8 +542,13 @@ Rendering: %.*fms
   2, initBundleCost,
     PERF_JS_BUNDLE_LOAD_COST, 2, jsBundleLoadCost,
     PERF_JS_BUNDLE_EVAL_COST, 2, jsBundleEvalCost,
+    PERF_JS_PARSE_TIME_COST, 2, jsParseTimeCost,
     PERF_FLUSH_UI_COMMAND_COST, 2, flushUiCommandCost, 2, flushUiCommandAvg, flushUiCommandCount,
     PERF_CREATE_ELEMENT_COST, 2, createElementCost, 2, createElementAvg, createElementCount,
+    PERF_JS_HOST_CLASS_GET_PROPERTY_COST, 2, jsHostClassGetPropertyCost, 2, jsHostClassGetPropertyAvg, jsHostClassGetPropertyCount,
+    PERF_JS_HOST_CLASS_SET_PROPERTY_COST, 2, jsHostClassSetPropertyCost, 2, jsHostClassSetPropertyAvg, jsHostClassSetPropertyCount,
+    PERF_JS_HOST_CLASS_INIT_COST, 2, jsHostClassInitCost, 2, jsHostClassInitAvg, jsHostClassInitCount,
+    PERF_JS_NATIVE_FUNCTION_CALL_COST, 2, jsNativeFunctionCost, 2, jsNativeFunctionAvg, jsNativeFunctionCount,
     PERF_CREATE_TEXT_NODE_COST, 2, createTextNodeCost, 2, createTextNodeAvg, createTextNodeCount,
     PERF_CREATE_COMMENT_COST, 2, createCommentCost, 2, createCommentAvg, createCommentCount,
     PERF_DISPOSE_EVENT_TARGET_COST, 2, disposeEventTargetCost, 2, disposeEventTargetAvg, disposeEventTargetCount,
@@ -469,16 +556,15 @@ Rendering: %.*fms
     PERF_INSERT_ADJACENT_NODE_COST, 2, insertAdjacentNodeCost, 2, insertAdjacentNodeAvg, insertAdjacentNodeCount,
     PERF_REMOVE_NODE_COST, 2, removeNodeCost, 2, removeNodeAvg, removeNodeCount,
     PERF_SET_STYLE_COST, 2, setStyleCost, 2, setStyleAvg, setStyleCount,
+    PERF_DOM_FORCE_LAYOUT_COST, 2, domForceLayoutCost, 2, domForceLayoutAvg, domForceLayoutCount,
+    PERF_DOM_FLUSH_UI_COMMAND_COST, 2, domFlushUICommandCost, 2, domFlushUICommandAvg, domFlushUICommandCount,
     PERF_SET_PROPERTIES_COST, 2, setPropertiesCost, 2, setPropertiesAvg, setPropertiesCount,
-    PERF_REMOVE_PROPERTIES_COST, 2, removePropertiesCost, 2, removePropertiesAvg, removePropertiesCount,
-  2, renderingCost,
-    PERF_FLEX_LAYOUT_COST, 2, flexLayoutCost, 2, flexLayoutAvg, flexLayoutCount,
-    PERF_FLOW_LAYOUT_COST, 2, flowLayoutCost, 2, flowLayoutAvg, flowLayoutCount,
-    PERF_INTRINSIC_LAYOUT_COST, 2, intrinsicLayoutCost, 2, intrinsicLayoutAvg, intrinsicLayoutCount,
-    PERF_SILVER_LAYOUT_COST, 2, silverLayoutCost, 2, silverLayoutAvg, silverLayoutCount,
-    PERF_PAINT_COST, 2, paintCost, 2, paintAvg, paintCount
+    PERF_REMOVE_PROPERTIES_COST, 2, removePropertiesCost, 2, removePropertiesAvg, removePropertiesCount
 );
   // clang-format on
+  printFunctionCallTime();
+  printHostClassGetPropertyCallTime();
+  printHostClassSetPropertyCallTime();
 
   JSStringRef resultStringRef = JSStringCreateWithUTF8CString(buffer);
   return JSValueMakeString(ctx, resultStringRef);
@@ -498,10 +584,16 @@ void JSPerformance::measureSummary() {
                   nullptr);
   internalMeasure(PERF_ELEMENT_MANAGER_PROPERTIES_INIT_COST, PERF_ELEMENT_MANAGER_INIT_START,
                   PERF_ELEMENT_MANAGER_PROPERTY_INIT, nullptr);
-  internalMeasure(PERF_BODY_ELEMENT_INIT_COST, PERF_BODY_ELEMENT_INIT_START, PERF_BODY_ELEMENT_INIT_END, nullptr);
-  internalMeasure(PERF_BODY_ELEMENT_PROPERTIES_INIT_COST, PERF_BODY_ELEMENT_INIT_START, PERF_BODY_ELEMENT_PROPERTY_INIT,
+  internalMeasure(PERF_ROOT_ELEMENT_INIT_COST, PERF_ROOT_ELEMENT_INIT_START, PERF_ROOT_ELEMENT_INIT_END, nullptr);
+  internalMeasure(PERF_ROOT_ELEMENT_PROPERTIES_INIT_COST, PERF_ROOT_ELEMENT_INIT_START, PERF_ROOT_ELEMENT_PROPERTY_INIT,
                   nullptr);
   internalMeasure(PERF_JS_CONTEXT_INIT_COST, PERF_JS_CONTEXT_INIT_START, PERF_JS_CONTEXT_INIT_END, nullptr);
+  internalMeasure(PERF_JS_HOST_CLASS_GET_PROPERTY_COST, PERF_JS_HOST_CLASS_GET_PROPERTY_START,
+                  PERF_JS_HOST_CLASS_GET_PROPERTY_END, nullptr);
+  internalMeasure(PERF_JS_HOST_CLASS_SET_PROPERTY_COST, PERF_JS_HOST_CLASS_SET_PROPERTY_START,
+                  PERF_JS_HOST_CLASS_SET_PROPERTY_END, nullptr);
+  internalMeasure(PERF_JS_HOST_CLASS_INIT_COST, PERF_JS_HOST_CLASS_INIT_START, PERF_JS_HOST_CLASS_INIT_END, nullptr);
+  internalMeasure(PERF_JS_NATIVE_FUNCTION_CALL_COST, PERF_JS_NATIVE_FUNCTION_CALL_START, PERF_JS_NATIVE_FUNCTION_CALL_END, nullptr);
   internalMeasure(PERF_JS_NATIVE_METHOD_INIT_COST, PERF_JS_NATIVE_METHOD_INIT_START, PERF_JS_NATIVE_METHOD_INIT_END,
                   nullptr);
   internalMeasure(PERF_JS_POLYFILL_INIT_COST, PERF_JS_POLYFILL_INIT_START, PERF_JS_POLYFILL_INIT_END, nullptr);
@@ -525,6 +617,10 @@ void JSPerformance::measureSummary() {
   internalMeasure(PERF_INTRINSIC_LAYOUT_COST, PERF_INTRINSIC_LAYOUT_START, PERF_INTRINSIC_LAYOUT_END, nullptr);
   internalMeasure(PERF_SILVER_LAYOUT_COST, PERF_SILVER_LAYOUT_START, PERF_SILVER_LAYOUT_END, nullptr);
   internalMeasure(PERF_PAINT_COST, PERF_PAINT_START, PERF_PAINT_END, nullptr);
+  internalMeasure(PERF_DOM_FORCE_LAYOUT_COST, PERF_DOM_FORCE_LAYOUT_START, PERF_DOM_FORCE_LAYOUT_END, nullptr);
+  internalMeasure(PERF_DOM_FLUSH_UI_COMMAND_COST, PERF_DOM_FLUSH_UI_COMMAND_START, PERF_DOM_FLUSH_UI_COMMAND_END,
+                  nullptr);
+  internalMeasure(PERF_JS_PARSE_TIME_COST, PERF_JS_PARSE_TIME_START, PERF_JS_PARSE_TIME_END, nullptr);
 }
 
 #endif
@@ -533,7 +629,7 @@ JSValueRef JSPerformance::measure(JSContextRef ctx, JSObjectRef function, JSObje
                                   const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount == 0) {
     throwJSError(ctx, "Failed to execute 'measure' on 'Performance': 1 argument required, but only 0 present.",
-                    exception);
+                 exception);
     return nullptr;
   }
 
@@ -617,9 +713,9 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
 
     if (endMarkCount == 0) {
       if (exception != nullptr) {
-        throwJSError(
-          ctx, ("Failed to execute 'measure' on 'Performance': The mark " + endMark + " does not exist.").c_str(),
-          exception);
+        throwJSError(ctx,
+                     ("Failed to execute 'measure' on 'Performance': The mark " + endMark + " does not exist.").c_str(),
+                     exception);
       }
       return;
     }
@@ -627,10 +723,10 @@ void JSPerformance::internalMeasure(const std::string &name, const std::string &
     if (startMarkCount != endMarkCount) {
       if (exception != nullptr) {
         throwJSError(ctx,
-                        ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " and " + endMark +
-                         "does not appear the same number of times")
-                          .c_str(),
-                        exception);
+                     ("Failed to execute 'measure' on 'Performance': The mark " + startMark + " and " + endMark +
+                      "does not appear the same number of times")
+                       .c_str(),
+                     exception);
       }
       return;
     }

@@ -40,7 +40,7 @@ describe('z-index', () => {
       });
     });
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with flex-item', async () => {
@@ -88,7 +88,7 @@ describe('z-index', () => {
     );
     BODY.appendChild(root);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('two flex items with both zIndex', async () => {
@@ -137,7 +137,7 @@ describe('z-index', () => {
     );
     BODY.appendChild(root);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('two flex items of zIndex and no zIndex', async () => {
@@ -184,7 +184,7 @@ describe('z-index', () => {
     );
     BODY.appendChild(root);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('two flex items of both no zIndex', async () => {
@@ -230,7 +230,7 @@ describe('z-index', () => {
     );
     BODY.appendChild(root);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('without flex-item', async () => {
@@ -278,7 +278,7 @@ describe('z-index', () => {
 
     BODY.appendChild(root);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with z-index change', async (done) => {
@@ -331,11 +331,11 @@ describe('z-index', () => {
 
     BODY.appendChild(root);
 
-    await matchViewportSnapshot();
+    await snapshot();
 
     requestAnimationFrame(async () => {
       div1.style.zIndex = 99;
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     });
   });
@@ -388,7 +388,7 @@ describe('z-index', () => {
 
     BODY.appendChild(root);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('works with z-index compare 2', async () => {
@@ -439,6 +439,6 @@ describe('z-index', () => {
 
     BODY.appendChild(root);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

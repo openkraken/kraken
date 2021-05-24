@@ -238,6 +238,6 @@ describe('clip-003', () => {
     BODY.appendChild(wrapper_3);
     BODY.appendChild(wrapper_4);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

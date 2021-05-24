@@ -17,7 +17,7 @@ describe('background-attachment', () => {
     append(container, text);
     append(BODY, container);
     await sleep(1);
-    await matchElementImageSnapshot(container);
+    await snapshot(container);
   });
 
   it('local', async () => {
@@ -39,9 +39,9 @@ describe('background-attachment', () => {
     append(container, text);
     append(BODY, container);
     await sleep(1);
-    await matchViewportSnapshot();
+    await snapshot();
     container.scrollTo(0, 100);
-    await matchViewportSnapshot(0.1);
+    await snapshot(0.1);
   });
 
   it('scroll', async () => {
@@ -73,6 +73,6 @@ describe('background-attachment', () => {
     append(container, text);
     append(BODY, container);
     await sleep(1);
-    await matchElementImageSnapshot(container);
+    await snapshot(container);
   });
 });

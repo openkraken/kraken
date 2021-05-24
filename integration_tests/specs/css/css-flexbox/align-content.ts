@@ -53,7 +53,7 @@ describe('align-content', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('002', async () => {
     let flexbox;
@@ -107,7 +107,7 @@ describe('align-content', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let p;
@@ -172,7 +172,7 @@ describe('align-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004', async () => {
     let p;
@@ -237,7 +237,7 @@ describe('align-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -302,7 +302,7 @@ describe('align-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('006', async () => {
     let p;
@@ -363,7 +363,7 @@ describe('align-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-001', async () => {
     let log;
@@ -577,7 +577,7 @@ describe('align-content', () => {
     BODY.appendChild(box_5);
     BODY.appendChild(box_6);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-002', async () => {
     let content1Horizontal;
@@ -989,7 +989,7 @@ describe('align-content', () => {
     BODY.appendChild(flexHorizontal_2);
     BODY.appendChild(flexVertical);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-003', async () => {
     let flexbox;
@@ -2747,7 +2747,7 @@ describe('align-content', () => {
     BODY.appendChild(flexbox_42);
     BODY.appendChild(flexbox_43);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-004', async () => {
     let flex;
@@ -2820,7 +2820,7 @@ describe('align-content', () => {
     );
     BODY.appendChild(flex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('stretch unbound flex-item 001', async () => {
@@ -2865,7 +2865,7 @@ describe('align-content', () => {
       ]
     );
     BODY.appendChild(flexHorizontal);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('stretch unbound flex-item 002', async () => {
@@ -2910,7 +2910,7 @@ describe('align-content', () => {
       ]
     );
     BODY.appendChild(flexHorizontal);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('stretch unbound flex-item 003', async () => {
@@ -2955,6 +2955,6 @@ describe('align-content', () => {
       ]
     );
     BODY.appendChild(flexHorizontal);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

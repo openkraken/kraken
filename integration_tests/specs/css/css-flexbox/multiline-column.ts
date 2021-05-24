@@ -227,6 +227,6 @@ describe('multiline-column', () => {
     );
     BODY.appendChild(flex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

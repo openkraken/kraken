@@ -41,7 +41,7 @@ describe('Content Visibility', () => {
       ]
     );
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should hidden', async () => {
@@ -87,7 +87,7 @@ describe('Content Visibility', () => {
       ]
     );
     BODY.appendChild(container);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should auto visible', async () => {
@@ -107,7 +107,7 @@ describe('Content Visibility', () => {
     });
 
     await sleep(0.1);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should auto hidden', async () => {
@@ -131,7 +131,7 @@ describe('Content Visibility', () => {
     container1.appendChild(text);
 
     // Should be empty blob
-    await matchElementImageSnapshot(container1);
+    await snapshot(container1);
   });
 
 });

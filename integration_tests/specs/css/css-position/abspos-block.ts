@@ -128,7 +128,7 @@ describe('abspos-block', () => {
     BODY.appendChild(rtl);
     BODY.appendChild(rtl_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('level-001', async () => {
     let absolute;
@@ -278,6 +278,6 @@ describe('abspos-block', () => {
     BODY.appendChild(rtl);
     BODY.appendChild(rtl_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

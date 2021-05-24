@@ -45,7 +45,7 @@ describe('tiled-radial', () => {
     );
     BODY.appendChild(outer);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('gradients', async () => {
     let gradient;
@@ -67,6 +67,6 @@ describe('tiled-radial', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

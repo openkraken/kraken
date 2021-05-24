@@ -14,7 +14,7 @@ describe('repeating-conic', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('gradient', async () => {
     let gradient;
@@ -31,6 +31,6 @@ describe('repeating-conic', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

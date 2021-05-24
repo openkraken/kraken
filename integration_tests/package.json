@@ -2,15 +2,16 @@
   "private": true,
   "scripts": {
     "pretest": "npm install",
-    "test": "flutter pub get && flutter clean && npm run integration",
+    "test": "flutter pub get && flutter clean && npm run clean && npm run lint && npm run integration",
     "lint": "cd ../ && npm run lint",
     "clean": "rm -rf ./.specs && git clean -xfd ./snapshots",
     "specs": "webpack --config ./webpack.config.js",
     "prettier": "prettier --no-config --single-quote --trailing-comma=es5 --write ./specs/{.,**,**/**}/*.ts",
-    "integration": "npm run lint && npm run clean && npm run specs && node scripts/integration_starter"
+    "integration": "npm run specs && node scripts/integration_starter"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
+    "@babel/helper-plugin-utils": "^7.13.0",
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-react": "^7.12.10",
     "@babel/preset-typescript": "^7.12.7",

@@ -62,7 +62,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('002-ref', async () => {
     let p;
@@ -110,7 +110,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('002', async () => {
     let p;
@@ -167,7 +167,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let p;
@@ -235,7 +235,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004-ref', async () => {
     let p;
@@ -276,7 +276,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004', async () => {
     let p;
@@ -338,7 +338,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -404,7 +404,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('006', async () => {
     let p;
@@ -470,7 +470,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('007-ref', async () => {
     let p;
@@ -529,7 +529,7 @@ describe('position-absolute', () => {
     BODY.appendChild(blue_1);
     BODY.appendChild(orange);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('007', async () => {
     let p;
@@ -595,7 +595,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('008', async () => {
     let p;
@@ -661,7 +661,7 @@ describe('position-absolute', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with nested parent', async () => {
@@ -708,6 +708,6 @@ describe('position-absolute', () => {
     BODY.appendChild(container);
     container.appendChild(flex);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

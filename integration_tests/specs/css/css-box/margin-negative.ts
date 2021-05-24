@@ -39,7 +39,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with bottom in flow layout', async () => {
@@ -82,7 +82,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with left in flow layout', async () => {
@@ -128,7 +128,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with right in flow layout', async () => {
@@ -174,7 +174,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with top in flex layout and row direction', async () => {
@@ -219,7 +219,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with bottom in flex layout and row direction', async () => {
@@ -264,7 +264,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with left in flex layout and row direction', async () => {
@@ -309,7 +309,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with right in flex layout and row direction', async () => {
@@ -354,7 +354,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with top in flex layout and column direction', async () => {
@@ -399,7 +399,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with bottom in flex layout and column direction', async () => {
@@ -444,7 +444,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with left in flex layout and column direction', async () => {
@@ -489,7 +489,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with right in flex layout and column direction', async () => {
@@ -534,7 +534,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-wrap wrap in flex layout and row direction', async () => {
@@ -582,7 +582,7 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('should work with flex-wrap wrap in flex layout and column direction', async () => {
@@ -630,6 +630,6 @@ describe('Box margin negative', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

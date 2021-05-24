@@ -76,7 +76,7 @@ describe('flex-shrink', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('002', async () => {
     let p;
@@ -154,7 +154,7 @@ describe('flex-shrink', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('003', async () => {
     let p;
@@ -231,7 +231,7 @@ describe('flex-shrink', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('004', async () => {
     let p;
@@ -311,7 +311,7 @@ describe('flex-shrink', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('005', async () => {
     let p;
@@ -389,7 +389,7 @@ describe('flex-shrink', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('006', async () => {
     let p;
@@ -475,7 +475,7 @@ describe('flex-shrink', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('007', async () => {
     let p;
@@ -552,7 +552,7 @@ describe('flex-shrink', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('008', async () => {
     let p;
@@ -666,6 +666,6 @@ describe('flex-shrink', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

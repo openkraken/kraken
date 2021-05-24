@@ -25,6 +25,6 @@ describe('blocks-018', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

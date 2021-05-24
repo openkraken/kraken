@@ -44,6 +44,6 @@ describe('Align text-align', () => {
 
     document.body.appendChild(container);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

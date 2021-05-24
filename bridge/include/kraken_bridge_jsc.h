@@ -1,3 +1,15 @@
+/*
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
+#ifndef KRAKEN_BRIDGE_JSC_H
+#define KRAKEN_BRIDGE_JSC_H
+
+// MUST READ:
+// All the struct which prefix with NativeXXX struct (exp: NativeElement) has a corresponding struct in Dart code.
+// All struct members include variables and functions must be follow the same order with Dart class, to keep the same memory layout cross dart and C++ code.
+#include "kraken_foundation.h"
 #include <JavaScriptCore/JavaScript.h>
 #include <chrono>
 #include <deque>
@@ -6,8 +18,7 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
-
-#include "kraken_bridge_jsc_config.h"
+#include <forward_list>
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg)>;
 
@@ -47,6 +58,8 @@ struct NativeEvent;
 class JSGestureEvent;
 struct NativeGestureEvent;
 class GestureEventInstance;
+struct NativeMouseEvent;
+class MouseEventInstance;
 
 class JSContext {
 public:
@@ -90,9 +103,10 @@ public:
   JSFunctionHolder() = delete;
   KRAKEN_EXPORT explicit JSFunctionHolder(JSContext *context, JSObjectRef root, void *data, const std::string &name,
                                           JSObjectCallAsFunctionCallback callback);
-
+  JSObjectRef function();
 private:
-  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
+  JSObjectRef m_function{nullptr};
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(JSFunctionHolder);
 };
 
 class KRAKEN_EXPORT JSStringHolder {
@@ -116,7 +130,7 @@ public:
 private:
   JSContext *m_context;
   JSStringRef m_string{nullptr};
-  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSStringHolder);
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(JSStringHolder);
 };
 
 class KRAKEN_EXPORT JSValueHolder {
@@ -130,7 +144,7 @@ public:
 private:
   JSContext *m_context;
   JSValueRef m_value{nullptr};
-  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(JSValueHolder);
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(JSValueHolder);
 };
 
 void KRAKEN_EXPORT buildUICommandArgs(JSStringRef key, NativeString &args_01);
@@ -291,8 +305,6 @@ public:
   JSObjectRef _call{nullptr};
 
 private:
-  void initPrototype() const;
-
   // The class template of javascript constructor function.
   JSClassRef jsClass{nullptr};
   HostClass *_parentHostClass{nullptr};
@@ -322,7 +334,7 @@ class JSEvent : public HostClass {
 public:
   DEFINE_OBJECT_PROPERTY(Event, 10, type, bubbles, cancelable, timestamp, defaultPrevented, target, srcElement,
                          currentTarget, returnValue, cancelBubble)
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Event, 3, stopImmediatePropagation, stopPropagation, preventDefault)
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Event, 4, stopImmediatePropagation, stopPropagation, preventDefault, initEvent)
 
   static std::unordered_map<JSContext *, JSEvent *> instanceMap;
   static std::unordered_map<std::string, EventCreator> eventCreatorMap;
@@ -332,6 +344,9 @@ public:
                                         size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef stopPropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                    size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+
+  static JSValueRef initEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef stopImmediatePropagation(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -362,6 +377,7 @@ private:
   JSFunctionHolder m_stopImmediatePropagation{context, prototypeObject, this, "stopImmediatePropagation",
                                               stopImmediatePropagation};
   JSFunctionHolder m_stopPropagation{context, prototypeObject, this, "stopPropagation", stopPropagation};
+  JSFunctionHolder m_initEvent{context, prototypeObject, this, "initEvent", initEvent};
   JSFunctionHolder m_preventDefault{context, prototypeObject, this, "preventDefault", preventDefault};
 };
 
@@ -376,12 +392,9 @@ public:
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   ~EventInstance() override;
   NativeEvent *nativeEvent;
-  bool _dispatchFlag{false};
-  bool _canceledFlag{false};
-  bool _initializedFlag{true};
-  bool _stopPropagationFlag{false};
-  bool _stopImmediatePropagationFlag{false};
-  bool _inPassiveListenerFlag{false};
+  bool _cancelled{false};
+  bool _propagationStopped{false};
+  bool _propagationImmediatelyStopped{false};
 
 private:
   friend JSEvent;
@@ -405,9 +418,14 @@ class JSEventTarget : public HostClass {
 public:
   static std::unordered_map<JSContext *, JSEventTarget *> instanceMap;
   static JSEventTarget *instance(JSContext *context);
-  DEFINE_OBJECT_PROPERTY(EventTarget, 1, eventTargetId)
+  DEFINE_OBJECT_PROPERTY(EventTarget, 1, eventTargetId);
+
+  #if defined(IS_TEST)
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(EventTarget, 4, addEventListener, removeEventListener, dispatchEvent,
-                                   __clearListeners__)
+                                   __kraken_clear_event_listeners__);
+  #else
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(EventTarget, 3, addEventListener, removeEventListener, dispatchEvent);
+  #endif
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -436,8 +454,10 @@ private:
 
   JSFunctionHolder m_removeEventListener{context, prototypeObject, nullptr, "removeEventListener", removeEventListener};
   JSFunctionHolder m_dispatchEvent{context, prototypeObject, nullptr, "dispatchEvent", dispatchEvent};
-  JSFunctionHolder m_clearListeners{context, prototypeObject, nullptr, "__clearListeners__", clearListeners};
   JSFunctionHolder m_addEventListener{context, prototypeObject, nullptr, "addEventListener", addEventListener};
+  #ifdef IS_TEST
+  JSFunctionHolder m_clearListeners{context, prototypeObject, nullptr, "__kraken_clear_event_listeners__", clearListeners};
+  #endif
 };
 
 class EventTargetInstance : public HostClass::Instance {
@@ -459,7 +479,7 @@ public:
 private:
   friend JSEventTarget;
   // TODO: use std::u16string for better performance.
-  std::unordered_map<std::string, std::deque<JSObjectRef>> _eventHandlers;
+  std::unordered_map<std::string, std::forward_list<JSObjectRef>> _eventHandlers;
   bool internalDispatchEvent(EventInstance *eventInstance);
 };
 
@@ -492,8 +512,8 @@ public:
   static std::unordered_map<JSContext *, JSNode *> instanceMap;
   static JSNode *instance(JSContext *context);
   DEFINE_OBJECT_PROPERTY(Node, 10, isConnected, ownerDocument, firstChild, lastChild, parentNode, childNodes, previousSibling,
-                         nextSibling, nodeType, textContent)
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Node, 6, appendChild, remove, removeChild, insertBefore, replaceChild, cloneNode)
+                         nextSibling, nodeType, textContent);
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Node, 6, appendChild, remove, removeChild, insertBefore, replaceChild, cloneNode);
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
@@ -528,13 +548,15 @@ protected:
   explicit JSNode(JSContext *context, const char *name);
   ~JSNode();
 
-private:
   JSFunctionHolder m_cloneNode{context, prototypeObject, this, "cloneNode", cloneNode};
   JSFunctionHolder m_removeChild{context, prototypeObject, this, "removeChild", removeChild};
   JSFunctionHolder m_appendChild{context, prototypeObject, this, "appendChild", appendChild};
   JSFunctionHolder m_remove{context, prototypeObject, this, "remove", remove};
   JSFunctionHolder m_insertBefore{context, prototypeObject, this, "insertBefore", insertBefore};
   JSFunctionHolder m_replaceChild{context, prototypeObject, this, "replaceChild", replaceChild};
+
+private:
+  friend NodeInstance;
   static void traverseCloneNode(JSContextRef ctx, NodeInstance* element, NodeInstance* parentElement);
   static JSValueRef copyNodeValue(JSContextRef ctx, NodeInstance* element);
 };
@@ -573,14 +595,17 @@ public:
   void refer();
   void unrefer();
 
-  int32_t _referenceCount{0};
+  inline DocumentInstance *document() { return m_document; }
 
-  DocumentInstance *document{nullptr};
+  int32_t _referenceCount{0};
   virtual void _notifyNodeRemoved(NodeInstance *node);
   virtual void _notifyNodeInsert(NodeInstance *node);
 
 private:
+  DocumentInstance *m_document{nullptr};
   void ensureDetached(NodeInstance *node);
+  friend DocumentInstance;
+  friend JSNode;
 };
 
 struct NativeNode {
@@ -596,6 +621,9 @@ public:
 
   JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                   const JSValueRef *arguments, JSValueRef *exception) override;
+
+  static JSValueRef createEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
 
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
@@ -618,6 +646,8 @@ protected:
   JSDocument(JSContext *context);
   ~JSDocument();
 
+
+  JSFunctionHolder m_createEvent{context, prototypeObject, this, "createEvent", createEvent};
   JSFunctionHolder m_createElement{context, prototypeObject, this, "createElement", createElement};
   JSFunctionHolder m_createTextNode{context, prototypeObject, this, "createTextNode", createTextNode};
   JSFunctionHolder m_createComment{context, prototypeObject, this, "createComment", createComment};
@@ -645,9 +675,9 @@ struct NativeDocument {
 
 class DocumentInstance : public NodeInstance {
 public:
-  DEFINE_OBJECT_PROPERTY(Document, 5, nodeName, all, cookie, body, documentElement)
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 5, createElement, createTextNode, createComment, getElementById,
-                                   getElementsByTagName)
+  DEFINE_OBJECT_PROPERTY(Document, 4, nodeName, all, cookie, documentElement);
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(Document, 6, createElement, createTextNode, createComment, getElementById,
+                                   getElementsByTagName, createEvent);
 
   static DocumentInstance *instance(JSContext *context);
 
@@ -658,16 +688,17 @@ public:
   KRAKEN_EXPORT bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   KRAKEN_EXPORT void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
-  void removeElementById(std::string &id, ElementInstance *element);
-  void addElementById(std::string &id, ElementInstance *element);
+  void removeElementById(JSValueRef id, ElementInstance *element);
+  void addElementById(JSValueRef id, ElementInstance *element);
 
   NativeDocument *nativeDocument;
   std::unordered_map<std::string, std::vector<ElementInstance *>> elementMapById;
 
-  ElementInstance *body;
+  ElementInstance *documentElement;
 
 private:
   DocumentCookie m_cookie;
+  friend NodeInstance;
 };
 
 class JSElementAttributes : public HostObject {
@@ -679,26 +710,26 @@ public:
   enum class AttributeProperty { kLength };
 
   static std::vector<JSStringRef> &getAttributePropertyNames();
-  static const std::unordered_map<std::string, AttributeProperty> &getAttributePropertyMap();
+  static std::unordered_map<std::string, AttributeProperty> &getAttributePropertyMap();
 
-  KRAKEN_EXPORT JSStringRef getAttribute(std::string &name);
-  KRAKEN_EXPORT void setAttribute(std::string &name, JSStringRef value);
+  KRAKEN_EXPORT JSValueRef getAttribute(std::string &name);
+  KRAKEN_EXPORT void setAttribute(std::string &name, JSValueRef value);
   KRAKEN_EXPORT bool hasAttribute(std::string &name);
   KRAKEN_EXPORT void removeAttribute(std::string &name);
 
-  KRAKEN_EXPORT std::map<std::string, JSStringRef>& getAttributesMap();
-  KRAKEN_EXPORT void setAttributesMap(std::map<std::string, JSStringRef>& attributes);
+  KRAKEN_EXPORT std::map<std::string, JSValueRef>& getAttributesMap();
+  KRAKEN_EXPORT void setAttributesMap(std::map<std::string, JSValueRef>& attributes);
 
-  KRAKEN_EXPORT std::vector<JSStringRef>& getAttributesVector();
-  KRAKEN_EXPORT void setAttributesVector(std::vector<JSStringRef>& attributes);
+  KRAKEN_EXPORT std::vector<JSValueRef>& getAttributesVector();
+  KRAKEN_EXPORT void setAttributesVector(std::vector<JSValueRef>& attributes);
 
   KRAKEN_EXPORT JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   KRAKEN_EXPORT bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   KRAKEN_EXPORT void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:
-  std::map<std::string, JSStringRef> m_attributes;
-  std::vector<JSStringRef> v_attributes;
+  std::map<std::string, JSValueRef> m_attributes;
+  std::vector<JSValueRef> v_attributes;
 };
 
 struct NativeBoundingClientRect {
@@ -739,7 +770,7 @@ protected:
 
 class StyleDeclarationInstance : public HostClass::Instance {
 public:
-  DEFINE_PROTOTYPE_OBJECT_PROPERTY(CSSStyleDeclaration, 3, setProperty, removeProperty, getPropertyValue)
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(CSSStyleDeclaration, 3, setProperty, removeProperty, getPropertyValue);
 
   StyleDeclarationInstance() = delete;
   StyleDeclarationInstance(CSSStyleDeclaration *cssStyleDeclaration, EventTargetInstance *ownerEventTarget);
@@ -749,11 +780,11 @@ public:
   bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
   bool internalSetProperty(std::string &name, JSValueRef value, JSValueRef *exception);
-  void internalRemoveProperty(JSStringRef name, JSValueRef *exception);
-  JSValueRef internalGetPropertyValue(JSStringRef name, JSValueRef *exception);
+  void internalRemoveProperty(std::string &name, JSValueRef *exception);
+  JSValueRef internalGetPropertyValue(std::string &name, JSValueRef *exception);
 
 private:
-  std::unordered_map<std::string, JSStringRef> properties;
+  std::unordered_map<std::string, JSValueRef> properties;
   const EventTargetInstance *ownerEventTarget;
 };
 
@@ -763,27 +794,10 @@ class KRAKEN_EXPORT JSElement : public JSNode {
 public:
   DEFINE_OBJECT_PROPERTY(Element, 17, style, attributes, nodeName, tagName, offsetLeft, offsetTop, offsetWidth,
                          offsetHeight, clientWidth, clientHeight, clientTop, clientLeft, scrollTop, scrollLeft,
-                         scrollHeight, scrollWidth, children)
+                         scrollHeight, scrollWidth, children);
 
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(Element, 10, getBoundingClientRect, getAttribute, setAttribute, hasAttribute,
-                                   removeAttribute, toBlob, click, scroll, scrollBy, scrollTo)
-
-  enum class ElementTagName {
-    kDiv,
-    kSpan,
-    kAnchor,
-    kAnimationPlayer,
-    kAudio,
-    kVideo,
-    kStrong,
-    kPre,
-    kParagraph,
-    kIframe,
-    kObject,
-    kImage,
-    kCanvas,
-    kInput,
-  };
+                                   removeAttribute, toBlob, click, scroll, scrollBy, scrollTo);
 
   static std::unordered_map<JSContext *, JSElement *> instanceMap;
   static std::unordered_map<std::string, ElementCreator> elementCreatorMap;
@@ -841,7 +855,7 @@ private:
 class KRAKEN_EXPORT ElementInstance : public NodeInstance {
 public:
   ElementInstance() = delete;
-  explicit ElementInstance(JSElement *element, const char *tagName, bool sendUICommand);
+  explicit ElementInstance(JSElement *element, const char *tagName, bool shouldAddUICommand);
   explicit ElementInstance(JSElement *element, JSStringRef tagName, double targetId);
   ~ElementInstance();
 
@@ -868,8 +882,8 @@ private:
   void _notifyChildRemoved();
   KRAKEN_EXPORT void _notifyNodeInsert(NodeInstance *insertNode) override;
   void _notifyChildInsert();
-  void _didModifyAttribute(std::string &name, std::string &oldId, std::string &newId);
-  void _beforeUpdateId(std::string &oldId, std::string &newId);
+  void _didModifyAttribute(std::string &name, JSValueRef oldId, JSValueRef newId);
+  void _beforeUpdateId(JSValueRef oldId, JSValueRef newId);
   JSHostObjectHolder<JSElementAttributes> m_attributes{context, object, "attributes", new JSElementAttributes(context)};
   JSHostClassHolder m_style{context, object, "style",
                             new StyleDeclarationInstance(CSSStyleDeclaration::instance(context), this)};
@@ -902,7 +916,7 @@ public:
   enum BoundingClientRectProperty { kX, kY, kWidth, kHeight, kLeft, kTop, kRight, kBottom };
 
   static std::array<JSStringRef, 8> &getBoundingClientRectPropertyNames();
-  static const std::unordered_map<std::string, BoundingClientRectProperty> &getPropertyMap();
+  static std::unordered_map<std::string, BoundingClientRectProperty> &getPropertyMap();
 
   BoundingClientRect() = delete;
   ~BoundingClientRect() override;
@@ -935,27 +949,19 @@ struct NativeGestureEvent {
   explicit NativeGestureEvent(NativeEvent *nativeEvent) : nativeEvent(nativeEvent){};
 
   NativeEvent *nativeEvent;
-
   NativeString *state;
-
   NativeString *direction;
-
   double_t deltaX;
-
   double_t deltaY;
-
   double_t velocityX;
-
   double_t velocityY;
-
   double_t scale;
-
   double_t rotation;
 };
 
 class JSGestureEvent : public JSEvent {
 public:
-  DEFINE_OBJECT_PROPERTY(GestureEvent, 8, state, direction, deltaX, deltaY, velocityX, velocityY, scale, rotation)
+  DEFINE_OBJECT_PROPERTY(GestureEvent, 8, state, direction, deltaX, deltaY, velocityX, velocityY, scale, rotation);
 
   DEFINE_PROTOTYPE_OBJECT_PROPERTY(GestureEvent, 1, initGestureEvent);
 
@@ -1005,4 +1011,72 @@ private:
   NativeGestureEvent *nativeGestureEvent;
 };
 
+struct NativeMouseEvent {
+  NativeMouseEvent() = delete;
+  explicit NativeMouseEvent(NativeEvent *nativeEvent) : nativeEvent(nativeEvent){};
+
+  NativeEvent *nativeEvent;
+
+  double_t clientX;
+
+  double_t clientY;
+
+  double_t offsetX;
+
+  double_t offsetY;
+};
+
+class JSMouseEvent : public JSEvent {
+public:
+  DEFINE_OBJECT_PROPERTY(MouseEvent, 4, clientX, clientY, offsetX, offsetY);
+
+  DEFINE_PROTOTYPE_OBJECT_PROPERTY(MouseEvent, 1, initMouseEvent);
+
+  static std::unordered_map<JSContext *, JSMouseEvent *> instanceMap;
+  OBJECT_INSTANCE(JSMouseEvent)
+
+  JSObjectRef instanceConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                  const JSValueRef *arguments, JSValueRef *exception) override;
+
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+
+protected:
+  JSMouseEvent() = delete;
+  explicit JSMouseEvent(JSContext *context);
+  ~JSMouseEvent() override;
+
+private:
+  friend MouseEventInstance;
+
+  JSFunctionHolder m_initMouseEvent{context, prototypeObject, this, "initMouseEvent", initMouseEvent};
+
+  static JSValueRef initMouseEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+};
+
+class MouseEventInstance : public EventInstance {
+public:
+  MouseEventInstance() = delete;
+  explicit MouseEventInstance(JSMouseEvent *jsMouseEvent, std::string MouseEventType, JSValueRef eventInit,
+                                JSValueRef *exception);
+  explicit MouseEventInstance(JSMouseEvent *jsMouseEvent, NativeMouseEvent *nativeMouseEvent);
+  JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
+  bool setProperty(std::string &name, JSValueRef value, JSValueRef *exception) override;
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+  ~MouseEventInstance() override;
+
+private:
+  friend JSMouseEvent;
+  JSValueHolder m_clientX{context, nullptr};
+  JSValueHolder m_clientY{context, nullptr};
+  JSValueHolder m_offsetX{context, nullptr};
+  JSValueHolder m_offsetY{context, nullptr};
+  NativeMouseEvent *nativeMouseEvent;
+};
+
 } // namespace kraken::binding::jsc
+
+KRAKEN_EXPORT
+JSGlobalContextRef getGlobalContextRef(int32_t contextId);
+
+#endif

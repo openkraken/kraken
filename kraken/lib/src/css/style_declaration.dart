@@ -422,25 +422,25 @@ class CSSStyleDeclaration {
             String defaultValue = func.args.length > 1 ? func.args[1] : null;
             switch (func.args.first) {
               case SAFE_AREA_INSET_TOP:
-                normalizedFunctionValue += '${window.viewPadding.top / window.devicePixelRatio}${CSSLength.PX},';
+                normalizedFunctionValue += '${window.viewPadding.top / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
                 break;
               case SAFE_AREA_INSET_RIGHT:
-                normalizedFunctionValue += '${window.viewPadding.right / window.devicePixelRatio}${CSSLength.PX},';
+                normalizedFunctionValue += '${window.viewPadding.right / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
                 break;
               case SAFE_AREA_INSET_BOTTOM:
-                normalizedFunctionValue += '${window.viewPadding.bottom / window.devicePixelRatio}${CSSLength.PX},';
+                normalizedFunctionValue += '${window.viewPadding.bottom / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
                 break;
               case SAFE_AREA_INSET_LEFT:
-                normalizedFunctionValue += '${window.viewPadding.left / window.devicePixelRatio}${CSSLength.PX},';
+                normalizedFunctionValue += '${window.viewPadding.left / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
                 break;
               default:
-                normalizedFunctionValue += '$defaultValue,';
+                normalizedFunctionValue += '$defaultValue$FUNCTION_SPLIT';
                 break;
             }
           } else if (loweredFuncName == 'var') {
             // TODO: impl CSS Variables.
           } else {
-            normalizedFunctionValue += '${func.name}(${func.args.join(',')}),';
+            normalizedFunctionValue += '${func.name}(${func.args.join(FUNCTION_ARGS_SPLIT)})$FUNCTION_SPLIT';
           }
         }
         result = normalizedFunctionValue.substring(0, normalizedFunctionValue.length - 1);
@@ -460,7 +460,6 @@ class CSSStyleDeclaration {
     }
 
     String normalizedValue = _normalizeValue(value);
-
 
     // Illegal value like '   ' after trim is '' should do nothing.
     if (normalizedValue.isEmpty) return;
@@ -491,10 +490,17 @@ class CSSStyleDeclaration {
           return;
         }
         break;
-      case MIN_WIDTH:
-      case MIN_HEIGHT:
       case MAX_WIDTH:
       case MAX_HEIGHT:
+        if (normalizedValue != NONE &&
+          !CSSLength.isLength(normalizedValue) &&
+          !CSSLength.isPercentage(normalizedValue)
+        ) {
+          return;
+        }
+        break;
+      case MIN_WIDTH:
+      case MIN_HEIGHT:
       case PADDING_TOP:
       case PADDING_LEFT:
       case PADDING_BOTTOM:
@@ -530,7 +536,7 @@ class CSSStyleDeclaration {
         if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
       case TRANSFORM:
-        if (CSSTransform.parseTransform(normalizedValue, viewportSize) == null) {
+        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize)) {
           return;
         }
         break;

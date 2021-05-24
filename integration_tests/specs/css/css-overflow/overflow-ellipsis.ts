@@ -18,6 +18,6 @@ describe('overflow-ellipsis', () => {
     );
     BODY.appendChild(p);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

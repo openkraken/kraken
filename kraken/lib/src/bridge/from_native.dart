@@ -296,20 +296,23 @@ typedef Native_FlushUICommand = Void Function();
 typedef Dart_FlushUICommand = void Function();
 
 void _flushUICommand() {
+  if (kProfileMode) {
+    PerformanceTiming.instance().mark(PERF_DOM_FLUSH_UI_COMMAND_START);
+  }
   flushUICommand();
+  if (kProfileMode) {
+    PerformanceTiming.instance().mark(PERF_DOM_FLUSH_UI_COMMAND_END);
+  }
 }
 
 final Pointer<NativeFunction<Native_FlushUICommand>> _nativeFlushUICommand = Pointer.fromFunction(_flushUICommand);
 
-// Body Element are special element which created at initialize time, so we can't use UICommandQueue to init body element.
-typedef Native_InitBody = Void Function(Int32 contextId, Pointer<NativeElement> nativePtr);
-typedef Dart_InitBody = void Function(int contextId, Pointer<NativeElement> nativePtr);
-
-void _initBody(int contextId, Pointer<NativeElement> nativePtr) {
-  ElementManager.bodyNativePtrMap[contextId] = nativePtr;
+// HTML Element is special element which created at initialize time, so we can't use UICommandQueue to init.
+typedef Native_InitHTML = Void Function(Int32 contextId, Pointer<NativeElement> nativePtr);
+void _initHTML(int contextId, Pointer<NativeElement> nativePtr) {
+  ElementManager.htmlNativePtrMap[contextId] = nativePtr;
 }
-
-final Pointer<NativeFunction<Native_InitBody>> _nativeInitBody = Pointer.fromFunction(_initBody);
+final Pointer<NativeFunction<Native_InitHTML>> _nativeInitHTML = Pointer.fromFunction(_initHTML);
 
 typedef Native_InitWindow = Void Function(Int32 contextId, Pointer<NativeWindow> nativePtr);
 typedef Dart_InitWindow = void Function(int contextId, Pointer<NativeWindow> nativePtr);
@@ -334,7 +337,7 @@ typedef Dart_Performance_GetEntries = Pointer<NativePerformanceEntryList> Functi
 
 Pointer<NativePerformanceEntryList> _performanceGetEntries(int contextId) {
   if (kProfileMode) {
-    return PerformanceTiming.instance(contextId).toNative();
+    return PerformanceTiming.instance().toNative();
   }
   return nullptr;
 }
@@ -367,7 +370,7 @@ final List<int> _dartNativeMethods = [
   _nativePlatformBrightness.address,
   _nativeToBlob.address,
   _nativeFlushUICommand.address,
-  _nativeInitBody.address,
+  _nativeInitHTML.address,
   _nativeInitWindow.address,
   _nativeInitDocument.address,
   _nativeGetEntries.address,

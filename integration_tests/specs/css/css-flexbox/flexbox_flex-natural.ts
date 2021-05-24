@@ -74,7 +74,7 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('mixed-basis-auto', async () => {
     let div;
@@ -143,7 +143,7 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('mixed-basis-ref', async () => {
     let div;
@@ -214,7 +214,7 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('mixed-basis', async () => {
     let div;
@@ -282,7 +282,7 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('ref', async () => {
     let div;
@@ -432,7 +432,7 @@ describe('flexbox_flex-natural', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('variable-auto-basis', async () => {
     let div;
@@ -504,7 +504,7 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('variable-zero-basis', async () => {
     let div;
@@ -576,6 +576,6 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

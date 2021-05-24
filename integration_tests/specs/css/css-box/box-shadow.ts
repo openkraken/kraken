@@ -16,7 +16,7 @@ describe('BoxShadow', () => {
     });
     append(reference, div);
     append(BODY, reference);
-    await matchElementImageSnapshot(reference);
+    await snapshot(reference);
   });
 
   it('with background color', async () => {
@@ -35,7 +35,7 @@ describe('BoxShadow', () => {
       },
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('without background color and shadow offset', async () => {
@@ -53,7 +53,7 @@ describe('BoxShadow', () => {
       },
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with shadow blur and spread radius', async () => {
@@ -71,7 +71,7 @@ describe('BoxShadow', () => {
       },
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('with border radius', async () => {
@@ -90,7 +90,7 @@ describe('BoxShadow', () => {
       },
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('remove box-shadow', async () => {
@@ -103,10 +103,35 @@ describe('BoxShadow', () => {
       boxShadow: '0 0 8px black',
     });
     append(BODY, div);
-    await matchViewportSnapshot();
+    await snapshot();
 
     div.style.boxShadow = null;
     // BoxShadow has been removed.
-    await matchViewportSnapshot();
+    await snapshot();
+  });
+
+  it('change from not none to none', async (done) => {
+    const cont = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          minHeight: '100px',
+          width: '100px',
+          backgroundColor: 'green',
+          fontSize: '18px',
+          boxShadow: '4px 4px 4px 0 red',
+        }
+      }
+    );
+    append(BODY, cont);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      cont.style.boxShadow = 'none';
+      await snapshot(0.1);
+      done();
+    });
   });
 });

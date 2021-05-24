@@ -50,6 +50,6 @@ describe('flexbox flex-item', () => {
     flex1.appendChild(div3);
     flex1.appendChild(div4);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

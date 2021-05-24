@@ -27,7 +27,7 @@ xdescribe('delete-inline-in-blocks', () => {
 
     async function onClick() {
       container1.removeChild(nodeToDelete);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       done();
     }
@@ -35,7 +35,7 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.addEventListener('click', onClick);
 
     append(BODY, container1);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -68,7 +68,7 @@ xdescribe('delete-inline-in-blocks', () => {
 
     async function onClick() {
       container1.removeChild(nodeToDelete);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       done();
     }
@@ -76,7 +76,7 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.addEventListener('click', onClick);
 
     append(BODY, container1);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -109,7 +109,7 @@ xdescribe('delete-inline-in-blocks', () => {
 
     async function onClick() {
       container1.removeChild(nodeToDelete);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       done();
     }
@@ -117,7 +117,7 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.addEventListener('click', onClick);
 
     append(BODY, container1);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -150,7 +150,7 @@ xdescribe('delete-inline-in-blocks', () => {
 
     async function onClick() {
       container1.removeChild(nodeToDelete);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       done();
     }
@@ -158,7 +158,7 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.addEventListener('click', onClick);
 
     append(BODY, container1);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });
@@ -191,7 +191,7 @@ xdescribe('delete-inline-in-blocks', () => {
 
     async function onClick() {
       container1.removeChild(nodeToDelete);
-      await matchViewportSnapshot();
+      await snapshot();
       BODY.removeEventListener('click', onClick);
       done();
     }
@@ -199,7 +199,7 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.addEventListener('click', onClick);
 
     append(BODY, container1);
-    await matchViewportSnapshot();
+    await snapshot();
 
     BODY.click();
   });

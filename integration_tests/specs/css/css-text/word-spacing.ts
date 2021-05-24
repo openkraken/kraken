@@ -14,7 +14,7 @@ describe('Text WordSpacing', () => {
       );
       append(BODY, cont);
 
-      return matchElementImageSnapshot(cont);
+      return snapshot(cont);
     });
   });
 });

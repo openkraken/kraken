@@ -24,7 +24,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('fallbacks-and-annotations', async () => {
     let p;
@@ -51,7 +51,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('fallbacks-and-annotations002', async () => {
     let p;
@@ -79,7 +79,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('fallbacks-and-annotations003', async () => {
     let p;
@@ -107,7 +107,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('fallbacks-and-annotations004', async () => {
     let p;
@@ -135,7 +135,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   xit('fallbacks-and-annotations005', async () => {
     let p;
@@ -167,7 +167,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
  it('size works width position absolute' , async (done) => {
@@ -201,7 +201,7 @@ describe('css-image', () => {
     n2.src = 'https://img.alicdn.com/tfs/TB14bXLHFT7gK0jSZFpXXaTkpXa-100-100.png';
 
     n2.onload = async () => {
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     };
   });
@@ -229,7 +229,7 @@ describe('css-image', () => {
     image.src = 'https://gw.alicdn.com/tfs/TB1Fejan7cx_u4jSZFlXXXnUFXa-200-200.png';
 
     image.onload = async () => {
-      await matchViewportSnapshot();
+      await snapshot();
       done();
     };
   });
@@ -269,7 +269,7 @@ describe('css-image', () => {
         }
       });
       div.appendChild(image2);
-      await matchViewportSnapshot(0.1);
+      await snapshot(0.1);
       done();
     }, 1000);
   });

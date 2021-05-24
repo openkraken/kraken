@@ -30,6 +30,6 @@ describe('flexbox flex-item', () => {
     flex2.appendChild(div6);
 
     container.appendChild(flex2);
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });
