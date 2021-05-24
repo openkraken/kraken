@@ -593,12 +593,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
 
-        setScrollableSize(childParentData, child);
-
-        // For scrolling box, the minimum width and height should not less than scrollableSize
-        if (isScrollingContentBox) {
-          ensureBoxSizeLargerThanScrollableSize();
-        }
+        extendMaxScrollableSize(child);
       } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
         RenderBoxModel scrollContainer = child.findScrollContainer();
         // Sticky offset depends on the layout of scroll container, delay the calculation of
@@ -655,7 +650,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else if (percentageToContainingBlockFound == true || percentageToOwnFound == true ) {
           _layoutPositionedChild(child);
         }
-        setScrollableSize(childParentData, child);
+        extendMaxScrollableSize(child);
       }
       child = childParentData.nextSibling;
     }

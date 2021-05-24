@@ -515,13 +515,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
-
-        setScrollableSize(childParentData, child);
-
-        // For scrolling box, the minimum width and height should not less than scrollableSize
-        if (isScrollingContentBox) {
-          ensureBoxSizeLargerThanScrollableSize();
-        }
+        extendMaxScrollableSize(child);
       } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
         RenderBoxModel scrollContainer = child.findScrollContainer();
         // Sticky offset depends on the layout of scroll container, delay the calculation of
@@ -579,7 +573,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         } else if (percentageToContainingBlockFound == true || percentageToOwnFound == true ) {
           _layoutPositionedChild(child);
         }
-        setScrollableSize(childParentData, child);
+        extendMaxScrollableSize(child);
       }
       child = childParentData.nextSibling;
     }
@@ -844,9 +838,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         break;
     }
 
-    Size maxScrollableSize = getMaxScrollableSize(runMetrics);
-    setMaxScrollableSize(maxScrollableSize.width, maxScrollableSize.height);
-
+    scrollableSize = _getMaxScrollableSize(runMetrics);
     autoMinWidth = _getMainAxisAutoSize(runMetrics);
     autoMinHeight = _getCrossAxisAutoSize(runMetrics);
 
@@ -1285,11 +1277,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   /// Calculate the size of scrollable overflow area
   /// https://drafts.csswg.org/css-overflow-3/#scrollable
-  Size getMaxScrollableSize(List<_RunMetrics> runMetrics) {
-    // Max scrollable width of all lines
-    double maxScrollableWidthOfLines;
-    // Max scrollable height of all lines
-    double maxScrollableHeightOfLines;
+  Size _getMaxScrollableSize(List<_RunMetrics> runMetrics) {
     // Scrollable width collection of each line
     List<double> scrollableWidthOfLines = [];
     // Scrollable width collection of each line
@@ -1349,15 +1337,37 @@ class RenderFlowLayout extends RenderLayoutBox {
       preLinesHeight += runMetric.crossAxisExtent;
     }
 
-    maxScrollableWidthOfLines = scrollableWidthOfLines.reduce((double curr, double next) {
+
+    // Max scrollable width of all lines
+    double maxScrollableWidthOfLines = scrollableWidthOfLines.reduce((double curr, double next) {
       return curr > next ? curr : next;
     });
 
-    maxScrollableHeightOfLines = scrollableHeightOfLines.reduce((double curr, double next) {
+    bool isScrollContainer = renderStyle.overflowX != CSSOverflowType.visible ||
+      renderStyle.overflowY != CSSOverflowType.visible;
+    // No need to add padding for scrolling content box
+    double maxScrollableWidthOfChildren = isScrollContainer ? maxScrollableWidthOfLines :
+      renderStyle.paddingLeft + maxScrollableWidthOfLines;
+
+    // Max scrollable height of all lines
+    double maxScrollableHeightOfLines = scrollableHeightOfLines.reduce((double curr, double next) {
       return curr > next ? curr : next;
     });
+    // No need to add padding for scrolling content box
+    double maxScrollableHeightOfChildren = isScrollContainer ? maxScrollableHeightOfLines :
+      renderStyle.paddingTop + maxScrollableHeightOfLines;
 
-    return Size(maxScrollableWidthOfLines, maxScrollableHeightOfLines);
+    RenderBoxModel container = isScrollingContentBox ? parent : this;
+    double maxScrollableWidth = math.max(
+      size.width - container.renderStyle.borderLeft - container.renderStyle.borderRight,
+      maxScrollableWidthOfChildren
+    );
+    double maxScrollableHeight = math.max(
+      size.height - container.renderStyle.borderTop - container.renderStyle.borderBottom,
+      maxScrollableHeightOfChildren
+    );
+
+    return Size(maxScrollableWidth, maxScrollableHeight);
   }
 
   // Get distance from top to baseline of child incluing margin

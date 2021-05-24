@@ -1213,7 +1213,10 @@ class RenderBoxModel extends RenderBox with
     needsLayout = false;
   }
 
-  void setScrollableSize(RenderLayoutParentData childParentData, RenderBoxModel child) {
+  /// Extend max scrollable size of renderBoxModel by offset of positioned child,
+  /// get the max scrollable size of children of normal flow and single positioned child.
+  void extendMaxScrollableSize(RenderBoxModel child) {
+    final RenderLayoutParentData childParentData = child.parentData;
     Size childSize = child.boxSize;
     RenderStyle childRenderStyle = child.renderStyle;
     double maxScrollableX = scrollableSize.width;
@@ -1226,7 +1229,6 @@ class RenderBoxModel extends RenderBox with
       if (isScrollingContentBox && (parent as RenderBoxModel).widthSizeType == BoxSizeType.specified) {
         RenderBoxModel overflowContainerBox = parent;
         maxScrollableX = math.max(maxScrollableX, -childRenderStyle.right.length + overflowContainerBox.renderStyle.width
-          - overflowContainerBox.renderStyle.paddingLeft - overflowContainerBox.renderStyle.paddingRight
           - overflowContainerBox.renderStyle.borderLeft - overflowContainerBox.renderStyle.borderRight);
       } else {
         maxScrollableX = math.max(maxScrollableX, -childRenderStyle.right.length + _contentSize.width);
@@ -1240,7 +1242,6 @@ class RenderBoxModel extends RenderBox with
       if (isScrollingContentBox && (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
         RenderBoxModel overflowContainerBox = parent;
         maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom.length + overflowContainerBox.renderStyle.height
-            - overflowContainerBox.renderStyle.paddingTop - overflowContainerBox.renderStyle.paddingBottom
             - overflowContainerBox.renderStyle.borderTop - overflowContainerBox.renderStyle.borderBottom);
       } else {
         maxScrollableY = math.max(maxScrollableY, -childRenderStyle.bottom.length + _contentSize.height);
@@ -1320,20 +1321,6 @@ class RenderBoxModel extends RenderBox with
     EdgeInsets resolvedPadding = renderStyle.padding != null ? renderStyle.padding.resolve(TextDirection.ltr) : null;
     paintDecoration(context, offset, resolvedPadding);
     _chainPaintOverflow(context, offset);
-  }
-
-  void ensureBoxSizeLargerThanScrollableSize() {
-    double newBoxWidth = size.width;
-    double newBoxHeight = size.height;
-
-    if (scrollableSize.width > newBoxWidth) {
-      newBoxWidth = scrollableSize.width;
-    }
-    if (scrollableSize.height > newBoxHeight) {
-      newBoxHeight = scrollableSize.height;
-    }
-
-    size = Size(newBoxWidth, newBoxHeight);
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
