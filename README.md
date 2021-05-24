@@ -92,3 +92,4 @@ By contributing to Kraken, you agree that your contributions will be licensed un
     ```shell
     $ npm test
     ```
+.
