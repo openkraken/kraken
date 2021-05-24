@@ -963,14 +963,12 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Use scrolling container to calculate flex line limit for scrolling content box
     RenderBoxModel containerBox = isScrollingContentBox ? parent : this;
     if (isAxisHorizontalDirection) {
-      double logicalConstraintWidth = containerBox.contentConstraints.maxWidth;
-      double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(containerBox);
-      flexLineLimit = logicalConstraintWidth ??  maxConstraintWidth;
+      flexLineLimit = containerBox.contentConstraints.maxWidth;
+      if (flexLineLimit == double.infinity) {
+        flexLineLimit = RenderBoxModel.getMaxConstraintWidth(containerBox);
+      }
     } else {
-      double logicalConstraintHeight = containerBox.contentConstraints.maxHeight;
-      // Children in vertical direction should not wrap if height no exists
-      double maxConstraintHeight = double.infinity;
-      flexLineLimit = logicalConstraintHeight ?? maxConstraintHeight;
+      flexLineLimit = containerBox.contentConstraints.maxHeight;
     }
 
     RenderBox child = placeholderChild ?? firstChild;
@@ -1456,8 +1454,6 @@ class RenderFlexLayout extends RenderLayoutBox {
           child = childParentData.nextSibling;
           continue;
         }
-
-        Size childSize = _getChildSize(child);
 
         DateTime childLayoutStart;
         if (kProfileMode) {

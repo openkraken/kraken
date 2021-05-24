@@ -619,17 +619,15 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderBoxModel containerBox = isScrollingContentBox ? parent : this;
     switch (direction) {
       case Axis.horizontal:
-        double logicalConstraintWidth = containerBox.contentConstraints.maxWidth;
-        double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(containerBox);
-        mainAxisLimit = logicalConstraintWidth ??  maxConstraintWidth;
+        mainAxisLimit = containerBox.contentConstraints.maxWidth;
+        if (mainAxisLimit == double.infinity) {
+          mainAxisLimit = RenderBoxModel.getMaxConstraintWidth(containerBox);
+        }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
       case Axis.vertical:
-        double logicalConstraintHeight = containerBox.contentConstraints.maxHeight;
-        // Children in vertical direction should not wrap if height no exists
-        double maxConstraintHeight = double.infinity;
-        mainAxisLimit = logicalConstraintHeight ?? maxConstraintHeight;
+        mainAxisLimit = containerBox.contentConstraints.maxHeight;
         if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
