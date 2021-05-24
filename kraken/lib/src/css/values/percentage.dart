@@ -2,15 +2,17 @@
 class CSSPercentage {
   static String PERCENTAGE = '%';
 
-  static double parsePercentage(String value) {
-    double parsed;
+  static double? parsePercentage(String value) {
+    double? parsed;
     if (value.endsWith(PERCENTAGE)) {
-      parsed = double.tryParse(value.split(PERCENTAGE)[0]) / 100;
+      double? v = double.tryParse(value.split(PERCENTAGE)[0]);
+      if (v == null) return null;
+      parsed = v / 100;
     }
     return parsed;
   }
 
   static bool isPercentage(String percentageValue) {
-    return percentageValue != null && percentageValue.endsWith(PERCENTAGE);
+    return percentageValue.endsWith(PERCENTAGE);
   }
 }

@@ -15,13 +15,17 @@ class CSSTime {
     return value != null && (value == _0s || value == _0ms || _timeRegExp.firstMatch(value) != null);
   }
 
-  static int parseTime(String input) {
-    double milliseconds;
+  static int? parseTime(String input) {
+    double? milliseconds;
     if (input.endsWith(MILLISECONDS)) {
-      milliseconds = double.tryParse(input.split(MILLISECONDS)[0]);
+      double? v = double.tryParse(input.split(MILLISECONDS)[0]);
+      if (v == null) return null;
+      milliseconds = v;
     } else if (input.endsWith(SECOND)) {
-      milliseconds = double.tryParse(input.split(SECOND)[0]) * 1000;
+      double? v = double.tryParse(input.split(SECOND)[0]);
+      if (v == null) return null;
+      milliseconds = v * 1000;
     }
-    return milliseconds.toInt();
+    return milliseconds!.toInt();
   }
 }

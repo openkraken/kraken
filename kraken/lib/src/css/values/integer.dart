@@ -2,7 +2,7 @@
 
 class CSSInteger {
 
-  static int parseInteger(String value) {
+  static int? parseInteger(String value) {
     return int.tryParse(value);
   }
 

@@ -10,7 +10,7 @@ import 'package:kraken/painting.dart';
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#urls
 class CSSUrl {
 
-  static ImageProvider parseUrl(String rawInput, { cache = 'auto', int contextId }) {
+  static ImageProvider parseUrl(String rawInput, { cache = 'auto', required int contextId }) {
     // support input string enclosed in quotation marks
     if ((rawInput.startsWith('\'') && rawInput.endsWith('\'')) ||
         (rawInput.startsWith('\"') && rawInput.endsWith('\"'))) {
@@ -33,10 +33,12 @@ class CSSUrl {
     } else if (rawInput.startsWith('data:')) {
       // Data URL:  https://tools.ietf.org/html/rfc2397
       // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
-
       UriData data = UriData.parse(rawInput);
       if (data.isBase64) {
         imageProvider = getImageProviderFactory(ImageType.dataUrl)(rawInput, data.contentAsBytes());
+      } else {
+        // Fallback to asset image
+        imageProvider = getImageProviderFactory(ImageType.assets)(rawInput);
       }
     } else if (rawInput.startsWith('blob:')) {
       // @TODO: support blob file url
