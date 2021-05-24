@@ -1216,7 +1216,6 @@ class RenderBoxModel extends RenderBox with
   /// Extend max scrollable size of renderBoxModel by offset of positioned child,
   /// get the max scrollable size of children of normal flow and single positioned child.
   void extendMaxScrollableSize(RenderBoxModel child) {
-    final RenderLayoutParentData childParentData = child.parentData;
     Size childSize = child.boxSize;
     RenderStyle childRenderStyle = child.renderStyle;
     double maxScrollableX = scrollableSize.width;
