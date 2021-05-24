@@ -1,38 +1,36 @@
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
- */
-import 'dart:math' as math;
-import 'dart:ui';
+ */ 
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/foundation.dart';
+'dart:math'math;
+'dart:ui';
+ 'package:flutter/rendering.dart';
+ '/foundation.dart';
+ 'package:kraken/css.dart';
+ 'package:kraken/dom.dart';
+ 'package:kraken/kraken.dart';
+ 'package:kraken/module.dart';
+ 'package:kraken/rendering.dart';
+ 'package:kraken/gesture.dart';
+ 'debug_overlay.dart';
 
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/gesture.dart';
-import 'debug_overlay.dart';
-
-// Constraints of element whose display style is none
-final _displayNoneConstraints = BoxConstraints(
+// Constraints of element whose display style is
+none
+ _displayNoneConstraints = BoxConstraints(
   minWidth: 0,
   maxWidth: 0,
   minHeight: 0,
   maxHeight: 0
-);
-
-class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
-  bool isPositioned = false;
+); RenderLayoutParentData ContainerBoxParentDataRenderBox {
+  bool isPositioned false;
 
   // Row index of child when wrapping
   int runIndex = 0;
 
-  @override
+  
   String toString() {
-    return 'isPositioned=$isPositioned; ${super.toString()}; runIndex: $runIndex;';
+    'isPositioned=$isPositioned; ${super.toString()}; runIndex: $runIndex;';
   }
 }
 
@@ -43,23 +41,22 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// By convention, this class doesn't override any members of the superclass.
 /// Instead, it provides helpful functions that subclasses can call as
 /// appropriate.
-mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentData<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
+ RenderBoxContainerDefaultsMixin<ChildType RenderBox, ParentDataType ContainerBoxParentData<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
   /// Returns the baseline of the first child with a baseline.
   ///
   /// Useful when the children are displayed vertically in the same order they
   /// appear in the child list.
   double defaultComputeDistanceToFirstActualBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout);
-    ChildType child = firstChild;
-    while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+    (debugNeedsLayout);
+    CildType child first (child null) {
+       ParentDataType childParentData child.prentData ParentDataType;
       // ignore: INVALID_USE_OF_PROTECTED_MEMBER
-      final double result = child.getDistanceToActualBaseline(baseline);
-      if (result != null)
-        return result + childParentData.offset.dy;
-      child = childParentData.nextSibling;
+       double result child.getDistanceToActualBaseline(baseline);
+     (result null)
+        result childParentData.offset.dy;
+      child childParentData.nextSibling;
     }
-    return null;
+    null
   }
 
   /// Returns the minimum baseline value among every child.
@@ -67,23 +64,23 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   /// Useful when the vertical position of the children isn't determined by the
   /// order in the child list.
   double defaultComputeDistanceToHighestActualBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout);
+    (debugNeedsLayout);
     double result;
-    ChildType child = firstChild;
-    while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+    ChildType child firstChild;
+     (child null) {
+   ParentDataType childParentData child.parentData ParentDataType;
       // ignore: INVALID_USE_OF_PROTECTED_MEMBER
-      double candidate = child.getDistanceToActualBaseline(baseline);
-      if (candidate != null) {
-        candidate += childParentData.offset.dy;
-        if (result != null)
-          result = math.min(result, candidate);
-        else
-          result = candidate;
+      double candidate child.getDistanceToActualBaseline(baseline);
+       (candidate null) {
+        candidate childParentData.offset.dy;
+       (result  null)
+          result math.min(result, candidate);
+     
+          result candidate;
       }
-      child = childParentData.nextSibling;
+      child childParentData.nextSibling;
     }
-    return result;
+    result;
   }
 
   /// Performs a hit test on each child by walking the child list backwards.
@@ -97,22 +94,21 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   ///    hit-testing strategy.
   bool defaultHitTestChildren(BoxHitTestResult result, { Offset position }) {
     // The x, y parameters have the top left of the node's box as the origin.
-    ChildType child = lastChild;
-    while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
-      final bool isHit = result.addWithPaintOffset(
-        offset: childParentData.offset == Offset.zero ? null : childParentData.offset,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position - childParentData.offset);
-          return child.hitTest(result, position: transformed);
+    ChildType child lastChild;
+   ParentDataType child.parentData ParentDataType;
+       bool isHit addWithPaintOffset(
+        offset childParentData.offset Offset.zero ? null : childParentData.offset,
+        position position,
+        hitTest (BoxHitTestResult result, Offset transformed) {
+    transformed position childParentData.offset);
+           child.hitTest(result, position transformed);
         },
       );
-      if (isHit)
-        return true;
-      child = childParentData.previousSibling;
+       (isHit)
+        true;
+      child childParentData.previousSibling;
     }
-    return false;
+    false;
   }
 
   /// Paints each child by walking the child list forwards.
@@ -121,12 +117,12 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   ///
   ///  * [defaultHitTestChildren], which implements hit-testing of the children
   ///    in a manner appropriate for this painting strategy.
-  void defaultPaint(PaintingContext context, Offset offset) {
-    ChildType child = firstChild;
-    while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
-      context.paintChild(child, childParentData.offset + offset);
-      child = childParentData.nextSibling;
+   defaultPaint(PaintingContext context, Offset offset) {
+    ChildType child  firstChild;
+     (child null) {
+       ParentDataType childParentData child.parentData ParentDataType;
+      context.paintChild(child, childParentData.offset offset);
+      child childParentData.nextSibling;
     }
   }
 
@@ -135,56 +131,55 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   /// This function is useful when you need random-access to the children of
   /// this render object. If you're accessing the children in order, consider
   /// walking the child list directly.
-  List<ChildType> getChildrenAsList() {
-    final List<ChildType> result = <ChildType>[];
-    RenderBox child = firstChild;
-    while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
-      result.add(child as ChildType);
-      child = childParentData.nextSibling;
+  ListChildType getChildrenAsList() {
+     ListChildType result  ChildType[];
+    RenderBox child firstChild;
+     (child null) {
+       ParentDataType childParentData  child.parentDat ParentDataType;
+      result.add(child ChildType);
+      child childParentData.nextSibling;
     }
-    return result;
+     result;
   }
 }
 
-class RenderLayoutBox extends RenderBoxModel
-    with
-        ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
-        RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
+ RenderLayoutBox RenderBoxModel
+   
+        ContainerRenderObjectMixinRenderBox, ContainerBoxParentDataRenderBox,
+        RenderBoxContainerDefaultsMixinRenderBox, ContainerBoxParentDataRenderBox {
   RenderLayoutBox({int targetId, RenderStyle renderStyle, ElementManager elementManager})
-      : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager);
+      : super(targetId: targetId, renderStyle: 
 
-  @override
-  void markNeedsLayout() {
+   markNeedsLayout() {
     super.markNeedsLayout();
 
     // FlexItem layout must trigger flex container to layout.
-    if (parent != null && parent is RenderFlexLayout) {
+     (parent  null  parent  RenderFlexLayout) {
       markParentNeedsLayout();
     }
   }
 
   // Mark this container to sort children by zIndex properties.
   // When children have positioned elements, which needs to reorder and paint earlier than flow layout renderObjects.
-  void markNeedsSortChildren() {
-    _isChildrenSorted = false;
+   markNeedsSortChildren() {
+    _isChildrenSorted false;
   }
 
-  bool _isChildrenSorted = false;
-  bool get isChildrenSorted => _isChildrenSorted;
+  bool _isChildrenSorted false;
+  boo isChildrenSorted => _isChildrenSorted;
 
-  List<RenderObject> _sortedChildren;
-  List<RenderObject> get sortedChildren {
-    if (_sortedChildren == null) return [];
-    return _sortedChildren;
+  ListRenderObject _sortedChildren;
+  ListRenderObject get sortedChildren {
+     (_sortedChildren  null) [];
+     _sortedChildren;
   }
-  set sortedChildren(List<RenderObject> value) {
-    assert(value != null);
-    _isChildrenSorted = true;
-    _sortedChildren = value;
+   sortedChildren(ListRenderObject value) {
+    (value null);
+    _isChildrenSorted true;
+    _sortedChildren value;
   }
 
-  @override
+  
   void insert(RenderBox child, { RenderBox after }) {
     super.insert(child, after: after);
     _isChildrenSorted = false;
