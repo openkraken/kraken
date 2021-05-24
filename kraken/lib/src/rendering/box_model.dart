@@ -1268,11 +1268,11 @@ class RenderBoxModel extends RenderBox with
   void paint(PaintingContext context, Offset offset) {
     if (kProfileMode) {
       childPaintDuration = 0;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: targetId);
     }
     if (isCSSDisplayNone || isCSSVisibilityHidden) {
       if (kProfileMode) {
-        PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END, uniqueId: targetId);
+        PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: targetId);
       }
       return;
     }
@@ -1280,7 +1280,7 @@ class RenderBoxModel extends RenderBox with
     paintBoxModel(context, offset);
     if (kProfileMode) {
       int amendEndTime = DateTime.now().microsecondsSinceEpoch - childPaintDuration;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
+      PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 

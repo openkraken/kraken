@@ -136,7 +136,7 @@ void _simulateKeyPress(Pointer<NativeString> nativeChars) {
       text: updatedText,
       selection: currentValue.selection.copyWith(baseOffset: baseOffset, extentOffset: extentOffset),
     );
-    current.formatAndSetValue(value);
+    current.formatAndSetValue(value, shouldDispatchEvent: true);
   } else {
     print('No focus input element found.');
   }

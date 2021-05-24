@@ -5,8 +5,10 @@
 
 #include "bindings/jsc/host_object_internal.h"
 #include "bindings/jsc/js_context_internal.h"
+#include "bindings/jsc/host_class.h"
 #include <unordered_map>
 #include <vector>
+#include <list>
 
 namespace kraken::binding::jsc {
 
@@ -28,6 +30,11 @@ namespace kraken::binding::jsc {
 #define PERF_JS_POLYFILL_INIT_COST "polyfill_init_cost"
 #define PERF_JS_BUNDLE_LOAD_COST "js_bundle_load_cost"
 #define PERF_JS_BUNDLE_EVAL_COST "js_bundle_eval_cost"
+#define PERF_JS_PARSE_TIME_COST "js_parse_time_cost"
+#define PERF_JS_HOST_CLASS_INIT_COST "js_host_class_init_cost"
+#define PERF_JS_NATIVE_FUNCTION_CALL_COST "js_native_function_call_cost"
+#define PERF_JS_HOST_CLASS_GET_PROPERTY_COST "js_host_class_get_property_cost"
+#define PERF_JS_HOST_CLASS_SET_PROPERTY_COST "js_host_class_set_property_cost"
 #define PERF_FLUSH_UI_COMMAND_COST "flush_ui_command_cost"
 #define PERF_CREATE_ELEMENT_COST "create_element_cost"
 #define PERF_CREATE_TEXT_NODE_COST "create_text_node_cost"
@@ -37,6 +44,8 @@ namespace kraken::binding::jsc {
 #define PERF_INSERT_ADJACENT_NODE_COST "insert_adjacent_node_cost"
 #define PERF_REMOVE_NODE_COST "remove_node_cost"
 #define PERF_SET_STYLE_COST "set_style_cost"
+#define PERF_DOM_FORCE_LAYOUT_COST "dom_force_layout_cost"
+#define PERF_DOM_FLUSH_UI_COMMAND_COST "dom_flush_ui_command_cost"
 #define PERF_SET_PROPERTIES_COST "set_properties_cost"
 #define PERF_REMOVE_PROPERTIES_COST "remove_properties_cost"
 #define PERF_FLEX_LAYOUT_COST "flex_layout_cost"
@@ -64,6 +73,14 @@ namespace kraken::binding::jsc {
 #define PERF_ROOT_ELEMENT_PROPERTY_INIT "root_element_property_init"
 #define PERF_JS_CONTEXT_INIT_START "js_context_start"
 #define PERF_JS_CONTEXT_INIT_END "js_context_end"
+#define PERF_JS_HOST_CLASS_GET_PROPERTY_START "js_host_class_get_property_start"
+#define PERF_JS_HOST_CLASS_GET_PROPERTY_END "js_host_class_get_property_end"
+#define PERF_JS_HOST_CLASS_SET_PROPERTY_START "js_host_class_set_property_start"
+#define PERF_JS_HOST_CLASS_SET_PROPERTY_END "js_host_class_set_property_end"
+#define PERF_JS_HOST_CLASS_INIT_START "js_host_class_init_start"
+#define PERF_JS_HOST_CLASS_INIT_END "js_host_class_init_end"
+#define PERF_JS_NATIVE_FUNCTION_CALL_START "js_native_function_call_start"
+#define PERF_JS_NATIVE_FUNCTION_CALL_END "js_native_function_call_end"
 #define PERF_JS_NATIVE_METHOD_INIT_START "init_native_method_start"
 #define PERF_JS_NATIVE_METHOD_INIT_END "init_native_method_end"
 #define PERF_JS_POLYFILL_INIT_START "init_js_polyfill_start"
@@ -72,6 +89,8 @@ namespace kraken::binding::jsc {
 #define PERF_JS_BUNDLE_LOAD_END "js_bundle_load_end"
 #define PERF_JS_BUNDLE_EVAL_START "js_bundle_eval_start"
 #define PERF_JS_BUNDLE_EVAL_END "js_bundle_eval_end"
+#define PERF_JS_PARSE_TIME_START "js_parse_time_start"
+#define PERF_JS_PARSE_TIME_END "js_parse_time_end"
 #define PERF_FLUSH_UI_COMMAND_START "flush_ui_command_start"
 #define PERF_FLUSH_UI_COMMAND_END "flush_ui_command_end"
 #define PERF_CREATE_ELEMENT_START "create_element_start"
@@ -90,6 +109,10 @@ namespace kraken::binding::jsc {
 #define PERF_REMOVE_NODE_END "remove_node_end"
 #define PERF_SET_STYLE_START "set_style_start"
 #define PERF_SET_STYLE_END "set_style_end"
+#define PERF_DOM_FORCE_LAYOUT_START "dom_force_layout_start"
+#define PERF_DOM_FORCE_LAYOUT_END "dom_force_layout_end"
+#define PERF_DOM_FLUSH_UI_COMMAND_START "dom_flush_ui_command_start"
+#define PERF_DOM_FLUSH_UI_COMMAND_END "dom_flush_ui_command_end"
 #define PERF_SET_PROPERTIES_START "set_properties_start"
 #define PERF_SET_PROPERTIES_END "set_properties_end"
 #define PERF_REMOVE_PROPERTIES_START "remove_properties_start"
@@ -164,7 +187,7 @@ public:
 
   void mark(const std::string &markName);
   void mark(const std::string &markName, int64_t startTime);
-  std::vector<NativePerformanceEntry *> entries;
+  std::list<NativePerformanceEntry *> entries;
 };
 
 class JSPerformance : public HostObject {
@@ -207,7 +230,13 @@ public:
 #endif
 
   JSPerformance(JSContext *context, NativePerformance *nativePerformance)
-    : HostObject(context, JSPerformanceName), nativePerformance(nativePerformance) {}
+    : HostObject(context, JSPerformanceName), nativePerformance(nativePerformance) {
+#if ENABLE_PROFILE
+    JSStringHolder nameStringHolder = JSStringHolder(context, "__kraken_navigation_summary__");
+    m_summary = JSObjectMakeFunctionWithCallback(context->context(), nameStringHolder.getString(), __kraken_navigation_summary__);
+    JSObjectSetProperty(context->context(), jsObject, nameStringHolder.getString(), m_summary, kJSPropertyAttributeNone, nullptr);
+#endif
+  }
   ~JSPerformance() override;
   JSValueRef getProperty(std::string &name, JSValueRef *exception) override;
   void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
@@ -225,7 +254,7 @@ private:
   JSFunctionHolder m_measure{context, jsObject, this, "measure", measure};
 
 #if ENABLE_PROFILE
-  JSFunctionHolder m_summary{context, jsObject, nullptr, "__kraken_navigation_summary__", __kraken_navigation_summary__};
+  JSObjectRef m_summary{nullptr};
   void measureSummary();
 #endif
   void internalMeasure(const std::string &name, const std::string &startMark, const std::string &endMark,

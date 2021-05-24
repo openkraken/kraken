@@ -1235,7 +1235,7 @@ class Element extends Node
     bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventType);
     bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
 
-    addEventListener(eventType, _eventResponder);
+    addEventListener(eventType, eventResponder);
 
     if (renderBoxModel != null) {
       // Bind pointer responder.
@@ -1249,7 +1249,7 @@ class Element extends Node
 
   void removeEvent(String eventType) {
     if (!eventHandlers.containsKey(eventType)) return; // Only listen once.
-    removeEventListener(eventType, _eventResponder);
+    removeEventListener(eventType, eventResponder);
 
     if (renderBoxModel != null) {
       // Remove pointer responder.
@@ -1262,7 +1262,7 @@ class Element extends Node
     }
   }
 
-  void _eventResponder(Event event) {
+  void eventResponder(Event event) {
     emitUIEvent(elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, event);
   }
 

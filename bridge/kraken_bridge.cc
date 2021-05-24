@@ -8,6 +8,7 @@
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
 #include "foundation/inspector_task_queue.h"
+#include "bindings/jsc/KOM/performance.h"
 
 #ifdef KRAKEN_ENABLE_JSA
 #include "bridge_jsa.h"
@@ -87,7 +88,7 @@ void initJSContextPool(int poolSize) {
   // When dart hot restarted, should dispose previous bridge and clear task message queue.
   if (inited) {
     disposeAllBridge();
-    foundation::UICommandTaskMessageQueue::instance(0)->clear();
+    foundation::UICommandBuffer::instance(0)->clear();
   };
   contextPool = new kraken::JSBridge *[poolSize];
   for (int i = 1; i < poolSize; i++) {
@@ -105,7 +106,12 @@ void disposeContext(int32_t contextId) {
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
   contextPool[contextId] = nullptr;
-  foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
+  foundation::UICommandBuffer::instance(contextId)->clear();
+
+#if ENABLE_PROFILE
+  auto nativePerformance = kraken::binding::jsc::NativePerformance::instance(contextId);
+  nativePerformance->entries.clear();
+#endif
 }
 
 int32_t allocateNewContext() {
@@ -215,15 +221,15 @@ void flushUICommandCallback() {
 }
 
 UICommandItem *getUICommandItems(int32_t contextId) {
-  return foundation::UICommandTaskMessageQueue::instance(contextId)->data();
+  return foundation::UICommandBuffer::instance(contextId)->data();
 }
 
 int64_t getUICommandItemSize(int32_t contextId) {
-  return foundation::UICommandTaskMessageQueue::instance(contextId)->size();
+  return foundation::UICommandBuffer::instance(contextId)->size();
 }
 
 void clearUICommandItems(int32_t contextId) {
-  return foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
+  return foundation::UICommandBuffer::instance(contextId)->clear();
 }
 
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void *data) {

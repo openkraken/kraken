@@ -49,11 +49,11 @@ TouchEventInstance::TouchEventInstance(JSTouchEvent *jsTouchEvent, JSStringRef d
 }
 
 JSValueRef TouchEventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSTouchEvent::getTouchEventPropertyMap();
+  auto &propertyMap = JSTouchEvent::getTouchEventPropertyMap();
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
 
   switch (property) {
   case JSTouchEvent::TouchEventProperty::touches:
@@ -76,7 +76,7 @@ JSValueRef TouchEventInstance::getProperty(std::string &name, JSValueRef *except
 }
 
 bool TouchEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSTouchEvent::getTouchEventPropertyMap();
+  auto &propertyMap = JSTouchEvent::getTouchEventPropertyMap();
   if (propertyMap.count(name) > 0) {
     return true;
   } else {
@@ -105,13 +105,13 @@ JSTouchList::JSTouchList(JSContext *context, NativeTouch **touches, int64_t leng
 }
 
 JSValueRef kraken::binding::jsc::JSTouchList::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getTouchListPropertyMap();
+  auto &propertyMap = getTouchListPropertyMap();
 
   if (isNumberIndex(name)) {
     size_t index = std::stoi(name);
     return m_touchList[index]->jsObject;
   } else if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     if (property == TouchListProperty::length) {
       return JSValueMakeNumber(ctx, m_touchList.size());
@@ -138,10 +138,10 @@ void JSTouchList::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
 JSTouch::JSTouch(JSContext *context, NativeTouch *touch) : HostObject(context, "Touch"), m_nativeTouch(touch) {}
 
 JSValueRef JSTouch::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getTouchPropertyMap();
+  auto &propertyMap = getTouchPropertyMap();
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch(property) {
     case TouchProperty::identifier:

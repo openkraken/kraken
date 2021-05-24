@@ -6,6 +6,7 @@
 #include "js_context_internal.h"
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/kraken.h"
+#include "bindings/jsc/KOM/performance.h"
 #include "dart_methods.h"
 #include <memory>
 #include <mutex>
@@ -229,18 +230,63 @@ NativeString *stringRefToNativeString(JSStringRef string) {
   return tmp.clone();
 }
 
+#if ENABLE_PROFILE
+std::unordered_map<std::string, double> m_f_call_time;
+std::unordered_map<std::string, int> m_f_call_count;
+std::unordered_map<std::string, double> *getNativeFunctionCallTime() {
+  return &m_f_call_time;
+}
+std::unordered_map<std::string, int> *getNativeFunctionCallCount() {
+  return &m_f_call_count;
+}
+
+struct ProxyContext {
+  std::string name;
+  JSObjectRef function{nullptr};
+};
+JSValueRef proxyFunctionCall(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                 const JSValueRef *arguments, JSValueRef *exception) {
+  auto *proxyContext = reinterpret_cast<ProxyContext*>(JSObjectGetPrivate(function));
+  auto nativePerformance = binding::jsc::NativePerformance::instance(0);
+  nativePerformance->mark(PERF_JS_NATIVE_FUNCTION_CALL_START);
+  double startTime = std::chrono::system_clock::now().time_since_epoch().count();
+  JSValueRef value = JSObjectCallAsFunction(ctx, proxyContext->function, thisObject, argumentCount, arguments, exception);
+  double endTime = std::chrono::system_clock::now().time_since_epoch().count();
+  if (m_f_call_time.count(proxyContext->name) == 0) {
+    m_f_call_time[proxyContext->name] = 0.0;
+    m_f_call_count[proxyContext->name] = 0;
+  }
+  m_f_call_time[proxyContext->name] += ((endTime - startTime) / 1000);
+  m_f_call_count[proxyContext->name]++;
+  nativePerformance->mark(PERF_JS_NATIVE_FUNCTION_CALL_END);
+  return value;
+}
+#endif
+
 JSFunctionHolder::JSFunctionHolder(JSContext *context, JSObjectRef root, void *data, const std::string& name,
                                    JSObjectCallAsFunctionCallback callback) {
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
-  JSObjectRef function;
   // If context is nullptr, create normal js function without private data
   if (data == nullptr) {
-    function = JSObjectMakeFunctionWithCallback(context->context(), nameStringHolder.getString(), callback);
+    m_function = JSObjectMakeFunctionWithCallback(context->context(), nameStringHolder.getString(), callback);
   } else {
-    function = makeObjectFunctionWithPrivateData(context, data, name.c_str(), callback);
+    m_function = makeObjectFunctionWithPrivateData(context, data, name.c_str(), callback);
   }
 
-  JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), function, kJSPropertyAttributeNone, nullptr);
+#if ENABLE_PROFILE
+  JSValueProtect(context->context(), m_function);
+  auto *proxyContext = new ProxyContext();
+  proxyContext->name = name;
+  proxyContext->function = m_function;
+  m_function = makeObjectFunctionWithPrivateData(context, proxyContext, name.c_str(), proxyFunctionCall);
+  JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), m_function, kJSPropertyAttributeNone, nullptr);
+#else
+  JSObjectSetProperty(context->context(), root, nameStringHolder.getString(), m_function, kJSPropertyAttributeNone, nullptr);
+#endif
+}
+
+JSObjectRef JSFunctionHolder::function() {
+  return m_function;
 }
 
 JSStringHolder::JSStringHolder(JSContext *context, const std::string &string)
