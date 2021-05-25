@@ -68,7 +68,7 @@ class CSSBackground {
         CSSPercentage.isPercentage(value);
   }
 
-  static Color getBackgroundColor(CSSStyleDeclaration style) {
+  static Color? getBackgroundColor(CSSStyleDeclaration style) {
     String backgroundColor = style[BACKGROUND_COLOR];
     if (backgroundColor.isNotEmpty) {
        return CSSColor.parseColor(backgroundColor);
@@ -86,11 +86,11 @@ class CSSBackground {
     return style[BACKGROUND_IMAGE].isNotEmpty && (attachment.isEmpty || attachment == SCROLL);
   }
 
-  static DecorationImage getDecorationImage(CSSStyleDeclaration style, CSSFunctionalNotation method, { int contextId }) {
+  static DecorationImage? getDecorationImage(CSSStyleDeclaration style, CSSFunctionalNotation method, { required int contextId }) {
     DecorationImage backgroundImage;
 
     String url = method.args.length > 0 ? method.args[0] : '';
-    if (url == null || url.isEmpty) {
+    if (url.isEmpty) {
       return null;
     }
 
@@ -142,8 +142,8 @@ class CSSBackground {
     return backgroundImage;
   }
 
-  static Gradient getBackgroundGradient(CSSStyleDeclaration style, RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
-    Gradient gradient;
+  static Gradient? getBackgroundGradient(CSSStyleDeclaration style, RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
+    Gradient? gradient;
     ElementManager elementManager = renderBoxModel.elementManager;
     double viewportWidth = elementManager.viewportWidth;
     double viewportHeight = elementManager.viewportHeight;
@@ -156,11 +156,11 @@ class CSSBackground {
       switch (method.name) {
         case 'linear-gradient':
         case 'repeating-linear-gradient':
-          double linearAngle;
+          double? linearAngle;
           Alignment begin = Alignment.topCenter;
           Alignment end = Alignment.bottomCenter;
           String arg0 = method.args[0].trim();
-          double gradientLength;
+          double? gradientLength;
           if (arg0.startsWith('to ')) {
             List<String> parts = arg0.split(_splitRegExp);
             if (parts.length >= 2) {
@@ -273,16 +273,21 @@ class CSSBackground {
             List<String> positionAndRadius = method.args[0].trim().split(' ');
             if (positionAndRadius.length >= 1) {
               if (CSSPercentage.isPercentage(positionAndRadius[0])) {
-                radius = CSSPercentage.parsePercentage(positionAndRadius[0]) * 0.5;
-                start = 1;
+                double? v = CSSPercentage.parsePercentage(positionAndRadius[0]);
+                if (v != null) {
+                  radius = v * 0.5;
+                  start = 1;
+                }
               }
               if (positionAndRadius.length > 2 && positionAndRadius[1] == 'at') {
                 start = 1;
                 if (CSSPercentage.isPercentage(positionAndRadius[2])) {
-                  atX = CSSPercentage.parsePercentage(positionAndRadius[2]);
+                  double? v = CSSPercentage.parsePercentage(positionAndRadius[2]);
+                  if (v != null) atX = v;
                 }
                 if (positionAndRadius.length == 4 && CSSPercentage.isPercentage(positionAndRadius[3])) {
-                  atY = CSSPercentage.parsePercentage(positionAndRadius[3]);
+                  double? v = CSSPercentage.parsePercentage(positionAndRadius[3]);
+                  if (v != null) atY = v;
                 }
               }
             }
@@ -311,10 +316,16 @@ class CSSBackground {
             }
             if (atIndex != -1) {
               if (atIndex + 1 < fromAt.length && CSSPercentage.isPercentage(fromAt[atIndex + 1])) {
-                atX = CSSPercentage.parsePercentage(fromAt[atIndex + 1]);
+                double? v = CSSPercentage.parsePercentage(fromAt[atIndex + 1]);
+                if (v != null) {
+                  atX = v;
+                }
               }
               if (atIndex + 2 < fromAt.length && CSSPercentage.isPercentage(fromAt[atIndex + 2])) {
-                atY = CSSPercentage.parsePercentage(fromAt[atIndex + 2]);
+                double? v = CSSPercentage.parsePercentage(fromAt[atIndex + 2]);
+                if (v != null) {
+                  atY = v;
+                }
               }
             }
             start = 1;
@@ -334,7 +345,7 @@ class CSSBackground {
     return gradient;
   }
 
-  static void _applyColorAndStops(RenderBoxModel renderBoxModel, int start, List<String> args, List<Color> colors, List<double> stops, [double gradientLength]) {
+  static void _applyColorAndStops(RenderBoxModel renderBoxModel, int start, List<String> args, List<Color> colors, List<double> stops, [double? gradientLength]) {
     // colors should more than one, otherwise invalid
     if (args.length - start - 1 > 0) {
       double grow = 1.0 / (args.length - start - 1);
@@ -348,7 +359,7 @@ class CSSBackground {
     }
   }
 
-  static List<CSSColorStop> _parseColorAndStop(RenderBoxModel renderBoxModel, String src, [double defaultStop, double gradientLength]) {
+  static List<CSSColorStop> _parseColorAndStop(RenderBoxModel renderBoxModel, String src, [double? defaultStop, double? gradientLength]) {
     List<String> strings = [];
     List<CSSColorStop> colorGradients = [];
     // rgba may contain space, color should handle special
@@ -360,7 +371,7 @@ class CSSBackground {
       }
       strings.add(src.substring(0, indexOfRgbaEnd + 1));
       if (indexOfRgbaEnd + 1 < src.length) {
-        strings.addAll(src.substring(indexOfRgbaEnd + 1)?.trim()?.split(' '));
+        strings.addAll(src.substring(indexOfRgbaEnd + 1).trim().split(' '));
       }
     } else {
       strings = src.split(' ');
@@ -371,8 +382,8 @@ class CSSBackground {
     double viewportHeight = elementManager.viewportHeight;
     Size viewportSize = Size(viewportWidth, viewportHeight);
 
-    if (strings != null && strings.length >= 1) {
-      double stop = defaultStop;
+    if (strings.length >= 1) {
+      double? stop = defaultStop;
       if (strings.length >= 2) {
         try {
           for (int i = 1; i < strings.length; i++) {
@@ -382,18 +393,27 @@ class CSSBackground {
               stop = CSSAngle.parseAngle(strings[i]) / (math.pi * 2);
             } else if (CSSLength.isLength(strings[i])) {
               if (gradientLength != null) {
-                stop = CSSLength.toDisplayPortValue(strings[i], viewportSize) / gradientLength;
+                double ?v = CSSLength.toDisplayPortValue(strings[i], viewportSize);
+                if (v != null) {
+                  stop = v / gradientLength;
+                }
               } else if (!renderBoxModel.attached) {
                 /// When node is not attached and has no width/height, gradient length
                 /// cannot be obtained, so wait for renderBoxModel attached to recalculate gradient length
                 renderBoxModel.shouldRecalGradient = true;
               }
             }
-            colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
+            Color? color = CSSColor.parseColor(strings[0]);
+            if (color != null && stop != null) {
+              colorGradients.add(CSSColorStop(color, stop));
+            }
           }
         } catch (e) {}
       } else {
-        colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
+        Color ?color = CSSColor.parseColor(strings[0]);
+        if (color != null && stop != null) {
+          colorGradients.add(CSSColorStop(color, stop));
+        }
       }
     }
     return colorGradients;

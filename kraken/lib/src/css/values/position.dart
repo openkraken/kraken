@@ -17,11 +17,11 @@ class CSSPosition {
   // [0, 1]
   static Alignment initial = Alignment.topLeft; // default value.
 
-  static Alignment? parsePosition(String input) {
+  static Alignment parsePosition(String input) {
     String normalized = input.trim();
     if (normalized.isEmpty) return initial;
 
-    Alignment? parsed;
+    Alignment parsed = initial;
     List<String> split = normalized.split(_splitRegExp);
 
     if (split.length == 1) {
