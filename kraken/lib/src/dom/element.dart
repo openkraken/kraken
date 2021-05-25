@@ -1001,9 +1001,6 @@ class Element extends Node
   }
 
   void _styleDisplayChangedListener(String property, String original, String present) {
-    // Display change may case width/height doesn't works at all.
-    _styleSizeChangedListener(property, original, present);
-
     renderBoxModel.renderStyle.updateDisplay(present, this);
   }
 

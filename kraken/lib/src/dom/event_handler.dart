@@ -25,7 +25,7 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPointerMove = handlePointMove;
     renderBoxModel.onPointerUp = handlePointUp;
     renderBoxModel.onPointerCancel = handlePointCancel;
-    renderBoxModel.onClick = dispatchEvent;
+    renderBoxModel.onClick = handleClick;
     renderBoxModel.onSwipe = dispatchEvent;
     renderBoxModel.onPan = dispatchEvent;
     renderBoxModel.onScale = dispatchEvent;
