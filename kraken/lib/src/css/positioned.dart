@@ -471,6 +471,13 @@ class CSSPositionedLayout {
         }
       }
 
+      // It needs to substract padding cause positioned renderBox position relative to scroll container.
+      if (parent.isScrollingContentBox) {
+        RenderLayoutBox overflowContainingBox = parent.parent;
+        top -= overflowContainingBox.renderStyle.paddingTop;
+        left -= overflowContainingBox.renderStyle.paddingLeft;
+      }
+
       x = left;
       y = top;
     }

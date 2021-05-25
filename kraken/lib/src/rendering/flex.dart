@@ -1793,12 +1793,14 @@ class RenderFlexLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
+    RenderBoxModel container = isScrollingContentBox ? parent : this;
     bool isScrollContainer = renderStyle.overflowX != CSSOverflowType.visible ||
       renderStyle.overflowY != CSSOverflowType.visible;
 
     // No need to add padding for scrolling content box
     double maxScrollableMainSizeOfChildren = isScrollContainer ? maxScrollableMainSizeOfLines :
-      (isHorizontalDirection ? renderStyle.paddingLeft : renderStyle.paddingTop) + maxScrollableMainSizeOfLines;
+      (isHorizontalDirection ? container.renderStyle.paddingLeft : container.renderStyle.paddingTop) +
+        maxScrollableMainSizeOfLines;
 
     // Max scrollable cross size of all lines
     double maxScrollableCrossSizeOfLines = scrollableCrossSizeOfLines.reduce((double curr, double next) {
@@ -1806,9 +1808,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     });
     // No need to add padding for scrolling content box
     double maxScrollableCrossSizeOfChildren = isScrollContainer ? maxScrollableCrossSizeOfLines :
-      (isHorizontalDirection ? renderStyle.paddingTop : renderStyle.paddingLeft) + maxScrollableCrossSizeOfLines;
+      (isHorizontalDirection ? container.renderStyle.paddingTop : container.renderStyle.paddingLeft) +
+        maxScrollableCrossSizeOfLines;
 
-    RenderBoxModel container = isScrollingContentBox ? parent : this;
     double containerContentWidth = size.width - container.renderStyle.borderLeft - container.renderStyle.borderRight;
     double containerContentHeight = size.height - container.renderStyle.borderTop - container.renderStyle.borderBottom;
     double maxScrollableMainSize = math.max(

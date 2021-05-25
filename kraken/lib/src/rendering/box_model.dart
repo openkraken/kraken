@@ -392,12 +392,20 @@ class RenderLayoutBox extends RenderBoxModel
   /// Extend max scrollable size of renderBoxModel by offset of positioned child,
   /// get the max scrollable size of children of normal flow and single positioned child.
   void extendMaxScrollableSize(RenderBoxModel child) {
-    Size childSize = child.boxSize;
+    Size childScrollableSize;
     RenderStyle childRenderStyle = child.renderStyle;
+    CSSOverflowType overflowX = childRenderStyle.overflowX;
+    CSSOverflowType overflowY = childRenderStyle.overflowY;
+    // Only non scroll container need to use scrollable size, otherwise use its own size
+    if (overflowX == CSSOverflowType.visible && overflowY == CSSOverflowType.visible) {
+      childScrollableSize = child.scrollableSize;
+    } else {
+      childScrollableSize = child.boxSize;
+    }
     double maxScrollableX = scrollableSize.width;
     double maxScrollableY = scrollableSize.height;
     if (childRenderStyle.left != null && !childRenderStyle.left.isAuto) {
-      maxScrollableX = math.max(maxScrollableX, childRenderStyle.left.length + childSize.width);
+      maxScrollableX = math.max(maxScrollableX, childRenderStyle.left.length + childScrollableSize.width);
     }
 
     if (childRenderStyle.right != null && !childRenderStyle.right.isAuto) {
@@ -411,7 +419,7 @@ class RenderLayoutBox extends RenderBoxModel
     }
 
     if (childRenderStyle.top != null && !childRenderStyle.top.isAuto) {
-      maxScrollableY = math.max(maxScrollableY, childRenderStyle.top.length + childSize.height);
+      maxScrollableY = math.max(maxScrollableY, childRenderStyle.top.length + childScrollableSize.height);
     }
     if (childRenderStyle.bottom != null && !childRenderStyle.bottom.isAuto) {
       if (isScrollingContentBox && (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
