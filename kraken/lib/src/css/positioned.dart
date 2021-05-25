@@ -443,10 +443,16 @@ class CSSPositionedLayout {
       double borderTop = borderEdge != null ? borderEdge.top : 0;
       double borderBottom = borderEdge != null ? borderEdge.bottom : 0;
       RenderStyle childRenderStyle = child.renderStyle;
-      double top = childRenderStyle.top != null && !childRenderStyle.top.isAuto ?
-        childRenderStyle.top.length + borderTop + childMarginTop : baseOffset.dy + childMarginTop;
-      if ((childRenderStyle.top == null || childRenderStyle.top.length == null) &&
-        (childRenderStyle.bottom != null && childRenderStyle.bottom.length != null)) {
+
+      double top;
+      if (childRenderStyle.top != null && childRenderStyle.top.length != null) {
+        top = childRenderStyle.top.length + borderTop + childMarginTop;
+
+        if (parent.isScrollingContentBox) {
+          RenderLayoutBox overflowContainingBox = parent.parent;
+          top -= overflowContainingBox.renderStyle.paddingTop;
+        }
+      } else if (childRenderStyle.bottom != null && childRenderStyle.bottom.length != null) {
         top = parentSize.height - child.boxSize.height - borderBottom - childMarginBottom -
           ((childRenderStyle.bottom.length) ?? 0);
 
@@ -455,27 +461,31 @@ class CSSPositionedLayout {
           top -= (overflowContainingBox.renderStyle.borderTop + overflowContainingBox.renderStyle.borderBottom
               + overflowContainingBox.renderStyle.paddingTop);
         }
+      } else {
+        // Use original offset in normal flow if no top and bottom is set.
+        top = baseOffset.dy + childMarginTop;
       }
 
-      double left = childRenderStyle.left != null && !childRenderStyle.left.isAuto ?
-        childRenderStyle.left.length + borderLeft + childMarginLeft : baseOffset.dx + childMarginLeft;
-      if ((childRenderStyle.left == null || childRenderStyle.left.length == null) &&
-        (childRenderStyle.right != null && childRenderStyle.right.length != null)) {
+      double left;
+      if (childRenderStyle.left != null && childRenderStyle.left.length != null) {
+        left = childRenderStyle.left.length + borderLeft + childMarginLeft;
+
+        if (parent.isScrollingContentBox) {
+          RenderLayoutBox overflowContainingBox = parent.parent;
+          left -= overflowContainingBox.renderStyle.paddingLeft;
+        }
+      } else if (childRenderStyle.right != null && childRenderStyle.right.length != null) {
         left = parentSize.width - child.boxSize.width - borderRight - childMarginRight -
           ((childRenderStyle.right.length) ?? 0);
 
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent;
           left -= (overflowContainingBox.renderStyle.borderLeft + overflowContainingBox.renderStyle.borderRight
-              + overflowContainingBox.renderStyle.paddingLeft);
+            + overflowContainingBox.renderStyle.paddingLeft);
         }
-      }
-
-      // It needs to substract padding cause positioned renderBox position relative to scroll container.
-      if (parent.isScrollingContentBox) {
-        RenderLayoutBox overflowContainingBox = parent.parent;
-        top -= overflowContainingBox.renderStyle.paddingTop;
-        left -= overflowContainingBox.renderStyle.paddingLeft;
+      } else {
+        // Use original offset in normal flow if no left and right is set.
+        left = baseOffset.dx + childMarginLeft;
       }
 
       x = left;
