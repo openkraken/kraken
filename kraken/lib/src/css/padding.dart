@@ -7,13 +7,15 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
 mixin CSSPaddingMixin on RenderStyleBase {
-  EdgeInsets _resolvedPadding;
+  EdgeInsets? _resolvedPadding;
 
   void _resolve() {
-    if (_resolvedPadding != null) return;
-    if (padding == null) return;
-    _resolvedPadding = padding.resolve(TextDirection.ltr);
-    assert(_resolvedPadding.isNonNegative);
+    EdgeInsetsGeometry? _p = padding;
+    EdgeInsets? _rp = _resolvedPadding;
+    if (_rp != null) return;
+    if (_p == null) return;
+    _resolvedPadding = _p.resolve(TextDirection.ltr);
+    assert(_resolvedPadding!.isNonNegative);
   }
 
   void _markNeedResolution() {
@@ -24,9 +26,9 @@ mixin CSSPaddingMixin on RenderStyleBase {
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
   /// must not be null.
-  EdgeInsetsGeometry get padding => _padding;
-  EdgeInsetsGeometry _padding;
-  set padding(EdgeInsetsGeometry value) {
+  EdgeInsets? get padding => _padding;
+  EdgeInsets? _padding;
+  set padding(EdgeInsets? value) {
     if (value == null) return;
     assert(value.isNonNegative);
     if (_padding == value) return;
@@ -36,30 +38,34 @@ mixin CSSPaddingMixin on RenderStyleBase {
 
   double get paddingTop {
     _resolve();
-    if (_resolvedPadding == null) return 0;
-    return _resolvedPadding.top;
+    EdgeInsets? resolvedPadding = _resolvedPadding;
+    if (resolvedPadding == null) return 0;
+    return resolvedPadding.top;
   }
 
   double get paddingRight {
     _resolve();
-    if (_resolvedPadding == null) return 0;
-    return _resolvedPadding.right;
+    EdgeInsets? resolvedPadding = _resolvedPadding;
+    if (resolvedPadding == null) return 0;
+    return resolvedPadding.right;
   }
 
   double get paddingBottom {
     _resolve();
-    if (_resolvedPadding == null) return 0;
-    return _resolvedPadding.bottom;
+    EdgeInsets? resolvedPadding = _resolvedPadding;
+    if (resolvedPadding == null) return 0;
+    return resolvedPadding.bottom;
   }
 
   double get paddingLeft {
     _resolve();
-    if (_resolvedPadding == null) return 0;
-    return _resolvedPadding.left;
+    EdgeInsets? resolvedPadding = _resolvedPadding;
+    if (resolvedPadding == null) return 0;
+    return resolvedPadding.left;
   }
 
   void updatePadding(String property, double value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this;
+    RenderStyle renderStyle = this as RenderStyle;
     EdgeInsets prevPadding = renderStyle.padding ?? EdgeInsets.only(
       top: 0.0,
       right: 0.0,
@@ -101,16 +107,20 @@ mixin CSSPaddingMixin on RenderStyleBase {
   }
 
   BoxConstraints deflatePaddingConstraints(BoxConstraints constraints) {
-    if (padding != null) {
-      return constraints.deflate(padding);
+    EdgeInsets? _padding = padding;
+    if (_padding != null) {
+      return constraints.deflate(_padding);
     }
     return constraints;
   }
 
   Size wrapPaddingSize(Size innerSize) {
     _resolve();
-    return Size(_resolvedPadding.left + innerSize.width + _resolvedPadding.right,
-      _resolvedPadding.top + innerSize.height + _resolvedPadding.bottom);
+    EdgeInsets? resolvedPadding = _resolvedPadding;
+    if (resolvedPadding == null) return Size.zero;
+
+    return Size(resolvedPadding.left + innerSize.width + resolvedPadding.right,
+        resolvedPadding.top + innerSize.height + resolvedPadding.bottom);
   }
 
   void debugPaddingProperties(DiagnosticPropertiesBuilder properties) {
