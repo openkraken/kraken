@@ -24,6 +24,6 @@ mixin CSSVisibilityMixin on ElementBase {
   }
 
   void updateRenderVisibility(Visibility visibility) {
-    renderBoxModel.visibility = visibility;
+    renderBoxModel!.visibility = visibility;
   }
 }

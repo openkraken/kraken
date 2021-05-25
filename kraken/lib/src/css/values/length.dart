@@ -56,12 +56,12 @@ class CSSLength {
     }
   }
 
-  static bool isAuto(String value) {
+  static bool isAuto(String? value) {
     return value == AUTO;
   }
 
-  static bool isPercentage(String value) {
-    return double.tryParse(value.split('%')[0]) != null;
+  static bool isPercentage(String? value) {
+    return value != null && double.tryParse(value.split('%')[0]) != null;
   }
 
   static double? parsePercentage(String percentage) {

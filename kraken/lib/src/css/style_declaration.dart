@@ -330,8 +330,8 @@ class CSSStyleDeclaration {
     return prevValue;
   }
 
-  void _expandShorthand(String propertyName, String normalizedValue, Size? viewportSize) {
-    Map<String, String> longhandProperties = {};
+  void _expandShorthand(String propertyName, String normalizedValue, Size viewportSize) {
+    Map<String, String?> longhandProperties = {};
     switch(propertyName) {
       case PADDING:
         CSSStyleProperty.setShorthandPadding(longhandProperties, normalizedValue);
@@ -376,7 +376,7 @@ class CSSStyleDeclaration {
     }
 
     if (longhandProperties.isNotEmpty) {
-      longhandProperties.forEach((String propertyName, String value) {
+      longhandProperties.forEach((String propertyName, String? value) {
         setProperty(propertyName, value, viewportSize);
       });
     }
@@ -453,7 +453,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [Size? viewportSize]) {
+  void setProperty(String propertyName, value, Size viewportSize) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -566,7 +566,7 @@ class CSSStyleDeclaration {
   /// Override [] and []= operator to get/set style properties.
   operator [](String property) => getPropertyValue(property);
   operator []=(String property, value) {
-    setProperty(property, value);
+    setProperty(property, value, target.viewportSize);
   }
 
   /// Check a css property is valid.

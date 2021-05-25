@@ -16,7 +16,7 @@ mixin CSSSliverMixin on RenderStyleBase {
       _sliverAxis = value;
 
       if (renderBoxModel is RenderRecyclerLayout) {
-        RenderRecyclerLayout recyclerLayout = renderBoxModel;
+        RenderRecyclerLayout recyclerLayout = renderBoxModel as RenderRecyclerLayout;
 
         AxisDirection axisDirection = RenderRecyclerLayout.getAxisDirection(value);
         recyclerLayout.scrollable = KrakenScrollable(axisDirection: axisDirection);
@@ -38,7 +38,6 @@ mixin CSSSliverMixin on RenderStyleBase {
     switch (sliverDirection) {
       case ROW:
         return Axis.horizontal;
-        break;
 
       case COLUMN:
       default:
