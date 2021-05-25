@@ -564,7 +564,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   void performLayout() {
     if (kProfileMode) {
       childLayoutDuration = 0;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_START, uniqueId: targetId);
     }
 
     beforeLayout();
@@ -585,7 +585,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Layout non positioned element and its placeholder
     _layoutChildren(null);
 
-    // Set offset of positioned element
+    // Set offset of positioned and sticky element
     child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
@@ -593,14 +593,32 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         CSSPositionedLayout.applyPositionedChildOffset(this, child);
 
-        setScrollableSize(childParentData, child);
-
+        extendMaxScrollableSize(child);
         // For scrolling box, the minimum width and height should not less than scrollableSize
         if (isScrollingContentBox) {
           ensureBoxSizeLargerThanScrollableSize();
         }
+      } else if (child is RenderBoxModel && CSSPositionedLayout.isSticky(child)) {
+        RenderBoxModel scrollContainer = child.findScrollContainer();
+        // Sticky offset depends on the layout of scroll container, delay the calculation of
+        // sticky offset to the layout stage of  scroll container if its not layouted yet
+        // due to the layout order of Flutter renderObject tree is from down to up.
+        if (scrollContainer.hasSize) {
+          CSSPositionedLayout.applyStickyChildOffset(scrollContainer, child);
+        }
       }
       child = childParentData.nextSibling;
+    }
+
+    bool isScrollContainer = renderStyle.overflowX != CSSOverflowType.visible ||
+      renderStyle.overflowY != CSSOverflowType.visible;
+    if (isScrollContainer) {
+      // Find all the sticky children when scroll container is layouted
+      stickyChildren = findStickyChildren();
+      // Calculate the offset of its sticky children
+      for (RenderBoxModel stickyChild in stickyChildren) {
+        CSSPositionedLayout.applyStickyChildOffset(this, stickyChild);
+      }
     }
 
     _relayoutPositionedChildren();
@@ -610,7 +628,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (kProfileMode) {
       DateTime flexLayoutEndTime = DateTime.now();
       int amendEndTime = flexLayoutEndTime.microsecondsSinceEpoch - childLayoutDuration;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
+      PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_END, uniqueId: targetId, startTime: amendEndTime);
     }
   }
 
@@ -636,7 +654,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else if (percentageToContainingBlockFound == true || percentageToOwnFound == true ) {
           _layoutPositionedChild(child);
         }
-        setScrollableSize(childParentData, child);
+        extendMaxScrollableSize(child);
       }
       child = childParentData.nextSibling;
     }
@@ -695,9 +713,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Metrics of each flex line
     List<_RunMetrics> runMetrics = <_RunMetrics>[];
-    // Max size of scrollable area
-    Map<int, double> maxScrollableWidthMap = Map();
-    Map<int, double> maxScrollableHeightMap = Map();
     // Flex container size in main and cross direction
     Map<String, double> containerSizeMap = {
       'main': 0.0,
@@ -713,8 +728,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       runMetrics,
       placeholderChild,
       containerSizeMap,
-      maxScrollableWidthMap,
-      maxScrollableHeightMap,
       needsRelayout,
     );
 
@@ -796,16 +809,12 @@ class RenderFlexLayout extends RenderLayoutBox {
       runBetweenSpace,
       placeholderChild,
       containerSizeMap,
-      maxScrollableWidthMap,
-      maxScrollableHeightMap,
     );
 
     /// Stage 3: Set flex container size according to children size
     _setContainerSize(
       runMetrics,
       containerSizeMap,
-      maxScrollableWidthMap,
-      maxScrollableHeightMap,
     );
 
     /// Stage 4: Set children offset based on flex alignment properties
@@ -814,8 +823,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       runBetweenSpace,
       runLeadingSpace,
       placeholderChild,
-      maxScrollableWidthMap,
-      maxScrollableHeightMap,
     );
 
     /// Make sure it will not trigger relayout again when in relayout stage
@@ -934,8 +941,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<_RunMetrics> runMetrics,
     RenderPositionHolder placeholderChild,
     Map<String, double> containerSizeMap,
-    Map<int, double> maxScrollableWidthMap,
-    Map<int, double> maxScrollableHeightMap,
     bool needsRelayout,
   ) {
     double mainAxisExtent = 0.0;
@@ -954,13 +959,16 @@ class RenderFlexLayout extends RenderLayoutBox {
     double flexLineLimit = 0.0;
 
     bool isAxisHorizontalDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
+
+    // Use scrolling container to calculate flex line limit for scrolling content box
+    RenderBoxModel containerBox = isScrollingContentBox ? parent : this;
     if (isAxisHorizontalDirection) {
-      double maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(this);
-      flexLineLimit = logicalContentWidth != null ? logicalContentWidth : maxConstraintWidth;
+      flexLineLimit = containerBox.contentConstraints.maxWidth;
+      if (flexLineLimit == double.infinity) {
+        flexLineLimit = RenderBoxModel.getMaxConstraintWidth(containerBox);
+      }
     } else {
-      // Children in vertical direction should not wrap if height no exists
-      double maxContentHeight = renderStyle.maxHeight ?? double.infinity;
-      flexLineLimit = logicalContentHeight != null ? logicalContentHeight : maxContentHeight;
+      flexLineLimit = containerBox.contentConstraints.maxHeight;
     }
 
     RenderBox child = placeholderChild ?? firstChild;
@@ -986,7 +994,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         childNodeId = child.targetId;
       }
 
-      if (child is RenderPositionHolder) {
+      if (child is RenderPositionHolder && isPlaceholderPositioned(child)) {
         RenderBoxModel realDisplayedBox = child.realDisplayedBox;
         // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
         Size realDisplayedBoxSize = realDisplayedBox.getBoxSize(realDisplayedBox.contentSize);
@@ -1028,10 +1036,10 @@ class RenderFlexLayout extends RenderLayoutBox {
         // cause Flutter will skip child layout if its constraints not changed between two layouts.
         if (child is RenderBoxModel && needsRelayout) {
           childConstraints = BoxConstraints(
-            minWidth: 0,
-            maxWidth: childConstraints.maxWidth,
-            minHeight: 0,
-            maxHeight: childConstraints.maxHeight,
+            minWidth: childConstraints.maxWidth != double.infinity ? childConstraints.maxWidth : 0,
+            maxWidth: double.infinity,
+            minHeight: childConstraints.maxHeight != double.infinity ? childConstraints.maxHeight : 0,
+            maxHeight: double.infinity,
           );
         }
         child.layout(childConstraints, parentUsesSize: true);
@@ -1048,15 +1056,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       double childMainAxisExtent = _getMainAxisExtent(child, shouldUseIntrinsicMainSize: true);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
-
-      // update max scrollable size
-      if (child is RenderBoxModel) {
-        maxScrollableWidthMap[child.targetId] = math.max(child.scrollableSize.width, childSize.width);
-        maxScrollableHeightMap[child.targetId] = math.max(child.scrollableSize.height, childSize.height);
-      }
-
       bool isExceedFlexLineLimit = runMainAxisExtent + childMainAxisExtent > flexLineLimit;
-
       // calculate flex line
       if ((renderStyle.flexWrap == FlexWrap.wrap || renderStyle.flexWrap == FlexWrap.wrapReverse) &&
         runChildren.length > 0 && isExceedFlexLineLimit) {
@@ -1289,8 +1289,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     double runBetweenSpace,
     RenderPositionHolder placeholderChild,
     Map<String, double> containerSizeMap,
-    Map<int, double> maxScrollableWidthMap,
-    Map<int, double> maxScrollableHeightMap,
   ) {
     RenderBox child = placeholderChild != null ? placeholderChild : firstChild;
 
@@ -1457,8 +1455,6 @@ class RenderFlexLayout extends RenderLayoutBox {
           continue;
         }
 
-        Size childSize = _getChildSize(child);
-
         DateTime childLayoutStart;
         if (kProfileMode) {
           childLayoutStart = DateTime.now();
@@ -1480,12 +1476,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (kProfileMode) {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch - childLayoutStart.microsecondsSinceEpoch);
-        }
-
-        // update max scrollable size
-        if (child is RenderBoxModel) {
-          maxScrollableWidthMap[child.targetId] = math.max(child.scrollableSize.width, childSize.width);
-          maxScrollableHeightMap[child.targetId] = math.max(child.scrollableSize.height, childSize.height);
         }
 
         containerSizeMap['cross'] = math.max(containerSizeMap['cross'], _getCrossAxisExtent(child));
@@ -1536,7 +1526,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (isHorizontalFlexDirection) {
           CSSMargin marginTop = childRenderStyle.marginTop;
           CSSMargin marginBottom = childRenderStyle.marginBottom;
-          bool crossConstraintsTight = constraints.minHeight == constraints.maxHeight;
+          bool hasMaxConstraints = constraints.maxHeight != double.infinity;
 
           // Margin auto alignment takes priority over align-items stretch,
           // it will not stretch child in vertical direction
@@ -1549,7 +1539,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             double childCrossSize = flexLineHeight - marginVertical;
             double stretchedHeight;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
-            if (!isFlexWrap && crossConstraintsTight) {
+            if (!isFlexWrap && hasMaxConstraints) {
               double verticalBorderLength = renderStyle.borderEdge != null ? renderStyle.borderEdge.vertical : 0;
               double verticalPaddingLength = renderStyle.padding != null ? renderStyle.padding.vertical : 0;
               stretchedHeight = math.min(
@@ -1564,7 +1554,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else {
           CSSMargin marginLeft = childRenderStyle.marginLeft;
           CSSMargin marginRight = childRenderStyle.marginRight;
-          bool crossConstraintsTight = constraints.minWidth == constraints.maxWidth;
+          bool hasMaxConstraints = constraints.maxHeight != double.infinity;
           // Margin auto alignment takes priority over align-items stretch,
           // it will not stretch child in horizontal direction
           if (marginLeft.isAuto || marginRight.isAuto) {
@@ -1576,7 +1566,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             double childCrossSize = flexLineHeight - marginHorizontal;
             double stretchedWidth;
             // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap
-            if (!isFlexWrap && crossConstraintsTight) {
+            if (!isFlexWrap && hasMaxConstraints) {
               double horizontalBorderLength = renderStyle.borderEdge != null ? renderStyle.borderEdge.horizontal : 0;
               double horizontalPaddingLength = renderStyle.padding != null ? renderStyle.padding.horizontal : 0;
               stretchedWidth = math.min(
@@ -1606,8 +1596,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   void _setContainerSize(
     List<_RunMetrics> runMetrics,
     Map<String, double> containerSizeMap,
-    Map<int, double> maxScrollableWidthMap,
-    Map<int, double> maxScrollableHeightMap,
     ) {
 
     // Find max size of flex lines
@@ -1616,18 +1604,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     });
     // Actual main axis size of flex items
     double maxAllocatedMainSize = maxMainSizeMetrics.mainAxisExtent;
-
-
-    double maxScrollableWidth = 0.0;
-    double maxScrollableHeight = 0.0;
-
-    if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-      maxScrollableWidthMap.forEach((key, value) => maxScrollableWidth += value);
-      maxScrollableHeightMap.forEach((key, value) => maxScrollableHeight = math.max(value, maxScrollableHeight));
-    } else {
-      maxScrollableWidthMap.forEach((key, value) => maxScrollableWidth = math.max(value, maxScrollableWidth));
-      maxScrollableHeightMap.forEach((key, value) => maxScrollableHeight += value);
-    }
 
     /// Stage 3: Set flex container size
     double contentWidth = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
@@ -1644,12 +1620,9 @@ class RenderFlexLayout extends RenderLayoutBox {
     double constraintHeight = layoutSize.height;
 
     Size contentSize = Size(constraintWidth, constraintHeight);
-    if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
-      setMaxScrollableSize(math.max(contentSize.width, maxScrollableWidth), math.max(contentSize.height, maxScrollableHeight));
-    } else {
-      setMaxScrollableSize(math.max(contentSize.width, maxScrollableWidth), math.max(contentSize.height, maxScrollableHeight));
-    }
     size = getBoxSize(contentSize);
+
+    _setMaxScrollableSizeForFlex(runMetrics);
 
     /// Set auto value of min-width and min-height based on size of flex items
     if (CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection)) {
@@ -1744,6 +1717,115 @@ class RenderFlexLayout extends RenderLayoutBox {
     return autoMinSize;
   }
 
+  /// Set the size of scrollable overflow area for flex layout
+  /// https://drafts.csswg.org/css-overflow-3/#scrollable
+  void _setMaxScrollableSizeForFlex(List<_RunMetrics> runMetrics) {
+    // Scrollable main size collection of each line
+    List<double> scrollableMainSizeOfLines = [];
+    // Scrollable cross size collection of each line
+    List<double> scrollableCrossSizeOfLines = [];
+    // Total cross size of previous lines
+    double preLinesCrossSize = 0;
+
+    bool isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection);
+
+    for (_RunMetrics runMetric in runMetrics) {
+      Map<int, _RunChild> runChildren = runMetric.runChildren;
+
+      List<RenderBox> runChildrenList = [];
+      // Scrollable main size collection of each child in the line
+      List<double> scrollableMainSizeOfChildren = [];
+      // Scrollable cross size collection of each child in the line
+      List<double> scrollableCrossSizeOfChildren = [];
+
+      void iterateRunChildren(int targetId, _RunChild runChild) {
+        RenderBox child = runChild.child;
+        // Total main size of previous siblings
+        double preSiblingsMainSize = 0;
+        for (RenderBox sibling in runChildrenList) {
+          preSiblingsMainSize += isHorizontalDirection ? sibling.size.width : sibling.size.height;
+        }
+
+        Size childScrollableSize = child.size;
+        double childMarginTop = 0;
+        double childMarginLeft = 0;
+        if (child is RenderBoxModel) {
+          RenderStyle childRenderStyle = child.renderStyle;
+          CSSOverflowType overflowX = childRenderStyle.overflowX;
+          CSSOverflowType overflowY = childRenderStyle.overflowY;
+          // Only non scroll container need to use scrollable size, otherwise use its own size
+          if (overflowX == CSSOverflowType.visible && overflowY == CSSOverflowType.visible) {
+            childScrollableSize = child.scrollableSize;
+          }
+          childMarginTop = childRenderStyle.marginTop.length;
+          childMarginLeft = childRenderStyle.marginLeft.length;
+        }
+
+        scrollableMainSizeOfChildren.add(preSiblingsMainSize +
+          (isHorizontalDirection ? childScrollableSize.width + childMarginLeft :
+          childScrollableSize.height + childMarginTop)
+        );
+        scrollableCrossSizeOfChildren.add(
+          isHorizontalDirection ? childScrollableSize.height + childMarginTop :
+          childScrollableSize.width + childMarginLeft
+        );
+        runChildrenList.add(child);
+      }
+      runChildren.forEach(iterateRunChildren);
+
+      // Max scrollable main size of all the children in the line
+      double maxScrollableMainSizeOfLine = scrollableMainSizeOfChildren.reduce((double curr, double next) {
+        return curr > next ? curr : next;
+      });
+
+      // Max scrollable cross size of all the children in the line
+      double maxScrollableCrossSizeOfLine = preLinesCrossSize + scrollableCrossSizeOfChildren.reduce((double curr, double next) {
+        return curr > next ? curr : next;
+      });
+
+      scrollableMainSizeOfLines.add(maxScrollableMainSizeOfLine);
+      scrollableCrossSizeOfLines.add(maxScrollableCrossSizeOfLine);
+      preLinesCrossSize += runMetric.crossAxisExtent;
+    }
+
+    // Max scrollable main size of all lines
+    double maxScrollableMainSizeOfLines = scrollableMainSizeOfLines.reduce((double curr, double next) {
+      return curr > next ? curr : next;
+    });
+
+    RenderBoxModel container = isScrollingContentBox ? parent : this;
+    bool isScrollContainer = renderStyle.overflowX != CSSOverflowType.visible ||
+      renderStyle.overflowY != CSSOverflowType.visible;
+
+    // No need to add padding for scrolling content box
+    double maxScrollableMainSizeOfChildren = isScrollContainer ? maxScrollableMainSizeOfLines :
+      (isHorizontalDirection ? container.renderStyle.paddingLeft : container.renderStyle.paddingTop) +
+        maxScrollableMainSizeOfLines;
+
+    // Max scrollable cross size of all lines
+    double maxScrollableCrossSizeOfLines = scrollableCrossSizeOfLines.reduce((double curr, double next) {
+      return curr > next ? curr : next;
+    });
+    // No need to add padding for scrolling content box
+    double maxScrollableCrossSizeOfChildren = isScrollContainer ? maxScrollableCrossSizeOfLines :
+      (isHorizontalDirection ? container.renderStyle.paddingTop : container.renderStyle.paddingLeft) +
+        maxScrollableCrossSizeOfLines;
+
+    double containerContentWidth = size.width - container.renderStyle.borderLeft - container.renderStyle.borderRight;
+    double containerContentHeight = size.height - container.renderStyle.borderTop - container.renderStyle.borderBottom;
+    double maxScrollableMainSize = math.max(
+      isHorizontalDirection ? containerContentWidth : containerContentHeight,
+      maxScrollableMainSizeOfChildren
+    );
+    double maxScrollableCrossSize = math.max(
+      isHorizontalDirection ? containerContentHeight : containerContentWidth,
+      maxScrollableCrossSizeOfChildren
+    );
+
+    scrollableSize = isHorizontalDirection ? Size(maxScrollableMainSize, maxScrollableCrossSize) :
+      Size(maxScrollableCrossSize, maxScrollableMainSize);
+  }
+
   /// Get flex line height according to flex-wrap style
   double _getFlexLineHeight(double runCrossAxisExtent, double runBetweenSpace, {bool beforeSetSize = true}) {
     // Flex line of align-content stretch should includes between space
@@ -1754,7 +1836,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     if (isSingleLine) {
       // Use content size if container size is not set yet
-//      return !hasSize ? runCrossAxisExtent : _getContentCrossSize();
       return beforeSetSize ? runCrossAxisExtent : _getContentCrossSize();
     } else if (isMultiLineStretch) {
       return runCrossAxisExtent + runBetweenSpace;
@@ -1769,8 +1850,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     double runBetweenSpace,
     double runLeadingSpace,
     RenderPositionHolder placeholderChild,
-    Map<int, double> maxScrollableWidthMap,
-    Map<int, double> maxScrollableHeightMap,
     ) {
     RenderBox child = placeholderChild != null ? placeholderChild : firstChild;
     // Cross axis offset of each flex line

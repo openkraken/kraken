@@ -9,3 +9,4 @@ export 'src/gesture/click.dart';
 export 'src/gesture/swipe.dart';
 export 'src/gesture/monodrag.dart';
 export 'src/gesture/constants.dart';
+export 'src/gesture/gesture_manager.dart';

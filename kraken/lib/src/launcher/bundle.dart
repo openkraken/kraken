@@ -69,13 +69,13 @@ abstract class KrakenBundle {
     if (!isResolved) await resolve();
 
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_JS_BUNDLE_EVAL_START);
+      PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
     evaluateScripts(contextId, content, url.toString(), lineOffset);
 
     if (kProfileMode) {
-      PerformanceTiming.instance(contextId).mark(PERF_JS_BUNDLE_EVAL_END);
+      PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
     }
   }
 }
@@ -93,7 +93,7 @@ class RawBundle extends KrakenBundle {
   }
 }
 
-class NetworkBundle extends KrakenBundle with BundleMixin {
+class NetworkBundle extends KrakenBundle {
   // Unique identifier.
   String bundleId;
   int contextId;
@@ -106,10 +106,16 @@ class NetworkBundle extends KrakenBundle with BundleMixin {
     NetworkAssetBundle bundle = NetworkAssetBundle(url, contextId: contextId);
     bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
-    ByteData data = await bundle.load(absoluteURL);
-    content = await _resolveStringFromData(data, absoluteURL);
+    ByteData bytes = await bundle.load(absoluteURL);
+    content = await _resolveStringFromData(bytes, absoluteURL);
     isResolved = true;
   }
+}
+
+String _resolveStringFromData(ByteData data, String key) {
+  if (data == null) throw FlutterError('Unable to load asset: $key');
+  // Utf8 decode is fast enough with dart 2.10
+  return utf8.decode(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
 }
 
 /// An [AssetBundle] that loads resources over the network.
@@ -162,7 +168,7 @@ class NetworkAssetBundle extends AssetBundle {
   String toString() => '${describeIdentity(this)}($_baseUrl)';
 }
 
-class AssetsBundle extends KrakenBundle with BundleMixin {
+class AssetsBundle extends KrakenBundle {
   AssetsBundle(Uri url)
       : assert(url != null),
         super(url);
@@ -172,16 +178,8 @@ class AssetsBundle extends KrakenBundle with BundleMixin {
     // JSBundle get default bundle manifest.
     manifest = AppManifest();
     String localPath = url.toString();
-    ByteData data = await rootBundle.load(localPath);
-    content = await _resolveStringFromData(data, localPath);
+    ByteData bytes = await rootBundle.load(localPath);
+    content = await _resolveStringFromData(bytes, localPath);
     isResolved = true;
-  }
-}
-
-mixin BundleMixin on KrakenBundle {
-  Future<String> _resolveStringFromData(ByteData data, String key) async {
-    if (data == null) throw FlutterError('Unable to load asset: $key');
-    // Utf8 decode is fast enough with dart 2.10
-    return utf8.decode(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
   }
 }

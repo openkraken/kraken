@@ -150,7 +150,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     if (kProfileMode) {
-      PerformanceTiming.instance(0).mark(PERF_CONTROLLER_INIT_START);
+      PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_START);
     }
 
     double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
@@ -174,7 +174,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
     );
 
     if (kProfileMode) {
-      PerformanceTiming.instance(controller.view.contextId).mark(PERF_CONTROLLER_INIT_END);
+      PerformanceTiming.instance().mark(PERF_CONTROLLER_INIT_END);
     }
 
     return controller.view.getRootRenderObject();

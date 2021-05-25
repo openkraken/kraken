@@ -168,7 +168,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   void performLayout() {
     if (kProfileMode) {
       childLayoutDuration = 0;
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_START, uniqueId: targetId);
+      PerformanceTiming.instance().mark(PERF_SILVER_LAYOUT_START, uniqueId: targetId);
     }
 
     beforeLayout();
@@ -215,7 +215,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     didLayout();
 
     if (kProfileMode) {
-      PerformanceTiming.instance(elementManager.contextId).mark(PERF_SILVER_LAYOUT_END,
+      PerformanceTiming.instance().mark(PERF_SILVER_LAYOUT_END,
           uniqueId: targetId, startTime: DateTime.now().microsecondsSinceEpoch - childLayoutDuration);
     }
   }

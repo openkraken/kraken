@@ -162,7 +162,7 @@ describe('Tags img', () => {
     expect(img.naturalWidth).toEqual(0);
   });
 
-  xit('should work with loading=lazy', (done) => {
+  it('should work with loading=lazy', (done) => {
     const img = document.createElement('img');
     // Make image loading=lazy.
     img.setAttribute('loading', 'lazy');

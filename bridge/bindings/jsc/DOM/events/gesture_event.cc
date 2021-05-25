@@ -97,8 +97,8 @@ GestureEventInstance::GestureEventInstance(JSGestureEvent *jsGestureEvent, Nativ
 }
 
 JSValueRef GestureEventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSGestureEvent::getGestureEventPropertyMap();
-  auto prototypePropertyMap = JSGestureEvent::getGestureEventPrototypePropertyMap();
+  auto &propertyMap = JSGestureEvent::getGestureEventPropertyMap();
+  auto &prototypePropertyMap = JSGestureEvent::getGestureEventPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) {
     return JSObjectGetProperty(ctx, prototype<JSEventTarget>()->prototypeObject,
@@ -106,7 +106,7 @@ JSValueRef GestureEventInstance::getProperty(std::string &name, JSValueRef *exce
   }
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
 
   switch (property) {
   case JSGestureEvent::GestureEventProperty::state:
@@ -131,7 +131,7 @@ JSValueRef GestureEventInstance::getProperty(std::string &name, JSValueRef *exce
 }
 
 bool GestureEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSGestureEvent::getGestureEventPropertyMap();
+  auto &propertyMap = JSGestureEvent::getGestureEventPropertyMap();
   if (propertyMap.count(name) > 0) {
     auto property = propertyMap[name];
 

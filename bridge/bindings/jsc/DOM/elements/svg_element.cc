@@ -33,8 +33,8 @@ JSSVGElement::SVGElementInstance::SVGElementInstance(JSSVGElement *jsSVGElement)
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
 
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeSVGElement);
+  foundation::UICommandBuffer::instance(context->getContextId())
+    ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeSVGElement);
 }
 
 JSSVGElement::SVGElementInstance::~SVGElementInstance() {

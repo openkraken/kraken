@@ -63,8 +63,8 @@ CustomEventInstance::CustomEventInstance(JSCustomEvent *jsCustomEvent, NativeCus
 }
 
 JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
-  auto prototypePropertyMap = JSCustomEvent::getCustomEventPrototypePropertyMap();
+  auto &propertyMap = JSCustomEvent::getCustomEventPropertyMap();
+  auto &prototypePropertyMap = JSCustomEvent::getCustomEventPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) {
     JSStringHolder nameStringHolder = JSStringHolder(context, name);
@@ -72,7 +72,7 @@ JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *excep
   };
 
   if (propertyMap.count(name) == 0) return EventInstance::getProperty(name, exception);
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
 
   switch (property) {
   case JSCustomEvent::CustomEventProperty::detail:
@@ -83,13 +83,13 @@ JSValueRef CustomEventInstance::getProperty(std::string &name, JSValueRef *excep
 }
 
 bool CustomEventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSCustomEvent::getCustomEventPropertyMap();
-  auto prototypePropertyMap = JSCustomEvent::getCustomEventPrototypePropertyMap();
+  auto &propertyMap = JSCustomEvent::getCustomEventPropertyMap();
+  auto &prototypePropertyMap = JSCustomEvent::getCustomEventPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     if (property == JSCustomEvent::CustomEventProperty::detail) {
       m_detail.setValue(value);

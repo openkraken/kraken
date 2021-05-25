@@ -6,7 +6,7 @@
 #include "event.h"
 #include "event_target.h"
 #include "bindings/jsc/DOM/custom_event.h"
-#include "bindings/jsc/DOM/gesture_event.h"
+#include "bindings/jsc/DOM/events/gesture_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
@@ -97,8 +97,8 @@ EventInstance::EventInstance(JSEvent *jsEvent, std::string eventType, JSValueRef
 }
 
 JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSEvent::getEventPropertyMap();
-  auto prototypeProperty = JSEvent::getEventPrototypePropertyMap();
+  auto &propertyMap = JSEvent::getEventPropertyMap();
+  auto &prototypeProperty = JSEvent::getEventPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypeProperty.count(name) > 0) {
@@ -107,7 +107,7 @@ JSValueRef EventInstance::getProperty(std::string &name, JSValueRef *exception) 
 
   if (propertyMap.count(name) == 0) return Instance::getProperty(name, exception);
 
-  auto property = propertyMap[name];
+  auto &property = propertyMap[name];
   switch (property) {
   case JSEvent::EventProperty::type: {
     JSStringRef eventStringRef = JSStringCreateWithCharacters(nativeEvent->type->string, nativeEvent->type->length);
@@ -200,13 +200,13 @@ JSValueRef JSEvent::preventDefault(JSContextRef ctx, JSObjectRef function, JSObj
 }
 
 bool EventInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = JSEvent::getEventPropertyMap();
-  auto prototypePropertyMap = JSEvent::getEventPrototypePropertyMap();
+  auto &propertyMap = JSEvent::getEventPropertyMap();
+  auto &prototypePropertyMap = JSEvent::getEventPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     if (property == JSEvent::EventProperty::cancelBubble) {
       bool v = JSValueToBoolean(_hostClass->ctx, value);

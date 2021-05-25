@@ -30,7 +30,6 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPan = dispatchEvent;
     renderBoxModel.onScale = dispatchEvent;
     renderBoxModel.onLongPress = dispatchEvent;
-    renderBoxModel.initGestureRecognizer(eventHandlers);
   }
 
   void removeEventResponder(RenderBoxModel renderBoxModel) {
@@ -94,7 +93,7 @@ mixin EventHandlerMixin on Node {
 
   void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
     RenderBoxModel root = elementManager.viewportElement.renderBoxModel;
-    Offset globalOffset = root.globalToLocal(Offset(down.position.dx, down.position.dy));
+    Offset globalOffset = root.globalToLocal(Offset(up.position.dx, up.position.dy));
 
     dispatchEvent(MouseEvent(eventType,
       MouseEventInit(
@@ -102,8 +101,8 @@ mixin EventHandlerMixin on Node {
         cancelable: true,
         clientX: globalOffset.dx,
         clientY: globalOffset.dy,
-        offsetX: down.localPosition.dx,
-        offsetY: down.localPosition.dy,
+        offsetX: up.localPosition.dx,
+        offsetY: up.localPosition.dy,
       )
     ));
   }
