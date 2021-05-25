@@ -435,7 +435,7 @@ class _Interpolation {
 class KeyframeEffect extends AnimationEffect {
   CSSStyleDeclaration style;
   Element target;
-  List<_Interpolation> _interpolations = List.empty();
+  List<_Interpolation> _interpolations = List.empty(growable: true);
   double? _progress;
   double? _activeTime;
   Map<String, List<Keyframe>> _propertySpecificKeyframeGroups = Map();

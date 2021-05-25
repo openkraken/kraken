@@ -57,7 +57,7 @@ class CSSLength {
     }
   }
 
-  static bool isAuto(String? value) {
+  static bool isAuto(String value) {
     return value == AUTO;
   }
 
@@ -75,7 +75,8 @@ class CSSLength {
     return toDisplayPortValue(unitedValue, viewportSize);
   }
 
-  static double? toDisplayPortValue(String unitedValue, Size viewportSize) {
+  static double? toDisplayPortValue(String? unitedValue, Size viewportSize) {
+    if (unitedValue == null) return null;
     if (unitedValue.isEmpty) return null;
 
     unitedValue = unitedValue.trim();
@@ -156,8 +157,8 @@ class CSSLength {
     return displayPortValue;
   }
 
-  static bool isLength(String value) {
-    return (value == ZERO || _lengthRegExp.hasMatch(value));
+  static bool isLength(String? value) {
+    return value != null && (value == ZERO || _lengthRegExp.hasMatch(value));
   }
 
 }

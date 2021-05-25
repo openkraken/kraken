@@ -290,7 +290,7 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
     command.id = id;
     int nativePtrValue = rawMemory[i + nativePtrMemOffset];
     command.nativePtr = nativePtrValue != 0 ? Pointer.fromAddress(rawMemory[i + nativePtrMemOffset]) : nullptr;
-    command.args = List.empty();
+    command.args = List.empty(growable: true);
 
     int args01And02Length = rawMemory[i + args01And02LengthMemOffset];
     int args01Length;
