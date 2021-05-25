@@ -15,7 +15,7 @@ enum CSSDisplay {
   flex,
   inlineFlex,
 
-  sILver, // @KOL temp name.
+  silver, // @kol temp name.
 
   none
 }
