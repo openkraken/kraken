@@ -9,8 +9,8 @@ import 'package:kraken/css.dart';
 
 class CSSMargin {
   CSSMargin({
-    this.length,
-    this.isAuto,
+    required this.length,
+    required this.isAuto,
   });
   /// length if margin value is length type
   double length;
@@ -19,13 +19,12 @@ class CSSMargin {
 }
 
 mixin CSSMarginMixin on RenderStyleBase {
-
-  EdgeInsets _resolvedMargin;
+  EdgeInsets? _resolvedMargin;
 
   void _resolve() {
     if (_resolvedMargin != null) return;
     if (margin == null) return;
-    _resolvedMargin = margin.resolve(TextDirection.ltr);
+    _resolvedMargin = margin!.resolve(TextDirection.ltr);
   }
 
   void _markNeedResolution() {
@@ -36,9 +35,9 @@ mixin CSSMarginMixin on RenderStyleBase {
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
   /// must not be null.
-  EdgeInsets get margin => _margin;
-  EdgeInsets _margin;
-  set margin(EdgeInsets value) {
+  EdgeInsets? get margin => _margin;
+  EdgeInsets? _margin;
+  set margin(EdgeInsets? value) {
     if (value == null) return;
     if (_margin == value) return;
     _margin = value;
@@ -47,34 +46,34 @@ mixin CSSMarginMixin on RenderStyleBase {
 
   CSSMargin get marginTop {
     _resolve();
-    double length = _resolvedMargin != null ? _resolvedMargin.top : 0;
+    double length = _resolvedMargin != null ? _resolvedMargin!.top : 0;
     bool isAuto = style[MARGIN_TOP] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   CSSMargin get marginRight {
     _resolve();
-    double length = _resolvedMargin != null ? _resolvedMargin.right : 0;
+    double length = _resolvedMargin != null ? _resolvedMargin!.right : 0;
     bool isAuto = style[MARGIN_RIGHT] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   CSSMargin get marginBottom {
     _resolve();
-    double length = _resolvedMargin != null ? _resolvedMargin.bottom : 0;
+    double length = _resolvedMargin != null ? _resolvedMargin!.bottom : 0;
     bool isAuto = style[MARGIN_BOTTOM] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   CSSMargin get marginLeft {
     _resolve();
-    double length = _resolvedMargin != null ? _resolvedMargin.left : 0;
+    double length = _resolvedMargin != null ? _resolvedMargin!.left : 0;
     bool isAuto = style[MARGIN_LEFT] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   void updateMargin(String property, double value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this;
+    RenderStyle renderStyle = this as RenderStyle;
 
     EdgeInsets prevMargin = renderStyle.margin ?? EdgeInsets.only(
       top: 0.0,

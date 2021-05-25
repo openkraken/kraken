@@ -16,7 +16,7 @@ mixin CSSObjectFitMixin on RenderStyleBase {
   }
 
   void updateObjectFit(String property, String value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this;
+    RenderStyle renderStyle = this as RenderStyle;
     renderStyle.objectFit = _getBoxFit(value);
     if (shouldMarkNeedsLayout) {
       renderBoxModel.markNeedsLayout();

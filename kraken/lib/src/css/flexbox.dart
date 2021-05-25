@@ -174,11 +174,11 @@ enum AlignSelf {
 
 mixin CSSFlexboxMixin on RenderStyleBase {
 
-  FlexDirection get flexDirection => _flexDirection;
-  FlexDirection _flexDirection = FlexDirection.row;
+  FlexDirection? get flexDirection => _flexDirection;
+  FlexDirection? _flexDirection = FlexDirection.row;
 
-  set flexDirection(FlexDirection value) {
-    assert(value != null);
+  set flexDirection(FlexDirection? value) {
+    if (value == null) return;
     if (_flexDirection != value) {
       _flexDirection = value;
       if (renderBoxModel is RenderFlexLayout) {
@@ -248,9 +248,9 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     }
   }
 
-  double get flexBasis => _flexBasis;
-  double _flexBasis;
-  set flexBasis(double value) {
+  double? get flexBasis => _flexBasis;
+  double? _flexBasis;
+  set flexBasis(double? value) {
     if (_flexBasis == value) return;
     _flexBasis = value;
     if (renderBoxModel.parent is RenderFlexLayout) {
@@ -416,21 +416,21 @@ mixin CSSFlexboxMixin on RenderStyleBase {
 
   double _getFlexGrow(CSSStyleDeclaration style) {
     String grow = style[FLEX_GROW];
-    double flexGrow = CSSLength.toDouble(grow);
+    double? flexGrow = CSSLength.toDouble(grow);
     return flexGrow != null && flexGrow >= 0 ? flexGrow : 0.0;
   }
 
   double _getFlexShrink(CSSStyleDeclaration style) {
     String shrink = style[FLEX_SHRINK];
-    double flexShrink = CSSLength.toDouble(shrink);
+    double? flexShrink = CSSLength.toDouble(shrink);
     return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
   }
 
-  double _getFlexBasis(CSSStyleDeclaration style, Size viewportSize) {
+  double? _getFlexBasis(CSSStyleDeclaration style, Size viewportSize) {
     String basisStr = style[FLEX_BASIS];
-    double flexBasis = CSSLength.toDisplayPortValue(basisStr, viewportSize);
+    double? flexBasis = CSSLength.toDisplayPortValue(basisStr, viewportSize);
     if (basisStr.isNotEmpty && basisStr != AUTO) {
-      if (flexBasis < 0) {
+      if (flexBasis != null && flexBasis < 0) {
         flexBasis = null;
       }
     } else {
@@ -442,19 +442,19 @@ mixin CSSFlexboxMixin on RenderStyleBase {
 
 
 class CSSFlex {
-  static bool isValidFlexWrapValue(String val) {
+  static bool isValidFlexWrapValue(String? val) {
     return val == 'wrap' || val == 'nowrap' || val == 'wrap-reverse';
   }
 
-  static bool isValidFlexDirectionValue(String val) {
+  static bool isValidFlexDirectionValue(String? val) {
     return val == 'row' || val == 'row-reverse' || val == 'column' || val == 'column-reverse';
   }
 
-  static bool isHorizontalFlexDirection(FlexDirection flexDirection) {
+  static bool isHorizontalFlexDirection(FlexDirection? flexDirection) {
     return flexDirection == FlexDirection.row || flexDirection == FlexDirection.rowReverse;
   }
 
-  static bool isVerticalFlexDirection(FlexDirection flexDirection) {
+  static bool isVerticalFlexDirection(FlexDirection? flexDirection) {
     return flexDirection == FlexDirection.columnReverse || flexDirection == FlexDirection.column;
   }
 

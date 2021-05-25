@@ -12,7 +12,7 @@ class CSSTime {
   static const String SECOND = 's';
 
   static bool isTime(String value) {
-    return value != null && (value == _0s || value == _0ms || _timeRegExp.firstMatch(value) != null);
+    return (value == _0s || value == _0ms || _timeRegExp.firstMatch(value) != null);
   }
 
   static int? parseTime(String input) {

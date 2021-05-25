@@ -15,7 +15,7 @@ const String SEPIA = 'sepia';
 const String BLUR = 'blur';
 
 // Calc 5x5 matrix multiplcation.
-List<double> _multiplyMatrix5(List<double> a, List<double> b) {
+List<double>? _multiplyMatrix5(List<double>? a, List<double>? b) {
   if (a == null || b == null) {
     return a ?? b;
   }
@@ -95,9 +95,9 @@ mixin CSSFilterEffectsMixin {
 
   // Get the color filter.
   // eg: 'grayscale(1) grayscale(0.5)' -> matrix5(grayscale(1)) · matrix5(grayscale(0.5))
-  static ColorFilter _parseColorFilters(List<CSSFunctionalNotation> functions) {
-    List<double> matrix5;
-    if (functions != null && functions.length > 0) {
+  static ColorFilter? _parseColorFilters(List<CSSFunctionalNotation> functions) {
+    List<double>? matrix5;
+    if (functions.length > 0) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         double amount = double.tryParse(f.args.first) ?? 1;
@@ -137,13 +137,14 @@ mixin CSSFilterEffectsMixin {
   }
 
   // Get the image filter.
-  static ImageFilter _parseImageFilters(List<CSSFunctionalNotation> functions, Size viewportSize) {
-    if (functions != null && functions.length > 0) {
+  static ImageFilter? _parseImageFilters(List<CSSFunctionalNotation> functions, Size viewportSize) {
+    if (functions.length > 0) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {
           case BLUR:
-            double amount = CSSLength.parseLength(f.args.first, viewportSize);
+            double? amount = CSSLength.parseLength(f.args.first, viewportSize);
+            if (amount == null) return null;
             return ImageFilter.blur(sigmaX: amount, sigmaY: amount);
         }
       }
@@ -152,9 +153,8 @@ mixin CSSFilterEffectsMixin {
   }
 
   void updateFilterEffects(RenderBoxModel renderBoxModel, String filter) {
-    assert(renderBoxModel != null);
     List<CSSFunctionalNotation> functions = CSSFunction.parseFunction(filter);
-    ColorFilter colorFilter = _parseColorFilters(functions);
+    ColorFilter? colorFilter = _parseColorFilters(functions);
     if (colorFilter != null) {
       renderBoxModel.colorFilter = colorFilter;
     }
@@ -163,7 +163,7 @@ mixin CSSFilterEffectsMixin {
     double viewportWidth = elementManager.viewportWidth;
     double viewportHeight = elementManager.viewportHeight;
     Size viewportSize = Size(viewportWidth, viewportHeight);
-    ImageFilter imageFilter = _parseImageFilters(functions, viewportSize);
+    ImageFilter? imageFilter = _parseImageFilters(functions, viewportSize);
     if (imageFilter != null) {
       renderBoxModel.imageFilter = imageFilter;
     }

@@ -227,7 +227,7 @@ class Animation {
 
     _playbackRate = value;
 
-    double oldCurrentTime = currentTime!;
+    double? oldCurrentTime = currentTime;
     _startTime = null;
     if (playState != AnimationPlayState.paused && playState != AnimationPlayState.idle) {
       _finishedFlag = false;
@@ -455,7 +455,7 @@ class KeyframeEffect extends AnimationEffect {
     }
   }
 
-  Size viewportSize;
+  Size? viewportSize;
 
   static _defaultParse(value) {
     return value;
@@ -465,7 +465,7 @@ class KeyframeEffect extends AnimationEffect {
     return progress < 0.5 ? start : end;
   }
 
-  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, Size viewportSize) {
+  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, Size? viewportSize) {
     List<_Interpolation> interpolations = [];
 
     propertySpecificKeyframeGroups.forEach((String property, List<Keyframe> keyframes) {
@@ -569,7 +569,7 @@ class KeyframeEffect extends AnimationEffect {
           scaledLocalTime = 1;
         }
 
-        RenderBoxModel renderBoxModel = target.renderBoxModel;
+        RenderBoxModel? renderBoxModel = target.renderBoxModel;
         if (renderBoxModel != null) {
           interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime, property, renderBoxModel.renderStyle);
         }
