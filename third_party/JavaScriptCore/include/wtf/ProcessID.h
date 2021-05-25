@@ -23,8 +23,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#ifndef ProcessID_h
-#define ProcessID_h
+#pragma once
 
 #if OS(UNIX)
 #include <unistd.h>
@@ -36,7 +35,13 @@
 
 namespace WTF {
 
-inline int getCurrentProcessID()
+#if OS(WINDOWS)
+using ProcessID = int;
+#else
+using ProcessID = pid_t;
+#endif
+
+inline ProcessID getCurrentProcessID()
 {
 #if OS(WINDOWS)
     return GetCurrentProcessId();
@@ -48,6 +53,4 @@ inline int getCurrentProcessID()
 } // namespace WTF
 
 using WTF::getCurrentProcessID;
-
-#endif // ProcessID_h
-
+using WTF::ProcessID;

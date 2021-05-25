@@ -23,8 +23,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#ifndef CFBundleSPI_h
-#define CFBundleSPI_h
+#pragma once
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -36,6 +35,9 @@
 
 WTF_EXTERN_C_BEGIN
 
+extern const CFStringRef _kCFBundleDisplayNameKey;
+extern const CFStringRef _kCFBundleShortVersionStringKey;
+
 void _CFBundleSetupXPCBootstrap(xpc_object_t bootstrap);
 
 CFBundleRef _CFBundleCreateUnique(CFAllocatorRef, CFURLRef bundleURL);
@@ -43,5 +45,3 @@ Boolean CFBundleGetLocalizationInfoForLocalization(CFStringRef localizationName,
 CFStringRef CFBundleCopyLocalizationForLocalizationInfo(SInt32 languageCode, SInt32 regionCode, SInt32 scriptCode, CFStringEncoding stringEncoding);
 
 WTF_EXTERN_C_END
-
-#endif

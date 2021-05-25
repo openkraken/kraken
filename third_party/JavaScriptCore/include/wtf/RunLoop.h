@@ -25,8 +25,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RunLoop_h
-#define RunLoop_h
+#pragma once
 
 #include <wtf/Condition.h>
 #include <wtf/Deque.h>
@@ -35,7 +34,7 @@
 #include <wtf/HashMap.h>
 #include <wtf/RetainPtr.h>
 #include <wtf/Seconds.h>
-#include <wtf/Threading.h>
+#include <wtf/ThreadingPrimitives.h>
 
 #if USE(GLIB_EVENT_LOOP)
 #include <wtf/glib/GRefPtr.h>
@@ -62,7 +61,7 @@ public:
     WTF_EXPORT_PRIVATE void wakeUp();
 
 #if USE(COCOA_EVENT_LOOP)
-    WTF_EXPORT_PRIVATE void runForDuration(double duration);
+    WTF_EXPORT_PRIVATE void runForDuration(Seconds duration);
 #endif
 
 #if USE(GLIB_EVENT_LOOP)
@@ -79,35 +78,42 @@ public:
 #endif
 
     class TimerBase {
+        WTF_MAKE_FAST_ALLOCATED;
         friend class RunLoop;
     public:
         WTF_EXPORT_PRIVATE explicit TimerBase(RunLoop&);
         WTF_EXPORT_PRIVATE virtual ~TimerBase();
 
-        void startRepeating(double repeatInterval) { start(repeatInterval, true); }
-        void startRepeating(std::chrono::milliseconds repeatInterval) { startRepeating(repeatInterval.count() * 0.001); }
-        void startRepeating(Seconds repeatInterval) { startRepeating(repeatInterval.value()); }
-        void startOneShot(double interval) { start(interval, false); }
-        void startOneShot(std::chrono::milliseconds interval) { start(interval.count() * 0.001, false); }
-        void startOneShot(Seconds interval) { start(interval.value(), false); }
+        void startRepeating(Seconds repeatInterval) { startInternal(repeatInterval, true); }
+        void startOneShot(Seconds interval) { startInternal(interval, false); }
 
         WTF_EXPORT_PRIVATE void stop();
         WTF_EXPORT_PRIVATE bool isActive() const;
+        WTF_EXPORT_PRIVATE Seconds secondsUntilFire() const;
 
         virtual void fired() = 0;
 
 #if USE(GLIB_EVENT_LOOP)
+        void setName(const char*);
         void setPriority(int);
 #endif
 
     private:
-        WTF_EXPORT_PRIVATE void start(double nextFireInterval, bool repeat);
+        void startInternal(Seconds nextFireInterval, bool repeat)
+        {
+            start(std::max(nextFireInterval, 0_s), repeat);
+        }
 
-        RunLoop& m_runLoop;
+        WTF_EXPORT_PRIVATE void start(Seconds nextFireInterval, bool repeat);
+
+        Ref<RunLoop> m_runLoop;
 
 #if USE(WINDOWS_EVENT_LOOP)
+        bool isActive(const AbstractLocker&) const;
         static void timerFired(RunLoop*, uint64_t ID);
         uint64_t m_ID;
+        MonotonicTime m_nextFireDate;
+        Seconds m_interval;
         bool m_isRepeating;
 #elif USE(COCOA_EVENT_LOOP)
         static void timerFired(CFRunLoopTimerRef, void*);
@@ -118,6 +124,9 @@ public:
         bool m_isRepeating { false };
         Seconds m_fireInterval { 0 };
 #elif USE(GENERIC_EVENT_LOOP)
+        bool isActive(const AbstractLocker&) const;
+        void stop(const AbstractLocker&);
+
         class ScheduledTask;
         RefPtr<ScheduledTask> m_scheduledTask;
 #endif
@@ -149,7 +158,7 @@ private:
 
     void performWork();
 
-    Mutex m_functionQueueLock;
+    Lock m_functionQueueLock;
     Deque<Function<void()>> m_functionQueue;
 
 #if USE(WINDOWS_EVENT_LOOP)
@@ -159,6 +168,7 @@ private:
     HWND m_runLoopMessageWindow;
 
     typedef HashMap<uint64_t, TimerBase*> TimerMap;
+    Lock m_activeTimersLock;
     TimerMap m_activeTimers;
 #elif USE(COCOA_EVENT_LOOP)
     static void performWork(void*);
@@ -172,7 +182,7 @@ private:
     void schedule(Ref<TimerBase::ScheduledTask>&&);
     void schedule(const AbstractLocker&, Ref<TimerBase::ScheduledTask>&&);
     void wakeUp(const AbstractLocker&);
-    void scheduleAndWakeUp(Ref<TimerBase::ScheduledTask>&&);
+    void scheduleAndWakeUp(const AbstractLocker&, Ref<TimerBase::ScheduledTask>&&);
 
     enum class RunMode {
         Iterate,
@@ -184,12 +194,14 @@ private:
         Stopping,
     };
     void runImpl(RunMode);
-    bool populateTasks(RunMode, Status&, Deque<Ref<TimerBase::ScheduledTask>>&);
+    bool populateTasks(RunMode, Status&, Deque<RefPtr<TimerBase::ScheduledTask>>&);
+
+    friend class TimerBase;
 
     Lock m_loopLock;
     Condition m_readyToRun;
     Condition m_stopCondition;
-    Vector<Ref<TimerBase::ScheduledTask>> m_schedules;
+    Vector<RefPtr<TimerBase::ScheduledTask>> m_schedules;
     Vector<Status*> m_mainLoops;
     bool m_shutdown { false };
     bool m_pendingTasks { false };
@@ -199,5 +211,3 @@ private:
 } // namespace WTF
 
 using WTF::RunLoop;
-
-#endif // RunLoop_h

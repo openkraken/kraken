@@ -43,44 +43,68 @@ enum TracePointCode {
     JavaScriptRange = 2500,
     VMEntryScopeStart,
     VMEntryScopeEnd,
+    WebAssemblyCompileStart,
+    WebAssemblyCompileEnd,
+    WebAssemblyExecuteStart,
+    WebAssemblyExecuteEnd,
 
     WebCoreRange = 5000,
+    MainResourceLoadDidStartProvisional,
+    MainResourceLoadDidEnd,
+    SubresourceLoadWillStart,
+    SubresourceLoadDidEnd,
+    FetchCookiesStart,
+    FetchCookiesEnd,
     StyleRecalcStart,
     StyleRecalcEnd,
+    RenderTreeBuildStart,
+    RenderTreeBuildEnd,
     LayoutStart,
     LayoutEnd,
-    PaintViewStart,
-    PaintViewEnd,
     PaintLayerStart,
     PaintLayerEnd,
-    RAFDisplayLinkScheduled,
-    RAFDisplayLinkFired,
+    AsyncImageDecodeStart,
+    AsyncImageDecodeEnd,
     RAFCallbackStart,
     RAFCallbackEnd,
+    MemoryPressureHandlerStart,
+    MemoryPressureHandlerEnd,
+    UpdateTouchRegionsStart,
+    UpdateTouchRegionsEnd,
+    DisplayListRecordStart,
+    DisplayListRecordEnd,
+    DisplayRefreshDispatchingToMainThread,
 
     WebKitRange = 10000,
-    WebKit2Range = 12000,
+    WebHTMLViewPaintStart,
+    WebHTMLViewPaintEnd,
 
-    RAFDidUpdateStart,
-    RAFDidUpdateEnd,
-    RAFBackingStoreFlushStart,
-    RAFBackingStoreFlushEnd,
-    RAFBuildTransactionStart,
-    RAFBuildTransactionEnd,
+    WebKit2Range = 12000,
+    BackingStoreFlushStart,
+    BackingStoreFlushEnd,
+    BuildTransactionStart,
+    BuildTransactionEnd,
+    SyncMessageStart,
+    SyncMessageEnd,
+    SyncTouchEventStart,
+    SyncTouchEventEnd,
+    InitializeWebProcessStart,
+    InitializeWebProcessEnd,
 
     UIProcessRange = 14000,
-
-    RAFCommitLayerTreeStart,
-    RAFCommitLayerTreeEnd,
-    RAFDidRefreshDisplayStart,
-    RAFDidRefreshDisplayEnd,
+    CommitLayerTreeStart,
+    CommitLayerTreeEnd,
+    ProcessLaunchStart,
+    ProcessLaunchEnd,
+    InitializeSandboxStart,
+    InitializeSandboxEnd,
 };
 
 #ifdef __cplusplus
 
 namespace WTF {
 
-inline void TracePoint(TracePointCode code, uint64_t data1 = 0, uint64_t data2 = 0, uint64_t data3 = 0, uint64_t data4 = 0)
+inline void tracePoint(TracePointCode code, uint64_t data1 = 0, uint64_t data2 = 0, uint64_t data3 = 0, uint64_t data4 = 0)
 {
 #if HAVE(KDEBUG_H)
     kdebug_trace(ARIADNEDBG_CODE(WEBKIT_COMPONENT, code), data1, data2, data3, data4);
@@ -96,15 +120,15 @@ inline void TracePoint(TracePointCode code, uint64_t data1 = 0, uint64_t data2 =
 class TraceScope {
 public:
 
-    TraceScope(TracePointCode entryCode, TracePointCode exitCode)
+    TraceScope(TracePointCode entryCode, TracePointCode exitCode, uint64_t data1 = 0, uint64_t data2 = 0, uint64_t data3 = 0, uint64_t data4 = 0)
         : m_exitCode(exitCode)
     {
-        TracePoint(entryCode);
+        tracePoint(entryCode, data1, data2, data3, data4);
     }
 
     ~TraceScope()
     {
-        TracePoint(m_exitCode);
+        tracePoint(m_exitCode);
     }
 
 private:
@@ -114,6 +138,6 @@ private:
 } // namespace WTF
 
 using WTF::TraceScope;
-using WTF::TracePoint;
+using WTF::tracePoint;
 
 #endif // __cplusplus

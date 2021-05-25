@@ -23,12 +23,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RefCounter_h
-#define RefCounter_h
+#pragma once
 
-#include <functional>
+#include <wtf/Function.h>
 #include <wtf/Noncopyable.h>
 #include <wtf/RefPtr.h>
+#include <wtf/SetForScope.h>
 
 namespace WTF {
 
@@ -36,6 +36,7 @@ enum class RefCounterEvent { Decrement, Increment };
 
 template<typename T>
 class RefCounter {
+    WTF_MAKE_FAST_ALLOCATED;
     WTF_MAKE_NONCOPYABLE(RefCounter);
 
     class Count {
@@ -43,6 +44,8 @@ class RefCounter {
     public:
         void ref();
         void deref();
+
+        void refCounterWasDeleted();
 
     private:
         friend class RefCounter;
@@ -55,13 +58,14 @@ class RefCounter {
 
         RefCounter* m_refCounter;
         size_t m_value;
+        bool m_inValueDidChange { false };
     };
 
 public:
     using Token = RefPtr<Count>;
-    using ValueChangeFunction = std::function<void (RefCounterEvent)>;
+    using ValueChangeFunction = WTF::Function<void (RefCounterEvent)>;
 
-    RefCounter(ValueChangeFunction = nullptr);
+    RefCounter(ValueChangeFunction&& = nullptr);
     ~RefCounter();
 
     Token count() const
@@ -93,8 +97,11 @@ inline void RefCounter<T>::Count::deref()
     ASSERT(m_value);
 
     --m_value;
-    if (m_refCounter && m_refCounter->m_valueDidChange)
+
+    if (m_refCounter && m_refCounter->m_valueDidChange) {
+        SetForScope<bool> inCallback(m_inValueDidChange, true);
         m_refCounter->m_valueDidChange(RefCounterEvent::Decrement);
+    }
 
     // The Count object is kept alive so long as either the RefCounter that created it remains
     // allocated, or so long as its reference count is non-zero.
@@ -105,8 +112,25 @@ inline void RefCounter<T>::Count::deref()
 }
 
 template<typename T>
-inline RefCounter<T>::RefCounter(ValueChangeFunction valueDidChange)
-    : m_valueDidChange(valueDidChange)
+inline void RefCounter<T>::Count::refCounterWasDeleted()
+{
+    // The Count object is kept alive so long as either the RefCounter that created it remains
+    // allocated, or so long as its reference count is non-zero.
+    // If the reference count of the Count is already zero then delete it now, otherwise
+    // clear its m_refCounter pointer.
+
+    m_refCounter = nullptr;
+
+    if (m_inValueDidChange)
+        return;
+
+    if (!m_value)
+        delete this;
+}
+
+template<typename T>
+inline RefCounter<T>::RefCounter(ValueChangeFunction&& valueDidChange)
+    : m_valueDidChange(WTFMove(valueDidChange))
     , m_count(new Count(*this))
 {
 }
@@ -114,19 +138,11 @@ inline RefCounter<T>::RefCounter(ValueChangeFunction valueDidChange)
 template<typename T>
 inline RefCounter<T>::~RefCounter()
 {
-    // The Count object is kept alive so long as either the RefCounter that created it remains
-    // allocated, or so long as its reference count is non-zero.
-    // If the reference count of the Count is already zero then delete it now, otherwise
-    // clear its m_refCounter pointer.
-    if (m_count->m_value)
-        m_count->m_refCounter = nullptr;
-    else
-        delete m_count;
+    m_count->refCounterWasDeleted();
+
 }
 
 } // namespace WTF
 
 using WTF::RefCounter;
 using WTF::RefCounterEvent;
-
-#endif // RefCounter_h

@@ -32,6 +32,7 @@
 #include <wtf/HashTraits.h>
 #include <wtf/Lock.h>
 #include <wtf/MathExtras.h>
+#include <wtf/RandomNumber.h>
 #include <wtf/StdLibExtras.h>
 #include <wtf/ValueCheck.h>
 
@@ -59,15 +60,15 @@ namespace WTF {
 
     struct HashTableStats {
         // The following variables are all atomically incremented when modified.
-        WTF_EXPORTDATA static std::atomic<unsigned> numAccesses;
-        WTF_EXPORTDATA static std::atomic<unsigned> numRehashes;
-        WTF_EXPORTDATA static std::atomic<unsigned> numRemoves;
-        WTF_EXPORTDATA static std::atomic<unsigned> numReinserts;
+        WTF_EXPORT_PRIVATE static std::atomic<unsigned> numAccesses;
+        WTF_EXPORT_PRIVATE static std::atomic<unsigned> numRehashes;
+        WTF_EXPORT_PRIVATE static std::atomic<unsigned> numRemoves;
+        WTF_EXPORT_PRIVATE static std::atomic<unsigned> numReinserts;
 
         // The following variables are only modified in the recordCollisionAtCount method within a mutex.
-        WTF_EXPORTDATA static unsigned maxCollisions;
-        WTF_EXPORTDATA static unsigned numCollisions;
-        WTF_EXPORTDATA static unsigned collisionGraph[4096];
+        WTF_EXPORT_PRIVATE static unsigned maxCollisions;
+        WTF_EXPORT_PRIVATE static unsigned numCollisions;
+        WTF_EXPORT_PRIVATE static unsigned collisionGraph[4096];
 
         WTF_EXPORT_PRIVATE static void recordCollisionAtCount(unsigned count);
         WTF_EXPORT_PRIVATE static void dumpStats();
@@ -225,8 +226,8 @@ namespace WTF {
         void checkValidity(const const_iterator&) const { }
 #endif
 
-        PointerType m_position;
-        PointerType m_endPosition;
+        PointerType m_position { nullptr };
+        PointerType m_endPosition { nullptr };
 
 #if CHECK_HASHTABLE_ITERATORS
     public:
@@ -379,6 +380,20 @@ namespace WTF {
         const_iterator begin() const { return isEmpty() ? end() : makeConstIterator(m_table); }
         const_iterator end() const { return makeKnownGoodConstIterator(m_table + m_tableSize); }
 
+        iterator random()
+        {
+            if (isEmpty())
+                return end();
+
+            while (1) {
+                auto& bucket = m_table[weakRandomUint32() & m_tableSizeMask];
+                if (!isEmptyOrDeletedBucket(bucket))
+                    return makeKnownGoodIterator(&bucket);
+            };
+        }
+
+        const_iterator random() const { return static_cast<const_iterator>(const_cast<HashTable*>(this)->random()); }
+
         unsigned size() const { return m_keyCount; }
         unsigned capacity() const { return m_tableSize; }
         bool isEmpty() const { return !m_keyCount; }
@@ -405,7 +420,7 @@ namespace WTF {
         void removeWithoutEntryConsistencyCheck(iterator);
         void removeWithoutEntryConsistencyCheck(const_iterator);
         template<typename Functor>
-        void removeIf(const Functor&);
+        bool removeIf(const Functor&);
         void clear();
 
         static bool isEmptyBucket(const ValueType& value) { return isHashTraitsEmptyValue<KeyTraits>(Extractor::extract(value)); }
@@ -837,7 +852,7 @@ namespace WTF {
     template<> struct HashTableBucketInitializer<false> {
         template<typename Traits, typename Value> static void initialize(Value& bucket)
         {
-            new (NotNull, std::addressof(bucket)) Value(Traits::emptyValue());
+            Traits::template constructEmptyValue<Traits>(bucket);
         }
     };
 
@@ -847,7 +862,7 @@ namespace WTF {
             // This initializes the bucket without copying the empty value.
             // That makes it possible to use this with types that don't support copying.
             // The memset to 0 looks like a slow operation but is optimized by the compilers.
-            memset(std::addressof(bucket), 0, sizeof(bucket));
+            memset(static_cast<void*>(std::addressof(bucket)), 0, sizeof(bucket));
         }
     };
     
@@ -1108,7 +1123,7 @@ namespace WTF {
 
     template<typename Key, typename Value, typename Extractor, typename HashFunctions, typename Traits, typename KeyTraits>
     template<typename Functor>
-    inline void HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits>::removeIf(const Functor& functor)
+    inline bool HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits>::removeIf(const Functor& functor)
     {
         // We must use local copies in case "functor" or "deleteBucket"
         // make a function call, which prevents the compiler from keeping
@@ -1134,6 +1149,7 @@ namespace WTF {
             shrink();
         
         internalCheckTableConsistency();
+        return removedBucketCount;
     }
 
     template<typename Key, typename Value, typename Extractor, typename HashFunctions, typename Traits, typename KeyTraits>

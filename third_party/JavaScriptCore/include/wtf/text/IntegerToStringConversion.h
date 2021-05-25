@@ -19,23 +19,21 @@
  *
  */
 
-#ifndef IntegerToStringConversion_h
-#define IntegerToStringConversion_h
+#pragma once
+
+#include <wtf/text/LChar.h>
 
 namespace WTF {
 
-enum PositiveOrNegativeNumber {
-    PositiveNumber,
-    NegativeNumber
-};
+enum PositiveOrNegativeNumber { PositiveNumber, NegativeNumber };
 
-template<typename T> struct IntegerToStringConversionTrait;
+template<typename> struct IntegerToStringConversionTrait;
 
 template<typename T, typename UnsignedIntegerType, PositiveOrNegativeNumber NumberType, typename AdditionalArgumentType>
 static typename IntegerToStringConversionTrait<T>::ReturnType numberToStringImpl(UnsignedIntegerType number, AdditionalArgumentType additionalArgument)
 {
     LChar buf[sizeof(UnsignedIntegerType) * 3 + 1];
-    LChar* end = buf + WTF_ARRAY_LENGTH(buf);
+    LChar* end = std::end(buf);
     LChar* p = end;
 
     do {
@@ -63,12 +61,11 @@ inline typename IntegerToStringConversionTrait<T>::ReturnType numberToStringUnsi
     return numberToStringImpl<T, UnsignedIntegerType, PositiveNumber>(number, additionalArgument);
 }
 
-
 template<typename CharacterType, typename UnsignedIntegerType, PositiveOrNegativeNumber NumberType>
 static void writeNumberToBufferImpl(UnsignedIntegerType number, CharacterType* destination)
 {
     LChar buf[sizeof(UnsignedIntegerType) * 3 + 1];
-    LChar* end = buf + WTF_ARRAY_LENGTH(buf);
+    LChar* end = std::end(buf);
     LChar* p = end;
 
     do {
@@ -96,7 +93,6 @@ inline void writeNumberToBufferUnsigned(UnsignedIntegerType number, CharacterTyp
 {
     return writeNumberToBufferImpl<CharacterType, UnsignedIntegerType, PositiveNumber>(number, destination);
 }
-
 
 template<typename UnsignedIntegerType, PositiveOrNegativeNumber NumberType>
 static unsigned lengthOfNumberAsStringImpl(UnsignedIntegerType number)
@@ -128,7 +124,4 @@ inline unsigned lengthOfNumberAsStringUnsigned(UnsignedIntegerType number)
     return lengthOfNumberAsStringImpl<UnsignedIntegerType, PositiveNumber>(number);
 }
 
-
 } // namespace WTF
-
-#endif // IntegerToStringConversion_h

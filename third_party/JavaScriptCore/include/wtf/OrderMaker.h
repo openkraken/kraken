@@ -23,8 +23,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_OrderMaker_h
-#define WTF_OrderMaker_h
+#pragma once
 
 #include <wtf/Bag.h>
 #include <wtf/HashMap.h>
@@ -50,7 +49,7 @@ class OrderMaker {
         {
         }
 
-        T payload;
+        T payload { };
     };
     
 public:
@@ -138,6 +137,3 @@ private:
 } // namespace WTF
 
 using WTF::OrderMaker;
-
-#endif // WTF_OrderMaker_h
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007, 2008, 2014 Apple Inc. All rights reserved.
+ * Copyright (C) 2007-2017 Apple Inc. All rights reserved.
  * Copyright (C) 2009 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,12 +27,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_Deque_h
-#define WTF_Deque_h
+#pragma once
 
 // FIXME: Could move what Vector and Deque share into a separate file.
 // Deque doesn't actually use Vector.
 
+#include <algorithm>
 #include <iterator>
 #include <wtf/Vector.h>
 
@@ -46,6 +46,8 @@ template<typename T, size_t inlineCapacity = 0>
 class Deque {
     WTF_MAKE_FAST_ALLOCATED;
 public:
+    typedef T ValueType;
+
     typedef DequeIterator<T, inlineCapacity> iterator;
     typedef DequeConstIterator<T, inlineCapacity> const_iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
@@ -73,6 +75,8 @@ public:
     reverse_iterator rend() { return reverse_iterator(begin()); }
     const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+    
+    template<typename U> bool contains(const U&) const;
 
     T& first() { ASSERT(m_start != m_end); return m_buffer.buffer()[m_start]; }
     const T& first() const { ASSERT(m_start != m_end); return m_buffer.buffer()[m_start]; }
@@ -89,11 +93,29 @@ public:
     void removeLast();
     void remove(iterator&);
     void remove(const_iterator&);
+    
+    template<typename Func> void removeAllMatching(const Func&);
+    
+    // This is a priority enqueue. The callback is given a value, and if it returns true, then this
+    // will put the appended value before that value. It will keep bubbling until the callback returns
+    // false or the value ends up at the head of the queue.
+    template<typename U, typename Func>
+    void appendAndBubble(U&&, const Func&);
+    
+    // Remove and return the first element for which the callback returns true. Returns a null version of
+    // T if it the callback always returns false.
+    template<typename Func>
+    T takeFirst(const Func&);
+
+    // Remove and return the last element for which the callback returns true. Returns a null version of
+    // T if it the callback always returns false.
+    template<typename Func>
+    T takeLast(const Func&);
 
     void clear();
 
-    template<typename Predicate>
-    iterator findIf(Predicate&&);
+    template<typename Predicate> iterator findIf(const Predicate&);
+    template<typename Predicate> const_iterator findIf(const Predicate&) const;
 
 private:
     friend class DequeIteratorBase<T, inlineCapacity>;
@@ -373,14 +395,16 @@ inline void Deque<T, inlineCapacity>::clear()
 
 template<typename T, size_t inlineCapacity>
 template<typename Predicate>
-inline auto Deque<T, inlineCapacity>::findIf(Predicate&& predicate) -> iterator
+inline auto Deque<T, inlineCapacity>::findIf(const Predicate& predicate) -> iterator
 {
-    iterator end_iterator = end();
-    for (iterator it = begin(); it != end_iterator; ++it) {
-        if (predicate(*it))
-            return it;
-    }
-    return end_iterator;
+    return std::find_if(begin(), end(), predicate);
+}
+
+template<typename T, size_t inlineCapacity>
+template<typename Predicate>
+inline auto Deque<T, inlineCapacity>::findIf(const Predicate& predicate) const -> const_iterator
+{
+    return std::find_if(begin(), end(), predicate);
 }
 
 template<typename T, size_t inlineCapacity>
@@ -415,6 +439,14 @@ void Deque<T, inlineCapacity>::expandCapacity()
     }
     m_buffer.deallocateBuffer(oldBuffer);
     checkValidity();
+}
+
+template<typename T, size_t inlineCapacity>
+template<typename U>
+bool Deque<T, inlineCapacity>::contains(const U& searchValue) const
+{
+    auto endIterator = end();
+    return std::find(begin(), endIterator, searchValue) != endIterator;
 }
 
 template<typename T, size_t inlineCapacity>
@@ -522,6 +554,74 @@ inline void Deque<T, inlineCapacity>::remove(size_t position)
         m_end = (m_end - 1 + m_buffer.capacity()) % m_buffer.capacity();
     }
     checkValidity();
+}
+
+template<typename T, size_t inlineCapacity>
+template<typename Func>
+inline void Deque<T, inlineCapacity>::removeAllMatching(const Func& func)
+{
+    size_t count = size();
+    while (count--) {
+        T value = takeFirst();
+        if (!func(value))
+            append(WTFMove(value));
+    }
+}
+
+template<typename T, size_t inlineCapacity>
+template<typename U, typename Func>
+inline void Deque<T, inlineCapacity>::appendAndBubble(U&& value, const Func& func)
+{
+    append(WTFMove(value));
+    iterator begin = this->begin();
+    iterator iter = end();
+    --iter;
+    while (iter != begin) {
+        iterator prev = iter;
+        --prev;
+        if (!func(*prev))
+            return;
+        std::swap(*prev, *iter);
+        iter = prev;
+    }
+}
+
+template<typename T, size_t inlineCapacity>
+template<typename Func>
+inline T Deque<T, inlineCapacity>::takeFirst(const Func& func)
+{
+    unsigned count = 0;
+    unsigned size = this->size();
+    while (count < size) {
+        T candidate = takeFirst();
+        if (func(candidate)) {
+            while (count--)
+                prepend(takeLast());
+            return candidate;
+        }
+        count++;
+        append(WTFMove(candidate));
+    }
+    return T();
+}
+
+template<typename T, size_t inlineCapacity>
+template<typename Func>
+inline T Deque<T, inlineCapacity>::takeLast(const Func& func)
+{
+    unsigned count = 0;
+    unsigned size = this->size();
+    while (count < size) {
+        T candidate = takeLast();
+        if (func(candidate)) {
+            while (count--)
+                append(takeFirst());
+            return candidate;
+        }
+        count++;
+        prepend(WTFMove(candidate));
+    }
+    return T();
 }
 
 #ifdef NDEBUG
@@ -684,5 +784,3 @@ inline T* DequeIteratorBase<T, inlineCapacity>::before() const
 } // namespace WTF
 
 using WTF::Deque;
-
-#endif // WTF_Deque_h

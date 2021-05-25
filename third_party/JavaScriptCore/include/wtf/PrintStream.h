@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, 2014-2016 Apple Inc. All rights reserved.
+ * Copyright (C) 2012-2018 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,11 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#ifndef PrintStream_h
-#define PrintStream_h
+#pragma once
 
 #include <memory>
 #include <stdarg.h>
+#include <tuple>
+#include <wtf/Forward.h>
 #include <wtf/FastMalloc.h>
 #include <wtf/Noncopyable.h>
 #include <wtf/Optional.h>
@@ -37,12 +38,10 @@
 
 namespace WTF {
 
-class AtomicStringImpl;
-class CString;
-class String;
-class StringImpl;
-class StringView;
-class UniquedStringImpl;
+inline const char* boolForPrinting(bool value)
+{
+    return value ? "true" : "false";
+}
 
 class PrintStream {
     WTF_MAKE_FAST_ALLOCATED; WTF_MAKE_NONCOPYABLE(PrintStream);
@@ -327,7 +326,7 @@ FormatImpl<Types...> format(Types... values)
 }
 
 template<typename T>
-void printInternal(PrintStream& out, const std::optional<T>& value)
+void printInternal(PrintStream& out, const Optional<T>& value)
 {
     if (value)
         out.print(*value);
@@ -337,6 +336,7 @@ void printInternal(PrintStream& out, const std::optional<T>& value)
 
 } // namespace WTF
 
+using WTF::boolForPrinting;
 using WTF::CharacterDump;
 using WTF::PointerDump;
 using WTF::PrintStream;
@@ -345,6 +345,3 @@ using WTF::ignoringContext;
 using WTF::inContext;
 using WTF::pointerDump;
 using WTF::pointerDumpInContext;
-
-#endif // PrintStream_h
-

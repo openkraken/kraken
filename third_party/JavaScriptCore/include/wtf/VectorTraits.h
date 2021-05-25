@@ -18,8 +18,7 @@
  *
  */
 
-#ifndef WTF_VectorTraits_h
-#define WTF_VectorTraits_h
+#pragma once
 
 #include <wtf/Ref.h>
 #include <wtf/RefPtr.h>
@@ -49,7 +48,7 @@ namespace WTF {
     struct VectorTraitsBase<true, T>
     {
         static const bool needsInitialization = false;
-        static const bool canInitializeWithMemset = false;
+        static const bool canInitializeWithMemset = true;
         static const bool canMoveWithMemcpy = true;
         static const bool canCopyWithMemcpy = true;
         static const bool canFillWithMemset = sizeof(T) == sizeof(char) && std::is_integral<T>::value;
@@ -92,5 +91,3 @@ namespace WTF {
 
 using WTF::VectorTraits;
 using WTF::SimpleClassVectorTraits;
-
-#endif // WTF_VectorTraits_h

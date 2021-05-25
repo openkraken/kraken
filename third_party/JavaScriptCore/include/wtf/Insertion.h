@@ -23,8 +23,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#ifndef Insertion_h
-#define Insertion_h
+#pragma once
 
 namespace WTF {
 
@@ -50,8 +49,8 @@ public:
     }
     
 private:
-    size_t m_index;
-    T m_element;
+    size_t m_index { 0 };
+    T m_element { };
 };
 
 template<typename TargetVectorType, typename InsertionVectorType>
@@ -73,7 +72,7 @@ size_t executeInsertions(TargetVectorType& target, InsertionVectorType& insertio
         target[firstIndex] = WTFMove(insertions[indexInInsertions].element());
         lastIndex = firstIndex;
     }
-    insertions.resize(0);
+    insertions.shrink(0);
     return numInsertions;
 }
 
@@ -81,5 +80,3 @@ size_t executeInsertions(TargetVectorType& target, InsertionVectorType& insertio
 
 using WTF::Insertion;
 using WTF::executeInsertions;
-
-#endif // Insertion_h

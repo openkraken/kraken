@@ -23,8 +23,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSAllocator_h
-#define OSAllocator_h
+#pragma once
 
 #include <algorithm>
 #include <wtf/VMTags.h>
@@ -36,14 +35,14 @@ public:
     enum Usage {
         UnknownUsage = -1,
         FastMallocPages = VM_TAG_FOR_TCMALLOC_MEMORY,
-        JSGCHeapPages = VM_TAG_FOR_COLLECTOR_MEMORY,
         JSVMStackPages = VM_TAG_FOR_REGISTERFILE_MEMORY,
         JSJITCodePages = VM_TAG_FOR_EXECUTABLEALLOCATOR_MEMORY,
     };
 
     // These methods are symmetric; reserveUncommitted allocates VM in an uncommitted state,
     // releaseDecommitted should be called on a region of VM allocated by a single reservation,
-    // the memory must all currently be in a decommitted state.
+    // the memory must all currently be in a decommitted state. reserveUncommitted returns to
+    // you memory that is zeroed.
     WTF_EXPORT_PRIVATE static void* reserveUncommitted(size_t, Usage = UnknownUsage, bool writable = true, bool executable = false, bool includesGuardPages = false);
     WTF_EXPORT_PRIVATE static void releaseDecommitted(void*, size_t);
 
@@ -98,5 +97,3 @@ inline T* OSAllocator::reallocateCommitted(T* oldBase, size_t oldSize, size_t ne
 } // namespace WTF
 
 using WTF::OSAllocator;
-
-#endif // OSAllocator_h

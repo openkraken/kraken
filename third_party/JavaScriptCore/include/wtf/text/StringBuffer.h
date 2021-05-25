@@ -26,12 +26,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef StringBuffer_h
-#define StringBuffer_h
+#pragma once
 
-#include <wtf/Assertions.h>
 #include <limits>
 #include <unicode/utypes.h>
+#include <wtf/Assertions.h>
+#include <wtf/MallocPtr.h>
 
 namespace WTF {
 
@@ -86,5 +86,3 @@ private:
 } // namespace WTF
 
 using WTF::StringBuffer;
-
-#endif // StringBuffer_h

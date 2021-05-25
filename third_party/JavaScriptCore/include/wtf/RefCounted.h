@@ -26,11 +26,11 @@
 
 namespace WTF {
 
-// #if defined(NDEBUG) //&& !ENABLE(SECURITY_ASSERTIONS)
+#if defined(NDEBUG) && !ENABLE(SECURITY_ASSERTIONS)
 #define CHECK_REF_COUNTED_LIFECYCLE 0
-// #else
-// #define CHECK_REF_COUNTED_LIFECYCLE 1
-// #endif
+#else
+#define CHECK_REF_COUNTED_LIFECYCLE 1
+#endif
 
 // This base class holds the non-template methods and attributes.
 // The RefCounted class inherits from it reducing the template bloat

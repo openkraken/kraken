@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009, 2010 Google Inc. All rights reserved.
- * Copyright (C) 2014, 2015, 2016 Apple Inc. All rights reserved.
+ * Copyright (C) 2014-2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -33,9 +33,9 @@
 
 #include <wtf/Assertions.h>
 #include <wtf/Forward.h>
-#include <wtf/PassRefPtr.h>
+#include <wtf/HashSet.h>
 #include <wtf/RefPtr.h>
-#include <wtf/Threading.h>
+#include <wtf/ThreadSafeRefCounted.h>
 #include <wtf/text/WTFString.h>
 
 namespace WTF {
@@ -49,10 +49,6 @@ struct CrossThreadCopierBaseHelper {
     };
 
     template<typename T> struct RemovePointer<RefPtr<T>> {
-        typedef T Type;
-    };
-
-    template<typename T> struct RemovePointer<PassRefPtr<T>> {
         typedef T Type;
     };
 
@@ -92,18 +88,10 @@ template<typename T> struct CrossThreadCopierBase<false, true, T> {
     typedef typename CrossThreadCopierBaseHelper::RemovePointer<T>::Type RefCountedType;
     static_assert(std::is_convertible<RefCountedType*, ThreadSafeRefCounted<RefCountedType>*>::value, "T is not convertible to ThreadSafeRefCounted!");
 
-    typedef PassRefPtr<RefCountedType> Type;
+    typedef RefPtr<RefCountedType> Type;
     static Type copy(const T& refPtr)
     {
         return refPtr;
-    }
-};
-
-template<> struct CrossThreadCopierBase<false, false, std::chrono::system_clock::time_point> {
-    typedef std::chrono::system_clock::time_point Type;
-    static Type copy(const Type& source)
-    {
-        return source;
     }
 };
 
@@ -120,8 +108,8 @@ struct CrossThreadCopier : public CrossThreadCopierBase<CrossThreadCopierBaseHel
 };
 
 // Default specialization for Vectors of CrossThreadCopyable classes.
-template<typename T> struct CrossThreadCopierBase<false, false, Vector<T>> {
-    typedef Vector<T> Type;
+template<typename T, size_t inlineCapacity, typename OverflowHandler, size_t minCapacity> struct CrossThreadCopierBase<false, false, Vector<T, inlineCapacity, OverflowHandler, minCapacity>> {
+    using Type = Vector<T, inlineCapacity, OverflowHandler, minCapacity>;
     static Type copy(const Type& source)
     {
         Type destination;
@@ -131,9 +119,50 @@ template<typename T> struct CrossThreadCopierBase<false, false, Vector<T>> {
         return destination;
     }
 };
+    
+// Default specialization for HashSets of CrossThreadCopyable classes
+template<typename T> struct CrossThreadCopierBase<false, false, HashSet<T> > {
+    typedef HashSet<T> Type;
+    static Type copy(const Type& source)
+    {
+        Type destination;
+        for (auto& object : source)
+            destination.add(CrossThreadCopier<T>::copy(object));
+        return destination;
+    }
+};
 
+// Default specialization for HashMaps of CrossThreadCopyable classes
+template<typename K, typename V> struct CrossThreadCopierBase<false, false, HashMap<K, V> > {
+    typedef HashMap<K, V> Type;
+    static Type copy(const Type& source)
+    {
+        Type destination;
+        for (auto& keyValue : source)
+            destination.add(CrossThreadCopier<K>::copy(keyValue.key), CrossThreadCopier<V>::copy(keyValue.value));
+        return destination;
+    }
+};
+
+// Default specialization for Optional of CrossThreadCopyable class.
+template<typename T> struct CrossThreadCopierBase<false, false, Optional<T>> {
+    typedef Optional<T> Type;
+    static Type copy(const Type& source)
+    {
+        if (!source)
+            return WTF::nullopt;
+        return CrossThreadCopier<T>::copy(*source);
+    }
+};
+
+template<typename T> T crossThreadCopy(const T& source)
+{
+    return CrossThreadCopier<T>::copy(source);
+}
+    
 } // namespace WTF
 
 using WTF::CrossThreadCopierBaseHelper;
 using WTF::CrossThreadCopierBase;
 using WTF::CrossThreadCopier;
+using WTF::crossThreadCopy;

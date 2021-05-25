@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Apple Inc. All rights reserved.
+ * Copyright (C) 2011-2018 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,8 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WTF_MetaAllocator_h
-#define WTF_MetaAllocator_h
+#pragma once
 
 #include <wtf/Assertions.h>
 #include <wtf/HashMap.h>
@@ -36,7 +35,6 @@
 #include <wtf/Noncopyable.h>
 #include <wtf/PageBlock.h>
 #include <wtf/RedBlackTree.h>
-#include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
 
 namespace WTF {
@@ -52,7 +50,7 @@ public:
     MetaAllocatorHandle* find(void* address)
     {
         MetaAllocatorHandle* handle = m_allocations.findGreatestLessThanOrEqual(address);
-        if (handle && address < handle->end())
+        if (handle && address < handle->end().untaggedPtr())
             return handle;
         return 0;
     }
@@ -64,6 +62,8 @@ class MetaAllocator {
     WTF_MAKE_NONCOPYABLE(MetaAllocator);
 
 public:
+    using FreeSpacePtr = MetaAllocatorPtr<FreeSpacePtrTag>;
+
     WTF_EXPORT_PRIVATE MetaAllocator(size_t allocationGranule, size_t pageSize = WTF::pageSize());
     
     WTF_EXPORT_PRIVATE virtual ~MetaAllocator();
@@ -110,8 +110,8 @@ protected:
     
     // Allocate new virtual space, but don't commit. This may return more
     // pages than we asked, in which case numPages is changed.
-    virtual void* allocateNewSpace(size_t& numPages) = 0;
-    
+    virtual FreeSpacePtr allocateNewSpace(size_t& numPages) = 0;
+
     // Commit a page.
     virtual void notifyNeedPage(void* page) = 0;
     
@@ -128,19 +128,25 @@ private:
     
     class FreeSpaceNode : public RedBlackTree<FreeSpaceNode, size_t>::Node {
     public:
+        FreeSpaceNode() = default;
+
         FreeSpaceNode(void* start, size_t sizeInBytes)
             : m_start(start)
-            , m_sizeInBytes(sizeInBytes)
+            , m_end(reinterpret_cast<uint8_t*>(start) + sizeInBytes)
+        { }
+
+        size_t sizeInBytes()
         {
+            return m_end.untaggedPtr<size_t>() - m_start.untaggedPtr<size_t>();
         }
 
         size_t key()
         {
-            return m_sizeInBytes;
+            return sizeInBytes();
         }
 
-        void* m_start;
-        size_t m_sizeInBytes;
+        FreeSpacePtr m_start;
+        FreeSpacePtr m_end;
     };
     typedef RedBlackTree<FreeSpaceNode, size_t> Tree;
 
@@ -150,16 +156,16 @@ private:
     // Remove free space from the allocator. This is effectively
     // the allocate() function, except that it does not mark the
     // returned space as being in-use.
-    void* findAndRemoveFreeSpace(size_t sizeInBytes);
+    FreeSpacePtr findAndRemoveFreeSpace(size_t sizeInBytes);
 
     // This is called when memory from an allocation is freed.
-    void addFreeSpaceFromReleasedHandle(void* start, size_t sizeInBytes);
-    
+    void addFreeSpaceFromReleasedHandle(FreeSpacePtr start, size_t sizeInBytes);
+
     // This is the low-level implementation of adding free space; it
     // is called from both addFreeSpaceFromReleasedHandle and from
     // addFreshFreeSpace.
-    void addFreeSpace(void* start, size_t sizeInBytes);
-    
+    void addFreeSpace(FreeSpacePtr start, size_t sizeInBytes);
+
     // Management of used space.
     
     void incrementPageOccupancy(void* address, size_t sizeInBytes);
@@ -178,8 +184,8 @@ private:
     unsigned m_logPageSize;
     
     Tree m_freeSpaceSizeMap;
-    HashMap<void*, FreeSpaceNode*> m_freeSpaceStartAddressMap;
-    HashMap<void*, FreeSpaceNode*> m_freeSpaceEndAddressMap;
+    HashMap<FreeSpacePtr, FreeSpaceNode*> m_freeSpaceStartAddressMap;
+    HashMap<FreeSpacePtr, FreeSpaceNode*> m_freeSpaceEndAddressMap;
     HashMap<uintptr_t, size_t> m_pageOccupancyMap;
     
     size_t m_bytesAllocated;
@@ -201,6 +207,3 @@ private:
 };
 
 } // namespace WTF
-
-#endif // WTF_MetaAllocator_h
-

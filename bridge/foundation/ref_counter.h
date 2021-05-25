@@ -115,7 +115,7 @@ private:
   }
 #endif
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafe);
+  KRAKEN_DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafe);
 };
 
 // If you subclass |RefCountedThreadSafe| and want to keep your destructor
