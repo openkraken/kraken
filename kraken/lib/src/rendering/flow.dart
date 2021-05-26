@@ -241,7 +241,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   double _computeIntrinsicHeightForWidth(double width) {
     assert(direction == Axis.horizontal);
-    int runCount = 0;
     double height = 0.0;
     double runWidth = 0.0;
     double runHeight = 0.0;
@@ -268,7 +267,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   double _computeIntrinsicWidthForHeight(double height) {
     assert(direction == Axis.vertical);
-    int runCount = 0;
     double width = 0.0;
     double runHeight = 0.0;
     double runWidth = 0.0;
