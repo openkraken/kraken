@@ -47,7 +47,7 @@ class CanvasPainter extends CustomPainter {
     }
 
     PictureRecorder pictureRecorder = _pictureRecorder = PictureRecorder();
-    canvas = _canvas = Canvas(_pictureRecorder!);
+    canvas = Canvas(_pictureRecorder!);
 
     if (_scaleX != 1.0 || _scaleY != 1.0) {
       canvas.scale(_scaleX, _scaleY);
@@ -107,6 +107,5 @@ class CanvasPainter extends CustomPainter {
 
     _picture?.dispose();
     _picture = null;
-    _canvas = null;
   }
 }

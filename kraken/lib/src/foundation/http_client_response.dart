@@ -16,23 +16,21 @@ class _HttpConnectionInfo implements HttpConnectionInfo {
 class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientResponse {
   String mime;
   String encoding;
-  Stream data;
+  Stream<List<int>> data;
 
   int statusCode;
   String reasonPhrase;
   Map<String, String> responseHeaders;
-  SingleHttpHeaders _singleHttpHeaders;
+  SingleHttpHeaders? _singleHttpHeaders;
 
   HttpClientStreamResponse(this.mime, this.encoding, this.data, {
     this.statusCode = 200,
     this.reasonPhrase = '',
     this.responseHeaders = const {},
-  }) : assert(mime != null),
-        assert(encoding != null),
-        assert(data != null);
+  });
 
   @override
-  X509Certificate get certificate => null;
+  X509Certificate? get certificate => null;
 
   @override
   HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.notCompressed;
@@ -44,11 +42,11 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   int get contentLength => -1;
 
   @override
-  List<Cookie> get cookies => null;
+  List<Cookie> get cookies => [];
 
   @override
   Future<Socket> detachSocket() async {
-    return null;
+    return Future<Socket>.error(UnsupportedError('Mocked response'));
   }
 
   @override
@@ -61,7 +59,7 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   bool get persistentConnection => false;
 
   @override
-  Future<HttpClientResponse> redirect([String method, Uri url, bool followLoops]) {
+  Future<HttpClientResponse> redirect([String? method, Uri? url, bool? followLoops]) {
     return Future.error(RedirectException('Redirect is unsupported.', redirects));
   }
 
@@ -69,7 +67,7 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   List<RedirectInfo> get redirects => [];
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, { Function onError, void Function() onDone, bool cancelOnError }) {
+  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, { Function? onError, void Function()? onDone, bool? cancelOnError }) {
     return data.listen(onData, onDone: onDone, cancelOnError: cancelOnError);
   }
 }

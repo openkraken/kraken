@@ -8,7 +8,7 @@ import 'http_client_request.dart';
 import 'http_overrides.dart';
 
 class ProxyHttpClient implements HttpClient {
-  ProxyHttpClient({ this.nativeHttpClient, this.httpOverrides });
+  ProxyHttpClient({ required this.nativeHttpClient, required this.httpOverrides });
 
   final KrakenHttpOverrides httpOverrides;
   final HttpClient nativeHttpClient;
@@ -22,10 +22,10 @@ class ProxyHttpClient implements HttpClient {
   }
 
   @override
-  Duration get connectionTimeout => nativeHttpClient.connectionTimeout;
+  Duration get connectionTimeout => nativeHttpClient.connectionTimeout!;
 
   @override
-  set connectionTimeout(Duration _connectionTimeout) {
+  set connectionTimeout(Duration? _connectionTimeout) {
     nativeHttpClient.connectionTimeout = _connectionTimeout;
   }
 
@@ -38,18 +38,18 @@ class ProxyHttpClient implements HttpClient {
   }
 
   @override
-  int get maxConnectionsPerHost => nativeHttpClient.maxConnectionsPerHost;
+  int get maxConnectionsPerHost => nativeHttpClient.maxConnectionsPerHost!;
 
   @override
-  set maxConnectionsPerHost(int _maxConnectionsPerHost) {
+  set maxConnectionsPerHost(int? _maxConnectionsPerHost) {
     nativeHttpClient.maxConnectionsPerHost = _maxConnectionsPerHost;
   }
 
   @override
-  String get userAgent => nativeHttpClient.userAgent;
+  String get userAgent => nativeHttpClient.userAgent!;
 
   @override
-  set userAgent(String _userAgent) {
+  set userAgent(String? _userAgent) {
     nativeHttpClient.userAgent = _userAgent;
   }
 
@@ -64,17 +64,17 @@ class ProxyHttpClient implements HttpClient {
   }
 
   @override
-  set authenticate(Future<bool> Function(Uri url, String scheme, String realm) f) {
+  set authenticate(Future<bool> f(Uri url, String scheme, String realm)?) {
     nativeHttpClient.authenticate = f;
   }
 
   @override
-  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm) f) {
+  set authenticateProxy( Future<bool> f(String host, int port, String scheme, String realm)?) {
     nativeHttpClient.authenticateProxy = f;
   }
 
   @override
-  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) {
+  set badCertificateCallback(bool callback(X509Certificate cert, String host, int port)?) {
     nativeHttpClient.badCertificateCallback = callback;
   }
 
@@ -94,7 +94,7 @@ class ProxyHttpClient implements HttpClient {
   }
 
   @override
-  set findProxy(String Function(Uri url) f) {
+  set findProxy(String f(Uri url)?) {
     nativeHttpClient.findProxy = f;
   }
 

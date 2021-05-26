@@ -9,21 +9,21 @@ import 'http_client.dart';
 
 const String HttpHeaderContextID = 'x-kraken-context-id';
 class KrakenHttpOverrides extends HttpOverrides {
-  static KrakenHttpOverrides _instance;
+  static KrakenHttpOverrides? _instance;
   KrakenHttpOverrides._();
 
   factory KrakenHttpOverrides.instance() {
     if (_instance == null) {
       _instance = KrakenHttpOverrides._();
     }
-    return _instance;
+    return _instance!;
   }
 
   static void markHttpRequest(HttpClientRequest request, String contextId) {
     request.headers.set(HttpHeaderContextID, contextId);
   }
 
-  final HttpOverrides parentHttpOverrides = HttpOverrides.current;
+  final HttpOverrides? parentHttpOverrides = HttpOverrides.current;
   final Map<String, HttpClientInterceptor> _contextIdToHttpClientInterceptorMap = Map<String, HttpClientInterceptor>();
 
   void registerKrakenContext(KrakenController controller, HttpClientInterceptor httpClientInterceptor) {
@@ -38,7 +38,7 @@ class KrakenHttpOverrides extends HttpOverrides {
   }
 
   HttpClientInterceptor getInterceptor(String contextId) {
-    return _contextIdToHttpClientInterceptorMap[contextId];
+    return _contextIdToHttpClientInterceptorMap[contextId]!;
   }
 
   void clearInterceptors() {
@@ -46,10 +46,10 @@ class KrakenHttpOverrides extends HttpOverrides {
   }
 
   @override
-  HttpClient createHttpClient(SecurityContext context) {
+  HttpClient createHttpClient(SecurityContext? context) {
     HttpClient nativeHttpClient;
     if (parentHttpOverrides != null) {
-      nativeHttpClient = parentHttpOverrides.createHttpClient(context);
+      nativeHttpClient = parentHttpOverrides!.createHttpClient(context);
     } else {
       nativeHttpClient = super.createHttpClient(context);
     }
@@ -62,12 +62,12 @@ class KrakenHttpOverrides extends HttpOverrides {
   }
 
   bool shouldOverride(HttpClientRequest request) {
-    String contextId = request.headers.value(HttpHeaderContextID);
+    String? contextId = request.headers.value(HttpHeaderContextID);
     return contextId != null && _contextIdToHttpClientInterceptorMap.containsKey(contextId);
   }
 }
 
-KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor httpClientInterceptor, { KrakenController controller }) {
+KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor httpClientInterceptor, { required KrakenController controller }) {
   KrakenHttpOverrides httpOverrides = KrakenHttpOverrides.instance();
   httpOverrides.registerKrakenContext(controller, httpClientInterceptor);
   HttpOverrides.global = httpOverrides;
