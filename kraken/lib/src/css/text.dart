@@ -18,11 +18,16 @@ mixin CSSTextMixin on RenderStyleBase {
 
   Color _color = CSSColor.initial;
   Color get color {
-    return _color;
+    // Get style from closest parent if specified style property is not set due to style inheritance.
+    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(COLOR);
+    return renderBox.renderStyle._color;
   }
+
   set color(Color value) {
     if (_color == value) return;
     _color = value;
+    // Update all the children text with specified style property not set due to style inheritance.
+    renderBoxModel.updateChildrenText(COLOR);
   }
 
   TextDecoration _textDecorationLine;
@@ -134,8 +139,13 @@ mixin CSSTextMixin on RenderStyleBase {
     _whiteSpace = value;
   }
 
-  static TextSpan createTextSpan(String text, Element parent) {
-    TextStyle textStyle = parent != null ? getTextStyle(parent) : null;
+  static TextSpan createTextSpan(String text, {Element parentElement, RenderBoxModel parentRenderBoxModel}) {
+    TextStyle textStyle;
+    if (parentElement != null) {
+      textStyle = getTextStyle(parentElement: parentElement);
+    } else if (parentRenderBoxModel != null) {
+      textStyle = getTextStyle(parentRenderBoxModel: parentRenderBoxModel);
+    }
     return TextSpan(
       text: text,
       style: textStyle,
@@ -157,35 +167,43 @@ mixin CSSTextMixin on RenderStyleBase {
   ///   locale: The locale used to select region-specific glyphs.
   ///   background: The paint drawn as a background for the text.
   ///   foreground: The paint used to draw the text. If this is specified, color must be null.
-  static TextStyle getTextStyle(Element parent) {
-    CSSStyleDeclaration parentStyle = parent.style;
-    RenderBoxModel parentRenderBoxModel = parent.renderBoxModel;
-    ElementManager elementManager = parent.elementManager;
+  static TextStyle getTextStyle({Element parentElement, RenderBoxModel parentRenderBoxModel}) {
+    CSSStyleDeclaration parentStyle;
+    ElementManager elementManager;
+    if (parentElement != null) {
+      parentStyle = parentElement.style;
+      elementManager = parentElement.elementManager;
+      parentRenderBoxModel = parentElement.renderBoxModel;
+    } else if (parentRenderBoxModel != null) {
+      parentStyle = parentRenderBoxModel.renderStyle.style;
+      elementManager = parentRenderBoxModel.elementManager;
+    }
+
     double viewportWidth = elementManager.viewportWidth;
     double viewportHeight = elementManager.viewportHeight;
     Size viewportSize = Size(viewportWidth, viewportHeight);
 
     // Text may be created when parent renderObject not created, get it from style instead
     Color color = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.color : CSSText.getTextColor(parent.style);
+      parentRenderBoxModel.renderStyle.color : CSSText.getTextColor(parentStyle);
     TextDecoration textDecorationLine = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textDecorationLine : CSSText.getTextDecorationLine(parent.style);
+      parentRenderBoxModel.renderStyle.textDecorationLine : CSSText.getTextDecorationLine(parentStyle);
     Color textDecorationColor = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textDecorationColor : CSSText.getTextDecorationColor(parent.style);
+      parentRenderBoxModel.renderStyle.textDecorationColor : CSSText.getTextDecorationColor(parentStyle);
     TextDecorationStyle textDecorationStyle = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textDecorationStyle : CSSText.getTextDecorationStyle(parent.style);
+      parentRenderBoxModel.renderStyle.textDecorationStyle : CSSText.getTextDecorationStyle(parentStyle);
     FontWeight fontWeight = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontWeight : CSSText.getFontWeight(parent.style);
+      parentRenderBoxModel.renderStyle.fontWeight : CSSText.getFontWeight(parentStyle);
     FontStyle fontStyle = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontStyle : CSSText.getFontStyle(parent.style);
+      parentRenderBoxModel.renderStyle.fontStyle : CSSText.getFontStyle(parentStyle);
     double fontSize = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontSize : CSSText.getFontSize(parent.style, viewportSize);
+      parentRenderBoxModel.renderStyle.fontSize : CSSText.getFontSize(parentStyle, viewportSize);
     double letterSpacing = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.letterSpacing : CSSText.getLetterSpacing(parent.style, viewportSize);
+      parentRenderBoxModel.renderStyle.letterSpacing : CSSText.getLetterSpacing(parentStyle, viewportSize);
     double wordSpacing = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.wordSpacing : CSSText.getWordSpacing(parent.style, viewportSize);
+      parentRenderBoxModel.renderStyle.wordSpacing : CSSText.getWordSpacing(parentStyle, viewportSize);
     List<Shadow> textShadow = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textShadow : CSSText.getTextShadow(parent.style, viewportSize);
+      parentRenderBoxModel.renderStyle.textShadow : CSSText.getTextShadow(parentStyle, viewportSize);
 
     return TextStyle(
       color: color,
@@ -196,7 +214,7 @@ mixin CSSTextMixin on RenderStyleBase {
       fontStyle: fontStyle,
       // To keep compatibility with font-family custimazition in test,
       // get style from constants if style not defined
-      fontFamilyFallback: CSSText.getFontFamilyFallback(parent.style),
+      fontFamilyFallback: CSSText.getFontFamilyFallback(parentStyle),
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,

@@ -104,7 +104,7 @@ class TextNode extends Node {
   void _updateTextStyle() {
     // parentNode must be an element.
     _renderTextBox.style = parentElement.style;
-    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
+    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement: parentElement);
     // Update paragraph line height
     KrakenRenderParagraph renderParagraph = _renderTextBox.child;
     renderParagraph.lineHeight = parentElement.renderBoxModel.renderStyle.lineHeight;
@@ -160,7 +160,7 @@ class TextNode extends Node {
     CSSStyleDeclaration parentStyle = parentElement.style;
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
-    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
+    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement: parentElement);
     // TextNode's style is inherited from parent style
     _renderTextBox.style = parentStyle;
     // Update paragraph line height
@@ -176,7 +176,7 @@ class TextNode extends Node {
       return renderer;
     }
 
-    InlineSpan text = CSSTextMixin.createTextSpan(_data, null);
+    InlineSpan text = CSSTextMixin.createTextSpan(_data);
     _renderTextBox = RenderTextBox(text,
       targetId: targetId,
       style: null,
