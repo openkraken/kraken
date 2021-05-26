@@ -31,7 +31,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_color == value) return;
     _color = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    renderBoxModel.updateChildrenText(COLOR);
+    _updateChildrenText(renderBoxModel, COLOR);
   }
 
   TextDecoration _textDecorationLine;
@@ -75,7 +75,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_fontWeight == value) return;
     _fontWeight = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    renderBoxModel.updateChildrenText(FONT_WEIGHT);
+    _updateChildrenText(renderBoxModel, FONT_WEIGHT);
   }
 
   FontStyle _fontStyle;
@@ -92,7 +92,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_fontStyle == value) return;
     _fontStyle = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    renderBoxModel.updateChildrenText(FONT_STYLE);
+    _updateChildrenText(renderBoxModel, FONT_STYLE);
   }
 
   List<String> _fontFamily;
@@ -112,7 +112,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_fontFamily == value) return;
     _fontFamily = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    renderBoxModel.updateChildrenText(FONT_FAMILY);
+    _updateChildrenText(renderBoxModel, FONT_FAMILY);
   }
 
   double _fontSize = CSSText.DEFAULT_FONT_SIZE;
@@ -129,17 +129,45 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_fontSize == value) return;
     _fontSize = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    renderBoxModel.updateChildrenText(FONT_SIZE);
+    _updateChildrenText(renderBoxModel, FONT_SIZE);
   }
 
   double _lineHeight;
   double get lineHeight {
+    // Get style from self or closest parent if specified style property is not set
+    // due to style inheritance.
+    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(LINE_HEIGHT);
+    if (renderBox != null) {
+      return renderBox.renderStyle._lineHeight;
+    }
     return _lineHeight;
   }
   set lineHeight(double value) {
     if (_lineHeight == value) return;
     _lineHeight = value;
-    renderBoxModel.markNeedsLayout();
+    // Update all the children layout and text with line-height not set due to style inheritance.
+    _markLayoutTextNeedsLayout(renderBoxModel, LINE_HEIGHT);
+  }
+
+  /// Mark all layout and text children with line-height not set as needs layout
+  /// cause line-height works for both layout and text node.
+  void _markLayoutTextNeedsLayout(RenderBoxModel renderBoxModel, String styleProperty) {
+    if (renderBoxModel is RenderLayoutBox) {
+      renderBoxModel.markNeedsLayout();
+      renderBoxModel.visitChildren((RenderObject child) {
+        if (child is RenderLayoutBox) {
+          // Only need to layout when the specified style property is not set.
+          if (child.renderStyle.style[styleProperty].isEmpty) {
+            _markLayoutTextNeedsLayout(child, styleProperty);
+          }
+        } else if (child is RenderTextBox) {
+          // Update line height of paragraph.
+          KrakenRenderParagraph renderParagraph = child.child;
+          renderParagraph.lineHeight = renderBoxModel.renderStyle.lineHeight;
+          renderParagraph.markNeedsLayout();
+        }
+      });
+    }
   }
 
   double _letterSpacing;
@@ -156,7 +184,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_letterSpacing == value) return;
     _letterSpacing = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    renderBoxModel.updateChildrenText(LETTER_SPACING);
+    _updateChildrenText(renderBoxModel, LETTER_SPACING);
   }
 
   double _wordSpacing;
@@ -173,7 +201,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_wordSpacing == value) return;
     _wordSpacing = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    renderBoxModel.updateChildrenText(WORD_SPACING);
+    _updateChildrenText(renderBoxModel, WORD_SPACING);
   }
 
   List<Shadow> _textShadow;
@@ -190,7 +218,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_textShadow == value) return;
     _textShadow = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    renderBoxModel.updateChildrenText(TEXT_SHADOW);
+    _updateChildrenText(renderBoxModel, TEXT_SHADOW);
   }
 
   WhiteSpace _whiteSpace;
@@ -200,6 +228,24 @@ mixin CSSTextMixin on RenderStyleBase {
   set whiteSpace(WhiteSpace value) {
     if (_whiteSpace == value) return;
     _whiteSpace = value;
+  }
+
+  /// Loop children to update text node with specified style property
+  void _updateChildrenText(RenderBoxModel renderBoxModel, String styleProperty) {
+    renderBoxModel.visitChildren((RenderObject child) {
+      if (child is RenderBoxModel) {
+        // Only need to update child text when style property is not set.
+        if (child.renderStyle.style[styleProperty].isEmpty) {
+          _updateChildrenText(child, styleProperty);
+        }
+      } else if (child is RenderTextBox) {
+        // Need to recreate text span cause text style can not be set alone.
+        RenderBoxModel parentRenderBoxModel = child.parent;
+        KrakenRenderParagraph renderParagraph = child.child;
+        String text = renderParagraph.text.text;
+        child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel: parentRenderBoxModel);
+      }
+    });
   }
 
   static TextSpan createTextSpan(String text, {Element parentElement, RenderBoxModel parentRenderBoxModel}) {
@@ -354,26 +400,6 @@ class CSSText {
       }
     }
     return lineHeight;
-  }
-
-  static TextAlign getTextAlign(CSSStyleDeclaration style) {
-    TextAlign textAlign = TextAlign.left;
-    if (style == null) {
-      return textAlign;
-    }
-    switch (style[TEXT_ALIGN]) {
-      case 'center':
-        textAlign = TextAlign.center;
-        break;
-      case 'right':
-        textAlign = TextAlign.right;
-        break;
-      case 'left':
-      default:
-        textAlign = TextAlign.left;
-        break;
-    }
-    return textAlign;
   }
 
   /// In CSS2.1, text-decoration determin the type of text decoration,

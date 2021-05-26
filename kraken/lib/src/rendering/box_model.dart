@@ -682,27 +682,6 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  void updateChildrenText(String styleProperty) {
-    visitChildren((child) {
-      updateChildText(child, styleProperty);
-    });
-  }
-
-  void updateChildText(RenderObject child, String styleProperty) {
-    if (child is RenderBoxModel) {
-      // Only need to update child text when style property is not set.
-      if (child.renderStyle.style[styleProperty].isEmpty) {
-        child.updateChildrenText(styleProperty);
-      }
-    } else if (child is RenderTextBox) {
-      // Need to recreate text span cause text style can not be set alone.
-      RenderBoxModel parentRenderBoxModel = child.parent;
-      KrakenRenderParagraph renderParagraph = child.child;
-      String text = renderParagraph.text.text;
-      child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel: parentRenderBoxModel);
-    }
-  }
-
   @override
   void layout(Constraints newConstraints, { bool parentUsesSize = false }) {
     if (hasSize) {
