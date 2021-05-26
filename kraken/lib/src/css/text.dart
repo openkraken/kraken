@@ -18,9 +18,13 @@ mixin CSSTextMixin on RenderStyleBase {
 
   Color _color = CSSColor.initial;
   Color get color {
-    // Get style from closest parent if specified style property is not set due to style inheritance.
+    // Get style from self or closest parent if specified style property is not set
+    // due to style inheritance.
     RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(COLOR);
-    return renderBox.renderStyle._color;
+    if (renderBox != null) {
+      return renderBox.renderStyle._color;
+    }
+    return _color;
   }
 
   set color(Color value) {
@@ -59,38 +63,73 @@ mixin CSSTextMixin on RenderStyleBase {
 
   FontWeight _fontWeight;
   FontWeight get fontWeight {
+    // Get style from self or closest parent if specified style property is not set
+    // due to style inheritance.
+    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(FONT_WEIGHT);
+    if (renderBox != null) {
+      return renderBox.renderStyle._fontWeight;
+    }
     return _fontWeight;
   }
   set fontWeight(FontWeight value) {
     if (_fontWeight == value) return;
     _fontWeight = value;
+    // Update all the children text with specified style property not set due to style inheritance.
+    renderBoxModel.updateChildrenText(FONT_WEIGHT);
   }
 
   FontStyle _fontStyle;
   FontStyle get fontStyle {
+    // Get style from self or closest parent if specified style property is not set
+    // due to style inheritance.
+    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(FONT_STYLE);
+    if (renderBox != null) {
+      return renderBox.renderStyle._fontStyle;
+    }
     return _fontStyle;
   }
   set fontStyle(FontStyle value) {
     if (_fontStyle == value) return;
     _fontStyle = value;
+    // Update all the children text with specified style property not set due to style inheritance.
+    renderBoxModel.updateChildrenText(FONT_STYLE);
   }
 
   List<String> _fontFamily;
   List<String> get fontFamily {
+    if (CSSText.DEFAULT_FONT_FAMILY_FALLBACK != null) {
+      return CSSText.getFontFamilyFallback(renderBoxModel.renderStyle.style);
+    }
+    // Get style from self or closest parent if specified style property is not set
+    // due to style inheritance.
+    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(FONT_FAMILY);
+    if (renderBox != null) {
+      return renderBox.renderStyle._fontFamily;
+    }
     return _fontFamily;
   }
   set fontFamily(List<String> value) {
     if (_fontFamily == value) return;
     _fontFamily = value;
+    // Update all the children text with specified style property not set due to style inheritance.
+    renderBoxModel.updateChildrenText(FONT_FAMILY);
   }
 
   double _fontSize = CSSText.DEFAULT_FONT_SIZE;
   double get fontSize {
+    // Get style from self or closest parent if specified style property is not set
+    // due to style inheritance.
+    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(FONT_SIZE);
+    if (renderBox != null) {
+      return renderBox.renderStyle._fontSize;
+    }
     return _fontSize;
   }
   set fontSize(double value) {
     if (_fontSize == value) return;
     _fontSize = value;
+    // Update all the children text with specified style property not set due to style inheritance.
+    renderBoxModel.updateChildrenText(FONT_SIZE);
   }
 
   double _lineHeight;
@@ -105,29 +144,53 @@ mixin CSSTextMixin on RenderStyleBase {
 
   double _letterSpacing;
   double get letterSpacing {
+    // Get style from self or closest parent if specified style property is not set
+    // due to style inheritance.
+    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(LETTER_SPACING);
+    if (renderBox != null) {
+      return renderBox.renderStyle._letterSpacing;
+    }
     return _letterSpacing;
   }
   set letterSpacing(double value) {
     if (_letterSpacing == value) return;
     _letterSpacing = value;
+    // Update all the children text with specified style property not set due to style inheritance.
+    renderBoxModel.updateChildrenText(LETTER_SPACING);
   }
 
   double _wordSpacing;
   double get wordSpacing {
+    // Get style from self or closest parent if specified style property is not set
+    // due to style inheritance.
+    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(WORD_SPACING);
+    if (renderBox != null) {
+      return renderBox.renderStyle._wordSpacing;
+    }
     return _wordSpacing;
   }
   set wordSpacing(double value) {
     if (_wordSpacing == value) return;
     _wordSpacing = value;
+    // Update all the children text with specified style property not set due to style inheritance.
+    renderBoxModel.updateChildrenText(WORD_SPACING);
   }
 
   List<Shadow> _textShadow;
   List<Shadow> get textShadow {
+    // Get style from self or closest parent if specified style property is not set
+    // due to style inheritance.
+    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(TEXT_SHADOW);
+    if (renderBox != null) {
+      return renderBox.renderStyle._textShadow;
+    }
     return _textShadow;
   }
   set textShadow(List<Shadow> value) {
     if (_textShadow == value) return;
     _textShadow = value;
+    // Update all the children text with specified style property not set due to style inheritance.
+    renderBoxModel.updateChildrenText(TEXT_SHADOW);
   }
 
   WhiteSpace _whiteSpace;
@@ -198,6 +261,8 @@ mixin CSSTextMixin on RenderStyleBase {
       parentRenderBoxModel.renderStyle.fontStyle : CSSText.getFontStyle(parentStyle);
     double fontSize = parentRenderBoxModel != null ?
       parentRenderBoxModel.renderStyle.fontSize : CSSText.getFontSize(parentStyle, viewportSize);
+    List<String> fontFamily = parentRenderBoxModel != null ?
+      parentRenderBoxModel.renderStyle.fontFamily : CSSText.getFontFamilyFallback(parentStyle);
     double letterSpacing = parentRenderBoxModel != null ?
       parentRenderBoxModel.renderStyle.letterSpacing : CSSText.getLetterSpacing(parentStyle, viewportSize);
     double wordSpacing = parentRenderBoxModel != null ?
@@ -212,9 +277,7 @@ mixin CSSTextMixin on RenderStyleBase {
       decorationStyle: textDecorationStyle,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
-      // To keep compatibility with font-family custimazition in test,
-      // get style from constants if style not defined
-      fontFamilyFallback: CSSText.getFontFamilyFallback(parentStyle),
+      fontFamilyFallback: fontFamily,
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
