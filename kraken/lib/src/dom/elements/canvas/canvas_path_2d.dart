@@ -25,10 +25,9 @@ class Path2D {
   // Syncs _points from native
   void _syncCurrentPoint() {
     PathMetrics metrics = _path.computeMetrics();
-    PathMetric metric = metrics.last;
-    if (metric == null) return;
-
-    Tangent tangent = metric.getTangentForOffset(metric.length);
+    PathMetric? metric = metrics.last;
+    Tangent? tangent = metric.getTangentForOffset(metric.length);
+    if (tangent == null) return;
     Offset position = tangent.position;
     _setPoint(position.dx, position.dy);
   }
@@ -108,7 +107,7 @@ class Path2D {
     _path.close();
   }
 
-  void addPath(Path2D path, {Float64List matrix4}) {
+  void addPath(Path2D path, {Float64List? matrix4}) {
     _path.addPath(path._path, Offset.zero, matrix4: matrix4);
     _syncCurrentPoint();
   }
