@@ -251,7 +251,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       final double childHeight = child.getMaxIntrinsicHeight(childWidth);
       if (runWidth + childWidth > width) {
         height += runHeight;
-        runCount += 1;
         runWidth = 0.0;
         runHeight = 0.0;
         childCount = 0;
@@ -277,7 +276,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       final double childWidth = child.getMaxIntrinsicWidth(childHeight);
       if (runHeight + childHeight > height) {
         width += runWidth;
-        runCount += 1;
         runHeight = 0.0;
         runWidth = 0.0;
         childCount = 0;
