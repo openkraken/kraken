@@ -40,7 +40,9 @@ class TextNode extends Node {
   // The text string.
   String? _data;
   String get data {
-    if (_data == null || _data!.isEmpty) return '';
+    String? _d = _data;
+
+    if (_d == null || _d.isEmpty) return '';
 
     WhiteSpace whiteSpace = CSSText.getWhiteSpace(parentElement!.style);
 
@@ -58,9 +60,9 @@ class TextNode extends Node {
         whiteSpace == WhiteSpace.preLine ||
         whiteSpace == WhiteSpace.preWrap ||
         whiteSpace == WhiteSpace.breakSpaces) {
-      return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_data ?? '') : _data ?? '';
+      return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_d) : _d;
     } else {
-      String collapsedData = collapseWhitespace(_data ?? '');
+      String collapsedData = collapseWhitespace(_d);
       // TODO:
       // Remove the leading space while prev element have space too:
       //   <p><span>foo </span> bar</p>
@@ -104,9 +106,8 @@ class TextNode extends Node {
   }
 
   void _updateTextStyle() {
-    Element? _parentElement = parentElement;
-    RenderTextBox? renderTextBox = _renderTextBox;
-    if (_parentElement == null || renderTextBox == null) return;
+    Element _parentElement = parentElement!;
+    RenderTextBox renderTextBox = _renderTextBox!;
 
     // parentNode must be an element.
     renderTextBox.style = _parentElement.style;
@@ -122,9 +123,8 @@ class TextNode extends Node {
   }
 
   void _setTextNodeProperties(CSSStyleDeclaration style) {
-    Element? _parentElement = parentElement;
-    RenderTextBox? renderTextBox = _renderTextBox;
-    if (_parentElement == null || renderTextBox == null) return;
+    Element _parentElement = parentElement!;
+    RenderTextBox renderTextBox = _renderTextBox!;
 
     renderTextBox.whiteSpace = CSSText.getWhiteSpace(_parentElement.style);
     renderTextBox.overflow = CSSText.getTextOverflow(_parentElement.style);
@@ -138,13 +138,12 @@ class TextNode extends Node {
 
     RenderLayoutBox? parentRenderLayoutBox;
     if (parent.scrollingContentLayoutBox != null) {
-      parentRenderLayoutBox = parent.scrollingContentLayoutBox;
+      parentRenderLayoutBox = parent.scrollingContentLayoutBox!;
     } else {
-      parentRenderLayoutBox = parent.renderBoxModel as RenderLayoutBox?;
+      parentRenderLayoutBox = (parent.renderBoxModel as RenderLayoutBox?)!;
     }
 
-    RenderTextBox? renderTextBox = _renderTextBox;
-    if (parentRenderLayoutBox == null || renderTextBox == null) return;
+    RenderTextBox renderTextBox = _renderTextBox!;
 
     parentRenderLayoutBox.insert(renderTextBox, after: after);
     _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
@@ -170,9 +169,8 @@ class TextNode extends Node {
   @override
   void willAttachRenderer() {
     createRenderer();
-    Element? _parentElement = parentElement;
-    RenderTextBox? renderTextBox = _renderTextBox;
-    if (_parentElement == null || renderTextBox == null) return;
+    Element _parentElement = parentElement!;
+    RenderTextBox renderTextBox = _renderTextBox!;
 
     CSSStyleDeclaration parentStyle = _parentElement.style;
     // Text node whitespace collapse relate to siblings,

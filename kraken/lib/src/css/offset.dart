@@ -133,7 +133,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     zIndex = int.tryParse(present);
   }
 
-  static CSSPositionType parsePositionType(String input) {
+  static CSSPositionType parsePositionType(String? input) {
     switch (input) {
       case RELATIVE:
         return CSSPositionType.relative;

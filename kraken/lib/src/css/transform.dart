@@ -121,7 +121,6 @@ FontWeight _parseFontWeight(String fontWeight, Size viewportSize) {
 
 void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress, String property, RenderStyle renderStyle) {
   FontWeight? fontWeight = FontWeight.lerp(oldValue, newValue, progress);
-  if (fontWeight == null) return;
 
   switch (property) {
     case FONT_WEIGHT:
@@ -227,11 +226,10 @@ void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, Ren
 
 void _updateChildTextNodes(RenderStyle renderStyle) {
   RenderBoxModel? renderBoxModel = renderStyle.renderBoxModel;
-  if (renderBoxModel == null) return;
   ElementManager elementManager = renderBoxModel.elementManager;
   int targetId = renderBoxModel.targetId;
-  Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
-  for (Node node in element.childNodes) {
+  Element? element = elementManager.getEventTargetByTargetId<Element>(targetId);
+  for (Node node in element!.childNodes) {
     if (node is TextNode) {
       node.updateTextStyle();
     }
@@ -1140,7 +1138,7 @@ mixin CSSTransformMixin on RenderStyleBase {
   }
 
   void updateTransform(
-    Matrix4 matrix4,
+    Matrix4? matrix4,
     {
       bool shouldToggleRepaintBoundary = true,
       bool shouldMarkNeedsLayout = true
@@ -1148,10 +1146,8 @@ mixin CSSTransformMixin on RenderStyleBase {
   ) {
     ElementManager elementManager = renderBoxModel.elementManager;
     int targetId = renderBoxModel.targetId;
-    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
-    RenderBoxModel? elementRenderBoxModel = element.renderBoxModel;
-    if (elementRenderBoxModel == null) return;
-
+    Element element = elementManager.getEventTargetByTargetId<Element>(targetId)!;
+    RenderBoxModel elementRenderBoxModel = element.renderBoxModel!;
     elementRenderBoxModel.renderStyle.transform = matrix4;
 
     if (shouldToggleRepaintBoundary) {

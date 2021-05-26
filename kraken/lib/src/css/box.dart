@@ -112,8 +112,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     _decoration = value;
     // If has border, render padding should subtracting the edge of the border
     if (value.border != null) {
-      Border? border = value.border as Border?;
-      if (border == null) return;
+      Border border = (value.border as Border?)!;
       borderEdge = EdgeInsets.fromLTRB(
         border.left.width,
         border.top.width,
@@ -142,7 +141,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     return constraints;
   }
 
-  void updateBox(String property, String original, String present) {
+  void updateBox(String property, String? original, String present) {
     RenderStyle renderStyle = this as RenderStyle;
 
     if (property == BACKGROUND_IMAGE) {
@@ -173,9 +172,7 @@ mixin CSSBoxMixin on RenderStyleBase {
        updateBoxShadow(property);
       }
     } else {
-      CSSBoxDecoration? _boxDecoration = getCSSBoxDecoration();
-      if (_boxDecoration == null) return;
-
+      CSSBoxDecoration _boxDecoration = getCSSBoxDecoration()!;
       cssBoxDecoration = getCSSBoxDecoration();
       renderStyle.decoration = _boxDecoration.toBoxDecoration();
       renderStyle.backgroundClip = getBackgroundClip(present);
@@ -209,9 +206,7 @@ mixin CSSBoxMixin on RenderStyleBase {
 
   void updateBackgroundColor([Color? color]) {
     Color? bgColor = color ?? CSSBackground.getBackgroundColor(style);
-    BoxDecoration? prevBoxDecoration = decoration;
-
-    if (prevBoxDecoration == null) return;
+    BoxDecoration? prevBoxDecoration = decoration!;
 
     // If change bg color from some color to null, which must be explicitly transparent.
     if (bgColor != null) {
@@ -235,8 +230,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   void updateBackgroundImage(String property, String present) {
-    BoxDecoration? prevBoxDecoration = decoration;
-    if (prevBoxDecoration == null) return;
+    BoxDecoration? prevBoxDecoration = decoration!;
 
     DecorationImage? decorationImage;
     Gradient? gradient;
@@ -287,15 +281,13 @@ mixin CSSBoxMixin on RenderStyleBase {
       if (_cssBoxDecoration == null) return;
       decoration = _cssBoxDecoration.toBoxDecoration();
     }
-    BoxDecoration? _decoration = decoration;
-    if (_decoration == null) return;
+    BoxDecoration _decoration = decoration!;
 
     // topLeft topRight bottomRight bottomLeft
     int? index = _borderRadiusMapping[property];
 
     if (index != null) {
-      Radius? newRadius = CSSBorderRadius.getRadius(present, viewportSize);
-      if (newRadius == null) return;
+      Radius newRadius = CSSBorderRadius.getRadius(present, viewportSize)!;
       BorderRadius? borderRadius = _decoration.borderRadius as BorderRadius?;
       decoration = _decoration.copyWith(borderRadius: BorderRadius.only(
         topLeft: index == 0 ? newRadius : borderRadius?.topLeft ?? Radius.zero,
@@ -307,9 +299,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   void updateBorder(String property, {Color? borderColor, double? borderWidth}) {
-    BoxDecoration? _decoration = decoration;
-    if (_decoration == null) return;
-
+    BoxDecoration _decoration = decoration!;
     Border? border = _decoration.border as Border?;
 
     bool isBorderWidthChange = property == BORDER_TOP_WIDTH || property == BORDER_RIGHT_WIDTH ||

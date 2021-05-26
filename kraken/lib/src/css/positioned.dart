@@ -290,15 +290,13 @@ class CSSPositionedLayout {
   /// the offsets are automatically calculated in reference to the nearest scrollport.
   /// https://www.w3.org/TR/css-position-3/#stickypos-insets
   static void applyStickyChildOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
-    RenderPositionHolder childRenderPositionHolder = child.renderPositionHolder;
-    RenderLayoutParentData? childPlaceHolderParentData = childRenderPositionHolder.parentData as RenderLayoutParentData?;
-
-    if (childPlaceHolderParentData == null) return;
+    RenderPositionHolder childRenderPositionHolder = child.renderPositionHolder!;
+    RenderLayoutParentData childPlaceHolderParentData = (childRenderPositionHolder.parentData as RenderLayoutParentData?)!;
 
     // Original offset of sticky child in relative status
     Offset childOriginalOffset = childPlaceHolderParentData.offset;
 
-    RenderObject rootRenderObject = child.elementManager.getRootRenderObject();
+    RenderObject rootRenderObject = child.elementManager.getRootRenderBox();
     // Offset of sticky child to scroll container
     Offset childToScrollContainerOffset =
       childRenderPositionHolder.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
@@ -342,8 +340,7 @@ class CSSPositionedLayout {
 
     // Scrolling element has two repaint boundary box, the inner box has constraints of inifinity
     // so it needs to find the upper box for querying content constraints
-    RenderBoxModel? containerBox = parent.isScrollingContentBox ? parent.parent as RenderBoxModel? : parent;
-    if (containerBox == null) return;
+    RenderBoxModel containerBox = (parent.isScrollingContentBox ? parent.parent as RenderBoxModel? : parent)!;
 
     Size trySize = containerBox.contentConstraints.biggest;
     Size parentSize = trySize.isInfinite ? containerBox.contentConstraints.smallest : trySize;
@@ -418,13 +415,11 @@ class CSSPositionedLayout {
     RenderBoxModel parent,
     RenderBoxModel child,
   ) {
-    final RenderLayoutParentData? childParentData = child.parentData as RenderLayoutParentData?;
-    if (childParentData == null) return;
+    final RenderLayoutParentData childParentData = (child.parentData as RenderLayoutParentData?)!;
     Size parentSize = parent.boxSize;
 
     if (parent.isScrollingContentBox) {
-      RenderLayoutBox? overflowContainerBox = parent.parent as RenderLayoutBox?;
-      if (overflowContainerBox == null) return;
+      RenderLayoutBox overflowContainerBox = (parent.parent as RenderLayoutBox?)!;
 
       if(overflowContainerBox.widthSizeType == BoxSizeType.specified && overflowContainerBox.heightSizeType == BoxSizeType.specified) {
         parentSize = Size(
@@ -453,11 +448,12 @@ class CSSPositionedLayout {
     childMarginRight = childRenderStyle.marginRight.length;
 
     // Offset to global coordinate system of base.
-    if (childParentData != null && childParentData.isPositioned) {
-      RenderObject root = parent.elementManager.getRootRenderObject();
-      Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(child.renderPositionHolder, parent) ?? Offset.zero;
+    if (childParentData.isPositioned) {
+      RenderObject root = parent.elementManager.getRootRenderBox();
+      RenderPositionHolder childPositionHolder = child.renderPositionHolder!;
+      Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childPositionHolder, parent) ?? Offset.zero;
 
-      Offset baseOffset = (child.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
+      Offset baseOffset = (childPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
         parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root));
 
       EdgeInsets? borderEdge = parent.renderStyle.borderEdge;

@@ -1,3 +1,4 @@
+import 'package:flutter/src/rendering/object.dart';
 import 'package:kraken/dom.dart';
 import 'dart:ffi';
 import 'package:kraken/bridge.dart';
@@ -7,8 +8,7 @@ class Document extends Node {
   final HTMLElement documentElement;
 
   Document(int targetId, this.nativeDocumentPtr, ElementManager elementManager, this.documentElement)
-      : assert(targetId != null),
-        super(NodeType.DOCUMENT_NODE, targetId, nativeDocumentPtr.ref.nativeNode, elementManager, '#document') {
+      : super(NodeType.DOCUMENT_NODE, targetId, nativeDocumentPtr.ref.nativeNode, elementManager, '#document') {
     appendChild(documentElement);
   }
 
@@ -22,4 +22,7 @@ class Document extends Node {
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
     addEventListener(eventName, _handleEvent);
   }
+
+  @override
+  RenderObject? get renderer => throw FlutterError('Document did\'t have renderObject.');
 }

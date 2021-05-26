@@ -172,8 +172,7 @@ class CSSStyleDeclaration {
 
   void _transition(String propertyName, begin, end, Size? viewportSize) {
     if (_hasRunningTransition(propertyName)) {
-      Animation? animation = _propertyRunningTransition[propertyName];
-      if (animation == null) return;
+      Animation animation = _propertyRunningTransition[propertyName]!;
       animation.cancel();
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.cancel);
       // Maybe set transition twice in a same frame. should check animationProperties has contains propertyName.

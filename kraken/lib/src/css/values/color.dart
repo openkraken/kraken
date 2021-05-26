@@ -440,8 +440,7 @@ double? _parseColorPart(String value, double min, double max) {
 }
 
 double? _parseColorHue(String number, String unit) {
-  final v = double.tryParse(number);
-  if (v == null) return null;
+  final v = double.tryParse(number)!;
 
   double deg;
   switch (unit) {

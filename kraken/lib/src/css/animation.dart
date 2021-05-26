@@ -43,8 +43,7 @@ Curve? _parseEasing(String function) {
     CSSFunctionalNotation method = methods.first;
     if (method.name == 'steps') {
       if (method.args.length >= 1) {
-        int? step = int.tryParse(method.args[0]);
-        if (step == null) return null;
+        int step = int.tryParse(method.args[0])!;
         var isStart = false;
         if (method.args.length == 2) {
           isStart = method.args[1] == 'start';
@@ -645,27 +644,24 @@ class KeyframeEffect extends AnimationEffect {
   // ignore: missing_return
   double? _calculateActiveTime(double activeDuration, double? localTime, AnimationEffectPhase phase) {
     FillMode fillMode = timing.fill;
-
-    if (localTime == null) return null;
-
     switch (phase) {
       case AnimationEffectPhase.before:
         // If the fill mode is backwards or both, return the result of evaluating
         // max(local time - start delay, 0).
         if (fillMode == FillMode.backwards || fillMode == FillMode.both)
-          return max<double>(localTime - timing.delay, 0.0);
+          return max<double>(localTime! - timing.delay, 0.0);
         // Otherwise, return an unresolved time value.
         return null;
       case AnimationEffectPhase.active:
         // If the animation effect is in the active phase, return the result of evaluating local time - start delay.
-        return localTime - timing.delay;
+        return localTime! - timing.delay;
       // If the animation effect is in the after phase, the result depends on the first matching
       // condition from the following,
       case AnimationEffectPhase.after:
         // If the fill mode is forwards or both, return the result of evaluating
         // max(min(local time - start delay, active duration), 0).
         if (fillMode == FillMode.forwards || fillMode == FillMode.both)
-          return max<double>(min<double>(localTime - timing.delay, activeDuration), 0.0);
+          return max<double>(min<double>(localTime! - timing.delay, activeDuration), 0.0);
         // Otherwise (the local time is unresolved), return an unresolved time value.
         return null;
       case AnimationEffectPhase.none:
@@ -821,8 +817,7 @@ class KeyframeEffect extends AnimationEffect {
 
     // Return the result of evaluating the animation effect’s timing function
     // passing directed progress as the input progress value.
-    Curve? easingCurve = timing._getEasingCurve();
-    if (easingCurve == null) return null;
+    Curve easingCurve = timing._getEasingCurve()!;
     return easingCurve.transform(directedProgress);
   }
 

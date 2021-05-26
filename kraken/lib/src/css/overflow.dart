@@ -87,8 +87,7 @@ mixin CSSOverflowMixin on ElementBase {
 
   void updateRenderOverflow(Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
-    RenderBoxModel? renderBoxModel = element.renderBoxModel;
-    if (renderBoxModel == null) return;
+    RenderBoxModel renderBoxModel = element.renderBoxModel!;
     RenderStyle renderStyle = renderBoxModel.renderStyle;
 
     renderStyle.updateOverflow(style);
@@ -189,8 +188,8 @@ mixin CSSOverflowMixin on ElementBase {
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
   // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.
   void _upgradeToSelfRepaint(Element element) {
-    RenderBoxModel? renderBoxModel = element.renderBoxModel;
-    if (scrollingContentLayoutBox != null || renderBoxModel == null) {
+    RenderBoxModel renderBoxModel = element.renderBoxModel!;
+    if (scrollingContentLayoutBox != null) {
       return;
     }
     // If renderBoxModel is already repaintBoundary caused by styles such as
@@ -198,9 +197,9 @@ mixin CSSOverflowMixin on ElementBase {
     // before creating two repaintBoundary.
     if (renderBoxModel.isRepaintBoundary) {
       element.convertToNonRepaintBoundary();
-      renderBoxModel = element.renderBoxModel;
+      renderBoxModel = element.renderBoxModel!;
     }
-    RenderObject layoutBoxParent = renderBoxModel!.parent as RenderObject;
+    RenderObject layoutBoxParent = renderBoxModel.parent as RenderObject;
     RenderBox? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
     RenderLayoutBox outerLayoutBox = Element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?);
 
@@ -230,10 +229,9 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void _downgradeToParentRepaint(Element element) {
-    RenderBoxModel? renderBoxModel = element.renderBoxModel;
-    RenderLayoutBox? _scrollingContentLayoutBox = scrollingContentLayoutBox;
+    RenderBoxModel renderBoxModel = element.renderBoxModel!;
+    RenderLayoutBox _scrollingContentLayoutBox = scrollingContentLayoutBox!;
 
-    if (_scrollingContentLayoutBox == null || renderBoxModel == null) return;
     RenderObject layoutBoxParent = renderBoxModel.parent as RenderObject;
     RenderBox? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
     RenderLayoutBox newLayoutBox = Element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?);

@@ -30,14 +30,14 @@ String uint16ToString(Pointer<Uint16> pointer, int length) {
 
 Pointer<Uint16> _stringToUint16(String string) {
   final units = string.codeUnits;
-  final Pointer<Uint16> result = malloc.allocate<Uint16>(units.length);
+  final Pointer<Uint16> result = malloc.allocate<Uint16>(units.length * sizeOf<Uint16>());
   final Uint16List nativeString = result.asTypedList(units.length);
   nativeString.setAll(0, units);
   return result;
 }
 
 Pointer<NativeString> stringToNativeString(String string) {
-  Pointer<NativeString> nativeString = malloc.allocate<NativeString>(1);
+  Pointer<NativeString> nativeString = malloc.allocate<NativeString>(sizeOf<NativeString>());
   nativeString.ref.string = _stringToUint16(string);
   nativeString.ref.length = string.length;
   return nativeString;
@@ -276,7 +276,7 @@ void _toBlob(Pointer<Void> callbackContext, int contextId,
   DartAsyncBlobCallback func = callback.asFunction();
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   controller.view.toImage(devicePixelRatio, id).then((Uint8List bytes) {
-    Pointer<Uint8> bytePtr = malloc.allocate<Uint8>(bytes.length);
+    Pointer<Uint8> bytePtr = malloc.allocate<Uint8>(sizeOf<Uint8>() * bytes.length);
     Uint8List byteList = bytePtr.asTypedList(bytes.length);
     byteList.setAll(0, bytes);
     func(callbackContext, contextId, nullptr, bytePtr, bytes.length);
@@ -381,7 +381,7 @@ final DartRegisterDartMethods _registerDartMethods =
     nativeDynamicLibrary.lookup<NativeFunction<NativeRegisterDartMethods>>('registerDartMethods').asFunction();
 
 void registerDartMethodsToCpp() {
-  Pointer<Uint64> bytes = malloc.allocate<Uint64>(_dartNativeMethods.length);
+  Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * _dartNativeMethods.length);
   Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
   nativeMethodList.setAll(0, _dartNativeMethods);
   _registerDartMethods(bytes, _dartNativeMethods.length);
