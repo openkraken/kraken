@@ -149,7 +149,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   bool get isRendererAttached => renderer != null && renderer!.attached;
 
   /// Attach a renderObject to parent.
-  void attachTo(Element parent, {RenderObject? after}) {}
+  void attachTo(Element parent, {RenderBox? after}) {}
 
   /// Detach renderObject from parent.
   void detach() {}
