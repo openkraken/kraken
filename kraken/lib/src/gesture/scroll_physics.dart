@@ -54,7 +54,7 @@ class ScrollPhysics {
   /// of [BouncingScrollPhysics] and [AlwaysScrollableScrollPhysics]:
   /// behaviors that are not specified in [BouncingScrollPhysics]
   /// (e.g. [shouldAcceptUserOffset]) will defer to [AlwaysScrollableScrollPhysics].
-  final ScrollPhysics parent;
+  final ScrollPhysics? parent;
 
   /// If [parent] is null then return ancestor, otherwise recursively build a
   /// ScrollPhysics that has [ancestor] as its parent.
@@ -115,7 +115,7 @@ class ScrollPhysics {
   /// may update to reflect an entirely unrelated scrollable.
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
     if (parent == null) return offset;
-    return parent.applyPhysicsToUserOffset(position, offset);
+    return parent!.applyPhysicsToUserOffset(position, offset);
   }
 
   /// Whether the scrollable should let the user adjust the scroll offset, for
@@ -129,7 +129,7 @@ class ScrollPhysics {
   /// may update to reflect an entirely unrelated scrollable.
   bool shouldAcceptUserOffset(ScrollMetrics position) {
     if (parent == null) return position.pixels != 0.0 || position.minScrollExtent != position.maxScrollExtent;
-    return parent.shouldAcceptUserOffset(position);
+    return parent!.shouldAcceptUserOffset(position);
   }
 
   /// Determines the overscroll by applying the boundary conditions.
@@ -168,7 +168,7 @@ class ScrollPhysics {
   /// ends up overscrolled.
   double applyBoundaryConditions(ScrollMetrics position, double value) {
     if (parent == null) return 0.0;
-    return parent.applyBoundaryConditions(position, value);
+    return parent!.applyBoundaryConditions(position, value);
   }
 
   /// Returns a simulation for ballistic scrolling starting from the given
@@ -183,9 +183,9 @@ class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
-  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     if (parent == null) return null;
-    return parent.createBallisticSimulation(position, velocity);
+    return parent!.createBallisticSimulation(position, velocity);
   }
 
   static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
@@ -243,14 +243,14 @@ class ScrollPhysics {
   /// By default, physics for platforms other than iOS doesn't carry momentum.
   double carriedMomentum(double existingVelocity) {
     if (parent == null) return 0.0;
-    return parent.carriedMomentum(existingVelocity);
+    return parent!.carriedMomentum(existingVelocity);
   }
 
   /// The minimum amount of pixel distance drags must move by to start motion
   /// the first time or after each time the drag motion stopped.
   ///
   /// If null, no minimum threshold is enforced.
-  double get dragStartDistanceMotionThreshold => parent?.dragStartDistanceMotionThreshold;
+  double get dragStartDistanceMotionThreshold => parent!.dragStartDistanceMotionThreshold;
 
   /// Whether a viewport is allowed to change its scroll position implicitly in
   /// response to a call to [RenderObject.showOnScreen].
@@ -282,7 +282,7 @@ class ScrollPhysics {
 ///    clamping behavior.
 class BouncingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that bounce back from the edge.
-  const BouncingScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  const BouncingScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
   BouncingScrollPhysics applyTo(ScrollPhysics ancestor) {
@@ -336,7 +336,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double applyBoundaryConditions(ScrollMetrics position, double value) => 0.0;
 
   @override
-  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
       return BouncingScrollSimulation(
@@ -400,7 +400,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
   /// bounds of the content..
-  const ClampingScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  const ClampingScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
   ClampingScrollPhysics applyTo(ScrollPhysics ancestor) {
@@ -437,17 +437,17 @@ class ClampingScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (position.outOfRange) {
-      double end;
+      double? end;
       if (position.pixels > position.maxScrollExtent) end = position.maxScrollExtent;
       if (position.pixels < position.minScrollExtent) end = position.minScrollExtent;
       assert(end != null);
       return ScrollSpringSimulation(
         spring,
         position.pixels,
-        end,
+        end!,
         math.min(0.0, velocity),
         tolerance: tolerance,
       );
@@ -479,7 +479,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
 ///    found on Android.
 class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that always lets the user scroll.
-  const AlwaysScrollableScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  const AlwaysScrollableScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
   AlwaysScrollableScrollPhysics applyTo(ScrollPhysics ancestor) {
@@ -502,7 +502,7 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
 ///    found on Android.
 class NeverScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that does not let the user scroll.
-  const NeverScrollableScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  const NeverScrollableScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
   NeverScrollableScrollPhysics applyTo(ScrollPhysics ancestor) {

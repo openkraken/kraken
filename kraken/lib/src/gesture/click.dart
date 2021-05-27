@@ -14,14 +14,14 @@ typedef GestureCallback = void Function(Event);
 
 class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
-  ClickGestureRecognizer({ Object debugOwner })
+  ClickGestureRecognizer({ Object? debugOwner })
       : super(deadline: kPressTimeout , debugOwner: debugOwner);
 
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
 
-  PointerDownEvent _down;
-  PointerUpEvent _up;
+  PointerDownEvent? _down;
+  PointerUpEvent? _up;
 
   /// A pointer has contacted the screen, which might be the start of a tap.
   ///
@@ -47,10 +47,10 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// instead.
   void handleTapUp( PointerDownEvent down, PointerUpEvent up ) {
     if (onClick != null)
-      onClick(EVENT_CLICK, down: down, up: up);
+      onClick!(EVENT_CLICK, down: down, up: up);
   }
 
-  MouseEventListener onClick;
+  MouseEventListener? onClick;
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
@@ -72,7 +72,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  void startTrackingPointer(int pointer, [Matrix4 transform]) {
+  void startTrackingPointer(int pointer, [Matrix4? transform]) {
     // The recognizer should never track any pointers when `_down` is null,
     // because calling `_checkDown` in this state will throw exception.
     assert(_down != null);
@@ -87,9 +87,9 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
     } else if (event is PointerCancelEvent) {
       resolve(GestureDisposition.rejected);
       _reset();
-    } else if (event.buttons != _down.buttons) {
+    } else if (_down != null && event.buttons != _down!.buttons) {
       resolve(GestureDisposition.rejected);
-      stopTrackingPointer(primaryPointer);
+      stopTrackingPointer(primaryPointer!);
     }
   }
 
@@ -134,7 +134,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (_sentTapDown) {
       return;
     }
-    handleTapDown(_down);
+    handleTapDown(_down!);
     _sentTapDown = true;
   }
 
@@ -142,7 +142,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (!_wonArenaForPrimaryPointer || _up == null) {
       return;
     }
-    handleTapUp(_down, _up);
+    handleTapUp(_down!, _up!);
     _reset();
   }
 

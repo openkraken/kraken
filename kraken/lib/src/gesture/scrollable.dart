@@ -19,18 +19,16 @@ import 'scroll_position_with_single_context.dart';
 typedef _ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
 
 mixin _CustomTickerProviderStateMixin implements TickerProvider {
-  Set<Ticker> _tickers;
+  Set<Ticker> _tickers = <_CustomTicker>{};
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    _tickers ??= <_CustomTicker>{};
     final _CustomTicker result = _CustomTicker(onTick, this, debugLabel: 'created by $this');
     _tickers.add(result);
     return result;
   }
 
   void _removeTicker(_CustomTicker ticker) {
-    assert(_tickers != null);
     assert(_tickers.contains(ticker));
     _tickers.remove(ticker);
   }
@@ -41,7 +39,7 @@ mixin _CustomTickerProviderStateMixin implements TickerProvider {
 // confusing. Instead we use the less precise but more anodyne "_WidgetTicker",
 // which attracts less attention.
 class _CustomTicker extends Ticker {
-  _CustomTicker(TickerCallback onTick, this._creator, {String debugLabel}) : super(onTick, debugLabel: debugLabel);
+  _CustomTicker(TickerCallback onTick, this._creator, {String? debugLabel}) : super(onTick, debugLabel: debugLabel);
 
   final _CustomTickerProviderStateMixin _creator;
 
@@ -53,11 +51,11 @@ class _CustomTicker extends Ticker {
 }
 
 class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollContext {
-  AxisDirection _axisDirection;
-  ScrollPosition position;
+  late AxisDirection _axisDirection;
+  late ScrollPosition position;
   ScrollPhysics _physics = BouncingScrollPhysics();
-  DragStartBehavior dragStartBehavior;
-  _ScrollListener scrollListener;
+  late DragStartBehavior dragStartBehavior;
+  _ScrollListener? scrollListener;
 
   KrakenScrollable({
     AxisDirection axisDirection = AxisDirection.down,
@@ -74,7 +72,6 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   Axis get axis => axisDirectionToAxis(_axisDirection);
 
   void handlePointerDown(PointerDownEvent event) {
-    assert(_recognizers != null);
     for (GestureRecognizer recognizer in _recognizers.values) {
       recognizer.addPointer(event);
     }
@@ -86,8 +83,8 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   // This field is set during layout, and then reused until the next time it is set.
   Map<Type, GestureRecognizerFactory> _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
   Map<Type, GestureRecognizer> _recognizers = const <Type, GestureRecognizer>{};
-  bool _lastCanDrag;
-  Axis _lastAxisDirection;
+  late bool _lastCanDrag;
+  late Axis _lastAxisDirection;
 
   @override
   void setCanDrag(bool canDrag) {
@@ -109,9 +106,9 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
                   ..onUpdate = _handleDragUpdate
                   ..onEnd = _handleDragEnd
                   ..onCancel = _handleDragCancel
-                  ..minFlingDistance = _physics?.minFlingDistance
-                  ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..minFlingDistance = _physics.minFlingDistance
+                  ..minFlingVelocity = _physics.minFlingVelocity
+                  ..maxFlingVelocity = _physics.maxFlingVelocity
                   ..dragStartBehavior = dragStartBehavior;
               },
             ),
@@ -130,9 +127,9 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
                   ..onUpdate = _handleDragUpdate
                   ..onEnd = _handleDragEnd
                   ..onCancel = _handleDragCancel
-                  ..minFlingDistance = _physics?.minFlingDistance
-                  ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity
+                  ..minFlingDistance = _physics.minFlingDistance
+                  ..minFlingVelocity = _physics.minFlingVelocity
+                  ..maxFlingVelocity = _physics.maxFlingVelocity
                   ..dragStartBehavior = dragStartBehavior;
               },
             ),
@@ -162,26 +159,25 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {
-    assert(_recognizers != null);
     final Map<Type, GestureRecognizer> oldRecognizers = _recognizers;
     _recognizers = <Type, GestureRecognizer>{};
     for (Type type in gestures.keys) {
       assert(gestures[type] != null);
       assert(!_recognizers.containsKey(type));
-      _recognizers[type] = oldRecognizers[type] ?? gestures[type].constructor();
+      _recognizers[type] = oldRecognizers[type] ?? gestures[type]!.constructor();
       assert(_recognizers[type].runtimeType == type,
           'GestureRecognizerFactory of type $type created a GestureRecognizer of type ${_recognizers[type].runtimeType}. The GestureRecognizerFactory must be specialized with the type of the class that it returns from its constructor method.');
-      gestures[type].initializer(_recognizers[type]);
+      gestures[type]!.initializer(_recognizers[type]!);
     }
     for (Type type in oldRecognizers.keys) {
-      if (!_recognizers.containsKey(type)) oldRecognizers[type].dispose();
+      if (!_recognizers.containsKey(type)) oldRecognizers[type]!.dispose();
     }
   }
 
   // TOUCH HANDLERS
 
-  Drag _drag;
-  ScrollHoldController _hold;
+  Drag? _drag;
+  ScrollHoldController? _hold;
 
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
@@ -238,8 +234,8 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
 }
 
 mixin RenderOverflowMixin on RenderBox {
-  _ScrollListener scrollListener;
-  void Function(PointerEvent) pointerListener;
+  late _ScrollListener scrollListener;
+  late void Function(PointerEvent) pointerListener;
 
   bool _clipX = false;
   bool get clipX => _clipX;
@@ -271,13 +267,12 @@ mixin RenderOverflowMixin on RenderBox {
     _enableScrollY = value;
   }
 
-  Size _scrollableSize;
-  Size _viewportSize;
+  late Size _scrollableSize;
+  late Size _viewportSize;
 
   ViewportOffset get scrollOffsetX => _scrollOffsetX;
-  ViewportOffset _scrollOffsetX;
+  late ViewportOffset _scrollOffsetX;
   set scrollOffsetX(ViewportOffset value) {
-    if (value == null) return;
     if (value == _scrollOffsetX) return;
     _scrollOffsetX = value;
     _scrollOffsetX.removeListener(_scrollXListener);
@@ -286,9 +281,8 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   ViewportOffset get scrollOffsetY => _scrollOffsetY;
-  ViewportOffset _scrollOffsetY;
+  late ViewportOffset _scrollOffsetY;
   set scrollOffsetY(ViewportOffset value) {
-    if (value == null) return;
     if (value == _scrollOffsetY) return;
     _scrollOffsetY = value;
     _scrollOffsetY.removeListener(_scrollYListener);
@@ -297,13 +291,11 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   void _scrollXListener() {
-    assert(scrollListener != null);
     scrollListener(scrollOffsetX.pixels, AxisDirection.right);
     markNeedsPaint();
   }
 
   void _scrollYListener() {
-    assert(scrollListener != null);
     scrollListener(scrollOffsetY.pixels, AxisDirection.down);
     markNeedsPaint();
   }
@@ -333,31 +325,27 @@ mixin RenderOverflowMixin on RenderBox {
   void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {
     _scrollableSize = scrollableSize;
     _viewportSize = viewportSize;
-    if (_clipX && _scrollOffsetX != null) {
+    if (_clipX) {
       _setUpScrollX();
     }
 
-    if (_clipY && _scrollOffsetY != null) {
+    if (_clipY) {
       _setUpScrollY();
     }
   }
 
   double get _paintOffsetX {
-    if (_scrollOffsetX == null) return 0.0;
     return -_scrollOffsetX.pixels;
   }
   double get _paintOffsetY {
-    if (_scrollOffsetY == null) return 0.0;
     return -_scrollOffsetY.pixels;
   }
 
   double get scrollTop {
-    if (_scrollOffsetY == null) return 0.0;
     return _scrollOffsetY.pixels;
   }
 
   double get scrollLeft {
-    if (_scrollOffsetX == null) return 0.0;
     return _scrollOffsetX.pixels;
   }
 
@@ -365,11 +353,11 @@ mixin RenderOverflowMixin on RenderBox {
     return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & childSize).bottomRight);
   }
 
-  ClipRRectLayer _oldClipRRectLayer;
-  ClipRectLayer _oldClipRectLayer;
+  ClipRRectLayer? _oldClipRRectLayer;
+  ClipRectLayer? _oldClipRectLayer;
 
   // @TODO implement RenderSilver protocol to achieve high performance scroll list.
-  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, PaintingContextCallback callback) {
+  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration? decoration, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
@@ -385,7 +373,7 @@ mixin RenderOverflowMixin on RenderBox {
         callback(context, offset + paintOffset);
       };
       if (decoration != null && decoration.borderRadius != null) {
-        BorderRadius radius = decoration.borderRadius;
+        BorderRadius radius = decoration.borderRadius as BorderRadius;
         RRect clipRRect = RRect.fromRectAndCorners(clipRect,
             topLeft: radius.topLeft,
             topRight: radius.topRight,
@@ -404,10 +392,10 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    double result;
-    final BoxParentData childParentData = parentData;
-    double candidate = getDistanceToActualBaseline(baseline);
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    double? result;
+    final BoxParentData childParentData = parentData as BoxParentData;
+    double? candidate = getDistanceToActualBaseline(baseline);
     if (candidate != null) {
       candidate += childParentData.offset.dy;
       if (result != null)
@@ -424,15 +412,15 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) {
+  Rect? describeApproximatePaintClip(RenderObject? child) {
     final Offset paintOffset = Offset(_paintOffsetX, _paintOffsetY);
     if (child != null && _shouldClipAtPaintOffset(paintOffset, size)) return Offset.zero & size;
     return null;
   }
 
   void debugOverflowProperties(DiagnosticPropertiesBuilder properties) {
-    if (_scrollableSize != null) properties.add(DiagnosticsProperty('scrollableSize', _scrollableSize));
-    if (_viewportSize != null) properties.add(DiagnosticsProperty('viewportSize', _viewportSize));
+    properties.add(DiagnosticsProperty('scrollableSize', _scrollableSize));
+    properties.add(DiagnosticsProperty('viewportSize', _viewportSize));
     properties.add(DiagnosticsProperty('clipX', clipX));
     properties.add(DiagnosticsProperty('clipY', clipY));
   }

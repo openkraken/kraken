@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
@@ -25,7 +25,6 @@ double computeSwipeSlop(PointerDeviceKind kind) {
     case PointerDeviceKind.touch:
       return kSwipeSlop;
   }
-  return kSwipeSlop;
 }
 
 typedef GestureSwipeCancelCallback = void Function();
@@ -37,8 +36,8 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   SwipeGestureRecognizer({
-    Object debugOwner,
-    PointerDeviceKind kind,
+    Object? debugOwner,
+    PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onSwipe,
@@ -74,28 +73,28 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  GestureSwipeCancelCallback onCancel;
+  GestureSwipeCancelCallback? onCancel;
 
-  GestureCallback onSwipe;
+  GestureCallback? onSwipe;
 
   /// The minimum distance an input pointer drag must have moved to
   /// to be considered a fling gesture.
   ///
   /// This value is typically compared with the distance traveled along the
   /// scrolling axis. If null then [kTouchSlop] is used.
-  double minFlingDistance;
+  late double minFlingDistance;
 
   /// The minimum velocity for an input pointer swipe to be considered fling.
   ///
   /// This value is typically compared with the magnitude of fling gesture's
   /// velocity along the scrolling axis. If null then [kMinFlingVelocity]
   /// is used.
-  double minFlingVelocity;
+  late double minFlingVelocity;
 
   /// Fling velocity magnitudes will be clamped to this value.
   ///
   /// If null then [kMaxFlingVelocity] is used.
-  double maxFlingVelocity;
+  late double maxFlingVelocity;
 
   /// Determines the type of velocity estimation method to use for a potential
   /// swipe gesture, when a new pointer is added.
@@ -122,21 +121,21 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
   _SwipeState _state = _SwipeState.ready;
-  OffsetPair _initialPosition;
-  OffsetPair _pendingDragOffset;
+  late OffsetPair _initialPosition;
+  late OffsetPair _pendingDragOffset;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
-  int _initialButtons;
+  int? _initialButtons;
 
-  String _direction;
+  late String _direction;
 
   /// Distance moved in the global coordinate space of the screen in swipe direction.
   ///
   /// If swipe is only allowed along a defined axis, this value may be negative to
   /// differentiate the direction of the swipe.
-  double _globalHorizontalDistanceMoved;
+  late double _globalHorizontalDistanceMoved;
 
-  double _globalVerticalDistanceMoved;
+  late double _globalVerticalDistanceMoved;
 
   /// Determines if a gesture is a fling or not based on velocity.
   ///
@@ -144,8 +143,8 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   /// provider of the callback to respond by carrying the gesture forward with
   /// inertia, for example.
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
-    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
+    final double minVelocity = minFlingVelocity;
+    final double minDistance = minFlingDistance;
 
     return ((_direction == DIRECTION_LEFT || _direction == DIRECTION_RIGHT) && (estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance)
     || (_direction == DIRECTION_UP || _direction == DIRECTION_DOWN) && (estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance));
@@ -198,8 +197,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_state != _SwipeState.ready);
     if (!event.synthesized
         && (event is PointerDownEvent || event is PointerMoveEvent)) {
-      final VelocityTracker tracker = _velocityTrackers[event.pointer];
-      assert(tracker != null);
+      final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
       tracker.addPosition(event.timeStamp, event.localPosition);
     }
 
@@ -211,21 +209,21 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
 
       _pendingDragOffset += OffsetPair(local: event.localDelta, global: event.delta);
 
-      final Matrix4 localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform);
+      final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
 
       final Offset movedHorizontalLocally = Offset(event.localDelta.dx, 0.0);
       _globalHorizontalDistanceMoved += PointerEvent.transformDeltaViaPositions(
         transform: localToGlobalTransform,
         untransformedDelta: movedHorizontalLocally,
         untransformedEndPosition: event.localPosition,
-      ).distance * (movedHorizontalLocally.dx ?? 1).sign;
+      ).distance * (movedHorizontalLocally.dx).sign;
 
       final Offset movedVerticalLocally = Offset(0.0, event.localDelta.dy);
       _globalVerticalDistanceMoved += PointerEvent.transformDeltaViaPositions(
         transform: localToGlobalTransform,
         untransformedDelta: movedVerticalLocally,
         untransformedEndPosition: event.localPosition,
-      ).distance * (movedVerticalLocally.dy ?? 1).sign;
+      ).distance * (movedVerticalLocally.dy).sign;
 
       if (_globalHorizontalDistanceMoved.abs() > _globalVerticalDistanceMoved.abs()) {
         _direction = _globalHorizontalDistanceMoved > 0 ? DIRECTION_RIGHT : DIRECTION_LEFT;
@@ -298,27 +296,26 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     if (onSwipe == null)
       return;
 
-    final VelocityTracker tracker = _velocityTrackers[pointer];
-    assert(tracker != null);
+    final VelocityTracker tracker = _velocityTrackers[pointer]!;
 
     String Function() debugReport;
 
-    final VelocityEstimate estimate = tracker.getVelocityEstimate();
+    final VelocityEstimate? estimate = tracker.getVelocityEstimate();
     if (estimate != null && isFlingGesture(estimate, tracker.kind)) {
       final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
-          .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
+          .clampMagnitude(minFlingVelocity, maxFlingVelocity);
       debugReport = () {
         return '$estimate; fling at $velocity.';
       };
       GestureEventInit e = GestureEventInit(direction: _direction, velocityX: velocity.pixelsPerSecond.dx, velocityY: velocity.pixelsPerSecond.dy );
-      invokeCallback<void>('onSwipe', () => onSwipe(GestureEvent(EVENT_SWIPE, e)), debugReport: debugReport);
+      invokeCallback<void>('onSwipe', () => onSwipe!(GestureEvent(EVENT_SWIPE, e)), debugReport: debugReport);
     }
   }
 
   void _checkCancel() {
     assert(_initialButtons == kPrimaryButton);
     if (onCancel != null)
-      invokeCallback<void>('onCancel', onCancel);
+      invokeCallback<void>('onCancel', onCancel!);
   }
 
   @override

@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
 
-typedef isAcceptedDragCallback = bool Function(AxisDirection direction);
+typedef IsAcceptedDragCallback = bool Function(AxisDirection direction);
 
 enum _DragState {
   ready,
@@ -33,12 +33,11 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   CompetitiveDragGestureRecognizer({
-    Object debugOwner,
-    PointerDeviceKind kind,
+    Object? debugOwner,
+    PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
-  }) : assert(dragStartBehavior != null),
-        super(debugOwner: debugOwner, kind: kind);
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
   /// Configure the behavior of offsets sent to [onStart].
@@ -74,7 +73,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [DragDownDetails], which is passed as an argument to this callback.
-  GestureDragDownCallback onDown;
+  GestureDragDownCallback? onDown;
 
   /// A pointer has contacted the screen with a primary button and has begun to
   /// move.
@@ -91,7 +90,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [DragStartDetails], which is passed as an argument to this callback.
-  GestureDragStartCallback onStart;
+  GestureDragStartCallback? onStart;
 
   /// A pointer that is in contact with the screen with a primary button and
   /// moving has moved again.
@@ -103,7 +102,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [DragUpdateDetails], which is passed as an argument to this callback.
-  GestureDragUpdateCallback onUpdate;
+  GestureDragUpdateCallback? onUpdate;
 
   /// A pointer that was previously in contact with the screen with a primary
   /// button and moving is no longer in contact with the screen and was moving
@@ -116,33 +115,33 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [DragEndDetails], which is passed as an argument to this callback.
-  GestureDragEndCallback onEnd;
+  GestureDragEndCallback? onEnd;
 
   /// The pointer that previously triggered [onDown] did not complete.
   ///
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  GestureDragCancelCallback onCancel;
+  GestureDragCancelCallback? onCancel;
 
   /// The minimum distance an input pointer drag must have moved to
   /// to be considered a fling gesture.
   ///
   /// This value is typically compared with the distance traveled along the
   /// scrolling axis. If null then [kTouchSlop] is used.
-  double minFlingDistance;
+  late double minFlingDistance;
 
   /// The minimum velocity for an input pointer drag to be considered fling.
   ///
   /// This value is typically compared with the magnitude of fling gesture's
   /// velocity along the scrolling axis. If null then [kMinFlingVelocity]
   /// is used.
-  double minFlingVelocity;
+  late double minFlingVelocity;
 
   /// Fling velocity magnitudes will be clamped to this value.
   ///
   /// If null then [kMaxFlingVelocity] is used.
-  double maxFlingVelocity;
+  late double maxFlingVelocity;
 
   /// Determines the type of velocity estimation method to use for a potential
   /// drag gesture, when a new pointer is added.
@@ -169,19 +168,19 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
   _DragState _state = _DragState.ready;
-  OffsetPair _initialPosition;
-  OffsetPair _pendingDragOffset;
-  Duration _lastPendingEventTimestamp;
+  late OffsetPair _initialPosition;
+  late OffsetPair _pendingDragOffset;
+  Duration? _lastPendingEventTimestamp;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
-  int _initialButtons;
-  Matrix4 _lastTransform;
+  int? _initialButtons;
+  Matrix4? _lastTransform;
 
   /// Distance moved in the global coordinate space of the screen in drag direction.
   ///
   /// If drag is only allowed along a defined axis, this value may be negative to
   /// differentiate the direction of the drag.
-  double _globalDistanceMoved;
+  late double _globalDistanceMoved;
 
   /// Determines if a gesture is a fling or not based on velocity.
   ///
@@ -246,12 +245,11 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
     assert(_state != _DragState.ready);
     if (!event.synthesized
         && (event is PointerDownEvent || event is PointerMoveEvent)) {
-      final VelocityTracker tracker = _velocityTrackers[event.pointer];
-      assert(tracker != null);
-      tracker.addPosition(event.timeStamp, event.localPosition);
+      final VelocityTracker? tracker = _velocityTrackers[event.pointer]!;
+      tracker!.addPosition(event.timeStamp, event.localPosition);
     }
     if (event is PointerDownEvent) {
-      final Duration timestamp = _lastPendingEventTimestamp;
+      final Duration? timestamp = _lastPendingEventTimestamp;
       _checkStart(timestamp);
     }
     if (event is PointerMoveEvent) {
@@ -272,12 +270,12 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
         _lastPendingEventTimestamp = event.timeStamp;
         _lastTransform = event.transform;
         final Offset movedLocally = _getDeltaForDetails(event.localDelta);
-        final Matrix4 localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform);
+        final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
         _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
           transform: localToGlobalTransform,
           untransformedDelta: movedLocally,
           untransformedEndPosition: event.localPosition,
-        ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
+        ).distance * (_getPrimaryValueFromOffset(movedLocally)).sign;
         if (_hasSufficientGlobalDistanceToAccept(event.kind) && _acceptDragGesture(event))
           resolve(GestureDisposition.accepted);
       }
@@ -295,8 +293,8 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
       final OffsetPair delta = _pendingDragOffset;
-      final Duration timestamp = _lastPendingEventTimestamp;
-      final Matrix4 transform = _lastTransform;
+      final Duration? timestamp = _lastPendingEventTimestamp;
+      final Matrix4? transform = _lastTransform;
       Offset localUpdateDelta;
       switch (dragStartBehavior) {
         case DragStartBehavior.start:
@@ -311,7 +309,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       _lastPendingEventTimestamp = null;
       _lastTransform = null;
       if (localUpdateDelta != Offset.zero && onUpdate != null) {
-        final Matrix4 localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
+        final Matrix4? localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
         final Offset correctedLocalPosition = _initialPosition.local + localUpdateDelta;
         final Offset globalUpdateDelta = PointerEvent.transformDeltaViaPositions(
           untransformedEndPosition: correctedLocalPosition,
@@ -374,10 +372,10 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       localPosition: _initialPosition.local,
     );
     if (onDown != null)
-      invokeCallback<void>('onDown', () => onDown(details));
+      invokeCallback<void>('onDown', () => onDown!(details));
   }
 
-  void _checkStart(Duration timestamp) {
+  void _checkStart(Duration? timestamp) {
     assert(_initialButtons == kPrimaryButton);
     final DragStartDetails details = DragStartDetails(
       sourceTimeStamp: timestamp,
@@ -385,15 +383,15 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       localPosition: _initialPosition.local,
     );
     if (onStart != null)
-      invokeCallback<void>('onStart', () => onStart(details));
+      invokeCallback<void>('onStart', () => onStart!(details));
   }
 
   void _checkUpdate({
-    Duration sourceTimeStamp,
-    @required Offset delta,
-    double primaryDelta,
-    @required Offset globalPosition,
-    Offset localPosition,
+    Duration? sourceTimeStamp,
+    required Offset delta,
+    double? primaryDelta,
+    required Offset globalPosition,
+    Offset? localPosition,
   }) {
     assert(_initialButtons == kPrimaryButton);
     final DragUpdateDetails details = DragUpdateDetails(
@@ -404,7 +402,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       localPosition: localPosition,
     );
     if (onUpdate != null)
-      invokeCallback<void>('onUpdate', () => onUpdate(details));
+      invokeCallback<void>('onUpdate', () => onUpdate!(details));
   }
 
   void _checkEnd(int pointer) {
@@ -412,16 +410,15 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
     if (onEnd == null)
       return;
 
-    final VelocityTracker tracker = _velocityTrackers[pointer];
-    assert(tracker != null);
+    final VelocityTracker tracker = _velocityTrackers[pointer]!;
 
     DragEndDetails details;
     String Function() debugReport;
 
-    final VelocityEstimate estimate = tracker.getVelocityEstimate();
+    final VelocityEstimate? estimate = tracker.getVelocityEstimate();
     if (estimate != null && isFlingGesture(estimate, tracker.kind)) {
       final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
-          .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
+          .clampMagnitude(minFlingVelocity, maxFlingVelocity);
       details = DragEndDetails(
         velocity: velocity,
         primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
@@ -441,13 +438,13 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       };
     }
 
-    invokeCallback<void>('onEnd', () => onEnd(details), debugReport: debugReport);
+    invokeCallback<void>('onEnd', () => onEnd!(details), debugReport: debugReport);
   }
 
   void _checkCancel() {
     assert(_initialButtons == kPrimaryButton);
     if (onCancel != null)
-      invokeCallback<void>('onCancel', onCancel);
+      invokeCallback<void>('onCancel', onCancel!);
   }
 
   @override
@@ -470,16 +467,16 @@ class ScrollVerticalDragGestureRecognizer extends CompetitiveDragGestureRecogniz
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   ScrollVerticalDragGestureRecognizer({
-    Object debugOwner,
-    PointerDeviceKind kind,
+    Object? debugOwner,
+    PointerDeviceKind? kind,
   }) : super(debugOwner: debugOwner, kind: kind);
 
-  isAcceptedDragCallback isAcceptedDrag;
+  late IsAcceptedDragCallback isAcceptedDrag;
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
-    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
+    final double minVelocity = minFlingVelocity;
+    final double minDistance = minFlingDistance;
     return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
   }
 
@@ -513,16 +510,16 @@ class ScrollHorizontalDragGestureRecognizer extends CompetitiveDragGestureRecogn
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   ScrollHorizontalDragGestureRecognizer({
-    Object debugOwner,
-    PointerDeviceKind kind,
+    Object? debugOwner,
+    PointerDeviceKind? kind,
   }) : super(debugOwner: debugOwner, kind: kind);
 
-  isAcceptedDragCallback isAcceptedDrag;
+  late IsAcceptedDragCallback isAcceptedDrag;
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
-    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
+    final double minVelocity = minFlingVelocity;
+    final double minDistance = minFlingDistance;
     return estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance;
   }
 
