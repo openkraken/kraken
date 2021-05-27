@@ -16,12 +16,11 @@ import 'bundle.dart';
 typedef ConnectedCallback = void Function();
 
 void launch({
-  String bundleURL,
-  String bundlePath,
-  String bundleContent,
-  bool debugEnableInspector,
-  Color background,
-  DevToolsService devToolsService,
+  String? bundleURL,
+  String? bundlePath,
+  String? bundleContent,
+  Color? background,
+  DevToolsService? devToolsService,
 }) async {
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
@@ -30,11 +29,10 @@ void launch({
     background: background,
     showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
     methodChannel: KrakenNativeChannel(),
-    debugEnableInspector: debugEnableInspector,
     devToolsService: devToolsService
   );
 
-  controller.view.attachView(RendererBinding.instance.renderView);
+  controller.view.attachView(RendererBinding.instance!.renderView);
 
   await controller.loadBundle(
       bundleURL: bundleURL,

@@ -72,7 +72,7 @@ typedef NativeInvokeModule = Pointer<NativeString> Function(Pointer<Void> callba
 
 String invokeModule(
     Pointer<Void> callbackContext, int contextId, String moduleName, String method, String? params, DartAsyncModuleCallback callback) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   String result = '';
 
   try {
@@ -117,7 +117,7 @@ final Pointer<NativeFunction<NativeInvokeModule>> _nativeInvokeModule = Pointer.
 typedef NativeReloadApp = Void Function(Int32 contextId);
 
 void _reloadApp(int contextId) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
 
   try {
     controller.reload();
@@ -141,7 +141,7 @@ typedef DartRAFAsyncCallback = void Function(
 typedef NativeRequestBatchUpdate = Void Function(Int32 contextId);
 
 void _requestBatchUpdate(int contextId) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   return controller.module.requestBatchUpdate();
 }
 
@@ -154,7 +154,7 @@ typedef NativeSetTimeout = Int32 Function(
 
 int _setTimeout(Pointer<Void> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
 
   return controller.module.setTimeout(timeout, () {
     DartAsyncCallback func = callback.asFunction();
@@ -175,7 +175,7 @@ typedef NativeSetInterval = Int32 Function(
 
 int _setInterval(Pointer<Void> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   return controller.module.setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
@@ -194,7 +194,7 @@ final Pointer<NativeFunction<NativeSetInterval>> _nativeSetInterval =
 typedef NativeClearTimeout = Void Function(Int32 contextId, Int32);
 
 void _clearTimeout(int contextId, int timerId) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   return controller.module.clearTimeout(timerId);
 }
 
@@ -206,7 +206,7 @@ typedef NativeRequestAnimationFrame = Int32 Function(
 
 int _requestAnimationFrame(Pointer<Void> callbackContext, int contextId,
     Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   return controller.module.requestAnimationFrame((double highResTimeStamp) {
     DartRAFAsyncCallback func = callback.asFunction();
     try {
@@ -225,7 +225,7 @@ final Pointer<NativeFunction<NativeRequestAnimationFrame>> _nativeRequestAnimati
 typedef NativeCancelAnimationFrame = Void Function(Int32 contextId, Int32 id);
 
 void _cancelAnimationFrame(int contextId, int timerId) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   controller.module.cancelAnimationFrame(timerId);
 }
 
@@ -274,7 +274,7 @@ typedef NativeToBlob = Void Function(Pointer<Void> callbackContext, Int32 contex
 void _toBlob(Pointer<Void> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   controller.view.toImage(devicePixelRatio, id).then((Uint8List bytes) {
     Pointer<Uint8> bytePtr = malloc.allocate<Uint8>(sizeOf<Uint8>() * bytes.length);
     Uint8List byteList = bytePtr.asTypedList(bytes.length);
@@ -343,7 +343,7 @@ final Pointer<NativeFunction<NativePerformanceGetEntries>> _nativeGetEntries = P
 typedef NativeJSError = Void Function(Int32 contextId, Pointer<Utf8>);
 
 void _onJSError(int contextId, Pointer<Utf8> charStr) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   JSErrorHandler? handler = controller.onJSError;
   if (handler != null) {
     String msg = charStr.toDartString();

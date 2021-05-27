@@ -34,7 +34,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: id);
     }
-    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
     EventTarget? eventTarget = controller.view.getEventTargetById(id);
     if (eventTarget == null) return;
     eventTarget.dispose();
@@ -344,7 +344,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     return renderBox;
   }
 
-  void attach(RenderObject parent, RenderObject previousSibling, {bool showPerformanceOverlay = false}) {
+  void attach(RenderObject parent, RenderObject? previousSibling, {bool showPerformanceOverlay = false}) {
     RenderObject root = buildRenderBox(showPerformanceOverlay: showPerformanceOverlay);
 
     if (parent is ContainerRenderObjectMixin) {

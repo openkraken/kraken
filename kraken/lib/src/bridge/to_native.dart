@@ -161,7 +161,7 @@ typedef DartReloadJSContext = void Function(int contextId);
 final DartReloadJSContext _reloadJSContext =
     nativeDynamicLibrary.lookup<NativeFunction<NativeReloadJSContext>>('reloadJsContext').asFunction();
 
-void reloadJSContext(int contextId) async {
+Future<void> reloadJSContext(int contextId) async {
   Completer completer = Completer<void>();
   Future.microtask(() {
     _reloadJSContext(contextId);
@@ -338,8 +338,9 @@ void clearUICommand(int contextId) {
 }
 
 void flushUICommand() {
-  Map<int, KrakenController> controllerMap = KrakenController.getControllerMap();
-  for (KrakenController controller in controllerMap.values) {
+  Map<int, KrakenController?> controllerMap = KrakenController.getControllerMap();
+  for (KrakenController? controller in controllerMap.values) {
+    if (controller == null) continue;
     Pointer<Uint64> nativeCommandItems = _getUICommandItems(controller.view.contextId);
     int commandLength = _getUICommandItemSize(controller.view.contextId);
 

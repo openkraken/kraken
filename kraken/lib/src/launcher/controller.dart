@@ -31,10 +31,8 @@ typedef TraverseElementCallback = void Function(Element element);
 // Traverse DOM element.
 void traverseElement(Element element, TraverseElementCallback callback) {
   callback(element);
-  if (element != null) {
-    for (Element el in element.children) {
-      traverseElement(el, callback);
-    }
+  for (Element el in element.children) {
+    traverseElement(el, callback);
   }
 }
 
@@ -62,16 +60,16 @@ class KrakenViewController {
 
   // The methods of the KrakenNavigateDelegation help you implement custom behaviors that are triggered
   // during a kraken view's process of loading, and completing a navigation request.
-  KrakenNavigationDelegate navigationDelegate;
+  KrakenNavigationDelegate? navigationDelegate;
 
-  GestureClient gestureClient;
+  GestureClient? gestureClient;
 
   double _viewportWidth;
   double get viewportWidth => _viewportWidth;
   set viewportWidth(double value) {
     if (value != _viewportWidth) {
       _viewportWidth = value;
-      viewport?.viewportSize = Size(_viewportWidth, _viewportHeight);
+      viewport.viewportSize = Size(_viewportWidth, _viewportHeight);
     }
   }
 
@@ -80,11 +78,11 @@ class KrakenViewController {
   set viewportHeight(double value) {
     if (value != _viewportHeight) {
       _viewportHeight = value;
-      viewport?.viewportSize = Size(_viewportWidth, _viewportHeight);
+      viewport.viewportSize = Size(_viewportWidth, _viewportHeight);
     }
   }
 
-  Color background;
+  Color? background;
 
   KrakenViewController(
     this._viewportWidth,
@@ -92,11 +90,11 @@ class KrakenViewController {
     this.background,
     this.showPerformanceOverlay,
     this.enableDebug = false,
-    int contextId,
-    this.rootController,
+    int? contextId,
+    required this.rootController,
     this.navigationDelegate,
     this.gestureClient,
-  }) : _contextId = contextId {
+  }) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
     }
@@ -110,7 +108,7 @@ class KrakenViewController {
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_START);
     }
 
-    if (_contextId == null) {
+    if (contextId == null) {
       _contextId = initBridge();
     }
 
@@ -147,18 +145,18 @@ class KrakenViewController {
   }
 
   // the manager which controller all renderObjects of Kraken
-  ElementManager _elementManager;
+  late ElementManager _elementManager;
   ElementManager get elementManager => _elementManager;
 
   // index value which identify javascript runtime context.
-  int _contextId;
+  late int _contextId;
 
   int get contextId {
     return _contextId;
   }
 
   // should render performanceOverlay layer into the screen for performance profile.
-  bool showPerformanceOverlay;
+  bool? showPerformanceOverlay;
 
   // print debug message when rendering.
   bool enableDebug;
@@ -168,7 +166,7 @@ class KrakenViewController {
 
   bool get disposed => _disposed;
 
-  RenderViewportBox viewport;
+  late RenderViewportBox viewport;
 
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
     assert(!_disposed, "Kraken have already disposed");
@@ -176,22 +174,22 @@ class KrakenViewController {
   }
 
   // attach kraken's renderObject to an renderObject.
-  void attachView(RenderObject parent, [RenderObject previousSibling]) {
+  void attachView(RenderObject parent, [RenderObject? previousSibling]) {
     _elementManager.attach(parent, previousSibling, showPerformanceOverlay: showPerformanceOverlay ?? false);
   }
 
-  Window get window {
-    return getEventTargetById(WINDOW_ID);
+  Window? get window {
+    return getEventTargetById(WINDOW_ID) as Window?;
   }
 
-  Document get document {
-    return getEventTargetById(DOCUMENT_ID);
+  Document? get document {
+    return getEventTargetById(DOCUMENT_ID) as Document?;
   }
 
   // dispose controller and recycle all resources.
   void dispose() {
     // break circle reference
-    (_elementManager.getRootRenderObject() as RenderObjectWithControllerMixin).controller = null;
+    (_elementManager.getRootRenderBox() as RenderObjectWithControllerMixin).controller = null;
 
     detachView();
 
@@ -204,7 +202,6 @@ class KrakenViewController {
     flushUICommand();
 
     _elementManager.dispose();
-    _elementManager = null;
     _disposed = true;
   }
 
@@ -332,15 +329,17 @@ class KrakenViewController {
     }
   }
 
-  EventTarget getEventTargetById(int id) {
+  EventTarget? getEventTargetById(int id) {
     return _elementManager.getEventTargetByTargetId<EventTarget>(id);
   }
 
-  void handleNavigationAction(String sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
+  void handleNavigationAction(String? sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
     KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
 
+    KrakenNavigationDelegate _delegate = navigationDelegate!;
+
     try {
-      KrakenNavigationActionPolicy policy = await navigationDelegate.dispatchDecisionHandler(action);
+      KrakenNavigationActionPolicy policy = await _delegate.dispatchDecisionHandler(action);
       if (policy == KrakenNavigationActionPolicy.cancel) return;
 
       switch (action.navigationType) {
@@ -351,8 +350,8 @@ class KrakenViewController {
         // Navigate and other type, do nothing.
       }
     } catch (e, stack) {
-      if (navigationDelegate.errorHandler != null) {
-        navigationDelegate.errorHandler(e, stack);
+      if (_delegate.errorHandler != null) {
+        _delegate.errorHandler!(e, stack);
       } else {
         print('Kraken navigation failed: $e\n$stack');
       }
@@ -365,13 +364,13 @@ class KrakenViewController {
   }
 
   RenderObject getRootRenderObject() {
-    return _elementManager.getRootRenderObject();
+    return _elementManager.getRootRenderBox();
   }
 }
 
 // An controller designed to control kraken's functional modules.
 class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
-  ModuleManager _moduleManager;
+  late ModuleManager _moduleManager;
   ModuleManager get moduleManager => _moduleManager;
 
   KrakenModuleController(KrakenController controller, int contextId) {
@@ -386,10 +385,10 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
 }
 
 class KrakenController {
-  static SplayTreeMap<int, KrakenController> _controllerMap = SplayTreeMap();
+  static SplayTreeMap<int, KrakenController?> _controllerMap = SplayTreeMap();
   static Map<String, int> _nameIdMap = Map();
 
-  static KrakenController getControllerOfJSContextId(int contextId) {
+  static KrakenController? getControllerOfJSContextId(int? contextId) {
     if (!_controllerMap.containsKey(contextId)) {
       return null;
     }
@@ -397,63 +396,61 @@ class KrakenController {
     return _controllerMap[contextId];
   }
 
-  static SplayTreeMap<int, KrakenController> getControllerMap() {
+  static SplayTreeMap<int, KrakenController?> getControllerMap() {
     return _controllerMap;
   }
 
-  static KrakenController getControllerOfName(String name) {
+  static KrakenController? getControllerOfName(String name) {
     if (!_nameIdMap.containsKey(name)) return null;
-    int contextId = _nameIdMap[name];
+    int? contextId = _nameIdMap[name];
     return getControllerOfJSContextId(contextId);
   }
 
-  LoadHandler onLoad;
+  LoadHandler? onLoad;
 
   // Error handler when load bundle failed.
-  LoadErrorHandler onLoadError;
+  LoadErrorHandler? onLoadError;
 
   // Error handler when got javascript error when evaluate javascript codes.
-  JSErrorHandler onJSError;
+  JSErrorHandler? onJSError;
 
-  final DevToolsService devToolsService;
-  final HttpClientInterceptor httpClientInterceptor;
+  final DevToolsService? devToolsService;
+  final HttpClientInterceptor? httpClientInterceptor;
 
-  KrakenMethodChannel _methodChannel;
+  KrakenMethodChannel? _methodChannel;
 
-  KrakenMethodChannel get methodChannel => _methodChannel;
+  KrakenMethodChannel? get methodChannel => _methodChannel;
 
-  String _name;
-  String get name => _name;
-  set name(String value) {
+  String? _name;
+  String? get name => _name;
+  set name(String? value) {
+    if (value == null) return;
     if (_name != null) {
-      int contextId = _nameIdMap[_name];
+      int? contextId = _nameIdMap[_name];
       _nameIdMap.remove(_name);
-      _nameIdMap[value] = contextId;
+      _nameIdMap[value] = contextId!;
     }
     _name = value;
   }
 
-  // Enable debug inspector.
-  bool debugEnableInspector;
-  GestureClient _gestureClient;
+  GestureClient? _gestureClient;
 
   KrakenController(
-    String name,
+    String? name,
     double viewportWidth,
     double viewportHeight, {
     bool showPerformanceOverlay = false,
     enableDebug = false,
-    String bundleURL,
-    String bundlePath,
-    String bundleContent,
-    Color background,
-    GestureClient gestureClient,
-    KrakenNavigationDelegate navigationDelegate,
-    KrakenMethodChannel methodChannel,
+    String? bundleURL,
+    String? bundlePath,
+    String? bundleContent,
+    Color? background,
+    GestureClient? gestureClient,
+    KrakenNavigationDelegate? navigationDelegate,
+    KrakenMethodChannel? methodChannel,
     this.onLoad,
     this.onLoadError,
     this.onJSError,
-    this.debugEnableInspector,
     this.httpClientInterceptor,
     this.devToolsService
   })  : _name = name,
@@ -486,43 +483,44 @@ class KrakenController {
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
     _controllerMap[_view.contextId] = this;
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
-    _nameIdMap[name] = _view.contextId;
+    if (name != null) {
+      _nameIdMap[name] = _view.contextId;
+    }
 
     if (httpClientInterceptor != null) {
-      setupHttpOverrides(httpClientInterceptor, controller: this);
+      setupHttpOverrides(httpClientInterceptor!, controller: this);
     }
 
     if (devToolsService != null) {
-      devToolsService.init(this);
+      devToolsService!.init(this);
     }
   }
 
-  KrakenViewController _view;
+  late KrakenViewController _view;
 
   KrakenViewController get view {
     return _view;
   }
 
-  KrakenModuleController _module;
+  late KrakenModuleController _module;
 
   KrakenModuleController get module {
     return _module;
   }
 
   // the bundle manager which used to download javascript source and run.
-  KrakenBundle _bundle;
-  KrakenBundle get bundle => _bundle;
+  KrakenBundle? _bundle;
+  KrakenBundle? get bundle => _bundle;
 
   void setNavigationDelegate(KrakenNavigationDelegate delegate) {
-    assert(_view != null);
     _view.navigationDelegate = delegate;
   }
 
-  void unload() async {
+  Future<void> unload() async {
     assert(!_view._disposed, "Kraken have already disposed");
     RenderObject root = _view.getRootRenderObject();
-    RenderObject parent = root.parent;
-    RenderObject previousSibling;
+    RenderObject? parent = root.parent as RenderObject?;
+    RenderObject? previousSibling;
     if (parent is ContainerRenderObjectMixin) {
       previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
     }
@@ -545,13 +543,13 @@ class KrakenController {
         contextId: _view.contextId,
         rootController: this,
         navigationDelegate: _view.navigationDelegate);
-    _view.attachView(parent, previousSibling);
+    _view.attachView(parent!, previousSibling);
   }
 
   // reload current kraken view.
-  void reload() async {
+  Future<void> reload() async {
     if (devToolsService != null) {
-      devToolsService.willReload();
+      devToolsService!.willReload();
     }
 
     await unload();
@@ -559,7 +557,7 @@ class KrakenController {
     await evalBundle();
 
     if (devToolsService != null) {
-      devToolsService.didReload();
+      devToolsService!.didReload();
     }
   }
 
@@ -577,44 +575,41 @@ class KrakenController {
     _nameIdMap.remove(name);
 
     if (devToolsService != null) {
-      devToolsService.dispose();
+      devToolsService!.dispose();
     }
   }
 
-  String _bundleContent;
+  String? _bundleContent;
 
-  String get bundleContent => _bundleContent;
-
-  set bundleContent(String value) {
+  String? get bundleContent => _bundleContent;
+  set bundleContent(String? value) {
     if (value == null) return;
     _bundleContent = value;
   }
 
-  String _bundlePath;
+  String? _bundlePath;
 
-  String get bundlePath => _bundlePath;
-
-  set bundlePath(String value) {
-    if (value == null) return;
+  String? get bundlePath => _bundlePath;
+  set bundlePath(String? value) {
     _bundlePath = value;
   }
 
-  String _bundleURL;
+  String? _bundleURL;
 
-  String get bundleURL => _bundleURL;
+  String? get bundleURL => _bundleURL;
 
-  set bundleURL(String value) {
+  set bundleURL(String? value) {
     if (value == null) return;
     _bundleURL = value;
   }
 
-  String get origin => _bundleURL ?? _bundlePath ?? 'vm://' + name;
+  String get origin => _bundleURL ?? _bundlePath ?? 'vm://' + name!;
 
   // preload javascript source and cache it.
-  void loadBundle({
-    String bundleContent,
-    String bundlePath,
-    String bundleURL
+  Future<void> loadBundle({
+    String? bundleContent,
+    String? bundlePath,
+    String? bundleURL
   }) async {
     assert(!_view._disposed, "Kraken have already disposed");
 
@@ -625,17 +620,19 @@ class KrakenController {
     _bundleContent = _bundleContent ?? bundleContent;
     _bundlePath = _bundlePath ?? bundlePath;
     _bundleURL = _bundleURL ?? bundleURL;
-    String url = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
+    String? url = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 
     if (url == null && methodChannel is KrakenNativeChannel) {
       url = await (methodChannel as KrakenNativeChannel).getUrl();
     }
 
+    if (url == null) return;
+
     if (onLoadError != null) {
       try {
         _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
       } catch (e, stack) {
-        onLoadError(FlutterError(e.toString()), stack);
+        onLoadError!(FlutterError(e.toString()), stack);
       }
     } else {
       _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
@@ -647,14 +644,14 @@ class KrakenController {
   }
 
   // execute preloaded javascript source
-  void evalBundle() async {
+  Future<void> evalBundle() async {
     assert(!_view._disposed, "Kraken have already disposed");
     if (_bundle != null) {
-      await _bundle.eval(_view.contextId);
+      await _bundle!.eval(_view.contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
-        EventTarget window = view.getEventTargetById(WINDOW_ID);
+        EventTarget window = view.getEventTargetById(WINDOW_ID)!;
         emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
 
         // @HACK: window.load should trigger after all image had loaded.
@@ -668,7 +665,7 @@ class KrakenController {
       if (onLoad != null) {
         // DOM element are created at next frame, so we should trigger onload callback in the next frame.
         module.requestAnimationFrame((_) {
-          onLoad(this);
+          onLoad!(this);
         });
       }
 
@@ -678,5 +675,5 @@ class KrakenController {
 
 mixin RenderObjectWithControllerMixin {
   // Kraken controller reference which control all kraken created renderObjects.
-  KrakenController controller;
+  KrakenController? controller;
 }

@@ -17,11 +17,11 @@ const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 
-String getBundleURLFromEnv() {
+String? getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
 }
 
-String getBundlePathFromEnv() {
+String? getBundlePathFromEnv() {
   return Platform.environment[BUNDLE_PATH];
 }
 
@@ -31,20 +31,20 @@ abstract class KrakenBundle {
   // Unique resource locator.
   final Uri url;
   // JS Content
-  String content;
+  late String content;
   // JS line offset, default to 0.
   List<String> assets = [];
   int lineOffset = 0;
   // Kraken bundle manifest
-  AppManifest manifest;
+  AppManifest? manifest;
 
   bool isResolved = false;
 
   Future<void> resolve();
 
-  static Future<KrakenBundle> getBundle(String path, { String contentOverride, int contextId }) async {
+  static Future<KrakenBundle> getBundle(String path, { String? contentOverride, required int contextId }) async {
     KrakenBundle bundle;
-    Uri uri = path != null ? Uri.parse(path) : null;
+    Uri uri = Uri.parse(path);
     if (contentOverride != null && contentOverride.isNotEmpty) {
       bundle = RawBundle(contentOverride, uri);
     } else {
@@ -94,12 +94,9 @@ class RawBundle extends KrakenBundle {
 }
 
 class NetworkBundle extends KrakenBundle {
-  // Unique identifier.
-  String bundleId;
   int contextId;
-  NetworkBundle(Uri url, { this.contextId })
-      : assert(url != null),
-        super(url);
+  NetworkBundle(Uri url, { required this.contextId })
+      : super(url);
 
   @override
   Future<void> resolve() async {
@@ -125,7 +122,7 @@ String _resolveStringFromData(ByteData data, String key) {
 class NetworkAssetBundle extends AssetBundle {
   /// Creates an network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl, { this.contextId })
+  NetworkAssetBundle(Uri baseUrl, { required this.contextId })
       : _baseUrl = baseUrl,
         httpClient = HttpClient();
 

@@ -31,7 +31,7 @@ class AnchorElement extends Element {
 
     Uri uri = Uri.parse(href);
     KrakenController rootController = elementManager.controller.view.rootController;
-    String sourceUrl = rootController.bundleURL;
+    String? sourceUrl = rootController.bundleURL;
     String scheme;
     if (!uri.hasScheme) {
       if (sourceUrl != null) {

@@ -55,7 +55,9 @@ class Window extends EventTarget {
     String url = nativeStringToString(urlPtr);
 
     ElementManager elementManager = _nativeMap[nativeWindowPtr.address]!.elementManager;
-    String sourceUrl = elementManager.controller.view.rootController.bundleURL;
+    String? sourceUrl = elementManager.controller.view.rootController.bundleURL;
+
+    if (sourceUrl == null) return;
 
     elementManager.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.navigate);
   }
