@@ -1076,7 +1076,6 @@ class Element extends Node
       }
       return;
     }
-
     renderBoxModel.renderStyle.updateTextStyle(property);
   }
 
