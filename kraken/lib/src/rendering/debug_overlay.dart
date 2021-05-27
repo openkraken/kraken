@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'dart:ui';
-import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 
@@ -12,7 +11,7 @@ const Color _kHighlightedRenderObjectBorderColor = Color.fromARGB(128, 64, 64, 1
 
 class InspectorOverlayLayer extends Layer {
   /// Creates a layer that displays the inspector overlay.
-  InspectorOverlayLayer({ @required this.overlayRect })
+  InspectorOverlayLayer({ required this.overlayRect })
       : assert(overlayRect != null) {
     bool inDebugMode = kDebugMode || kProfileMode;
     if (inDebugMode == false) {
@@ -32,7 +31,7 @@ class InspectorOverlayLayer extends Layer {
   /// (as described at [Layer]).
   final Rect overlayRect;
 
-  Picture _picture;
+  late Picture _picture;
 
   @override
   void addToScene(SceneBuilder builder, [Offset layerOffset = Offset.zero]) {

@@ -174,11 +174,10 @@ enum AlignSelf {
 
 mixin CSSFlexboxMixin on RenderStyleBase {
 
-  FlexDirection? get flexDirection => _flexDirection;
-  FlexDirection? _flexDirection = FlexDirection.row;
+  FlexDirection get flexDirection => _flexDirection;
+  FlexDirection _flexDirection = FlexDirection.row;
 
-  set flexDirection(FlexDirection? value) {
-    if (value == null) return;
+  set flexDirection(FlexDirection value) {
     if (_flexDirection != value) {
       _flexDirection = value;
       if (renderBoxModel is RenderFlexLayout) {
@@ -191,7 +190,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   FlexWrap _flexWrap = FlexWrap.nowrap;
 
   set flexWrap(FlexWrap value) {
-    assert(value != null);
     if (_flexWrap != value) {
       _flexWrap = value;
       if (renderBoxModel is RenderFlexLayout) {

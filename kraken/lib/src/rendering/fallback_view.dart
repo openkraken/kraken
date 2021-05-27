@@ -10,7 +10,7 @@ const Color _black = Color(0xBF000000);
 const Color _yellow = Color(0xBFFFFF00);
 
 class RenderFallbackViewBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  RenderFallbackViewBox({RenderBox child}) : assert(child != null) {
+  RenderFallbackViewBox({required RenderBox child}) {
     this.child = child;
   }
 
@@ -28,7 +28,7 @@ class RenderFallbackViewBox extends RenderBox with RenderObjectWithChildMixin<Re
     context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height), _linePaint);
     if (child != null) {
       // Add some offset to show borders.
-      child.paint(context, offset + Offset(5.0, 5.0));
+      child!.paint(context, offset + Offset(5.0, 5.0));
     }
   }
 
@@ -36,7 +36,7 @@ class RenderFallbackViewBox extends RenderBox with RenderObjectWithChildMixin<Re
   void performLayout() {
     size = constraints.biggest;
     if (child != null) {
-      child.layout(constraints);
+      child!.layout(constraints);
     }
   }
 }

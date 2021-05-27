@@ -7,13 +7,13 @@ import 'package:kraken/css.dart';
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
 mixin RenderContentVisibilityMixin on RenderBoxModelBase {
-  bool contentVisibilityHitTest(BoxHitTestResult result, {Offset position}) {
-    ContentVisibility _contentVisibility = renderStyle.contentVisibility;
+  bool contentVisibilityHitTest(BoxHitTestResult result, {Offset? position}) {
+    ContentVisibility? _contentVisibility = renderStyle.contentVisibility;
     return _contentVisibility != ContentVisibility.hidden;
   }
 
   void paintContentVisibility(PaintingContext context, Offset offset, PaintingContextCallback callback) {
-    ContentVisibility _contentVisibility = renderStyle.contentVisibility;
+    ContentVisibility? _contentVisibility = renderStyle.contentVisibility;
     if (_contentVisibility == ContentVisibility.hidden) {
       return;
     }
@@ -21,7 +21,7 @@ mixin RenderContentVisibilityMixin on RenderBoxModelBase {
   }
 
   void debugVisibilityProperties(DiagnosticPropertiesBuilder properties) {
-    ContentVisibility contentVisibility = renderStyle.contentVisibility;
+    ContentVisibility? contentVisibility = renderStyle.contentVisibility;
     if (contentVisibility != null) properties.add(DiagnosticsProperty<ContentVisibility>('contentVisibility', contentVisibility));
   }
 }

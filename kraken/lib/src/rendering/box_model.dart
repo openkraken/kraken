@@ -225,8 +225,8 @@ class RenderLayoutBox extends RenderBoxModel
   }
 
   // Get all children as a list and detach them all.
-  List<RenderObject> getDetachedChildrenAsList() {
-    List<RenderObject> children = getChildrenAsList();
+  List<RenderBox> getDetachedChildrenAsList() {
+    List<RenderBox> children = getChildrenAsList();
     removeAll();
     return children;
   }
