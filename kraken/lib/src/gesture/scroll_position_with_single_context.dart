@@ -106,7 +106,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void beginActivity(ScrollActivity newActivity) {
     _heldPreviousVelocity = 0.0;
-    if (newActivity == null) return;
     assert(newActivity.delegate == this);
     super.beginActivity(newActivity);
     _currentDrag?.dispose();

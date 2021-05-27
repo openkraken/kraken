@@ -57,36 +57,36 @@ class Kraken extends StatelessWidget {
 
   final HttpClientInterceptor? httpClientInterceptor;
 
-  KrakenController get controller {
+  KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
 
   loadContent(String bundleContent) async {
-    await controller.unload();
-    await controller.loadBundle(
+    await controller!.unload();
+    await controller!.loadBundle(
       bundleContent: bundleContent
     );
-    _evalBundle(controller, animationController);
+    _evalBundle(controller!, animationController);
   }
 
   loadURL(String bundleURL) async {
-    await controller.unload();
-    await controller.loadBundle(
+    await controller!.unload();
+    await controller!.loadBundle(
       bundleURL: bundleURL
     );
-    _evalBundle(controller, animationController);
+    _evalBundle(controller!, animationController);
   }
 
   loadPath(String bundlePath) async {
-    await controller.unload();
-    await controller.loadBundle(
+    await controller!.unload();
+    await controller!.loadBundle(
       bundlePath: bundlePath
     );
-    _evalBundle(controller, animationController);
+    _evalBundle(controller!, animationController);
   }
 
   reload() async {
-    await controller.reload();
+    await controller!.reload();
   }
 
   Kraken({
@@ -176,35 +176,38 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
     super.updateRenderObject(context, renderObject);
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
+    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
     controller.name = shortHash(_krakenWidget.hashCode);
 
     bool viewportWidthHasChanged = controller.view.viewportWidth != _krakenWidget.viewportWidth;
     bool viewportHeightHasChanged = controller.view.viewportHeight != _krakenWidget.viewportHeight;
 
+    double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
+    double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
+
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     if (viewportWidthHasChanged) {
-      double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
       controller.view.viewportWidth = viewportWidth;
-      controller.view.document.documentElement.style.setProperty(WIDTH, controller.view.viewportWidth.toString() + 'px');
+      controller.view.document!.documentElement.style.setProperty(WIDTH, controller.view.viewportWidth.toString() + 'px', viewportSize);
     }
 
     if (viewportHeightHasChanged) {
-      double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
       controller.view.viewportHeight = viewportHeight;
-      controller.view.document.documentElement.style.setProperty(HEIGHT, controller.view.viewportHeight.toString() + 'px');
+      controller.view.document!.documentElement.style.setProperty(HEIGHT, controller.view.viewportHeight.toString() + 'px', viewportSize);
     }
 
     if (viewportWidthHasChanged || viewportHeightHasChanged) {
-      traverseElement(controller.view.document.documentElement, (element) {
+      traverseElement(controller.view.document!.documentElement, (element) {
         element.style.applyTargetProperties();
-        element.renderBoxModel.markNeedsLayout();
+        element.renderBoxModel!.markNeedsLayout();
       });
     }
   }
 
   @override
   void didUnmountRenderObject(covariant RenderObject renderObject) {
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
+    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
     controller.dispose();
   }
 
@@ -221,7 +224,7 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
   void mount(Element? parent, Object? newSlot) async {
     super.mount(parent, newSlot);
 
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
+    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
 
     if (controller.bundleContent == null && controller.bundlePath == null && controller.bundleURL == null) {
       return;

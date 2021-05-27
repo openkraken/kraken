@@ -114,7 +114,7 @@ class TextNode extends Node {
     renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
     // Update paragraph line height
     KrakenRenderParagraph renderParagraph = renderTextBox.child as KrakenRenderParagraph;
-    renderParagraph.lineHeight = (_parentElement.renderBoxModel?.renderStyle.lineHeight)!;
+    renderParagraph.lineHeight = (_parentElement.renderBoxModel?.renderStyle.lineHeight);
     renderParagraph.markNeedsLayout();
 
     _setTextNodeProperties(_parentElement.style);
@@ -180,7 +180,7 @@ class TextNode extends Node {
     renderTextBox.style = parentStyle;
     // Update paragraph line height
     KrakenRenderParagraph renderParagraph = renderTextBox.child as KrakenRenderParagraph;
-    renderParagraph.lineHeight = (_parentElement.renderBoxModel?.renderStyle.lineHeight)!;
+    renderParagraph.lineHeight = (_parentElement.renderBoxModel?.renderStyle.lineHeight);
 
     _setTextNodeProperties(_parentElement.style);
   }

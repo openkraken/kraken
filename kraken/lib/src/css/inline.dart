@@ -21,7 +21,6 @@ mixin CSSInlineMixin on RenderStyleBase {
   VerticalAlign _verticalAlign = VerticalAlign.baseline;
   VerticalAlign get verticalAlign => _verticalAlign;
   set verticalAlign(VerticalAlign value) {
-    if (value == null) return;
     if (_verticalAlign != value) {
       renderBoxModel.markNeedsLayout();
       _verticalAlign = value;

@@ -34,7 +34,7 @@ class _RunMetrics {
 class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout(
       {
-        required List<RenderBox> children,
+        List<RenderBox>? children,
         required RenderStyle renderStyle,
         required int targetId,
         required ElementManager elementManager

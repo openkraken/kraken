@@ -438,7 +438,7 @@ class RenderLayoutBox extends RenderBoxModel
 
 mixin RenderBoxModelBase on RenderBox {
   late RenderStyle renderStyle;
-  Size? boxSize;
+  late Size boxSize;
 }
 
 class RenderBoxModel extends RenderBox with

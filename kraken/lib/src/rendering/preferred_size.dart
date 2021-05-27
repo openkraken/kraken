@@ -1,27 +1,24 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/rendering.dart';
-import 'package:meta/meta.dart';
 
 /// [RenderPreferredSize] Render a box with preferred size,
 /// if no child provided, size is exactly what preferred size
 /// is, but it also obey parent constraints.
 class RenderPreferredSize extends RenderProxyBox {
   RenderPreferredSize({
-    @required Size preferredSize,
-    RenderBox child,
-  })  : assert(preferredSize != null),
-        _preferredSize = preferredSize,
+    required Size preferredSize,
+    RenderBox? child,
+  })  : _preferredSize = preferredSize,
         super(child);
 
   Size _preferredSize;
   Size get preferredSize => _preferredSize;
   set preferredSize(Size value) {
-    assert(value != null);
     if (_preferredSize == value) return;
 
     _preferredSize = value;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
       markNeedsLayout();
     });
   }
@@ -42,17 +39,17 @@ class RenderPreferredSize extends RenderProxyBox {
 /// A placeholder for positioned RenderBox
 class RenderPositionHolder extends RenderPreferredSize {
   RenderPositionHolder({
-    @required Size preferredSize,
-    RenderBox child,
+    required Size preferredSize,
+    RenderBox? child,
   }) : super(preferredSize: preferredSize, child: child);
 
-  RenderBoxModel realDisplayedBox;
+  late RenderBoxModel realDisplayedBox;
 
   // Box size equals to RenderBox.size to avoid flutter complain when read size property.
-  Size _boxSize;
+  Size? _boxSize;
   Size get boxSize {
-    assert(_boxSize != null, 'box does not have laid out.');
-    return _boxSize;
+    if (_boxSize == null) throw FlutterError('box does not have laid out.');
+    return _boxSize!;
   }
 
   set size(Size value) {
@@ -61,7 +58,7 @@ class RenderPositionHolder extends RenderPreferredSize {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
     return false;
   }
 }

@@ -538,7 +538,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     if (key == VALUE) {
       String text = value?.toString() ?? '';
-      TextRange composing = textSelectionDelegate.textEditingValue.composing ?? TextRange.empty;
+      TextRange composing = textSelectionDelegate.textEditingValue.composing;
       TextSelection selection = TextSelection.collapsed(offset: text.length);
       TextEditingValue newTextEditingValue = TextEditingValue(
         text: text,

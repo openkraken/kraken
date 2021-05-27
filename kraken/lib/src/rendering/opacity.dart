@@ -11,7 +11,7 @@ mixin RenderOpacityMixin on RenderBox {
 
   int alpha = ui.Color.getAlphaFromOpacity(1.0);
 
-  OpacityLayer _opacityLayer;
+  OpacityLayer? _opacityLayer;
 
   void paintOpacity(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (alpha == 0) {

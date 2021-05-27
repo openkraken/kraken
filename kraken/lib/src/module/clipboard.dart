@@ -23,7 +23,7 @@ class ClipBoardModule extends BaseModule {
   String invoke(String method, dynamic params, callback) {
     if (method == 'readText') {
       ClipBoardModule.readText().then((String value) {
-        callback(data: value ?? '');
+        callback(data: value);
       }).catchError((e, stack) {
         callback(error: '$e\n$stack');
       });

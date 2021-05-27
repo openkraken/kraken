@@ -559,8 +559,7 @@ mixin ElementInspectorService {
     final DiagnosticsNode node = toObject(diagnosticsNodeId) as DiagnosticsNode;
     final InspectorSerializationDelegate delegate =
         InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate,
-        parent: node);
+    return _nodesToJson(_getChildrenFiltered(node, delegate), delegate, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
