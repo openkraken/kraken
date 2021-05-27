@@ -380,7 +380,8 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   double _getCrossAxisExtent(RenderBox child) {
-    double lineHeight = _getLineHeight(child);
+    bool isLineHeightValid = _isLineHeightValid(child);
+    double lineHeight = isLineHeightValid ? _getLineHeight(child) : 0;
     double marginVertical = 0;
     double marginHorizontal = 0;
 
