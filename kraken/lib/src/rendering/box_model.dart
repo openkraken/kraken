@@ -1481,7 +1481,7 @@ class RenderBoxModel extends RenderBox with
 
   /// Get the closest parent including self with the specified style property
   RenderBoxModel getSelfParentWithSpecifiedStyle(String styleProperty) {
-    RenderBox _parent = this;
+    RenderObject _parent = this;
     while (_parent != null && _parent is! RenderViewportBox) {
       if (_parent is RenderBoxModel && _parent.renderStyle.style[styleProperty].isNotEmpty) {
         break;
