@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient;
 
 import 'package:flutter/painting.dart';
-import 'package:meta/meta.dart';
 
 // ignore: must_be_immutable
 class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
@@ -14,25 +13,26 @@ class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
   CSSLinearGradient({
     Alignment begin = Alignment.centerLeft,
     Alignment end = Alignment.centerRight,
-    double angle,
-    @required List<Color> colors,
-    List<double> stops,
+    double? angle,
+    required List<Color> colors,
+    List<double>? stops,
     TileMode tileMode = TileMode.clamp,
-    GradientTransform transform,
+    GradientTransform? transform,
   }) : _angle = angle,
         super(begin: begin, end: end, colors: colors, stops: stops, tileMode: tileMode, transform: transform);
 
-  final double _angle;
+  final double? _angle;
 
   @override
-  Shader createShader(Rect rect, {TextDirection textDirection}) {
-    if (borderEdge != null) {
-      rect = Rect.fromLTRB(rect.left + borderEdge.left, rect.top + borderEdge.top, rect.right - borderEdge.right,
-          rect.bottom - borderEdge.bottom);
+  Shader createShader(Rect rect, { TextDirection? textDirection }) {
+    var _borderEdge = borderEdge;
+    if (_borderEdge != null) {
+      rect = Rect.fromLTRB(rect.left + _borderEdge.left, rect.top + _borderEdge.top, rect.right - _borderEdge.right,
+          rect.bottom - _borderEdge.bottom);
     }
     double angle;
     if (_angle != null) {
-      angle = _angle;
+      angle = _angle!;
     } else {
       Alignment point = end as Alignment;
       angle = math.atan2(point.x * rect.height, -point.y * rect.width) - math.pi * 2;
@@ -44,7 +44,8 @@ class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
     double width = rect.width;
     double height = rect.height;
     // If width/height is null, x/y can be infinite.
-    if (width == 0 || height == 0) return null;
+    if (width == 0 || height == 0) return ui.Gradient.linear(
+        Offset(0, 0), Offset(0, 0), colors);;
 
     double length = (sin * width).abs() + (cos * height).abs();
     double x = sin * length / width;
@@ -73,17 +74,18 @@ class CSSRadialGradient extends RadialGradient with BorderGradientMixin {
   CSSRadialGradient({
     AlignmentGeometry center = Alignment.center,
     double radius = 1.0,
-    @required List<Color> colors,
-    List<double> stops,
+    required List<Color> colors,
+    List<double>? stops,
     TileMode tileMode = TileMode.clamp,
-    GradientTransform transform,
+    GradientTransform? transform,
   }) : super(center: center, radius: radius, colors: colors, stops: stops, tileMode: tileMode, transform: transform);
 
   @override
-  Shader createShader(Rect rect, {TextDirection textDirection}) {
-    if (borderEdge != null) {
-      rect = Rect.fromLTRB(rect.left + borderEdge.left, rect.top + borderEdge.top, rect.right - borderEdge.right,
-          rect.bottom - borderEdge.bottom);
+  Shader createShader(Rect rect, {TextDirection? textDirection}) {
+    var _borderEdge = borderEdge;
+    if (_borderEdge != null) {
+      rect = Rect.fromLTRB(rect.left + _borderEdge.left, rect.top + _borderEdge.top, rect.right - _borderEdge.right,
+          rect.bottom - _borderEdge.bottom);
     }
     Offset centerOffset = center.resolve(textDirection).withinRect(rect);
     // calculate the longest distance from center to cornor
@@ -114,7 +116,7 @@ class CSSRadialGradient extends RadialGradient with BorderGradientMixin {
       _impliedStops(),
       tileMode,
       _resolveTransform(rect, textDirection),
-      focal == null ? null : focal.resolve(textDirection).withinRect(rect),
+      focal == null ? null : focal!.resolve(textDirection).withinRect(rect),
       focalRadius * rect.shortestSide,
     );
   }
@@ -128,16 +130,17 @@ class CSSConicGradient extends SweepGradient with BorderGradientMixin {
   /// have the same length as [colors].
   CSSConicGradient(
       {AlignmentGeometry center = Alignment.center,
-      @required List<Color> colors,
-      List<double> stops,
-      GradientTransform transform})
+      required List<Color> colors,
+      List<double>? stops,
+      GradientTransform? transform})
       : super(center: center, colors: colors, stops: stops, transform: transform);
 
   @override
-  Shader createShader(Rect rect, {TextDirection textDirection}) {
-    if (borderEdge != null) {
-      rect = Rect.fromLTRB(rect.left - borderEdge.left, rect.top - borderEdge.top, rect.right - borderEdge.right,
-          rect.bottom - borderEdge.bottom);
+  Shader createShader(Rect rect, {TextDirection? textDirection}) {
+    var _borderEdge = borderEdge;
+    if (_borderEdge != null) {
+      rect = Rect.fromLTRB(rect.left - _borderEdge.left, rect.top - _borderEdge.top, rect.right - _borderEdge.right,
+          rect.bottom - _borderEdge.bottom);
     }
     return super.createShader(rect, textDirection: textDirection);
   }
@@ -145,14 +148,14 @@ class CSSConicGradient extends SweepGradient with BorderGradientMixin {
 
 mixin BorderGradientMixin on Gradient {
   /// BorderSize to deflate.
-  EdgeInsets _borderEdge;
-  EdgeInsets get borderEdge => _borderEdge;
-  set borderEdge(EdgeInsets newValue) {
+  EdgeInsets? _borderEdge;
+  EdgeInsets? get borderEdge => _borderEdge;
+  set borderEdge(EdgeInsets? newValue) {
     _borderEdge = newValue;
   }
 
   List<double> _impliedStops() {
-    if (stops != null) return stops;
+    if (stops != null) return stops!;
     assert(colors.length >= 2, 'colors list must have at least two colors');
     final double separation = 1.0 / (colors.length - 1);
     return List<double>.generate(
@@ -162,7 +165,7 @@ mixin BorderGradientMixin on Gradient {
     );
   }
 
-  Float64List _resolveTransform(Rect bounds, TextDirection textDirection) {
-    return transform?.transform(bounds, textDirection: textDirection)?.storage;
+  Float64List? _resolveTransform(Rect bounds, TextDirection? textDirection) {
+    return transform!.transform(bounds, textDirection: textDirection)?.storage;
   }
 }

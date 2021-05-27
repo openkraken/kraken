@@ -92,7 +92,7 @@ ImageProviderFactory getImageProviderFactory(ImageType imageType) {
   }
 }
 
-void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory customImageProviderFactory) {
+void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory? customImageProviderFactory) {
   if (customImageProviderFactory != null) {
     switch (imageType) {
       case ImageType.cached:
@@ -125,37 +125,37 @@ ImageProvider defaultCachedProviderFactory(String url, [dynamic param]) {
 
 /// default ImageProviderFactory implementation of [ImageType.network]
 ImageProvider defaultNetworkProviderFactory(String url, [dynamic param]) {
-  String contextId;
+  String? contextId;
   if (param is List) contextId = param[0]?.toString();
   NetworkImage networkImage = NetworkImage(url, headers: {
     HttpHeaders.userAgentHeader: getKrakenInfo().userAgent,
-    HttpHeaderContextID: contextId,
+    HttpHeaderContextID: contextId!,
   });
   return networkImage;
 }
 
 /// default ImageProviderFactory implementation of [ImageType.file]
 ImageProvider defaultFileProviderFactory(String rawPath, [dynamic param]) {
-  ImageProvider _imageProvider;
+  ImageProvider? _imageProvider;
   if (param is File) {
     _imageProvider = FileImage(param);
   }
-  return _imageProvider;
+  return _imageProvider!;
 }
 
 /// default ImageProviderFactory implementation of [ImageType.dataUrl].
 ImageProvider defaultDataUrlProviderFactory(String uriDataPath, [dynamic param]) {
-  ImageProvider _imageProvider;
+  ImageProvider? _imageProvider;
   if (param is Uint8List) {
     _imageProvider = MemoryImage(param);
   }
-  return _imageProvider;
+  return _imageProvider!;
 }
 
 /// default ImageProviderFactory implementation of [ImageType.blob].
 ImageProvider defaultBlobProviderFactory(String blobPath, [dynamic param]) {
   // @TODO: support blob file url
-  return null;
+  throw FlutterError('blob Provider factor not implemented!');
 }
 
 /// default ImageProviderFactory implementation of [ImageType.assets].
