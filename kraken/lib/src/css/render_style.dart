@@ -516,36 +516,36 @@ class RenderStyle
   /// Get height of replaced element by intrinsic ratio if height is not defined
   double getHeightByIntrinsicRatio() {
     // @TODO: move intrinsic width/height to renderStyle
-    double intrinsicWidth = renderBoxModel.intrinsicWidth;
-    double intrinsicRatio = renderBoxModel.intrinsicRatio;
-    double realWidth = width ?? intrinsicWidth;
+    double? intrinsicWidth = renderBoxModel.intrinsicWidth;
+    double? intrinsicRatio = renderBoxModel.intrinsicRatio;
+    double? realWidth = width ?? intrinsicWidth;
     double? _minWidth = minWidth;
     double? _maxWidth = maxWidth;
-    if (_minWidth != null && realWidth < _minWidth) {
+    if (_minWidth != null && realWidth != null && realWidth < _minWidth) {
       realWidth = _minWidth;
     }
-    if (_maxWidth != null && realWidth > _maxWidth) {
+    if (_maxWidth != null && realWidth != null && realWidth > _maxWidth) {
       realWidth = _maxWidth;
     }
-    double realHeight = realWidth * intrinsicRatio;
+    double realHeight = realWidth! * intrinsicRatio!;
     return realHeight;
   }
 
   /// Get width of replaced element by intrinsic ratio if width is not defined
   double getWidthByIntrinsicRatio() {
     // @TODO: move intrinsic width/height to renderStyle
-    double intrinsicHeight = renderBoxModel.intrinsicHeight;
-    double intrinsicRatio = renderBoxModel.intrinsicRatio;
-    double realHeight = height ?? intrinsicHeight;
+    double? intrinsicHeight = renderBoxModel.intrinsicHeight;
+    double? intrinsicRatio = renderBoxModel.intrinsicRatio;
+    double? realHeight = height ?? intrinsicHeight;
     double? _minWidth = minWidth;
     double? _maxWidth = maxWidth;
-    if (_minWidth != null && realHeight < _minWidth) {
+    if (_minWidth != null && realHeight != null && realHeight < _minWidth) {
       realHeight = _minWidth;
     }
-    if (_maxWidth != null && realHeight > _maxWidth) {
+    if (_maxWidth != null && realHeight != null && realHeight > _maxWidth) {
       realHeight = _maxWidth;
     }
-    double realWidth = realHeight / intrinsicRatio;
+    double realWidth = realHeight! / intrinsicRatio!;
     return realWidth;
   }
 }

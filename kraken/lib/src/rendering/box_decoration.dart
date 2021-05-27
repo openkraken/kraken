@@ -15,9 +15,9 @@ enum BackgroundBoundary {
 
 mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 
-  BoxDecorationPainter _painter;
-  BoxDecorationPainter get boxPainter => _painter;
-  set boxPainter(BoxDecorationPainter painter) {
+  BoxDecorationPainter? _painter;
+  BoxDecorationPainter? get boxPainter => _painter;
+  set boxPainter(BoxDecorationPainter? painter) {
     _painter = painter;
   }
 
@@ -32,14 +32,15 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     markNeedsPaint();
   }
 
-  void paintBackground(PaintingContext context, Offset offset, EdgeInsets padding) {
-    BoxDecoration decoration = renderStyle.decoration;
+  void paintBackground(PaintingContext context, Offset offset, EdgeInsets? padding) {
+    BoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
+    BoxDecorationPainter? painter = _painter;
 
     if (decoration == null) return;
-    if (_painter == null) {
-      _painter ??= BoxDecorationPainter(
+    if (painter == null) {
+      _painter = painter = BoxDecorationPainter(
         decoration,
         padding,
         renderStyle,
@@ -49,12 +50,12 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 
     final ImageConfiguration filledConfiguration = imageConfiguration.copyWith(size: size);
     if (decorationPosition == DecorationPosition.background) {
-      int debugSaveCount;
+      int? debugSaveCount;
       assert(() {
         debugSaveCount = context.canvas.getSaveCount();
         return true;
       }());
-      _painter.paintBackground(context.canvas, offset, filledConfiguration);
+      painter.paintBackground(context.canvas, offset, filledConfiguration);
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -73,17 +74,18 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     }
 
     if (decorationPosition == DecorationPosition.foreground) {
-      _painter.paint(context.canvas, offset, filledConfiguration);
+      painter.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
     }
   }
 
-  void paintDecoration(PaintingContext context, Offset offset, EdgeInsets padding) {
-    BoxDecoration decoration = renderStyle.decoration;
+  void paintDecoration(PaintingContext context, Offset offset, EdgeInsets? padding) {
+    BoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
+    BoxDecorationPainter? painter = _painter;
     if (decoration == null) return;
-    _painter ??= BoxDecorationPainter(
+    _painter = painter = BoxDecorationPainter(
       decoration,
       padding,
       renderStyle,
@@ -92,13 +94,13 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 
     final ImageConfiguration filledConfiguration = imageConfiguration.copyWith(size: size);
     if (decorationPosition == DecorationPosition.background) {
-      int debugSaveCount;
+      int? debugSaveCount;
       assert(() {
         debugSaveCount = context.canvas.getSaveCount();
         return true;
       }());
 
-      _painter.paint(context.canvas, offset, filledConfiguration);
+      painter.paint(context.canvas, offset, filledConfiguration);
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -116,7 +118,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       if (decoration.isComplex) context.setIsComplexHint();
     }
     Offset contentOffset;
-    EdgeInsets borderEdge = renderStyle.borderEdge;
+    EdgeInsets? borderEdge = renderStyle.borderEdge;
     if (borderEdge == null) {
       contentOffset = Offset(0, 0);
     } else {
@@ -124,7 +126,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     }
     super.paint(context, contentOffset);
     if (decorationPosition == DecorationPosition.foreground) {
-      _painter.paint(context.canvas, offset, filledConfiguration);
+      painter.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
     }
   }
@@ -133,7 +135,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     if (renderStyle.borderEdge != null) properties.add(DiagnosticsProperty('borderEdge', renderStyle.borderEdge));
     if (renderStyle.backgroundClip != null) properties.add(DiagnosticsProperty('backgroundClip', renderStyle.backgroundClip));
     if (renderStyle.backgroundOrigin != null) properties.add(DiagnosticsProperty('backgroundOrigin', renderStyle.backgroundOrigin));
-    BoxDecoration _decoration = renderStyle.decoration;
+    BoxDecoration? _decoration = renderStyle.decoration;
     if (_decoration != null && _decoration.borderRadius != null) properties.add(DiagnosticsProperty('borderRadius', _decoration.borderRadius));
     if (_decoration != null && _decoration.image != null) properties.add(DiagnosticsProperty('backgroundImage', _decoration.image));
     if (_decoration != null && _decoration.boxShadow != null) properties.add(DiagnosticsProperty('boxShadow', _decoration.boxShadow));
@@ -148,37 +150,35 @@ class BoxDecorationPainter extends BoxPainter {
     this.padding,
     this.renderStyle,
     VoidCallback onChanged
-  ) : assert(_decoration != null),
-      super(onChanged);
+  ) : super(onChanged);
 
-  EdgeInsets padding;
+  EdgeInsets? padding;
   RenderStyle renderStyle;
   final BoxDecoration _decoration;
 
-  Paint _cachedBackgroundPaint;
-  Rect _rectForCachedBackgroundPaint;
-  Paint _getBackgroundPaint(Rect rect, TextDirection textDirection) {
-    assert(rect != null);
+  Paint? _cachedBackgroundPaint;
+  Rect? _rectForCachedBackgroundPaint;
+  Paint _getBackgroundPaint(Rect rect, TextDirection? textDirection) {
     assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
     if (_cachedBackgroundPaint == null ||
       (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = Paint();
       if (_decoration.backgroundBlendMode != null)
-        paint.blendMode = _decoration.backgroundBlendMode;
+        paint.blendMode = _decoration.backgroundBlendMode!;
       if (_decoration.color != null)
-        paint.color = _decoration.color;
+        paint.color = _decoration.color!;
       if (_decoration.gradient != null) {
-        paint.shader = _decoration.gradient.createShader(rect, textDirection: textDirection);
+        paint.shader = _decoration.gradient!.createShader(rect, textDirection: textDirection);
         _rectForCachedBackgroundPaint = rect;
       }
       _cachedBackgroundPaint = paint;
     }
 
-    return _cachedBackgroundPaint;
+    return _cachedBackgroundPaint!;
   }
 
-  void _paintBox(Canvas canvas, Rect rect, Paint paint, TextDirection textDirection) {
+  void _paintBox(Canvas canvas, Rect rect, Paint paint, TextDirection? textDirection) {
     switch (_decoration.shape) {
       case BoxShape.circle:
         assert(_decoration.borderRadius == null);
@@ -190,21 +190,21 @@ class BoxDecorationPainter extends BoxPainter {
         if (_decoration.borderRadius == null) {
           canvas.drawRect(rect, paint);
         } else {
-          canvas.drawRRect(_decoration.borderRadius.resolve(textDirection).toRRect(rect), paint);
+          canvas.drawRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(rect), paint);
         }
         break;
     }
   }
 
-  void _paintShadows(Canvas canvas, Rect rect, TextDirection textDirection) {
+  void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_decoration.boxShadow == null)
       return;
-    for (final BoxShadow boxShadow in _decoration.boxShadow) {
+    for (final BoxShadow boxShadow in _decoration.boxShadow!) {
       _paintBoxShadow(canvas, rect, textDirection, boxShadow);
     }
   }
 
-  void _paintBoxShadow(Canvas canvas, Rect rect, TextDirection textDirection, BoxShadow boxShadow) {
+  void _paintBoxShadow(Canvas canvas, Rect rect, TextDirection? textDirection, BoxShadow boxShadow) {
     final Paint paint = Paint()
       ..color = boxShadow.color
     // Following W3C spec, blur sigma is exactly half the blur radius
@@ -229,9 +229,9 @@ class BoxDecorationPainter extends BoxPainter {
       shadowPath = Path()..addRect(shadowRect);
       shadowBlurPath = Path()..addRect(shadowBlurRect);
     } else {
-      borderPath = Path()..addRRect(_decoration.borderRadius.resolve(textDirection).toRRect(rect));
-      shadowPath = Path()..addRRect(_decoration.borderRadius.resolve(textDirection).toRRect(shadowRect));
-      shadowBlurPath = Path()..addRRect(_decoration.borderRadius.resolve(textDirection).toRRect(shadowBlurRect));
+      borderPath = Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(rect));
+      shadowPath = Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(shadowRect));
+      shadowBlurPath = Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(shadowBlurRect));
     }
 
     // Path of shadow blur rect subtract border rect of which the box shadow should paint
@@ -242,27 +242,27 @@ class BoxDecorationPainter extends BoxPainter {
     canvas.restore();
   }
 
-  void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection textDirection) {
+  void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_decoration.color != null || _decoration.gradient != null)
       _paintBox(canvas, rect, _getBackgroundPaint(rect, textDirection), textDirection);
   }
 
-  DecorationImagePainter _imagePainter;
+  DecorationImagePainter? _imagePainter;
   void _paintBackgroundImage(Canvas canvas, Rect rect, ImageConfiguration configuration) {
     if (_decoration.image == null)
       return;
-    _imagePainter ??= _decoration.image.createPainter(onChanged);
-    Path clipPath;
+    _imagePainter ??= _decoration.image!.createPainter(onChanged!);
+    Path? clipPath;
     switch (_decoration.shape) {
       case BoxShape.circle:
         clipPath = Path()..addOval(rect);
         break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null)
-          clipPath = Path()..addRRect(_decoration.borderRadius.resolve(configuration.textDirection).toRRect(rect));
+          clipPath = Path()..addRRect(_decoration.borderRadius!.resolve(configuration.textDirection).toRRect(rect));
         break;
     }
-    _imagePainter.paint(canvas, rect, clipPath, configuration);
+    _imagePainter!.paint(canvas, rect, clipPath, configuration);
   }
 
   @override
@@ -280,7 +280,7 @@ class BoxDecorationPainter extends BoxPainter {
     assert(configuration.size != null);
     Offset baseOffset = Offset(0, 0);
 
-    final TextDirection textDirection = configuration.textDirection;
+    final TextDirection? textDirection = configuration.textDirection;
     bool hasLocalAttachment = hasLocalBackgroundImage(renderStyle);
 
     // Rect of background color
@@ -297,9 +297,9 @@ class BoxDecorationPainter extends BoxPainter {
   }
 
   Rect _getBackgroundOriginRect(Offset offset, ImageConfiguration configuration) {
-    Size size = configuration.size;
+    Size size = configuration.size!;
 
-    EdgeInsets borderEdge = renderStyle.borderEdge;
+    EdgeInsets? borderEdge = renderStyle.borderEdge;
     double borderTop = 0;
     double borderLeft = 0;
     if (borderEdge != null) {
@@ -307,15 +307,11 @@ class BoxDecorationPainter extends BoxPainter {
       borderLeft = borderEdge.left;
     }
 
-    double paddingTop = 0;
-    double paddingLeft = 0;
-    if (padding != null) {
-      paddingTop = padding.top;
-      paddingLeft = padding.left;
-    }
+    double paddingTop = padding != null ? padding!.top : 0.0;
+    double paddingLeft = padding != null ? padding!.left : 0.0;
     // Background origin moves background image from specified origin
     Rect backgroundOriginRect;
-    BackgroundBoundary backgroundOrigin = renderStyle.backgroundOrigin;
+    BackgroundBoundary? backgroundOrigin = renderStyle.backgroundOrigin;
     switch(backgroundOrigin) {
       case BackgroundBoundary.borderBox:
         backgroundOriginRect = offset & size;
@@ -331,12 +327,12 @@ class BoxDecorationPainter extends BoxPainter {
   }
 
   Rect _getBackgroundClipRect(Offset offset, ImageConfiguration configuration) {
-    Size size = configuration.size;
+    Size size = configuration.size!;
     double borderTop = 0;
     double borderBottom = 0;
     double borderLeft = 0;
     double borderRight = 0;
-    EdgeInsets borderEdge = renderStyle.borderEdge;
+    EdgeInsets? borderEdge = renderStyle.borderEdge;
     if (borderEdge != null) {
       borderTop = borderEdge.top;
       borderBottom = borderEdge.bottom;
@@ -344,18 +340,12 @@ class BoxDecorationPainter extends BoxPainter {
       borderRight = borderEdge.right;
     }
 
-    double paddingTop = 0;
-    double paddingBottom = 0;
-    double paddingLeft = 0;
-    double paddingRight = 0;
-    if (padding != null) {
-      paddingTop = padding.top;
-      paddingBottom = padding.bottom;
-      paddingLeft = padding.left;
-      paddingRight = padding.right;
-    }
+    double paddingTop = padding != null ? padding!.top : 0.0;
+    double paddingBottom = padding != null ? padding!.bottom : 0.0;
+    double paddingLeft = padding != null ? padding!.left : 0.0;
+    double paddingRight = padding != null ? padding!.right : 0.0;
     Rect backgroundClipRect;
-    BackgroundBoundary backgroundClip = renderStyle.backgroundClip;
+    BackgroundBoundary? backgroundClip = renderStyle.backgroundClip;
     switch(backgroundClip) {
       case BackgroundBoundary.paddingBox:
         backgroundClipRect = offset.translate(borderLeft, borderTop) & Size(
@@ -379,11 +369,8 @@ class BoxDecorationPainter extends BoxPainter {
   /// Paint the box decoration into the given location on the given canvas
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
-    assert(configuration.size != null);
-
-    final Rect rect = offset & configuration.size;
-    final TextDirection textDirection = configuration.textDirection;
+    final Rect rect = offset & configuration.size!;
+    final TextDirection? textDirection = configuration.textDirection;
 
     bool hasLocalAttachment = hasLocalBackgroundImage(renderStyle);
     if (!hasLocalAttachment) {
