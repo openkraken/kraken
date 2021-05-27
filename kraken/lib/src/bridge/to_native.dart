@@ -88,7 +88,7 @@ void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event even
   freeNativeString(eventTypeString);
 }
 
-void emitModuleEvent(int contextId, String moduleName, Event event, String extra) {
+void emitModuleEvent(int contextId, String moduleName, Event? event, String extra) {
   invokeModuleEvent(contextId, moduleName, event, extra);
 }
 
