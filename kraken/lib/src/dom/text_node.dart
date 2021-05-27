@@ -118,7 +118,7 @@ class TextNode extends Node {
 
   void _setTextNodeProperties(CSSStyleDeclaration style) {
     _renderTextBox.whiteSpace = CSSText.getWhiteSpace(parentElement.style);
-    _renderTextBox.overflow = CSSText.getTextOverflow(parentElement.style);
+    _renderTextBox.overflow = CSSText.getTextOverflow(style: parentElement.style);
     _renderTextBox.maxLines = CSSText.getLineClamp(parentElement.style);
   }
 

@@ -31,7 +31,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_color == value) return;
     _color = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateChildrenText(renderBoxModel, COLOR);
+    _updateNestChildrenText(renderBoxModel, COLOR);
   }
 
   TextDecoration _textDecorationLine;
@@ -41,6 +41,8 @@ mixin CSSTextMixin on RenderStyleBase {
   set textDecorationLine(TextDecoration value) {
     if (_textDecorationLine == value) return;
     _textDecorationLine = value;
+    // Non inheritable style change should only update text node in direct children.
+    _updateChildrenText(renderBoxModel, TEXT_DECORATION_LINE);
   }
 
   Color _textDecorationColor;
@@ -50,6 +52,8 @@ mixin CSSTextMixin on RenderStyleBase {
   set textDecorationColor(Color value) {
     if (_textDecorationColor == value) return;
     _textDecorationColor = value;
+    // Non inheritable style change should only update text node in direct children.
+    _updateChildrenText(renderBoxModel, TEXT_DECORATION_COLOR);
   }
 
   TextDecorationStyle _textDecorationStyle;
@@ -59,6 +63,8 @@ mixin CSSTextMixin on RenderStyleBase {
   set textDecorationStyle(TextDecorationStyle value) {
     if (_textDecorationStyle == value) return;
     _textDecorationStyle = value;
+    // Non inheritable style change should only update text node in direct children.
+    _updateChildrenText(renderBoxModel, TEXT_DECORATION_STYLE);
   }
 
   FontWeight _fontWeight;
@@ -75,7 +81,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_fontWeight == value) return;
     _fontWeight = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateChildrenText(renderBoxModel, FONT_WEIGHT);
+    _updateNestChildrenText(renderBoxModel, FONT_WEIGHT);
   }
 
   FontStyle _fontStyle;
@@ -92,7 +98,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_fontStyle == value) return;
     _fontStyle = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateChildrenText(renderBoxModel, FONT_STYLE);
+    _updateNestChildrenText(renderBoxModel, FONT_STYLE);
   }
 
   List<String> _fontFamily;
@@ -112,7 +118,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_fontFamily == value) return;
     _fontFamily = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateChildrenText(renderBoxModel, FONT_FAMILY);
+    _updateNestChildrenText(renderBoxModel, FONT_FAMILY);
   }
 
   double _fontSize = CSSText.DEFAULT_FONT_SIZE;
@@ -129,7 +135,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_fontSize == value) return;
     _fontSize = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateChildrenText(renderBoxModel, FONT_SIZE);
+    _updateNestChildrenText(renderBoxModel, FONT_SIZE);
   }
 
   double _lineHeight;
@@ -145,29 +151,8 @@ mixin CSSTextMixin on RenderStyleBase {
   set lineHeight(double value) {
     if (_lineHeight == value) return;
     _lineHeight = value;
-    // Update all the children layout and text with line-height not set due to style inheritance.
-    _markLayoutTextNeedsLayout(renderBoxModel, LINE_HEIGHT);
-  }
-
-  /// Mark all layout and text children with line-height not set as needs layout
-  /// cause line-height works for both layout and text node.
-  void _markLayoutTextNeedsLayout(RenderBoxModel renderBoxModel, String styleProperty) {
-    if (renderBoxModel is RenderLayoutBox) {
-      renderBoxModel.markNeedsLayout();
-      renderBoxModel.visitChildren((RenderObject child) {
-        if (child is RenderLayoutBox) {
-          // Only need to layout when the specified style property is not set.
-          if (child.renderStyle.style[styleProperty].isEmpty) {
-            _markLayoutTextNeedsLayout(child, styleProperty);
-          }
-        } else if (child is RenderTextBox) {
-          // Update line height of paragraph.
-          KrakenRenderParagraph renderParagraph = child.child;
-          renderParagraph.lineHeight = renderBoxModel.renderStyle.lineHeight;
-          renderParagraph.markNeedsLayout();
-        }
-      });
-    }
+    // Update all the children layout and text with specified style property not set due to style inheritance.
+    _markChildrenNeedsLayoutByLineHeight(renderBoxModel, LINE_HEIGHT);
   }
 
   double _letterSpacing;
@@ -184,7 +169,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_letterSpacing == value) return;
     _letterSpacing = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateChildrenText(renderBoxModel, LETTER_SPACING);
+    _updateNestChildrenText(renderBoxModel, LETTER_SPACING);
   }
 
   double _wordSpacing;
@@ -201,7 +186,7 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_wordSpacing == value) return;
     _wordSpacing = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateChildrenText(renderBoxModel, WORD_SPACING);
+    _updateNestChildrenText(renderBoxModel, WORD_SPACING);
   }
 
   List<Shadow> _textShadow;
@@ -218,25 +203,120 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_textShadow == value) return;
     _textShadow = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateChildrenText(renderBoxModel, TEXT_SHADOW);
+    _updateNestChildrenText(renderBoxModel, TEXT_SHADOW);
   }
 
-  WhiteSpace _whiteSpace;
+  WhiteSpace _whiteSpace = WhiteSpace.normal;
   WhiteSpace get whiteSpace {
+    // Get style from self or closest parent if specified style property is not set
+    // due to style inheritance.
+    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(WHITE_SPACE);
+    if (renderBox != null) {
+      return renderBox.renderStyle._whiteSpace;
+    }
     return _whiteSpace;
   }
   set whiteSpace(WhiteSpace value) {
     if (_whiteSpace == value) return;
     _whiteSpace = value;
+    // Update all the children layout and text with specified style property not set due to style inheritance.
+    _markChildrenNeedsLayoutByWhiteSpace(renderBoxModel, WHITE_SPACE);
   }
 
-  /// Loop children to update text node with specified style property
+  TextOverflow _textOverflow = TextOverflow.clip;
+  TextOverflow get textOverflow {
+    return _textOverflow;
+  }
+  set textOverflow(TextOverflow value) {
+    if (_textOverflow == value) return;
+    _textOverflow = value;
+    // Non inheritable style change should only update text node in direct children.
+    _updateChildrenText(renderBoxModel, TEXT_OVERFLOW);
+  }
+
+  int _lineClamp;
+  int get lineClamp {
+    return _lineClamp;
+  }
+  set lineClamp(int value) {
+    if (_lineClamp == value) return;
+    _lineClamp = value;
+    // Non inheritable style change should only update text node in direct children.
+    _updateChildrenText(renderBoxModel, LINE_CLAMP);
+  }
+
+  /// Mark all layout and text children as needs layout when line-height changed.
+  void _markChildrenNeedsLayoutByLineHeight(RenderBoxModel renderBoxModel, String styleProperty) {
+    if (renderBoxModel is RenderLayoutBox) {
+      renderBoxModel.markNeedsLayout();
+      renderBoxModel.visitChildren((RenderObject child) {
+        if (child is RenderLayoutBox) {
+          // Only need to layout when the specified style property is not set.
+          if (child.renderStyle.style[styleProperty].isEmpty) {
+            _markChildrenNeedsLayoutByLineHeight(child, styleProperty);
+          }
+        } else if (child is RenderTextBox) {
+          // Update line height of paragraph.
+          KrakenRenderParagraph renderParagraph = child.child;
+          renderParagraph.lineHeight = renderBoxModel.renderStyle.lineHeight;
+          renderParagraph.markNeedsLayout();
+        }
+      });
+    }
+  }
+
+  /// Mark all layout and text children as needs layout when white-space changed.
+  void _markChildrenNeedsLayoutByWhiteSpace(RenderBoxModel renderBoxModel, String styleProperty) {
+    if (renderBoxModel is RenderLayoutBox) {
+      renderBoxModel.markNeedsLayout();
+      renderBoxModel.visitChildren((RenderObject child) {
+        if (child is RenderLayoutBox) {
+          // Only need to layout when the specified style property is not set.
+          if (child.renderStyle.style[styleProperty].isEmpty) {
+            _markChildrenNeedsLayoutByWhiteSpace(child, styleProperty);
+          }
+        } else if (child is RenderTextBox) {
+          RenderBoxModel parentRenderBoxModel = child.parent;
+          RenderStyle parentRenderStyle = parentRenderBoxModel.renderStyle;
+          child.whiteSpace = parentRenderStyle.whiteSpace;
+          // White-space change will affect text-overflow.
+          child.overflow = CSSText.getTextOverflow(renderStyle: parentRenderStyle);
+        }
+      });
+    }
+  }
+
+  /// None inheritable style change should only loop direct children to update text node with specified
+  /// style property not set in its parent.
   void _updateChildrenText(RenderBoxModel renderBoxModel, String styleProperty) {
+    renderBoxModel.visitChildren((RenderObject child) {
+      if (child is RenderTextBox) {
+        // Need to recreate text span cause text style can not be set alone.
+        RenderBoxModel parentRenderBoxModel = child.parent;
+        KrakenRenderParagraph renderParagraph = child.child;
+        String text = renderParagraph.text.text;
+        child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel: parentRenderBoxModel);
+        // Update text box property which will then update paragraph and mark it needs layout.
+        if (styleProperty == TEXT_OVERFLOW) {
+          // Always get text overflow from style cause it is affected by white-space and overflow.
+          child.overflow = CSSText.getTextOverflow(renderStyle: parentRenderBoxModel.renderStyle);
+        } else if (styleProperty == LINE_CLAMP) {
+          child.maxLines = parentRenderBoxModel.renderStyle.lineClamp;
+          // Text-overflow needs to change when line-clamp has changed.
+          child.overflow = CSSText.getTextOverflow(renderStyle: parentRenderBoxModel.renderStyle);
+        }
+      }
+    });
+  }
+
+  /// Inheritable style change should loop nest children to update text node with specified style property
+  /// not set in its parent.
+  void _updateNestChildrenText(RenderBoxModel renderBoxModel, String styleProperty) {
     renderBoxModel.visitChildren((RenderObject child) {
       if (child is RenderBoxModel) {
         // Only need to update child text when style property is not set.
         if (child.renderStyle.style[styleProperty].isEmpty) {
-          _updateChildrenText(child, styleProperty);
+          _updateNestChildrenText(child, styleProperty);
         }
       } else if (child is RenderTextBox) {
         // Need to recreate text span cause text style can not be set alone.
@@ -336,20 +416,54 @@ mixin CSSTextMixin on RenderStyleBase {
     );
   }
 
-  void updateTextStyle() {
-    color = CSSText.getTextColor(style);
-    textDecorationLine = CSSText.getTextDecorationLine(style);
-    textDecorationColor = CSSText.getTextDecorationColor(style);
-    textDecorationStyle = CSSText.getTextDecorationStyle(style);
-    fontWeight = CSSText.getFontWeight(style);
-    fontStyle = CSSText.getFontStyle(style);
-    fontFamily = CSSText.getFontFamilyFallback(style);
-    fontSize = CSSText.getFontSize(style, viewportSize);
-    lineHeight = CSSText.getLineHeight(style, viewportSize);
-    letterSpacing = CSSText.getLetterSpacing(style, viewportSize);
-    wordSpacing = CSSText.getWordSpacing(style, viewportSize);
-    textShadow = CSSText.getTextShadow(style, viewportSize);
-    whiteSpace = CSSText.getWhiteSpace(style);
+  void updateTextStyle(String property) {
+    switch (property) {
+      case COLOR:
+        color = CSSText.getTextColor(style);
+        break;
+      case TEXT_DECORATION_LINE:
+        textDecorationLine = CSSText.getTextDecorationLine(style);
+        break;
+      case TEXT_DECORATION_STYLE:
+        textDecorationColor = CSSText.getTextDecorationColor(style);
+        break;
+      case TEXT_DECORATION_COLOR:
+        textDecorationStyle = CSSText.getTextDecorationStyle(style);
+        break;
+      case FONT_WEIGHT:
+        fontWeight = CSSText.getFontWeight(style);
+        break;
+      case FONT_STYLE:
+        fontStyle = CSSText.getFontStyle(style);
+        break;
+      case FONT_FAMILY:
+        fontFamily = CSSText.getFontFamilyFallback(style);
+        break;
+      case FONT_SIZE:
+        fontSize = CSSText.getFontSize(style, viewportSize);
+        break;
+      case LINE_HEIGHT:
+        lineHeight = CSSText.getLineHeight(style, viewportSize);
+        break;
+      case LETTER_SPACING:
+        letterSpacing = CSSText.getLetterSpacing(style, viewportSize);
+        break;
+      case WORD_SPACING:
+        wordSpacing = CSSText.getWordSpacing(style, viewportSize);
+        break;
+      case TEXT_SHADOW:
+        textShadow = CSSText.getTextShadow(style, viewportSize);
+        break;
+      case WHITE_SPACE:
+        whiteSpace = CSSText.getWhiteSpace(style);
+        break;
+      case TEXT_OVERFLOW:
+        textOverflow = CSSText.getTextOverflow(renderStyle: this);
+        break;
+      case LINE_CLAMP:
+        lineClamp = CSSText.getLineClamp(style);
+        break;
+    }
   }
 }
 
@@ -440,27 +554,27 @@ class CSSText {
     return CSSLength.toInt(style[LINE_CLAMP]);
   }
 
-  static TextOverflow getTextOverflow(CSSStyleDeclaration style) {
-    List<CSSOverflowType> overflows = getOverflowTypes(style);
-    WhiteSpace whiteSpace = getWhiteSpace(style);
-    int lineClamp = getLineClamp(style);
+  static TextOverflow getTextOverflow({CSSStyleDeclaration style, RenderStyle renderStyle}) {
+    List<CSSOverflowType> overflows = renderStyle != null ?
+      getOverflowTypes(renderStyle: renderStyle) : getOverflowTypes(style: style);
+    // Get white space from renderStyle cause it may be inherited from parents.
+    WhiteSpace whiteSpace = renderStyle != null ?
+      renderStyle.whiteSpace : getWhiteSpace(style);
+    int lineClamp = renderStyle != null ?
+      renderStyle.lineClamp : getLineClamp(style);
 
     // Set line-clamp to number makes text-overflow ellipsis which takes priority over text-overflow
     if (lineClamp != null && lineClamp > 0) {
       return TextOverflow.ellipsis;
     }
-
     //  To make text overflow its container you have to set overflowX hidden and white-space: nowrap.
     if (overflows[0] != CSSOverflowType.hidden || whiteSpace != WhiteSpace.nowrap) {
       return TextOverflow.visible;
     }
 
-    TextOverflow textOverflow = TextOverflow.clip;
-    if (style == null) {
-      return textOverflow;
-    }
-
-    switch(style[TEXT_OVERFLOW]) {
+    // Always get text overflow from style cause it is affected by white-space and overflow.
+    CSSStyleDeclaration _style = renderStyle != null ? renderStyle.style : style;
+    switch(_style[TEXT_OVERFLOW]) {
       case 'ellipsis':
         return TextOverflow.ellipsis;
       case 'fade':

@@ -830,34 +830,28 @@ class Element extends Node
     // Text Style
     switch (property) {
       case COLOR:
-      case LINE_CLAMP:
-        _updateTextChildNodesStyle(property);
+        _updateTextStyle(property);
         // Color change should trigger currentColor update
         _styleBoxChangedListener(property, original, present);
         break;
-      case OVERFLOW_X:
-      case OVERFLOW_Y:
       case TEXT_SHADOW:
       case TEXT_DECORATION_LINE:
       case TEXT_DECORATION_STYLE:
+      case TEXT_DECORATION_COLOR:
       case FONT_WEIGHT:
       case FONT_STYLE:
+      case FONT_FAMILY:
       case FONT_SIZE:
       case LINE_HEIGHT:
       case LETTER_SPACING:
       case WORD_SPACING:
-        _updateTextChildNodesStyle(property);
-        break;
-
       case WHITE_SPACE:
-        _updateTextChildNodesStyle(property);
-
-        // white-space affects whether lines in flow layout may wrap at unforced soft wrap opportunities
-        // https://www.w3.org/TR/css-text-3/#line-breaking
-        // so FlowLayout needs to relayout when its value changes
-        if (renderBoxModel is RenderFlowLayout) {
-          renderBoxModel.markNeedsLayout();
-        }
+      case TEXT_OVERFLOW:
+      // Overflow will affect text-overflow ellipsis taking effect
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
+      case LINE_CLAMP:
+        _updateTextStyle(property);
         break;
     }
   }
@@ -1059,8 +1053,8 @@ class Element extends Node
     renderBoxModel.renderStyle.updateTransformOrigin(present);
   }
 
-  // Update textNode style when container style changed
-  void _updateTextChildNodesStyle(String property) {
+  // Update text related style
+  void _updateTextStyle(String property) {
     /// Percentage font-size should be resolved when node attached
     /// cause it needs to know its parents style
     if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
@@ -1083,12 +1077,7 @@ class Element extends Node
       return;
     }
 
-    renderBoxModel.renderStyle.updateTextStyle();
-    for (Node node in childNodes) {
-      if (node is TextNode) {
-        node.updateTextStyle();
-      }
-    }
+    renderBoxModel.renderStyle.updateTextStyle(property);
   }
 
   /// Percentage font size is set relative to parent's font size.
