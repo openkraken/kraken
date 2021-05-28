@@ -25,4 +25,53 @@ describe('Text TextDecoration', () => {
       return snapshot(cont);
     });
   });
+
+  it('works with inheritance', async (done) => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('inherited text-shadow')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightblue',
+          textShadow: '2px 2px 2px red',
+        }
+      }, [
+        createText('not inherited text-shadow')
+      ]))
+    ]);
+
+    let container = createElement('div', {
+      style: {
+        textShadow: '2px 2px 2px blue'
+      }
+    });
+    container.appendChild(div);
+    BODY.appendChild(container);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      container.style.textShadow = '2px 2px 2px yellow';
+      await snapshot();
+      done();
+    });
+  });
 });

@@ -48,4 +48,53 @@ describe('FontWeight', () => {
       return snapshot();
     });
   });
+
+  it('works with inheritance', async (done) => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('inherited font-weight')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightblue',
+          fontWeight: 'normal',
+        }
+      }, [
+        createText('not inherited font-weigth')
+      ]))
+    ]);
+
+    let container = createElement('div', {
+      style: {
+        fontWeight: 'lighter'
+      }
+    });
+    container.appendChild(div);
+    BODY.appendChild(container);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      container.style.fontWeight = 'bold';
+      await snapshot();
+      done();
+    });
+  });
 });
