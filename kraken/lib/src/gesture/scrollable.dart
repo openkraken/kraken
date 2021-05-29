@@ -83,8 +83,8 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   // This field is set during layout, and then reused until the next time it is set.
   Map<Type, GestureRecognizerFactory> _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
   Map<Type, GestureRecognizer> _recognizers = const <Type, GestureRecognizer>{};
-  late bool _lastCanDrag;
-  late Axis _lastAxisDirection;
+  bool? _lastCanDrag;
+  Axis? _lastAxisDirection;
 
   @override
   void setCanDrag(bool canDrag) {
@@ -267,13 +267,12 @@ mixin RenderOverflowMixin on RenderBox {
     _enableScrollY = value;
   }
 
-  late Size _scrollableSize;
-  late Size _viewportSize;
+  Size? _scrollableSize;
+  Size? _viewportSize;
 
   ViewportOffset get scrollOffsetX => _scrollOffsetX;
   late ViewportOffset _scrollOffsetX;
   set scrollOffsetX(ViewportOffset value) {
-    if (value == _scrollOffsetX) return;
     _scrollOffsetX = value;
     _scrollOffsetX.removeListener(_scrollXListener);
     _scrollOffsetX.addListener(_scrollXListener);
@@ -283,7 +282,6 @@ mixin RenderOverflowMixin on RenderBox {
   ViewportOffset get scrollOffsetY => _scrollOffsetY;
   late ViewportOffset _scrollOffsetY;
   set scrollOffsetY(ViewportOffset value) {
-    if (value == _scrollOffsetY) return;
     _scrollOffsetY = value;
     _scrollOffsetY.removeListener(_scrollYListener);
     _scrollOffsetY.addListener(_scrollYListener);
@@ -313,13 +311,13 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   void _setUpScrollX() {
-    _scrollOffsetX.applyViewportDimension(_viewportSize.width);
-    _scrollOffsetX.applyContentDimensions(0.0, math.max(0.0, _scrollableSize.width - _viewportSize.width));
+    _scrollOffsetX.applyViewportDimension(_viewportSize!.width);
+    _scrollOffsetX.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.width - _viewportSize!.width));
   }
 
   void _setUpScrollY() {
-    _scrollOffsetY.applyViewportDimension(_viewportSize.height);
-    _scrollOffsetY.applyContentDimensions(0.0, math.max(0.0, _scrollableSize.height - _viewportSize.height));
+    _scrollOffsetY.applyViewportDimension(_viewportSize!.height);
+    _scrollOffsetY.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.height - _viewportSize!.height));
   }
 
   void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {

@@ -93,6 +93,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(window);
 
     document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
+    document.appendChild(documentElement);
     setEventTarget(document);
 
     element_registry.defineBuiltInElements();

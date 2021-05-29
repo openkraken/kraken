@@ -8,9 +8,7 @@ class Document extends Node {
   final HTMLElement documentElement;
 
   Document(int targetId, this.nativeDocumentPtr, ElementManager elementManager, this.documentElement)
-      : super(NodeType.DOCUMENT_NODE, targetId, nativeDocumentPtr.ref.nativeNode, elementManager, '#document') {
-    appendChild(documentElement);
-  }
+      : super(NodeType.DOCUMENT_NODE, targetId, nativeDocumentPtr.ref.nativeNode, elementManager, '#document');
 
   void _handleEvent(Event event) {
     emitUIEvent(elementManager.controller.view.contextId, nativeDocumentPtr.ref.nativeNode.ref.nativeEventTarget, event);

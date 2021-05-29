@@ -10,7 +10,10 @@ mixin CSSPaddingMixin on RenderStyleBase {
   EdgeInsets? _resolvedPadding;
 
   void _resolve() {
-    EdgeInsetsGeometry _p = padding!;
+    EdgeInsetsGeometry? _p = padding;
+    EdgeInsets? _rp = _resolvedPadding;
+    if (_rp != null) return;
+    if (_p == null) return;
     _resolvedPadding = _p.resolve(TextDirection.ltr);
     assert(_resolvedPadding!.isNonNegative);
   }

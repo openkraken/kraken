@@ -126,20 +126,20 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   final String? debugLabel;
 
   @override
-  double get minScrollExtent => _minScrollExtent;
-  late double _minScrollExtent;
+  double get minScrollExtent => _minScrollExtent!;
+  double? _minScrollExtent;
 
   @override
-  double get maxScrollExtent => _maxScrollExtent;
-  late double _maxScrollExtent;
+  double get maxScrollExtent => _maxScrollExtent!;
+  double? _maxScrollExtent;
 
   @override
   double get pixels => _pixels ?? 0.0;
   double? _pixels;
 
   @override
-  double get viewportDimension => _viewportDimension;
-  late double _viewportDimension;
+  double get viewportDimension => _viewportDimension!;
+  double? _viewportDimension;
 
   /// Whether [viewportDimension], [minScrollExtent], [maxScrollExtent],
   /// [outOfRange], and [atEdge] are available.
@@ -377,7 +377,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     return true;
   }
 
-  late Set<SemanticsAction> _semanticActions;
+  Set<SemanticsAction>? _semanticActions;
 
   /// Called whenever the scroll position or the dimensions of the scroll view
   /// change to schedule an update of the available semantics actions. The
@@ -412,13 +412,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     if (setEquals<SemanticsAction>(actions, _semanticActions)) return;
 
     _semanticActions = actions;
-    context.setSemanticsActions(_semanticActions);
+    context.setSemanticsActions(actions);
   }
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    assert(minScrollExtent != null);
-    assert(maxScrollExtent != null);
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
         _didChangeViewportDimensionOrReceiveCorrection) {
@@ -623,7 +621,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       activity.dispose();
     }
     _activity = newActivity;
-    isScrollingNotifier.value = activity!.isScrolling;
+    isScrollingNotifier.value = newActivity.isScrolling;
   }
 
   @override

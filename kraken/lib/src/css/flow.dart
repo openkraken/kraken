@@ -12,7 +12,7 @@ import 'package:kraken/css.dart';
 mixin CSSFlowMixin on RenderStyleBase {
 
   TextAlign get textAlign => _textAlign;
-  late TextAlign _textAlign;
+  TextAlign _textAlign = TextAlign.start;
   set textAlign(TextAlign value) {
     if (_textAlign == value) return;
     _textAlign = value;
