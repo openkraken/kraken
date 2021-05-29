@@ -206,17 +206,17 @@ enum UICommandType {
 
 class UICommandItem extends Struct {
   @Int64()
-  int type;
+  external int type;
 
-  Pointer<Pointer<NativeString>> args;
-
-  @Int64()
-  int id;
+  external Pointer<Pointer<NativeString>> args;
 
   @Int64()
-  int length;
+  external int id;
 
-  Pointer nativePtr;
+  @Int64()
+  external int length;
+
+  external Pointer nativePtr;
 }
 
 typedef NativeGetUICommandItems = Pointer<Uint64> Function(Int32 contextId);

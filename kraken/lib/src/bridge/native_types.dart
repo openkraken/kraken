@@ -10,222 +10,222 @@ typedef NativeGetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
 typedef DartGetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
 
 class NativeKrakenInfo extends Struct {
-  Pointer<Utf8> app_name;
-  Pointer<Utf8> app_version;
-  Pointer<Utf8> app_revision;
-  Pointer<Utf8> system_name;
-  Pointer<NativeFunction<NativeGetUserAgent>> getUserAgent;
+  external Pointer<Utf8> app_name;
+  external Pointer<Utf8> app_version;
+  external Pointer<Utf8> app_revision;
+  external Pointer<Utf8> system_name;
+  external Pointer<NativeFunction<NativeGetUserAgent>> getUserAgent;
 }
 
 class NativeEvent extends Struct {
-  Pointer<NativeString> type;
+  external Pointer<NativeString> type;
 
   @Int64()
-  int bubbles;
+  external int bubbles;
 
   @Int64()
-  int cancelable;
+  external int cancelable;
 
   @Int64()
-  int timeStamp;
+  external int timeStamp;
 
   @Int64()
-  int defaultPrevented;
+  external int defaultPrevented;
 
-  Pointer target;
+  external Pointer target;
 
-  Pointer currentTarget;
+  external Pointer currentTarget;
 }
 
 class NativeInputEvent extends Struct {
-  Pointer<NativeEvent> nativeEvent;
-  Pointer<NativeString> inputType;
-  Pointer<NativeString> data;
+  external Pointer<NativeEvent> nativeEvent;
+  external Pointer<NativeString> inputType;
+  external Pointer<NativeString> data;
 }
 
 class NativeMediaErrorEvent extends Struct {
-  Pointer<NativeEvent> nativeEvent;
+  external Pointer<NativeEvent> nativeEvent;
 
   @Int64()
-  int code;
+  external int code;
 
-  Pointer<NativeString> message;
+  external Pointer<NativeString> message;
 }
 
 class NativeMessageEvent extends Struct {
-  Pointer<NativeEvent> nativeEvent;
+  external Pointer<NativeEvent> nativeEvent;
 
-  Pointer<NativeString> data;
-  Pointer<NativeString> origin;
+  external Pointer<NativeString> data;
+  external Pointer<NativeString> origin;
 }
 
 class NativeCustomEvent extends Struct {
-  Pointer<NativeEvent> nativeEvent;
+  external Pointer<NativeEvent> nativeEvent;
 
-  Pointer<NativeString> detail;
+  external Pointer<NativeString> detail;
 }
 
 class NativeMouseEvent extends Struct {
-  Pointer<NativeEvent> nativeEvent;
+  external Pointer<NativeEvent> nativeEvent;
 
   @Double()
-  double clientX;
+  external double clientX;
 
   @Double()
-  double clientY;
+  external double clientY;
 
   @Double()
-  double offsetX;
+  external double offsetX;
 
   @Double()
-  double offsetY;
+  external double offsetY;
 }
 
 class NativeGestureEvent extends Struct {
-  Pointer<NativeEvent> nativeEvent;
+  external Pointer<NativeEvent> nativeEvent;
 
-  Pointer<NativeString> state;
+  external Pointer<NativeString> state;
 
-  Pointer<NativeString> direction;
-
-  @Double()
-  double deltaX;
+  external Pointer<NativeString> direction;
 
   @Double()
-  double deltaY;
+  external double deltaX;
 
   @Double()
-  double velocityX;
+  external double deltaY;
 
   @Double()
-  double velocityY;
+  external double velocityX;
 
   @Double()
-  double scale;
+  external double velocityY;
 
   @Double()
-  double rotation;
+  external double scale;
+
+  @Double()
+  external double rotation;
 }
 
 class NativeCloseEvent extends Struct {
-  Pointer<NativeEvent> nativeEvent;
+  external Pointer<NativeEvent> nativeEvent;
 
   @Int64()
-  int code;
+  external int code;
 
-  Pointer<NativeString> reason;
+  external Pointer<NativeString> reason;
 
   @Int64()
-  int wasClean;
+  external int wasClean;
 }
 
 class NativeIntersectionChangeEvent extends Struct {
-  Pointer<NativeEvent> nativeEvent;
+  external Pointer<NativeEvent> nativeEvent;
 
   @Double()
-  double intersectionRatio;
+  external double intersectionRatio;
 }
 
 class NativeTouchEvent extends Struct {
-  Pointer<NativeEvent> nativeEvent;
+  external Pointer<NativeEvent> nativeEvent;
 
-  Pointer<Pointer<NativeTouch>> touches;
+  external Pointer<Pointer<NativeTouch>> touches;
   @Int64()
-  int touchLength;
+  external int touchLength;
 
-  Pointer<Pointer<NativeTouch>> targetTouches;
-
-  @Int64()
-  int targetTouchesLength;
-
-  Pointer<Pointer<NativeTouch>> changedTouches;
+  external Pointer<Pointer<NativeTouch>> targetTouches;
 
   @Int64()
-  int changedTouchesLength;
+  external int targetTouchesLength;
+
+  external Pointer<Pointer<NativeTouch>> changedTouches;
 
   @Int64()
-  int altKey;
+  external int changedTouchesLength;
 
   @Int64()
-  int metaKey;
+  external int altKey;
 
   @Int64()
-  int ctrlKey;
+  external int metaKey;
 
   @Int64()
-  int shiftKey;
+  external int ctrlKey;
+
+  @Int64()
+  external int shiftKey;
 }
 
 class NativeTouch extends Struct {
   @Int64()
-  int identifier;
+  external int identifier;
 
-  Pointer<NativeEventTarget> target;
-
-  @Double()
-  double clientX;
+  external Pointer<NativeEventTarget> target;
 
   @Double()
-  double clientY;
+  external double clientX;
 
   @Double()
-  double screenX;
+  external double clientY;
 
   @Double()
-  double screenY;
+  external double screenX;
 
   @Double()
-  double pageX;
+  external double screenY;
 
   @Double()
-  double pageY;
+  external double pageX;
 
   @Double()
-  double radiusX;
+  external double pageY;
 
   @Double()
-  double radiusY;
+  external double radiusX;
 
   @Double()
-  double rotationAngle;
+  external double radiusY;
 
   @Double()
-  double force;
+  external double rotationAngle;
 
   @Double()
-  double altitudeAngle;
+  external double force;
 
   @Double()
-  double azimuthAngle;
+  external double altitudeAngle;
+
+  @Double()
+  external double azimuthAngle;
 
   @Int64()
-  int touchType;
+  external int touchType;
 }
 
 class NativeBoundingClientRect extends Struct {
   @Double()
-  double x;
+  external double x;
 
   @Double()
-  double y;
+  external double y;
 
   @Double()
-  double width;
+  external double width;
 
   @Double()
-  double height;
+  external double height;
 
   @Double()
-  double top;
+  external double top;
 
   @Double()
-  double right;
+  external double right;
 
   @Double()
-  double bottom;
+  external double bottom;
 
   @Double()
-  double left;
+  external double left;
 }
 
 typedef NativeDispatchEvent = Void Function(
@@ -234,12 +234,12 @@ typedef DartDispatchEvent = void Function(
     Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
 class NativeEventTarget extends Struct {
-  Pointer<Void> instance;
-  Pointer<NativeFunction<NativeDispatchEvent>> dispatchEvent;
+  external Pointer<Void> instance;
+  external Pointer<NativeFunction<NativeDispatchEvent>> dispatchEvent;
 }
 
 class NativeNode extends Struct {
-  Pointer<NativeEventTarget> nativeEventTarget;
+  external Pointer<NativeEventTarget> nativeEventTarget;
 }
 
 typedef NativeGetViewModuleProperty = Double Function(Pointer<NativeElement> nativeElement, Int64 property);
@@ -251,15 +251,15 @@ typedef NativeScrollBy = Void Function(Pointer<NativeElement> nativeElement, Int
 typedef NativeSetViewModuleProperty = Void Function(Pointer<NativeElement> nativeElement, Int64 property, Double value);
 
 class NativeElement extends Struct {
-  Pointer<NativeNode> nativeNode;
+  external Pointer<NativeNode> nativeNode;
 
-  Pointer<NativeFunction<NativeGetViewModuleProperty>> getViewModuleProperty;
-  Pointer<NativeFunction<NativeSetViewModuleProperty>> setViewModuleProperty;
-  Pointer<NativeFunction<NativeGetBoundingClientRect>> getBoundingClientRect;
-  Pointer<NativeFunction<NativeGetStringValueProperty>> getStringValueProperty;
-  Pointer<NativeFunction<NativeClick>> click;
-  Pointer<NativeFunction<NativeScroll>> scroll;
-  Pointer<NativeFunction<NativeScrollBy>> scrollBy;
+  external Pointer<NativeFunction<NativeGetViewModuleProperty>> getViewModuleProperty;
+  external Pointer<NativeFunction<NativeSetViewModuleProperty>> setViewModuleProperty;
+  external Pointer<NativeFunction<NativeGetBoundingClientRect>> getBoundingClientRect;
+  external Pointer<NativeFunction<NativeGetStringValueProperty>> getStringValueProperty;
+  external Pointer<NativeFunction<NativeClick>> click;
+  external Pointer<NativeFunction<NativeScroll>> scroll;
+  external Pointer<NativeFunction<NativeScrollBy>> scrollBy;
 }
 
 typedef NativeWindowOpen = Void Function(Pointer<NativeWindow> nativeWindow, Pointer<NativeString> url);
@@ -269,28 +269,28 @@ typedef NativeWindowScrollTo = Void Function(Pointer<NativeWindow> nativeWindow,
 typedef NativeWindowScrollBy = Void Function(Pointer<NativeWindow> nativeWindow, Int32 x, Int32 y);
 
 class NativeWindow extends Struct {
-  Pointer<NativeEventTarget> nativeEventTarget;
-  Pointer<NativeFunction<NativeWindowOpen>> open;
-  Pointer<NativeFunction<NativeWindowScrollX>> scrollX;
-  Pointer<NativeFunction<NativeWindowScrollY>> scrollY;
-  Pointer<NativeFunction<NativeWindowScrollTo>> scrollTo;
-  Pointer<NativeFunction<NativeWindowScrollBy>> scrollBy;
+  external Pointer<NativeEventTarget> nativeEventTarget;
+  external Pointer<NativeFunction<NativeWindowOpen>> open;
+  external Pointer<NativeFunction<NativeWindowScrollX>> scrollX;
+  external Pointer<NativeFunction<NativeWindowScrollY>> scrollY;
+  external Pointer<NativeFunction<NativeWindowScrollTo>> scrollTo;
+  external Pointer<NativeFunction<NativeWindowScrollBy>> scrollBy;
 }
 
 class NativeDocument extends Struct {
-  Pointer<NativeNode> nativeNode;
+  external Pointer<NativeNode> nativeNode;
 }
 
 class NativeTextNode extends Struct {
-  Pointer<NativeNode> nativeNode;
+  external Pointer<NativeNode> nativeNode;
 }
 
 class NativeCommentNode extends Struct {
-  Pointer<NativeNode> nativeNode;
+  external Pointer<NativeNode> nativeNode;
 }
 
 class NativeAnchorElement extends Struct {
-  Pointer<NativeElement> nativeElement;
+  external Pointer<NativeElement> nativeElement;
 }
 
 typedef GetImageWidth = Double Function(Pointer<NativeImgElement> nativePtr);
@@ -303,33 +303,33 @@ typedef GetInputHeight = Double Function(Pointer<NativeInputElement> nativePtr);
 typedef InputElementMethodVoidCallback = Void Function(Pointer<NativeInputElement> nativePtr);
 
 class NativeImgElement extends Struct {
-  Pointer<NativeElement> nativeElement;
+  external Pointer<NativeElement> nativeElement;
 
-  Pointer<NativeFunction<GetImageWidth>> getImageWidth;
-  Pointer<NativeFunction<GetImageHeight>> getImageHeight;
-  Pointer<NativeFunction<GetImageNaturalWidth>> getImageNaturalWidth;
-  Pointer<NativeFunction<GetImageNaturalHeight>> getImageNaturalHeight;
+  external Pointer<NativeFunction<GetImageWidth>> getImageWidth;
+  external Pointer<NativeFunction<GetImageHeight>> getImageHeight;
+  external Pointer<NativeFunction<GetImageNaturalWidth>> getImageNaturalWidth;
+  external Pointer<NativeFunction<GetImageNaturalHeight>> getImageNaturalHeight;
 }
 
 class NativeObjectElement extends Struct {
-  Pointer<NativeElement> nativeElement;
+  external Pointer<NativeElement> nativeElement;
 }
 
 class NativeInputElement extends Struct {
-  Pointer<NativeElement> nativeElement;
+  external Pointer<NativeElement> nativeElement;
 
-  Pointer<NativeFunction<GetInputWidth>> getInputWidth;
-  Pointer<NativeFunction<GetInputHeight>> getInputHeight;
-  Pointer<NativeFunction<InputElementMethodVoidCallback>> focus;
-  Pointer<NativeFunction<InputElementMethodVoidCallback>> blur;
+  external Pointer<NativeFunction<GetInputWidth>> getInputWidth;
+  external Pointer<NativeFunction<GetInputHeight>> getInputHeight;
+  external Pointer<NativeFunction<InputElementMethodVoidCallback>> focus;
+  external Pointer<NativeFunction<InputElementMethodVoidCallback>> blur;
 }
 
 typedef NativeCanvasGetContext = Pointer<NativeCanvasRenderingContext2D> Function(
     Pointer<NativeCanvasElement> nativeCanvasElement, Pointer<NativeString> contextId);
 
 class NativeCanvasElement extends Struct {
-  Pointer<NativeElement> nativeElement;
-  Pointer<NativeFunction<NativeCanvasGetContext>> getContext;
+  external Pointer<NativeElement> nativeElement;
+  external Pointer<NativeFunction<NativeCanvasGetContext>> getContext;
 }
 
 typedef NativeRenderingContextSetProperty = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> value);
@@ -362,58 +362,58 @@ typedef NativeRenderingContextTransform = Void Function(Pointer<NativeCanvasRend
 typedef NativeRenderingContextTranslate = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y);
 
 class NativeCanvasRenderingContext2D extends Struct {
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setDirection;
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setFont;
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setFillStyle;
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setStrokeStyle;
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setLineCap;
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setLineDashOffset;
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setLineJoin;
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setLineWidth;
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setMiterLimit;
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setTextAlign;
-  Pointer<NativeFunction<NativeRenderingContextSetProperty>> setTextBaseline;
-  Pointer<NativeFunction<NativeRenderingContextArc>> arc;
-  Pointer<NativeFunction<NativeRenderingContextArcTo>> arcTo;
-  Pointer<NativeFunction<NativeRenderingContextBeginPath>> beginPath;
-  Pointer<NativeFunction<NativeRenderingContextBezierCurveTo>> bezierCurveTo;
-  Pointer<NativeFunction<NativeRenderingContextClearRect>> clearRect;
-  Pointer<NativeFunction<NativeRenderingContextClip>> clip;
-  Pointer<NativeFunction<NativeRenderingContextClosePath>> closePath;
-  Pointer<NativeFunction<NativeRenderingContextEllipse>> ellipse;
-  Pointer<NativeFunction<NativeRenderingContextFill>> fill;
-  Pointer<NativeFunction<NativeRenderingContextFillRect>> fillRect;
-  Pointer<NativeFunction<NativeRenderingContextFillText>> fillText;
-  Pointer<NativeFunction<NativeRenderingContextLineTo>> lineTo;
-  Pointer<NativeFunction<NativeRenderingContextMoveTo>> moveTo;
-  Pointer<NativeFunction<NativeRenderingContextQuadraticCurveTo>> quadraticCurveTo;
-  Pointer<NativeFunction<NativeRenderingContextRect>> rect;
-  Pointer<NativeFunction<NativeRenderingContextRestore>> restore;
-  Pointer<NativeFunction<NativeRenderingContextRotate>> rotate;
-  Pointer<NativeFunction<NativeRenderingContextResetTransform>> resetTransform;
-  Pointer<NativeFunction<NativeRenderingContextSave>> save;
-  Pointer<NativeFunction<NativeRenderingContextScale>> scale;
-  Pointer<NativeFunction<NativeRenderingContextStroke>> stroke;
-  Pointer<NativeFunction<NativeRenderingContextStrokeRect>> strokeRect;
-  Pointer<NativeFunction<NativeRenderingContextStrokeText>> strokeText;
-  Pointer<NativeFunction<NativeRenderingContextSetTransform>> setTransform;
-  Pointer<NativeFunction<NativeRenderingContextTransform>> transform;
-  Pointer<NativeFunction<NativeRenderingContextTranslate>> translate;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setDirection;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setFont;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setFillStyle;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setStrokeStyle;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setLineCap;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setLineDashOffset;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setLineJoin;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setLineWidth;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setMiterLimit;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setTextAlign;
+  external Pointer<NativeFunction<NativeRenderingContextSetProperty>> setTextBaseline;
+  external Pointer<NativeFunction<NativeRenderingContextArc>> arc;
+  external Pointer<NativeFunction<NativeRenderingContextArcTo>> arcTo;
+  external Pointer<NativeFunction<NativeRenderingContextBeginPath>> beginPath;
+  external Pointer<NativeFunction<NativeRenderingContextBezierCurveTo>> bezierCurveTo;
+  external Pointer<NativeFunction<NativeRenderingContextClearRect>> clearRect;
+  external Pointer<NativeFunction<NativeRenderingContextClip>> clip;
+  external Pointer<NativeFunction<NativeRenderingContextClosePath>> closePath;
+  external Pointer<NativeFunction<NativeRenderingContextEllipse>> ellipse;
+  external Pointer<NativeFunction<NativeRenderingContextFill>> fill;
+  external Pointer<NativeFunction<NativeRenderingContextFillRect>> fillRect;
+  external Pointer<NativeFunction<NativeRenderingContextFillText>> fillText;
+  external Pointer<NativeFunction<NativeRenderingContextLineTo>> lineTo;
+  external Pointer<NativeFunction<NativeRenderingContextMoveTo>> moveTo;
+  external Pointer<NativeFunction<NativeRenderingContextQuadraticCurveTo>> quadraticCurveTo;
+  external Pointer<NativeFunction<NativeRenderingContextRect>> rect;
+  external Pointer<NativeFunction<NativeRenderingContextRestore>> restore;
+  external Pointer<NativeFunction<NativeRenderingContextRotate>> rotate;
+  external Pointer<NativeFunction<NativeRenderingContextResetTransform>> resetTransform;
+  external Pointer<NativeFunction<NativeRenderingContextSave>> save;
+  external Pointer<NativeFunction<NativeRenderingContextScale>> scale;
+  external Pointer<NativeFunction<NativeRenderingContextStroke>> stroke;
+  external Pointer<NativeFunction<NativeRenderingContextStrokeRect>> strokeRect;
+  external Pointer<NativeFunction<NativeRenderingContextStrokeText>> strokeText;
+  external Pointer<NativeFunction<NativeRenderingContextSetTransform>> setTransform;
+  external Pointer<NativeFunction<NativeRenderingContextTransform>> transform;
+  external Pointer<NativeFunction<NativeRenderingContextTranslate>> translate;
 }
 
 class NativePerformanceEntry extends Struct {
-  Pointer<Utf8> name;
-  Pointer<Utf8> entryType;
+  external Pointer<Utf8> name;
+  external Pointer<Utf8> entryType;
 
   @Double()
-  double startTime;
+  external double startTime;
   @Double()
-  double duration;
+  external double duration;
 }
 
 class NativePerformanceEntryList extends Struct {
-  Pointer<Uint64> entries;
+  external Pointer<Uint64> entries;
 
   @Int32()
-  int length;
+  external int length;
 }

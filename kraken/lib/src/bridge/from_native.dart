@@ -18,10 +18,10 @@ import 'native_types.dart';
 
 // An native struct can be directly convert to javaScript String without any conversion cost.
 class NativeString extends Struct {
-  Pointer<Uint16> string;
+  external Pointer<Uint16> string;
 
   @Int32()
-  int length;
+  external int length;
 }
 
 String uint16ToString(Pointer<Uint16> pointer, int length) {
