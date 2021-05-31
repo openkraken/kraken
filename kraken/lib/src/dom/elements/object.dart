@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -24,8 +26,8 @@ _DefaultObjectElementClient _DefaultObjectElementClientFactory(ObjectElementHost
 ///https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
 class ObjectElement extends Element implements ObjectElementHost {
 
-  late ObjectElementClientFactory _objectElementClientFactory;
-  late ObjectElementClient _objectElementClient;
+  ObjectElementClientFactory _objectElementClientFactory;
+  ObjectElementClient _objectElementClient;
 
   ObjectElement(int targetId, Pointer<NativeObjectElement> nativePtr, ElementManager elementManager)
       : super(targetId, nativePtr.ref.nativeElement, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
@@ -41,14 +43,14 @@ class ObjectElement extends Element implements ObjectElementHost {
 
   Future<dynamic> initElementClient() async {
     try {
-      await _objectElementClient.initElementClient(properties);
+      await _objectElementClient?.initElementClient(properties);
     } catch (e) {
       print(e);
     }
   }
 
   void initDetachCallback(final ElementManager elementManager) {
-    elementManager.setDetachCallback(disposeClient);
+    elementManager?.setDetachCallback(disposeClient);
   }
 
   @override
@@ -56,10 +58,10 @@ class ObjectElement extends Element implements ObjectElementHost {
     super.setProperty(key, value);
     switch (key) {
       case 'type':
-        _objectElementClient.setProperty(key, value);
+        _objectElementClient?.setProperty(key, value);
         break;
       case 'data':
-        _objectElementClient.setProperty(key, value);
+        _objectElementClient?.setProperty(key, value);
         break;
       default:
         break;
@@ -84,7 +86,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   }
 
   void disposeClient() {
-    _objectElementClient.dispose();
+    _objectElementClient?.dispose();
   }
 
 //  @override

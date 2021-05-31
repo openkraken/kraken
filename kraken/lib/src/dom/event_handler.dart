@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -68,9 +70,8 @@ mixin EventHandlerMixin on Node {
 
   TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
     TouchEvent event = TouchEvent(type);
-    var pointerEventOriginal = pointEvent.original;
     // Use original event, prevent to be relative coordinate
-    if (pointerEventOriginal != null) pointEvent = pointerEventOriginal;
+    if (pointEvent.original != null) pointEvent = pointEvent.original;
 
     Touch touch = Touch(
       identifier: pointEvent.pointer,
@@ -92,12 +93,10 @@ mixin EventHandlerMixin on Node {
     return event;
   }
 
-  void handleMouseEvent(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
-    RenderBoxModel? root = elementManager.viewportElement.renderBoxModel;
-    if (root == null || up == null) {
-      return;
-    }
+  void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
+    RenderBoxModel root = elementManager.viewportElement.renderBoxModel;
     Offset globalOffset = root.globalToLocal(Offset(up.position.dx, up.position.dy));
+
     dispatchEvent(MouseEvent(eventType,
       MouseEventInit(
         bubbles: true,

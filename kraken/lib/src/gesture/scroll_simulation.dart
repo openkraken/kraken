@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 
 /// An implementation of scroll physics that matches iOS.
@@ -34,7 +35,12 @@ class BouncingScrollSimulation extends Simulation {
     required this.trailingExtent,
     required this.spring,
     Tolerance tolerance = Tolerance.defaultTolerance,
-  })  : assert(leadingExtent <= trailingExtent),
+  })  : assert(position != null),
+        assert(velocity != null),
+        assert(leadingExtent != null),
+        assert(trailingExtent != null),
+        assert(leadingExtent <= trailingExtent),
+        assert(spring != null),
         super(tolerance: tolerance) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
@@ -44,25 +50,26 @@ class BouncingScrollSimulation extends Simulation {
       _springTime = double.negativeInfinity;
     } else {
       _frictionSimulation = FrictionSimulation(0.135, position, velocity);
-      final double finalX = _frictionSimulation.finalX;
+      final double finalX = _frictionSimulation!.finalX;
       if (velocity > 0.0 && finalX > trailingExtent) {
-        _springTime = _frictionSimulation.timeAtX(trailingExtent);
+        _springTime = _frictionSimulation!.timeAtX(trailingExtent);
         _springSimulation = _overscrollSimulation(
           trailingExtent,
-          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+          math.min(_frictionSimulation!.dx(_springTime!), maxSpringTransferVelocity),
         );
-        assert(_springTime.isFinite);
+        assert(_springTime!.isFinite);
       } else if (velocity < 0.0 && finalX < leadingExtent) {
-        _springTime = _frictionSimulation.timeAtX(leadingExtent);
+        _springTime = _frictionSimulation!.timeAtX(leadingExtent);
         _springSimulation = _underscrollSimulation(
           leadingExtent,
-          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+          math.min(_frictionSimulation!.dx(_springTime!), maxSpringTransferVelocity),
         );
-        assert(_springTime.isFinite);
+        assert(_springTime!.isFinite);
       } else {
         _springTime = double.infinity;
       }
     }
+    assert(_springTime != null);
   }
 
   /// The maximum velocity that can be transferred from the inertia of a ballistic
@@ -80,10 +87,10 @@ class BouncingScrollSimulation extends Simulation {
   /// The spring used used to return [x] to either [leadingExtent] or [trailingExtent].
   final SpringDescription spring;
 
-  late FrictionSimulation _frictionSimulation;
-  late Simulation _springSimulation;
-  late double _springTime;
-  double _timeOffset = 0.0;
+  FrictionSimulation? _frictionSimulation;
+  Simulation? _springSimulation;
+  double? _springTime;
+  double? _timeOffset = 0.0;
 
   Simulation _underscrollSimulation(double x, double dx) {
     return ScrollSpringSimulation(spring, x, leadingExtent, dx);
@@ -93,26 +100,26 @@ class BouncingScrollSimulation extends Simulation {
     return ScrollSpringSimulation(spring, x, trailingExtent, dx);
   }
 
-  Simulation _simulation(double time) {
-    Simulation simulation;
-    if (time > _springTime) {
-      _timeOffset = _springTime.isFinite ? _springTime : 0.0;
+  Simulation? _simulation(double time) {
+    Simulation? simulation;
+    if (time > _springTime!) {
+      _timeOffset = _springTime!.isFinite ? _springTime : 0.0;
       simulation = _springSimulation;
     } else {
       _timeOffset = 0.0;
       simulation = _frictionSimulation;
     }
-    return simulation..tolerance = tolerance;
+    return simulation!..tolerance = tolerance;
   }
 
   @override
-  double x(double time) => _simulation(time).x(time - _timeOffset);
+  double x(double time) => _simulation(time)!.x(time - _timeOffset!);
 
   @override
-  double dx(double time) => _simulation(time).dx(time - _timeOffset);
+  double dx(double time) => _simulation(time)!.dx(time - _timeOffset!);
 
   @override
-  bool isDone(double time) => _simulation(time).isDone(time - _timeOffset);
+  bool isDone(double time) => _simulation(time)!.isDone(time - _timeOffset!);
 
   @override
   String toString() {
@@ -145,7 +152,7 @@ class ClampingScrollSimulation extends Simulation {
   }
 
   /// The position of the particle at the beginning of the simulation.
-  final double position;
+  final double? position;
 
   /// The velocity at which the particle is traveling at the beginning of the
   /// simulation.
@@ -206,7 +213,7 @@ class ClampingScrollSimulation extends Simulation {
   @override
   double x(double time) {
     final double t = (time / _duration).clamp(0.0, 1.0);
-    return position + _distance * _flingDistancePenetration(t) * velocity.sign;
+    return position! + _distance * _flingDistancePenetration(t) * velocity.sign;
   }
 
   @override

@@ -1,5 +1,7 @@
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#functional-notations
 
+// @dart=2.9
+
 final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
 final _functionStart = '(';
 final _functionEnd = ')';
@@ -12,7 +14,7 @@ const String FUNCTION_ARGS_SPLIT = ',';
 class CSSFunction {
 
   static bool isFunction(String value) {
-    return _functionRegExp.hasMatch(value);
+    return value != null && _functionRegExp.hasMatch(value);
   }
 
   static List<CSSFunctionalNotation> parseFunction(String value) {

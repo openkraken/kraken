@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
@@ -25,6 +25,7 @@ double computeSwipeSlop(PointerDeviceKind kind) {
     case PointerDeviceKind.touch:
       return kSwipeSlop;
   }
+  return kSwipeSlop;
 }
 
 typedef GestureSwipeCancelCallback = void Function();
@@ -122,12 +123,12 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
 
   _SwipeState _state = _SwipeState.ready;
   late OffsetPair _initialPosition;
-  late OffsetPair _pendingDragOffset;
+  OffsetPair? _pendingDragOffset;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int? _initialButtons;
 
-  late String _direction;
+  String? _direction;
 
   /// Distance moved in the global coordinate space of the screen in swipe direction.
   ///
@@ -198,6 +199,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     if (!event.synthesized
         && (event is PointerDownEvent || event is PointerMoveEvent)) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
+      assert(tracker != null);
       tracker.addPosition(event.timeStamp, event.localPosition);
     }
 
@@ -207,7 +209,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
         return;
       }
 
-      _pendingDragOffset += OffsetPair(local: event.localDelta, global: event.delta);
+      _pendingDragOffset = _pendingDragOffset! + OffsetPair(local: event.localDelta, global: event.delta);
 
       final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
 
@@ -247,9 +249,9 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     if (_state != _SwipeState.accepted) {
       _state = _SwipeState.accepted;
-      final OffsetPair delta = _pendingDragOffset;
+      final OffsetPair? delta = _pendingDragOffset;
       if (dragStartBehavior == DragStartBehavior.start) {
-        _initialPosition = _initialPosition + delta;
+        _initialPosition = _initialPosition + delta!;
       }
       _pendingDragOffset = OffsetPair.zero;
     }
@@ -297,6 +299,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       return;
 
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
+    assert(tracker != null);
 
     String Function() debugReport;
 

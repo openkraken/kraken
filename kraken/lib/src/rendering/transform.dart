@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -13,27 +15,29 @@ mixin RenderTransformMixin on RenderBoxModelBase {
     final Matrix4 result = Matrix4.identity();
     Offset transformOffset = renderStyle.transformOffset;
     Alignment transformAlignment = renderStyle.transformAlignment;
-    result.translate(transformOffset.dx, transformOffset.dy);
-    Offset? translation;
-    if (transformAlignment != Alignment.topLeft) {
+    if (transformOffset != null) {
+      result.translate(transformOffset.dx, transformOffset.dy);
+    }
+    Offset translation;
+    if (transformAlignment != null && transformAlignment != Alignment.topLeft) {
       // Use boxSize instead of size to avoid Flutter cannot access size beyond parent access warning
       translation = hasSize ? transformAlignment.alongSize(boxSize) : Offset.zero;
       result.translate(translation.dx, translation.dy);
     }
 
-    result.multiply(renderStyle.transform!);
+    result.multiply(renderStyle.transform);
 
-    if (transformAlignment != Alignment.topLeft) result.translate(-translation!.dx, -translation.dy);
-    result.translate(-transformOffset.dx, -transformOffset.dy);
+    if (transformAlignment != null && transformAlignment != Alignment.topLeft) result.translate(-translation.dx, -translation.dy);
+    if (transformOffset != null) result.translate(-transformOffset.dx, -transformOffset.dy);
     return result;
   }
 
-  TransformLayer? _transformLayer;
+  TransformLayer _transformLayer;
 
   void paintTransform(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (renderStyle.transform != null) {
       final Matrix4 transform = getEffectiveTransform();
-      final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
+      final Offset childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null) {
         _transformLayer = context.pushTransform(
           needsCompositing,
@@ -57,7 +61,7 @@ mixin RenderTransformMixin on RenderBoxModelBase {
     }
   }
 
-  bool hitTestLayoutChildren(BoxHitTestResult result, RenderBox? child, Offset position) {
+  bool hitTestLayoutChildren(BoxHitTestResult result, RenderBox child, Offset position) {
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
       final bool isHit = result.addWithPaintTransform(
@@ -69,14 +73,14 @@ mixin RenderTransformMixin on RenderBoxModelBase {
             position: position,
             hitTest: (BoxHitTestResult result, Offset transformed) {
               assert(transformed == position - childParentData.offset);
-              return child!.hitTest(result, position: transformed);
+              return child.hitTest(result, position: transformed);
             },
           );
         },
       );
       if (isHit)
         return true;
-      child = childParentData.previousSibling!;
+      child = childParentData.previousSibling;
     }
     return false;
   }
@@ -86,7 +90,7 @@ mixin RenderTransformMixin on RenderBoxModelBase {
       transform: getEffectiveTransform(),
       position: position,
       hitTest: (BoxHitTestResult result, Offset position) {
-        return child.hitTest(result, position: position);
+        return child?.hitTest(result, position: position) ?? false;
       },
     );
     if (isHit)

@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2021 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -19,13 +21,12 @@ void defineElement(String type, ElementCreator creator) {
 }
 
 Element createElement(int id, Pointer nativePtr, String type, ElementManager elementManager) {
-  ElementCreator? creator = _elementRegistry[type];
-  if (creator == null) {
+  if (!_elementRegistry.containsKey(type)) {
     print('ERROR: unexpected element type "$type"');
     return Element(id, nativePtr.cast<NativeElement>(), elementManager, tagName: UNKNOWN);
   }
 
-  Element element = creator(id, nativePtr, elementManager);
+  Element element = _elementRegistry[type](id, nativePtr, elementManager);
   return element;
 }
 

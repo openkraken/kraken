@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -12,6 +14,8 @@ enum Visibility {
 
 mixin CSSVisibilityMixin on ElementBase {
   static Visibility getVisibility(String value) {
+    if (value == null) return Visibility.visible;
+
     switch(value) {
       case HIDDEN:
         return Visibility.hidden;
@@ -22,6 +26,6 @@ mixin CSSVisibilityMixin on ElementBase {
   }
 
   void updateRenderVisibility(Visibility visibility) {
-    renderBoxModel!.visibility = visibility;
+    renderBoxModel.visibility = visibility;
   }
 }

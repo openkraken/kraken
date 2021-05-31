@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -15,8 +17,8 @@ enum CSSPositionType {
 
 class CSSOffset {
   CSSOffset({
-    required this.length,
-    required this.isAuto,
+    this.length,
+    this.isAuto,
   });
   /// length if margin value is length type
   double length;
@@ -25,53 +27,54 @@ class CSSOffset {
 }
 
 mixin CSSPositionMixin on RenderStyleBase {
-  CSSOffset? _top;
-  CSSOffset? get top {
+
+  CSSOffset _top;
+  CSSOffset get top {
     return _top;
   }
-  set top(CSSOffset? value) {
+  set top(CSSOffset value) {
     if (_top == value) return;
     _top = value;
   }
 
-  CSSOffset? _bottom;
-  CSSOffset? get bottom {
+  CSSOffset _bottom;
+  CSSOffset get bottom {
     return _bottom;
   }
-  set bottom(CSSOffset? value) {
+  set bottom(CSSOffset value) {
     if (_bottom == value) return;
     _bottom = value;
   }
 
-  CSSOffset? _left;
-  CSSOffset? get left {
+  CSSOffset _left;
+  CSSOffset get left {
     return _left;
   }
-  set left(CSSOffset? value) {
+  set left(CSSOffset value) {
     if (_left == value) return;
     _left = value;
   }
 
-  CSSOffset? _right;
-  CSSOffset? get right {
+  CSSOffset _right;
+  CSSOffset get right {
     return _right;
   }
-  set right(CSSOffset? value) {
+  set right(CSSOffset value) {
     if (_right == value) return;
     _right = value;
   }
 
-  int? _zIndex;
-  int? get zIndex {
+  int _zIndex;
+  int get zIndex {
     return _zIndex;
   }
-  set zIndex(int? value) {
+  set zIndex(int value) {
     if (_zIndex == value) return;
     _zIndex = value;
     _markParentNeedsLayout();
     // Needs to sort children when parent paint children
     if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderLayoutBox parent = renderBoxModel.parent as RenderLayoutBox;
+      RenderLayoutBox parent = renderBoxModel.parent;
       parent.markNeedsSortChildren();
     }
   }
@@ -93,7 +96,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     if (renderBoxModel.parentData is RenderLayoutParentData) {
       RenderStyle renderStyle = renderBoxModel.renderStyle;
       if (renderStyle.position != CSSPositionType.static) {
-        RenderBoxModel parent = renderBoxModel.parent as RenderBoxModel;
+        RenderBoxModel parent = renderBoxModel.parent;
         parent.markNeedsLayout();
       }
     }
@@ -122,7 +125,7 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   void updatePosition(String property, String present) {
-    RenderStyle renderStyle = this as RenderStyle;
+    RenderStyle renderStyle = this;
     position = parsePositionType(style[POSITION]);
     // Position change may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
@@ -133,7 +136,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     zIndex = int.tryParse(present);
   }
 
-  static CSSPositionType parsePositionType(String? input) {
+  static CSSPositionType parsePositionType(String input) {
     switch (input) {
       case RELATIVE:
         return CSSPositionType.relative;

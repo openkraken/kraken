@@ -55,7 +55,7 @@ export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 ///
 /// Used by [RawGestureDetector.gestures].
 @optionalTypeArgs
-abstract class GestureRecognizerFactory<T extends GestureRecognizer> {
+abstract class GestureRecognizerFactory<T extends GestureRecognizer?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const GestureRecognizerFactory();

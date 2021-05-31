@@ -26,7 +26,7 @@ import 'scroll_position_with_single_context.dart';
 ///  * [ScrollPositionWithSingleContext], the main implementation of this interface.
 abstract class ScrollActivityDelegate {
   /// The direction in which the scroll view scrolls.
-  AxisDirection get axisDirection;
+  AxisDirection? get axisDirection;
 
   /// Update the scroll position to the given pixel value.
   ///
@@ -40,7 +40,7 @@ abstract class ScrollActivityDelegate {
   /// position, for example by dragging the scroll view. Typically applies
   /// [ScrollPhysics.applyPhysicsToUserOffset] and other transformations that
   /// are appropriate for user-driving scrolling.
-  void applyUserOffset(double delta);
+  void applyUserOffset(double? delta);
 
   /// Terminate the current activity and start an idle activity.
   void goIdle();
@@ -178,7 +178,7 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 
   @override
   void cancel() {
-    delegate?.goBallistic(0.0);
+    delegate!.goBallistic(0.0);
   }
 
   @override
@@ -205,7 +205,9 @@ class ScrollDragController implements Drag {
     this.onDragCanceled,
     this.carriedVelocity,
     this.motionStartDistanceThreshold,
-  })  : assert(motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
+  })  : assert(delegate != null),
+        assert(details != null),
+        assert(motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
             'motionStartDistanceThreshold must be a positive number or null'),
         _delegate = delegate,
         _lastDetails = details,
@@ -248,7 +250,7 @@ class ScrollDragController implements Drag {
   /// drag is considered a deliberate fling.
   static const double _bigThresholdBreakDistance = 24.0;
 
-  bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
+  bool get _reversed => axisDirectionIsReversed(delegate.axisDirection!);
 
   /// Updates the controller's link to the [ScrollActivityDelegate].
   ///
@@ -261,7 +263,7 @@ class ScrollDragController implements Drag {
 
   /// Determines whether to lose the existing incoming velocity when starting
   /// the drag.
-  void _maybeLoseMomentum(double offset, Duration? timestamp) {
+  void _maybeLoseMomentum(double? offset, Duration? timestamp) {
     if (_retainMomentum &&
         offset == 0.0 &&
         (timestamp == null || // If drag event has no timestamp, we lose momentum.
@@ -277,7 +279,7 @@ class ScrollDragController implements Drag {
   ///
   /// Returns `0.0` when stationary or within threshold. Returns `offset`
   /// transparently when already in motion.
-  double _adjustForScrollStartThreshold(double offset, Duration? timestamp) {
+  double? _adjustForScrollStartThreshold(double? offset, Duration? timestamp) {
     if (timestamp == null) {
       // If we can't track time, we can't apply thresholds.
       // May be null for proxied drags like via accessibility.
@@ -298,7 +300,7 @@ class ScrollDragController implements Drag {
         // Android. Allow transparent offset transmission.
         return offset;
       } else {
-        _offsetSinceLastStop = _offsetSinceLastStop! + offset;
+        _offsetSinceLastStop = _offsetSinceLastStop! + offset!;
         if (_offsetSinceLastStop!.abs() > motionStartDistanceThreshold!) {
           // Threshold broken.
           _offsetSinceLastStop = null;
@@ -323,16 +325,17 @@ class ScrollDragController implements Drag {
     }
   }
 
-  double get pixels => (delegate as ScrollPositionWithSingleContext).pixels;
+  double? get pixels => (delegate as ScrollPositionWithSingleContext).pixels;
 
-  double get maxScrollExtent => (delegate as ScrollPositionWithSingleContext).maxScrollExtent;
+  double? get maxScrollExtent => (delegate as ScrollPositionWithSingleContext).maxScrollExtent;
 
-  double get minScrollExtent => (delegate as ScrollPositionWithSingleContext).minScrollExtent;
+  double? get minScrollExtent => (delegate as ScrollPositionWithSingleContext).minScrollExtent;
 
   @override
   void update(DragUpdateDetails details) {
+    assert(details.primaryDelta != null);
     _lastDetails = details;
-    double offset = details.primaryDelta!;
+    double? offset = details.primaryDelta;
     if (offset != 0.0) {
       _lastNonStationaryTimestamp = details.sourceTimeStamp;
     }
@@ -345,7 +348,7 @@ class ScrollDragController implements Drag {
       return;
     }
     if (_reversed) // e.g. an AxisDirection.up scrollable
-      offset = -offset;
+      offset = -offset!;
     delegate.applyUserOffset(offset);
   }
 

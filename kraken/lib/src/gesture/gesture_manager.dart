@@ -16,26 +16,26 @@ class GestureManager {
 
   factory GestureManager.instance() {
     if (_instance == null) {
-      GestureManager instance = _instance = GestureManager._();
+      _instance = GestureManager._();
 
-      instance.gestures[ClickGestureRecognizer] = ClickGestureRecognizer();
-      (instance.gestures[ClickGestureRecognizer] as ClickGestureRecognizer).onClick = instance.onClick;
+      _instance!.gestures[ClickGestureRecognizer] = ClickGestureRecognizer();
+      (_instance!.gestures[ClickGestureRecognizer] as ClickGestureRecognizer).onClick = _instance!.onClick;
 
-      instance.gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer();
-      (instance.gestures[SwipeGestureRecognizer] as SwipeGestureRecognizer).onSwipe = instance.onSwipe;
+      _instance!.gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer();
+      (_instance!.gestures[SwipeGestureRecognizer] as SwipeGestureRecognizer).onSwipe = _instance!.onSwipe;
 
-      instance.gestures[PanGestureRecognizer] = PanGestureRecognizer();
-      (instance.gestures[PanGestureRecognizer] as PanGestureRecognizer).onStart = instance.onPanStart;
-      (instance.gestures[PanGestureRecognizer] as PanGestureRecognizer).onUpdate = instance.onPanUpdate;
-      (instance.gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = instance.onPanEnd;
+      _instance!.gestures[PanGestureRecognizer] = PanGestureRecognizer();
+      (_instance!.gestures[PanGestureRecognizer] as PanGestureRecognizer).onStart = _instance!.onPanStart;
+      (_instance!.gestures[PanGestureRecognizer] as PanGestureRecognizer).onUpdate = _instance!.onPanUpdate;
+      (_instance!.gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = _instance!.onPanEnd;
 
-      instance.gestures[LongPressGestureRecognizer] = LongPressGestureRecognizer();
-      (instance.gestures[LongPressGestureRecognizer] as LongPressGestureRecognizer).onLongPressEnd = instance.onLongPressEnd;
+      _instance!.gestures[LongPressGestureRecognizer] = LongPressGestureRecognizer();
+      (_instance!.gestures[LongPressGestureRecognizer] as LongPressGestureRecognizer).onLongPressEnd = _instance!.onLongPressEnd;
 
-      instance.gestures[ScaleGestureRecognizer] = ScaleGestureRecognizer();
-      (instance.gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onStart = instance.onScaleStart;
-      (instance.gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onUpdate = instance.onScaleUpdate;
-      (instance.gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onEnd = instance.onScaleEnd;
+      _instance!.gestures[ScaleGestureRecognizer] = ScaleGestureRecognizer();
+      (_instance!.gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onStart = _instance!.onScaleStart;
+      (_instance!.gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onUpdate = _instance!.onScaleUpdate;
+      (_instance!.gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onEnd = _instance!.onScaleEnd;
     }
     return _instance!;
   }
@@ -65,65 +65,56 @@ class GestureManager {
   }
 
   void onClick(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
-    RenderBoxModel? target = _target;
-    if (target != null && target.onClick != null) {
-      target.onClick!(eventType, up: up);
+    if (_target != null && _target!.onClick != null) {
+      _target!.onClick!(eventType, up: up);
     }
   }
 
   void onSwipe(Event event) {
-    RenderBoxModel? target = _target;
-    if (target != null && target.onSwipe != null) {
-      target.onSwipe!(event);
+    if (_target != null && _target!.onSwipe != null) {
+      _target!.onSwipe!(event);
     }
   }
 
   void onPanStart(DragStartDetails details) {
-    RenderBoxModel? target = _target;
-    if (target != null && target.onPan != null) {
-      target.onPan!(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+    if (_target != null && _target!.onPan != null) {
+      _target!.onPan!(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
     }
   }
 
   void onPanUpdate(DragUpdateDetails details) {
-    RenderBoxModel? target = _target;
-    if (target != null && target.onPan != null) {
-      target.onPan!(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+    if (_target != null && _target!.onPan != null) {
+      _target!.onPan!(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
     }
   }
 
   void onPanEnd(DragEndDetails details) {
-    RenderBoxModel? target = _target;
-    if (target != null && target.onPan != null) {
-      target.onPan!(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy )));
+    if (_target != null && _target!.onPan != null) {
+      _target!.onPan!(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy )));
     }
   }
 
   void onScaleStart(ScaleStartDetails details) {
-    RenderBoxModel? target = _target;
-    if (target != null && target.onScale != null) {
-      target.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_START )));
+    if (_target != null && _target!.onScale != null) {
+      _target!.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_START )));
     }
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    RenderBoxModel? target = _target;
-    if (target != null && target.onScale != null) {
-        target.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale )));
+      if (_target != null && _target!.onScale != null) {
+        _target!.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale )));
     }
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    RenderBoxModel? target = _target;
-    if (target != null && target.onScale != null) {
-      target.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_END )));
+      if (_target != null && _target!.onScale != null) {
+        _target!.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_END )));
     }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    RenderBoxModel? target = _target;
-    if (target != null && target.onLongPress != null) {
-      target.onLongPress!(GestureEvent(EVENT_LONG_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+      if (_target != null && _target!.onLongPress != null) {
+        _target!.onLongPress!(GestureEvent(EVENT_LONG_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
     }
   }
 }

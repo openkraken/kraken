@@ -1,3 +1,5 @@
+// @dart=2.9
+
 
 import 'dart:math';
 import 'dart:typed_data';
@@ -11,7 +13,7 @@ import 'package:kraken/dom.dart';
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 
-Color? _parseColor(String color, Size viewportSize) {
+Color _parseColor(String color, [Size viewportSize]) {
   return CSSColor.parseColor(color);
 }
 
@@ -50,7 +52,7 @@ void _updateColor(Color oldColor, Color newColor, double progress, String proper
   }
 }
 
-double? _parseLength(String _length, Size viewportSize) {
+double _parseLength(String _length, [Size viewportSize]) {
   return CSSLength.parseLength(_length, viewportSize);
 }
 
@@ -115,13 +117,12 @@ void _updateLength(double oldLength, double newLength, double progress, String p
   }
 }
 
-FontWeight _parseFontWeight(String fontWeight, Size viewportSize) {
+FontWeight _parseFontWeight(String fontWeight, [Size viewportSize]) {
   return CSSText.parseFontWeight(fontWeight);
 }
 
 void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress, String property, RenderStyle renderStyle) {
-  FontWeight? fontWeight = FontWeight.lerp(oldValue, newValue, progress);
-
+  FontWeight fontWeight = FontWeight.lerp(oldValue, newValue, progress);
   switch (property) {
     case FONT_WEIGHT:
       renderStyle.fontWeight = fontWeight;
@@ -131,7 +132,7 @@ void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress
   }
 }
 
-double? _parseNumber(String number, Size viewportSize) {
+double _parseNumber(String number, [Size viewportSize]) {
   return CSSNumber.parseNumber(number);
 }
 
@@ -157,32 +158,32 @@ void _updateNumber(double oldValue, double newValue, double progress, String pro
   }
 }
 
-String _parseLineHeight(String lineHeight, Size viewportSize) {
+String _parseLineHeight(String lineHeight, [Size viewportSize]) {
   return lineHeight;
 }
 
 void _updateLineHeight(String oldValue, String newValue, double progress, String property, RenderStyle renderStyle) {
   Size viewportSize = renderStyle.viewportSize;
-  double? lineHeight;
+  double lineHeight;
 
   if (CSSLength.isLength(oldValue) && CSSLength.isLength(newValue)) {
-    double left = CSSLength.parseLength(oldValue, viewportSize)!;
-    double right = CSSLength.parseLength(newValue, viewportSize)!;
+    double left = CSSLength.parseLength(oldValue, viewportSize);
+    double right = CSSLength.parseLength(newValue, viewportSize);
     lineHeight = _getNumber(left, right, progress);
   } else if (CSSNumber.isNumber(oldValue) && CSSNumber.isNumber(newValue)) {
-    double left = CSSNumber.parseNumber(oldValue)!;
-    double right = CSSNumber.parseNumber(newValue)!;
+    double left = CSSNumber.parseNumber(oldValue);
+    double right = CSSNumber.parseNumber(newValue);
     lineHeight = _getNumber(left, right, progress);
   }
 
   switch (property) {
     case LINE_HEIGHT:
-      renderStyle.lineHeight = lineHeight!;
+      renderStyle.lineHeight = lineHeight;
       break;
   }
 }
 
-Matrix4? _parseTransform(String value, Size viewportSize) {
+Matrix4 _parseTransform(String value, [Size viewportSize]) {
   return CSSTransform.parseTransform(value, viewportSize);
 }
 
@@ -206,13 +207,11 @@ void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, Ren
     List lerp2D  = CSSTransform.lerp2DMatrix(matrixA, matrixB, t);
     newMatrix4 = CSSTransform.compose2DMatrix(lerp2D);
   } else {
-    List? beginMatrix = CSSTransform.decompose3DMatrix(begin);
-    List? endMatrix = CSSTransform.decompose3DMatrix(end);
-    if (beginMatrix == null || endMatrix == null) return;
-
+    List beginMatrix = CSSTransform.decompose3DMatrix(begin);
+    List endMatrix = CSSTransform.decompose3DMatrix(end);
     List beginQuaternion = beginMatrix[4];
     List endQuaternion = endMatrix[4];
-    List<double> quaternion = CSSTransform.lerpQuaternion(beginQuaternion, endQuaternion, t);
+    List quaternion = CSSTransform.lerpQuaternion(beginQuaternion, endQuaternion, t);
     newMatrix4 = CSSTransform.compose3DMatrix(
       _lerpFloat64List(beginMatrix[0], endMatrix[0], t),
       _lerpFloat64List(beginMatrix[1], endMatrix[1], t),
@@ -225,11 +224,11 @@ void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, Ren
 }
 
 void _updateChildTextNodes(RenderStyle renderStyle) {
-  RenderBoxModel? renderBoxModel = renderStyle.renderBoxModel;
+  RenderBoxModel renderBoxModel = renderStyle.renderBoxModel;
   ElementManager elementManager = renderBoxModel.elementManager;
   int targetId = renderBoxModel.targetId;
-  Element? element = elementManager.getEventTargetByTargetId<Element>(targetId);
-  for (Node node in element!.childNodes) {
+  Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
+  for (Node node in element.childNodes) {
     if (node is TextNode) {
       node.updateTextStyle();
     }
@@ -321,7 +320,7 @@ List _inverse(m) {
   ];
   var lastRow = [];
   for (var i = 0; i < 3; i++) {
-    double val = 0;
+    var val = 0;
     for (var j = 0; j < 3; j++) {
       val += m[3][j] * ainv[j][i];
     }
@@ -406,8 +405,8 @@ List<List<double>> _multiply(a, b) {
 
 class CSSTransform {
   // https://drafts.csswg.org/css-transforms-2/#recomposing-to-a-3d-matrix
-  static Matrix4 compose3DMatrix(translate, scale, skew, perspective, List<double> quaternion) {
-    List<List<double>> matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+  static Matrix4 compose3DMatrix(translate, scale, skew, perspective, quaternion) {
+    List<List> matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 
     // apply perspective
     for (var i = 0; i < 4; i++) {
@@ -481,13 +480,13 @@ class CSSTransform {
   // https://github.com/WebKit/webkit/blob/950143da027e80924b4bb86defa8a3f21fd3fb1e/Source/WebCore/platform/graphics/transforms/TransformationMatrix.cpp#L530
   // Perform a spherical linear interpolation between the two
   // passed quaternions with 0 <= t <= 1.
-  static List<double> lerpQuaternion(quaternionA, quaternionB, t) {
+  static List lerpQuaternion(quaternionA, quaternionB, t) {
     var product = _dot(quaternionA, quaternionB);
 
     // Clamp product to -1.0 <= product <= 1.0
     product = max<double>(min<double>(product, 1.0), -1.0);
 
-    List<double> quaternionDst = List.empty(growable: true);
+    var quaternionDst = List(4);
     if (product.abs() == 1.0) {
       return quaternionDst = quaternionA;
     }
@@ -505,7 +504,7 @@ class CSSTransform {
   }
 
   // https://drafts.csswg.org/css-transforms-2/#decomposing-a-3d-matrix
-  static List? decompose3DMatrix(Matrix4 matrix4) {
+  static List decompose3DMatrix(Matrix4 matrix4) {
     List<double> m4storage = matrix4.storage;
     List<List<double>> matrix = [
       m4storage.sublist(0, 4),
@@ -522,7 +521,7 @@ class CSSTransform {
 
     // perspectiveMatrix is used to solve for perspective, but it also provides
     // an easy way to test for singularity of the upper 3x3 component.
-    List<List<double>> perspectiveMatrix = List.empty(growable: true);
+    List<List<double>> perspectiveMatrix = List(4);
     for (int i = 0; i < 4; i++) {
       perspectiveMatrix[i] = matrix[i].sublist(0);
     }
@@ -540,7 +539,7 @@ class CSSTransform {
     // First, isolate perspective.
 
     // rightHandSide is the right hand side of the equation.
-    List<double> rightHandSide = List.filled(4, 0.0);
+    List<double> rightHandSide = List(4);
 
     List<double> perspective;
     if (matrix[0][3] != 0 || matrix[1][3] != 0 || matrix[2][3] != 0) {
@@ -567,13 +566,13 @@ class CSSTransform {
     row.add(matrix[0].sublist(0, 3));
 
     // Compute X scale factor and _normalize first row.
-    List<double> scale = List.filled(3, 0);
+    List<double> scale = List(3);
     scale[0] = _length(row[0]);
     row[0] = _normalize(row[0]);
 
     // Compute XY shear factor and make 2nd row orthogonal to 1st.
     // skew factors XY,XZ,YZ represented as a 3 component vector
-    List<double> skew = List.filled(3, 0);
+    List<double> skew = List(3);
     row.add(matrix[1].sublist(0, 3));
     skew[0] = _dot(row[0], row[1]);
     row[1] = _combine(row[1], row[0], 1.0, -skew[0]);
@@ -610,7 +609,7 @@ class CSSTransform {
     }
 
     // Now, get the rotations out
-    List quaternion = List.empty(growable: true); // a 4 component vector
+    List quaternion = List(4); // a 4 component vector
 
     quaternion[0] = 0.5 * sqrt(max<double>(1 + row[0][0] - row[1][1] - row[2][2], 0));
     quaternion[1] = 0.5 * sqrt(max<double>(1 - row[0][0] + row[1][1] - row[2][2], 0));
@@ -647,7 +646,7 @@ class CSSTransform {
 
   static Matrix4 compose2DMatrix(List decomposed) {
     // a 4x4 matrix initialized to identity matrix
-    List<List<double>> matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    List<List> matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
 
     List<double> translate = decomposed[0];
     List<double> scale = decomposed[1];
@@ -767,12 +766,12 @@ class CSSTransform {
     double row1x = matrix[1][0];
     double row1y = matrix[1][1];
 
-    List<double> translate = List.filled(2, 0);
+    List<double> translate = List(2);
     translate[0] = matrix[3][0];
     translate[1] = matrix[3][1];
 
     // Compute scaling factors.
-    List<double> scale = List.filled(2, 0); // [scaleX, scaleY]
+    List<double> scale = List(2); // [scaleX, scaleY]
     scale[0] = sqrt(row0x * row0x + row0y * row0y);
     scale[1] = sqrt(row1x * row1x + row1y * row1y);
 
@@ -825,18 +824,18 @@ class CSSTransform {
     return [translate, scale, angle, m11, m12, m21, m22];
   }
 
-  static bool isValidTransformValue(String value, Size viewportSize) {
+  static bool isValidTransformValue(String value, [Size viewportSize]) {
     return value == NONE || parseTransform(value, viewportSize) != null;
   }
 
   static Matrix4 initial = Matrix4.identity();
 
-  static Matrix4? parseTransform(String value, Size viewportSize) {
+  static Matrix4 parseTransform(String value, [Size viewportSize]) {
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(value);
 
-    Matrix4? matrix4;
+    Matrix4 matrix4;
     for (CSSFunctionalNotation method in methods) {
-      Matrix4? transform = _parseTransform(method, viewportSize);
+      Matrix4 transform = _parseTransform(method, viewportSize);
       if (transform != null) {
         if (matrix4 == null) {
           matrix4 = transform;
@@ -870,11 +869,11 @@ class CSSTransform {
   static const String SKEW_Y = 'skewy';
   static const String PERSPECTIVE = 'perspective';
 
-  static Matrix4? _parseTransform(CSSFunctionalNotation method, Size viewportSize) {
+  static Matrix4 _parseTransform(CSSFunctionalNotation method, [Size viewportSize]) {
     switch (method.name) {
       case MATRIX:
         if (method.args.length == 6) {
-          List<double> args = List.filled(6, 0);
+          List<double> args = List(6);
           for (int i = 0; i < 6; i++) {
             args[i] = double.tryParse(method.args[i].trim()) ?? 1.0;
           }
@@ -883,7 +882,7 @@ class CSSTransform {
         break;
       case MATRIX_3D:
         if (method.args.length == 16) {
-          List<double> args = List.filled(16, 0);
+          List<double> args = List(16);
           for (int i = 0; i < 16; i++) {
             args[i] = double.tryParse(method.args[i].trim()) ?? 1.0;
           }
@@ -942,7 +941,7 @@ class CSSTransform {
       case ROTATE:
       case ROTATE_Z:
         if (method.args.length == 1) {
-          double angle = CSSAngle.parseAngle(method.args[0].trim());
+          double angle = CSSAngle.parseAngle(method.args[0].trim()) ?? 0;
           return Matrix4.rotationZ(angle);
         }
         break;
@@ -951,20 +950,20 @@ class CSSTransform {
           double x = double.tryParse(method.args[0].trim()) ?? 0.0;
           double y = double.tryParse(method.args[1].trim()) ?? 0.0;
           double z = double.tryParse(method.args[2].trim()) ?? 0.0;
-          double angle = CSSAngle.parseAngle(method.args[3].trim());
+          double angle = CSSAngle.parseAngle(method.args[3].trim()) ?? 0;
           Vector3 vector3 = Vector3(x, y, z);
           return Matrix4.identity()..rotate(vector3, angle);
         }
         break;
       case ROTATE_X:
         if (method.args.length == 1) {
-          double x = CSSAngle.parseAngle(method.args[0].trim());
+          double x = CSSAngle.parseAngle(method.args[0].trim()) ?? 0;
           return Matrix4.rotationX(x);
         }
         break;
       case ROTATE_Y:
         if (method.args.length == 1) {
-          double y = CSSAngle.parseAngle(method.args[0].trim());
+          double y = CSSAngle.parseAngle(method.args[0].trim()) ?? 0;
           return Matrix4.rotationY(y);
         }
         break;
@@ -973,7 +972,7 @@ class CSSTransform {
           double x = double.tryParse(method.args[0].trim()) ?? 1.0;
           double y = x;
           if (method.args.length == 2) {
-            y = double.tryParse(method.args[1].trim()) ?? x;
+            y = double.tryParse(method.args[1].trim()) ?? x ?? 0;
           }
           return Matrix4.identity()..scale(x, y, 1);
         }
@@ -1008,10 +1007,10 @@ class CSSTransform {
         break;
       case SKEW:
         if (method.args.length == 1 || method.args.length == 2) {
-          double alpha = CSSAngle.parseAngle(method.args[0].trim());
+          double alpha = CSSAngle.parseAngle(method.args[0].trim()) ?? 0;
           double beta = 0.0;
           if (method.args.length == 2) {
-            beta = CSSAngle.parseAngle(method.args[1].trim());
+            beta = CSSAngle.parseAngle(method.args[1].trim()) ?? 0;
           }
           return Matrix4.skew(alpha, beta);
         }
@@ -1019,7 +1018,7 @@ class CSSTransform {
       case SKEW_X:
       case SKEW_Y:
         if (method.args.length == 1) {
-          double angle = CSSAngle.parseAngle(method.args[0].trim());
+          double angle = CSSAngle.parseAngle(method.args[0].trim()) ?? 0;
           if (method.name == SKEW_X) {
             return Matrix4.skewX(angle);
           } else {
@@ -1034,7 +1033,7 @@ class CSSTransform {
         //   0, 0, 1, perspective,
         //   0, 0, 0, 1]
         if (method.args.length == 1) {
-          double? p = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize);
+          double p = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
           p = p != null ? (-1 / p) : 0;
           return Matrix4.identity()..storage[11] = p;
         }
@@ -1050,10 +1049,10 @@ class CSSOrigin {
 
   CSSOrigin(this.offset, this.alignment);
 
-  static CSSOrigin? parseOrigin(String? origin, Size viewportSize) {
+  static CSSOrigin parseOrigin(String origin, Size viewportSize) {
     if (origin != null && origin.isNotEmpty) {
       List<String> originList = origin.trim().split(_spaceRegExp);
-      String? x, y;
+      String x, y;
       if (originList.length == 1) {
         // default center
         x = originList[0];
@@ -1070,7 +1069,7 @@ class CSSOrigin {
       // switch to right place
       if ((x == CSSPosition.TOP || x == CSSPosition.BOTTOM) &&
           (y == CSSPosition.LEFT || y == CSSPosition.RIGHT || y == CSSPosition.CENTER)) {
-        String? tmp = x;
+        String tmp = x;
         x = y;
         y = tmp;
       }
@@ -1079,10 +1078,7 @@ class CSSOrigin {
       if (CSSLength.isLength(x)) {
         offsetX = CSSLength.toDisplayPortValue(x, viewportSize) ?? offsetX;
       } else if (CSSPercentage.isPercentage(x)) {
-        double? _v = CSSPercentage.parsePercentage(x);
-        if (_v != null) {
-          alignX = _v * 2 - 1;
-        }
+        alignX = CSSPercentage.parsePercentage(x) * 2 - 1;
       } else if (x == CSSPosition.LEFT) {
         alignX = -1.0;
       } else if (x == CSSPosition.RIGHT) {
@@ -1095,10 +1091,7 @@ class CSSOrigin {
       if (CSSLength.isLength(y)) {
         offsetY = CSSLength.toDisplayPortValue(y, viewportSize) ?? offsetY;
       } else if (CSSPercentage.isPercentage(y)) {
-        double? _v = CSSPercentage.parsePercentage(y);
-        if (_v != null) {
-          alignY = _v * 2 - 1;
-        }
+        alignY = CSSPercentage.parsePercentage(y) * 2 - 1;
       } else if (y == CSSPosition.TOP) {
         alignY = -1.0;
       } else if (y == CSSPosition.BOTTOM) {
@@ -1114,9 +1107,9 @@ class CSSOrigin {
 
 mixin CSSTransformMixin on RenderStyleBase {
 
-  Matrix4? get transform => _transform;
-  Matrix4? _transform;
-  set transform(Matrix4? value) {
+  Matrix4 get transform => _transform;
+  Matrix4 _transform;
+  set transform(Matrix4 value) {
     if (_transform == value) return;
     _transform = value;
   }
@@ -1138,17 +1131,21 @@ mixin CSSTransformMixin on RenderStyleBase {
   }
 
   void updateTransform(
-    Matrix4? matrix4,
+    Matrix4 matrix4,
     {
       bool shouldToggleRepaintBoundary = true,
       bool shouldMarkNeedsLayout = true
     }
   ) {
+    // If render box model was not created yet, then exit.
+    if (renderBoxModel == null) {
+      return;
+    }
+
     ElementManager elementManager = renderBoxModel.elementManager;
     int targetId = renderBoxModel.targetId;
-    Element element = elementManager.getEventTargetByTargetId<Element>(targetId)!;
-    RenderBoxModel elementRenderBoxModel = element.renderBoxModel!;
-    elementRenderBoxModel.renderStyle.transform = matrix4;
+    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
+    element.renderBoxModel.renderStyle.transform = matrix4;
 
     if (shouldToggleRepaintBoundary) {
       if (element.shouldConvertToRepaintBoundary) {
@@ -1159,12 +1156,12 @@ mixin CSSTransformMixin on RenderStyleBase {
     }
 
     if (shouldMarkNeedsLayout) {
-      elementRenderBoxModel.markNeedsLayout();
+      element.renderBoxModel.markNeedsLayout();
     }
   }
 
-  void updateTransformOrigin(String present, [CSSOrigin? newOrigin]) {
-    CSSOrigin? transformOriginValue = newOrigin ?? CSSOrigin.parseOrigin(present, viewportSize);
+  void updateTransformOrigin(String present, [CSSOrigin newOrigin]) {
+    CSSOrigin transformOriginValue = newOrigin ?? CSSOrigin.parseOrigin(present, viewportSize);
     if (transformOriginValue == null) return;
 
     Offset oldOffset = transformOffset;

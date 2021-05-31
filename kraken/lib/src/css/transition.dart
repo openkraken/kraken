@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:flutter/animation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';

@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'dart:ffi';
 
 import 'package:flutter/scheduler.dart';
@@ -27,19 +29,19 @@ class ScriptElement extends Element {
   void _fetchBundle(String src) async {
     if (src != null && src.isNotEmpty && isConnected) {
       try {
-        KrakenBundle bundle = await KrakenBundle.getBundle(src, contextId: elementManager.contextId);
+        KrakenBundle bundle = await KrakenBundle.getBundle(src);
         await bundle.eval(elementManager.contextId);
         // Successful load.
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
         });
       } catch(e) {
         // An error occurred.
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
         });
       }
-      SchedulerBinding.instance!.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrame();
     }
   }
 

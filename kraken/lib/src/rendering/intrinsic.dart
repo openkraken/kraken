@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -50,7 +52,7 @@ class RenderIntrinsic extends RenderBoxModel
       PerformanceTiming.instance().mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: targetId);
     }
 
-    CSSDisplay? display = renderStyle.display;
+    CSSDisplay display = renderStyle.display;
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       if (kProfileMode) {
@@ -61,31 +63,29 @@ class RenderIntrinsic extends RenderBoxModel
 
     beforeLayout();
 
-    double? width = renderStyle.width;
-    double? height = renderStyle.height;
-    double? minWidth = renderStyle.minWidth;
-    double? minHeight = renderStyle.minHeight;
-    double? maxWidth = renderStyle.maxWidth;
-    double? maxHeight = renderStyle.maxHeight;
-
-    RenderBox? child = this.child;
+    double width = renderStyle.width;
+    double height = renderStyle.height;
+    double minWidth = renderStyle.minWidth;
+    double minHeight = renderStyle.minHeight;
+    double maxWidth = renderStyle.maxWidth;
+    double maxHeight = renderStyle.maxHeight;
 
     if (child != null) {
-      DateTime? childLayoutStart;
+      DateTime childLayoutStart;
       if (kProfileMode) {
         childLayoutStart = DateTime.now();
       }
 
-      child.layout(contentConstraints!, parentUsesSize: true);
+      child.layout(contentConstraints, parentUsesSize: true);
 
       if (kProfileMode) {
         DateTime childLayoutEnd = DateTime.now();
-        childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch) - childLayoutStart!.microsecondsSinceEpoch;
+        childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch) - childLayoutStart.microsecondsSinceEpoch;
       }
 
       setMaxScrollableSize(child.size.width, child.size.height);
 
-      CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
+      CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
       bool isInlineLevel = transformedDisplay == CSSDisplay.inlineBlock || transformedDisplay == CSSDisplay.inlineFlex;
 
       double constraintWidth = child.size.width;
@@ -97,14 +97,14 @@ class RenderIntrinsic extends RenderBoxModel
 
         // max-height should respect intrinsic ratio with max-width
         if (intrinsicRatio != null && maxHeight == null) {
-          constraintHeight = constraintWidth * intrinsicRatio!;
+          constraintHeight = constraintWidth * intrinsicRatio;
         }
       } else if (isInlineLevel && minWidth != null && width == null) {
         constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
 
         // max-height should respect intrinsic ratio with max-width
         if (intrinsicRatio != null && minHeight == null) {
-          constraintHeight = constraintWidth * intrinsicRatio!;
+          constraintHeight = constraintWidth * intrinsicRatio;
         }
       }
 
@@ -114,14 +114,14 @@ class RenderIntrinsic extends RenderBoxModel
 
         // max-width should respect intrinsic ratio with max-height
         if (intrinsicRatio != null && maxWidth == null) {
-          constraintWidth = constraintHeight / intrinsicRatio!;
+          constraintWidth = constraintHeight / intrinsicRatio;
         }
       } else if (isInlineLevel && minHeight != null && height == null) {
         constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
 
         // max-width should respect intrinsic ratio with max-height
         if (intrinsicRatio != null && minWidth == null) {
-          constraintWidth = constraintHeight / intrinsicRatio!;
+          constraintWidth = constraintHeight / intrinsicRatio;
         }
       }
 
@@ -159,15 +159,15 @@ class RenderIntrinsic extends RenderBoxModel
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
     return computeDistanceToBaseline();
   }
 
   /// Compute distance to baseline of replaced element
   @override
-  double? computeDistanceToBaseline() {
-    double marginTop = renderStyle.marginTop.length;
-    double marginBottom = renderStyle.marginBottom.length;
+  double computeDistanceToBaseline() {
+    double marginTop = renderStyle.marginTop.length ?? 0;
+    double marginBottom = renderStyle.marginBottom.length ?? 0;
 
     // Use margin-bottom as baseline if layout has no children
     return marginTop + boxSize.height + marginBottom;
@@ -191,23 +191,21 @@ class RenderIntrinsic extends RenderBoxModel
       offset += Offset(renderStyle.borderLeft, renderStyle.borderTop);
     }
 
-    RenderBox? child = this.child;
-
     if (child != null) {
-      DateTime? childPaintStart;
+      DateTime childPaintStart;
       if (kProfileMode) {
         childPaintStart = DateTime.now();
       }
       context.paintChild(child, offset);
       if (kProfileMode) {
         DateTime childPaintEnd = DateTime.now();
-        childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart!.microsecondsSinceEpoch);
+        childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
       }
     }
   }
 
   RenderSelfRepaintIntrinsic toSelfRepaint() {
-    RenderBox? childRenderObject = child;
+    RenderObject childRenderObject = child;
     child = null;
     RenderSelfRepaintIntrinsic newChild = RenderSelfRepaintIntrinsic(targetId, renderStyle, elementManager);
     newChild.child = childRenderObject;
@@ -215,9 +213,9 @@ class RenderIntrinsic extends RenderBoxModel
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
     if (renderStyle.transform != null) {
-      return hitTestIntrinsicChild(result, child!, position);
+      return hitTestIntrinsicChild(result, child, position);
     }
     return super.hitTestChildren(result, position: position);
   }
@@ -231,7 +229,7 @@ class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
   bool get isRepaintBoundary => true;
 
   RenderIntrinsic toParentRepaint() {
-    RenderBox? childRenderObject = child;
+    RenderObject childRenderObject = child;
     child = null;
     RenderIntrinsic newChild = RenderIntrinsic(targetId, renderStyle, elementManager);
     newChild.child = childRenderObject;

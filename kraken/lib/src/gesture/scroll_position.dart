@@ -95,7 +95,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     this.keepScrollOffset = true,
     ScrollPosition? oldPosition,
     this.debugLabel,
-  })  {
+  })  : assert(physics != null),
+        assert(context != null),
+        assert(context.vsync != null),
+        assert(keepScrollOffset != null) {
     if (oldPosition != null) absorb(oldPosition);
   }
 
@@ -126,19 +129,19 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   final String? debugLabel;
 
   @override
-  double get minScrollExtent => _minScrollExtent!;
+  double? get minScrollExtent => _minScrollExtent;
   double? _minScrollExtent;
 
   @override
-  double get maxScrollExtent => _maxScrollExtent!;
+  double? get maxScrollExtent => _maxScrollExtent;
   double? _maxScrollExtent;
 
   @override
-  double get pixels => _pixels ?? 0.0;
+  double get pixels => _pixels!;
   double? _pixels;
 
   @override
-  double get viewportDimension => _viewportDimension!;
+  double? get viewportDimension => _viewportDimension;
   double? _viewportDimension;
 
   /// Whether [viewportDimension], [minScrollExtent], [maxScrollExtent],
@@ -228,7 +231,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         }
         return true;
       }());
-      final double oldPixels = _pixels!;
+      final double? oldPixels = _pixels;
       _pixels = newPixels - overscroll;
       if (_pixels != oldPixels) {
         notifyListeners();
@@ -326,7 +329,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// scroll offset). Consider [correctPixels] if you find you need to adjust
   /// the position during layout.
   @protected
-  void forcePixels(double value) {
+  void forcePixels(double? value) {
     assert(pixels != null);
     _pixels = value;
     notifyListeners();
@@ -377,7 +380,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     return true;
   }
 
-  Set<SemanticsAction>? _semanticActions;
+  Set<SemanticsAction?>? _semanticActions;
 
   /// Called whenever the scroll position or the dimensions of the scroll view
   /// change to schedule an update of the available semantics actions. The
@@ -392,8 +395,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// scroll view dimensions both change) and therefore shouldn't do anything
   /// expensive.
   void _updateSemanticActions() {
-    SemanticsAction forward;
-    SemanticsAction backward;
+    SemanticsAction? forward;
+    SemanticsAction? backward;
     switch (axis) {
       case Axis.vertical:
         forward = SemanticsAction.scrollUp;
@@ -405,18 +408,20 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         break;
     }
 
-    final Set<SemanticsAction> actions = <SemanticsAction>{};
-    if (pixels > minScrollExtent) actions.add(backward);
-    if (pixels < maxScrollExtent) actions.add(forward);
+    final Set<SemanticsAction?> actions = <SemanticsAction?>{};
+    if (pixels > minScrollExtent!) actions.add(backward);
+    if (pixels < maxScrollExtent!) actions.add(forward);
 
-    if (setEquals<SemanticsAction>(actions, _semanticActions)) return;
+    if (setEquals<SemanticsAction?>(actions, _semanticActions)) return;
 
     _semanticActions = actions;
-    context.setSemanticsActions(actions);
+    context.setSemanticsActions(_semanticActions);
   }
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    assert(minScrollExtent != null);
+    assert(maxScrollExtent != null);
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
         _didChangeViewportDimensionOrReceiveCorrection) {
@@ -454,6 +459,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   @mustCallSuper
   void applyNewDimensions() {
+    assert(pixels != null);
     activity!.applyNewDimensions();
     _updateSemanticActions(); // will potentially request a semantics update.
   }
@@ -472,22 +478,24 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
   }) {
+    assert(alignmentPolicy != null);
     assert(object.attached);
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
+    assert(viewport != null);
 
-    double target;
+    double? target;
     switch (alignmentPolicy) {
       case ScrollPositionAlignmentPolicy.explicit:
-        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent!, maxScrollExtent!);
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent!, maxScrollExtent!);
         if (target < pixels) {
           target = pixels;
         }
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent!, maxScrollExtent!);
         if (target > pixels) {
           target = pixels;
         }
@@ -540,7 +548,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// The animation is typically handled by an [DrivenScrollActivity].
   @override
   Future<void> animateTo(
-    double to, {
+    double? to, {
     required Duration duration,
     required Curve curve,
   });
@@ -555,7 +563,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// scroll notifications will be dispatched. No overscroll notifications can
   /// be generated by this method.
   @override
-  void jumpTo(double value);
+  void jumpTo(double? value);
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
   /// [animateTo] is called.
@@ -571,9 +579,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     Curve? curve,
     bool? clamp = true,
   }) {
-    if (clamp == null) clamp = true;
+    assert(to != null);
+    assert(clamp != null);
 
-    if (clamp) to = to.clamp(minScrollExtent, maxScrollExtent);
+    if (clamp!) to = to.clamp(minScrollExtent!, maxScrollExtent!);
 
     return super.moveTo(to, duration: duration, curve: curve);
   }
@@ -616,12 +625,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// method might return null, since it means the caller does not have to
   /// explicitly null-check the argument.
   void beginActivity(ScrollActivity newActivity) {
-    ScrollActivity? activity = _activity;
-    if (activity != null) {
-      activity.dispose();
+    if (newActivity == null) return;
+    if (_activity != null) {
+      _activity!.dispose();
     }
     _activity = newActivity;
-    isScrollingNotifier.value = newActivity.isScrolling;
+    isScrollingNotifier.value = activity!.isScrolling;
   }
 
   @override
@@ -638,10 +647,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    description.add(debugLabel!);
-    super.debugFillDescription(description);
-    description.add('range: ${minScrollExtent.toStringAsFixed(1)}..${maxScrollExtent.toStringAsFixed(1)}');
-    description.add('viewport: ${viewportDimension.toStringAsFixed(1)}');
+  void debugFillDescription(List<String?> description) {
+    if (debugLabel != null) description.add(debugLabel);
+    super.debugFillDescription(description as List<String>);
+    description.add('range: ${minScrollExtent?.toStringAsFixed(1)}..${maxScrollExtent?.toStringAsFixed(1)}');
+    description.add('viewport: ${viewportDimension?.toStringAsFixed(1)}');
   }
 }

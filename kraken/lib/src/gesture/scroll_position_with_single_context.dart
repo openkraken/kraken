@@ -8,6 +8,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
 
 import 'gesture_detector.dart';
 import 'scroll_activity.dart';
@@ -61,7 +62,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
         ) {
     // If oldPosition is not null, the superclass will first call absorb(),
     // which may set _pixels and _activity.
-    if (pixels == null && initialPixels != null) correctPixels(initialPixels);
+    correctPixels(initialPixels);
     if (activity == null) goIdle();
     assert(activity != null);
   }
@@ -71,7 +72,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   double _heldPreviousVelocity = 0.0;
 
   @override
-  AxisDirection get axisDirection => context.axisDirection;
+  AxisDirection? get axisDirection => context.axisDirection;
 
   @override
   double setPixels(double newPixels) {
@@ -106,6 +107,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void beginActivity(ScrollActivity newActivity) {
     _heldPreviousVelocity = 0.0;
+    if (newActivity == null) return;
     assert(newActivity.delegate == this);
     super.beginActivity(newActivity);
     _currentDrag?.dispose();
@@ -113,8 +115,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void applyUserOffset(double delta) {
-    setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
+  void applyUserOffset(double? delta) {
+    setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta)!);
   }
 
   @override
@@ -133,6 +135,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// The velocity should be in logical pixels per second.
   @override
   void goBallistic(double velocity) {
+    assert(pixels != null);
     final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
       beginActivity(BallisticScrollActivity(this, simulation, context.vsync));
@@ -147,7 +150,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @override
   Future<void> animateTo(
-    double to, {
+    double? to, {
     required Duration duration,
     required Curve curve,
   }) {
@@ -160,7 +163,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     final DrivenScrollActivity activity = DrivenScrollActivity(
       this,
       from: pixels,
-      to: to,
+      to: to!,
       duration: duration,
       curve: curve,
       vsync: context.vsync,
@@ -170,7 +173,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void jumpTo(double value) {
+  void jumpTo(double? value) {
     goIdle();
     if (pixels != value) {
       forcePixels(value);
@@ -227,7 +230,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(List<String?> description) {
     super.debugFillDescription(description);
     description.add('${context.runtimeType}');
     description.add('$physics');
@@ -236,5 +239,5 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  bool get hasPixels => true;
+  bool get hasPixels => pixels != null;
 }

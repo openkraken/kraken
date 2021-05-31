@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -16,7 +18,7 @@ mixin CSSSliverMixin on RenderStyleBase {
       _sliverAxis = value;
 
       if (renderBoxModel is RenderRecyclerLayout) {
-        RenderRecyclerLayout recyclerLayout = renderBoxModel as RenderRecyclerLayout;
+        RenderRecyclerLayout recyclerLayout = renderBoxModel;
 
         AxisDirection axisDirection = RenderRecyclerLayout.getAxisDirection(value);
         recyclerLayout.scrollable = KrakenScrollable(axisDirection: axisDirection);
@@ -38,6 +40,7 @@ mixin CSSSliverMixin on RenderStyleBase {
     switch (sliverDirection) {
       case ROW:
         return Axis.horizontal;
+        break;
 
       case COLUMN:
       default:

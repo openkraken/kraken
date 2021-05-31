@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -16,7 +18,7 @@ mixin CSSObjectFitMixin on RenderStyleBase {
   }
 
   void updateObjectFit(String property, String value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this as RenderStyle;
+    RenderStyle renderStyle = this;
     renderStyle.objectFit = _getBoxFit(value);
     if (shouldMarkNeedsLayout) {
       renderBoxModel.markNeedsLayout();

@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -13,8 +15,8 @@ import 'package:flutter/rendering.dart';
 const String ANCHOR = 'A';
 
 class AnchorElement extends Element {
-  String? _href;
-  String? _target;
+  String _href;
+  String _target;
 
   final Pointer<NativeAnchorElement> nativeAnchorElement;
 
@@ -23,15 +25,14 @@ class AnchorElement extends Element {
     addEvent(EVENT_CLICK);
   }
 
-  void handleMouseEvent(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
+  void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
     super.handleMouseEvent(eventType, down: down, up: up);
 
-    String? href = _href;
-    if (href == null) return;
+    if (_href == null) return;
 
-    Uri uri = Uri.parse(href);
+    Uri uri = Uri.parse(_href);
     KrakenController rootController = elementManager.controller.view.rootController;
-    String? sourceUrl = rootController.bundleURL;
+    String sourceUrl = rootController.bundleURL;
     String scheme;
     if (!uri.hasScheme) {
       if (sourceUrl != null) {
@@ -43,7 +44,7 @@ class AnchorElement extends Element {
     } else {
       scheme = uri.scheme;
     }
-    elementManager.controller.view.handleNavigationAction(sourceUrl, href, _getNavigationType(scheme));
+    elementManager.controller.view.handleNavigationAction(sourceUrl, _href, _getNavigationType(scheme));
   }
 
   KrakenNavigationType _getNavigationType(String scheme) {

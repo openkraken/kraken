@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2020 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -7,15 +9,16 @@ import 'package:flutter/gestures.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/gesture.dart';
 import 'dart:ui';
+import 'package:meta/meta.dart';
 
 class RenderViewportBox extends RenderProxyBox
     with RenderObjectWithControllerMixin {
   RenderViewportBox({
-    required Size viewportSize,
-    RenderBox? child,
+    @required Size viewportSize,
+    RenderBox child,
     gestureClient,
     this.background,
-    required KrakenController controller,
+    @required KrakenController controller,
   }) : _viewportSize = viewportSize, super(child) {
     if (gestureClient != null) {
       _verticalDragGestureRecognizer.onUpdate = _horizontalDragRecognizer.onUpdate = gestureClient.dragUpdateCallback;
@@ -28,7 +31,7 @@ class RenderViewportBox extends RenderProxyBox
   @override
   bool get isRepaintBoundary => true;
 
-  Color? background;
+  Color background;
 
   Size _viewportSize;
   Size get viewportSize => _viewportSize;
@@ -62,7 +65,7 @@ class RenderViewportBox extends RenderProxyBox
       if (height.isNegative || height.isNaN) {
         height = _viewportSize.height;
       }
-      child!.layout(BoxConstraints.tightFor(
+      child.layout(BoxConstraints.tightFor(
         width: _viewportSize.width,
         height: height,
       ));
@@ -70,7 +73,7 @@ class RenderViewportBox extends RenderProxyBox
   }
 
   @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
     if (event is PointerDownEvent) {
       _verticalDragGestureRecognizer.addPointer(event);
@@ -90,12 +93,12 @@ class RenderViewportBox extends RenderProxyBox
       );
       context.canvas.drawRect(
         rect,
-        Paint()..color = background!,
+        Paint()..color = background,
       );
     }
 
     if (child != null) {
-      context.paintChild(child!, offset);
+      context.paintChild(child, offset);
     }
   }
 }

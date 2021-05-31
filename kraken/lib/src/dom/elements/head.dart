@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'dart:ffi';
 
 import 'package:kraken/bridge.dart';

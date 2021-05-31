@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 /// A description of a [Scrollable]'s contents, useful for modeling the state
@@ -61,7 +62,7 @@ abstract class ScrollMetrics {
   ///
   /// This value should typically be non-null and less than or equal to
   /// [maxScrollExtent]. It can be negative infinity, if the scroll is unbounded.
-  double get minScrollExtent;
+  double? get minScrollExtent;
 
   /// The maximum in-range value for [pixels].
   ///
@@ -69,23 +70,23 @@ abstract class ScrollMetrics {
   ///
   /// This value should typically be non-null and greater than or equal to
   /// [minScrollExtent]. It can be infinity, if the scroll is unbounded.
-  double get maxScrollExtent;
+  double? get maxScrollExtent;
 
   /// The current scroll position, in logical pixels along the [axisDirection].
   double get pixels;
 
   /// The extent of the viewport along the [axisDirection].
-  double get viewportDimension;
+  double? get viewportDimension;
 
   /// The direction in which the scroll view scrolls.
-  AxisDirection get axisDirection;
+  AxisDirection? get axisDirection;
 
   /// The axis in which the scroll view scrolls.
-  Axis get axis => axisDirectionToAxis(axisDirection);
+  Axis get axis => axisDirectionToAxis(axisDirection!);
 
   /// Whether the [pixels] value is outside the [minScrollExtent] and
   /// [maxScrollExtent].
-  bool get outOfRange => pixels < minScrollExtent || pixels > maxScrollExtent;
+  bool get outOfRange => pixels < minScrollExtent! || pixels > maxScrollExtent!;
 
   /// Whether the [pixels] value is exactly at the [minScrollExtent] or the
   /// [maxScrollExtent].
@@ -93,7 +94,7 @@ abstract class ScrollMetrics {
 
   /// The quantity of content conceptually "above" the viewport in the scrollable.
   /// This is the content above the content described by [extentInside].
-  double get extentBefore => math.max(pixels - minScrollExtent, 0.0);
+  double get extentBefore => math.max(pixels - minScrollExtent!, 0.0);
 
   /// The quantity of content conceptually "inside" the viewport in the scrollable.
   ///
@@ -103,19 +104,19 @@ abstract class ScrollMetrics {
   ///
   /// The value is always non-negative, and less than or equal to [viewportDimension].
   double get extentInside {
-    assert(minScrollExtent <= maxScrollExtent);
-    return viewportDimension
+    assert(minScrollExtent! <= maxScrollExtent!);
+    return viewportDimension!
         // "above" overscroll value
         -
-        (minScrollExtent - pixels).clamp(0, viewportDimension)
+        (minScrollExtent! - pixels).clamp(0, viewportDimension!)
         // "below" overscroll value
         -
-        (pixels - maxScrollExtent).clamp(0, viewportDimension);
+        (pixels - maxScrollExtent!).clamp(0, viewportDimension!);
   }
 
   /// The quantity of content conceptually "below" the viewport in the scrollable.
   /// This is the content below the content described by [extentInside].
-  double get extentAfter => math.max(maxScrollExtent - pixels, 0.0);
+  double get extentAfter => math.max(maxScrollExtent! - pixels, 0.0);
 }
 
 /// An immutable snapshot of values associated with a [Scrollable] viewport.
@@ -132,19 +133,19 @@ class FixedScrollMetrics extends ScrollMetrics {
   });
 
   @override
-  final double minScrollExtent;
+  final double? minScrollExtent;
 
   @override
-  final double maxScrollExtent;
+  final double? maxScrollExtent;
 
   @override
   final double pixels;
 
   @override
-  final double viewportDimension;
+  final double? viewportDimension;
 
   @override
-  final AxisDirection axisDirection;
+  final AxisDirection? axisDirection;
 
   @override
   String toString() {

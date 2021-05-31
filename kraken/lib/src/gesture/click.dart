@@ -33,7 +33,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// If this recognizer doesn't win the arena, [handleTapCancel] is called next.
   /// Otherwise, [handleTapUp] is called next.
-  void handleTapDown(PointerDownEvent down) {}
+  void handleTapDown(PointerDownEvent? down) {}
 
   /// A pointer has stopped contacting the screen, which is recognized as a tap.
   ///
@@ -45,7 +45,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// If this recognizer doesn't win the arena, [handleTapCancel] is called
   /// instead.
-  void handleTapUp( PointerDownEvent down, PointerUpEvent up ) {
+  void handleTapUp( PointerDownEvent? down, PointerUpEvent? up ) {
     if (onClick != null)
       onClick!(EVENT_CLICK, down: down, up: up);
   }
@@ -87,7 +87,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
     } else if (event is PointerCancelEvent) {
       resolve(GestureDisposition.rejected);
       _reset();
-    } else if (_down != null && event.buttons != _down!.buttons) {
+    } else if (event.buttons != _down!.buttons) {
       resolve(GestureDisposition.rejected);
       stopTrackingPointer(primaryPointer!);
     }
@@ -134,7 +134,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (_sentTapDown) {
       return;
     }
-    handleTapDown(_down!);
+    handleTapDown(_down);
     _sentTapDown = true;
   }
 
@@ -142,7 +142,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (!_wonArenaForPrimaryPointer || _up == null) {
       return;
     }
-    handleTapUp(_down!, _up!);
+    handleTapUp(_down, _up);
     _reset();
   }
 

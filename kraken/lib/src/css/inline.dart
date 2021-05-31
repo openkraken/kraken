@@ -1,4 +1,7 @@
 // https://www.w3.org/TR/css-inline-3/
+
+// @dart=2.9
+
 import 'package:kraken/css.dart';
 
 /// Sets vertical alignment of an inline, inline-block
@@ -21,6 +24,7 @@ mixin CSSInlineMixin on RenderStyleBase {
   VerticalAlign _verticalAlign = VerticalAlign.baseline;
   VerticalAlign get verticalAlign => _verticalAlign;
   set verticalAlign(VerticalAlign value) {
+    if (value == null) return;
     if (_verticalAlign != value) {
       renderBoxModel.markNeedsLayout();
       _verticalAlign = value;

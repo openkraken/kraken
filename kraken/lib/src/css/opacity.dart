@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -20,6 +22,7 @@ mixin CSSOpacityMixin on RenderStyleBase {
   double get opacity => _opacity;
   double _opacity = 1.0;
   set opacity(double value) {
+    if (value == null) return;
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
@@ -32,7 +35,7 @@ mixin CSSOpacityMixin on RenderStyleBase {
   }
 
   void updateOpacity(String value) {
-    double opacityValue = CSSStyleDeclaration.isNullOrEmptyValue(value) ? 1.0 : CSSLength.toDouble(value) ?? 1.0;
+    double opacityValue = CSSStyleDeclaration.isNullOrEmptyValue(value) ? 1.0 : CSSLength.toDouble(value);
     opacity = opacityValue;
   }
 }

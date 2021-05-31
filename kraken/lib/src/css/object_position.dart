@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -15,43 +17,36 @@ mixin CSSObjectPositionMixin on RenderStyleBase {
     _objectPosition = value;
   }
 
-  void updateObjectPosition(String property, String? value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this as RenderStyle;
+  void updateObjectPosition(String property, String value, {bool shouldMarkNeedsLayout = true}) {
+    RenderStyle renderStyle = this;
     renderStyle.objectPosition = _getBoxPosition(value);
     if (shouldMarkNeedsLayout) {
       renderBoxModel.markNeedsLayout();
     }
   }
-  Alignment _getBoxPosition(String? position) {
+  Alignment _getBoxPosition(String position) {
     // Syntax: object-position: <position>
     // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
     // <position> = [ [ left | center | right ] || [ top | center | bottom ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]? | [ [ left | right ] <length-percentage> ] && [ [ top | bottom ] <length-percentage> ] ]
 
     if (position != null) {
       List<String> values = CSSStyleProperty.getPositionValues(position);
-      double? _x = _getAlignmentValueFromString(values[0]);
-      double? _y = _getAlignmentValueFromString(values[1]);
-
-      if (_x == null || _y == null) {
-        return Alignment.center;
-      }
-
-      return Alignment(_x, _y);
+      return Alignment(_getAlignmentValueFromString(values[0]), _getAlignmentValueFromString(values[1]));
     }
 
     // The default value for object-position is 50% 50%
     return Alignment.center;
   }
 
-  static double? _getAlignmentValueFromString(String value) {
+  static double _getAlignmentValueFromString(String value) {
+    assert(value != null);
+
     // Support percentage
     if (value.endsWith('%')) {
       // 0% equal to -1.0
       // 50% equal to 0.0
       // 100% equal to 1.0
-      double? _v = double.tryParse(value.substring(0, value.length - 1));
-      if (_v != null) return _v / 50 - 1;
-      return null;
+      return double.tryParse(value.substring(0, value.length - 1)) / 50 - 1;
     }
 
     switch (value) {

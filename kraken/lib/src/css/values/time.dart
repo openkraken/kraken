@@ -1,3 +1,5 @@
+// @dart=2.9
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -12,20 +14,16 @@ class CSSTime {
   static const String SECOND = 's';
 
   static bool isTime(String value) {
-    return (value == _0s || value == _0ms || _timeRegExp.firstMatch(value) != null);
+    return value != null && (value == _0s || value == _0ms || _timeRegExp.firstMatch(value) != null);
   }
 
-  static int? parseTime(String input) {
-    double? milliseconds;
+  static int parseTime(String input) {
+    double milliseconds;
     if (input.endsWith(MILLISECONDS)) {
-      double? v = double.tryParse(input.split(MILLISECONDS)[0]);
-      if (v == null) return null;
-      milliseconds = v;
+      milliseconds = double.tryParse(input.split(MILLISECONDS)[0]);
     } else if (input.endsWith(SECOND)) {
-      double? v = double.tryParse(input.split(SECOND)[0]);
-      if (v == null) return null;
-      milliseconds = v * 1000;
+      milliseconds = double.tryParse(input.split(SECOND)[0]) * 1000;
     }
-    return milliseconds!.toInt();
+    return milliseconds.toInt();
   }
 }
