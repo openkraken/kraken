@@ -38,7 +38,7 @@ final Dart_EvaluateTestScripts _evaluateTestScripts =
     nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateTestScripts>>('evaluateTestScripts').asFunction();
 
 void evaluateTestScripts(int contextId, String code, {String url = 'test://', int line = 0}) {
-  Pointer<Utf8> _url = Utf8.toUtf8(url);
+  Pointer<Utf8> _url = (url).toNativeUtf8();
   _evaluateTestScripts(contextId, stringToNativeString(code), _url, line);
 }
 
@@ -50,7 +50,7 @@ typedef Dart_ExecuteTest = void Function(int contextId, Pointer<NativeFunction<N
 final Dart_ExecuteTest _executeTest =
     nativeDynamicLibrary.lookup<NativeFunction<Native_ExecuteTest>>('executeTest').asFunction();
 
-List<Completer<String>> completerList = List(10);
+List<Completer<String>> completerList = List.filled(10, null);
 
 void _executeTestCallback(int contextId, Pointer<NativeString> status) {
   if (completerList[contextId] == null) return;
