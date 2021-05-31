@@ -884,7 +884,6 @@ class RenderFlowLayout extends RenderLayoutBox {
           continue;
         }
         if (childParentData.runIndex != i) break;
-
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
 
