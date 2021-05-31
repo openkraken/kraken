@@ -132,6 +132,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
+  static String obscuringCharacter = '•';
+
   final Pointer<NativeInputElement> nativeInputElement;
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
@@ -150,8 +152,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   bool obscureText = false;
   bool autoCorrect = false;
   TextSelectionDelegate textSelectionDelegate = EditableTextDelegate();
-  TextSpan textSpan;
-  RenderEditable renderEditable;
+  TextSpan _actualText;
+  RenderEditable _renderEditable;
   RenderOffsetBox _renderOffsetBox;
   TextInputConnection textInputConnection;
 
@@ -178,7 +180,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextSpan get placeholderTextSpan {
     // TODO: support ::placeholder pseudo element
-    return buildTextSpan(
+    return _buildTextSpan(
       text: placeholderText,
     );
   }
@@ -240,7 +242,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     super.didDetachRenderer();
     _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
     _cursorBlinkOpacityController = null;
-    renderEditable = null;
+    _renderEditable = null;
   }
 
   @override
@@ -248,26 +250,33 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     super.setStyle(key, value);
 
     // @TODO: Filter style properties that used by text span.
-    updateTextSpan();
+    _rebuildTextSpan();
   }
 
-  void updateTextSpan() {
+  void _rebuildTextSpan() {
     // Rebuilt text span, for style has changed.
-    textSpan = buildTextSpan();
-    textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
+    _actualText = _buildTextSpan(text: _actualText?.text);
+    textSelectionDelegate.textEditingValue = TextEditingValue(text: _actualText.text);
 
-    if (renderEditable != null) {
-      renderEditable.text = textSpan.text.length == 0 ? placeholderTextSpan : textSpan;
-      renderEditable.textOverflow = textOverflow;
+    TextSpan text = obscureText ? _buildPasswordTextSpan(_actualText.text) : _actualText;
+    if (_renderEditable != null) {
+      _renderEditable.text = _actualText.text.length == 0
+          ? placeholderTextSpan
+          : text;
+      _renderEditable.textOverflow = textOverflow;
     }
   }
 
-  TextSpan buildTextSpan({String text = ''}) {
+  TextSpan _buildTextSpan({ String text = '' }) {
     text ??= properties[VALUE];
     return CSSTextMixin.createTextSpan(text, this);
   }
 
-  get cursorColor => CSSColor.initial;
+  TextSpan _buildPasswordTextSpan(String text) {
+    return CSSTextMixin.createTextSpan(obscuringCharacter * text.length, this);
+  }
+
+  Color get cursorColor => CSSColor.initial;
 
   @override
   void handlePointDown(PointerDownEvent pointEvent) {
@@ -329,7 +338,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
     textInputConnection.show();
     _startCursorTimer();
-    renderEditable.markNeedsTextLayout();
+    _renderEditable.markNeedsTextLayout();
   }
 
   void deactiveTextInput() {
@@ -338,7 +347,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       textInputConnection.close();
     }
     _stopCursorTimer();
-    renderEditable.markNeedsTextLayout();
+    _renderEditable.markNeedsTextLayout();
   }
 
   void onSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
@@ -348,16 +357,20 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   bool get multiLine => maxLines > 1;
-
   bool get _hasFocus => InputElement.focusInputElement == this;
 
   RenderEditable createRenderEditable() {
-    if (textSpan == null) {
-      textSpan = buildTextSpan();
+    if (_actualText == null) {
+      _actualText = _buildTextSpan();
     }
-    TextSpan text = textSpan.toPlainText().length > 0 ? textSpan : placeholderTextSpan;
+    TextSpan text = _actualText;
+    if (_actualText.toPlainText().length == 0) {
+      text = placeholderTextSpan;
+    } else if (obscureText) {
+      text = _buildPasswordTextSpan(text.text);
+    }
 
-    renderEditable = RenderEditable(
+    _renderEditable = RenderEditable(
       text: text,
       cursorColor: cursorColor,
       showCursor: _cursorVisibilityNotifier,
@@ -385,7 +398,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       endHandleLayerLink: LayerLink(),
       textOverflow: textOverflow,
     );
-    return renderEditable;
+    return _renderEditable;
   }
 
   RenderObject createRenderObject() {
@@ -474,12 +487,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     if (textChanged) {
       _updateRemoteEditingValueIfNeeded();
-      textSpan = buildTextSpan(text: value.text);
-      if (renderEditable != null) {
+      if (_renderEditable != null) {
         if (value.text.length == 0) {
-          renderEditable.text = placeholderTextSpan;
+          _renderEditable.text = placeholderTextSpan;
+        } else if (obscureText) {
+          _renderEditable.text = _buildPasswordTextSpan(value.text);
         } else {
-          renderEditable.text = textSpan;
+          _renderEditable.text = _buildTextSpan(text: value.text);
         }
       }
       // Sync value to input element property
@@ -493,8 +507,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       }
     }
 
-    if (renderEditable != null) {
-      renderEditable.selection = value.selection;
+    if (_renderEditable != null) {
+      _renderEditable.selection = value.selection;
     }
   }
 
@@ -536,7 +550,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       formatAndSetValue(newTextEditingValue);
     } else if (key == 'placeholder') {
       // Update placeholder text.
-      updateTextSpan();
+      _rebuildTextSpan();
     } else if (key == 'autofocus') {
       _autoFocus = value != null;
     } else if (key == 'type') {
@@ -567,7 +581,18 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       case 'tel':
         textInputType = TextInputType.number;
         break;
+      case 'password':
+        textInputType = TextInputType.text;
+        _enablePassword();
+        break;
       // @TODO: more types.
+    }
+  }
+
+  void _enablePassword() {
+    obscureText = true;
+    if (_renderEditable != null) {
+      _renderEditable.obscureText = obscureText;
     }
   }
 
@@ -595,7 +620,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         newCaretRect.bottom,
       );
 
-      renderEditable.showOnScreen(
+      _renderEditable.showOnScreen(
         rect: inflatedRect,
         duration: _caretAnimationDuration,
         curve: _caretAnimationCurve,
@@ -660,12 +685,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     final TextPosition currentTextPosition = TextPosition(offset: 1);
-    Rect _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-    renderEditable.setFloatingCursor(point.state, _startCaretRect.center, currentTextPosition);
+    Rect _startCaretRect = _renderEditable.getLocalRectForCaret(currentTextPosition);
+    _renderEditable.setFloatingCursor(point.state, _startCaretRect.center, currentTextPosition);
   }
 
   void _onCursorColorTick() {
-    renderEditable.cursorColor = cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+    _renderEditable.cursorColor = cursorColor.withOpacity(_cursorBlinkOpacityController.value);
     _cursorVisibilityNotifier.value = _cursorBlinkOpacityController.value > 0;
   }
 
