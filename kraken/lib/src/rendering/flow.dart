@@ -726,8 +726,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     final int runCount = runMetrics.length;
 
     Size layoutSize = getLayoutSize(
-      logicalContentWidth: logicalContentWidth!,
-      logicalContentHeight: logicalContentHeight!,
+      logicalContentWidth: logicalContentWidth ?? 0,
+      logicalContentHeight: logicalContentHeight ?? 0,
       contentWidth: mainAxisExtent,
       contentHeight: crossAxisExtent,
     );
@@ -1077,7 +1077,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth!, logicalContentHeight!);
+        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth ?? 0, logicalContentHeight ?? 0);
         if (percentageExist) {
           percentageFound = true;
           break;

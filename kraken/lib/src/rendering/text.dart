@@ -58,7 +58,7 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     _renderParagraph.overflow = value;
   }
 
-  set maxLines(int value) {
+  set maxLines(int? value) {
     // Forcing a break after a set number of lines
     // https://drafts.csswg.org/css-overflow-3/#max-lines
     _renderParagraph.maxLines = value;
@@ -75,7 +75,7 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     super.size = value;
   }
 
-  late WhiteSpace _whiteSpace;
+  WhiteSpace _whiteSpace = WhiteSpace.normal;
   WhiteSpace get whiteSpace {
     return _whiteSpace;
   }

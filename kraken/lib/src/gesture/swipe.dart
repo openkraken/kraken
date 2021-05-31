@@ -82,19 +82,19 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// This value is typically compared with the distance traveled along the
   /// scrolling axis. If null then [kTouchSlop] is used.
-  late double minFlingDistance;
+  double? minFlingDistance;
 
   /// The minimum velocity for an input pointer swipe to be considered fling.
   ///
   /// This value is typically compared with the magnitude of fling gesture's
   /// velocity along the scrolling axis. If null then [kMinFlingVelocity]
   /// is used.
-  late double minFlingVelocity;
+  double? minFlingVelocity;
 
   /// Fling velocity magnitudes will be clamped to this value.
   ///
   /// If null then [kMaxFlingVelocity] is used.
-  late double maxFlingVelocity;
+  double? maxFlingVelocity;
 
   /// Determines the type of velocity estimation method to use for a potential
   /// swipe gesture, when a new pointer is added.
@@ -143,8 +143,8 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   /// provider of the callback to respond by carrying the gesture forward with
   /// inertia, for example.
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
-    final double minVelocity = minFlingVelocity;
-    final double minDistance = minFlingDistance;
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
 
     return ((_direction == DIRECTION_LEFT || _direction == DIRECTION_RIGHT) && (estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance)
     || (_direction == DIRECTION_UP || _direction == DIRECTION_DOWN) && (estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance));
@@ -303,7 +303,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
     final VelocityEstimate? estimate = tracker.getVelocityEstimate();
     if (estimate != null && isFlingGesture(estimate, tracker.kind)) {
       final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
-          .clampMagnitude(minFlingVelocity, maxFlingVelocity);
+          .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
       debugReport = () {
         return '$estimate; fling at $velocity.';
       };

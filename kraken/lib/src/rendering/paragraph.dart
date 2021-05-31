@@ -485,11 +485,11 @@ class KrakenRenderParagraph extends RenderBox
   // into the LibTxt layout. This does not do anything if no inline widgets were
   // specified.
   void _layoutChildren(BoxConstraints constraints) {
+    _placeholderDimensions = List.empty(growable: true);
     if (childCount == 0) {
       return;
     }
     RenderBox? child = firstChild;
-    _placeholderDimensions = List.empty(growable: true);
     int childIndex = 0;
     while (child != null) {
       // Only constrain the width to the maximum width of the paragraph.

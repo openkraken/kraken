@@ -128,7 +128,7 @@ class TextNode extends Node {
 
     renderTextBox.whiteSpace = CSSText.getWhiteSpace(_parentElement.style);
     renderTextBox.overflow = CSSText.getTextOverflow(_parentElement.style);
-    renderTextBox.maxLines = CSSText.getLineClamp(_parentElement.style)!;
+    renderTextBox.maxLines = CSSText.getLineClamp(_parentElement.style);
   }
 
   // Attach renderObject of current node to parent

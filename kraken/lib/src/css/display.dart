@@ -41,11 +41,11 @@ mixin CSSDisplayMixin on RenderStyleBase {
     );
     display = presentDisplay;
     transformedDisplay = getTransformedDisplay();
-    RenderLayoutBox? prevRenderLayoutBox = renderBoxModel as RenderLayoutBox;
-    if (originalDisplay != presentDisplay && prevRenderLayoutBox is RenderLayoutBox) {
-      RenderLayoutBox newRenderLayoutBox = renderBoxModel = Element.createRenderLayout(element, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: element.repaintSelf);
+    RenderBoxModel? prevRenderBoxModel = renderBoxModel;
+    if (originalDisplay != presentDisplay && prevRenderBoxModel is RenderLayoutBox) {
+      RenderLayoutBox newRenderLayoutBox = renderBoxModel = Element.createRenderLayout(element, prevRenderLayoutBox: prevRenderBoxModel, repaintSelf: element.repaintSelf);
       Element? parentElement = element.parentElement;
-      bool shouldReattach = element.isRendererAttached && parentElement != null && prevRenderLayoutBox != newRenderLayoutBox;
+      bool shouldReattach = element.isRendererAttached && parentElement != null && prevRenderBoxModel != newRenderLayoutBox;
 
       if (shouldReattach) {
         RenderLayoutBox parentRenderObject = parentElement.renderBoxModel as RenderLayoutBox;
@@ -53,7 +53,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
         RenderObject? previous = (previousSibling != null) ? previousSibling.renderer : null;
 
         if (previous == null || !(previous is RenderBox)) return;
-        parentRenderObject.remove(prevRenderLayoutBox);
+        parentRenderObject.remove(prevRenderBoxModel);
         parentRenderObject.insert(newRenderLayoutBox, after: previous);
       } else {
         newRenderLayoutBox.markNeedsLayout();

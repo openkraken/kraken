@@ -263,11 +263,11 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     Node target = getEventTargetByTargetId<Node>(targetId)!;
     Node newNode = getEventTargetByTargetId<Node>(newTargetId)!;
-    Node targetParentNode = target.parentNode!;
+    Node? targetParentNode = target.parentNode;
 
     switch (position) {
       case 'beforebegin':
-        targetParentNode.insertBefore(newNode, target);
+        targetParentNode!.insertBefore(newNode, target);
         break;
       case 'afterbegin':
         target.insertBefore(newNode, target.firstChild);
@@ -276,7 +276,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
         target.appendChild(newNode);
         break;
       case 'afterend':
-        if (targetParentNode.lastChild == target) {
+        if (targetParentNode!.lastChild == target) {
           targetParentNode.appendChild(newNode);
         } else {
           targetParentNode.insertBefore(

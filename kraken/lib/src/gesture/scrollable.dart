@@ -270,31 +270,33 @@ mixin RenderOverflowMixin on RenderBox {
   Size? _scrollableSize;
   Size? _viewportSize;
 
-  ViewportOffset get scrollOffsetX => _scrollOffsetX;
-  late ViewportOffset _scrollOffsetX;
-  set scrollOffsetX(ViewportOffset value) {
+  ViewportOffset? get scrollOffsetX => _scrollOffsetX;
+  ViewportOffset? _scrollOffsetX;
+  set scrollOffsetX(ViewportOffset? value) {
+    if (value == null) return;
     _scrollOffsetX = value;
-    _scrollOffsetX.removeListener(_scrollXListener);
-    _scrollOffsetX.addListener(_scrollXListener);
+    value.removeListener(_scrollXListener);
+    value.addListener(_scrollXListener);
     markNeedsLayout();
   }
 
-  ViewportOffset get scrollOffsetY => _scrollOffsetY;
-  late ViewportOffset _scrollOffsetY;
-  set scrollOffsetY(ViewportOffset value) {
+  ViewportOffset? get scrollOffsetY => _scrollOffsetY;
+  ViewportOffset? _scrollOffsetY;
+  set scrollOffsetY(ViewportOffset? value) {
+    if (value == null) return;
     _scrollOffsetY = value;
-    _scrollOffsetY.removeListener(_scrollYListener);
-    _scrollOffsetY.addListener(_scrollYListener);
+    value.removeListener(_scrollYListener);
+    value.addListener(_scrollYListener);
     markNeedsLayout();
   }
 
   void _scrollXListener() {
-    scrollListener(scrollOffsetX.pixels, AxisDirection.right);
+    scrollListener(scrollOffsetX!.pixels, AxisDirection.right);
     markNeedsPaint();
   }
 
   void _scrollYListener() {
-    scrollListener(scrollOffsetY.pixels, AxisDirection.down);
+    scrollListener(scrollOffsetY!.pixels, AxisDirection.down);
     markNeedsPaint();
   }
 
@@ -311,40 +313,44 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   void _setUpScrollX() {
-    _scrollOffsetX.applyViewportDimension(_viewportSize!.width);
-    _scrollOffsetX.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.width - _viewportSize!.width));
+    _scrollOffsetX!.applyViewportDimension(_viewportSize!.width);
+    _scrollOffsetX!.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.width - _viewportSize!.width));
   }
 
   void _setUpScrollY() {
-    _scrollOffsetY.applyViewportDimension(_viewportSize!.height);
-    _scrollOffsetY.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.height - _viewportSize!.height));
+    _scrollOffsetY!.applyViewportDimension(_viewportSize!.height);
+    _scrollOffsetY!.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.height - _viewportSize!.height));
   }
 
   void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {
     _scrollableSize = scrollableSize;
     _viewportSize = viewportSize;
-    if (_clipX) {
+    if (_clipX && _scrollOffsetX != null) {
       _setUpScrollX();
     }
 
-    if (_clipY) {
+    if (_clipY && _scrollOffsetY != null) {
       _setUpScrollY();
     }
   }
 
   double get _paintOffsetX {
-    return -_scrollOffsetX.pixels;
+    if (_scrollOffsetX == null) return 0.0;
+    return -_scrollOffsetX!.pixels;
   }
   double get _paintOffsetY {
-    return -_scrollOffsetY.pixels;
+    if (_scrollOffsetY == null) return 0.0;
+    return -_scrollOffsetY!.pixels;
   }
 
   double get scrollTop {
-    return _scrollOffsetY.pixels;
+    if (_scrollOffsetY == null) return 0.0;
+    return _scrollOffsetY!.pixels;
   }
 
   double get scrollLeft {
-    return _scrollOffsetX.pixels;
+    if (_scrollOffsetX == null) return 0.0;
+    return _scrollOffsetX!.pixels;
   }
 
   bool _shouldClipAtPaintOffset(Offset paintOffset, Size childSize) {

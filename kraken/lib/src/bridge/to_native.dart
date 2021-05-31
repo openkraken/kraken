@@ -274,7 +274,8 @@ final bool isEnabledLog = kDebugMode && Platform.environment['ENABLE_KRAKEN_JS_L
 List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
   List<int> rawMemory = nativeCommandItems.asTypedList(commandLength * nativeCommandSize).toList(growable: false);
 
-  UICommand commandItemGenerator(int i) {
+  List<UICommand> results = List.generate(commandLength, (int _i) {
+    int i = _i * nativeCommandSize;
     UICommand command = UICommand();
 
     int typeIdCombine = rawMemory[i + typeAndIdMemOffset];
@@ -324,9 +325,8 @@ List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, in
       print(printMsg);
     }
     return command;
-  }
+  }, growable: false);
 
-  List<UICommand> results = List.generate(commandLength, commandItemGenerator, growable: false);
   // Clear native command.
   _clearUICommandItems(contextId);
 
