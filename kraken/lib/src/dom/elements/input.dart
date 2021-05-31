@@ -267,8 +267,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  TextSpan _buildTextSpan({ String text = '' }) {
-    text ??= properties[VALUE];
+  TextSpan _buildTextSpan({ String text }) {
+    if (text == null || text.length == 0) {
+      text = properties[VALUE] ?? '';
+    }
     return CSSTextMixin.createTextSpan(text ?? '', this);
   }
 
@@ -493,7 +495,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         } else if (obscureText) {
           _renderEditable.text = _buildPasswordTextSpan(value.text);
         } else {
-          _renderEditable.text = _buildTextSpan(text: value.text);
+          _actualText = _renderEditable.text = _buildTextSpan(text: value.text);
         }
       }
       // Sync value to input element property
