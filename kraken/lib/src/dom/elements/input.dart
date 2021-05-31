@@ -269,7 +269,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextSpan _buildTextSpan({ String text = '' }) {
     text ??= properties[VALUE];
-    return CSSTextMixin.createTextSpan(text, this);
+    return CSSTextMixin.createTextSpan(text ?? '', this);
   }
 
   TextSpan _buildPasswordTextSpan(String text) {
