@@ -97,4 +97,64 @@ describe('Align text-align', () => {
       done();
     });
   });
+
+  it('works only with inline and inline-block', async () => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+        textAlign: 'center'
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          display: 'inline-block',
+          width: '250px',
+          height: '50px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('display inline-block')
+      ])),
+      (createElement('div', {
+        style: {
+          display: 'inline-flex',
+          width: '250px',
+          height: '50px',
+          backgroundColor: 'pink',
+        }
+      }, [
+        createText('display inline-flex')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '50px',
+          backgroundColor: 'lightblue',
+          fontFamily: 'arial',
+        }
+      }, [
+        createText('display block')
+      ])),
+      (createElement('div', {
+        style: {
+          display: 'flex',
+          width: '250px',
+          height: '50px',
+          backgroundColor: 'coral',
+          fontFamily: 'arial',
+        }
+      }, [
+        createText('display flex')
+      ]))
+    ]);
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
 });
