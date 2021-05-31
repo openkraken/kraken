@@ -474,7 +474,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth!, logicalContentHeight!);
+        bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
         bool percentageToOwnFound = child.renderStyle.isPercentageToOwnExist();
         bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(this, logicalContentWidth, logicalContentHeight);
 
@@ -530,7 +530,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderBoxModel containerBox = isScrollingContentBox ? parent as RenderBoxModel : this;
     switch (direction) {
       case Axis.horizontal:
-        mainAxisLimit = containerBox.contentConstraints.maxWidth;
+        mainAxisLimit = containerBox.contentConstraints!.maxWidth;
         if (mainAxisLimit == double.infinity) {
           mainAxisLimit = RenderBoxModel.getMaxConstraintWidth(containerBox);
         }
@@ -538,7 +538,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
       case Axis.vertical:
-        mainAxisLimit = containerBox.contentConstraints.maxHeight;
+        mainAxisLimit = containerBox.contentConstraints!.maxHeight;
         if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
@@ -704,7 +704,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       } else {
         runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
-      runChildren[childNodeId!] = child;
+      if (childNodeId != null) {
+        runChildren[childNodeId] = child;
+      }
 
       childParentData.runIndex = runMetrics.length;
       preChild = child;
@@ -1077,7 +1079,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth ?? 0, logicalContentHeight ?? 0);
+        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
         if (percentageExist) {
           percentageFound = true;
           break;

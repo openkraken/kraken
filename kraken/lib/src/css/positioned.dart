@@ -342,8 +342,8 @@ class CSSPositionedLayout {
     // so it needs to find the upper box for querying content constraints
     RenderBoxModel containerBox = (parent.isScrollingContentBox ? parent.parent as RenderBoxModel? : parent)!;
 
-    Size trySize = containerBox.contentConstraints.biggest;
-    Size parentSize = trySize.isInfinite ? containerBox.contentConstraints.smallest : trySize;
+    Size trySize = containerBox.contentConstraints!.biggest;
+    Size parentSize = trySize.isInfinite ? containerBox.contentConstraints!.smallest : trySize;
     BoxSizeType? widthType = _getChildWidthSizeType(child);
     BoxSizeType? heightType = _getChildHeightSizeType(child);
     RenderStyle childRenderStyle = child.renderStyle;

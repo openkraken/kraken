@@ -76,7 +76,7 @@ class RenderIntrinsic extends RenderBoxModel
         childLayoutStart = DateTime.now();
       }
 
-      child.layout(contentConstraints, parentUsesSize: true);
+      child.layout(contentConstraints!, parentUsesSize: true);
 
       if (kProfileMode) {
         DateTime childLayoutEnd = DateTime.now();

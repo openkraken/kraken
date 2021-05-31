@@ -632,7 +632,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth!, logicalContentHeight!);
+        bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
         bool percentageToOwnFound = child.renderStyle.isPercentageToOwnExist();
         bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(this, logicalContentWidth, logicalContentHeight);
 
@@ -686,8 +686,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     /// If no child exists, stop layout.
     if (childCount == 0) {
       Size layoutSize = getLayoutSize(
-        logicalContentWidth: logicalContentWidth!,
-        logicalContentHeight: logicalContentHeight!,
+        logicalContentWidth: logicalContentWidth,
+        logicalContentHeight: logicalContentHeight,
         contentWidth: 0,
         contentHeight: 0,
       );
@@ -893,7 +893,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth!, logicalContentHeight!);
+        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(logicalContentWidth, logicalContentHeight);
         if (percentageExist) {
           percentageFound = true;
           break;
@@ -955,12 +955,12 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Use scrolling container to calculate flex line limit for scrolling content box
     RenderBoxModel containerBox = isScrollingContentBox ? parent as RenderBoxModel : this;
     if (isAxisHorizontalDirection) {
-      flexLineLimit = containerBox.contentConstraints.maxWidth;
+      flexLineLimit = containerBox.contentConstraints!.maxWidth;
       if (flexLineLimit == double.infinity) {
         flexLineLimit = RenderBoxModel.getMaxConstraintWidth(containerBox);
       }
     } else {
-      flexLineLimit = containerBox.contentConstraints.maxHeight;
+      flexLineLimit = containerBox.contentConstraints!.maxHeight;
     }
 
     RenderBox? child = placeholderChild ?? firstChild;
@@ -1288,16 +1288,16 @@ class RenderFlexLayout extends RenderLayoutBox {
     double containerWidth = 0;
     if (logicalContentWidth != null) {
       containerWidth = logicalContentWidth!;
-    } else if (contentConstraints.hasTightWidth) {
-      containerWidth = contentConstraints.maxWidth;
+    } else if (contentConstraints!.hasTightWidth) {
+      containerWidth = contentConstraints!.maxWidth;
     }
 
     // Container's height specified by style or inherited from parent
     double containerHeight = 0;
     if (logicalContentHeight != null) {
       containerHeight = logicalContentHeight!;
-    } else if (contentConstraints.hasTightHeight) {
-      containerHeight = contentConstraints.maxHeight;
+    } else if (contentConstraints!.hasTightHeight) {
+      containerHeight = contentConstraints!.maxHeight;
     }
 
     double maxMainSize = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ? containerWidth : containerHeight;
@@ -1603,8 +1603,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     double contentHeight = CSSFlex.isHorizontalFlexDirection(renderStyle.flexDirection) ?
       containerSizeMap['cross']! : maxAllocatedMainSize;
     Size layoutSize = getLayoutSize(
-      logicalContentWidth: logicalContentWidth!,
-      logicalContentHeight: logicalContentHeight!,
+      logicalContentWidth: logicalContentWidth,
+      logicalContentHeight: logicalContentHeight,
       contentWidth: contentWidth,
       contentHeight: contentHeight,
     );

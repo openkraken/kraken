@@ -172,9 +172,10 @@ mixin CSSBoxMixin on RenderStyleBase {
        updateBoxShadow(property);
       }
     } else {
-      CSSBoxDecoration _boxDecoration = getCSSBoxDecoration()!;
-      cssBoxDecoration = getCSSBoxDecoration();
-      renderStyle.decoration = _boxDecoration.toBoxDecoration();
+      CSSBoxDecoration? boxDecoration = getCSSBoxDecoration();
+      if (boxDecoration == null) return;
+      cssBoxDecoration = boxDecoration;
+      renderStyle.decoration = boxDecoration.toBoxDecoration();
       renderStyle.backgroundClip = getBackgroundClip(present);
       renderStyle.backgroundOrigin = getBackgroundOrigin(present);
     }

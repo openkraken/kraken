@@ -134,7 +134,7 @@ mixin CSSTextMixin on RenderStyleBase {
     _whiteSpace = value;
   }
 
-  static TextSpan createTextSpan(String text, Element? parent) {
+  static TextSpan createTextSpan(String? text, Element? parent) {
     TextStyle? textStyle = parent != null ? getTextStyle(parent) : null;
     return TextSpan(
       text: text,

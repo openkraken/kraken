@@ -369,7 +369,7 @@ class RenderStyle
     return isPercentageExist;
   }
 
-  bool isPercentageOfSizingExist(double parentLogicalContentWidth, double parentLogicalContentHeight) {
+  bool isPercentageOfSizingExist(double? parentLogicalContentWidth, double? parentLogicalContentHeight) {
     if (
       CSSLength.isPercentage(style[WIDTH]) ||
       CSSLength.isPercentage(style[MIN_WIDTH]) ||

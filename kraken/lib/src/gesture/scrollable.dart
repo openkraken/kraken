@@ -234,7 +234,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
 }
 
 mixin RenderOverflowMixin on RenderBox {
-  late _ScrollListener scrollListener;
+  _ScrollListener? scrollListener;
   void Function(PointerEvent)? pointerListener;
 
   bool _clipX = false;
@@ -291,12 +291,12 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   void _scrollXListener() {
-    scrollListener(scrollOffsetX!.pixels, AxisDirection.right);
+    scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
     markNeedsPaint();
   }
 
   void _scrollYListener() {
-    scrollListener(scrollOffsetY!.pixels, AxisDirection.down);
+    scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
     markNeedsPaint();
   }
 

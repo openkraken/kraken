@@ -330,8 +330,8 @@ class RenderLayoutBox extends RenderBoxModel
 
   /// Common layout size (including flow and flexbox layout) calculation logic
   Size getLayoutSize({
-    required double logicalContentWidth,
-    required double logicalContentHeight,
+    double? logicalContentWidth,
+    double? logicalContentHeight,
     required double contentWidth,
     required double contentHeight,
   }) {
@@ -339,8 +339,8 @@ class RenderLayoutBox extends RenderBoxModel
     double layoutHeight = contentHeight;
 
     // Size which is specified by sizing styles
-    double specifiedWidth = logicalContentWidth;
-    double specifiedHeight = logicalContentHeight;
+    double? specifiedWidth = logicalContentWidth;
+    double? specifiedHeight = logicalContentHeight;
     // Flex basis takes priority over main size in flex item.
     if (parent is RenderFlexLayout) {
       RenderBoxModel parentRenderBoxModel = (parent as RenderBoxModel?)!;
@@ -354,8 +354,8 @@ class RenderLayoutBox extends RenderBoxModel
       }
     }
 
-    layoutWidth = math.max(specifiedWidth, contentWidth);
-    layoutHeight = math.max(specifiedHeight, contentHeight);
+    layoutWidth = math.max(specifiedWidth ?? 0, contentWidth);
+    layoutHeight = math.max(specifiedHeight ?? 0, contentHeight);
 
     CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
     bool isInlineBlock = transformedDisplay == CSSDisplay.inlineBlock;
@@ -483,8 +483,8 @@ class RenderBoxModel extends RenderBox with
   int childPaintDuration = 0;
   int childLayoutDuration = 0;
 
-  late BoxConstraints _contentConstraints;
-  BoxConstraints get contentConstraints {
+  BoxConstraints? _contentConstraints;
+  BoxConstraints? get contentConstraints {
     assert(_debugHasBoxLayout, 'can not access contentConstraints, RenderBoxModel has not layout: ${toString()}');
     return _contentConstraints;
   }
@@ -1078,7 +1078,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   Size getBoxSize(Size contentSize) {
-    Size boxSize = _contentSize = contentConstraints.constrain(contentSize);
+    Size boxSize = _contentSize = contentConstraints!.constrain(contentSize);
 
     scrollableViewportSize = Size(
       contentSize.width + renderStyle.paddingLeft + renderStyle.paddingRight,
@@ -1190,7 +1190,7 @@ class RenderBoxModel extends RenderBox with
       _contentConstraints = boxConstraints;
     }
 
-    return _contentConstraints;
+    return _contentConstraints!;
   }
 
   /// Find scroll container

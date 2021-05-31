@@ -329,7 +329,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// with the most recently set [TextSelectionDelegate].
   TextSelectionDelegate textSelectionDelegate;
 
-  late Rect _lastCaretRect;
+  Rect? _lastCaretRect;
 
   /// Track whether position of the start of the selected text is within the viewport.
   ///
@@ -477,6 +477,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
+    print(1234);
+
     // TODO(ianh): It seems to be entirely possible for the selection to be null here, but
     // all the keyboard handling functions assume it is not.
     assert(selection != null);
@@ -490,7 +492,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
-    } else if (key == LogicalKeyboardKey.delete) {
+    } else if (key == LogicalKeyboardKey.delete || key == LogicalKeyboardKey.backspace) {
+      print(11);
       _handleDelete();
     }
   }
@@ -691,7 +694,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     // Update the text selection delegate so that the engine knows what we did.
-    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
+    textSelectionDelegate.userUpdateTextEditingValue(
+        textSelectionDelegate.textEditingValue.copyWith(selection: newSelection), SelectionChangedCause.keyboard);
     _handleSelectionChange(
       newSelection,
       SelectionChangedCause.keyboard,
@@ -713,11 +717,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (key == LogicalKeyboardKey.keyX) {
       if (!selection!.isCollapsed) {
         Clipboard.setData(ClipboardData(text: selection!.textInside(_plainText)));
-        textSelectionDelegate.textEditingValue = TextEditingValue(
-          text: selection!.textBefore(_plainText)
-              + selection!.textAfter(_plainText),
-          selection: TextSelection.collapsed(offset: selection!.start),
-        );
+        textSelectionDelegate.userUpdateTextEditingValue(
+            TextEditingValue(
+              text: selection!.textBefore(_plainText)
+                  + selection!.textAfter(_plainText),
+              selection: TextSelection.collapsed(offset: selection!.start),
+            ), SelectionChangedCause.keyboard);
       }
       return;
     }
@@ -727,14 +732,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final TextEditingValue value = textSelectionDelegate.textEditingValue;
       final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
       if (data != null) {
-        textSelectionDelegate.textEditingValue = TextEditingValue(
-          text: value.selection.textBefore(value.text)
-              + data.text!
-              + value.selection.textAfter(value.text),
-          selection: TextSelection.collapsed(
-              offset: value.selection.start + data.text!.length
-          ),
-        );
+        textSelectionDelegate.userUpdateTextEditingValue(
+            TextEditingValue(
+              text: value.selection.textBefore(value.text)
+                  + data.text!
+                  + value.selection.textAfter(value.text),
+              selection: TextSelection.collapsed(
+                  offset: value.selection.start + data.text!.length
+              ),
+            ), SelectionChangedCause.keyboard);
       }
       return;
     }
@@ -756,15 +762,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final String textAfter = localSelection.textAfter(_plainText);
     if (textAfter.isNotEmpty) {
       final int deleteCount = nextCharacter(0, textAfter);
-      textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: localSelection.textBefore(_plainText)
-            + localSelection.textAfter(_plainText).substring(deleteCount),
-        selection: TextSelection.collapsed(offset: localSelection.start),
-      );
+      textSelectionDelegate.userUpdateTextEditingValue(
+          TextEditingValue(
+            text: localSelection.textBefore(_plainText)
+                + localSelection.textAfter(_plainText).substring(deleteCount),
+            selection: TextSelection.collapsed(offset: localSelection.start),
+          ), SelectionChangedCause.keyboard);
     } else {
-      textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: localSelection.textBefore(_plainText),
-        selection: TextSelection.collapsed(offset: localSelection.start),
+      textSelectionDelegate.userUpdateTextEditingValue(
+          TextEditingValue(
+            text: localSelection.textBefore(_plainText),
+            selection: TextSelection.collapsed(offset: localSelection.start),
+          ), SelectionChangedCause.keyboard
       );
     }
   }
