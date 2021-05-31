@@ -36,7 +36,7 @@ describe('Tags input', () => {
     input.placeholder = "This is placeholder.";
 
     div.appendChild(input);
-    document.body.appendChild(input);
+    document.body.appendChild(div);
 
     await snapshot();
   });
