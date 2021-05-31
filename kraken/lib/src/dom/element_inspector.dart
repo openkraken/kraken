@@ -205,14 +205,14 @@ mixin ElementInspectorService {
   /// lifetimes of object references in the returned JSON (see [disposeGroup]).
   void _registerServiceExtensionWithArg({
     required String name,
-    required FutureOr<dynamic> callback(String objectId, String objectGroup),
+    required FutureOr<Object?> Function(String? objectId, String objectGroup) callback,
   }) {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
-        return <String, Object>{
-          'result': await callback(parameters['arg']!, parameters['objectGroup']!),
+        return <String, Object?>{
+          'result': await callback(parameters['arg'], parameters['objectGroup']!),
         };
       },
     );
@@ -233,11 +233,20 @@ mixin ElementInspectorService {
         maxDescendentsTruncatableNode: 5,
         service: this,
       ),
-    );
+    )!;
 
     errorJson['errorsSinceReload'] = _errorsSinceReload;
-    _errorsSinceReload += 1;
+    if (_errorsSinceReload == 0) {
+      errorJson['renderedErrorText'] = TextTreeRenderer(
+        wrapWidth: FlutterError.wrapWidth,
+        wrapWidthProperties: FlutterError.wrapWidth,
+        maxDescendentsTruncatableNode: 5,
+      ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight();
+    } else {
+      errorJson['renderedErrorText'] = 'Another exception was thrown: ${details.summary}';
+    }
 
+    _errorsSinceReload += 1;
     postEvent('Flutter.Error', errorJson);
   }
 
@@ -417,7 +426,7 @@ mixin ElementInspectorService {
   /// If the object exists in other groups it will remain alive and the object
   /// id will remain valid.
   @protected
-  void disposeId(String? id, String groupName) {
+  void disposeId(String? id, String? groupName) {
     if (id == null) return;
 
     final _InspectorReferenceData? referenceData = _idToReferenceData[id];
@@ -435,7 +444,7 @@ mixin ElementInspectorService {
   /// The `groupName` parameter is not required by is added to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
   @protected
-  bool setSelectionById(String id, [String? groupName]) {
+  bool setSelectionById(String? id, String? groupName) {
     return setSelection(toObject(id), groupName);
   }
 
@@ -471,11 +480,11 @@ mixin ElementInspectorService {
     return false;
   }
 
-  Map<String, Object?> _nodeToJson(
-    DiagnosticsNode? node,
-    InspectorSerializationDelegate delegate,
-  ) {
-    return node!.toJsonMap(delegate);
+  Map<String, Object?>? _nodeToJson(
+      DiagnosticsNode? node,
+      InspectorSerializationDelegate delegate,
+      ) {
+    return node?.toJsonMap(delegate);
   }
 
   /// Wrapper around `json.encode` that uses a ring of cached values to prevent
@@ -486,7 +495,7 @@ mixin ElementInspectorService {
   //
   // TODO(jacobr): Replace this with a better solution once
   // https://github.com/dart-lang/sdk/issues/32919 is fixed.
-  String _safeJsonEncode(Object object) {
+  String _safeJsonEncode(Object? object) {
     final String jsonString = json.encode(object);
     _serializeRing[_serializeRingIndex] = jsonString;
     _serializeRingIndex = (_serializeRingIndex + 1) % _serializeRing.length;
@@ -519,7 +528,7 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getProperties(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getProperties(String diagnosticsNodeId, String groupName) {
+  List<Object> _getProperties(String? diagnosticsNodeId, String? groupName) {
     final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode;
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(),
         InspectorSerializationDelegate(groupName: groupName, service: this),
@@ -532,7 +541,7 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getChildren(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getChildren(String diagnosticsNodeId, String groupName) {
+  List<Object> _getChildren(String? diagnosticsNodeId, String? groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId) as DiagnosticsNode;
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, service: this);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate,
@@ -555,7 +564,7 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getChildrenSummaryTree(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getChildrenSummaryTree(String diagnosticsNodeId, String groupName) {
+  List<Object> _getChildrenSummaryTree(String? diagnosticsNodeId, String? groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId) as DiagnosticsNode;
     final InspectorSerializationDelegate delegate =
         InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
@@ -572,7 +581,7 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getChildrenDetailsSubtree(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getChildrenDetailsSubtree(String diagnosticsNodeId, String groupName) {
+  List<Object> _getChildrenDetailsSubtree(String? diagnosticsNodeId, String? groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId) as DiagnosticsNode;
     // With this value of minDepth we only expand one extra level of important nodes.
     final InspectorSerializationDelegate delegate =
@@ -620,9 +629,8 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getRootRenderObject(groupName));
   }
 
-  Map<String, Object?> _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance!.renderView.toDiagnosticsNode(),
-        InspectorSerializationDelegate(groupName: groupName, service: this));
+  Map<String, Object?>? _getRootRenderObject(String groupName) {
+    return _nodeToJson(RendererBinding.instance?.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -677,11 +685,10 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getSelectedRenderObject(previousSelectionId, groupName));
   }
 
-  Map<String, Object?> _getSelectedRenderObject(String previousSelectionId, String groupName) {
-    final DiagnosticsNode previousSelection = toObject(previousSelectionId) as DiagnosticsNode;
-    final RenderObject current = selection.current!;
-    return _nodeToJson(current == previousSelection.value ? previousSelection : current.toDiagnosticsNode(),
-        InspectorSerializationDelegate(groupName: groupName, service: this));
+  Map<String, Object?>? _getSelectedRenderObject(String? previousSelectionId, String groupName) {
+    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
+    final RenderObject? current = selection.current;
+    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// This method is called by [WidgetBinding.performReassemble] to flush caches
@@ -727,7 +734,8 @@ class InspectorSelection {
   /// Setting [candidates] or calling [clear] resets the selection.
   ///
   /// Returns null if the selection is invalid.
-  RenderObject? get current => _current;
+  RenderObject? get current => active ? _current : null;
+
   RenderObject? _current;
   set current(RenderObject? value) {
     if (_current != value) {
@@ -841,12 +849,12 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   bool get _interactive => groupName != null;
 
   @override
-  Map<String, Object> additionalNodeProperties(DiagnosticsNode node) {
-    final Map<String, Object> result = <String, Object>{};
+  Map<String, Object?> additionalNodeProperties(DiagnosticsNode node) {
+    final Map<String, Object?> result = <String, Object?>{};
     final Object? value = node.value;
     if (_interactive) {
-      result['objectId'] = service.toId(node, groupName!)!;
-      result['valueId'] = service.toId(value, groupName!)!;
+      result['objectId'] = service.toId(node, groupName!);
+      result['valueId'] = service.toId(value, groupName!);
     }
     if (summaryTree) {
       result['summaryTree'] = true;
