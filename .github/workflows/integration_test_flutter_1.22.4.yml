@@ -1,4 +1,4 @@
-name: Integration Test WorkFlow
+name: Integration Test With Flutter 1.22.4
 
 on: [push, workflow_dispatch, pull_request]
 
