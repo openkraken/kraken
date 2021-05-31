@@ -90,7 +90,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
-    // TODO: implement userUpdateTextEditingValue
+    _textEditingValue = value;
   }
 }
 
@@ -264,7 +264,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void updateTextSpan() {
     // Rebuilt text span, for style has changed.
     TextSpan span = textSpan = buildTextSpan();
-    textSelectionDelegate.textEditingValue = TextEditingValue(text: span.text!);
+    TextEditingValue value = TextEditingValue(text: span.text ?? '');
+    textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
 
     if (renderEditable != null) {
       renderEditable!.text = span.text!.length == 0 ? placeholderTextSpan : span;
@@ -272,8 +273,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     }
   }
 
-  TextSpan buildTextSpan({String text = ''}) {
-    text = properties[VALUE];
+  TextSpan buildTextSpan({String? text}) {
+    text ??= properties[VALUE];
     return CSSTextMixin.createTextSpan(text, this);
   }
 
@@ -360,7 +361,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   bool get multiLine => maxLines > 1;
 
-  bool get _hasFocus => InputElement.focusInputElement == this;
+  // bool get _hasFocus => InputElement.focusInputElement == this;
+  bool get _hasFocus => true;
 
   RenderEditable createRenderEditable() {
     if (textSpan == null) {
@@ -481,7 +483,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   void formatAndSetValue(TextEditingValue value, { bool shouldDispatchEvent = false }) {
     final bool textChanged = textSelectionDelegate.textEditingValue.text != value.text;
-    textSelectionDelegate.textEditingValue = value;
+    textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
 
     if (textChanged) {
       _updateRemoteEditingValueIfNeeded();
