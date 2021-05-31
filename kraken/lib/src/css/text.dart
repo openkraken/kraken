@@ -248,6 +248,7 @@ mixin CSSTextMixin on RenderStyleBase {
   /// Mark all layout and text children as needs layout when line-height changed.
   void _markChildrenNeedsLayoutByLineHeight(RenderBoxModel renderBoxModel, String styleProperty) {
     if (renderBoxModel is RenderLayoutBox) {
+      // Line-height works both on text and layout.
       renderBoxModel.markNeedsLayout();
       renderBoxModel.visitChildren((RenderObject child) {
         if (child is RenderLayoutBox) {
@@ -268,6 +269,7 @@ mixin CSSTextMixin on RenderStyleBase {
   /// Mark all layout and text children as needs layout when white-space changed.
   void _markChildrenNeedsLayoutByWhiteSpace(RenderBoxModel renderBoxModel, String styleProperty) {
     if (renderBoxModel is RenderLayoutBox) {
+      // White-space works both on text and layout.
       renderBoxModel.markNeedsLayout();
       renderBoxModel.visitChildren((RenderObject child) {
         if (child is RenderLayoutBox) {
