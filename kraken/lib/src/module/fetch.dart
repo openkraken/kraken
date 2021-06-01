@@ -58,7 +58,7 @@ Future<Response> _fetch(String url, Map<String, dynamic> map, { required int con
   }
 
   BaseOptions options =
-      BaseOptions(headers: headers, method: method, contentType: 'application/json', responseType: ResponseType.plain);
+      BaseOptions(headers: headers, method: method, responseType: ResponseType.plain);
 
   switch (method) {
     case 'POST':
