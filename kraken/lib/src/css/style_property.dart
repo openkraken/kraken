@@ -364,8 +364,6 @@ class CSSStyleProperty {
   }
 
   static List<List<String?>>? getShadowValues(String property) {
-    assert(property != null);
-
     List shadows = property.split(_commaRegExp);
     List<List<String?>> values = List.empty(growable: true);
     for (String shadow in shadows as Iterable<String>) {

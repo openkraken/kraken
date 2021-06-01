@@ -45,7 +45,7 @@ class TextSelectionPoint {
   /// Creates a description of a point in a text selection.
   ///
   /// The [point] argument must not be null.
-  const TextSelectionPoint(this.point, this.direction) : assert(point != null);
+  const TextSelectionPoint(this.point, this.direction);
 
   /// Coordinates of the lower left or lower right corner of the selection,
   /// relative to the top left of the [RenderEditable] object.
@@ -191,39 +191,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     Clip clipBehavior = Clip.hardEdge,
     TextOverflow textOverflow = TextOverflow.clip,
     required this.textSelectionDelegate,
-  })  : assert(textAlign != null),
-        assert(textDirection != null,
-            'RenderEditable created without a textDirection.'),
-        assert(maxLines == null || maxLines > 0),
+  })  :
+        assert(maxLines > 0),
         assert(minLines == null || minLines > 0),
-        assert(startHandleLayerLink != null),
-        assert(endHandleLayerLink != null),
+        assert((minLines == null) || (maxLines >= minLines), "minLines can't be greater than maxLines", ),
         assert(
-          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-          "minLines can't be greater than maxLines",
-        ),
-        assert(expands != null),
-        assert(
-          !expands || (maxLines == null && minLines == null),
+          !expands || (minLines == null),
           'minLines and maxLines must be null when expands is true.',
         ),
-        assert(textScaleFactor != null),
-        assert(offset != null),
-        assert(ignorePointer != null),
-        assert(textWidthBasis != null),
-        assert(paintCursorAboveText != null),
-        assert(obscuringCharacter != null &&
-            obscuringCharacter.characters.length == 1),
-        assert(obscureText != null),
-        assert(textSelectionDelegate != null),
-        assert(cursorWidth != null && cursorWidth >= 0.0),
+        assert(obscuringCharacter.characters.length == 1),
+        assert(cursorWidth >= 0.0),
         assert(cursorHeight == null || cursorHeight >= 0.0),
-        assert(readOnly != null),
-        assert(forceLine != null),
-        assert(devicePixelRatio != null),
-        assert(selectionHeightStyle != null),
-        assert(selectionWidthStyle != null),
-        assert(clipBehavior != null),
         _textPainter = TextPainter(
           text: text,
           textAlign: textAlign,
@@ -263,7 +241,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         _promptRectRange = promptRectRange,
         _clipBehavior = clipBehavior,
         _textOverflow = textOverflow {
-    assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     this.hasFocus = hasFocus ?? false;
     if (promptRectColor != null) _promptRectPaint.color = promptRectColor;
@@ -306,7 +283,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
 
   set textWidthBasis(TextWidthBasis value) {
-    assert(value != null);
     if (_textPainter.textWidthBasis == value) return;
     _textPainter.textWidthBasis = value;
     markNeedsTextLayout();
@@ -334,7 +310,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_obscuringCharacter == value) {
       return;
     }
-    assert(value != null && value.characters.length == 1);
+    assert(value.characters.length == 1);
     _obscuringCharacter = value;
     markNeedsLayout();
   }
@@ -763,9 +739,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     // Update the text selection delegate so that the engine knows what we did.
-    textSelectionDelegate.textEditingValue = textSelectionDelegate
+    textSelectionDelegate.userUpdateTextEditingValue(textSelectionDelegate
         .textEditingValue
-        .copyWith(selection: newSelection);
+        .copyWith(selection: newSelection), SelectionChangedCause.keyboard);
     _handleSelectionChange(
       newSelection!,
       SelectionChangedCause.keyboard,
@@ -788,11 +764,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       if (!selection!.isCollapsed) {
         Clipboard.setData(
             ClipboardData(text: selection!.textInside(_plainText!)));
-        textSelectionDelegate.textEditingValue = TextEditingValue(
-          text: selection!.textBefore(_plainText!) +
-              selection!.textAfter(_plainText!),
-          selection: TextSelection.collapsed(offset: selection!.start),
-        );
+        textSelectionDelegate.userUpdateTextEditingValue(
+            TextEditingValue(
+              text: selection!.textBefore(_plainText!) +
+                  selection!.textAfter(_plainText!),
+              selection: TextSelection.collapsed(offset: selection!.start),
+            ), SelectionChangedCause.keyboard);
       }
       return;
     }
@@ -802,13 +779,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final TextEditingValue value = textSelectionDelegate.textEditingValue;
       final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
       if (data != null) {
-        textSelectionDelegate.textEditingValue = TextEditingValue(
-          text: value.selection.textBefore(value.text) +
-              data.text! +
-              value.selection.textAfter(value.text),
-          selection: TextSelection.collapsed(
-              offset: value.selection.start + data.text!.length),
-        );
+        textSelectionDelegate.userUpdateTextEditingValue(
+            TextEditingValue(
+              text: value.selection.textBefore(value.text) +
+                  data.text! +
+                  value.selection.textAfter(value.text),
+              selection: TextSelection.collapsed(
+                  offset: value.selection.start + data.text!.length),
+            ), SelectionChangedCause.keyboard);
       }
       return;
     }
@@ -829,15 +807,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final String textAfter = selection!.textAfter(_plainText!);
     if (textAfter.isNotEmpty) {
       final int deleteCount = nextCharacter(0, textAfter);
-      textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: selection!.textBefore(_plainText!) +
-            selection!.textAfter(_plainText!).substring(deleteCount),
-        selection: TextSelection.collapsed(offset: selection!.start),
-      );
+      textSelectionDelegate.userUpdateTextEditingValue(
+          TextEditingValue(
+            text: selection!.textBefore(_plainText!) +
+                selection!.textAfter(_plainText!).substring(deleteCount),
+            selection: TextSelection.collapsed(offset: selection!.start),
+          ), SelectionChangedCause.keyboard);
     } else {
-      textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: selection!.textBefore(_plainText!),
-        selection: TextSelection.collapsed(offset: selection!.start),
+      textSelectionDelegate.userUpdateTextEditingValue(
+          TextEditingValue(
+            text: selection!.textBefore(_plainText!),
+            selection: TextSelection.collapsed(offset: selection!.start),
+          ),
+        SelectionChangedCause.keyboard
       );
     }
   }
@@ -890,7 +872,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   TextAlign get textAlign => _textPainter.textAlign;
 
   set textAlign(TextAlign value) {
-    assert(value != null);
     if (_textPainter.textAlign == value) return;
     _textPainter.textAlign = value;
     markNeedsTextLayout();
@@ -915,7 +896,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   TextDirection get textDirection => _textPainter.textDirection!;
 
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textPainter.textDirection == value) return;
     _textPainter.textDirection = value;
     markNeedsTextLayout();
@@ -978,7 +958,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ValueNotifier<bool> _showCursor;
 
   set showCursor(ValueNotifier<bool> value) {
-    assert(value != null);
     if (_showCursor == value) return;
     if (attached) _showCursor.removeListener(markNeedsPaint);
     _showCursor = value;
@@ -992,7 +971,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _listenerAttached = false;
 
   set hasFocus(bool value) {
-    assert(value != null);
     if (_hasFocus == value) return;
     _hasFocus = value;
     if (_hasFocus) {
@@ -1012,7 +990,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _forceLine = false;
 
   set forceLine(bool value) {
-    assert(value != null);
     if (_forceLine == value) return;
     _forceLine = value;
     markNeedsLayout();
@@ -1023,7 +1000,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _readOnly = false;
 
   set readOnly(bool value) {
-    assert(value != null);
     if (_readOnly == value) return;
     _readOnly = value;
     markNeedsSemanticsUpdate();
@@ -1044,7 +1020,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// The value may be null. If it is not null, then it must be greater than zero.
   set maxLines(int value) {
-    assert(value == null || value > 0);
+    assert(value > 0);
     if (maxLines == value) return;
     _maxLines = value;
     markNeedsTextLayout();
@@ -1067,7 +1043,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _expands;
 
   set expands(bool value) {
-    assert(value != null);
     if (expands == value) return;
     _expands = value;
     markNeedsTextLayout();
@@ -1090,7 +1065,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double get textScaleFactor => _textPainter.textScaleFactor;
 
   set textScaleFactor(double value) {
-    assert(value != null);
     if (_textPainter.textScaleFactor == value) return;
     _textPainter.textScaleFactor = value;
     markNeedsTextLayout();
@@ -1124,7 +1098,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ViewportOffset _offset;
 
   set offset(ViewportOffset value) {
-    assert(value != null);
     if (_offset == value) return;
     if (attached) _offset.removeListener(markNeedsPaint);
     _offset = value;
@@ -1252,7 +1225,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ui.BoxHeightStyle _selectionHeightStyle;
 
   set selectionHeightStyle(ui.BoxHeightStyle value) {
-    assert(value != null);
     if (_selectionHeightStyle == value) return;
     _selectionHeightStyle = value;
     markNeedsPaint();
@@ -1265,7 +1237,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ui.BoxWidthStyle _selectionWidthStyle;
 
   set selectionWidthStyle(ui.BoxWidthStyle value) {
-    assert(value != null);
     if (_selectionWidthStyle == value) return;
     _selectionWidthStyle = value;
     markNeedsPaint();
@@ -1327,12 +1298,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   Color get promptRectColor => _promptRectPaint.color;
 
   set promptRectColor(Color newValue) {
-    // Painter.color cannot be null.
-    if (newValue == null) {
-      setPromptRectRange(null);
-      return;
-    }
-
     if (promptRectColor == newValue) return;
 
     _promptRectPaint.color = newValue;
@@ -1371,7 +1336,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   Clip _clipBehavior = Clip.hardEdge;
 
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -1384,7 +1348,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   TextOverflow get textOverflow => _textOverflow;
 
   set textOverflow(TextOverflow value) {
-    assert(value != null);
     if (value != _textOverflow) {
       _textOverflow = value;
       _textPainter.ellipsis =
@@ -1499,7 +1462,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     while (true) {
       final TextRange range =
           _textPainter.getWordBoundary(TextPosition(offset: offset));
-      if (range == null || !range.isValid || range.isCollapsed) return null;
+      if (!range.isValid || range.isCollapsed) return null;
       if (!_onlyWhitespace(range)) return range;
       offset = range.end;
     }
@@ -1509,7 +1472,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     while (offset >= 0) {
       final TextRange range =
           _textPainter.getWordBoundary(TextPosition(offset: offset));
-      if (range == null || !range.isValid || range.isCollapsed) return null;
+      if (!range.isValid || range.isCollapsed) return null;
       if (!_onlyWhitespace(range)) return range;
       offset = range.start - 1;
     }
@@ -1608,7 +1571,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///  * [getLocalRectForCaret], which is the equivalent but for
   ///    a [TextPosition] rather than a [TextSelection].
   List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
-    assert(constraints != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
 
     final Offset paintOffset = _paintOffset;
@@ -1691,7 +1653,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   double _preferredHeight(double width) {
     // Lock height to maxLines if needed.
-    final bool lockedMax = maxLines != null && minLines == null;
+    final bool lockedMax = minLines == null;
     final bool lockedBoth = minLines != null && minLines == maxLines;
     final bool singleLine = maxLines == 1;
     if (singleLine || lockedMax || lockedBoth) {
@@ -1700,13 +1662,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     // Clamp height to minLines or maxLines if needed.
     final bool minLimited = minLines != null && minLines! > 1;
-    final bool maxLimited = maxLines != null;
-    if (minLimited || maxLimited) {
+    if (minLimited) {
       _layoutText(maxWidth: width);
       if (minLimited && _textPainter.height < preferredLineHeight * minLines!) {
         return preferredLineHeight * minLines!;
       }
-      if (maxLimited && _textPainter.height > preferredLineHeight * maxLines) {
+      if (_textPainter.height > preferredLineHeight * maxLines) {
         return preferredLineHeight * maxLines;
       }
     }
@@ -1845,8 +1806,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       {required Offset from,
       Offset? to,
       required SelectionChangedCause cause}) {
-    assert(cause != null);
-    assert(from != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     if (onSelectionChanged == null) {
       return;
@@ -1890,8 +1849,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       {required Offset from,
       Offset? to,
       required SelectionChangedCause cause}) {
-    assert(cause != null);
-    assert(from != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     if (onSelectionChanged == null) {
       return;
@@ -1918,7 +1875,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.editable.select}
   void selectWordEdge({required SelectionChangedCause cause}) {
-    assert(cause != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     assert(_lastTapDownPosition != null);
     if (onSelectionChanged == null) {
@@ -1974,7 +1930,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _layoutText({double minWidth = 0.0, double maxWidth = double.infinity}) {
-    assert(maxWidth != null && minWidth != null);
     if (_textLayoutLastMaxWidth == maxWidth &&
         _textLayoutLastMinWidth == minWidth) return;
 
@@ -2031,7 +1986,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// of the cursor for iOS is approximate and obtained through an eyeball
   /// comparison.
   void _computeCaretPrototype() {
-    assert(defaultTargetPlatform != null);
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -2160,9 +2114,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void setFloatingCursor(FloatingCursorDragState state, Offset boundedOffset,
       TextPosition lastTextPosition,
       {double? resetLerpValue}) {
-    assert(state != null);
-    assert(boundedOffset != null);
-    assert(lastTextPosition != null);
     if (state == FloatingCursorDragState.Start) {
       _relativeOrigin = const Offset(0, 0);
       _previousOffset = null;
@@ -2296,7 +2247,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   final Paint _promptRectPaint = Paint();
 
   void _paintPromptRectIfNeeded(Canvas canvas, Offset effectiveOffset) {
-    if (_promptRectRange == null || promptRectColor == null) {
+    if (_promptRectRange == null) {
       return;
     }
 

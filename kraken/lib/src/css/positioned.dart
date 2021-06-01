@@ -129,7 +129,7 @@ class CSSPositionedLayout {
       return null;
     }
 
-  static void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox) {
+  static void applyRelativeOffset(Offset? relativeOffset, RenderBox renderBox) {
     RenderLayoutParentData? boxParentData = renderBox.parentData as RenderLayoutParentData?;
 
     if (boxParentData != null) {

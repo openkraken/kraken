@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 
 /// An implementation of scroll physics that matches iOS.
@@ -35,12 +34,7 @@ class BouncingScrollSimulation extends Simulation {
     required this.trailingExtent,
     required this.spring,
     Tolerance tolerance = Tolerance.defaultTolerance,
-  })  : assert(position != null),
-        assert(velocity != null),
-        assert(leadingExtent != null),
-        assert(trailingExtent != null),
-        assert(leadingExtent <= trailingExtent),
-        assert(spring != null),
+  })  : assert(leadingExtent <= trailingExtent),
         super(tolerance: tolerance) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);

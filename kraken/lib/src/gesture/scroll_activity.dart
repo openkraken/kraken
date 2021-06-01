@@ -205,9 +205,7 @@ class ScrollDragController implements Drag {
     this.onDragCanceled,
     this.carriedVelocity,
     this.motionStartDistanceThreshold,
-  })  : assert(delegate != null),
-        assert(details != null),
-        assert(motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
+  })  : assert(motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
             'motionStartDistanceThreshold must be a positive number or null'),
         _delegate = delegate,
         _lastDetails = details,
@@ -534,11 +532,7 @@ class DrivenScrollActivity extends ScrollActivity {
     required Duration duration,
     required Curve curve,
     required TickerProvider vsync,
-  })  : assert(from != null),
-        assert(to != null),
-        assert(duration != null),
-        assert(duration > Duration.zero),
-        assert(curve != null),
+  })  : assert(duration > Duration.zero),
         super(delegate) {
     _completer = Completer<void>();
     _controller = AnimationController.unbounded(

@@ -95,10 +95,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     this.keepScrollOffset = true,
     ScrollPosition? oldPosition,
     this.debugLabel,
-  })  : assert(physics != null),
-        assert(context != null),
-        assert(context.vsync != null),
-        assert(keepScrollOffset != null) {
+  }) {
     if (oldPosition != null) absorb(oldPosition);
   }
 
@@ -181,7 +178,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   @mustCallSuper
   void absorb(ScrollPosition other) {
-    assert(other != null);
     assert(other.context == context);
     assert(_pixels == null);
     _minScrollExtent = other.minScrollExtent;
@@ -330,7 +326,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// the position during layout.
   @protected
   void forcePixels(double? value) {
-    assert(pixels != null);
     _pixels = value;
     notifyListeners();
   }
@@ -420,13 +415,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    assert(minScrollExtent != null);
-    assert(maxScrollExtent != null);
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
         _didChangeViewportDimensionOrReceiveCorrection) {
-      assert(minScrollExtent != null);
-      assert(maxScrollExtent != null);
       assert(minScrollExtent <= maxScrollExtent);
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
@@ -459,7 +450,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   @mustCallSuper
   void applyNewDimensions() {
-    assert(pixels != null);
     activity!.applyNewDimensions();
     _updateSemanticActions(); // will potentially request a semantics update.
   }
@@ -478,10 +468,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
   }) {
-    assert(alignmentPolicy != null);
     assert(object.attached);
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
-    assert(viewport != null);
 
     double? target;
     switch (alignmentPolicy) {
@@ -579,7 +567,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     Curve? curve,
     bool? clamp = true,
   }) {
-    assert(to != null);
     assert(clamp != null);
 
     if (clamp!) to = to.clamp(minScrollExtent!, maxScrollExtent!);
@@ -625,7 +612,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// method might return null, since it means the caller does not have to
   /// explicitly null-check the argument.
   void beginActivity(ScrollActivity newActivity) {
-    if (newActivity == null) return;
     if (_activity != null) {
       _activity!.dispose();
     }

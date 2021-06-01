@@ -39,7 +39,7 @@ class RenderViewportBox extends RenderProxyBox
   Size get viewportSize => _viewportSize;
 
   set viewportSize(Size value) {
-    if (value != null && value != _viewportSize) {
+    if (value != _viewportSize) {
       _viewportSize = value;
       markNeedsLayout();
     }
@@ -50,7 +50,7 @@ class RenderViewportBox extends RenderProxyBox
   double get bottomInset => _bottomInset;
 
   set bottomInset(double value) {
-    if (value != null && value != _bottomInset) {
+    if (value != _bottomInset) {
       _bottomInset = value;
       markNeedsLayout();
     }
@@ -63,7 +63,6 @@ class RenderViewportBox extends RenderProxyBox
 
   @override
   void performLayout() {
-    assert(_viewportSize != null);
     double maxWidth = window.physicalSize.width / window.devicePixelRatio;
     double maxHeight = window.physicalSize.height / window.devicePixelRatio;
     size = constraints.constrain(Size(maxWidth, maxHeight));

@@ -159,10 +159,7 @@ class ProxyHttpClient implements HttpClient {
   }
 
   Future<HttpClientRequest> _proxyClientRequest(HttpClientRequest request) async {
-    if (httpOverrides != null) {
-      return ProxyHttpClientRequest(request, httpOverrides);
-    }
-    return request;
+    return ProxyHttpClientRequest(request, httpOverrides);
   }
 }
 

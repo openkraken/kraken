@@ -159,8 +159,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 class BoxDecorationPainter extends BoxPainter {
   BoxDecorationPainter(
       this._decoration, this.padding, this.renderStyle, VoidCallback onChanged)
-      : assert(_decoration != null),
-        super(onChanged);
+      : super(onChanged);
 
   EdgeInsets? padding;
   RenderStyle renderStyle;
@@ -170,7 +169,6 @@ class BoxDecorationPainter extends BoxPainter {
   Rect? _rectForCachedBackgroundPaint;
 
   Paint? _getBackgroundPaint(Rect rect, TextDirection? textDirection) {
-    assert(rect != null);
     assert(
         _decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
@@ -434,7 +432,6 @@ class BoxDecorationPainter extends BoxPainter {
   /// Paint the box decoration into the given location on the given canvas
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
     assert(configuration.size != null);
 
     final Rect rect = offset & configuration.size!;

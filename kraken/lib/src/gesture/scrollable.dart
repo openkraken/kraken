@@ -74,7 +74,6 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   Axis get axis => axisDirectionToAxis(_axisDirection!);
 
   void handlePointerDown(PointerDownEvent event) {
-    assert(_recognizers != null);
     for (GestureRecognizer? recognizer in _recognizers.values) {
       recognizer!.addPointer(event);
     }
@@ -162,7 +161,6 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {
-    assert(_recognizers != null);
     final Map<Type, GestureRecognizer?> oldRecognizers = _recognizers;
     _recognizers = <Type, GestureRecognizer?>{};
     for (Type type in gestures.keys) {
@@ -426,7 +424,7 @@ mixin RenderOverflowMixin on RenderBox {
   @override
   Rect? describeApproximatePaintClip(RenderObject child) {
     final Offset paintOffset = Offset(_paintOffsetX, _paintOffsetY);
-    if (child != null && _shouldClipAtPaintOffset(paintOffset, size)) return Offset.zero & size;
+    if (_shouldClipAtPaintOffset(paintOffset, size)) return Offset.zero & size;
     return null;
   }
 

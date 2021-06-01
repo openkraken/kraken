@@ -24,7 +24,7 @@ mixin CSSObjectPositionMixin on RenderStyleBase {
       renderBoxModel!.markNeedsLayout();
     }
   }
-  Alignment _getBoxPosition(String position) {
+  Alignment _getBoxPosition(String? position) {
     // Syntax: object-position: <position>
     // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
     // <position> = [ [ left | center | right ] || [ top | center | bottom ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]? | [ [ left | right ] <length-percentage> ] && [ [ top | bottom ] <length-percentage> ] ]
@@ -39,7 +39,6 @@ mixin CSSObjectPositionMixin on RenderStyleBase {
   }
 
   static double _getAlignmentValueFromString(String value) {
-    assert(value != null);
 
     // Support percentage
     if (value.endsWith('%')) {

@@ -101,10 +101,7 @@ class IntersectionObserverLayer extends ContainerLayer {
       required Offset paintOffset,
       required this.onIntersectionChange,
       required this.rootRenderObject})
-      : assert(paintOffset != null),
-        assert(elementSize != null),
-        assert(onIntersectionChange != null),
-        // TODO: This is zero for box element. For sliver element, this offset points to the start of the element which may be outside the viewport.
+      : // TODO: This is zero for box element. For sliver element, this offset points to the start of the element which may be outside the viewport.
         _elementOffset = Offset.zero,
         _layerOffset = Offset.zero,
         _elementSize = elementSize,
@@ -169,7 +166,6 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// The sequence must be in [parent, child] order.  The sequence must not be
   /// null.
   Matrix4 _accumulateTransforms(Iterable<Layer> layerChain) {
-    assert(layerChain != null);
     Matrix4 transform = Matrix4.identity();
     if (layerChain.isNotEmpty) {
       var parent = layerChain.first;
@@ -281,8 +277,6 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// Invokes the visibility callback if [IntersectionObserverEntry] hasn't meaningfully
   /// changed since the last time we invoked it.
   void _fireCallback(IntersectionObserverEntry info) {
-    assert(info != null);
-
     final oldInfo = _lastIntersectionInfo;
     // If isIntersecting is true maybe not visible when element size is 0
     final isIntersecting = info.isIntersecting;
@@ -349,8 +343,6 @@ class IntersectionObserverEntry {
     required Rect boundingClientRect,
     required Rect rootBounds,
   }) {
-    assert(boundingClientRect != null);
-    assert(rootBounds != null);
 
     // Compute the intersection in the element's local coordinates.
     final intersectionRect = boundingClientRect.overlaps(rootBounds)
@@ -430,7 +422,6 @@ class IntersectionObserverEntry {
     // from whether two [IntersectionObserverEntry] objects are sufficiently similar
     // that we don't need to fire callbacks for both.  This could be pertinent
     // if other properties are added.
-    assert(info != null);
     return size == info.size && intersectionRect == info.intersectionRect;
   }
 }
@@ -441,7 +432,6 @@ const _kDefaultTolerance = 0.01;
 
 /// Computes the area of a rectangle of the specified dimensions.
 double _area(Size size) {
-  assert(size != null);
   // Negative areas are considered empty.
   // Empty area considered square as zero.
   if (size.isEmpty) {

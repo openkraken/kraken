@@ -33,7 +33,6 @@ class _RunMetrics {
   double _totalFlexGrow;
 
   set totalFlexGrow(double value) {
-    assert(value != null);
     if (_totalFlexGrow != value) {
       _totalFlexGrow = value;
     }
@@ -44,7 +43,6 @@ class _RunMetrics {
   double _totalFlexShrink;
 
   set totalFlexShrink(double value) {
-    assert(value != null);
     if (_totalFlexShrink != value) {
       _totalFlexShrink = value;
     }
@@ -61,7 +59,6 @@ class _RunMetrics {
   double _remainingFreeSpace = 0;
 
   set remainingFreeSpace(double value) {
-    assert(value != null);
     if (_remainingFreeSpace != value) {
       _remainingFreeSpace = value;
     }
@@ -85,7 +82,6 @@ class _RunChild {
   RenderBox _child;
 
   set child(RenderBox value) {
-    assert(value != null);
     if (_child != value) {
       _child = value;
     }
@@ -96,7 +92,6 @@ class _RunChild {
   double _originalMainSize;
 
   set originalMainSize(double value) {
-    assert(value != null);
     if (_originalMainSize != value) {
       _originalMainSize = value;
     }
@@ -107,7 +102,6 @@ class _RunChild {
   double _adjustedMainSize;
 
   set adjustedMainSize(double value) {
-    assert(value != null);
     if (_adjustedMainSize != value) {
       _adjustedMainSize = value;
     }
@@ -118,7 +112,6 @@ class _RunChild {
   bool _frozen = false;
 
   set frozen(bool value) {
-    assert(value != null);
     if (_frozen != value) {
       _frozen = value;
     }
@@ -126,8 +119,6 @@ class _RunChild {
 }
 
 bool? _startIsTopLeft(FlexDirection direction) {
-  assert(direction != null);
-
   switch (direction) {
     case FlexDirection.column:
     case FlexDirection.row:
@@ -1335,13 +1326,13 @@ class RenderFlexLayout extends RenderLayoutBox {
       double flexShrink = _getFlexShrink(child);
 
       double remainingFreeSpace = runMetric.remainingFreeSpace;
-      if (isFlexGrow && flexGrow != null && flexGrow > 0) {
+      if (isFlexGrow && flexGrow > 0) {
         final double spacePerFlex = totalFlexGrow > 0
             ? (remainingFreeSpace / totalFlexGrow)
             : double.nan;
         final double flexGrow = _getFlexGrow(child);
         computedSize = originalMainSize + spacePerFlex * flexGrow;
-      } else if (isFlexShrink && flexShrink != null && flexShrink > 0) {
+      } else if (isFlexShrink && flexShrink > 0) {
         /// If child's mainAxis have clips, it will create a new format context in it's children's.
         /// so we do't need to care about child's size.
         if (child is RenderBoxModel && _isChildMainAxisClip(child)) {

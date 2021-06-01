@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
 
-typedef isAcceptedDragCallback = bool Function(AxisDirection direction);
+typedef IsAcceptedDragCallback = bool Function(AxisDirection direction);
 
 enum _DragState {
   ready,
@@ -37,8 +37,7 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
     PointerDeviceKind? kind,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
-  }) : assert(dragStartBehavior != null),
-        super(debugOwner: debugOwner, kind: kind);
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
   /// Configure the behavior of offsets sent to [onStart].
@@ -247,7 +246,6 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
     if (!event.synthesized
         && (event is PointerDownEvent || event is PointerMoveEvent)) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
-      assert(tracker != null);
       tracker.addPosition(event.timeStamp, event.localPosition);
     }
     if (event is PointerDownEvent) {
@@ -413,7 +411,6 @@ abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecogn
       return;
 
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
-    assert(tracker != null);
 
     DragEndDetails details;
     String Function() debugReport;
@@ -474,7 +471,7 @@ class ScrollVerticalDragGestureRecognizer extends CompetitiveDragGestureRecogniz
     PointerDeviceKind? kind,
   }) : super(debugOwner: debugOwner, kind: kind);
 
-  late isAcceptedDragCallback isAcceptedDrag;
+  late IsAcceptedDragCallback isAcceptedDrag;
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
@@ -517,7 +514,7 @@ class ScrollHorizontalDragGestureRecognizer extends CompetitiveDragGestureRecogn
     PointerDeviceKind? kind,
   }) : super(debugOwner: debugOwner, kind: kind);
 
-  late isAcceptedDragCallback isAcceptedDrag;
+  late IsAcceptedDragCallback isAcceptedDrag;
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {

@@ -54,7 +54,6 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    assert(event != null);
     if (state == GestureRecognizerState.ready) {
       // `_down` must be assigned in this method instead of `handlePrimaryPointer`,
       // because `acceptGesture` might be called before `handlePrimaryPointer`,

@@ -8,7 +8,6 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
 
 import 'gesture_detector.dart';
 import 'scroll_activity.dart';
@@ -107,7 +106,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void beginActivity(ScrollActivity newActivity) {
     _heldPreviousVelocity = 0.0;
-    if (newActivity == null) return;
     assert(newActivity.delegate == this);
     super.beginActivity(newActivity);
     _currentDrag?.dispose();
@@ -135,7 +133,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// The velocity should be in logical pixels per second.
   @override
   void goBallistic(double velocity) {
-    assert(pixels != null);
     final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
       beginActivity(BallisticScrollActivity(this, simulation, context.vsync));
@@ -239,5 +236,5 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  bool get hasPixels => pixels != null;
+  bool get hasPixels => true;
 }

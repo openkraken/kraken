@@ -55,15 +55,8 @@ class KrakenRenderParagraph extends RenderBox
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
     List<RenderBox>? children,
-  })  : assert(text != null),
-        assert(text.debugAssertIsValid()),
-        assert(textAlign != null),
-        assert(textDirection != null),
-        assert(softWrap != null),
-        assert(overflow != null),
-        assert(textScaleFactor != null),
+  })  : assert(text.debugAssertIsValid()),
         assert(maxLines == null || maxLines > 0),
-        assert(textWidthBasis != null),
         _softWrap = softWrap,
         _overflow = overflow,
         _textPainter = TextPainter(
@@ -103,7 +96,6 @@ class KrakenRenderParagraph extends RenderBox
   TextSpan get text => _textPainter.text as TextSpan;
 
   set text(TextSpan value) {
-    assert(value != null);
     switch (_textPainter.text!.compareTo(value)) {
       case RenderComparison.identical:
       case RenderComparison.metadata:
@@ -136,7 +128,6 @@ class KrakenRenderParagraph extends RenderBox
   TextAlign get textAlign => _textPainter.textAlign;
 
   set textAlign(TextAlign value) {
-    assert(value != null);
     if (_textPainter.textAlign == value) return;
     _textPainter.textAlign = value;
     markNeedsPaint();
@@ -158,7 +149,6 @@ class KrakenRenderParagraph extends RenderBox
   TextDirection get textDirection => _textPainter.textDirection!;
 
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textPainter.textDirection == value) return;
     _textPainter.textDirection = value;
     markNeedsLayout();
@@ -175,7 +165,6 @@ class KrakenRenderParagraph extends RenderBox
   bool _softWrap;
 
   set softWrap(bool value) {
-    assert(value != null);
     if (_softWrap == value) return;
     _softWrap = value;
     markNeedsLayout();
@@ -186,7 +175,6 @@ class KrakenRenderParagraph extends RenderBox
   TextOverflow _overflow;
 
   set overflow(TextOverflow value) {
-    assert(value != null);
     if (_overflow == value) return;
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
@@ -200,7 +188,6 @@ class KrakenRenderParagraph extends RenderBox
   double get textScaleFactor => _textPainter.textScaleFactor;
 
   set textScaleFactor(double value) {
-    assert(value != null);
     if (_textPainter.textScaleFactor == value) return;
     _textPainter.textScaleFactor = value;
     _overflowShader = null;
@@ -255,7 +242,6 @@ class KrakenRenderParagraph extends RenderBox
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
 
   set textWidthBasis(TextWidthBasis value) {
-    assert(value != null);
     if (_textPainter.textWidthBasis == value) return;
     _textPainter.textWidthBasis = value;
     _overflowShader = null;
@@ -715,7 +701,6 @@ class KrakenRenderParagraph extends RenderBox
           _overflowShader = null;
           break;
         case TextOverflow.fade:
-          assert(textDirection != null);
           _needsClipping = true;
           final TextPainter fadeSizePainter = TextPainter(
             text: TextSpan(style: _textPainter.text!.style, text: '\u2026'),
@@ -897,14 +882,12 @@ class KrakenRenderParagraph extends RenderBox
     String? workingLabel;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.requiresOwnNode) {
-        if (workingText != null) {
-          combined.add(InlineSpanSemanticsInformation(
-            workingText,
-            semanticsLabel: workingLabel ?? workingText,
-          ));
-          workingText = '';
-          workingLabel = null;
-        }
+        combined.add(InlineSpanSemanticsInformation(
+          workingText,
+          semanticsLabel: workingLabel ?? workingText,
+        ));
+        workingText = '';
+        workingLabel = null;
         combined.add(info);
       } else {
         workingText += info.text;
@@ -916,14 +899,10 @@ class KrakenRenderParagraph extends RenderBox
         }
       }
     }
-    if (workingText != null) {
-      combined.add(InlineSpanSemanticsInformation(
-        workingText,
-        semanticsLabel: workingLabel,
-      ));
-    } else {
-      assert(workingLabel != null);
-    }
+    combined.add(InlineSpanSemanticsInformation(
+      workingText,
+      semanticsLabel: workingLabel,
+    ));
     return combined;
   }
 

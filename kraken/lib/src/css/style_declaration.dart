@@ -417,36 +417,34 @@ class CSSStyleDeclaration {
     if (CSSFunction.isFunction(result)) {
       String normalizedFunctionValue = '';
       List<CSSFunctionalNotation> funcs = CSSFunction.parseFunction(result);
-      if (funcs != null) {
-        for (CSSFunctionalNotation func in funcs) {
-          String loweredFuncName = func.name.toLowerCase();
-          if (loweredFuncName == 'env' && func.args.length > 0) {
-            String? defaultValue = func.args.length > 1 ? func.args[1] : null;
-            switch (func.args.first) {
-              case SAFE_AREA_INSET_TOP:
-                normalizedFunctionValue += '${window.viewPadding.top / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-                break;
-              case SAFE_AREA_INSET_RIGHT:
-                normalizedFunctionValue += '${window.viewPadding.right / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-                break;
-              case SAFE_AREA_INSET_BOTTOM:
-                normalizedFunctionValue += '${window.viewPadding.bottom / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-                break;
-              case SAFE_AREA_INSET_LEFT:
-                normalizedFunctionValue += '${window.viewPadding.left / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-                break;
-              default:
-                normalizedFunctionValue += '$defaultValue$FUNCTION_SPLIT';
-                break;
-            }
-          } else if (loweredFuncName == 'var') {
-            // TODO: impl CSS Variables.
-          } else {
-            normalizedFunctionValue += '${func.name}(${func.args.join(FUNCTION_ARGS_SPLIT)})$FUNCTION_SPLIT';
+      for (CSSFunctionalNotation func in funcs) {
+        String loweredFuncName = func.name.toLowerCase();
+        if (loweredFuncName == 'env' && func.args.length > 0) {
+          String? defaultValue = func.args.length > 1 ? func.args[1] : null;
+          switch (func.args.first) {
+            case SAFE_AREA_INSET_TOP:
+              normalizedFunctionValue += '${window.viewPadding.top / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
+              break;
+            case SAFE_AREA_INSET_RIGHT:
+              normalizedFunctionValue += '${window.viewPadding.right / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
+              break;
+            case SAFE_AREA_INSET_BOTTOM:
+              normalizedFunctionValue += '${window.viewPadding.bottom / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
+              break;
+            case SAFE_AREA_INSET_LEFT:
+              normalizedFunctionValue += '${window.viewPadding.left / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
+              break;
+            default:
+              normalizedFunctionValue += '$defaultValue$FUNCTION_SPLIT';
+              break;
           }
+        } else if (loweredFuncName == 'var') {
+          // TODO: impl CSS Variables.
+        } else {
+          normalizedFunctionValue += '${func.name}(${func.args.join(FUNCTION_ARGS_SPLIT)})$FUNCTION_SPLIT';
         }
-        result = normalizedFunctionValue.substring(0, normalizedFunctionValue.length - 1);
       }
+      result = normalizedFunctionValue.substring(0, normalizedFunctionValue.length - 1);
     }
 
     return result;
@@ -580,16 +578,10 @@ class CSSStyleDeclaration {
   }
 
   void removeStyleChangeListener(StyleChangeListener listener) {
-    if (listener != null) {
       _styleChangeListeners.remove(listener);
-    } else {
-      _styleChangeListeners.clear();
-    }
   }
 
   void setRenderStyleProperty(String property, String? original, String present) {
-    assert(property != null);
-
     for (int i = 0; i < _styleChangeListeners.length; i++) {
       StyleChangeListener listener = _styleChangeListeners[i];
       listener(property, original, present);

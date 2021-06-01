@@ -11,6 +11,6 @@ class CSSNumber {
   }
 
   static bool isNumber(String input) {
-    return input != null && _numberRegExp.hasMatch(input);
+    return _numberRegExp.hasMatch(input);
   }
 }

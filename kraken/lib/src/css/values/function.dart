@@ -14,7 +14,7 @@ const String FUNCTION_ARGS_SPLIT = ',';
 class CSSFunction {
 
   static bool isFunction(String value) {
-    return value != null && _functionRegExp.hasMatch(value);
+    return _functionRegExp.hasMatch(value);
   }
 
   static List<CSSFunctionalNotation> parseFunction(String value) {

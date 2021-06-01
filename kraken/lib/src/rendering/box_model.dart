@@ -189,7 +189,6 @@ class RenderLayoutBox extends RenderBoxModel
   }
 
   set sortedChildren(List<RenderObject?> value) {
-    assert(value != null);
     _isChildrenSorted = true;
     _sortedChildren = value;
   }
@@ -488,8 +487,7 @@ class RenderBoxModel extends RenderBox
     required this.targetId,
     required this.renderStyle,
     this.elementManager,
-  })  : assert(targetId != null),
-        super() {
+  })  : super() {
     renderStyle.renderBoxModel = this;
   }
 
@@ -505,7 +503,7 @@ class RenderBoxModel extends RenderBox
   bool get debugShouldPaintOverlay => _debugShouldPaintOverlay;
 
   set debugShouldPaintOverlay(bool value) {
-    if (value != null && _debugShouldPaintOverlay != value) {
+    if (_debugShouldPaintOverlay != value) {
       _debugShouldPaintOverlay = value;
       markNeedsPaint();
     }
@@ -533,7 +531,6 @@ class RenderBoxModel extends RenderBox
   bool get shouldRecalGradient => _shouldRecalGradient;
 
   set shouldRecalGradient(bool value) {
-    if (value == null) return;
     if (_shouldRecalGradient != value) {
       _shouldRecalGradient = value;
     }
@@ -546,7 +543,6 @@ class RenderBoxModel extends RenderBox
   bool get shouldLazyCalFontSize => _shouldLazyCalFontSize;
 
   set shouldLazyCalFontSize(bool value) {
-    if (value == null) return;
     if (_shouldLazyCalFontSize != value) {
       _shouldLazyCalFontSize = value;
     }
@@ -559,7 +555,6 @@ class RenderBoxModel extends RenderBox
   bool get shouldLazyCalLineHeight => _shouldLazyCalLineHeight;
 
   set shouldLazyCalLineHeight(bool value) {
-    if (value == null) return;
     if (_shouldLazyCalLineHeight != value) {
       _shouldLazyCalLineHeight = value;
     }
@@ -1133,9 +1128,6 @@ class RenderBoxModel extends RenderBox
 
   /// Set the size of scrollable overflow area of renderBoxModel
   void setMaxScrollableSize(double width, double height) {
-    assert(width != null);
-    assert(height != null);
-
     // Scrollable area includes right and bottom padding
     scrollableSize = Size(
         width + renderStyle.paddingLeft, height + renderStyle.paddingTop);
@@ -1304,7 +1296,6 @@ class RenderBoxModel extends RenderBox
   Size get scrollableSize => _maxScrollableSize;
 
   set scrollableSize(Size value) {
-    assert(value != null);
     _maxScrollableSize = value;
   }
 
@@ -1313,7 +1304,6 @@ class RenderBoxModel extends RenderBox
   Size get scrollableViewportSize => _scrollableViewportSize;
 
   set scrollableViewportSize(Size value) {
-    assert(value != null);
     _scrollableViewportSize = value;
   }
 

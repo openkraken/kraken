@@ -19,7 +19,7 @@ class RenderTextBox extends RenderBox
     this.targetId,
     this.style,
     this.elementManager,
-  }) : assert(text != null) {
+  }) {
     _renderParagraph = KrakenRenderParagraph(
       text,
       textDirection: TextDirection.ltr,
@@ -138,7 +138,7 @@ class RenderTextBox extends RenderBox
       } else if (parentConstraints.maxWidth == double.infinity) {
         maxConstraintWidth =
             RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel);
-      } else if (parentConstraints.maxWidth != null) {
+      } else {
         EdgeInsets? borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
         EdgeInsetsGeometry? padding = parentRenderBoxModel.renderStyle.padding;
         double horizontalBorderLength =

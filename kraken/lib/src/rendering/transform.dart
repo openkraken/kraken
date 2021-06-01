@@ -12,11 +12,9 @@ mixin RenderTransformMixin on RenderBoxModelBase {
     final Matrix4 result = Matrix4.identity();
     Offset transformOffset = renderStyle.transformOffset;
     Alignment transformAlignment = renderStyle.transformAlignment;
-    if (transformOffset != null) {
-      result.translate(transformOffset.dx, transformOffset.dy);
-    }
+    result.translate(transformOffset.dx, transformOffset.dy);
     late Offset translation;
-    if (transformAlignment != null && transformAlignment != Alignment.topLeft) {
+    if (transformAlignment != Alignment.topLeft) {
       // Use boxSize instead of size to avoid Flutter cannot access size beyond parent access warning
       translation =
           hasSize ? transformAlignment.alongSize(boxSize!) : Offset.zero;
@@ -25,10 +23,9 @@ mixin RenderTransformMixin on RenderBoxModelBase {
 
     result.multiply(renderStyle.transform!);
 
-    if (transformAlignment != null && transformAlignment != Alignment.topLeft)
+    if (transformAlignment != Alignment.topLeft)
       result.translate(-translation.dx, -translation.dy);
-    if (transformOffset != null)
-      result.translate(-transformOffset.dx, -transformOffset.dy);
+    result.translate(-transformOffset.dx, -transformOffset.dy);
     return result;
   }
 
@@ -103,10 +100,8 @@ mixin RenderTransformMixin on RenderBoxModelBase {
   void debugTransformProperties(DiagnosticPropertiesBuilder properties) {
     Offset transformOffset = renderStyle.transformOffset;
     Alignment transformAlignment = renderStyle.transformAlignment;
-    if (transformOffset != null)
-      properties.add(DiagnosticsProperty('transformOrigin', transformOffset));
-    if (transformAlignment != null)
-      properties
-          .add(DiagnosticsProperty('transformAlignment', transformAlignment));
+    properties.add(DiagnosticsProperty('transformOrigin', transformOffset));
+    properties
+        .add(DiagnosticsProperty('transformAlignment', transformAlignment));
   }
 }

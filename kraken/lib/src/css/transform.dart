@@ -1034,7 +1034,7 @@ class CSSTransform {
         //   0, 0, 0, 1]
         if (method.args.length == 1) {
           double p = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
-          p = p != null ? (-1 / p) : 0;
+          p = (-1 / p);
           return Matrix4.identity()..storage[11] = p;
         }
         break;
@@ -1050,7 +1050,7 @@ class CSSOrigin {
   CSSOrigin(this.offset, this.alignment);
 
   static CSSOrigin? parseOrigin(String origin, Size viewportSize) {
-    if (origin != null && origin.isNotEmpty) {
+    if (origin.isNotEmpty) {
       List<String> originList = origin.trim().split(_spaceRegExp);
       String? x, y;
       if (originList.length == 1) {

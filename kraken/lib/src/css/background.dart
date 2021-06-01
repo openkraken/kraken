@@ -92,7 +92,7 @@ class CSSBackground {
     DecorationImage backgroundImage;
 
     String url = method.args.length > 0 ? method.args[0] : '';
-    if (url == null || url.isEmpty) {
+    if (url.isEmpty) {
       return null;
     }
 
@@ -373,7 +373,7 @@ class CSSBackground {
     double viewportHeight = elementManager.viewportHeight;
     Size viewportSize = Size(viewportWidth, viewportHeight);
 
-    if (strings != null && strings.length >= 1) {
+    if (strings.length >= 1) {
       double? stop = defaultStop;
       if (strings.length >= 2) {
         try {

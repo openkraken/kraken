@@ -25,7 +25,7 @@ class ScriptElement extends Element {
   }
 
   void _fetchBundle(String src) async {
-    if (src != null && src.isNotEmpty && isConnected) {
+    if (src.isNotEmpty && isConnected) {
       try {
         KrakenBundle bundle = await KrakenBundle.getBundle(src, contextId: elementManager.contextId);
         await bundle.eval(elementManager.contextId);

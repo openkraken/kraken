@@ -229,7 +229,6 @@ class CSSColor {
   }
 
   static Color? parseColor(String color) {
-    if (color == null) return null;
     color = color.trim().toLowerCase();
 
     if (color == TRANSPARENT) {

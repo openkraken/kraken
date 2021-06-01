@@ -58,9 +58,7 @@ abstract class KrakenBundle {
       }
     }
 
-    if (bundle != null) {
-      await bundle.resolve();
-    }
+    await bundle.resolve();
 
     return bundle;
   }
@@ -82,8 +80,7 @@ abstract class KrakenBundle {
 
 class RawBundle extends KrakenBundle {
   RawBundle(String content, Uri url)
-      : assert(content != null),
-        super(url) {
+      : super(url) {
     this.content = content;
   }
 
@@ -152,8 +149,6 @@ class NetworkAssetBundle extends AssetBundle {
   /// fetched.
   @override
   Future<T> loadStructuredData<T>(String key, Future<T> parser(String value)) async {
-    assert(key != null);
-    assert(parser != null);
     return parser(await loadString(key));
   }
 
@@ -166,8 +161,7 @@ class NetworkAssetBundle extends AssetBundle {
 
 class AssetsBundle extends KrakenBundle {
   AssetsBundle(Uri url)
-      : assert(url != null),
-        super(url);
+      : super(url);
 
   @override
   Future<void> resolve() async {

@@ -53,9 +53,7 @@ Future<Response> _fetch(String url, Map<String, dynamic> map, { required int con
   if (headers[HttpHeaders.userAgentHeader] == null) {
     headers[HttpHeaders.userAgentHeader] = getKrakenInfo().userAgent;
   }
-  if (contextId != null) {
-    headers[HttpHeaderContextID] = contextId.toString();
-  }
+  headers[HttpHeaderContextID] = contextId.toString();
 
   BaseOptions options =
       BaseOptions(headers: headers, method: method, responseType: ResponseType.plain);

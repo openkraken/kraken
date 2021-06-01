@@ -19,11 +19,7 @@ class SingleHttpHeaders implements HttpHeaders {
   @override
   int get contentLength {
     String val = value(HttpHeaders.contentLengthHeader);
-    if (val != null) {
-      return int.tryParse(val) ?? -1;
-    } else {
-      return -1;
-    }
+    return int.tryParse(val) ?? -1;
   }
 
   @override

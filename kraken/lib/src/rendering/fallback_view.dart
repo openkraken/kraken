@@ -11,7 +11,7 @@ const Color _yellow = Color(0xBFFFFF00);
 
 class RenderFallbackViewBox extends RenderBox
     with RenderObjectWithChildMixin<RenderBox> {
-  RenderFallbackViewBox({required RenderBox child}) : assert(child != null) {
+  RenderFallbackViewBox({required RenderBox child}) {
     this.child = child;
   }
 

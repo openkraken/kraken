@@ -279,9 +279,6 @@ class CSSText {
 
   static TextAlign getTextAlign(CSSStyleDeclaration style) {
     TextAlign textAlign = TextAlign.left;
-    if (style == null) {
-      return textAlign;
-    }
     switch (style[TEXT_ALIGN]) {
       case 'center':
         textAlign = TextAlign.center;
@@ -348,11 +345,6 @@ class CSSText {
     //  To make text overflow its container you have to set overflowX hidden and white-space: nowrap.
     if (overflows[0] != CSSOverflowType.hidden || whiteSpace != WhiteSpace.nowrap) {
       return TextOverflow.visible;
-    }
-
-    TextOverflow textOverflow = TextOverflow.clip;
-    if (style == null) {
-      return textOverflow;
     }
 
     switch(style[TEXT_OVERFLOW]) {

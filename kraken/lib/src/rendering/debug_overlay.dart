@@ -13,8 +13,7 @@ const Color _kHighlightedRenderObjectBorderColor =
 
 class InspectorOverlayLayer extends Layer {
   /// Creates a layer that displays the inspector overlay.
-  InspectorOverlayLayer({required this.overlayRect})
-      : assert(overlayRect != null) {
+  InspectorOverlayLayer({required this.overlayRect}) {
     bool inDebugMode = kDebugMode || kProfileMode;
     if (inDebugMode == false) {
       throw FlutterError.fromParts(<DiagnosticsNode>[

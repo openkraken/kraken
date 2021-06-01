@@ -57,7 +57,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   Axis _direction = Axis.horizontal;
 
   set direction(Axis value) {
-    assert(value != null);
     if (_direction == value) return;
     _direction = value;
     markNeedsLayout();
@@ -78,7 +77,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   double _spacing = 0.0;
 
   set spacing(double value) {
-    assert(value != null);
     if (_spacing == value) return;
     _spacing = value;
     markNeedsLayout();
@@ -96,7 +94,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   MainAxisAlignment _runAlignment = MainAxisAlignment.start;
 
   set runAlignment(MainAxisAlignment value) {
-    assert(value != null);
     if (_runAlignment == value) return;
     _runAlignment = value;
     markNeedsLayout();
@@ -128,7 +125,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   double _runSpacing = 0.0;
 
   set runSpacing(double value) {
-    assert(value != null);
     if (_runSpacing == value) return;
     _runSpacing = value;
     markNeedsLayout();
@@ -147,7 +143,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   CrossAxisAlignment _crossAxisAlignment = CrossAxisAlignment.end;
 
   set crossAxisAlignment(CrossAxisAlignment value) {
-    assert(value != null);
     if (_crossAxisAlignment == value) return;
     _crossAxisAlignment = value;
     markNeedsLayout();
@@ -216,67 +211,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       _verticalDirection = value;
       markNeedsLayout();
     }
-  }
-
-  bool get _debugHasNecessaryDirections {
-    assert(direction != null);
-    assert(runAlignment != null);
-    assert(crossAxisAlignment != null);
-    if (firstChild != null && lastChild != firstChild) {
-      // i.e. there's more than one child
-      switch (direction) {
-        case Axis.horizontal:
-          assert(textDirection != null,
-              'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
-          break;
-        case Axis.vertical:
-          assert(verticalDirection != null,
-              'Vertical $runtimeType with multiple children has a null verticalDirection, so the layout order is undefined.');
-          break;
-      }
-    }
-
-    TextAlign textAlign = renderStyle.textAlign;
-
-    if (textAlign == TextAlign.start || textAlign == TextAlign.end) {
-      switch (direction) {
-        case Axis.horizontal:
-          assert(textDirection != null,
-              'Horizontal $runtimeType with textAlign $textAlign has a null textDirection, so the textAlign cannot be resolved.');
-          break;
-        case Axis.vertical:
-          assert(verticalDirection != null,
-              'Vertical $runtimeType with textAlign $textAlign has a null verticalDirection, so the textAlign cannot be resolved.');
-          break;
-      }
-    }
-    if (runAlignment == MainAxisAlignment.start ||
-        runAlignment == MainAxisAlignment.end) {
-      switch (direction) {
-        case Axis.horizontal:
-          assert(verticalDirection != null,
-              'Horizontal $runtimeType with runAlignment $runAlignment has a null verticalDirection, so the textAlign cannot be resolved.');
-          break;
-        case Axis.vertical:
-          assert(textDirection != null,
-              'Vertical $runtimeType with runAlignment $runAlignment has a null textDirection, so the textAlign cannot be resolved.');
-          break;
-      }
-    }
-    if (crossAxisAlignment == CrossAxisAlignment.start ||
-        crossAxisAlignment == CrossAxisAlignment.end) {
-      switch (direction) {
-        case Axis.horizontal:
-          assert(verticalDirection != null,
-              'Horizontal $runtimeType with crossAxisAlignment $crossAxisAlignment has a null verticalDirection, so the textAlign cannot be resolved.');
-          break;
-        case Axis.vertical:
-          assert(textDirection != null,
-              'Vertical $runtimeType with crossAxisAlignment $crossAxisAlignment has a null textDirection, so the textAlign cannot be resolved.');
-          break;
-      }
-    }
-    return true;
   }
 
   /// Line boxes of flow layout
@@ -617,7 +551,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   void _layoutChildren({bool needsRelayout = false}) {
-    assert(_debugHasNecessaryDirections);
     RenderBox? child = firstChild;
 
     // If no child exists, stop layout.
@@ -661,7 +594,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
     }
-    assert(mainAxisLimit != null);
     final double spacing = this.spacing;
     final double runSpacing = this.runSpacing;
     List<_RunMetrics> runMetrics = <_RunMetrics>[];

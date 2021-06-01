@@ -180,7 +180,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   FlexDirection _flexDirection = FlexDirection.row;
 
   set flexDirection(FlexDirection value) {
-    assert(value != null);
     if (_flexDirection != value) {
       _flexDirection = value;
       if (renderBoxModel is RenderFlexLayout) {
@@ -193,7 +192,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   FlexWrap _flexWrap = FlexWrap.nowrap;
 
   set flexWrap(FlexWrap value) {
-    assert(value != null);
     if (_flexWrap != value) {
       _flexWrap = value;
       if (renderBoxModel is RenderFlexLayout) {
@@ -206,7 +204,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   JustifyContent _justifyContent = JustifyContent.flexStart;
 
   set justifyContent(JustifyContent value) {
-    assert(value != null);
     if (_justifyContent != value) {
       _justifyContent = value;
       if (renderBoxModel is RenderFlexLayout) {
@@ -219,7 +216,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   AlignItems _alignItems = AlignItems.stretch;
 
   set alignItems(AlignItems value) {
-    assert(value != null);
     if (_alignItems != value) {
       _alignItems = value;
       if (renderBoxModel is RenderFlexLayout) {
@@ -231,7 +227,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   AlignContent get alignContent => _alignContent;
   AlignContent _alignContent = AlignContent.stretch;
   set alignContent(AlignContent value) {
-    assert(value != null);
     if (_alignContent == value) return;
     _alignContent = value;
     if (renderBoxModel is RenderFlexLayout) {
@@ -242,7 +237,6 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   AlignSelf get alignSelf => _alignSelf;
   AlignSelf _alignSelf = AlignSelf.auto;
   set alignSelf(AlignSelf value) {
-    assert(value != null);
     if (_alignSelf == value) return;
     _alignSelf = value;
     if (renderBoxModel!.parent is RenderFlexLayout) {

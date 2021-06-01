@@ -43,26 +43,24 @@ Curve? _parseEasing(String? function) {
       return Threshold(1);
   }
   List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(function);
-  if (methods != null && methods.length > 0) {
+  if (methods.length > 0) {
     CSSFunctionalNotation method = methods.first;
-    if (method != null) {
-      if (method.name == 'steps') {
-        if (method.args.length >= 1) {
-          var step = int.tryParse(method.args[0]);
-          var isStart = false;
-          if (method.args.length == 2) {
-            isStart = method.args[1] == 'start';
-          }
-          return CSSStepCurve(step, isStart);
+    if (method.name == 'steps') {
+      if (method.args.length >= 1) {
+        var step = int.tryParse(method.args[0]);
+        var isStart = false;
+        if (method.args.length == 2) {
+          isStart = method.args[1] == 'start';
         }
-      } else if (method.name == 'cubic-bezier') {
-        if (method.args.length == 4) {
-          var first = double.tryParse(method.args[0])!;
-          var sec = double.tryParse(method.args[1])!;
-          var third = double.tryParse(method.args[2])!;
-          var forth = double.tryParse(method.args[3])!;
-          return Cubic(first, sec, third, forth);
-        }
+        return CSSStepCurve(step, isStart);
+      }
+    } else if (method.name == 'cubic-bezier') {
+      if (method.args.length == 4) {
+        var first = double.tryParse(method.args[0])!;
+        var sec = double.tryParse(method.args[1])!;
+        var third = double.tryParse(method.args[2])!;
+        var forth = double.tryParse(method.args[3])!;
+        return Cubic(first, sec, third, forth);
       }
     }
   }
@@ -459,10 +457,8 @@ class KeyframeEffect extends AnimationEffect {
   KeyframeEffect(this.style, this.target, List<Keyframe> keyframes, EffectTiming? options, this.viewportSize) {
     timing = options == null ? EffectTiming() : options;
 
-    if (keyframes != null) {
-      _propertySpecificKeyframeGroups = _makePropertySpecificKeyframeGroups(keyframes);
-      _interpolations = _makeInterpolations(_propertySpecificKeyframeGroups, viewportSize);
-    }
+    _propertySpecificKeyframeGroups = _makePropertySpecificKeyframeGroups(keyframes);
+    _interpolations = _makeInterpolations(_propertySpecificKeyframeGroups, viewportSize);
   }
 
   Size? viewportSize;

@@ -259,10 +259,10 @@ mixin CSSBoxMixin on RenderStyleBase {
     } else if (CSSBackground.hasLocalBackgroundImage(style!)) {
       // @FIXME: support local background image
       decoration = updateBoxDecoration;
-    } else if (prevBoxDecoration != null) {
-      // Used for removing background properties.
+    } else {
       decoration = updateBoxDecoration;
     }
+
   }
 
   static Map _borderRadiusMapping = {

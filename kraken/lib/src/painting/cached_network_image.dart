@@ -9,9 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
-  const CachedNetworkImage(this.url, {this.scale = 1.0, this.headers})
-      : assert(url != null),
-        assert(scale != null);
+  const CachedNetworkImage(this.url, {this.scale = 1.0, this.headers});
 
   final String url;
 
@@ -74,7 +72,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
       CachedNetworkImage key, DecoderCallback decode, StreamController<ImageChunkEvent> chunkEvents) async {
     Uint8List bytes = await loadFile(key, chunkEvents);
 
-    if (bytes != null && bytes.length > 0) {
+    if (bytes.length > 0) {
       return decode(bytes);
     }
     return null;

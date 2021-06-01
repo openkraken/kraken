@@ -18,7 +18,7 @@ const String BLUR = 'blur';
 
 // Calc 5x5 matrix multiplcation.
 List<double> _multiplyMatrix5(List<double>? a, List<double> b) {
-  if (a == null || b == null) {
+  if (a == null) {
     return a ?? b;
   }
 
@@ -99,7 +99,7 @@ mixin CSSFilterEffectsMixin {
   // eg: 'grayscale(1) grayscale(0.5)' -> matrix5(grayscale(1)) · matrix5(grayscale(0.5))
   static ColorFilter? _parseColorFilters(List<CSSFunctionalNotation> functions) {
     List<double>? matrix5;
-    if (functions != null && functions.length > 0) {
+    if (functions.length > 0) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         double amount = double.tryParse(f.args.first) ?? 1;
@@ -140,7 +140,7 @@ mixin CSSFilterEffectsMixin {
 
   // Get the image filter.
   static ImageFilter? _parseImageFilters(List<CSSFunctionalNotation> functions, Size viewportSize) {
-    if (functions != null && functions.length > 0) {
+    if (functions.length > 0) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {
@@ -154,7 +154,6 @@ mixin CSSFilterEffectsMixin {
   }
 
   void updateFilterEffects(RenderBoxModel renderBoxModel, String filter) {
-    assert(renderBoxModel != null);
     List<CSSFunctionalNotation> functions = CSSFunction.parseFunction(filter);
     ColorFilter? colorFilter = _parseColorFilters(functions);
     if (colorFilter != null) {

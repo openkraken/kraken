@@ -95,28 +95,26 @@ ImageProviderFactory getImageProviderFactory(ImageType imageType) {
 }
 
 void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory customImageProviderFactory) {
-  if (customImageProviderFactory != null) {
-    switch (imageType) {
-      case ImageType.cached:
-        _cachedProviderFactory = customImageProviderFactory;
-        break;
-      case ImageType.network:
-        _networkProviderFactory = customImageProviderFactory;
-        break;
-      case ImageType.file:
-        _fileProviderFactory = customImageProviderFactory;
-        break;
-      case ImageType.dataUrl:
-        _dataUrlProviderFactory = customImageProviderFactory;
-        break;
-      case ImageType.blob:
-        _blobProviderFactory = customImageProviderFactory;
-        break;
-      case ImageType.assets:
-      default:
-        _assetsProviderFactory = customImageProviderFactory;
-        break;
-    }
+  switch (imageType) {
+    case ImageType.cached:
+      _cachedProviderFactory = customImageProviderFactory;
+      break;
+    case ImageType.network:
+      _networkProviderFactory = customImageProviderFactory;
+      break;
+    case ImageType.file:
+      _fileProviderFactory = customImageProviderFactory;
+      break;
+    case ImageType.dataUrl:
+      _dataUrlProviderFactory = customImageProviderFactory;
+      break;
+    case ImageType.blob:
+      _blobProviderFactory = customImageProviderFactory;
+      break;
+    case ImageType.assets:
+    default:
+      _assetsProviderFactory = customImageProviderFactory;
+      break;
   }
 }
 

@@ -9,8 +9,7 @@ class RenderPreferredSize extends RenderProxyBox {
   RenderPreferredSize({
     required Size preferredSize,
     RenderBox? child,
-  })  : assert(preferredSize != null),
-        _preferredSize = preferredSize,
+  })  : _preferredSize = preferredSize,
         super(child);
 
   Size _preferredSize;
@@ -18,7 +17,6 @@ class RenderPreferredSize extends RenderProxyBox {
   Size get preferredSize => _preferredSize;
 
   set preferredSize(Size value) {
-    assert(value != null);
     if (_preferredSize == value) return;
 
     _preferredSize = value;

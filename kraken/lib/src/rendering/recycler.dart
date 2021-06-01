@@ -285,9 +285,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
     int targetId = _children[index];
     Node node = elementManager!.getEventTargetByTargetId<Node>(targetId)!;
 
-    if (node != null) {
-      node.createRenderer();
-    }
+    node.createRenderer();
 
     return node.renderer as RenderBox?;
   }
@@ -304,7 +302,6 @@ class RenderRecyclerLayout extends RenderLayoutBox
     RenderBox? child;
     int targetId = _children[index];
     Node node = elementManager!.getEventTargetByTargetId<Node>(targetId)!;
-    assert(node != null);
     node.willAttachRenderer();
 
     if (node is Element) {
@@ -340,7 +337,6 @@ class RenderRecyclerLayout extends RenderLayoutBox
   @override
   void didAdoptChild(RenderBox child) {
     final parentData = child.parentData as SliverMultiBoxAdaptorParentData;
-    assert(parentData != null);
     parentData.index = _currentIndex;
   }
 

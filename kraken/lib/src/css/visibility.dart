@@ -14,8 +14,6 @@ enum Visibility {
 
 mixin CSSVisibilityMixin on ElementBase {
   static Visibility getVisibility(String value) {
-    if (value == null) return Visibility.visible;
-
     switch(value) {
       case HIDDEN:
         return Visibility.hidden;

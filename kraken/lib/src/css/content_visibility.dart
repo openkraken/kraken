@@ -49,8 +49,6 @@ mixin CSSContentVisibilityMixin on RenderStyleBase {
   }
 
   static ContentVisibility getContentVisibility(String value) {
-    if (value == null) return ContentVisibility.visible;
-
     switch(value) {
       case HIDDEN:
         return ContentVisibility.hidden;

@@ -16,7 +16,6 @@ mixin CSSFlowMixin on RenderStyleBase {
   TextAlign get textAlign => _textAlign!;
   TextAlign? _textAlign;
   set textAlign(TextAlign value) {
-    assert(value != null);
     if (_textAlign == value) return;
     _textAlign = value;
 

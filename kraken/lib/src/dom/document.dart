@@ -1,4 +1,4 @@
-import 'package:flutter/src/rendering/object.dart';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'dart:ffi';
 import 'package:kraken/bridge.dart';
