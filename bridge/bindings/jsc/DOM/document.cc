@@ -257,6 +257,7 @@ DocumentInstance::DocumentInstance(JSDocument *document)
   JSStringRef tagName = JSStringCreateWithUTF8CString("HTML");
   documentElement = new ElementInstance(JSElement::instance(document->context), tagName, HTML_TARGET_ID);
   documentElement->m_document = this;
+  documentElement->parentNode = this;
   JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
   JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(),
                       documentElement->object, kJSPropertyAttributeReadOnly, nullptr);
