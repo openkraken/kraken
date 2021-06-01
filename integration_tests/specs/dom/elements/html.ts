@@ -7,4 +7,10 @@ describe('html', () => {
   it('tagName is HTML', async () => {
     expect(document.documentElement.tagName).toBe('HTML');
   });
+
+  it('parentNode is document', async () => {
+    expect(document.documentElement.parentNode).toBe(document);
+  });
+
+  
 });
