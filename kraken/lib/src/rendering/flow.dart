@@ -412,7 +412,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     if (child is RenderBoxModel) {
       marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
-      marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
+      marginVertical = _getChildMarginTop(child) + _getChildMarginBottom(child);
     }
 
     Size childSize = _getChildSize(child) ?? Size.zero;
@@ -432,7 +432,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     if (child is RenderBoxModel) {
       marginHorizontal = child.renderStyle.marginLeft.length + child.renderStyle.marginRight.length;
-      marginVertical = child.renderStyle.marginTop.length + child.renderStyle.marginBottom.length;
+      marginVertical = _getChildMarginTop(child) + _getChildMarginBottom(child);
     }
     Size childSize = _getChildSize(child) ?? Size.zero;
     switch (direction) {
@@ -765,8 +765,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginTop = 0;
         double childMarginBottom = 0;
         if (child is RenderBoxModel) {
-          childMarginTop = child.renderStyle.marginTop.length;
-          childMarginBottom = child.renderStyle.marginBottom.length;
+          childMarginTop = _getChildMarginTop(child);
+          childMarginBottom = _getChildMarginBottom(child);
         }
 
         Size childSize = _getChildSize(child);
@@ -1005,7 +1005,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginTop = 0;
         if (child is RenderBoxModel) {
           childMarginLeft = child.renderStyle.marginLeft.length;
-          childMarginTop = child.renderStyle.marginTop.length;
+          childMarginTop = _getChildMarginTop(child);
         }
 
         Offset relativeOffset = _getOffset(
@@ -1079,7 +1079,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       lineBoxMetrics[lineBoxMetrics.length - 1] : lineBoxMetrics[0];
     // Use the max baseline of the children as the baseline in flow layout
     lineMetrics.runChildren.forEach((int targetId, RenderBox child) {
-      double childMarginTop = child is RenderBoxModel ? child.renderStyle.marginTop.length : 0;
+      double childMarginTop = child is RenderBoxModel ? _getChildMarginTop(child) : 0;
       RenderLayoutParentData childParentData = child.parentData;
       double childBaseLineDistance;
       if (child is RenderBoxModel) {
@@ -1322,7 +1322,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           if (overflowX == CSSOverflowType.visible && overflowY == CSSOverflowType.visible) {
             childScrollableSize = child.scrollableSize;
           }
-          childMarginTop = childRenderStyle.marginTop.length;
+          childMarginTop = _getChildMarginTop(child);
           childMarginLeft = childRenderStyle.marginLeft.length;
         }
 
@@ -1387,8 +1387,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double childMarginTop = 0;
     double childMarginBottom = 0;
     if (child is RenderBoxModel) {
-      childMarginTop = child.renderStyle.marginTop.length;
-      childMarginBottom = child.renderStyle.marginBottom.length;
+      childMarginTop = _getChildMarginTop(child);
+      childMarginBottom = _getChildMarginBottom(child);
     }
 
     Size childSize = _getChildSize(child);
@@ -1447,6 +1447,162 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
     }
     return false;
+  }
+
+  double _getMarginTopWithPreSibling(RenderBoxModel renderBoxModel, RenderObject preSibling) {
+    double height = renderBoxModel.renderStyle.height;
+    double marginTop = renderBoxModel.renderStyle.marginTop.length;
+    double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
+
+    if (preSibling is RenderBoxModel &&
+      preSibling.renderStyle.marginBottom.length != 0
+    ) {
+      double preSiblingHeight = preSibling.renderStyle.height;
+      double preSiblingMarginTop = preSibling.renderStyle.marginTop.length;
+      double preSiblingMarginBottom = preSibling.renderStyle.marginBottom.length;
+      // Margin top and bottom of empty block collapse
+      if (preSibling.boxSize.height == 0) {
+        preSiblingMarginBottom = math.max(preSiblingMarginTop, preSiblingMarginBottom);
+      }
+      return math.max(marginTop - preSiblingMarginBottom, 0);
+    }
+
+    // Margin top and bottom of empty block collapse
+    if (height == null || height == 0) {
+      return math.max(marginTop, marginBottom);
+    }
+    return marginTop;
+  }
+
+  double _getMarginTopWithFirstChild(RenderBoxModel renderBoxModel) {
+    RenderLayoutBox parent = renderBoxModel.parent;
+
+    // Margin top of first child with parent which is in flow layout collapse with parent
+    // which makes the margin top of itself 0.
+    if (parent.renderStyle.transformedDisplay == CSSDisplay.block &&
+      parent.renderStyle.paddingTop == 0 &&
+      parent.renderStyle.borderTop == 0 &&
+      parent.parent is RenderFlowLayout
+    ) {
+      return 0;
+    }
+
+    // Find the max margin top of itself and its nested first child
+    return _getMarginTopWithNestChild(renderBoxModel);
+  }
+
+  double _getMarginTopWithNestChild(RenderBoxModel renderBoxModel) {
+    double paddingTop = renderBoxModel.renderStyle.paddingTop;
+    double borderTop = renderBoxModel.renderStyle.borderTop;
+    double height = renderBoxModel.renderStyle.height;
+    double marginTop = renderBoxModel.renderStyle.marginTop.length;
+    double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
+    if (renderBoxModel is RenderLayoutBox &&
+      renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.block &&
+      paddingTop == 0 &&
+      borderTop == 0
+    ) {
+      RenderObject firstChild = renderBoxModel.firstChild;
+      if (firstChild is RenderBoxModel &&
+        firstChild.renderStyle.transformedDisplay == CSSDisplay.block
+      ) {
+        double childMarginTop = firstChild is RenderFlowLayout ?
+          _getMarginTopWithNestChild(firstChild) : firstChild.renderStyle.marginTop.length;
+        return math.max(marginTop, childMarginTop);
+      }
+    }
+    // Margin top and bottom of empty block collapse
+    if (renderBoxModel.boxSize.height == 0) {
+      return math.max(marginTop, marginBottom);
+    }
+    return marginTop;
+  }
+
+  double _getMarginBottomWithFirstChild(RenderBoxModel renderBoxModel) {
+    RenderLayoutBox parent = renderBoxModel.parent;
+
+    // Margin bottom of first child with parent which is in flow layout collapse with parent
+    // which makes the margin top of itself 0.
+    if (parent.renderStyle.transformedDisplay == CSSDisplay.block &&
+      parent.renderStyle.paddingBottom == 0 &&
+      parent.renderStyle.borderBottom == 0 &&
+      parent.parent is RenderFlowLayout
+    ) {
+      return 0;
+    }
+
+    // Find the max margin top of itself and its nested first child
+    return _getMarginBottomWithNestChild(renderBoxModel);
+  }
+
+  double _getMarginBottomWithNestChild(RenderBoxModel renderBoxModel) {
+    double paddingBottom = renderBoxModel.renderStyle.paddingBottom;
+    double borderBottom = renderBoxModel.renderStyle.borderBottom;
+    double height = renderBoxModel.renderStyle.height;
+    double marginTop = renderBoxModel.renderStyle.marginTop.length;
+    double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
+    if (paddingBottom == 0 && borderBottom == 0 && renderBoxModel is RenderLayoutBox) {
+      RenderObject lastChild = renderBoxModel.lastChild;
+      if (lastChild is RenderBoxModel &&
+        lastChild.renderStyle.transformedDisplay == CSSDisplay.block) {
+        double childMarginBottom = lastChild is RenderLayoutBox ?
+          _getMarginBottomWithNestChild(lastChild) : lastChild.renderStyle.marginBottom.length;
+        return math.max(marginBottom, childMarginBottom);
+      }
+    }
+    // Margin top and bottom of empty block collapse
+    if (renderBoxModel.boxSize.height == 0) {
+      return math.max(marginTop, marginBottom);
+    }
+    return marginBottom;
+  }
+  /// Get the actual margin top of child due to margin collapse
+  double _getChildMarginTop(RenderBoxModel child) {
+    if (child.renderStyle.transformedDisplay != CSSDisplay.block &&
+      child.renderStyle.transformedDisplay != CSSDisplay.flex
+    ) {
+      return child.renderStyle.marginTop.length;
+    }
+
+    RenderLayoutParentData childParentData = child.parentData;
+    RenderObject preSibling = childParentData.previousSibling;
+    double marginTop;
+    if (preSibling == null) {
+      // 1. Find margin-top collapse with nested first child
+      marginTop = _getMarginTopWithFirstChild(child);
+    } else {
+      // 2. Find margin-top collapse with margin-bottom previous sibling
+      marginTop = _getMarginTopWithPreSibling(child, preSibling);
+    }
+    return marginTop;
+  }
+
+  /// Get the actual margin bottom of child due to margin collapse
+  double _getChildMarginBottom(RenderBoxModel child) {
+    if (child.renderStyle.transformedDisplay != CSSDisplay.block &&
+      child.renderStyle.transformedDisplay != CSSDisplay.flex
+    ) {
+      return child.renderStyle.marginBottom.length;
+    }
+
+    // 1. Find margin-top and margin-bottom collapse with empty block
+    double height = child.renderStyle.height;
+    double marginTop = child.renderStyle.marginTop.length;
+    double marginBottom = child.renderStyle.marginBottom.length;
+    // Margin top and bottom of empty block collapse
+    if (child.boxSize.height == 0) {
+      marginBottom = 0;
+    }
+
+    // 2. Find margin-bottom collapse with last child
+    RenderLayoutParentData childParentData = child.parentData;
+    RenderObject nextSibling = childParentData.nextSibling;
+    if (nextSibling == null) {
+      // 1. Find margin-top collapse with nested first child
+      marginBottom = _getMarginTopWithFirstChild(child);
+    }
+
+    return marginBottom;
   }
 
   @override
