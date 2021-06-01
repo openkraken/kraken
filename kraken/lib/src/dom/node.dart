@@ -1,5 +1,3 @@
-// @dart=2.9
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -21,18 +19,21 @@ enum NodeType {
 class Comment extends Node {
   final Pointer<NativeCommentNode> nativeCommentNodePtr;
 
-  Comment({int targetId, this.nativeCommentNodePtr, ElementManager elementManager, this.data})
+  Comment(int targetId, this.nativeCommentNodePtr, ElementManager elementManager, this.data)
       : super(NodeType.COMMENT_NODE, targetId, nativeCommentNodePtr.ref.nativeNode, elementManager, '#comment');
 
   // The comment information.
   String data;
+
+  @override
+  RenderObject? get renderer => null;
 }
 
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
 /// rendering of the application.
 abstract class RenderObjectNode {
-  RenderObject get renderer => throw FlutterError('This node has no render object implemented.');
+  RenderObject? get renderer => throw FlutterError('This node has no render object implemented.');
 
   /// Creates an instance of the [RenderObject] class that this
   /// [RenderObjectNode] represents, using the configuration described by this
@@ -84,26 +85,22 @@ abstract class LifecycleCallbacks {
 }
 
 abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCallbacks {
-  RenderObject _renderer;
-
   final Pointer<NativeNode> nativeNodePtr;
 
-  @override
-  RenderObject get renderer => _renderer;
-
   List<Node> childNodes = [];
-  Node parentNode;
+  Node? parentNode;
   NodeType nodeType;
   String nodeName;
 
   /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
-  Node get parent => parentNode;
+  Node? get parent => parentNode;
 
   /// The Node.parentElement read-only property returns the DOM node's parent Element,
   /// or null if the node either has no parent, or its parent isn't a DOM Element.
-  Element get parentElement {
-    if (parentNode != null && parentNode.nodeType == NodeType.ELEMENT_NODE) {
-      return parentNode;
+  Element? get parentElement {
+    Node? _parentNode = parentNode;
+    if (_parentNode != null && _parentNode.nodeType == NodeType.ELEMENT_NODE) {
+      return _parentNode as Element;
     }
     return null;
   }
@@ -117,47 +114,42 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   Node(this.nodeType, int targetId, this.nativeNodePtr, ElementManager elementManager, this.nodeName)
-      : super(targetId, nativeNodePtr.ref.nativeEventTarget, elementManager) {
-    assert(nodeType != null);
-    assert(targetId != null);
-    nodeName = nodeName ?? '';
-  }
+      : super(targetId, nativeNodePtr.ref.nativeEventTarget, elementManager);
 
   // If node is on the tree, the root parent is body.
   bool get isConnected {
-    Node parent = this;
-    while (parent.parentNode != null) {
-      parent = parent.parentNode;
+    Node? _node = parentNode;
+    while (_node != null) {
+      _node = _node.parentNode;
     }
     Document document = elementManager.document;
-    return this == document || parent == document;
+    return this == document || _node == document;
   }
 
-  Node get firstChild => childNodes?.first;
+  Node get firstChild => childNodes.first;
+  Node get lastChild => childNodes.last;
 
-  Node get lastChild => childNodes?.last;
-
-  Node get previousSibling {
-    if (parentNode == null) return null;
-    int index = parentNode.childNodes?.indexOf(this);
-    if (index == null) return null;
+  Node? get previousSibling {
+    Node? _parentNode = parentNode;
+    if (_parentNode == null) return null;
+    int index = _parentNode.childNodes.indexOf(this);
     if (index - 1 < 0) return null;
-    return parentNode.childNodes[index - 1];
+    return _parentNode.childNodes[index - 1];
   }
 
-  Node get nextSibling {
-    if (parentNode == null) return null;
-    int index = parentNode.childNodes?.indexOf(this);
-    if (index == null) return null;
-    if (index + 1 > parentNode.childNodes.length - 1) return null;
-    return parentNode.childNodes[index + 1];
+  Node? get nextSibling {
+    Node? _parentNode = parentNode;
+    if (_parentNode == null) return null;
+    int index = _parentNode.childNodes.indexOf(this);
+    if (index + 1 > _parentNode.childNodes.length - 1) return null;
+    return _parentNode.childNodes[index + 1];
   }
 
   // Is child renderObject attached.
-  bool get isRendererAttached => renderer != null && renderer.attached;
+  bool get isRendererAttached => renderer != null && renderer!.attached;
 
   /// Attach a renderObject to parent.
-  void attachTo(Element parent, {RenderObject after}) {}
+  void attachTo(Element parent, {RenderBox? after}) {}
 
   /// Detach renderObject from parent.
   void detach() {}
@@ -174,7 +166,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   @override
-  RenderObject createRenderer() => null;
+  RenderObject createRenderer() => throw FlutterError('createRenderer function is not implemented.');
 
   @override
   void didAttachRenderer() {}
@@ -208,7 +200,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   Node getRootNode() {
     Node root = this;
     while (root.parentNode != null) {
-      root = root.parentNode;
+      root = root.parentNode as Node;
     }
     return root;
   }
@@ -238,10 +230,10 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   @mustCallSuper
-  Node replaceChild(Node newNode, Node oldNode) {
-    Node replacedNode;
+  Node? replaceChild(Node newNode, Node oldNode) {
+    Node? replacedNode;
     if (childNodes.contains(oldNode)) {
-      num referenceIndex = childNodes.indexOf(oldNode);
+      int referenceIndex = childNodes.indexOf(oldNode);
       oldNode.parentNode = null;
       replacedNode = oldNode;
       childNodes[referenceIndex] = newNode;
@@ -257,8 +249,9 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   /// Ensure node is not connected to a parent element.
   void _ensureOrphan() {
-    if (parent != null) {
-      parent.removeChild(this);
+    Node? _parent = parent;
+    if (_parent != null) {
+      _parent.removeChild(this);
     }
   }
 
@@ -286,6 +279,4 @@ int getNodeTypeValue(NodeType nodeType) {
     case NodeType.DOCUMENT_FRAGMENT_NODE:
       return 11;
   }
-  // 0 means unknown node type.
-  return 0;
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
@@ -12,8 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 typedef _RegisterServiceExtensionCallback = void Function({
-  @required String name,
-  @required ServiceExtensionCallback callback,
+  required String name,
+  required ServiceExtensionCallback callback,
 });
 
 /// Signature for the selection change callback used by
@@ -55,7 +53,7 @@ class _ElementInspectorService = Object with ElementInspectorService;
 mixin ElementInspectorService {
   /// Ring of cached JSON values to prevent JSON from being garbage
   /// collected before it can be requested over the Observatory protocol.
-  final List<String> _serializeRing = List<String>(20);
+  final List<String> _serializeRing = List<String>.filled(20, '');
   int _serializeRingIndex = 0;
 
   /// The current [ElementInspectorService].
@@ -79,7 +77,7 @@ mixin ElementInspectorService {
   /// The Flutter IntelliJ Plugin does not need to listen for this event as it
   /// instead listens for `dart:developer` `inspect` events which also trigger
   /// when the inspection target changes on device.
-  InspectorSelectionChangedCallback selectionChangedCallback;
+  InspectorSelectionChangedCallback? selectionChangedCallback;
 
   /// The Observatory protocol does not keep alive object references so this
   /// class needs to manually manage groups of objects that should be kept
@@ -89,7 +87,7 @@ mixin ElementInspectorService {
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
-  _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
+  late _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
 
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name").
@@ -101,8 +99,8 @@ mixin ElementInspectorService {
   /// reported to the remote caller and is dumped to the logs.
   @protected
   void registerServiceExtension({
-    @required String name,
-    @required ServiceExtensionCallback callback,
+    required String name,
+    required ServiceExtensionCallback callback,
   }) {
     _registerServiceExtensionCallback(
       name: 'inspector.$name',
@@ -113,8 +111,8 @@ mixin ElementInspectorService {
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name"), which takes no arguments.
   void _registerSignalServiceExtension({
-    @required String name,
-    @required FutureOr<Object> callback(),
+    required String name,
+    required FutureOr<dynamic> callback(),
   }) {
     registerServiceExtension(
       name: name,
@@ -131,13 +129,13 @@ mixin ElementInspectorService {
   /// If "objectGroup" is omitted, the returned JSON will not include any object
   /// references to avoid leaking memory.
   void _registerObjectGroupServiceExtension({
-    @required String name,
-    @required FutureOr<Object> callback(String objectGroup),
+    required String name,
+    required FutureOr<dynamic> callback(String objectGroup),
   }) {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        return <String, Object>{'result': await callback(parameters['objectGroup'])};
+        return <String, Object>{'result': await callback(parameters['objectGroup']!)};
       },
     );
   }
@@ -155,13 +153,10 @@ mixin ElementInspectorService {
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
   void _registerBoolServiceExtension({
-    @required String name,
-    @required AsyncValueGetter<bool> getter,
-    @required AsyncValueSetter<bool> setter,
+    required String name,
+    required AsyncValueGetter<bool> getter,
+    required AsyncValueSetter<bool> setter,
   }) {
-    assert(name != null);
-    assert(getter != null);
-    assert(setter != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -200,7 +195,7 @@ mixin ElementInspectorService {
   /// [WidgetInspectorService] can track which events were dispatched by
   /// overriding this method.
   @protected
-  void postEvent(String eventKind, Map<Object, Object> eventData) {
+  void postEvent(String eventKind, Map<String, dynamic> eventData) {
     developer.postEvent(eventKind, eventData);
   }
 
@@ -209,15 +204,15 @@ mixin ElementInspectorService {
   /// "arg" and a required parameter named "objectGroup" used to control the
   /// lifetimes of object references in the returned JSON (see [disposeGroup]).
   void _registerServiceExtensionWithArg({
-    @required String name,
-    @required FutureOr<Object> callback(String objectId, String objectGroup),
+    required String name,
+    required FutureOr<Object?> Function(String? objectId, String objectGroup) callback,
   }) {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
-        return <String, Object>{
-          'result': await callback(parameters['arg'], parameters['objectGroup']),
+        return <String, Object?>{
+          'result': await callback(parameters['arg'], parameters['objectGroup']!),
         };
       },
     );
@@ -228,7 +223,7 @@ mixin ElementInspectorService {
   int _errorsSinceReload = 0;
 
   void _reportError(FlutterErrorDetails details) {
-    final Map<String, Object> errorJson = _nodeToJson(
+    final Map<String, Object?> errorJson = _nodeToJson(
       details.toDiagnosticsNode(),
       InspectorSerializationDelegate(
         groupName: _consoleObjectGroup,
@@ -238,11 +233,20 @@ mixin ElementInspectorService {
         maxDescendentsTruncatableNode: 5,
         service: this,
       ),
-    );
+    )!;
 
     errorJson['errorsSinceReload'] = _errorsSinceReload;
-    _errorsSinceReload += 1;
+    if (_errorsSinceReload == 0) {
+      errorJson['renderedErrorText'] = TextTreeRenderer(
+        wrapWidth: FlutterError.wrapWidth,
+        wrapWidthProperties: FlutterError.wrapWidth,
+        maxDescendentsTruncatableNode: 5,
+      ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight();
+    } else {
+      errorJson['renderedErrorText'] = 'Another exception was thrown: ${details.summary}';
+    }
 
+    _errorsSinceReload += 1;
     postEvent('Flutter.Error', errorJson);
   }
 
@@ -273,7 +277,7 @@ mixin ElementInspectorService {
 //    SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
     final FlutterExceptionHandler structuredExceptionHandler = _reportError;
-    final FlutterExceptionHandler defaultExceptionHandler = FlutterError.onError;
+    final FlutterExceptionHandler? defaultExceptionHandler = FlutterError.onError;
 
     _registerBoolServiceExtension(
       name: 'structuredErrors',
@@ -327,13 +331,13 @@ mixin ElementInspectorService {
       name: 'getDetailsSubtree',
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
-        final String subtreeDepth = parameters['subtreeDepth'];
+        final String? subtreeDepth = parameters['subtreeDepth'];
         return <String, Object>{
           'result': _getDetailsSubtree(
-            parameters['arg'],
-            parameters['objectGroup'],
+            parameters['arg']!,
+            parameters['objectGroup']!,
             subtreeDepth != null ? int.parse(subtreeDepth) : 2,
-          ),
+          )!,
         };
       },
     );
@@ -361,7 +365,7 @@ mixin ElementInspectorService {
   /// references from a different group.
   @protected
   void disposeGroup(String name) {
-    final Set<_InspectorReferenceData> references = _groups.remove(name);
+    final Set<_InspectorReferenceData>? references = _groups.remove(name);
     if (references == null) return;
     references.forEach(_decrementReferenceCount);
   }
@@ -370,8 +374,7 @@ mixin ElementInspectorService {
     reference.count -= 1;
     assert(reference.count >= 0);
     if (reference.count == 0) {
-      final String id = _objectToId.remove(reference.object);
-      assert(id != null);
+      final String id = _objectToId.remove(reference.object)!;
       _idToReferenceData.remove(id);
     }
   }
@@ -380,13 +383,13 @@ mixin ElementInspectorService {
   /// [disposeGroup] is called on [groupName] or [dispose] is called on the id
   /// returned by this method.
   @protected
-  String toId(Object object, String groupName) {
+  String? toId(Object? object, String groupName) {
     if (object == null) return null;
 
     final Set<_InspectorReferenceData> group =
         _groups.putIfAbsent(groupName, () => Set<_InspectorReferenceData>.identity());
-    String id = _objectToId[object];
-    _InspectorReferenceData referenceData;
+    String? id = _objectToId[object];
+    _InspectorReferenceData? referenceData;
     if (id == null) {
       id = 'inspector-$_nextId';
       _nextId += 1;
@@ -395,7 +398,7 @@ mixin ElementInspectorService {
       _idToReferenceData[id] = referenceData;
       group.add(referenceData);
     } else {
-      referenceData = _idToReferenceData[id];
+      referenceData = _idToReferenceData[id]!;
       if (group.add(referenceData)) referenceData.count += 1;
     }
     return id;
@@ -407,10 +410,10 @@ mixin ElementInspectorService {
   /// API surface of the methods in this class called from the Flutter IntelliJ
   /// Plugin.
   @protected
-  Object toObject(String id, [String groupName]) {
+  Object? toObject(String? id, [String? groupName]) {
     if (id == null) return null;
 
-    final _InspectorReferenceData data = _idToReferenceData[id];
+    final _InspectorReferenceData? data = _idToReferenceData[id];
     if (data == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist.')]);
     }
@@ -423,10 +426,10 @@ mixin ElementInspectorService {
   /// If the object exists in other groups it will remain alive and the object
   /// id will remain valid.
   @protected
-  void disposeId(String id, String groupName) {
+  void disposeId(String? id, String? groupName) {
     if (id == null) return;
 
-    final _InspectorReferenceData referenceData = _idToReferenceData[id];
+    final _InspectorReferenceData? referenceData = _idToReferenceData[id];
     if (referenceData == null) throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist')]);
     if (_groups[groupName]?.remove(referenceData) != true)
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id is not in group')]);
@@ -441,7 +444,7 @@ mixin ElementInspectorService {
   /// The `groupName` parameter is not required by is added to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
   @protected
-  bool setSelectionById(String id, [String groupName]) {
+  bool setSelectionById(String? id, String? groupName) {
     return setSelection(toObject(id), groupName);
   }
 
@@ -453,7 +456,7 @@ mixin ElementInspectorService {
   /// The `groupName` parameter is not needed but is specified to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
   @protected
-  bool setSelection(Object object, [String groupName]) {
+  bool setSelection(Object? object, [String? groupName]) {
     if (object is RenderObject) {
       if (object == selection.current) {
         return false;
@@ -461,13 +464,13 @@ mixin ElementInspectorService {
       selection.current = object;
       developer.inspect(selection.current);
       if (selectionChangedCallback != null) {
-        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
-          selectionChangedCallback();
+        if (SchedulerBinding.instance?.schedulerPhase == SchedulerPhase.idle) {
+          selectionChangedCallback!();
         } else {
           // It isn't safe to trigger the selection change callback if we are in
           // the middle of rendering the frame.
-          SchedulerBinding.instance.scheduleTask(
-            selectionChangedCallback,
+          SchedulerBinding.instance!.scheduleTask(
+            selectionChangedCallback!,
             Priority.touch,
           );
         }
@@ -477,10 +480,10 @@ mixin ElementInspectorService {
     return false;
   }
 
-  Map<String, Object> _nodeToJson(
-    DiagnosticsNode node,
-    InspectorSerializationDelegate delegate,
-  ) {
+  Map<String, Object?>? _nodeToJson(
+      DiagnosticsNode? node,
+      InspectorSerializationDelegate delegate,
+      ) {
     return node?.toJsonMap(delegate);
   }
 
@@ -492,7 +495,7 @@ mixin ElementInspectorService {
   //
   // TODO(jacobr): Replace this with a better solution once
   // https://github.com/dart-lang/sdk/issues/32919 is fixed.
-  String _safeJsonEncode(Object object) {
+  String _safeJsonEncode(Object? object) {
     final String jsonString = json.encode(object);
     _serializeRing[_serializeRingIndex] = jsonString;
     _serializeRingIndex = (_serializeRingIndex + 1) % _serializeRing.length;
@@ -510,10 +513,10 @@ mixin ElementInspectorService {
     return nodes.take(maxDescendentsTruncatableNode).toList();
   }
 
-  List<Map<String, Object>> _nodesToJson(
+  List<Map<String, Object?>> _nodesToJson(
     List<DiagnosticsNode> nodes,
     InspectorSerializationDelegate delegate, {
-    @required DiagnosticsNode parent,
+    required DiagnosticsNode? parent,
   }) {
     return DiagnosticsNode.toJsonList(nodes, parent, delegate);
   }
@@ -525,8 +528,8 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getProperties(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getProperties(String diagnosticsNodeId, String groupName) {
-    final DiagnosticsNode node = toObject(diagnosticsNodeId) as DiagnosticsNode;
+  List<Object> _getProperties(String? diagnosticsNodeId, String? groupName) {
+    final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode;
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(),
         InspectorSerializationDelegate(groupName: groupName, service: this),
         parent: node);
@@ -538,7 +541,7 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getChildren(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getChildren(String diagnosticsNodeId, String groupName) {
+  List<Object> _getChildren(String? diagnosticsNodeId, String? groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId) as DiagnosticsNode;
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, service: this);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate,
@@ -561,12 +564,11 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getChildrenSummaryTree(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getChildrenSummaryTree(String diagnosticsNodeId, String groupName) {
+  List<Object> _getChildrenSummaryTree(String? diagnosticsNodeId, String? groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId) as DiagnosticsNode;
     final InspectorSerializationDelegate delegate =
         InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate,
-        parent: node);
+    return _nodesToJson(_getChildrenFiltered(node, delegate), delegate, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -579,7 +581,7 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getChildrenDetailsSubtree(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getChildrenDetailsSubtree(String diagnosticsNodeId, String groupName) {
+  List<Object> _getChildrenDetailsSubtree(String? diagnosticsNodeId, String? groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId) as DiagnosticsNode;
     // With this value of minDepth we only expand one extra level of important nodes.
     final InspectorSerializationDelegate delegate =
@@ -592,7 +594,7 @@ mixin ElementInspectorService {
     if (node.level == DiagnosticLevel.error) {
       return true;
     }
-    final Object value = node.value;
+    final Object? value = node.value;
     if (value is! Diagnosticable) {
       return true;
     }
@@ -627,9 +629,8 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getRootRenderObject(groupName));
   }
 
-  Map<String, Object> _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance?.renderView?.toDiagnosticsNode(),
-        InspectorSerializationDelegate(groupName: groupName, service: this));
+  Map<String, Object?>? _getRootRenderObject(String groupName) {
+    return _nodeToJson(RendererBinding.instance?.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -649,15 +650,15 @@ mixin ElementInspectorService {
     String groupName, {
     int subtreeDepth = 2,
   }) {
-    return _safeJsonEncode(_getDetailsSubtree(id, groupName, subtreeDepth));
+    return _safeJsonEncode(_getDetailsSubtree(id, groupName, subtreeDepth)!);
   }
 
-  Map<String, Object> _getDetailsSubtree(
+  Map<String, Object?>? _getDetailsSubtree(
     String id,
     String groupName,
     int subtreeDepth,
   ) {
-    final DiagnosticsNode root = toObject(id) as DiagnosticsNode;
+    final DiagnosticsNode? root = toObject(id) as DiagnosticsNode?;
     if (root == null) {
       return null;
     }
@@ -684,11 +685,10 @@ mixin ElementInspectorService {
     return _safeJsonEncode(_getSelectedRenderObject(previousSelectionId, groupName));
   }
 
-  Map<String, Object> _getSelectedRenderObject(String previousSelectionId, String groupName) {
-    final DiagnosticsNode previousSelection = toObject(previousSelectionId) as DiagnosticsNode;
-    final RenderObject current = selection?.current;
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(),
-        InspectorSerializationDelegate(groupName: groupName, service: this));
+  Map<String, Object?>? _getSelectedRenderObject(String? previousSelectionId, String groupName) {
+    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
+    final RenderObject? current = selection.current;
+    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// This method is called by [WidgetBinding.performReassemble] to flush caches
@@ -734,9 +734,10 @@ class InspectorSelection {
   /// Setting [candidates] or calling [clear] resets the selection.
   ///
   /// Returns null if the selection is invalid.
-  RenderObject get current => _current;
-  RenderObject _current;
-  set current(RenderObject value) {
+  RenderObject? get current => active ? _current : null;
+
+  RenderObject? _current;
+  set current(RenderObject? value) {
     if (_current != value) {
       _current = value;
     }
@@ -752,7 +753,7 @@ class InspectorSelection {
 
   /// Whether the selected render object is attached to the tree or has gone
   /// out of scope.
-  bool get active => _current != null && _current.attached;
+  bool get active => _current != null && _current!.attached;
 }
 
 /// A delegate that configures how a hierarchy of [DiagnosticsNode]s are
@@ -768,7 +769,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     this.expandPropertyValues = true,
     this.subtreeDepth = 1,
     this.includeProperties = false,
-    @required this.service,
+    required this.service,
     this.addAdditionalPropertiesCallback,
   });
 
@@ -780,7 +781,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   ///
   /// Object ids returned as part of the json will remain live at least until
   /// [WidgetInspectorService.disposeGroup()] is called on [groupName].
-  final String groupName;
+  final String? groupName;
 
   /// Whether the tree should only include nodes created by the local project.
   final bool summaryTree;
@@ -841,25 +842,25 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   ///  );
   /// }
   /// ```
-  final Map<String, Object> Function(DiagnosticsNode, InspectorSerializationDelegate) addAdditionalPropertiesCallback;
+  final Map<String, Object> Function(DiagnosticsNode, InspectorSerializationDelegate)? addAdditionalPropertiesCallback;
 
   final List<DiagnosticsNode> _nodesCreatedByLocalProject = <DiagnosticsNode>[];
 
   bool get _interactive => groupName != null;
 
   @override
-  Map<String, Object> additionalNodeProperties(DiagnosticsNode node) {
-    final Map<String, Object> result = <String, Object>{};
-    final Object value = node.value;
+  Map<String, Object?> additionalNodeProperties(DiagnosticsNode node) {
+    final Map<String, Object?> result = <String, Object?>{};
+    final Object? value = node.value;
     if (_interactive) {
-      result['objectId'] = service.toId(node, groupName);
-      result['valueId'] = service.toId(value, groupName);
+      result['objectId'] = service.toId(node, groupName!);
+      result['valueId'] = service.toId(value, groupName!);
     }
     if (summaryTree) {
       result['summaryTree'] = true;
     }
     if (addAdditionalPropertiesCallback != null) {
-      result.addAll(addAdditionalPropertiesCallback(node, this) ?? <String, Object>{});
+      result.addAll(addAdditionalPropertiesCallback!(node, this));
     }
     return result;
   }
@@ -890,7 +891,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   }
 
   @override
-  List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
+  List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
     if (maxDescendentsTruncatableNode >= 0 &&
         owner?.allowTruncate == true &&
         nodes.length > maxDescendentsTruncatableNode) {
@@ -900,7 +901,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   }
 
   @override
-  DiagnosticsSerializationDelegate copyWith({int subtreeDepth, bool includeProperties}) {
+  DiagnosticsSerializationDelegate copyWith({int? subtreeDepth, bool? includeProperties}) {
     return InspectorSerializationDelegate(
       groupName: groupName,
       summaryTree: summaryTree,

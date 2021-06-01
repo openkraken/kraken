@@ -1,5 +1,3 @@
-// @dart=2.9
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -23,7 +21,7 @@ class BodyElement extends Element {
   @override
   void willAttachRenderer() {
     super.willAttachRenderer();
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    RenderStyle renderStyle = renderBoxModel!.renderStyle;
     renderStyle.width = elementManager.viewportWidth;
   }
 }

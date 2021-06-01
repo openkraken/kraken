@@ -82,7 +82,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     if (intersectionObserverLayer == null) {
       intersectionObserverLayer = IntersectionObserverLayer(
         elementSize: size, paintOffset: offset, onIntersectionChange: _onIntersectionChange,
-          rootRenderObject: (this as RenderBoxModel).elementManager.getRootRenderObject());
+          rootRenderObject: (this as RenderBoxModel).elementManager.getRootRenderBox());
     } else {
       intersectionObserverLayer.elementSize = semanticBounds.size;
       intersectionObserverLayer.paintOffset = offset;

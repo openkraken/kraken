@@ -1,13 +1,11 @@
-// @dart=2.9
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 
 typedef ObjectElementClientFactory = ObjectElementClient Function(ObjectElementHost objectElementHost);
 
-ObjectElementClientFactory _objectElementFactory;
+ObjectElementClientFactory? _objectElementFactory;
 
-ObjectElementClientFactory getObjectElementClientFactory() {
+ObjectElementClientFactory? getObjectElementClientFactory() {
   return _objectElementFactory;
 }
 

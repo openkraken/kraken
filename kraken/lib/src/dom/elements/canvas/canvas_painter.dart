@@ -8,13 +8,12 @@ import 'package:flutter/rendering.dart';
 import 'canvas_context_2d.dart';
 
 class CanvasPainter extends CustomPainter {
-  CanvasPainter({Listenable? repaint}): super(repaint: repaint);
+  CanvasPainter({required Listenable repaint}): super(repaint: repaint);
   CanvasRenderingContext2D? context;
 
   bool _shouldRepaint = false;
   PictureRecorder? _pictureRecorder;
   Picture? _picture;
-  Canvas? _canvas;
 
   bool get _shouldPainting => context != null && context!.actionCount > 0;
   bool get _hasSnapshot => context != null && _picture != null && _picture!.approximateBytesUsed > 0;
@@ -47,11 +46,11 @@ class CanvasPainter extends CustomPainter {
       return canvas.drawPicture(_picture!);
     }
 
-    _pictureRecorder = PictureRecorder();
-    _canvas = Canvas(_pictureRecorder!);
+    PictureRecorder pictureRecorder = _pictureRecorder = PictureRecorder();
+    canvas = Canvas(_pictureRecorder!);
 
     if (_scaleX != 1.0 || _scaleY != 1.0) {
-      _canvas!.scale(_scaleX, _scaleY);
+      canvas.scale(_scaleX, _scaleY);
     }
 
     // This lets you create composite effects, for example making a group of drawing commands semi-transparent.
@@ -59,24 +58,24 @@ class CanvasPainter extends CustomPainter {
     // so where they overlap would be darker than where they do not. By using saveLayer to group them together,
     // they can be drawn with an opaque color at first,
     // and then the entire group can be made transparent using the saveLayer's paint.
-    _canvas!.saveLayer(null, _saveLayerPaint);
+    canvas.saveLayer(null, _saveLayerPaint);
 
     // Paint last content
     if (_hasSnapshot) {
-      _canvas!.drawPicture(_picture!);
+      canvas.drawPicture(_picture!);
     }
 
     // Paint new actions
     if (_shouldPainting) {
-      context!.performActions(_canvas!, size);
+      context!.performActions(canvas, size);
     }
 
     // Must pair each call to save()/saveLayer() with a later matching call to restore().
-    _canvas!.restore();
+    canvas.restore();
 
     // After calling this function, both the picture recorder
     // and the canvas objects are invalid and cannot be used further.
-    _picture = _pictureRecorder!.endRecording();
+    _picture = pictureRecorder.endRecording();
 
     canvas.drawPicture(_picture!);
 
@@ -98,15 +97,15 @@ class CanvasPainter extends CustomPainter {
   }
 
   void dispose() {
-    if (_pictureRecorder != null) {
-      if (_pictureRecorder!.isRecording) {
-        _pictureRecorder!.endRecording().dispose();
+    PictureRecorder? pictureRecorder = _pictureRecorder;
+    if (pictureRecorder != null) {
+      if (pictureRecorder.isRecording) {
+        pictureRecorder.endRecording().dispose();
       }
-      _pictureRecorder = null;
+      pictureRecorder = null;
     }
 
     _picture?.dispose();
     _picture = null;
-    _canvas = null;
   }
 }

@@ -1,5 +1,3 @@
-// @dart=2.9
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -14,7 +12,7 @@ typedef EventHandler = void Function(Event event);
 
 class EventTarget {
   // A unique target identifier.
-  int targetId;
+  final int targetId;
 
   // The Add
   final Pointer<NativeEventTarget> nativeEventTargetPtr;
@@ -25,25 +23,23 @@ class EventTarget {
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
-    assert(targetId != null);
-    assert(elementManager != null);
-  }
+  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager);
 
   void addEvent(String eventType) {}
 
   void addEventListener(String eventType, EventHandler eventHandler) {
-    if (!eventHandlers.containsKey(eventType)) {
-      eventHandlers[eventType] = [];
+    List<EventHandler>? existHandler = eventHandlers[eventType];
+    if (existHandler == null) {
+      eventHandlers[eventType] = existHandler = [];
     }
-    eventHandlers[eventType].add(eventHandler);
+    existHandler.add(eventHandler);
   }
 
   void removeEventListener(String eventType, EventHandler eventHandler) {
-    if (!eventHandlers.containsKey(eventType)) {
+    List<EventHandler>? currentHandlers = eventHandlers[eventType];
+    if (currentHandlers == null) {
       return;
     }
-    List<EventHandler> currentHandlers = eventHandlers[eventType];
     currentHandlers.remove(eventHandler);
   }
 
@@ -57,8 +53,6 @@ class EventTarget {
   @mustCallSuper
   void dispose() {
     elementManager.removeTarget(this);
-    // Remove elementManager reference.
-    elementManager = null;
     eventHandlers.clear();
   }
 }

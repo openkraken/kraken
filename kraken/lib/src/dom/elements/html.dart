@@ -1,5 +1,3 @@
-// @dart=2.9
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -33,7 +31,7 @@ class HTMLElement extends Element {
     willAttachRenderer();
     // Init default render style value
     style.applyTargetProperties();
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    RenderStyle renderStyle = renderBoxModel!.renderStyle;
     // Must init with viewport width
     renderStyle.width = elementManager.viewportWidth;
     renderStyle.height = elementManager.viewportHeight;

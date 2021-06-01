@@ -32,7 +32,7 @@ class RenderStyle
 
   RenderBoxModel? renderBoxModel;
   CSSStyleDeclaration? style;
-  Size get viewportSize => renderBoxModel!.elementManager!.viewport!.viewportSize;
+  Size get viewportSize => renderBoxModel!.elementManager!.viewport.viewportSize;
 
   RenderStyle({ this.renderBoxModel, this.style });
 

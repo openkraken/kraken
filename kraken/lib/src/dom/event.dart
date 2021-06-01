@@ -1,5 +1,3 @@
-// @dart=2.9
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -58,25 +56,21 @@ const String EVENT_STATE_END = 'end';
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
   String type;
-  bool bubbles;
-  bool cancelable;
-  EventTarget currentTarget;
-  EventTarget target;
-  num timeStamp;
+  bool bubbles = false;
+  bool cancelable = false;
+  EventTarget? currentTarget;
+  EventTarget? target;
+  int timeStamp = DateTime.now().millisecondsSinceEpoch;
   bool defaultPrevented = false;
-
   bool _immediateBubble = true;
 
-  Event(this.type, [EventInit init]) {
-    assert(type != null);
-
+  Event(this.type, [EventInit? init]) {
     if (init == null) {
       init = EventInit();
     }
 
     bubbles = init.bubbles;
     cancelable = init.cancelable;
-    timeStamp = DateTime.now().millisecondsSinceEpoch;
   }
 
   void preventDefault() {
@@ -101,7 +95,9 @@ class Event {
     event.ref.cancelable = cancelable ? 1 : 0;
     event.ref.timeStamp = timeStamp;
     event.ref.defaultPrevented = defaultPrevented ? 1 : 0;
-    event.ref.target = target != null ? target.nativeEventTargetPtr : nullptr;
+
+    EventTarget? _target = target;
+    event.ref.target = _target != null ? _target.nativeEventTargetPtr : nullptr;
 
     return event.cast<Pointer>();
   }
@@ -133,12 +129,12 @@ class EventInit {
 class MouseEvent extends Event {
   final MouseEventInit _mouseEventInit;
 
-  double get clientX => _mouseEventInit?.clientX;
-  double get clientY => _mouseEventInit?.clientY;
-  double get offsetX => _mouseEventInit?.offsetX;
-  double get offsetY => _mouseEventInit?.offsetY;
+  double get clientX => _mouseEventInit.clientX;
+  double get clientY => _mouseEventInit.clientY;
+  double get offsetX => _mouseEventInit.offsetX;
+  double get offsetY => _mouseEventInit.offsetY;
 
-  MouseEvent(String type, [MouseEventInit mouseEventInit])
+  MouseEvent(String type, MouseEventInit mouseEventInit)
       : _mouseEventInit = mouseEventInit, super(type, mouseEventInit);
 
   Pointer<NativeMouseEvent> toNative() {
@@ -199,17 +195,16 @@ class GestureEventInit extends EventInit {
 class GestureEvent extends Event {
   final GestureEventInit _gestureEventInit;
 
-  String get state => _gestureEventInit?.state;
-  String get direction => _gestureEventInit?.direction;
-  double get rotation => _gestureEventInit?.rotation;
-  double get deltaX => _gestureEventInit?.deltaX;
-  double get deltaY => _gestureEventInit?.deltaY;
-  double get velocityX => _gestureEventInit?.velocityX;
-  double get velocityY => _gestureEventInit?.velocityY;
-  double get scale => _gestureEventInit?.scale;
+  String get state => _gestureEventInit.state;
+  String get direction => _gestureEventInit.direction;
+  double get rotation => _gestureEventInit.rotation;
+  double get deltaX => _gestureEventInit.deltaX;
+  double get deltaY => _gestureEventInit.deltaY;
+  double get velocityX => _gestureEventInit.velocityX;
+  double get velocityY => _gestureEventInit.velocityY;
+  double get scale => _gestureEventInit.scale;
 
-
-  GestureEvent(String type, [GestureEventInit gestureEventInit])
+  GestureEvent(String type, GestureEventInit gestureEventInit)
       : _gestureEventInit = gestureEventInit, super(type, gestureEventInit);
 
   Pointer<NativeGestureEvent> toNative() {
@@ -230,7 +225,7 @@ class GestureEvent extends Event {
 class CustomEventInit extends EventInit {
   final String detail;
 
-  CustomEventInit({bool bubbles = false, bool cancelable = false, this.detail })
+  CustomEventInit({bool bubbles = false, bool cancelable = false, required this.detail })
       : super(bubbles: bubbles, cancelable: cancelable);
 }
 
@@ -238,9 +233,9 @@ class CustomEventInit extends EventInit {
 /// Attention: Detail now only can be a string.
 class CustomEvent extends Event {
   final CustomEventInit _customEventInit;
-  String get detail => _customEventInit?.detail;
+  String get detail => _customEventInit.detail;
 
-  CustomEvent(String type, [CustomEventInit customEventInit])
+  CustomEvent(String type, CustomEventInit customEventInit)
       : _customEventInit = customEventInit, super(type, customEventInit);
 
   Pointer<NativeCustomEvent> toNative() {
@@ -271,8 +266,7 @@ class InputEvent extends Event {
   InputEvent(
     this.data, {
     this.inputType = '',
-  }) :  assert(data != null),
-        super(EVENT_INPUT, EventInit(cancelable: true));
+  }) : super(EVENT_INPUT, EventInit(cancelable: true));
 }
 
 class AppearEvent extends Event {
@@ -318,9 +312,7 @@ class MediaError extends Event {
     return nativeMediaError;
   }
 
-  MediaError(this.code, this.message) :
-        assert(message != null),
-        super(EVENT_MEDIA_ERROR);
+  MediaError(this.code, this.message) : super(EVENT_MEDIA_ERROR);
 }
 
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
@@ -331,9 +323,7 @@ class MessageEvent extends Event {
   /// A USVString representing the origin of the message emitter.
   final String origin;
 
-  MessageEvent(this.data, {this.origin = ''}) :
-        assert(data != null),
-        super(EVENT_MESSAGE);
+  MessageEvent(this.data, {this.origin = ''}) : super(EVENT_MESSAGE);
 
   Pointer<NativeMessageEvent> toNative() {
     Pointer<NativeMessageEvent> messageEvent = malloc.allocate<NativeMessageEvent>(sizeOf<NativeMessageEvent>());
@@ -356,9 +346,7 @@ class CloseEvent extends Event {
   /// Indicates whether or not the connection was cleanly closed
   final bool wasClean;
 
-  CloseEvent(this.code, this.reason, this.wasClean) :
-        assert(reason != null),
-        super(EVENT_CLOSE);
+  CloseEvent(this.code, this.reason, this.wasClean) : super(EVENT_CLOSE);
 
   Pointer<NativeCloseEvent> toNative() {
     Pointer<NativeCloseEvent> closeEvent = malloc.allocate<NativeCloseEvent>(sizeOf<NativeCloseEvent>());
@@ -438,8 +426,8 @@ class Touch {
   final TouchType touchType;
 
   Touch({
-    this.identifier,
-    this.target,
+    required this.identifier,
+    required this.target,
     this.clientX = 0,
     this.clientY = 0,
     this.screenX = 0,
@@ -490,7 +478,7 @@ class TouchList {
   }
 
   Pointer<Pointer<NativeTouch>> toNative() {
-    Pointer<Pointer<NativeTouch>> touchList = malloc.allocate<NativeTouch>(items.length * sizeOf<NativeTouch>()).cast<Pointer<NativeTouch>>();
+    Pointer<Pointer<NativeTouch>> touchList = malloc.allocate<NativeTouch>(sizeOf<NativeTouch>() * items.length).cast<Pointer<NativeTouch>>();
     for (int i = 0; i < items.length; i ++) {
       touchList[i] = items[i].toNative();
     }

@@ -189,7 +189,7 @@ class KrakenViewController {
   // dispose controller and recycle all resources.
   void dispose() {
     // break circle reference
-    (_elementManager.getRootRenderObject() as RenderObjectWithControllerMixin).controller = null;
+    (_elementManager.getRootRenderBox() as RenderObjectWithControllerMixin).controller = null;
 
     detachView();
 
@@ -364,7 +364,7 @@ class KrakenViewController {
   }
 
   RenderObject getRootRenderObject() {
-    return _elementManager.getRootRenderObject();
+    return _elementManager.getRootRenderBox();
   }
 }
 

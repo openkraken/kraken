@@ -310,7 +310,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       debugReport = () {
         return '$estimate; fling at $velocity.';
       };
-      GestureEventInit e = GestureEventInit(direction: _direction, velocityX: velocity.pixelsPerSecond.dx, velocityY: velocity.pixelsPerSecond.dy );
+      GestureEventInit e = GestureEventInit(direction: _direction ?? '', velocityX: velocity.pixelsPerSecond.dx, velocityY: velocity.pixelsPerSecond.dy );
       invokeCallback<void>('onSwipe', () => onSwipe!(GestureEvent(EVENT_SWIPE, e)), debugReport: debugReport);
     }
   }

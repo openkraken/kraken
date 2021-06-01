@@ -88,7 +88,7 @@ mixin CSSOverflowMixin on ElementBase {
   RenderLayoutBox? scrollingContentLayoutBox;
 
   void updateRenderOverflow(Element element, ScrollListener scrollListener) {
-    CSSStyleDeclaration style = element.style!;
+    CSSStyleDeclaration style = element.style;
     RenderBoxModel renderBoxModel = element.renderBoxModel!;
     RenderStyle renderStyle = renderBoxModel.renderStyle!;
 
@@ -177,7 +177,7 @@ mixin CSSOverflowMixin on ElementBase {
     // @TODO: remove this after rendering phase are working without element and targetId required
     Element scrollingElement = Element(shadowElementTargetId, element.nativeElementPtr, element.elementManager,
         defaultStyle: element.defaultStyle, isIntrinsicBox: element.isInlineBox, tagName: element.tagName, isHiddenElement: true);
-    CSSStyleDeclaration repaintBoundaryStyle = element.style!.clone(scrollingElement);
+    CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
     scrollingContentLayoutBox = Element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
 
@@ -197,13 +197,13 @@ mixin CSSOverflowMixin on ElementBase {
     // If renderBoxModel is already repaintBoundary caused by styles such as
     // transform or position fixed, degrade to non repaint boundary first
     // before creating two repaintBoundary.
-    if (renderBoxModel.isRepaintBoundary) {
+    if (renderBoxModel!.isRepaintBoundary) {
       element.convertToNonRepaintBoundary();
       renderBoxModel = element.renderBoxModel;
     }
-    RenderObject? layoutBoxParent = renderBoxModel.parent as RenderObject?;
+    RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox outerLayoutBox = Element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?)!;
+    RenderLayoutBox outerLayoutBox = Element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?);
 
     _createScrollingLayoutBox(element);
 
@@ -231,9 +231,9 @@ mixin CSSOverflowMixin on ElementBase {
   void _downgradeToParentRepaint(Element element) {
     RenderBoxModel? renderBoxModel = element.renderBoxModel;
     if (scrollingContentLayoutBox == null) return;
-    RenderObject? layoutBoxParent = renderBoxModel.parent as RenderObject?;
+    RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox newLayoutBox = Element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?)!;
+    RenderLayoutBox newLayoutBox = Element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?);
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
     element.renderBoxModel = newLayoutBox;
@@ -281,7 +281,7 @@ mixin CSSOverflowMixin on ElementBase {
     } else if (parent is ContainerRenderObjectMixin) {
       // Update renderBoxModel reference before move to its containing block
       element.renderBoxModel = newRenderObject as RenderBoxModel?;
-      element.parentElement!.addChildRenderObject(element, after: previousSibling);
+      element.parentElement!.addChildRenderObject(element, after: previousSibling as RenderBox?);
     }
   }
 

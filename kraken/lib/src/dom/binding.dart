@@ -1,5 +1,3 @@
-// @dart=2.9
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -116,8 +114,8 @@ mixin ElementsBinding
   /// If you need the binding to be constructed before calling [runApp],
   /// you can ensure a Elements binding has been constructed by calling the
   /// `ElementsFlutterBinding.ensureInitialized()` function.
-  static ElementsBinding get instance => _instance;
-  static ElementsBinding _instance;
+  static ElementsBinding? get instance => _instance;
+  static ElementsBinding? _instance;
 
   @override
   void initServiceExtensions() {
@@ -278,14 +276,6 @@ mixin ElementsBinding
   @override
   Future<void> handleSystemMessage(Object systemMessage) async {
     await super.handleSystemMessage(systemMessage);
-    final Map<String, dynamic> message = systemMessage;
-    final String type = message['type'];
-    switch (type) {
-      case 'memoryPressure':
-        handleMemoryPressure();
-        break;
-    }
-    return;
   }
 
   // ignore: prefer_final_fields
@@ -369,6 +359,6 @@ class ElementsFlutterBinding extends BindingBase
   /// it will at least implement [ElementsBinding].
   static ElementsBinding ensureInitialized() {
     if (ElementsBinding.instance == null) ElementsFlutterBinding();
-    return ElementsBinding.instance;
+    return ElementsBinding.instance!;
   }
 }
