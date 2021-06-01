@@ -169,25 +169,25 @@ mixin CSSTextMixin on RenderStyleBase {
 
     // Text may be created when parent renderObject not created, get it from style instead
     Color? color = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle!.color : CSSText.getTextColor(parent.style);
+      parentRenderBoxModel.renderStyle.color : CSSText.getTextColor(parent.style);
     TextDecoration? textDecorationLine = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle!.textDecorationLine : CSSText.getTextDecorationLine(parent.style);
+      parentRenderBoxModel.renderStyle.textDecorationLine : CSSText.getTextDecorationLine(parent.style);
     Color? textDecorationColor = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle!.textDecorationColor : CSSText.getTextDecorationColor(parent.style);
+      parentRenderBoxModel.renderStyle.textDecorationColor : CSSText.getTextDecorationColor(parent.style);
     TextDecorationStyle? textDecorationStyle = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle!.textDecorationStyle : CSSText.getTextDecorationStyle(parent.style);
+      parentRenderBoxModel.renderStyle.textDecorationStyle : CSSText.getTextDecorationStyle(parent.style);
     FontWeight? fontWeight = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle!.fontWeight : CSSText.getFontWeight(parent.style);
+      parentRenderBoxModel.renderStyle.fontWeight : CSSText.getFontWeight(parent.style);
     FontStyle? fontStyle = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle!.fontStyle : CSSText.getFontStyle(parent.style);
+      parentRenderBoxModel.renderStyle.fontStyle : CSSText.getFontStyle(parent.style);
     double fontSize = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle!.fontSize : CSSText.getFontSize(parent.style, viewportSize);
+      parentRenderBoxModel.renderStyle.fontSize : CSSText.getFontSize(parent.style, viewportSize);
     double? letterSpacing = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle!.letterSpacing : CSSText.getLetterSpacing(parent.style, viewportSize);
+      parentRenderBoxModel.renderStyle.letterSpacing : CSSText.getLetterSpacing(parent.style, viewportSize);
     double? wordSpacing = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle!.wordSpacing : CSSText.getWordSpacing(parent.style, viewportSize);
+      parentRenderBoxModel.renderStyle.wordSpacing : CSSText.getWordSpacing(parent.style, viewportSize);
     List<Shadow>? textShadow = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle!.textShadow : CSSText.getTextShadow(parent.style, viewportSize);
+      parentRenderBoxModel.renderStyle.textShadow : CSSText.getTextShadow(parent.style, viewportSize);
 
     return TextStyle(
       color: color,

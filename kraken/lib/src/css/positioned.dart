@@ -43,7 +43,7 @@ Offset? _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, Render
 // which will override the default position rule
 // https://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width
 Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxModel child, Size parentSize) {
-  RenderStyle childRenderStyle = child.renderStyle!;
+  RenderStyle childRenderStyle = child.renderStyle;
 
   CSSMargin marginLeft = childRenderStyle.marginLeft;
   CSSMargin marginRight = childRenderStyle.marginRight;
@@ -94,7 +94,7 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
 
 class CSSPositionedLayout {
   static RenderLayoutParentData getPositionParentData(RenderBoxModel renderBoxModel, RenderLayoutParentData parentData) {
-    CSSPositionType positionType = renderBoxModel.renderStyle!.position;
+    CSSPositionType positionType = renderBoxModel.renderStyle.position;
     parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
     return parentData;
   }
@@ -136,7 +136,7 @@ class CSSPositionedLayout {
       Offset? styleOffset;
       // Text node does not have relative offset
       if (renderBox is RenderBoxModel) {
-        styleOffset = getRelativeOffset(renderBox.renderStyle!);
+        styleOffset = getRelativeOffset(renderBox.renderStyle);
       }
 
       if (relativeOffset != null) {
@@ -152,7 +152,7 @@ class CSSPositionedLayout {
   }
 
   static bool isSticky(RenderBoxModel child) {
-    final renderStyle = child.renderStyle!;
+    final renderStyle = child.renderStyle;
     return renderStyle.position == CSSPositionType.sticky &&
         (renderStyle.top != null ||
         renderStyle.left != null ||
@@ -174,7 +174,7 @@ class CSSPositionedLayout {
     // Dynamic offset to scroll container
     double offsetLeftToScrollContainer = childToScrollContainerOffset.dx - scrollContainer.scrollLeft;
     double offsetRightToScrollContainer = scrollContainerWidth - childWidth - offsetLeftToScrollContainer;
-    RenderStyle childRenderStyle = child.renderStyle!;
+    RenderStyle childRenderStyle = child.renderStyle;
     RenderStyle? scrollContainerRenderStyle = scrollContainer.renderStyle;
 
     if (childRenderStyle.left != null) {
@@ -230,7 +230,7 @@ class CSSPositionedLayout {
     // Dynamic offset to scroll container
     double offsetTopToScrollContainer = childToScrollContainerOffset.dy;
     double offsetBottomToScrollContainer = scrollContainerHeight - childHeight - offsetTopToScrollContainer;
-    RenderStyle childRenderStyle = child.renderStyle!;
+    RenderStyle childRenderStyle = child.renderStyle;
     RenderStyle? scrollContainerRenderStyle = scrollContainer.renderStyle;
 
     if (childRenderStyle.top != null) {
@@ -283,7 +283,7 @@ class CSSPositionedLayout {
     // Original offset of sticky child in relative status
     Offset childOriginalOffset = childPlaceHolderParentData.offset;
 
-    RenderBox rootRenderObject = child.elementManager.getRootRenderBox();
+    RenderBox rootRenderObject = child.elementManager!.getRootRenderBox();
     // Offset of sticky child to scroll container
     Offset childToScrollContainerOffset =
       childRenderPositionHolder.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
@@ -291,7 +291,7 @@ class CSSPositionedLayout {
 
     bool isVerticalFixed = false;
     bool isHorizontalFixed = false;
-    RenderStyle childRenderStyle = child.renderStyle!;
+    RenderStyle childRenderStyle = child.renderStyle;
 
     if (childRenderStyle.left != null || childRenderStyle.right != null) {
       isHorizontalFixed = _applyStickyChildHorizontalOffset(
@@ -332,7 +332,7 @@ class CSSPositionedLayout {
     Size parentSize = trySize.isInfinite ? containerBox.contentConstraints!.smallest : trySize;
     BoxSizeType? widthType = _getChildWidthSizeType(child);
     BoxSizeType? heightType = _getChildHeightSizeType(child);
-    RenderStyle childRenderStyle = child.renderStyle!;
+    RenderStyle childRenderStyle = child.renderStyle;
 
     // If child has no width, calculate width by left and right.
     // Element with intrinsic size such as image will not stretch
@@ -407,8 +407,8 @@ class CSSPositionedLayout {
 
       if(overflowContainerBox.widthSizeType == BoxSizeType.specified && overflowContainerBox.heightSizeType == BoxSizeType.specified) {
         parentSize = Size(
-            overflowContainerBox.renderStyle!.width!,
-            overflowContainerBox.renderStyle!.height!
+            overflowContainerBox.renderStyle.width!,
+            overflowContainerBox.renderStyle.height!
         );
       } else {
         parentSize = parent.boxSize;
@@ -425,7 +425,7 @@ class CSSPositionedLayout {
     double? childMarginLeft = 0;
     double? childMarginRight = 0;
 
-    RenderStyle childRenderStyle = child.renderStyle!;
+    RenderStyle childRenderStyle = child.renderStyle;
     childMarginTop = childRenderStyle.marginTop.length;
     childMarginBottom = childRenderStyle.marginBottom.length;
     childMarginLeft = childRenderStyle.marginLeft.length;
@@ -439,12 +439,12 @@ class CSSPositionedLayout {
       Offset baseOffset = (child.renderPositionHolder!.localToGlobal(positionHolderScrollOffset, ancestor: root) -
         parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root));
 
-      EdgeInsets? borderEdge = parent.renderStyle!.borderEdge;
+      EdgeInsets? borderEdge = parent.renderStyle.borderEdge;
       double borderLeft = borderEdge != null ? borderEdge.left : 0;
       double borderRight = borderEdge != null ? borderEdge.right : 0;
       double borderTop = borderEdge != null ? borderEdge.top : 0;
       double borderBottom = borderEdge != null ? borderEdge.bottom : 0;
-      RenderStyle childRenderStyle = child.renderStyle!;
+      RenderStyle childRenderStyle = child.renderStyle;
 
       double top;
       if (childRenderStyle.top != null && childRenderStyle.top!.length != null) {
@@ -452,16 +452,16 @@ class CSSPositionedLayout {
 
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          top -= overflowContainingBox.renderStyle!.paddingTop;
+          top -= overflowContainingBox.renderStyle.paddingTop;
         }
       } else if (childRenderStyle.bottom != null && childRenderStyle.bottom!.length != null) {
-        top = parentSize.height - child.boxSize!.height - borderBottom - childMarginBottom! -
+        top = parentSize!.height - child.boxSize!.height - borderBottom - childMarginBottom! -
           ((childRenderStyle.bottom!.length) ?? 0);
 
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          top -= (overflowContainingBox.renderStyle!.borderTop + overflowContainingBox.renderStyle!.borderBottom
-              + overflowContainingBox.renderStyle!.paddingTop);
+          top -= (overflowContainingBox.renderStyle.borderTop + overflowContainingBox.renderStyle.borderBottom
+              + overflowContainingBox.renderStyle.paddingTop);
         }
       } else {
         // Use original offset in normal flow if no top and bottom is set.
@@ -474,16 +474,16 @@ class CSSPositionedLayout {
 
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          left -= overflowContainingBox.renderStyle!.paddingLeft;
+          left -= overflowContainingBox.renderStyle.paddingLeft;
         }
       } else if (childRenderStyle.right != null && childRenderStyle.right!.length != null) {
-        left = parentSize.width - child.boxSize!.width - borderRight - childMarginRight! -
+        left = parentSize!.width - child.boxSize!.width - borderRight - childMarginRight! -
           ((childRenderStyle.right!.length) ?? 0);
 
         if (parent.isScrollingContentBox) {
           RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          left -= (overflowContainingBox.renderStyle!.borderLeft + overflowContainingBox.renderStyle!.borderRight
-            + overflowContainingBox.renderStyle!.paddingLeft);
+          left -= (overflowContainingBox.renderStyle.borderLeft + overflowContainingBox.renderStyle.borderRight
+            + overflowContainingBox.renderStyle.paddingLeft);
         }
       } else {
         // Use original offset in normal flow if no left and right is set.
@@ -494,7 +494,7 @@ class CSSPositionedLayout {
       y = top;
     }
 
-    Offset offset = _getAutoMarginPositionedElementOffset(x, y, child, parentSize);
+    Offset offset = _getAutoMarginPositionedElementOffset(x, y, child, parentSize!);
     childParentData.offset = offset;
   }
 }

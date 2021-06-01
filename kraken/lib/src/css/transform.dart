@@ -1145,7 +1145,7 @@ mixin CSSTransformMixin on RenderStyleBase {
     ElementManager elementManager = renderBoxModel!.elementManager!;
     int targetId = renderBoxModel!.targetId;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId)!;
-    element.renderBoxModel!.renderStyle!.transform = matrix4;
+    element.renderBoxModel!.renderStyle.transform = matrix4;
 
     if (shouldToggleRepaintBoundary) {
       if (element.shouldConvertToRepaintBoundary) {

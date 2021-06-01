@@ -64,7 +64,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   set borderEdge(EdgeInsets? newValue) {
     _borderEdge = newValue;
 
-    BoxDecoration? decoration = renderBoxModel!.renderStyle!.decoration;
+    BoxDecoration? decoration = renderBoxModel!.renderStyle.decoration;
     if (decoration != null && decoration is BoxDecoration) {
       Gradient? gradient = decoration.gradient;
       if (gradient is BorderGradientMixin) {

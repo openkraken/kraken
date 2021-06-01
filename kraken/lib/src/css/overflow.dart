@@ -90,7 +90,7 @@ mixin CSSOverflowMixin on ElementBase {
   void updateRenderOverflow(Element element, ScrollListener scrollListener) {
     CSSStyleDeclaration style = element.style;
     RenderBoxModel renderBoxModel = element.renderBoxModel!;
-    RenderStyle renderStyle = renderBoxModel.renderStyle!;
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
 
     renderStyle.updateOverflow(style);
     CSSOverflowType overflowX = renderStyle.overflowX;
@@ -225,7 +225,7 @@ mixin CSSOverflowMixin on ElementBase {
     _attachRenderObject(element, layoutBoxParent, previousSibling, outerLayoutBox);
     element.renderBoxModel = outerLayoutBox;
     // Update renderBoxModel reference in renderStyle
-    element.renderBoxModel!.renderStyle!.renderBoxModel = outerLayoutBox;
+    element.renderBoxModel!.renderStyle.renderBoxModel = outerLayoutBox;
   }
 
   void _downgradeToParentRepaint(Element element) {
@@ -253,7 +253,7 @@ mixin CSSOverflowMixin on ElementBase {
     newLayoutBox.remove(scrollingContentLayoutBox!);
     scrollingContentLayoutBox = null;
 
-    element.renderBoxModel!.renderStyle!.renderBoxModel = newLayoutBox;
+    element.renderBoxModel!.renderStyle.renderBoxModel = newLayoutBox;
 
     // If renderBoxModel should be converted to repaintBoundary caused by styles
     // such as transform or position fixed, convert to repaintBoundary at last.

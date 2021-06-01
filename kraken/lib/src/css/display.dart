@@ -108,7 +108,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
         // Display as inline-block if parent node is flex
         display = CSSDisplay.inlineBlock;
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
-        RenderStyle parentRenderStyle = parent.renderStyle!;
+        RenderStyle parentRenderStyle = parent.renderStyle;
 
         CSSMargin marginLeft = renderStyle.marginLeft;
         CSSMargin marginRight = renderStyle.marginRight;

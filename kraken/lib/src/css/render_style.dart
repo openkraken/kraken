@@ -43,7 +43,7 @@ class RenderStyle
       return false;
     }
 
-    RenderStyle parentRenderStyle = parent.renderStyle!;
+    RenderStyle parentRenderStyle = parent.renderStyle;
     bool isPercentageExist = false;
     Size parentSize = parent.size;
     Size? size = renderBoxModel!.boxSize;
@@ -500,7 +500,7 @@ class RenderStyle
     double? intrinsicWidth = renderBoxModel!.intrinsicWidth;
     double intrinsicRatio = renderBoxModel!.intrinsicRatio!;
     double? realWidth = width ?? intrinsicWidth;
-    if (minWidth != null && realWidth < minWidth!) {
+    if (minWidth != null && realWidth! < minWidth!) {
       realWidth = minWidth;
     }
     if (maxWidth != null && realWidth! > maxWidth!) {
@@ -516,7 +516,7 @@ class RenderStyle
     double? intrinsicHeight = renderBoxModel!.intrinsicHeight;
     double intrinsicRatio = renderBoxModel!.intrinsicRatio!;
     double? realHeight = height ?? intrinsicHeight;
-    if (minHeight != null && realHeight < minHeight!) {
+    if (minHeight != null && realHeight! < minHeight!) {
       realHeight = minHeight;
     }
     if (maxHeight != null && realHeight! > maxHeight!) {

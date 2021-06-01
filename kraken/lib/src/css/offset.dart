@@ -94,7 +94,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     // cause RelayoutBoundary of positioned element will prevent the needsLayout flag
     // to bubble up in the RenderObject tree.
     if (renderBoxModel!.parentData is RenderLayoutParentData) {
-      RenderStyle renderStyle = renderBoxModel!.renderStyle!;
+      RenderStyle renderStyle = renderBoxModel!.renderStyle;
       if (renderStyle.position != CSSPositionType.static) {
         RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
         parent.markNeedsLayout();

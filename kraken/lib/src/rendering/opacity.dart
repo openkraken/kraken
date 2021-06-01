@@ -1,5 +1,3 @@
-// @dart=2.9
-
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -13,9 +11,10 @@ mixin RenderOpacityMixin on RenderBox {
 
   int alpha = ui.Color.getAlphaFromOpacity(1.0);
 
-  OpacityLayer _opacityLayer;
+  OpacityLayer? _opacityLayer;
 
-  void paintOpacity(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+  void paintOpacity(PaintingContext context, Offset offset,
+      PaintingContextCallback callback) {
     if (alpha == 0) {
       // No need to keep the layer. We'll create a new one if necessary.
       _opacityLayer = null;
@@ -29,11 +28,13 @@ mixin RenderOpacityMixin on RenderBox {
       return;
     }
 
-    _opacityLayer = context.pushOpacity(offset, alpha, callback, oldLayer: _opacityLayer);
+    _opacityLayer =
+        context.pushOpacity(offset, alpha, callback, oldLayer: _opacityLayer);
   }
 
   void debugOpacityProperties(DiagnosticPropertiesBuilder properties) {
-    if (alpha != 0 && alpha != 255) properties.add(DiagnosticsProperty('alpha', alpha));;
+    if (alpha != 0 && alpha != 255)
+      properties.add(DiagnosticsProperty('alpha', alpha));
+    ;
   }
 }
-

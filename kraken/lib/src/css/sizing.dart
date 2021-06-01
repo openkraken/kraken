@@ -157,7 +157,7 @@ mixin CSSSizingMixin on RenderStyleBase {
   static bool isStretchChildHeight(RenderBoxModel current, RenderBoxModel child) {
     bool isStretch = false;
     RenderStyle? renderStyle = current.renderStyle;
-    RenderStyle childRenderStyle = child.renderStyle!;
+    RenderStyle childRenderStyle = child.renderStyle;
     bool isFlex = current is RenderFlexLayout;
     bool isHorizontalDirection = false;
     bool isAlignItemsStretch = false;
@@ -166,7 +166,7 @@ mixin CSSSizingMixin on RenderStyleBase {
     bool isChildStretchSelf = false;
     if (isFlex) {
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
-        current.renderStyle!.flexDirection
+        current.renderStyle.flexDirection
       );
       isAlignItemsStretch = renderStyle.alignItems == AlignItems.stretch;
       isFlexNoWrap = renderStyle.flexWrap != FlexWrap.wrap &&
