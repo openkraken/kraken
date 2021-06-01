@@ -233,6 +233,7 @@ describe('MouseEvent', () => {
     div.style.backgroundColor = 'red';
     div.style.width = '100px';
     div.style.height = '100px';
+    document.body.appendChild(div);
 
     document.addEventListener('click', function handler(e) {
       done();
@@ -246,6 +247,7 @@ describe('MouseEvent', () => {
     div.style.backgroundColor = 'red';
     div.style.width = '100px';
     div.style.height = '100px';
+    document.body.appendChild(div);
 
     document.body.addEventListener('click', function handler(e) {
       done();
