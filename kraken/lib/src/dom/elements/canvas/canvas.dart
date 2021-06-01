@@ -181,8 +181,8 @@ class CanvasElement extends Element {
       }
       if (painter.scaleX != scaleX || painter.scaleY != scaleY) {
         painter
-          ..scaleX = scaleX!
-          ..scaleY = scaleY!;
+          ..scaleX = scaleX
+          ..scaleY = scaleY;
         if (painter.shouldRepaint(painter)) {
           renderCustomPaint.markNeedsPaint();
         }
