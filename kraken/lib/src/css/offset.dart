@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
@@ -21,60 +21,60 @@ class CSSOffset {
     this.isAuto,
   });
   /// length if margin value is length type
-  double length;
+  double? length;
   /// Whether value is auto
-  bool isAuto;
+  bool? isAuto;
 }
 
 mixin CSSPositionMixin on RenderStyleBase {
 
-  CSSOffset _top;
-  CSSOffset get top {
+  CSSOffset? _top;
+  CSSOffset? get top {
     return _top;
   }
-  set top(CSSOffset value) {
+  set top(CSSOffset? value) {
     if (_top == value) return;
     _top = value;
   }
 
-  CSSOffset _bottom;
-  CSSOffset get bottom {
+  CSSOffset? _bottom;
+  CSSOffset? get bottom {
     return _bottom;
   }
-  set bottom(CSSOffset value) {
+  set bottom(CSSOffset? value) {
     if (_bottom == value) return;
     _bottom = value;
   }
 
-  CSSOffset _left;
-  CSSOffset get left {
+  CSSOffset? _left;
+  CSSOffset? get left {
     return _left;
   }
-  set left(CSSOffset value) {
+  set left(CSSOffset? value) {
     if (_left == value) return;
     _left = value;
   }
 
-  CSSOffset _right;
-  CSSOffset get right {
+  CSSOffset? _right;
+  CSSOffset? get right {
     return _right;
   }
-  set right(CSSOffset value) {
+  set right(CSSOffset? value) {
     if (_right == value) return;
     _right = value;
   }
 
-  int _zIndex;
-  int get zIndex {
+  int? _zIndex;
+  int? get zIndex {
     return _zIndex;
   }
-  set zIndex(int value) {
+  set zIndex(int? value) {
     if (_zIndex == value) return;
     _zIndex = value;
     _markParentNeedsLayout();
     // Needs to sort children when parent paint children
-    if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderLayoutBox parent = renderBoxModel.parent;
+    if (renderBoxModel!.parentData is RenderLayoutParentData) {
+      RenderLayoutBox parent = renderBoxModel!.parent as RenderLayoutBox;
       parent.markNeedsSortChildren();
     }
   }
@@ -93,10 +93,10 @@ mixin CSSPositionMixin on RenderStyleBase {
     // Should mark positioned element's containing block needs layout directly
     // cause RelayoutBoundary of positioned element will prevent the needsLayout flag
     // to bubble up in the RenderObject tree.
-    if (renderBoxModel.parentData is RenderLayoutParentData) {
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
+    if (renderBoxModel!.parentData is RenderLayoutParentData) {
+      RenderStyle renderStyle = renderBoxModel!.renderStyle!;
       if (renderStyle.position != CSSPositionType.static) {
-        RenderBoxModel parent = renderBoxModel.parent;
+        RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
         parent.markNeedsLayout();
       }
     }
@@ -105,16 +105,16 @@ mixin CSSPositionMixin on RenderStyleBase {
   void updateOffset(String property, double value, {bool shouldMarkNeedsLayout = true}) {
     switch (property) {
       case TOP:
-        top = CSSOffset(length: value, isAuto: style[TOP] == AUTO);
+        top = CSSOffset(length: value, isAuto: style![TOP] == AUTO);
         break;
       case LEFT:
-        left = CSSOffset(length: value, isAuto: style[LEFT] == AUTO);
+        left = CSSOffset(length: value, isAuto: style![LEFT] == AUTO);
         break;
       case RIGHT:
-        right = CSSOffset(length: value, isAuto: style[RIGHT] == AUTO);
+        right = CSSOffset(length: value, isAuto: style![RIGHT] == AUTO);
         break;
       case BOTTOM:
-        bottom = CSSOffset(length: value, isAuto: style[BOTTOM] == AUTO);
+        bottom = CSSOffset(length: value, isAuto: style![BOTTOM] == AUTO);
         break;
     }
     /// Should mark parent needsLayout directly cause positioned element is rendered as relayoutBoundary
@@ -125,8 +125,8 @@ mixin CSSPositionMixin on RenderStyleBase {
   }
 
   void updatePosition(String property, String present) {
-    RenderStyle renderStyle = this;
-    position = parsePositionType(style[POSITION]);
+    RenderStyle renderStyle = this as RenderStyle;
+    position = parsePositionType(style![POSITION]);
     // Position change may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
     renderStyle.transformedDisplay = renderStyle.getTransformedDisplay();
@@ -136,7 +136,7 @@ mixin CSSPositionMixin on RenderStyleBase {
     zIndex = int.tryParse(present);
   }
 
-  static CSSPositionType parsePositionType(String input) {
+  static CSSPositionType parsePositionType(String? input) {
     switch (input) {
       case RELATIVE:
         return CSSPositionType.relative;

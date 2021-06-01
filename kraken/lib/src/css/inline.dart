@@ -1,6 +1,6 @@
 // https://www.w3.org/TR/css-inline-3/
 
-// @dart=2.9
+
 
 import 'package:kraken/css.dart';
 
@@ -26,7 +26,7 @@ mixin CSSInlineMixin on RenderStyleBase {
   set verticalAlign(VerticalAlign value) {
     if (value == null) return;
     if (_verticalAlign != value) {
-      renderBoxModel.markNeedsLayout();
+      renderBoxModel!.markNeedsLayout();
       _verticalAlign = value;
     }
   }

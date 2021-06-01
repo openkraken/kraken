@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
@@ -27,21 +27,21 @@ mixin CSSContentVisibilityMixin on RenderStyleBase {
   ///
   /// If ContentVisibility.auto, the framework will compute the intersection bounds and not to paint when child renderObject
   /// are no longer intersection with this renderObject.
-  ContentVisibility _contentVisibility;
-  ContentVisibility get contentVisibility => _contentVisibility;
-  set contentVisibility(ContentVisibility value) {
+  ContentVisibility? _contentVisibility;
+  ContentVisibility? get contentVisibility => _contentVisibility;
+  set contentVisibility(ContentVisibility? value) {
     if (value == null) return;
     if (value == _contentVisibility) return;
     _contentVisibility = value;
-    renderBoxModel.markNeedsPaint();
+    renderBoxModel!.markNeedsPaint();
   }
 
   bool _hasIntersectionObserver = false;
 
   void setContentVisibilityIntersectionObserver(
-    RenderBoxModel renderBoxModel, ContentVisibility contentVisibility) {
+    RenderBoxModel? renderBoxModel, ContentVisibility? contentVisibility) {
     if (contentVisibility == ContentVisibility.auto && !_hasIntersectionObserver) {
-      renderBoxModel.addIntersectionChangeListener(_handleIntersectionChange);
+      renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
       // Call needs paint make sure intersection observer works immediately
       renderBoxModel.markNeedsPaint();
       _hasIntersectionObserver = true;
@@ -73,7 +73,7 @@ mixin CSSContentVisibilityMixin on RenderStyleBase {
     if (renderBoxModel != null) {
       contentVisibility = CSSContentVisibilityMixin.getContentVisibility(value);
       if (contentVisibility != ContentVisibility.auto && _hasIntersectionObserver) {
-        renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);
+        renderBoxModel!.removeIntersectionChangeListener(_handleIntersectionChange);
         _hasIntersectionObserver = false;
       }
       setContentVisibilityIntersectionObserver(renderBoxModel, contentVisibility);

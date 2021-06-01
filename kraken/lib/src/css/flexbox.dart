@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
@@ -184,7 +184,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     if (_flexDirection != value) {
       _flexDirection = value;
       if (renderBoxModel is RenderFlexLayout) {
-        renderBoxModel.markNeedsLayout();
+        renderBoxModel!.markNeedsLayout();
       }
     }
   }
@@ -197,7 +197,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     if (_flexWrap != value) {
       _flexWrap = value;
       if (renderBoxModel is RenderFlexLayout) {
-        renderBoxModel.markNeedsLayout();
+        renderBoxModel!.markNeedsLayout();
       }
     }
   }
@@ -210,7 +210,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     if (_justifyContent != value) {
       _justifyContent = value;
       if (renderBoxModel is RenderFlexLayout) {
-        renderBoxModel.markNeedsLayout();
+        renderBoxModel!.markNeedsLayout();
       }
     }
   }
@@ -223,7 +223,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     if (_alignItems != value) {
       _alignItems = value;
       if (renderBoxModel is RenderFlexLayout) {
-        renderBoxModel.markNeedsLayout();
+        renderBoxModel!.markNeedsLayout();
       }
     }
   }
@@ -235,7 +235,7 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     if (_alignContent == value) return;
     _alignContent = value;
     if (renderBoxModel is RenderFlexLayout) {
-      renderBoxModel.markNeedsLayout();
+      renderBoxModel!.markNeedsLayout();
     }
   }
 
@@ -245,18 +245,18 @@ mixin CSSFlexboxMixin on RenderStyleBase {
     assert(value != null);
     if (_alignSelf == value) return;
     _alignSelf = value;
-    if (renderBoxModel.parent is RenderFlexLayout) {
-      renderBoxModel.markNeedsLayout();
+    if (renderBoxModel!.parent is RenderFlexLayout) {
+      renderBoxModel!.markNeedsLayout();
     }
   }
 
-  double get flexBasis => _flexBasis;
-  double _flexBasis;
-  set flexBasis(double value) {
+  double? get flexBasis => _flexBasis;
+  double? _flexBasis;
+  set flexBasis(double? value) {
     if (_flexBasis == value) return;
     _flexBasis = value;
-    if (renderBoxModel.parent is RenderFlexLayout) {
-      renderBoxModel.markNeedsLayout();
+    if (renderBoxModel!.parent is RenderFlexLayout) {
+      renderBoxModel!.markNeedsLayout();
     }
   }
 
@@ -265,8 +265,8 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   set flexGrow(double value) {
     if (_flexGrow == value) return;
     _flexGrow = value;
-    if (renderBoxModel.parent is RenderFlexLayout) {
-      renderBoxModel.markNeedsLayout();
+    if (renderBoxModel!.parent is RenderFlexLayout) {
+      renderBoxModel!.markNeedsLayout();
     }
   }
 
@@ -275,24 +275,24 @@ mixin CSSFlexboxMixin on RenderStyleBase {
   set flexShrink(double value) {
     if (_flexShrink == value) return;
     _flexShrink = value;
-    if (renderBoxModel.parent is RenderFlexLayout) {
-      renderBoxModel.markNeedsLayout();
+    if (renderBoxModel!.parent is RenderFlexLayout) {
+      renderBoxModel!.markNeedsLayout();
     }
   }
 
   void updateFlexbox() {
-    flexDirection = _getFlexDirection(style);
-    flexWrap = _getFlexWrap(style);
-    justifyContent = _getJustifyContent(style);
-    alignItems = _getAlignItems(style);
-    alignContent = _getAlignContent(style);
+    flexDirection = _getFlexDirection(style!);
+    flexWrap = _getFlexWrap(style!);
+    justifyContent = _getJustifyContent(style!);
+    alignItems = _getAlignItems(style!);
+    alignContent = _getAlignContent(style!);
   }
 
   void updateFlexItem() {
-    flexGrow = _getFlexGrow(style);
-    flexShrink = _getFlexShrink(style);
-    flexBasis = _getFlexBasis(style, viewportSize);
-    alignSelf = _getAlignSelf(style);
+    flexGrow = _getFlexGrow(style!);
+    flexShrink = _getFlexShrink(style!);
+    flexBasis = _getFlexBasis(style!, viewportSize);
+    alignSelf = _getAlignSelf(style!);
   }
 
   FlexDirection _getFlexDirection(CSSStyleDeclaration style) {
@@ -418,21 +418,21 @@ mixin CSSFlexboxMixin on RenderStyleBase {
 
   double _getFlexGrow(CSSStyleDeclaration style) {
     String grow = style[FLEX_GROW];
-    double flexGrow = CSSLength.toDouble(grow);
+    double? flexGrow = CSSLength.toDouble(grow);
     return flexGrow != null && flexGrow >= 0 ? flexGrow : 0.0;
   }
 
   double _getFlexShrink(CSSStyleDeclaration style) {
     String shrink = style[FLEX_SHRINK];
-    double flexShrink = CSSLength.toDouble(shrink);
+    double? flexShrink = CSSLength.toDouble(shrink);
     return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
   }
 
-  double _getFlexBasis(CSSStyleDeclaration style, Size viewportSize) {
+  double? _getFlexBasis(CSSStyleDeclaration style, Size viewportSize) {
     String basisStr = style[FLEX_BASIS];
-    double flexBasis = CSSLength.toDisplayPortValue(basisStr, viewportSize);
+    double? flexBasis = CSSLength.toDisplayPortValue(basisStr, viewportSize);
     if (basisStr.isNotEmpty && basisStr != AUTO) {
-      if (flexBasis < 0) {
+      if (flexBasis! < 0) {
         flexBasis = null;
       }
     } else {

@@ -1,6 +1,6 @@
 // CSS Values keywords
 
-// @dart=2.9
+
 
 const String INITIAL = 'initial';
 const String NORMAL = 'normal';

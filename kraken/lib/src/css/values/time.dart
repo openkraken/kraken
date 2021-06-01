@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
@@ -18,12 +18,12 @@ class CSSTime {
   }
 
   static int parseTime(String input) {
-    double milliseconds;
+    double? milliseconds;
     if (input.endsWith(MILLISECONDS)) {
       milliseconds = double.tryParse(input.split(MILLISECONDS)[0]);
     } else if (input.endsWith(SECOND)) {
-      milliseconds = double.tryParse(input.split(SECOND)[0]) * 1000;
+      milliseconds = double.tryParse(input.split(SECOND)[0])! * 1000;
     }
-    return milliseconds.toInt();
+    return milliseconds!.toInt();
   }
 }

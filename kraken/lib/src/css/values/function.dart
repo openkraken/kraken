@@ -1,6 +1,6 @@
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#functional-notations
 
-// @dart=2.9
+
 
 final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
 final _functionStart = '(';

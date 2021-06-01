@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
@@ -18,14 +18,14 @@ mixin CSSSliverMixin on RenderStyleBase {
       _sliverAxis = value;
 
       if (renderBoxModel is RenderRecyclerLayout) {
-        RenderRecyclerLayout recyclerLayout = renderBoxModel;
+        RenderRecyclerLayout recyclerLayout = renderBoxModel as RenderRecyclerLayout;
 
         AxisDirection axisDirection = RenderRecyclerLayout.getAxisDirection(value);
         recyclerLayout.scrollable = KrakenScrollable(axisDirection: axisDirection);
-        RenderViewport renderViewport = recyclerLayout.renderViewport;
+        RenderViewport renderViewport = recyclerLayout.renderViewport!;
         renderViewport.axisDirection = axisDirection;
         renderViewport.crossAxisDirection = RenderRecyclerLayout.getCrossAxisDirection(value);
-        renderViewport.offset = recyclerLayout.scrollable.position;
+        renderViewport.offset = recyclerLayout.scrollable!.position!;
 
         recyclerLayout.markNeedsLayout();
       }
@@ -40,7 +40,6 @@ mixin CSSSliverMixin on RenderStyleBase {
     switch (sliverDirection) {
       case ROW:
         return Axis.horizontal;
-        break;
 
       case COLUMN:
       default:
