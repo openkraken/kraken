@@ -98,9 +98,8 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   /// The Node.parentElement read-only property returns the DOM node's parent Element,
   /// or null if the node either has no parent, or its parent isn't a DOM Element.
   Element? get parentElement {
-    Node? _parentNode = parentNode;
-    if (_parentNode != null && _parentNode.nodeType == NodeType.ELEMENT_NODE) {
-      return _parentNode as Element;
+    if (parentNode != null && parentNode!.nodeType == NodeType.ELEMENT_NODE) {
+      return parentNode as Element;
     }
     return null;
   }
@@ -118,33 +117,31 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   // If node is on the tree, the root parent is body.
   bool get isConnected {
-    Node? _node = parentNode;
-    while (_node != null) {
-      _node = _node.parentNode;
+    Node parent = this;
+    while (parent.parentNode != null) {
+      parent = parent.parentNode!;
     }
     Document document = elementManager.document;
-    return this == document || _node == document;
+    return this == document || parent == document;
   }
 
   Node get firstChild => childNodes.first;
+
   Node get lastChild => childNodes.last;
 
   Node? get previousSibling {
-    Node? _parentNode = parentNode;
-    if (_parentNode == null) return null;
-    int index = _parentNode.childNodes.indexOf(this);
+    if (parentNode == null) return null;
+    int index = parentNode!.childNodes.indexOf(this);
     if (index - 1 < 0) return null;
-    return _parentNode.childNodes[index - 1];
+    return parentNode!.childNodes[index - 1];
   }
 
   Node? get nextSibling {
-    Node? _parentNode = parentNode;
-    if (_parentNode == null) return null;
-    int index = _parentNode.childNodes.indexOf(this);
-    if (index + 1 > _parentNode.childNodes.length - 1) return null;
-    return _parentNode.childNodes[index + 1];
+    if (parentNode == null) return null;
+    int index = parentNode!.childNodes.indexOf(this);
+    if (index + 1 > parentNode!.childNodes.length - 1) return null;
+    return parentNode!.childNodes[index + 1];
   }
-
   // Is child renderObject attached.
   bool get isRendererAttached => renderer != null && renderer!.attached;
 
