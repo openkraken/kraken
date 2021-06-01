@@ -152,8 +152,8 @@ class CSSBackground {
     Size viewportSize = Size(viewportWidth, viewportHeight);
 
     if (method.args.length > 1) {
-      List<Color?> colors = [];
-      List<double?> stops = [];
+      List<Color> colors = [];
+      List<double> stops = [];
       int start = 0;
       switch (method.name) {
         case 'linear-gradient':
