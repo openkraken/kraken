@@ -145,7 +145,7 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
     ElementInstance *element = reinterpret_cast<ElementInstance *>(node);
 
     /* createElement */
-    std::string tagName = element->tagName();
+    std::string tagName = element->getTagName();
     auto newElement = JSElement::buildElementInstance(element->document()->context, tagName);
 
     /* copy attributes */
