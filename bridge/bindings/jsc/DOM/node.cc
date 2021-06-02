@@ -202,8 +202,10 @@ JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef
                              const JSValueRef *arguments, JSValueRef *exception) {
   auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
 
-  JSValueRef deepValue = JSValueMakeBoolean(ctx, false);
-  if (argumentCount >= 1) {
+  JSValueRef deepValue;
+  if (argumentCount < 1) {
+    deepValue = JSValueMakeBoolean(ctx, false);
+  } else {
     deepValue = arguments[0];
   }
 
