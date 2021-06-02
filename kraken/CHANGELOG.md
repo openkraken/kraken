@@ -1,3 +1,14 @@
+## 0.7.3+2
+
+**Features**
+
++ Input element now support type=password options https://github.com/openkraken/kraken/pull/377
+
+**Bug Fixed**
+
++ Fix event can't bubble to document element https://github.com/openkraken/kraken/pull/380
++ fix: fix bridge crash with getStringProperty on InputElement. https://github.com/openkraken/kraken/pull/386
+
 ## 0.7.3+1
 
 * Fix: fix prebuilt binary.
