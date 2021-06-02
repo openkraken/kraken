@@ -129,5 +129,22 @@ describe('Clone node', () => {
     img2.addEventListener('load', loadImg);
   })
 
+  it('deep is not required', async () => {
+    const div = document.createElement('div');
+    div.style.width = '100px';
+    div.style.height = '100px';
+    div.style.backgroundColor = 'red';
+    const divChild = document.createElement('div');
+    divChild.style.width = '50px';
+    divChild.style.height = '50px';
+    divChild.style.backgroundColor = 'yellow';
+    document.body.appendChild(div);
+    div.appendChild(divChild);
+
+    const divClone = div.cloneNode();
+    document.body.appendChild(divClone);
+
+    await snapshot();
+  })
 });
   
