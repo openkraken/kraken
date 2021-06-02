@@ -1452,7 +1452,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   double _getMarginTopWithPreSibling(RenderBoxModel renderBoxModel, RenderObject preSibling) {
-    double height = renderBoxModel.renderStyle.height;
     double marginTop = renderBoxModel.renderStyle.marginTop.length;
     double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
 
@@ -1461,7 +1460,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       preSibling.renderStyle.transformedDisplay == CSSDisplay.flex) &&
       preSibling.renderStyle.marginBottom.length > 0
     ) {
-      double preSiblingHeight = preSibling.renderStyle.height;
       double preSiblingMarginTop = preSibling.renderStyle.marginTop.length;
       double preSiblingMarginBottom = preSibling.renderStyle.marginBottom.length;
       // Margin top and bottom of empty block collapse
@@ -1485,6 +1483,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     // which makes the margin top of itself 0.
     if (parent.elementType != HTML &&
       parent.renderStyle.transformedDisplay == CSSDisplay.block &&
+      parent.renderStyle.overflowX == CSSOverflowType.visible &&
+      parent.renderStyle.overflowY == CSSOverflowType.visible &&
       parent.renderStyle.paddingTop == 0 &&
       parent.renderStyle.borderTop == 0 &&
       parent.parent is RenderFlowLayout
@@ -1499,11 +1499,12 @@ class RenderFlowLayout extends RenderLayoutBox {
   double _getMarginTopWithNestChild(RenderBoxModel renderBoxModel) {
     double paddingTop = renderBoxModel.renderStyle.paddingTop;
     double borderTop = renderBoxModel.renderStyle.borderTop;
-    double height = renderBoxModel.renderStyle.height;
     double marginTop = renderBoxModel.renderStyle.marginTop.length;
     double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
     if (renderBoxModel is RenderLayoutBox &&
       renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.block &&
+      renderBoxModel.renderStyle.overflowX == CSSOverflowType.visible &&
+      renderBoxModel.renderStyle.overflowY == CSSOverflowType.visible &&
       paddingTop == 0 &&
       borderTop == 0
     ) {
@@ -1530,6 +1531,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Margin bottom of first child with parent which is in flow layout collapse with parent
     // which makes the margin top of itself 0.
     if (parent.renderStyle.transformedDisplay == CSSDisplay.block &&
+      parent.renderStyle.overflowX == CSSOverflowType.visible &&
+      parent.renderStyle.overflowY == CSSOverflowType.visible &&
       parent.renderStyle.paddingBottom == 0 &&
       parent.renderStyle.borderBottom == 0 &&
       parent.parent is RenderFlowLayout
@@ -1544,10 +1547,15 @@ class RenderFlowLayout extends RenderLayoutBox {
   double _getMarginBottomWithNestChild(RenderBoxModel renderBoxModel) {
     double paddingBottom = renderBoxModel.renderStyle.paddingBottom;
     double borderBottom = renderBoxModel.renderStyle.borderBottom;
-    double height = renderBoxModel.renderStyle.height;
     double marginTop = renderBoxModel.renderStyle.marginTop.length;
     double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
-    if (paddingBottom == 0 && borderBottom == 0 && renderBoxModel is RenderLayoutBox) {
+    if (renderBoxModel is RenderLayoutBox &&
+      renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.block &&
+      renderBoxModel.renderStyle.overflowX == CSSOverflowType.visible &&
+      renderBoxModel.renderStyle.overflowY == CSSOverflowType.visible &&
+      paddingBottom == 0 &&
+      borderBottom == 0
+    ) {
       RenderObject lastChild = renderBoxModel.lastChild;
       if (lastChild is RenderBoxModel &&
         lastChild.renderStyle.transformedDisplay == CSSDisplay.block) {
@@ -1606,8 +1614,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     // 1. Find margin-top and margin-bottom collapse with empty block
-    double height = child.renderStyle.height;
-    double marginTop = child.renderStyle.marginTop.length;
     double marginBottom = child.renderStyle.marginBottom.length;
     // Margin top and bottom of empty block collapse
     if (child.boxSize.height == 0) {
@@ -1618,8 +1624,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderLayoutParentData childParentData = child.parentData;
     RenderObject nextSibling = childParentData.nextSibling;
     if (nextSibling == null) {
-      // 1. Find margin-top collapse with nested first child
-      marginBottom = _getMarginTopWithFirstChild(child);
+      // 3. Find margin-bottom collapse with nested first child
+      marginBottom = _getMarginBottomWithFirstChild(child);
     }
 
     return marginBottom;
