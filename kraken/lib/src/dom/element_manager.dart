@@ -183,7 +183,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     newTarget.style = oldTarget.style;
     newTarget.properties.clear();
     oldTarget.properties.forEach((key, value) {
-      newTarget.properties[key] = value;
+      newTarget.setProperty(key, value);
     });
   }
 
