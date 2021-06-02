@@ -57,4 +57,10 @@ describe('DOM Element API', () => {
     expect(container.children[0]).toBe(a);
     expect(container.children[1]).toBe(b);
   });
+
+  it('should work with string value property', () => {
+    let input = document.createElement('input');
+    input.value = 'helloworld';
+    expect(input.value).toBe('helloworld');
+  });
 });
