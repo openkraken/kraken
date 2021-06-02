@@ -1354,10 +1354,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, elementType: element.tagName, targetId: element.targetId, elementManager: element.elementManager);
         } else {
           flexLayout = RenderFlexLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, elementType: element.tagName, targetId: element.targetId, elementManager: element.elementManager);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
@@ -1415,10 +1415,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, elementType: element.tagName, targetId: element.targetId, elementManager: element.elementManager);
         } else {
           flowLayout = RenderFlowLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, elementType: element.tagName, targetId: element.targetId, elementManager: element.elementManager);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
@@ -1497,10 +1497,10 @@ class Element extends Node
     if (prevRenderIntrinsic == null) {
       if (repaintSelf) {
         intrinsic = RenderSelfRepaintIntrinsic(
-          element.targetId, renderStyle, element.elementManager);
+          element.targetId, element.tagName, renderStyle, element.elementManager);
       } else {
         intrinsic = RenderIntrinsic(
-          element.targetId, renderStyle, element.elementManager);
+          element.targetId, element.tagName, renderStyle, element.elementManager);
       }
     } else {
       if (prevRenderIntrinsic is RenderSelfRepaintIntrinsic) {

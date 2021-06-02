@@ -151,8 +151,8 @@ class RenderLayoutBox extends RenderBoxModel
     with
         ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
-  RenderLayoutBox({int targetId, RenderStyle renderStyle, ElementManager elementManager})
-      : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager);
+  RenderLayoutBox({int targetId, String elementType, RenderStyle renderStyle, ElementManager elementManager})
+      : super(targetId: targetId, elementType: elementType, renderStyle: renderStyle, elementManager: elementManager);
 
   @override
   void markNeedsLayout() {
@@ -455,6 +455,7 @@ class RenderBoxModel extends RenderBox with
     RenderObjectWithControllerMixin {
   RenderBoxModel({
     this.targetId,
+    this.elementType,
     this.renderStyle,
     this.elementManager,
   }) : assert(targetId != null),
@@ -463,6 +464,8 @@ class RenderBoxModel extends RenderBox with
   }
 
   RenderStyle renderStyle;
+
+  String elementType;
 
   @override
   bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
@@ -1503,6 +1506,7 @@ class RenderBoxModel extends RenderBox with
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty('targetId', targetId, missingIfNull: true));
+    properties.add(DiagnosticsProperty('elementType', elementType, missingIfNull: true));
     properties.add(DiagnosticsProperty('contentSize', _contentSize));
     properties.add(DiagnosticsProperty('contentConstraints', _contentConstraints, missingIfNull: true));
     properties.add(DiagnosticsProperty('widthSizeType', widthSizeType, missingIfNull: true));

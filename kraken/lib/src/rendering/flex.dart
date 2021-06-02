@@ -155,10 +155,11 @@ class RenderFlexLayout extends RenderLayoutBox {
   /// start of the main axis and the center of the cross axis.
   RenderFlexLayout({
     List<RenderBox> children,
+    String elementType,
     int targetId,
     ElementManager elementManager,
     RenderStyle renderStyle,
-  }) : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager) {
+  }) : super(targetId: targetId, elementType: elementType, renderStyle: renderStyle, elementManager: elementManager) {
     addAll(children);
   }
 
@@ -2426,10 +2427,11 @@ class RenderFlexLayout extends RenderLayoutBox {
 class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
   RenderSelfRepaintFlexLayout({
     List<RenderBox> children,
+    String elementType,
     int targetId,
     ElementManager elementManager,
     RenderStyle renderStyle,
-  }) : super(children: children, targetId: targetId, elementManager: elementManager, renderStyle: renderStyle);
+  }) : super(children: children, elementType: elementType, targetId: targetId, elementManager: elementManager, renderStyle: renderStyle);
 
   @override
   bool get isRepaintBoundary => true;

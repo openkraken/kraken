@@ -34,10 +34,11 @@ class _RunMetrics {
 class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout(
       {List<RenderBox> children,
+      String elementType,
       RenderStyle renderStyle,
       int targetId,
       ElementManager elementManager})
-      : super(targetId: targetId, renderStyle: renderStyle, elementManager: elementManager) {
+      : super(targetId: targetId, elementType: elementType, renderStyle: renderStyle, elementManager: elementManager) {
     addAll(children);
   }
 
@@ -889,7 +890,6 @@ class RenderFlowLayout extends RenderLayoutBox {
       final double runBaselineExtent = metrics.baselineExtent;
       final double mainAxisFreeSpace = math.max(0.0, mainAxisContentSize - runMainAxisExtent);
       final int runChildrenCount = metrics.runChildren.length;
-
       double childLeadingSpace = 0.0;
       double childBetweenSpace = 0.0;
 
@@ -1053,8 +1053,10 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   double computeDistanceToBaseline() {
     double lineDistance;
-    double marginTop = renderStyle.marginTop.length ?? 0;
-    double marginBottom = renderStyle.marginBottom.length ?? 0;
+    bool isInline = renderStyle.transformedDisplay == CSSDisplay.inline;
+    // Margin does not work for inline element.
+    double marginTop = !isInline ? renderStyle.marginTop.length : 0;
+    double marginBottom = !isInline ? renderStyle.marginBottom.length : 0;
     bool isParentFlowLayout = parent is RenderFlowLayout;
     CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay != CSSDisplay.block && transformedDisplay != CSSDisplay.flex;
@@ -1455,7 +1457,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
 
     if (preSibling is RenderBoxModel &&
-      preSibling.renderStyle.marginBottom.length != 0
+      (preSibling.renderStyle.transformedDisplay == CSSDisplay.block ||
+      preSibling.renderStyle.transformedDisplay == CSSDisplay.flex) &&
+      preSibling.renderStyle.marginBottom.length > 0
     ) {
       double preSiblingHeight = preSibling.renderStyle.height;
       double preSiblingMarginTop = preSibling.renderStyle.marginTop.length;
@@ -1468,7 +1472,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     // Margin top and bottom of empty block collapse
-    if (height == null || height == 0) {
+    if (renderBoxModel.boxSize.height == 0) {
       return math.max(marginTop, marginBottom);
     }
     return marginTop;
@@ -1479,7 +1483,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Margin top of first child with parent which is in flow layout collapse with parent
     // which makes the margin top of itself 0.
-    if (parent.renderStyle.transformedDisplay == CSSDisplay.block &&
+    if (parent.elementType != HTML &&
+      parent.renderStyle.transformedDisplay == CSSDisplay.block &&
       parent.renderStyle.paddingTop == 0 &&
       parent.renderStyle.borderTop == 0 &&
       parent.parent is RenderFlowLayout
@@ -1504,7 +1509,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     ) {
       RenderObject firstChild = renderBoxModel.firstChild;
       if (firstChild is RenderBoxModel &&
-        firstChild.renderStyle.transformedDisplay == CSSDisplay.block
+        (firstChild.renderStyle.transformedDisplay == CSSDisplay.block ||
+        firstChild.renderStyle.transformedDisplay == CSSDisplay.flex)
       ) {
         double childMarginTop = firstChild is RenderFlowLayout ?
           _getMarginTopWithNestChild(firstChild) : firstChild.renderStyle.marginTop.length;
@@ -1556,10 +1562,18 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
     return marginBottom;
   }
+
   /// Get the actual margin top of child due to margin collapse
   double _getChildMarginTop(RenderBoxModel child) {
-    if (child.renderStyle.transformedDisplay != CSSDisplay.block &&
-      child.renderStyle.transformedDisplay != CSSDisplay.flex
+    CSSDisplay childTransformedDisplay = child.renderStyle.transformedDisplay;
+    // Margin does not work on inline element
+    if (childTransformedDisplay == CSSDisplay.inline) {
+      return 0;
+    }
+    // Margin collapse does not work on HTML element and inline level elements
+    if (child.elementType == HTML ||
+      (childTransformedDisplay != CSSDisplay.block &&
+      childTransformedDisplay != CSSDisplay.flex)
     ) {
       return child.renderStyle.marginTop.length;
     }
@@ -1574,13 +1588,19 @@ class RenderFlowLayout extends RenderLayoutBox {
       // 2. Find margin-top collapse with margin-bottom previous sibling
       marginTop = _getMarginTopWithPreSibling(child, preSibling);
     }
+
     return marginTop;
   }
 
   /// Get the actual margin bottom of child due to margin collapse
   double _getChildMarginBottom(RenderBoxModel child) {
-    if (child.renderStyle.transformedDisplay != CSSDisplay.block &&
-      child.renderStyle.transformedDisplay != CSSDisplay.flex
+    CSSDisplay childTransformedDisplay = child.renderStyle.transformedDisplay;
+    // Margin does not work on inline element
+    if (childTransformedDisplay == CSSDisplay.inline) {
+      return 0;
+    }
+    if (childTransformedDisplay != CSSDisplay.block &&
+      childTransformedDisplay != CSSDisplay.flex
     ) {
       return child.renderStyle.marginBottom.length;
     }
@@ -1709,10 +1729,11 @@ class RenderFlowLayout extends RenderLayoutBox {
 class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   RenderSelfRepaintFlowLayout({
     List<RenderBox> children,
+    String elementType,
     int targetId,
     ElementManager elementManager,
     RenderStyle renderStyle,
-  }): super(children: children, targetId: targetId, elementManager: elementManager, renderStyle: renderStyle);
+  }): super(children: children, elementType: elementType, targetId: targetId, elementManager: elementManager, renderStyle: renderStyle);
 
   @override
   bool get isRepaintBoundary => true;
