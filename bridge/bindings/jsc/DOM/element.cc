@@ -727,7 +727,7 @@ void ElementInstance::_beforeUpdateId(JSValueRef oldId, JSValueRef newId) {
   }
 }
 
-std::string ElementInstance::getLowerTagName() {
+std::string ElementInstance::getRegisteredTagName() {
   return m_tagName.string();
 }
 
