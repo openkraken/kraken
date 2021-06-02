@@ -16,11 +16,9 @@ enum CSSOverflowType {
   clip
 }
 
-List<CSSOverflowType> getOverflowTypes({CSSStyleDeclaration style, RenderStyle renderStyle}) {
-  CSSOverflowType overflowX = renderStyle != null ?
-    renderStyle.overflowX : _getOverflowType(style[OVERFLOW_X]);
-  CSSOverflowType overflowY = renderStyle != null ?
-    renderStyle.overflowY : _getOverflowType(style[OVERFLOW_Y]);
+List<CSSOverflowType> getOverflowTypes(CSSStyleDeclaration style) {
+  CSSOverflowType overflowX = _getOverflowType(style[OVERFLOW_X]);
+  CSSOverflowType overflowY = _getOverflowType(style[OVERFLOW_Y]);
 
   // Apply overflow special rules from w3c.
   if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
@@ -71,7 +69,7 @@ mixin CSSOverflowStyleMixin on RenderStyleBase {
 
   void updateOverflow(CSSStyleDeclaration style) {
     RenderStyle renderStyle = this;
-    List<CSSOverflowType> overflow = getOverflowTypes(style: style);
+    List<CSSOverflowType> overflow = getOverflowTypes(style);
     renderStyle.overflowX = overflow[0];
     renderStyle.overflowY = overflow[1];
   }

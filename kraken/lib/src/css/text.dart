@@ -557,8 +557,8 @@ class CSSText {
   }
 
   static TextOverflow getTextOverflow({CSSStyleDeclaration style, RenderStyle renderStyle}) {
-    List<CSSOverflowType> overflows = renderStyle != null ?
-      getOverflowTypes(renderStyle: renderStyle) : getOverflowTypes(style: style);
+    CSSOverflowType overflowX = renderStyle != null ?
+      renderStyle.overflowX : getOverflowTypes(style)[0];
     // Get white space from renderStyle cause it may be inherited from parents.
     WhiteSpace whiteSpace = renderStyle != null ?
       renderStyle.whiteSpace : getWhiteSpace(style);
@@ -570,7 +570,7 @@ class CSSText {
       return TextOverflow.ellipsis;
     }
     //  To make text overflow its container you have to set overflowX hidden and white-space: nowrap.
-    if (overflows[0] != CSSOverflowType.hidden || whiteSpace != WhiteSpace.nowrap) {
+    if (overflowX != CSSOverflowType.hidden || whiteSpace != WhiteSpace.nowrap) {
       return TextOverflow.visible;
     }
 
