@@ -765,6 +765,7 @@ BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientR
   : HostObject(context, "BoundingClientRect"), nativeBoundingClientRect(boundingClientRect) {}
 
 JSValueRef ElementInstance::getStringValueProperty(std::string &name) {
+  getDartMethod()->flushUICommand();
   JSStringRef stringRef = JSStringCreateWithUTF8CString(name.c_str());
   NativeString *nativeString = stringRefToNativeString(stringRef);
   NativeString *returnedString = nativeElement->getStringValueProperty(nativeElement, nativeString);
