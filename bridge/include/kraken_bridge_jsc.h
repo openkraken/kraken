@@ -874,7 +874,7 @@ public:
 
   std::string tagName();
 
-  std::string getTagName();
+  std::string getLowerTagName();
 
 private:
   friend JSElement;
