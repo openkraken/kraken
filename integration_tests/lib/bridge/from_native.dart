@@ -82,16 +82,16 @@ PointerChange _getPointerChange(double change) {
 
 class MousePointer extends Struct {
   @Int32()
-  int contextId;
+  external int contextId;
 
   @Double()
-  double x;
+  external double x;
 
   @Double()
-  double y;
+  external double y;
 
   @Double()
-  double change;
+  external double change;
 }
 
 void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int length) {
@@ -115,7 +115,7 @@ void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int lengt
     ));
   }
   PointerDataPacket dataPacket = PointerDataPacket(data: data);
-  window.onPointerDataPacket(dataPacket);
+  window.onPointerDataPacket!(dataPacket);
 }
 
 final Pointer<NativeFunction<Native_SimulatePointer>> _nativeSimulatePointer = Pointer.fromFunction(_simulatePointer);
@@ -127,7 +127,7 @@ void _simulateKeyPress(Pointer<NativeString> nativeChars) {
     return;
   }
   if (InputElement.focusInputElement != null) {
-    InputElement current = InputElement.focusInputElement;
+    InputElement current = InputElement.focusInputElement!;
     TextEditingValue currentValue = current.textSelectionDelegate.textEditingValue;
     String updatedText = currentValue.text + chars;
     int baseOffset = currentValue.selection.baseOffset + chars.length;

@@ -12,27 +12,27 @@ import 'bridge/from_native.dart';
 import 'bridge/to_native.dart';
 import 'custom/custom_object_element.dart';
 import 'package:kraken/gesture.dart';
-// import 'package:kraken_websocket/kraken_websocket.dart';
-// import 'package:kraken_animation_player/kraken_animation_player.dart';
-// import 'package:kraken_video_player/kraken_video_player.dart';
-// import 'package:kraken_webview/kraken_webview.dart';
+import 'package:kraken_websocket/kraken_websocket.dart';
+import 'package:kraken_animation_player/kraken_animation_player.dart';
+import 'package:kraken_video_player/kraken_video_player.dart';
+import 'package:kraken_webview/kraken_webview.dart';
 
-String pass = (AnsiPen()..green())('[TEST PASS]');
-String err = (AnsiPen()..red())('[TEST FAILED]');
+String? pass = (AnsiPen()..green())('[TEST PASS]');
+String? err = (AnsiPen()..red())('[TEST FAILED]');
 
 final String __dirname = path.dirname(Platform.script.path);
 final String testDirectory = Platform.environment['KRAKEN_TEST_DIR'] ?? __dirname;
 final Directory specsDirectory = Directory(path.join(testDirectory, '.specs'));
 
 const int KRAKEN_NUM = 1;
-List<Kraken> kraken = List<Kraken>.filled(KRAKEN_NUM, null);
+Map<int, Kraken> krakenMap = Map();
 
 class NativeGestureClient implements GestureClient {
   NativeGestureClient({
     this.gestureClientID
   });
 
-  int gestureClientID;
+  int? gestureClientID;
 
   @override
   void dragUpdateCallback(DragUpdateDetails details) {
@@ -41,7 +41,7 @@ class NativeGestureClient implements GestureClient {
   @override
   void dragStartCallback(DragStartDetails details) {
     var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
-    kraken[gestureClientID].controller.view.document.documentElement.dispatchEvent(event);
+    krakenMap[gestureClientID!]!.controller!.view.document!.documentElement.dispatchEvent(event);
   }
 
   @override
@@ -51,13 +51,13 @@ class NativeGestureClient implements GestureClient {
 
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
 void main() async {
-  // KrakenWebsocket.initialize();
-  // KrakenAnimationPlayer.initialize();
-  // KrakenVideoPlayer.initialize();
-  // KrakenWebView.initialize();
+  KrakenWebsocket.initialize();
+  KrakenAnimationPlayer.initialize();
+  KrakenVideoPlayer.initialize();
+  KrakenWebView.initialize();
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
-  // setObjectElementFactory(customObjectElementFactory);
+  setObjectElementFactory(customObjectElementFactory);
 
   List<FileSystemEntity> specs = specsDirectory.listSync(recursive: true);
   List<Map<String, String>> mainTestPayload = [];
@@ -77,7 +77,7 @@ void main() async {
     mainTestPayload,
     mainTestPayload.reversed.toList()
   ];
-  List<Kraken> widgets = [];
+  List<Widget> widgets = [];
 
   for (int i = 0; i < KRAKEN_NUM; i ++) {
     KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
@@ -86,7 +86,7 @@ void main() async {
       return 'method: ' + method;
     };
 
-    kraken[i] = Kraken(
+    krakenMap[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
       bundleContent: 'console.log("Starting integration tests...")',
@@ -95,7 +95,7 @@ void main() async {
       javaScriptChannel: javaScriptChannel,
       gestureClient: NativeGestureClient(gestureClientID:i),
     );
-    widgets.add(kraken[i]);
+    widgets.add(krakenMap[i]!);
   }
 
   runApp(MaterialApp(
@@ -111,7 +111,7 @@ void main() async {
     ),
   ));
 
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
+  WidgetsBinding.instance!.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();
 
     List<Future<String>> testResults = [];

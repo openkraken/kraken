@@ -1205,8 +1205,8 @@ class Element extends Node
 
   BoundingClientRect get boundingClientRect {
     BoundingClientRect boundingClientRect = BoundingClientRect(0, 0, 0, 0, 0, 0, 0, 0);
-    RenderBox sizedBox = renderBoxModel!;
     if (isRendererAttached) {
+      RenderBox sizedBox = renderBoxModel!;
       // Force flush layout.
       if (!sizedBox.hasSize) {
         sizedBox.markNeedsLayout();

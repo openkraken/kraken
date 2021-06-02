@@ -14,7 +14,7 @@ void setObjectElementFactory(ObjectElementClientFactory factory) {
 }
 
 abstract class ObjectElementHost implements EventTarget {
-  updateChildTextureBox(TextureBox textureBox);
+  updateChildTextureBox(TextureBox? textureBox);
 }
 
 abstract class ObjectElementClient {
