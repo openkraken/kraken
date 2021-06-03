@@ -2403,6 +2403,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
       children: children,
+      elementType: elementType,
       targetId: targetId,
       renderStyle: renderStyle,
       elementManager: elementManager
@@ -2415,6 +2416,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
       children: children,
+      elementType: elementType,
       targetId: targetId,
       renderStyle: renderStyle,
       elementManager: elementManager
