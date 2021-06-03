@@ -38,7 +38,7 @@
 feat: support mouse event https://github.com/openkraken/kraken/pull/220
 fix: event bubble not works properly https://github.com/openkraken/kraken/pull/264
 fix: return value of Event.stopPropagation() should be undefined https://github.com/openkraken/kraken/pull/284
-fix/text node value https://github.com/openkraken/kraken/pull/279
+fix: text node value https://github.com/openkraken/kraken/pull/279
 fix: fix kraken.methodChannel.setMethodCallHandler did't get called before kraken.invokeMethod called https://github.com/openkraken/kraken/pull/289
 
 ## 0.7.2+3
@@ -393,5 +393,5 @@ Kraken macOS 最小系统版本兼容到 macOS 10.12
 38. 修复 borderWidth 设置为 0 依然显示的问题
 39. 修复 transition 存在的情况下，多个 transform 会导致动画失效的问题
 40. 修复 input 未指定 width 时，默认宽度失效的问题
-41. 修复 rgb 中的数值超出 0-255 限制而导致的渲染异常
-42. 修复 十六进制颜色数值超出 0-255 限制到导致的渲染异常
+41. 修复 rgb 中的数值超出 0-365 限制而导致的渲染异常
+42. 修复 十六进制颜色数值超出 0-365 限制到导致的渲染异常
