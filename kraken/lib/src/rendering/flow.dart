@@ -1458,7 +1458,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       preSibling.renderStyle.transformedDisplay == CSSDisplay.flex)
     ) {
       double preSiblingMarginBottom = _getChildMarginBottom(preSibling);
-      return math.max(marginTop - preSiblingMarginBottom, 0);
+      if (marginTop > 0 && preSiblingMarginBottom > 0) {
+        return math.max(marginTop, preSiblingMarginBottom);
+      }
     }
     return marginTop;
   }
@@ -1502,8 +1504,14 @@ class RenderFlowLayout extends RenderLayoutBox {
         firstChild.renderStyle.transformedDisplay == CSSDisplay.flex)
       ) {
         double childMarginTop = firstChild is RenderFlowLayout ?
-          _getCollapsedMarginTopWithNestedFirstChild(firstChild) : firstChild.renderStyle.marginTop.length;
-        return math.max(marginTop, childMarginTop);
+        _getCollapsedMarginTopWithNestedFirstChild(firstChild) : firstChild.renderStyle.marginTop.length;
+        if (marginTop < 0 && childMarginTop < 0) {
+          return math.min(marginTop, childMarginTop);
+        } else if ((marginTop < 0 && childMarginTop > 0) || (marginTop > 0 && childMarginTop < 0)) {
+          return marginTop + childMarginTop;
+        } else {
+          return math.max(marginTop, childMarginTop);
+        }
       }
     }
     return marginTop;
@@ -1522,12 +1530,10 @@ class RenderFlowLayout extends RenderLayoutBox {
     // 1. HTML element
     // 2. Inline level elements
     // 3. Inner renderBox of element with overflow auto/scroll
-    // 4. Negative margin or margin not set
     if (child.elementType == HTML ||
       child.isScrollingContentBox ||
       (childTransformedDisplay != CSSDisplay.block &&
-      childTransformedDisplay != CSSDisplay.flex) ||
-      originalMarginTop <= 0
+      childTransformedDisplay != CSSDisplay.flex)
     ) {
       return originalMarginTop;
     }
@@ -1599,12 +1605,14 @@ class RenderFlowLayout extends RenderLayoutBox {
         lastChild.renderStyle.transformedDisplay == CSSDisplay.block) {
         double childMarginBottom = lastChild is RenderLayoutBox ?
         _getCollapsedMarginBottomWithNestedLastChild(lastChild) : lastChild.renderStyle.marginBottom.length;
-        return math.max(marginBottom, childMarginBottom);
+        if (marginBottom < 0 && childMarginBottom < 0) {
+          return math.min(marginBottom, childMarginBottom);
+        } else if ((marginBottom < 0 && childMarginBottom > 0) || (marginBottom > 0 && childMarginBottom < 0)) {
+          return marginBottom + childMarginBottom;
+        } else {
+          return math.max(marginBottom, childMarginBottom);
+        }
       }
-    }
-    // Margin top and bottom of empty block collapse
-    if (renderBoxModel.boxSize.height == 0) {
-      return math.max(marginTop, marginBottom);
     }
     return marginBottom;
   }
@@ -1625,8 +1633,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (child.elementType == HTML ||
       child.isScrollingContentBox ||
       (childTransformedDisplay != CSSDisplay.block &&
-      childTransformedDisplay != CSSDisplay.flex) ||
-      originalMarginBottom <= 0
+      childTransformedDisplay != CSSDisplay.flex)
     ) {
       return originalMarginBottom;
     }
