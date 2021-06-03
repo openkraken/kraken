@@ -1459,7 +1459,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     ) {
       double preSiblingMarginBottom = _getChildMarginBottom(preSibling);
       if (marginTop > 0 && preSiblingMarginBottom > 0) {
-        return math.max(marginTop, preSiblingMarginBottom);
+        return math.max(marginTop - preSiblingMarginBottom, 0);
       }
     }
     return marginTop;
@@ -1613,6 +1613,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
       }
     }
+
     return marginBottom;
   }
 
