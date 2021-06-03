@@ -1509,30 +1509,35 @@ class RenderFlowLayout extends RenderLayoutBox {
     return marginTop;
   }
 
-  /// Get the actual margin top of child due to margin collapse
+  /// Get the collapsed margin top of child due to the margin collapse rule.
+  /// https://www.w3.org/TR/CSS2/box.html#collapsing-margins
   double _getChildMarginTop(RenderBoxModel child) {
     CSSDisplay childTransformedDisplay = child.renderStyle.transformedDisplay;
     // Margin is invalid for inline element.
     if (childTransformedDisplay == CSSDisplay.inline) {
       return 0;
     }
+    double originalMarginTop = child.renderStyle.marginTop.length;
     // Margin collapse does not work on following case:
     // 1. HTML element
     // 2. Inline level elements
     // 3. Inner renderBox of element with overflow auto/scroll
+    // 4. Negative margin or margin not set
     if (child.elementType == HTML ||
       child.isScrollingContentBox ||
       (childTransformedDisplay != CSSDisplay.block &&
-      childTransformedDisplay != CSSDisplay.flex)
+      childTransformedDisplay != CSSDisplay.flex) ||
+      originalMarginTop <= 0
     ) {
-      return child.renderStyle.marginTop.length;
+      return originalMarginTop;
     }
 
     RenderLayoutParentData childParentData = child.parentData;
     RenderObject preSibling = childParentData.previousSibling;
 
-    // Margin top collapse with its nested first child when no padding, border and no stacking
-    // context of itself (eg. overflow scroll and position absolute) is created.
+    // Margin top collapse with its nested first child when meeting following cases at the same time:
+    // 1. No padding, border is set.
+    // 2. No formatting context of itself (eg. overflow scroll and position absolute) is created.
     double marginTop = _getCollapsedMarginTopWithNestedFirstChild(child);
     // Margin top and bottom of empty block collapse.
     // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
@@ -1580,6 +1585,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     double marginTop = renderBoxModel.renderStyle.marginTop.length;
     double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
     if (renderBoxModel is RenderLayoutBox &&
+      renderBoxModel.renderStyle.height == null &&
+      renderBoxModel.renderStyle.minHeight == null &&
+      renderBoxModel.renderStyle.maxHeight == null &&
       renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.block &&
       renderBoxModel.renderStyle.overflowX == CSSOverflowType.visible &&
       renderBoxModel.renderStyle.overflowY == CSSOverflowType.visible &&
@@ -1601,13 +1609,15 @@ class RenderFlowLayout extends RenderLayoutBox {
     return marginBottom;
   }
 
-  /// Get the actual margin bottom of child due to margin collapse
+  /// Get the collapsed margin bottom of child due to the margin collapse rule.
+  /// https://www.w3.org/TR/CSS2/box.html#collapsing-margins
   double _getChildMarginBottom(RenderBoxModel child) {
     CSSDisplay childTransformedDisplay = child.renderStyle.transformedDisplay;
     // Margin is invalid for inline element.
     if (childTransformedDisplay == CSSDisplay.inline) {
       return 0;
     }
+    double originalMarginBottom = child.renderStyle.marginBottom.length;
     // Margin collapse does not work on following case:
     // 1. HTML element
     // 2. Inline level elements
@@ -1615,9 +1625,10 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (child.elementType == HTML ||
       child.isScrollingContentBox ||
       (childTransformedDisplay != CSSDisplay.block &&
-      childTransformedDisplay != CSSDisplay.flex)
+      childTransformedDisplay != CSSDisplay.flex) ||
+      originalMarginBottom <= 0
     ) {
-      return child.renderStyle.marginBottom.length;
+      return originalMarginBottom;
     }
 
     // Margin top and bottom of empty block collapse.
@@ -1629,8 +1640,10 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderLayoutParentData childParentData = child.parentData;
     RenderObject nextSibling = childParentData.nextSibling;
 
-    // Margin bottom collapse with its nested last child when no padding, border and no stacking
-    // context of itself (eg. overflow scroll and position absolute) is created.
+    // Margin bottom collapse with its nested last child when meeting following cases at the same time:
+    // 1. No padding, border is set.
+    // 2. No height, min-height, max-height is set.
+    // 3. No formatting context of itself (eg. overflow scroll and position absolute) is created.
     double marginBottom = _getCollapsedMarginBottomWithNestedLastChild(child);
     if (nextSibling == null) {
       // Margin bottom collapse with its parent if it is the last child of its parent and its value is 0.
