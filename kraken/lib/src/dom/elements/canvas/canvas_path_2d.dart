@@ -25,10 +25,9 @@ class Path2D {
   // Syncs _points from native
   void _syncCurrentPoint() {
     PathMetrics metrics = _path.computeMetrics();
-    PathMetric? metric = metrics.last;
+    PathMetric metric = metrics.last;
     Tangent? tangent = metric.getTangentForOffset(metric.length);
-    if (tangent == null) return;
-    Offset position = tangent.position;
+    Offset position = tangent!.position;
     _setPoint(position.dx, position.dy);
   }
 

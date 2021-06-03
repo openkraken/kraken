@@ -459,9 +459,9 @@ class CanvasRenderingContext2D {
   }
   TextDirection get direction => _direction;
 
-  Map<String, String> _fontProperties = {};
+  Map<String, String?> _fontProperties = {};
   bool _parseFont(String newValue) {
-    Map<String, String> properties = {};
+    Map<String, String?> properties = {};
     CSSStyleProperty.setShorthandFont(properties, newValue);
     if (properties.isEmpty) return false;
     _fontProperties = properties;
@@ -894,6 +894,7 @@ class CanvasRenderingContext2D {
 
   void fillText(String text, double x, double y, {double? maxWidth}) {
     addAction((Canvas canvas, Size size) {
+      print('paint text $text');
       TextPainter textPainter = _getTextPainter(text, fillStyle);
       if (maxWidth != null) {
         // FIXME: should scale down to a smaller font size in order to fit the text in the specified width.

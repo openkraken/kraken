@@ -40,7 +40,7 @@ class ImageElement extends Element {
   double? _propertyWidth;
   double? _propertyHeight;
   ImageStreamListener? _initImageListener;
-  ImageStreamListener? _renderStreamListener;
+  late ImageStreamListener _renderStreamListener;
 
   /// Number of image frame, used to identify gif after image loaded
   int _frameNumber = 0;
@@ -62,12 +62,12 @@ class ImageElement extends Element {
     return element;
   }
 
-  static double getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
+  static double? getImageWidth(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
     return imageElement.width;
   }
 
-  static double getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
+  static double? getImageHeight(Pointer<NativeImgElement> nativeImageElement) {
     ImageElement imageElement = getImageElementOfNativePtr(nativeImageElement);
     return imageElement.height;
   }
@@ -87,12 +87,12 @@ class ImageElement extends Element {
 
   ImageElement(int targetId, this.nativeImgElement, ElementManager elementManager)
       : super(
-        targetId,
-        nativeImgElement.ref.nativeElement,
-        elementManager,
-        isIntrinsicBox: true,
-        tagName: IMAGE,
-        defaultStyle: _defaultStyle) {
+      targetId,
+      nativeImgElement.ref.nativeElement,
+      elementManager,
+      isIntrinsicBox: true,
+      tagName: IMAGE,
+      defaultStyle: _defaultStyle) {
     _renderStreamListener = ImageStreamListener(_renderImageStream);
     _nativeMap[nativeImgElement.address] = this;
 
@@ -133,9 +133,9 @@ class ImageElement extends Element {
     _nativeMap.remove(nativeImgElement.address);
   }
 
-  double get width {
+  double? get width {
     if (_imageBox != null) {
-      return _imageBox!.width!;
+      return _imageBox!.width;
     }
 
     if (renderBoxModel != null && renderBoxModel!.hasSize) {
@@ -145,9 +145,9 @@ class ImageElement extends Element {
     return 0.0;
   }
 
-  double get height {
+  double? get height {
     if (_imageBox != null) {
-      return _imageBox!.height!;
+      return _imageBox!.height;
     }
 
     if (renderBoxModel != null && renderBoxModel!.hasSize) {
@@ -205,10 +205,10 @@ class ImageElement extends Element {
   }
 
   void _constructImageChild() {
-    RenderImage image = _imageBox = createRenderImageBox();
+    _imageBox = createRenderImageBox();
 
     if (childNodes.isEmpty) {
-      addChild(image);
+      addChild(_imageBox!);
     }
   }
 
@@ -247,6 +247,8 @@ class ImageElement extends Element {
     _imageInfo = imageInfo;
     _imageBox?.image = _imageInfo?.image;
 
+    print('imageinfo: ${imageInfo.image.debugDisposed}');
+
     // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
     // so use two frames to tell multiframe image from static image, note this optimization will fail
     // at multiframe image with only two frames which is not common
@@ -279,8 +281,7 @@ class ImageElement extends Element {
       return _handleImageResizeAfterLayout();
     }
 
-    RenderBoxModel imageRenderBox = renderBoxModel!;
-    RenderStyle renderStyle = imageRenderBox.renderStyle;
+    RenderStyle renderStyle = renderBoxModel!.renderStyle;
     // Waiting for size computed after layout stage
     if (style.contains(WIDTH) && renderStyle.width == null ||
         style.contains(HEIGHT) && renderStyle.height == null) {
@@ -291,10 +292,10 @@ class ImageElement extends Element {
     double? height = renderStyle.height ?? _propertyHeight;
 
     if (renderStyle.width == null && _propertyWidth != null) {
-      imageRenderBox.renderStyle.updateSizing(WIDTH, _propertyWidth);
+      renderBoxModel!.renderStyle.updateSizing(WIDTH, _propertyWidth);
     }
     if (renderStyle.height == null && _propertyHeight != null) {
-      imageRenderBox.renderStyle.updateSizing(HEIGHT, _propertyHeight);
+      renderBoxModel!.renderStyle.updateSizing(HEIGHT, _propertyHeight);
     }
 
     if (width == null && height == null) {
@@ -316,18 +317,18 @@ class ImageElement extends Element {
 
     _imageBox?.width = width;
     _imageBox?.height = height;
-    imageRenderBox.intrinsicWidth = naturalWidth;
-    imageRenderBox.intrinsicHeight = naturalHeight;
+    renderBoxModel!.intrinsicWidth = naturalWidth;
+    renderBoxModel!.intrinsicHeight = naturalHeight;
 
     if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-      imageRenderBox.intrinsicRatio = 0.0;
+      renderBoxModel!.intrinsicRatio = null;
     } else {
-      imageRenderBox.intrinsicRatio = naturalHeight / naturalWidth;
+      renderBoxModel!.intrinsicRatio = naturalHeight / naturalWidth;
     }
   }
 
   void _removeStreamListener() {
-    _imageStream?.removeListener(_renderStreamListener!);
+    _imageStream?.removeListener(_renderStreamListener);
 
     if (_initImageListener != null) {
       _imageStream?.removeListener(_initImageListener!);
@@ -397,7 +398,7 @@ class ImageElement extends Element {
         _removeStreamListener();
         _image = CSSUrl.parseUrl(source, cache: properties['caching'], contextId: elementManager.contextId);
         _imageStream = _image!.resolve(ImageConfiguration.empty);
-        _imageStream!.addListener(_renderStreamListener!);
+        _imageStream!.addListener(_renderStreamListener);
 
         _initImageListener = ImageStreamListener(_initImageInfo);
         _imageStream!.addListener(_initImageListener!);

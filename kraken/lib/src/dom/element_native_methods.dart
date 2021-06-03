@@ -119,6 +119,7 @@ mixin ElementNativeMethods on Node {
   }
 
   static void _scroll(Pointer<NativeElement> nativeElement, int x, int y) {
+    print('call scroll');
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
     element.scrollTo(x: x, y: y, withAnimation: false);

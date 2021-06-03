@@ -25,11 +25,10 @@ dependencies:
   colorize: ^3.0.0
   flutter:
     sdk: flutter
-  kraken:
-    path: ../kraken
+  kraken: 0.8.0-dev.1
   image: ^3.0.2
-  kraken_video_player: ^0.4.0-dev.1
-  kraken_websocket: ^0.2.0-dev.1
+  kraken_video_player: ^0.4.0-dev.3
+  kraken_websocket: ^0.2.0-dev.2
   kraken_animation_player: ^0.2.0-dev.1
   kraken_webview: ^0.6.0-dev.1
 

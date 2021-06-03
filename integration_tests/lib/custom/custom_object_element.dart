@@ -61,7 +61,7 @@ class CustomObjectElement implements ObjectElementClient {
 
   void addVideoBox(int textureId) {
     TextureBox box = TextureBox(textureId: textureId);
-    objectElementHost?.updateChildTextureBox(box);
+    objectElementHost.updateChildTextureBox(box);
     controller?.play();
   }
 

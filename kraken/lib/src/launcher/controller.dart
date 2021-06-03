@@ -626,16 +626,14 @@ class KrakenController {
       url = await (methodChannel as KrakenNativeChannel).getUrl();
     }
 
-    if (url == null) return;
-
     if (onLoadError != null) {
       try {
-        _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
+        _bundle = await KrakenBundle.getBundle(url ?? '', contentOverride: _bundleContent, contextId: view.contextId);
       } catch (e, stack) {
         onLoadError!(FlutterError(e.toString()), stack);
       }
     } else {
-      _bundle = await KrakenBundle.getBundle(url, contentOverride: _bundleContent, contextId: view.contextId);
+      _bundle = await KrakenBundle.getBundle(url ?? '', contentOverride: _bundleContent, contextId: view.contextId);
     }
 
     if (kProfileMode) {
@@ -646,10 +644,13 @@ class KrakenController {
   // execute preloaded javascript source
   Future<void> evalBundle() async {
     assert(!_view._disposed, "Kraken have already disposed");
+    print('eval bundle $_bundle');
     if (_bundle != null) {
       await _bundle!.eval(_view.contextId);
       // trigger DOMContentLoaded event
+      print('request animation frame');
       module.requestAnimationFrame((_) {
+        print('trigger dom loaded event');
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
         EventTarget window = view.getEventTargetById(WINDOW_ID)!;
         emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);

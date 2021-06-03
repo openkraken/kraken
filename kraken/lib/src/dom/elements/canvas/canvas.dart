@@ -43,7 +43,7 @@ class CanvasElement extends Element {
   late CanvasPainter painter;
 
   // The custom paint render object.
-  RenderCustomPaint? _renderCustomPaint;
+  RenderCustomPaint? renderCustomPaint;
 
   static SplayTreeMap<int, CanvasElement> _nativeMap = SplayTreeMap();
 
@@ -83,12 +83,12 @@ class CanvasElement extends Element {
   @override
   void willAttachRenderer() {
     super.willAttachRenderer();
-    _renderCustomPaint = RenderCanvasPaint(
+    renderCustomPaint = RenderCanvasPaint(
       painter: painter,
       preferredSize: size,
     );
 
-    addChild(_renderCustomPaint!);
+    addChild(renderCustomPaint!);
     style.addStyleChangeListener(_styleChangedListener);
   }
 
@@ -97,7 +97,7 @@ class CanvasElement extends Element {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_styleChangedListener);
     painter.dispose();
-    _renderCustomPaint = null;
+    renderCustomPaint = null;
   }
 
   // RenderingContext? getContext(DOMString contextId, optional any options = null);
@@ -155,11 +155,10 @@ class CanvasElement extends Element {
   }
 
   void resize() {
-    RenderCustomPaint? renderCustomPaint = _renderCustomPaint;
     if (renderCustomPaint != null) {
       // https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-set-bitmap-dimensions
       final Size paintingBounding = size;
-      renderCustomPaint.preferredSize = paintingBounding;
+      renderCustomPaint!.preferredSize = paintingBounding;
 
       // The intrinsic dimensions of the canvas element when it represents embedded content are
       // equal to the dimensions of the element’s bitmap.
@@ -184,7 +183,7 @@ class CanvasElement extends Element {
           ..scaleX = scaleX
           ..scaleY = scaleY;
         if (painter.shouldRepaint(painter)) {
-          renderCustomPaint.markNeedsPaint();
+          renderCustomPaint!.markNeedsPaint();
         }
       }
     }
