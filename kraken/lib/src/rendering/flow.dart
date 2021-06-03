@@ -1550,7 +1550,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Margin top collapse with its nested first child when meeting following cases at the same time:
     // 1. No padding, border is set.
-    // 2. No formatting context of itself (eg. overflow scroll and position absolute) is created.
+    // 2. No block formatting context of itself (eg. overflow scroll and position absolute) is created.
     double marginTop = _getCollapsedMarginTopWithNestedFirstChild(child);
     bool isChildOverflowVisible = child.renderStyle.overflowX == CSSOverflowType.visible &&
       child.renderStyle.overflowY == CSSOverflowType.visible;
@@ -1678,7 +1678,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Margin bottom collapse with its nested last child when meeting following cases at the same time:
     // 1. No padding, border is set.
     // 2. No height, min-height, max-height is set.
-    // 3. No formatting context of itself (eg. overflow scroll and position absolute) is created.
+    // 3. No block formatting context of itself (eg. overflow scroll and position absolute) is created.
     double marginBottom = _getCollapsedMarginBottomWithNestedLastChild(child);
     if (nextSibling == null) {
       // Margin bottom collapse with its parent if it is the last child of its parent and its value is 0.
