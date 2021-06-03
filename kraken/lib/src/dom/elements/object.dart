@@ -74,7 +74,7 @@ class ObjectElement extends Element implements ObjectElementHost {
 
   @override
   void updateChildTextureBox(TextureBox? textureBox) {
-    addChild(textureBox!);
+    if (textureBox != null) addChild(textureBox);
   }
 
   @override

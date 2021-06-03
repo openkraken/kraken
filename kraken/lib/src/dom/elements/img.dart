@@ -245,9 +245,6 @@ class ImageElement extends Element {
   void _renderImageStream(ImageInfo imageInfo, bool synchronousCall) {
     _frameNumber++;
     _imageInfo = imageInfo;
-    _imageBox?.image = _imageInfo?.image;
-
-    print('imageinfo: ${imageInfo.image.debugDisposed}');
 
     // @HACK Flutter image cache will cause image steam listener to trigger twice when page reload
     // so use two frames to tell multiframe image from static image, note this optimization will fail
@@ -261,6 +258,7 @@ class ImageElement extends Element {
     }
 
     _resize();
+    _imageBox?.image = _imageInfo?.image;
   }
 
   // Delay image size setting to next frame to make sure image has been layouted

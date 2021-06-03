@@ -193,6 +193,7 @@ describe('Tags img', () => {
     document.body.appendChild(img);
 
     img.onload = async () => {
+      window.scroll(0, 2000);
       await snapshot();
       done();
     };
