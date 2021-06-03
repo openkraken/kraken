@@ -1588,7 +1588,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   double _getCollapsedMarginBottomWithNestedLastChild(RenderBoxModel renderBoxModel) {
     double paddingBottom = renderBoxModel.renderStyle.paddingBottom;
     double borderBottom = renderBoxModel.renderStyle.borderBottom;
-    double marginTop = renderBoxModel.renderStyle.marginTop.length;
     double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
     if (renderBoxModel is RenderLayoutBox &&
       renderBoxModel.renderStyle.height == null &&
