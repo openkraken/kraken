@@ -1451,30 +1451,19 @@ class RenderFlowLayout extends RenderLayoutBox {
     return false;
   }
 
+  /// Get the collapsed margin top with the margin-bottom of its previous sibling
   double _getCollapsedMarginTopWithPreSibling(RenderBoxModel renderBoxModel, RenderObject preSibling, double marginTop) {
-    double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
-
     if (preSibling is RenderBoxModel &&
       (preSibling.renderStyle.transformedDisplay == CSSDisplay.block ||
-      preSibling.renderStyle.transformedDisplay == CSSDisplay.flex) &&
-      preSibling.renderStyle.marginBottom.length > 0
+      preSibling.renderStyle.transformedDisplay == CSSDisplay.flex)
     ) {
-      double preSiblingMarginTop = preSibling.renderStyle.marginTop.length;
-      double preSiblingMarginBottom = preSibling.renderStyle.marginBottom.length;
-      // Margin top and bottom of empty block collapse
-      if (preSibling.boxSize.height == 0) {
-        preSiblingMarginBottom = math.max(preSiblingMarginTop, preSiblingMarginBottom);
-      }
+      double preSiblingMarginBottom = _getChildMarginBottom(preSibling);
       return math.max(marginTop - preSiblingMarginBottom, 0);
-    }
-
-    // Margin top and bottom of empty block collapse
-    if (renderBoxModel.boxSize.height == 0) {
-      return math.max(marginTop, marginBottom);
     }
     return marginTop;
   }
 
+  /// Get the collapsed margin top with parent if it is the first child of its parent
   double _getCollapsedMarginTopWithParent(RenderBoxModel renderBoxModel, double marginTop) {
     // Get the outer box of overflow scroll/auto element as parent
     RenderLayoutBox parent = (renderBoxModel.parent as RenderLayoutBox).isScrollingContentBox ?
@@ -1495,12 +1484,11 @@ class RenderFlowLayout extends RenderLayoutBox {
     return marginTop;
   }
 
-  // Find the max margin top of itself and its nested first child
+  /// Get the collapsed margin top with its nested first child
   double _getCollapsedMarginTopWithNestedFirstChild(RenderBoxModel renderBoxModel) {
     double paddingTop = renderBoxModel.renderStyle.paddingTop;
     double borderTop = renderBoxModel.renderStyle.borderTop;
     double marginTop = renderBoxModel.renderStyle.marginTop.length;
-    double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
     if (renderBoxModel is RenderLayoutBox &&
       renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.block &&
       renderBoxModel.renderStyle.overflowX == CSSOverflowType.visible &&
@@ -1517,10 +1505,6 @@ class RenderFlowLayout extends RenderLayoutBox {
           _getCollapsedMarginTopWithNestedFirstChild(firstChild) : firstChild.renderStyle.marginTop.length;
         return math.max(marginTop, childMarginTop);
       }
-    }
-    // Margin top and bottom of empty block collapse
-    if (renderBoxModel.boxSize.height == 0) {
-      return math.max(marginTop, marginBottom);
     }
     return marginTop;
   }
@@ -1547,20 +1531,28 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderLayoutParentData childParentData = child.parentData;
     RenderObject preSibling = childParentData.previousSibling;
 
-    // 1. Find margin-top collapse with nested first child
+    // Margin top collapse with its nested first child when no padding, border and no stacking
+    // context of itself (eg. overflow scroll and position absolute) is created.
     double marginTop = _getCollapsedMarginTopWithNestedFirstChild(child);
-
+    // Margin top and bottom of empty block collapse.
+    // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
+    if (child.boxSize.height == 0) {
+      double marginBottom = child.renderStyle.marginBottom.length;
+      marginTop = math.max(marginTop, marginBottom);
+    }
     if (preSibling == null) {
-      // 2. Find margin-top collapse with parent
+      // Margin top collapse with its parent if it is the first child of its parent and its value is 0.
       marginTop = _getCollapsedMarginTopWithParent(child, marginTop);
     } else {
-      // 3. Find margin-top collapse with margin-bottom of previous sibling
+      // Margin top collapse with margin-bottom of its previous sibling, get the difference between
+      // the margin top of itself and the margin bottom of ite previous sibling. Set it to 0 if the
+      // difference is negative.
       marginTop = _getCollapsedMarginTopWithPreSibling(child, preSibling, marginTop);
     }
-
     return marginTop;
   }
 
+  /// Get the collapsed margin bottom with parent if it is the last child of its parent
   double _getCollapsedMarginBottomWithParent(RenderBoxModel renderBoxModel, double marginBottom) {
     // Get the outer box of overflow scroll/auto element as parent
     RenderLayoutBox parent = (renderBoxModel.parent as RenderLayoutBox).isScrollingContentBox ?
@@ -1578,10 +1570,10 @@ class RenderFlowLayout extends RenderLayoutBox {
     ) {
       return 0;
     }
-
     return marginBottom;
   }
 
+  /// Get the collapsed margin bottom with its nested last child
   double _getCollapsedMarginBottomWithNestedLastChild(RenderBoxModel renderBoxModel) {
     double paddingBottom = renderBoxModel.renderStyle.paddingBottom;
     double borderBottom = renderBoxModel.renderStyle.borderBottom;
@@ -1628,7 +1620,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       return child.renderStyle.marginBottom.length;
     }
 
-    // Margin-bottom of block with no height collapse with margin-top
+    // Margin top and bottom of empty block collapse.
+    // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
     if (child.boxSize.height == 0) {
       return 0;
     }
@@ -1636,11 +1629,11 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderLayoutParentData childParentData = child.parentData;
     RenderObject nextSibling = childParentData.nextSibling;
 
-    // 1. Find margin-bottom collapse with nested last child
+    // Margin bottom collapse with its nested last child when no padding, border and no stacking
+    // context of itself (eg. overflow scroll and position absolute) is created.
     double marginBottom = _getCollapsedMarginBottomWithNestedLastChild(child);
-
     if (nextSibling == null) {
-      // 2. Find margin-bottom collapse with parent
+      // Margin bottom collapse with its parent if it is the last child of its parent and its value is 0.
       marginBottom = _getCollapsedMarginBottomWithParent(child, marginBottom);
     }
 
