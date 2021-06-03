@@ -1470,13 +1470,16 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Get the outer box of overflow scroll/auto element as parent
     RenderLayoutBox parent = (renderBoxModel.parent as RenderLayoutBox).isScrollingContentBox ?
       renderBoxModel.parent.parent : renderBoxModel.parent;
+    bool isParentOverflowVisible = parent.renderStyle.overflowX == CSSOverflowType.visible &&
+        parent.renderStyle.overflowY == CSSOverflowType.visible;
+    bool isParentOverflowClip = parent.renderStyle.overflowX == CSSOverflowType.clip &&
+      parent.renderStyle.overflowY == CSSOverflowType.clip;
     // Margin top of first child with parent which is in flow layout collapse with parent
     // which makes the margin top of itself 0.
     // Margin collapse does not work on HTML.
     if (parent.elementType != HTML &&
       parent.renderStyle.transformedDisplay == CSSDisplay.block &&
-      parent.renderStyle.overflowX == CSSOverflowType.visible &&
-      parent.renderStyle.overflowY == CSSOverflowType.visible &&
+      (isParentOverflowVisible || isParentOverflowClip) &&
       parent.renderStyle.paddingTop == 0 &&
       parent.renderStyle.borderTop == 0 &&
       parent.parent is RenderFlowLayout
@@ -1491,10 +1494,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     double paddingTop = renderBoxModel.renderStyle.paddingTop;
     double borderTop = renderBoxModel.renderStyle.borderTop;
     double marginTop = renderBoxModel.renderStyle.marginTop.length;
+    bool isOverflowVisible = renderBoxModel.renderStyle.overflowX == CSSOverflowType.visible &&
+      renderBoxModel.renderStyle.overflowY == CSSOverflowType.visible;
+    bool isOverflowClip = renderBoxModel.renderStyle.overflowX == CSSOverflowType.clip &&
+      renderBoxModel.renderStyle.overflowY == CSSOverflowType.clip;
+
     if (renderBoxModel is RenderLayoutBox &&
       renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.block &&
-      renderBoxModel.renderStyle.overflowX == CSSOverflowType.visible &&
-      renderBoxModel.renderStyle.overflowY == CSSOverflowType.visible &&
+      (isOverflowVisible || isOverflowClip) &&
       paddingTop == 0 &&
       borderTop == 0
     ) {
@@ -1545,9 +1552,16 @@ class RenderFlowLayout extends RenderLayoutBox {
     // 1. No padding, border is set.
     // 2. No formatting context of itself (eg. overflow scroll and position absolute) is created.
     double marginTop = _getCollapsedMarginTopWithNestedFirstChild(child);
+    bool isChildOverflowVisible = child.renderStyle.overflowX == CSSOverflowType.visible &&
+      child.renderStyle.overflowY == CSSOverflowType.visible;
+    bool isChildOverflowClip = child.renderStyle.overflowX == CSSOverflowType.clip &&
+      child.renderStyle.overflowY == CSSOverflowType.clip;
+
     // Margin top and bottom of empty block collapse.
     // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
-    if (child.boxSize.height == 0) {
+    if (child.boxSize.height == 0 &&
+      (isChildOverflowVisible || isChildOverflowClip)
+    ) {
       double marginBottom = child.renderStyle.marginBottom.length;
       marginTop = math.max(marginTop, marginBottom);
     }
@@ -1568,13 +1582,16 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Get the outer box of overflow scroll/auto element as parent
     RenderLayoutBox parent = (renderBoxModel.parent as RenderLayoutBox).isScrollingContentBox ?
       renderBoxModel.parent.parent : renderBoxModel.parent;
+    bool isParentOverflowVisible = parent.renderStyle.overflowX == CSSOverflowType.visible &&
+      parent.renderStyle.overflowY == CSSOverflowType.visible;
+    bool isParentOverflowClip = parent.renderStyle.overflowX == CSSOverflowType.clip &&
+      parent.renderStyle.overflowY == CSSOverflowType.clip;
     // Margin bottom of first child with parent which is in flow layout collapse with parent
     // which makes the margin top of itself 0.
     // Margin collapse does not work on HTML.
     if (parent.elementType != HTML &&
       parent.renderStyle.transformedDisplay == CSSDisplay.block &&
-      parent.renderStyle.overflowX == CSSOverflowType.visible &&
-      parent.renderStyle.overflowY == CSSOverflowType.visible &&
+      (isParentOverflowVisible || isParentOverflowClip) &&
       parent.renderStyle.paddingBottom == 0 &&
       parent.renderStyle.borderBottom == 0 &&
       parent.parent is RenderFlowLayout
@@ -1589,13 +1606,17 @@ class RenderFlowLayout extends RenderLayoutBox {
     double paddingBottom = renderBoxModel.renderStyle.paddingBottom;
     double borderBottom = renderBoxModel.renderStyle.borderBottom;
     double marginBottom = renderBoxModel.renderStyle.marginBottom.length;
+    bool isOverflowVisible = renderBoxModel.renderStyle.overflowX == CSSOverflowType.visible &&
+      renderBoxModel.renderStyle.overflowY == CSSOverflowType.visible;
+    bool isOverflowClip = renderBoxModel.renderStyle.overflowX == CSSOverflowType.clip &&
+      renderBoxModel.renderStyle.overflowY == CSSOverflowType.clip;
+
     if (renderBoxModel is RenderLayoutBox &&
       renderBoxModel.renderStyle.height == null &&
       renderBoxModel.renderStyle.minHeight == null &&
       renderBoxModel.renderStyle.maxHeight == null &&
       renderBoxModel.renderStyle.transformedDisplay == CSSDisplay.block &&
-      renderBoxModel.renderStyle.overflowX == CSSOverflowType.visible &&
-      renderBoxModel.renderStyle.overflowY == CSSOverflowType.visible &&
+      (isOverflowVisible || isOverflowClip) &&
       paddingBottom == 0 &&
       borderBottom == 0
     ) {
@@ -1638,9 +1659,16 @@ class RenderFlowLayout extends RenderLayoutBox {
       return originalMarginBottom;
     }
 
+    bool isChildOverflowVisible = child.renderStyle.overflowX == CSSOverflowType.visible &&
+      child.renderStyle.overflowY == CSSOverflowType.visible;
+    bool isChildOverflowClip = child.renderStyle.overflowX == CSSOverflowType.clip &&
+      child.renderStyle.overflowY == CSSOverflowType.clip;
+
     // Margin top and bottom of empty block collapse.
     // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
-    if (child.boxSize.height == 0) {
+    if (child.boxSize.height == 0 &&
+      (isChildOverflowVisible || isChildOverflowClip)
+    ) {
       return 0;
     }
 
