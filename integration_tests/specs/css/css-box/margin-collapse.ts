@@ -85,6 +85,51 @@ describe("Margin collapse", () => {
       await snapshot();
     });
 
+    it("should not work with element of display flex", async () => {
+      let div1 = createElement(
+        "div",
+        {
+          style: {
+            position: "relative",
+
+            width: "300px",
+            height: "100px",
+            backgroundColor: "grey",
+            margin: "50px 0 70px"
+          }
+        },
+        [
+          createElement(
+            "div",
+            {
+              style: {
+                display: 'flex',
+                flexDirection: 'column',
+                width: "250px",
+                height: "50px",
+                backgroundColor: "lightgreen",
+                margin: "80px 0"
+              }
+            },
+            [
+              createElement("div", {
+                style: {
+                  width: "200px",
+                  height: "25px",
+                  backgroundColor: "lightblue",
+                  margin: "90px 0"
+                }
+              })
+            ]
+          )
+        ]
+      );
+
+      BODY.appendChild(div1);
+
+      await snapshot();
+    });
+    
     it("should not work with element of overflow scroll", async () => {
       let div1 = createElement(
         "div",
@@ -279,6 +324,61 @@ describe("Margin collapse", () => {
           style: {
             position: "relative",
             display: 'inline-block',
+            width: "300px",
+            backgroundColor: "grey",
+            margin: "50px 0"
+          }
+        },
+        [
+          createElement(
+            "div",
+            {
+              style: {
+                width: "250px",
+                backgroundColor: "lightgreen",
+                margin: "80px 0"
+              }
+            },
+            [
+              createElement("div", {
+                style: {
+                  width: "200px",
+                  height: "50px",
+                  backgroundColor: "lightblue",
+                  margin: "100px 0"
+                }
+              })
+            ]
+          )
+        ]
+      );
+
+      let div2 = createElement(
+        "div",
+        {
+          style: {
+            width: "300px",
+            height: "100px",
+            backgroundColor: "coral"
+          }
+        },
+        []
+      );
+
+      BODY.appendChild(div1);
+      BODY.appendChild(div2);
+
+      await snapshot();
+    });
+
+    it("should not work with element of display flex", async () => {
+      let div1 = createElement(
+        "div",
+        {
+          style: {
+            position: "relative",
+            display: 'flex',
+            flexDirection: 'column',
             width: "300px",
             backgroundColor: "grey",
             margin: "50px 0"
@@ -577,6 +677,55 @@ describe("Margin collapse", () => {
       await snapshot();
     });
 
+    it("should not work with element of display flex", async () => {
+      let div1 = createElement(
+        "div",
+        {
+          style: {
+            position: "relative",
+            display: 'flex',
+            flexDirection: 'column',
+            width: "300px",
+            height: "50px",
+            backgroundColor: "grey",
+            margin: "50px 0"
+          }
+        },
+        [
+          createElement(
+            "div",
+            {
+              style: {
+                width: "250px",
+                height: "50px",
+                backgroundColor: "lightgreen",
+                margin: "80px 0"
+              }
+            },
+            []
+          )
+        ]
+      );
+
+      let div2 = createElement(
+        "div",
+        {
+          style: {
+            width: "300px",
+            height: "100px",
+            backgroundColor: "coral",
+            margin: "40px 0"
+          }
+        },
+        []
+      );
+
+      BODY.appendChild(div1);
+      BODY.appendChild(div2);
+
+      await snapshot();
+    });
+
     it("should not work with element of overflow scroll", async () => {
       let div1 = createElement(
         "div",
@@ -718,13 +867,13 @@ describe("Margin collapse", () => {
 
       await snapshot();
     });
+
     it("should not work with element of display inline-block", async () => {
       let div1 = createElement(
         "div",
         {
           style: {
             position: "relative",
-            display: 'inline-block',
             width: "300px",
             height: "50px",
             backgroundColor: "grey",
@@ -738,6 +887,53 @@ describe("Margin collapse", () => {
         "div",
         {
           style: {
+            display: 'inline-block',
+            width: "300px",
+            backgroundColor: "coral",
+            margin: "100px 0"
+          }
+        },
+        []
+      );
+      let div3 = createElement(
+        "div",
+        {
+          style: {
+            width: "300px",
+            height: "100px",
+            backgroundColor: "coral"
+          }
+        },
+        []
+      );
+
+      BODY.appendChild(div1);
+      BODY.appendChild(div2);
+      BODY.appendChild(div3);
+
+      await snapshot();
+    });
+
+    it("should not work with element of display flex", async () => {
+      let div1 = createElement(
+        "div",
+        {
+          style: {
+            position: "relative",
+            width: "300px",
+            height: "50px",
+            backgroundColor: "grey",
+            margin: "50px 0"
+          }
+        },
+        []
+      );
+
+      let div2 = createElement(
+        "div",
+        {
+          style: {
+            display: 'flex',
             width: "300px",
             backgroundColor: "coral",
             margin: "100px 0"

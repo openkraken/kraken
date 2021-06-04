@@ -1560,6 +1560,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Margin top and bottom of empty block collapse.
     // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
     if (child.boxSize.height == 0 &&
+      childTransformedDisplay != CSSDisplay.flex &&
       (isChildOverflowVisible || isChildOverflowClip)
     ) {
       double marginBottom = child.renderStyle.marginBottom.length;
@@ -1667,6 +1668,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Margin top and bottom of empty block collapse.
     // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
     if (child.boxSize.height == 0 &&
+      childTransformedDisplay != CSSDisplay.flex &&
       (isChildOverflowVisible || isChildOverflowClip)
     ) {
       return 0;
