@@ -17,12 +17,26 @@ describe('Tags input', () => {
 
     await snapshot();
   });
-  
+
   it('with value first', async () => {
     const input = document.createElement('input');
     input.setAttribute('value', 'Hello World Hello World Hello World Hello World');
     input.style.fontSize = '16px';
     document.body.appendChild(input);
+
+    await snapshot();
+  });
+
+  it('type password', async () => {
+    const div = document.createElement('div');
+    const input = document.createElement('input');
+
+    input.type = 'password';
+    input.value = 'HelloWorld';
+    input.placeholder = "This is placeholder.";
+
+    div.appendChild(input);
+    document.body.appendChild(div);
 
     await snapshot();
   });
@@ -60,7 +74,7 @@ describe('Tags input', () => {
 
     input1.focus();
     input2.focus();
-    
+
   });
 
   it('event input', (done) => {

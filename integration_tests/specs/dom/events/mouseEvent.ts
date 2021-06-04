@@ -227,4 +227,32 @@ describe('MouseEvent', () => {
   
     span.click();
   });
+
+  it('should work width document addEventListener', async (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'red';
+    div.style.width = '100px';
+    div.style.height = '100px';
+    document.body.appendChild(div);
+
+    document.addEventListener('click', function handler(e) {
+      done();
+    });
+  
+    await simulateClick(10.0, 10.0);
+  });
+
+  it('should work width body addEventListener', async (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'red';
+    div.style.width = '100px';
+    div.style.height = '100px';
+    document.body.appendChild(div);
+
+    document.body.addEventListener('click', function handler(e) {
+      done();
+    });
+  
+    await simulateClick(10.0, 10.0);
+  });
 });
