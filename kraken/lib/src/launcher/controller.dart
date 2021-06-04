@@ -644,13 +644,10 @@ class KrakenController {
   // execute preloaded javascript source
   Future<void> evalBundle() async {
     assert(!_view._disposed, "Kraken have already disposed");
-    print('eval bundle $_bundle');
     if (_bundle != null) {
       await _bundle!.eval(_view.contextId);
       // trigger DOMContentLoaded event
-      print('request animation frame');
       module.requestAnimationFrame((_) {
-        print('trigger dom loaded event');
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
         EventTarget window = view.getEventTargetById(WINDOW_ID)!;
         emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
