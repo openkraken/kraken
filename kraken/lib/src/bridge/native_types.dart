@@ -7,7 +7,10 @@ import 'from_native.dart';
 // All class members include variables and functions must be follow the same order with C++ struct, to keep the same memory layout cross dart and C++ code.
 
 // representation of JSContext
-class JSCallbackContext extends Struct {}
+class JSCallbackContext extends Struct {
+  @Int32()
+  int a;
+}
 
 typedef Native_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
 typedef Dart_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);

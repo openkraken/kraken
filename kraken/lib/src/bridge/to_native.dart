@@ -27,28 +27,28 @@ class KrakenInfo {
 
   String get appName {
     if (_nativeKrakenInfo.ref.app_name == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_name);
+    return (_nativeKrakenInfo.ref.app_name).toDartString();
   }
 
   String get appVersion {
     if (_nativeKrakenInfo.ref.app_version == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_version);
+    return (_nativeKrakenInfo.ref.app_version).toDartString();
   }
 
   String get appRevision {
     if (_nativeKrakenInfo.ref.app_revision == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_revision);
+    return (_nativeKrakenInfo.ref.app_revision).toDartString();
   }
 
   String get systemName {
     if (_nativeKrakenInfo.ref.system_name == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.system_name);
+    return (_nativeKrakenInfo.ref.system_name).toDartString();
   }
 
   String get userAgent {
     if (_nativeKrakenInfo.ref.getUserAgent == nullptr) return '';
     Dart_GetUserAgent getUserAgent = _nativeKrakenInfo.ref.getUserAgent.asFunction();
-    return Utf8.fromUtf8(getUserAgent(_nativeKrakenInfo));
+    return (getUserAgent(_nativeKrakenInfo)).toDartString();
   }
 }
 
@@ -79,7 +79,7 @@ void invokeModuleEvent(int contextId, String moduleName, Event event, String ext
   assert(moduleName != null);
   Pointer<NativeString> nativeModuleName = stringToNativeString(moduleName);
   Pointer<Void> nativeEvent = event == null ? nullptr : event.toNative().cast<Void>();
-  _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : Utf8.toUtf8(event.type), nativeEvent, stringToNativeString(extra ?? ''));
+  _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : (event.type).toNativeUtf8(), nativeEvent, stringToNativeString(extra ?? ''));
   freeNativeString(nativeModuleName);
 }
 
@@ -119,7 +119,7 @@ nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScr
 
 void evaluateScripts(int contextId, String code, String url, int line) {
   Pointer<NativeString> nativeString = stringToNativeString(code);
-  Pointer<Utf8> _url = Utf8.toUtf8(url);
+  Pointer<Utf8> _url = (url).toNativeUtf8();
   try {
     _evaluateScripts(contextId, nativeString, _url, line);
   } catch (e, stack) {

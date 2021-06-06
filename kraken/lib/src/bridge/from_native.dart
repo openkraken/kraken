@@ -30,7 +30,7 @@ String uint16ToString(Pointer<Uint16> pointer, int length) {
 
 Pointer<Uint16> _stringToUint16(String string) {
   final units = string.codeUnits;
-  final Pointer<Uint16> result = allocate<Uint16>(count: units.length);
+  final Pointer<Uint16> result = malloc.allocate<Uint16>(sizeOf<Uint64>() * units.length);
   final Uint16List nativeString = result.asTypedList(units.length);
   nativeString.setAll(0, units);
   return result;
@@ -38,7 +38,7 @@ Pointer<Uint16> _stringToUint16(String string) {
 
 Pointer<NativeString> stringToNativeString(String string) {
   assert(string != null);
-  Pointer<NativeString> nativeString = allocate<NativeString>();
+  Pointer<NativeString> nativeString = malloc.allocate<NativeString>(sizeOf<NativeString>());
   nativeString.ref.string = _stringToUint16(string);
   nativeString.ref.length = string.length;
   return nativeString;
@@ -49,8 +49,8 @@ String nativeStringToString(Pointer<NativeString> pointer) {
 }
 
 void freeNativeString(Pointer<NativeString> pointer) {
-  free(pointer.ref.string);
-  free(pointer);
+  malloc.free(pointer.ref.string);
+  malloc.free(pointer);
 }
 
 // Steps for using dart:ffi to call a Dart function from C:
@@ -162,7 +162,7 @@ int _setTimeout(Pointer<JSCallbackContext> callbackContext, int contextId,
     try {
       func(callbackContext, contextId, nullptr);
     } catch (e, stack) {
-      func(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
+      func(callbackContext, contextId, ('Error: $e\n$stack').toNativeUtf8());
     }
   });
 }
@@ -182,7 +182,7 @@ int _setInterval(Pointer<JSCallbackContext> callbackContext, int contextId,
     try {
       func(callbackContext, contextId, nullptr);
     } catch (e, stack) {
-      func(callbackContext, contextId, Utf8.toUtf8('Dart Error: $e\n$stack'));
+      func(callbackContext, contextId, ('Dart Error: $e\n$stack').toNativeUtf8());
     }
   });
 }
@@ -213,7 +213,7 @@ int _requestAnimationFrame(Pointer<JSCallbackContext> callbackContext, int conte
     try {
       func(callbackContext, contextId, highResTimeStamp, nullptr);
     } catch (e, stack) {
-      func(callbackContext, contextId, highResTimeStamp, Utf8.toUtf8('Error: $e\n$stack'));
+      func(callbackContext, contextId, highResTimeStamp, ('Error: $e\n$stack').toNativeUtf8());
     }
   });
 }
@@ -257,7 +257,10 @@ final Pointer<NativeFunction<Native_PlatformBrightness>> _nativePlatformBrightne
     Pointer.fromFunction(_platformBrightness);
 
 // Register getScreen
-class ScreenSize extends Struct {}
+class ScreenSize extends Struct {
+  @Int32()
+  int a;
+}
 
 typedef Native_GetScreen = Pointer<ScreenSize> Function();
 
@@ -280,12 +283,12 @@ void _toBlob(Pointer<JSCallbackContext> callbackContext, int contextId,
   DartAsyncBlobCallback func = callback.asFunction();
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   controller.view.toImage(devicePixelRatio, id).then((Uint8List bytes) {
-    Pointer<Uint8> bytePtr = allocate<Uint8>(count: bytes.length);
+    Pointer<Uint8> bytePtr = malloc.allocate<Uint8>(bytes.length * sizeOf<Uint8>());
     Uint8List byteList = bytePtr.asTypedList(bytes.length);
     byteList.setAll(0, bytes);
     func(callbackContext, contextId, nullptr, bytePtr, bytes.length);
   }).catchError((error, stack) {
-    Pointer<Utf8> msg = Utf8.toUtf8('$error\n$stack');
+    Pointer<Utf8> msg = ('$error\n$stack').toNativeUtf8();
     func(callbackContext, contextId, msg, nullptr, 0);
   });
 }
@@ -349,7 +352,7 @@ typedef Native_JSError = Void Function(Int32 contextId, Pointer<Utf8>);
 void _onJSError(int contextId, Pointer<Utf8> charStr) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   if (controller.onJSError != null) {
-    String msg = Utf8.fromUtf8(charStr);
+    String msg = (charStr).toDartString();
     controller.onJSError(msg);
   }
 }
@@ -384,7 +387,7 @@ final Dart_RegisterDartMethods _registerDartMethods =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterDartMethods>>('registerDartMethods').asFunction();
 
 void registerDartMethodsToCpp() {
-  Pointer<Uint64> bytes = allocate<Uint64>(count: _dartNativeMethods.length);
+  Pointer<Uint64> bytes = malloc.allocate<Uint64>(_dartNativeMethods.length * sizeOf<Uint64>());
   Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
   nativeMethodList.setAll(0, _dartNativeMethods);
   _registerDartMethods(bytes, _dartNativeMethods.length);

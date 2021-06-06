@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken_websocket/kraken_websocket.dart';
-import 'package:kraken_devtools/kraken_devtools.dart';
+// import 'package:kraken_websocket/kraken_websocket.dart';
+// import 'package:kraken_devtools/kraken_devtools.dart';
 import 'dart:ui';
 
 void main() {
-  KrakenWebsocket.initialize();
+  // KrakenWebsocket.initialize();
   runApp(MyApp());
 }
 
@@ -91,8 +91,16 @@ class _MyHomePageState extends State<MyBrowser> {
         child: _kraken = Kraken(
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-          bundlePath: 'assets/bundle.js',
-          devToolsService: ChromeDevToolsService(),
+          bundleURL: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/data/cvd3r6f068.js',
+          // devToolsService: ChromeDevToolsService(),
+          onLoad: (KrakenController controller) {
+            String code = """
+            setTimeout(() => {
+  console.log(performance.__kraken_navigation_summary__());
+}, 5000);
+            """;
+            controller.view.evaluateJavaScripts(code);
+          },
         ),
     ));
   }

@@ -98,7 +98,7 @@ class PerformanceTiming {
   }
 
   Pointer<NativePerformanceEntryList> toNative() {
-    Pointer<NativePerformanceEntryList> list = allocate<NativePerformanceEntryList>();
+    Pointer<NativePerformanceEntryList> list = malloc.allocate<NativePerformanceEntryList>(sizeOf<NativePerformanceEntryList>());
     int byteLength = entriesSize * 3;
 
     Uint64List data = Uint64List(byteLength);
@@ -106,13 +106,13 @@ class PerformanceTiming {
     int dataIndex = 0;
 
     for (int i = 0; i < byteLength; i += 3) {
-      data[i] = Utf8.toUtf8(entries[dataIndex].name).address;
+      data[i] = entries[dataIndex].name.toNativeUtf8().address;
       data[i + 1] = entries[dataIndex].startTime;
       data[i + 2] = entries[dataIndex].uniqueId;
       dataIndex++;
     }
 
-    final Pointer<Uint64> bytes = allocate<Uint64>(count: byteLength);
+    final Pointer<Uint64> bytes = malloc.allocate<Uint64>(byteLength * sizeOf<Uint64>());
     final Uint64List buffer = bytes.asTypedList(byteLength);
     buffer.setAll(0, data);
 

@@ -64,7 +64,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
   }
 
   @override
-  void hideToolbar() {
+  void hideToolbar([bool hideHandles = true]) {
     // TODO: implement hideToolbar
     print('call hideToolbar');
   }
@@ -80,6 +80,11 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   bool get selectAllEnabled => true;
+
+  @override
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
+    // TODO: implement userUpdateTextEditingValue
+  }
 }
 
 class InputElement extends Element implements TextInputClient, TickerProvider {

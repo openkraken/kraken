@@ -83,7 +83,7 @@ typedef CanvasAction = void Function(Canvas, Size);
 class CanvasRenderingContext2D {
   final Pointer<NativeCanvasRenderingContext2D> nativeCanvasRenderingContext2D;
 
-  CanvasRenderingContext2D() : nativeCanvasRenderingContext2D = allocate<NativeCanvasRenderingContext2D>() {
+  CanvasRenderingContext2D() : nativeCanvasRenderingContext2D = malloc.allocate<NativeCanvasRenderingContext2D>(sizeOf<NativeCanvasRenderingContext2D>()) {
     _settings = CanvasRenderingContext2DSettings();
 
     _nativeMap[nativeCanvasRenderingContext2D.address] = this;

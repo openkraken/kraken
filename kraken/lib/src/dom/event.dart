@@ -93,7 +93,7 @@ class Event {
   }
 
   Pointer toNative() {
-    Pointer<NativeEvent> event = allocate<NativeEvent>();
+    Pointer<NativeEvent> event = malloc.allocate<NativeEvent>(sizeOf<NativeEvent>());
     event.ref.type = stringToNativeString(type);
     event.ref.bubbles = bubbles ? 1 : 0;
     event.ref.cancelable = cancelable ? 1 : 0;
@@ -140,7 +140,7 @@ class MouseEvent extends Event {
       : _mouseEventInit = mouseEventInit, super(type, mouseEventInit);
 
   Pointer<NativeMouseEvent> toNative() {
-    Pointer<NativeMouseEvent> nativeMouseEventPointer = allocate<NativeMouseEvent>();
+    Pointer<NativeMouseEvent> nativeMouseEventPointer = malloc.allocate<NativeMouseEvent>(sizeOf<NativeMouseEvent>());
     nativeMouseEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
     nativeMouseEventPointer.ref.clientX = clientX;
     nativeMouseEventPointer.ref.clientY = clientY;
@@ -211,7 +211,7 @@ class GestureEvent extends Event {
       : _gestureEventInit = gestureEventInit, super(type, gestureEventInit);
 
   Pointer<NativeGestureEvent> toNative() {
-    Pointer<NativeGestureEvent> nativeGestureEventPointer = allocate<NativeGestureEvent>();
+    Pointer<NativeGestureEvent> nativeGestureEventPointer = malloc.allocate<NativeGestureEvent>(sizeOf<NativeGestureEvent>());
     nativeGestureEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
     nativeGestureEventPointer.ref.state = stringToNativeString(state);
     nativeGestureEventPointer.ref.direction = stringToNativeString(direction);
@@ -242,7 +242,7 @@ class CustomEvent extends Event {
       : _customEventInit = customEventInit, super(type, customEventInit);
 
   Pointer<NativeCustomEvent> toNative() {
-    Pointer<NativeCustomEvent> nativeCustomEventPointer = allocate<NativeCustomEvent>();
+    Pointer<NativeCustomEvent> nativeCustomEventPointer = malloc.allocate<NativeCustomEvent>(sizeOf<NativeCustomEvent>());
     nativeCustomEventPointer.ref.nativeEvent = super.toNative().cast<NativeEvent>();
     nativeCustomEventPointer.ref.detail = stringToNativeString(detail);
     return nativeCustomEventPointer;
@@ -258,7 +258,7 @@ class InputEvent extends Event {
   final String data;
 
   Pointer<NativeInputEvent> toNative() {
-    Pointer<NativeInputEvent> nativeInputEvent = allocate<NativeInputEvent>();
+    Pointer<NativeInputEvent> nativeInputEvent = malloc.allocate<NativeInputEvent>(sizeOf<NativeInputEvent>());
     Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
     nativeInputEvent.ref.nativeEvent = nativeEvent;
     nativeInputEvent.ref.inputType = stringToNativeString(inputType);
@@ -308,7 +308,7 @@ class MediaError extends Event {
   final String message;
 
   Pointer<NativeMediaErrorEvent> toNative() {
-    Pointer<NativeMediaErrorEvent> nativeMediaError = allocate<NativeMediaErrorEvent>();
+    Pointer<NativeMediaErrorEvent> nativeMediaError = malloc.allocate<NativeMediaErrorEvent>(sizeOf<NativeMediaErrorEvent>());
     Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
     nativeMediaError.ref.nativeEvent = nativeEvent;
     nativeMediaError.ref.code = code;
@@ -334,7 +334,7 @@ class MessageEvent extends Event {
         super(EVENT_MESSAGE);
 
   Pointer<NativeMessageEvent> toNative() {
-    Pointer<NativeMessageEvent> messageEvent = allocate<NativeMessageEvent>();
+    Pointer<NativeMessageEvent> messageEvent = malloc.allocate<NativeMessageEvent>(sizeOf<NativeMessageEvent>());
     Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
     messageEvent.ref.nativeEvent = nativeEvent;
     messageEvent.ref.data = stringToNativeString(data);
@@ -359,7 +359,7 @@ class CloseEvent extends Event {
         super(EVENT_CLOSE);
 
   Pointer<NativeCloseEvent> toNative() {
-    Pointer<NativeCloseEvent> closeEvent = allocate<NativeCloseEvent>();
+    Pointer<NativeCloseEvent> closeEvent = malloc.allocate<NativeCloseEvent>(sizeOf<NativeCloseEvent>());
     Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
     closeEvent.ref.nativeEvent = nativeEvent;
     closeEvent.ref.code = code;
@@ -374,7 +374,7 @@ class IntersectionChangeEvent extends Event {
   final double intersectionRatio;
 
   Pointer<NativeIntersectionChangeEvent> toNative() {
-    Pointer<NativeIntersectionChangeEvent> intersectionChangeEvent = allocate<NativeIntersectionChangeEvent>();
+    Pointer<NativeIntersectionChangeEvent> intersectionChangeEvent = malloc.allocate<NativeIntersectionChangeEvent>(sizeOf<NativeIntersectionChangeEvent>());
     Pointer<NativeEvent> nativeEvent = super.toNative().cast<NativeEvent>();
     intersectionChangeEvent.ref.nativeEvent = nativeEvent;
     intersectionChangeEvent.ref.intersectionRatio = intersectionRatio;
@@ -396,7 +396,7 @@ class TouchEvent extends Event {
   bool shiftKey = false;
 
   Pointer<NativeTouchEvent> toNative() {
-    Pointer<NativeTouchEvent> touchEvent = allocate<NativeTouchEvent>();
+    Pointer<NativeTouchEvent> touchEvent = malloc.allocate<NativeTouchEvent>(sizeOf<NativeTouchEvent>());
     touchEvent.ref.nativeEvent = super.toNative().cast<NativeEvent>();
     touchEvent.ref.touches = touches.toNative();
     touchEvent.ref.touchLength = touches.length;
@@ -454,7 +454,7 @@ class Touch {
   });
 
   Pointer<NativeTouch> toNative() {
-    Pointer<NativeTouch> nativeTouch = allocate<NativeTouch>();
+    Pointer<NativeTouch> nativeTouch = malloc.allocate<NativeTouch>(sizeOf<NativeTouch>());
     nativeTouch.ref.identifier = identifier;
     nativeTouch.ref.target = target.nativeEventTargetPtr;
     nativeTouch.ref.clientX = clientX;
@@ -488,7 +488,7 @@ class TouchList {
   }
 
   Pointer<Pointer<NativeTouch>> toNative() {
-    Pointer<Pointer<NativeTouch>> touchList = allocate<NativeTouch>(count: items.length).cast<Pointer<NativeTouch>>();
+    Pointer<Pointer<NativeTouch>> touchList = malloc.allocate<NativeTouch>(sizeOf<NativeTouch>() * items.length).cast<Pointer<NativeTouch>>();
     for (int i = 0; i < items.length; i ++) {
       touchList[i] = items[i].toNative();
     }

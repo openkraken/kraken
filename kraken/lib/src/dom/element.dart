@@ -1565,7 +1565,7 @@ class BoundingClientRect {
   BoundingClientRect(this.x, this.y, this.width, this.height, this.top, this.right, this.bottom, this.left);
 
   Pointer<NativeBoundingClientRect> toNative() {
-    Pointer<NativeBoundingClientRect> nativeBoundingClientRect = allocate<NativeBoundingClientRect>();
+    Pointer<NativeBoundingClientRect> nativeBoundingClientRect = malloc.allocate<NativeBoundingClientRect>(sizeOf<NativeBoundingClientRect>());
     nativeBoundingClientRect.ref.width = width;
     nativeBoundingClientRect.ref.height = height;
     nativeBoundingClientRect.ref.x = x;

@@ -237,4 +237,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     description.add('$activity');
     description.add('$userScrollDirection');
   }
+
+  @override
+  // TODO: implement hasPixels
+  bool get hasPixels => true;
 }
