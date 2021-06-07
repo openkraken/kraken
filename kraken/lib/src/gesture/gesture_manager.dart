@@ -69,7 +69,7 @@ class GestureManager {
     _renderBoxModelList = [];
   }
 
-  void addPointer(PointerEvent event) {print('_eventTypesList=${_eventTypesList}');
+  void addPointer(PointerEvent event) {
     gestures.forEach((key, gesture) {
       gesture.addPointer(event as PointerDownEvent);
     });
