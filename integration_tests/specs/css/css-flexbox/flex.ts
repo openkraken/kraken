@@ -1017,4 +1017,80 @@ describe('flex', () => {
       done();
     });
   });
+
+ 
+  it('should work with percentage of child of flex item in flex column direction', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '100px',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            flex: 1,
+            width: '200px',
+            padding: '10px',
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              width: '100px',
+              height: '100%',
+              backgroundColor: 'red'
+            }
+          })
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+  });
+
+  it('should work with percentage of child of flex item in flex row direction', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '100px',
+          display: 'flex',
+          flexDirection: 'row',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            flex: 1,
+            height: '100px',
+            padding: '10px',
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              width: '100%',
+              height: '50px',
+              backgroundColor: 'red'
+            }
+          })
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+  });
+ 
 });

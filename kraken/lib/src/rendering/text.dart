@@ -131,7 +131,13 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
 
         maxConstraintWidth = parentConstraints.minWidth - horizontalPaddingLength - horizontalBorderLength;
       } else if (parentConstraints.maxWidth == double.infinity) {
-        maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel) ?? double.infinity;
+        final RenderLayoutParentData parentParentData = parentRenderBoxModel.parentData;
+        // Width of positioned element does not contrainted by parent.
+        if (parentParentData.isPositioned) {
+          maxConstraintWidth = double.infinity;
+        } else {
+          maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel) ?? double.infinity;
+        }
       } else if (parentConstraints.maxWidth != null) {
         EdgeInsets borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
         EdgeInsetsGeometry padding = parentRenderBoxModel.renderStyle.padding;
