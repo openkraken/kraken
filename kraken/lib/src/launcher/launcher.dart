@@ -26,20 +26,34 @@ void launch({
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
-  KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-    background: background,
-    showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-    methodChannel: KrakenNativeChannel(),
-    debugEnableInspector: debugEnableInspector,
-    devToolsService: devToolsService
-  );
+  VoidCallback _ordinaryOnMetricsChanged = window.onMetricsChanged;
 
-  controller.view.attachView(RendererBinding.instance.renderView);
+  // window.physicalSize are Size.zero when app first loaded.
+  // We should wait for onMetricsChanged when window.physicalSize get updated from Flutter Engine.
+  window.onMetricsChanged = () async {
+    if (window.physicalSize == Size.zero) return;
 
-  await controller.loadBundle(
-      bundleURL: bundleURL,
-      bundlePath: bundlePath,
-      bundleContent: bundleContent);
+    KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
+        background: background,
+        showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+        methodChannel: KrakenNativeChannel(),
+        debugEnableInspector: debugEnableInspector,
+        devToolsService: devToolsService
+    );
 
-  await controller.evalBundle();
+    controller.view.attachView(RendererBinding.instance.renderView);
+
+    await controller.loadBundle(
+        bundleURL: bundleURL,
+        bundlePath: bundlePath,
+        bundleContent: bundleContent);
+
+    await controller.evalBundle();
+
+    // Should proxy to ordinary window.onMetricsChanged callbacks.
+    _ordinaryOnMetricsChanged();
+
+    // Recover ordinary callback to window.onMetricsChanged
+    window.onMetricsChanged = _ordinaryOnMetricsChanged;
+  };
 }
