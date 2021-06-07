@@ -1092,5 +1092,4 @@ describe('flex', () => {
     BODY.appendChild(div);
     await snapshot();
   });
- 
 });
