@@ -82,8 +82,6 @@ class PerformanceTiming {
     return _instance!;
   }
 
-  int entriesSize = 0;
-
   void mark(String name, {int? startTime, int? uniqueId}) {
     if (startTime == null) {
       startTime = DateTime.now().microsecondsSinceEpoch;
@@ -94,12 +92,12 @@ class PerformanceTiming {
     }
 
     PerformanceEntry entry = PerformanceEntry(name, startTime, uniqueId);
-    entries[entriesSize++] = entry;
+    entries.add(entry);
   }
 
   Pointer<NativePerformanceEntryList> toNative() {
     Pointer<NativePerformanceEntryList> list = malloc.allocate<NativePerformanceEntryList>(sizeOf<NativePerformanceEntryList>());
-    int byteLength = entriesSize * 3;
+    int byteLength = entries.length * 3;
 
     Uint64List data = Uint64List(byteLength);
 
@@ -116,7 +114,7 @@ class PerformanceTiming {
     final Uint64List buffer = bytes.asTypedList(byteLength);
     buffer.setAll(0, data);
 
-    list.ref.length = entriesSize;
+    list.ref.length = entries.length;
     list.ref.entries = bytes;
 
     return list;
