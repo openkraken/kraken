@@ -44,10 +44,21 @@ class GestureManager {
 
   List<RenderBoxModel> _renderBoxModelList = [];
 
+  List _eventTypesList = [];
+
   RenderBoxModel? _target;
 
   void addTargetToList(RenderBoxModel renderBoxModel) {
     _renderBoxModelList.add(renderBoxModel);
+  }
+
+  void addEventTypes(List<String> list) {
+    for (int i = 0; i < list.length; i++) {
+      String eventType = list[i];
+      if (!_eventTypesList.contains(eventType)) {
+        _eventTypesList.add(eventType);
+      }
+    }
   }
 
   void clearTargetList() {
@@ -58,7 +69,7 @@ class GestureManager {
     _renderBoxModelList = [];
   }
 
-  void addPointer(PointerEvent event) {
+  void addPointer(PointerEvent event) {print('_eventTypesList=${_eventTypesList}');
     gestures.forEach((key, gesture) {
       gesture.addPointer(event as PointerDownEvent);
     });

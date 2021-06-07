@@ -15,6 +15,8 @@ typedef GestureCallback = void Function(Event);
 typedef MouseEventListener = void Function(String,
     {PointerDownEvent? down, PointerUpEvent? up});
 
+typedef EventTypes = List<String> Function();
+
 mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -44,6 +46,8 @@ mixin RenderPointerListenerMixin on RenderBox {
   GestureCallback? onScale;
 
   GestureCallback? onLongPress;
+
+  EventTypes getEventTypes;
 
   void onPanStart(DragStartDetails details) {
     onPan!(GestureEvent(

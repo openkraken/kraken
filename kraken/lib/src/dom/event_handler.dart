@@ -30,6 +30,7 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPan = dispatchEvent;
     renderBoxModel.onScale = dispatchEvent;
     renderBoxModel.onLongPress = dispatchEvent;
+    renderBoxModel.getEventTypes = getEventTypes;
   }
 
   void removeEventResponder(RenderBoxModel renderBoxModel) {
