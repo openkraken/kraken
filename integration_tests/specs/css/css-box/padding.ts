@@ -199,7 +199,6 @@ describe('Box padding', () => {
         ]))
       ]
     );
-
     BODY.appendChild(div);
 
     await snapshot();
