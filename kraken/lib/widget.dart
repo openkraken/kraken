@@ -200,7 +200,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
     if (viewportWidthHasChanged || viewportHeightHasChanged) {
       traverseElement(controller.view.document!.documentElement, (element) {
         element.style.applyTargetProperties();
-        element.renderBoxModel!.markNeedsLayout();
+        element.renderBoxModel?.markNeedsLayout();
       });
     }
   }
