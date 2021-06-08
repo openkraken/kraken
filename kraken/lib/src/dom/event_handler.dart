@@ -62,7 +62,7 @@ mixin EventHandlerMixin on Node {
   }
 
   void handlePointCancel(PointerCancelEvent pointEvent) {
-    Event event = Event(EVENT_TOUCH_CANCEL, EventInit());
+    TouchEvent event = TouchEvent(EVENT_TOUCH_CANCEL);
     dispatchEvent(event);
   }
 
