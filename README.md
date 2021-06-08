@@ -44,7 +44,7 @@ By contributing to Kraken, you agree that your contributions will be licensed un
     * [Flutter](https://flutter.dev/docs/get-started/install) version in the `kraken/pubspec.yaml`
     * [CMake](https://cmake.org/) v3.2.0 or later
     * [Xcode](https://developer.apple.com/xcode/) (10.12) or later (Running on macOS or iOS)
-    * [Android NDK](https://developer.android.com/studio/projects/install-ndk) version `20.0.5594570` or later (Running on Android)
+    * [Android NDK](https://developer.android.com/studio/projects/install-ndk) version `21.4.7075529` (Running on Android)
 
 1. Install
 

@@ -116,6 +116,8 @@ bool StyleDeclarationInstance::internalSetProperty(std::string &name, JSValueRef
   }
 
   name = parseJavaScriptCSSPropertyName(name);
+
+  JSValueProtect(ctx, value);
   properties[name] = value;
 
   NativeString args_01{};
@@ -134,6 +136,8 @@ void StyleDeclarationInstance::internalRemoveProperty(std::string &name, JSValue
     return;
   }
 
+  JSValueRef value = properties[name];
+  JSValueUnprotect(ctx, value);
   properties.erase(name);
 
   NativeString args_01{};
