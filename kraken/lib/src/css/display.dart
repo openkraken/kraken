@@ -40,6 +40,11 @@ mixin CSSDisplayMixin on RenderStyleBase {
     CSSDisplay presentDisplay = getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(value) ? element.defaultDisplay : value
     );
+    // Destroy renderer of element when display is changed to none.
+    if (presentDisplay == CSSDisplay.none) {
+      element.detach();
+      return;
+    }
     display = presentDisplay;
     transformedDisplay = getTransformedDisplay();
     if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
