@@ -52,15 +52,6 @@ class GestureManager {
     _renderBoxModelList.add(renderBoxModel);
   }
 
-  void addEventTypes(List<String> list) {
-    for (int i = 0; i < list.length; i++) {
-      String eventType = list[i];
-      if (!_eventTypesList.contains(eventType)) {
-        _eventTypesList.add(eventType);
-      }
-    }
-  }
-
   void clearTargetList() {
     if (_renderBoxModelList.length != 0) {
       // The target node triggered by the gesture is the bottom node of hittest.
@@ -93,7 +84,7 @@ class GestureManager {
         }
       }
     }
-
+    
     gestures.forEach((key, gesture) {
 <<<<<<< HEAD
       gesture.addPointer(event as PointerDownEvent);
