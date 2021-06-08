@@ -17,30 +17,30 @@ class GestureManager {
   factory GestureManager.instance() {
     if (_instance == null) {
       _instance = GestureManager._();
+      
+      _instance!.gestures[EVENT_CLICK] = ClickGestureRecognizer();
+      (_instance!.gestures[EVENT_CLICK] as ClickGestureRecognizer).onClick = _instance!.onClick;
 
-      _instance!.gestures[ClickGestureRecognizer] = ClickGestureRecognizer();
-      (_instance!.gestures[ClickGestureRecognizer] as ClickGestureRecognizer).onClick = _instance!.onClick;
+      _instance!.gestures[EVENT_SWIPE] = SwipeGestureRecognizer();
+      (_instance!.gestures[EVENT_SWIPE] as SwipeGestureRecognizer).onSwipe = _instance!.onSwipe;
 
-      _instance!.gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer();
-      (_instance!.gestures[SwipeGestureRecognizer] as SwipeGestureRecognizer).onSwipe = _instance!.onSwipe;
+      _instance!.gestures[EVENT_PAN] = PanGestureRecognizer();
+      (_instance!.gestures[EVENT_PAN] as PanGestureRecognizer).onStart = _instance!.onPanStart;
+      (_instance!.gestures[EVENT_PAN] as PanGestureRecognizer).onUpdate = _instance!.onPanUpdate;
+      (_instance!.gestures[EVENT_PAN] as PanGestureRecognizer).onEnd = _instance!.onPanEnd;
 
-      _instance!.gestures[PanGestureRecognizer] = PanGestureRecognizer();
-      (_instance!.gestures[PanGestureRecognizer] as PanGestureRecognizer).onStart = _instance!.onPanStart;
-      (_instance!.gestures[PanGestureRecognizer] as PanGestureRecognizer).onUpdate = _instance!.onPanUpdate;
-      (_instance!.gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = _instance!.onPanEnd;
+      _instance!.gestures[EVENT_LONG_PRESS] = LongPressGestureRecognizer();
+      (_instance!.gestures[EVENT_LONG_PRESS] as LongPressGestureRecognizer).onLongPressEnd = _instance!.onLongPressEnd;
 
-      _instance!.gestures[LongPressGestureRecognizer] = LongPressGestureRecognizer();
-      (_instance!.gestures[LongPressGestureRecognizer] as LongPressGestureRecognizer).onLongPressEnd = _instance!.onLongPressEnd;
-
-      _instance!.gestures[ScaleGestureRecognizer] = ScaleGestureRecognizer();
-      (_instance!.gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onStart = _instance!.onScaleStart;
-      (_instance!.gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onUpdate = _instance!.onScaleUpdate;
-      (_instance!.gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onEnd = _instance!.onScaleEnd;
+      _instance!.gestures[EVENT_SCALE] = ScaleGestureRecognizer();
+      (_instance!.gestures[EVENT_SCALE] as ScaleGestureRecognizer).onStart = _instance!.onScaleStart;
+      (_instance!.gestures[EVENT_SCALE] as ScaleGestureRecognizer).onUpdate = _instance!.onScaleUpdate;
+      (_instance!.gestures[EVENT_SCALE] as ScaleGestureRecognizer).onEnd = _instance!.onScaleEnd;
     }
     return _instance!;
   }
 
-  final Map<Type, GestureRecognizer> gestures = <Type, GestureRecognizer>{};
+  final Map<String, GestureRecognizer> gestures = <String, GestureRecognizer>{};
 
   List<RenderBoxModel> _renderBoxModelList = [];
 
@@ -70,8 +70,38 @@ class GestureManager {
   }
 
   void addPointer(PointerEvent event) {
+    // Collect the events in the hittest.
+    List<String> eventList = [];
+    for (int i = 0; i < _renderBoxModelList.length; i++) {
+      RenderBoxModel renderBoxModel = _renderBoxModelList[i];
+      if (renderBoxModel.getEventHandlers != null) {
+        Map<String, List<EventHandler>> eventHandlers = renderBoxModel.getEventHandlers();
+        if (eventHandlers.containsKey(EVENT_CLICK)) {
+          eventList.add(EVENT_CLICK);
+        }
+        if (eventHandlers.containsKey(EVENT_SWIPE)) {
+          eventList.add(EVENT_SWIPE);
+        }
+        if (eventHandlers.containsKey(EVENT_PAN)) {
+          eventList.add(EVENT_PAN);
+        }
+        if (eventHandlers.containsKey(EVENT_LONG_PRESS)) {
+          eventList.add(EVENT_LONG_PRESS);
+        }
+        if (eventHandlers.containsKey(EVENT_SCALE)) {
+          eventList.add(EVENT_SCALE);
+        }
+      }
+    }
     gestures.forEach((key, gesture) {
+<<<<<<< HEAD
       gesture.addPointer(event as PointerDownEvent);
+=======
+      // Register the recognizer that needs to be monitored.
+      if (eventList.contains(key)) {
+        gesture.addPointer(event);
+      }
+>>>>>>> feat: Only register recognizers that need to be monitored.
     });
   }
 

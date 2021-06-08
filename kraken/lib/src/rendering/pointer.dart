@@ -15,7 +15,7 @@ typedef GestureCallback = void Function(Event);
 typedef MouseEventListener = void Function(String,
     {PointerDownEvent? down, PointerUpEvent? up});
 
-typedef EventTypes = List<String> Function();
+typedef EventHandlers = Map<String, List<EventHandler>> Function();
 
 mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer comes into contact with the screen (for touch
@@ -47,7 +47,7 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   GestureCallback? onLongPress;
 
-  EventTypes getEventTypes;
+  EventHandlers getEventHandlers;
 
   void onPanStart(DragStartDetails details) {
     onPan!(GestureEvent(
