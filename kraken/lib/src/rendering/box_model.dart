@@ -749,9 +749,15 @@ class RenderBoxModel extends RenderBox with
     logicalContentHeight + verticalPaddingLength + verticalBorderLength : null;
 
     // Constraints
-    double minConstraintWidth = 0;
+    // Width should be not smaller than border and padding in horizontal direction
+    // when box-sizing is border-box which is only supported.
+    double minConstraintWidth = renderStyle.borderLeft + renderStyle.borderRight +
+      renderStyle.paddingLeft + renderStyle.paddingRight;
     double maxConstraintWidth = logicalWidth ?? double.infinity;
-    double minConstraintHeight = 0;
+    // Height should be not smaller than border and padding in vertical direction
+    // when box-sizing is border-box which is only supported.
+    double minConstraintHeight = renderStyle.borderTop + renderStyle.borderBottom +
+      renderStyle.paddingTop + renderStyle.paddingBottom;
     double maxConstraintHeight = logicalHeight ?? double.infinity;
 
     if (parent is RenderFlexLayout) {

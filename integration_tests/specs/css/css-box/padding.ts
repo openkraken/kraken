@@ -234,7 +234,6 @@ describe('Box padding', () => {
             style: {
               position: 'absolute',
               background: 'pink',
-              width: '100%',
               paddingTop: '100%',
             },
           },
