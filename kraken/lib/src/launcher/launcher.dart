@@ -15,12 +15,14 @@ import 'bundle.dart';
 
 typedef ConnectedCallback = void Function();
 
+const _white = Color(0xFFFFFFFF);
+
 void launch({
   String bundleURL,
   String bundlePath,
   String bundleContent,
   bool debugEnableInspector,
-  Color background,
+  Color background = _white,
   DevToolsService devToolsService,
 }) async {
   // Bootstrap binding.
