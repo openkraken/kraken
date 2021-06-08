@@ -76,23 +76,24 @@ class GestureManager {
       RenderBoxModel renderBoxModel = _renderBoxModelList[i];
       if (renderBoxModel.getEventHandlers != null) {
         Map<String, List<EventHandler>> eventHandlers = renderBoxModel.getEventHandlers();
-        if (eventHandlers.containsKey(EVENT_CLICK)) {
+        if (!eventList.contains(EVENT_CLICK) && eventHandlers.containsKey(EVENT_CLICK)) {
           eventList.add(EVENT_CLICK);
         }
-        if (eventHandlers.containsKey(EVENT_SWIPE)) {
+        if (!eventList.contains(EVENT_SWIPE) && eventHandlers.containsKey(EVENT_SWIPE)) {
           eventList.add(EVENT_SWIPE);
         }
-        if (eventHandlers.containsKey(EVENT_PAN)) {
+        if (!eventList.contains(EVENT_PAN) && eventHandlers.containsKey(EVENT_PAN)) {
           eventList.add(EVENT_PAN);
         }
-        if (eventHandlers.containsKey(EVENT_LONG_PRESS)) {
+        if (!eventList.contains(EVENT_LONG_PRESS) && eventHandlers.containsKey(EVENT_LONG_PRESS)) {
           eventList.add(EVENT_LONG_PRESS);
         }
-        if (eventHandlers.containsKey(EVENT_SCALE)) {
+        if (!eventList.contains(EVENT_SCALE) && eventHandlers.containsKey(EVENT_SCALE)) {
           eventList.add(EVENT_SCALE);
         }
       }
     }
+
     gestures.forEach((key, gesture) {
 <<<<<<< HEAD
       gesture.addPointer(event as PointerDownEvent);
