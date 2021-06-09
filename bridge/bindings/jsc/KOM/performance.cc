@@ -418,6 +418,12 @@ JSValueRef JSPerformance::__kraken_navigation_summary__(JSContextRef ctx, JSObje
   performance->measureSummary();
 
   std::vector<NativePerformanceEntry *> entries = performance->getFullEntries();
+
+  if (entries.empty()) {
+    throwJSError(ctx, "Failed to get navigation summary: flutter is not running in profile mode.", exception);
+    return nullptr;
+  }
+
   std::vector<NativePerformanceEntry *> measures;
   for (auto &m_entries : entries) {
     if (std::string(m_entries->entryType) == "measure") {
@@ -676,6 +682,7 @@ std::vector<NativePerformanceEntry *> JSPerformance::getFullEntries() {
     return std::vector<NativePerformanceEntry *>();
   }
   auto dartEntryList = getDartMethod()->getPerformanceEntries(context->getContextId());
+  if (dartEntryList == nullptr) return std::vector<NativePerformanceEntry *>();
   auto dartEntityBytes = dartEntryList->entries;
   std::vector<NativePerformanceEntry *> dartEntries;
   dartEntries.reserve(dartEntryList->length);

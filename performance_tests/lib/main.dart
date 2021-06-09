@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'dart:ui';
+import 'dart:io';
+import 'dart:async';
 
 void main() {
   runApp(MyApp());
@@ -90,7 +92,12 @@ class _MyHomePageState extends State<MyBrowser> {
             viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
             bundleURL: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/data/cvd3r6f068.js',
             onLoad: (KrakenController controller) {
-
+              Timer(Duration(seconds: 4), () {
+                exit(0);
+              });
+              controller.view.evaluateJavaScripts("""setTimeout(() => {
+                console.log(performance.__kraken_navigation_summary__());
+              }, 2000);""");
             },
           ),
         ));
