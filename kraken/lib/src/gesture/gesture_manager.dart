@@ -17,7 +17,7 @@ class GestureManager {
   factory GestureManager.instance() {
     if (_instance == null) {
       _instance = GestureManager._();
-      
+
       _instance!.gestures[EVENT_CLICK] = ClickGestureRecognizer();
       (_instance!.gestures[EVENT_CLICK] as ClickGestureRecognizer).onClick = _instance!.onClick;
 
@@ -43,8 +43,6 @@ class GestureManager {
   final Map<String, GestureRecognizer> gestures = <String, GestureRecognizer>{};
 
   List<RenderBoxModel> _renderBoxModelList = [];
-
-  List _eventTypesList = [];
 
   RenderBoxModel? _target;
 
@@ -84,7 +82,7 @@ class GestureManager {
         }
       }
     }
-    
+
     gestures.forEach((key, gesture) {
 <<<<<<< HEAD
       gesture.addPointer(event as PointerDownEvent);
