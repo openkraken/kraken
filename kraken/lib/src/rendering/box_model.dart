@@ -720,11 +720,6 @@ class RenderBoxModel extends RenderBox with
 
     CSSDisplay transformedDisplay = renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
-    bool isDisplayNone = transformedDisplay == CSSDisplay.none;
-
-    if (isDisplayNone) {
-      return _displayNoneConstraints;
-    }
 
     EdgeInsets borderEdge = renderStyle.borderEdge;
     EdgeInsetsGeometry padding = renderStyle.padding;
@@ -1260,11 +1255,6 @@ class RenderBoxModel extends RenderBox with
     needsLayout = false;
   }
 
-  bool get isCSSDisplayNone {
-    CSSDisplay display = renderStyle.display;
-    return display != null && display == CSSDisplay.none;
-  }
-
   /// [RenderLayoutBox] real paint things after basiclly paint box model.
   /// Override which to paint layout or intrinsic things.
   /// Used by [RenderIntrinsic], [RenderFlowLayout], [RenderFlexLayout].
@@ -1278,7 +1268,7 @@ class RenderBoxModel extends RenderBox with
       childPaintDuration = 0;
       PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: targetId);
     }
-    if (isCSSDisplayNone || isCSSVisibilityHidden) {
+    if (isCSSVisibilityHidden) {
       if (kProfileMode) {
         PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: targetId);
       }

@@ -50,15 +50,6 @@ class RenderIntrinsic extends RenderBoxModel
       PerformanceTiming.instance().mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: targetId);
     }
 
-    CSSDisplay display = renderStyle.display;
-    if (display == CSSDisplay.none) {
-      size = constraints.smallest;
-      if (kProfileMode) {
-        PerformanceTiming.instance().mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
-      }
-      return;
-    }
-
     beforeLayout();
 
     double width = renderStyle.width;
