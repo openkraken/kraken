@@ -20,10 +20,10 @@ final Pointer<NativeFunction<NativeWindowScrollBy>> nativeScrollBy = Pointer.fro
 
 class Window extends EventTarget {
   final Pointer<NativeWindow> nativeWindowPtr;
-  final Element viewportElement;
   static SplayTreeMap<int, Window> _nativeMap = SplayTreeMap();
+  final Document document;
 
-  Window(int targetId, this.nativeWindowPtr, ElementManager elementManager, this.viewportElement) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
+  Window(int targetId, this.nativeWindowPtr, ElementManager elementManager, this.document) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
       dispatchEvent(event);
@@ -111,7 +111,7 @@ class Window extends EventTarget {
       case EVENT_LOAD:
         return addEventListener(eventName, _handleLoad);
       case EVENT_SCROLL:
-        return viewportElement.addEventListener(eventName, _handleScroll);
+        return document.documentElement.addEventListener(eventName, _handleScroll);
       default:
         break;
     }
