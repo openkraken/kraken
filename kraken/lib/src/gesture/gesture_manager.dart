@@ -42,27 +42,27 @@ class GestureManager {
 
   final Map<String, GestureRecognizer> gestures = <String, GestureRecognizer>{};
 
-  List<RenderBoxModel> _renderBoxModelList = [];
+  List<RenderBox> _hittestList = [];
 
   RenderBoxModel? _target;
 
-  void addTargetToList(RenderBoxModel renderBoxModel) {
-    _renderBoxModelList.add(renderBoxModel);
+  void addTargetToList(RenderBox renderBoxModel) {
+    _hittestList.add(renderBoxModel);
   }
 
   void clearTargetList() {
-    if (_renderBoxModelList.length != 0) {
+    if (_hittestList.length != 0) {
       // The target node triggered by the gesture is the bottom node of hittest.
-      _target = _renderBoxModelList[0];
+      _target = _hittestList[0];
     }
-    _renderBoxModelList = [];
+    _hittestList = [];
   }
 
   void addPointer(PointerEvent event) {
     // Collect the events in the hittest.
     List<String> events = [];
-    for (int i = 0; i < _renderBoxModelList.length; i++) {
-      RenderBoxModel renderBoxModel = _renderBoxModelList[i];
+    for (int i = 0; i < _hittestList.length; i++) {
+      RenderBoxModel renderBoxModel = _hittestList[i];
       if (renderBoxModel.getEventHandlers != null) {
         Map<String, List<EventHandler>> eventHandlers = renderBoxModel.getEventHandlers();
         if (!events.contains(EVENT_CLICK) && eventHandlers.containsKey(EVENT_CLICK)) {
