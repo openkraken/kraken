@@ -60,25 +60,25 @@ class GestureManager {
 
   void addPointer(PointerEvent event) {
     // Collect the events in the hittest.
-    List<String> eventList = [];
+    List<String> events = [];
     for (int i = 0; i < _renderBoxModelList.length; i++) {
       RenderBoxModel renderBoxModel = _renderBoxModelList[i];
       if (renderBoxModel.getEventHandlers != null) {
         Map<String, List<EventHandler>> eventHandlers = renderBoxModel.getEventHandlers();
-        if (!eventList.contains(EVENT_CLICK) && eventHandlers.containsKey(EVENT_CLICK)) {
-          eventList.add(EVENT_CLICK);
+        if (!events.contains(EVENT_CLICK) && eventHandlers.containsKey(EVENT_CLICK)) {
+          events.add(EVENT_CLICK);
         }
-        if (!eventList.contains(EVENT_SWIPE) && eventHandlers.containsKey(EVENT_SWIPE)) {
-          eventList.add(EVENT_SWIPE);
+        if (!events.contains(EVENT_SWIPE) && eventHandlers.containsKey(EVENT_SWIPE)) {
+          events.add(EVENT_SWIPE);
         }
-        if (!eventList.contains(EVENT_PAN) && eventHandlers.containsKey(EVENT_PAN)) {
-          eventList.add(EVENT_PAN);
+        if (!events.contains(EVENT_PAN) && eventHandlers.containsKey(EVENT_PAN)) {
+          events.add(EVENT_PAN);
         }
-        if (!eventList.contains(EVENT_LONG_PRESS) && eventHandlers.containsKey(EVENT_LONG_PRESS)) {
-          eventList.add(EVENT_LONG_PRESS);
+        if (!events.contains(EVENT_LONG_PRESS) && eventHandlers.containsKey(EVENT_LONG_PRESS)) {
+          events.add(EVENT_LONG_PRESS);
         }
-        if (!eventList.contains(EVENT_SCALE) && eventHandlers.containsKey(EVENT_SCALE)) {
-          eventList.add(EVENT_SCALE);
+        if (!events.contains(EVENT_SCALE) && eventHandlers.containsKey(EVENT_SCALE)) {
+          events.add(EVENT_SCALE);
         }
       }
     }
@@ -88,7 +88,7 @@ class GestureManager {
       gesture.addPointer(event as PointerDownEvent);
 =======
       // Register the recognizer that needs to be monitored.
-      if (eventList.contains(key)) {
+      if (events.contains(key)) {
         gesture.addPointer(event);
       }
 >>>>>>> feat: Only register recognizers that need to be monitored.
