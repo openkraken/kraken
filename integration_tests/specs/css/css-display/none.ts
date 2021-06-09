@@ -35,7 +35,7 @@ describe('Display', () => {
             backgroundColor: 'yellow',
           }
         }, [
-          createText('changed to block'),
+          createText('none to block'),
         ])
       ]
     );
@@ -67,7 +67,7 @@ describe('Display', () => {
             backgroundColor: 'yellow',
           }
         }, [
-          createText('changed to block'),
+          createText('block to none'),
         ])
       ]
     );
