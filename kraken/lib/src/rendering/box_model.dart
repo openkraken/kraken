@@ -16,14 +16,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
 import 'debug_overlay.dart';
 
-// Constraints of element whose display style is none
-final _displayNoneConstraints = BoxConstraints(
-  minWidth: 0,
-  maxWidth: 0,
-  minHeight: 0,
-  maxHeight: 0
-);
-
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   bool isPositioned = false;
 
