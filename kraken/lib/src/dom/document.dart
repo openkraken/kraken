@@ -12,10 +12,15 @@ class Document extends Node {
   Document(int targetId, this.nativeDocumentPtr, ElementManager elementManager, this.documentElement, this.renderView)
       : super(NodeType.DOCUMENT_NODE, targetId, nativeDocumentPtr.ref.nativeNode, elementManager, '#document') {
     appendChild(documentElement);
+    renderView.getEventHandlers = getEventHandlers;
   }
 
   void _handleEvent(Event event) {
     emitUIEvent(elementManager.controller.view.contextId, nativeDocumentPtr.ref.nativeNode.ref.nativeEventTarget, event);
+  }
+
+  Map<String, List<EventHandler>> getEventHandlers() {
+    return eventHandlers;
   }
 
   @override

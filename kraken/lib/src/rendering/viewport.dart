@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:kraken/launcher.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
 import 'dart:ui';
 
@@ -33,6 +34,8 @@ class RenderViewportBox extends RenderProxyBox
   bool get isRepaintBoundary => true;
 
   Color? background;
+
+  EventHandlers getEventHandlers;
 
   Size _viewportSize;
 
