@@ -729,6 +729,10 @@ void ElementInstance::_beforeUpdateId(JSValueRef oldId, JSValueRef newId) {
   }
 }
 
+std::string ElementInstance::getRegisteredTagName() {
+  return m_tagName.string();
+}
+
 std::string ElementInstance::tagName() {
   std::string tagName = m_tagName.string();
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);

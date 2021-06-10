@@ -2017,13 +2017,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // though we currently don't use those here.
     // See also RenderParagraph which has a similar issue.
     final Size textPainterSize = _textPainter.size;
-    final double width = forceLine
-        ? constraints.maxWidth
-        : constraints.constrainWidth(_textPainter.size.width + _caretMargin);
-    size = Size(width,
-        constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
-    final Size contentSize =
-        Size(textPainterSize.width + _caretMargin, textPainterSize.height);
+    final double width = forceLine ? constraints.maxWidth : constraints
+        .constrainWidth(_textPainter.size.width + _caretMargin);
+    final double height = constraints.maxHeight != double.infinity ?
+      constraints.maxHeight : _preferredHeight(constraints.maxWidth);
+    size = Size(width, height);
+    final Size contentSize = Size(textPainterSize.width + _caretMargin, textPainterSize.height);
     _maxScrollExtent = _getMaxScrollExtent(contentSize);
     offset.applyViewportDimension(_viewportExtent);
     offset.applyContentDimensions(0.0, _maxScrollExtent);

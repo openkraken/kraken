@@ -145,7 +145,7 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
     ElementInstance *element = reinterpret_cast<ElementInstance *>(node);
 
     /* createElement */
-    std::string tagName = element->tagName();
+    std::string tagName = element->getRegisteredTagName();
     auto newElement = JSElement::buildElementInstance(element->document()->context, tagName);
 
     /* copy attributes */
@@ -202,7 +202,13 @@ JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef
                              const JSValueRef *arguments, JSValueRef *exception) {
   auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
 
-  const JSValueRef deepValue = arguments[0];
+  JSValueRef deepValue;
+  if (argumentCount < 1) {
+    deepValue = JSValueMakeBoolean(ctx, false);
+  } else {
+    deepValue = arguments[0];
+  }
+
   if (!JSValueIsBoolean(ctx, deepValue)) {
     throwJSError(ctx, "Failed to cloneNode: deep should be a Boolean.", exception);
     return nullptr;

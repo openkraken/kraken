@@ -18,6 +18,26 @@ describe('Tags input', () => {
     await snapshot();
   });
 
+  it('with height smaller than text height', async () => {
+    const input = document.createElement('input');
+    input.style.fontSize = '26px';
+    input.style.height = '22px';
+    input.setAttribute('value', 'Hello World');
+    document.body.appendChild(input);
+
+    await snapshot();
+  });
+
+  it('with height larger than text height', async () => {
+    const input = document.createElement('input');
+    input.style.fontSize = '26px';
+    input.style.height = '52px';
+    input.setAttribute('value', 'Hello World');
+    document.body.appendChild(input);
+
+    await snapshot();
+  });
+
   it('with value first', async () => {
     const input = document.createElement('input');
     input.setAttribute('value', 'Hello World Hello World Hello World Hello World');

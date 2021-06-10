@@ -177,10 +177,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     Element oldTarget = getEventTargetByTargetId<Element>(oldId)!;
     Element newTarget = getEventTargetByTargetId<Element>(newId)!;
 
-    newTarget.style = oldTarget.style;
+    newTarget.style = oldTarget.style.clone(newTarget);
     newTarget.properties.clear();
     oldTarget.properties.forEach((key, value) {
-      newTarget.properties[key] = value;
+      newTarget.setProperty(key, value);
     });
   }
 
