@@ -52,7 +52,7 @@ class GestureManager {
 
   void clearTargetList() {
     if (_hitTestList.length != 0) {
-      // The target node triggered by the gesture is the bottom node of hittest.
+      // The target node triggered by the gesture is the bottom node of hitTest.
       _target = _hitTestList[0];
     }
     _hitTestList = [];

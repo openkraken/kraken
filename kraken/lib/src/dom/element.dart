@@ -1303,23 +1303,7 @@ class Element extends Node
 
   void handleMethodClick() {
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
-
-    if (isRendererAttached) {
-      final RenderBox box = renderBoxModel!;
-      // HitTest will test rootView's every child (including
-      // child's child), so must flush rootView every times,
-      // or child may miss size.
-      elementManager
-          .getRootRenderBox()
-          .owner!
-          .flushLayout();
-
-      // Position the center of element.
-      Offset position = box.localToGlobal(box.size.center(Offset.zero), ancestor: elementManager.getRootRenderBox());
-      final BoxHitTestResult boxHitTestResult = BoxHitTestResult();
-      GestureBinding.instance!.hitTest(boxHitTestResult, position);
-    }
-
+    
     // If element not in tree, click is fired and only response to itself.
     dispatchEvent(clickEvent);
   }
