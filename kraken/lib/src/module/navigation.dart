@@ -31,7 +31,7 @@ class NavigationModule extends BaseModule {
   @override
   String get name => 'Navigation';
 
-  NavigationModule(ModuleManager moduleManager) : super(moduleManager);
+  NavigationModule(ModuleManager? moduleManager) : super(moduleManager);
 
   @override
   void dispose() {}
@@ -41,17 +41,17 @@ class NavigationModule extends BaseModule {
     if (method == 'goTo') {
       assert(params is String, 'URL must be string.');
       String url = params;
-      String sourceUrl = moduleManager.controller.bundlePath ?? moduleManager.controller.bundleURL;
+      String? sourceUrl = moduleManager!.controller.bundlePath ?? moduleManager!.controller.bundleURL;
 
       Uri targetUri = Uri.parse(url);
-      Uri sourceUri = Uri.parse(sourceUrl);
+      Uri? sourceUri = sourceUrl != null ? Uri.parse(sourceUrl) : null;
 
-      if (targetUri.scheme != sourceUri.scheme ||
+      if (sourceUri == null || (targetUri.scheme != sourceUri.scheme ||
           targetUri.host != sourceUri.host ||
           targetUri.port != sourceUri.port ||
           targetUri.path != sourceUri.path ||
-          targetUri.query != sourceUri.query) {
-        moduleManager.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
+          targetUri.query != sourceUri.query)) {
+        moduleManager!.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
       }
     }
 
@@ -63,7 +63,7 @@ class KrakenNavigationAction {
   KrakenNavigationAction(this.source, this.target, this.navigationType);
 
   // The current source url.
-  String source;
+  String? source;
 
   // The target source url.
   String target;
@@ -81,7 +81,7 @@ Future<KrakenNavigationActionPolicy> defaultDecisionHandler(KrakenNavigationActi
 
 class KrakenNavigationDelegate {
   // Called when an error occurs during navigation.
-  KrakenNavigationErrorHandler errorHandler;
+  KrakenNavigationErrorHandler? errorHandler;
 
   KrakenNavigationDecisionHandler _decisionHandler = defaultDecisionHandler;
 

@@ -18,32 +18,34 @@ typedef ConnectedCallback = void Function();
 const _white = Color(0xFFFFFFFF);
 
 void launch({
-  String bundleURL,
-  String bundlePath,
-  String bundleContent,
-  bool debugEnableInspector,
+  String? bundleURL,
+  String? bundlePath,
+  String? bundleContent,
+  bool? debugEnableInspector,
   Color background = _white,
-  DevToolsService devToolsService,
+  DevToolsService? devToolsService,
 }) async {
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
-  VoidCallback _ordinaryOnMetricsChanged = window.onMetricsChanged;
+  VoidCallback? _ordinaryOnMetricsChanged = window.onMetricsChanged;
 
   // window.physicalSize are Size.zero when app first loaded.
   // We should wait for onMetricsChanged when window.physicalSize get updated from Flutter Engine.
   window.onMetricsChanged = () async {
-    if (window.physicalSize == Size.zero) return;
+    if (window.physicalSize == Size.zero) {
+      window.onMetricsChanged = _ordinaryOnMetricsChanged;
+      return;
+    }
 
     KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
         background: background,
         showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
         methodChannel: KrakenNativeChannel(),
-        debugEnableInspector: debugEnableInspector,
         devToolsService: devToolsService
     );
 
-    controller.view.attachView(RendererBinding.instance.renderView);
+    controller.view.attachView(RendererBinding.instance!.renderView);
 
     await controller.loadBundle(
         bundleURL: bundleURL,
@@ -53,9 +55,10 @@ void launch({
     await controller.evalBundle();
 
     // Should proxy to ordinary window.onMetricsChanged callbacks.
-    _ordinaryOnMetricsChanged();
-
-    // Recover ordinary callback to window.onMetricsChanged
-    window.onMetricsChanged = _ordinaryOnMetricsChanged;
+    if (_ordinaryOnMetricsChanged != null) {
+      _ordinaryOnMetricsChanged();
+      // Recover ordinary callback to window.onMetricsChanged
+      window.onMetricsChanged = _ordinaryOnMetricsChanged;
+    }
   };
 }

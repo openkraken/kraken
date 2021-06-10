@@ -11,30 +11,31 @@ import 'package:kraken/rendering.dart';
 /// ancestors.  The returned sequence is in [parent, child] order.
 Iterable<Layer> _getLayerChain(Layer start) {
   final layerChain = <Layer>[];
-  for (Layer layer = start; layer != null; layer = layer.parent) {
+  for (Layer? layer = start; layer != null; layer = layer.parent) {
     layerChain.add(layer);
   }
   return layerChain.reversed;
 }
 
-typedef IntersectionChangeCallback = void Function(IntersectionObserverEntry info);
+typedef IntersectionChangeCallback = void Function(
+    IntersectionObserverEntry info);
 
 mixin RenderIntersectionObserverMixin on RenderBox {
-  IntersectionChangeCallback _onIntersectionChange;
-  IntersectionObserverLayer intersectionObserverLayer;
+  IntersectionChangeCallback? _onIntersectionChange;
+  IntersectionObserverLayer? intersectionObserverLayer;
 
   /**
    * A list of event handlers
    */
-  List<IntersectionChangeCallback> _listeners;
+  List<IntersectionChangeCallback>? _listeners;
 
   void addIntersectionChangeListener(IntersectionChangeCallback callback) {
     // Init things
     if (_listeners == null) {
-      _listeners = List();
+      _listeners = List.empty(growable: true);
       _onIntersectionChange = _dispatchChange;
     }
-    _listeners.add(callback);
+    _listeners!.add(callback);
   }
 
   void clearIntersectionChangeListeners() {
@@ -49,13 +50,13 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       return;
     }
 
-    for (int i = 0; i < _listeners.length; i += 1) {
-      if (_listeners[i] == callback) {
-        _listeners.removeAt(i);
+    for (int i = 0; i < _listeners!.length; i += 1) {
+      if (_listeners![i] == callback) {
+        _listeners!.removeAt(i);
         break;
       }
     }
-    if (_listeners.isEmpty) {
+    if (_listeners!.isEmpty) {
       _listeners = null;
       _onIntersectionChange = null;
     }
@@ -64,13 +65,14 @@ mixin RenderIntersectionObserverMixin on RenderBox {
   void _dispatchChange(IntersectionObserverEntry info) {
     // Not use for-in, and not cache length, due to callback call stack may
     // clear [_listeners], which case concurrent exception.
-    for (int i = 0; i < (_listeners == null ? 0 : _listeners.length); i ++) {
-      IntersectionChangeCallback callback = _listeners[i];
+    for (int i = 0; i < (_listeners == null ? 0 : _listeners!.length); i++) {
+      IntersectionChangeCallback callback = _listeners![i];
       callback(info);
     }
   }
 
-  void paintIntersectionObserver(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+  void paintIntersectionObserver(PaintingContext context, Offset offset,
+      PaintingContextCallback callback) {
     // Skip to next if not has intersection observer
     if (_onIntersectionChange == null) {
       callback(context, offset);
@@ -79,24 +81,27 @@ mixin RenderIntersectionObserverMixin on RenderBox {
 
     if (intersectionObserverLayer == null) {
       intersectionObserverLayer = IntersectionObserverLayer(
-        elementSize: size, paintOffset: offset, onIntersectionChange: _onIntersectionChange,
-          rootRenderObject: (this as RenderBoxModel).elementManager.getRootRenderObject());
+          elementSize: size,
+          paintOffset: offset,
+          onIntersectionChange: _onIntersectionChange!,
+          rootRenderObject:
+              (this as RenderBoxModel).elementManager!.getRootRenderBox());
     } else {
-      intersectionObserverLayer.elementSize = semanticBounds.size;
-      intersectionObserverLayer.paintOffset = offset;
+      intersectionObserverLayer!.elementSize = semanticBounds.size;
+      intersectionObserverLayer!.paintOffset = offset;
     }
 
-    context.pushLayer(intersectionObserverLayer, callback, offset);
+    context.pushLayer(intersectionObserverLayer!, callback, offset);
   }
 }
 
 class IntersectionObserverLayer extends ContainerLayer {
   IntersectionObserverLayer(
-      {@required Size elementSize, @required Offset paintOffset, @required this.onIntersectionChange, @required this.rootRenderObject})
-      : assert(paintOffset != null),
-        assert(elementSize != null),
-        assert(onIntersectionChange != null),
-        // TODO: This is zero for box element. For sliver element, this offset points to the start of the element which may be outside the viewport.
+      {required Size elementSize,
+      required Offset paintOffset,
+      required this.onIntersectionChange,
+      required this.rootRenderObject})
+      : // TODO: This is zero for box element. For sliver element, this offset points to the start of the element which may be outside the viewport.
         _elementOffset = Offset.zero,
         _layerOffset = Offset.zero,
         _elementSize = elementSize,
@@ -111,6 +116,7 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// Keeps track of [IntersectionObserverLayer] objects that have been recently
   /// updated and that might need to report visibility changes.
   static final _updated = <int, IntersectionObserverLayer>{};
+
   /// 300ms delay compute layer offset
   static Duration _updateInterval = Duration(milliseconds: 300);
 
@@ -123,6 +129,7 @@ class IntersectionObserverLayer extends ContainerLayer {
   }
 
   Offset _paintOffset;
+
   set paintOffset(Offset value) {
     if (value == _paintOffset) return;
     _paintOffset = value;
@@ -140,7 +147,7 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// This is used to suppress extraneous callbacks when visibility hasn't
   /// changed.  Stores entries only for visible element objects;
   /// entries for non-visible ones are actively removed.
-  IntersectionObserverEntry _lastIntersectionInfo;
+  IntersectionObserverEntry? _lastIntersectionInfo;
 
   /// Converts a [Rect] in local coordinates of the specified [Layer] to a new
   /// [Rect] in global coordinates.
@@ -159,7 +166,6 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// The sequence must be in [parent, child] order.  The sequence must not be
   /// null.
   Matrix4 _accumulateTransforms(Iterable<Layer> layerChain) {
-    assert(layerChain != null);
     Matrix4 transform = Matrix4.identity();
     if (layerChain.isNotEmpty) {
       var parent = layerChain.first;
@@ -225,7 +231,8 @@ class IntersectionObserverLayer extends ContainerLayer {
     // of `addPostFrameCallback` or `scheduleFrameCallback` so that work will
     // be done even if a new frame isn't scheduled and without unnecessarily
     // scheduling a new frame.
-    SchedulerBinding.instance.scheduleTask<void>(_processCallbacks, Priority.touch);
+    SchedulerBinding.instance!
+        .scheduleTask<void>(_processCallbacks, Priority.touch);
   }
 
   /// Computes the bounds for the corresponding element in
@@ -239,17 +246,17 @@ class IntersectionObserverLayer extends ContainerLayer {
   // Computes the accumulated clipping bounds, in global coordinates.
   Rect _computeClipRect() {
     assert(RendererBinding.instance?.renderView != null);
-    var clipRect = Offset.zero & RendererBinding.instance.renderView.size;
+    var clipRect = Offset.zero & RendererBinding.instance!.renderView.size;
 
     var parentLayer = parent;
     while (parentLayer != null) {
-      Rect curClipRect;
+      Rect? curClipRect;
       if (parentLayer is ClipRectLayer) {
         curClipRect = parentLayer.clipRect;
       } else if (parentLayer is ClipRRectLayer) {
-        curClipRect = parentLayer.clipRRect.outerRect;
+        curClipRect = parentLayer.clipRRect!.outerRect;
       } else if (parentLayer is ClipPathLayer) {
-        curClipRect = parentLayer.clipPath.getBounds();
+        curClipRect = parentLayer.clipPath!.getBounds();
       }
 
       if (curClipRect != null) {
@@ -270,8 +277,6 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// Invokes the visibility callback if [IntersectionObserverEntry] hasn't meaningfully
   /// changed since the last time we invoked it.
   void _fireCallback(IntersectionObserverEntry info) {
-    assert(info != null);
-
     final oldInfo = _lastIntersectionInfo;
     // If isIntersecting is true maybe not visible when element size is 0
     final isIntersecting = info.isIntersecting;
@@ -294,8 +299,8 @@ class IntersectionObserverLayer extends ContainerLayer {
     onIntersectionChange(info);
   }
 
-  Rect _rootBounds;
-  Rect _elementBounds;
+  Rect? _rootBounds;
+  Rect? _elementBounds;
   int previousLayerHash = 0;
 
   /// Executes visibility callbacks for all updated.
@@ -309,7 +314,8 @@ class IntersectionObserverLayer extends ContainerLayer {
       Rect elementBounds = layer._computeElementBounds();
       Rect rootBounds = layer._computeClipRect();
 
-      final info = IntersectionObserverEntry.fromRects(boundingClientRect: elementBounds, rootBounds: rootBounds);
+      final info = IntersectionObserverEntry.fromRects(
+          boundingClientRect: elementBounds, rootBounds: rootBounds);
       layer._fireCallback(info);
     }
     _updated.clear();
@@ -318,7 +324,11 @@ class IntersectionObserverLayer extends ContainerLayer {
 
 @immutable
 class IntersectionObserverEntry {
-  const IntersectionObserverEntry({Rect boundingClientRect, Rect intersectionRect, Rect rootBounds, Size size})
+  const IntersectionObserverEntry(
+      {Rect? boundingClientRect,
+      Rect? intersectionRect,
+      Rect? rootBounds,
+      Size? size})
       : boundingClientRect = boundingClientRect ?? Rect.zero,
         intersectionRect = intersectionRect ?? Rect.zero,
         rootBounds = rootBounds ?? Rect.zero,
@@ -330,15 +340,15 @@ class IntersectionObserverEntry {
   /// [boundingClientRect] and [rootBounds] are expected to be in the same coordinate
   /// system.
   factory IntersectionObserverEntry.fromRects({
-    @required Rect boundingClientRect,
-    @required Rect rootBounds,
+    required Rect boundingClientRect,
+    required Rect rootBounds,
   }) {
-    assert(boundingClientRect != null);
-    assert(rootBounds != null);
 
     // Compute the intersection in the element's local coordinates.
     final intersectionRect = boundingClientRect.overlaps(rootBounds)
-        ? boundingClientRect.intersect(rootBounds).shift(-boundingClientRect.topLeft)
+        ? boundingClientRect
+            .intersect(rootBounds)
+            .shift(-boundingClientRect.topLeft)
         : Rect.zero;
 
     return IntersectionObserverEntry(
@@ -354,8 +364,10 @@ class IntersectionObserverEntry {
   bool get isIntersecting {
     if (size == Size.zero) return false;
 
-    if (boundingClientRect.right < rootBounds.left || rootBounds.right < boundingClientRect.left) return false;
-    if (boundingClientRect.bottom < rootBounds.top || rootBounds.bottom < boundingClientRect.top) return false;
+    if (boundingClientRect.right < rootBounds.left ||
+        rootBounds.right < boundingClientRect.left) return false;
+    if (boundingClientRect.bottom < rootBounds.top ||
+        rootBounds.bottom < boundingClientRect.top) return false;
     return true;
   }
 
@@ -410,7 +422,6 @@ class IntersectionObserverEntry {
     // from whether two [IntersectionObserverEntry] objects are sufficiently similar
     // that we don't need to fire callbacks for both.  This could be pertinent
     // if other properties are added.
-    assert(info != null);
     return size == info.size && intersectionRect == info.intersectionRect;
   }
 }
@@ -421,7 +432,6 @@ const _kDefaultTolerance = 0.01;
 
 /// Computes the area of a rectangle of the specified dimensions.
 double _area(Size size) {
-  assert(size != null);
   // Negative areas are considered empty.
   // Empty area considered square as zero.
   if (size.isEmpty) {
@@ -433,5 +443,6 @@ double _area(Size size) {
 /// Returns whether two floating-point values are approximately equal.
 bool _floatNear(double f1, double f2) {
   final absDiff = (f1 - f2).abs();
-  return absDiff <= _kDefaultTolerance || (absDiff / max(f1.abs(), f2.abs()) <= _kDefaultTolerance);
+  return absDiff <= _kDefaultTolerance ||
+      (absDiff / max(f1.abs(), f2.abs()) <= _kDefaultTolerance);
 }

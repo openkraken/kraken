@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -11,20 +13,19 @@ import 'package:kraken/css.dart';
 
 mixin CSSFlowMixin on RenderStyleBase {
 
-  TextAlign get textAlign => _textAlign;
-  TextAlign _textAlign;
+  TextAlign get textAlign => _textAlign!;
+  TextAlign? _textAlign;
   set textAlign(TextAlign value) {
-    assert(value != null);
     if (_textAlign == value) return;
     _textAlign = value;
 
     if (renderBoxModel is RenderFlowLayout) {
-      renderBoxModel.markNeedsLayout();
+      renderBoxModel!.markNeedsLayout();
     }
   }
 
   void updateFlow() {
-    CSSStyleDeclaration style = this.style;
+    CSSStyleDeclaration style = this.style!;
     textAlign = _getTextAlign(style);
   }
 

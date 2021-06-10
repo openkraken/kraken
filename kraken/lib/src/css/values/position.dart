@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/painting.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
@@ -17,11 +19,11 @@ class CSSPosition {
   // [0, 1]
   static Alignment initial = Alignment.topLeft; // default value.
 
-  static Alignment parsePosition(String input) {
+  static Alignment? parsePosition(String input) {
     String normalized = input.trim();
     if (normalized.isEmpty) return initial;
 
-    Alignment parsed;
+    Alignment? parsed;
     List<String> split = normalized.split(_splitRegExp);
 
     if (split.length == 1) {
@@ -35,7 +37,7 @@ class CSSPosition {
     return parsed;
   }
 
-  static double _gatValuePercentage(String input) {
+  static double? _gatValuePercentage(String input) {
     if (input.endsWith('%')) {
       var percentageValue = input.substring(0, input.length - 1);
       return (double.tryParse(percentageValue) ?? 0) / 50 - 1;
