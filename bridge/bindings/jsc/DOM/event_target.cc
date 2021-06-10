@@ -130,8 +130,13 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
 
   std::string eventType = JSStringToStdString(JSValueToStringCopy(ctx, eventNameValueRef, exception));
 
+  // init list.
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
     eventTargetInstance->_eventHandlers[eventType] = std::forward_list<JSObjectRef>();
+  }
+
+  // Dart needs to be notified for the first registration event.
+  if (eventTargetInstance->_eventHandlers[eventType].empty()) {
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
     NativeString args_01{};
@@ -146,6 +151,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
         eventTargetInstance->eventTargetId, UICommand::addEvent, args_01, nullptr);
     };
   }
+
   std::forward_list<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
   JSValueProtect(ctx, callbackObjectRef);
   handlers.emplace_after(handlers.cbefore_begin(), callbackObjectRef);
@@ -219,6 +225,23 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
     }
     return false;
   });
+
+   if (handlers.empty()) {
+    // Dart needs to be notified for handles is empty.
+    int32_t contextId = eventTargetInstance->_hostClass->contextId;
+
+    NativeString args_01{};
+    buildUICommandArgs(eventType, args_01);
+
+    auto EventTarget = reinterpret_cast<JSEventTarget *>(eventTargetInstance->_hostClass);
+    auto isJsOnlyEvent =
+      std::find(EventTarget->m_jsOnlyEvents.begin(), EventTarget->m_jsOnlyEvents.end(), eventType) != EventTarget->m_jsOnlyEvents.end();
+
+    if (!isJsOnlyEvent) {
+      foundation::UICommandBuffer::instance(contextId)->addCommand(
+        eventTargetInstance->eventTargetId, UICommand::removeEvent, args_01, nullptr);
+    };
+  }
 
   return nullptr;
 }

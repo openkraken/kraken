@@ -275,6 +275,16 @@ class KrakenViewController {
     }
   }
 
+  void removeEvent(int targetId, String eventType) {
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_REMOVE_EVENT_START, uniqueId: targetId);
+    }
+    _elementManager.removeEvent(targetId, eventType);
+    if (kProfileMode) {
+      PerformanceTiming.instance().mark(PERF_REMOVE_EVENT_END, uniqueId: targetId);
+    }
+  }
+
   void insertAdjacentNode(int targetId, String position, int childId) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_INSERT_ADJACENT_NODE_START, uniqueId: targetId);

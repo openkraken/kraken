@@ -202,6 +202,7 @@ enum UICommandType {
   setProperty,
   removeProperty,
   cloneNode,
+  removeEvent,
 }
 
 class UICommandItem extends Struct {
@@ -383,6 +384,9 @@ void flushUICommand() {
             break;
           case UICommandType.addEvent:
             controller.view.addEvent(id, command.args[0]);
+            break;
+          case UICommandType.removeEvent:
+            controller.view.removeEvent(id, command.args[0]);
             break;
           case UICommandType.insertAdjacentNode:
             int childId = int.parse(command.args[0]);
