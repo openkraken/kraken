@@ -496,7 +496,7 @@ JSValueRef JSPerformance::__kraken_navigation_summary__(JSContextRef ctx, JSObje
   sprintf(buffer, R"(
 Total time cost(without paint and layout): %.*fms
 
-+ %s %.*fms
+%s: %.*fms
   + %s %.*fms
   + %s %.*fms
   + %s %.*fms
