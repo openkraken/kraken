@@ -1122,11 +1122,6 @@ class Element extends Node
     double parentFontSize = parentRenderStyle.fontSize;
     double parsedFontSize = parentFontSize * CSSLength.parsePercentage(style[FONT_SIZE]);
     selfRenderBoxModel.renderStyle.fontSize = parsedFontSize;
-    for (Node node in childNodes) {
-      if (node is TextNode) {
-        node.updateTextStyle();
-      }
-    }
   }
 
   /// Percentage line height is set relative to its own font size.
@@ -1136,11 +1131,6 @@ class Element extends Node
     double fontSize = renderStyle.fontSize;
     double parsedLineHeight = fontSize * CSSLength.parsePercentage(style[LINE_HEIGHT]);
     selfRenderBoxModel.renderStyle.lineHeight = parsedLineHeight;
-    for (Node node in childNodes) {
-      if (node is TextNode) {
-        node.updateTextStyle();
-      }
-    }
   }
 
   // Universal style property change callback.
