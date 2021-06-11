@@ -1648,7 +1648,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       paddingBottom == 0 &&
       borderBottom == 0
     ) {
-      RenderObject lastChild = renderBoxModel.lastChild as RenderObject;
+      RenderObject? lastChild = renderBoxModel.lastChild != null ?
+        renderBoxModel.lastChild as RenderObject : null;
       if (lastChild is RenderBoxModel &&
         lastChild.renderStyle.transformedDisplay == CSSDisplay.block) {
         double childMarginBottom = lastChild is RenderLayoutBox ?
