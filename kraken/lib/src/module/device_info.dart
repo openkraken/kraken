@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:device_info/device_info.dart';
 import 'package:kraken/src/module/module_manager.dart';
 
-DeviceInfoPlugin _deviceInfoPlugin;
+DeviceInfoPlugin? _deviceInfoPlugin;
 
 void _initDeviceInfoPlugin() {
   if (_deviceInfoPlugin == null) {
@@ -21,26 +21,26 @@ class DeviceInfoModule extends BaseModule {
     Map<String, dynamic> deviceData;
 
     if (Platform.isAndroid) {
-      deviceData = _readAndroidBuildData(await _deviceInfoPlugin.androidInfo);
+      deviceData = _readAndroidBuildData(await _deviceInfoPlugin!.androidInfo);
     } else if (Platform.isIOS) {
-      deviceData = _readIosDeviceInfo(await _deviceInfoPlugin.iosInfo);
+      deviceData = _readIosDeviceInfo(await _deviceInfoPlugin!.iosInfo);
     } else if (Platform.isMacOS) {
       deviceData = {
         'brand': 'Apple',
         'platformName': 'Mac OS',
-        'name': Platform.localeName ?? Platform.localHostname,
+        'name': Platform.localeName,
         'isPhysicalDevice': true,
       };
     } else if (Platform.isLinux) {
       deviceData = {
         'platformName': 'Linux',
-        'name': Platform.localeName ?? Platform.localHostname,
+        'name': Platform.localeName,
         'isPhysicalDevice': true,
       };
     } else if (Platform.isWindows) {
       deviceData = {
         'platformName': 'Windows',
-        'name': Platform.localeName ?? Platform.localHostname,
+        'name': Platform.localeName,
         'isPhysicalDevice': true,
       };
     } else {
@@ -54,7 +54,7 @@ class DeviceInfoModule extends BaseModule {
     return Platform.numberOfProcessors;
   }
 
-  DeviceInfoModule(ModuleManager moduleManager) : super(moduleManager);
+  DeviceInfoModule(ModuleManager? moduleManager) : super(moduleManager);
 
   @override
   void dispose() {

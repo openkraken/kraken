@@ -22,7 +22,7 @@ mixin TimerMixin {
   void clearTimeout(int timerId) {
     // If timer already executed, which will be removed.
     if (_timerMap[timerId] != null) {
-      _timerMap[timerId].cancel();
+      _timerMap[timerId]!.cancel();
       _timerMap.remove(timerId);
     }
   }

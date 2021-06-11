@@ -1,19 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/bridge.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/module.dart';
 import 'dart:ffi';
 
-import 'package:kraken/kraken.dart';
-
-final Pointer<NativeFunction<Native_GetViewModuleProperty>> nativeGetViewModuleProperty = Pointer.fromFunction(ElementNativeMethods._getViewModuleProperty, 0.0);
-final Pointer<NativeFunction<Native_SetViewModuleProperty>> nativeSetViewModuleProperty = Pointer.fromFunction(ElementNativeMethods._setViewModuleProperty);
-final Pointer<NativeFunction<Native_GetBoundingClientRect>> nativeGetBoundingClientRect =
+final Pointer<NativeFunction<NativeGetViewModuleProperty>> nativeGetViewModuleProperty = Pointer.fromFunction(ElementNativeMethods._getViewModuleProperty, 0.0);
+final Pointer<NativeFunction<NativeSetViewModuleProperty>> nativeSetViewModuleProperty = Pointer.fromFunction(ElementNativeMethods._setViewModuleProperty);
+final Pointer<NativeFunction<NativeGetBoundingClientRect>> nativeGetBoundingClientRect =
     Pointer.fromFunction(ElementNativeMethods._getBoundingClientRect);
-final Pointer<NativeFunction<Native_GetStringValueProperty>> nativeGetStringValueProperty =
+final Pointer<NativeFunction<NativeGetStringValueProperty>> nativeGetStringValueProperty =
 Pointer.fromFunction(ElementNativeMethods._getStringValueProperty);
-final Pointer<NativeFunction<Native_Click>> nativeClick = Pointer.fromFunction(ElementNativeMethods._click);
-final Pointer<NativeFunction<Native_Scroll>> nativeScroll = Pointer.fromFunction(ElementNativeMethods._scroll);
-final Pointer<NativeFunction<Native_ScrollBy>> nativeScrollBy = Pointer.fromFunction(ElementNativeMethods._scrollBy);
+final Pointer<NativeFunction<NativeClick>> nativeClick = Pointer.fromFunction(ElementNativeMethods._click);
+final Pointer<NativeFunction<NativeScroll>> nativeScroll = Pointer.fromFunction(ElementNativeMethods._scroll);
+final Pointer<NativeFunction<NativeScrollBy>> nativeScrollBy = Pointer.fromFunction(ElementNativeMethods._scrollBy);
 
 // https://www.w3.org/TR/cssom-view-1/
 enum ViewModuleProperty {
@@ -44,6 +44,12 @@ mixin ElementNativeMethods on Node {
       PerformanceTiming.instance().mark(PERF_DOM_FORCE_LAYOUT_END);
     }
 
+    RenderBoxModel? elementRenderBoxModel = element.renderBoxModel;
+
+    if (elementRenderBoxModel == null) {
+      return 0.0;
+    }
+
     ViewModuleProperty kind = ViewModuleProperty.values[property];
     switch(kind) {
       case ViewModuleProperty.offsetTop:
@@ -51,17 +57,17 @@ mixin ElementNativeMethods on Node {
       case ViewModuleProperty.offsetLeft:
         return element.getOffsetX();
       case ViewModuleProperty.offsetWidth:
-        return element.renderBoxModel.hasSize ? element.renderBoxModel.size.width : 0;
+        return elementRenderBoxModel.hasSize ? elementRenderBoxModel.size.width : 0;
       case ViewModuleProperty.offsetHeight:
-        return element.renderBoxModel.hasSize ? element.renderBoxModel.size.height : 0;
+        return elementRenderBoxModel.hasSize ? elementRenderBoxModel.size.height : 0;
       case ViewModuleProperty.clientWidth:
-        return element.renderBoxModel.clientWidth;
+        return elementRenderBoxModel.clientWidth;
       case ViewModuleProperty.clientHeight:
-        return element.renderBoxModel.clientHeight;
+        return elementRenderBoxModel.clientHeight;
       case ViewModuleProperty.clientTop:
-        return element.renderBoxModel.renderStyle.borderTop;
+        return elementRenderBoxModel.renderStyle.borderTop;
       case ViewModuleProperty.clientLeft:
-        return element.renderBoxModel.renderStyle.borderLeft;
+        return elementRenderBoxModel.renderStyle.borderLeft;
       case ViewModuleProperty.scrollTop:
         return element.scrollTop;
       case ViewModuleProperty.scrollLeft:
@@ -71,7 +77,6 @@ mixin ElementNativeMethods on Node {
       case ViewModuleProperty.scrollWidth:
         return element.scrollWidth;
     }
-    return 0.0;
   }
 
   static void _setViewModuleProperty(Pointer<NativeElement> nativeElement, int property, double value) {
@@ -114,6 +119,7 @@ mixin ElementNativeMethods on Node {
   }
 
   static void _scroll(Pointer<NativeElement> nativeElement, int x, int y) {
+    print('call scroll');
     Element element = Element.getElementOfNativePtr(nativeElement);
     element.flushLayout();
     element.scrollTo(x: x, y: y, withAnimation: false);

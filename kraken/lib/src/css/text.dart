@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -16,116 +18,116 @@ const double DEFAULT_WORD_SPACING = 0.0;
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 mixin CSSTextMixin on RenderStyleBase {
 
-  Color _color = CSSColor.initial;
-  Color get color {
+  Color? _color = CSSColor.initial;
+  Color? get color {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(COLOR);
+    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(COLOR);
     if (renderBox != null) {
       return renderBox.renderStyle._color;
     }
     return _color;
   }
 
-  set color(Color value) {
+  set color(Color? value) {
     if (_color == value) return;
     _color = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateNestChildrenText(renderBoxModel, COLOR);
+    _updateNestChildrenText(renderBoxModel!, COLOR);
   }
 
-  TextDecoration _textDecorationLine;
-  TextDecoration get textDecorationLine {
+  TextDecoration? _textDecorationLine;
+  TextDecoration? get textDecorationLine {
     return _textDecorationLine;
   }
-  set textDecorationLine(TextDecoration value) {
+  set textDecorationLine(TextDecoration? value) {
     if (_textDecorationLine == value) return;
     _textDecorationLine = value;
     // Non inheritable style change should only update text node in direct children.
-    _updateChildrenText(renderBoxModel, TEXT_DECORATION_LINE);
+    _updateChildrenText(renderBoxModel!, TEXT_DECORATION_LINE);
   }
 
-  Color _textDecorationColor;
-  Color get textDecorationColor {
+  Color? _textDecorationColor;
+  Color? get textDecorationColor {
     return _textDecorationColor;
   }
-  set textDecorationColor(Color value) {
+  set textDecorationColor(Color? value) {
     if (_textDecorationColor == value) return;
     _textDecorationColor = value;
     // Non inheritable style change should only update text node in direct children.
-    _updateChildrenText(renderBoxModel, TEXT_DECORATION_COLOR);
+    _updateChildrenText(renderBoxModel!, TEXT_DECORATION_COLOR);
   }
 
-  TextDecorationStyle _textDecorationStyle;
-  TextDecorationStyle get textDecorationStyle {
+  TextDecorationStyle? _textDecorationStyle;
+  TextDecorationStyle? get textDecorationStyle {
     return _textDecorationStyle;
   }
-  set textDecorationStyle(TextDecorationStyle value) {
+  set textDecorationStyle(TextDecorationStyle? value) {
     if (_textDecorationStyle == value) return;
     _textDecorationStyle = value;
     // Non inheritable style change should only update text node in direct children.
-    _updateChildrenText(renderBoxModel, TEXT_DECORATION_STYLE);
+    _updateChildrenText(renderBoxModel!, TEXT_DECORATION_STYLE);
   }
 
-  FontWeight _fontWeight;
-  FontWeight get fontWeight {
+  FontWeight? _fontWeight;
+  FontWeight? get fontWeight {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(FONT_WEIGHT);
+    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(FONT_WEIGHT);
     if (renderBox != null) {
       return renderBox.renderStyle._fontWeight;
     }
     return _fontWeight;
   }
-  set fontWeight(FontWeight value) {
+  set fontWeight(FontWeight? value) {
     if (_fontWeight == value) return;
     _fontWeight = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateNestChildrenText(renderBoxModel, FONT_WEIGHT);
+    _updateNestChildrenText(renderBoxModel!, FONT_WEIGHT);
   }
 
-  FontStyle _fontStyle;
-  FontStyle get fontStyle {
+  FontStyle? _fontStyle;
+  FontStyle? get fontStyle {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(FONT_STYLE);
+    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(FONT_STYLE);
     if (renderBox != null) {
       return renderBox.renderStyle._fontStyle;
     }
     return _fontStyle;
   }
-  set fontStyle(FontStyle value) {
+  set fontStyle(FontStyle? value) {
     if (_fontStyle == value) return;
     _fontStyle = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateNestChildrenText(renderBoxModel, FONT_STYLE);
+    _updateNestChildrenText(renderBoxModel!, FONT_STYLE);
   }
 
-  List<String> _fontFamily;
-  List<String> get fontFamily {
+  List<String>? _fontFamily;
+  List<String>? get fontFamily {
     if (CSSText.DEFAULT_FONT_FAMILY_FALLBACK != null) {
-      return CSSText.getFontFamilyFallback(renderBoxModel.renderStyle.style);
+      return CSSText.getFontFamilyFallback(renderBoxModel!.renderStyle.style!);
     }
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(FONT_FAMILY);
+    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(FONT_FAMILY);
     if (renderBox != null) {
       return renderBox.renderStyle._fontFamily;
     }
     return _fontFamily;
   }
-  set fontFamily(List<String> value) {
+  set fontFamily(List<String>? value) {
     if (_fontFamily == value) return;
     _fontFamily = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateNestChildrenText(renderBoxModel, FONT_FAMILY);
+    _updateNestChildrenText(renderBoxModel!, FONT_FAMILY);
   }
 
   double _fontSize = CSSText.DEFAULT_FONT_SIZE;
   double get fontSize {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(FONT_SIZE);
+    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(FONT_SIZE);
     if (renderBox != null) {
       return renderBox.renderStyle._fontSize;
     }
@@ -135,92 +137,92 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_fontSize == value) return;
     _fontSize = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateNestChildrenText(renderBoxModel, FONT_SIZE);
+    _updateNestChildrenText(renderBoxModel!, FONT_SIZE);
   }
 
-  double _lineHeight;
-  double get lineHeight {
+  double? _lineHeight;
+  double? get lineHeight {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(LINE_HEIGHT);
+    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(LINE_HEIGHT);
     if (renderBox != null) {
       return renderBox.renderStyle._lineHeight;
     }
     return _lineHeight;
   }
-  set lineHeight(double value) {
+  set lineHeight(double? value) {
     if (_lineHeight == value) return;
     _lineHeight = value;
     // Update all the children layout and text with specified style property not set due to style inheritance.
-    _markChildrenNeedsLayoutByLineHeight(renderBoxModel, LINE_HEIGHT);
+    _markChildrenNeedsLayoutByLineHeight(renderBoxModel!, LINE_HEIGHT);
   }
 
-  double _letterSpacing;
-  double get letterSpacing {
+  double? _letterSpacing;
+  double? get letterSpacing {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(LETTER_SPACING);
+    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(LETTER_SPACING);
     if (renderBox != null) {
       return renderBox.renderStyle._letterSpacing;
     }
     return _letterSpacing;
   }
-  set letterSpacing(double value) {
+  set letterSpacing(double? value) {
     if (_letterSpacing == value) return;
     _letterSpacing = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateNestChildrenText(renderBoxModel, LETTER_SPACING);
+    _updateNestChildrenText(renderBoxModel!, LETTER_SPACING);
   }
 
-  double _wordSpacing;
-  double get wordSpacing {
+  double? _wordSpacing;
+  double? get wordSpacing {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(WORD_SPACING);
+    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(WORD_SPACING);
     if (renderBox != null) {
       return renderBox.renderStyle._wordSpacing;
     }
     return _wordSpacing;
   }
-  set wordSpacing(double value) {
+  set wordSpacing(double? value) {
     if (_wordSpacing == value) return;
     _wordSpacing = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateNestChildrenText(renderBoxModel, WORD_SPACING);
+    _updateNestChildrenText(renderBoxModel!, WORD_SPACING);
   }
 
-  List<Shadow> _textShadow;
-  List<Shadow> get textShadow {
+  List<Shadow>? _textShadow;
+  List<Shadow>? get textShadow {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(TEXT_SHADOW);
+    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(TEXT_SHADOW);
     if (renderBox != null) {
       return renderBox.renderStyle._textShadow;
     }
     return _textShadow;
   }
-  set textShadow(List<Shadow> value) {
+  set textShadow(List<Shadow>? value) {
     if (_textShadow == value) return;
     _textShadow = value;
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateNestChildrenText(renderBoxModel, TEXT_SHADOW);
+    _updateNestChildrenText(renderBoxModel!, TEXT_SHADOW);
   }
 
-  WhiteSpace _whiteSpace = WhiteSpace.normal;
-  WhiteSpace get whiteSpace {
+  WhiteSpace? _whiteSpace = WhiteSpace.normal;
+  WhiteSpace? get whiteSpace {
     // Get style from self or closest parent if specified style property is not set
     // due to style inheritance.
-    RenderBoxModel renderBox = renderBoxModel.getSelfParentWithSpecifiedStyle(WHITE_SPACE);
+    RenderBoxModel? renderBox = renderBoxModel!.getSelfParentWithSpecifiedStyle(WHITE_SPACE);
     if (renderBox != null) {
       return renderBox.renderStyle._whiteSpace;
     }
     return _whiteSpace;
   }
-  set whiteSpace(WhiteSpace value) {
+  set whiteSpace(WhiteSpace? value) {
     if (_whiteSpace == value) return;
     _whiteSpace = value;
     // Update all the children layout and text with specified style property not set due to style inheritance.
-    _markChildrenNeedsLayoutByWhiteSpace(renderBoxModel, WHITE_SPACE);
+    _markChildrenNeedsLayoutByWhiteSpace(renderBoxModel!, WHITE_SPACE);
   }
 
   TextOverflow _textOverflow = TextOverflow.clip;
@@ -231,18 +233,18 @@ mixin CSSTextMixin on RenderStyleBase {
     if (_textOverflow == value) return;
     _textOverflow = value;
     // Non inheritable style change should only update text node in direct children.
-    _updateChildrenText(renderBoxModel, TEXT_OVERFLOW);
+    _updateChildrenText(renderBoxModel!, TEXT_OVERFLOW);
   }
 
-  int _lineClamp;
-  int get lineClamp {
+  int? _lineClamp;
+  int? get lineClamp {
     return _lineClamp;
   }
-  set lineClamp(int value) {
+  set lineClamp(int? value) {
     if (_lineClamp == value) return;
     _lineClamp = value;
     // Non inheritable style change should only update text node in direct children.
-    _updateChildrenText(renderBoxModel, LINE_CLAMP);
+    _updateChildrenText(renderBoxModel!, LINE_CLAMP);
   }
 
   /// Mark all layout and text children as needs layout when line-height changed.
@@ -253,12 +255,12 @@ mixin CSSTextMixin on RenderStyleBase {
       renderBoxModel.visitChildren((RenderObject child) {
         if (child is RenderLayoutBox) {
           // Only need to layout when the specified style property is not set.
-          if (child.renderStyle.style[styleProperty].isEmpty) {
+          if (child.renderStyle.style?[styleProperty].isEmpty) {
             _markChildrenNeedsLayoutByLineHeight(child, styleProperty);
           }
         } else if (child is RenderTextBox) {
           // Update line height of paragraph.
-          KrakenRenderParagraph renderParagraph = child.child;
+          KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
           renderParagraph.lineHeight = renderBoxModel.renderStyle.lineHeight;
           renderParagraph.markNeedsLayout();
         }
@@ -274,11 +276,11 @@ mixin CSSTextMixin on RenderStyleBase {
       renderBoxModel.visitChildren((RenderObject child) {
         if (child is RenderLayoutBox) {
           // Only need to layout when the specified style property is not set.
-          if (child.renderStyle.style[styleProperty].isEmpty) {
+          if (child.renderStyle.style?[styleProperty].isEmpty) {
             _markChildrenNeedsLayoutByWhiteSpace(child, styleProperty);
           }
         } else if (child is RenderTextBox) {
-          RenderBoxModel parentRenderBoxModel = child.parent;
+          RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
           RenderStyle parentRenderStyle = parentRenderBoxModel.renderStyle;
           child.whiteSpace = parentRenderStyle.whiteSpace;
           // White-space change will affect text-overflow.
@@ -294,9 +296,9 @@ mixin CSSTextMixin on RenderStyleBase {
     renderBoxModel.visitChildren((RenderObject child) {
       if (child is RenderTextBox) {
         // Need to recreate text span cause text style can not be set alone.
-        RenderBoxModel parentRenderBoxModel = child.parent;
-        KrakenRenderParagraph renderParagraph = child.child;
-        String text = renderParagraph.text.text;
+        RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
+        KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
+        String? text = renderParagraph.text.text;
         child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel: parentRenderBoxModel);
         // Update text box property which will then update paragraph and mark it needs layout.
         if (styleProperty == TEXT_OVERFLOW) {
@@ -317,25 +319,41 @@ mixin CSSTextMixin on RenderStyleBase {
     renderBoxModel.visitChildren((RenderObject child) {
       if (child is RenderBoxModel) {
         // Only need to update child text when style property is not set.
-        if (child.renderStyle.style[styleProperty].isEmpty) {
+        if (child.renderStyle.style?[styleProperty].isEmpty) {
           _updateNestChildrenText(child, styleProperty);
         }
       } else if (child is RenderTextBox) {
         // Need to recreate text span cause text style can not be set alone.
-        RenderBoxModel parentRenderBoxModel = child.parent;
-        KrakenRenderParagraph renderParagraph = child.child;
-        String text = renderParagraph.text.text;
+        RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
+        KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
+        String? text = renderParagraph.text.text;
         child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel: parentRenderBoxModel);
       }
     });
   }
 
-  static TextSpan createTextSpan(String text, {Element parentElement, RenderBoxModel parentRenderBoxModel}) {
-    TextStyle textStyle;
+  static TextSpan createTextSpan(String? text, {Element? parentElement, RenderBoxModel? parentRenderBoxModel}) {
+    TextStyle? textStyle;
+
+    CSSStyleDeclaration parentStyle;
+    ElementManager elementManager;
     if (parentElement != null) {
-      textStyle = getTextStyle(parentElement: parentElement);
+      parentStyle = parentElement.style;
+      elementManager = parentElement.elementManager;
+      parentRenderBoxModel = parentElement.renderBoxModel;
+    } else {
+      parentStyle = parentRenderBoxModel!.renderStyle.style!;
+      elementManager = parentRenderBoxModel.elementManager!;
+    }
+
+    double viewportWidth = elementManager.viewportWidth;
+    double viewportHeight = elementManager.viewportHeight;
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
+    if (parentElement != null) {
+      textStyle = getTextStyle(parentStyle, viewportSize);
     } else if (parentRenderBoxModel != null) {
-      textStyle = getTextStyle(parentRenderBoxModel: parentRenderBoxModel);
+      textStyle = getTextStyle(parentStyle, viewportSize, parentRenderStyle: parentRenderBoxModel.renderStyle);
     }
     return TextSpan(
       text: text,
@@ -358,45 +376,30 @@ mixin CSSTextMixin on RenderStyleBase {
   ///   locale: The locale used to select region-specific glyphs.
   ///   background: The paint drawn as a background for the text.
   ///   foreground: The paint used to draw the text. If this is specified, color must be null.
-  static TextStyle getTextStyle({Element parentElement, RenderBoxModel parentRenderBoxModel}) {
-    CSSStyleDeclaration parentStyle;
-    ElementManager elementManager;
-    if (parentElement != null) {
-      parentStyle = parentElement.style;
-      elementManager = parentElement.elementManager;
-      parentRenderBoxModel = parentElement.renderBoxModel;
-    } else if (parentRenderBoxModel != null) {
-      parentStyle = parentRenderBoxModel.renderStyle.style;
-      elementManager = parentRenderBoxModel.elementManager;
-    }
-
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-
+  static TextStyle getTextStyle(CSSStyleDeclaration parentStyle, Size viewportSize, {RenderStyle? parentRenderStyle}) {
     // Text may be created when parent renderObject not created, get it from style instead
-    Color color = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.color : CSSText.getTextColor(parentStyle);
-    TextDecoration textDecorationLine = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textDecorationLine : CSSText.getTextDecorationLine(parentStyle);
-    Color textDecorationColor = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textDecorationColor : CSSText.getTextDecorationColor(parentStyle);
-    TextDecorationStyle textDecorationStyle = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textDecorationStyle : CSSText.getTextDecorationStyle(parentStyle);
-    FontWeight fontWeight = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontWeight : CSSText.getFontWeight(parentStyle);
-    FontStyle fontStyle = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontStyle : CSSText.getFontStyle(parentStyle);
-    double fontSize = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontSize : CSSText.getFontSize(parentStyle, viewportSize);
-    List<String> fontFamily = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.fontFamily : CSSText.getFontFamilyFallback(parentStyle);
-    double letterSpacing = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.letterSpacing : CSSText.getLetterSpacing(parentStyle, viewportSize);
-    double wordSpacing = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.wordSpacing : CSSText.getWordSpacing(parentStyle, viewportSize);
-    List<Shadow> textShadow = parentRenderBoxModel != null ?
-      parentRenderBoxModel.renderStyle.textShadow : CSSText.getTextShadow(parentStyle, viewportSize);
+    Color? color = parentRenderStyle != null ?
+      parentRenderStyle.color : CSSText.getTextColor(parentStyle);
+    TextDecoration? textDecorationLine = parentRenderStyle != null ?
+      parentRenderStyle.textDecorationLine : CSSText.getTextDecorationLine(parentStyle);
+    Color? textDecorationColor = parentRenderStyle != null ?
+      parentRenderStyle.textDecorationColor : CSSText.getTextDecorationColor(parentStyle);
+    TextDecorationStyle? textDecorationStyle = parentRenderStyle != null ?
+      parentRenderStyle.textDecorationStyle : CSSText.getTextDecorationStyle(parentStyle);
+    FontWeight? fontWeight = parentRenderStyle != null ?
+      parentRenderStyle.fontWeight : CSSText.getFontWeight(parentStyle);
+    FontStyle? fontStyle = parentRenderStyle != null ?
+      parentRenderStyle.fontStyle : CSSText.getFontStyle(parentStyle);
+    double? fontSize = parentRenderStyle != null ?
+      parentRenderStyle.fontSize : CSSText.getFontSize(parentStyle, viewportSize);
+    List<String>? fontFamily = parentRenderStyle != null ?
+      parentRenderStyle.fontFamily : CSSText.getFontFamilyFallback(parentStyle);
+    double? letterSpacing = parentRenderStyle != null ?
+      parentRenderStyle.letterSpacing : CSSText.getLetterSpacing(parentStyle, viewportSize);
+    double? wordSpacing = parentRenderStyle != null ?
+      parentRenderStyle.wordSpacing : CSSText.getWordSpacing(parentStyle, viewportSize);
+    List<Shadow>? textShadow = parentRenderStyle != null ?
+      parentRenderStyle.textShadow : CSSText.getTextShadow(parentStyle, viewportSize);
 
     return TextStyle(
       color: color,
@@ -418,52 +421,52 @@ mixin CSSTextMixin on RenderStyleBase {
     );
   }
 
-  void updateTextStyle(String property) {
+  void updateTextStyle(String? property) {
     switch (property) {
       case COLOR:
-        color = CSSText.getTextColor(style);
+        color = CSSText.getTextColor(style!);
         break;
       case TEXT_DECORATION_LINE:
-        textDecorationLine = CSSText.getTextDecorationLine(style);
+        textDecorationLine = CSSText.getTextDecorationLine(style!);
         break;
       case TEXT_DECORATION_STYLE:
-        textDecorationColor = CSSText.getTextDecorationColor(style);
+        textDecorationColor = CSSText.getTextDecorationColor(style!);
         break;
       case TEXT_DECORATION_COLOR:
-        textDecorationStyle = CSSText.getTextDecorationStyle(style);
+        textDecorationStyle = CSSText.getTextDecorationStyle(style!);
         break;
       case FONT_WEIGHT:
-        fontWeight = CSSText.getFontWeight(style);
+        fontWeight = CSSText.getFontWeight(style!);
         break;
       case FONT_STYLE:
-        fontStyle = CSSText.getFontStyle(style);
+        fontStyle = CSSText.getFontStyle(style!);
         break;
       case FONT_FAMILY:
-        fontFamily = CSSText.getFontFamilyFallback(style);
+        fontFamily = CSSText.getFontFamilyFallback(style!);
         break;
       case FONT_SIZE:
-        fontSize = CSSText.getFontSize(style, viewportSize);
+        fontSize = CSSText.getFontSize(style!, viewportSize);
         break;
       case LINE_HEIGHT:
-        lineHeight = CSSText.getLineHeight(style, viewportSize);
+        lineHeight = CSSText.getLineHeight(style!, viewportSize);
         break;
       case LETTER_SPACING:
-        letterSpacing = CSSText.getLetterSpacing(style, viewportSize);
+        letterSpacing = CSSText.getLetterSpacing(style!, viewportSize);
         break;
       case WORD_SPACING:
-        wordSpacing = CSSText.getWordSpacing(style, viewportSize);
+        wordSpacing = CSSText.getWordSpacing(style!, viewportSize);
         break;
       case TEXT_SHADOW:
-        textShadow = CSSText.getTextShadow(style, viewportSize);
+        textShadow = CSSText.getTextShadow(style!, viewportSize);
         break;
       case WHITE_SPACE:
-        whiteSpace = CSSText.getWhiteSpace(style);
+        whiteSpace = CSSText.getWhiteSpace(style!);
         break;
       case TEXT_OVERFLOW:
-        textOverflow = CSSText.getTextOverflow(renderStyle: this);
+        textOverflow = CSSText.getTextOverflow(renderStyle: this as RenderStyle);
         break;
       case LINE_CLAMP:
-        lineClamp = CSSText.getLineClamp(style);
+        lineClamp = CSSText.getLineClamp(style!);
         break;
     }
   }
@@ -476,7 +479,7 @@ class CSSText {
   }
 
   static bool isValidFontWeightValue(String value) {
-    double weight = CSSNumber.parseNumber(value);
+    double? weight = CSSNumber.parseNumber(value);
     if (weight != null) {
       return weight >= 1 && weight <= 1000;
     } else {
@@ -496,20 +499,20 @@ class CSSText {
     return value == 'solid' || value == 'double' || value == 'dotted' || value == 'dashed' || value == 'wavy';
   }
 
-  static double getLineHeight(CSSStyleDeclaration style, Size viewportSize) {
+  static double? getLineHeight(CSSStyleDeclaration style, Size viewportSize) {
     return parseLineHeight(style[LINE_HEIGHT], getFontSize(style, viewportSize), viewportSize);
   }
 
-  static double parseLineHeight(String value, double fontSize, Size viewportSize) {
-    double lineHeight;
+  static double? parseLineHeight(String value, double fontSize, Size viewportSize) {
+    double? lineHeight;
     if (value.isNotEmpty) {
       if (CSSLength.isLength(value)) {
-        double lineHeightValue = CSSLength.toDisplayPortValue(value, viewportSize);
+        double lineHeightValue = CSSLength.toDisplayPortValue(value, viewportSize)!;
         if (lineHeightValue > 0) {
           lineHeight = lineHeightValue;
         }
       } else {
-        double multipliedNumber = double.tryParse(value);
+        double? multipliedNumber = double.tryParse(value);
         if (multipliedNumber != null && multipliedNumber > 0) {
           lineHeight = fontSize * multipliedNumber;
         }
@@ -552,18 +555,18 @@ class CSSText {
     }
   }
 
-  static int getLineClamp(CSSStyleDeclaration style) {
+  static int? getLineClamp(CSSStyleDeclaration style) {
     return CSSLength.toInt(style[LINE_CLAMP]);
   }
 
-  static TextOverflow getTextOverflow({CSSStyleDeclaration style, RenderStyle renderStyle}) {
+  static TextOverflow getTextOverflow({CSSStyleDeclaration? style, RenderStyle? renderStyle}) {
     CSSOverflowType overflowX = renderStyle != null ?
-      renderStyle.overflowX : getOverflowTypes(style)[0];
+      renderStyle.overflowX : getOverflowTypes(style!)[0];
     // Get white space from renderStyle cause it may be inherited from parents.
-    WhiteSpace whiteSpace = renderStyle != null ?
-      renderStyle.whiteSpace : getWhiteSpace(style);
-    int lineClamp = renderStyle != null ?
-      renderStyle.lineClamp : getLineClamp(style);
+    WhiteSpace? whiteSpace = renderStyle != null ?
+      renderStyle.whiteSpace : getWhiteSpace(style!);
+    int? lineClamp = renderStyle != null ?
+      renderStyle.lineClamp : getLineClamp(style!);
 
     // Set line-clamp to number makes text-overflow ellipsis which takes priority over text-overflow
     if (lineClamp != null && lineClamp > 0) {
@@ -575,8 +578,8 @@ class CSSText {
     }
 
     // Always get text overflow from style cause it is affected by white-space and overflow.
-    CSSStyleDeclaration _style = renderStyle != null ? renderStyle.style : style;
-    switch(_style[TEXT_OVERFLOW]) {
+    CSSStyleDeclaration? _style = renderStyle != null ? renderStyle.style : style;
+    switch(_style![TEXT_OVERFLOW]) {
       case 'ellipsis':
         return TextOverflow.ellipsis;
       case 'fade':
@@ -588,7 +591,7 @@ class CSSText {
   }
 
 
-  static Color getTextColor(CSSStyleDeclaration style) {
+  static Color? getTextColor(CSSStyleDeclaration style) {
     if (style.contains(COLOR)) {
       return CSSColor.parseColor(style[COLOR]);
     } else {
@@ -596,7 +599,7 @@ class CSSText {
     }
   }
 
-  static Color getTextDecorationColor(CSSStyleDeclaration style) {
+  static Color? getTextDecorationColor(CSSStyleDeclaration style) {
     if (style.contains(TEXT_DECORATION_COLOR)) {
       return CSSColor.parseColor(style[TEXT_DECORATION_COLOR]);
     } else {
@@ -620,7 +623,7 @@ class CSSText {
     }
   }
 
-  static FontWeight parseFontWeight(String fontWeight) {
+  static FontWeight parseFontWeight(String? fontWeight) {
     switch (fontWeight) {
       case 'lighter':
         return FontWeight.w200;
@@ -631,7 +634,7 @@ class CSSText {
       case 'bolder':
         return FontWeight.w900;
       default:
-        int fontWeightValue;
+        int? fontWeightValue;
         if (fontWeight != null) {
           fontWeightValue = int.tryParse(fontWeight);
         }
@@ -659,7 +662,6 @@ class CSSText {
         } else {
           return FontWeight.w100;
         }
-        break;
     }
   }
 
@@ -680,24 +682,24 @@ class CSSText {
     return FontStyle.normal;
   }
 
-  static TextBaseline getTextBaseLine(CSSStyleDeclaration style) {
+  static TextBaseline getTextBaseLine(CSSStyleDeclaration? style) {
     return TextBaseline.alphabetic; // @TODO: impl vertical-align
   }
 
-  static String BUILTIN_FONT_PACKAGE;
-  static String getFontPackage(CSSStyleDeclaration style) {
+  static String? BUILTIN_FONT_PACKAGE;
+  static String? getFontPackage(CSSStyleDeclaration? style) {
     return BUILTIN_FONT_PACKAGE;
   }
 
-  static List<String> DEFAULT_FONT_FAMILY_FALLBACK;
-  static List<String> getFontFamilyFallback(CSSStyleDeclaration style) {
+  static List<String>? DEFAULT_FONT_FAMILY_FALLBACK;
+  static List<String>? getFontFamilyFallback(CSSStyleDeclaration style) {
     return parseFontFamilyFallback(style[FONT_FAMILY]);
   }
 
-  static List<String> parseFontFamilyFallback(String fontFamily) {
-    if (fontFamily.isNotEmpty) {
+  static List<String>? parseFontFamilyFallback(String? fontFamily) {
+    if (fontFamily!.isNotEmpty) {
       List<String> values = fontFamily.split(_commaRegExp);
-      List<String> resolvedFamily = List();
+      List<String> resolvedFamily = List.empty(growable: true);
 
       for (int i = 0; i < values.length; i++) {
         String familyName = values[i];
@@ -779,17 +781,17 @@ class CSSText {
     }
   }
 
-  static Locale getLocale(CSSStyleDeclaration style) {
+  static Locale? getLocale(CSSStyleDeclaration? style) {
     // TODO: impl locale for text decoration.
     return null;
   }
 
-  static Paint getBackground(CSSStyleDeclaration style) {
+  static Paint? getBackground(CSSStyleDeclaration? style) {
     // TODO: Reserved port for customize text decoration background.
     return null;
   }
 
-  static Paint getForeground(CSSStyleDeclaration style) {
+  static Paint? getForeground(CSSStyleDeclaration? style) {
     // TODO: Reserved port for customize text decoration foreground.
     return null;
   }
@@ -801,7 +803,7 @@ class CSSText {
       if (shadows != null) {
         for (var shadowDefinitions in shadows) {
           // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
-          Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style.getCurrentColor());
+          Color? color = CSSColor.parseColor(shadowDefinitions[0] ?? style.getCurrentColor());
           double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1], viewportSize) ?? 0;
           double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2], viewportSize) ?? 0;
           double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3], viewportSize) ?? 0;

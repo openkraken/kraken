@@ -17,22 +17,22 @@ import 'package:kraken_animation_player/kraken_animation_player.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 import 'package:kraken_webview/kraken_webview.dart';
 
-String pass = (AnsiPen()..green())('[TEST PASS]');
-String err = (AnsiPen()..red())('[TEST FAILED]');
+String? pass = (AnsiPen()..green())('[TEST PASS]');
+String? err = (AnsiPen()..red())('[TEST FAILED]');
 
 final String __dirname = path.dirname(Platform.script.path);
 final String testDirectory = Platform.environment['KRAKEN_TEST_DIR'] ?? __dirname;
 final Directory specsDirectory = Directory(path.join(testDirectory, '.specs'));
 
 const int KRAKEN_NUM = 1;
-List<Kraken> kraken = List<Kraken>(KRAKEN_NUM);
+Map<int, Kraken> krakenMap = Map();
 
 class NativeGestureClient implements GestureClient {
   NativeGestureClient({
     this.gestureClientID
   });
 
-  int gestureClientID;
+  int? gestureClientID;
 
   @override
   void dragUpdateCallback(DragUpdateDetails details) {
@@ -41,7 +41,7 @@ class NativeGestureClient implements GestureClient {
   @override
   void dragStartCallback(DragStartDetails details) {
     var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
-    kraken[gestureClientID].controller.view.document.documentElement.dispatchEvent(event);
+    krakenMap[gestureClientID!]!.controller!.view.document!.documentElement.dispatchEvent(event);
   }
 
   @override
@@ -77,7 +77,7 @@ void main() async {
     mainTestPayload,
     mainTestPayload.reversed.toList()
   ];
-  List<Kraken> widgets = [];
+  List<Widget> widgets = [];
 
   for (int i = 0; i < KRAKEN_NUM; i ++) {
     KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
@@ -86,17 +86,16 @@ void main() async {
       return 'method: ' + method;
     };
 
-    kraken[i] = Kraken(
+    krakenMap[i] = Kraken(
       viewportWidth: 360,
       viewportHeight: 640,
       bundleContent: 'console.log("Starting integration tests...")',
       disableViewportWidthAssertion: true,
       disableViewportHeightAssertion: true,
       javaScriptChannel: javaScriptChannel,
-      debugEnableInspector: false,
       gestureClient: NativeGestureClient(gestureClientID:i),
     );
-    widgets.add(kraken[i]);
+    widgets.add(krakenMap[i]!);
   }
 
   runApp(MaterialApp(
@@ -112,7 +111,7 @@ void main() async {
     ),
   ));
 
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
+  WidgetsBinding.instance!.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();
 
     List<Future<String>> testResults = [];

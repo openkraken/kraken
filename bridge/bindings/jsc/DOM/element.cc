@@ -71,6 +71,8 @@ JSValueRef JSElementAttributes::getAttribute(std::string &name) {
 void JSElementAttributes::setAttribute(std::string &name, JSValueRef value) {
   bool numberIndex = isNumberIndex(name);
 
+  JSValueProtect(ctx, value);
+
   if (numberIndex) {
     int64_t index = std::stoi(name);
 
@@ -95,7 +97,7 @@ bool JSElementAttributes::hasAttribute(std::string &name) {
 
 void JSElementAttributes::removeAttribute(std::string &name) {
   JSValueRef value = m_attributes[name];
-
+  JSValueUnprotect(ctx, value);
   auto index = std::find(v_attributes.begin(), v_attributes.end(), value);
   v_attributes.erase(index);
 

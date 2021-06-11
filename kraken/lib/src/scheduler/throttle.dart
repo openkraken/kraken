@@ -18,7 +18,7 @@ class Throttling {
 
   Throttling({Duration duration = const Duration(seconds: 1)})
       : assert(duration is Duration && !duration.isNegative),
-        _duration = duration ?? Duration(seconds: 1) {
+        _duration = duration {
     _stateSC.sink.add(true);
   }
 
@@ -31,10 +31,10 @@ class Throttling {
         _isReady = true;
         _stateSC.sink.add(true);
       });
-    return Function.apply(func, List<dynamic>());
+    return Function.apply(func, List.empty());
   }
 
-  StreamSubscription<bool> listen(Function onData) => _stateSC.stream.listen(onData);
+  StreamSubscription<bool> listen(void Function(bool)? onData) => _stateSC.stream.listen(onData);
 
   void dispose() {
     _stateSC.close();
