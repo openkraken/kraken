@@ -350,10 +350,10 @@ mixin CSSTextMixin on RenderStyleBase {
     double viewportHeight = elementManager.viewportHeight;
     Size viewportSize = Size(viewportWidth, viewportHeight);
 
-    if (parentElement != null) {
-      textStyle = getTextStyle(parentStyle, viewportSize);
-    } else if (parentRenderBoxModel != null) {
+    if (parentRenderBoxModel != null) {
       textStyle = getTextStyle(parentStyle, viewportSize, parentRenderStyle: parentRenderBoxModel.renderStyle);
+    } else {
+      textStyle = getTextStyle(parentStyle, viewportSize);
     }
     return TextSpan(
       text: text,
