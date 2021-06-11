@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -19,21 +21,21 @@ mixin CSSOpacityMixin on RenderStyleBase {
   /// expensive.
   double get opacity => _opacity;
   double _opacity = 1.0;
-  set opacity(double value) {
+  set opacity(double? value) {
     if (value == null) return;
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
     _opacity = value;
     int alpha = ui.Color.getAlphaFromOpacity(_opacity);
-    renderBoxModel.alpha = alpha;
+    renderBoxModel!.alpha = alpha;
     if (alpha != 0 && alpha != 255)
-      renderBoxModel.markNeedsCompositingBitsUpdate();
-    renderBoxModel.markNeedsPaint();
+      renderBoxModel!.markNeedsCompositingBitsUpdate();
+    renderBoxModel!.markNeedsPaint();
   }
 
   void updateOpacity(String value) {
-    double opacityValue = CSSStyleDeclaration.isNullOrEmptyValue(value) ? 1.0 : CSSLength.toDouble(value);
+    double? opacityValue = CSSStyleDeclaration.isNullOrEmptyValue(value) ? 1.0 : CSSLength.toDouble(value);
     opacity = opacityValue;
   }
 }

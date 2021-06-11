@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -10,14 +12,14 @@ import 'package:kraken/painting.dart';
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#urls
 class CSSUrl {
 
-  static ImageProvider parseUrl(String rawInput, { cache = 'auto', int contextId }) {
+  static ImageProvider? parseUrl(String rawInput, { cache = 'auto', int? contextId }) {
     // support input string enclosed in quotation marks
     if ((rawInput.startsWith('\'') && rawInput.endsWith('\'')) ||
         (rawInput.startsWith('\"') && rawInput.endsWith('\"'))) {
       rawInput = rawInput.substring(1, rawInput.length - 1);
     }
 
-    ImageProvider imageProvider;
+    ImageProvider? imageProvider;
 
     if (rawInput.startsWith('//') || rawInput.startsWith('http://') || rawInput.startsWith('https://')) {
       String url = rawInput.startsWith('//') ? 'https:' + rawInput : rawInput;

@@ -20,9 +20,9 @@ enum CanvasDirection { ltr, rtl, inherit }
 
 class ImageData {
   ImageData(
-    double sw,
-    double sh, {
-    Uint8List data,
+    this.width,
+    this.height, {
+    required this.data,
   });
 
   double width;
@@ -65,24 +65,25 @@ class TextMetrics {
 }
 
 abstract class CanvasCompositing {
-  double globalAlpha; // (default 1.0)
-  String globalCompositeOperation; // (default source-over)
+  double globalAlpha = 1.0; // (default 1.0)
+  String globalCompositeOperation = 'source-over'; // (default source-over)
 }
 
 abstract class CanvasImageSmoothing {
   // image smoothing
-  bool imageSmoothingEnabled; // (default true)
-  ImageSmoothingQuality imageSmoothingQuality; // (default low)
+  bool imageSmoothingEnabled = true; // (default true)
+  ImageSmoothingQuality imageSmoothingQuality = ImageSmoothingQuality.low; // (default low)
 }
 
 abstract class CanvasImageSource {
   String imageSource;
+  CanvasImageSource(this.imageSource);
 }
 
 abstract class CanvasFillStrokeStyles {
   // colors and styles (see also the CanvasPathDrawingStyles and CanvasTextDrawingStyles
-  Color strokeStyle; // (default black)
-  Color fillStyle; // (default black)
+  Color strokeStyle = Color(0xFF000000); // (default black)
+  Color fillStyle = Color(0xFF000000); // (default black)
   CanvasGradient createLinearGradient(double x0, double y0, double x1, double y1);
 
   CanvasGradient createRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1);
@@ -92,15 +93,15 @@ abstract class CanvasFillStrokeStyles {
 
 abstract class CanvasShadowStyles {
   // shadows
-  double shadowOffsetX; // (default 0)
-  double shadowOffsetY; // (default 0)
-  double shadowBlur; // (default 0)
-  Color shadowColor; // (default transparent black)
+  double shadowOffsetX = 0.0; // (default 0)
+  double shadowOffsetY = 0.0; // (default 0)
+  double shadowBlur = 0.0; // (default 0)
+  Color shadowColor = Color(0x00000000); // (default transparent black)
 }
 
 abstract class CanvasFilters {
   // filters
-  String filter; // (default "none")
+  String filter = 'none'; // (default "none")
 }
 
 // ignore: one_member_abstracts

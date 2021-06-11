@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -14,7 +16,7 @@ const String SAFE_AREA_INSET_LEFT = '$SAFE_AREA_INSET-left';
 const String SAFE_AREA_INSET_RIGHT = '$SAFE_AREA_INSET-right';
 const String SAFE_AREA_INSET_BOTTOM = '$SAFE_AREA_INSET-bottom';
 
-typedef StyleChangeListener = void Function(String property,  String original, String present);
+typedef StyleChangeListener = void Function(String property,  String? original, String present);
 
 // https://github.com/WebKit/webkit/blob/master/Source/WebCore/css/CSSProperties.json
 
@@ -105,7 +107,7 @@ RegExp _camelCaseReg = RegExp(r'-(\w)');
 /// 3. Via [Window.getComputedStyle()], which exposes the [CSSStyleDeclaration]
 ///    object as a read-only interface.
 class CSSStyleDeclaration {
-  Element target;
+  Element? target;
 
   CSSStyleDeclaration(this.target);
   /// When some property changed, corresponding [StyleChangeListener] will be
@@ -126,7 +128,7 @@ class CSSStyleDeclaration {
   }
 
   String getCurrentColor() {
-    String currentColor = _properties[COLOR];
+    String? currentColor = _properties[COLOR];
     return currentColor ?? CSSColor.INITIAL_COLOR;
   }
 
@@ -134,7 +136,7 @@ class CSSStyleDeclaration {
     _transitions = value;
   }
 
-  bool _shouldTransition(String property, String prevValue, String nextValue) {
+  bool _shouldTransition(String property, String? prevValue, String nextValue) {
     // When begin propertyValue is AUTO, skip animation and trigger style update directly.
     if ((prevValue == null && CSSLength.isAuto(CSSInitialValues[property])) || CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
       return false;
@@ -143,9 +145,9 @@ class CSSStyleDeclaration {
       (_transitions.containsKey(property) || _transitions.containsKey(ALL));
   }
 
-  EffectTiming _getTransitionEffectTiming(String property) {
+  EffectTiming? _getTransitionEffectTiming(String property) {
 
-    List transitionOptions = _transitions[property] ?? _transitions[ALL];
+    List? transitionOptions = _transitions[property] ?? _transitions[ALL];
     // [duration, function, delay]
     if (transitionOptions != null) {
 
@@ -168,9 +170,9 @@ class CSSStyleDeclaration {
     return _propertyRunningTransition.containsKey(property);
   }
 
-  void _transition(String propertyName, begin, end, Size viewportSize) {
+  void _transition(String propertyName, begin, end, Size? viewportSize) {
     if (_hasRunningTransition(propertyName)) {
-      Animation animation = _propertyRunningTransition[propertyName];
+      Animation animation = _propertyRunningTransition[propertyName]!;
       animation.cancel();
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.cancel);
       // Maybe set transition twice in a same frame. should check animationProperties has contains propertyName.
@@ -194,7 +196,7 @@ class CSSStyleDeclaration {
       }
     }
 
-    EffectTiming options = _getTransitionEffectTiming(propertyName);
+    EffectTiming? options = _getTransitionEffectTiming(propertyName);
 
     List<Keyframe> keyframes = [
       Keyframe(propertyName, begin, 0, LINEAR),
@@ -219,7 +221,7 @@ class CSSStyleDeclaration {
   }
 
   _setTransitionEndProperty(String propertyName, value) {
-    String prevValue = _properties[propertyName];
+    String? prevValue = _properties[propertyName];
     if (value == prevValue) return;
     _properties[propertyName] = value;
     setRenderStyleProperty(propertyName, prevValue, value);
@@ -258,8 +260,8 @@ class CSSStyleDeclaration {
     return _properties[propertyName] ?? EMPTY_STRING;
   }
 
-  String removeAnimationProperty(String propertyName) {
-    String prevValue = EMPTY_STRING;
+  String? removeAnimationProperty(String propertyName) {
+    String? prevValue = EMPTY_STRING;
 
     if (_animationProperties.containsKey(propertyName)) {
        prevValue = _animationProperties[propertyName];
@@ -270,7 +272,7 @@ class CSSStyleDeclaration {
   }
 
   /// Removes a property from the CSS declaration block.
-  String removeProperty(String propertyName) {
+  String? removeProperty(String propertyName) {
 
     switch (propertyName) {
       case PADDING:
@@ -315,7 +317,7 @@ class CSSStyleDeclaration {
         break;
     }
 
-    String prevValue = EMPTY_STRING;
+    String? prevValue = EMPTY_STRING;
 
     if (_properties.containsKey(propertyName)) {
        prevValue = _properties[propertyName];
@@ -327,8 +329,8 @@ class CSSStyleDeclaration {
     return prevValue;
   }
 
-  void _expandShorthand(String propertyName, String normalizedValue, Size viewportSize) {
-    Map<String, String> longhandProperties = {};
+  void _expandShorthand(String propertyName, String normalizedValue, Size? viewportSize) {
+    Map<String, String?> longhandProperties = {};
     switch(propertyName) {
       case PADDING:
         CSSStyleProperty.setShorthandPadding(longhandProperties, normalizedValue);
@@ -373,7 +375,7 @@ class CSSStyleDeclaration {
     }
 
     if (longhandProperties.isNotEmpty) {
-      longhandProperties.forEach((String propertyName, String value) {
+      longhandProperties.forEach((String propertyName, String? value) {
         setProperty(propertyName, value, viewportSize);
       });
     }
@@ -382,7 +384,7 @@ class CSSStyleDeclaration {
   String _replacePattern(String string, String lowerCase, String startString, String endString, [int start = 0]) {
     int startIndex = lowerCase.indexOf(startString, start);
     if (startIndex >= 0) {
-      int endIndex;
+      int? endIndex;
       int startStringLength = startString.length;
       startIndex  = startIndex + startStringLength;
       for (int i = startIndex; i < string.length; i++) {
@@ -415,36 +417,34 @@ class CSSStyleDeclaration {
     if (CSSFunction.isFunction(result)) {
       String normalizedFunctionValue = '';
       List<CSSFunctionalNotation> funcs = CSSFunction.parseFunction(result);
-      if (funcs != null) {
-        for (CSSFunctionalNotation func in funcs) {
-          String loweredFuncName = func.name.toLowerCase();
-          if (loweredFuncName == 'env' && func.args.length > 0) {
-            String defaultValue = func.args.length > 1 ? func.args[1] : null;
-            switch (func.args.first) {
-              case SAFE_AREA_INSET_TOP:
-                normalizedFunctionValue += '${window.viewPadding.top / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-                break;
-              case SAFE_AREA_INSET_RIGHT:
-                normalizedFunctionValue += '${window.viewPadding.right / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-                break;
-              case SAFE_AREA_INSET_BOTTOM:
-                normalizedFunctionValue += '${window.viewPadding.bottom / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-                break;
-              case SAFE_AREA_INSET_LEFT:
-                normalizedFunctionValue += '${window.viewPadding.left / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
-                break;
-              default:
-                normalizedFunctionValue += '$defaultValue$FUNCTION_SPLIT';
-                break;
-            }
-          } else if (loweredFuncName == 'var') {
-            // TODO: impl CSS Variables.
-          } else {
-            normalizedFunctionValue += '${func.name}(${func.args.join(FUNCTION_ARGS_SPLIT)})$FUNCTION_SPLIT';
+      for (CSSFunctionalNotation func in funcs) {
+        String loweredFuncName = func.name.toLowerCase();
+        if (loweredFuncName == 'env' && func.args.length > 0) {
+          String? defaultValue = func.args.length > 1 ? func.args[1] : null;
+          switch (func.args.first) {
+            case SAFE_AREA_INSET_TOP:
+              normalizedFunctionValue += '${window.viewPadding.top / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
+              break;
+            case SAFE_AREA_INSET_RIGHT:
+              normalizedFunctionValue += '${window.viewPadding.right / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
+              break;
+            case SAFE_AREA_INSET_BOTTOM:
+              normalizedFunctionValue += '${window.viewPadding.bottom / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
+              break;
+            case SAFE_AREA_INSET_LEFT:
+              normalizedFunctionValue += '${window.viewPadding.left / window.devicePixelRatio}${CSSLength.PX}$FUNCTION_SPLIT';
+              break;
+            default:
+              normalizedFunctionValue += '$defaultValue$FUNCTION_SPLIT';
+              break;
           }
+        } else if (loweredFuncName == 'var') {
+          // TODO: impl CSS Variables.
+        } else {
+          normalizedFunctionValue += '${func.name}(${func.args.join(FUNCTION_ARGS_SPLIT)})$FUNCTION_SPLIT';
         }
-        result = normalizedFunctionValue.substring(0, normalizedFunctionValue.length - 1);
       }
+      result = normalizedFunctionValue.substring(0, normalizedFunctionValue.length - 1);
     }
 
     return result;
@@ -452,7 +452,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [Size viewportSize]) {
+  void setProperty(String propertyName, value, [Size? viewportSize]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -464,7 +464,7 @@ class CSSStyleDeclaration {
     // Illegal value like '   ' after trim is '' should do nothing.
     if (normalizedValue.isEmpty) return;
 
-    String prevValue = _properties[propertyName];
+    String? prevValue = _properties[propertyName];
     if (normalizedValue == prevValue) return;
 
     if (CSSShorthandProperty[propertyName] != null) {
@@ -550,7 +550,7 @@ class CSSStyleDeclaration {
     // Therefore we should cancel all running transition to get thing works.
     if (propertyName == TRANSITION_PROPERTY && _propertyRunningTransition.length > 0) {
       for (String property in _propertyRunningTransition.keys) {
-        _propertyRunningTransition[property].finish();
+        _propertyRunningTransition[property]!.finish();
       }
       _propertyRunningTransition.clear();
     }
@@ -578,16 +578,10 @@ class CSSStyleDeclaration {
   }
 
   void removeStyleChangeListener(StyleChangeListener listener) {
-    if (listener != null) {
       _styleChangeListeners.remove(listener);
-    } else {
-      _styleChangeListeners.clear();
-    }
   }
 
-  void setRenderStyleProperty(String property, String original, String present) {
-    assert(property != null);
-
+  void setRenderStyleProperty(String property, String? original, String present) {
     for (int i = 0; i < _styleChangeListeners.length; i++) {
       StyleChangeListener listener = _styleChangeListeners[i];
       listener(property, original, present);
@@ -610,7 +604,7 @@ class CSSStyleDeclaration {
     _propertyRunningTransition.clear();
   }
 
-  double getLengthByPropertyName(String propertyName, ElementManager elementManager) {
+  double? getLengthByPropertyName(String propertyName, ElementManager elementManager) {
     double viewportWidth = elementManager.viewportWidth;
     double viewportHeight = elementManager.viewportHeight;
     Size viewportSize = Size(viewportWidth, viewportHeight);
@@ -627,13 +621,13 @@ class CSSStyleDeclaration {
 
 // aB to a-b
 String kebabize(String str) {
-  return str.replaceAllMapped(_kebabCaseReg, (match) => '-${match[0].toLowerCase()}');
+  return str.replaceAllMapped(_kebabCaseReg, (match) => '-${match[0]!.toLowerCase()}');
 }
 
 // a-b to aB
 String camelize(String str) {
   return str.replaceAllMapped(_camelCaseReg, (match) {
-    String subStr = match[0].substring(1);
+    String subStr = match[0]!.substring(1);
     return subStr.isNotEmpty ? subStr.toUpperCase() : '';
   });
 }

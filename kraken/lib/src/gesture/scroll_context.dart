@@ -19,11 +19,11 @@ abstract class ScrollContext {
   TickerProvider get vsync;
 
   /// The direction in which the widget scrolls.
-  AxisDirection get axisDirection;
+  AxisDirection? get axisDirection;
 
   /// Whether the user can drag the widget, for example to initiate a scroll.
   void setCanDrag(bool value);
 
   /// Set the [SemanticsAction]s that should be expose to the semantics tree.
-  void setSemanticsActions(Set<SemanticsAction> actions);
+  void setSemanticsActions(Set<SemanticsAction?>? actions);
 }

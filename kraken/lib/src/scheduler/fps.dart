@@ -14,13 +14,13 @@ typedef FpsCallback = void Function(List<FpsInfo> fps);
 class Fps {
   Fps._();
 
-  static Fps _instance;
+  static Fps? _instance;
 
   static Fps get instance {
     if (_instance == null) {
       _instance = Fps._();
     }
-    return _instance;
+    return _instance!;
   }
 
   bool _started = false;
@@ -34,7 +34,7 @@ class Fps {
     if (!_started) {
       _started = true;
 
-      ElementsBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
+      ElementsBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
         if (_fpsCallbacks.isNotEmpty) {
           List<FpsInfo> fps = timings.map<FpsInfo>((timing) => FpsInfo(timing)).toList();
           for (var callback in _fpsCallbacks) {
@@ -85,7 +85,7 @@ class RenderFpsOverlay extends RenderBox {
     Fps.instance.start();
   }
 
-  FpsInfo _fpsInfo;
+  FpsInfo? _fpsInfo;
 
   TextPainter _getTextPainter(String text, Color color) {
     TextStyle textStyle = TextStyle(
@@ -120,7 +120,7 @@ class RenderFpsOverlay extends RenderBox {
     assert(needsCompositing);
     Canvas canvas = context.canvas;
     if (_fpsInfo != null) {
-      TextPainter textPainter = _getTextPainter(_fpsInfo.toString(), CSSColor.parseColor('red'));
+      TextPainter textPainter = _getTextPainter(_fpsInfo.toString(), CSSColor.parseColor('red')!);
       textPainter.layout();
       textPainter.paint(canvas, Offset(0, 0));
     }

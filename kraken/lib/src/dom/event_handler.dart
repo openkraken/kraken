@@ -68,8 +68,9 @@ mixin EventHandlerMixin on Node {
 
   TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
     TouchEvent event = TouchEvent(type);
+    var pointerEventOriginal = pointEvent.original;
     // Use original event, prevent to be relative coordinate
-    if (pointEvent.original != null) pointEvent = pointEvent.original;
+    if (pointerEventOriginal != null) pointEvent = pointerEventOriginal;
 
     Touch touch = Touch(
       identifier: pointEvent.pointer,
@@ -91,10 +92,12 @@ mixin EventHandlerMixin on Node {
     return event;
   }
 
-  void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
-    RenderBoxModel root = elementManager.viewportElement.renderBoxModel;
+  void handleMouseEvent(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
+    RenderBoxModel? root = elementManager.viewportElement.renderBoxModel;
+    if (root == null || up == null) {
+      return;
+    }
     Offset globalOffset = root.globalToLocal(Offset(up.position.dx, up.position.dy));
-
     dispatchEvent(MouseEvent(eventType,
       MouseEventInit(
         bubbles: true,
