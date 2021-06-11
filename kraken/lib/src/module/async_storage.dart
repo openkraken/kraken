@@ -7,9 +7,9 @@ class AsyncStorageModule extends BaseModule {
   @override
   String get name => 'AsyncStorage';
 
-  static Future<SharedPreferences> _prefs;
+  static Future<SharedPreferences>? _prefs;
 
-  AsyncStorageModule(ModuleManager moduleManager) : super(moduleManager);
+  AsyncStorageModule(ModuleManager? moduleManager) : super(moduleManager);
 
   /// Loads and parses the [SharedPreferences] for this app from disk.
   ///
@@ -17,7 +17,7 @@ class AsyncStorageModule extends BaseModule {
   /// performance-sensitive blocks.
   static Future<SharedPreferences> _getPrefs() {
     if (_prefs == null) _prefs = SharedPreferences.getInstance();
-    return _prefs;
+    return _prefs!;
   }
 
   static Future<bool> setItem(String key, String value) async {
@@ -25,7 +25,7 @@ class AsyncStorageModule extends BaseModule {
     return prefs.setString(key, value);
   }
 
-  static Future<String> getItem(String key) async {
+  static Future<String?> getItem(String key) async {
     final SharedPreferences prefs = await _getPrefs();
     return prefs.getString(key);
   }
@@ -48,7 +48,7 @@ class AsyncStorageModule extends BaseModule {
   static Future<int> length() async {
     final SharedPreferences prefs = await _getPrefs();
     final Set<String> keys = prefs.getKeys();
-    return keys != null ? keys.length : 0;
+    return keys.length;
   }
 
   @override
@@ -59,10 +59,10 @@ class AsyncStorageModule extends BaseModule {
   String invoke(String method, dynamic args, InvokeModuleCallback callback) {
     switch (method) {
       case 'getItem':
-        AsyncStorageModule.getItem(args).then((String value) {
+        AsyncStorageModule.getItem(args).then((String? value) {
           callback(data: value ?? '');
         }).catchError((e, stack) {
-          callback(errmsg: '$e\n$stack');
+          callback(error: '$e\n$stack');
         });
         break;
       case 'setItem':
@@ -71,14 +71,14 @@ class AsyncStorageModule extends BaseModule {
         AsyncStorageModule.setItem(key, value).then((bool isSuccess) {
           callback(data: isSuccess.toString());
         }).catchError((e, stack) {
-          callback(errmsg: 'Error: $e\n$stack');
+          callback(error: 'Error: $e\n$stack');
         });
         break;
       case 'removeItem':
         AsyncStorageModule.removeItem(args).then((bool isSuccess) {
           callback(data: isSuccess.toString());
         }).catchError((e, stack) {
-          callback(errmsg: 'Error: $e\n$stack');
+          callback(error: 'Error: $e\n$stack');
         });
         break;
       case 'getAllKeys':
@@ -86,21 +86,21 @@ class AsyncStorageModule extends BaseModule {
           List<String> list = List.from(set);
           callback(data: list);
         }).catchError((e, stack) {
-          callback(errmsg: 'Error: $e\n$stack');
+          callback(error: 'Error: $e\n$stack');
         });
         break;
       case 'clear':
         AsyncStorageModule.clear().then((bool isSuccess) {
           callback(data: isSuccess.toString());
         }).catchError((e, stack) {
-          callback(errmsg: 'Error: $e\n$stack');
+          callback(error: 'Error: $e\n$stack');
         });
         break;
       case 'length':
         AsyncStorageModule.length().then((int length) {
           callback(data: length);
         }).catchError((e, stack) {
-          callback(errmsg: 'Error: $e\n$stack');
+          callback(error: 'Error: $e\n$stack');
         });
         break;
       default:

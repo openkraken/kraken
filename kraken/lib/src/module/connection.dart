@@ -24,7 +24,7 @@ class ConnectionModule extends BaseModule {
   @override
   String get name => 'Connection';
 
-  static Connectivity _connectivity;
+  static Connectivity? _connectivity;
 
   static void _initConnectivity() {
     if (_connectivity == null) {
@@ -34,20 +34,20 @@ class ConnectionModule extends BaseModule {
 
   static void getConnectivity(OnConnectivityChangedCallback callback) {
     _initConnectivity();
-    _connectivity.checkConnectivity().then((ConnectivityResult connectivityResult) {
+    _connectivity!.checkConnectivity().then((ConnectivityResult connectivityResult) {
       callback(_getResult(connectivityResult));
     });
   }
 
   static void onConnectivityChanged(OnConnectivityChangedCallback callback) {
     _initConnectivity();
-    _connectivity.onConnectivityChanged.listen((ConnectivityResult connectivityResul) {
+    _connectivity!.onConnectivityChanged.listen((ConnectivityResult connectivityResul) {
       Map json = _getResult(connectivityResul);
       callback(json);
     });
   }
 
-  ConnectionModule(ModuleManager moduleManager) : super(moduleManager);
+  ConnectionModule(ModuleManager? moduleManager) : super(moduleManager);
 
   @override
   void dispose() {}
@@ -63,7 +63,7 @@ class ConnectionModule extends BaseModule {
       }
       case 'onConnectivityChanged': {
         onConnectivityChanged((Map data) {
-          moduleManager.emitModuleEvent(name, data: data);
+          moduleManager!.emitModuleEvent(name, data: data);
         });
         break;
       }

@@ -15,87 +15,82 @@ import 'package:kraken/css.dart';
 
 class Kraken extends StatelessWidget {
   // The background color for viewport, default to transparent.
-  final Color background;
+  final Color? background;
 
   // the width of krakenWidget
-  final double viewportWidth;
+  final double? viewportWidth;
 
   // the height of krakenWidget
-  final double viewportHeight;
+  final double? viewportHeight;
 
   // The initial URL to load.
-  final String bundleURL;
+  final String? bundleURL;
 
   // The initial assets path to load.
-  final String bundlePath;
+  final String? bundlePath;
 
   // The initial raw javascript content to load.
-  final String bundleContent;
+  final String? bundleContent;
 
   // The animationController of Flutter Route object.
   // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
-  final AnimationController animationController;
+  final AnimationController? animationController;
 
   // The methods of the KrakenNavigateDelegation help you implement custom behaviors that are triggered
   // during a kraken view's process of loading, and completing a navigation request.
-  final KrakenNavigationDelegate navigationDelegate;
+  final KrakenNavigationDelegate? navigationDelegate;
 
   // A method channel for receiving messaged from JavaScript code and sending message to JavaScript.
-  final KrakenJavaScriptChannel javaScriptChannel;
+  final KrakenJavaScriptChannel? javaScriptChannel;
 
-  final LoadErrorHandler onLoadError;
+  final LoadErrorHandler? onLoadError;
 
-  final LoadHandler onLoad;
+  final LoadHandler? onLoad;
 
-  final JSErrorHandler onJSError;
+  final JSErrorHandler ?onJSError;
 
   // Open a service to support Chrome DevTools for debugging.
   // https://github.com/openkraken/devtools
-  final DevToolsService devToolsService;
+  final DevToolsService? devToolsService;
 
-  final bool debugEnableInspector;
+  final GestureClient? gestureClient;
 
-  final GestureClient gestureClient;
+  final HttpClientInterceptor? httpClientInterceptor;
 
-  final HttpClientInterceptor httpClientInterceptor;
-
-  KrakenController get controller {
+  KrakenController? get controller {
     return KrakenController.getControllerOfName(shortHash(this));
   }
 
   loadContent(String bundleContent) async {
-    if (bundleContent == null) return;
-    await controller.unload();
-    await controller.loadBundle(
+    await controller!.unload();
+    await controller!.loadBundle(
       bundleContent: bundleContent
     );
-    _evalBundle(controller, animationController);
+    _evalBundle(controller!, animationController);
   }
 
   loadURL(String bundleURL) async {
-    if (bundleURL == null) return;
-    await controller.unload();
-    await controller.loadBundle(
+    await controller!.unload();
+    await controller!.loadBundle(
       bundleURL: bundleURL
     );
-    _evalBundle(controller, animationController);
+    _evalBundle(controller!, animationController);
   }
 
   loadPath(String bundlePath) async {
-    if (bundlePath == null) return;
-    await controller.unload();
-    await controller.loadBundle(
+    await controller!.unload();
+    await controller!.loadBundle(
       bundlePath: bundlePath
     );
-    _evalBundle(controller, animationController);
+    _evalBundle(controller!, animationController);
   }
 
   reload() async {
-    await controller.reload();
+    await controller!.reload();
   }
 
   Kraken({
-    Key key,
+    Key? key,
     this.viewportWidth,
     this.viewportHeight,
     this.bundleURL,
@@ -122,7 +117,6 @@ class Kraken extends StatelessWidget {
     // Callback functions when loading Javascript scripts failed.
     this.onLoadError,
     this.animationController,
-    this.debugEnableInspector,
     this.onJSError
   }) : super(key: key);
 
@@ -141,7 +135,7 @@ class Kraken extends StatelessWidget {
 
 class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  const _KrakenRenderObjectWidget(Kraken widget, {Key key})
+  const _KrakenRenderObjectWidget(Kraken widget, {Key? key})
       : _krakenWidget = widget,
         super(key: key);
 
@@ -166,7 +160,6 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       onLoadError: _krakenWidget.onLoadError,
       onJSError: _krakenWidget.onJSError,
       methodChannel: _krakenWidget.javaScriptChannel,
-      debugEnableInspector: _krakenWidget.debugEnableInspector,
       gestureClient: _krakenWidget.gestureClient,
       navigationDelegate: _krakenWidget.navigationDelegate,
       devToolsService: _krakenWidget.devToolsService,
@@ -183,33 +176,38 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
     super.updateRenderObject(context, renderObject);
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
+    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
     controller.name = shortHash(_krakenWidget.hashCode);
 
     bool viewportWidthHasChanged = controller.view.viewportWidth != _krakenWidget.viewportWidth;
     bool viewportHeightHasChanged = controller.view.viewportHeight != _krakenWidget.viewportHeight;
 
+    double viewportWidth = _krakenWidget.viewportWidth ?? window.physicalSize.width / window.devicePixelRatio;
+    double viewportHeight = _krakenWidget.viewportHeight ?? window.physicalSize.height / window.devicePixelRatio;
+
+    Size viewportSize = Size(viewportWidth, viewportHeight);
+
     if (viewportWidthHasChanged) {
-      controller.view.viewportWidth = _krakenWidget.viewportWidth;
-      controller.view.document.documentElement.style.setProperty(WIDTH, controller.view.viewportWidth.toString() + 'px');
+      controller.view.viewportWidth = viewportWidth;
+      controller.view.document!.documentElement.style.setProperty(WIDTH, controller.view.viewportWidth.toString() + 'px', viewportSize);
     }
 
     if (viewportHeightHasChanged) {
-      controller.view.viewportHeight = _krakenWidget.viewportHeight;
-      controller.view.document.documentElement.style.setProperty(HEIGHT, controller.view.viewportHeight.toString() + 'px');
+      controller.view.viewportHeight = viewportHeight;
+      controller.view.document!.documentElement.style.setProperty(HEIGHT, controller.view.viewportHeight.toString() + 'px', viewportSize);
     }
 
     if (viewportWidthHasChanged || viewportHeightHasChanged) {
-      traverseElement(controller.view.document.documentElement, (element) {
+      traverseElement(controller.view.document!.documentElement, (element) {
         element.style.applyTargetProperties();
-        element.renderBoxModel.markNeedsLayout();
+        element.renderBoxModel?.markNeedsLayout();
       });
     }
   }
 
   @override
   void didUnmountRenderObject(covariant RenderObject renderObject) {
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
+    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
     controller.dispose();
   }
 
@@ -223,10 +221,10 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
   _KrakenRenderObjectElement(_KrakenRenderObjectWidget widget) : super(widget);
 
   @override
-  void mount(Element parent, dynamic newSlot) async {
+  void mount(Element? parent, Object? newSlot) async {
     super.mount(parent, newSlot);
 
-    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller;
+    KrakenController controller = (renderObject as RenderObjectWithControllerMixin).controller!;
 
     if (controller.bundleContent == null && controller.bundlePath == null && controller.bundleURL == null) {
       return;
@@ -241,7 +239,7 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
   _KrakenRenderObjectWidget get widget => super.widget as _KrakenRenderObjectWidget;
 }
 
-void _evalBundle(KrakenController controller, AnimationController animationController) async {
+void _evalBundle(KrakenController controller, AnimationController? animationController) async {
   // Execute JavaScript scripts will block the Flutter UI Threads.
   // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
   if (animationController != null) {

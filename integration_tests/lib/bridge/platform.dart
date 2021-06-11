@@ -14,7 +14,7 @@ import 'package:path/path.dart';
 /// Search dynamic lib from env.KRAKEN_LIBRARY_PATH or /usr/lib
 const String KRAKEN_LIBRARY_PATH = 'KRAKEN_LIBRARY_PATH';
 const String KRAKEN_JS_ENGINE = 'KRAKEN_JS_ENGINE';
-final String kkLibraryPath = Platform.environment[KRAKEN_LIBRARY_PATH];
+final String? kkLibraryPath = Platform.environment[KRAKEN_LIBRARY_PATH];
 final String kkJsEngine = Platform.environment[KRAKEN_JS_ENGINE] ??
     ((Platform.isIOS || Platform.isMacOS || Platform.isAndroid) ? 'jsc' : 'v8');
 final String libName = 'libkraken_test_$kkJsEngine';

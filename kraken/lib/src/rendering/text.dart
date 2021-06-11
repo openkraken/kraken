@@ -10,21 +10,16 @@ import 'package:kraken/css.dart';
 
 class TextParentData extends ContainerBoxParentData<RenderBox> {}
 
-enum WhiteSpace {
-  normal,
-  nowrap,
-  pre,
-  preWrap,
-  preLine,
-  breakSpaces
-}
+enum WhiteSpace { normal, nowrap, pre, preWrap, preLine, breakSpaces }
 
-class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  RenderTextBox(InlineSpan text, {
+class RenderTextBox extends RenderBox
+    with RenderObjectWithChildMixin<RenderBox> {
+  RenderTextBox(
+    InlineSpan text, {
     this.targetId,
     this.style,
     this.elementManager,
-  }) : assert(text != null) {
+  }) {
     _renderParagraph = KrakenRenderParagraph(
       text,
       textDirection: TextDirection.ltr,
@@ -33,44 +28,46 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     child = _renderParagraph;
   }
 
-  KrakenRenderParagraph _renderParagraph;
-  int targetId;
-  CSSStyleDeclaration style;
-  ElementManager elementManager;
+  KrakenRenderParagraph? _renderParagraph;
+  int? targetId;
+  CSSStyleDeclaration? style;
+  ElementManager? elementManager;
 
-  BoxSizeType widthSizeType;
-  BoxSizeType heightSizeType;
+  BoxSizeType? widthSizeType;
+  BoxSizeType? heightSizeType;
 
   // Auto value for min-width
   double autoMinWidth = 0;
+
   // Auto value for min-height
   double autoMinHeight = 0;
 
   set text(TextSpan value) {
     assert(_renderParagraph != null);
-    _renderParagraph.text = value;
+    _renderParagraph!.text = value;
   }
 
   set textAlign(TextAlign value) {
     assert(_renderParagraph != null);
-    _renderParagraph.textAlign = value;
+    _renderParagraph!.textAlign = value;
   }
 
   set overflow(TextOverflow value) {
     assert(_renderParagraph != null);
-    _renderParagraph.overflow = value;
+    _renderParagraph!.overflow = value;
   }
 
-  set maxLines(int value) {
+  set maxLines(int? value) {
     assert(_renderParagraph != null);
     // Forcing a break after a set number of lines
     // https://drafts.csswg.org/css-overflow-3/#max-lines
-    _renderParagraph.maxLines = value;
+    _renderParagraph!.maxLines = value;
   }
 
   // Box size equals to RenderBox.size to avoid flutter complain when read size property.
-  Size _boxSize;
-  Size get boxSize {
+  Size? _boxSize;
+
+  Size? get boxSize {
     assert(_boxSize != null, 'box does not have laid out.');
     return _boxSize;
   }
@@ -80,11 +77,13 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     super.size = value;
   }
 
-  WhiteSpace _whiteSpace;
-  WhiteSpace get whiteSpace {
+  WhiteSpace? _whiteSpace;
+
+  WhiteSpace? get whiteSpace {
     return _whiteSpace;
   }
-  set whiteSpace(WhiteSpace value) {
+
+  set whiteSpace(WhiteSpace? value) {
     if (value == whiteSpace) return;
     _whiteSpace = value;
     markNeedsLayout();
@@ -112,57 +111,61 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
   }
 
   BoxConstraints getConstraints() {
-    if (whiteSpace == WhiteSpace.nowrap && _renderParagraph.overflow != TextOverflow.ellipsis) {
+    if (whiteSpace == WhiteSpace.nowrap &&
+        _renderParagraph!.overflow != TextOverflow.ellipsis) {
       return BoxConstraints();
     }
     double maxConstraintWidth = double.infinity;
     if (parent is RenderBoxModel) {
-      RenderBoxModel parentRenderBoxModel = parent;
+      RenderBoxModel parentRenderBoxModel = parent as RenderBoxModel;
       BoxConstraints parentConstraints = parentRenderBoxModel.constraints;
 
       // Scrolling content box has indefinite max constraints to allow children overflow
       if (parentRenderBoxModel.isScrollingContentBox) {
         // Border and padding defined on the outer box of scroll box
-        RenderBoxModel outerScrollBox = parentRenderBoxModel.parent;
-        EdgeInsets borderEdge = outerScrollBox.renderStyle.borderEdge;
-        EdgeInsetsGeometry padding = outerScrollBox.renderStyle.padding;
-        double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
-        double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
+        RenderBoxModel outerScrollBox =
+            parentRenderBoxModel.parent as RenderBoxModel;
+        EdgeInsets? borderEdge = outerScrollBox.renderStyle.borderEdge;
+        EdgeInsetsGeometry? padding = outerScrollBox.renderStyle.padding;
+        double horizontalBorderLength =
+            borderEdge != null ? borderEdge.horizontal : 0;
+        double horizontalPaddingLength =
+            padding != null ? padding.horizontal : 0;
 
-        maxConstraintWidth = parentConstraints.minWidth - horizontalPaddingLength - horizontalBorderLength;
+        maxConstraintWidth = parentConstraints.minWidth -
+            horizontalPaddingLength -
+            horizontalBorderLength;
       } else if (parentConstraints.maxWidth == double.infinity) {
-        final RenderLayoutParentData parentParentData = parentRenderBoxModel.parentData;
+        final RenderLayoutParentData parentParentData = parentRenderBoxModel.parentData as RenderLayoutParentData;
         // Width of positioned element does not contrainted by parent.
         if (parentParentData.isPositioned) {
           maxConstraintWidth = double.infinity;
         } else {
-          maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel) ?? double.infinity;
+          maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel);
         }
       } else if (parentConstraints.maxWidth != null) {
-        EdgeInsets borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
-        EdgeInsetsGeometry padding = parentRenderBoxModel.renderStyle.padding;
+        EdgeInsets? borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
+        EdgeInsetsGeometry? padding = parentRenderBoxModel.renderStyle.padding;
         double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
         double horizontalPaddingLength = padding != null ? padding.horizontal : 0;
 
         maxConstraintWidth = parentConstraints.maxWidth - horizontalPaddingLength - horizontalBorderLength;
       }
-
     }
     // Text will not overflow from container, so it can inherit
     // constraints from parents
     return BoxConstraints(
-      minWidth: 0,
-      maxWidth: maxConstraintWidth,
-      minHeight: 0,
-      maxHeight: double.infinity
-    );
+        minWidth: 0,
+        maxWidth: maxConstraintWidth,
+        minHeight: 0,
+        maxHeight: double.infinity);
   }
 
   @override
   void performLayout() {
     if (child != null) {
-      child.layout(constraints, parentUsesSize: true);
-      size = child.size;
+      child!.layout(constraints, parentUsesSize: true);
+      size = child!.size;
 
       // @FIXME: Minimum size of text equals to single word in browser
       // which cannot be calculated in Flutter currently.
@@ -179,29 +182,29 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
   }
 
   double computeDistanceToBaseline() {
-    return parent is RenderFlowLayout ?
-      _renderParagraph.computeDistanceToLastLineBaseline() :
-      _renderParagraph.computeDistanceToFirstLineBaseline();
+    return parent is RenderFlowLayout
+        ? _renderParagraph!.computeDistanceToLastLineBaseline()
+        : _renderParagraph!.computeDistanceToFirstLineBaseline();
   }
 
   double computeDistanceToFirstLineBaseline() {
-    return _renderParagraph.computeDistanceToFirstLineBaseline();
+    return _renderParagraph!.computeDistanceToFirstLineBaseline();
   }
 
   double computeDistanceToLastLineBaseline() {
-    return _renderParagraph.computeDistanceToLastLineBaseline();
+    return _renderParagraph!.computeDistanceToLastLineBaseline();
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      context.paintChild(child, offset);
+      context.paintChild(child!, offset);
     }
   }
 
   // Text node need hittest self to trigger scroll
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
-    return hasSize && size.contains(position);
+  bool hitTest(BoxHitTestResult result, {Offset? position}) {
+    return hasSize && size.contains(position!);
   }
 }

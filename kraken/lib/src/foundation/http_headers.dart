@@ -6,8 +6,8 @@
 import 'dart:io';
 
 class SingleHttpHeaders implements HttpHeaders {
-  final Map<String, String> _headers = Map<String, String>();
-  SingleHttpHeaders({ Map<String, String> initialHeaders }) {
+  final Map<String, dynamic> _headers = Map<String, String>();
+  SingleHttpHeaders({ Map<String, String>? initialHeaders }) {
     if (initialHeaders != null) {
       _headers.addAll(initialHeaders);
     }
@@ -19,11 +19,7 @@ class SingleHttpHeaders implements HttpHeaders {
   @override
   int get contentLength {
     String val = value(HttpHeaders.contentLengthHeader);
-    if (val != null) {
-      return int.tryParse(val) ?? -1;
-    } else {
-      return -1;
-    }
+    return int.tryParse(val) ?? -1;
   }
 
   @override
@@ -36,8 +32,8 @@ class SingleHttpHeaders implements HttpHeaders {
   }
 
   @override
-  ContentType get contentType {
-    String value = _headers[HttpHeaders.contentTypeHeader];
+  ContentType? get contentType {
+    String? value = _headers[HttpHeaders.contentTypeHeader];
     if (value != null) {
       return ContentType.parse(value);
     } else {
@@ -46,7 +42,7 @@ class SingleHttpHeaders implements HttpHeaders {
   }
 
   @override
-  set contentType(ContentType contentType) {
+  set contentType(ContentType? contentType) {
     if (contentType == null) {
       removeAll(HttpHeaders.contentTypeHeader);
     } else {
@@ -55,9 +51,9 @@ class SingleHttpHeaders implements HttpHeaders {
   }
 
   @override
-  DateTime get date {
-    String value = _headers[HttpHeaders.dateHeader];
-    if (String != null) {
+  DateTime? get date {
+    String? value = _headers[HttpHeaders.dateHeader];
+    if (value != null) {
       try {
         return HttpDate.parse(value);
       } on Exception {
@@ -68,7 +64,7 @@ class SingleHttpHeaders implements HttpHeaders {
   }
 
   @override
-  set date(DateTime date) {
+  set date(DateTime? date) {
     if (date == null) {
       removeAll(HttpHeaders.dateHeader);
     } else {
@@ -79,25 +75,27 @@ class SingleHttpHeaders implements HttpHeaders {
   }
 
   @override
-  DateTime get expires => DateTime.tryParse(_headers[HttpHeaders.expiresHeader]);
+  DateTime? get expires => DateTime.tryParse(_headers[HttpHeaders.expiresHeader]!);
 
   @override
-  set expires(DateTime _expires) {
+  set expires(DateTime? _expires) {
+    if (_expires == null) return;
     String formatted = HttpDate.format(_expires.toUtc());
     set(HttpHeaders.expiresHeader, formatted);
   }
 
   @override
-  String get host => _headers[HttpHeaders.hostHeader];
+  String? get host => _headers[HttpHeaders.hostHeader];
 
   @override
-  set host(String _host) {
+  set host(String? _host) {
+    if (_host == null) return;
     set(HttpHeaders.hostHeader, _host);
   }
 
   @override
-  DateTime get ifModifiedSince {
-    String value = _headers[HttpHeaders.ifModifiedSinceHeader];
+  DateTime? get ifModifiedSince {
+    String? value = _headers[HttpHeaders.ifModifiedSinceHeader];
     if (value != null) {
       try {
         return HttpDate.parse(value);
@@ -109,7 +107,7 @@ class SingleHttpHeaders implements HttpHeaders {
   }
 
   @override
-  set ifModifiedSince(DateTime _ifModifiedSince) {
+  set ifModifiedSince(DateTime? _ifModifiedSince) {
     if (_ifModifiedSince == null) {
       _headers.remove(HttpHeaders.ifModifiedSinceHeader);
     } else {
@@ -124,11 +122,13 @@ class SingleHttpHeaders implements HttpHeaders {
   bool persistentConnection = false;
 
   @override
-  int port = 80;
+  int? port = 80;
 
   @override
   List<String> operator [](String name) {
-    return [_headers[name]];
+    String? v = _headers[name];
+    if (v != null) return [v];
+    return [];
   }
 
   @override
@@ -177,7 +177,7 @@ class SingleHttpHeaders implements HttpHeaders {
   @override
   String toString() {
     StringBuffer sb = StringBuffer();
-    _headers.forEach((String name, String value) {
+    _headers.forEach((String name, dynamic value) {
       sb..write(name)
         ..write(': ')
         ..write(value)

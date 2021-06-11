@@ -15,7 +15,6 @@ void main() async {
       body: Kraken(
         viewportWidth: 360,
         viewportHeight: 640,
-        debugEnableInspector: false,
       ),
     ),
   ));
