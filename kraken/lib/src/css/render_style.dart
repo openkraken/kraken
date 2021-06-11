@@ -44,19 +44,11 @@ class RenderStyle
     }
 
     final RenderLayoutParentData childParentData = renderBoxModel!.parentData as RenderLayoutParentData;
-    double parentActualContentWidth = parent.size.width -
-      parent.renderStyle.borderLeft - parent.renderStyle.borderRight -
-      parent.renderStyle.paddingLeft - parent.renderStyle.paddingRight;
     double parentActualContentHeight = parent.size.height -
       parent.renderStyle.borderTop - parent.renderStyle.borderBottom -
       parent.renderStyle.paddingTop - parent.renderStyle.paddingBottom;
     double? parentLogicalContentHeight = parent.logicalContentHeight;
 
-    // The percentage of width is calculated with respect to the width of the generated box's containing block.
-    // If the containing block's width depends on this element's width, then the resulting layout is undefined in CSS 2.1.
-    // https://www.w3.org/TR/CSS2/visudet.html#propdef-width
-    // @FIXME: The undefined layout of parent's width which depends on child's width may differ from browser.
-    double parentContentWidth = parentActualContentWidth;
     // The percentage of height is calculated with respect to the height of the generated box's containing block.
     // If the height of the containing block is not specified explicitly (i.e., it depends on content height),
     // and this element is not absolutely positioned, the value computes to 'auto'.
@@ -379,19 +371,11 @@ class RenderStyle
 
   bool isPercentageOfSizingExist(RenderBoxModel parent) {
     final RenderLayoutParentData childParentData = renderBoxModel!.parentData as RenderLayoutParentData;
-    double parentActualContentWidth = parent.size.width -
-      parent.renderStyle.borderLeft - parent.renderStyle.borderRight -
-      parent.renderStyle.paddingLeft - parent.renderStyle.paddingRight;
     double parentActualContentHeight = parent.size.height -
       parent.renderStyle.borderTop - parent.renderStyle.borderBottom -
       parent.renderStyle.paddingTop - parent.renderStyle.paddingBottom;
     double? parentLogicalContentHeight = parent.logicalContentHeight;
 
-    // The percentage of width is calculated with respect to the width of the generated box's containing block.
-    // If the containing block's width depends on this element's width, then the resulting layout is undefined in CSS 2.1.
-    // https://www.w3.org/TR/CSS2/visudet.html#propdef-width
-    // @FIXME: The undefined layout of parent's width which depends on child's width may differ from browser.
-    double parentContentWidth = parentActualContentWidth;
     // The percentage of height is calculated with respect to the height of the generated box's containing block.
     // If the height of the containing block is not specified explicitly (i.e., it depends on content height),
     // and this element is not absolutely positioned, the value computes to 'auto'.
@@ -401,11 +385,10 @@ class RenderStyle
     double? parentContentHeight = childParentData.isPositioned || parent.parent is RenderFlexLayout ?
       parentActualContentHeight : parentLogicalContentHeight;
 
-    if (parentContentWidth != null && (
-      CSSLength.isPercentage(style![WIDTH]) ||
+    if (CSSLength.isPercentage(style![WIDTH]) ||
       CSSLength.isPercentage(style![MIN_WIDTH]) ||
       CSSLength.isPercentage(style![MAX_WIDTH])
-    )) {
+    ) {
       return true;
     }
 
