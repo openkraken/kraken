@@ -11,14 +11,11 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   final HttpClientRequest _clientRequest;
   final KrakenHttpOverrides _httpOverrides;
   ProxyHttpClientRequest(HttpClientRequest clientRequest, KrakenHttpOverrides httpOverrides)
-      : assert(clientRequest != null), _clientRequest = clientRequest,
+      : _clientRequest = clientRequest,
         _httpOverrides = httpOverrides;
 
-  String _getContextId(HttpClientRequest request) {
-    if (request != null) {
-      return request.headers.value(HttpHeaderContextID);
-    }
-    return null;
+  String? _getContextId(HttpClientRequest request) {
+    return request.headers.value(HttpHeaderContextID);
   }
 
   @override
@@ -30,7 +27,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  void abort([Object exception, StackTrace stackTrace]) {
+  void abort([Object? exception, StackTrace? stackTrace]) {
     _clientRequest.abort(exception, stackTrace);
   }
 
@@ -40,7 +37,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  void addError(Object error, [StackTrace stackTrace]) {
+  void addError(error, [StackTrace? stackTrace]) {
     _clientRequest.addError(error, stackTrace);
   }
 
@@ -49,7 +46,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     return _clientRequest.addStream(stream);
   }
 
-  Future<HttpClientRequest> _beforeRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
+  Future<HttpClientRequest?> _beforeRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
     try {
       return await _clientInterceptor.beforeRequest(_clientRequest);
     } catch (err, stack) {
@@ -58,7 +55,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     return null;
   }
 
-  Future<HttpClientResponse> _afterResponse(
+  Future<HttpClientResponse?> _afterResponse(
       HttpClientInterceptor _clientInterceptor,
       HttpClientRequest _clientRequest,
       HttpClientResponse _clientResponse) async {
@@ -70,7 +67,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     return null;
   }
 
-  Future<HttpClientResponse> _shouldInterceptRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
+  Future<HttpClientResponse?> _shouldInterceptRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
     try {
       return await _clientInterceptor.shouldInterceptRequest(_clientRequest);
     } catch (err, stack) {
@@ -81,16 +78,14 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() async {
-    if (_httpOverrides != null && _httpOverrides.shouldOverride(_clientRequest)) {
-      String contextId = _getContextId(_clientRequest);
+    if (_httpOverrides.shouldOverride(_clientRequest)) {
+      String? contextId = _getContextId(_clientRequest);
       if (contextId != null) {
         _clientRequest.headers.removeAll(HttpHeaderContextID);
         HttpClientInterceptor _clientInterceptor = _httpOverrides.getInterceptor(contextId);
-        if (_clientInterceptor != null) {
-          HttpClientRequest _request = await _beforeRequest(_clientInterceptor, _clientRequest) ?? _clientRequest;
-          HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(_clientInterceptor, _request) ?? await _request.close();
-          return await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
-        }
+        HttpClientRequest _request = await _beforeRequest(_clientInterceptor, _clientRequest) ?? _clientRequest;
+        HttpClientResponse _interceptedResponse = await _shouldInterceptRequest(_clientInterceptor, _request) ?? await _request.close();
+        return await _afterResponse(_clientInterceptor, _request, _interceptedResponse) ?? _interceptedResponse;
       }
     }
 
@@ -98,7 +93,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  HttpConnectionInfo get connectionInfo => _clientRequest.connectionInfo;
+  HttpConnectionInfo get connectionInfo => _clientRequest.connectionInfo!;
 
   @override
   List<Cookie> get cookies => _clientRequest.cookies;
@@ -121,7 +116,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   Uri get uri => _clientRequest.uri;
 
   @override
-  void write(Object obj) {
+  void write(Object? obj) {
     _clientRequest.write(obj);
   }
 
@@ -136,7 +131,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   }
 
   @override
-  void writeln([Object obj = ""]) {
-    _clientRequest.writeln(obj);
+  void writeln([Object? object = ""]) {
+    _clientRequest.writeln(object);
   }
 }

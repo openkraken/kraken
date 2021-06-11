@@ -22,14 +22,14 @@ const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
 
-final Pointer<NativeFunction<Native_CanvasGetContext>> nativeGetContext =
+final Pointer<NativeFunction<NativeCanvasGetContext>> nativeGetContext =
     Pointer.fromFunction(CanvasElement._getContext);
 
 class RenderCanvasPaint extends RenderCustomPaint {
   @override
   bool get isRepaintBoundary => true;
 
-  RenderCanvasPaint({CustomPainter painter, Size preferredSize})
+  RenderCanvasPaint({required CustomPainter painter, required Size preferredSize})
       : super(
           painter: painter,
           foregroundPainter: null, // Ignore foreground painter
@@ -40,16 +40,16 @@ class RenderCanvasPaint extends RenderCustomPaint {
 class CanvasElement extends Element {
   final ChangeNotifier repaintNotifier = ChangeNotifier();
   /// The painter that paints before the children.
-  CanvasPainter painter;
+  late CanvasPainter painter;
 
   // The custom paint render object.
-  RenderCustomPaint renderCustomPaint;
+  RenderCustomPaint? renderCustomPaint;
 
-  static SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
+  static SplayTreeMap<int, CanvasElement> _nativeMap = SplayTreeMap();
 
   static CanvasElement getCanvasElementOfNativePtr(Pointer<NativeCanvasElement> nativeCanvasElement) {
-    CanvasElement canvasElement = _nativeMap[nativeCanvasElement.address];
-    assert(canvasElement != null, 'Can not get canvas element from nativeElement: $nativeCanvasElement');
+    CanvasElement? canvasElement = _nativeMap[nativeCanvasElement.address];
+    if (canvasElement == null) throw FlutterError('Can not get canvas element from nativeElement: $nativeCanvasElement');
     return canvasElement;
   }
 
@@ -57,7 +57,7 @@ class CanvasElement extends Element {
       Pointer<NativeCanvasElement> nativeCanvasElement, Pointer<NativeString> contextId) {
     CanvasElement canvasElement = getCanvasElementOfNativePtr(nativeCanvasElement);
     canvasElement.getContext(nativeStringToString(contextId));
-    return canvasElement.painter.context.nativeCanvasRenderingContext2D;
+    return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
   }
 
   final Pointer<NativeCanvasElement> nativeCanvasElement;
@@ -88,7 +88,7 @@ class CanvasElement extends Element {
       preferredSize: size,
     );
 
-    addChild(renderCustomPaint);
+    addChild(renderCustomPaint!);
     style.addStyleChangeListener(_styleChangedListener);
   }
 
@@ -114,7 +114,7 @@ class CanvasElement extends Element {
           context2d.viewportSize = viewportSize;
           painter.context = context2d;
         }
-        return painter.context;
+        return painter.context!;
       default:
         throw FlutterError('CanvasRenderingContext $contextId not supported!');
     }
@@ -126,12 +126,12 @@ class CanvasElement extends Element {
   /// If there's a child, this is ignored, and the size of the child is used
   /// instead.
   Size get size {
-    double width;
-    double height;
+    double? width;
+    double? height;
 
-    RenderStyle renderStyle = renderBoxModel.renderStyle;
-    double styleWidth = renderStyle.width;
-    double styleHeight = renderStyle.height;
+    RenderStyle renderStyle = renderBoxModel!.renderStyle;
+    double? styleWidth = renderStyle.width;
+    double? styleHeight = renderStyle.height;
 
     if (styleWidth != null) {
       width = styleWidth;
@@ -151,14 +151,14 @@ class CanvasElement extends Element {
       height = _attrWidth / width * _attrHeight;
     }
 
-    return Size(width, height);
+    return Size(width!, height!);
   }
 
   void resize() {
     if (renderCustomPaint != null) {
       // https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-set-bitmap-dimensions
       final Size paintingBounding = size;
-      renderCustomPaint.preferredSize = paintingBounding;
+      renderCustomPaint!.preferredSize = paintingBounding;
 
       // The intrinsic dimensions of the canvas element when it represents embedded content are
       // equal to the dimensions of the element’s bitmap.
@@ -166,12 +166,12 @@ class CanvasElement extends Element {
       // to the object-fit CSS property.
       // @TODO: CSS object-fit for canvas.
       // To fill (default value of object-fit) the bitmap content, use scale to get the same performed.
-      RenderStyle renderStyle = renderBoxModel.renderStyle;
-      double styleWidth = renderStyle.width;
-      double styleHeight = renderStyle.height;
+      RenderStyle renderStyle = renderBoxModel!.renderStyle;
+      double? styleWidth = renderStyle.width;
+      double? styleHeight = renderStyle.height;
 
-      double scaleX;
-      double scaleY;
+      double? scaleX;
+      double? scaleY;
       if (styleWidth != null) {
         scaleX = paintingBounding.width / _attrWidth;
       }
@@ -183,7 +183,7 @@ class CanvasElement extends Element {
           ..scaleX = scaleX
           ..scaleY = scaleY;
         if (painter.shouldRepaint(painter)) {
-          renderCustomPaint.markNeedsPaint();
+          renderCustomPaint!.markNeedsPaint();
         }
       }
     }
@@ -192,7 +192,7 @@ class CanvasElement extends Element {
   /// Element attribute width
   double _attrWidth = ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
   double get attrWidth => _attrWidth;
-  set attrWidth(double value) {
+  set attrWidth(double? value) {
     if (value != null && value != _attrWidth) {
       _attrWidth = value;
       resize();
@@ -202,14 +202,14 @@ class CanvasElement extends Element {
   /// Element attribute height
   double _attrHeight = ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
   double get attrHeight => _attrHeight;
-  set attrHeight(double value) {
+  set attrHeight(double? value) {
     if (value != null && value != _attrHeight) {
       _attrHeight = value;
       resize();
     }
   }
 
-  void _styleChangedListener(String key, String original, String present) {
+  void _styleChangedListener(String key, String? original, String present) {
     switch (key) {
       case 'width':
       case 'height':
@@ -224,7 +224,7 @@ class CanvasElement extends Element {
     _nativeMap.remove(nativeCanvasElement.address);
     // If not getContext and element is disposed that context is not existed.
     if (painter.context != null) {
-      painter.context.dispose();
+      painter.context!.dispose();
     }
   }
 

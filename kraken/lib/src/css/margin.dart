@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -13,19 +15,19 @@ class CSSMargin {
     this.isAuto,
   });
   /// length if margin value is length type
-  double length;
+  double? length;
   /// Whether value is auto
-  bool isAuto;
+  bool? isAuto;
 }
 
 mixin CSSMarginMixin on RenderStyleBase {
 
-  EdgeInsets _resolvedMargin;
+  EdgeInsets? _resolvedMargin;
 
   void _resolve() {
     if (_resolvedMargin != null) return;
     if (margin == null) return;
-    _resolvedMargin = margin.resolve(TextDirection.ltr);
+    _resolvedMargin = margin!.resolve(TextDirection.ltr);
   }
 
   void _markNeedResolution() {
@@ -36,9 +38,9 @@ mixin CSSMarginMixin on RenderStyleBase {
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
   /// must not be null.
-  EdgeInsets get margin => _margin;
-  EdgeInsets _margin;
-  set margin(EdgeInsets value) {
+  EdgeInsets? get margin => _margin;
+  EdgeInsets? _margin;
+  set margin(EdgeInsets? value) {
     if (value == null) return;
     if (_margin == value) return;
     _margin = value;
@@ -47,34 +49,34 @@ mixin CSSMarginMixin on RenderStyleBase {
 
   CSSMargin get marginTop {
     _resolve();
-    double length = _resolvedMargin != null ? _resolvedMargin.top : 0;
-    bool isAuto = style[MARGIN_TOP] == AUTO;
+    double length = _resolvedMargin != null ? _resolvedMargin!.top : 0;
+    bool isAuto = style![MARGIN_TOP] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   CSSMargin get marginRight {
     _resolve();
-    double length = _resolvedMargin != null ? _resolvedMargin.right : 0;
-    bool isAuto = style[MARGIN_RIGHT] == AUTO;
+    double length = _resolvedMargin != null ? _resolvedMargin!.right : 0;
+    bool isAuto = style![MARGIN_RIGHT] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   CSSMargin get marginBottom {
     _resolve();
-    double length = _resolvedMargin != null ? _resolvedMargin.bottom : 0;
-    bool isAuto = style[MARGIN_BOTTOM] == AUTO;
+    double length = _resolvedMargin != null ? _resolvedMargin!.bottom : 0;
+    bool isAuto = style![MARGIN_BOTTOM] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   CSSMargin get marginLeft {
     _resolve();
-    double length = _resolvedMargin != null ? _resolvedMargin.left : 0;
-    bool isAuto = style[MARGIN_LEFT] == AUTO;
+    double length = _resolvedMargin != null ? _resolvedMargin!.left : 0;
+    bool isAuto = style![MARGIN_LEFT] == AUTO;
     return CSSMargin(length: length, isAuto: isAuto);
   }
 
   void updateMargin(String property, double value, {bool shouldMarkNeedsLayout = true}) {
-    RenderStyle renderStyle = this;
+    RenderStyle renderStyle = this as RenderStyle;
 
     EdgeInsets prevMargin = renderStyle.margin ?? EdgeInsets.only(
       top: 0.0,
@@ -111,11 +113,11 @@ mixin CSSMarginMixin on RenderStyleBase {
     );
 
     if (shouldMarkNeedsLayout) {
-      renderBoxModel.markNeedsLayout();
+      renderBoxModel!.markNeedsLayout();
       // Sizing may affect parent size, mark parent as needsLayout in case
       // renderBoxModel has tight constraints which will prevent parent from marking.
-      if (renderBoxModel.parent is RenderBoxModel) {
-        (renderBoxModel.parent as RenderBoxModel).markNeedsLayout();
+      if (renderBoxModel!.parent is RenderBoxModel) {
+        (renderBoxModel!.parent as RenderBoxModel).markNeedsLayout();
       }
     }
   }

@@ -874,6 +874,8 @@ public:
 
   std::string tagName();
 
+  std::string getRegisteredTagName();
+
 private:
   friend JSElement;
   JSStringHolder m_tagName{context, ""};

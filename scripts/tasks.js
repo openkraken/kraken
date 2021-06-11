@@ -420,15 +420,10 @@ task('build-android-kraken-lib', (done) => {
   }
 
   const ndkDir = path.join(androidHome, 'ndk');
-  let installedNDK = fs.readdirSync(ndkDir).filter(d => d[0] != '.');
-  if (installedNDK.length == 0) {
-    throw new Error('Android NDK not Found. Please install one');
-  }
+  const ndkVersion = '21.4.7075529';
 
-  const ndkVersion = installedNDK.slice(-1)[0];
-
-  if (parseInt(ndkVersion.substr(0, 2)) < 20) {
-    throw new Error('Android NDK version must at least >= 20');
+  if (!fs.existsSync(path.join(ndkDir, ndkVersion))) {
+    throw new Error('Android NDK version (21.4.7075529) not installed.');
   }
 
   const archs = ['arm64-v8a', 'armeabi-v7a'];

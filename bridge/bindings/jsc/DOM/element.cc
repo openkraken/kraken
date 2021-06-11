@@ -71,6 +71,8 @@ JSValueRef JSElementAttributes::getAttribute(std::string &name) {
 void JSElementAttributes::setAttribute(std::string &name, JSValueRef value) {
   bool numberIndex = isNumberIndex(name);
 
+  JSValueProtect(ctx, value);
+
   if (numberIndex) {
     int64_t index = std::stoi(name);
 
@@ -95,7 +97,7 @@ bool JSElementAttributes::hasAttribute(std::string &name) {
 
 void JSElementAttributes::removeAttribute(std::string &name) {
   JSValueRef value = m_attributes[name];
-
+  JSValueUnprotect(ctx, value);
   auto index = std::find(v_attributes.begin(), v_attributes.end(), value);
   v_attributes.erase(index);
 
@@ -727,6 +729,10 @@ void ElementInstance::_beforeUpdateId(JSValueRef oldId, JSValueRef newId) {
   }
 }
 
+std::string ElementInstance::getRegisteredTagName() {
+  return m_tagName.string();
+}
+
 std::string ElementInstance::tagName() {
   std::string tagName = m_tagName.string();
   std::transform(tagName.begin(), tagName.end(), tagName.begin(), ::toupper);
@@ -765,6 +771,7 @@ BoundingClientRect::BoundingClientRect(JSContext *context, NativeBoundingClientR
   : HostObject(context, "BoundingClientRect"), nativeBoundingClientRect(boundingClientRect) {}
 
 JSValueRef ElementInstance::getStringValueProperty(std::string &name) {
+  getDartMethod()->flushUICommand();
   JSStringRef stringRef = JSStringCreateWithUTF8CString(name.c_str());
   NativeString *nativeString = stringRefToNativeString(stringRef);
   NativeString *returnedString = nativeElement->getStringValueProperty(nativeElement, nativeString);
