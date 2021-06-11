@@ -549,7 +549,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
     }
-    assert(mainAxisLimit != null);
     List<_RunMetrics> runMetrics = <_RunMetrics>[];
     double mainAxisExtent = 0.0;
     double crossAxisExtent = 0.0;
@@ -844,6 +843,8 @@ class RenderFlowLayout extends RenderLayoutBox {
             break;
           case TextAlign.justify:
             childBetweenSpace = runChildrenCount > 1 ? mainAxisFreeSpace / (runChildrenCount - 1) : 0.0;
+            break;
+          default:
             break;
         }
       }
