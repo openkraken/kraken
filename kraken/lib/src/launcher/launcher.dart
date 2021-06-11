@@ -24,6 +24,7 @@ void launch({
   bool? debugEnableInspector,
   Color background = _white,
   DevToolsService? devToolsService,
+  HttpClientInterceptor? httpClientInterceptor
 }) async {
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
@@ -39,10 +40,11 @@ void launch({
     }
 
     KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-        background: background,
-        showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-        methodChannel: KrakenNativeChannel(),
-        devToolsService: devToolsService
+      background: background,
+      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      methodChannel: KrakenNativeChannel(),
+      devToolsService: devToolsService,
+      httpClientInterceptor: httpClientInterceptor
     );
 
     controller.view.attachView(RendererBinding.instance!.renderView);
