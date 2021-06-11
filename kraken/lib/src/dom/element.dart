@@ -1176,12 +1176,12 @@ class Element extends Node
       // When renderer and style listener is not created when original display is none,
       // thus it needs to create renderer when style changed.
       if (originalDisplay == CSSDisplay.none && key == DISPLAY && value != NONE) {
-        RenderBox after;
+        RenderBox? after;
         Element parent = this.parent as Element;
         if (parent.scrollingContentLayoutBox != null) {
-          after = parent.scrollingContentLayoutBox!.lastChild!;
+          after = parent.scrollingContentLayoutBox!.lastChild;
         } else {
-          after = (parent.renderBoxModel as RenderLayoutBox).lastChild!;
+          after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
         }
         attachTo(parent, after: after);
       }
