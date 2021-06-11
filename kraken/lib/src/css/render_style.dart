@@ -89,35 +89,33 @@ class RenderStyle
 
     /// Percentage sizing, margin and padding starts from the edge of content box of containing block
     /// Update sizing
-    if (parentContentWidth != null) {
-      double relativeParentWidth = childParentData.isPositioned ? parentPaddingBoxWidth : parentContentBoxWidth;
+    double relativeParentWidth = childParentData.isPositioned ? parentPaddingBoxWidth : parentContentBoxWidth;
 
-      if (CSSLength.isPercentage(style![WIDTH])) {
-        updateSizing(
-          WIDTH,
-          relativeParentWidth * CSSLength.parsePercentage(style![WIDTH]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    if (CSSLength.isPercentage(style![WIDTH])) {
+      updateSizing(
+        WIDTH,
+        relativeParentWidth * CSSLength.parsePercentage(style![WIDTH]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
 
-      if (CSSLength.isPercentage(style![MIN_WIDTH])) {
-        updateSizing(
-          MIN_WIDTH,
-          relativeParentWidth * CSSLength.parsePercentage(style![MIN_WIDTH]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    if (CSSLength.isPercentage(style![MIN_WIDTH])) {
+      updateSizing(
+        MIN_WIDTH,
+        relativeParentWidth * CSSLength.parsePercentage(style![MIN_WIDTH]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
 
-      if (CSSLength.isPercentage(style![MAX_WIDTH])) {
-        updateSizing(
-          MAX_WIDTH,
-          relativeParentWidth * CSSLength.parsePercentage(style![MAX_WIDTH]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    if (CSSLength.isPercentage(style![MAX_WIDTH])) {
+      updateSizing(
+        MAX_WIDTH,
+        relativeParentWidth * CSSLength.parsePercentage(style![MAX_WIDTH]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
     }
 
     if (parentContentHeight != null) {
@@ -152,83 +150,80 @@ class RenderStyle
     }
 
     /// Percentage of padding and margin refer to the logical width of containing block
-    if (parentContentWidth != null) {
-      /// Update padding
-      /// https://www.w3.org/TR/css-box-3/#padding-physical
-      double relativeParentWidth = childParentData.isPositioned ? parentPaddingBoxWidth : parentContentBoxWidth;
-      if (CSSLength.isPercentage(style![PADDING_TOP])) {
-        updatePadding(
-          PADDING_TOP,
-          relativeParentWidth * CSSLength.parsePercentage(style![PADDING_TOP]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    /// Update padding
+    /// https://www.w3.org/TR/css-box-3/#padding-physical
+    if (CSSLength.isPercentage(style![PADDING_TOP])) {
+      updatePadding(
+        PADDING_TOP,
+        relativeParentWidth * CSSLength.parsePercentage(style![PADDING_TOP]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
 
-      if (CSSLength.isPercentage(style![PADDING_RIGHT])) {
-        updatePadding(
-          PADDING_RIGHT,
-          relativeParentWidth * CSSLength.parsePercentage(style![PADDING_RIGHT]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    if (CSSLength.isPercentage(style![PADDING_RIGHT])) {
+      updatePadding(
+        PADDING_RIGHT,
+        relativeParentWidth * CSSLength.parsePercentage(style![PADDING_RIGHT]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
 
-      if (CSSLength.isPercentage(style![PADDING_BOTTOM])) {
-        updatePadding(
-          PADDING_BOTTOM,
-          relativeParentWidth * CSSLength.parsePercentage(style![PADDING_BOTTOM]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    if (CSSLength.isPercentage(style![PADDING_BOTTOM])) {
+      updatePadding(
+        PADDING_BOTTOM,
+        relativeParentWidth * CSSLength.parsePercentage(style![PADDING_BOTTOM]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
 
-      if (CSSLength.isPercentage(style![PADDING_LEFT])) {
-        updatePadding(
-          PADDING_LEFT,
-          relativeParentWidth * CSSLength.parsePercentage(style![PADDING_LEFT]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    if (CSSLength.isPercentage(style![PADDING_LEFT])) {
+      updatePadding(
+        PADDING_LEFT,
+        relativeParentWidth * CSSLength.parsePercentage(style![PADDING_LEFT]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
 
-      /// Update margin
-      /// https://www.w3.org/TR/css-box-3/#margin-physical
-      if (CSSLength.isPercentage(style![MARGIN_TOP])) {
-        updateMargin(
-          MARGIN_TOP,
-          relativeParentWidth * CSSLength.parsePercentage(style![MARGIN_TOP]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    /// Update margin
+    /// https://www.w3.org/TR/css-box-3/#margin-physical
+    if (CSSLength.isPercentage(style![MARGIN_TOP])) {
+      updateMargin(
+        MARGIN_TOP,
+        relativeParentWidth * CSSLength.parsePercentage(style![MARGIN_TOP]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
 
-      if (CSSLength.isPercentage(style![MARGIN_RIGHT])) {
-        updateMargin(
-          MARGIN_RIGHT,
-          relativeParentWidth * CSSLength.parsePercentage(style![MARGIN_RIGHT]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    if (CSSLength.isPercentage(style![MARGIN_RIGHT])) {
+      updateMargin(
+        MARGIN_RIGHT,
+        relativeParentWidth * CSSLength.parsePercentage(style![MARGIN_RIGHT]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
 
-      if (CSSLength.isPercentage(style![MARGIN_BOTTOM])) {
-        updateMargin(
-          MARGIN_BOTTOM,
-          relativeParentWidth * CSSLength.parsePercentage(style![MARGIN_BOTTOM]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    if (CSSLength.isPercentage(style![MARGIN_BOTTOM])) {
+      updateMargin(
+        MARGIN_BOTTOM,
+        relativeParentWidth * CSSLength.parsePercentage(style![MARGIN_BOTTOM]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
+    }
 
-      if (CSSLength.isPercentage(style![MARGIN_LEFT])) {
-        updateMargin(
-          MARGIN_LEFT,
-          relativeParentWidth * CSSLength.parsePercentage(style![MARGIN_LEFT]),
-          shouldMarkNeedsLayout: false
-        );
-        isPercentageExist = true;
-      }
+    if (CSSLength.isPercentage(style![MARGIN_LEFT])) {
+      updateMargin(
+        MARGIN_LEFT,
+        relativeParentWidth * CSSLength.parsePercentage(style![MARGIN_LEFT]),
+        shouldMarkNeedsLayout: false
+      );
+      isPercentageExist = true;
     }
 
     /// Update offset

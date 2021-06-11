@@ -143,7 +143,7 @@ class RenderTextBox extends RenderBox
         } else {
           maxConstraintWidth = RenderBoxModel.getMaxConstraintWidth(parentRenderBoxModel);
         }
-      } else if (parentConstraints.maxWidth != null) {
+      } else {
         EdgeInsets? borderEdge = parentRenderBoxModel.renderStyle.borderEdge;
         EdgeInsetsGeometry? padding = parentRenderBoxModel.renderStyle.padding;
         double horizontalBorderLength = borderEdge != null ? borderEdge.horizontal : 0;
