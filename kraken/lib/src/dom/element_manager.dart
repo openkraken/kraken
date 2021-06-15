@@ -34,8 +34,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_START, uniqueId: id);
     }
-    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-    EventTarget eventTarget = controller.view.getEventTargetById(id);
+    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
+    EventTarget? eventTarget = controller.view.getEventTargetById(id);
     if (eventTarget == null) return;
     eventTarget.dispose();
 
@@ -55,12 +55,12 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
 
-  RenderViewportBox viewport;
-  Document document;
-  RenderObject _viewportRenderObject;
-  Element viewportElement;
+  late final RenderViewportBox viewport;
+  late final Document document;
+  late final RenderBox _viewportRenderObject;
+  late final Element viewportElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
-  bool showPerformanceOverlayOverride;
+  bool? showPerformanceOverlayOverride;
   KrakenController controller;
 
   double get viewportWidth => viewport.viewportSize.width;
@@ -70,13 +70,13 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   final List<VoidCallback> _detachCallbacks = [];
 
-  ElementManager({this.contextId, this.viewport, this.controller, this.showPerformanceOverlayOverride}) {
+  ElementManager({required this.contextId, required this.viewport, required this.controller, this.showPerformanceOverlayOverride = false}) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
     }
 
-    Element documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId], this);
+    HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
     setEventTarget(documentElement);
 
     viewportElement = documentElement;
@@ -89,10 +89,11 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     _setupObserver();
 
-    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this, viewportElement);
+    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId]!, this, viewportElement);
     setEventTarget(window);
 
-    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId], this, documentElement);
+    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
+    document.appendChild(documentElement);
     setEventTarget(document);
 
     element_registry.defineBuiltInElements();
@@ -100,23 +101,22 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void _setupObserver() {
     if (ElementsBinding.instance != null) {
-      ElementsBinding.instance.addObserver(this);
+      ElementsBinding.instance!.addObserver(this);
     } else if (WidgetsBinding.instance != null) {
-      WidgetsBinding.instance.addObserver(this);
+      WidgetsBinding.instance!.addObserver(this);
     }
   }
 
   void _teardownObserver() {
     if (ElementsBinding.instance != null) {
-      ElementsBinding.instance.removeObserver(this);
+      ElementsBinding.instance!.removeObserver(this);
     } else if (WidgetsBinding.instance != null) {
-      WidgetsBinding.instance.removeObserver(this);
+      WidgetsBinding.instance!.removeObserver(this);
     }
   }
 
-  T getEventTargetByTargetId<T>(int targetId) {
-    assert(targetId != null);
-    EventTarget target = _eventTargets[targetId];
+  T? getEventTargetByTargetId<T>(int targetId) {
+    EventTarget? target = _eventTargets[targetId];
     if (target is T)
       return target as T;
     else
@@ -128,8 +128,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void removeTarget(EventTarget target) {
-    assert(target.targetId != null);
-    // FIXME: when the shadow scrollingElement dispose that has not targetId
     if (_eventTargets.containsKey(target.targetId)) {
       _eventTargets.remove(target.targetId);
     }
@@ -140,7 +138,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void setEventTarget(EventTarget target) {
-    assert(target != null);
     _eventTargets[target.targetId] = target;
   }
 
@@ -150,7 +147,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   Element createElement(
-      int id, Pointer nativePtr, String type, Map<String, dynamic> props, List<String> events) {
+      int id, Pointer nativePtr, String type, Map<String, dynamic>? props, List<String>? events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<String> eventList;
@@ -172,13 +169,13 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
-    EventTarget comment = Comment(targetId: id, nativeCommentNodePtr: nativePtr, data: data, elementManager: this);
+    EventTarget comment = Comment(id, nativePtr, this, data);
     setEventTarget(comment);
   }
 
   void cloneNode(int oldId, int newId) {
-    Element oldTarget = getEventTargetByTargetId<Element>(oldId);
-    Element newTarget = getEventTargetByTargetId<Element>(newId);
+    Element oldTarget = getEventTargetByTargetId<Element>(oldId)!;
+    Element newTarget = getEventTargetByTargetId<Element>(newId)!;
 
     newTarget.style = oldTarget.style.clone(newTarget);
     newTarget.properties.clear();
@@ -190,8 +187,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   void removeNode(int targetId) {
     assert(existsTarget(targetId), 'targetId: $targetId');
 
-    Node target = getEventTargetByTargetId<Node>(targetId);
-    assert(target != null);
+    Node target = getEventTargetByTargetId<Node>(targetId)!;
 
     // Should detach renderObject.
     target.detach();
@@ -203,8 +199,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void setProperty(int targetId, String key, dynamic value) {
     assert(existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
-    Node target = getEventTargetByTargetId<Node>(targetId);
-    assert(target != null);
+    Node target = getEventTargetByTargetId<Node>(targetId)!;
 
     if (target is Element) {
       // Only Element has properties.
@@ -218,8 +213,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   dynamic getProperty(int targetId, String key) {
     assert(existsTarget(targetId), 'targetId: $targetId key: $key');
-    Node target = getEventTargetByTargetId<Node>(targetId);
-    assert(target != null);
+    Node target = getEventTargetByTargetId<Node>(targetId)!;
 
     if (target is Element) {
       // Only Element has properties
@@ -233,8 +227,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void removeProperty(int targetId, String key) {
     assert(existsTarget(targetId), 'targetId: $targetId key: $key');
-    Node target = getEventTargetByTargetId<Node>(targetId);
-    assert(target != null);
+    Node target = getEventTargetByTargetId<Node>(targetId)!;
 
     if (target is Element) {
       target.removeProperty(key);
@@ -247,8 +240,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void setStyle(int targetId, String key, dynamic value) {
     assert(existsTarget(targetId), 'id: $targetId key: $key value: $value');
-    Node target = getEventTargetByTargetId<Node>(targetId);
-    assert(target != null);
+    Node? target = getEventTargetByTargetId<Node>(targetId);
+    if (target == null) return;
 
     if (target is Element) {
       target.setStyle(key, value);
@@ -268,12 +261,13 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     assert(existsTarget(targetId), 'targetId: $targetId position: $position newTargetId: $newTargetId');
     assert(existsTarget(newTargetId), 'newTargetId: $newTargetId position: $position');
 
-    Node target = getEventTargetByTargetId<Node>(targetId);
-    Node newNode = getEventTargetByTargetId<Node>(newTargetId);
+    Node target = getEventTargetByTargetId<Node>(targetId)!;
+    Node newNode = getEventTargetByTargetId<Node>(newTargetId)!;
+    Node? targetParentNode = target.parentNode;
 
     switch (position) {
       case 'beforebegin':
-        target?.parentNode?.insertBefore(newNode, target);
+        targetParentNode!.insertBefore(newNode, target);
         break;
       case 'afterbegin':
         target.insertBefore(newNode, target.firstChild);
@@ -282,12 +276,12 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
         target.appendChild(newNode);
         break;
       case 'afterend':
-        if (target.parentNode.lastChild == target) {
-          target.parentNode.appendChild(newNode);
+        if (targetParentNode!.lastChild == target) {
+          targetParentNode.appendChild(newNode);
         } else {
-          target.parentNode.insertBefore(
+          targetParentNode.insertBefore(
             newNode,
-            target.parentNode.childNodes[target.parentNode.childNodes.indexOf(target) + 1],
+            targetParentNode.childNodes[targetParentNode.childNodes.indexOf(target) + 1],
           );
         }
 
@@ -299,8 +293,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   void addEvent(int targetId, String eventType) {
     assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
-    EventTarget target = getEventTargetByTargetId<EventTarget>(targetId);
-    assert(target != null);
+    EventTarget target = getEventTargetByTargetId<EventTarget>(targetId)!;
 
     target.addEvent(eventType);
   }
@@ -308,27 +301,24 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   void removeEvent(int targetId, String eventType) {
     assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
 
-    Element target = getEventTargetByTargetId<Element>(targetId);
-    assert(target != null);
+    Element target = getEventTargetByTargetId<Element>(targetId)!;
 
     target.removeEvent(eventType);
   }
 
-  RenderObject getRootRenderObject() {
+  RenderBox getRootRenderBox() {
     return _viewportRenderObject;
   }
 
   bool showPerformanceOverlay = false;
 
-  RenderBox buildRenderBox({bool showPerformanceOverlay}) {
-    if (showPerformanceOverlay != null) {
-      this.showPerformanceOverlay = showPerformanceOverlay;
-    }
+  RenderBox buildRenderBox({bool showPerformanceOverlay = false}) {
+    this.showPerformanceOverlay = showPerformanceOverlay;
 
-    RenderBox renderBox = getRootRenderObject();
+    RenderBox renderBox = getRootRenderBox();
 
     // We need to add PerformanceOverlay of it's needed.
-    if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride;
+    if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride!;
 
     if (showPerformanceOverlay) {
       RenderPerformanceOverlay renderPerformanceOverlay =
@@ -355,7 +345,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     return renderBox;
   }
 
-  void attach(RenderObject parent, RenderObject previousSibling, {bool showPerformanceOverlay}) {
+  void attach(RenderObject parent, RenderObject? previousSibling, {bool showPerformanceOverlay = false}) {
     RenderObject root = buildRenderBox(showPerformanceOverlay: showPerformanceOverlay);
 
     if (parent is ContainerRenderObjectMixin) {
@@ -366,7 +356,7 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   }
 
   void detach() {
-    RenderObject parent = _viewportRenderObject.parent;
+    RenderObject? parent = _viewportRenderObject.parent as RenderObject?;
 
     if (parent == null) return;
 
@@ -378,23 +368,20 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       callback();
     }
     _detachCallbacks.clear();
-
-    viewportElement = null;
-    document = null;
   }
 
   // Hooks for DevTools.
-  VoidCallback debugDOMTreeChanged;
+  VoidCallback? debugDOMTreeChanged;
   void _debugDOMTreeChanged() {
-    if (debugDOMTreeChanged != null) {
-      debugDOMTreeChanged();
+    VoidCallback? f = debugDOMTreeChanged;
+    if (f != null) {
+      f();
     }
   }
 
   void dispose() {
     _teardownObserver();
     debugDOMTreeChanged = null;
-    controller = null;
   }
 
   @override
@@ -404,36 +391,35 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   @override
-  void didChangeLocales(List<Locale> locale) { }
+  void didChangeLocales(List<Locale>? locale) { }
 
   WindowPadding _prevViewInsets = window.viewInsets;
 
   @override
   void didChangeMetrics() {
-    if (viewport != null) {
-      double bottomInset = window.viewInsets.bottom / window.devicePixelRatio;
-      if (_prevViewInsets.bottom > window.viewInsets.bottom) {
-        // Hide keyboard
-        viewport.bottomInset = bottomInset;
-      } else {
-        bool shouldScrollByToCenter = false;
-        if (InputElement.focusInputElement != null) {
-          RenderBox renderer = InputElement.focusInputElement.renderer;
-          if (renderer.hasSize) {
-            Offset focusOffset = renderer.localToGlobal(Offset.zero);
-            // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
-            if (focusOffset.dy > viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
-              shouldScrollByToCenter = true;
-            }
+    double bottomInset = window.viewInsets.bottom / window.devicePixelRatio;
+    if (_prevViewInsets.bottom > window.viewInsets.bottom) {
+      // Hide keyboard
+      viewport.bottomInset = bottomInset;
+    } else {
+      bool shouldScrollByToCenter = false;
+      InputElement? focusInputElement = InputElement.focusInputElement;
+      if (focusInputElement != null) {
+        RenderBox? renderer = focusInputElement.renderer as RenderBox?;
+        if (renderer != null && renderer.hasSize) {
+          Offset focusOffset = renderer.localToGlobal(Offset.zero);
+          // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
+          if (focusOffset.dy > viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
+            shouldScrollByToCenter = true;
           }
         }
-        // Show keyboard
-        viewport.bottomInset = bottomInset;
-        if (shouldScrollByToCenter) {
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            viewportElement.scrollBy(dy: bottomInset);
-          });
-        }
+      }
+      // Show keyboard
+      viewport.bottomInset = bottomInset;
+      if (shouldScrollByToCenter) {
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
+          viewportElement.scrollBy(dy: bottomInset);
+        });
       }
     }
     _prevViewInsets = window.viewInsets;

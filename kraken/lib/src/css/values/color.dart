@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -226,8 +228,7 @@ class CSSColor {
     return color == CURRENT_COLOR || parseColor(color) != null;
   }
 
-  static Color parseColor(String color) {
-    if (color == null) return null;
+  static Color? parseColor(String color) {
     color = color.trim().toLowerCase();
 
     if (color == TRANSPARENT) {
@@ -236,11 +237,11 @@ class CSSColor {
       return _cachedColor[color];
     }
 
-    Color parsed;
+    Color? parsed;
     if (color.startsWith('#')) {
       final hexMatch = _colorHexRegExp.firstMatch(color);
       if (hexMatch != null) {
-        final hex = hexMatch[1].toUpperCase();
+        final hex = hexMatch[1]!.toUpperCase();
         // https://drafts.csswg.org/css-color-4/#hex-notation
         switch (hex.length) {
           case 3:
@@ -264,10 +265,10 @@ class CSSColor {
     } else if (color.startsWith(RGB)) {
       final rgbMatch = _colorRgbRegExp.firstMatch(color);
       if (rgbMatch != null) {
-        final double rgbR = _parseColorPart(rgbMatch[2], 0, 255);
-        final double rgbG = _parseColorPart(rgbMatch[3], 0, 255);
-        final double rgbB = _parseColorPart(rgbMatch[4], 0, 255);
-        final double rgbO = rgbMatch[6] != null ? _parseColorPart(rgbMatch[6], 0, 1) : 1;
+        final double? rgbR = _parseColorPart(rgbMatch[2]!, 0, 255);
+        final double? rgbG = _parseColorPart(rgbMatch[3]!, 0, 255);
+        final double? rgbB = _parseColorPart(rgbMatch[4]!, 0, 255);
+        final double? rgbO = rgbMatch[6] != null ? _parseColorPart(rgbMatch[6]!, 0, 1) : 1;
         if (rgbR != null && rgbG != null && rgbB != null && rgbO != null) {
           parsed = Color.fromRGBO(rgbR.round(), rgbG.round(), rgbB.round(), rgbO);
         }
@@ -275,16 +276,16 @@ class CSSColor {
     } else if (color.startsWith(HSL)) {
       final hslMatch = _colorHslRegExp.firstMatch(color);
       if (hslMatch != null) {
-        final hslH = _parseColorHue(hslMatch[2], hslMatch[3]);
-        final hslS = _parseColorPart(hslMatch[4], 0, 1);
-        final hslL = _parseColorPart(hslMatch[5], 0, 1);
-        final hslA = hslMatch[7] != null ? _parseColorPart(hslMatch[7], 0, 1) : 1;
+        final hslH = _parseColorHue(hslMatch[2]!, hslMatch[3]);
+        final hslS = _parseColorPart(hslMatch[4]!, 0, 1);
+        final hslL = _parseColorPart(hslMatch[5]!, 0, 1);
+        final hslA = hslMatch[7] != null ? _parseColorPart(hslMatch[7]!, 0, 1) : 1;
         if (hslH != null && hslS != null && hslL != null && hslA != null) {
-          parsed = HSLColor.fromAHSL(hslA, hslH, hslS, hslL).toColor();
+          parsed = HSLColor.fromAHSL(hslA as double, hslH, hslS, hslL).toColor();
         }
       }
     } else if (_namedColors.containsKey(color)) {
-      parsed = Color(_namedColors[color]);
+      parsed = Color(_namedColors[color]!);
     }
 
     if (parsed != null) {
@@ -294,7 +295,7 @@ class CSSColor {
     return parsed;
   }
 
-  Color value;
+  Color? value;
 }
 
 /// A color in the CIELAB color space.
@@ -428,8 +429,8 @@ String _x2(String value) {
   return sb.toString();
 }
 
-double _parseColorPart(String value, double min, double max) {
-  double v;
+double? _parseColorPart(String value, double min, double max) {
+  double? v;
 
   if (value.endsWith('%')) {
     final p = double.tryParse(value.substring(0, value.length - 1));
@@ -439,10 +440,10 @@ double _parseColorPart(String value, double min, double max) {
 
   v ??= double.tryParse(value);
 
-  return v < min ? min : (v > max ? max : v);
+  return v! < min ? min : (v > max ? max : v);
 }
 
-double _parseColorHue(String number, String unit) {
+double? _parseColorHue(String number, String? unit) {
   final v = double.tryParse(number);
   if (v == null) return null;
 

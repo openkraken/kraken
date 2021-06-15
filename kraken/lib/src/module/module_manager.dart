@@ -3,19 +3,18 @@ import 'package:kraken/bridge.dart' as bridge;
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/src/module/navigator.dart';
 
 abstract class BaseModule {
   String get name;
-  final ModuleManager moduleManager;
+  final ModuleManager? moduleManager;
   BaseModule(this.moduleManager);
   String invoke(String method, dynamic params, InvokeModuleCallback callback);
   void dispose();
 }
 
-typedef InvokeModuleCallback = void Function({String errmsg, dynamic data});
+typedef InvokeModuleCallback = void Function({String ?error, dynamic data});
 typedef NewModuleCreator = BaseModule Function(ModuleManager);
-typedef ModuleCreator = BaseModule Function(ModuleManager moduleNamager);
+typedef ModuleCreator = BaseModule Function(ModuleManager? moduleNamager);
 
 class ModuleManager {
   final int contextId;
@@ -27,14 +26,13 @@ class ModuleManager {
 
   ModuleManager(this.controller, this.contextId) {
     if (!inited) {
-      defineModule((moduleManager) => AsyncStorageModule(moduleManager));
-      defineModule((moduleManager) => ClipBoardModule(moduleManager));
-      defineModule((moduleManager) => ConnectionModule(moduleManager));
-      defineModule((moduleManager) => DeviceInfoModule(moduleManager));
-      defineModule((moduleManager) => FetchModule(moduleManager));
-      defineModule((moduleManager) => MethodChannelModule(moduleManager));
-      defineModule((moduleManager) => NavigationModule(moduleManager));
-      defineModule((moduleManager) => NavigatorModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => AsyncStorageModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => ClipBoardModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => ConnectionModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => DeviceInfoModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => FetchModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => MethodChannelModule(moduleManager));
+      defineModule((ModuleManager? moduleManager) => NavigationModule(moduleManager));
       inited = true;
     }
   }
@@ -48,20 +46,21 @@ class ModuleManager {
     _creatorMap[fakeModule.name] = moduleCreator;
   }
 
-  void emitModuleEvent(String moduleName, {Event event, Object data}) {
+  void emitModuleEvent(String moduleName, {Event? event, Object? data}) {
     bridge.emitModuleEvent(contextId, moduleName, event, jsonEncode(data));
   }
 
   String invokeModule(String moduleName, String method, dynamic params, InvokeModuleCallback callback) {
-    if (!_creatorMap.containsKey(moduleName)) {
+    ModuleCreator? creator = _creatorMap[moduleName];
+    if (creator == null) {
       throw Exception('ModuleManager: Can not find module of name: $moduleName');
     }
 
     if (!_moduleMap.containsKey(moduleName)) {
-      _moduleMap[moduleName] = _creatorMap[moduleName](this);
+      _moduleMap[moduleName] = creator(this);
     }
 
-    BaseModule module = _moduleMap[moduleName];
+    BaseModule module = _moduleMap[moduleName]!;
     return module.invoke(method, params, callback);
   }
 
