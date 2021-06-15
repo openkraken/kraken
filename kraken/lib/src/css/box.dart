@@ -49,6 +49,26 @@ mixin CSSBoxMixin on RenderStyleBase {
     _backgroundImage = value;
   }
 
+  /// Background-position-x
+  CSSStylePosition get backgroundPositionX => _backgroundPositionX;
+  CSSStylePosition _backgroundPositionX = CSSStylePosition(percentage: -1);
+  set backgroundPositionX(CSSStylePosition? value) {
+    if (value == null) return;
+    if (value == _backgroundPositionX) return;
+    _backgroundPositionX = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Background-position-y
+  CSSStylePosition get backgroundPositionY => _backgroundPositionY;
+  CSSStylePosition _backgroundPositionY = CSSStylePosition(percentage: -1);
+  set backgroundPositionY(CSSStylePosition? value) {
+    if (value == null) return;
+    if (value == _backgroundPositionY) return;
+    _backgroundPositionY = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
   /// Background-attachment
   String? get backgroundAttachment => _backgroundAttachment;
   String? _backgroundAttachment;
@@ -155,8 +175,12 @@ mixin CSSBoxMixin on RenderStyleBase {
         renderStyle.backgroundOrigin = getBackgroundOrigin(present);
       } else if (property == BACKGROUND_COLOR) {
         updateBackgroundColor();
+      } else if (property == BACKGROUND_POSITION_X) {
+        backgroundPositionX = CSSPosition.parsePosition(present, viewportSize, true);
+      } else if (property == BACKGROUND_POSITION_Y) {
+        backgroundPositionY = CSSPosition.parsePosition(present, viewportSize, false);
       } else if (property.startsWith(BACKGROUND)) {
-        // Including BACKGROUND_REPEAT, BACKGROUND_POSITION, BACKGROUND_IMAGE,
+        // Including BACKGROUND_REPEAT, BACKGROUND_IMAGE,
         //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.
         updateBackgroundImage(property, present);
       } else if (property.startsWith(BORDER)) {

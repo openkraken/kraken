@@ -1,8 +1,24 @@
 
 
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 import 'package:flutter/painting.dart';
+import 'package:kraken/css.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
+
+class CSSStylePosition {
+  CSSStylePosition({
+    this.length,
+    this.percentage,
+  });
+  /// Absolute position to image container when length type is set.
+  double? length;
+  /// Relative position to image container when keyword or percentage type is set.
+  double? percentage;
+}
 
 /// CSS Values and Units: https://drafts.csswg.org/css-values-3/#position
 /// The <position> value specifies the position of a object area
@@ -19,54 +35,40 @@ class CSSPosition {
   // [0, 1]
   static Alignment initial = Alignment.topLeft; // default value.
 
-  static Alignment? parsePosition(String input) {
-    String normalized = input.trim();
-    if (normalized.isEmpty) return initial;
-
-    Alignment? parsed;
-    List<String> split = normalized.split(_splitRegExp);
-
-    if (split.length == 1) {
-      // If one value is set, another value should be center(0).
-      double dx = _getValueX(split.first, initial: 0);
-      double dy = _getValueY(split.first, initial: 0);
-      parsed = Alignment(dx, dy);
-    } else if (split.length == 2) {
-      parsed = Alignment(_getValueX(split.first), _getValueY(split.last));
+  static CSSStylePosition parsePosition(String input, Size viewportSize, bool isHorizontal) {
+    if (CSSLength.isPercentage(input)) {
+      return CSSStylePosition(percentage: _gatValuePercentage(input));
+    } else if (CSSLength.isLength(input)) {
+      return CSSStylePosition(length: CSSLength.toDisplayPortValue(input, viewportSize));
+    } else {
+      if (isHorizontal) {
+        switch (input) {
+          case LEFT:
+            return CSSStylePosition(percentage: -1);
+          case RIGHT:
+            return CSSStylePosition(percentage: 1);
+          case CENTER:
+            return CSSStylePosition(percentage: 0);
+          default:
+            return CSSStylePosition(percentage: -1);
+        }
+      } else {
+        switch (input) {
+          case TOP:
+            return CSSStylePosition(percentage: -1);
+          case BOTTOM:
+            return CSSStylePosition(percentage: 1);
+          case CENTER:
+            return CSSStylePosition(percentage: 0);
+          default:
+            return CSSStylePosition(percentage: -1);
+        }
+      }
     }
-    return parsed;
   }
 
   static double? _gatValuePercentage(String input) {
-    if (input.endsWith('%')) {
-      var percentageValue = input.substring(0, input.length - 1);
-      return (double.tryParse(percentageValue) ?? 0) / 50 - 1;
-    } else {
-      return null;
-    }
-  }
-
-  static double _getValueX(String input, {double initial = -1}) {
-    switch (input) {
-      case LEFT:
-        return -1;
-      case RIGHT:
-        return 1;
-      case CENTER:
-        return 0;
-    }
-    return _gatValuePercentage(input) ?? initial;
-  }
-
-  static double _getValueY(String input, {double initial = 1}) {
-    switch (input) {
-      case TOP:
-        return -1;
-      case BOTTOM:
-        return 1;
-      case CENTER:
-        return 0;
-    }
-    return _gatValuePercentage(input) ?? initial;
+    var percentageValue = input.substring(0, input.length - 1);
+    return (double.tryParse(percentageValue) ?? 0) / 50 - 1;
   }
 }

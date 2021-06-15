@@ -373,7 +373,6 @@ class BoxDecorationPainter extends BoxPainter {
       canvas.save();
       canvas.clipPath(clipPath);
     }
-
     _paintImage(
       canvas: canvas,
       rect: rect,
@@ -382,7 +381,8 @@ class BoxDecorationPainter extends BoxPainter {
       scale: decorationImage.scale * _image!.scale,
       colorFilter: decorationImage.colorFilter,
       fit: decorationImage.fit,
-      alignment: decorationImage.alignment.resolve(configuration.textDirection),
+      positionX: renderStyle.backgroundPositionX,
+      positionY: renderStyle.backgroundPositionY,
       centerSlice: decorationImage.centerSlice,
       repeat: decorationImage.repeat,
       flipHorizontally: flipHorizontally,
@@ -426,73 +426,9 @@ class BoxDecorationPainter extends BoxPainter {
   }
 
   /// Paints an image into the given rectangle on the canvas.
-  ///
-  /// The arguments have the following meanings:
-  ///
-  ///  * `canvas`: The canvas onto which the image will be painted.
-  ///
-  ///  * `rect`: The region of the canvas into which the image will be painted.
-  ///    The image might not fill the entire rectangle (e.g., depending on the
-  ///    `fit`). If `rect` is empty, nothing is painted.
-  ///
-  ///  * `image`: The image to paint onto the canvas.
-  ///
-  ///  * `scale`: The number of image pixels for each logical pixel.
-  ///
-  ///  * `colorFilter`: If non-null, the color filter to apply when painting the
-  ///    image.
-  ///
-  ///  * `fit`: How the image should be inscribed into `rect`. If null, the
-  ///    default behavior depends on `centerSlice`. If `centerSlice` is also null,
-  ///    the default behavior is [BoxFit.scaleDown]. If `centerSlice` is
-  ///    non-null, the default behavior is [BoxFit.fill]. See [BoxFit] for
-  ///    details.
-  ///
-  ///  * `alignment`: How the destination rectangle defined by applying `fit` is
-  ///    aligned within `rect`. For example, if `fit` is [BoxFit.contain] and
-  ///    `alignment` is [Alignment.bottomRight], the image will be as large
-  ///    as possible within `rect` and placed with its bottom right corner at the
-  ///    bottom right corner of `rect`. Defaults to [Alignment.center].
-  ///
-  ///  * `centerSlice`: The image is drawn in nine portions described by splitting
-  ///    the image by drawing two horizontal lines and two vertical lines, where
-  ///    `centerSlice` describes the rectangle formed by the four points where
-  ///    these four lines intersect each other. (This forms a 3-by-3 grid
-  ///    of regions, the center region being described by `centerSlice`.)
-  ///    The four regions in the corners are drawn, without scaling, in the four
-  ///    corners of the destination rectangle defined by applying `fit`. The
-  ///    remaining five regions are drawn by stretching them to fit such that they
-  ///    exactly cover the destination rectangle while maintaining their relative
-  ///    positions.
-  ///
-  ///  * `repeat`: If the image does not fill `rect`, whether and how the image
-  ///    should be repeated to fill `rect`. By default, the image is not repeated.
-  ///    See [ImageRepeat] for details.
-  ///
-  ///  * `flipHorizontally`: Whether to flip the image horizontally. This is
-  ///    occasionally used with images in right-to-left environments, for images
-  ///    that were designed for left-to-right locales (or vice versa). Be careful,
-  ///    when using this, to not flip images with integral shadows, text, or other
-  ///    effects that will look incorrect when flipped.
-  ///
-  ///  * `invertColors`: Inverting the colors of an image applies a new color
-  ///    filter to the paint. If there is another specified color filter, the
-  ///    invert will be applied after it. This is primarily used for implementing
-  ///    smart invert on iOS.
-  ///
-  ///  * `filterQuality`: Use this to change the quality when scaling an image.
-  ///     Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
-  ///     bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
-  ///     to nearest-neighbor.
-  ///
-  /// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, `flipHorizontally` and `filterQuality`
-  /// arguments must not be null.
-  ///
-  /// See also:
-  ///
-  ///  * [paintBorder], which paints a border around a rectangle on a canvas.
-  ///  * [DecorationImage], which holds a configuration for calling this function.
-  ///  * [BoxDecoration], which uses this function to paint a [DecorationImage].
+  /// Migrated paintImage method from flutter.
+  /// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L419
+  /// Add positionX and positionY parameter to add the ability to specify absolute position of background image.
   void _paintImage({
     required Canvas canvas,
     required Rect rect,
@@ -501,7 +437,8 @@ class BoxDecorationPainter extends BoxPainter {
     double scale = 1.0,
     ColorFilter? colorFilter,
     BoxFit? fit,
-    Alignment alignment = Alignment.center,
+    required CSSStylePosition positionX,
+    required CSSStylePosition positionY,
     Rect? centerSlice,
     ImageRepeat repeat = ImageRepeat.noRepeat,
     bool flipHorizontally = false,
@@ -509,12 +446,6 @@ class BoxDecorationPainter extends BoxPainter {
     FilterQuality filterQuality = FilterQuality.low,
     bool isAntiAlias = false,
   }) {
-    assert(canvas != null);
-    assert(image != null);
-    assert(alignment != null);
-    assert(repeat != null);
-    assert(flipHorizontally != null);
-    assert(isAntiAlias != null);
     assert(
     image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
     'Cannot paint an image that is disposed.\n'
@@ -556,8 +487,13 @@ class BoxDecorationPainter extends BoxPainter {
     paint.invertColors = invertColors;
     final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
     final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;
-    final double dx = halfWidthDelta + (flipHorizontally ? -alignment.x : alignment.x) * halfWidthDelta;
-    final double dy = halfHeightDelta + alignment.y * halfHeightDelta;
+
+    // Use position as length type if specified in positionX/ positionY, otherwise use as percentage type.
+    final double dx = positionX.length != null ? positionX.length! :
+        halfWidthDelta + (flipHorizontally ? -positionX.percentage! : positionX.percentage!) * halfWidthDelta;
+    final double dy = positionY.length != null ? positionY.length! :
+        halfHeightDelta + positionY.percentage! * halfHeightDelta;
+
     final Offset destinationPosition = rect.topLeft.translate(dx, dy);
     final Rect destinationRect = destinationPosition & destinationSize;
 
@@ -642,10 +578,13 @@ class BoxDecorationPainter extends BoxPainter {
       canvas.scale(-1.0, 1.0);
       canvas.translate(dx, 0.0);
     }
+
+    final Rect outputRect = Offset.zero & outputSize;
+    // Restrict background image to container rect.
+    canvas.clipRect(outputRect);
+
     if (centerSlice == null) {
-      final Rect sourceRect = alignment.inscribe(
-        sourceSize, Offset.zero & inputSize,
-      );
+      final Rect sourceRect = Offset.zero & sourceSize;
       if (repeat == ImageRepeat.noRepeat) {
         canvas.drawImageRect(image, sourceRect, destinationRect, paint);
       } else {
@@ -818,6 +757,7 @@ class BoxDecorationPainter extends BoxPainter {
           _getBackgroundOriginRect(offset, configuration);
       Rect backgroundImageRect =
           backgroundClipRect.intersect(backgroundOriginRect);
+
       _paintBackgroundImage(canvas, backgroundImageRect, configuration);
     }
 
