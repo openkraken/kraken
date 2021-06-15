@@ -31,21 +31,4 @@ class Document extends Node {
 
   @override
   RenderObject? get renderer => throw FlutterError('Document did\'t have renderObject.');
-
-  double scrollX() {
-    return documentElement.scrollLeft;
-  }
-
-  double scrollY() {
-    return documentElement.scrollTop;
-  }
-
-  void scrollTo(num x, num y) {
-    documentElement.scrollTo(x: x, y: y, withAnimation: false);
-  }
-
-  void scrollBy(num x, num y) {
-    documentElement.scrollBy(dx: x, dy: y, withAnimation: false);
-  }
-
 }
