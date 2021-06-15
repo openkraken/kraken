@@ -18,10 +18,11 @@ enum BackgroundBoundary {
 }
 
 mixin RenderBoxDecorationMixin on RenderBoxModelBase {
+  BoxDecorationPainter? _painter;
 
-  BoxDecorationPainter _painter;
-  BoxDecorationPainter get boxPainter => _painter;
-  set boxPainter(BoxDecorationPainter painter) {
+  BoxDecorationPainter? get boxPainter => _painter;
+
+  set boxPainter(BoxDecorationPainter? painter) {
     _painter = painter;
   }
 
@@ -36,39 +37,40 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     markNeedsPaint();
   }
 
-  void paintBackground(PaintingContext context, Offset offset, EdgeInsets padding) {
-    BoxDecoration decoration = renderStyle.decoration;
+  void paintBackground(
+      PaintingContext context, Offset offset, EdgeInsets? padding) {
+    BoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
 
     if (decoration == null) return;
     if (_painter == null) {
       _painter ??= BoxDecorationPainter(
-        decoration,
-        padding,
-        renderStyle,
-        markNeedsPaint
-      );
+          decoration, padding, renderStyle, markNeedsPaint);
     }
 
-    final ImageConfiguration filledConfiguration = imageConfiguration.copyWith(size: size);
+    final ImageConfiguration filledConfiguration =
+        imageConfiguration.copyWith(size: size);
     if (decorationPosition == DecorationPosition.background) {
-      int debugSaveCount;
+      int? debugSaveCount;
       assert(() {
         debugSaveCount = context.canvas.getSaveCount();
         return true;
       }());
-      _painter.paintBackground(context.canvas, offset, filledConfiguration);
+      _painter!.paintBackground(context.canvas, offset, filledConfiguration);
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('${decoration.runtimeType} painter had mismatching save and restore calls.'),
-            ErrorDescription('Before painting the decoration, the canvas save count was $debugSaveCount. '
-              'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-              'Every call to save() or saveLayer() must be matched by a call to restore().'),
+            ErrorSummary(
+                '${decoration.runtimeType} painter had mismatching save and restore calls.'),
+            ErrorDescription(
+                'Before painting the decoration, the canvas save count was $debugSaveCount. '
+                'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
+                'Every call to save() or saveLayer() must be matched by a call to restore().'),
             DiagnosticsProperty<Decoration>('The decoration was', decoration,
-              style: DiagnosticsTreeStyle.errorProperty),
-            DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
+                style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<BoxPainter>('The painter was', _painter,
+                style: DiagnosticsTreeStyle.errorProperty),
           ]);
         }
         return true;
@@ -77,13 +79,13 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     }
 
     if (decorationPosition == DecorationPosition.foreground) {
-      _painter.paint(context.canvas, offset, filledConfiguration);
+      _painter!.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
     }
   }
 
-  ImageStream _imageStream;
-  ImageInfo _image;
+  ImageStream? _imageStream;
+  ImageInfo? _image;
 
   void _handleImage(ImageInfo value, bool synchronousCall) {
     if (_image == value)
@@ -91,39 +93,39 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     _image = value;
   }
 
-  void paintDecoration(PaintingContext context, Offset offset, EdgeInsets padding) {
-    BoxDecoration decoration = renderStyle.decoration;
-
+  void paintDecoration(
+      PaintingContext context, Offset offset, EdgeInsets? padding) {
+    BoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
 
     if (decoration == null) return;
-    _painter ??= BoxDecorationPainter(
-      decoration,
-      padding,
-      renderStyle,
-      markNeedsPaint
-    );
+    _painter ??=
+        BoxDecorationPainter(decoration, padding, renderStyle, markNeedsPaint);
 
-    final ImageConfiguration filledConfiguration = imageConfiguration.copyWith(size: size);
+    final ImageConfiguration filledConfiguration =
+        imageConfiguration.copyWith(size: size);
     if (decorationPosition == DecorationPosition.background) {
-      int debugSaveCount;
+      int? debugSaveCount;
       assert(() {
         debugSaveCount = context.canvas.getSaveCount();
         return true;
       }());
 
-      _painter.paint(context.canvas, offset, filledConfiguration);
+      _painter!.paint(context.canvas, offset, filledConfiguration);
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('${decoration.runtimeType} painter had mismatching save and restore calls.'),
-            ErrorDescription('Before painting the decoration, the canvas save count was $debugSaveCount. '
-              'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-              'Every call to save() or saveLayer() must be matched by a call to restore().'),
+            ErrorSummary(
+                '${decoration.runtimeType} painter had mismatching save and restore calls.'),
+            ErrorDescription(
+                'Before painting the decoration, the canvas save count was $debugSaveCount. '
+                'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
+                'Every call to save() or saveLayer() must be matched by a call to restore().'),
             DiagnosticsProperty<Decoration>('The decoration was', decoration,
-              style: DiagnosticsTreeStyle.errorProperty),
-            DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
+                style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<BoxPainter>('The painter was', _painter,
+                style: DiagnosticsTreeStyle.errorProperty),
           ]);
         }
         return true;
@@ -131,7 +133,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
       if (decoration.isComplex) context.setIsComplexHint();
     }
     Offset contentOffset;
-    EdgeInsets borderEdge = renderStyle.borderEdge;
+    EdgeInsets? borderEdge = renderStyle.borderEdge;
     if (borderEdge == null) {
       contentOffset = Offset(0, 0);
     } else {
@@ -139,52 +141,61 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     }
     super.paint(context, contentOffset);
     if (decorationPosition == DecorationPosition.foreground) {
-      _painter.paint(context.canvas, offset, filledConfiguration);
+      _painter!.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
     }
   }
 
   void debugBoxDecorationProperties(DiagnosticPropertiesBuilder properties) {
-    if (renderStyle.borderEdge != null) properties.add(DiagnosticsProperty('borderEdge', renderStyle.borderEdge));
-    if (renderStyle.backgroundClip != null) properties.add(DiagnosticsProperty('backgroundClip', renderStyle.backgroundClip));
-    if (renderStyle.backgroundOrigin != null) properties.add(DiagnosticsProperty('backgroundOrigin', renderStyle.backgroundOrigin));
-    BoxDecoration _decoration = renderStyle.decoration;
-    if (_decoration != null && _decoration.borderRadius != null) properties.add(DiagnosticsProperty('borderRadius', _decoration.borderRadius));
-    if (_decoration != null && _decoration.image != null) properties.add(DiagnosticsProperty('backgroundImage', _decoration.image));
-    if (_decoration != null && _decoration.boxShadow != null) properties.add(DiagnosticsProperty('boxShadow', _decoration.boxShadow));
-    if (_decoration != null && _decoration.gradient != null) properties.add(DiagnosticsProperty('gradient', _decoration.gradient));
+    if (renderStyle.borderEdge != null)
+      properties
+          .add(DiagnosticsProperty('borderEdge', renderStyle.borderEdge));
+    if (renderStyle.backgroundClip != null)
+      properties.add(
+          DiagnosticsProperty('backgroundClip', renderStyle.backgroundClip));
+    if (renderStyle.backgroundOrigin != null)
+      properties.add(DiagnosticsProperty(
+          'backgroundOrigin', renderStyle.backgroundOrigin));
+    BoxDecoration? _decoration = renderStyle.decoration;
+    if (_decoration != null && _decoration.borderRadius != null)
+      properties
+          .add(DiagnosticsProperty('borderRadius', _decoration.borderRadius));
+    if (_decoration != null && _decoration.image != null)
+      properties.add(DiagnosticsProperty('backgroundImage', _decoration.image));
+    if (_decoration != null && _decoration.boxShadow != null)
+      properties.add(DiagnosticsProperty('boxShadow', _decoration.boxShadow));
+    if (_decoration != null && _decoration.gradient != null)
+      properties.add(DiagnosticsProperty('gradient', _decoration.gradient));
   }
 }
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class BoxDecorationPainter extends BoxPainter {
   BoxDecorationPainter(
-    this._decoration,
-    this.padding,
-    this.renderStyle,
-    VoidCallback onChanged
-  ) : assert(_decoration != null),
-      super(onChanged);
+      this._decoration, this.padding, this.renderStyle, VoidCallback onChanged)
+      : super(onChanged);
 
-  EdgeInsets padding;
+  EdgeInsets? padding;
   RenderStyle renderStyle;
   final BoxDecoration _decoration;
 
-  Paint _cachedBackgroundPaint;
-  Rect _rectForCachedBackgroundPaint;
-  Paint _getBackgroundPaint(Rect rect, TextDirection textDirection) {
-    assert(rect != null);
-    assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
+  Paint? _cachedBackgroundPaint;
+  Rect? _rectForCachedBackgroundPaint;
+
+  Paint? _getBackgroundPaint(Rect rect, TextDirection? textDirection) {
+    assert(
+        _decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
     if (_cachedBackgroundPaint == null ||
-      (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
+        (_decoration.gradient != null &&
+            _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = Paint();
       if (_decoration.backgroundBlendMode != null)
-        paint.blendMode = _decoration.backgroundBlendMode;
-      if (_decoration.color != null)
-        paint.color = _decoration.color;
+        paint.blendMode = _decoration.backgroundBlendMode!;
+      if (_decoration.color != null) paint.color = _decoration.color!;
       if (_decoration.gradient != null) {
-        paint.shader = _decoration.gradient.createShader(rect, textDirection: textDirection);
+        paint.shader = _decoration.gradient!
+            .createShader(rect, textDirection: textDirection);
         _rectForCachedBackgroundPaint = rect;
       }
       _cachedBackgroundPaint = paint;
@@ -193,45 +204,52 @@ class BoxDecorationPainter extends BoxPainter {
     return _cachedBackgroundPaint;
   }
 
-  void _paintBox(Canvas canvas, Rect rect, Paint paint, TextDirection textDirection) {
+  void _paintBox(
+      Canvas canvas, Rect rect, Paint? paint, TextDirection? textDirection) {
     switch (_decoration.shape) {
       case BoxShape.circle:
         assert(_decoration.borderRadius == null);
         final Offset center = rect.center;
         final double radius = rect.shortestSide / 2.0;
-        canvas.drawCircle(center, radius, paint);
+        canvas.drawCircle(center, radius, paint!);
         break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius == null) {
-          canvas.drawRect(rect, paint);
+          canvas.drawRect(rect, paint!);
         } else {
-          canvas.drawRRect(_decoration.borderRadius.resolve(textDirection).toRRect(rect), paint);
+          canvas.drawRRect(
+              _decoration.borderRadius!.resolve(textDirection).toRRect(rect),
+              paint!);
         }
         break;
     }
   }
 
-  void _paintShadows(Canvas canvas, Rect rect, TextDirection textDirection) {
-    if (_decoration.boxShadow == null)
-      return;
-    for (final BoxShadow boxShadow in _decoration.boxShadow) {
+  void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
+    if (_decoration.boxShadow == null) return;
+    for (final BoxShadow boxShadow in _decoration.boxShadow!) {
       _paintBoxShadow(canvas, rect, textDirection, boxShadow);
     }
   }
 
-  void _paintBoxShadow(Canvas canvas, Rect rect, TextDirection textDirection, BoxShadow boxShadow) {
+  void _paintBoxShadow(Canvas canvas, Rect rect, TextDirection? textDirection,
+      BoxShadow boxShadow) {
     final Paint paint = Paint()
       ..color = boxShadow.color
-    // Following W3C spec, blur sigma is exactly half the blur radius
-    // which is different from the value of Flutter:
-    // https://www.w3.org/TR/css-backgrounds-3/#shadow-blur
-    // https://html.spec.whatwg.org/C/#when-shadows-are-drawn
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, boxShadow.blurRadius / 2);
+      // Following W3C spec, blur sigma is exactly half the blur radius
+      // which is different from the value of Flutter:
+      // https://www.w3.org/TR/css-backgrounds-3/#shadow-blur
+      // https://html.spec.whatwg.org/C/#when-shadows-are-drawn
+      ..maskFilter =
+          MaskFilter.blur(BlurStyle.normal, boxShadow.blurRadius / 2);
 
     // Rect of box shadow not including blur radius
-    final Rect shadowRect = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
+    final Rect shadowRect =
+        rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
     // Rect of box shadow including blur radius, add 1 pixel to avoid the fill bleed in (due to antialiasing)
-    final Rect shadowBlurRect = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius + boxShadow.blurRadius + 1);
+    final Rect shadowBlurRect = rect
+        .shift(boxShadow.offset)
+        .inflate(boxShadow.spreadRadius + boxShadow.blurRadius + 1);
     // Path of border rect
     Path borderPath;
     // Path of box shadow rect
@@ -244,49 +262,78 @@ class BoxDecorationPainter extends BoxPainter {
       shadowPath = Path()..addRect(shadowRect);
       shadowBlurPath = Path()..addRect(shadowBlurRect);
     } else {
-      borderPath = Path()..addRRect(_decoration.borderRadius.resolve(textDirection).toRRect(rect));
-      shadowPath = Path()..addRRect(_decoration.borderRadius.resolve(textDirection).toRRect(shadowRect));
-      shadowBlurPath = Path()..addRRect(_decoration.borderRadius.resolve(textDirection).toRRect(shadowBlurRect));
+      borderPath = Path()
+        ..addRRect(
+            _decoration.borderRadius!.resolve(textDirection).toRRect(rect));
+      shadowPath = Path()
+        ..addRRect(_decoration.borderRadius!
+            .resolve(textDirection)
+            .toRRect(shadowRect));
+      shadowBlurPath = Path()
+        ..addRRect(_decoration.borderRadius!
+            .resolve(textDirection)
+            .toRRect(shadowBlurRect));
     }
 
     // Path of shadow blur rect subtract border rect of which the box shadow should paint
-    final Path clipedPath = Path.combine(PathOperation.difference, shadowBlurPath, borderPath);
+    final Path clipedPath =
+        Path.combine(PathOperation.difference, shadowBlurPath, borderPath);
     canvas.save();
     canvas.clipPath(clipedPath);
     canvas.drawPath(shadowPath, paint);
     canvas.restore();
   }
 
-  void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection textDirection) {
+  void _paintBackgroundColor(
+      Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_decoration.color != null || _decoration.gradient != null)
-      _paintBox(canvas, rect, _getBackgroundPaint(rect, textDirection), textDirection);
+      _paintBox(canvas, rect, _getBackgroundPaint(rect, textDirection),
+          textDirection);
   }
 
-  DecorationImagePainter _imagePainter;
-  void _paintBackgroundImage(Canvas canvas, Rect rect, ImageConfiguration configuration) {
-    if (_decoration.image == null)
-      return;
-    _imagePainter ??= _decoration.image.createPainter(onChanged);
-    Path clipPath;
+  DecorationImagePainter? _imagePainter;
+
+  void _paintBackgroundImage(
+      Canvas canvas, Rect rect, ImageConfiguration configuration) {
+    if (_decoration.image == null) return;
+    _imagePainter ??= _decoration.image!.createPainter(onChanged!);
+    Path? clipPath;
     switch (_decoration.shape) {
       case BoxShape.circle:
         clipPath = Path()..addOval(rect);
         break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null)
-          clipPath = Path()..addRRect(_decoration.borderRadius.resolve(configuration.textDirection).toRRect(rect));
+          clipPath = Path()
+            ..addRRect(_decoration.borderRadius!
+                .resolve(configuration.textDirection)
+                .toRRect(rect));
         break;
     }
 //    _imagePainter.paint(canvas, rect, clipPath, configuration);
     _paint(canvas, rect, clipPath, configuration);
   }
 
-  void _paint(Canvas canvas, Rect rect, Path clipPath, ImageConfiguration configuration) {
+  /// Draw the image onto the given canvas.
+  ///
+  /// The image is drawn at the position and size given by the `rect` argument.
+  ///
+  /// The image is clipped to the given `clipPath`, if any.
+  ///
+  /// The `configuration` object is used to resolve the image (e.g. to pick
+  /// resolution-specific assets), and to implement the
+  /// [DecorationImage.matchTextDirection] feature.
+  ///
+  /// If the image needs to be painted again, e.g. because it is animated or
+  /// because it had not yet been loaded the first time this method was called,
+  /// then the `onChanged` callback passed to [DecorationImage.createPainter]
+  /// will be called.
+  void _paint(Canvas canvas, Rect rect, Path? clipPath, ImageConfiguration configuration) {
     assert(canvas != null);
     assert(rect != null);
     assert(configuration != null);
 
-    DecorationImage decorationImage = _decoration.image;
+    DecorationImage decorationImage = _decoration.image!;
     bool flipHorizontally = false;
     if (decorationImage.matchTextDirection) {
       assert(() {
@@ -297,7 +344,7 @@ class BoxDecorationPainter extends BoxPainter {
             ErrorSummary('DecorationImage.matchTextDirection can only be used when a TextDirection is available.'),
             ErrorDescription(
               'When DecorationImagePainter.paint() was called, there was no text direction provided '
-                'in the ImageConfiguration object to match.'
+                'in the ImageConfiguration object to match.',
             ),
             DiagnosticsProperty<DecorationImage>('The DecorationImage was', decorationImage, style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<ImageConfiguration>('The ImageConfiguration was', configuration, style: DiagnosticsTreeStyle.errorProperty),
@@ -317,7 +364,7 @@ class BoxDecorationPainter extends BoxPainter {
       );
       _imageStream?.removeListener(listener);
       _imageStream = newImageStream;
-      _imageStream.addListener(listener);
+      _imageStream!.addListener(listener);
     }
     if (_image == null)
       return;
@@ -330,9 +377,9 @@ class BoxDecorationPainter extends BoxPainter {
     _paintImage(
       canvas: canvas,
       rect: rect,
-      image: _image.image,
-      debugImageLabel: _image.debugLabel,
-      scale: decorationImage.scale * _image.scale,
+      image: _image!.image,
+      debugImageLabel: _image!.debugLabel,
+      scale: decorationImage.scale * _image!.scale,
       colorFilter: decorationImage.colorFilter,
       fit: decorationImage.fit,
       alignment: decorationImage.alignment.resolve(configuration.textDirection),
@@ -346,8 +393,9 @@ class BoxDecorationPainter extends BoxPainter {
       canvas.restore();
   }
 
-  ImageStream _imageStream;
-  ImageInfo _image;
+
+  ImageStream? _imageStream;
+  ImageInfo? _image;
 
   void _handleImage(ImageInfo value, bool synchronousCall) {
     if (_image == value)
@@ -355,7 +403,7 @@ class BoxDecorationPainter extends BoxPainter {
     _image = value;
     assert(onChanged != null);
     if (!synchronousCall)
-      onChanged();
+      onChanged!();
   }
 
   /// Used by [paintImage] to report image sizes drawn at the end of the frame.
@@ -446,15 +494,15 @@ class BoxDecorationPainter extends BoxPainter {
   ///  * [DecorationImage], which holds a configuration for calling this function.
   ///  * [BoxDecoration], which uses this function to paint a [DecorationImage].
   void _paintImage({
-    Canvas canvas,
-    Rect rect,
-    ui.Image image,
-    String debugImageLabel,
+    required Canvas canvas,
+    required Rect rect,
+    required ui.Image image,
+    String? debugImageLabel,
     double scale = 1.0,
-    ColorFilter colorFilter,
-    BoxFit fit,
+    ColorFilter? colorFilter,
+    BoxFit? fit,
     Alignment alignment = Alignment.center,
-    Rect centerSlice,
+    Rect? centerSlice,
     ImageRepeat repeat = ImageRepeat.noRepeat,
     bool flipHorizontally = false,
     bool invertColors = false,
@@ -467,18 +515,21 @@ class BoxDecorationPainter extends BoxPainter {
     assert(repeat != null);
     assert(flipHorizontally != null);
     assert(isAntiAlias != null);
+    assert(
+    image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
+    'Cannot paint an image that is disposed.\n'
+      'The caller of paintImage is expected to wait to dispose the image until '
+      'after painting has completed.',
+    );
     if (rect.isEmpty)
       return;
     Size outputSize = rect.size;
     Size inputSize = Size(image.width.toDouble(), image.height.toDouble());
-    Offset sliceBorder;
+    Offset? sliceBorder;
     if (centerSlice != null) {
-      sliceBorder = Offset(
-        centerSlice.left + inputSize.width - centerSlice.right,
-        centerSlice.top + inputSize.height - centerSlice.bottom,
-      );
+      sliceBorder = inputSize / scale - centerSlice.size as Offset;
       outputSize = outputSize - sliceBorder as Size;
-      inputSize = inputSize - sliceBorder as Size;
+      inputSize = inputSize - sliceBorder * scale as Size;
     }
     fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
     assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));
@@ -486,7 +537,7 @@ class BoxDecorationPainter extends BoxPainter {
     final Size sourceSize = fittedSizes.source * scale;
     Size destinationSize = fittedSizes.destination;
     if (centerSlice != null) {
-      outputSize += sliceBorder;
+      outputSize += sliceBorder!;
       destinationSize += sliceBorder;
       // We don't have the ability to draw a subset of the image at the same time
       // as we apply a nine-patch stretch.
@@ -501,9 +552,7 @@ class BoxDecorationPainter extends BoxPainter {
     final Paint paint = Paint()..isAntiAlias = isAntiAlias;
     if (colorFilter != null)
       paint.colorFilter = colorFilter;
-    if (sourceSize != destinationSize) {
-      paint.filterQuality = filterQuality;
-    }
+    paint.filterQuality = filterQuality;
     paint.invertColors = invertColors;
     final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
     final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;
@@ -532,7 +581,7 @@ class BoxDecorationPainter extends BoxPainter {
             exception: 'Image $debugImageLabel has a display size of '
               '$outputWidth×$outputHeight but a decode size of '
               '${image.width}×${image.height}, which uses an additional '
-              '${overheadInKilobytes}kb.\n\n'
+              '${overheadInKilobytes}KB.\n\n'
               'Consider resizing the asset ahead of time, supplying a cacheWidth '
               'parameter of $outputWidth, a cacheHeight parameter of '
               '$outputHeight, or using a ResizeImage.',
@@ -560,14 +609,12 @@ class BoxDecorationPainter extends BoxPainter {
       }());
       // Avoid emitting events that are the same as those emitted in the last frame.
       if (!_lastFrameImageSizeInfo.contains(sizeInfo)) {
-        final ImageSizeInfo existingSizeInfo = _pendingImageSizeInfo[sizeInfo.source];
+        final ImageSizeInfo? existingSizeInfo = _pendingImageSizeInfo[sizeInfo.source];
         if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
-          _pendingImageSizeInfo[sizeInfo.source] = sizeInfo;
+          _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;
         }
-        if (debugOnPaintImage != null) {
-          debugOnPaintImage(sizeInfo);
-        }
-        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        debugOnPaintImage?.call(sizeInfo);
+        SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
           _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
           if (_pendingImageSizeInfo.isEmpty) {
             return;
@@ -576,7 +623,7 @@ class BoxDecorationPainter extends BoxPainter {
             'Flutter.ImageSizesForFrame',
             <String, Object>{
               for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
-                imageSizeInfo.source: imageSizeInfo.toJson()
+                imageSizeInfo.source!: imageSizeInfo.toJson(),
             },
           );
           _pendingImageSizeInfo = <String, ImageSizeInfo>{};
@@ -584,7 +631,7 @@ class BoxDecorationPainter extends BoxPainter {
       }
     }
 
-    final bool needSave = repeat != ImageRepeat.noRepeat || flipHorizontally;
+    final bool needSave = centerSlice != null || repeat != ImageRepeat.noRepeat || flipHorizontally;
     if (needSave)
       canvas.save();
     if (repeat != ImageRepeat.noRepeat)
@@ -606,11 +653,12 @@ class BoxDecorationPainter extends BoxPainter {
           canvas.drawImageRect(image, sourceRect, tileRect, paint);
       }
     } else {
+      canvas.scale(1 / scale);
       if (repeat == ImageRepeat.noRepeat) {
-        canvas.drawImageNine(image, centerSlice, destinationRect, paint);
+        canvas.drawImageNine(image, _scaleRect(centerSlice, scale), _scaleRect(destinationRect, scale), paint);
       } else {
         for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
-          canvas.drawImageNine(image, centerSlice, tileRect, paint);
+          canvas.drawImageNine(image, _scaleRect(centerSlice, scale), _scaleRect(tileRect, scale), paint);
       }
     }
     if (needSave)
@@ -621,6 +669,8 @@ class BoxDecorationPainter extends BoxPainter {
     }
   }
 
+  Rect _scaleRect(Rect rect, double scale) => Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);
+
   @override
   void dispose() {
     _imagePainter?.dispose();
@@ -629,33 +679,39 @@ class BoxDecorationPainter extends BoxPainter {
 
   bool hasLocalBackgroundImage(RenderStyle renderStyle) {
     return renderStyle.backgroundImage != null &&
-      renderStyle.backgroundAttachment == LOCAL;
+        renderStyle.backgroundAttachment == LOCAL;
   }
 
-  void paintBackground(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+  void paintBackground(
+      Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration.size != null);
     Offset baseOffset = Offset(0, 0);
 
-    final TextDirection textDirection = configuration.textDirection;
+    final TextDirection? textDirection = configuration.textDirection;
     bool hasLocalAttachment = hasLocalBackgroundImage(renderStyle);
 
     // Rect of background color
-    Rect backgroundColorRect = _getBackgroundClipRect(baseOffset, configuration);
+    Rect backgroundColorRect =
+        _getBackgroundClipRect(baseOffset, configuration);
     _paintBackgroundColor(canvas, backgroundColorRect, textDirection);
 
     // Background image of background-attachment local scroll with content
     Offset backgrundImageOffset = hasLocalAttachment ? offset : baseOffset;
     // Rect of background image
-    Rect backgroundClipRect = _getBackgroundClipRect(backgrundImageOffset, configuration);
-    Rect backgroundOriginRect = _getBackgroundOriginRect(backgrundImageOffset, configuration);
-    Rect backgroundImageRect = backgroundClipRect.intersect(backgroundOriginRect);
+    Rect backgroundClipRect =
+        _getBackgroundClipRect(backgrundImageOffset, configuration);
+    Rect backgroundOriginRect =
+        _getBackgroundOriginRect(backgrundImageOffset, configuration);
+    Rect backgroundImageRect =
+        backgroundClipRect.intersect(backgroundOriginRect);
     _paintBackgroundImage(canvas, backgroundImageRect, configuration);
   }
 
-  Rect _getBackgroundOriginRect(Offset offset, ImageConfiguration configuration) {
-    Size size = configuration.size;
+  Rect _getBackgroundOriginRect(
+      Offset offset, ImageConfiguration configuration) {
+    Size? size = configuration.size;
 
-    EdgeInsets borderEdge = renderStyle.borderEdge;
+    EdgeInsets? borderEdge = renderStyle.borderEdge;
     double borderTop = 0;
     double borderLeft = 0;
     if (borderEdge != null) {
@@ -666,33 +722,35 @@ class BoxDecorationPainter extends BoxPainter {
     double paddingTop = 0;
     double paddingLeft = 0;
     if (padding != null) {
-      paddingTop = padding.top;
-      paddingLeft = padding.left;
+      paddingTop = padding!.top;
+      paddingLeft = padding!.left;
     }
     // Background origin moves background image from specified origin
     Rect backgroundOriginRect;
-    BackgroundBoundary backgroundOrigin = renderStyle.backgroundOrigin;
-    switch(backgroundOrigin) {
+    BackgroundBoundary? backgroundOrigin = renderStyle.backgroundOrigin;
+    switch (backgroundOrigin) {
       case BackgroundBoundary.borderBox:
-        backgroundOriginRect = offset & size;
+        backgroundOriginRect = offset & size!;
         break;
       case BackgroundBoundary.contentBox:
-        backgroundOriginRect = offset.translate(borderLeft + paddingLeft, borderTop + paddingTop) & size;
+        backgroundOriginRect =
+            offset.translate(borderLeft + paddingLeft, borderTop + paddingTop) &
+                size!;
         break;
       default:
-        backgroundOriginRect = offset.translate(borderLeft, borderTop) & size;
+        backgroundOriginRect = offset.translate(borderLeft, borderTop) & size!;
         break;
     }
     return backgroundOriginRect;
   }
 
   Rect _getBackgroundClipRect(Offset offset, ImageConfiguration configuration) {
-    Size size = configuration.size;
+    Size? size = configuration.size;
     double borderTop = 0;
     double borderBottom = 0;
     double borderLeft = 0;
     double borderRight = 0;
-    EdgeInsets borderEdge = renderStyle.borderEdge;
+    EdgeInsets? borderEdge = renderStyle.borderEdge;
     if (borderEdge != null) {
       borderTop = borderEdge.top;
       borderBottom = borderEdge.bottom;
@@ -705,28 +763,39 @@ class BoxDecorationPainter extends BoxPainter {
     double paddingLeft = 0;
     double paddingRight = 0;
     if (padding != null) {
-      paddingTop = padding.top;
-      paddingBottom = padding.bottom;
-      paddingLeft = padding.left;
-      paddingRight = padding.right;
+      paddingTop = padding!.top;
+      paddingBottom = padding!.bottom;
+      paddingLeft = padding!.left;
+      paddingRight = padding!.right;
     }
     Rect backgroundClipRect;
-    BackgroundBoundary backgroundClip = renderStyle.backgroundClip;
-    switch(backgroundClip) {
+    BackgroundBoundary? backgroundClip = renderStyle.backgroundClip;
+    switch (backgroundClip) {
       case BackgroundBoundary.paddingBox:
-        backgroundClipRect = offset.translate(borderLeft, borderTop) & Size(
-          size.width - borderRight - borderLeft,
-          size.height - borderBottom - borderTop,
-        );
+        backgroundClipRect = offset.translate(borderLeft, borderTop) &
+            Size(
+              size!.width - borderRight - borderLeft,
+              size.height - borderBottom - borderTop,
+            );
         break;
       case BackgroundBoundary.contentBox:
-        backgroundClipRect = offset.translate(borderLeft + paddingLeft, borderTop + paddingTop) & Size(
-          size.width - borderRight - borderLeft - paddingRight -  paddingLeft,
-          size.height - borderBottom - borderTop - paddingBottom - paddingTop,
-        );
+        backgroundClipRect =
+            offset.translate(borderLeft + paddingLeft, borderTop + paddingTop) &
+                Size(
+                  size!.width -
+                      borderRight -
+                      borderLeft -
+                      paddingRight -
+                      paddingLeft,
+                  size.height -
+                      borderBottom -
+                      borderTop -
+                      paddingBottom -
+                      paddingTop,
+                );
         break;
       default:
-        backgroundClipRect = offset & size;
+        backgroundClipRect = offset & size!;
         break;
     }
     return backgroundClipRect;
@@ -735,19 +804,20 @@ class BoxDecorationPainter extends BoxPainter {
   /// Paint the box decoration into the given location on the given canvas
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
     assert(configuration.size != null);
 
-    final Rect rect = offset & configuration.size;
-    final TextDirection textDirection = configuration.textDirection;
+    final Rect rect = offset & configuration.size!;
+    final TextDirection? textDirection = configuration.textDirection;
 
     bool hasLocalAttachment = hasLocalBackgroundImage(renderStyle);
     if (!hasLocalAttachment) {
       Rect backgroundClipRect = _getBackgroundClipRect(offset, configuration);
       _paintBackgroundColor(canvas, backgroundClipRect, textDirection);
 
-      Rect backgroundOriginRect = _getBackgroundOriginRect(offset, configuration);
-      Rect backgroundImageRect = backgroundClipRect.intersect(backgroundOriginRect);
+      Rect backgroundOriginRect =
+          _getBackgroundOriginRect(offset, configuration);
+      Rect backgroundImageRect =
+          backgroundClipRect.intersect(backgroundOriginRect);
       _paintBackgroundImage(canvas, backgroundImageRect, configuration);
     }
 
@@ -755,7 +825,7 @@ class BoxDecorationPainter extends BoxPainter {
       canvas,
       rect,
       shape: _decoration.shape,
-      borderRadius: _decoration.borderRadius as BorderRadius,
+      borderRadius: _decoration.borderRadius as BorderRadius?,
       textDirection: configuration.textDirection,
     );
 

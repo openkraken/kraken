@@ -13,8 +13,8 @@ import 'package:flutter/rendering.dart';
 const String ANCHOR = 'A';
 
 class AnchorElement extends Element {
-  String _href;
-  String _target;
+  String? _href;
+  String? _target;
 
   final Pointer<NativeAnchorElement> nativeAnchorElement;
 
@@ -23,14 +23,15 @@ class AnchorElement extends Element {
     addEvent(EVENT_CLICK);
   }
 
-  void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
+  void handleMouseEvent(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
     super.handleMouseEvent(eventType, down: down, up: up);
 
-    if (_href == null) return;
+    String? href = _href;
+    if (href == null) return;
 
-    Uri uri = Uri.parse(_href);
+    Uri uri = Uri.parse(href);
     KrakenController rootController = elementManager.controller.view.rootController;
-    String sourceUrl = rootController.bundleURL;
+    String? sourceUrl = rootController.bundleURL;
     String scheme;
     if (!uri.hasScheme) {
       if (sourceUrl != null) {
@@ -42,7 +43,7 @@ class AnchorElement extends Element {
     } else {
       scheme = uri.scheme;
     }
-    elementManager.controller.view.handleNavigationAction(sourceUrl, _href, _getNavigationType(scheme));
+    elementManager.controller.view.handleNavigationAction(sourceUrl, href, _getNavigationType(scheme));
   }
 
   KrakenNavigationType _getNavigationType(String scheme) {

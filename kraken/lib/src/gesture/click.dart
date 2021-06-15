@@ -14,14 +14,14 @@ typedef GestureCallback = void Function(Event);
 
 class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
-  ClickGestureRecognizer({ Object debugOwner })
+  ClickGestureRecognizer({ Object? debugOwner })
       : super(deadline: kPressTimeout , debugOwner: debugOwner);
 
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
 
-  PointerDownEvent _down;
-  PointerUpEvent _up;
+  PointerDownEvent? _down;
+  PointerUpEvent? _up;
 
   /// A pointer has contacted the screen, which might be the start of a tap.
   ///
@@ -33,7 +33,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// If this recognizer doesn't win the arena, [handleTapCancel] is called next.
   /// Otherwise, [handleTapUp] is called next.
-  void handleTapDown(PointerDownEvent down) {}
+  void handleTapDown(PointerDownEvent? down) {}
 
   /// A pointer has stopped contacting the screen, which is recognized as a tap.
   ///
@@ -45,16 +45,15 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// If this recognizer doesn't win the arena, [handleTapCancel] is called
   /// instead.
-  void handleTapUp( PointerDownEvent down, PointerUpEvent up ) {
+  void handleTapUp( PointerDownEvent? down, PointerUpEvent? up ) {
     if (onClick != null)
-      onClick(EVENT_CLICK, down: down, up: up);
+      onClick!(EVENT_CLICK, down: down, up: up);
   }
 
-  MouseEventListener onClick;
+  MouseEventListener? onClick;
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    assert(event != null);
     if (state == GestureRecognizerState.ready) {
       // `_down` must be assigned in this method instead of `handlePrimaryPointer`,
       // because `acceptGesture` might be called before `handlePrimaryPointer`,
@@ -72,7 +71,7 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  void startTrackingPointer(int pointer, [Matrix4 transform]) {
+  void startTrackingPointer(int pointer, [Matrix4? transform]) {
     // The recognizer should never track any pointers when `_down` is null,
     // because calling `_checkDown` in this state will throw exception.
     assert(_down != null);
@@ -87,9 +86,9 @@ class ClickGestureRecognizer extends PrimaryPointerGestureRecognizer {
     } else if (event is PointerCancelEvent) {
       resolve(GestureDisposition.rejected);
       _reset();
-    } else if (event.buttons != _down.buttons) {
+    } else if (event.buttons != _down!.buttons) {
       resolve(GestureDisposition.rejected);
-      stopTrackingPointer(primaryPointer);
+      stopTrackingPointer(primaryPointer!);
     }
   }
 
