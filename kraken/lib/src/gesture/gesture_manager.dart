@@ -106,30 +106,84 @@ class GestureManager {
   }
 
   void onPanStart(DragStartDetails details) {
-    _target!.onPan!(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+    _target!.onPan!(
+      GestureEvent(
+        EVENT_PAN,
+        GestureEventInit(
+          state: EVENT_STATE_START,
+          deltaX: details.globalPosition.dx,
+          deltaY: details.globalPosition.dy
+        )
+      )
+    );
   }
 
   void onPanUpdate(DragUpdateDetails details) {
-    _target!.onPan!(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+    _target!.onPan!(
+      GestureEvent(
+        EVENT_PAN,
+        GestureEventInit(
+          state: EVENT_STATE_UPDATE,
+          deltaX: details.globalPosition.dx,
+          deltaY: details.globalPosition.dy
+        )
+      )
+    );
   }
 
   void onPanEnd(DragEndDetails details) {
-    _target!.onPan!(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy )));
+    _target!.onPan!(
+      GestureEvent(
+        EVENT_PAN,
+        GestureEventInit(
+          state: EVENT_STATE_END,
+          velocityX: details.velocity.pixelsPerSecond.dx,
+          velocityY: details.velocity.pixelsPerSecond.dy
+        )
+      )
+    );
   }
 
   void onScaleStart(ScaleStartDetails details) {
-    _target!.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_START )));
+    _target!.onScale!(
+      GestureEvent(
+        EVENT_SCALE,
+        GestureEventInit( state: EVENT_STATE_START )
+      )
+    );
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    _target!.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale )));
+    _target!.onScale!(
+      GestureEvent(
+        EVENT_SCALE,
+        GestureEventInit(
+          state: EVENT_STATE_UPDATE,
+          rotation: details.rotation,
+          scale: details.scale
+        )
+      )
+    );
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    _target!.onScale!(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_END )));
+    _target!.onScale!(
+      GestureEvent(
+        EVENT_SCALE,
+        GestureEventInit( state: EVENT_STATE_END )
+      )
+    );
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    _target!.onLongPress!(GestureEvent(EVENT_LONG_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+    _target!.onLongPress!(
+      GestureEvent(
+        EVENT_LONG_PRESS,
+        GestureEventInit(
+          deltaX: details.globalPosition.dx,
+          deltaY: details.globalPosition.dy
+        )
+      )
+    );
   }
 }

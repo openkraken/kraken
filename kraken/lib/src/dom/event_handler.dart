@@ -20,29 +20,29 @@ mixin EventHandlerMixin on Node {
 
   AppearEventState appearEventState = AppearEventState.none;
 
-  void addEventResponder(RenderPointerListenerMixin renderBoxModel) {
-    renderBoxModel.onPointerDown = handlePointDown;
-    renderBoxModel.onPointerMove = handlePointMove;
-    renderBoxModel.onPointerUp = handlePointUp;
-    renderBoxModel.onPointerCancel = handlePointCancel;
-    renderBoxModel.onClick = handleMouseEvent;
-    renderBoxModel.onSwipe = dispatchEvent;
-    renderBoxModel.onPan = dispatchEvent;
-    renderBoxModel.onScale = dispatchEvent;
-    renderBoxModel.onLongPress = dispatchEvent;
-    renderBoxModel.getEventHandlers = getEventHandlers;
+  void addEventResponder(RenderPointerListenerMixin renderBox) {
+    renderBox.onPointerDown = handlePointDown;
+    renderBox.onPointerMove = handlePointMove;
+    renderBox.onPointerUp = handlePointUp;
+    renderBox.onPointerCancel = handlePointCancel;
+    renderBox.onClick = handleMouseEvent;
+    renderBox.onSwipe = dispatchEvent;
+    renderBox.onPan = dispatchEvent;
+    renderBox.onScale = dispatchEvent;
+    renderBox.onLongPress = dispatchEvent;
+    renderBox.getEventHandlers = getEventHandlers;
   }
 
-  void removeEventResponder(RenderPointerListenerMixin renderBoxModel) {
-    renderBoxModel.onPointerDown = null;
-    renderBoxModel.onPointerMove = null;
-    renderBoxModel.onPointerUp = null;
-    renderBoxModel.onPointerCancel = null;
-    renderBoxModel.onClick = null;
-    renderBoxModel.onSwipe = null;
-    renderBoxModel.onPan = null;
-    renderBoxModel.onScale = null;
-    renderBoxModel.onLongPress = null;
+  void removeEventResponder(RenderPointerListenerMixin renderBox) {
+    renderBox.onPointerDown = null;
+    renderBox.onPointerMove = null;
+    renderBox.onPointerUp = null;
+    renderBox.onPointerCancel = null;
+    renderBox.onClick = null;
+    renderBox.onSwipe = null;
+    renderBox.onPan = null;
+    renderBox.onScale = null;
+    renderBox.onLongPress = null;
   }
 
   void handlePointDown(PointerDownEvent pointEvent) {
