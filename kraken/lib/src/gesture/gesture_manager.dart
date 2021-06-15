@@ -90,14 +90,11 @@ class GestureManager {
     }
 
     gestures.forEach((key, gesture) {
-<<<<<<< HEAD
-      gesture.addPointer(event as PointerDownEvent);
-=======
+      gesture.addPointer(event);
       // Register the recognizer that needs to be monitored.
       if (events.contains(key)) {
         gesture.addPointer(event);
       }
->>>>>>> feat: Only register recognizers that need to be monitored.
     });
   }
 

@@ -30,10 +30,9 @@ class Document extends Node {
     addEventListener(eventName, _handleEvent);
   }
 
-<<<<<<< HEAD
   @override
   RenderObject? get renderer => throw FlutterError('Document did\'t have renderObject.');
-=======
+
   double scrollX() {
     return documentElement.scrollLeft;
   }
@@ -49,5 +48,5 @@ class Document extends Node {
   void scrollBy(num x, num y) {
     documentElement.scrollBy(dx: x, dy: y, withAnimation: false);
   }
->>>>>>> fix: renderview mounted under document
+
 }
