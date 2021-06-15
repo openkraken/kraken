@@ -20,7 +20,7 @@ mixin EventHandlerMixin on Node {
 
   AppearEventState appearEventState = AppearEventState.none;
 
-  void addEventResponder(RenderBoxModel renderBoxModel) {
+  void addEventResponder(RenderPointerListenerMixin renderBoxModel) {
     renderBoxModel.onPointerDown = handlePointDown;
     renderBoxModel.onPointerMove = handlePointMove;
     renderBoxModel.onPointerUp = handlePointUp;
@@ -33,7 +33,7 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.getEventHandlers = getEventHandlers;
   }
 
-  void removeEventResponder(RenderBoxModel renderBoxModel) {
+  void removeEventResponder(RenderPointerListenerMixin renderBoxModel) {
     renderBoxModel.onPointerDown = null;
     renderBoxModel.onPointerMove = null;
     renderBoxModel.onPointerUp = null;

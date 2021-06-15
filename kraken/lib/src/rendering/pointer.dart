@@ -14,7 +14,7 @@ typedef GestureCallback = void Function(Event);
 typedef MouseEventListener = void Function(String,
     {PointerDownEvent? down, PointerUpEvent? up});
 
-typedef EventHandlers = Map<String, List<EventHandler>> Function();
+typedef GetEventHandlers = Map<String, List<EventHandler>> Function();
 
 mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer comes into contact with the screen (for touch
@@ -46,61 +46,7 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   GestureCallback? onLongPress;
 
-  EventHandlers? getEventHandlers;
-
-  void onPanStart(DragStartDetails details) {
-    onPan!(GestureEvent(
-        EVENT_PAN,
-        GestureEventInit(
-            state: EVENT_STATE_START,
-            deltaX: details.globalPosition.dx,
-            deltaY: details.globalPosition.dy)));
-  }
-
-  void onPanUpdate(DragUpdateDetails details) {
-    onPan!(GestureEvent(
-        EVENT_PAN,
-        GestureEventInit(
-            state: EVENT_STATE_UPDATE,
-            deltaX: details.globalPosition.dx,
-            deltaY: details.globalPosition.dy)));
-  }
-
-  void onPanEnd(DragEndDetails details) {
-    onPan!(GestureEvent(
-        EVENT_PAN,
-        GestureEventInit(
-            state: EVENT_STATE_END,
-            velocityX: details.velocity.pixelsPerSecond.dx,
-            velocityY: details.velocity.pixelsPerSecond.dy)));
-  }
-
-  void onScaleStart(ScaleStartDetails details) {
-    onScale!(
-        GestureEvent(EVENT_SCALE, GestureEventInit(state: EVENT_STATE_START)));
-  }
-
-  void onScaleUpdate(ScaleUpdateDetails details) {
-    onScale!(GestureEvent(
-        EVENT_SCALE,
-        GestureEventInit(
-            state: EVENT_STATE_UPDATE,
-            rotation: details.rotation,
-            scale: details.scale)));
-  }
-
-  void onScaleEnd(ScaleEndDetails details) {
-    onScale!(
-        GestureEvent(EVENT_SCALE, GestureEventInit(state: EVENT_STATE_END)));
-  }
-
-  void onLongPressEnd(LongPressEndDetails details) {
-    onLongPress!(GestureEvent(
-        EVENT_LONG_PRESS,
-        GestureEventInit(
-            deltaX: details.globalPosition.dx,
-            deltaY: details.globalPosition.dy)));
-  }
+  GetEventHandlers? getEventHandlers;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {

@@ -4,22 +4,18 @@ import 'dart:ffi';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 
-class Document extends Node {
+class Document extends Node with EventHandlerMixin {
   final Pointer<NativeDocument> nativeDocumentPtr;
   final HTMLElement documentElement;
   final RenderViewportBox renderView;
 
   Document(int targetId, this.nativeDocumentPtr, ElementManager elementManager, this.documentElement, this.renderView)
       : super(NodeType.DOCUMENT_NODE, targetId, nativeDocumentPtr.ref.nativeNode, elementManager, '#document') {
-    renderView.getEventHandlers = getEventHandlers;
+    addEventResponder(renderView);
   }
 
   void _handleEvent(Event event) {
     emitUIEvent(elementManager.controller.view.contextId, nativeDocumentPtr.ref.nativeNode.ref.nativeEventTarget, event);
-  }
-
-  Map<String, List<EventHandler>> getEventHandlers() {
-    return eventHandlers;
   }
 
   @override

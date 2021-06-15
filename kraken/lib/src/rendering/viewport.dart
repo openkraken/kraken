@@ -10,7 +10,7 @@ import 'package:kraken/gesture.dart';
 import 'dart:ui';
 
 class RenderViewportBox extends RenderProxyBox
-    with RenderObjectWithControllerMixin {
+    with RenderObjectWithControllerMixin, RenderPointerListenerMixin {
   RenderViewportBox({
     required Size viewportSize,
     RenderBox? child,
@@ -39,7 +39,7 @@ class RenderViewportBox extends RenderProxyBox
 
   Size get viewportSize => _viewportSize;
 
-  EventHandlers? getEventHandlers;
+  GetEventHandlers? getEventHandlers;
 
   set viewportSize(Size value) {
     if (value != _viewportSize) {

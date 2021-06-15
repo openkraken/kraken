@@ -44,16 +44,16 @@ class GestureManager {
 
   List<RenderBox> _hitTestList = [];
 
-  RenderBoxModel? _target;
+  RenderPointerListenerMixin? _target;
 
   void addTargetToList(RenderBox target) {
     _hitTestList.add(target);
   }
 
   void clearTargetList() {
-    if (_hitTestList.length != 0 && _hitTestList[0] is RenderBoxModel) {
+    if (_hitTestList.isNotEmpty && _hitTestList[0] is RenderPointerListenerMixin) {
       // The target node triggered by the gesture is the bottom node of hitTest.
-      _target = _hitTestList[0] as RenderBoxModel;
+      _target = _hitTestList[0] as RenderPointerListenerMixin;
     }
     _hitTestList = [];
   }
