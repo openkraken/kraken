@@ -64,9 +64,9 @@ class GestureManager {
     for (int i = 0; i < _hitTestList.length; i++) {
       RenderBox renderBox = _hitTestList[i];
       Map<String, List<EventHandler>> eventHandlers = {};
-      if (renderBox is RenderBoxModel) {
+      if (renderBox is RenderBoxModel && renderBox.getEventHandlers != null) {
         eventHandlers = renderBox.getEventHandlers!();
-      } else if (renderBox is RenderViewportBox) {
+      } else if (renderBox is RenderViewportBox && renderBox.getEventHandlers != null) {
         eventHandlers = renderBox.getEventHandlers!();
       }
 
