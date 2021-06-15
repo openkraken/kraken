@@ -106,10 +106,6 @@ class Window extends EventTarget {
 
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
 
-    // Events listened on the Window need to be proxied to the Document, because there is a RenderView on the Document, which can handle hitTest.
-    // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-    document.addEvent(eventName);
-
     switch (eventName) {
       case EVENT_COLOR_SCHEME_CHANGE:
         return addEventListener(eventName, _handleColorSchemeChange);
@@ -118,6 +114,9 @@ class Window extends EventTarget {
       case EVENT_SCROLL:
         return document.documentElement.addEventListener(eventName, _handleScroll);
       default:
+        // Events listened on the Window need to be proxied to the Document, because there is a RenderView on the Document, which can handle hitTest.
+        // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
+        document.addEvent(eventName);
         break;
     }
   }
