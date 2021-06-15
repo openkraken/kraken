@@ -8,12 +8,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  kraken:
-    path: ../kraken
+  kraken: ^0.8.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+dependency_overrides:
+  kraken:
+    path: ../kraken
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

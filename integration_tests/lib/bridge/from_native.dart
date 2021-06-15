@@ -122,10 +122,6 @@ final Pointer<NativeFunction<Native_SimulatePointer>> _nativeSimulatePointer = P
 
 void _simulateKeyPress(Pointer<NativeString> nativeChars) {
   String chars = nativeStringToString(nativeChars);
-  if (chars == null) {
-    print('Warning: simulateKeyPress chars is null.');
-    return;
-  }
   if (InputElement.focusInputElement != null) {
     InputElement current = InputElement.focusInputElement!;
     TextEditingValue currentValue = current.textSelectionDelegate.textEditingValue;
