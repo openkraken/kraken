@@ -88,10 +88,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
     _setupObserver();
 
-    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, viewportElement, viewport);
+    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, viewportElement as HTMLElement, viewport);
     setEventTarget(document);
 
-    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId], this, document);
+    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId]!, this, document);
     setEventTarget(window);
 
     element_registry.defineBuiltInElements();

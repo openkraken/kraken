@@ -46,7 +46,7 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   GestureCallback? onLongPress;
 
-  EventHandlers getEventHandlers;
+  EventHandlers? getEventHandlers;
 
   void onPanStart(DragStartDetails details) {
     onPan!(GestureEvent(

@@ -35,11 +35,11 @@ class RenderViewportBox extends RenderProxyBox
 
   Color? background;
 
-  EventHandlers getEventHandlers;
-
   Size _viewportSize;
 
   Size get viewportSize => _viewportSize;
+
+  EventHandlers? getEventHandlers;
 
   set viewportSize(Size value) {
     if (value != _viewportSize) {

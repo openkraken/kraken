@@ -74,30 +74,30 @@ class Window extends EventTarget {
 
   static void _scrollTo(Pointer<NativeWindow> nativeWindowPtr, int x, int y) {
     Window window = _nativeMap[nativeWindowPtr.address]!;
-    window.viewportElement.flushLayout();
+    window.document.documentElement.flushLayout();
     window.scrollTo(x, y);
   }
 
   static void _scrollBy(Pointer<NativeWindow> nativeWindowPtr, int x, int y) {
     Window window = _nativeMap[nativeWindowPtr.address]!;
-    window.viewportElement.flushLayout();
+    window.document.documentElement.flushLayout();
     window.scrollBy(x, y);
   }
 
   double scrollX() {
-    return viewportElement.scrollLeft;
+    return document.documentElement.scrollLeft;
   }
 
   double scrollY() {
-    return viewportElement.scrollTop;
+    return document.documentElement.scrollTop;
   }
 
   void scrollTo(num x, num y) {
-    viewportElement.scrollTo(x: x, y: y, withAnimation: false);
+    document.documentElement.scrollTo(x: x, y: y, withAnimation: false);
   }
 
   void scrollBy(num x, num y) {
-    viewportElement.scrollBy(dx: x, dy: y, withAnimation: false);
+    document.documentElement.scrollBy(dx: x, dy: y, withAnimation: false);
   }
 
   @override
