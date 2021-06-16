@@ -784,7 +784,6 @@ class Element extends Node
       case BACKGROUND_ATTACHMENT:
       case BACKGROUND_IMAGE:
       case BACKGROUND_REPEAT:
-      case BACKGROUND_POSITION:
       case BACKGROUND_POSITION_X:
       case BACKGROUND_POSITION_Y:
       case BACKGROUND_SIZE:

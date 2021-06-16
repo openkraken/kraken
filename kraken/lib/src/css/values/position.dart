@@ -9,17 +9,6 @@ import 'package:kraken/css.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 
-class CSSStylePosition {
-  CSSStylePosition({
-    this.length,
-    this.percentage,
-  });
-  /// Absolute position to image container when length type is set.
-  double? length;
-  /// Relative position to image container when keyword or percentage type is set.
-  double? percentage;
-}
-
 /// CSS Values and Units: https://drafts.csswg.org/css-values-3/#position
 /// The <position> value specifies the position of a object area
 /// (e.g. background image) inside a positioning area (e.g. background
@@ -35,39 +24,68 @@ class CSSPosition {
   // [0, 1]
   static Alignment initial = Alignment.topLeft; // default value.
 
-  static CSSStylePosition parsePosition(String input, Size viewportSize, bool isHorizontal) {
+  /// Parse background-position shorthand to background-position-x and background-position-y list.
+  static List<String> parsePositionShorthand(String input) {
+    List<String> positions = [];
+    List<String> split = input.split(_splitRegExp);
+    if (split.length == 1) {
+      switch(split.first) {
+        case TOP:
+        case BOTTOM:
+          positions.add(CENTER);
+          positions.add(split.first);
+          break;
+        case LEFT:
+        case RIGHT:
+          positions.add(split.first);
+          positions.add(CENTER);
+          break;
+        default:
+          positions.add(split.first);
+          positions.add(CENTER);
+          break;
+      }
+    } else if (split.length == 2) {
+      positions.add(split.first);
+      positions.add(split.last);
+    }
+    return positions;
+  }
+
+  /// Parse background-position-x/background-position-y from string to CSSBackgroundPosition type.
+  static CSSBackgroundPosition parsePosition(String input, Size viewportSize, bool isHorizontal) {
     if (CSSLength.isPercentage(input)) {
-      return CSSStylePosition(percentage: _gatValuePercentage(input));
+      return CSSBackgroundPosition(percentage: _gatValuePercentage(input));
     } else if (CSSLength.isLength(input)) {
-      return CSSStylePosition(length: CSSLength.toDisplayPortValue(input, viewportSize));
+      return CSSBackgroundPosition(length: CSSLength.toDisplayPortValue(input, viewportSize));
     } else {
       if (isHorizontal) {
         switch (input) {
           case LEFT:
-            return CSSStylePosition(percentage: -1);
+            return CSSBackgroundPosition(percentage: -1);
           case RIGHT:
-            return CSSStylePosition(percentage: 1);
+            return CSSBackgroundPosition(percentage: 1);
           case CENTER:
-            return CSSStylePosition(percentage: 0);
+            return CSSBackgroundPosition(percentage: 0);
           default:
-            return CSSStylePosition(percentage: -1);
+            return CSSBackgroundPosition(percentage: -1);
         }
       } else {
         switch (input) {
           case TOP:
-            return CSSStylePosition(percentage: -1);
+            return CSSBackgroundPosition(percentage: -1);
           case BOTTOM:
-            return CSSStylePosition(percentage: 1);
+            return CSSBackgroundPosition(percentage: 1);
           case CENTER:
-            return CSSStylePosition(percentage: 0);
+            return CSSBackgroundPosition(percentage: 0);
           default:
-            return CSSStylePosition(percentage: -1);
+            return CSSBackgroundPosition(percentage: -1);
         }
       }
     }
   }
 
-  static double? _gatValuePercentage(String input) {
+  static double _gatValuePercentage(String input) {
     var percentageValue = input.substring(0, input.length - 1);
     return (double.tryParse(percentageValue) ?? 0) / 50 - 1;
   }

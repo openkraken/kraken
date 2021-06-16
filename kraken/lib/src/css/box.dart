@@ -18,6 +18,17 @@ import 'package:kraken/css.dart';
 
 final RegExp _spaceRegExp = RegExp(r'\s+');
 
+class CSSBackgroundPosition {
+  CSSBackgroundPosition({
+    this.length,
+    this.percentage,
+  });
+  /// Absolute position to image container when length type is set.
+  double? length;
+  /// Relative position to image container when keyword or percentage type is set.
+  double? percentage;
+}
+
 /// - background
 /// - border
 mixin CSSBoxMixin on RenderStyleBase {
@@ -50,9 +61,9 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   /// Background-position-x
-  CSSStylePosition get backgroundPositionX => _backgroundPositionX;
-  CSSStylePosition _backgroundPositionX = CSSStylePosition(percentage: -1);
-  set backgroundPositionX(CSSStylePosition? value) {
+  CSSBackgroundPosition get backgroundPositionX => _backgroundPositionX;
+  CSSBackgroundPosition _backgroundPositionX = CSSBackgroundPosition(percentage: -1);
+  set backgroundPositionX(CSSBackgroundPosition? value) {
     if (value == null) return;
     if (value == _backgroundPositionX) return;
     _backgroundPositionX = value;
@@ -60,9 +71,9 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   /// Background-position-y
-  CSSStylePosition get backgroundPositionY => _backgroundPositionY;
-  CSSStylePosition _backgroundPositionY = CSSStylePosition(percentage: -1);
-  set backgroundPositionY(CSSStylePosition? value) {
+  CSSBackgroundPosition get backgroundPositionY => _backgroundPositionY;
+  CSSBackgroundPosition _backgroundPositionY = CSSBackgroundPosition(percentage: -1);
+  set backgroundPositionY(CSSBackgroundPosition? value) {
     if (value == null) return;
     if (value == _backgroundPositionY) return;
     _backgroundPositionY = value;

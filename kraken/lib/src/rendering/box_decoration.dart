@@ -310,29 +310,13 @@ class BoxDecorationPainter extends BoxPainter {
                 .toRRect(rect));
         break;
     }
-//    _imagePainter.paint(canvas, rect, clipPath, configuration);
     _paint(canvas, rect, clipPath, configuration);
   }
 
   /// Draw the image onto the given canvas.
-  ///
-  /// The image is drawn at the position and size given by the `rect` argument.
-  ///
-  /// The image is clipped to the given `clipPath`, if any.
-  ///
-  /// The `configuration` object is used to resolve the image (e.g. to pick
-  /// resolution-specific assets), and to implement the
-  /// [DecorationImage.matchTextDirection] feature.
-  ///
-  /// If the image needs to be painted again, e.g. because it is animated or
-  /// because it had not yet been loaded the first time this method was called,
-  /// then the `onChanged` callback passed to [DecorationImage.createPainter]
-  /// will be called.
+  /// Forked from flutter with parameter customization of _paintImage method:
+  /// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L231
   void _paint(Canvas canvas, Rect rect, Path? clipPath, ImageConfiguration configuration) {
-    assert(canvas != null);
-    assert(rect != null);
-    assert(configuration != null);
-
     DecorationImage decorationImage = _decoration.image!;
     bool flipHorizontally = false;
     if (decorationImage.matchTextDirection) {
@@ -426,7 +410,7 @@ class BoxDecorationPainter extends BoxPainter {
   }
 
   /// Paints an image into the given rectangle on the canvas.
-  /// Migrated paintImage method from flutter.
+  /// Forked from flutter with parameter customization of _paintImage method:
   /// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L419
   /// Add positionX and positionY parameter to add the ability to specify absolute position of background image.
   void _paintImage({
@@ -437,8 +421,8 @@ class BoxDecorationPainter extends BoxPainter {
     double scale = 1.0,
     ColorFilter? colorFilter,
     BoxFit? fit,
-    required CSSStylePosition positionX,
-    required CSSStylePosition positionY,
+    required CSSBackgroundPosition positionX,
+    required CSSBackgroundPosition positionY,
     Rect? centerSlice,
     ImageRepeat repeat = ImageRepeat.noRepeat,
     bool flipHorizontally = false,
@@ -608,6 +592,8 @@ class BoxDecorationPainter extends BoxPainter {
     }
   }
 
+  /// Forked from flutter with no modification:
+  /// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L621
   Rect _scaleRect(Rect rect, double scale) => Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);
 
   @override
@@ -778,6 +764,8 @@ class BoxDecorationPainter extends BoxPainter {
   }
 }
 
+/// Forked from flutter with no modification:
+/// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L597
 Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) sync* {
   int startX = 0;
   int startY = 0;
