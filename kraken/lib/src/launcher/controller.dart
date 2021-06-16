@@ -108,9 +108,7 @@ class KrakenViewController {
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_START);
     }
 
-    if (contextId == null) {
-      _contextId = initBridge();
-    }
+    _contextId = contextId ?? initBridge();
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_END);
@@ -196,7 +194,7 @@ class KrakenViewController {
     // should clear previous page cached ui commands
     clearUICommand(_contextId);
 
-    disposeBridge(_contextId);
+    disposeContext(_contextId);
 
     // DisposeEventTarget command will created when js context disposed, should flush them all.
     flushUICommand();
@@ -530,20 +528,29 @@ class KrakenController {
     // Should clear previous page cached ui commands
     clearUICommand(_view.contextId);
 
-    // Should init JS first
-    await reloadJSContext(_view.contextId);
+    disposeContext(_view.contextId);
 
-    // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
-    flushUICommand();
+    // Wait for next microtask to make sure C++ native Elements are GC collected and generate disposeEventTarget command in the command queue.
+    Completer completer = Completer();
+    Future.microtask(() {
+      // DisposeEventTarget command will created when js context disposed, should flush them before creating new view.
+      flushUICommand();
 
-    _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
-        background: _view.background,
-        showPerformanceOverlay: _view.showPerformanceOverlay,
-        enableDebug: _view.enableDebug,
-        contextId: _view.contextId,
-        rootController: this,
-        navigationDelegate: _view.navigationDelegate);
-    _view.attachView(parent!, previousSibling);
+      allocateNewContext(_view.contextId);
+
+      _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
+          background: _view.background,
+          showPerformanceOverlay: _view.showPerformanceOverlay,
+          enableDebug: _view.enableDebug,
+          contextId: _view.contextId,
+          rootController: this,
+          navigationDelegate: _view.navigationDelegate);
+      _view.attachView(parent!, previousSibling);
+
+      completer.complete();
+    });
+
+    return completer.future;
   }
 
   // reload current kraken view.
@@ -617,9 +624,9 @@ class KrakenController {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_LOAD_START);
     }
 
-    _bundleContent = _bundleContent ?? bundleContent;
-    _bundlePath = _bundlePath ?? bundlePath;
-    _bundleURL = _bundleURL ?? bundleURL;
+    _bundleContent = bundleContent ?? _bundleContent;
+    _bundlePath =  bundlePath ?? _bundlePath;
+    _bundleURL =  bundleURL ?? _bundleURL;
     String? url = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 
     if (url == null && methodChannel is KrakenNativeChannel) {

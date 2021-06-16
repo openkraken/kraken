@@ -106,26 +106,26 @@ void disposeContext(int32_t contextId) {
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
   contextPool[contextId] = nullptr;
-  foundation::UICommandBuffer::instance(contextId)->clear();
-
 #if ENABLE_PROFILE
   auto nativePerformance = kraken::binding::jsc::NativePerformance::instance(contextId);
   nativePerformance->entries.clear();
 #endif
 }
 
-int32_t allocateNewContext() {
-  poolIndex++;
-  if (poolIndex >= maxPoolSize) {
-    poolIndex = searchForAvailableContextId();
+int32_t allocateNewContext(int32_t targetContextId) {
+  if (targetContextId == -1) {
+    targetContextId = poolIndex++;
   }
 
-  assert(contextPool[poolIndex] == nullptr && (std::string("can not allocate JSBridge at index") +
-                                               std::to_string(poolIndex) + std::string(": bridge have already exist."))
-                                                .c_str());
+  if (targetContextId >= maxPoolSize) {
+    targetContextId = searchForAvailableContextId();
+  }
 
-  auto context = new kraken::JSBridge(poolIndex, printError);
-  contextPool[poolIndex] = context;
+  assert(contextPool[targetContextId] == nullptr && (std::string("can not allocate JSBridge at index") +
+                                               std::to_string(targetContextId) + std::string(": bridge have already exist."))
+                                                .c_str());
+  auto context = new kraken::JSBridge(targetContextId, printError);
+  contextPool[targetContextId] = context;
   return poolIndex;
 }
 

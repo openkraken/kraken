@@ -140,18 +140,18 @@ typedef DartDisposeContext = void Function(int contextId);
 final DartDisposeContext _disposeContext =
     nativeDynamicLibrary.lookup<NativeFunction<NativeDisposeContext>>('disposeContext').asFunction();
 
-void disposeBridge(int contextId) {
+void disposeContext(int contextId) {
   _disposeContext(contextId);
 }
 
-typedef NativeAllocateNewContext = Int32 Function();
-typedef DartAllocateNewContext = int Function();
+typedef NativeAllocateNewContext = Int32 Function(Int32);
+typedef DartAllocateNewContext = int Function(int);
 
 final DartAllocateNewContext _allocateNewContext =
     nativeDynamicLibrary.lookup<NativeFunction<NativeAllocateNewContext>>('allocateNewContext').asFunction();
 
-int allocateNewContext() {
-  return _allocateNewContext();
+int allocateNewContext([int targetContextId = -1]) {
+  return _allocateNewContext(targetContextId);
 }
 
 // Regisdster reloadJsContext
