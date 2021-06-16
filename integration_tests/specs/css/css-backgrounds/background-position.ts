@@ -1,4 +1,4 @@
-fdescribe('Background-position', () => {
+describe('Background-position', () => {
   it('center', async () => {
     // position
     const position = document.createElement('div');
