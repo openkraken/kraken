@@ -1168,9 +1168,23 @@ class Element extends Node
       });
       return;
     } else {
+      CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
       // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
       // [StyleChangeListener] to be invoked in sync.
       style.setProperty(key, value, viewportSize);
+
+      // When renderer and style listener is not created when original display is none,
+      // thus it needs to create renderer when style changed.
+      if (originalDisplay == CSSDisplay.none && key == DISPLAY && value != NONE) {
+        RenderBox? after;
+        Element parent = this.parent as Element;
+        if (parent.scrollingContentLayoutBox != null) {
+          after = parent.scrollingContentLayoutBox!.lastChild;
+        } else {
+          after = (parent.renderBoxModel as RenderLayoutBox).lastChild;
+        }
+        attachTo(parent, after: after);
+      }
     }
   }
 

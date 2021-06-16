@@ -16,10 +16,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
 import 'debug_overlay.dart';
 
-// Constraints of element whose display style is none
-final _displayNoneConstraints =
-    BoxConstraints(minWidth: 0, maxWidth: 0, minHeight: 0, maxHeight: 0);
-
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   bool isPositioned = false;
 
@@ -770,11 +766,6 @@ class RenderBoxModel extends RenderBox
 
     CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
-    bool isDisplayNone = transformedDisplay == CSSDisplay.none;
-
-    if (isDisplayNone) {
-      return _displayNoneConstraints;
-    }
 
     EdgeInsets? borderEdge = renderStyle.borderEdge;
     EdgeInsetsGeometry? padding = renderStyle.padding;
@@ -1332,11 +1323,6 @@ class RenderBoxModel extends RenderBox
     needsLayout = false;
   }
 
-  bool get isCSSDisplayNone {
-    CSSDisplay? display = renderStyle.display;
-    return display != null && display == CSSDisplay.none;
-  }
-
   /// [RenderLayoutBox] real paint things after basiclly paint box model.
   /// Override which to paint layout or intrinsic things.
   /// Used by [RenderIntrinsic], [RenderFlowLayout], [RenderFlexLayout].
@@ -1350,7 +1336,7 @@ class RenderBoxModel extends RenderBox
       childPaintDuration = 0;
       PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: targetId);
     }
-    if (isCSSDisplayNone || isCSSVisibilityHidden) {
+    if (isCSSVisibilityHidden) {
       if (kProfileMode) {
         PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: targetId);
       }

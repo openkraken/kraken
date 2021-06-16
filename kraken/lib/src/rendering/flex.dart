@@ -731,13 +731,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     CSSPositionedLayout.applyPositionedChildOffset(this, child);
   }
 
-  bool _isChildDisplayNone(RenderObject child) {
-    if (child is RenderBoxModel) {
-      return child.renderStyle.display == CSSDisplay.none;
-    }
-    return false;
-  }
-
   bool isPlaceholderPositioned(RenderObject child) {
     if (child is RenderPositionHolder) {
       RenderBoxModel realDisplayedBox = child.realDisplayedBox!;
@@ -1609,11 +1602,6 @@ class RenderFlexLayout extends RenderLayoutBox {
           continue;
         }
 
-        if (_isChildDisplayNone(child)) {
-          // Skip No Grow and unsized child.
-          child = childParentData.nextSibling;
-          continue;
-        }
 
         late DateTime childLayoutStart;
         if (kProfileMode) {

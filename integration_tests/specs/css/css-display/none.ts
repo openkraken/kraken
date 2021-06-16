@@ -15,4 +15,70 @@ describe('Display', () => {
 
     await snapshot();
   });
+
+
+  it('should works when changed from none to block', async (done) => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'none',
+          width: '200px',
+          height: '100px',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        createElement('span', {
+          style: {
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createText('none to block'),
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div.style.display = 'block';
+       await snapshot();
+       done();
+    })
+  });
+
+  it('should works when changed from block to none', async (done) => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '100px',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        createElement('span', {
+          style: {
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createText('block to none'),
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+       div.style.display = 'none';
+       await snapshot();
+       done();
+    })
+  });
 });
