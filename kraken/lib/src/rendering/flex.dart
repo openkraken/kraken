@@ -699,13 +699,9 @@ class RenderFlexLayout extends RenderLayoutBox {
           child.parentData as RenderLayoutParentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        bool percentageOfSizingFound = child.renderStyle
-            .isPercentageOfSizingExist(
-                logicalContentWidth, logicalContentHeight);
+        bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(this);
         bool percentageToOwnFound = child.renderStyle.isPercentageToOwnExist();
-        bool percentageToContainingBlockFound = child.renderStyle
-            .resolvePercentageToContainingBlock(
-                this, logicalContentWidth, logicalContentHeight);
+        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(this);
 
         /// When percentage exists in sizing styles(width/height) and styles relies on its own size,
         /// it needs to relayout twice cause the latter relies on the size calculated in the first relayout
@@ -931,9 +927,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle
-            .resolvePercentageToContainingBlock(
-                this, logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(this);
         if (percentageExist) {
           percentageFound = true;
         }
@@ -981,8 +975,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(
-            logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(this);
         if (percentageExist) {
           percentageFound = true;
           break;
@@ -1609,11 +1602,13 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
 
         BoxConstraints childConstraints = getChildConstraints(
-            child, metrics, runBetweenSpace,
-            isFlexGrow: isFlexGrow,
-            isFlexShrink: isFlexShrink,
-            isStretchSelf: isStretchSelf);
-
+          child,
+          metrics,
+          runBetweenSpace,
+          isFlexGrow: isFlexGrow,
+          isFlexShrink: isFlexShrink,
+          isStretchSelf: isStretchSelf
+        );
         child.layout(childConstraints, parentUsesSize: true);
 
         // @FIXME: need to update runMetrics cause child relayout may affect container size

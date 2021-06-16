@@ -152,6 +152,48 @@ describe('Box margin', () => {
     await snapshot();
   });
 
+  it('should work with percentage of positioned element', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          position: 'relative',
+          background: 'blue',
+          border: '10px solid green',
+          padding: '10px',
+          width: '120px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'yellow',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              position: 'absolute',
+              background: 'pink',
+              marginLeft: '100%',
+            },
+          },
+          [(text = createText(`two`))]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
   it('should work with percentage after element is attached', async (done) => {
     let div2;
     let div;
