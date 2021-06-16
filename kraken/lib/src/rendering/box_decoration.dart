@@ -287,7 +287,12 @@ class BoxDecorationPainter extends BoxPainter {
   void _paintBackgroundImage(
       Canvas canvas, Rect rect, ImageConfiguration configuration) {
     if (_decoration.image == null) return;
-    _imagePainter ??= BoxDecorationImagePainter._(_decoration.image!, renderStyle, onChanged!);
+    _imagePainter ??= BoxDecorationImagePainter._(
+      _decoration.image!,
+      renderStyle.backgroundPositionX,
+      renderStyle.backgroundPositionY,
+      onChanged!
+    );
     Path? clipPath;
     switch (_decoration.shape) {
       case BoxShape.circle:
@@ -475,10 +480,11 @@ class BoxDecorationPainter extends BoxPainter {
 /// Forked from flutter of [DecorationImagePainter] Class.
 /// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L208
 class BoxDecorationImagePainter {
-  BoxDecorationImagePainter._(this._details, this._renderStyle, this._onChanged);
+  BoxDecorationImagePainter._(this._details, this._backgroundPositionX, this._backgroundPositionY, this._onChanged);
 
   final DecorationImage _details;
-  final RenderStyle _renderStyle;
+  final CSSBackgroundPosition _backgroundPositionX;
+  final CSSBackgroundPosition _backgroundPositionY;
   final VoidCallback _onChanged;
 
   ImageStream? _imageStream;
@@ -534,8 +540,8 @@ class BoxDecorationImagePainter {
       scale: _details.scale * _image!.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
-      positionX: _renderStyle.backgroundPositionX,
-      positionY: _renderStyle.backgroundPositionY,
+      positionX: _backgroundPositionX,
+      positionY: _backgroundPositionY,
       centerSlice: _details.centerSlice,
       repeat: _details.repeat,
       flipHorizontally: flipHorizontally,
