@@ -525,8 +525,10 @@ function getDevicesInfo() {
   return androidDevices;
 }
 
-task('run-benchmark', (done) => {
+task('run-benchmark', async (done) => {
   let androidDevices = getDevicesInfo();
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   done();
 });
