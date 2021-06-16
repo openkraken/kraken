@@ -475,7 +475,7 @@ class BoxDecorationPainter extends BoxPainter {
 /// Forked from flutter of [DecorationImagePainter] Class.
 /// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L208
 class BoxDecorationImagePainter {
-  BoxDecorationImagePainter._(this._details, this._renderStyle, this._onChanged) : assert(_details != null);
+  BoxDecorationImagePainter._(this._details, this._renderStyle, this._onChanged);
 
   final DecorationImage _details;
   final RenderStyle _renderStyle;
@@ -555,7 +555,6 @@ class BoxDecorationImagePainter {
     }
     _image?.dispose();
     _image = value;
-    assert(_onChanged != null);
     if (!synchronousCall)
       _onChanged();
   }
