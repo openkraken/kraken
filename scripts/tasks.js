@@ -528,14 +528,24 @@ function getDevicesInfo() {
 task('run-benchmark', async (done) => {
   let androidDevices = getDevicesInfo();
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.openkraken.kraken_example');
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.openkraken.kraken_example');
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.openkraken.kraken_example');
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.openkraken.kraken_example');
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.openkraken.kraken_example');
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.openkraken.kraken_example');
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.openkraken.kraken_example');
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.openkraken.kraken_example');
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.openkraken.kraken_example');
   execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.openkraken.kraken_example');
   done();
 });
