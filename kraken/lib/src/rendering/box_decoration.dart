@@ -84,15 +84,6 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
     }
   }
 
-  ImageStream? _imageStream;
-  ImageInfo? _image;
-
-  void _handleImage(ImageInfo value, bool synchronousCall) {
-    if (_image == value)
-      return;
-    _image = value;
-  }
-
   void paintDecoration(
       PaintingContext context, Offset offset, EdgeInsets? padding) {
     BoxDecoration? decoration = renderStyle.decoration;
