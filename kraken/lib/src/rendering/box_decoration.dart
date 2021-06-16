@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:developer' as developer;
 import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
@@ -605,10 +604,12 @@ void debugFlushLastFrameImageSizeInfo() {
   }());
 }
 
-/// Paints an image into the given rectangle on the canvas.
-/// Forked from flutter with parameter customization of _paintImage method:
-/// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L419
-/// Add positionX and positionY parameter to add the ability to specify absolute position of background image.
+/*
+  Paints an image into the given rectangle on the canvas.
+  Forked from flutter with parameter customization of _paintImage method:
+  https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L419
+  Add positionX and positionY parameter to add the ability to specify absolute position of background image.
+ */
 void _paintImage({
   required Canvas canvas,
   required Rect rect,
@@ -735,13 +736,6 @@ void _paintImage({
         if (_pendingImageSizeInfo.isEmpty) {
           return;
         }
-        developer.postEvent(
-          'Flutter.ImageSizesForFrame',
-          <String, Object>{
-            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
-              imageSizeInfo.source!: imageSizeInfo.toJson(),
-          },
-        );
         _pendingImageSizeInfo = <String, ImageSizeInfo>{};
       });
     }
@@ -799,8 +793,10 @@ void _paintImage({
   }
 }
 
-/// Forked from flutter with no modification:
-/// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L597
+/*
+  Forked from flutter with no modification:
+  https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L597
+ */
 Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) sync* {
   int startX = 0;
   int startY = 0;
@@ -825,7 +821,9 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
   }
 }
 
-/// Forked from flutter with no modification:
-/// https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L621
+/*
+  Forked from flutter with no modification:
+  https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/decoration_image.dart#L621
+ */
 Rect _scaleRect(Rect rect, double scale) => Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);
 
