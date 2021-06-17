@@ -38,5 +38,6 @@ lib/generated_plugin_registrant.dart
 
 
 .specs
+specs/index.ts
 pubspec.lock
 GeneratedPluginRegistrant.swift

@@ -1,28 +1,20 @@
 const path = require('path');
-const glob = require('glob');
 const bableTransformSnapshotPlugin = require('./scripts/babel_transform_snapshot');
+const generateEntryFile = require('./scripts/generate_entry_file');
 
 const context = path.join(__dirname);
 const runtimePath = path.join(context, 'runtime');
-const globalRuntimePath = path.join(context, 'runtime/global');
-const resetRuntimePath = path.join(context, 'runtime/reset');
 const buildPath = path.join(context, '.specs');
 const testPath = path.join(context, 'specs');
 const snapshotPath = path.join(context, 'snapshots');
-const entryFiles = glob.sync('specs/**/*.{js,jsx,ts,tsx}', {
-  cwd: context,
-  ignore: 'node_modules/**',
-}).map((file) => './' + file);
 
-// Add global vars
-entryFiles.unshift(globalRuntimePath);
-entryFiles.unshift(resetRuntimePath);
+generateEntryFile();
 
 module.exports = {
   context: context,
   mode: 'development',
   devtool: false,
-  entry: entryFiles,
+  entry: './specs/index.ts',
   output: {
     path: buildPath,
     filename: 'specs.build.js',
@@ -58,7 +50,7 @@ module.exports = {
             presets: [
               [
                 '@babel/preset-env',
-                { 
+                {
                   targets: {
                     chrome: 76,
                   },
@@ -67,7 +59,7 @@ module.exports = {
                 }],
               [
                 '@babel/preset-typescript',
-                { 
+                {
                   isTSX: true,
                   allExtensions: true
                 }
