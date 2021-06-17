@@ -105,7 +105,12 @@ class CSSStyleProperty {
     properties[BACKGROUND_IMAGE] = values[1];
     properties[BACKGROUND_REPEAT] = values[2];
     properties[BACKGROUND_ATTACHMENT] = values[3];
-    properties[BACKGROUND_POSITION] = values[4];
+    String? backgroundPosition = values[4];
+    if (backgroundPosition != null) {
+      List<String> positions = CSSPosition.parsePositionShorthand(backgroundPosition);
+      properties[BACKGROUND_POSITION_X] = positions[0];
+      properties[BACKGROUND_POSITION_Y] = positions[1];
+    }
     properties[BACKGROUND_SIZE] = values[5];
   }
 
@@ -116,6 +121,16 @@ class CSSStyleProperty {
     if (style.contains(BACKGROUND_POSITION)) style.removeProperty(BACKGROUND_POSITION);
     if (style.contains(BACKGROUND_SIZE)) style.removeProperty(BACKGROUND_SIZE);
     if (style.contains(BACKGROUND_REPEAT)) style.removeProperty(BACKGROUND_REPEAT);
+  }
+
+  static void setShorthandBackgroundPosition(Map<String, String?> properties, String shorthandValue) {
+    List<String> positions = CSSPosition.parsePositionShorthand(shorthandValue);
+    properties[BACKGROUND_POSITION_X] = positions[0];
+    properties[BACKGROUND_POSITION_Y] = positions[1];
+  }
+
+  static void removeShorthandBackgroundPosition(CSSStyleDeclaration style) {
+    if (style.contains(BACKGROUND_POSITION)) style.removeProperty(BACKGROUND_POSITION);
   }
 
   static void setShorthandBorderRadius(Map<String, String?> properties, String shorthandValue) {

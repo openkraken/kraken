@@ -138,7 +138,6 @@ class CSSBackground {
     backgroundImage = DecorationImage(
         image: CSSUrl.parseUrl(url, contextId: contextId)!,
         repeat: imageRepeat,
-        alignment: CSSPosition.parsePosition(style[BACKGROUND_POSITION])!,
         fit: boxFit);
 
     return backgroundImage;
