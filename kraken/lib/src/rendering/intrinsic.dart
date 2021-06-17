@@ -61,16 +61,6 @@ class RenderIntrinsic extends RenderBoxModel
           .mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: targetId);
     }
 
-    CSSDisplay? display = renderStyle.display;
-    if (display == CSSDisplay.none) {
-      size = constraints.smallest;
-      if (kProfileMode) {
-        PerformanceTiming.instance()
-            .mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
-      }
-      return;
-    }
-
     beforeLayout();
 
     double? width = renderStyle.width;
@@ -192,7 +182,7 @@ class RenderIntrinsic extends RenderBoxModel
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+    if (isCSSVisibilityHidden) return;
     paintBoxModel(context, offset);
   }
 

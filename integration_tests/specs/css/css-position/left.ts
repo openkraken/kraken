@@ -2160,4 +2160,46 @@ describe('left', () => {
 
     await snapshot();
   });
+
+  it('should work with percentage of positioned element', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          position: 'relative',
+          background: 'blue',
+          border: '10px solid green',
+          padding: '10px',
+          width: '120px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'yellow',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              position: 'absolute',
+              background: 'pink',
+              left: '100%',
+            },
+          },
+          [(text = createText(`two`))]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
 });

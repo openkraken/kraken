@@ -64,26 +64,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     markNeedsLayout();
   }
 
-  /// How much space to place between children in a run in the main axis.
-  ///
-  /// For example, if [spacing] is 10.0, the children will be spaced at least
-  /// 10.0 logical pixels apart in the main axis.
-  ///
-  /// If there is additional free space in a run (e.g., because the wrap has a
-  /// minimum size that is not filled or because some runs are longer than
-  /// others), the additional free space will be allocated according to the
-  /// textAlign style.
-  ///
-  /// Defaults to 0.0.
-  double get spacing => _spacing;
-  double _spacing = 0.0;
-
-  set spacing(double value) {
-    if (_spacing == value) return;
-    _spacing = value;
-    markNeedsLayout();
-  }
-
   /// How the runs themselves should be placed in the cross axis.
   ///
   /// For example, if [runAlignment] is [MainAxisAlignment.center], the runs are
@@ -101,11 +81,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     markNeedsLayout();
   }
 
-  /// How much space to place between the runs themselves in the cross axis.
-  ///
-  /// For example, if [runSpacing] is 10.0, the runs will be spaced at least
-  /// 10.0 logical pixels apart in the cross axis.
-  ///
   /// If there is additional free space in the overall [RenderWrap] (e.g.,
   /// The distance by which the child's top edge is inset from the top of the stack.
   double? top;
@@ -118,19 +93,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   /// The distance by which the child's left edge is inset from the left of the stack.
   double? left;
-
-  /// because the wrap has a minimum size that is not filled), the additional
-  /// free space will be allocated according to the [runAlignment].
-  ///
-  /// Defaults to 0.0.
-  double get runSpacing => _runSpacing;
-  double _runSpacing = 0.0;
-
-  set runSpacing(double value) {
-    if (_runSpacing == value) return;
-    _runSpacing = value;
-    markNeedsLayout();
-  }
 
   /// How the children within a run should be aligned relative to each other in
   /// the cross axis.
@@ -231,7 +193,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   double _computeIntrinsicHeightForWidth(double width) {
     assert(direction == Axis.horizontal);
-    int runCount = 0;
     double height = 0.0;
     double runWidth = 0.0;
     double runHeight = 0.0;
@@ -242,25 +203,21 @@ class RenderFlowLayout extends RenderLayoutBox {
       final double childHeight = child.getMaxIntrinsicHeight(childWidth);
       if (runWidth + childWidth > width) {
         height += runHeight;
-        if (runCount > 0) height += runSpacing;
-        runCount += 1;
         runWidth = 0.0;
         runHeight = 0.0;
         childCount = 0;
       }
       runWidth += childWidth;
       runHeight = math.max(runHeight, childHeight);
-      if (childCount > 0) runWidth += spacing;
       childCount += 1;
       child = childAfter(child);
     }
-    if (childCount > 0) height += runHeight + runSpacing;
+    if (childCount > 0) height += runHeight;
     return height;
   }
 
   double _computeIntrinsicWidthForHeight(double height) {
     assert(direction == Axis.vertical);
-    int runCount = 0;
     double width = 0.0;
     double runHeight = 0.0;
     double runWidth = 0.0;
@@ -271,19 +228,16 @@ class RenderFlowLayout extends RenderLayoutBox {
       final double childWidth = child.getMaxIntrinsicWidth(childHeight);
       if (runHeight + childHeight > height) {
         width += runWidth;
-        if (runCount > 0) width += runSpacing;
-        runCount += 1;
         runHeight = 0.0;
         runWidth = 0.0;
         childCount = 0;
       }
       runHeight += childHeight;
       runWidth = math.max(runWidth, childWidth);
-      if (childCount > 0) runHeight += spacing;
       childCount += 1;
       child = childAfter(child);
     }
-    if (childCount > 0) width += runWidth + runSpacing;
+    if (childCount > 0) width += runWidth;
     return width;
   }
 
@@ -375,7 +329,8 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   double _getCrossAxisExtent(RenderBox child) {
-    double? lineHeight = _getLineHeight(child);
+    bool isLineHeightValid = _isLineHeightValid(child);
+    double? lineHeight = isLineHeightValid ? _getLineHeight(child) : 0;
     double marginVertical = 0;
     double marginHorizontal = 0;
 
@@ -518,13 +473,9 @@ class RenderFlowLayout extends RenderLayoutBox {
           child.parentData as RenderLayoutParentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        bool percentageOfSizingFound = child.renderStyle
-            .isPercentageOfSizingExist(
-                logicalContentWidth, logicalContentHeight);
+        bool percentageOfSizingFound = child.renderStyle.isPercentageOfSizingExist(this);
         bool percentageToOwnFound = child.renderStyle.isPercentageToOwnExist();
-        bool percentageToContainingBlockFound = child.renderStyle
-            .resolvePercentageToContainingBlock(
-                this, logicalContentWidth, logicalContentHeight);
+        bool percentageToContainingBlockFound = child.renderStyle.resolvePercentageToContainingBlock(this);
 
         /// When percentage exists in sizing styles(width/height) and styles relies on its own size,
         /// it needs to relayout twice cause the latter relies on the size calculated in the first relayout
@@ -594,8 +545,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
     }
-    final double spacing = this.spacing;
-    final double runSpacing = this.runSpacing;
     List<_RunMetrics> runMetrics = <_RunMetrics>[];
     double mainAxisExtent = 0.0;
     double crossAxisExtent = 0.0;
@@ -696,7 +645,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       bool isChildBlockLevel = _isChildBlockLevel(child);
       bool isPreChildBlockLevel = _isChildBlockLevel(preChild);
       bool isLineLengthExeedContainter = whiteSpace != WhiteSpace.nowrap &&
-          (runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit);
+          (runMainAxisExtent + childMainAxisExtent > mainAxisLimit);
 
       if (runChildren.length > 0 &&
           (isChildBlockLevel ||
@@ -704,7 +653,6 @@ class RenderFlowLayout extends RenderLayoutBox {
               isLineLengthExeedContainter)) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
-        if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
         runMetrics.add(_RunMetrics(
           runMainAxisExtent,
           runCrossAxisExtent,
@@ -718,9 +666,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         maxSizeBelowBaseline = 0.0;
       }
       runMainAxisExtent += childMainAxisExtent;
-      if (runChildren.length > 0) {
-        runMainAxisExtent += spacing;
-      }
 
       /// Calculate baseline extent of layout box
       RenderStyle childRenderStyle = _getChildRenderStyle(child)!;
@@ -778,7 +723,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (runChildren.length > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
-      if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
       runMetrics.add(_RunMetrics(
         runMainAxisExtent,
         runCrossAxisExtent,
@@ -850,7 +794,6 @@ class RenderFlowLayout extends RenderLayoutBox {
         break;
     }
 
-    runBetweenSpace += runSpacing;
     double crossAxisOffset = flipCrossAxis
         ? crossAxisContentSize - runLeadingSpace
         : runLeadingSpace;
@@ -862,34 +805,49 @@ class RenderFlowLayout extends RenderLayoutBox {
       final double runMainAxisExtent = metrics.mainAxisExtent;
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double runBaselineExtent = metrics.baselineExtent;
-      final double mainAxisFreeSpace =
-          math.max(0.0, mainAxisContentSize - runMainAxisExtent);
+      final Map<int?, RenderBox> runChildren = metrics.runChildren;
       final int runChildrenCount = metrics.runChildren.length;
+      final double mainAxisFreeSpace = math.max(0.0, mainAxisContentSize - runMainAxisExtent);
+
       double childLeadingSpace = 0.0;
       double childBetweenSpace = 0.0;
 
-      switch (renderStyle.textAlign) {
-        case TextAlign.left:
-        case TextAlign.start:
-          break;
-        case TextAlign.right:
-        case TextAlign.end:
-          childLeadingSpace = mainAxisFreeSpace;
-          break;
-        case TextAlign.center:
-          childLeadingSpace = mainAxisFreeSpace / 2.0;
-          break;
-        case TextAlign.justify:
-          childBetweenSpace = runChildrenCount > 1
-              ? mainAxisFreeSpace / (runChildrenCount - 1)
-              : 0.0;
-          break;
+      // Whether inline level child exists in this run.
+      bool runContainInlineChild = true;
+
+      int? firstChildKey = runChildren.keys.elementAt(0);
+      RenderBox? firstChild = runChildren[firstChildKey];
+      // Block level and inline level child can not exists at the same run,
+      // so only need to loop the first child.
+      if (firstChild is RenderBoxModel) {
+        CSSDisplay? childDisplay = firstChild.renderStyle.transformedDisplay;
+        runContainInlineChild = childDisplay != CSSDisplay.block && childDisplay != CSSDisplay.flex;
       }
 
-      childBetweenSpace += spacing;
+      // Text-align only works on inline level children
+      if (runContainInlineChild) {
+        switch (renderStyle.textAlign) {
+          case TextAlign.left:
+          case TextAlign.start:
+            break;
+          case TextAlign.right:
+          case TextAlign.end:
+            childLeadingSpace = mainAxisFreeSpace;
+            break;
+          case TextAlign.center:
+            childLeadingSpace = mainAxisFreeSpace / 2.0;
+            break;
+          case TextAlign.justify:
+            childBetweenSpace = runChildrenCount > 1 ? mainAxisFreeSpace / (runChildrenCount - 1) : 0.0;
+            break;
+          default:
+            break;
+        }
+      }
+
       double childMainPosition = flipMainAxis
-          ? mainAxisContentSize - childLeadingSpace
-          : childLeadingSpace;
+        ? mainAxisContentSize - childLeadingSpace
+        : childLeadingSpace;
 
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
 
@@ -1132,9 +1090,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle
-            .resolvePercentageToContainingBlock(
-                this, logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.resolvePercentageToContainingBlock(this);
         if (percentageExist) {
           percentageFound = true;
         }
@@ -1177,8 +1133,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
       if (child is RenderBoxModel) {
-        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(
-            logicalContentWidth, logicalContentHeight);
+        bool percentageExist = child.renderStyle.isPercentageOfSizingExist(this);
         if (percentageExist) {
           percentageFound = true;
           break;

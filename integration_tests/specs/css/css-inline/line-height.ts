@@ -69,8 +69,8 @@ describe('line-height', () => {
               height: '50px',
             },
           }, [
-          createText(`line height 2`),
-        ])
+            createText(`line height 2`),
+          ])
       ]
     );
     BODY.appendChild(div);
@@ -104,8 +104,8 @@ describe('line-height', () => {
               height: '50px',
             },
           }, [
-          createText(`line height 2`),
-        ])
+            createText(`line height 2`),
+          ])
       ]
     );
     BODY.appendChild(div);
@@ -141,8 +141,8 @@ describe('line-height', () => {
               height: '50px',
             },
           }, [
-          createText(`line height 2`),
-        ]),
+            createText(`line height 2`),
+          ]),
         createElement(
           'div',
           {
@@ -155,8 +155,8 @@ describe('line-height', () => {
               height: '50px',
             },
           }, [
-          createText(`line height 2`),
-        ])
+            createText(`line height 2`),
+          ])
       ]
     );
     BODY.appendChild(div);
@@ -190,8 +190,8 @@ describe('line-height', () => {
               height: '50px',
             },
           }, [
-          createText(`line height 2`),
-        ]),
+            createText(`line height 2`),
+          ]),
         createElement(
           'div',
           {
@@ -204,8 +204,8 @@ describe('line-height', () => {
               height: '50px',
             },
           }, [
-          createText(`line height 2`),
-        ])
+            createText(`line height 2`),
+          ])
       ]
     );
     BODY.appendChild(div);
@@ -289,4 +289,52 @@ describe('line-height', () => {
     });
   });
 
+  it('works with inheritance', async (done) => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('inherited line-height')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightblue',
+          lineHeight: 1,
+        }
+      }, [
+        createText('not inherited line-height')
+      ]))
+    ]);
+
+    let container = createElement('div', {
+      style: {
+        lineHeight: '40px'
+      }
+    });
+    container.appendChild(div);
+    BODY.appendChild(container);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      container.style.lineHeight = '80px';
+      await snapshot();
+      done();
+    });
+  });
 });

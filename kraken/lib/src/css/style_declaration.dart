@@ -72,6 +72,7 @@ const Map<String, bool> CSSShorthandProperty = {
   MARGIN: true,
   PADDING: true,
   BACKGROUND: true,
+  BACKGROUND_POSITION: true,
   BORDER_RADIUS: true,
   BORDER: true,
   BORDER_COLOR: true,
@@ -284,6 +285,9 @@ class CSSStyleDeclaration {
       case BACKGROUND:
         CSSStyleProperty.removeShorthandBackground(this);
         break;
+      case BACKGROUND_POSITION:
+        CSSStyleProperty.removeShorthandBackgroundPosition(this);
+        break;
       case BORDER_RADIUS:
         CSSStyleProperty.removeShorthandBorderRadius(this);
         break;
@@ -340,6 +344,9 @@ class CSSStyleDeclaration {
         break;
       case BACKGROUND:
         CSSStyleProperty.setShorthandBackground(longhandProperties, normalizedValue);
+        break;
+      case BACKGROUND_POSITION:
+        CSSStyleProperty.setShorthandBackgroundPosition(longhandProperties, normalizedValue);
         break;
       case BORDER_RADIUS:
         CSSStyleProperty.setShorthandBorderRadius(longhandProperties, normalizedValue);

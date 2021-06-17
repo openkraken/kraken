@@ -16,10 +16,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
 import 'debug_overlay.dart';
 
-// Constraints of element whose display style is none
-final _displayNoneConstraints =
-    BoxConstraints(minWidth: 0, maxWidth: 0, minHeight: 0, maxHeight: 0);
-
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   bool isPositioned = false;
 
@@ -775,11 +771,6 @@ class RenderBoxModel extends RenderBox
 
     CSSDisplay? transformedDisplay = renderStyle.transformedDisplay;
     bool isDisplayInline = transformedDisplay == CSSDisplay.inline;
-    bool isDisplayNone = transformedDisplay == CSSDisplay.none;
-
-    if (isDisplayNone) {
-      return _displayNoneConstraints;
-    }
 
     EdgeInsets? borderEdge = renderStyle.borderEdge;
     EdgeInsetsGeometry? padding = renderStyle.padding;
@@ -807,9 +798,15 @@ class RenderBoxModel extends RenderBox
         : null;
 
     // Constraints
-    double minConstraintWidth = 0;
+    // Width should be not smaller than border and padding in horizontal direction
+    // when box-sizing is border-box which is only supported.
+    double minConstraintWidth = renderStyle.borderLeft + renderStyle.borderRight +
+      renderStyle.paddingLeft + renderStyle.paddingRight;
     double maxConstraintWidth = logicalWidth ?? double.infinity;
-    double minConstraintHeight = 0;
+    // Height should be not smaller than border and padding in vertical direction
+    // when box-sizing is border-box which is only supported.
+    double minConstraintHeight = renderStyle.borderTop + renderStyle.borderBottom +
+      renderStyle.paddingTop + renderStyle.paddingBottom;
     double maxConstraintHeight = logicalHeight ?? double.infinity;
 
     if (parent is RenderFlexLayout) {
@@ -1337,11 +1334,6 @@ class RenderBoxModel extends RenderBox
     needsLayout = false;
   }
 
-  bool get isCSSDisplayNone {
-    CSSDisplay? display = renderStyle.display;
-    return display != null && display == CSSDisplay.none;
-  }
-
   /// [RenderLayoutBox] real paint things after basiclly paint box model.
   /// Override which to paint layout or intrinsic things.
   /// Used by [RenderIntrinsic], [RenderFlowLayout], [RenderFlexLayout].
@@ -1355,7 +1347,7 @@ class RenderBoxModel extends RenderBox
       childPaintDuration = 0;
       PerformanceTiming.instance().mark(PERF_PAINT_START, uniqueId: targetId);
     }
-    if (isCSSDisplayNone || isCSSVisibilityHidden) {
+    if (isCSSVisibilityHidden) {
       if (kProfileMode) {
         PerformanceTiming.instance().mark(PERF_PAINT_END, uniqueId: targetId);
       }
@@ -1575,6 +1567,26 @@ class RenderBoxModel extends RenderBox
     );
 
     return isHit;
+  }
+
+  /// Get the closest parent including self with the specified style property
+  RenderBoxModel? getSelfParentWithSpecifiedStyle(String styleProperty) {
+    RenderObject? _parent = this;
+    while (_parent != null && _parent is! RenderViewportBox) {
+      if (_parent is RenderBoxModel && _parent.renderStyle.style![styleProperty].isNotEmpty) {
+        break;
+      }
+      if (_parent.parent != null) {
+        _parent = _parent.parent as RenderObject;
+      } else {
+        _parent = null;
+      }
+    }
+    if (_parent is RenderViewportBox) {
+      return null;
+    }
+
+    return _parent != null ? _parent as RenderBoxModel : null;
   }
 
   @override

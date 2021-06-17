@@ -46,4 +46,115 @@ describe('Align text-align', () => {
 
     await snapshot();
   });
+
+  it('works with inheritance', async (done) => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          display: 'inline-block',
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('inherited text-align')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          display: 'inline-block',
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightblue',
+          textAlign: 'left',
+        }
+      }, [
+        createText('not inherited text-align')
+      ]))
+    ]);
+
+    let container = createElement('div', {
+      style: {
+        textAlign: 'center'
+      }
+    });
+    container.appendChild(div);
+    BODY.appendChild(container);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      container.style.textAlign = 'right';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('works only with inline and inline-block', async () => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+        textAlign: 'center'
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          display: 'inline-block',
+          width: '250px',
+          height: '50px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('display inline-block')
+      ])),
+      (createElement('div', {
+        style: {
+          display: 'inline-flex',
+          width: '250px',
+          height: '50px',
+          backgroundColor: 'pink',
+        }
+      }, [
+        createText('display inline-flex')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '50px',
+          backgroundColor: 'lightblue',
+          fontFamily: 'arial',
+        }
+      }, [
+        createText('display block')
+      ])),
+      (createElement('div', {
+        style: {
+          display: 'flex',
+          width: '250px',
+          height: '50px',
+          backgroundColor: 'coral',
+          fontFamily: 'arial',
+        }
+      }, [
+        createText('display flex')
+      ]))
+    ]);
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
 });

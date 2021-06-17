@@ -18,6 +18,17 @@ import 'package:kraken/css.dart';
 
 final RegExp _spaceRegExp = RegExp(r'\s+');
 
+class CSSBackgroundPosition {
+  CSSBackgroundPosition({
+    this.length,
+    this.percentage,
+  });
+  /// Absolute position to image container when length type is set.
+  double? length;
+  /// Relative position to image container when keyword or percentage type is set.
+  double? percentage;
+}
+
 /// - background
 /// - border
 mixin CSSBoxMixin on RenderStyleBase {
@@ -47,6 +58,26 @@ mixin CSSBoxMixin on RenderStyleBase {
     if (value == null) return;
     if (value == _backgroundImage) return;
     _backgroundImage = value;
+  }
+
+  /// Background-position-x
+  CSSBackgroundPosition get backgroundPositionX => _backgroundPositionX;
+  CSSBackgroundPosition _backgroundPositionX = CSSBackgroundPosition(percentage: -1);
+  set backgroundPositionX(CSSBackgroundPosition? value) {
+    if (value == null) return;
+    if (value == _backgroundPositionX) return;
+    _backgroundPositionX = value;
+    renderBoxModel!.markNeedsPaint();
+  }
+
+  /// Background-position-y
+  CSSBackgroundPosition get backgroundPositionY => _backgroundPositionY;
+  CSSBackgroundPosition _backgroundPositionY = CSSBackgroundPosition(percentage: -1);
+  set backgroundPositionY(CSSBackgroundPosition? value) {
+    if (value == null) return;
+    if (value == _backgroundPositionY) return;
+    _backgroundPositionY = value;
+    renderBoxModel!.markNeedsPaint();
   }
 
   /// Background-attachment
@@ -155,8 +186,12 @@ mixin CSSBoxMixin on RenderStyleBase {
         renderStyle.backgroundOrigin = getBackgroundOrigin(present);
       } else if (property == BACKGROUND_COLOR) {
         updateBackgroundColor();
+      } else if (property == BACKGROUND_POSITION_X) {
+        backgroundPositionX = CSSPosition.parsePosition(present, viewportSize, true);
+      } else if (property == BACKGROUND_POSITION_Y) {
+        backgroundPositionY = CSSPosition.parsePosition(present, viewportSize, false);
       } else if (property.startsWith(BACKGROUND)) {
-        // Including BACKGROUND_REPEAT, BACKGROUND_POSITION, BACKGROUND_IMAGE,
+        // Including BACKGROUND_REPEAT, BACKGROUND_IMAGE,
         //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.
         updateBackgroundImage(property, present);
       } else if (property.startsWith(BORDER)) {
