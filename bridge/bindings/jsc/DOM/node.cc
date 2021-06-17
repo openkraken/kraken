@@ -56,11 +56,11 @@ NodeInstance::NodeInstance(JSNode *node, NodeType nodeType, int64_t targetId)
 
 // Returns true if node is connected and false otherwise.
 bool NodeInstance::isConnected() {
-  bool _isConnected = eventTargetId == BODY_TARGET_ID;
+  bool _isConnected = eventTargetId == HTML_TARGET_ID;
   auto parent = parentNode;
 
   while (parent != nullptr && !_isConnected) {
-    _isConnected = parent->eventTargetId == BODY_TARGET_ID;
+    _isConnected = parent->eventTargetId == HTML_TARGET_ID;
     parent = parent->parentNode;
   }
 
@@ -145,7 +145,7 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
     ElementInstance *element = reinterpret_cast<ElementInstance *>(node);
 
     /* createElement */
-    std::string tagName = element->tagName();
+    std::string tagName = element->getRegisteredTagName();
     auto newElement = JSElement::buildElementInstance(element->document()->context, tagName);
 
     /* copy attributes */
@@ -155,8 +155,8 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
     JSObjectRef attributeObjectRef = JSValueToObject(ctx, attributeValueRef, nullptr);
     auto mAttributes = reinterpret_cast<JSElementAttributes *>(JSObjectGetPrivate(attributeObjectRef));
 
-    std::map<std::string, JSStringRef> &attributesMap = mAttributes->getAttributesMap();
-    std::vector<JSStringRef> &attributesVector = mAttributes->getAttributesVector();
+    std::map<std::string, JSValueRef> &attributesMap = mAttributes->getAttributesMap();
+    std::vector<JSValueRef> &attributesVector = mAttributes->getAttributesVector();
 
     (*newElement->getAttributes())->setAttributesMap(attributesMap);
     (*newElement->getAttributes())->setAttributesVector(attributesVector);
@@ -169,8 +169,8 @@ JSValueRef JSNode::copyNodeValue(JSContextRef ctx, NodeInstance *node) {
     NativeString args_01{};
     buildUICommandArgs(newNodeEventTargetId, args_01);
 
-    foundation::UICommandTaskMessageQueue::instance(newElement->contextId)
-      ->registerCommand(element->eventTargetId, UICommand::cloneNode, args_01, nullptr);
+    foundation::UICommandBuffer::instance(newElement->contextId)
+      ->addCommand(element->eventTargetId, UICommand::cloneNode, args_01, nullptr);
 
     return newElement->object;
   } else if (node->nodeType == TEXT_NODE) {
@@ -202,7 +202,13 @@ JSValueRef JSNode::cloneNode(JSContextRef ctx, JSObjectRef function, JSObjectRef
                              const JSValueRef *arguments, JSValueRef *exception) {
   auto selfInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(thisObject));
 
-  const JSValueRef deepValue = arguments[0];
+  JSValueRef deepValue;
+  if (argumentCount < 1) {
+    deepValue = JSValueMakeBoolean(ctx, false);
+  } else {
+    deepValue = arguments[0];
+  }
+
   if (!JSValueIsBoolean(ctx, deepValue)) {
     throwJSError(ctx, "Failed to cloneNode: deep should be a Boolean.", exception);
     return nullptr;
@@ -257,7 +263,7 @@ JSValueRef JSNode::appendChild(JSContextRef ctx, JSObjectRef function, JSObjectR
     return nullptr;
   }
 
-  if (nodeInstance->eventTargetId == BODY_TARGET_ID || nodeInstance == selfInstance) {
+  if (nodeInstance->eventTargetId == HTML_TARGET_ID || nodeInstance == selfInstance) {
     throwJSError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.",
                  exception);
     return nullptr;
@@ -396,8 +402,8 @@ void NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *refere
       NativeString args_02{};
       buildUICommandArgs(nodeEventTargetId, position, args_01, args_02);
 
-      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(referenceNode->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
+      foundation::UICommandBuffer::instance(_hostClass->contextId)
+        ->addCommand(referenceNode->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
     }
   }
 }
@@ -461,8 +467,8 @@ void NodeInstance::internalAppendChild(NodeInstance *node) {
 
   buildUICommandArgs(nodeEventTargetId, position, args_01, args_02);
 
-  foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
-    ->registerCommand(eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
+  foundation::UICommandBuffer::instance(node->_hostClass->contextId)
+    ->addCommand(eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
 }
 
 void NodeInstance::internalRemove(JSValueRef *exception) {
@@ -478,8 +484,8 @@ NodeInstance *NodeInstance::internalRemoveChild(NodeInstance *node, JSValueRef *
     node->parentNode = nullptr;
     node->unrefer();
     node->_notifyNodeRemoved(this);
-    foundation::UICommandTaskMessageQueue::instance(node->_hostClass->contextId)
-      ->registerCommand(node->eventTargetId, UICommand::removeNode, nullptr);
+    foundation::UICommandBuffer::instance(node->_hostClass->contextId)
+      ->addCommand(node->eventTargetId, UICommand::removeNode, nullptr);
   }
 
   return node;
@@ -514,11 +520,11 @@ NodeInstance *NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeIns
 
   buildUICommandArgs(newChildEventTargetId, position, args_01, args_02);
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(oldChild->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
+  foundation::UICommandBuffer::instance(_hostClass->contextId)
+    ->addCommand(oldChild->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
 
-  foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-    ->registerCommand(oldChild->eventTargetId, UICommand::removeNode, nullptr);
+  foundation::UICommandBuffer::instance(_hostClass->contextId)
+    ->addCommand(oldChild->eventTargetId, UICommand::removeNode, nullptr);
 
   return oldChild;
 }
@@ -534,8 +540,8 @@ JSValueRef JSNode::prototypeGetProperty(std::string &name, JSValueRef *exception
 }
 
 JSValueRef NodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = JSNode::getNodePropertyMap();
-  auto prototypePropertyMap = JSNode::getNodePrototypePropertyMap();
+  auto &propertyMap = JSNode::getNodePropertyMap();
+  auto &prototypePropertyMap = JSNode::getNodePrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) {
     JSStringHolder nameStringHolder = JSStringHolder(context, name);

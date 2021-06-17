@@ -17,13 +17,14 @@
 #include "bindings/jsc/DOM/elements/image_element.h"
 #include "bindings/jsc/DOM/elements/input_element.h"
 #include "bindings/jsc/DOM/elements/object_element.h"
+#include "bindings/jsc/DOM/elements/script_element.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/events/media_error_event.h"
 #include "bindings/jsc/DOM/events/message_event.h"
 #include "bindings/jsc/DOM/events/close_event.h"
 #include "bindings/jsc/DOM/events/intersection_change_event.h"
 #include "bindings/jsc/DOM/events/touch_event.h"
-#include "bindings/jsc/DOM/gesture_event.h"
+#include "bindings/jsc/DOM/events/gesture_event.h"
 #include "bindings/jsc/DOM/custom_event.h"
 
 namespace kraken::binding::jsc {

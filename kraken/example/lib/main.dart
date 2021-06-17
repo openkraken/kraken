@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
+import 'package:kraken_devtools/kraken_devtools.dart';
 import 'dart:ui';
 
 void main() {
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyBrowser extends StatefulWidget {
-  MyBrowser({Key key, this.title}) : super(key: key);
+  MyBrowser({Key? key, this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -32,7 +33,7 @@ class MyBrowser extends StatefulWidget {
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
 
-  final String title;
+  final String? title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -52,7 +53,7 @@ class _MyHomePageState extends State<MyBrowser> {
     final MediaQueryData queryData = MediaQuery.of(context);
     final TextEditingController textEditingController = TextEditingController();
 
-    Kraken _kraken;
+    Kraken? _kraken;
     AppBar appBar = AppBar(
         backgroundColor: Colors.black87,
         titleSpacing: 10.0,
@@ -91,6 +92,7 @@ class _MyHomePageState extends State<MyBrowser> {
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
           bundlePath: 'assets/bundle.js',
+          devToolsService: ChromeDevToolsService(),
         ),
     ));
   }

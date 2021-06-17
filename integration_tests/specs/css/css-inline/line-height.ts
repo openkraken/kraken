@@ -68,7 +68,7 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
+          }, [
             createText(`line height 2`),
           ])
       ]
@@ -103,7 +103,7 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
+          }, [
             createText(`line height 2`),
           ])
       ]
@@ -140,7 +140,7 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
+          }, [
             createText(`line height 2`),
           ]),
         createElement(
@@ -154,7 +154,7 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
+          }, [
             createText(`line height 2`),
           ])
       ]
@@ -189,7 +189,7 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
+          }, [
             createText(`line height 2`),
           ]),
         createElement(
@@ -203,7 +203,7 @@ describe('line-height', () => {
               width: '200px',
               height: '50px',
             },
-          },[
+          }, [
             createText(`line height 2`),
           ])
       ]
@@ -264,4 +264,77 @@ describe('line-height', () => {
     await snapshot();
   });
 
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+
+    div2 = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        backgroundColor: 'green',
+        fontSize: '16px',
+      }
+    }, [
+      createText('percentage line height works. ')
+    ]);
+
+    BODY.appendChild(div2);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      div2.style.lineHeight = '200%';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('works with inheritance', async (done) => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('inherited line-height')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightblue',
+          lineHeight: 1,
+        }
+      }, [
+        createText('not inherited line-height')
+      ]))
+    ]);
+
+    let container = createElement('div', {
+      style: {
+        lineHeight: '40px'
+      }
+    });
+    container.appendChild(div);
+    BODY.appendChild(container);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      container.style.lineHeight = '80px';
+      await snapshot();
+      done();
+    });
+  });
 });

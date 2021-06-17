@@ -30,7 +30,6 @@ mixin EventHandlerMixin on Node {
     renderBoxModel.onPan = dispatchEvent;
     renderBoxModel.onScale = dispatchEvent;
     renderBoxModel.onLongPress = dispatchEvent;
-    renderBoxModel.initGestureRecognizer(eventHandlers);
   }
 
   void removeEventResponder(RenderBoxModel renderBoxModel) {
@@ -63,14 +62,15 @@ mixin EventHandlerMixin on Node {
   }
 
   void handlePointCancel(PointerCancelEvent pointEvent) {
-    Event event = Event(EVENT_TOUCH_CANCEL, EventInit());
+    TouchEvent event = _getTouchEvent(EVENT_TOUCH_CANCEL, pointEvent);
     dispatchEvent(event);
   }
 
   TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
     TouchEvent event = TouchEvent(type);
+    var pointerEventOriginal = pointEvent.original;
     // Use original event, prevent to be relative coordinate
-    if (pointEvent.original != null) pointEvent = pointEvent.original;
+    if (pointerEventOriginal != null) pointEvent = pointerEventOriginal;
 
     Touch touch = Touch(
       identifier: pointEvent.pointer,
@@ -92,18 +92,20 @@ mixin EventHandlerMixin on Node {
     return event;
   }
 
-  void handleMouseEvent(String eventType, { PointerDownEvent down, PointerUpEvent up }) {
-    RenderBoxModel root = elementManager.getRootElement().renderBoxModel;
-    Offset globalOffset = root.globalToLocal(Offset(down.position.dx, down.position.dy));
-
+  void handleMouseEvent(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
+    RenderBoxModel? root = elementManager.viewportElement.renderBoxModel;
+    if (root == null || up == null) {
+      return;
+    }
+    Offset globalOffset = root.globalToLocal(Offset(up.position.dx, up.position.dy));
     dispatchEvent(MouseEvent(eventType,
       MouseEventInit(
         bubbles: true,
         cancelable: true,
         clientX: globalOffset.dx,
         clientY: globalOffset.dy,
-        offsetX: down.localPosition.dx,
-        offsetY: down.localPosition.dy,
+        offsetX: up.localPosition.dx,
+        offsetY: up.localPosition.dy,
       )
     ));
   }

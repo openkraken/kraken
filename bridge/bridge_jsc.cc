@@ -21,10 +21,11 @@
 #include "bindings/jsc/DOM/element.h"
 #include "bindings/jsc/DOM/elements/image_element.h"
 #include "bindings/jsc/DOM/elements/input_element.h"
+#include "bindings/jsc/DOM/elements/svg_element.h"
 #include "bindings/jsc/DOM/event.h"
 #include "bindings/jsc/DOM/custom_event.h"
-#include "bindings/jsc/DOM/gesture_event.h"
-#include "bindings/jsc/DOM/mouse_event.h"
+#include "bindings/jsc/DOM/events/gesture_event.h"
+#include "bindings/jsc/DOM/events/mouse_event.h"
 #include "bindings/jsc/DOM/events/input_event.h"
 #include "bindings/jsc/DOM/event_target.h"
 #include "bindings/jsc/DOM/events/close_event.h"
@@ -60,7 +61,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
     handler(contextId, errmsg);
     // trigger window.onerror handler.
-    // TODO: trigger oneror event.
+    // TODO: trigger onerror event.
   };
 
 #if ENABLE_PROFILE
@@ -100,6 +101,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindElement(m_context);
   bindImageElement(m_context);
   bindInputElement(m_context);
+  bindSVGElement(m_context);
   bindWindow(m_context);
   bindPerformance(m_context);
   bindCSSStyleDeclaration(m_context);
@@ -164,7 +166,15 @@ void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType
 void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
   if (!m_context->isValid()) return;
   binding::jsc::updateLocation(url);
+
+#if ENABLE_PROFILE
+  auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
+  nativePerformance->mark(PERF_JS_PARSE_TIME_START);
+  std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t *>(script->string));
+  m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
+#else
   m_context->evaluateJavaScript(script->string, script->length, url, startLine);
+#endif
 }
 
 void JSBridge::evaluateScript(const std::u16string &script, const char *url, int startLine) {

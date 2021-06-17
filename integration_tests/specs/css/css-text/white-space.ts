@@ -478,6 +478,104 @@ describe('Inline level element', () => {
       done();
     });
   });
+
+  it('works with inheritance', async (done) => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          width: '120px',
+          height: '100px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('inherited white-space')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          width: '120px',
+          height: '100px',
+          backgroundColor: 'lightblue',
+          whiteSpace: 'normal',
+        }
+      }, [
+        createText('not inherited white-space')
+      ]))
+    ]);
+
+    let container = createElement('div', {
+      style: {
+      }
+    });
+    container.appendChild(div);
+    BODY.appendChild(container);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      container.style.whiteSpace = 'nowrap';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('works with inheritance and text-overflow ellipsis', async (done) => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          width: '120px',
+          height: '100px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('inherited white-space')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          width: '120px',
+          height: '100px',
+          backgroundColor: 'lightblue',
+          whiteSpace: 'normal',
+        }
+      }, [
+        createText('not inherited white-space')
+      ]))
+    ]);
+
+    let container = createElement('div', {
+      style: {
+      }
+    });
+    container.appendChild(div);
+    BODY.appendChild(container);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      container.style.whiteSpace = 'nowrap';
+      div1.style.overflow = 'hidden';
+      div1.style.textOverflow = 'ellipsis';
+      await snapshot();
+      done();
+    });
+  });
 });
 
 

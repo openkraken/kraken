@@ -8,7 +8,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/src/module/module_manager.dart';
+import 'package:kraken/module.dart';
+import 'package:kraken/foundation.dart';
 
 String EMPTY_STRING = '';
 
@@ -16,7 +17,7 @@ class FetchModule extends BaseModule {
   @override
   String get name => 'Fetch';
 
-  FetchModule(ModuleManager moduleManager) : super(moduleManager);
+  FetchModule(ModuleManager? moduleManager) : super(moduleManager);
 
   @override
   void dispose() {}
@@ -26,13 +27,13 @@ class FetchModule extends BaseModule {
     String url = method;
     Map<String, dynamic> options = params;
 
-    _fetch(url, options).then((Response response) {
+    _fetch(url, options, contextId: moduleManager!.contextId).then((Response response) {
       callback(data: ['', response.statusCode, response.data]);
     }).catchError((e, stack) {
-      if (e is DioError && e.type == DioErrorType.RESPONSE) {
-        callback(data: [e.toString(), e.response.statusCode, EMPTY_STRING]);
+      if (e is DioError && e.type == DioErrorType.response) {
+        callback(data: [e.toString(), e.response!.statusCode, EMPTY_STRING]);
       } else {
-        callback(errmsg: '$e\n$stack');
+        callback(error: '$e\n$stack');
       }
     });
 
@@ -40,7 +41,7 @@ class FetchModule extends BaseModule {
   }
 }
 
-Future<Response> _fetch(String url, Map<String, dynamic> map) async {
+Future<Response> _fetch(String url, Map<String, dynamic> map, { required int contextId }) async {
   Future<Response> future;
   String method = map['method'] ?? 'GET';
 
@@ -52,14 +53,12 @@ Future<Response> _fetch(String url, Map<String, dynamic> map) async {
   if (headers[HttpHeaders.userAgentHeader] == null) {
     headers[HttpHeaders.userAgentHeader] = getKrakenInfo().userAgent;
   }
+  headers[HttpHeaderContextID] = contextId.toString();
 
   BaseOptions options =
-      BaseOptions(headers: headers, method: method, contentType: 'application/json', responseType: ResponseType.plain);
+      BaseOptions(headers: headers, method: method, responseType: ResponseType.plain);
 
   switch (method) {
-    case 'GET':
-      future = Dio(options).get(url);
-      break;
     case 'POST':
       future = Dio(options).post(url, data: map['body']);
       break;
@@ -74,6 +73,10 @@ Future<Response> _fetch(String url, Map<String, dynamic> map) async {
       break;
     case 'HEAD':
       future = Dio(options).head(url);
+      break;
+    case 'GET':
+    default:
+      future = Dio(options).get(url);
       break;
   }
 

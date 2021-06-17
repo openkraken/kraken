@@ -41,9 +41,9 @@ list(APPEND BRIDGE_SOURCE
     foundation/ui_task_queue.cc
     foundation/inspector_task_queue.h
     foundation/inspector_task_queue.cc
-    foundation/task_queue.cpp
+    foundation/task_queue.cc
     foundation/task_queue.h
-    foundation/ui_command_queue.cc
+    foundation/ui_command_buffer.cc
     foundation/ui_command_callback_queue.cc
     foundation/closure.h
     foundation/bridge_callback.h
@@ -119,6 +119,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/elements/input_element.h
     bindings/jsc/DOM/elements/object_element.cc
     bindings/jsc/DOM/elements/object_element.h
+    bindings/jsc/DOM/elements/svg_element.cc
+    bindings/jsc/DOM/elements/svg_element.h
+    bindings/jsc/DOM/elements/script_element.cc
+    bindings/jsc/DOM/elements/script_element.h
     bindings/jsc/KOM/performance.cc
     bindings/jsc/KOM/performance.h
     bindings/jsc/DOM/element.cc
@@ -126,10 +130,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     bindings/jsc/DOM/event.h
     bindings/jsc/DOM/event.cc
     bindings/jsc/DOM/custom_event.h
-    bindings/jsc/DOM/mouse_event.cc
-    bindings/jsc/DOM/mouse_event.h
-    bindings/jsc/DOM/gesture_event.cc
-    bindings/jsc/DOM/gesture_event.h
+    bindings/jsc/DOM/events/mouse_event.cc
+    bindings/jsc/DOM/events/mouse_event.h
+    bindings/jsc/DOM/events/gesture_event.cc
+    bindings/jsc/DOM/events/gesture_event.h
     bindings/jsc/DOM/custom_event.cc
     bindings/jsc/DOM/events/input_event.cc
     bindings/jsc/DOM/events/input_event.h

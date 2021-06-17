@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -40,6 +42,8 @@ const String BACKGROUND = 'background';
 const String BACKGROUND_ATTACHMENT = 'backgroundAttachment';
 const String BACKGROUND_REPEAT = 'backgroundRepeat';
 const String BACKGROUND_POSITION = 'backgroundPosition';
+const String BACKGROUND_POSITION_X = 'backgroundPositionX';
+const String BACKGROUND_POSITION_Y = 'backgroundPositionY';
 const String BACKGROUND_IMAGE = 'backgroundImage';
 const String BACKGROUND_SIZE = 'backgroundSize';
 const String BACKGROUND_COLOR = 'backgroundColor';

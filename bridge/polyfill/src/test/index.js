@@ -1,4 +1,4 @@
-const jasmineCore = require('./jasmine.js');
+const jasmineCore = require('./jasmine');
 const ConsoleReporter = require('./console-reporter');
 const jasmine = jasmineCore.core(jasmineCore);
 const env = jasmine.getEnv({ suppressLoadErrors: true });
@@ -48,26 +48,27 @@ global.setInterval = function (fn, timeout) {
   return timer;
 };
 
+// https://jasmine.github.io/api/edge/Reporter.html
 class JasmineTracker {
-  onJasmineStarted() { }
   onJasmineDone() { }
-  onSpecDone() { }
-
-  jasmineStarted(result) {
-    return this.onJasmineStarted(result);
-  }
 
   jasmineDone(result) {
     return this.onJasmineDone(result);
   }
 
-  specStarted(result) {
-    return new Promise((resolve) => {
-      requestAnimationFrame(resolve);
-    });
-  }
   specDone(result) {
-    return this.onSpecDone(result);
+    return new Promise((resolve, reject) => {
+      try {
+        clearAllTimer();
+        clearAllEventsListeners();
+        resetDocumentElement();
+        kraken.methodChannel.clearMethodCallHandler();
+        resolve();
+      } catch (e) {
+        console.log(e);
+        reject(e);
+      }
+    });
   }
 }
 
@@ -89,12 +90,6 @@ function createPrinter(logger) {
   }
 }
 
-let config = {
-  oneFailurePerSpec: true,
-  failFast: environment.KRAKEN_STOP_ON_FAIL === 'true',
-  random: false
-};
-
 function HtmlSpecFilter(options) {
   var filterString =
     options &&
@@ -113,8 +108,13 @@ var specFilter = new HtmlSpecFilter({
   }
 });
 
-config.specFilter = function (spec) {
-  return specFilter.matches(spec.getFullName());
+let config = {
+  oneFailurePerSpec: true,
+  failFast: environment.KRAKEN_STOP_ON_FAIL === 'true',
+  random: false,
+  specFilter: function (spec) {
+    return specFilter.matches(spec.getFullName());
+  }
 };
 
 env.configure(config);
@@ -163,9 +163,11 @@ global.simulatePointer = function simulatePointer(list) {
 
 global.simulateKeyPress = __kraken_simulate_keypress__;
 
-function clearAllNodes() {
-  while (document.body.firstChild) {
-    document.body.firstChild.remove();
+function resetDocumentElement() {
+  window.scrollTo(0, 0);
+  document.body = document.createElement('body');
+  while (document.head.firstChild) {
+    document.head.firstChild.remove();
   }
 }
 
@@ -181,40 +183,13 @@ function traverseNode(node, handle) {
 }
 
 function clearAllEventsListeners() {
-  window.__clearListeners__();
+  window.__kraken_clear_event_listeners__();
   traverseNode(document.body, (node) => {
-    node.__clearListeners__();
+    node.__kraken_clear_event_listeners__();
   });
 }
 
-__kraken_executeTest__((done) => {
-  jasmineTracker.onSpecDone = (result) => {
-    return new Promise((resolve, reject) => {
-      try {
-        if (window.notNeedInitEnv) {
-          resolve();
-        } else {
-          clearAllTimer();
-          clearAllEventsListeners();
-          clearAllNodes();
-          kraken.methodChannel.clearMethodCallHandler();
-          requestAnimationFrame(() => {
-            __kraken_refresh_paint__(function (e) {
-              if (e) {
-                reject(e);
-              } else {
-                resolve();
-              }
-            });
-          });
-        }
-      } catch (e) {
-        console.log(e);
-        reject(e);
-      }
-    });
-  };
-
+__kraken_execute_test__((done) => {
   jasmineTracker.onJasmineDone = (result) => {
     done(result.overallStatus);
   };

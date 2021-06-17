@@ -26,14 +26,14 @@ JSObjectElement::ObjectElementInstance::ObjectElementInstance(JSObjectElement *j
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
 
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-      ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeObjectElement);
+  foundation::UICommandBuffer::instance(context->getContextId())
+      ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeObjectElement);
 }
 
 JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getObjectElementPropertyMap();
+  auto &propertyMap = getObjectElementPropertyMap();
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
     switch (property) {
     case ObjectElementProperty::type:
     case ObjectElementProperty::currentType: {
@@ -50,10 +50,10 @@ JSValueRef JSObjectElement::ObjectElementInstance::getProperty(std::string &name
 }
 
 bool JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getObjectElementPropertyMap();
+  auto &propertyMap = getObjectElementPropertyMap();
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
     switch (property) {
     case ObjectElementProperty::data: {
       JSStringRef dataStringRef = JSValueToStringCopy(_hostClass->ctx, value, exception);
@@ -64,8 +64,8 @@ bool JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSVa
       NativeString args_02{};
 
       buildUICommandArgs(name, dataStringRef, args_01, args_02);
-      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
+      foundation::UICommandBuffer::instance(_hostClass->contextId)
+        ->addCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     case ObjectElementProperty::type: {
@@ -76,8 +76,8 @@ bool JSObjectElement::ObjectElementInstance::setProperty(std::string &name, JSVa
       NativeString args_02{};
 
       buildUICommandArgs(name, typeStringRef, args_01, args_02);
-      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
+      foundation::UICommandBuffer::instance(_hostClass->contextId)
+        ->addCommand(eventTargetId,UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     default:

@@ -24,8 +24,8 @@ class TextNode extends Node {
   static SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
 
   static TextNode getTextNodeOfNativePtr(Pointer<NativeTextNode> nativeTextNode) {
-    TextNode textNode = _nativeMap[nativeTextNode.address];
-    assert(textNode != null, 'Can not get textNode from nativeTextNode: $nativeTextNode');
+    TextNode? textNode = _nativeMap[nativeTextNode.address];
+    if (textNode == null) throw FlutterError('Can not get textNode from nativeTextNode: $nativeTextNode');
     return textNode;
   }
 
@@ -34,15 +34,17 @@ class TextNode extends Node {
     _nativeMap[_nativePtr.address] = this;
   }
 
-  RenderTextBox _renderTextBox;
+  RenderTextBox? _renderTextBox;
 
   static const String NORMAL_SPACE = '\u0020';
   // The text string.
-  String _data;
+  String? _data;
   String get data {
-    if (_data == null || _data.isEmpty) return '';
+    String? _d = _data;
 
-    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parent?.style);
+    if (_d == null || _d.isEmpty) return '';
+
+    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parentElement!.style);
 
     /// https://drafts.csswg.org/css-text-3/#propdef-white-space
     /// The following table summarizes the behavior of the various white-space values:
@@ -58,15 +60,15 @@ class TextNode extends Node {
         whiteSpace == WhiteSpace.preLine ||
         whiteSpace == WhiteSpace.preWrap ||
         whiteSpace == WhiteSpace.breakSpaces) {
-      return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_data) : _data;
+      return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_d) : _d;
     } else {
-      String collapsedData = collapseWhitespace(_data);
-      // TODO: 
+      String collapsedData = collapseWhitespace(_d);
+      // TODO:
       // Remove the leading space while prev element have space too:
       //   <p><span>foo </span> bar</p>
-      // Refs: 
+      // Refs:
       //   https://github.com/WebKit/WebKit/blob/6a970b217d59f36e64606ed03f5238d572c23c48/Source/WebCore/layout/inlineformatting/InlineLineBuilder.cpp#L295
-      
+
       if (previousSibling == null) {
         collapsedData = collapsedData.trimLeft();
       }
@@ -79,15 +81,14 @@ class TextNode extends Node {
     }
   }
 
-  set data(String newData) {
+  set data(String? newData) {
     assert(newData != null);
     _data = newData;
     updateTextStyle();
   }
 
   @override
-  RenderObject get renderer => _renderTextBox;
-
+  RenderObject? get renderer => _renderTextBox;
 
   void updateTextStyle() {
     if (isRendererAttached) {
@@ -96,45 +97,55 @@ class TextNode extends Node {
   }
 
   void _setTextSizeType(BoxSizeType width, BoxSizeType height) {
+    RenderTextBox? renderTextBox = _renderTextBox;
+    if (renderTextBox == null) return;
+
     // migrate element's size type to RenderTextBox
-    _renderTextBox.widthSizeType = width;
-    _renderTextBox.heightSizeType = height;
+    renderTextBox.widthSizeType = width;
+    renderTextBox.heightSizeType = height;
   }
 
   void _updateTextStyle() {
-    // parentNode must be an element.
-    Element parentElement = parent;
-    _renderTextBox.style = parentElement.style;
-    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement);
-    // Update paragraph line height
-    KrakenRenderParagraph renderParagraph = _renderTextBox.child;
-    renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
-    
-    _setTextNodeProperties(parentElement.style);
+    Element _parentElement = parentElement!;
+    RenderTextBox renderTextBox = _renderTextBox!;
 
-    RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
-    _setTextSizeType(parentRenderBoxModel.widthSizeType, parentRenderBoxModel.heightSizeType);
+    // parentNode must be an element.
+    renderTextBox.style = _parentElement.style;
+    renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement: parentElement);
+    // Update paragraph line height
+    KrakenRenderParagraph renderParagraph = renderTextBox.child as KrakenRenderParagraph;
+    renderParagraph.lineHeight = (_parentElement.renderBoxModel?.renderStyle.lineHeight);
+    renderParagraph.markNeedsLayout();
+
+    _setTextNodeProperties(_parentElement.style);
+    RenderBoxModel? parentRenderBoxModel = _parentElement.renderBoxModel;
+    _setTextSizeType(parentRenderBoxModel!.widthSizeType, parentRenderBoxModel.heightSizeType);
   }
 
   void _setTextNodeProperties(CSSStyleDeclaration style) {
-    _renderTextBox.whiteSpace = CSSText.getWhiteSpace(parentElement.style);
-    _renderTextBox.overflow = CSSText.getTextOverflow(parentElement.style);
-    _renderTextBox.maxLines = CSSText.getLineClamp(parentElement.style);
+    Element _parentElement = parentElement!;
+    RenderTextBox renderTextBox = _renderTextBox!;
+
+    renderTextBox.whiteSpace = CSSText.getWhiteSpace(_parentElement.style);
+    renderTextBox.overflow = CSSText.getTextOverflow(style: _parentElement.style);
+    renderTextBox.maxLines = CSSText.getLineClamp(_parentElement.style);
   }
 
   // Attach renderObject of current node to parent
   @override
-  void attachTo(Element parent, { RenderObject after }) {
+  void attachTo(Element parent, { RenderBox? after }) {
     willAttachRenderer();
 
-    RenderLayoutBox parentRenderLayoutBox;
+    RenderLayoutBox? parentRenderLayoutBox;
     if (parent.scrollingContentLayoutBox != null) {
-      parentRenderLayoutBox = parent.scrollingContentLayoutBox;
+      parentRenderLayoutBox = parent.scrollingContentLayoutBox!;
     } else {
-      parentRenderLayoutBox = parent.renderBoxModel;
+      parentRenderLayoutBox = (parent.renderBoxModel as RenderLayoutBox?)!;
     }
 
-    parentRenderLayoutBox.insert(_renderTextBox, after: after);
+    RenderTextBox renderTextBox = _renderTextBox!;
+
+    parentRenderLayoutBox.insert(renderTextBox, after: after);
     _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
 
     didAttachRenderer();
@@ -146,8 +157,9 @@ class TextNode extends Node {
     willDetachRenderer();
 
     if (isRendererAttached) {
-      ContainerRenderObjectMixin parent = _renderTextBox.parent;
-      parent.remove(_renderTextBox);
+      RenderTextBox renderTextBox = _renderTextBox!;
+      ContainerRenderObjectMixin parent = renderTextBox.parent as ContainerRenderObjectMixin;
+      parent.remove(renderTextBox);
     }
 
     didDetachRenderer();
@@ -157,32 +169,35 @@ class TextNode extends Node {
   @override
   void willAttachRenderer() {
     createRenderer();
-    CSSStyleDeclaration parentStyle = parent.style;
+    Element _parentElement = parentElement!;
+    RenderTextBox renderTextBox = _renderTextBox!;
+
+    CSSStyleDeclaration parentStyle = _parentElement.style;
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
-    _renderTextBox.text = CSSTextMixin.createTextSpan(data, parent);
+    renderTextBox.text = CSSTextMixin.createTextSpan(data, parentElement: parentElement);
     // TextNode's style is inherited from parent style
-    _renderTextBox.style = parentStyle;
+    renderTextBox.style = parentStyle;
     // Update paragraph line height
-    KrakenRenderParagraph renderParagraph = _renderTextBox.child;
-    renderParagraph.lineHeight = parent.renderBoxModel.renderStyle.lineHeight;
+    KrakenRenderParagraph renderParagraph = renderTextBox.child as KrakenRenderParagraph;
+    renderParagraph.lineHeight = (_parentElement.renderBoxModel?.renderStyle.lineHeight);
 
-    _setTextNodeProperties(parent.style);
+    _setTextNodeProperties(_parentElement.style);
   }
 
   @override
   RenderObject createRenderer() {
     if (renderer != null) {
-      return renderer;
+      return renderer!;
     }
 
-    InlineSpan text = CSSTextMixin.createTextSpan(_data, null);
-    _renderTextBox = RenderTextBox(text,
+    InlineSpan text = CSSTextMixin.createTextSpan(_data!, parentElement: parentElement);
+    RenderTextBox renderTextBox = _renderTextBox = RenderTextBox(text,
       targetId: targetId,
       style: null,
       elementManager: elementManager,
     );
-    return _renderTextBox;
+    return renderTextBox;
   }
 
   @override

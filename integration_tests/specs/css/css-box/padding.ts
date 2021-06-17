@@ -106,22 +106,22 @@ describe('Box padding', () => {
         },
       },
       [
+        createElement('div', {
+          style: {
+            width: '100%',
+            height: '100%',
+            padding: '30%',
+            backgroundColor: 'yellow',
+          }
+        }, [
           createElement('div', {
             style: {
-              width: '100%',
-              height: '100%',
-              padding: '30%',
-              backgroundColor: 'yellow',
+              width: '20px',
+              height: '20px',
+              backgroundColor: 'red'
             }
-          }, [
-              createElement('div', {
-                  style: {
-                      width: '20px',
-                      height: '20px',
-                      backgroundColor: 'red'
-                  }
-               })
-          ])
+          })
+        ])
       ]
     );
 
@@ -129,4 +129,163 @@ describe('Box padding', () => {
     await snapshot();
   });
 
+  it('should work with percentage of flow layout', async () => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '100px',
+          height: '200px',
+          display: 'inline-block',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            height: '100px',
+            paddingTop: '50%',
+            display: 'inline-block',
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              width: '50px',
+              height: '50px',
+              backgroundColor: 'red'
+            }
+          })
+        ]))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work with percentage of flex layout', async () => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '100px',
+          height: '200px',
+          display: 'inline-flex',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            height: '100px',
+            paddingTop: '50%',
+            display: 'inline-flex',
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              width: '50px',
+              height: '50px',
+              backgroundColor: 'red'
+            }
+          })
+        ]))
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work with percentage of positioned element', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          position: 'relative',
+          background: 'blue',
+          border: '10px solid green',
+          padding: '10px',
+          width: '120px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              background: 'yellow',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              position: 'absolute',
+              background: 'pink',
+              paddingTop: '100%',
+            },
+          },
+          [(text = createText(`two`))]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work with percentage after element is attached', async (done) => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '100px',
+          height: '200px',
+          padding: '20px',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'yellow',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              width: '20px',
+              height: '20px',
+              backgroundColor: 'red'
+            }
+          })
+        ]))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      div2.style.padding = '30%';
+      await snapshot();
+      done();
+    });
+  });
 });

@@ -44,4 +44,53 @@ describe('FontFamily', () => {
 
     return snapshot();
   });
+
+  it('works with inheritance', async (done) => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('inherited font-family')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightblue',
+          fontFamily: 'arial',
+        }
+      }, [
+        createText('not inherited font-family')
+      ]))
+    ]);
+
+    let container = createElement('div', {
+      style: {
+        fontFamily: 'Songti SC'
+      }
+    });
+    container.appendChild(div);
+    BODY.appendChild(container);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      container.style.fontFamily = 'Tahoma';
+      await snapshot();
+      done();
+    });
+  });
 });

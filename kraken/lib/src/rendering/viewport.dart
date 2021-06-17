@@ -5,53 +5,64 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:kraken/launcher.dart';
+import 'package:kraken/gesture.dart';
 import 'dart:ui';
-import 'package:meta/meta.dart';
 
 class RenderViewportBox extends RenderProxyBox
     with RenderObjectWithControllerMixin {
   RenderViewportBox({
-    @required Size viewportSize,
-    RenderBox child,
+    required Size viewportSize,
+    RenderBox? child,
     gestureClient,
     this.background,
-  }) : _viewportSize = viewportSize, super(child) {
+    required KrakenController controller,
+  })  : _viewportSize = viewportSize,
+        super(child) {
     if (gestureClient != null) {
-      _verticalDragGestureRecognizer.onUpdate = _horizontalDragRecognizer.onUpdate = gestureClient.dragUpdateCallback;
-      _verticalDragGestureRecognizer.onStart = _horizontalDragRecognizer.onStart = gestureClient.dragStartCallback;
-      _verticalDragGestureRecognizer.onEnd = _horizontalDragRecognizer.onEnd = gestureClient.dragEndCallback;
+      _verticalDragGestureRecognizer.onUpdate =
+          _horizontalDragRecognizer.onUpdate = gestureClient.dragUpdateCallback;
+      _verticalDragGestureRecognizer.onStart =
+          _horizontalDragRecognizer.onStart = gestureClient.dragStartCallback;
+      _verticalDragGestureRecognizer.onEnd =
+          _horizontalDragRecognizer.onEnd = gestureClient.dragEndCallback;
     }
+    this.controller = controller;
   }
 
   @override
   bool get isRepaintBoundary => true;
 
-  Color background;
+  Color? background;
 
   Size _viewportSize;
+
   Size get viewportSize => _viewportSize;
+
   set viewportSize(Size value) {
-    if (value != null && value != _viewportSize) {
+    if (value != _viewportSize) {
       _viewportSize = value;
       markNeedsLayout();
     }
   }
 
   double _bottomInset = 0.0;
+
   double get bottomInset => _bottomInset;
+
   set bottomInset(double value) {
-    if (value != null && value != _bottomInset) {
+    if (value != _bottomInset) {
       _bottomInset = value;
       markNeedsLayout();
     }
   }
 
-  final VerticalDragGestureRecognizer _verticalDragGestureRecognizer = VerticalDragGestureRecognizer();
-  final HorizontalDragGestureRecognizer _horizontalDragRecognizer = HorizontalDragGestureRecognizer();
+  final VerticalDragGestureRecognizer _verticalDragGestureRecognizer =
+      VerticalDragGestureRecognizer();
+  final HorizontalDragGestureRecognizer _horizontalDragRecognizer =
+      HorizontalDragGestureRecognizer();
 
   @override
   void performLayout() {
-    assert(_viewportSize != null);
     double maxWidth = window.physicalSize.width / window.devicePixelRatio;
     double maxHeight = window.physicalSize.height / window.devicePixelRatio;
     size = constraints.constrain(Size(maxWidth, maxHeight));
@@ -60,7 +71,7 @@ class RenderViewportBox extends RenderProxyBox
       if (height.isNegative || height.isNaN) {
         height = _viewportSize.height;
       }
-      child.layout(BoxConstraints.tightFor(
+      child!.layout(BoxConstraints.tightFor(
         width: _viewportSize.width,
         height: height,
       ));
@@ -69,9 +80,12 @@ class RenderViewportBox extends RenderProxyBox
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    super.handleEvent(event, entry);
+    super.handleEvent(event, entry as BoxHitTestEntry);
     if (event is PointerDownEvent) {
       _verticalDragGestureRecognizer.addPointer(event);
+      GestureManager.instance().addPointer(event);
+    } else if (event is PointerUpEvent) {
+      GestureManager.instance().clearTargetList();
     }
   }
 
@@ -85,12 +99,12 @@ class RenderViewportBox extends RenderProxyBox
       );
       context.canvas.drawRect(
         rect,
-        Paint()..color = background,
+        Paint()..color = background!,
       );
     }
 
     if (child != null) {
-      context.paintChild(child, offset);
+      context.paintChild(child!, offset);
     }
   }
 }

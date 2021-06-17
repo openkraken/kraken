@@ -176,4 +176,90 @@ describe('Tags img', () => {
       done();
     };
   });
+
+  it ('lazy loading should work with scroll', (done) => {
+    const img = document.createElement('img');
+    img.setAttribute('loading', 'lazy'); 
+    img.style.width = '60px';
+    img.style.height = '60px';
+    img.style.background = 'red';
+
+    let div = document.createElement('div');
+    div.style.width = '60px';
+    div.style.height = '2000px';
+    div.style.background = 'yellow';
+
+    document.body.appendChild(div);
+    document.body.appendChild(img);
+
+    img.onload = async () => {
+      window.scroll(0, 2000);
+      await snapshot();
+      done();
+    };
+    img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+
+    window.scroll(0, 2000);
+  })
+        
+  it('should work with loading=lazy and transform', (done) => {
+    const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    const img = document.createElement('img');
+    img.style.width = img.style.height = '300px';
+    img.style.border = '3px solid #000';
+    img.style.transform = 'translate(0, 100px)';
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute(
+      'src',
+      imageURL
+    );
+
+    img.addEventListener('load', async () => {
+      await snapshot();
+      done();
+    });
+
+    document.body.appendChild(img);
+  });
+
+  it('should work with loading=lazy and objectFit', (done) => {
+    const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    const img = document.createElement('img');
+    img.style.width = img.style.height = '300px';
+    img.style.border = '3px solid #000';
+    img.style.objectFit = 'contain';
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute(
+      'src',
+      imageURL
+    );
+
+    img.addEventListener('load', async () => {
+      await snapshot();
+      done();
+    });
+
+    document.body.appendChild(img);
+  });
+
+  it('should work with loading=lazy and objectPosition', (done) => {
+    const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    const img = document.createElement('img');
+    img.style.width = img.style.height = '300px';
+    img.style.border = '3px solid #000';
+    img.style.objectFit = 'contain';
+    img.style.objectPosition = 'center bottom';
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute(
+      'src',
+      imageURL
+    );
+
+    img.addEventListener('load', async () => {
+      await snapshot();
+      done();
+    });
+
+    document.body.appendChild(img);
+  });
 });

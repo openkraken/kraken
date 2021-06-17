@@ -15,31 +15,60 @@ import 'bundle.dart';
 
 typedef ConnectedCallback = void Function();
 
+const _white = Color(0xFFFFFFFF);
+
 void launch({
-  String bundleURL,
-  String bundlePath,
-  String bundleContent,
-  bool debugEnableInspector,
-  Color background,
-  DevToolsService devToolsService,
+  String? bundleURL,
+  String? bundlePath,
+  String? bundleContent,
+  bool? debugEnableInspector,
+  Color background = _white,
+  DevToolsService? devToolsService,
+  HttpClientInterceptor? httpClientInterceptor
 }) async {
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
-  KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-    background: background,
-    showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-    methodChannel: KrakenNativeChannel(),
-    debugEnableInspector: debugEnableInspector,
-    devToolsService: devToolsService
-  );
+  VoidCallback? _ordinaryOnMetricsChanged = window.onMetricsChanged;
 
-  controller.view.attachView(RendererBinding.instance.renderView);
+  Future<void> _initKrakenApp() async {
+    KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
+      background: background,
+      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      methodChannel: KrakenNativeChannel(),
+      devToolsService: devToolsService,
+      httpClientInterceptor: httpClientInterceptor
+    );
 
-  await controller.loadBundle(
-      bundleURL: bundleURL,
-      bundlePath: bundlePath,
-      bundleContent: bundleContent);
+    controller.view.attachView(RendererBinding.instance!.renderView);
 
-  await controller.evalBundle();
+    await controller.loadBundle(
+        bundleURL: bundleURL,
+        bundlePath: bundlePath,
+        bundleContent: bundleContent);
+
+    await controller.evalBundle();
+  }
+
+  // window.physicalSize are Size.zero when app first loaded. This only happened on Android and iOS physical devices with release build.
+  // We should wait for onMetricsChanged when window.physicalSize get updated from Flutter Engine.
+  if (window.physicalSize == Size.zero) {
+    window.onMetricsChanged = () async {
+      if (window.physicalSize == Size.zero) {
+        window.onMetricsChanged = _ordinaryOnMetricsChanged;
+        return;
+      }
+
+      await _initKrakenApp();
+
+      // Should proxy to ordinary window.onMetricsChanged callbacks.
+      if (_ordinaryOnMetricsChanged != null) {
+        _ordinaryOnMetricsChanged();
+        // Recover ordinary callback to window.onMetricsChanged
+        window.onMetricsChanged = _ordinaryOnMetricsChanged;
+      }
+    };
+  } else {
+    await _initKrakenApp();
+  }
 }

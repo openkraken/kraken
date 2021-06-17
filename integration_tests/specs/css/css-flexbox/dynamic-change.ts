@@ -365,4 +365,100 @@ describe('dynamic-change', () => {
       done();
     });
   });
+
+  it('change inner box width in nested flex layout', async (done) => {
+    let div;
+    let div2;
+    let div3;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'inline-flex',
+          flexDirection: 'column',
+          padding: '10px',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            display: 'inline-flex',
+            flexDirection: 'column',
+            backgroundColor: 'yellow',
+            padding: '10px',
+          }
+        }, [
+          (div3 = createElement('div', {
+            style: {
+              display: 'inline-flex',
+              flexDirection: 'column',
+              backgroundColor: 'lightblue',
+              width: '200px',
+            }
+          }, [
+            createText('The quick brown fox jumps over the lazy dog.')
+          ]))
+        ]))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      div3.style.width = '300px';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('change outer box width in nested flex layout', async (done) => {
+    let div;
+    let div2;
+    let div3;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'inline-flex',
+          flexDirection: 'column',
+          width: '200px',
+          padding: '10px',
+          backgroundColor: 'green',
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            display: 'inline-flex',
+            flexDirection: 'column',
+            backgroundColor: 'yellow',
+            padding: '10px',
+          }
+        }, [
+          (div3 = createElement('div', {
+            style: {
+              display: 'inline-flex',
+              flexDirection: 'column',
+              backgroundColor: 'lightblue',
+            }
+          }, [
+            createText('The quick brown fox jumps over the lazy dog.')
+          ]))
+        ]))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      div.style.width = '300px';
+      await snapshot();
+      done();
+    });
+  });
 });

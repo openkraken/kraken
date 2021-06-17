@@ -7,6 +7,7 @@
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
+#include "bindings/jsc/host_class.h"
 
 namespace kraken::binding::jsc {
 
@@ -328,6 +329,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
 
   return JSValueMakeNumber(ctx, requestId);
 }
+
 
 void bindTimer(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_BINDING_FUNCTION(context, "setTimeout", setTimeout);

@@ -1,3 +1,5 @@
+
+
 import 'package:kraken/css.dart';
 
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
@@ -11,10 +13,10 @@ const String _1 = '1';
 
 // Origin version: https://github.com/jedmao/css-list-helpers/blob/master/src/index.ts
 List<String> _splitBySpace(String value) {
-  List<String> array = List();
+  List<String> array = List.empty(growable: true);
   String current = '';
   int func = 0;
-  String quote;
+  String? quote;
   bool splitMe = false;
   bool escape = false;
 
@@ -61,8 +63,8 @@ List<String> _splitBySpace(String value) {
 }
 
 class CSSStyleProperty {
-  static void setShorthandPadding(Map<String, String> properties, String shorthandValue) {
-    List<String> values = _getEdgeValues(shorthandValue);
+  static void setShorthandPadding(Map<String, String?> properties, String shorthandValue) {
+    List<String?>? values = _getEdgeValues(shorthandValue);
     if (values == null) return;
 
     properties[PADDING_TOP] = values[0];
@@ -78,8 +80,8 @@ class CSSStyleProperty {
     if (style.contains(PADDING_BOTTOM)) style.removeProperty(PADDING_BOTTOM);
   }
 
-  static void setShorthandMargin(Map<String, String> properties, String shorthandValue) {
-    List<String> values = _getEdgeValues(shorthandValue, isLengthOrPercentage: false);
+  static void setShorthandMargin(Map<String, String?> properties, String shorthandValue) {
+    List<String?>? values = _getEdgeValues(shorthandValue, isLengthOrPercentage: false);
     if (values == null) return;
 
     properties[MARGIN_TOP] = values[0];
@@ -95,15 +97,20 @@ class CSSStyleProperty {
     if (style.contains(MARGIN_BOTTOM)) style.removeProperty(MARGIN_BOTTOM);
   }
 
-  static void setShorthandBackground(Map<String, String> properties, String shorthandValue) {
-    List<String> values = _getBackgroundValues(shorthandValue);
+  static void setShorthandBackground(Map<String, String?> properties, String shorthandValue) {
+    List<String?>? values = _getBackgroundValues(shorthandValue);
     if (values == null) return;
 
     properties[BACKGROUND_COLOR] = values[0];
     properties[BACKGROUND_IMAGE] = values[1];
     properties[BACKGROUND_REPEAT] = values[2];
     properties[BACKGROUND_ATTACHMENT] = values[3];
-    properties[BACKGROUND_POSITION] = values[4];
+    String? backgroundPosition = values[4];
+    if (backgroundPosition != null) {
+      List<String> positions = CSSPosition.parsePositionShorthand(backgroundPosition);
+      properties[BACKGROUND_POSITION_X] = positions[0];
+      properties[BACKGROUND_POSITION_Y] = positions[1];
+    }
     properties[BACKGROUND_SIZE] = values[5];
   }
 
@@ -116,8 +123,18 @@ class CSSStyleProperty {
     if (style.contains(BACKGROUND_REPEAT)) style.removeProperty(BACKGROUND_REPEAT);
   }
 
-  static void setShorthandBorderRadius(Map<String, String> properties, String shorthandValue) {
-    List<String> values = _getBorderRaidusValues(shorthandValue);
+  static void setShorthandBackgroundPosition(Map<String, String?> properties, String shorthandValue) {
+    List<String> positions = CSSPosition.parsePositionShorthand(shorthandValue);
+    properties[BACKGROUND_POSITION_X] = positions[0];
+    properties[BACKGROUND_POSITION_Y] = positions[1];
+  }
+
+  static void removeShorthandBackgroundPosition(CSSStyleDeclaration style) {
+    if (style.contains(BACKGROUND_POSITION)) style.removeProperty(BACKGROUND_POSITION);
+  }
+
+  static void setShorthandBorderRadius(Map<String, String?> properties, String shorthandValue) {
+    List<String?>? values = _getBorderRaidusValues(shorthandValue);
 
     if (values == null) return;
 
@@ -134,7 +151,7 @@ class CSSStyleProperty {
     if (style.contains(BORDER_BOTTOM_LEFT_RADIUS)) style.removeProperty(BORDER_BOTTOM_LEFT_RADIUS);
   }
 
-  static void setShorthandOverflow(Map<String, String> properties, String shorthandValue) {
+  static void setShorthandOverflow(Map<String, String?> properties, String shorthandValue) {
     List<String> values = shorthandValue.split(_spaceRegExp);
     if (values.length == 1) {
       properties[OVERFLOW_Y] = properties[OVERFLOW_X] = values[0];
@@ -149,8 +166,8 @@ class CSSStyleProperty {
     if (style.contains(OVERFLOW_Y)) style.removeProperty(OVERFLOW_Y);
   }
 
-  static void setShorthandFont(Map<String, String> properties, String shorthandValue) {
-    List<String> values = _getFontValues(shorthandValue);
+  static void setShorthandFont(Map<String, String?> properties, String shorthandValue) {
+    List<String?>? values = _getFontValues(shorthandValue);
     if (values == null) return;
     properties[FONT_STYLE] = values[0];
     properties[FONT_WEIGHT] = values[1];
@@ -167,8 +184,8 @@ class CSSStyleProperty {
     if (style.contains(FONT_FAMILY)) style.removeProperty(FONT_FAMILY);
   }
 
-  static void setShorthandFlex(Map<String, String> properties, String shorthandValue) {
-    List<String> values = _getFlexValues(shorthandValue);
+  static void setShorthandFlex(Map<String, String?> properties, String shorthandValue) {
+    List<String>? values = _getFlexValues(shorthandValue);
     if (values == null) return;
     properties[FLEX_GROW] = values[0];
     properties[FLEX_SHRINK] = values[1];
@@ -181,8 +198,8 @@ class CSSStyleProperty {
     if (style.contains(FLEX_BASIS)) style.removeProperty(FLEX_BASIS);
   }
 
-  static void setShorthandFlexFlow(Map<String, String> properties, String shorthandValue) {
-    List<String> values = _getFlexFlowValues(shorthandValue);
+  static void setShorthandFlexFlow(Map<String, String?> properties, String shorthandValue) {
+    List<String?>? values = _getFlexFlowValues(shorthandValue);
     if (values == null) return;
     properties[FLEX_DIRECTION] = values[0];
     properties[FLEX_WRAP] = values[1];
@@ -193,8 +210,8 @@ class CSSStyleProperty {
     if (style.contains(FLEX_WRAP)) style.removeProperty(FLEX_WRAP);
   }
 
-  static void setShorthandTransition(Map<String, String> properties, String shorthandValue) {
-    List<String> values = _getTransitionValues(shorthandValue);
+  static void setShorthandTransition(Map<String, String?> properties, String shorthandValue) {
+    List<String?>? values = _getTransitionValues(shorthandValue);
     if (values == null) return;
 
     properties[TRANSITION_PROPERTY] = values[0];
@@ -210,8 +227,8 @@ class CSSStyleProperty {
     if (style.contains(TRANSITION_DELAY)) style.removeProperty(TRANSITION_DELAY);
   }
 
-  static void setShorthandTextDecoration(Map<String, String> properties, String shorthandValue) {
-    List<String> values = _getTextDecorationValues(shorthandValue);
+  static void setShorthandTextDecoration(Map<String, String?> properties, String shorthandValue) {
+    List<String?>? values = _getTextDecorationValues(shorthandValue);
     if (values == null) return;
 
     properties[TEXT_DECORATION_LINE] = values[0];
@@ -225,26 +242,26 @@ class CSSStyleProperty {
     if (style.contains(TEXT_DECORATION_STYLE)) style.removeProperty(TEXT_DECORATION_STYLE);
   }
 
-  static void setShorthandBorder(Map<String, String> properties, String property, String shorthandValue) {
-    String borderTopColor;
-    String borderRightColor;
-    String borderBottomColor;
-    String borderLeftColor;
-    String borderTopStyle;
-    String borderRightStyle;
-    String borderBottomStyle;
-    String borderLeftStyle;
-    String borderTopWidth;
-    String borderRightWidth;
-    String borderBottomWidth;
-    String borderLeftWidth;
+  static void setShorthandBorder(Map<String, String?> properties, String property, String shorthandValue) {
+    String? borderTopColor;
+    String? borderRightColor;
+    String? borderBottomColor;
+    String? borderLeftColor;
+    String? borderTopStyle;
+    String? borderRightStyle;
+    String? borderBottomStyle;
+    String? borderLeftStyle;
+    String? borderTopWidth;
+    String? borderRightWidth;
+    String? borderBottomWidth;
+    String? borderLeftWidth;
 
     if (property == BORDER ||
         property == BORDER_TOP ||
         property == BORDER_RIGHT ||
         property == BORDER_BOTTOM ||
         property == BORDER_LEFT) {
-      List<String> values = CSSStyleProperty._getBorderValues(shorthandValue);
+      List<String?>? values = CSSStyleProperty._getBorderValues(shorthandValue);
       if (values == null) return;
 
       if (property == BORDER || property == BORDER_TOP) {
@@ -268,7 +285,7 @@ class CSSStyleProperty {
         borderLeftColor = values[2];
       }
     } else if (property == BORDER_WIDTH) {
-      List<String> values = _getEdgeValues(shorthandValue);
+      List<String?>? values = _getEdgeValues(shorthandValue);
       if (values == null) return;
 
       borderTopWidth = values[0];
@@ -277,7 +294,7 @@ class CSSStyleProperty {
       borderLeftWidth = values[3];
     } else if (property == BORDER_STYLE) {
       // @TODO: validate value
-      List<String> values = _getEdgeValues(shorthandValue, isLengthOrPercentage: false);
+      List<String?>? values = _getEdgeValues(shorthandValue, isLengthOrPercentage: false);
       if (values == null) return;
 
       borderTopStyle = values[0];
@@ -286,7 +303,7 @@ class CSSStyleProperty {
       borderLeftStyle = values[3];
     } else if (property == BORDER_COLOR) {
       // @TODO: validate value
-      List<String> values = _getEdgeValues(shorthandValue, isLengthOrPercentage: false);
+      List<String?>? values = _getEdgeValues(shorthandValue, isLengthOrPercentage: false);
       if (values == null) return;
 
       borderTopColor = values[0];
@@ -356,26 +373,24 @@ class CSSStyleProperty {
   }
 
   // all, -moz-specific, sliding; => ['all', '-moz-specific', 'sliding']
-  static List<String> getMultipleValues(String property) {
+  static List<String>? getMultipleValues(String property) {
     if (property.isEmpty) return null;
     return property.split(_commaRegExp);
   }
 
-  static List<List<String>> getShadowValues(String property) {
-    assert(property != null);
-
+  static List<List<String?>>? getShadowValues(String property) {
     List shadows = property.split(_commaRegExp);
-    List<List<String>> values = List();
-    for (String shadow in shadows) {
+    List<List<String?>> values = List.empty(growable: true);
+    for (String shadow in shadows as Iterable<String>) {
       if (shadow == NONE) {
         continue;
       }
       List<String> parts = shadow.trim().split(_spaceRegExp);
 
-      String inset;
-      String color;
+      String? inset;
+      String? color;
 
-      List<String> lengthValues = List(4);
+      List<String?> lengthValues = List.filled(4, null);
       int i = 0;
       for (String part in parts) {
         if (part == INSET) {
@@ -402,7 +417,7 @@ class CSSStyleProperty {
     return values;
   }
 
-  static List<String> _getBorderRaidusValues(String shorthandProperty) {
+  static List<String?>? _getBorderRaidusValues(String shorthandProperty) {
     if (!shorthandProperty.contains('/')) {
       return _getEdgeValues(shorthandProperty);
     }
@@ -421,8 +436,8 @@ class CSSStyleProperty {
     String firstRadius = radius[0];
     String secondRadius = radius[1];
 
-    List<String> firstValues = _getEdgeValues(firstRadius);
-    List<String> secondValues = _getEdgeValues(secondRadius);
+    List<String?> firstValues = _getEdgeValues(firstRadius)!;
+    List<String?> secondValues = _getEdgeValues(secondRadius)!;
 
     return [
       '${firstValues[0]} ${secondValues[0]}',
@@ -433,25 +448,25 @@ class CSSStyleProperty {
   }
 
   // Current not support multiple background layer:
-  static List<String> _getBackgroundValues(String shorthandProperty) {
+  static List<String?>? _getBackgroundValues(String shorthandProperty) {
     // Convert 40%/10em -> 40% / 10em
     shorthandProperty = shorthandProperty.replaceAll(_slashRegExp, ' / ');
     List values = shorthandProperty.split(_spaceRegExp);
 
-    String color;
-    String image;
-    String repeat;
-    String attachment;
-    String positionX;
-    String positionY;
-    String sizeWidth;
-    String sizeHeight;
+    String? color;
+    String? image;
+    String? repeat;
+    String? attachment;
+    String? positionX;
+    String? positionY;
+    String? sizeWidth;
+    String? sizeHeight;
 
-    String position;
-    String size;
+    String? position;
+    String? size;
     bool isPositionEndAndSizeStart = false;
 
-    for (String value in values) {
+    for (String value in values as Iterable<String>) {
       if (color == null && CSSColor.isColor(value)) {
         color = value;
       } else if (image == null && CSSBackground.isValidBackgroundImageValue(value)) {
@@ -491,7 +506,7 @@ class CSSStyleProperty {
     }
 
     if (positionY != null) {
-      position += (' ' + positionY);
+      position = position! + (' ' + positionY);
     }
 
     if (sizeWidth != null) {
@@ -499,28 +514,28 @@ class CSSStyleProperty {
     }
 
     if (sizeHeight != null) {
-      size += (' ' + sizeHeight);
+      size = size! + (' ' + sizeHeight);
     }
 
     return [color, image, repeat, attachment, position, size];
   }
 
-  static List<String> _getFontValues(String shorthandProperty) {
+  static List<String?>? _getFontValues(String shorthandProperty) {
     // Convert 40%/10em => 40% / 10em
     shorthandProperty = shorthandProperty.replaceAll(_slashRegExp, ' / ');
     // Convert "Goudy Bookletter 1911", sans-serif => "Goudy Bookletter 1911",sans-serif
     shorthandProperty = shorthandProperty.replaceAll(_replaceCommaRegExp, ',');
     List values = _splitBySpace(shorthandProperty);
 
-    String style;
-    String weight;
-    String size;
-    String lineHeight;
-    String family;
+    String? style;
+    String? weight;
+    String? size;
+    String? lineHeight;
+    String? family;
 
     bool isSizeEndAndLineHeightStart = false;
 
-    for (String value in values) {
+    for (String value in values as Iterable<String>) {
       if (style == null && CSSText.isValidFontStyleValue(value)) {
         style = value;
       } else if (weight == null && CSSText.isValidFontWeightValue(value)) {
@@ -548,11 +563,11 @@ class CSSStyleProperty {
     return [style, weight, size, lineHeight, family];
   }
 
-  static List<String> _getTextDecorationValues(String shorthandProperty) {
+  static List<String?>? _getTextDecorationValues(String shorthandProperty) {
     List<String> values = shorthandProperty.split(_spaceRegExp);
-    String line;
-    String color;
-    String style;
+    String? line;
+    String? color;
+    String? style;
 
     for (String value in values) {
       if (line == null && CSSText.isValidTextTextDecorationLineValue(value)) {
@@ -569,17 +584,17 @@ class CSSStyleProperty {
     return [line, color, style];
   }
 
-  static List<String> _getTransitionValues(String shorthandProperty) {
+  static List<String?>? _getTransitionValues(String shorthandProperty) {
     List transitions = shorthandProperty.split(_commaRegExp);
-    List<String> values = List(4);
+    List<String?> values = List.filled(4, null);
 
-    for (String transition in transitions) {
+    for (String transition in transitions as Iterable<String>) {
       List<String> parts = transition.trim().split(_spaceRegExp);
 
-      String property;
-      String duration;
-      String timingFuction;
-      String delay;
+      String? property;
+      String? duration;
+      String? timingFuction;
+      String? delay;
 
       for (String part in parts) {
         if (property == null && CSSTransition.isValidTransitionPropertyValue(part)) {
@@ -600,20 +615,20 @@ class CSSStyleProperty {
       timingFuction = timingFuction ?? EASE;
       delay = delay ?? _0s;
 
-      values[0] == null ? values[0] = property : values[0] += (_comma + property);
-      values[1] == null ? values[1] = duration : values[1] += (_comma + duration);
-      values[2] == null ? values[2] = timingFuction : values[2] += (_comma + timingFuction);
-      values[3] == null ? values[3] = delay : values[3] += (_comma + delay);
+      values[0] == null ? values[0] = property : values[0] = values[0]! + (_comma + property);
+      values[1] == null ? values[1] = duration : values[1] = values[1]! + (_comma + duration);
+      values[2] == null ? values[2] = timingFuction : values[2] = values[2]! + (_comma + timingFuction);
+      values[3] == null ? values[3] = delay : values[3] = values[3]! + (_comma + delay);
     }
 
     return values;
   }
 
-  static List<String> _getFlexFlowValues(String shorthandProperty) {
+  static List<String?>? _getFlexFlowValues(String shorthandProperty) {
     List<String> values = shorthandProperty.split(_spaceRegExp);
 
-    String direction;
-    String wrap;
+    String? direction;
+    String? wrap;
 
     for (String value in values) {
       if (direction == null && CSSFlex.isValidFlexDirectionValue(value)) {
@@ -628,13 +643,13 @@ class CSSStyleProperty {
     return [direction, wrap];
   }
 
-  static List<String> _getFlexValues(String shorthandProperty) {
+  static List<String>? _getFlexValues(String shorthandProperty) {
     List<String> values = shorthandProperty.split(_spaceRegExp);
 
     // In flex shorthand case it is interpreted as flex: <number> 1 0;
-    String grow;
-    String shrink;
-    String basis;
+    String? grow;
+    String? shrink;
+    String? basis;
 
     for (String value in values) {
       if (values.length == 1) {
@@ -670,12 +685,12 @@ class CSSStyleProperty {
     return [grow ?? _1, shrink ?? _1, basis ?? _0];
   }
 
-  static List<String> _getBorderValues(String shorthandProperty) {
+  static List<String?>? _getBorderValues(String shorthandProperty) {
     List<String> values = shorthandProperty.split(_spaceRegExp);
 
-    String width;
-    String style;
-    String color;
+    String? width;
+    String? style;
+    String? color;
 
     // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work
     for (String value in values) {
@@ -693,13 +708,13 @@ class CSSStyleProperty {
     return [width, style, color];
   }
 
-  static List<String> _getEdgeValues(String shorthandProperty, {bool isLengthOrPercentage = true}) {
+  static List<String?>? _getEdgeValues(String shorthandProperty, {bool isLengthOrPercentage = true}) {
     var properties = shorthandProperty.split(_spaceRegExp);
 
-    String topValue;
-    String rightValue;
-    String bottomValue;
-    String leftValue;
+    String? topValue;
+    String? rightValue;
+    String? bottomValue;
+    String? leftValue;
 
     if (properties.length == 1) {
       topValue = rightValue = bottomValue = leftValue = properties[0];
@@ -731,11 +746,11 @@ class CSSStyleProperty {
   }
 
   // https://drafts.csswg.org/css-values-4/#typedef-position
-  static List<String> getPositionValues(String shorthandProperty) {
+  static List<String?> getPositionValues(String shorthandProperty) {
     var properties = shorthandProperty.trim().split(_spaceRegExp);
 
-    String x;
-    String y;
+    String? x;
+    String? y;
     if (properties.length == 1) {
       x = y = properties[0];
     } else if (properties.length == 2) {

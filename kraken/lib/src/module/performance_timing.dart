@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
@@ -19,9 +18,9 @@ final String PERF_CREATE_VIEWPORT_END = 'create_viewport_end';
 final String PERF_ELEMENT_MANAGER_INIT_START = 'element_manager_init_start';
 final String PERF_ELEMENT_MANAGER_INIT_END = 'element_manager_init_end';
 final String PERF_ELEMENT_MANAGER_PROPERTY_INIT = 'element_manager_property_init';
-final String PERF_BODY_ELEMENT_INIT_START = 'body_element_init_start';
-final String PERF_BODY_ELEMENT_INIT_END = 'body_element_init_end';
-final String PERF_BODY_ELEMENT_PROPERTY_INIT = 'body_element_property_init';
+final String PERF_ROOT_ELEMENT_INIT_START = 'root_element_init_start';
+final String PERF_ROOT_ELEMENT_INIT_END = 'root_element_init_end';
+final String PERF_ROOT_ELEMENT_PROPERTY_INIT = 'root_element_property_init';
 final String PERF_JS_BUNDLE_LOAD_START = 'js_bundle_load_start';
 final String PERF_JS_BUNDLE_LOAD_END = 'js_bundle_load_end';
 final String PERF_JS_BUNDLE_EVAL_START = 'js_bundle_eval_start';
@@ -44,6 +43,10 @@ final String PERF_REMOVE_NODE_START = 'remove_node_start';
 final String PERF_REMOVE_NODE_END = 'remove_node_end';
 final String PERF_SET_STYLE_START = 'set_style_start';
 final String PERF_SET_STYLE_END = 'set_style_end';
+final String PERF_DOM_FORCE_LAYOUT_START = 'dom_force_layout_start';
+final String PERF_DOM_FORCE_LAYOUT_END = 'dom_force_layout_end';
+final String PERF_DOM_FLUSH_UI_COMMAND_START = 'dom_flush_ui_command_start';
+final String PERF_DOM_FLUSH_UI_COMMAND_END = 'dom_flush_ui_command_end';
 final String PERF_SET_PROPERTIES_START = 'set_properties_start';
 final String PERF_SET_PROPERTIES_END = 'set_properties_end';
 final String PERF_REMOVE_PROPERTIES_START = 'remove_properties_start';
@@ -70,18 +73,16 @@ class PerformanceEntry {
 final int PERFORMANCE_NONE_UNIQUE_ID = -1024;
 
 class PerformanceTiming {
-  static SplayTreeMap<int, PerformanceTiming> _instanceMap = SplayTreeMap();
+  static PerformanceTiming? _instance;
 
-  static PerformanceTiming instance(int contextId) {
-    if (!_instanceMap.containsKey(contextId)) {
-      _instanceMap[contextId] = PerformanceTiming();
+  static PerformanceTiming instance() {
+    if (_instance == null) {
+      _instance = PerformanceTiming();
     }
-    return _instanceMap[contextId];
+    return _instance!;
   }
 
-  int entriesSize = 0;
-
-  void mark(String name, {int startTime, int uniqueId}) {
+  void mark(String name, {int? startTime, int? uniqueId}) {
     if (startTime == null) {
       startTime = DateTime.now().microsecondsSinceEpoch;
     }
@@ -91,34 +92,34 @@ class PerformanceTiming {
     }
 
     PerformanceEntry entry = PerformanceEntry(name, startTime, uniqueId);
-    entries[entriesSize++] = entry;
+    entries.add(entry);
   }
 
   Pointer<NativePerformanceEntryList> toNative() {
-    Pointer<NativePerformanceEntryList> list = allocate<NativePerformanceEntryList>();
-    int byteLength = entriesSize * 3;
+    Pointer<NativePerformanceEntryList> list = malloc.allocate<NativePerformanceEntryList>(sizeOf<NativePerformanceEntryList>());
+    int byteLength = entries.length * 3;
 
     Uint64List data = Uint64List(byteLength);
 
     int dataIndex = 0;
 
     for (int i = 0; i < byteLength; i += 3) {
-      data[i] = Utf8.toUtf8(entries[dataIndex].name).address;
+      data[i] = (entries[dataIndex].name).toNativeUtf8().address;
       data[i + 1] = entries[dataIndex].startTime;
       data[i + 2] = entries[dataIndex].uniqueId;
       dataIndex++;
     }
 
-    final Pointer<Uint64> bytes = allocate<Uint64>(count: byteLength);
+    final Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() *  byteLength);
     final Uint64List buffer = bytes.asTypedList(byteLength);
     buffer.setAll(0, data);
 
-    list.ref.length = entriesSize;
+    list.ref.length = entries.length;
     list.ref.entries = bytes;
 
     return list;
   }
 
   // Pre allocate big list for better performance.
-  List<PerformanceEntry> entries = List.filled(1000000, null, growable: true);
+  List<PerformanceEntry> entries = List.empty(growable: true);
 }

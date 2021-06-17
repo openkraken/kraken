@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -22,53 +24,58 @@ enum CSSDisplay {
 
 mixin CSSDisplayMixin on RenderStyleBase {
 
-  CSSDisplay _display;
-  CSSDisplay get display => _display;
-  set display(CSSDisplay value) {
+  CSSDisplay? _display;
+  CSSDisplay? get display => _display;
+  set display(CSSDisplay? value) {
     if (value == null) return;
     if (_display != value) {
-      renderBoxModel.markNeedsLayout();
+      renderBoxModel!.markNeedsLayout();
       _display = value;
     }
   }
   /// Some layout effects require blockification or inlinification of the box type
   /// https://www.w3.org/TR/css-display-3/#transformations
-  CSSDisplay transformedDisplay;
+  CSSDisplay? transformedDisplay;
 
   void updateDisplay(String value, Element element) {
-    CSSDisplay originalDisplay = display;
+    CSSDisplay? originalDisplay = display;
     CSSDisplay presentDisplay = getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(value) ? element.defaultDisplay : value
     );
+    // Destroy renderer of element when display is changed to none.
+    if (presentDisplay == CSSDisplay.none) {
+      element.detach();
+      return;
+    }
     display = presentDisplay;
     transformedDisplay = getTransformedDisplay();
     if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
-      RenderLayoutBox prevRenderLayoutBox = renderBoxModel;
-      renderBoxModel = element.createRenderLayout(element, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: element.repaintSelf);
+      RenderLayoutBox? prevRenderLayoutBox = renderBoxModel as RenderLayoutBox?;
+      renderBoxModel = Element.createRenderLayout(element, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: element.repaintSelf);
       bool shouldReattach = element.isRendererAttached && element.parent != null && prevRenderLayoutBox != renderBoxModel;
 
       if (shouldReattach) {
-        RenderLayoutBox parentRenderObject = element.parent.renderBoxModel;
-        Element previousSibling = element.previousSibling;
-        RenderObject previous = previousSibling != null ? previousSibling.renderer : null;
+        RenderLayoutBox parentRenderObject = element.parentElement!.renderBoxModel as RenderLayoutBox;
+        Element? previousSibling = element.previousSibling as Element?;
+        RenderObject? previous = previousSibling != null ? previousSibling.renderer : null;
 
-        parentRenderObject.remove(prevRenderLayoutBox);
-        parentRenderObject.insert(renderBoxModel, after: previous);
+        parentRenderObject.remove(prevRenderLayoutBox!);
+        parentRenderObject.insert(renderBoxModel!, after: previous as RenderBox?);
       } else {
-        renderBoxModel.markNeedsLayout();
+        renderBoxModel!.markNeedsLayout();
       }
     }
   }
 
   /// Set display and transformedDisplay when display is not set in style
-  void initDisplay(CSSStyleDeclaration style, String defaultDisplay) {
+  void initDisplay(CSSStyleDeclaration style, String? defaultDisplay) {
     display = CSSDisplayMixin.getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]
     );
     transformedDisplay = getTransformedDisplay();
   }
 
-  static CSSDisplay getDisplay(String displayString) {
+  static CSSDisplay getDisplay(String? displayString) {
     switch (displayString) {
       case 'none':
         return CSSDisplay.none;
@@ -91,21 +98,21 @@ mixin CSSDisplayMixin on RenderStyleBase {
   /// Element tree hierarchy can cause element display behavior to change,
   /// for example element which is flex-item can display like inline-block or block
   /// https://www.w3.org/TR/css-display-3/#transformations
-  CSSDisplay getTransformedDisplay() {
-    RenderStyle renderStyle = this;
-    CSSDisplay display = renderStyle.display;
+  CSSDisplay? getTransformedDisplay() {
+    RenderStyle renderStyle = this as RenderStyle;
+    CSSDisplay? display = renderStyle.display;
 
     CSSPositionType position = renderStyle.position;
 
     // Display as inline-block when element is positioned
     if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {
       display = CSSDisplay.inlineBlock;
-    } else if (renderBoxModel.parent is! RenderBoxModel) {
+    } else if (renderBoxModel!.parent is! RenderBoxModel) {
       return renderStyle.display;
-    } else if (renderBoxModel.parent is RenderFlexLayout) {
+    } else if (renderBoxModel!.parent is RenderFlexLayout) {
         // Display as inline-block if parent node is flex
         display = CSSDisplay.inlineBlock;
-        RenderBoxModel parent = renderBoxModel.parent;
+        RenderBoxModel parent = renderBoxModel!.parent as RenderBoxModel;
         RenderStyle parentRenderStyle = parent.renderStyle;
 
         CSSMargin marginLeft = renderStyle.marginLeft;
@@ -118,7 +125,7 @@ mixin CSSDisplayMixin on RenderStyleBase {
         bool isAlignItemsStretch = parentRenderStyle.alignItems == AlignItems.stretch;
 
         // Display as block if flex vertical layout children and stretch children
-        if (!marginLeft.isAuto && !marginRight.isAuto && isVerticalDirection && isFlexNoWrap && isAlignItemsStretch) {
+        if (!marginLeft.isAuto! && !marginRight.isAuto! && isVerticalDirection && isFlexNoWrap && isAlignItemsStretch) {
           display = CSSDisplay.block;
         }
     }

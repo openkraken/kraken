@@ -25,10 +25,11 @@ describe('Appear Event', () => {
       div.removeEventListener('disappear', onDisappear);
       done();
     });
-
+    
+    // Should must appear larger then 300ms means that have been appeared.
     setTimeout(() => {
       div.style.top = '-600px';
-    }, 100);
+    }, 400);
 
     document.body.appendChild(div);
   });

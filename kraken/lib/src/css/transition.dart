@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/animation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
@@ -79,26 +81,26 @@ class CSSTransition {
         CSSFunction.isFunction(value);
   }
 
-  static void dispatchTransitionEvent(Element target, CSSTransitionEvent status) {
+  static void dispatchTransitionEvent(Element? target, CSSTransitionEvent status) {
     if (status == CSSTransitionEvent.run) {
-      target.dispatchEvent(Event(EVENT_TRANSITION_RUN));
+      target!.dispatchEvent(Event(EVENT_TRANSITION_RUN));
     } else if (status == CSSTransitionEvent.cancel) {
       // An Event fired when a CSS transition has been cancelled.
-      target.dispatchEvent(Event(EVENT_TRANSITION_CANCEL));
+      target!.dispatchEvent(Event(EVENT_TRANSITION_CANCEL));
     } else if (status == CSSTransitionEvent.start) {
       // An Event fired when a CSS transition is created,
       // when it is added to a set of running transitions,
       // though not necessarily started.
-      target.dispatchEvent(Event(EVENT_TRANSITION_START));
+      target!.dispatchEvent(Event(EVENT_TRANSITION_START));
     } else if (status == CSSTransitionEvent.end) {
       // An Event fired when a CSS transition has finished playing.
-      target.dispatchEvent(Event(EVENT_TRANSITION_END));
+      target!.dispatchEvent(Event(EVENT_TRANSITION_END));
     }
   }
 }
 
 class CSSStepCurve extends Curve {
-  final int step;
+  final int? step;
   final bool isStart;
 
   CSSStepCurve(this.step, this.isStart);
@@ -110,9 +112,9 @@ class CSSStepCurve extends Curve {
       addition = 1;
     }
 
-    int cur = (t * step).floor();
+    int cur = (t * step!).floor();
     cur = cur + addition;
 
-    return cur / step;
+    return cur / step!;
   }
 }

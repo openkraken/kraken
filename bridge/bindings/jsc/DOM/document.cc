@@ -73,10 +73,8 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
     return nullptr;
   }
 
-  JSStringRef tagNameStringRef = JSValueToStringCopy(ctx, tagNameValue, exception);
-  std::string tagName = JSStringToStdString(tagNameStringRef);
-
   auto document = static_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
+  std::string tagName = JSStringToStdString(JSValueToStringCopy(ctx, tagNameValue, exception));
   auto element = JSElement::buildElementInstance(document->context, tagName);
   return element->object;
 }
@@ -164,6 +162,10 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
       return new MouseEventInstance(JSMouseEvent::instance(context),
                                       reinterpret_cast<NativeMouseEvent *>(nativeEvent));
     });
+    JSEvent::defineEvent(EVENT_CANCEL, [](JSContext *context, void *nativeEvent) -> EventInstance * {
+      return new MouseEventInstance(JSMouseEvent::instance(context),
+                                      reinterpret_cast<NativeMouseEvent *>(nativeEvent));
+    });
   }
   if (!document_registered) {
     document_registered = true;
@@ -182,6 +184,9 @@ JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document") {
     });
     JSElement::defineElement("object", [](JSContext *context) -> ElementInstance* {
       return new JSObjectElement::ObjectElementInstance(JSObjectElement::instance(context));
+    });
+    JSElement::defineElement("script", [](JSContext *context) -> ElementInstance * {
+      return new JSScriptElement::ScriptElementInstance(JSScriptElement::instance(context));
     });
   }
 }
@@ -248,22 +253,22 @@ DocumentInstance::DocumentInstance(JSDocument *document)
   : NodeInstance(document, NodeType::DOCUMENT_NODE, DOCUMENT_TARGET_ID),
     nativeDocument(new NativeDocument(nativeNode)) {
   m_document = this;
-  JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
-  auto Element = JSElement::instance(document->context);
-  body = new ElementInstance(Element, bodyTagName, BODY_TARGET_ID);
-  body->m_document = this;
-  JSStringHolder bodyStringHolder = JSStringHolder(context, "body");
+
+  JSStringRef tagName = JSStringCreateWithUTF8CString("HTML");
+  documentElement = new ElementInstance(JSElement::instance(document->context), tagName, HTML_TARGET_ID);
+  documentElement->m_document = this;
+  documentElement->parentNode = this;
   JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
-  JSObjectSetProperty(ctx, object, bodyStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly, nullptr);
-  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(), body->object, kJSPropertyAttributeReadOnly,
-                      nullptr);
+  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(),
+                      documentElement->object, kJSPropertyAttributeReadOnly, nullptr);
+
   instanceMap[document->context] = this;
   getDartMethod()->initDocument(contextId, nativeDocument);
 }
 
 JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getDocumentPropertyMap();
-  auto prototypePropertyMap = getDocumentPrototypePropertyMap();
+  auto &propertyMap = getDocumentPropertyMap();
+  auto &prototypePropertyMap = getDocumentPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypePropertyMap.count(name) > 0) {
@@ -274,17 +279,16 @@ JSValueRef DocumentInstance::getProperty(std::string &name, JSValueRef *exceptio
     return NodeInstance::getProperty(name, exception);
   }
 
-  DocumentProperty property = propertyMap[name];
+  DocumentProperty &property = propertyMap[name];
 
   switch (property) {
-  case DocumentProperty::documentElement:
-  case DocumentProperty::body: {
+  case DocumentProperty::documentElement: {
     return nullptr;
   }
   case DocumentProperty::all: {
     auto all = new JSAllCollection(context);
 
-    traverseNode(body, [&all](NodeInstance *node) {
+    traverseNode(documentElement, [&all](NodeInstance *node) {
       all->internalAdd(node, nullptr);
       return false;
     });
@@ -318,14 +322,16 @@ void DocumentInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator
   }
 }
 
-void DocumentInstance::removeElementById(std::string &id, ElementInstance *element) {
+void DocumentInstance::removeElementById(JSValueRef idRef, ElementInstance *element) {
+  std::string id = JSStringToStdString(JSValueToStringCopy(ctx, idRef, nullptr));
   if (elementMapById.count(id) > 0) {
     auto &list = elementMapById[id];
     list.erase(std::find(list.begin(), list.end(), element));
   }
 }
 
-void DocumentInstance::addElementById(std::string &id, ElementInstance *element) {
+void DocumentInstance::addElementById(JSValueRef idRef, ElementInstance *element) {
+  std::string id = JSStringToStdString(JSValueToStringCopy(ctx, idRef, nullptr));
   if (elementMapById.count(id) == 0) {
     elementMapById[id] = std::vector<ElementInstance *>();
   }
@@ -348,11 +354,11 @@ JSValueRef JSDocument::getElementById(JSContextRef ctx, JSObjectRef function, JS
     return nullptr;
   }
 
+  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   JSStringRef idStringRef = JSValueToStringCopy(ctx, arguments[0], exception);
   std::string id = JSStringToStdString(idStringRef);
   if (id.empty()) return nullptr;
 
-  auto document = reinterpret_cast<DocumentInstance *>(JSObjectGetPrivate(thisObject));
   if (document->elementMapById.count(id) == 0) {
     return nullptr;
   }
@@ -384,7 +390,7 @@ JSValueRef JSDocument::getElementsByTagName(JSContextRef ctx, JSObjectRef functi
 
   std::vector<ElementInstance *> elements;
 
-  traverseNode(document->body, [tagName, &elements](NodeInstance *node) {
+  traverseNode(document->documentElement, [tagName, &elements](NodeInstance *node) {
     if (node->nodeType == NodeType::ELEMENT_NODE) {
       auto element = reinterpret_cast<ElementInstance *>(node);
       if (element->tagName() == tagName) {
@@ -405,13 +411,13 @@ JSValueRef JSDocument::getElementsByTagName(JSContextRef ctx, JSObjectRef functi
 }
 
 bool DocumentInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getDocumentPropertyMap();
-  auto prototypePropertyMap = getDocumentPrototypePropertyMap();
+  auto &propertyMap = getDocumentPropertyMap();
+  auto &prototypePropertyMap = getDocumentPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     if (property == DocumentProperty::cookie) {
       JSStringRef str = JSValueToStringCopy(ctx, value, exception);

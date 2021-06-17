@@ -83,4 +83,205 @@ describe('Position sticky', () => {
 
     await snapshot();
   });
+
+  it('should work with scroll container padding change in flow layout', (done) => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'green',
+          overflow: 'scroll'
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            position: 'sticky',
+            top: '30px',
+            left: '30px',
+            height: '100px',
+            width: '100px',
+            backgroundColor: 'yellow',
+          }
+        })),
+        (createElement('div', {
+          style: {
+            height: '300px',
+            width: '500px',
+            backgroundColor: 'blue',
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    requestAnimationFrame(async () => {
+      div.style.paddingTop = '20px';
+      div.style.paddingLeft = '20px';
+      await snapshot(0.1);
+      done();
+    });
+  });
+
+  it('should work with scroll container padding change in flex layout of row direction', (done) => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          display: 'flex',
+          backgroundColor: 'green',
+          overflow: 'scroll'
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            position: 'sticky',
+            top: '30px',
+            left: '30px',
+            height: '100px',
+            width: '100px',
+            flexShrink: 0,
+            backgroundColor: 'yellow',
+          }
+        })),
+        (createElement('div', {
+          style: {
+            height: '300px',
+            width: '500px',
+            flexShrink: 0,
+            backgroundColor: 'blue',
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    requestAnimationFrame(async () => {
+      div.style.paddingTop = '20px';
+      div.style.paddingLeft = '20px';
+      await snapshot(0.1);
+      done();
+    });
+  });
+
+  it('should work with scroll container padding change in flex layout of column direction', (done) => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: 'green',
+          overflow: 'scroll'
+        },
+      },
+      [
+        (div2 = createElement('div', {
+          style: {
+            position: 'sticky',
+            top: '30px',
+            left: '30px',
+            height: '100px',
+            width: '100px',
+            flexShrink: 0,
+            backgroundColor: 'yellow',
+          }
+        })),
+        (createElement('div', {
+          style: {
+            height: '300px',
+            width: '500px',
+            flexShrink: 0,
+            backgroundColor: 'blue',
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    requestAnimationFrame(async () => {
+      div.style.paddingTop = '20px';
+      div.style.paddingLeft = '20px';
+      await snapshot(0.1);
+      done();
+    });
+  });
+
+  it('children size in scroll container changes', async (done) => {
+    let prepadding;
+    let filter;
+    let sticky;
+    let container;
+    let coantents;
+    let scroller;
+    scroller = createElementWithStyle(
+      'div',
+      {
+        'box-sizing': 'border-box',
+        position: 'relative',
+        width: '100px',
+        height: '200px',
+        overflow: 'scroll',
+        background: 'yellow',
+        border: '1px solid #fff',
+      },
+      [
+        (contents = createElementWithStyle(
+          'div',
+          {
+            'box-sizing': 'border-box',
+            height: '200px',
+            width: '100px',
+          },
+          [
+            (prepadding = createElementWithStyle('div', {
+              'box-sizing': 'border-box',
+              height: '100px',
+              width: '100px',
+              'background-color': 'red',
+            })),
+            createElementWithStyle('div', {
+              height: '100px',
+              width: '100px',
+              'background-color': 'blue',
+            }, [
+              (sticky = createElementWithStyle('div', {
+                position: 'sticky',
+                top: '50px',
+                height: '50px',
+                width: '100px',
+                'background-color': 'green',
+              })),
+            ])
+
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(scroller);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      prepadding.style.height = '10px';
+      await snapshot();
+      done();
+    });
+  });
 });

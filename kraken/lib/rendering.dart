@@ -1,9 +1,12 @@
+
+
 /*
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
 export 'src/rendering/box_decoration.dart';
+export 'src/rendering/box_decoration_painter.dart';
 export 'src/dom/elements/canvas/canvas_painter.dart';
 export 'src/rendering/fallback_view.dart';
 export 'src/rendering/filter.dart';

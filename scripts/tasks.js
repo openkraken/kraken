@@ -2,7 +2,7 @@ const { src, dest, series, parallel, task } = require('gulp');
 const mkdirp = require('mkdirp');
 const path = require('path');
 const { readFileSync, writeFileSync, mkdirSync } = require('fs');
-const { spawnSync, execSync, fork, spawn } = require('child_process');
+const { spawnSync, execSync, fork, spawn, exec } = require('child_process');
 const { join, resolve } = require('path');
 const { program } = require('commander');
 const chalk = require('chalk');
@@ -36,7 +36,8 @@ const paths = {
   thirdParty: resolveKraken('third_party'),
   tests: resolveKraken('integration_tests'),
   sdk: resolveKraken('sdk'),
-  templates: resolveKraken('scripts/templates')
+  templates: resolveKraken('scripts/templates'),
+  performanceTests: resolveKraken('performance_tests')
 };
 
 const pkgVersion = readFileSync(path.join(paths.kraken, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
@@ -420,15 +421,10 @@ task('build-android-kraken-lib', (done) => {
   }
 
   const ndkDir = path.join(androidHome, 'ndk');
-  let installedNDK = fs.readdirSync(ndkDir).filter(d => d[0] != '.');
-  if (installedNDK.length == 0) {
-    throw new Error('Android NDK not Found. Please install one');
-  }
+  const ndkVersion = '21.4.7075529';
 
-  const ndkVersion = installedNDK.slice(-1)[0];
-
-  if (parseInt(ndkVersion.substr(0, 2)) < 20) {
-    throw new Error('Android NDK version must at least >= 20');
+  if (!fs.existsSync(path.join(ndkDir, ndkVersion))) {
+    throw new Error('Android NDK version (21.4.7075529) not installed.');
   }
 
   const archs = ['arm64-v8a', 'armeabi-v7a'];
@@ -515,5 +511,41 @@ task('patch-windows-symbol-link-for-android', done => {
 
 task('android-so-clean', (done) => {
   execSync(`rm -rf ${paths.bridge}/build/android`, { stdio: 'inherit', shell: winShell });
+  done();
+});
+
+function getDevicesInfo() {
+  let output = JSON.parse(execSync('flutter devices --machine', {stdio: 'pipe', encoding: 'utf-8'}));
+  let androidDevices = output.filter(device => {
+    return device.sdk.indexOf('Android') >= 0;
+  });
+  if (androidDevices.length == 0) {
+    throw new Error('Can not find android benchmark devices.');
+  }
+  return androidDevices;
+}
+
+task('run-benchmark', async (done) => {
+  let androidDevices = getDevicesInfo();
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.example.performance_tests');
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.example.performance_tests');
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.example.performance_tests');
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.example.performance_tests');
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.example.performance_tests');
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.example.performance_tests');
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.example.performance_tests');
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.example.performance_tests');
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.example.performance_tests');
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+  execSync('adb uninstall com.example.performance_tests');
   done();
 });

@@ -10,6 +10,8 @@ const { series, parallel, task } = require('gulp');
 const { execSync } = require('child_process');
 const buildMode = process.env.KRAKEN_BUILD || 'Debug';
 
+process.env.PATCH_PROMISE_POLYFILL = 'true';
+
 // Run tasks
 series(
   'ios-framework-clean',

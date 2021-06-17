@@ -7,15 +7,15 @@ import 'dart:ui';
 
 // https://w3c.github.io/manifest/
 class AppManifest with KrakenManifest {
-  String name;
-  String shortName;
-  String version;
-  String startUrl;
-  String display;
-  String backgroundColor;
-  String description;
-  List<Icons> icons;
-  List<RelatedApplications> relatedApplications;
+  String? name;
+  String? shortName;
+  String? version;
+  String? startUrl;
+  String? display;
+  String? backgroundColor;
+  String? description;
+  List<Icons>? icons;
+  List<RelatedApplications>? relatedApplications;
 
   AppManifest({
     this.name,
@@ -38,15 +38,15 @@ class AppManifest with KrakenManifest {
     backgroundColor = json['background_color'];
     description = json['description'];
     if (json['icons'] != null) {
-      icons = List<Icons>();
+      icons = List<Icons>.empty(growable: true);
       json['icons'].forEach((Map<String, dynamic> v) {
-        icons.add(Icons.fromJson(v));
+        icons!.add(Icons.fromJson(v));
       });
     }
     if (json['related_applications'] != null) {
-      relatedApplications = List<RelatedApplications>();
+      relatedApplications = List<RelatedApplications>.empty(growable: true);
       json['related_applications'].forEach((Map<String, dynamic> v) {
-        relatedApplications.add(RelatedApplications.fromJson(v));
+        relatedApplications!.add(RelatedApplications.fromJson(v));
       });
     }
     _parseKrakenManifestFromJson(json);
@@ -62,10 +62,10 @@ class AppManifest with KrakenManifest {
     data['background_color'] = backgroundColor;
     data['description'] = description;
     if (icons != null) {
-      data['icons'] = icons.map((v) => v.toJson()).toList();
+      data['icons'] = icons!.map((v) => v.toJson()).toList();
     }
     if (relatedApplications != null) {
-      data['related_applications'] = relatedApplications.map((v) => v.toJson()).toList();
+      data['related_applications'] = relatedApplications!.map((v) => v.toJson()).toList();
     }
 
     _appendKrakenJson(data);
@@ -77,18 +77,18 @@ class AppManifest with KrakenManifest {
 /// The extra definition of AppManifest, only works in kraken.
 mixin KrakenManifest {
   /// Description of window size.
-  Size size;
+  Size? size;
 
   /// Description of window title.
-  String title;
+  String? title;
 
   /// Description of window can be resized.
-  bool resizeable;
+  bool? resizeable;
 
   void _parseKrakenManifestFromJson(Map<String, dynamic> json) {
     title = json['title'];
 
-    Map rawSize = json['size'];
+    Map? rawSize = json['size'];
     if (rawSize != null) {
       size = Size(rawSize['width'] ?? 0, rawSize['height'] ?? 0);
     }
@@ -100,7 +100,7 @@ mixin KrakenManifest {
   }
 
   void _appendKrakenJson(Map<String, dynamic> data) {
-    Map<String, double> _size = {'width': size.width, 'height': size.height};
+    Map<String, double> _size = {'width': size!.width, 'height': size!.height};
     data['size'] = _size;
     data['title'] = title;
     data['resizeable'] = resizeable;
@@ -108,9 +108,9 @@ mixin KrakenManifest {
 }
 
 class Icons {
-  String src;
-  String sizes;
-  String type;
+  String? src;
+  String? sizes;
+  String? type;
 
   Icons({this.src, this.sizes, this.type});
 
@@ -130,8 +130,8 @@ class Icons {
 }
 
 class RelatedApplications {
-  String platform;
-  String url;
+  String? platform;
+  String? url;
 
   RelatedApplications({this.platform, this.url});
 

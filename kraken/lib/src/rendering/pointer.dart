@@ -8,98 +8,96 @@ import 'package:kraken/dom.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 
 typedef GestureCallback = void Function(Event);
 
-typedef MouseEventListener = void Function(String, { PointerDownEvent down, PointerUpEvent up });
+typedef MouseEventListener = void Function(String,
+    {PointerDownEvent? down, PointerUpEvent? up});
 
 mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
   /// location.
-  PointerDownEventListener onPointerDown;
+  PointerDownEventListener? onPointerDown;
 
   /// Called when a pointer that triggered an [onPointerDown] changes position.
-  PointerMoveEventListener onPointerMove;
+  PointerMoveEventListener? onPointerMove;
 
   /// Called when a pointer that triggered an [onPointerDown] is no longer in
   /// contact with the screen.
-  PointerUpEventListener onPointerUp;
+  PointerUpEventListener? onPointerUp;
 
   /// Called when the input from a pointer that triggered an [onPointerDown] is
   /// no longer directed towards this receiver.
-  PointerCancelEventListener onPointerCancel;
+  PointerCancelEventListener? onPointerCancel;
 
   /// Called when a pointer signal occurs over this object.
-  PointerSignalEventListener onPointerSignal;
+  PointerSignalEventListener? onPointerSignal;
 
-  MouseEventListener onClick;
+  MouseEventListener? onClick;
 
-  GestureCallback onSwipe;
+  GestureCallback? onSwipe;
 
-  GestureCallback onPan;
+  GestureCallback? onPan;
 
-  GestureCallback onScale;
+  GestureCallback? onScale;
 
-  GestureCallback onLongPress;
+  GestureCallback? onLongPress;
 
   void onPanStart(DragStartDetails details) {
-    onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+    onPan!(GestureEvent(
+        EVENT_PAN,
+        GestureEventInit(
+            state: EVENT_STATE_START,
+            deltaX: details.globalPosition.dx,
+            deltaY: details.globalPosition.dy)));
   }
 
   void onPanUpdate(DragUpdateDetails details) {
-    onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+    onPan!(GestureEvent(
+        EVENT_PAN,
+        GestureEventInit(
+            state: EVENT_STATE_UPDATE,
+            deltaX: details.globalPosition.dx,
+            deltaY: details.globalPosition.dy)));
   }
 
   void onPanEnd(DragEndDetails details) {
-    onPan(GestureEvent(EVENT_PAN, GestureEventInit( state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy )));
+    onPan!(GestureEvent(
+        EVENT_PAN,
+        GestureEventInit(
+            state: EVENT_STATE_END,
+            velocityX: details.velocity.pixelsPerSecond.dx,
+            velocityY: details.velocity.pixelsPerSecond.dy)));
   }
 
   void onScaleStart(ScaleStartDetails details) {
-    onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_START )));
+    onScale!(
+        GestureEvent(EVENT_SCALE, GestureEventInit(state: EVENT_STATE_START)));
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale )));
+    onScale!(GestureEvent(
+        EVENT_SCALE,
+        GestureEventInit(
+            state: EVENT_STATE_UPDATE,
+            rotation: details.rotation,
+            scale: details.scale)));
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    onScale(GestureEvent(EVENT_SCALE, GestureEventInit( state: EVENT_STATE_END )));
+    onScale!(
+        GestureEvent(EVENT_SCALE, GestureEventInit(state: EVENT_STATE_END)));
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    onLongPress(GestureEvent(EVENT_Long_PRESS, GestureEventInit(deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy )));
+    onLongPress!(GestureEvent(
+        EVENT_LONG_PRESS,
+        GestureEventInit(
+            deltaX: details.globalPosition.dx,
+            deltaY: details.globalPosition.dy)));
   }
-
-  /// Called when a pointer signal this object.
-  void initGestureRecognizer(Map<String, List<EventHandler>> eventHandlers) {
-    if (eventHandlers.containsKey('click')) {
-      gestures[ClickGestureRecognizer] = ClickGestureRecognizer();
-      (gestures[ClickGestureRecognizer] as ClickGestureRecognizer).onClick = onClick;
-    }
-    if (eventHandlers.containsKey('swipe')) {
-      gestures[SwipeGestureRecognizer] = SwipeGestureRecognizer();
-      (gestures[SwipeGestureRecognizer] as SwipeGestureRecognizer).onSwipe = onSwipe;
-    }
-    if (eventHandlers.containsKey('pan')) {
-      gestures[PanGestureRecognizer] = PanGestureRecognizer();
-      (gestures[PanGestureRecognizer] as PanGestureRecognizer).onStart = onPanStart;
-      (gestures[PanGestureRecognizer] as PanGestureRecognizer).onUpdate = onPanUpdate;
-      (gestures[PanGestureRecognizer] as PanGestureRecognizer).onEnd = onPanEnd;
-    }
-    if (eventHandlers.containsKey('longpress')) {
-      gestures[LongPressGestureRecognizer] = LongPressGestureRecognizer();
-      (gestures[LongPressGestureRecognizer] as LongPressGestureRecognizer).onLongPressEnd = onLongPressEnd;
-    }
-    if (eventHandlers.containsKey('scale')) {
-      gestures[ScaleGestureRecognizer] = ScaleGestureRecognizer();
-      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onStart = onScaleStart;
-      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onUpdate = onScaleUpdate;
-      (gestures[ScaleGestureRecognizer] as ScaleGestureRecognizer).onEnd = onScaleEnd;
-    }
-  }
-
-  final Map<Type, GestureRecognizer> gestures = <Type, GestureRecognizer>{};
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
@@ -109,20 +107,21 @@ mixin RenderPointerListenerMixin on RenderBox {
     /// pointers), or has its button pressed (for mouse pointers) at this widget's
     /// location.
     if (event is PointerDownEvent) {
-      gestures.forEach((key, gesture) {
-        gesture.addPointer(event);
-      });
+      if (entry.target is RenderBoxModel) {
+        GestureManager.instance()
+            .addTargetToList(entry.target as RenderBoxModel);
+      }
     }
 
     if (onPointerDown != null && event is PointerDownEvent)
-      return onPointerDown(event);
+      return onPointerDown!(event);
     if (onPointerMove != null && event is PointerMoveEvent)
-      return onPointerMove(event);
+      return onPointerMove!(event);
     if (onPointerUp != null && event is PointerUpEvent)
-      return onPointerUp(event);
+      return onPointerUp!(event);
     if (onPointerCancel != null && event is PointerCancelEvent)
-      return onPointerCancel(event);
+      return onPointerCancel!(event);
     if (onPointerSignal != null && event is PointerSignalEvent)
-      return onPointerSignal(event);
+      return onPointerSignal!(event);
   }
 }

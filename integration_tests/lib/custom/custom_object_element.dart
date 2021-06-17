@@ -14,19 +14,19 @@ class CustomObjectElement implements ObjectElementClient {
 
   CustomObjectElement(this.objectElementHost);
 
-  VideoPlayerController controller;
+  VideoPlayerController? controller;
 
-  String _src;
+  String? _src;
 
-  String get src => _src;
+  String? get src => _src;
 
-  set src(String value) {
+  set src(String? value) {
     if (_src != value) {
       bool needDispose = _src != null;
       _src = value;
 
       if (needDispose && controller != null) {
-        controller.dispose().then((_) {
+        controller!.dispose().then((_) {
           _createVideoBox();
         });
       } else {
@@ -52,7 +52,7 @@ class CustomObjectElement implements ObjectElementClient {
 
     _src = src;
 
-    controller.initialize().then((int textureId) {
+    controller!.initialize().then((int textureId) {
       completer.complete(textureId);
     });
 
@@ -61,12 +61,12 @@ class CustomObjectElement implements ObjectElementClient {
 
   void addVideoBox(int textureId) {
     TextureBox box = TextureBox(textureId: textureId);
-    objectElementHost?.updateChildTextureBox(box);
+    objectElementHost.updateChildTextureBox(box);
     controller?.play();
   }
 
   void _createVideoBox() {
-    createVideoPlayer(_src).then((textureId) {
+    createVideoPlayer(_src!).then((textureId) {
       addVideoBox(textureId);
       _dispatchCustomEvent();
     });
@@ -85,10 +85,10 @@ class CustomObjectElement implements ObjectElementClient {
 
     switch (name) {
       case 'play':
-        controller.play();
+        controller!.play();
         break;
       case 'pause':
-        controller.pause();
+        controller!.pause();
         break;
     }
   }
@@ -100,9 +100,9 @@ class CustomObjectElement implements ObjectElementClient {
     } else if (key == 'data') {
       src = value.toString();
     } else if (key == 'loop') {
-      controller.setLooping(value == 'true' ? true : false);
+      controller!.setLooping(value == 'true' ? true : false);
     } else if (key == 'currentTime') {
-      controller.seekTo(Duration(seconds: int.parse(value)));
+      controller!.seekTo(Duration(seconds: int.parse(value)));
     }
   }
 
@@ -110,15 +110,15 @@ class CustomObjectElement implements ObjectElementClient {
   dynamic getProperty(String key) {
     switch (key) {
       case 'loop':
-        return controller.value.isLooping;
+        return controller!.value.isLooping;
       case 'currentTime':
-        return controller.value.position.inSeconds;
+        return controller!.value.position.inSeconds;
       case 'src':
         return _src;
       case 'videoWidth':
-        return controller.value.size.width;
+        return controller!.value.size!.width;
       case 'videoHeight':
-        return controller.value.size.height;
+        return controller!.value.size!.height;
     }
   }
 
@@ -130,15 +130,15 @@ class CustomObjectElement implements ObjectElementClient {
   }
 
   @override
-  Future initElementClient(Map<String, dynamic> properties) {
+  Future<dynamic> initElementClient(Map<String, dynamic> properties) async {
     return null;
   }
 
   @override
   void dispose() {
-    objectElementHost?.updateChildTextureBox(null);
-    controller?.pause();
-    controller?.dispose();
+    objectElementHost.updateChildTextureBox(null);
+    controller!.pause();
+    controller!.dispose();
     controller = null;
   }
 }

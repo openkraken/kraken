@@ -12,7 +12,7 @@ typedef EventHandler = void Function(Event event);
 
 class EventTarget {
   // A unique target identifier.
-  int targetId;
+  final int targetId;
 
   // The Add
   final Pointer<NativeEventTarget> nativeEventTargetPtr;
@@ -23,61 +23,36 @@ class EventTarget {
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager) {
-    assert(targetId != null);
-    assert(elementManager != null);
-  }
+  EventTarget(this.targetId, this.nativeEventTargetPtr, this.elementManager);
 
   void addEvent(String eventType) {}
 
   void addEventListener(String eventType, EventHandler eventHandler) {
-    if (!eventHandlers.containsKey(eventType)) {
-      eventHandlers[eventType] = [];
+    List<EventHandler>? existHandler = eventHandlers[eventType];
+    if (existHandler == null) {
+      eventHandlers[eventType] = existHandler = [];
     }
-    eventHandlers[eventType].add(eventHandler);
+    existHandler.add(eventHandler);
   }
 
   void removeEventListener(String eventType, EventHandler eventHandler) {
-    if (!eventHandlers.containsKey(eventType)) {
+    List<EventHandler>? currentHandlers = eventHandlers[eventType];
+    if (currentHandlers == null) {
       return;
     }
-    List<EventHandler> currentHandlers = eventHandlers[eventType];
     currentHandlers.remove(eventHandler);
   }
 
-  /// return whether event is cancelled.
-  bool dispatchEvent(Event event) {
-    bool cancelled = true;
+  void dispatchEvent(Event event) {
     event.currentTarget = event.target = this;
-    if (event.currentTarget != null) {
-      List<EventHandler> handlers = event.currentTarget.getEventHandlers(event.type);
-      cancelled = _dispatchEventToTarget(event.currentTarget, handlers, event);
+    if (event.currentTarget != null && this is Element) {
+      (this as Element).eventResponder(event);
     }
-    return cancelled;
-  }
-
-  bool _dispatchEventToTarget(EventTarget target, List<EventHandler> handlers, Event event) {
-    if (handlers != null) {
-      for (var handler in handlers) {
-        handler(event);
-        if (event.defaultPrevented || !event.canBubble()) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   @mustCallSuper
   void dispose() {
     elementManager.removeTarget(this);
-    // @remove reference to elementManager.
-    elementManager = null;
     eventHandlers.clear();
-  }
-
-  List<EventHandler> getEventHandlers(String type) {
-    assert(type != null);
-    return eventHandlers[type];
   }
 }

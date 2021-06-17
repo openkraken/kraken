@@ -151,4 +151,107 @@ describe('Background-position', () => {
     await sleep(1);
     await snapshot();
   });
+
+  it('should works with length type', async () => {
+    const position1 = document.createElement('div');
+    setElementStyle(position1, {
+      width: '120px',
+      height: '120px',
+      background: 'url(assets/cat.png) no-repeat yellow',
+      backgroundPosition: '40px 60px',
+    });
+    append(BODY, position1);
+    await snapshot(0.1);
+  });
+
+  it('should works with length type and background-repeat of repeat', async () => {
+    const position1 = document.createElement('div');
+    setElementStyle(position1, {
+      width: '120px',
+      height: '120px',
+      background: 'url(assets/cat.png) repeat yellow',
+      backgroundPosition: '40px 60px',
+    });
+    append(BODY, position1);
+    await snapshot(0.1);
+  });
+
+  it('should works with percentage type', async () => {
+    const position1 = document.createElement('div');
+    setElementStyle(position1, {
+      width: '120px',
+      height: '120px',
+      background: 'url(assets/cat.png) 80% 40% no-repeat yellow',
+    });
+    append(BODY, position1);
+    await snapshot(0.1);
+  });
+
+  it('should works with mixing type 1', async () => {
+    const position1 = document.createElement('div');
+    setElementStyle(position1, {
+      width: '120px',
+      height: '120px',
+      background: 'url(assets/cat.png) 80% 40px no-repeat yellow',
+    });
+    append(BODY, position1);
+    await snapshot(0.1);
+  });
+
+  it('should works with mixing type 2', async () => {
+    const position1 = document.createElement('div');
+    setElementStyle(position1, {
+      width: '120px',
+      height: '120px',
+      background: 'url(assets/cat.png) 40px top no-repeat yellow',
+    });
+    append(BODY, position1);
+    await snapshot(0.1);
+  });
+
+  it('should works with mixing type 3', async () => {
+    const position1 = document.createElement('div');
+    setElementStyle(position1, {
+      width: '120px',
+      height: '120px',
+      background: 'url(assets/cat.png) 30% bottom no-repeat yellow',
+    });
+    append(BODY, position1);
+    await snapshot(0.1);
+  });
+
+  it('should works when background image size is bigger than container size', async () => {
+    const position1 = document.createElement('div');
+    setElementStyle(position1, {
+      width: '60px',
+      height: '80px',
+      background: 'url(assets/cat.png) 20px bottom no-repeat yellow',
+    });
+    append(BODY, position1);
+    await snapshot(0.1);
+  });
+
+  it('should works with background-position-x', async () => {
+    const position1 = document.createElement('div');
+    setElementStyle(position1, {
+      width: '120px',
+      height: '120px',
+      background: 'url(assets/cat.png) no-repeat yellow',
+      backgroundPositionX: '50px',
+    });
+    append(BODY, position1);
+    await snapshot(0.1);
+  });
+
+  it('should works with background-position-y', async () => {
+    const position1 = document.createElement('div');
+    setElementStyle(position1, {
+      width: '120px',
+      height: '120px',
+      background: 'url(assets/cat.png) no-repeat yellow',
+      backgroundPositionY: 'bottom',
+    });
+    append(BODY, position1);
+    await snapshot(0.1);
+  });
 });

@@ -42,8 +42,8 @@ JSCommentNode::CommentNodeInstance::CommentNodeInstance(JSCommentNode *jsComment
   NativeString args_01{};
   buildUICommandArgs(str, args_01);
 
-  ::foundation::UICommandTaskMessageQueue::instance(jsCommentNode->contextId)
-    ->registerCommand(eventTargetId, UICommand::createComment, args_01, nativeComment);
+  ::foundation::UICommandBuffer::instance(jsCommentNode->contextId)
+    ->addCommand(eventTargetId, UICommand::createComment, args_01, nativeComment);
 }
 
 bool JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
@@ -51,11 +51,11 @@ bool JSCommentNode::CommentNodeInstance::setProperty(std::string &name, JSValueR
 }
 
 JSValueRef JSCommentNode::CommentNodeInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getCommentNodePropertyMap();
+  auto &propertyMap = getCommentNodePropertyMap();
 
   if (propertyMap.count(name) == 0) return NodeInstance::getProperty(name, exception);
 
-  CommentNodeProperty property = propertyMap[name];
+  CommentNodeProperty &property = propertyMap[name];
 
   switch (property) {
   case CommentNodeProperty::data:

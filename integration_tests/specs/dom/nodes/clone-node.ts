@@ -105,5 +105,46 @@ describe('Clone node', () => {
 
     await snapshot();
   });
+
+  it('should work with img element', async (done) => {
+    const img = document.createElement('img');
+    img.style.width = '100px';
+    img.style.height = '100px';
+    img.src = "assets/kraken.png";
+    document.body.appendChild(img);
+    const img2 = img.cloneNode(false);
+    document.body.appendChild(img2);
+
+    let anotherImgHasLoad = false;
+    async function loadImg() {
+      if (anotherImgHasLoad) {
+        await snapshot();
+        done();
+      } else {
+        anotherImgHasLoad = true;
+      }
+    }
+
+    img.addEventListener('load', loadImg);
+    img2.addEventListener('load', loadImg);
+  })
+
+  it('deep is not required', async () => {
+    const div = document.createElement('div');
+    div.style.width = '100px';
+    div.style.height = '100px';
+    div.style.backgroundColor = 'red';
+    const divChild = document.createElement('div');
+    divChild.style.width = '50px';
+    divChild.style.height = '50px';
+    divChild.style.backgroundColor = 'yellow';
+    document.body.appendChild(div);
+    div.appendChild(divChild);
+
+    const divClone = div.cloneNode();
+    document.body.appendChild(divClone);
+
+    await snapshot();
+  })
 });
   

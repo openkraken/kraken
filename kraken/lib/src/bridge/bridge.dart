@@ -18,14 +18,14 @@ bool _firstView = true;
 /// Init bridge
 int initBridge() {
   if (kProfileMode) {
-    PerformanceTiming.instance(0).mark(PERF_BRIDGE_REGISTER_DART_METHOD_START);
+    PerformanceTiming.instance().mark(PERF_BRIDGE_REGISTER_DART_METHOD_START);
   }
 
   // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
 
   if (kProfileMode) {
-    PerformanceTiming.instance(0).mark(PERF_BRIDGE_REGISTER_DART_METHOD_END);
+    PerformanceTiming.instance().mark(PERF_BRIDGE_REGISTER_DART_METHOD_END);
   }
 
   int contextId = -1;
@@ -35,7 +35,7 @@ int initBridge() {
   if (_firstView) {
     Future.microtask(() {
       // Port flutter's frame callback into bridge.
-      SchedulerBinding.instance.addPersistentFrameCallback((_) {
+      SchedulerBinding.instance!.addPersistentFrameCallback((_) {
         assert(contextId != -1);
         flushUICommand();
         flushUICommandCallback();

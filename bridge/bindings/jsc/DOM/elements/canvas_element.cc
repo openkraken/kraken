@@ -29,8 +29,8 @@ JSCanvasElement::CanvasElementInstance::CanvasElementInstance(JSCanvasElement *j
   NativeString args_01{};
   buildUICommandArgs(tagName, args_01);
 
-  foundation::UICommandTaskMessageQueue::instance(context->getContextId())
-    ->registerCommand(eventTargetId, UICommand::createElement, args_01, nativeCanvasElement);
+  foundation::UICommandBuffer::instance(context->getContextId())
+    ->addCommand(eventTargetId, UICommand::createElement, args_01, nativeCanvasElement);
 }
 
 JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
@@ -39,8 +39,8 @@ JSCanvasElement::CanvasElementInstance::~CanvasElementInstance() {
 }
 
 JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name, JSValueRef *exception) {
-  auto propertyMap = getCanvasElementPropertyMap();
-  auto prototypePropertyMap = getCanvasElementPrototypePropertyMap();
+  auto &propertyMap = getCanvasElementPropertyMap();
+  auto &prototypePropertyMap = getCanvasElementPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypePropertyMap.count(name) > 0) {
@@ -48,7 +48,7 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
   };
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
 
     switch (property) {
     case CanvasElementProperty::width: {
@@ -63,13 +63,13 @@ JSValueRef JSCanvasElement::CanvasElementInstance::getProperty(std::string &name
 }
 
 bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSValueRef value, JSValueRef *exception) {
-  auto propertyMap = getCanvasElementPropertyMap();
-  auto prototypePropertyMap = getCanvasElementPrototypePropertyMap();
+  auto &propertyMap = getCanvasElementPropertyMap();
+  auto &prototypePropertyMap = getCanvasElementPrototypePropertyMap();
 
   if (prototypePropertyMap.count(name) > 0) return false;
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &&property = propertyMap[name];
 
     switch (property) {
     case CanvasElementProperty::width: {
@@ -82,8 +82,8 @@ bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
 
       buildUICommandArgs(name, widthString, args_01, args_02);
 
-      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+      foundation::UICommandBuffer::instance(_hostClass->contextId)
+        ->addCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     case CanvasElementProperty::height: {
@@ -95,8 +95,8 @@ bool JSCanvasElement::CanvasElementInstance::setProperty(std::string &name, JSVa
       NativeString args_02{};
 
       buildUICommandArgs(name, heightString, args_01, args_02);
-      foundation::UICommandTaskMessageQueue::instance(_hostClass->contextId)
-        ->registerCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
+      foundation::UICommandBuffer::instance(_hostClass->contextId)
+        ->addCommand(eventTargetId, UICommand::setProperty, args_01, args_02, nullptr);
       break;
     }
     default:
@@ -166,8 +166,8 @@ CanvasRenderingContext2D::CanvasRenderingContext2DInstance::~CanvasRenderingCont
 
 JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProperty(std::string &name,
                                                                                    JSValueRef *exception) {
-  auto propertyMap = getCanvasRenderingContext2DPropertyMap();
-  auto prototypePropertyMap = getCanvasRenderingContext2DPrototypePropertyMap();
+  auto &propertyMap = getCanvasRenderingContext2DPropertyMap();
+  auto &prototypePropertyMap = getCanvasRenderingContext2DPrototypePropertyMap();
   JSStringHolder nameStringHolder = JSStringHolder(context, name);
 
   if (prototypePropertyMap.count(name) > 0) {
@@ -175,7 +175,7 @@ JSValueRef CanvasRenderingContext2D::CanvasRenderingContext2DInstance::getProper
   }
 
   if (propertyMap.count(name) > 0) {
-    auto property = propertyMap[name];
+    auto &property = propertyMap[name];
     switch (property) {
     case CanvasRenderingContext2DProperty::direction: {
       return m_direction.makeString();

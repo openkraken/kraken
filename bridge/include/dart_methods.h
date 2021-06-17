@@ -39,12 +39,10 @@ typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallba
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
 typedef void (*FlushUICommand)();
-typedef void (*InitBody)(int32_t contextId, void *nativePtr);
+typedef void (*InitHTML)(int32_t contextId, void *nativePtr);
 typedef void (*InitWindow)(int32_t contextId, void *nativePtr);
 typedef void (*InitDocument)(int32_t contextId, void *nativePtr);
 
-using RefreshPaintCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
-using RefreshPaint = void (*)(void *callbackContext, int32_t contextId, RefreshPaintCallback callback);
 using MatchImageSnapshotCallback = void (*)(void *callbackContext, int32_t contextId, int8_t);
 using MatchImageSnapshot = void (*)(void *callbackContext, int32_t contextId, uint8_t *bytes, int32_t length,
                                     NativeString *name, MatchImageSnapshotCallback callback);
@@ -83,7 +81,6 @@ struct DartMethodPointer {
   PlatformBrightness platformBrightness{nullptr};
   ToBlob toBlob{nullptr};
   OnJSError onJsError{nullptr};
-  RefreshPaint refreshPaint{nullptr};
   MatchImageSnapshot matchImageSnapshot{nullptr};
   Environment environment{nullptr};
   SimulatePointer simulatePointer{nullptr};
@@ -92,7 +89,7 @@ struct DartMethodPointer {
 #if ENABLE_PROFILE
   GetPerformanceEntries getPerformanceEntries{nullptr};
 #endif
-  InitBody initBody{nullptr};
+  InitHTML initHTML{nullptr};
   InitWindow initWindow{nullptr};
   InitDocument initDocument{nullptr};
 };

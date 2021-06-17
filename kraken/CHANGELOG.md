@@ -1,3 +1,46 @@
+## 0.7.3+2
+
+**Features**
+
++ Input element now support type=password options https://github.com/openkraken/kraken/pull/377
+
+**Bug Fixed**
+
++ Fix event can't bubble to document element https://github.com/openkraken/kraken/pull/380
++ fix: fix bridge crash with getStringProperty on InputElement. https://github.com/openkraken/kraken/pull/386
+
+## 0.7.3+1
+
+* Fix: fix prebuilt binary.
+## 0.7.3
+
+**Features**
+
++ Feat: add network proxy interface in dart widget API https://github.com/openkraken/kraken/pull/292
++ Feat: add AsyncStorage.length method https://github.com/openkraken/kraken/pull/298
++ Feat: improve bridge call performance. https://github.com/openkraken/kraken/pull/328
++ feat: add SVGElement https://github.com/openkraken/kraken/pull/338
+
+
+**Bug Fixed**
++ Fix input setting value does not take effect before adding the dom tree. https://github.com/openkraken/kraken/pull/297/files
++ Fix: remove unnecessary flushUICommand https://github.com/openkraken/kraken/pull/318
++ Fix: img lazy loading not work https://github.com/openkraken/kraken/pull/319
++ Fix: touchend crash caused by bridge https://github.com/openkraken/kraken/pull/320
++ Fix: fix target of the event agent does not point to the clicked Node https://github.com/openkraken/kraken/pull/322
+
+**Refactor**
+
++ refactor: position sticky https://github.com/openkraken/kraken/pull/324
+
+## 0.7.2+4
+
+feat: support mouse event https://github.com/openkraken/kraken/pull/220
+fix: event bubble not works properly https://github.com/openkraken/kraken/pull/264
+fix: return value of Event.stopPropagation() should be undefined https://github.com/openkraken/kraken/pull/284
+fix/text node value https://github.com/openkraken/kraken/pull/279
+fix: fix kraken.methodChannel.setMethodCallHandler did't get called before kraken.invokeMethod called https://github.com/openkraken/kraken/pull/289
+
 ## 0.7.2+3
 
 feat: add willReload and didReload hooks for devTools.
