@@ -67,4 +67,52 @@ describe('FontStyle', () => {
 
     return snapshot();
   });
+
+  it('works with inheritance', async (done) => {
+    let div1;
+    let div2;
+    let div = createElement('div', {
+      style: {
+        position: 'relative',
+        width: '300px',
+        height: '200px',
+        backgroundColor: 'grey',
+      }
+    }, [
+      (div1 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightgreen',
+        }
+      }, [
+        createText('inherited font-style')
+      ])),
+      (div2 = createElement('div', {
+        style: {
+          width: '250px',
+          height: '100px',
+          backgroundColor: 'lightblue',
+          fontStyle: 'normal',
+        }
+      }, [
+        createText('not inherited font-style')
+      ]))
+    ]);
+
+    let container = createElement('div', {
+      style: {
+      }
+    });
+    container.appendChild(div);
+    BODY.appendChild(container);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      container.style.fontStyle = 'italic';
+      await snapshot();
+      done();
+    });
+  });
 });

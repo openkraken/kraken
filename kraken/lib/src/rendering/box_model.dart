@@ -1564,6 +1564,26 @@ class RenderBoxModel extends RenderBox
     return isHit;
   }
 
+  /// Get the closest parent including self with the specified style property
+  RenderBoxModel? getSelfParentWithSpecifiedStyle(String styleProperty) {
+    RenderObject? _parent = this;
+    while (_parent != null && _parent is! RenderViewportBox) {
+      if (_parent is RenderBoxModel && _parent.renderStyle.style![styleProperty].isNotEmpty) {
+        break;
+      }
+      if (_parent.parent != null) {
+        _parent = _parent.parent as RenderObject;
+      } else {
+        _parent = null;
+      }
+    }
+    if (_parent is RenderViewportBox) {
+      return null;
+    }
+
+    return _parent != null ? _parent as RenderBoxModel : null;
+  }
+
   @override
   bool hitTestSelf(Offset position) {
     return size.contains(position);
