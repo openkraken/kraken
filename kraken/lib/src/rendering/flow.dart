@@ -37,13 +37,11 @@ class _RunMetrics {
 class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout(
       {List<RenderBox>? children,
-      required String elementType,
       required RenderStyle renderStyle,
       required int targetId,
       ElementManager? elementManager})
       : super(
             targetId: targetId,
-            elementType: elementType,
             renderStyle: renderStyle,
             elementManager: elementManager) {
     addAll(children);
@@ -1456,8 +1454,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       parent.renderStyle.overflowY == CSSOverflowType.clip;
     // Margin top of first child with parent which is in flow layout collapse with parent
     // which makes the margin top of itself 0.
-    // Margin collapse does not work on HTML.
-    if (parent.elementType != HTML &&
+    // Margin collapse does not work on document root box.
+    if (!parent.isDocumentRootBox &&
       parent.renderStyle.transformedDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
       parent.renderStyle.paddingTop == 0 &&
@@ -1515,10 +1513,10 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
     double originalMarginTop = child.renderStyle.marginTop.length!;
     // Margin collapse does not work on following case:
-    // 1. HTML element
+    // 1. Document root element(HTML)
     // 2. Inline level elements
     // 3. Inner renderBox of element with overflow auto/scroll
-    if (child.elementType == HTML ||
+    if (child.isDocumentRootBox ||
       child.isScrollingContentBox ||
       (childTransformedDisplay != CSSDisplay.block &&
       childTransformedDisplay != CSSDisplay.flex)
@@ -1571,8 +1569,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       parent.renderStyle.overflowY == CSSOverflowType.clip;
     // Margin bottom of first child with parent which is in flow layout collapse with parent
     // which makes the margin top of itself 0.
-    // Margin collapse does not work on HTML.
-    if (parent.elementType != HTML &&
+    // Margin collapse does not work on document root box.
+    if (!parent.isDocumentRootBox &&
       parent.renderStyle.transformedDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
       parent.renderStyle.paddingBottom == 0 &&
@@ -1632,10 +1630,10 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
     double originalMarginBottom = child.renderStyle.marginBottom.length!;
     // Margin collapse does not work on following case:
-    // 1. HTML element
+    // 1. Document root element(HTML)
     // 2. Inline level elements
     // 3. Inner renderBox of element with overflow auto/scroll
-    if (child.elementType == HTML ||
+    if (child.isDocumentRootBox ||
       child.isScrollingContentBox ||
       (childTransformedDisplay != CSSDisplay.block &&
       childTransformedDisplay != CSSDisplay.flex)
@@ -1740,7 +1738,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderRecyclerLayout layout = RenderRecyclerLayout(
         targetId: targetId,
-        elementType: elementType,
         renderStyle: renderStyle,
         elementManager: elementManager);
     layout.addAll(children as List<RenderBox?>?);
@@ -1753,7 +1750,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderFlexLayout flexLayout = RenderFlexLayout(
         children: children as List<RenderBox>,
         targetId: targetId,
-        elementType: elementType,
         renderStyle: renderStyle,
         elementManager: elementManager);
     return copyWith(flexLayout);
@@ -1765,7 +1761,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout =
         RenderSelfRepaintFlowLayout(
             children: children as List<RenderBox>?,
-            elementType: elementType,
             targetId: targetId,
             renderStyle: renderStyle,
             elementManager: elementManager);
@@ -1778,7 +1773,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout =
         RenderSelfRepaintFlexLayout(
             children: children as List<RenderBox>,
-            elementType: elementType,
             targetId: targetId,
             renderStyle: renderStyle,
             elementManager: elementManager);
@@ -1790,13 +1784,11 @@ class RenderFlowLayout extends RenderLayoutBox {
 class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   RenderSelfRepaintFlowLayout({
     List<RenderBox>? children,
-    required  String elementType,
     required int targetId,
     ElementManager? elementManager,
     required RenderStyle renderStyle,
   }) : super(
             children: children,
-            elementType: elementType,
             targetId: targetId,
             elementManager: elementManager,
             renderStyle: renderStyle);
@@ -1810,7 +1802,6 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout =
         RenderSelfRepaintFlexLayout(
             children: children as List<RenderBox>,
-            elementType: elementType,
             targetId: targetId,
             renderStyle: renderStyle,
             elementManager: elementManager);
@@ -1822,7 +1813,6 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
         children: children as List<RenderBox>,
-        elementType: elementType,
         targetId: targetId,
         renderStyle: renderStyle,
         elementManager: elementManager);
@@ -1834,7 +1824,6 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
         children: children as List<RenderBox>,
-        elementType: elementType,
         targetId: targetId,
         renderStyle: renderStyle,
         elementManager: elementManager);

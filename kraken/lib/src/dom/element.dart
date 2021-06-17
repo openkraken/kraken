@@ -1389,10 +1389,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
-            renderStyle: renderStyle, elementType: element.tagName, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         } else {
           flexLayout = RenderFlexLayout(
-            renderStyle: renderStyle, elementType: element.tagName, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
@@ -1450,10 +1450,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
-            renderStyle: renderStyle, elementType: element.tagName, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         } else {
           flowLayout = RenderFlowLayout(
-            renderStyle: renderStyle, elementType: element.tagName, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
@@ -1507,7 +1507,7 @@ class Element extends Node
 
       if (prevRenderLayoutBox == null) {
         renderRecyclerLayout = RenderRecyclerLayout(
-            renderStyle: renderStyle, elementType: element.tagName, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
       } else if (prevRenderLayoutBox is RenderFlexLayout) {
@@ -1532,10 +1532,10 @@ class Element extends Node
     if (prevRenderIntrinsic == null) {
       if (repaintSelf) {
         intrinsic = RenderSelfRepaintIntrinsic(
-          element.targetId, element.tagName, renderStyle, element.elementManager);
+          element.targetId, renderStyle, element.elementManager);
       } else {
         intrinsic = RenderIntrinsic(
-          element.targetId, element.tagName, renderStyle, element.elementManager);
+          element.targetId, renderStyle, element.elementManager);
       }
     } else {
       if (prevRenderIntrinsic is RenderSelfRepaintIntrinsic) {

@@ -32,12 +32,10 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
   RenderRecyclerLayout({
     required int targetId,
-    required String elementType,
     ElementManager? elementManager,
     required RenderStyle renderStyle,
   }) : super(
             targetId: targetId,
-            elementType: elementType,
             renderStyle: renderStyle,
             elementManager: elementManager) {
     _buildRenderViewport();
@@ -401,7 +399,6 @@ class RenderRecyclerLayout extends RenderLayoutBox
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
         children: children as List<RenderBox>?,
-        elementType: elementType,
         targetId: targetId,
         renderStyle: renderStyle,
         elementManager: elementManager);
@@ -412,7 +409,6 @@ class RenderRecyclerLayout extends RenderLayoutBox
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
         targetId: targetId,
-        elementType: elementType,
         renderStyle: renderStyle,
         elementManager: elementManager);
     renderFlowLayout.addAll(children as List<RenderBox>?);

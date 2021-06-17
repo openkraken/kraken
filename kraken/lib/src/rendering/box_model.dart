@@ -150,12 +150,10 @@ class RenderLayoutBox extends RenderBoxModel
             ContainerBoxParentData<RenderBox>> {
   RenderLayoutBox(
       {required int targetId,
-      required String elementType,
       required RenderStyle renderStyle,
       ElementManager? elementManager})
       : super(
             targetId: targetId,
-            elementType: elementType,
             renderStyle: renderStyle,
             elementManager: elementManager);
 
@@ -483,7 +481,6 @@ class RenderBoxModel extends RenderBox
         RenderObjectWithControllerMixin {
   RenderBoxModel({
     required this.targetId,
-    required this.elementType,
     required this.renderStyle,
     this.elementManager,
   })  : super() {
@@ -491,8 +488,6 @@ class RenderBoxModel extends RenderBox
   }
 
   RenderStyle renderStyle;
-
-  String elementType;
 
   @override
   bool get alwaysNeedsCompositing => opacityAlwaysNeedsCompositing();
@@ -687,6 +682,19 @@ class RenderBoxModel extends RenderBox
     if (_intrinsicRatio == value) return;
     _intrinsicRatio = value;
     markNeedsLayout();
+  }
+
+
+  /// Whether current box is the root of the document which corresponds to HTML element in dom tree.
+  bool get isDocumentRootBox {
+    // Get the outer box of overflow scroll box
+    RenderBoxModel currentBox = isScrollingContentBox ?
+    parent as RenderBoxModel : this;
+    // Root element of document is the child of viewport.
+    if (currentBox.parent is RenderViewportBox) {
+      return true;
+    }
+    return false;
   }
 
   // Auto value for min-width
@@ -1613,7 +1621,6 @@ class RenderBoxModel extends RenderBox
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty('targetId', targetId, missingIfNull: true));
-    properties.add(DiagnosticsProperty('elementType', elementType, missingIfNull: true));
     properties.add(DiagnosticsProperty('contentSize', _contentSize));
     properties.add(DiagnosticsProperty(
         'contentConstraints', _contentConstraints,

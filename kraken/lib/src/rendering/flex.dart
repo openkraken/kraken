@@ -155,12 +155,10 @@ class RenderFlexLayout extends RenderLayoutBox {
   RenderFlexLayout({
     List<RenderBox>? children,
     required int targetId,
-    required String elementType,
     ElementManager? elementManager,
     required RenderStyle renderStyle,
   }) : super(
             targetId: targetId,
-            elementType: elementType,
             renderStyle: renderStyle,
             elementManager: elementManager) {
     addAll(children);
@@ -2632,7 +2630,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<RenderBox?> children = getDetachedChildrenAsList() as List<RenderBox?>;
     RenderRecyclerLayout renderRecyclerLayout = RenderRecyclerLayout(
         targetId: targetId,
-        elementType: elementType,
         renderStyle: renderStyle,
         elementManager: elementManager);
     renderRecyclerLayout.addAll(children);
@@ -2644,7 +2641,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderFlowLayout flowLayout = RenderFlowLayout(
         children: children as List<RenderBox>,
-        elementType: elementType,
         targetId: targetId,
         renderStyle: renderStyle,
         elementManager: elementManager);
@@ -2657,7 +2653,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout =
         RenderSelfRepaintFlexLayout(
             children: children as List<RenderBox>,
-            elementType: elementType,
             targetId: targetId,
             renderStyle: renderStyle,
             elementManager: elementManager);
@@ -2670,7 +2665,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout =
         RenderSelfRepaintFlowLayout(
             children: children as List<RenderBox>,
-            elementType: elementType,
             targetId: targetId,
             renderStyle: renderStyle,
             elementManager: elementManager);
@@ -2683,12 +2677,10 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
   RenderSelfRepaintFlexLayout({
     List<RenderBox>? children,
     required int targetId,
-    required String elementType,
     ElementManager? elementManager,
     required RenderStyle renderStyle,
   }) : super(
             children: children,
-            elementType: elementType,
             targetId: targetId,
             elementManager: elementManager,
             renderStyle: renderStyle);
@@ -2702,7 +2694,6 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout =
         RenderSelfRepaintFlowLayout(
             children: children as List<RenderBox>?,
-            elementType: elementType,
             targetId: targetId,
             renderStyle: renderStyle,
             elementManager: elementManager);
@@ -2714,7 +2705,6 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderFlexLayout flexLayout = RenderFlexLayout(
         children: children as List<RenderBox>,
-        elementType: elementType,
         targetId: targetId,
         renderStyle: renderStyle,
         elementManager: elementManager);
@@ -2726,7 +2716,6 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
     List<RenderObject> children = getDetachedChildrenAsList();
     RenderFlowLayout flowLayout = RenderFlowLayout(
         children: children as List<RenderBox>?,
-        elementType: elementType,
         targetId: targetId,
         renderStyle: renderStyle,
         elementManager: elementManager);
