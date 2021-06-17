@@ -85,10 +85,10 @@ class RenderViewportBox extends RenderProxyBox
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry as BoxHitTestEntry);
     if (event is PointerDownEvent) {
-      // add viewport to hitTest list.
+      // Add viewport to hitTest list.
       GestureManager.instance().addTargetToList(this);
       _verticalDragGestureRecognizer.addPointer(event);
-      // add down pointer to gestures then register the gesture recognizer to the arena.
+      // Add down pointer to gestures then register the gesture recognizer to the arena.
       GestureManager.instance().addPointer(event);
     } else if (event is PointerUpEvent) {
       GestureManager.instance().clearTargetList();
