@@ -322,23 +322,30 @@ bool EventTargetInstance::setProperty(std::string &name, JSValueRef value, JSVal
 JSValueRef EventTargetInstance::getPropertyHandler(std::string &name, JSValueRef *exception) {
   std::string eventType = name.substr(2);
 
-  if (_eventHandlers.count(eventType) == 0) {
+  if (_propertyEventHandler.count(eventType) == 0) {
     return JSValueMakeNull(ctx);
   }
-  return _eventHandlers[eventType].front();
+  return _propertyEventHandler[eventType];
 }
 
 void EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value,
                                                             JSValueRef *exception) {
   std::string eventType = name.substr(2);
 
-  if (_eventHandlers.count(eventType) == 0) {
-    _eventHandlers[eventType] = std::forward_list<JSObjectRef>();
+  // We need to remove previous eventHandler when setting new eventHandler with same eventType.
+  if (_propertyEventHandler.count(eventType) > 0) {
+    JSValueUnprotect(ctx, _propertyEventHandler[eventType]);
+    _propertyEventHandler.erase(eventType);
+  }
+
+  // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
+  if (JSValueIsNull(ctx, value)) {
+    return;
   }
 
   JSObjectRef handlerObjectRef = JSValueToObject(_hostClass->ctx, value, exception);
   JSValueProtect(_hostClass->ctx, handlerObjectRef);
-  _eventHandlers[eventType].emplace_after(_eventHandlers[eventType].cbefore_begin(), handlerObjectRef);
+  _propertyEventHandler[eventType] = handlerObjectRef;
 
   auto Event = reinterpret_cast<JSEventTarget *>(_hostClass);
   auto isJsOnlyEvent = std::find(Event->m_jsOnlyEvents.begin(), Event->m_jsOnlyEvents.end(), name.substr(2)) !=
@@ -368,14 +375,24 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance *eventInstance) {
   std::string eventType = toUTF8(u16EventType);
   auto stack = _eventHandlers[eventType];
 
-  for (auto &handler : stack) {
-    if (eventInstance->_propagationImmediatelyStopped) break;
+  // Dispatch event listeners writen by addEventListener
+  auto _dispatchEvent = [&eventInstance, this](JSObjectRef& handler) {
+    if (eventInstance->_propagationImmediatelyStopped) return;
 
     JSValueRef exception = nullptr;
     const JSValueRef arguments[] = {eventInstance->object};
     // The third params `thisObject` to null equals global object.
     JSObjectCallAsFunction(_hostClass->ctx, handler, nullptr, 1, arguments, &exception);
     context->handleException(exception);
+  };
+
+  for (auto &handler : stack) {
+    _dispatchEvent(handler);
+  }
+
+  // Dispatch event listener white by 'on' prefix property.
+  if (_propertyEventHandler.count(eventType) > 0) {
+    _dispatchEvent(_propertyEventHandler[eventType]);
   }
 
   // do not dispatch event when event has been canceled
