@@ -14,7 +14,7 @@ enum AppearEventState {
   disappear
 }
 
-mixin EventHandlerMixin on Node {
+mixin EventHandlerMixin on EventTarget {
   static const int MAX_STEP_MS = 10;
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
 

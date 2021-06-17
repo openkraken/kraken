@@ -20,10 +20,10 @@ final Pointer<NativeFunction<NativeWindowScrollBy>> nativeScrollBy = Pointer.fro
 
 class Window extends EventTarget {
   final Pointer<NativeWindow> nativeWindowPtr;
+  final Element viewportElement;
   static SplayTreeMap<int, Window> _nativeMap = SplayTreeMap();
-  final Document document;
 
-  Window(int targetId, this.nativeWindowPtr, ElementManager elementManager, this.document) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
+  Window(int targetId, this.nativeWindowPtr, ElementManager elementManager, this.viewportElement) : super(targetId, nativeWindowPtr.ref.nativeEventTarget, elementManager) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
       dispatchEvent(event);
@@ -74,30 +74,30 @@ class Window extends EventTarget {
 
   static void _scrollTo(Pointer<NativeWindow> nativeWindowPtr, int x, int y) {
     Window window = _nativeMap[nativeWindowPtr.address]!;
-    window.document.documentElement.flushLayout();
+    window.viewportElement.flushLayout();
     window.scrollTo(x, y);
   }
 
   static void _scrollBy(Pointer<NativeWindow> nativeWindowPtr, int x, int y) {
     Window window = _nativeMap[nativeWindowPtr.address]!;
-    window.document.documentElement.flushLayout();
+    window.viewportElement.flushLayout();
     window.scrollBy(x, y);
   }
 
   double scrollX() {
-    return document.documentElement.scrollLeft;
+    return viewportElement.scrollLeft;
   }
 
   double scrollY() {
-    return document.documentElement.scrollTop;
+    return viewportElement.scrollTop;
   }
 
   void scrollTo(num x, num y) {
-    document.documentElement.scrollTo(x: x, y: y, withAnimation: false);
+    viewportElement.scrollTo(x: x, y: y, withAnimation: false);
   }
 
   void scrollBy(num x, num y) {
-    document.documentElement.scrollBy(dx: x, dy: y, withAnimation: false);
+    viewportElement.scrollBy(dx: x, dy: y, withAnimation: false);
   }
 
   @override
@@ -112,11 +112,11 @@ class Window extends EventTarget {
       case EVENT_LOAD:
         return addEventListener(eventName, _handleLoad);
       case EVENT_SCROLL:
-        return document.documentElement.addEventListener(eventName, _handleScroll);
+        return viewportElement.addEventListener(eventName, _handleScroll);
       default:
         // Events listened on the Window need to be proxied to the Document, because there is a RenderView on the Document, which can handle hitTest.
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        document.addEvent(eventName);
+        viewportElement.addEvent(eventName);
         break;
     }
   }
