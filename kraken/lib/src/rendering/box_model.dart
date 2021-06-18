@@ -684,17 +684,13 @@ class RenderBoxModel extends RenderBox
     markNeedsLayout();
   }
 
-
   /// Whether current box is the root of the document which corresponds to HTML element in dom tree.
   bool get isDocumentRootBox {
     // Get the outer box of overflow scroll box
     RenderBoxModel currentBox = isScrollingContentBox ?
     parent as RenderBoxModel : this;
     // Root element of document is the child of viewport.
-    if (currentBox.parent is RenderViewportBox) {
-      return true;
-    }
-    return false;
+    return currentBox.parent is RenderViewportBox;
   }
 
   // Auto value for min-width
