@@ -506,6 +506,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         } else {
           _actualText = _renderEditable!.text = _buildTextSpan(text: value.text);
         }
+      } else {
+        // Update text when input element is not appended to dom yet.
+        _actualText = _buildTextSpan(text: value.text);
       }
       // Sync value to input element property
       properties[VALUE] = value.text;
