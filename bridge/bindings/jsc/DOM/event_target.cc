@@ -380,10 +380,13 @@ void EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value
 
   if (isJsOnlyEvent) return;
 
-  int32_t contextId = _hostClass->contextId;
-  NativeString args_01{};
-  buildUICommandArgs(eventType, args_01);
-  foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetId, UICommand::addEvent, args_01, nullptr);
+  if (_eventHandlers.empty()) {
+    int32_t contextId = _hostClass->contextId;
+    NativeString args_01{};
+    buildUICommandArgs(eventType, args_01);
+    int32_t type = JSObjectIsFunction(ctx, handlerObjectRef) ? UICommand::addEvent : UICommand::removeEvent;
+    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetId, type, args_01, nullptr);
+  }
 }
 
 void EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
