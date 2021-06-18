@@ -130,8 +130,15 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
 
   std::string eventType = JSStringToStdString(JSValueToStringCopy(ctx, eventNameValueRef, exception));
 
+  // Init list.
   if (eventTargetInstance->_eventHandlers.count(eventType) == 0) {
     eventTargetInstance->_eventHandlers[eventType] = std::forward_list<JSObjectRef>();
+  }
+
+  JSObjectRef &propertyHandlers = eventTargetInstance->_propertyEventHandler[eventType];
+
+  // Dart needs to be notified for the first registration event.
+  if (eventTargetInstance->_eventHandlers[eventType].empty() && JSObjectIsFunction(ctx, propertyHandlers)) {
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
     NativeString args_01{};
@@ -146,6 +153,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
         eventTargetInstance->eventTargetId, UICommand::addEvent, args_01, nullptr);
     };
   }
+
   std::forward_list<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventType];
   JSValueProtect(ctx, callbackObjectRef);
   handlers.emplace_after(handlers.cbefore_begin(), callbackObjectRef);
@@ -219,6 +227,25 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
     }
     return false;
   });
+
+  JSObjectRef &propertyHandlers = eventTargetInstance->_propertyEventHandler[eventType];
+
+  if (handlers.empty() && JSObjectIsFunction(ctx, propertyHandlers)) {
+    // Dart needs to be notified for handles is empty.
+    int32_t contextId = eventTargetInstance->_hostClass->contextId;
+
+    NativeString args_01{};
+    buildUICommandArgs(eventType, args_01);
+
+    auto EventTarget = reinterpret_cast<JSEventTarget *>(eventTargetInstance->_hostClass);
+    auto isJsOnlyEvent =
+      std::find(EventTarget->m_jsOnlyEvents.begin(), EventTarget->m_jsOnlyEvents.end(), eventType) != EventTarget->m_jsOnlyEvents.end();
+
+    if (!isJsOnlyEvent) {
+      foundation::UICommandBuffer::instance(contextId)->addCommand(
+        eventTargetInstance->eventTargetId, UICommand::removeEvent, args_01, nullptr);
+    };
+  }
 
   return nullptr;
 }
@@ -353,10 +380,13 @@ void EventTargetInstance::setPropertyHandler(std::string &name, JSValueRef value
 
   if (isJsOnlyEvent) return;
 
-  int32_t contextId = _hostClass->contextId;
-  NativeString args_01{};
-  buildUICommandArgs(eventType, args_01);
-  foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetId, UICommand::addEvent, args_01, nullptr);
+  if (_eventHandlers.empty()) {
+    int32_t contextId = _hostClass->contextId;
+    NativeString args_01{};
+    buildUICommandArgs(eventType, args_01);
+    int32_t type = JSObjectIsFunction(ctx, handlerObjectRef) ? UICommand::addEvent : UICommand::removeEvent;
+    foundation::UICommandBuffer::instance(contextId)->addCommand(eventTargetId, type, args_01, nullptr);
+  }
 }
 
 void EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
