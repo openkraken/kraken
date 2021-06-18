@@ -621,7 +621,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
       Rect? currentCaretRect = _currentCaretRect;
-      if (currentCaretRect == null) {
+      if (currentCaretRect == null || _renderEditable == null) {
         return;
       }
 
