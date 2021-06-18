@@ -103,6 +103,7 @@ class Window extends EventTarget {
   @override
   void addEvent(String eventName) {
     super.addEvent(eventName);
+
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
 
     switch (eventName) {
@@ -113,6 +114,9 @@ class Window extends EventTarget {
       case EVENT_SCROLL:
         return viewportElement.addEventListener(eventName, _handleScroll);
       default:
+        // Events listened on the Window need to be proxied to the Document, because there is a RenderView on the Document, which can handle hitTest.
+        // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
+        viewportElement.addEvent(eventName);
         break;
     }
   }

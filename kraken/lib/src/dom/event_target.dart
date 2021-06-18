@@ -50,6 +50,10 @@ class EventTarget {
     }
   }
 
+  Map<String, List<EventHandler>> getEventHandlers() {
+    return eventHandlers;
+  }
+
   @mustCallSuper
   void dispose() {
     elementManager.removeTarget(this);

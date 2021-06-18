@@ -18,6 +18,16 @@ describe('Tags input', () => {
     await snapshot();
   });
 
+  it('with placeholder and value set', async () => {
+    const input = document.createElement('input');
+    input.style.width = '100px';
+    input.setAttribute('placeholder', 'Please input');
+    input.setAttribute('value', 'Hello World');
+
+    document.body.appendChild(input);
+    await snapshot();
+  });
+
   it('with height smaller than text height', async () => {
     const input = document.createElement('input');
     input.style.fontSize = '26px';

@@ -1304,22 +1304,6 @@ class Element extends Node
   void handleMethodClick() {
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
 
-    if (isRendererAttached) {
-      final RenderBox box = renderBoxModel!;
-      // HitTest will test rootView's every child (including
-      // child's child), so must flush rootView every times,
-      // or child may miss size.
-      elementManager
-          .getRootRenderBox()
-          .owner!
-          .flushLayout();
-
-      // Position the center of element.
-      Offset position = box.localToGlobal(box.size.center(Offset.zero), ancestor: elementManager.getRootRenderBox());
-      final BoxHitTestResult boxHitTestResult = BoxHitTestResult();
-      GestureBinding.instance!.hitTest(boxHitTestResult, position);
-    }
-
     // If element not in tree, click is fired and only response to itself.
     dispatchEvent(clickEvent);
   }
@@ -1389,10 +1373,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager, children: []);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         } else {
           flexLayout = RenderFlexLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager, children: []);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
@@ -1450,10 +1434,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager, children: []);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         } else {
           flowLayout = RenderFlowLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager, children: []);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {

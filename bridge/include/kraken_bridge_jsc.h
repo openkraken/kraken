@@ -482,6 +482,7 @@ private:
   friend JSEventTarget;
   // TODO: use std::u16string for better performance.
   std::unordered_map<std::string, std::forward_list<JSObjectRef>> _eventHandlers;
+  std::unordered_map<std::string, JSObjectRef> _propertyEventHandler;
   bool internalDispatchEvent(EventInstance *eventInstance);
 };
 

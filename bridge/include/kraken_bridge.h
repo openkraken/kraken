@@ -57,7 +57,8 @@ enum UICommand {
   setStyle,
   setProperty,
   removeProperty,
-  cloneNode
+  cloneNode,
+  removeEvent,
 };
 
 struct KRAKEN_EXPORT UICommandItem {
@@ -87,7 +88,7 @@ void initJSContextPool(int poolSize);
 KRAKEN_EXPORT_C
 void disposeContext(int32_t contextId);
 KRAKEN_EXPORT_C
-int32_t allocateNewContext();
+int32_t allocateNewContext(int32_t targetContextId);
 KRAKEN_EXPORT_C
 void *getJSContext(int32_t contextId);
 bool checkContext(int32_t contextId);
