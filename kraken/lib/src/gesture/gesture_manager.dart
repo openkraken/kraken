@@ -64,9 +64,7 @@ class GestureManager {
     for (int i = 0; i < _hitTestList.length; i++) {
       RenderBox renderBox = _hitTestList[i];
       Map<String, List<EventHandler>> eventHandlers = {};
-      if (renderBox is RenderBoxModel && renderBox.getEventHandlers != null) {
-        eventHandlers = renderBox.getEventHandlers!();
-      } else if (renderBox is RenderViewportBox && renderBox.getEventHandlers != null) {
+      if (renderBox is RenderPointerListenerMixin && renderBox.getEventHandlers != null) {
         eventHandlers = renderBox.getEventHandlers!();
       }
 
@@ -98,92 +96,110 @@ class GestureManager {
   }
 
   void onClick(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
-    _target!.onClick!(eventType, up: up);
+    if (_target != null && _target!.onClick != null) {
+      _target!.onClick!(eventType, up: up);
+    }
   }
 
   void onSwipe(Event event) {
-    _target!.onSwipe!(event);
+    if (_target != null && _target!.onSwipe != null) {
+      _target!.onSwipe!(event);
+    }
   }
 
   void onPanStart(DragStartDetails details) {
-    _target!.onPan!(
-      GestureEvent(
-        EVENT_PAN,
-        GestureEventInit(
-          state: EVENT_STATE_START,
-          deltaX: details.globalPosition.dx,
-          deltaY: details.globalPosition.dy
-        )
-      )
-    );
+    if (_target != null && _target!.onPan != null) {
+      _target!.onPan!(
+          GestureEvent(
+              EVENT_PAN,
+              GestureEventInit(
+                  state: EVENT_STATE_START,
+                  deltaX: details.globalPosition.dx,
+                  deltaY: details.globalPosition.dy
+              )
+          )
+      );
+    }
   }
 
   void onPanUpdate(DragUpdateDetails details) {
-    _target!.onPan!(
-      GestureEvent(
-        EVENT_PAN,
-        GestureEventInit(
-          state: EVENT_STATE_UPDATE,
-          deltaX: details.globalPosition.dx,
-          deltaY: details.globalPosition.dy
-        )
-      )
-    );
+    if (_target != null && _target!.onPan != null) {
+      _target!.onPan!(
+          GestureEvent(
+              EVENT_PAN,
+              GestureEventInit(
+                  state: EVENT_STATE_UPDATE,
+                  deltaX: details.globalPosition.dx,
+                  deltaY: details.globalPosition.dy
+              )
+          )
+      );
+    }
   }
 
   void onPanEnd(DragEndDetails details) {
-    _target!.onPan!(
-      GestureEvent(
-        EVENT_PAN,
-        GestureEventInit(
-          state: EVENT_STATE_END,
-          velocityX: details.velocity.pixelsPerSecond.dx,
-          velocityY: details.velocity.pixelsPerSecond.dy
-        )
-      )
-    );
+    if (_target != null && _target!.onPan != null) {
+      _target!.onPan!(
+          GestureEvent(
+              EVENT_PAN,
+              GestureEventInit(
+                  state: EVENT_STATE_END,
+                  velocityX: details.velocity.pixelsPerSecond.dx,
+                  velocityY: details.velocity.pixelsPerSecond.dy
+              )
+          )
+      );
+    }
   }
 
   void onScaleStart(ScaleStartDetails details) {
-    _target!.onScale!(
-      GestureEvent(
-        EVENT_SCALE,
-        GestureEventInit( state: EVENT_STATE_START )
-      )
-    );
+    if (_target != null && _target!.onScale != null) {
+      _target!.onScale!(
+          GestureEvent(
+              EVENT_SCALE,
+              GestureEventInit( state: EVENT_STATE_START )
+          )
+      );
+    }
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    _target!.onScale!(
-      GestureEvent(
-        EVENT_SCALE,
-        GestureEventInit(
-          state: EVENT_STATE_UPDATE,
-          rotation: details.rotation,
-          scale: details.scale
-        )
-      )
-    );
+    if (_target != null && _target!.onScale != null) {
+      _target!.onScale!(
+          GestureEvent(
+              EVENT_SCALE,
+              GestureEventInit(
+                  state: EVENT_STATE_UPDATE,
+                  rotation: details.rotation,
+                  scale: details.scale
+              )
+          )
+      );
+    }
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    _target!.onScale!(
-      GestureEvent(
-        EVENT_SCALE,
-        GestureEventInit( state: EVENT_STATE_END )
-      )
-    );
+    if (_target != null && _target!.onScale != null) {
+      _target!.onScale!(
+          GestureEvent(
+              EVENT_SCALE,
+              GestureEventInit( state: EVENT_STATE_END )
+          )
+      );
+    }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    _target!.onLongPress!(
-      GestureEvent(
-        EVENT_LONG_PRESS,
-        GestureEventInit(
-          deltaX: details.globalPosition.dx,
-          deltaY: details.globalPosition.dy
-        )
-      )
-    );
+    if (_target != null && _target!.onLongPress != null) {
+      _target!.onLongPress!(
+          GestureEvent(
+              EVENT_LONG_PRESS,
+              GestureEventInit(
+                  deltaX: details.globalPosition.dx,
+                  deltaY: details.globalPosition.dy
+              )
+          )
+      );
+    }
   }
 }
