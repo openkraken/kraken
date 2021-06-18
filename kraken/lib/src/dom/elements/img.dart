@@ -104,7 +104,7 @@ class ImageElement extends Element {
     nativeImgElement.ref.getImageNaturalHeight = nativeGetImageNaturalHeight;
   }
 
-  ui.Image get image => _imageInfo.image;
+  ui.Image get image => _imageInfo!.image;
 
   @override
   void willAttachRenderer() {

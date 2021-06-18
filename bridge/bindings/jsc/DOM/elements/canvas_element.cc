@@ -571,6 +571,7 @@ JSValueRef CanvasRenderingContext2D::drawImage(JSContextRef ctx, JSObjectRef fun
   assert_m(instance->nativeCanvasRenderingContext2D->drawImage != nullptr,
            "Failed to execute drawImage(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->drawImage(instance->nativeCanvasRenderingContext2D,
+                                                      argumentCount,
                                                       imageInstance->nativeImageElement,
                                                       sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   return nullptr;

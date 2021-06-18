@@ -281,11 +281,11 @@ class CanvasRenderingContext2D {
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-  static void _drawImage(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeImgElement> imagePtr,
+  static void _drawImage(Pointer<NativeCanvasRenderingContext2D> nativePtr, int argumentCount, Pointer<NativeImgElement> imagePtr,
       double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
     ImageElement imageElement = ImageElement.getImageElementOfNativePtr(imagePtr);
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2DOfNativePtr(nativePtr);
-    canvasRenderingContext2D.drawImage(imageElement.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+    canvasRenderingContext2D.drawImage(argumentCount, imageElement.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
 
   static void _ellipse(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y,
@@ -587,13 +587,25 @@ class CanvasRenderingContext2D {
     });
   }
 
-  void drawImage(Image image, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
+  void drawImage(int argumentCount, Image img, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
     addAction((Canvas canvas, Size size) {
-      // TODO
       // ctx.drawImage(image, dx, dy);
-      // ctx.drawImage(image, dx, dy, dWidth, dHeight);
-      // ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-      canvas.drawImage(image, Offset(dx, dy), Paint());
+      if (argumentCount == 3) {
+        canvas.drawImage(img, Offset(dx, dy), Paint());
+      } else {
+        if (argumentCount == 5) {
+          // ctx.drawImage(image, dx, dy, dWidth, dHeight);
+          sx = 0;
+          sy = 0;
+          sWidth = img.width.toDouble();
+          sHeight = img.height.toDouble();
+        }
+
+        canvas.drawImageRect(img,
+            Rect.fromLTWH(sx, sy, sWidth, sHeight),
+            Rect.fromLTWH(dx, dy, dWidth, dHeight),
+            Paint());
+      }
     });
   }
 
@@ -914,7 +926,6 @@ class CanvasRenderingContext2D {
 
   void fillText(String text, double x, double y, {double? maxWidth}) {
     addAction((Canvas canvas, Size size) {
-      print('paint text $text');
       TextPainter textPainter = _getTextPainter(text, fillStyle);
       if (maxWidth != null) {
         // FIXME: should scale down to a smaller font size in order to fit the text in the specified width.
