@@ -213,7 +213,7 @@ class RenderIntrinsic extends RenderBoxModel
     RenderObject? childRenderObject = child;
     child = null;
     RenderSelfRepaintIntrinsic newChild =
-        RenderSelfRepaintIntrinsic(targetId, renderStyle, elementManager);
+      RenderSelfRepaintIntrinsic(targetId, renderStyle, elementManager);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }

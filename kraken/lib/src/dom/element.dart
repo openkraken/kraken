@@ -1373,10 +1373,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager, children: []);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         } else {
           flexLayout = RenderFlexLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager, children: []);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
@@ -1434,10 +1434,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager, children: []);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         } else {
           flowLayout = RenderFlowLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager, children: []);
+            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
