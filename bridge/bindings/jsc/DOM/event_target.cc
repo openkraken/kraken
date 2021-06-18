@@ -135,8 +135,10 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     eventTargetInstance->_eventHandlers[eventType] = std::forward_list<JSObjectRef>();
   }
 
+  JSObjectRef &propertyHandlers = eventTargetInstance->_propertyEventHandler[eventType];
+
   // Dart needs to be notified for the first registration event.
-  if (eventTargetInstance->_eventHandlers[eventType].empty()) {
+  if (eventTargetInstance->_eventHandlers[eventType].empty() && JSObjectIsFunction(ctx, propertyHandlers)) {
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
     NativeString args_01{};
@@ -226,7 +228,9 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
     return false;
   });
 
-   if (handlers.empty()) {
+  JSObjectRef &propertyHandlers = eventTargetInstance->_propertyEventHandler[eventType];
+
+  if (handlers.empty() && JSObjectIsFunction(ctx, propertyHandlers)) {
     // Dart needs to be notified for handles is empty.
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
