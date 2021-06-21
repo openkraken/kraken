@@ -5,7 +5,16 @@ const isPortReachable = require('is-port-reachable');
 
 // Dart null safety error didn't report in dist binaries. Should run integration test with flutter run directly.
 function startIntegrationTest() {
-  const tester = spawn('flutter', ['run', '-d', 'macos'], {
+  const shouldSkipBuild = /skip\-build/.test(process.argv);
+  if (!shouldSkipBuild) {
+    console.log('Building integration tests macOS application from "lib/main.dart"...');
+    spawnSync('flutter', ['build', 'macos', '--debug'], {
+      stdio: 'inherit'
+    });
+  }
+
+  const testExecutable = path.join(__dirname, '../build/macos/Build/Products/Debug/tests.app/Contents/MacOS/tests');
+  const tester = spawn(testExecutable, [], {
     env: {
       ...process.env,
       KRAKEN_ENABLE_TEST: 'true',
