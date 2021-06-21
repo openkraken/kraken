@@ -138,7 +138,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   JSObjectRef &propertyHandlers = eventTargetInstance->_propertyEventHandler[eventType];
 
   // Dart needs to be notified for the first registration event.
-  if (eventTargetInstance->_eventHandlers[eventType].empty() && JSObjectIsFunction(ctx, propertyHandlers)) {
+  if (eventTargetInstance->_eventHandlers[eventType].empty() || JSObjectIsFunction(ctx, propertyHandlers)) {
     int32_t contextId = eventTargetInstance->_hostClass->contextId;
 
     NativeString args_01{};
