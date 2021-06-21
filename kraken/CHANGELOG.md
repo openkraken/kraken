@@ -1,3 +1,9 @@
+## 0.8.0+1
+
+**Bug Fixed**
+
++ Fix DOM events can't bind with addEventListener https://github.com/openkraken/kraken/pull/436
+
 ## 0.8.0
 
 **Big News**
