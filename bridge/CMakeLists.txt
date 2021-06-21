@@ -3,7 +3,6 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
 project(KrakenBridge)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_FLAGS -flto)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
@@ -52,13 +51,15 @@ list(APPEND BRIDGE_SOURCE
 )
 
 list(APPEND BRIDGE_INCLUDE
-  ./foundation
-  ./
-  ./include
-  ./polyfill/dist
+  ${CMAKE_CURRENT_LIST_DIR}/foundation
+  ${CMAKE_CURRENT_LIST_DIR}
+  ${CMAKE_CURRENT_LIST_DIR}/include
+  ${CMAKE_CURRENT_LIST_DIR}/polyfill/dist
   ${DART_SDK}
   ${ADDITIONAL_INCLUDE_DIRS}
   )
+
+set(BINDING_DIR ${CMAKE_CURRENT_LIST_DIR}/bindings)
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   add_compile_options(-DKRAKEN_JSC_ENGINE=1)
@@ -173,21 +174,31 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   )
 
   list(APPEND QUICK_JS_SOURCE
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp-opcode.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode-table.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/list.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.c
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp-opcode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libunicode-table.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/list.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
   )
-  add_library(quickjs SHARED ${QUICK_JS_SOURCE})
+  add_library(quickjs STATIC ${QUICK_JS_SOURCE})
+
+  list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
+  list(APPEND BRIDGE_LINK_LIBS quickjs)
+
+  list(APPEND BRIDGE_SOURCE
+      bridge_qjs.cc
+      bridge_qjs.h
+      bindings/qjs/js_context.cc
+      bindings/qjs/js_context.h
+  )
 
   target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
 endif()
@@ -252,6 +263,9 @@ endif ()
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
   set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_jsc)
+elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "qjs")
+  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_qjs)
+  set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_qjs)
 endif()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})

@@ -20,6 +20,8 @@ const getPolyFillHeader = (outputName) => `/*
 #include "bridge_jsa.h"
 #elif KRAKEN_JSC_ENGINE
 #include "bridge_jsc.h"
+#elif KRAKEN_QUICK_JS_ENGINE
+#include "bridge_qjs.h"
 #endif
 
 void initKraken${outputName}(kraken::JSBridge *bridge);

@@ -20,8 +20,6 @@
 #include <vector>
 #include <forward_list>
 
-using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg)>;
-
 class NativeString;
 
 namespace kraken::binding::jsc {

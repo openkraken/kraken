@@ -10,10 +10,12 @@
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
+#include <codecvt>
 
 #include <sstream>
 #include <string>
-#include <JavaScriptCore/JavaScript.h>
+
+#define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 
 #define KRAKEN_DISALLOW_COPY(TypeName) TypeName(const TypeName &) = delete
 
@@ -39,6 +41,8 @@
 
 struct NativeString;
 struct UICommandItem;
+
+using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg)>;
 
 namespace foundation {
 
@@ -116,7 +120,7 @@ private:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(LogMessage);
 };
 
-void printLog(int32_t contextId, std::stringstream &stream, std::string level, JSGlobalContextRef ctx);
+void printLog(int32_t contextId, std::stringstream &stream, std::string level, void *ctx);
 
 } // namespace foundation
 
@@ -135,5 +139,20 @@ void printLog(int32_t contextId, std::stringstream &stream, std::string level, J
 #define KRAKEN_CHECK(condition)                                                                                        \
   KRAKEN_LAZY_STREAM(::foundation::LogMessage(::foundation::LOG_FATAL, __FILE__, __LINE__, #condition).stream(),       \
                      !(condition))
+
+template <typename T> std::string toUTF8(const std::basic_string<T, std::char_traits<T>, std::allocator<T>> &source) {
+  std::string result;
+
+  std::wstring_convert<std::codecvt_utf8_utf16<T>, T> convertor;
+  result = convertor.to_bytes(source);
+
+  return result;
+}
+
+template <typename T>
+void fromUTF8(const std::string &source, std::basic_string<T, std::char_traits<T>, std::allocator<T>> &result) {
+  std::wstring_convert<std::codecvt_utf8_utf16<T>, T> convertor;
+  result = convertor.from_bytes(source);
+}
 
 #endif

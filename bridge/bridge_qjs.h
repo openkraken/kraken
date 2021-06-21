@@ -1,15 +1,14 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
-#ifndef KRAKEN_JS_JSC_BRIDGE_H_
-#define KRAKEN_JS_JSC_BRIDGE_H_
-
-#ifndef KRAKEN_ENABLE_JSA
+#ifndef KRAKEN_JS_QJS_BRIDGE_H_
+#define KRAKEN_JS_QJS_BRIDGE_H_
 
 #include "foundation/bridge_callback.h"
 #include "include/kraken_bridge.h"
+#include <quickjs/quickjs.h>
 
 #include <atomic>
 #include <deque>
@@ -26,7 +25,7 @@ public:
 
   static std::unordered_map<std::string, NativeString> pluginSourceCode;
 
-  std::deque<JSObjectRef> krakenModuleListenerList;
+  std::deque<JSValue> krakenModuleListenerList;
 
   int32_t contextId;
   foundation::BridgeCallback *bridgeCallback;
@@ -36,7 +35,7 @@ public:
   KRAKEN_EXPORT void evaluateScript(const NativeString *script, const char *url, int startLine);
   KRAKEN_EXPORT void evaluateScript(const std::u16string &script, const char *url, int startLine);
 
-  const std::unique_ptr<kraken::binding::jsc::JSContext> &getContext() const {
+  const std::unique_ptr<kraken::binding::qjs::JSContext> &getContext() const {
     return m_context;
   }
 
@@ -45,8 +44,9 @@ public:
   void setDisposeCallback(Task task, void *data);
 
   std::atomic<bool> event_registered = false;
+
 private:
-  std::unique_ptr<binding::jsc::JSContext> m_context;
+  std::unique_ptr<binding::qjs::JSContext> m_context;
   JSExceptionHandler m_handler;
   Task m_disposeCallback{nullptr};
   void *m_disposePrivateData{nullptr};
@@ -54,5 +54,4 @@ private:
 
 } // namespace kraken
 
-#endif
-#endif // KRAKEN_JS_JSC_BRIDGE_H_
+#endif // KRAKEN_JS_QJS_BRIDGE_H_

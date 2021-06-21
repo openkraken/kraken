@@ -6,7 +6,6 @@
 #include <algorithm>
 #include "colors.h"
 #include "logging.h"
-#include "bridge_jsc.h"
 
 #if defined(IS_ANDROID)
 #include <android/log.h>
@@ -109,7 +108,7 @@ enum class MessageLevel : uint8_t {
   Info = 5,
 };
 
-void printLog(int32_t contextId, std::stringstream &stream, std::string level, JSGlobalContextRef ctx) {
+void printLog(int32_t contextId, std::stringstream &stream, std::string level, void* ctx) {
     MessageLevel _log_level = MessageLevel::Info;
     switch (level[0]) {
       case 'l':
@@ -136,9 +135,11 @@ void printLog(int32_t contextId, std::stringstream &stream, std::string level, J
         KRAKEN_LOG(VERBOSE) << stream.str();
     }
 
+#if KRAKEN_JSC_ENGINE
     if (kraken::JSBridge::consoleMessageHandler != nullptr) {
-      kraken::JSBridge::consoleMessageHandler(ctx, stream.str(), static_cast<int>(_log_level));
+      kraken::JSBridge::consoleMessageHandler(reinterpret_cast<JSGlobalContextRef>(ctx), stream.str(), static_cast<int>(_log_level));
     }
+#endif
   }
 
 } // namespace foundation

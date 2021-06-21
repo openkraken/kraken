@@ -8,7 +8,12 @@
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
 #include "foundation/inspector_task_queue.h"
+
+#if KRAKEN_JSC_ENGINE
 #include "bindings/jsc/KOM/performance.h"
+#elif KRAKEN_QUICK_JS_ENGINE
+#include "bridge_qjs.h"
+#endif
 
 #ifdef KRAKEN_ENABLE_JSA
 #include "bridge_jsa.h"
@@ -106,10 +111,10 @@ void disposeContext(int32_t contextId) {
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
   contextPool[contextId] = nullptr;
-#if ENABLE_PROFILE
-  auto nativePerformance = kraken::binding::jsc::NativePerformance::instance(contextId);
-  nativePerformance->entries.clear();
-#endif
+//#if ENABLE_PROFILE
+//  auto nativePerformance = kraken::binding::jsc::NativePerformance::instance(contextId);
+//  nativePerformance->entries.clear();
+//#endif
 }
 
 int32_t allocateNewContext(int32_t targetContextId) {

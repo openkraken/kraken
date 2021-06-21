@@ -14,6 +14,7 @@
 
 #if KRAKEN_JSC_ENGINE
 #include "kraken_bridge_jsc.h"
+#elif KRAKEN_QUICK_JS_ENGINE
 #endif
 
 #define KRAKEN_EXPORT_C extern "C" __attribute__((visibility("default"))) __attribute__((used))
