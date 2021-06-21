@@ -369,4 +369,22 @@ describe('Canvas context 2d', () => {
     await snapshot();
   });
 
+
+  it('should work with drawImage', async (done) => {
+    const canvas = <canvas height="400" width="400" />;
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const img = document.createElement('img');
+    img.onload = async () => {
+      // drawImage(image, dx, dy)
+      ctx.drawImage(img, 0, 0);
+      // drawImage(image, dx, dy, dWidth, dHeight);
+      ctx.drawImage(img, 100, 100, 100, 100);
+      // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+      ctx.drawImage(img, 20, 20, 20, 20, 200, 200, 100, 100);
+      await snapshot(canvas);
+      done();
+    };
+    img.src = 'assets/rabbit.png';
+  });
 });
