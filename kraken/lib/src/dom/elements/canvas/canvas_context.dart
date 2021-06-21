@@ -104,22 +104,6 @@ abstract class CanvasFilters {
   String filter = 'none'; // (default "none")
 }
 
-// ignore: one_member_abstracts
-abstract class CanvasDrawImage {
-  // drawing images
-  void drawImage(
-    CanvasImageSource image,
-    double dx,
-    double dy, {
-    double dw,
-    double dh,
-    double sx,
-    double sy,
-    double sw,
-    double sh,
-  });
-}
-
 abstract class CanvasImageData {
   // pixel manipulation
   ImageData createImageData({double sw, double sh, ImageData imagedata});

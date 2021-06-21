@@ -4,6 +4,7 @@
  */
 
 #include "canvas_element.h"
+#include "image_element.h"
 
 namespace kraken::binding::jsc {
 
@@ -525,6 +526,54 @@ JSValueRef CanvasRenderingContext2D::clip(JSContextRef ctx, JSObjectRef function
   assert_m(instance->nativeCanvasRenderingContext2D->clip != nullptr,
            "Failed to execute clip(): dart method is nullptr.");
   instance->nativeCanvasRenderingContext2D->clip(instance->nativeCanvasRenderingContext2D, &fillRuleNativeString);
+  return nullptr;
+}
+
+JSValueRef CanvasRenderingContext2D::drawImage(JSContextRef ctx, JSObjectRef function,
+                                        JSObjectRef thisObject,
+                                        size_t argumentCount,
+                                        const JSValueRef *arguments,
+                                        JSValueRef *exception) {
+  if (argumentCount != 3 && argumentCount != 5 && argumentCount != 9) {
+    throwJSError(ctx, ("Failed to execute 'drawImage' on 'CanvasRenderingContext2D': 3, 5 or 9 arguments required, but " +
+                     std::to_string(argumentCount) + " present.").c_str(), exception);
+    return nullptr;
+  }
+
+  auto imageInstance = reinterpret_cast<JSImageElement::ImageElementInstance *>
+    (JSObjectGetPrivate(JSValueToObject(ctx, arguments[0], exception)));
+
+
+  double sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight;
+  if (argumentCount == 3) {
+    dx = JSValueToNumber(ctx, arguments[1], exception);
+    dy = JSValueToNumber(ctx, arguments[2], exception);
+  } else if (argumentCount == 5) {
+    dx = JSValueToNumber(ctx, arguments[1], exception);
+    dy = JSValueToNumber(ctx, arguments[2], exception);
+    dWidth = JSValueToNumber(ctx, arguments[3], exception);
+    dHeight = JSValueToNumber(ctx, arguments[4], exception);
+  } else {
+    sx = JSValueToNumber(ctx, arguments[1], exception);
+    sy = JSValueToNumber(ctx, arguments[2], exception);
+    sWidth = JSValueToNumber(ctx, arguments[3], exception);
+    sHeight = JSValueToNumber(ctx, arguments[4], exception);
+    dx = JSValueToNumber(ctx, arguments[5], exception);
+    dy = JSValueToNumber(ctx, arguments[6], exception);
+    dWidth = JSValueToNumber(ctx, arguments[7], exception);
+    dHeight = JSValueToNumber(ctx, arguments[8], exception);
+  }
+
+  auto instance =
+    reinterpret_cast<CanvasRenderingContext2D::CanvasRenderingContext2DInstance *>(JSObjectGetPrivate(thisObject));
+
+  getDartMethod()->flushUICommand();
+  assert_m(instance->nativeCanvasRenderingContext2D->drawImage != nullptr,
+           "Failed to execute drawImage(): dart method is nullptr.");
+  instance->nativeCanvasRenderingContext2D->drawImage(instance->nativeCanvasRenderingContext2D,
+                                                      argumentCount,
+                                                      imageInstance->nativeImageElement,
+                                                      sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   return nullptr;
 }
 

@@ -39,7 +39,7 @@ describe('Background-position', () => {
     setElementStyle(position2, {
       width: '360px',
       height: '200px',
-      backgroundImage: 'url(assets/rax.png)',
+      backgroundImage: 'url(assets/rabbit.png)',
       backgroundPosition: 'left',
       backgroundRepeat: 'no-repeat',
     });
@@ -65,7 +65,7 @@ describe('Background-position', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(assets/rax.png)',
+        'url(assets/rabbit.png)',
       backgroundPosition: 'top',
       backgroundRepeat: 'no-repeat',
     });
@@ -92,7 +92,7 @@ describe('Background-position', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(assets/rax.png)',
+        'url(assets/rabbit.png)',
       backgroundPosition: 'right',
       backgroundRepeat: 'no-repeat',
     });
@@ -118,7 +118,7 @@ describe('Background-position', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(assets/rax.png)',
+        'url(assets/rabbit.png)',
       backgroundPosition: 'bottom',
       backgroundRepeat: 'no-repeat',
     });
@@ -142,7 +142,7 @@ describe('Background-position', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(assets/rax.png)',
+        'url(assets/rabbit.png)',
       backgroundPosition: 'right center',
       backgroundRepeat: 'no-repeat',
     });

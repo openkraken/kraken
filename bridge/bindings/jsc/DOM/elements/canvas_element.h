@@ -77,6 +77,8 @@ using ClearRect = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRendering
                            double width, double height);
 using Clip = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *fillRule);
 using ClosePath = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D);
+using DrawImage = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, int argumentCount, NativeImageElement *nativeImage,
+                           double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight);
 using Ellipse = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, double x, double y,
                         double radiusX, double radiusY, double rotation, double startAngle, double endAngle, double counterclockwise);
 using Fill = void (*)(NativeCanvasRenderingContext2D *nativeCanvasRenderingContext2D, NativeString *fillRule);
@@ -124,6 +126,7 @@ struct NativeCanvasRenderingContext2D {
   ClearRect clearRect{nullptr};
   Clip clip{nullptr};
   ClosePath closePath{nullptr};
+  DrawImage drawImage{nullptr};
   Ellipse ellipse{nullptr};
   Fill fill{nullptr};
   FillRect fillRect{nullptr};
@@ -163,6 +166,8 @@ public:
   static JSValueRef clip(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef clearRect(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                              const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef drawImage(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                               const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef ellipse(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                              const JSValueRef arguments[], JSValueRef *exception);
@@ -209,10 +214,10 @@ public:
                           direction, font, fillStyle, strokeStyle, lineCap,
                           lineDashOffset, lineJoin, lineWidth, miterLimit, textAlign,
                           textBaseline);
-    DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasRenderingContext2D, 26,
+    DEFINE_PROTOTYPE_OBJECT_PROPERTY(CanvasRenderingContext2D, 27,
                                     arc, arcTo, beginPath, bezierCurveTo, clearRect,
-                                    closePath, clip, ellipse, fill, fillRect,
-                                    fillText, lineTo, moveTo, rect, restore, 
+                                    closePath, clip, drawImage, ellipse, fill, fillRect,
+                                    fillText, lineTo, moveTo, rect, restore,
                                     resetTransform, rotate, quadraticCurveTo, stroke, strokeRect,
                                     save, scale, strokeText, setTransform, transform,
                                     translate);
@@ -252,6 +257,7 @@ protected:
   JSFunctionHolder m_closePath{context, prototypeObject, this, "closePath", closePath};
   JSFunctionHolder m_clearRect{context, prototypeObject, this, "clearRect", clearRect};
   JSFunctionHolder m_clip{context, prototypeObject, this, "clip", clip};
+  JSFunctionHolder m_drawImage{context, prototypeObject, this, "drawImage", drawImage};
   JSFunctionHolder m_ellipse{context, prototypeObject, this, "ellipse", ellipse};
   JSFunctionHolder m_fill{context, prototypeObject, this, "fill", fill};
   JSFunctionHolder m_fillText{context, prototypeObject, this, "fillText", fillText};
