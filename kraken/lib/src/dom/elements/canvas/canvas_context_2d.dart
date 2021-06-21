@@ -587,7 +587,9 @@ class CanvasRenderingContext2D {
     });
   }
 
-  void drawImage(int argumentCount, Image img, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
+  void drawImage(int argumentCount, Image? img, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
+    if (img == null) return;
+
     addAction((Canvas canvas, Size size) {
       // ctx.drawImage(image, dx, dy);
       if (argumentCount == 3) {
