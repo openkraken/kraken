@@ -135,7 +135,7 @@ describe('BoxShadow', () => {
     });
   });
 
-  fdescribe('inset', () => {
+  describe('inset', () => {
     it('should works with positive box shadow offset', async () => {
       let div;
       div = createElement(
