@@ -26,6 +26,15 @@ abstract class GestureClient {
   void dragEndCallback(DragEndDetails details);
 }
 
+/// Pass Touch to native.
+abstract class TouchClient {
+  void touchStartCallback(PointerEvent event);
+
+  void touchMoveCallback(PointerEvent event);
+
+  void touchEndCallback(PointerEvent event);
+}
+
 abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   ///

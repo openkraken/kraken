@@ -102,15 +102,19 @@ class GestureManager {
 
     if (_target != null) {
       if (_target!.onPointerDown != null && event is PointerDownEvent)
-        return _target!.onPointerDown!(event);
+        _target!.onPointerDown!(event);
       if (_target!.onPointerMove != null && event is PointerMoveEvent)
-        return _target!.onPointerMove!(event);
+        _target!.onPointerMove!(event);
       if (_target!.onPointerUp != null && event is PointerUpEvent)
-        return _target!.onPointerUp!(event);
+        _target!.onPointerUp!(event);
       if (_target!.onPointerCancel != null && event is PointerCancelEvent)
-        return _target!.onPointerCancel!(event);
+        _target!.onPointerCancel!(event);
       if (_target!.onPointerSignal != null && event is PointerSignalEvent)
-        return _target!.onPointerSignal!(event);
+        _target!.onPointerSignal!(event);
+    }
+
+    if (_target is RenderBoxModel && (_target as RenderBoxModel).elementManager!.touchClient != null) {
+      (_target as RenderBoxModel).elementManager!.touchClient!.touchStartCallback(event);
     }
   }
 
