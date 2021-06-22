@@ -10,12 +10,13 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, RouteInformation;
 import 'dart:ffi';
 
+import 'package:kraken/gesture.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/launcher.dart';
-import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/scheduler.dart';
@@ -70,16 +71,17 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   final List<VoidCallback> _detachCallbacks = [];
 
-  ElementManager({required this.contextId, required this.viewport, required this.controller, this.showPerformanceOverlayOverride = false}) {
+  TouchClient? touchClient;
+
+  ElementManager({required this.contextId, required this.viewport, required this.controller, this.showPerformanceOverlayOverride = false, this.touchClient}) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
     }
 
-    HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
-    setEventTarget(documentElement);
+    viewportElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
+    setEventTarget(viewportElement);
 
-    viewportElement = documentElement;
     viewport.child = viewportElement.renderBoxModel;
     _viewportRenderObject = viewport;
 
@@ -92,8 +94,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     Window window = Window(WINDOW_ID, windowNativePtrMap[contextId]!, this, viewportElement);
     setEventTarget(window);
 
-    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
-    document.appendChild(documentElement);
+    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, viewportElement as HTMLElement);
+    document.appendChild(viewportElement);
     setEventTarget(document);
 
     element_registry.defineBuiltInElements();

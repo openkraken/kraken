@@ -39,8 +39,6 @@ class RenderViewportBox extends RenderProxyBox
 
   Size get viewportSize => _viewportSize;
 
-  GetEventHandlers? getEventHandlers;
-
   set viewportSize(Size value) {
     if (value != _viewportSize) {
       _viewportSize = value;
