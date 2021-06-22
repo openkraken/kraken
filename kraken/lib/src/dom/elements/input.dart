@@ -21,8 +21,6 @@ import 'package:kraken/rendering.dart';
 const String INPUT = 'INPUT';
 const String VALUE = 'value';
 
-const TextInputType TEXT_INPUT_TYPE_NUMBER = TextInputType.numberWithOptions(signed: true);
-
 final Pointer<NativeFunction<GetInputWidth>> nativeGetInputWidth = Pointer.fromFunction(InputElement.getInputWidth, 0.0);
 final Pointer<NativeFunction<GetInputHeight>> nativeGetInputHeight = Pointer.fromFunction(InputElement.getInputHeight, 0.0);
 final Pointer<NativeFunction<InputElementMethodVoidCallback>> nativeInputMethodFocus = Pointer.fromFunction(InputElement.callMethodFocus);
@@ -165,7 +163,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   TextSelectionDelegate textSelectionDelegate = EditableTextDelegate();
   TextSpan? _actualText;
   RenderEditable? _renderEditable;
-  TextInputConnection? textInputConnection;
+  TextInputConnection? _textInputConnection;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
@@ -240,8 +238,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     super.willDetachRenderer();
     InputElement.clearFocus();
     _cursorTimer?.cancel();
-    if (textInputConnection != null && textInputConnection!.attached) {
-      textInputConnection!.close();
+    if (_textInputConnection != null && _textInputConnection!.attached) {
+      _textInputConnection!.close();
     }
   }
 
@@ -325,6 +323,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   // Store the state at the begin of user input.
   String? _inputValueAtBegin;
 
+  TextInputAction _textInputAction = TextInputAction.done;
+
   void activeTextInput() {
     _inputValueAtBegin = properties[VALUE];
 
@@ -333,37 +333,45 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         inputType: _textInputType,
         obscureText: obscureText,
         autocorrect: autoCorrect,
-        inputAction: TextInputAction.done, // newline to multilines
+        inputAction: _textInputAction, // newline to multilines
         textCapitalization: TextCapitalization.none,
         keyboardAppearance: Brightness.light,
       );
     }
 
-    TextInputConnection? _textInputConnection = textInputConnection;
-    if (_textInputConnection == null || !_textInputConnection.attached) {
+    if (_textInputConnection == null || !_textInputConnection!.attached) {
       final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
       _lastKnownRemoteTextEditingValue = localValue;
 
-      _textInputConnection = textInputConnection = TextInput.attach(this, textInputConfiguration!);
-      _textInputConnection.setEditingState(localValue);
+      _textInputConnection = TextInput.attach(this, textInputConfiguration!);
+      _textInputConnection!.setEditingState(localValue);
     }
-    _textInputConnection.show();
+
+    // FIXME: hide virtual keyword will make real keyboard could not input also
+    if (!_hideVirtualKeyboard) {
+      _textInputConnection!.show();
+    }
+
     _startCursorTimer();
     _renderEditable!.markNeedsTextLayout();
   }
 
   void deactiveTextInput() {
     _cursorVisibilityNotifier.value = false;
-    if (textInputConnection != null && textInputConnection!.attached) {
-      textInputConnection!.close();
+    if (_textInputConnection != null && _textInputConnection!.attached) {
+      _textInputConnection!.close();
     }
     _stopCursorTimer();
     _renderEditable!.markNeedsTextLayout();
   }
 
   void onSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+    // When first focus input will trigger selection change
+    if (selection.baseOffset == selection.extentOffset) return;
+
     TextEditingValue value = textSelectionDelegate.textEditingValue.copyWith(
         selection: renderObject.text == placeholderTextSpan ? blurSelection : selection, composing: TextRange.empty);
+
     updateEditingValue(value);
   }
 
@@ -481,7 +489,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // todo: selection overlay.
   }
 
-  bool get _hasInputConnection => textInputConnection != null && textInputConnection!.attached;
+  bool get _hasInputConnection => _textInputConnection != null && _textInputConnection!.attached;
   TextEditingValue? _lastKnownRemoteTextEditingValue;
 
   void _updateRemoteEditingValueIfNeeded() {
@@ -489,7 +497,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
     if (localValue == _lastKnownRemoteTextEditingValue) return;
     _lastKnownRemoteTextEditingValue = localValue;
-    textInputConnection!.setEditingState(localValue);
+    _textInputConnection!.setEditingState(localValue);
   }
 
   void formatAndSetValue(TextEditingValue value, { bool shouldDispatchEvent = false }) {
@@ -569,6 +577,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       _autoFocus = value != null;
     } else if (key == 'type') {
       _setType(value);
+    } else if (key == 'inputmode') {
+      _setInputMode(value);
     }
   }
 
@@ -577,7 +587,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   set textInputType(TextInputType value) {
     if (value != _textInputType) {
       _textInputType = value;
-      if (textInputConnection != null && textInputConnection!.attached) {
+      if (_textInputConnection != null && _textInputConnection!.attached) {
         deactiveTextInput();
         activeTextInput();
       }
@@ -590,16 +600,52 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         textInputType = TextInputType.text;
         break;
       case 'number':
-        textInputType = TEXT_INPUT_TYPE_NUMBER;
+        textInputType = TextInputType.numberWithOptions(signed: true);
         break;
       case 'tel':
-        textInputType = TextInputType.number;
+        textInputType = TextInputType.phone;
+        break;
+      case 'email':
+        textInputType = TextInputType.emailAddress;
         break;
       case 'password':
         textInputType = TextInputType.text;
         _enablePassword();
         break;
       // @TODO: more types.
+    }
+  }
+
+  bool _hideVirtualKeyboard = false;
+  void _setInputMode(String value) {
+    switch (value) {
+      case 'none':
+        _hideVirtualKeyboard = true;
+        // HACK: Set a diff value trigger update
+        textInputType = TextInputType.name;
+        break;
+      case 'text':
+        textInputType = TextInputType.text;
+        break;
+      case 'numeric':
+        textInputType = TextInputType.numberWithOptions();
+        break;
+      case 'decimal':
+        textInputType = TextInputType.numberWithOptions(decimal: true);
+        break;
+      case 'tel':
+        textInputType = TextInputType.phone;
+        break;
+      case 'url':
+        textInputType = TextInputType.url;
+        break;
+      case 'email':
+        textInputType = TextInputType.emailAddress;
+        break;
+      case 'search':
+        _textInputAction = TextInputAction.search;
+        textInputType = TextInputType.text;
+        break;
     }
   }
 
@@ -671,7 +717,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _startCursorTimer() {
     _targetCursorVisibility = true;
     _cursorBlinkOpacityController!.value = 1.0;
-    _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
+    if (_cursorTimer == null) {
+      _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
+    }
   }
 
   void _cursorWaitForStart(Timer timer) {
