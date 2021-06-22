@@ -39,6 +39,13 @@ describe('Event', () => {
     await snapshot();
   });
 
+  it('should trigger event with addEventListener', done => {
+    let div = document.createElement('div');
+    div.addEventListener('click', done);
+    document.body.appendChild(div);
+    div.click();
+  });
+
   it('do not trigger click when scrolling', async () => {
     let clickCount = 0;
     let container;

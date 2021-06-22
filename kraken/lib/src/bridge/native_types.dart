@@ -7,7 +7,6 @@ import 'from_native.dart';
 // All class members include variables and functions must be follow the same order with C++ struct, to keep the same memory layout cross dart and C++ code.
 
 typedef NativeGetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
-typedef DartGetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
 
 class NativeKrakenInfo extends Struct {
   external Pointer<Utf8> app_name;
@@ -230,8 +229,6 @@ class NativeBoundingClientRect extends Struct {
 
 typedef NativeDispatchEvent = Void Function(
     Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, Int32 isCustomEvent);
-typedef DartDispatchEvent = void Function(
-    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
 class NativeEventTarget extends Struct {
   external Pointer<Void> instance;
@@ -339,6 +336,8 @@ typedef NativeRenderingContextArcTo = Void Function(Pointer<NativeCanvasRenderin
 typedef NativeRenderingContextBeginPath = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
 typedef NativeRenderingContextClosePath = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
 typedef NativeRenderingContextClearRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
+typedef NativeRenderingContextDrawImage = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Int32 argumentCount, Pointer<NativeImgElement> image,
+  Double sx, Double sy, Double sWidth, Double sHeight, Double dx, Double dy, Double dWidth, Double dHeight);
 typedef NativeRenderingContextStrokeRect = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Double x, Double y, Double width, Double height);
 typedef NativeRenderingContextStrokeText = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr, Pointer<NativeString> text, Double x, Double y, Double maxWidth);
 typedef NativeRenderingContextSave = Void Function(Pointer<NativeCanvasRenderingContext2D> nativePtr);
@@ -380,6 +379,7 @@ class NativeCanvasRenderingContext2D extends Struct {
   external Pointer<NativeFunction<NativeRenderingContextClearRect>> clearRect;
   external Pointer<NativeFunction<NativeRenderingContextClip>> clip;
   external Pointer<NativeFunction<NativeRenderingContextClosePath>> closePath;
+  external Pointer<NativeFunction<NativeRenderingContextDrawImage>> drawImage;
   external Pointer<NativeFunction<NativeRenderingContextEllipse>> ellipse;
   external Pointer<NativeFunction<NativeRenderingContextFill>> fill;
   external Pointer<NativeFunction<NativeRenderingContextFillRect>> fillRect;

@@ -20,6 +20,8 @@ import 'native_types.dart';
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call the C function.
 
+typedef DartGetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
+
 class KrakenInfo {
   Pointer<NativeKrakenInfo> _nativeKrakenInfo;
 
@@ -77,6 +79,9 @@ void invokeModuleEvent(int contextId, String moduleName, Event? event, String ex
   _invokeModuleEvent(contextId, nativeModuleName, event == null ? nullptr : event.type.toNativeUtf8(), nativeEvent, stringToNativeString(extra));
   freeNativeString(nativeModuleName);
 }
+
+typedef DartDispatchEvent = void Function(
+    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, int isCustomEvent);
 
 void emitUIEvent(int contextId, Pointer<NativeEventTarget> nativePtr, Event event) {
   Pointer<NativeEventTarget> nativeEventTarget = nativePtr;

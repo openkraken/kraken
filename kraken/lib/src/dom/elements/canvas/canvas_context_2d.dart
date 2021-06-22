@@ -37,6 +37,7 @@ final Pointer<NativeFunction<NativeRenderingContextBezierCurveTo>> nativeBezierC
 final Pointer<NativeFunction<NativeRenderingContextClip>> nativeClip = Pointer.fromFunction(CanvasRenderingContext2D._clip);
 final Pointer<NativeFunction<NativeRenderingContextClearRect>> nativeClearRect = Pointer.fromFunction(CanvasRenderingContext2D._clearRect);
 final Pointer<NativeFunction<NativeRenderingContextClosePath>> nativeClosePath = Pointer.fromFunction(CanvasRenderingContext2D._closePath);
+final Pointer<NativeFunction<NativeRenderingContextDrawImage>> nativeDrawImage = Pointer.fromFunction(CanvasRenderingContext2D._drawImage);
 final Pointer<NativeFunction<NativeRenderingContextEllipse>> nativeEllipse = Pointer.fromFunction(CanvasRenderingContext2D._ellipse);
 final Pointer<NativeFunction<NativeRenderingContextFill>> nativeFill = Pointer.fromFunction(CanvasRenderingContext2D._fill);
 final Pointer<NativeFunction<NativeRenderingContextFillText>> nativeFillText = Pointer.fromFunction(CanvasRenderingContext2D._fillText);
@@ -108,6 +109,7 @@ class CanvasRenderingContext2D {
     nativeCanvasRenderingContext2D.ref.clearRect = nativeClearRect;
     nativeCanvasRenderingContext2D.ref.clip = nativeClip;
     nativeCanvasRenderingContext2D.ref.closePath = nativeClosePath;
+    nativeCanvasRenderingContext2D.ref.drawImage = nativeDrawImage;
     nativeCanvasRenderingContext2D.ref.ellipse = nativeEllipse;
     nativeCanvasRenderingContext2D.ref.fill = nativeFill;
     nativeCanvasRenderingContext2D.ref.fillRect = nativeFillRect;
@@ -276,6 +278,14 @@ class CanvasRenderingContext2D {
   static void _closePath(Pointer<NativeCanvasRenderingContext2D> nativePtr) {
     CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2DOfNativePtr(nativePtr);
     canvasRenderingContext2D.closePath();
+  }
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+  static void _drawImage(Pointer<NativeCanvasRenderingContext2D> nativePtr, int argumentCount, Pointer<NativeImgElement> imagePtr,
+      double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
+    ImageElement imageElement = ImageElement.getImageElementOfNativePtr(imagePtr);
+    CanvasRenderingContext2D canvasRenderingContext2D = getCanvasRenderContext2DOfNativePtr(nativePtr);
+    canvasRenderingContext2D.drawImage(argumentCount, imageElement.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
 
   static void _ellipse(Pointer<NativeCanvasRenderingContext2D> nativePtr, double x, double y,
@@ -574,6 +584,30 @@ class CanvasRenderingContext2D {
   void closePath() {
     addAction((Canvas canvas, Size size) {
       path2d.closePath();
+    });
+  }
+
+  void drawImage(int argumentCount, Image? img, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
+    if (img == null) return;
+
+    addAction((Canvas canvas, Size size) {
+      // ctx.drawImage(image, dx, dy);
+      if (argumentCount == 3) {
+        canvas.drawImage(img, Offset(dx, dy), Paint());
+      } else {
+        if (argumentCount == 5) {
+          // ctx.drawImage(image, dx, dy, dWidth, dHeight);
+          sx = 0;
+          sy = 0;
+          sWidth = img.width.toDouble();
+          sHeight = img.height.toDouble();
+        }
+
+        canvas.drawImageRect(img,
+            Rect.fromLTWH(sx, sy, sWidth, sHeight),
+            Rect.fromLTWH(dx, dy, dWidth, dHeight),
+            Paint());
+      }
     });
   }
 
@@ -894,7 +928,6 @@ class CanvasRenderingContext2D {
 
   void fillText(String text, double x, double y, {double? maxWidth}) {
     addAction((Canvas canvas, Size size) {
-      print('paint text $text');
       TextPainter textPainter = _getTextPainter(text, fillStyle);
       if (maxWidth != null) {
         // FIXME: should scale down to a smaller font size in order to fit the text in the specified width.
