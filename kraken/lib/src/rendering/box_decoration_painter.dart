@@ -18,7 +18,7 @@ class BoxDecorationPainter extends BoxPainter {
 
   EdgeInsets? padding;
   RenderStyle renderStyle;
-  final BoxDecoration _decoration;
+  final CSSBoxDecoration _decoration;
 
   Paint? _cachedBackgroundPaint;
   Rect? _rectForCachedBackgroundPaint;
@@ -68,9 +68,12 @@ class BoxDecorationPainter extends BoxPainter {
 
   void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_decoration.boxShadow == null) return;
-    for (final BoxShadow boxShadow in _decoration.boxShadow!) {
-      _paintInsetBoxShadow(canvas, rect, textDirection, boxShadow);
-//      _paintBoxShadow(canvas, rect, textDirection, boxShadow);
+    for (final CSSBoxShadow boxShadow in _decoration.boxShadow!) {
+      if (boxShadow.inset) {
+        _paintInsetBoxShadow(canvas, rect, textDirection, boxShadow);
+      } else {
+        _paintBoxShadow(canvas, rect, textDirection, boxShadow);
+      }
     }
   }
 

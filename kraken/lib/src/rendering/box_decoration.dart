@@ -6,6 +6,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/css.dart';
 
 enum BackgroundBoundary {
   borderBox,
@@ -35,7 +36,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 
   void paintBackground(
       PaintingContext context, Offset offset, EdgeInsets? padding) {
-    BoxDecoration? decoration = renderStyle.decoration;
+    CSSBoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
 
@@ -82,7 +83,7 @@ mixin RenderBoxDecorationMixin on RenderBoxModelBase {
 
   void paintDecoration(
       PaintingContext context, Offset offset, EdgeInsets? padding) {
-    BoxDecoration? decoration = renderStyle.decoration;
+    CSSBoxDecoration? decoration = renderStyle.decoration;
     DecorationPosition decorationPosition = renderStyle.decorationPosition;
     ImageConfiguration imageConfiguration = renderStyle.imageConfiguration;
 
