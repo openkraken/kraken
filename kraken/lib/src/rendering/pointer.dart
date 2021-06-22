@@ -58,16 +58,5 @@ mixin RenderPointerListenerMixin on RenderBox {
     if (event is PointerDownEvent) {
       GestureManager.instance().addTargetToList(this);
     }
-
-    if (onPointerDown != null && event is PointerDownEvent)
-      return onPointerDown!(event);
-    if (onPointerMove != null && event is PointerMoveEvent)
-      return onPointerMove!(event);
-    if (onPointerUp != null && event is PointerUpEvent)
-      return onPointerUp!(event);
-    if (onPointerCancel != null && event is PointerCancelEvent)
-      return onPointerCancel!(event);
-    if (onPointerSignal != null && event is PointerSignalEvent)
-      return onPointerSignal!(event);
   }
 }
