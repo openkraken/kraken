@@ -69,131 +69,9 @@ class BoxDecorationPainter extends BoxPainter {
   void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_decoration.boxShadow == null) return;
     for (final BoxShadow boxShadow in _decoration.boxShadow!) {
-//      _paintInsetBoxShadow(canvas, rect, textDirection, boxShadow);
-      _paintBoxShadow(canvas, rect, textDirection, boxShadow);
+      _paintInsetBoxShadow(canvas, rect, textDirection, boxShadow);
+//      _paintBoxShadow(canvas, rect, textDirection, boxShadow);
     }
-  }
-
-  void _paintInsetBoxShadow(Canvas canvas, Rect rect, TextDirection? textDirection,
-    BoxShadow boxShadow) {
-    final Paint paint = Paint()
-      ..color = boxShadow.color
-    // Following W3C spec, blur sigma is exactly half the blur radius
-    // which is different from the value of Flutter:
-    // https://www.w3.org/TR/css-backgrounds-3/#shadow-blur
-    // https://html.spec.whatwg.org/C/#when-shadows-are-drawn
-      ..maskFilter =
-      MaskFilter.blur(BlurStyle.normal, boxShadow.blurRadius / 2);
-
-    double width = renderStyle.width!;
-    double height = renderStyle.height!;
-
-    _paintInsetBoxShadowByDirection(
-      canvas,
-      rect,
-      textDirection,
-      boxShadow,
-      paint,
-      width,
-      height,
-      'top'
-    );
-    _paintInsetBoxShadowByDirection(
-      canvas,
-      rect,
-      textDirection,
-      boxShadow,
-      paint,
-      width,
-      height,
-      'bottom'
-    );
-    _paintInsetBoxShadowByDirection(
-      canvas,
-      rect,
-      textDirection,
-      boxShadow,
-      paint,
-      width,
-      height,
-      'left'
-    );
-    _paintInsetBoxShadowByDirection(
-      canvas,
-      rect,
-      textDirection,
-      boxShadow,
-      paint,
-      width,
-      height,
-      'right'
-    );
-  }
-
-  void _paintInsetBoxShadowByDirection(
-    Canvas canvas,
-    Rect rect,
-    TextDirection? textDirection,
-    BoxShadow boxShadow,
-    Paint paint,
-    double width,
-    double height,
-    String direction,
-  ) {
-    Path borderPath = _decoration.borderRadius == null ?
-      (Path()..addRect(rect)) :
-      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(rect)));
-
-    Rect shadowRect;
-    Rect shadowOffsetRect;
-
-    if (direction == 'left') {
-      shadowRect = rect
-        .shift(Offset(-width + boxShadow.offset.dx + boxShadow.spreadRadius, 0));
-      shadowOffsetRect = rect
-        .shift(Offset(boxShadow.offset.dx + boxShadow.spreadRadius, 0));
-    } else if (direction == 'right') {
-      shadowRect = rect
-        .shift(Offset(width + boxShadow.offset.dx - boxShadow.spreadRadius, 0));
-      shadowOffsetRect = rect
-        .shift(Offset(boxShadow.offset.dx + boxShadow.spreadRadius, 0));
-    } else if (direction == 'top') {
-      shadowRect = rect
-        .shift(Offset(0, -height + boxShadow.offset.dy + boxShadow.spreadRadius));
-      shadowOffsetRect = rect
-        .shift(Offset(0, boxShadow.offset.dy + boxShadow.spreadRadius));
-    } else {
-      shadowRect = rect
-        .shift(Offset(0, height + boxShadow.offset.dy - boxShadow.spreadRadius));
-      shadowOffsetRect = rect
-        .shift(Offset(0, boxShadow.offset.dy + boxShadow.spreadRadius));
-    }
-
-    Path shadowPath = _decoration.borderRadius == null ?
-      (Path()..addRect(shadowRect)) :
-      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(shadowRect)));
-
-    Path shadowOffsetPath = _decoration.borderRadius == null ?
-      (Path()..addRect(shadowOffsetRect)) :
-      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(shadowOffsetRect)));
-
-    Path shadowInnerPath;
-    if (direction == 'left' || direction == 'right') {
-      shadowInnerPath = boxShadow.offset.dx > 0 ?
-        Path.combine(PathOperation.difference, borderPath, shadowOffsetPath) :
-        Path.combine(PathOperation.difference, shadowOffsetPath, borderPath);
-    } else {
-      shadowInnerPath = boxShadow.offset.dy > 0 ?
-        Path.combine(PathOperation.difference, borderPath, shadowOffsetPath) :
-        Path.combine(PathOperation.difference, shadowOffsetPath, borderPath);
-    }
-
-    Path shadowOuterPath = Path.combine(PathOperation.difference, shadowPath, borderPath);
-    Path shadowDirectionPath = Path.combine(PathOperation.xor, shadowOuterPath, shadowInnerPath);
-    canvas.save();
-    canvas.clipPath(borderPath);
-    canvas.drawPath(shadowDirectionPath, paint);
-    canvas.restore();
   }
 
   void _paintBoxShadow(Canvas canvas, Rect rect, TextDirection? textDirection,
@@ -240,12 +118,110 @@ class BoxDecorationPainter extends BoxPainter {
     }
 
     // Path of shadow blur rect subtract border rect of which the box shadow should paint
-    final Path clipedPath =
+    final Path clippedPath =
     Path.combine(PathOperation.difference, shadowBlurPath, borderPath);
     canvas.save();
-    canvas.clipPath(clipedPath);
+    canvas.clipPath(clippedPath);
     canvas.drawPath(shadowPath, paint);
     canvas.restore();
+  }
+
+  void _paintInsetBoxShadow(Canvas canvas, Rect rect, TextDirection? textDirection,
+    BoxShadow boxShadow) {
+    final Paint paint = Paint()
+      ..color = boxShadow.color
+    // Following W3C spec, blur sigma is exactly half the blur radius
+    // which is different from the value of Flutter:
+    // https://www.w3.org/TR/css-backgrounds-3/#shadow-blur
+    // https://html.spec.whatwg.org/C/#when-shadows-are-drawn
+      ..maskFilter =
+      MaskFilter.blur(BlurStyle.normal, boxShadow.blurRadius / 2);
+
+    Path borderPath = _decoration.borderRadius == null ?
+      (Path()..addRect(rect)) :
+      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(rect)));
+
+    Path outerBorderPath;
+    Path topRectPath = _getOuterBorderPathByDirection(
+      borderPath,
+      rect,
+      textDirection,
+      boxShadow,
+      'top'
+    );
+    Path bottomRectPath = _getOuterBorderPathByDirection(
+      borderPath,
+      rect,
+      textDirection,
+      boxShadow,
+      'bottom'
+    );
+    Path leftRectPath = _getOuterBorderPathByDirection(
+      borderPath,
+      rect,
+      textDirection,
+      boxShadow,
+      'left'
+    );
+    Path rightRectPath = _getOuterBorderPathByDirection(
+      borderPath,
+      rect,
+      textDirection,
+      boxShadow,
+      'right'
+    );
+
+    Rect shadowOffsetRect = rect
+      .shift(Offset(boxShadow.offset.dx, boxShadow.offset.dy))
+      .inflate(-boxShadow.spreadRadius);
+
+    Path shadowOffsetPath = _decoration.borderRadius == null ?
+      (Path()..addRect(shadowOffsetRect)) :
+      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(shadowOffsetRect)));
+
+    outerBorderPath = Path.combine(PathOperation.xor, rightRectPath, leftRectPath);
+    outerBorderPath = Path.combine(PathOperation.xor, outerBorderPath, topRectPath);
+    outerBorderPath = Path.combine(PathOperation.xor, outerBorderPath, bottomRectPath);
+
+    Path innerShadowPath = Path.combine(PathOperation.difference, borderPath, shadowOffsetPath);
+    Path shadowPaintPath = Path.combine(PathOperation.xor, outerBorderPath, innerShadowPath);
+
+    canvas.save();
+    canvas.clipPath(borderPath);
+    canvas.drawPath(shadowPaintPath, paint);
+    canvas.restore();
+  }
+
+  Path _getOuterBorderPathByDirection(
+    Path borderPath,
+    Rect rect,
+    TextDirection? textDirection,
+    BoxShadow boxShadow,
+    String direction,
+    ) {
+    Rect offsetRect;
+    double width = rect.size.width;
+    double height = rect.size.height;
+
+    if (direction == 'left') {
+      offsetRect = rect
+        .shift(Offset(-width + boxShadow.offset.dx + boxShadow.spreadRadius, boxShadow.offset.dy));
+    } else if (direction == 'right') {
+      offsetRect = rect
+        .shift(Offset(width + boxShadow.offset.dx - boxShadow.spreadRadius, boxShadow.offset.dy));
+    } else if (direction == 'top') {
+      offsetRect = rect
+        .shift(Offset(boxShadow.offset.dx, -height + boxShadow.offset.dy + boxShadow.spreadRadius));
+    } else {
+      offsetRect = rect
+        .shift(Offset(boxShadow.offset.dx, height + boxShadow.offset.dy - boxShadow.spreadRadius));
+    }
+    Path offsetRectPath = _decoration.borderRadius == null ?
+    (Path()..addRect(offsetRect)) :
+    (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(offsetRect)));
+
+    Path outerBorderPath = Path.combine(PathOperation.difference, offsetRectPath, borderPath);
+    return outerBorderPath;
   }
 
   void _paintBackgroundColor(
