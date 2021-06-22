@@ -685,6 +685,7 @@ class CSSBorderStyle {
   }
 }
 
+// ignore: must_be_immutable
 class CSSBoxShadow extends BoxShadow {
   CSSBoxShadow({
     Color color = const Color(0xFF000000),
@@ -695,6 +696,7 @@ class CSSBoxShadow extends BoxShadow {
   }) : super(color: color, offset: offset, blurRadius: blurRadius, spreadRadius: spreadRadius) {
     _inset = inset;
   }
+
 
   bool _inset = false;
   bool get inset {
