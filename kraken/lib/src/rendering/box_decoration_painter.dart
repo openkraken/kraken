@@ -77,6 +77,8 @@ class BoxDecorationPainter extends BoxPainter {
     }
   }
 
+  /// An outer box-shadow casts a shadow as if the border-box of the element were opaque.
+  /// It is clipped inside the border-box of the element.
   void _paintBoxShadow(Canvas canvas, Rect rect, TextDirection? textDirection,
     BoxShadow boxShadow) {
     final Paint paint = Paint()
@@ -129,6 +131,8 @@ class BoxDecorationPainter extends BoxPainter {
     canvas.restore();
   }
 
+  /// An inner box-shadow casts a shadow as if everything outside the padding edge were opaque.
+  /// It is clipped outside the padding box of the element.
   void _paintInsetBoxShadow(Canvas canvas, Rect rect, TextDirection? textDirection,
     BoxShadow boxShadow) {
     final Paint paint = Paint()
@@ -140,91 +144,129 @@ class BoxDecorationPainter extends BoxPainter {
       ..maskFilter =
       MaskFilter.blur(BlurStyle.normal, boxShadow.blurRadius / 2);
 
-    Path borderPath = _decoration.borderRadius == null ?
-      (Path()..addRect(rect)) :
-      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(rect)));
+    // The normal box-shadow is drawn outside the border box edge while
+    // the inset box-shadow is drawn inside the padding box edge.
+    // https://drafts.csswg.org/css-backgrounds-3/#shadow-shape
+    Rect paddingBoxRect = Rect.fromLTRB(
+      rect.left + renderStyle.borderLeft,
+      rect.top + renderStyle.borderTop,
+      rect.right - renderStyle.borderRight,
+      rect.bottom - renderStyle.borderBottom
+    );
 
-    Path outerBorderPath;
-    Path topRectPath = _getOuterBorderPathByDirection(
-      borderPath,
-      rect,
+    Path paddingBoxPath;
+    if (_decoration.borderRadius == null) {
+      paddingBoxPath = Path()..addRect(paddingBoxRect);
+    } else {
+      RRect borderBoxRRect = _decoration.borderRadius!.resolve(textDirection).toRRect(rect);
+      // A borderRadius can only be given for a uniform Border in Flutter.
+      // https://github.com/flutter/flutter/issues/12583
+      double uniformBorderWidth = renderStyle.borderTop;
+      RRect paddingBoxRRect = borderBoxRRect.deflate(uniformBorderWidth);
+      paddingBoxPath = Path()..addRRect(paddingBoxRRect);
+    }
+
+    // 1. Create a shadow rect shifted by boxShadow and spread radius and get the
+    // difference path subtracted from the padding box path.
+    Rect shadowOffsetRect = paddingBoxRect
+      .shift(Offset(boxShadow.offset.dx, boxShadow.offset.dy))
+      .deflate(boxShadow.spreadRadius);
+    Path shadowOffsetPath = _decoration.borderRadius == null ?
+      (Path()..addRect(shadowOffsetRect)) :
+      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(shadowOffsetRect)));
+    Path innerShadowPath = Path.combine(PathOperation.difference, paddingBoxPath, shadowOffsetPath);
+
+    // 2. Create shadow rect in four directions and get the difference path
+    // subtracted from the padding box path.
+    Path topRectPath = _getOuterPaddingBoxPathByDirection(
+      paddingBoxPath,
+      paddingBoxRect,
       textDirection,
       boxShadow,
       'top'
     );
-    Path bottomRectPath = _getOuterBorderPathByDirection(
-      borderPath,
-      rect,
+    Path bottomRectPath = _getOuterPaddingBoxPathByDirection(
+      paddingBoxPath,
+      paddingBoxRect,
       textDirection,
       boxShadow,
       'bottom'
     );
-    Path leftRectPath = _getOuterBorderPathByDirection(
-      borderPath,
-      rect,
+    Path leftRectPath = _getOuterPaddingBoxPathByDirection(
+      paddingBoxPath,
+      paddingBoxRect,
       textDirection,
       boxShadow,
       'left'
     );
-    Path rightRectPath = _getOuterBorderPathByDirection(
-      borderPath,
-      rect,
+    Path rightRectPath = _getOuterPaddingBoxPathByDirection(
+      paddingBoxPath,
+      paddingBoxRect,
       textDirection,
       boxShadow,
       'right'
     );
 
-    Rect shadowOffsetRect = rect
-      .shift(Offset(boxShadow.offset.dx, boxShadow.offset.dy))
-      .inflate(-boxShadow.spreadRadius);
+    // 3. Combine all the paths in step 1 and step 2 as the final shadow path.
+    List<Path> paintPaths = [
+      innerShadowPath,
+      topRectPath,
+      bottomRectPath,
+      leftRectPath,
+      rightRectPath,
+    ];
+    Path? shadowPath = _combinePaths(paintPaths);
 
-    Path shadowOffsetPath = _decoration.borderRadius == null ?
-      (Path()..addRect(shadowOffsetRect)) :
-      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(shadowOffsetRect)));
-
-    outerBorderPath = Path.combine(PathOperation.xor, rightRectPath, leftRectPath);
-    outerBorderPath = Path.combine(PathOperation.xor, outerBorderPath, topRectPath);
-    outerBorderPath = Path.combine(PathOperation.xor, outerBorderPath, bottomRectPath);
-
-    Path innerShadowPath = Path.combine(PathOperation.difference, borderPath, shadowOffsetPath);
-    Path shadowPaintPath = Path.combine(PathOperation.xor, outerBorderPath, innerShadowPath);
-
+    // 4. Restrict the shadow painted in padding box and paint the shadow path with blur radius.
     canvas.save();
-    canvas.clipPath(borderPath);
-    canvas.drawPath(shadowPaintPath, paint);
+    canvas.clipPath(paddingBoxPath);
+    canvas.drawPath(shadowPath!, paint);
     canvas.restore();
   }
 
-  Path _getOuterBorderPathByDirection(
-    Path borderPath,
-    Rect rect,
+  /// Get the shadow path outside padding box in each direction.
+  Path _getOuterPaddingBoxPathByDirection(
+    Path paddingBoxPath,
+    Rect paddingBoxRect,
     TextDirection? textDirection,
     BoxShadow boxShadow,
     String direction,
     ) {
     Rect offsetRect;
-    double width = rect.size.width;
-    double height = rect.size.height;
+    Size paddingBoxSize = paddingBoxRect.size;
 
     if (direction == 'left') {
-      offsetRect = rect
-        .shift(Offset(-width + boxShadow.offset.dx + boxShadow.spreadRadius, boxShadow.offset.dy));
+      offsetRect = paddingBoxRect
+        .shift(Offset(-paddingBoxSize.width + boxShadow.offset.dx + boxShadow.spreadRadius, boxShadow.offset.dy));
     } else if (direction == 'right') {
-      offsetRect = rect
-        .shift(Offset(width + boxShadow.offset.dx - boxShadow.spreadRadius, boxShadow.offset.dy));
+      offsetRect = paddingBoxRect
+        .shift(Offset(paddingBoxSize.width + boxShadow.offset.dx - boxShadow.spreadRadius, boxShadow.offset.dy));
     } else if (direction == 'top') {
-      offsetRect = rect
-        .shift(Offset(boxShadow.offset.dx, -height + boxShadow.offset.dy + boxShadow.spreadRadius));
+      offsetRect = paddingBoxRect
+        .shift(Offset(boxShadow.offset.dx, -paddingBoxSize.height + boxShadow.offset.dy + boxShadow.spreadRadius));
     } else {
-      offsetRect = rect
-        .shift(Offset(boxShadow.offset.dx, height + boxShadow.offset.dy - boxShadow.spreadRadius));
+      offsetRect = paddingBoxRect
+        .shift(Offset(boxShadow.offset.dx, paddingBoxSize.height + boxShadow.offset.dy - boxShadow.spreadRadius));
     }
     Path offsetRectPath = _decoration.borderRadius == null ?
-    (Path()..addRect(offsetRect)) :
-    (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(offsetRect)));
+      (Path()..addRect(offsetRect)) :
+      (Path()..addRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(offsetRect)));
 
-    Path outerBorderPath = Path.combine(PathOperation.difference, offsetRectPath, borderPath);
+    Path outerBorderPath = Path.combine(PathOperation.difference, offsetRectPath, paddingBoxPath);
     return outerBorderPath;
+  }
+
+  /// Combine multiple non overlapped path into one path.
+  Path? _combinePaths(List<Path> paths) {
+    Path? finalPath;
+    for (Path path in paths) {
+      if (finalPath != null) {
+        finalPath = Path.combine(PathOperation.xor, finalPath, path);
+      } else {
+        finalPath = path;
+      }
+    }
+    return finalPath;
   }
 
   void _paintBackgroundColor(
