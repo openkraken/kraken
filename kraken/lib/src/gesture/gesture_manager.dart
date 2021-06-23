@@ -93,10 +93,16 @@ class GestureManager {
       });
 
       // The target node triggered by the gesture is the bottom node of hitTest.
-      if (_hitTestList.isNotEmpty && _hitTestList[0] is RenderPointerListenerMixin) {
-        _target = _hitTestList[0] as RenderPointerListenerMixin;
-      } else {
-        _target = null;
+      // The scroll element needs to be judged by isScrollingContentBox to find the real element upwards.
+      _target = null;
+      if (_hitTestList.isNotEmpty) {
+        for (int i = 0; i < _hitTestList.length; i++) {
+          RenderBox renderBox = _hitTestList[i];
+          if ((renderBox is RenderBoxModel && !renderBox.isScrollingContentBox) || renderBox is RenderViewportBox) {
+            _target = renderBox as RenderPointerListenerMixin;
+            break;
+          }
+        }
       }
     }
 
