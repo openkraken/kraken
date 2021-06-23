@@ -436,8 +436,7 @@ class CSSPositionedLayout {
       RenderBox? root = parent.elementManager!.getRootRenderBox();
       Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(child.renderPositionHolder!, parent) ?? Offset.zero;
 
-      Offset baseOffset = (child.renderPositionHolder!.localToGlobal(positionHolderScrollOffset, ancestor: root) -
-        parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root));
+      Offset baseOffset = child.renderPositionHolder!.localToGlobal(positionHolderScrollOffset, ancestor: parent);
 
       EdgeInsets? borderEdge = parent.renderStyle.borderEdge;
       double borderLeft = borderEdge != null ? borderEdge.left : 0;
