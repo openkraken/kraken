@@ -1,3 +1,33 @@
+## 0.8.0+1
+
+**Bug Fixed**
+
++ Fix DOM events can't bind with addEventListener https://github.com/openkraken/kraken/pull/436
+
+## 0.8.0
+
+**Big News**
+
++ Kraken v0.8.0 now support flutter 2.2.0
+
+**Features**
+
++ Support dart null safety and all dependencies had upgraded.
++ Lock Android NDK version to 21.4.7075529. https://github.com/openkraken/kraken/pull/394
++ Add length value support in background-position https://github.com/openkraken/kraken/pull/421
+
+**Bug Fixed**
+
++ Fix error when setting element's eventHandler property to null  https://github.com/openkraken/kraken/pull/426
++ Fix crash when trigger `touchcancel` events https://github.com/openkraken/kraken/pull/424
++ Fix error when reload kraken pages. https://github.com/openkraken/kraken/pull/419
++ Fix element's doesn't show up when setting display: none to display: block. https://github.com/openkraken/kraken/pull/405
++ Fix empty blank screen in Android / iOS physical devices launching with SDK mode. https://github.com/openkraken/kraken/pull/399
++ Fix WebView (created by iframe element) can't scroll. https://github.com/openkraken/kraken/pull/398
++ Fix percentage length doesn't work in flex layout box. https://github.com/openkraken/kraken/pull/397
++ Fix input element's height can't set with CSS height property. https://github.com/openkraken/kraken/pull/395
++ Fix crash when set element.style multiple times in a short of times. https://github.com/openkraken/kraken/pull/391
+
 ## 0.7.3+2
 
 **Features**
