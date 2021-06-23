@@ -12,7 +12,7 @@
 #include <atomic>
 #include <cstdlib>
 #include <memory>
-
+#include "bindings/qjs/BOM/console.h"
 //#include "bindings/jsc/KOM/timer.h"
 //#include "bindings/jsc/DOM/comment_node.h"
 //#include "bindings/jsc/DOM/custom_event.h"
@@ -77,7 +77,8 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 //  nativePerformance->mark(PERF_JS_CONTEXT_INIT_END);
 //  nativePerformance->mark(PERF_JS_NATIVE_METHOD_INIT_START);
 //#endif
-//
+
+  bindConsole(m_context);
 //  bindTimer(m_context);
 //  bindKraken(m_context);
 //  bindUIManager(m_context);
@@ -112,7 +113,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 //  nativePerformance->mark(PERF_JS_POLYFILL_INIT_START);
 //#endif
 
-  initKrakenPolyFill(this);
+//  initKrakenPolyFill(this);
 
   for (auto p : pluginSourceCode) {
     evaluateScript(&p.second, p.first.c_str(), 0);

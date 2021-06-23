@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
@@ -15,27 +15,26 @@ using QjsRuntime = JSRuntime;
 
 namespace kraken::binding::qjs {
 
+static JSClassID kHostObjectClassId{0};
+static JSClassID kHostClassClassId{0};
+static JSClassID kFunctionClassId{0};
+
 class JSContext {
 public:
   JSContext() = delete;
   JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
   ~JSContext();
 
-  KRAKEN_EXPORT bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
-  KRAKEN_EXPORT bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
-
-  KRAKEN_EXPORT bool isValid();
-
-  KRAKEN_EXPORT JSValue global();
-  KRAKEN_EXPORT QjsContext* context();
-
-  KRAKEN_EXPORT int32_t getContextId();
-
-  KRAKEN_EXPORT void *getOwner();
-
-  KRAKEN_EXPORT bool handleException(JSValue *exc);
-
-  KRAKEN_EXPORT void reportError(const char *errmsg);
+  bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
+  bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
+  bool isValid();
+  JSValue global();
+  QjsContext* context();
+  static QjsRuntime *runtime();
+  int32_t getContextId();
+  void *getOwner();
+  bool handleException(JSValue *exc);
+  void reportError(const char *errmsg);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
@@ -10,6 +10,7 @@
 namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> context_unique_id{0};
+std::once_flag kGlobalClassIdFlag;
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
   return std::make_unique<JSContext>(contextId, handler, owner);
@@ -20,6 +21,12 @@ QjsRuntime *m_runtime{nullptr};
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
 
+  std::call_once(kGlobalClassIdFlag, []() {
+    JS_NewClassID(&kHostObjectClassId);
+    JS_NewClassID(&kHostClassClassId);
+    JS_NewClassID(&kFunctionClassId);
+  });
+
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
   }
@@ -29,6 +36,8 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   JS_DefinePropertyValue(m_ctx, JS_GetGlobalObject(m_ctx), JS_NewAtomLen(m_ctx, "window", 6),
                          JS_DupValue(m_ctx, JS_GetGlobalObject(m_ctx)), JS_PROP_CONFIGURABLE | JS_PROP_WRITABLE);
   timeOrigin = std::chrono::system_clock::now();
+
+  JS_SetContextOpaque(m_ctx, this);
 }
 
 JSContext::~JSContext() {
@@ -97,6 +106,10 @@ JSValue JSContext::global() {
 QjsContext *JSContext::context() {
   assert(!ctxInvalid_ && "context has been released");
   return m_ctx;
+}
+
+QjsRuntime *JSContext::runtime() {
+  return m_runtime;
 }
 
 void JSContext::reportError(const char *errmsg) {

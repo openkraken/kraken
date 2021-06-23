@@ -14,11 +14,9 @@ TEST(Context, isValid) {
 
 TEST(Context, evalWithError) {
   auto errorHandler = [](int32_t contextId, const char *errmsg) {
-    printf("%s", errmsg);
     EXPECT_STREQ(errmsg, "ReferenceError: 'document' is not defined\n"
                       "    at <anonymous> (internal://:3)\n"
                       "    at <eval> (internal://:2516)\n");
-    std::cout << errmsg;
   };
   auto bridge = new kraken::JSBridge(0, errorHandler);
   std::u16string code = u"let a = 1;";

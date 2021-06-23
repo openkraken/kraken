@@ -188,7 +188,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
   )
-  add_library(quickjs STATIC ${QUICK_JS_SOURCE})
+  add_library(quickjs SHARED ${QUICK_JS_SOURCE})
 
   list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
   list(APPEND BRIDGE_LINK_LIBS quickjs)
@@ -198,6 +198,9 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bridge_qjs.h
       bindings/qjs/js_context.cc
       bindings/qjs/js_context.h
+      bindings/qjs/host_object.h
+      bindings/qjs/BOM/console.cc
+      bindings/qjs/BOM/console.h
   )
 
   target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
