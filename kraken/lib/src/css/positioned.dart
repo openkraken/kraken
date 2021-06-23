@@ -433,9 +433,7 @@ class CSSPositionedLayout {
 
     // Offset to global coordinate system of base.
     if (childParentData.isPositioned) {
-      RenderBox? root = parent.elementManager!.getRootRenderBox();
       Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(child.renderPositionHolder!, parent) ?? Offset.zero;
-
       Offset baseOffset = child.renderPositionHolder!.localToGlobal(positionHolderScrollOffset, ancestor: parent);
 
       EdgeInsets? borderEdge = parent.renderStyle.borderEdge;
