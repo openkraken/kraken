@@ -64,7 +64,7 @@ class KrakenViewController {
 
   GestureClient? gestureClient;
 
-  TouchClient? touchClient;
+  EventClient? eventClient;
 
   double _viewportWidth;
   double get viewportWidth => _viewportWidth;
@@ -96,7 +96,7 @@ class KrakenViewController {
     required this.rootController,
     this.navigationDelegate,
     this.gestureClient,
-    this.touchClient,
+    this.eventClient,
   }) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
@@ -138,7 +138,7 @@ class KrakenViewController {
       viewport: viewport,
       showPerformanceOverlayOverride: showPerformanceOverlay,
       controller: rootController,
-      touchClient: touchClient,
+      eventClient: eventClient,
     );
 
     if (kProfileMode) {
@@ -447,7 +447,7 @@ class KrakenController {
 
   GestureClient? _gestureClient;
 
-  TouchClient? _touchClient;
+  EventClient? _eventClient;
 
   KrakenController(
     String? name,
@@ -460,7 +460,7 @@ class KrakenController {
     String? bundleContent,
     Color? background,
     GestureClient? gestureClient,
-    TouchClient? touchClient,
+    EventClient? eventClient,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
     this.onLoad,
@@ -473,7 +473,7 @@ class KrakenController {
         _bundlePath = bundlePath,
         _bundleContent = bundleContent,
         _gestureClient = gestureClient,
-        _touchClient = touchClient{
+        _eventClient = eventClient{
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
@@ -489,7 +489,7 @@ class KrakenController {
         rootController: this,
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
         gestureClient: _gestureClient,
-        touchClient: _touchClient,
+        eventClient: _eventClient,
     );
 
     if (kProfileMode) {

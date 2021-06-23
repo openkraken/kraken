@@ -112,10 +112,6 @@ class GestureManager {
       if (_target!.onPointerSignal != null && event is PointerSignalEvent)
         _target!.onPointerSignal!(event);
     }
-
-    if (_target is RenderBoxModel && (_target as RenderBoxModel).elementManager!.touchClient != null) {
-      (_target as RenderBoxModel).elementManager!.touchClient!.touchStartCallback(event);
-    }
   }
 
   void onClick(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
