@@ -71,9 +71,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
 
   final List<VoidCallback> _detachCallbacks = [];
 
-  TouchClient? touchClient;
+  EventClient? eventClient;
 
-  ElementManager({required this.contextId, required this.viewport, required this.controller, this.showPerformanceOverlayOverride = false, this.touchClient}) {
+  ElementManager({required this.contextId, required this.viewport, required this.controller, this.showPerformanceOverlayOverride = false, this.eventClient}) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);

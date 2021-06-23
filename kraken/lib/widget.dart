@@ -55,7 +55,7 @@ class Kraken extends StatelessWidget {
 
   final GestureClient? gestureClient;
 
-  final TouchClient? touchClient;
+  final EventClient? eventClient;
 
   final HttpClientInterceptor? httpClientInterceptor;
 
@@ -103,7 +103,7 @@ class Kraken extends StatelessWidget {
     this.javaScriptChannel,
     this.background,
     this.gestureClient,
-    this.touchClient,
+    this.eventClient,
     this.devToolsService,
     // Kraken's http client interceptor.
     this.httpClientInterceptor,
@@ -164,7 +164,7 @@ class _KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
       onJSError: _krakenWidget.onJSError,
       methodChannel: _krakenWidget.javaScriptChannel,
       gestureClient: _krakenWidget.gestureClient,
-      touchClient: _krakenWidget.touchClient,
+      eventClient: _krakenWidget.eventClient,
       navigationDelegate: _krakenWidget.navigationDelegate,
       devToolsService: _krakenWidget.devToolsService,
       httpClientInterceptor: _krakenWidget.httpClientInterceptor,
