@@ -39,6 +39,14 @@ Offset? _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, Render
   return null;
 }
 
+/// Get the offset of the RenderPlaceholder of positioned element to its parent RenderBoxModel.
+Offset _getPlaceholderToParentOffset(RenderPositionHolder placeholder, RenderBoxModel parent) {
+  Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(placeholder, parent) ?? Offset.zero;
+  Offset placeholderOffset = placeholder.localToGlobal(positionHolderScrollOffset, ancestor: parent);
+  return placeholderOffset;
+}
+
+
 // Margin auto has special rules for positioned element
 // which will override the default position rule
 // https://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width
@@ -433,15 +441,13 @@ class CSSPositionedLayout {
 
     // Offset to global coordinate system of base.
     if (childParentData.isPositioned) {
-      Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(child.renderPositionHolder!, parent) ?? Offset.zero;
-      Offset baseOffset = child.renderPositionHolder!.localToGlobal(positionHolderScrollOffset, ancestor: parent);
-
       EdgeInsets? borderEdge = parent.renderStyle.borderEdge;
       double borderLeft = borderEdge != null ? borderEdge.left : 0;
       double borderRight = borderEdge != null ? borderEdge.right : 0;
       double borderTop = borderEdge != null ? borderEdge.top : 0;
       double borderBottom = borderEdge != null ? borderEdge.bottom : 0;
       RenderStyle childRenderStyle = child.renderStyle;
+      Offset? placeholderOffset;
 
       double top;
       if (childRenderStyle.top != null && childRenderStyle.top!.length != null) {
@@ -461,8 +467,9 @@ class CSSPositionedLayout {
               + overflowContainingBox.renderStyle.paddingTop);
         }
       } else {
+        placeholderOffset = _getPlaceholderToParentOffset(child.renderPositionHolder!, parent);
         // Use original offset in normal flow if no top and bottom is set.
-        top = baseOffset.dy + childMarginTop!;
+        top = placeholderOffset.dy + childMarginTop!;
       }
 
       double left;
@@ -483,8 +490,11 @@ class CSSPositionedLayout {
             + overflowContainingBox.renderStyle.paddingLeft);
         }
       } else {
+        if (placeholderOffset == null) {
+          placeholderOffset = _getPlaceholderToParentOffset(child.renderPositionHolder!, parent);
+        }
         // Use original offset in normal flow if no left and right is set.
-        left = baseOffset.dx + childMarginLeft!;
+        left = placeholderOffset.dx + childMarginLeft!;
       }
 
       x = left;
