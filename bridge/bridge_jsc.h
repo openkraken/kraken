@@ -6,8 +6,6 @@
 #ifndef KRAKEN_JS_JSC_BRIDGE_H_
 #define KRAKEN_JS_JSC_BRIDGE_H_
 
-#ifndef KRAKEN_ENABLE_JSA
-
 #include "foundation/bridge_callback.h"
 #include "include/kraken_bridge.h"
 
@@ -54,5 +52,4 @@ private:
 
 } // namespace kraken
 
-#endif
 #endif // KRAKEN_JS_JSC_BRIDGE_H_

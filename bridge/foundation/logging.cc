@@ -7,6 +7,10 @@
 #include "colors.h"
 #include "logging.h"
 
+#if KRAKEN_JSC_ENGINE
+#include "bridge_jsc.h"
+#endif
+
 #if defined(IS_ANDROID)
 #include <android/log.h>
 #elif defined(IS_IOS)

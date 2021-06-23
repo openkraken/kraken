@@ -3,8 +3,6 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKEN_ENABLE_JSA
-
 #include "foundation/logging.h"
 #include "polyfill.h"
 
@@ -122,11 +120,6 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 //#if ENABLE_PROFILE
 //  nativePerformance->mark(PERF_JS_POLYFILL_INIT_END);
 //#endif
-
-//#ifdef KRAKEN_ENABLE_JSA
-//  Object promiseHandler = m_context->global().getPropertyAsObject(*m_context, "__global_unhandled_promise_handler__");
-//  m_context->setUnhandledPromiseRejectionHandler(promiseHandler);
-//#endif
 }
 
 void JSBridge::invokeModuleEvent(NativeString *moduleName, const char* eventType, void *event, NativeString *extra) {
@@ -211,5 +204,3 @@ void JSBridge::setDisposeCallback(Task task, void *data) {
 }
 
 } // namespace kraken
-
-#endif

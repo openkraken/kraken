@@ -32,25 +32,25 @@ public:
 #if KRAKEN_JSC_ENGINE
   struct Context {
     Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef *exception)
-      : _context(context), _callback(callback) {
+      : m_context(context), m_callback(callback) {
       JSValueProtect(context.context(), callback);
     };
     Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef secondaryCallback,
             JSValueRef *exception)
-      : _context(context), _callback(callback), _secondaryCallback(secondaryCallback) {
+      : m_context(context), m_callback(callback), m_secondaryCallback(secondaryCallback) {
       JSValueProtect(context.context(), callback);
       JSValueProtect(context.context(), secondaryCallback);
     };
     ~Context() {
-      JSValueUnprotect(_context.context(), _callback);
+      JSValueUnprotect(m_context.context(), m_callback);
 
-      if (_secondaryCallback != nullptr) {
-        JSValueUnprotect(_context.context(), _secondaryCallback);
+      if (m_secondaryCallback != nullptr) {
+        JSValueUnprotect(m_context.context(), m_secondaryCallback);
       }
     }
-    kraken::binding::jsc::JSContext &_context;
-    JSValueRef _callback{nullptr};
-    JSValueRef _secondaryCallback{nullptr};
+    kraken::binding::jsc::JSContext &m_context;
+    JSValueRef m_callback{nullptr};
+    JSValueRef m_secondaryCallback{nullptr};
   };
 #elif KRAKEN_QUICK_JS_ENGINE
   struct Context {

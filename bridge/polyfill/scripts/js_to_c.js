@@ -16,9 +16,7 @@ const getPolyFillHeader = (outputName) => `/*
 #ifndef KRAKEN_${outputName.toUpperCase()}_H
 #define KRAKEN_${outputName.toUpperCase()}_H
 
-#ifdef KRAKEN_ENABLE_JSA
-#include "bridge_jsa.h"
-#elif KRAKEN_JSC_ENGINE
+#if KRAKEN_JSC_ENGINE
 #include "bridge_jsc.h"
 #elif KRAKEN_QUICK_JS_ENGINE
 #include "bridge_qjs.h"

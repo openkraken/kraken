@@ -15,9 +15,7 @@
 #include "bridge_qjs.h"
 #endif
 
-#ifdef KRAKEN_ENABLE_JSA
-#include "bridge_jsa.h"
-#elif KRAKEN_JSC_ENGINE
+#if KRAKEN_JSC_ENGINE
 #include "bridge_jsc.h"
 #endif
 
