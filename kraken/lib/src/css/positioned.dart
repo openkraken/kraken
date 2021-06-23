@@ -39,7 +39,7 @@ Offset? _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, Render
   return null;
 }
 
-/// Get the offset of the RenderPlaceholder of positioned element to its parent RenderBoxModel.
+// Get the offset of the RenderPlaceholder of positioned element to its parent RenderBoxModel.
 Offset _getPlaceholderToParentOffset(RenderPositionHolder placeholder, RenderBoxModel parent) {
   Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(placeholder, parent) ?? Offset.zero;
   Offset placeholderOffset = placeholder.localToGlobal(positionHolderScrollOffset, ancestor: parent);
