@@ -62,6 +62,13 @@ bool JSContext::evaluateJavaScript(const char16_t *code, size_t length, const ch
   return hasException;
 }
 
+bool JSContext::evaluateJavaScript(const char *code, size_t codeLength, const char *sourceURL, int startLine) {
+  JSValue result = JS_Eval(m_ctx, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL);
+  bool hasException = handleException(&result);
+  JS_FreeValue(m_ctx, result);
+  return hasException;
+}
+
 bool JSContext::isValid() {
   return !ctxInvalid_;
 }

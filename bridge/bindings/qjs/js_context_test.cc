@@ -14,12 +14,11 @@ TEST(Context, isValid) {
 
 TEST(Context, evalWithError) {
   auto errorHandler = [](int32_t contextId, const char *errmsg) {
-    EXPECT_STREQ(errmsg, "ReferenceError: 'document' is not defined\n"
-                      "    at <anonymous> (internal://:3)\n"
-                      "    at <eval> (internal://:2516)\n");
+    EXPECT_STREQ(errmsg, "TypeError: cannot read property 'toString' of null\n"
+                         "    at <eval> (file://:1)\n");
   };
   auto bridge = new kraken::JSBridge(0, errorHandler);
-  std::u16string code = u"let a = 1;";
-  bridge->evaluateScript(code, "file://", 0);
+  const char* code = "let object = null; object.toString();";
+  bridge->evaluateScript(code, strlen(code), "file://", 0);
   delete bridge;
 }

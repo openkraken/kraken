@@ -27,6 +27,7 @@ public:
 
   bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
   bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
+  bool evaluateJavaScript(const char* code, size_t codeLength, const char* sourceURL, int startLine);
   bool isValid();
   JSValue global();
   QjsContext* context();

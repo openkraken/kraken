@@ -9,6 +9,21 @@ Usage: node js_to_c.js -s /path/to/source.js -o /path/to/dist.cc -n polyfill\n`)
   process.exit(0);
 }
 
+function strEncodeUTF16(str) {
+  let buf = new ArrayBuffer(str.length*2);
+  let bufView = new Uint16Array(buf);
+  for (var i=0, strLen=str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return bufView;
+}
+
+function strEncodeUTF8(str) {
+  let bufView = new Uint8Array(Buffer.from(str));
+  return bufView;
+}
+
+
 const getPolyFillHeader = (outputName) => `/*
  * Copyright (C) 2020 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -27,6 +42,21 @@ void initKraken${outputName}(kraken::JSBridge *bridge);
 #endif // KRAKEN_${outputName.toUpperCase()}_H
 `;
 
+const getPolyFillJavaScriptSource = (source) => {
+  // const uint8Array = new Uint8Array(Buffer.from(source));
+  let utf8BufferView = strEncodeUTF8(source);
+  let utf16BufferView = strEncodeUTF16(source);
+  if (process.env.KRAKEN_JS_ENGINE == 'quickjs') {
+    return `
+const uint32_t bufferLength = ${utf8BufferView.length};
+static const uint8_t sourceBuffer[${utf8BufferView.length}] = { ${utf8BufferView.join(',')} };`
+  } else {
+    return `
+const uint32_t bufferLength = ${utf16BufferView.length};
+static const uint16_t sourceBuffer[${utf16BufferView.length}] = { ${utf16BufferView.join(',')} };`
+  }
+};
+
 const getPolyFillSource = (source, outputName) => `/*
  * Copyright (C) 2020 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -34,10 +64,10 @@ const getPolyFillSource = (source, outputName) => `/*
 
 #include "${outputName.toLowerCase()}.h"
 
-static std::u16string jsCode = std::u16string(uR"(${source})");
+${getPolyFillJavaScriptSource(source)}
 
 void initKraken${outputName}(kraken::JSBridge *bridge) {
-  bridge->evaluateScript(jsCode, "internal://", 0);
+  bridge->evaluateScript(sourceBuffer, bufferLength, "internal://", 0);
 }
 `;
 

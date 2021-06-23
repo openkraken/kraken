@@ -11,6 +11,8 @@
 #include <cstdlib>
 #include <memory>
 #include "bindings/qjs/BOM/console.h"
+#include "bridge_qjs.h"
+
 //#include "bindings/jsc/KOM/timer.h"
 //#include "bindings/jsc/DOM/comment_node.h"
 //#include "bindings/jsc/DOM/custom_event.h"
@@ -170,10 +172,16 @@ void JSBridge::evaluateScript(const NativeString *script, const char *url, int s
 //#endif
 }
 
-void JSBridge::evaluateScript(const std::u16string &script, const char *url, int startLine) {
+void JSBridge::evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine) {
   if (!m_context->isValid()) return;
 //  binding::qjs::updateLocation(url);
-  m_context->evaluateJavaScript(script.c_str(), script.size(), url, startLine);
+  m_context->evaluateJavaScript(script, length, url, startLine);
+}
+
+void JSBridge::evaluateScript(const char *script, size_t length, const char *url, int startLine) {
+  if (!m_context->isValid()) return;
+  //  binding::qjs::updateLocation(url);
+  m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
 JSBridge::~JSBridge() {
