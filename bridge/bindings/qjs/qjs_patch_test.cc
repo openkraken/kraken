@@ -54,3 +54,32 @@ TEST(JS_ToUnicode, emoji) {
   JS_FreeContext(ctx);
   JS_FreeRuntime(runtime);
 }
+
+TEST(JS_NewUnicodeString, fromAscii) {
+  JSRuntime *runtime = JS_NewRuntime();
+  JSContext *ctx = JS_NewContext(runtime);
+  std::u16string source = u"helloworld";
+  JSValue result = JS_NewUnicodeString(runtime, ctx, reinterpret_cast<const uint16_t *>(source.c_str()), source.length());
+  const char* str = JS_ToCString(ctx, result);
+  EXPECT_STREQ(str, "helloworld");
+
+  JS_FreeValue(ctx, result);
+  JS_FreeContext(ctx);
+  JS_FreeRuntime(runtime);
+}
+
+TEST(JS_NewUnicodeString, fromChieseCode) {
+  JSRuntime *runtime = JS_NewRuntime();
+  JSContext *ctx = JS_NewContext(runtime);
+  std::u16string source = u"a你的名字12345";
+  JSValue result = JS_NewUnicodeString(runtime, ctx, reinterpret_cast<const uint16_t *>(source.c_str()), source.length());
+  uint32_t length;
+  uint16_t *buffer = JS_ToUnicode(ctx, result, &length);
+  std::u16string bufferString = std::u16string(reinterpret_cast<const char16_t*>(buffer), length);
+
+  EXPECT_EQ(bufferString == source, true);
+
+  JS_FreeValue(ctx, result);
+  JS_FreeContext(ctx);
+  JS_FreeRuntime(runtime);
+}
