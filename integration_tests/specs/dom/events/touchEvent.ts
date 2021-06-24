@@ -68,4 +68,3 @@ describe('TouchEvent', () => {
     simulateClick(120, 10);
   });
 });
-  
