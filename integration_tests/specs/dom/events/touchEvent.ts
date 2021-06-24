@@ -41,13 +41,13 @@ describe('TouchEvent', () => {
   });
 
   it('should work with element dispatch touch event', (done) => {
-    let startNum = 0;
+    let touchNum = 0;
     const div = document.createElement('div');
     div.style.backgroundColor = 'yellow';
     div.style.width = '100px';
     div.style.height = '100px';
 
-    div.addEventListener('touchstart', ()=>startNum++)
+    div.addEventListener('touchstart', ()=>touchNum++)
 
     document.body.appendChild(div)
 
@@ -57,11 +57,11 @@ describe('TouchEvent', () => {
     div2.style.height = '50px';
     div2.style.marginLeft = '100px';
 
-    div2.addEventListener('touchstart', ()=>startNum++)
+    div2.addEventListener('touchstart', ()=>touchNum++)
     div.appendChild(div2)
 
     document.body.addEventListener('touchstart', ()=>{
-      expect(startNum).toBe(2);
+      expect(touchNum).toBe(2);
       done();
     })
 
