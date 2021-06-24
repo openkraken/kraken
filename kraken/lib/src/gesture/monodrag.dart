@@ -29,7 +29,7 @@ abstract class GestureClient {
 
 /// Pass Touch to native.
 abstract class EventClient {
-  void eventCallback(Event event);
+  void eventListener(Event event);
 }
 
 abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecognizer {
