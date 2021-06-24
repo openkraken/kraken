@@ -50,7 +50,7 @@ class EventTarget {
 
       // dispatch listener of widget.
       if ((this as Element).elementManager.eventClient != null) {
-        (this as Element).elementManager.eventClient!.eventCallback(event);
+        (this as Element).elementManager.eventClient!.eventListener(event);
       }
     }
   }
