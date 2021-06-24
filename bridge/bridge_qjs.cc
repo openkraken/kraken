@@ -14,6 +14,7 @@
 
 #include "bindings/qjs/BOM/console.h"
 #include "bindings/qjs/kraken.h"
+#include "bindings/qjs/module_manager.h"
 
 //#include "bindings/jsc/KOM/timer.h"
 //#include "bindings/jsc/DOM/comment_node.h"
@@ -83,7 +84,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bindConsole(m_context);
 //  bindTimer(m_context);
   bindKraken(m_context);
-//  bindUIManager(m_context);
+  bindModuleManager(m_context);
 //  bindConsole(m_context);
 //  bindEvent(m_context);
 //  bindMouseEvent(m_context);

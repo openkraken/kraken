@@ -54,25 +54,25 @@ public:
   };
 #elif KRAKEN_QUICK_JS_ENGINE
   struct Context {
-    Context(kraken::binding::qjs::JSContext &context, JSValue callback, JSValue *exception)
-      : m_context(context), m_callback(callback), m_func_count(1) {
+    Context(kraken::binding::qjs::JSContext &context, JSValue callback)
+      : m_context(context), m_callback(callback) {
       JS_DupValue(context.context(), callback);
     };
-    Context(kraken::binding::qjs::JSContext &context, JSValue callback, JSValue secondaryCallback, JSValue *exception)
-      : m_context(context), m_callback(callback), m_secondaryCallback(secondaryCallback), m_func_count(2) {
+    Context(kraken::binding::qjs::JSContext &context, JSValue callback, JSValue secondaryCallback)
+      : m_context(context), m_callback(callback), m_secondaryCallback(secondaryCallback) {
       JS_DupValue(context.context(), callback);
       JS_DupValue(context.context(), secondaryCallback);
     };
     ~Context() {
       JS_FreeValue(m_context.context(), m_callback);
-      if (m_func_count == 2) {
+      if (!JS_IsNull(m_secondaryCallback)) {
         JS_FreeValue(m_context.context(), m_secondaryCallback);
       }
     }
     kraken::binding::qjs::JSContext &m_context;
     int32_t m_func_count{0};
-    JSValue m_callback;
-    JSValue m_secondaryCallback;
+    JSValue m_callback{JS_NULL};
+    JSValue m_secondaryCallback{JS_NULL};
   };
 #endif
 
