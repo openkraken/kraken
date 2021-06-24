@@ -5,7 +5,7 @@
 
 #include "js_context.h"
 #include "kraken_bridge.h"
-#include <quickjs/quickjs-atom.h>
+#include "qjs_patch.h"
 
 namespace kraken::binding::qjs {
 
@@ -14,6 +14,19 @@ std::once_flag kGlobalClassIdFlag;
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
   return std::make_unique<JSContext>(contextId, handler, owner);
+}
+
+NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value) {
+  if (!JS_IsString(value)) {
+    return nullptr;
+  }
+
+  uint32_t length;
+  uint16_t *buffer = JS_ToUnicode(ctx, value, &length);
+  NativeString tmp{};
+  tmp.string = buffer;
+  tmp.length = length;
+  return tmp.clone();
 }
 
 QjsRuntime *m_runtime{nullptr};

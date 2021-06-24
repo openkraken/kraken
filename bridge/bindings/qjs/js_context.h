@@ -50,6 +50,7 @@ private:
 };
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
+NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value);
 
 }
 
