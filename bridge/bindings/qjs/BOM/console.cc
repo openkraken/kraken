@@ -32,7 +32,7 @@ JSValue print(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *ar
 
 void bindConsole(std::unique_ptr<JSContext> &context) {
   JSValue function = JS_NewCFunction(context->context(), print, "__kraken_print__", 2);
-  JS_SetProperty(context->context(), context->global(), JS_NewAtom(context->context(), "__kraken_print__"), function);
+  JS_DefinePropertyValue(context->context(), context->global(), JS_NewAtom(context->context(), "__kraken_print__"), function, JS_PROP_NORMAL);
 }
 
 }

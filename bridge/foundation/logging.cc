@@ -3,12 +3,14 @@
  * Author: Kraken Team.
  */
 
-#include <algorithm>
-#include "colors.h"
 #include "logging.h"
+#include "colors.h"
+#include <algorithm>
 
 #if KRAKEN_JSC_ENGINE
 #include "bridge_jsc.h"
+#elif KRAKEN_QUICK_JS_ENGINE
+#include "bridge_qjs.h"
 #endif
 
 #if defined(IS_ANDROID)
@@ -20,10 +22,10 @@
 #endif
 
 #if ENABLE_DEBUGGER
+#include "inspector/impl/jsc_console_client_impl.h"
+#include <JavaScriptCore/APICast.h>
 #include <JavaScriptCore/ConsoleTypes.h>
 #include <JavaScriptCore/JSGlobalObject.h>
-#include <JavaScriptCore/APICast.h>
-#include "inspector/impl/jsc_console_client_impl.h"
 #endif
 
 namespace foundation {
@@ -52,10 +54,9 @@ const char *StripPath(const char *path) {
 
 } // namespace
 
-LogMessage::LogMessage(LogSeverity severity, const char *file, int line, const char* condition)
+LogMessage::LogMessage(LogSeverity severity, const char *file, int line, const char *condition)
   : severity_(severity), file_(file), line_(line) {
-  if (condition)
-    stream_ << "Check failed: " << condition << ". ";
+  if (condition) stream_ << "Check failed: " << condition << ". ";
 }
 
 LogMessage::~LogMessage() {
@@ -112,38 +113,36 @@ enum class MessageLevel : uint8_t {
   Info = 5,
 };
 
-void printLog(int32_t contextId, std::stringstream &stream, std::string level, void* ctx) {
-    MessageLevel _log_level = MessageLevel::Info;
-    switch (level[0]) {
-      case 'l':
-        KRAKEN_LOG(VERBOSE) << stream.str();
-        _log_level = MessageLevel::Log;
-        break;
-      case 'i':
-        KRAKEN_LOG(INFO) << stream.str();
-        _log_level = MessageLevel::Info;
-        break;
-      case 'd':
-        KRAKEN_LOG(DEBUG_) << stream.str();
-        _log_level = MessageLevel::Debug;
-        break;
-      case 'w':
-        KRAKEN_LOG(WARN) << stream.str();
-        _log_level = MessageLevel::Warning;
-        break;
-      case 'e':
-        KRAKEN_LOG(ERROR) << stream.str();
-        _log_level = MessageLevel::Error;
-        break;
-      default:
-        KRAKEN_LOG(VERBOSE) << stream.str();
-    }
-
-#if KRAKEN_JSC_ENGINE
-    if (kraken::JSBridge::consoleMessageHandler != nullptr) {
-      kraken::JSBridge::consoleMessageHandler(reinterpret_cast<JSGlobalContextRef>(ctx), stream.str(), static_cast<int>(_log_level));
-    }
-#endif
+void printLog(int32_t contextId, std::stringstream &stream, std::string level, void *ctx) {
+  MessageLevel _log_level = MessageLevel::Info;
+  switch (level[0]) {
+  case 'l':
+    KRAKEN_LOG(VERBOSE) << stream.str();
+    _log_level = MessageLevel::Log;
+    break;
+  case 'i':
+    KRAKEN_LOG(INFO) << stream.str();
+    _log_level = MessageLevel::Info;
+    break;
+  case 'd':
+    KRAKEN_LOG(DEBUG_) << stream.str();
+    _log_level = MessageLevel::Debug;
+    break;
+  case 'w':
+    KRAKEN_LOG(WARN) << stream.str();
+    _log_level = MessageLevel::Warning;
+    break;
+  case 'e':
+    KRAKEN_LOG(ERROR) << stream.str();
+    _log_level = MessageLevel::Error;
+    break;
+  default:
+    KRAKEN_LOG(VERBOSE) << stream.str();
   }
+
+  if (kraken::JSBridge::consoleMessageHandler != nullptr) {
+    kraken::JSBridge::consoleMessageHandler(ctx, stream.str(), static_cast<int>(_log_level));
+  }
+}
 
 } // namespace foundation

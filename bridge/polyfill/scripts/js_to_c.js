@@ -67,7 +67,7 @@ const getPolyFillSource = (source, outputName) => `/*
 ${getPolyFillJavaScriptSource(source)}
 
 void initKraken${outputName}(kraken::JSBridge *bridge) {
-  bridge->evaluateScript(sourceBuffer, bufferLength, "internal://", 0);
+  bridge->evaluateScript(${process.env.KRAKEN_JS_ENGINE === 'quickjs' ? 'reinterpret_cast<const char *>(sourceBuffer)' : 'sourceBuffer'}, bufferLength, "internal://", 0);
 }
 `;
 

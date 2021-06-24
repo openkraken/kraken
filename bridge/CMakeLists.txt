@@ -199,6 +199,12 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/js_context.cc
       bindings/qjs/js_context.h
       bindings/qjs/host_object.h
+      bindings/qjs/qjs_patch.cc
+      bindings/qjs/qjs_patch.h
+      bindings/qjs/module_manager.cc
+      bindings/qjs/module_manager.h
+      bindings/qjs/kraken.cc
+      bindings/qjs/kraken.h
       bindings/qjs/BOM/console.cc
       bindings/qjs/BOM/console.h
   )
