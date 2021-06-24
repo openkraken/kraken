@@ -79,7 +79,10 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
     }
 
-    viewportElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
+    HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
+    setEventTarget(documentElement);
+
+    viewportElement = documentElement;
     setEventTarget(viewportElement);
 
     viewport.child = viewportElement.renderBoxModel;
@@ -94,8 +97,8 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     Window window = Window(WINDOW_ID, windowNativePtrMap[contextId]!, this, viewportElement);
     setEventTarget(window);
 
-    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, viewportElement as HTMLElement);
-    document.appendChild(viewportElement);
+    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
+    document.appendChild(documentElement);
     setEventTarget(document);
 
     element_registry.defineBuiltInElements();
