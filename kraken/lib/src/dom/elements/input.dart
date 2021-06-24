@@ -717,9 +717,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _startCursorTimer() {
     _targetCursorVisibility = true;
     _cursorBlinkOpacityController!.value = 1.0;
-    if (_cursorTimer == null) {
-      _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
-    }
+
+    _cursorTimer ??= Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
   }
 
   void _cursorWaitForStart(Timer timer) {
