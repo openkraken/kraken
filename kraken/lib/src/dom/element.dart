@@ -161,10 +161,18 @@ class Element extends Node
     RenderStyle? renderStyle;
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
-      RenderIntrinsic renderIntrinsic = _renderIntrinsic = createRenderIntrinsic(this, repaintSelf: repaintSelf);
+      RenderIntrinsic renderIntrinsic = _renderIntrinsic = createRenderIntrinsic(
+        this,
+        repaintSelf: repaintSelf,
+        viewportSize: viewportSize
+      );
       renderStyle = renderIntrinsic.renderStyle;
     } else {
-      RenderLayoutBox renderLayoutBox = _renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
+      RenderLayoutBox renderLayoutBox = _renderLayoutBox = createRenderLayout(
+        this,
+        repaintSelf: repaintSelf,
+        viewportSize: viewportSize
+      );
       renderStyle = renderLayoutBox.renderStyle;
     }
 
@@ -293,7 +301,12 @@ class Element extends Node
         parentRenderObject.remove(_renderBoxModel);
       }
     }
-    RenderBoxModel targetRenderBox = createRenderBoxModel(this, prevRenderBoxModel: _renderBoxModel, repaintSelf: repaintSelf);
+    RenderBoxModel targetRenderBox = createRenderBoxModel(
+      this,
+      viewportSize: viewportSize,
+      prevRenderBoxModel: _renderBoxModel,
+      repaintSelf: repaintSelf
+    );
     // Append new renderObject
     if (parentRenderObject is ContainerRenderObjectMixin) {
       renderBoxModel = _renderBoxModel = targetRenderBox;
@@ -489,7 +502,8 @@ class Element extends Node
       /// Recalculate gradient after node attached when gradient length cannot be obtained from style
       if (selfRenderBoxModel.shouldRecalGradient) {
         String backgroundImage = style[BACKGROUND_IMAGE];
-        selfRenderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage);
+        int contextId = elementManager.contextId;
+        selfRenderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage, contextId);
         selfRenderBoxModel.shouldRecalGradient = false;
       }
 
@@ -1037,7 +1051,8 @@ class Element extends Node
   }
 
   void _styleBoxChangedListener(String property, String? original, String present) {
-    renderBoxModel!.renderStyle.updateBox(property, original, present);
+    int contextId = elementManager.contextId;
+    renderBoxModel!.renderStyle.updateBox(property, original, present, contextId);
   }
 
   void _styleBorderRadiusChangedListener(String property, String? original, String present) {
@@ -1350,17 +1365,42 @@ class Element extends Node
     }
   }
 
-  static RenderBoxModel createRenderBoxModel(Element element, {RenderBoxModel? prevRenderBoxModel, bool repaintSelf = false}) {
+  static RenderBoxModel createRenderBoxModel(
+    Element element,
+    {
+      required Size viewportSize,
+      RenderBoxModel? prevRenderBoxModel,
+      bool repaintSelf = false
+    }
+  ) {
     RenderBoxModel? renderBoxModel = prevRenderBoxModel ?? element.renderBoxModel;
 
     if (renderBoxModel is RenderIntrinsic) {
-      return createRenderIntrinsic(element, prevRenderIntrinsic: prevRenderBoxModel as RenderIntrinsic?, repaintSelf: repaintSelf);
+      return createRenderIntrinsic(
+        element,
+        viewportSize: viewportSize,
+        prevRenderIntrinsic: prevRenderBoxModel as RenderIntrinsic?,
+        repaintSelf: repaintSelf
+      );
     } else {
-      return createRenderLayout(element, prevRenderLayoutBox: prevRenderBoxModel as RenderLayoutBox?, repaintSelf: repaintSelf);
+      return createRenderLayout(
+        element,
+        viewportSize: viewportSize,
+        prevRenderLayoutBox: prevRenderBoxModel as RenderLayoutBox?,
+        repaintSelf: repaintSelf
+      );
     }
   }
 
-  static RenderLayoutBox createRenderLayout(Element element, {CSSStyleDeclaration? style, RenderLayoutBox? prevRenderLayoutBox, bool repaintSelf = false}) {
+  static RenderLayoutBox createRenderLayout(
+    Element element,
+    {
+      required Size viewportSize,
+      CSSStyleDeclaration? style,
+      RenderLayoutBox? prevRenderLayoutBox,
+      bool repaintSelf = false
+    }
+  ) {
     style = style ?? element.style;
     CSSDisplay display = CSSDisplayMixin.getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]
@@ -1373,10 +1413,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, viewportSize: viewportSize);
         } else {
           flexLayout = RenderFlexLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, viewportSize: viewportSize);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
@@ -1434,10 +1474,10 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, viewportSize: viewportSize);
         } else {
           flowLayout = RenderFlowLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, viewportSize: viewportSize);
         }
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
@@ -1491,7 +1531,7 @@ class Element extends Node
 
       if (prevRenderLayoutBox == null) {
         renderRecyclerLayout = RenderRecyclerLayout(
-            renderStyle: renderStyle, targetId: element.targetId, elementManager: element.elementManager);
+            renderStyle: renderStyle, viewportSize: viewportSize);
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
         renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
       } else if (prevRenderLayoutBox is RenderFlexLayout) {
@@ -1508,18 +1548,24 @@ class Element extends Node
     }
   }
 
-  static RenderIntrinsic createRenderIntrinsic(Element element,
-    {RenderIntrinsic? prevRenderIntrinsic, bool repaintSelf = false}) {
+  static RenderIntrinsic createRenderIntrinsic(
+    Element element,
+    {
+      required Size viewportSize,
+      RenderIntrinsic? prevRenderIntrinsic,
+      bool repaintSelf = false
+    }
+  ) {
     RenderIntrinsic intrinsic;
     RenderStyle renderStyle = RenderStyle(style: element.style);
 
     if (prevRenderIntrinsic == null) {
       if (repaintSelf) {
         intrinsic = RenderSelfRepaintIntrinsic(
-          element.targetId, renderStyle, element.elementManager);
+          renderStyle, viewportSize);
       } else {
         intrinsic = RenderIntrinsic(
-          element.targetId, renderStyle, element.elementManager);
+          renderStyle, viewportSize);
       }
     } else {
       if (prevRenderIntrinsic is RenderSelfRepaintIntrinsic) {

@@ -31,13 +31,11 @@ class RenderRecyclerLayout extends RenderLayoutBox
   }
 
   RenderRecyclerLayout({
-    required int targetId,
-    ElementManager? elementManager,
     required RenderStyle renderStyle,
+    required Size viewportSize
   }) : super(
-            targetId: targetId,
             renderStyle: renderStyle,
-            elementManager: elementManager) {
+            viewportSize: viewportSize) {
     _buildRenderViewport();
     super.insert(renderViewport!);
   }
@@ -277,18 +275,18 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
   int? _currentIndex;
 
-  RenderBox? _createRenderBox(int index) {
-    if (childCount <= index) {
-      return null;
-    }
-
-    int targetId = _children[index];
-    Node node = elementManager!.getEventTargetByTargetId<Node>(targetId)!;
-
-    node.createRenderer();
-
-    return node.renderer as RenderBox?;
-  }
+//  RenderBox? _createRenderBox(int index) {
+//    if (childCount <= index) {
+//      return null;
+//    }
+//
+//    int targetId = _children[index];
+//    Node node = elementManager!.getEventTargetByTargetId<Node>(targetId)!;
+//
+//    node.createRenderer();
+//
+//    return node.renderer as RenderBox?;
+//  }
 
   @override
   void createChild(int index, {RenderBox? after}) {
@@ -385,32 +383,30 @@ class RenderRecyclerLayout extends RenderLayoutBox
     return trailingScrollOffset + averageExtent * remainingCount;
   }
 
-  @override
-  List<RenderBox> getChildrenAsList() {
-    assert(_element != null);
-    final List<RenderBox> result = <RenderBox>[];
-    for (int index = 0; index < childCount; index++) {
-      result.add(_createRenderBox(index)!);
-    }
-    return result;
-  }
+//  @override
+//  List<RenderBox> getChildrenAsList() {
+//    assert(_element != null);
+//    final List<RenderBox> result = <RenderBox>[];
+//    for (int index = 0; index < childCount; index++) {
+//      result.add(_createRenderBox(index)!);
+//    }
+//    return result;
+//  }
 
   RenderFlexLayout toFlexLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
         children: children as List<RenderBox>?,
-        targetId: targetId,
         renderStyle: renderStyle,
-        elementManager: elementManager);
+        viewportSize: viewportSize);
     return copyWith(renderFlexLayout);
   }
 
   RenderFlowLayout toFlowLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
-        targetId: targetId,
         renderStyle: renderStyle,
-        elementManager: elementManager);
+        viewportSize: viewportSize);
     renderFlowLayout.addAll(children as List<RenderBox>?);
     return copyWith(renderFlowLayout);
   }

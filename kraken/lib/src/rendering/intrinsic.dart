@@ -13,11 +13,11 @@ import 'package:kraken/rendering.dart';
 class RenderIntrinsic extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   RenderIntrinsic(
-      int targetId, RenderStyle renderStyle, ElementManager? elementManager)
-      : super(
-            targetId: targetId,
+      RenderStyle renderStyle,
+      Size viewportSize
+  ) : super(
             renderStyle: renderStyle,
-            elementManager: elementManager);
+            viewportSize: viewportSize);
 
   BoxSizeType get widthSizeType {
     bool widthDefined =
@@ -57,7 +57,7 @@ class RenderIntrinsic extends RenderBoxModel
     if (kProfileMode) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
-          .mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: targetId);
+          .mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: hashCode);
     }
 
     beforeLayout();
@@ -143,7 +143,7 @@ class RenderIntrinsic extends RenderBoxModel
 
     if (kProfileMode) {
       PerformanceTiming.instance()
-          .mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: targetId);
+          .mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: hashCode);
     }
   }
 
@@ -213,7 +213,7 @@ class RenderIntrinsic extends RenderBoxModel
     RenderObject? childRenderObject = child;
     child = null;
     RenderSelfRepaintIntrinsic newChild =
-      RenderSelfRepaintIntrinsic(targetId, renderStyle, elementManager);
+      RenderSelfRepaintIntrinsic(renderStyle, viewportSize);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }
@@ -229,8 +229,9 @@ class RenderIntrinsic extends RenderBoxModel
 
 class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
   RenderSelfRepaintIntrinsic(
-      int targetId, RenderStyle renderStyle, ElementManager? elementManager)
-      : super(targetId, renderStyle, elementManager);
+      RenderStyle renderStyle,
+      Size viewportSize)
+      : super(renderStyle, viewportSize);
 
   @override
   bool get isRepaintBoundary => true;
@@ -239,7 +240,7 @@ class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
     RenderObject? childRenderObject = child;
     child = null;
     RenderIntrinsic newChild =
-        RenderIntrinsic(targetId, renderStyle, elementManager);
+        RenderIntrinsic(renderStyle, viewportSize);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }

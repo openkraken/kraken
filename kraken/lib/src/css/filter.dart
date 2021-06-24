@@ -160,10 +160,7 @@ mixin CSSFilterEffectsMixin {
       renderBoxModel.colorFilter = colorFilter;
     }
 
-    ElementManager elementManager = renderBoxModel.elementManager!;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
+    Size viewportSize = renderBoxModel.viewportSize;
     ImageFilter? imageFilter = _parseImageFilters(functions, viewportSize);
     if (imageFilter != null) {
       renderBoxModel.imageFilter = imageFilter;

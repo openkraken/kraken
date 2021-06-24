@@ -83,9 +83,8 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       intersectionObserverLayer = IntersectionObserverLayer(
           elementSize: size,
           paintOffset: offset,
-          onIntersectionChange: _onIntersectionChange!,
-          rootRenderObject:
-              (this as RenderBoxModel).elementManager!.getRootRenderBox());
+          onIntersectionChange: _onIntersectionChange!
+      );
     } else {
       intersectionObserverLayer!.elementSize = semanticBounds.size;
       intersectionObserverLayer!.paintOffset = offset;
@@ -99,8 +98,7 @@ class IntersectionObserverLayer extends ContainerLayer {
   IntersectionObserverLayer(
       {required Size elementSize,
       required Offset paintOffset,
-      required this.onIntersectionChange,
-      required this.rootRenderObject})
+      required this.onIntersectionChange})
       : // TODO: This is zero for box element. For sliver element, this offset points to the start of the element which may be outside the viewport.
         _elementOffset = Offset.zero,
         _layerOffset = Offset.zero,
@@ -134,8 +132,6 @@ class IntersectionObserverLayer extends ContainerLayer {
     if (value == _paintOffset) return;
     _paintOffset = value;
   }
-
-  RenderBox rootRenderObject;
 
   /// Last known layer offset supplied to [addToScene].  Never null.
   Offset _layerOffset;

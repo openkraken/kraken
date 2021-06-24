@@ -179,7 +179,12 @@ mixin CSSOverflowMixin on ElementBase {
         defaultStyle: element.defaultStyle, isIntrinsicBox: element.isInlineBox, tagName: element.tagName, isHiddenElement: true);
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
-    scrollingContentLayoutBox = Element.createRenderLayout(scrollingElement, repaintSelf: true, style: repaintBoundaryStyle);
+    scrollingContentLayoutBox = Element.createRenderLayout(
+      scrollingElement,
+      viewportSize: element.viewportSize,
+      repaintSelf: true,
+      style: repaintBoundaryStyle
+    );
 
     scrollingContentLayoutBox!.isScrollingContentBox = true;
     scrollingElement.renderBoxModel = scrollingContentLayoutBox;
@@ -203,7 +208,12 @@ mixin CSSOverflowMixin on ElementBase {
     }
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox outerLayoutBox = Element.createRenderLayout(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?);
+    RenderLayoutBox outerLayoutBox = Element.createRenderLayout(
+      element,
+      viewportSize: element.viewportSize,
+      repaintSelf: true,
+      prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
+    );
 
     _createScrollingLayoutBox(element);
 
@@ -233,7 +243,12 @@ mixin CSSOverflowMixin on ElementBase {
     if (scrollingContentLayoutBox == null) return;
     RenderObject? layoutBoxParent = renderBoxModel!.parent as RenderObject?;
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
-    RenderLayoutBox newLayoutBox = Element.createRenderLayout(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?);
+    RenderLayoutBox newLayoutBox = Element.createRenderLayout(
+      element,
+      viewportSize: element.viewportSize,
+      repaintSelf: false,
+      prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
+    );
 
     _attachRenderObject(element, layoutBoxParent, previousSibling, newLayoutBox);
     element.renderBoxModel = newLayoutBox;
