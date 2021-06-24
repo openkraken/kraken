@@ -473,7 +473,7 @@ class KrakenController {
         _bundlePath = bundlePath,
         _bundleContent = bundleContent,
         _gestureClient = gestureClient,
-        _eventClient = eventClient{
+        _eventClient = eventClient {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
