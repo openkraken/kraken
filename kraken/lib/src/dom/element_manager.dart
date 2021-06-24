@@ -83,8 +83,6 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     setEventTarget(documentElement);
 
     viewportElement = documentElement;
-    setEventTarget(viewportElement);
-
     viewport.child = viewportElement.renderBoxModel;
     _viewportRenderObject = viewport;
 
