@@ -20,16 +20,11 @@ public:
     JSClassDef def{};
     def.class_name = name.c_str();
     def.finalizer = proxyFinalize;
-    JSClassExoticMethods exoticMethods;
-    exoticMethods.get_own_property_names = static_cast<T *>(this)->getOwnPropertyNames;
-    exoticMethods.get_own_property = static_cast<T *>(this)->getOwnProperty;
-    exoticMethods.define_own_property = static_cast<T *>(this)->defineOwnProperty;
-    exoticMethods.delete_property = static_cast<T *>(this)->deleteProperty;
-    def.exotic = &exoticMethods;
-    int success = JS_NewClass(JSContext::runtime(), kHostObjectClassId, &def);
+    int success = JS_NewClass(kraken::binding::qjs::JSContext::runtime(), kHostObjectClassId, &def);
     assert_m(success == 0, "Can not allocate new Javascript Class.");
 
     m_jsObject = JS_NewObjectClass(m_ctx, kHostObjectClassId);
+    JS_SetOpaque(m_jsObject, this);
   }
 
   std::string m_name;
@@ -39,25 +34,40 @@ public:
   QjsContext *m_ctx;
 
 protected:
-  int getOwnPropertyNames(QjsContext *ctx, JSPropertyEnum **ptab,
-                                uint32_t *plen,
-                                JSValueConst obj) { return 0; };
-  int getOwnProperty(QjsContext *ctx, JSPropertyDescriptor *desc,
-                          JSValueConst obj, JSAtom prop) { return 0; };
-  int defineOwnProperty(QjsContext *ctx, JSValueConst this_obj,
-                             JSAtom prop, JSValueConst val,
-                             JSValueConst getter, JSValueConst setter,
-                             int flags) { return 0; };
-  int deleteProperty(QjsContext *ctx, JSValueConst obj, JSAtom prop) { return 0;};
+  ~HostObject() = default;
 
 private:
-  ~HostObject() {
-    static_cast<T *>(this)->dispose();
-  };
   static void proxyFinalize(JSRuntime *rt, JSValue val) {
     auto hostObject = static_cast<T *>(JS_GetOpaque(val, kHostObjectClassId));
     JS_FreeValue(hostObject->m_ctx, hostObject->m_jsObject);
     delete hostObject;
+  };
+};
+
+class HostObjectProperty {
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(HostObjectProperty);
+
+public:
+  HostObjectProperty() = delete;
+  explicit HostObjectProperty(JSContext *context, JSValueConst thisObject, const char *property,
+                              JSCFunction getterFunction, JSCFunction setterFunction) {
+    JSValue ge = JS_NewCFunction(context->context(), getterFunction, "get", 0);
+    JSValue se = JS_NewCFunction(context->context(), setterFunction, "set", 1);
+    JS_DefinePropertyGetSet(context->context(), thisObject, JS_NewAtom(context->context(), property), ge, se,
+                            JS_PROP_C_W_E);
+  };
+};
+
+class HostObjectFunction {
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(HostObjectFunction);
+
+public:
+  HostObjectFunction() = delete;
+  explicit HostObjectFunction(JSContext *context, JSValueConst thisObject, const char *functionName,
+                              JSCFunction function, int argc) {
+    JSValue f = JS_NewCFunction(context->context(), function, functionName, argc);
+    JS_DefinePropertyValue(context->context(), thisObject, JS_NewAtom(context->context(), functionName), f,
+                           JS_PROP_C_W_E);
   };
 };
 

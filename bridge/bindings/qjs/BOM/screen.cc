@@ -9,7 +9,7 @@ namespace kraken::binding::qjs {
 
 void bindScreen(std::unique_ptr<JSContext> &context) {}
 
-JSValue WidthPropertyDescriptor::getter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue JSScreen::WidthPropertyDescriptor::getter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (getDartMethod()->getScreen == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read screen: dart method (getScreen) is not registered.");
   }
@@ -19,11 +19,11 @@ JSValue WidthPropertyDescriptor::getter(QjsContext *ctx, JSValue this_val, int a
   return JS_NewFloat64(ctx, screen->width);
 }
 
-JSValue WidthPropertyDescriptor::setter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue JSScreen::WidthPropertyDescriptor::setter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_UNDEFINED;
 }
 
-JSValue HeightPropertyDescriptor::getter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue JSScreen::HeightPropertyDescriptor::getter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   if (getDartMethod()->getScreen == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to read screen: dart method (getScreen) is not registered.");
   }
@@ -33,7 +33,7 @@ JSValue HeightPropertyDescriptor::getter(QjsContext *ctx, JSValue this_val, int 
   return JS_NewFloat64(ctx, screen->height);
 }
 
-JSValue HeightPropertyDescriptor::setter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue JSScreen::HeightPropertyDescriptor::setter(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_UNDEFINED;
 }
 

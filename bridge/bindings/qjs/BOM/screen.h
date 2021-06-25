@@ -12,22 +12,22 @@
 
 namespace kraken::binding::qjs {
 
-class WidthPropertyDescriptor {
-public:
-  static JSValue getter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue setter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-};
-
-class HeightPropertyDescriptor {
-public:
-  static JSValue getter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-  static JSValue setter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
-};
-
 class JSScreen : public HostObject<JSScreen> {
 public:
   explicit JSScreen(JSContext *context) : HostObject(context, "Screen"){};
 private:
+  class WidthPropertyDescriptor {
+  public:
+    static JSValue getter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+    static JSValue setter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  };
+
+  class HeightPropertyDescriptor {
+  public:
+    static JSValue getter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+    static JSValue setter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
+  };
+
   HostObjectProperty m_width{m_context, m_jsObject, "width", WidthPropertyDescriptor::getter, WidthPropertyDescriptor::setter};
   HostObjectProperty m_height{m_context, m_jsObject, "height", HeightPropertyDescriptor::getter, HeightPropertyDescriptor::setter};
 };
