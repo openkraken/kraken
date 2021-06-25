@@ -26,6 +26,28 @@ TEST(Context, evalWithError) {
   delete bridge;
 }
 
+TEST(Context, unrejectPromiseError) {
+  bool errorHandlerExecuted = false;
+  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg) {
+    errorHandlerExecuted = true;
+    EXPECT_STREQ(errmsg, "TypeError: cannot read property 'forceNullError' of null\n"
+                         "    at <anonymous> (file://:4)\n"
+                         "    at Promise (native)\n"
+                         "    at <eval> (file://:6)\n");
+  };
+  auto bridge = new kraken::JSBridge(0, errorHandler);
+  const char* code = " var p = new Promise(function (resolve, reject) {\n"
+                     "        var nullObject = null;\n"
+                     "        // Raise a TypeError: Cannot read property 'forceNullError' of null\n"
+                     "        var x = nullObject.forceNullError();\n"
+                     "        resolve();\n"
+                     "    });\n"
+                     "\n";
+  bridge->evaluateScript(code, strlen(code), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, true);
+  delete bridge;
+}
+
 TEST(jsValueToNativeString, utf8String) {
   auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->context(), "helloworld");

@@ -31,6 +31,13 @@ NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value) {
 
 QjsRuntime *m_runtime{nullptr};
 
+void promiseRejectTracker(QjsContext *ctx, JSValueConst promise,
+                          JSValueConst reason,
+                          JS_BOOL is_handled, void *opaque) {
+  auto *context = static_cast<JSContext *>(opaque);
+  context->reportError(reason);
+}
+
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
 
@@ -46,11 +53,10 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
   m_ctx = JS_NewContext(m_runtime);
 
-  JS_DefinePropertyValue(m_ctx, JS_GetGlobalObject(m_ctx), JS_NewAtomLen(m_ctx, "window", 6),
-                         JS_DupValue(m_ctx, JS_GetGlobalObject(m_ctx)), JS_PROP_CONFIGURABLE | JS_PROP_WRITABLE);
   timeOrigin = std::chrono::system_clock::now();
 
   JS_SetContextOpaque(m_ctx, this);
+  JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, this);
 }
 
 JSContext::~JSContext() {
@@ -98,21 +104,9 @@ void *JSContext::getOwner() {
 
 bool JSContext::handleException(JSValue *exception) {
   if (JS_IsException(*exception)) {
-    JSValue exp = JS_GetException(m_ctx);
-    if (JS_IsError(m_ctx, exp)) {
-      const char *title = JS_ToCString(m_ctx, exp);
-      const char *stack = nullptr;
-      JSValue stackValue = JS_GetPropertyStr(m_ctx, exp, "stack");
-      if (!JS_IsUndefined(stackValue)) {
-        stack = JS_ToCString(m_ctx, stackValue);
-        JS_FreeCString(m_ctx, stack);
-      }
-      JS_FreeCString(m_ctx, title);
-      JS_FreeValue(m_ctx, stackValue);
-
-      _handler(contextId, (std::string(title) + "\n" + std::string(stack)).c_str());
-    }
-    JS_FreeValue(m_ctx, exp);
+    JSValue error = JS_GetException(m_ctx);
+    reportError(error);
+    JS_FreeValue(m_ctx, error);
     return false;
   }
 
@@ -132,8 +126,20 @@ QjsRuntime *JSContext::runtime() {
   return m_runtime;
 }
 
-void JSContext::reportError(const char *errmsg) {
-  _handler(contextId, errmsg);
+void JSContext::reportError(JSValueConst &error) {
+  if (!JS_IsError(m_ctx, error)) return;
+
+  const char *title = JS_ToCString(m_ctx, error);
+  const char *stack = nullptr;
+  JSValue stackValue = JS_GetPropertyStr(m_ctx, error, "stack");
+  if (!JS_IsUndefined(stackValue)) {
+    stack = JS_ToCString(m_ctx, stackValue);
+    JS_FreeCString(m_ctx, stack);
+  }
+  JS_FreeCString(m_ctx, title);
+  JS_FreeValue(m_ctx, stackValue);
+
+  _handler(contextId, (std::string(title) + "\n" + std::string(stack)).c_str());
 }
 
 } // namespace kraken::binding::qjs

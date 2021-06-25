@@ -42,7 +42,7 @@ public:
   int32_t getContextId();
   void *getOwner();
   bool handleException(JSValue *exc);
-  void reportError(const char *errmsg);
+  void reportError(JSValueConst &error);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 
