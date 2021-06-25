@@ -20,7 +20,7 @@ public:
     JSClassDef def{};
     def.class_name = name.c_str();
     def.finalizer = proxyFinalize;
-    int success = JS_NewClass(kraken::binding::qjs::JSContext::runtime(), kHostObjectClassId, &def);
+    int success = JS_NewClass(context->runtime(), kHostObjectClassId, &def);
     assert_m(success == 0, "Can not allocate new Javascript Class.");
 
     m_jsObject = JS_NewObjectClass(m_ctx, kHostObjectClassId);
@@ -53,8 +53,10 @@ public:
                               JSCFunction getterFunction, JSCFunction setterFunction) {
     JSValue ge = JS_NewCFunction(context->context(), getterFunction, "get", 0);
     JSValue se = JS_NewCFunction(context->context(), setterFunction, "set", 1);
-    JS_DefinePropertyGetSet(context->context(), thisObject, JS_NewAtom(context->context(), property), ge, se,
+    JSAtom key = JS_NewAtom(context->context(), property);
+    JS_DefinePropertyGetSet(context->context(), thisObject, key, ge, se,
                             JS_PROP_C_W_E);
+    JS_FreeAtom(context->context(), key);
   };
 };
 
@@ -66,8 +68,10 @@ public:
   explicit HostObjectFunction(JSContext *context, JSValueConst thisObject, const char *functionName,
                               JSCFunction function, int argc) {
     JSValue f = JS_NewCFunction(context->context(), function, functionName, argc);
-    JS_DefinePropertyValue(context->context(), thisObject, JS_NewAtom(context->context(), functionName), f,
+    JSAtom key = JS_NewAtom(context->context(), functionName);
+    JS_DefinePropertyValue(context->context(), thisObject, key, f,
                            JS_PROP_C_W_E);
+    JS_FreeAtom(context->context(), key);
   };
 };
 

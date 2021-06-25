@@ -63,6 +63,7 @@ TEST(JS_NewUnicodeString, fromAscii) {
   const char* str = JS_ToCString(ctx, result);
   EXPECT_STREQ(str, "helloworld");
 
+  JS_FreeCString(ctx, str);
   JS_FreeValue(ctx, result);
   JS_FreeContext(ctx);
   JS_FreeRuntime(runtime);

@@ -10,9 +10,14 @@
 
 namespace kraken::binding::qjs {
 
+static bool isSampleFree = false;
+
 class SampleObject : public HostObject<SampleObject> {
 public:
   explicit SampleObject(JSContext *context) : HostObject(context, "Screen"){};
+  ~SampleObject() {
+    isSampleFree = true;
+  }
 private:
   class FooPropertyDescriptor {
   public:
@@ -54,7 +59,7 @@ TEST(HostObject, defineProperty) {
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleObject(context.get());
   JSValue &object = sampleObject->m_jsObject;
-  JS_DefinePropertyValue(context->context(), context->global(), JS_NewAtom(context->context(), "o"), sampleObject->m_jsObject, JS_PROP_CONFIGURABLE | JS_PROP_ENUMERABLE);
+  context->defineGlobalProperty("o", object);
   const char* code = "o.foo++; console.log(o);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   delete bridge;
@@ -70,17 +75,19 @@ TEST(HostObject, defineFunction) {
     EXPECT_STREQ(message.c_str(), "20");
   };
   auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleObject(context.get());
   JSValue &object = sampleObject->m_jsObject;
-  JS_DefinePropertyValue(context->context(), context->global(), JS_NewAtom(context->context(), "o"), sampleObject->m_jsObject, JS_PROP_CONFIGURABLE | JS_PROP_ENUMERABLE);
+  context->defineGlobalProperty("o", object);
   const char* code = "console.log(o.f(10))";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   delete bridge;
   EXPECT_EQ(logCalled, true);
   EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(isSampleFree, true);
 }
 
 } // namespace kraken::binding::qjs

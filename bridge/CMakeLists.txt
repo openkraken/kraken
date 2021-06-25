@@ -212,7 +212,16 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/BOM/screen.h
   )
 
-  target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"} -fno-optimize-sibling-calls -fno-omit-frame-pointer)
+  # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2
+  # https://stackoverflow.com/questions/14735010/how-do-you-get-gccs-builtin-frame-address-to-work-with-o2
+  add_compile_options(-fno-optimize-sibling-calls -fno-omit-frame-pointer)
+  target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
+
+  ## ENABLE MEM LEAK CHECK in debug mode
+  if (${CMAKE_BUILD_TYPE} STREQUAL "debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
+    target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1)
+  endif()
+
 endif()
 
 list(APPEND PUBLIC_HEADER

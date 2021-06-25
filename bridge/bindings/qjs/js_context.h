@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_JS_CONTEXT_H
 
 #include "kraken_foundation.h"
+#include <forward_list>
 #include <memory>
 #include <quickjs/quickjs.h>
 
@@ -15,9 +16,8 @@ using QjsRuntime = JSRuntime;
 
 #define QJS_GLOBAL_BINDING_FUNCTION(context, function, name, argc)                                                     \
   {                                                                                                                    \
-    JSValue f = JS_NewCFunction(context->context(), function, name, argc);                        \
-    JS_DefinePropertyValue(context->context(), context->global(), JS_NewAtom(context->context(), name), f,                 \
-                           JS_PROP_CONFIGURABLE | JS_PROP_ENUMERABLE);                                                 \
+    JSValue f = JS_NewCFunction(context->context(), function, name, argc);                                             \
+    context->defineGlobalProperty(name, f);                                                                            \
   }
 
 namespace kraken::binding::qjs {
@@ -38,11 +38,12 @@ public:
   bool isValid();
   JSValue global();
   QjsContext *context();
-  static QjsRuntime *runtime();
+  QjsRuntime *runtime();
   int32_t getContextId();
   void *getOwner();
   bool handleException(JSValue *exc);
   void reportError(JSValueConst &error);
+  void defineGlobalProperty(const char *prop, JSValueConst value);
 
   std::chrono::time_point<std::chrono::system_clock> timeOrigin;
 
@@ -52,8 +53,11 @@ private:
   int32_t contextId;
   JSExceptionHandler _handler;
   void *owner;
+  JSValue globalObject{JS_NULL};
   std::atomic<bool> ctxInvalid_{false};
   QjsContext *m_ctx{nullptr};
+  QjsRuntime *m_runtime{nullptr};
+  std::forward_list<JSValue> m_globalProps;
 };
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);

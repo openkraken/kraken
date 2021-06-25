@@ -29,8 +29,6 @@ NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value) {
   return tmp.clone();
 }
 
-QjsRuntime *m_runtime{nullptr};
-
 void promiseRejectTracker(QjsContext *ctx, JSValueConst promise,
                           JSValueConst reason,
                           JS_BOOL is_handled, void *opaque) {
@@ -47,13 +45,11 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
     JS_NewClassID(&kFunctionClassId);
   });
 
-  if (m_runtime == nullptr) {
-    m_runtime = JS_NewRuntime();
-  }
-
+  m_runtime = JS_NewRuntime();
   m_ctx = JS_NewContext(m_runtime);
 
   timeOrigin = std::chrono::system_clock::now();
+  globalObject = JS_GetGlobalObject(m_ctx);
 
   JS_SetContextOpaque(m_ctx, this);
   JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, this);
@@ -61,7 +57,14 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
 JSContext::~JSContext() {
   ctxInvalid_ = true;
+
+  for (auto &prop : m_globalProps) {
+    JS_FreeValue(m_ctx, prop);
+  }
+
+  JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
+  JS_FreeRuntime(m_runtime);
   m_ctx = nullptr;
 }
 
@@ -140,6 +143,14 @@ void JSContext::reportError(JSValueConst &error) {
   JS_FreeValue(m_ctx, stackValue);
 
   _handler(contextId, (std::string(title) + "\n" + std::string(stack)).c_str());
+}
+
+void JSContext::defineGlobalProperty(const char* prop, JSValue value) {
+  JSAtom atom = JS_NewAtom(m_ctx, prop);
+  JS_DefineProperty(m_ctx, globalObject, atom, value,
+                    JS_UNDEFINED, JS_UNDEFINED, JS_PROP_HAS_VALUE);
+  m_globalProps.emplace_front(value);
+  JS_FreeAtom(m_ctx, atom);
 }
 
 } // namespace kraken::binding::qjs
