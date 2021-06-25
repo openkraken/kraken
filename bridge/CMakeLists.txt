@@ -209,7 +209,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/BOM/console.h
   )
 
-  target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
+  target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"} -fno-optimize-sibling-calls -fno-omit-frame-pointer)
 endif()
 
 list(APPEND PUBLIC_HEADER
