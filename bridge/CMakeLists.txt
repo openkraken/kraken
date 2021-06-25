@@ -188,7 +188,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
   )
-  add_library(quickjs SHARED ${QUICK_JS_SOURCE})
+  add_library(quickjs STATIC ${QUICK_JS_SOURCE})
 
   list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
   list(APPEND BRIDGE_LINK_LIBS quickjs)
@@ -199,6 +199,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/js_context.cc
       bindings/qjs/js_context.h
       bindings/qjs/host_object.h
+      bindings/qjs/host_class.h
       bindings/qjs/qjs_patch.cc
       bindings/qjs/qjs_patch.h
       bindings/qjs/module_manager.cc
@@ -207,6 +208,8 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/kraken.h
       bindings/qjs/BOM/console.cc
       bindings/qjs/BOM/console.h
+      bindings/qjs/BOM/screen.cc
+      bindings/qjs/BOM/screen.h
   )
 
   target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"} -fno-optimize-sibling-calls -fno-omit-frame-pointer)
@@ -231,13 +234,17 @@ target_include_directories(kraken PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
-  ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
-  ### remove dynamic_cast and exceptions
-  target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden)
-else()
-  ### remove dynamic_cast and exceptions
-  target_compile_options(kraken PRIVATE -fno-exceptions)
+if($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+  if (${CMAKE_BUILD_TYPE} STREQUAL "release" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
+    ## http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html
+    ### remove dynamic_cast and exceptions
+    target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden)
+  else()
+    ### remove dynamic_cast and exceptions
+    target_compile_options(kraken PRIVATE -fno-exceptions)
+  endif()
+elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+  target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden -fno-rtti)
 endif()
 
 ### KrakenStatic

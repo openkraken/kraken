@@ -25,7 +25,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   ### kraken_unit_test executable
   add_executable(kraken_unit_test ${KRAKEN_UNIT_TEST_SOURCE})
   target_include_directories(kraken_unit_test PUBLIC ./third_party/googletest/googletest/include ${BRIDGE_INCLUDE})
-  target_link_libraries(kraken_unit_test gtest gtest_main kraken quickjs)
+  target_link_libraries(kraken_unit_test gtest gtest_main kraken_static quickjs)
 endif()
 
 ### kraken_integration support library

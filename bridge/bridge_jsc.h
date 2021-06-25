@@ -32,7 +32,7 @@ public:
   void *owner;
   // evaluate JavaScript source codes in standard mode.
   KRAKEN_EXPORT void evaluateScript(const NativeString *script, const char *url, int startLine);
-  KRAKEN_EXPORT void evaluateScript(const std::u16string &script, const char *url, int startLine);
+  KRAKEN_EXPORT void evaluateScript(const uint16_t *script, size_t length, const char *url, int startLine);
 
   const std::unique_ptr<kraken::binding::jsc::JSContext> &getContext() const {
     return m_context;
