@@ -65,7 +65,7 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
     JSValue arguments[] = {errorObject};
     returnValue = JS_Call(ctx, callback, obj->m_context.global(), 1, arguments);
   } else {
-    std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t *>(json->string, json->length));
+    std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t *>(json->string), json->length);
     std::string utf8Arguments = toUTF8(argumentString);
     JSValue jsonValue = JS_ParseJSON(ctx, utf8Arguments.c_str(), utf8Arguments.length(), "");
     JSValue arguments[] = {JS_NULL, jsonValue};
@@ -154,7 +154,11 @@ JSValue krakenInvokeModule(QjsContext *ctx, JSValueConst this_val, int argc, JSV
 }
 
 JSValue flushUICommand(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
-
+  if (getDartMethod()->flushUICommand == nullptr) {
+    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
+  }
+  getDartMethod()->flushUICommand();
+  return JS_NULL;
 }
 
 void bindModuleManager(std::unique_ptr<JSContext> &context) {
