@@ -66,7 +66,7 @@ void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {
   methodPointer->matchImageSnapshot = reinterpret_cast<MatchImageSnapshot>(methodBytes[i++]);
   methodPointer->environment = reinterpret_cast<Environment>(methodBytes[i++]);
   methodPointer->simulatePointer = reinterpret_cast<SimulatePointer>(methodBytes[i++]);
-  methodPointer->simulateKeyPress = reinterpret_cast<SimulateKeyPress>(methodBytes[i++]);
+  methodPointer->simulateInputText = reinterpret_cast<SimulateInputText>(methodBytes[i++]);
 
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }

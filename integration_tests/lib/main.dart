@@ -10,6 +10,7 @@ import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart' as path;
 import 'bridge/from_native.dart';
 import 'bridge/to_native.dart';
+import 'bridge/test_input.dart';
 import 'custom/custom_object_element.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
@@ -55,6 +56,7 @@ void main() async {
   KrakenAnimationPlayer.initialize();
   KrakenVideoPlayer.initialize();
   KrakenWebView.initialize();
+
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
   setObjectElementFactory(customObjectElementFactory);
@@ -111,6 +113,9 @@ void main() async {
     ),
   ));
 
+  testTextInput = TestTextInput();
+  testTextInput.register();
+
   WidgetsBinding.instance!.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();
 
@@ -140,11 +145,11 @@ void main() async {
     for (int i = 0; i < results.length; i ++) {
       String status = results[i];
       if (status == 'failed') {
-        exit(1);
+        // exit(1);
       }
     }
 
-    exit(0);
+    // exit(0);
   });
 }
 

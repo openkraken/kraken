@@ -124,7 +124,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -139,7 +139,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -154,7 +154,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -169,7 +169,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -184,7 +184,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -199,7 +199,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -214,7 +214,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -229,7 +229,30 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
+    });
+  });
+
+  it('support maxlength', (done) => {
+    const input = <input maxlength="3" />;
+    document.body.appendChild(input);
+    input.focus();
+    requestAnimationFrame(() => {
+      simulateInputText('1');
+      requestAnimationFrame(() => {
+        expect(input.value).toEqual('1');
+
+        simulateInputText('123');
+        requestAnimationFrame(() => {
+          expect(input.value).toEqual('123');
+
+          simulateInputText('1234');
+          requestAnimationFrame(() => {
+            expect(input.value).toEqual('123');
+            done();
+          });
+        });
+      });
     });
   });
 });

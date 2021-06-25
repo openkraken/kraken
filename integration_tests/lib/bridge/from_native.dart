@@ -19,6 +19,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:test/test.dart';
 
+import 'test_input.dart';
 import 'platform.dart';
 import 'match_snapshots.dart';
 
@@ -74,7 +75,7 @@ Pointer<Utf8> _environment() {
 final Pointer<NativeFunction<NativeEnvironment>> _nativeEnvironment = Pointer.fromFunction(_environment);
 
 typedef Native_SimulatePointer = Void Function(Pointer<Pointer<MousePointer>>,  Int32 length);
-typedef Native_SimulateKeyPress = Void Function(Pointer<NativeString>);
+typedef Native_SimulateInputText = Void Function(Pointer<NativeString>);
 
 PointerChange _getPointerChange(double change) {
   return PointerChange.values[change.toInt()];
@@ -119,33 +120,21 @@ void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int lengt
 }
 
 final Pointer<NativeFunction<Native_SimulatePointer>> _nativeSimulatePointer = Pointer.fromFunction(_simulatePointer);
+late TestTextInput testTextInput;
 
-void _simulateKeyPress(Pointer<NativeString> nativeChars) {
-  String chars = nativeStringToString(nativeChars);
-  if (InputElement.focusInputElement != null) {
-    InputElement current = InputElement.focusInputElement!;
-    TextEditingValue currentValue = current.textSelectionDelegate.textEditingValue;
-    String updatedText = currentValue.text + chars;
-    int baseOffset = currentValue.selection.baseOffset + chars.length;
-    int extentOffset = currentValue.selection.extentOffset + chars.length;
-    TextEditingValue value = currentValue.copyWith(
-      text: updatedText,
-      selection: currentValue.selection.copyWith(baseOffset: baseOffset, extentOffset: extentOffset),
-    );
-    current.formatAndSetValue(value, shouldDispatchEvent: true);
-  } else {
-    print('No focus input element found.');
-  }
+void _simulateInputText(Pointer<NativeString> nativeChars) {
+  String text = nativeStringToString(nativeChars);
+  testTextInput.enterText(text);
 }
 
-final Pointer<NativeFunction<Native_SimulateKeyPress>> _nativeSimulateKeyPress = Pointer.fromFunction(_simulateKeyPress);
+final Pointer<NativeFunction<Native_SimulateInputText>> _nativeSimulateInputText = Pointer.fromFunction(_simulateInputText);
 
 final List<int> _dartNativeMethods = [
   _nativeOnJsError.address,
   _nativeMatchImageSnapshot.address,
   _nativeEnvironment.address,
   _nativeSimulatePointer.address,
-  _nativeSimulateKeyPress.address
+  _nativeSimulateInputText.address
 ];
 
 typedef Native_RegisterTestEnvDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);

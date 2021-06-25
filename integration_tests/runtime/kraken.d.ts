@@ -32,9 +32,9 @@ declare enum PointerChange {
 }
 
 type SimulatePointer = (list: [number, number, number][]) => void;
-type SimulateKeyPress = (chars: string) => void;
+type SimulateInputText = (chars: string) => void;
 declare const simulatePointer: SimulatePointer;
-declare const simulateKeyPress: SimulateKeyPress;
+declare const simulateInputText: SimulateInputText;
 
 interface Navigator {
   connection: {
