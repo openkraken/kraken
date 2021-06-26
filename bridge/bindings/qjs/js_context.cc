@@ -36,6 +36,8 @@ void promiseRejectTracker(QjsContext *ctx, JSValueConst promise,
   context->reportError(reason);
 }
 
+static JSRuntime *m_runtime{nullptr};
+
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
 
@@ -45,7 +47,9 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
     JS_NewClassID(&kFunctionClassId);
   });
 
-  m_runtime = JS_NewRuntime();
+  if (m_runtime == nullptr) {
+    m_runtime = JS_NewRuntime();
+  }
   m_ctx = JS_NewContext(m_runtime);
 
   timeOrigin = std::chrono::system_clock::now();
@@ -64,7 +68,7 @@ JSContext::~JSContext() {
 
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
-  JS_FreeRuntime(m_runtime);
+  JS_RunGC(m_runtime);
   m_ctx = nullptr;
 }
 

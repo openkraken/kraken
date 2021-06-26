@@ -56,7 +56,6 @@ private:
   JSValue globalObject{JS_NULL};
   std::atomic<bool> ctxInvalid_{false};
   QjsContext *m_ctx{nullptr};
-  QjsRuntime *m_runtime{nullptr};
   std::forward_list<JSValue> m_globalProps;
 };
 
