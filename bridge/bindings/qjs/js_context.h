@@ -12,7 +12,6 @@
 #include <quickjs/quickjs.h>
 
 using QjsContext = JSContext;
-using QjsRuntime = JSRuntime;
 
 #define QJS_GLOBAL_BINDING_FUNCTION(context, function, name, argc)                                                     \
   {                                                                                                                    \
@@ -38,7 +37,7 @@ public:
   bool isValid();
   JSValue global();
   QjsContext *context();
-  QjsRuntime *runtime();
+  JSRuntime *runtime();
   int32_t getContextId();
   void *getOwner();
   bool handleException(JSValue *exc);

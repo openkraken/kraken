@@ -129,7 +129,7 @@ QjsContext *JSContext::context() {
   return m_ctx;
 }
 
-QjsRuntime *JSContext::runtime() {
+JSRuntime *JSContext::runtime() {
   return m_runtime;
 }
 
