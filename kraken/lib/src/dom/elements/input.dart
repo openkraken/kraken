@@ -36,7 +36,6 @@ final Pointer<NativeFunction<InputElementMethodVoidCallback>> nativeInputMethodB
 /// Otherwise, use 300px for the width and/or 150px for the height as needed.
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
-  WIDTH: '150px',
   BORDER: '1px solid #767676',
 };
 
@@ -219,6 +218,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     if (properties.containsKey(VALUE)) {
       setProperty(VALUE, properties[VALUE]);
+    }
+
+    // Default width of input equals to 10 times of font-size approximately if width is not set.
+    if (style[WIDTH].isEmpty) {
+      double fontSize = CSSText.getFontSize(style, viewportSize);
+      String defaultWidth = (fontSize * 10).toString() + 'px';
+      style.setProperty(WIDTH, defaultWidth , viewportSize);
     }
 
     SchedulerBinding.instance!.addPostFrameCallback((_) {
@@ -415,11 +421,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
             - renderIntrinsic.renderStyle.borderTop
             - renderIntrinsic.renderStyle.borderBottom) / 2;
 
-    RenderOffsetBox renderOffsetBox = RenderOffsetBox(
+    RenderInputBox renderInputBox = RenderInputBox(
       offset: Offset(0, dy),
       child: renderEditable,
     );
-    return renderOffsetBox;
+    return renderInputBox;
   }
 
   @override
@@ -861,8 +867,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 }
 
-class RenderOffsetBox extends RenderProxyBox {
-  RenderOffsetBox({
+class RenderInputBox extends RenderProxyBox {
+  RenderInputBox({
     RenderBox? child,
     Offset? offset
   }) : assert(offset != null),
@@ -887,6 +893,21 @@ class RenderOffsetBox extends RenderProxyBox {
       if (child != null) {
         context.paintChild(child!, transformedOffset);
       }
+    }
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child!.layout(constraints, parentUsesSize: true);
+      Size childSize = child!.size;
+      double width = constraints.maxWidth != double.infinity ?
+        constraints.maxWidth : childSize.width;
+      double height = constraints.maxHeight != double.infinity ?
+      constraints.maxHeight : childSize.height;
+      size = Size(width, height);
+    } else {
+      size = computeSizeForNoChild(constraints);
     }
   }
 }
