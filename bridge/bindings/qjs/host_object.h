@@ -44,37 +44,6 @@ private:
   };
 };
 
-class HostObjectProperty {
-  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(HostObjectProperty);
-
-public:
-  HostObjectProperty() = delete;
-  explicit HostObjectProperty(JSContext *context, JSValueConst thisObject, const char *property,
-                              JSCFunction getterFunction, JSCFunction setterFunction) {
-    JSValue ge = JS_NewCFunction(context->context(), getterFunction, "get", 0);
-    JSValue se = JS_NewCFunction(context->context(), setterFunction, "set", 1);
-    JSAtom key = JS_NewAtom(context->context(), property);
-    JS_DefinePropertyGetSet(context->context(), thisObject, key, ge, se,
-                            JS_PROP_C_W_E);
-    JS_FreeAtom(context->context(), key);
-  };
-};
-
-class HostObjectFunction {
-  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(HostObjectFunction);
-
-public:
-  HostObjectFunction() = delete;
-  explicit HostObjectFunction(JSContext *context, JSValueConst thisObject, const char *functionName,
-                              JSCFunction function, int argc) {
-    JSValue f = JS_NewCFunction(context->context(), function, functionName, argc);
-    JSAtom key = JS_NewAtom(context->context(), functionName);
-    JS_DefinePropertyValue(context->context(), thisObject, key, f,
-                           JS_PROP_C_W_E);
-    JS_FreeAtom(context->context(), key);
-  };
-};
-
 } // namespace kraken::binding::qjs
 
 #endif // KRAKENBRIDGE_HOST_OBJECT_H

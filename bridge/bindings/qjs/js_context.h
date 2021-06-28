@@ -58,6 +58,43 @@ private:
   std::forward_list<JSValue> m_globalProps;
 };
 
+class ObjectProperty {
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
+
+public:
+  ObjectProperty() = delete;
+  explicit ObjectProperty(JSContext *context, JSValueConst thisObject, const char *property,
+                              JSCFunction getterFunction, JSCFunction setterFunction) {
+    JSValue ge = JS_NewCFunction(context->context(), getterFunction, "get", 0);
+    JSValue se = JS_NewCFunction(context->context(), setterFunction, "set", 1);
+    JSAtom key = JS_NewAtom(context->context(), property);
+    JS_DefinePropertyGetSet(context->context(), thisObject, key, ge, se,
+                            JS_PROP_C_W_E);
+    JS_FreeAtom(context->context(), key);
+  };
+};
+
+class ObjectFunction {
+  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectFunction);
+
+public:
+  ObjectFunction() = delete;
+  explicit ObjectFunction(JSContext *context, JSValueConst thisObject, const char *functionName,
+                              JSCFunction function, int argc) {
+    JSValue f = JS_NewCFunction(context->context(), function, functionName, argc);
+    JSAtom key = JS_NewAtom(context->context(), functionName);
+
+// We should avoid overwrite exist property functions.
+#ifdef DEBUG
+    assert_m(JS_HasProperty(context->context(), thisObject, key) == 0, (std::string("Found exist function property: ") + std::string(functionName)).c_str());
+#endif
+
+    JS_DefinePropertyValue(context->context(), thisObject, key, f,
+                           JS_PROP_C_W_E);
+    JS_FreeAtom(context->context(), key);
+  };
+};
+
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value);
 

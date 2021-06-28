@@ -41,8 +41,8 @@ private:
   }
 
   double m_foo{0};
-  HostObjectProperty m_width{m_context, m_jsObject, "foo", FooPropertyDescriptor::getter, FooPropertyDescriptor::setter};
-  HostObjectFunction m_f{m_context, m_jsObject, "f", f, 1};
+  ObjectProperty m_width{m_context, m_jsObject, "foo", FooPropertyDescriptor::getter, FooPropertyDescriptor::setter};
+  ObjectFunction m_f{m_context, m_jsObject, "f", f, 1};
 };
 
 TEST(HostObject, defineProperty) {

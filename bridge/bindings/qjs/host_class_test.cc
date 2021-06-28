@@ -9,15 +9,32 @@
 
 namespace kraken::binding::qjs {
 
-class SampleClass : public HostClass<SampleClass> {
+class ParentClass : public HostClass {
 public:
-  explicit SampleClass(JSContext *context) : HostClass(context, "SampleClass") {}
+  explicit ParentClass(JSContext *context) : HostClass(context, "ParentClass") {}
+  JSValue constructor(QjsContext *ctx, JSValue this_val, int argc, JSValueConst *argv) override {
+    return HostClass::constructor(ctx, this_val, argc, argv);
+  }
+
+  static JSValue foo(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
+    return JS_NewFloat64(ctx, 20);
+  }
+private:
+  ObjectFunction m_foo{m_context, m_prototypeObject, "foo", foo, 0};
+};
+
+class SampleClass : public ParentClass {
+public:
+  explicit SampleClass(JSContext *context) : ParentClass(context) {}
+  JSValue constructor(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) override {
+    return ParentClass::constructor(ctx, this_val, argc, argv);
+  }
 private:
   static JSValue f(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
     return JS_NewFloat64(ctx, 10);
   }
 
-  HostClassFunction m_f{m_context, m_classObject, "f", f, 0};
+  ObjectFunction m_f{m_context, m_prototypeObject, "f", f, 0};
 };
 
 TEST(HostClass, newInstance) {
@@ -28,6 +45,7 @@ TEST(HostClass, newInstance) {
     EXPECT_STREQ(message.c_str(), "10");
   };
   auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
   auto &context = bridge->getContext();
@@ -63,6 +81,30 @@ TEST(HostClass, instanceOf) {
   // Test with Javascript
   const char* code = "let obj = new SampleClass(1,2,3,4); \n console.log(obj instanceof SampleClass)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}
+
+TEST(HostClass, inheritance) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "20");
+  };
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    errorCalled = true;
+    KRAKEN_LOG(VERBOSE) << errmsg;
+  });
+  auto &context = bridge->getContext();
+  auto *sampleObject = new SampleClass(context.get());
+
+  context->defineGlobalProperty("SampleClass", sampleObject->m_classObject);
+
+  const char* code = "let obj = new SampleClass(1,2,3,4);\n"
+                     "console.log(obj.foo())";
+  context->evaluateJavaScript(code, strlen(code), "vm://", 0);
   delete bridge;
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);

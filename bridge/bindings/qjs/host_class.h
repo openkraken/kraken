@@ -10,7 +10,7 @@
 
 namespace kraken::binding::qjs {
 
-template <class T> class HostClass {
+class HostClass {
 public:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(HostClass);
 
@@ -31,6 +31,7 @@ public:
     JS_SetConstructorBit(m_ctx, m_classObject, true);
     JS_SetOpaque(m_classObject, this);
   };
+  virtual ~HostClass() = default;
 
   JSValue m_classObject;
   JSValue m_prototypeObject;
@@ -38,36 +39,31 @@ public:
   JSContext *m_context;
   int32_t m_contextId;
   QjsContext *m_ctx;
+  HostClass *m_parentClass{nullptr};
+
+  virtual JSValue constructor(QjsContext *ctx, JSValue this_val, int argc, JSValueConst *argv) {
+    JSValue instance = JS_NewObject(ctx);
+    JS_SetPrototype(ctx, instance, m_prototypeObject);
+    return instance;
+  };
+  void setParentClass(HostClass *parent) {
+    m_parentClass = parent;
+  };
 
 private:
   static void proxyFinalize(JSRuntime *rt, JSValue val) {
-    auto hostObject = static_cast<T *>(JS_GetOpaque(val, kHostObjectClassId));
+    auto hostObject = static_cast<HostClass *>(JS_GetOpaque(val, kHostObjectClassId));
     JS_FreeValue(hostObject->m_ctx, hostObject->m_classObject);
+    JS_FreeValue(hostObject->m_ctx, hostObject->m_prototypeObject);
     delete hostObject;
   };
   static JSValue proxyCall(QjsContext *ctx, JSValueConst func_obj,
                         JSValueConst this_val, int argc, JSValueConst *argv,
                         int flags) {
     auto *hostClass = static_cast<HostClass *>(JS_GetOpaque(this_val, kHostClassClassId));
-    JSValue obj = JS_NewObject(ctx);
-    JS_SetPrototype(ctx, obj, hostClass->m_prototypeObject);
-    return obj;
+    JSValue instance = hostClass->constructor(ctx, this_val, argc, argv);
+    return instance;
   }
-};
-
-class HostClassFunction {
-  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(HostClassFunction);
-
-public:
-  HostClassFunction() = delete;
-  explicit HostClassFunction(JSContext *context, JSValueConst thisObject, const char *functionName,
-                              JSCFunction function, int argc) {
-    JSValue f = JS_NewCFunction(context->context(), function, functionName, argc);
-    JSAtom key = JS_NewAtom(context->context(), functionName);
-    JS_DefinePropertyValue(context->context(), thisObject, key, f,
-                           JS_PROP_C_W_E);
-    JS_FreeAtom(context->context(), key);
-  };
 };
 
 }
