@@ -229,7 +229,7 @@ function(cxx_executable_with_flags name cxx_flags libs)
   endforeach()
 endfunction()
 
-# cxx_executable(name dir googletest srcs...)
+# cxx_executable(name dir lib srcs...)
 #
 # creates a named target that depends on the given libs and is built
 # from the given source files.  dir/name.cc is implicitly included in
