@@ -145,11 +145,11 @@ void main() async {
     for (int i = 0; i < results.length; i ++) {
       String status = results[i];
       if (status == 'failed') {
-        // exit(1);
+        exit(1);
       }
     }
 
-    // exit(0);
+    exit(0);
   });
 }
 
