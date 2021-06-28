@@ -214,17 +214,22 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
 
-    addChild(createRenderBox());
-
-    if (properties.containsKey(VALUE)) {
-      setProperty(VALUE, properties[VALUE]);
-    }
-
     // Default width of input equals to 10 times of font-size approximately if width is not set.
     if (style[WIDTH].isEmpty) {
       double fontSize = CSSText.getFontSize(style, viewportSize);
       String defaultWidth = (fontSize * 10).toString() + 'px';
       style.setProperty(WIDTH, defaultWidth , viewportSize);
+    }
+
+    // Line-height works as height when height is not set.
+    if (style[HEIGHT].isEmpty && style[LINE_HEIGHT].isNotEmpty) {
+      style.setProperty(HEIGHT, style[LINE_HEIGHT] , viewportSize);
+    }
+
+    addChild(createRenderBox());
+
+    if (properties.containsKey(VALUE)) {
+      setProperty(VALUE, properties[VALUE]);
     }
 
     SchedulerBinding.instance!.addPostFrameCallback((_) {
