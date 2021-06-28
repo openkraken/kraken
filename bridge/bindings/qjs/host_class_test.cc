@@ -23,11 +23,21 @@ private:
   ObjectFunction m_foo{m_context, m_prototypeObject, "foo", foo, 0};
 };
 
+class SampleClass;
+
+class SampleClassInstance : public Instance {
+public:
+  explicit SampleClassInstance(JSContext *context, HostClass *sampleClass) : Instance(context, sampleClass, "SampleClass") {};
+private:
+};
+
 class SampleClass : public ParentClass {
 public:
   explicit SampleClass(JSContext *context) : ParentClass(context) {}
   JSValue constructor(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) override {
-    return ParentClass::constructor(ctx, this_val, argc, argv);
+    auto *sampleClass = static_cast<SampleClass *>(JS_GetOpaque(this_val, kHostClassClassId));
+    auto *instance = new SampleClassInstance(sampleClass->m_context, sampleClass);
+    return instance->instanceObject;
   }
 private:
   static JSValue f(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {
@@ -50,7 +60,7 @@ TEST(HostClass, newInstance) {
   });
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleClass(context.get());
-  context->defineGlobalProperty("SampleClass", sampleObject->m_classObject);
+  context->defineGlobalProperty("SampleClass", sampleObject->classObject);
   const char* code = "let obj = new SampleClass(1,2,3,4); console.log(obj.f())";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   delete bridge;
@@ -72,10 +82,10 @@ TEST(HostClass, instanceOf) {
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleClass(context.get());
   // Test for C API
-  context->defineGlobalProperty("SampleClass", sampleObject->m_classObject);
+  context->defineGlobalProperty("SampleClass", sampleObject->classObject);
   JSValue args[] = {};
-  JSValue object = JS_CallConstructor(context->context(), sampleObject->m_classObject, 0, args);
-  bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->m_classObject);
+  JSValue object = JS_CallConstructor(context->context(), sampleObject->classObject, 0, args);
+  bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->classObject);
   EXPECT_EQ(isInstanceof, true);
 
   // Test with Javascript
@@ -100,7 +110,7 @@ TEST(HostClass, inheritance) {
   auto &context = bridge->getContext();
   auto *sampleObject = new SampleClass(context.get());
 
-  context->defineGlobalProperty("SampleClass", sampleObject->m_classObject);
+  context->defineGlobalProperty("SampleClass", sampleObject->classObject);
 
   const char* code = "let obj = new SampleClass(1,2,3,4);\n"
                      "console.log(obj.foo())";
@@ -108,6 +118,60 @@ TEST(HostClass, inheritance) {
   delete bridge;
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
+}
+
+TEST(HostClass, multipleInstance) {
+  bool static errorCalled = false;
+  auto *bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {
+    errorCalled = true;
+    KRAKEN_LOG(VERBOSE) << errmsg;
+  });
+  auto &context = bridge->getContext();
+
+  // Test for C API 1
+  {
+    auto *sampleObject = new SampleClass(context.get());
+    context->defineGlobalProperty("SampleClass1", sampleObject->classObject);
+    JSValue args[] = {};
+    JSValue object = JS_CallConstructor(context->context(), sampleObject->classObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->classObject);
+    EXPECT_EQ(isInstanceof, true);
+  }
+
+  // Test for C API 2
+  {
+    auto *sampleObject = new SampleClass(context.get());
+    context->defineGlobalProperty("SampleClass2", sampleObject->classObject);
+    JSValue args[] = {};
+    JSValue object = JS_CallConstructor(context->context(), sampleObject->classObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->classObject);
+    EXPECT_EQ(isInstanceof, true);
+  }
+
+  {
+    auto *sampleObject = new SampleClass(context.get());
+    context->defineGlobalProperty("SampleClass3", sampleObject->classObject);
+    JSValue args[] = {};
+    JSValue object = JS_CallConstructor(context->context(), sampleObject->classObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->classObject);
+    EXPECT_EQ(isInstanceof, true);
+  }
+
+  {
+    auto *sampleObject = new SampleClass(context.get());
+    context->defineGlobalProperty("SampleClass4", sampleObject->classObject);
+    JSValue args[] = {};
+    JSValue object = JS_CallConstructor(context->context(), sampleObject->classObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->classObject);
+    EXPECT_EQ(isInstanceof, true);
+  }
+
+
+  // Test with Javascript
+//  const char* code = "let obj = new SampleClass(1,2,3,4); \n console.log(obj instanceof SampleClass)";
+//  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+  delete bridge;
+  EXPECT_EQ(errorCalled, false);
 }
 
 }

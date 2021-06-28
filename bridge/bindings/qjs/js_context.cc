@@ -41,12 +41,6 @@ static JSRuntime *m_runtime{nullptr};
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
 
-  std::call_once(kGlobalClassIdFlag, []() {
-    JS_NewClassID(&kHostObjectClassId);
-    JS_NewClassID(&kHostClassClassId);
-    JS_NewClassID(&kFunctionClassId);
-  });
-
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
   }

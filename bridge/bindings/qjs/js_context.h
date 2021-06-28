@@ -21,9 +21,7 @@ using QjsContext = JSContext;
 
 namespace kraken::binding::qjs {
 
-static JSClassID kHostObjectClassId{0};
-static JSClassID kHostClassClassId{0};
-static JSClassID kFunctionClassId{0};
+static JSClassID kGlobalCustomClassId{0};
 
 class JSContext {
 public:
