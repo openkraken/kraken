@@ -31,6 +31,8 @@ mixin EventHandlerMixin on EventTarget {
     renderBox.onScale = dispatchEvent;
     renderBox.onLongPress = dispatchEvent;
     renderBox.getEventHandlers = getEventHandlers;
+    renderBox.getEventTarget = getEventTarget;
+    renderBox.dispatchEvent = dispatchEvent;
   }
 
   void removeEventResponder(RenderPointerListenerMixin renderBox) {
@@ -43,6 +45,12 @@ mixin EventHandlerMixin on EventTarget {
     renderBox.onPan = null;
     renderBox.onScale = null;
     renderBox.onLongPress = null;
+    renderBox.getEventTarget = null;
+    renderBox.dispatchEvent = null;
+  }
+
+  EventTarget getEventTarget() {
+    return this;
   }
 
   void handlePointDown(PointerDownEvent pointEvent) {

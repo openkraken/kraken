@@ -16,6 +16,10 @@ typedef MouseEventListener = void Function(String,
 
 typedef GetEventHandlers = Map<String, List<EventHandler>> Function();
 
+typedef GetEventTarget = EventTarget Function();
+
+typedef DispatchEvent = void Function(Event event);
+
 mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -47,6 +51,10 @@ mixin RenderPointerListenerMixin on RenderBox {
   GestureCallback? onLongPress;
 
   GetEventHandlers? getEventHandlers;
+
+  GetEventTarget? getEventTarget;
+
+  DispatchEvent? dispatchEvent;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {

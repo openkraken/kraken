@@ -44,7 +44,11 @@ class GestureManager {
 
   List<RenderBox> _hitTestList = [];
 
-  RenderPointerListenerMixin? _target;
+  Map<int, PointerEvent> eventByPointer = Map();
+
+  Map<int, RenderPointerListenerMixin> targetByPointer = Map();
+
+  List<int> points = [];
 
   void addTargetToList(RenderBox target) {
     _hitTestList.add(target);
@@ -83,148 +87,205 @@ class GestureManager {
       }
     }
 
+    String touchType = '';
+
     if (event is PointerDownEvent) {
+      touchType = EVENT_TOUCH_START;
+      eventByPointer[event.pointer] = event;
+      points.add(event.pointer);
+
       // Add pointer to gestures then register the gesture recognizer to the arena.
       gestures.forEach((key, gesture) {
         // Register the recognizer that needs to be monitored.
         if (events.contains(key)) {
-          gesture.addPointer(event);
+          gesture.addPointer(event as PointerDownEvent);
         }
       });
 
       // The target node triggered by the gesture is the bottom node of hitTest.
       // The scroll element needs to be judged by isScrollingContentBox to find the real element upwards.
-      _target = null;
       if (_hitTestList.isNotEmpty) {
         for (int i = 0; i < _hitTestList.length; i++) {
           RenderBox renderBox = _hitTestList[i];
           if ((renderBox is RenderBoxModel && !renderBox.isScrollingContentBox) || renderBox is RenderViewportBox) {
-            _target = renderBox as RenderPointerListenerMixin;
+            targetByPointer[event.pointer] = renderBox as RenderPointerListenerMixin;
             break;
           }
         }
       }
+    } else if (event is PointerMoveEvent) {
+      touchType = EVENT_TOUCH_MOVE;
+      eventByPointer[event.pointer] = event;
+    } else if (event is PointerUpEvent) {
+      touchType = EVENT_TOUCH_END;
+      points.remove(event.pointer);
+      eventByPointer.remove(event.pointer);
     }
 
-    if (_target != null) {
-      if (_target!.onPointerDown != null && event is PointerDownEvent)
-        _target!.onPointerDown!(event);
-      if (_target!.onPointerMove != null && event is PointerMoveEvent)
-        _target!.onPointerMove!(event);
-      if (_target!.onPointerUp != null && event is PointerUpEvent)
-        _target!.onPointerUp!(event);
-      if (_target!.onPointerCancel != null && event is PointerCancelEvent)
-        _target!.onPointerCancel!(event);
-      if (_target!.onPointerSignal != null && event is PointerSignalEvent)
-        _target!.onPointerSignal!(event);
+    if (targetByPointer[event.pointer] != null) {
+      RenderPointerListenerMixin currentTarget = targetByPointer[event.pointer] as RenderPointerListenerMixin;
+
+      TouchEvent e = TouchEvent(touchType);
+      var pointerEventOriginal = event.original;
+      // Use original event, prevent to be relative coordinate
+      if (pointerEventOriginal != null) event = pointerEventOriginal;
+
+      for (int i = 0; i < points.length; i++) {
+        int pointer = points[i];
+        PointerEvent point = eventByPointer[pointer] as PointerEvent;
+        RenderPointerListenerMixin target = targetByPointer[pointer] as RenderPointerListenerMixin;
+
+        EventTarget node = target.getEventTarget!();
+
+        Touch touch = Touch(
+          identifier: event.pointer,
+          target: node,
+          screenX: event.position.dx,
+          screenY: event.position.dy,
+          clientX: event.localPosition.dx,
+          clientY: event.localPosition.dy,
+          pageX: event.localPosition.dx,
+          pageY: event.localPosition.dy,
+          radiusX: event.radiusMajor,
+          radiusY: event.radiusMinor,
+          rotationAngle: event.orientation,
+          force: event.pressure,
+        );
+
+        e.changedTouches.append(touch);
+        e.targetTouches.append(touch);
+        e.touches.append(touch);
+      }
+
+      if (currentTarget.dispatchEvent != null) {
+        currentTarget.dispatchEvent!(e);
+      }
+
+      //
+      // if (currentTarget.onPointerDown != null && event is PointerDownEvent)
+      //   currentTarget.onPointerDown!(event);
+      // if (currentTarget.onPointerMove != null && event is PointerMoveEvent)
+      //   currentTarget.onPointerMove!(event);
+      // if (currentTarget.onPointerUp != null && event is PointerUpEvent)
+      //   currentTarget.onPointerUp!(event);
+      // if (currentTarget.onPointerCancel != null && event is PointerCancelEvent)
+      //   currentTarget.onPointerCancel!(event);
+      // if (currentTarget.onPointerSignal != null && event is PointerSignalEvent)
+      //   currentTarget.onPointerSignal!(event);
     }
   }
 
   void onClick(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
-    if (_target != null && _target!.onClick != null) {
-      _target!.onClick!(eventType, up: up);
+    if (targetByPointer[down?.pointer] != null) {
+      RenderPointerListenerMixin target = targetByPointer[down?.pointer] as RenderPointerListenerMixin;
+      if (target.onClick != null) {
+        target.onClick!(eventType, up: up);
+      }
     }
   }
 
   void onSwipe(Event event) {
-    if (_target != null && _target!.onSwipe != null) {
-      _target!.onSwipe!(event);
-    }
+    // if (targetByPointer[event?.pointer] != null) {
+    //   RenderPointerListenerMixin target = targetByPointer[down?.pointer] as RenderPointerListenerMixin;
+    //   if (target!.onSwipe != null) {
+    //     target!.onSwipe!(event);
+    //   }
+    // }
   }
 
   void onPanStart(DragStartDetails details) {
-    if (_target != null && _target!.onPan != null) {
-      _target!.onPan!(
-          GestureEvent(
-              EVENT_PAN,
-              GestureEventInit(
-                  state: EVENT_STATE_START,
-                  deltaX: details.globalPosition.dx,
-                  deltaY: details.globalPosition.dy
-              )
-          )
-      );
-    }
+    // if (_target != null && _target!.onPan != null) {
+    //   _target!.onPan!(
+    //       GestureEvent(
+    //           EVENT_PAN,
+    //           GestureEventInit(
+    //               state: EVENT_STATE_START,
+    //               deltaX: details.globalPosition.dx,
+    //               deltaY: details.globalPosition.dy
+    //           )
+    //       )
+    //   );
+    // }
   }
 
   void onPanUpdate(DragUpdateDetails details) {
-    if (_target != null && _target!.onPan != null) {
-      _target!.onPan!(
-          GestureEvent(
-              EVENT_PAN,
-              GestureEventInit(
-                  state: EVENT_STATE_UPDATE,
-                  deltaX: details.globalPosition.dx,
-                  deltaY: details.globalPosition.dy
-              )
-          )
-      );
-    }
+    // if (_target != null && _target!.onPan != null) {
+    //   _target!.onPan!(
+    //       GestureEvent(
+    //           EVENT_PAN,
+    //           GestureEventInit(
+    //               state: EVENT_STATE_UPDATE,
+    //               deltaX: details.globalPosition.dx,
+    //               deltaY: details.globalPosition.dy
+    //           )
+    //       )
+    //   );
+    // }
   }
 
   void onPanEnd(DragEndDetails details) {
-    if (_target != null && _target!.onPan != null) {
-      _target!.onPan!(
-          GestureEvent(
-              EVENT_PAN,
-              GestureEventInit(
-                  state: EVENT_STATE_END,
-                  velocityX: details.velocity.pixelsPerSecond.dx,
-                  velocityY: details.velocity.pixelsPerSecond.dy
-              )
-          )
-      );
-    }
+    // if (_target != null && _target!.onPan != null) {
+    //   _target!.onPan!(
+    //       GestureEvent(
+    //           EVENT_PAN,
+    //           GestureEventInit(
+    //               state: EVENT_STATE_END,
+    //               velocityX: details.velocity.pixelsPerSecond.dx,
+    //               velocityY: details.velocity.pixelsPerSecond.dy
+    //           )
+    //       )
+    //   );
+    // }
   }
 
   void onScaleStart(ScaleStartDetails details) {
-    if (_target != null && _target!.onScale != null) {
-      _target!.onScale!(
-          GestureEvent(
-              EVENT_SCALE,
-              GestureEventInit( state: EVENT_STATE_START )
-          )
-      );
-    }
+    // if (_target != null && _target!.onScale != null) {
+    //   _target!.onScale!(
+    //       GestureEvent(
+    //           EVENT_SCALE,
+    //           GestureEventInit( state: EVENT_STATE_START )
+    //       )
+    //   );
+    // }
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    if (_target != null && _target!.onScale != null) {
-      _target!.onScale!(
-          GestureEvent(
-              EVENT_SCALE,
-              GestureEventInit(
-                  state: EVENT_STATE_UPDATE,
-                  rotation: details.rotation,
-                  scale: details.scale
-              )
-          )
-      );
-    }
+    // if (_target != null && _target!.onScale != null) {
+    //   _target!.onScale!(
+    //       GestureEvent(
+    //           EVENT_SCALE,
+    //           GestureEventInit(
+    //               state: EVENT_STATE_UPDATE,
+    //               rotation: details.rotation,
+    //               scale: details.scale
+    //           )
+    //       )
+    //   );
+    // }
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    if (_target != null && _target!.onScale != null) {
-      _target!.onScale!(
-          GestureEvent(
-              EVENT_SCALE,
-              GestureEventInit( state: EVENT_STATE_END )
-          )
-      );
-    }
+    // if (_target != null && _target!.onScale != null) {
+    //   _target!.onScale!(
+    //       GestureEvent(
+    //           EVENT_SCALE,
+    //           GestureEventInit( state: EVENT_STATE_END )
+    //       )
+    //   );
+    // }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    if (_target != null && _target!.onLongPress != null) {
-      _target!.onLongPress!(
-          GestureEvent(
-              EVENT_LONG_PRESS,
-              GestureEventInit(
-                  deltaX: details.globalPosition.dx,
-                  deltaY: details.globalPosition.dy
-              )
-          )
-      );
-    }
+    // if (_target != null && _target!.onLongPress != null) {
+    //   _target!.onLongPress!(
+    //       GestureEvent(
+    //           EVENT_LONG_PRESS,
+    //           GestureEventInit(
+    //               deltaX: details.globalPosition.dx,
+    //               deltaY: details.globalPosition.dy
+    //           )
+    //       )
+    //   );
+    // }
   }
 }
