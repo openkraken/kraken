@@ -567,9 +567,9 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       int? childNodeId;
       if (child is RenderTextBox) {
-        childNodeId = child.targetId;
+        childNodeId = child.hashCode;
       } else if (child is RenderBoxModel) {
-        childNodeId = child.targetId;
+        childNodeId = child.hashCode;
       }
 
       BoxConstraints childConstraints;
@@ -1032,7 +1032,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         ? lineBoxMetrics[lineBoxMetrics.length - 1]
         : lineBoxMetrics[0];
     // Use the max baseline of the children as the baseline in flow layout
-    lineMetrics.runChildren.forEach((int? targetId, RenderBox child) {
+    lineMetrics.runChildren.forEach((int? hashCode, RenderBox child) {
       double? childMarginTop =
           child is RenderBoxModel ? _getChildMarginTop(child) : 0;
       RenderLayoutParentData? childParentData =
@@ -1169,7 +1169,7 @@ class RenderFlowLayout extends RenderLayoutBox {
   void _recordRunsMainSize(_RunMetrics runMetrics, List<double> runMainSize) {
     Map<int?, RenderBox> runChildren = runMetrics.runChildren;
     double runMainExtent = 0;
-    void iterateRunChildren(int? targetId, RenderBox runChild) {
+    void iterateRunChildren(int? hashCode, RenderBox runChild) {
       double runChildMainSize = runChild.size.width;
       if (runChild is RenderTextBox) {
         runChildMainSize = runChild.autoMinWidth;
@@ -1210,7 +1210,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     Map<int?, RenderBox> runChildren = runMetrics.runChildren;
     double runCrossExtent = 0;
     List<double> runChildrenCrossSize = [];
-    void iterateRunChildren(int? targetId, RenderBox runChild) {
+    void iterateRunChildren(int? hashCode, RenderBox runChild) {
       double runChildCrossSize = runChild.size.height;
       if (runChild is RenderTextBox) {
         runChildCrossSize = runChild.autoMinHeight;
@@ -1267,7 +1267,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       // Scrollable cross size collection of each child in the line
       List<double> scrollableCrossSizeOfChildren = [];
 
-      void iterateRunChildren(int? targetId, RenderBox child) {
+      void iterateRunChildren(int? hashCode, RenderBox child) {
         // Total main size of previous siblings
         double preSiblingsMainSize = 0;
         for (RenderBox sibling in runChildrenList) {
