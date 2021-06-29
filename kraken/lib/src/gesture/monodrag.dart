@@ -8,6 +8,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
+import 'package:kraken/dom.dart';
 
 typedef IsAcceptedDragCallback = bool Function(AxisDirection direction);
 
@@ -24,6 +25,11 @@ abstract class GestureClient {
   void dragStartCallback(DragStartDetails details);
 
   void dragEndCallback(DragEndDetails details);
+}
+
+/// Pass Touch to native.
+abstract class EventClient {
+  void eventListener(Event event);
 }
 
 abstract class CompetitiveDragGestureRecognizer extends OneSequenceGestureRecognizer {

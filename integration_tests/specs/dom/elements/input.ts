@@ -108,7 +108,7 @@ describe('Tags input', () => {
   });
 
   it('event input', (done) => {
-    const VALUE = 'HELLO WORLD';
+    const VALUE = 'Hello';
     const input = document.createElement('input');
     input.value = '';
     input.addEventListener('input', function handler(event: InputEvent) {
@@ -121,6 +121,111 @@ describe('Tags input', () => {
       done();
     });
 
+    document.body.appendChild(input);
+    input.focus();
+    requestAnimationFrame(() => {
+      simulateKeyPress(VALUE);
+    });
+  });
+
+  it('support inputmode=text', (done) => {
+    const VALUE = 'Hello';
+    const input = <input inputmode="text" />;
+    input.addEventListener('input', function handler(event: InputEvent) {
+      input.removeEventListener('input', handler);
+      expect(input.value).toEqual(VALUE);
+      done();
+    });
+    document.body.appendChild(input);
+    input.focus();
+    requestAnimationFrame(() => {
+      simulateKeyPress(VALUE);
+    });
+  });
+
+  it('support inputmode=tel', (done) => {
+    const VALUE = '123456789';
+    const input = <input inputmode="tel" />;
+    input.addEventListener('input', function handler(event: InputEvent) {
+      input.removeEventListener('input', handler);
+      expect(input.value).toEqual(VALUE);
+      done();
+    });
+    document.body.appendChild(input);
+    input.focus();
+    requestAnimationFrame(() => {
+      simulateKeyPress(VALUE);
+    });
+  });
+
+  it('support inputmode=decimal', (done) => {
+    const VALUE = '123456789';
+    const input = <input inputmode="decimal" />;
+    input.addEventListener('input', function handler(event: InputEvent) {
+      input.removeEventListener('input', handler);
+      expect(input.value).toEqual(VALUE);
+      done();
+    });
+    document.body.appendChild(input);
+    input.focus();
+    requestAnimationFrame(() => {
+      simulateKeyPress(VALUE);
+    });
+  });
+
+  it('support inputmode=numeric', (done) => {
+    const VALUE = '123456789';
+    const input = <input inputmode="numeric" />;
+    input.addEventListener('input', function handler(event: InputEvent) {
+      input.removeEventListener('input', handler);
+      expect(input.value).toEqual(VALUE);
+      done();
+    });
+    document.body.appendChild(input);
+    input.focus();
+    requestAnimationFrame(() => {
+      simulateKeyPress(VALUE);
+    });
+  });
+
+  it('support inputmode=search', (done) => {
+    const VALUE = 'Hello';
+    const input = <input inputmode="search" />;
+    input.addEventListener('input', function handler(event: InputEvent) {
+      input.removeEventListener('input', handler);
+      expect(input.value).toEqual(VALUE);
+      done();
+    });
+    document.body.appendChild(input);
+    input.focus();
+    requestAnimationFrame(() => {
+      simulateKeyPress(VALUE);
+    });
+  });
+
+  it('support inputmode=email', (done) => {
+    const VALUE = 'example@example.com';
+    const input = <input inputmode="email" />;
+    input.addEventListener('input', function handler(event: InputEvent) {
+      input.removeEventListener('input', handler);
+      expect(input.value).toEqual(VALUE);
+      done();
+    });
+    document.body.appendChild(input);
+    input.focus();
+    requestAnimationFrame(() => {
+      simulateKeyPress(VALUE);
+    });
+  });
+
+  it('support inputmode=url', (done) => {
+    const VALUE = 'example.com';
+    const input = <input inputmode="url" />;
+    input.addEventListener('input', function handler(event: InputEvent) {
+      input.removeEventListener('input', handler);
+      expect(input.value).toEqual(VALUE);
+      done();
+    });
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {

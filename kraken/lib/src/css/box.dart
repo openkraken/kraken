@@ -4,6 +4,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:core';
 import 'dart:ui';
 
 import 'package:flutter/painting.dart';
@@ -95,8 +96,8 @@ mixin CSSBoxMixin on RenderStyleBase {
   set borderEdge(EdgeInsets? newValue) {
     _borderEdge = newValue;
 
-    BoxDecoration? decoration = renderBoxModel!.renderStyle.decoration;
-    if (decoration != null && decoration is BoxDecoration) {
+    CSSBoxDecoration? decoration = renderBoxModel!.renderStyle.decoration;
+    if (decoration != null && decoration is CSSBoxDecoration) {
       Gradient? gradient = decoration.gradient;
       if (gradient is BorderGradientMixin) {
         gradient.borderEdge = newValue;
@@ -125,14 +126,12 @@ mixin CSSBoxMixin on RenderStyleBase {
     return borderEdge!.right;
   }
 
-  CSSBoxDecoration? cssBoxDecoration;
-
   /// What decoration to paint.
   ///
-  /// Commonly a [BoxDecoration].
-  BoxDecoration? get decoration => _decoration;
-  BoxDecoration? _decoration;
-  set decoration(BoxDecoration? value) {
+  /// Commonly a [CSSBoxDecoration].
+  CSSBoxDecoration? get decoration => _decoration;
+  CSSBoxDecoration? _decoration;
+  set decoration(CSSBoxDecoration? value) {
     if (value == null) return;
     if (value == _decoration) return;
 
@@ -178,7 +177,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       backgroundAttachment = present;
     }
 
-    if (cssBoxDecoration != null) {
+    if (decoration != null) {
       // Update by property
       if (property == BACKGROUND_CLIP) {
         renderStyle.backgroundClip = getBackgroundClip(present);
@@ -204,10 +203,10 @@ mixin CSSBoxMixin on RenderStyleBase {
        updateBoxShadow(property);
       }
     } else {
-      cssBoxDecoration = getCSSBoxDecoration();
+      CSSBoxDecoration? cssBoxDecoration = getCSSBoxDecoration();
       if (cssBoxDecoration == null) return;
 
-      renderStyle.decoration = cssBoxDecoration!.toBoxDecoration();
+      renderStyle.decoration = cssBoxDecoration;
       renderStyle.backgroundClip = getBackgroundClip(present);
       renderStyle.backgroundOrigin = getBackgroundOrigin(present);
     }
@@ -215,11 +214,11 @@ mixin CSSBoxMixin on RenderStyleBase {
 
   void updateBoxShadow(String property) {
 
-    BoxDecoration? prevBoxDecoration = decoration;
+    CSSBoxDecoration? prevBoxDecoration = decoration;
     Size viewportSize = renderBoxModel!.viewportSize;
 
     if (prevBoxDecoration != null) {
-      decoration = BoxDecoration(
+      decoration = CSSBoxDecoration(
           // Only modify boxShadow.
           boxShadow: getBoxShadow(style!, viewportSize),
           color: prevBoxDecoration.color,
@@ -231,24 +230,24 @@ mixin CSSBoxMixin on RenderStyleBase {
           shape: prevBoxDecoration.shape
       );
     } else {
-      decoration = BoxDecoration(boxShadow: getBoxShadow(style!, viewportSize));
+      decoration = CSSBoxDecoration(boxShadow: getBoxShadow(style!, viewportSize));
     }
   }
 
   void updateBackgroundColor([Color? color]) {
     Color? bgColor = color ?? CSSBackground.getBackgroundColor(style!);
-    BoxDecoration? prevBoxDecoration = decoration;
+    CSSBoxDecoration? prevBoxDecoration = decoration;
 
     // If change bg color from some color to null, which must be explicitly transparent.
     if (bgColor != null) {
       // If there has gradient, background color will not work
       if (prevBoxDecoration!.gradient == null) {
-        decoration = prevBoxDecoration.copyWith(color: bgColor);
+        decoration = prevBoxDecoration.clone(color: bgColor);
       }
     } else {
       // Remove background color.
-      //   [BoxDecoration.copyWith] can not remove some value, so instantite a new [BoxDecoration].
-      decoration = BoxDecoration(
+      //   [CSSBoxDecoration.copyWith] can not remove some value, so instantite a new [CSSBoxDecoration].
+      decoration = CSSBoxDecoration(
         image: prevBoxDecoration!.image,
         border: prevBoxDecoration.border,
         borderRadius: prevBoxDecoration.borderRadius,
@@ -261,7 +260,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   }
 
   void updateBackgroundImage(String property, String present, int contextId) {
-    BoxDecoration prevBoxDecoration = decoration!;
+    CSSBoxDecoration prevBoxDecoration = decoration!;
 
     DecorationImage? decorationImage;
     Gradient? gradient;
@@ -275,7 +274,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       }
     }
 
-    BoxDecoration updateBoxDecoration = BoxDecoration(
+    CSSBoxDecoration updateBoxDecoration = CSSBoxDecoration(
       image: decorationImage,
       gradient: gradient,
       color: prevBoxDecoration.color,
@@ -306,10 +305,10 @@ mixin CSSBoxMixin on RenderStyleBase {
 
   // Add border radius transition listener
   void updateBorderRadius(String property, String present) {
-    if (cssBoxDecoration == null) {
-      cssBoxDecoration = getCSSBoxDecoration();
+    if (decoration == null) {
+      CSSBoxDecoration? cssBoxDecoration = getCSSBoxDecoration();
       if (cssBoxDecoration == null) return;
-      decoration = cssBoxDecoration!.toBoxDecoration();
+      decoration = cssBoxDecoration;
     }
     if (decoration == null) return;
 
@@ -319,7 +318,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     if (index != null) {
       Radius? newRadius = CSSBorderRadius.getRadius(present, viewportSize);
       BorderRadius? borderRadius = decoration!.borderRadius as BorderRadius?;
-      decoration = decoration!.copyWith(borderRadius: BorderRadius.only(
+      decoration = decoration!.clone(borderRadius: BorderRadius.only(
         topLeft: index == 0 ? newRadius! : borderRadius?.topLeft ?? Radius.zero,
         topRight: index == 1 ? newRadius! : borderRadius?.topRight ?? Radius.zero,
         bottomRight: index == 2 ? newRadius! : borderRadius?.bottomRight ?? Radius.zero,
@@ -359,7 +358,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       }
 
       if (!updateAll) {
-        decoration = decoration!.copyWith(border: Border(
+        decoration = decoration!.clone(border: Border(
           left: left ?? BorderSide.none,
           top: top ?? BorderSide.none,
           right: right ?? BorderSide.none,
@@ -372,7 +371,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     List<BorderSide>? borderSides = _getBorderSides(borderColor, borderWidth);
 
     if (borderSides != null) {
-      decoration = decoration!.copyWith(border: Border(
+      decoration = decoration!.clone(border: Border(
         left: borderSides[0],
         top: borderSides[1],
         right: borderSides[2],
@@ -442,25 +441,51 @@ mixin CSSBoxMixin on RenderStyleBase {
       }
     }
 
-    List<Radius>? borderRadius = _getBorderRadius();
-    List<BoxShadow>? boxShadow = getBoxShadow(style!, viewportSize);
+    List<Radius>? radius = _getBorderRadius();
+    List<CSSBoxShadow>? boxShadow = getBoxShadow(style!, viewportSize);
     List<BorderSide>? borderSides = _getBorderSides();
 
     if (bgColor == null &&
         decorationImage == null &&
         gradient == null &&
         borderSides == null &&
-        borderRadius == null &&
+        radius == null &&
         boxShadow == null) {
       return null;
     }
 
-    return CSSBoxDecoration(bgColor, decorationImage, gradient, borderSides, borderRadius, getBoxShadow(style!, viewportSize));
+    if (gradient != null) {
+      bgColor = null;
+    }
+
+    Border? border;
+    if (borderSides != null) {
+      // side read inorder left top right bottom
+      border = Border(left: borderSides[0], top: borderSides[1], right: borderSides[2], bottom: borderSides[3]);
+    }
+
+    BorderRadius? borderRadius;
+    // Flutter border radius only works when border is uniform.
+    if (radius != null && (border == null || border.isUniform)) {
+      borderRadius = BorderRadius.only(
+        topLeft: radius[0],
+        topRight: radius[1],
+        bottomRight: radius[2],
+        bottomLeft: radius[3],
+      );
+    }
+    return CSSBoxDecoration(
+        color: bgColor,
+        image: decorationImage,
+        border: border,
+        borderRadius: borderRadius,
+        boxShadow: boxShadow,
+        gradient: gradient
+    );
   }
 
-  /// Tip: inset not supported.
-  List<BoxShadow>? getBoxShadow(CSSStyleDeclaration style, Size viewportSize) {
-    List<BoxShadow>? boxShadow;
+  List<CSSBoxShadow>? getBoxShadow(CSSStyleDeclaration style, Size viewportSize) {
+    List<CSSBoxShadow>? boxShadow;
 
     if (style.contains(BOX_SHADOW)) {
       boxShadow = [];
@@ -477,19 +502,20 @@ mixin CSSBoxMixin on RenderStyleBase {
           double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2], viewportSize) ?? 0;
           double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3], viewportSize) ?? 0;
           double spreadRadius = CSSLength.toDisplayPortValue(shadowDefinitions[4], viewportSize) ?? 0;
+          bool inset = shadowDefinitions[5] == INSET;
 
           if (color != null) {
-            boxShadow.add(BoxShadow(
+            boxShadow.add(CSSBoxShadow(
               offset: Offset(offsetX, offsetY),
               blurRadius: blurRadius,
               spreadRadius: spreadRadius,
               color: color,
+              inset: inset,
             ));
           }
         }
       }
     }
-
     return boxShadow;
   }
 
@@ -656,63 +682,81 @@ class CSSBorderStyle {
   }
 }
 
-class CSSBoxDecoration {
-  Color? color;
-  DecorationImage? image;
-  Gradient? gradient;
-  // radius inorder topLeft topRight bottomRight bottomLeft
-  List<Radius>? radius;
-  // side inorder left top right bottom
-  List<BorderSide>? borderSides;
-  List<BoxShadow>? boxShadow;
-
-  CSSBoxDecoration(this.color, this.image, this.gradient, this.borderSides, this.radius, this.boxShadow);
-
-  CSSBoxDecoration clone() {
-    return CSSBoxDecoration(
-        color,
-        image,
-        gradient,
-        // side read inorder left top right bottom
-        borderSides != null ? List.of(borderSides!) : null,
-        // radius read inorder topLeft topRight bottomLeft bottomRight
-        radius != null ? List.of(radius!) : null,
-        boxShadow != null ? List.of(boxShadow!) : null);
+// ignore: must_be_immutable
+class CSSBoxShadow extends BoxShadow {
+  CSSBoxShadow({
+    Color color = const Color(0xFF000000),
+    Offset offset = Offset.zero,
+    double blurRadius = 0.0,
+    double spreadRadius = 0.0,
+    bool inset = false,
+  }) : super(color: color, offset: offset, blurRadius: blurRadius, spreadRadius: spreadRadius) {
+    _inset = inset;
   }
 
-  BoxDecoration toBoxDecoration() {
-    if (gradient != null) {
-      color = null;
-    }
 
-    Border? border;
-    if (borderSides != null) {
-      // side read inorder left top right bottom
-      border = Border(left: borderSides![0], top: borderSides![1], right: borderSides![2], bottom: borderSides![3]);
-    }
-
-    BorderRadius? borderRadius;
-    // Flutter border radius only works when border is uniform.
-    if (radius != null && (border == null || border.isUniform)) {
-      borderRadius = BorderRadius.only(
-        topLeft: radius![0],
-        topRight: radius![1],
-        bottomRight: radius![2],
-        bottomLeft: radius![3],
-      );
-    }
-
-    return BoxDecoration(
-        color: color,
-        image: image,
-        border: border,
-        borderRadius: borderRadius,
-        boxShadow: boxShadow,
-        gradient: gradient);
+  bool _inset = false;
+  bool get inset {
+    return _inset;
+  }
+  set inset(bool value) {
+    if (_inset == value) return;
+    _inset = value;
   }
 
   @override
-  String toString() {
-    return 'CSSBoxDecoration(color: $color, image: $image, borderSides: $borderSides, radius: $radius, boxShadow: $boxShadow, gradient: $gradient)';
+  String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius $inset)';
+}
+
+class CSSBoxDecoration extends BoxDecoration {
+  CSSBoxDecoration({
+    this.color,
+    this.image,
+    this.border,
+    this.borderRadius,
+    this.boxShadow,
+    this.gradient,
+    this.backgroundBlendMode,
+    this.shape = BoxShape.rectangle,
+  }): super(color: color, image: image, border: border, borderRadius: borderRadius,
+    gradient: gradient, backgroundBlendMode: backgroundBlendMode, shape: shape);
+
+  final Color? color;
+
+  final DecorationImage? image;
+
+  final BoxBorder? border;
+
+  final BorderRadiusGeometry? borderRadius;
+
+  final List<CSSBoxShadow>? boxShadow;
+
+  final Gradient? gradient;
+
+  final BlendMode? backgroundBlendMode;
+
+  final BoxShape shape;
+
+  CSSBoxDecoration clone({
+    Color? color,
+    DecorationImage? image,
+    BoxBorder? border,
+    BorderRadiusGeometry? borderRadius,
+    List<CSSBoxShadow>? boxShadow,
+    Gradient? gradient,
+    BlendMode? backgroundBlendMode,
+    BoxShape? shape,
+  }) {
+    return CSSBoxDecoration(
+      color: color ?? this.color,
+      image: image ?? this.image,
+      border: border ?? this.border,
+      borderRadius: borderRadius ?? this.borderRadius,
+      boxShadow: boxShadow ?? this.boxShadow,
+      gradient: gradient ?? this.gradient,
+      backgroundBlendMode: backgroundBlendMode ?? this.backgroundBlendMode,
+      shape: shape ?? this.shape,
+    );
   }
 }
+

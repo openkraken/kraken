@@ -64,6 +64,8 @@ class KrakenViewController {
 
   GestureClient? gestureClient;
 
+  EventClient? eventClient;
+
   double _viewportWidth;
   double get viewportWidth => _viewportWidth;
   set viewportWidth(double value) {
@@ -94,6 +96,7 @@ class KrakenViewController {
     required this.rootController,
     this.navigationDelegate,
     this.gestureClient,
+    this.eventClient,
   }) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_PROPERTY_INIT);
@@ -135,6 +138,7 @@ class KrakenViewController {
       viewport: viewport,
       showPerformanceOverlayOverride: showPerformanceOverlay,
       controller: rootController,
+      eventClient: eventClient,
     );
 
     if (kProfileMode) {
@@ -443,6 +447,8 @@ class KrakenController {
 
   GestureClient? _gestureClient;
 
+  EventClient? _eventClient;
+
   KrakenController(
     String? name,
     double viewportWidth,
@@ -454,6 +460,7 @@ class KrakenController {
     String? bundleContent,
     Color? background,
     GestureClient? gestureClient,
+    EventClient? eventClient,
     KrakenNavigationDelegate? navigationDelegate,
     KrakenMethodChannel? methodChannel,
     this.onLoad,
@@ -465,7 +472,8 @@ class KrakenController {
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent,
-        _gestureClient = gestureClient {
+        _gestureClient = gestureClient,
+        _eventClient = eventClient {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CONTROLLER_PROPERTY_INIT);
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_START);
@@ -480,7 +488,9 @@ class KrakenController {
         enableDebug: enableDebug,
         rootController: this,
         navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate(),
-        gestureClient: _gestureClient);
+        gestureClient: _gestureClient,
+        eventClient: _eventClient,
+    );
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_VIEW_CONTROLLER_INIT_END);

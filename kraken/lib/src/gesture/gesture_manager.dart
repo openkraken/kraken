@@ -51,10 +51,6 @@ class GestureManager {
   }
 
   void clearTargetList() {
-    if (_hitTestList.isNotEmpty && _hitTestList[0] is RenderPointerListenerMixin) {
-      // The target node triggered by the gesture is the bottom node of hitTest.
-      _target = _hitTestList[0] as RenderPointerListenerMixin;
-    }
     _hitTestList = [];
   }
 
@@ -87,12 +83,41 @@ class GestureManager {
       }
     }
 
-    gestures.forEach((key, gesture) {
-      // Register the recognizer that needs to be monitored.
-      if (events.contains(key)) {
-        gesture.addPointer(event as PointerDownEvent);
+    if (event is PointerDownEvent) {
+      // Add pointer to gestures then register the gesture recognizer to the arena.
+      gestures.forEach((key, gesture) {
+        // Register the recognizer that needs to be monitored.
+        if (events.contains(key)) {
+          gesture.addPointer(event);
+        }
+      });
+
+      // The target node triggered by the gesture is the bottom node of hitTest.
+      // The scroll element needs to be judged by isScrollingContentBox to find the real element upwards.
+      _target = null;
+      if (_hitTestList.isNotEmpty) {
+        for (int i = 0; i < _hitTestList.length; i++) {
+          RenderBox renderBox = _hitTestList[i];
+          if ((renderBox is RenderBoxModel && !renderBox.isScrollingContentBox) || renderBox is RenderViewportBox) {
+            _target = renderBox as RenderPointerListenerMixin;
+            break;
+          }
+        }
       }
-    });
+    }
+
+    if (_target != null) {
+      if (_target!.onPointerDown != null && event is PointerDownEvent)
+        _target!.onPointerDown!(event);
+      if (_target!.onPointerMove != null && event is PointerMoveEvent)
+        _target!.onPointerMove!(event);
+      if (_target!.onPointerUp != null && event is PointerUpEvent)
+        _target!.onPointerUp!(event);
+      if (_target!.onPointerCancel != null && event is PointerCancelEvent)
+        _target!.onPointerCancel!(event);
+      if (_target!.onPointerSignal != null && event is PointerSignalEvent)
+        _target!.onPointerSignal!(event);
+    }
   }
 
   void onClick(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
