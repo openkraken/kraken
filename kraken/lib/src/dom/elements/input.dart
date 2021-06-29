@@ -324,8 +324,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (isRendererAttached) {
       // Set focus that make it add keyboard listener
       _renderEditable!.hasFocus = true;
-      // Set same height for cursor
-      _renderEditable!.cursorHeight = renderBoxModel!.renderStyle.fontSize;
       activeTextInput();
       dispatchEvent(Event('focus'));
     }
