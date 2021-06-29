@@ -241,8 +241,10 @@ EventTargetInstance::EventTargetInstance(EventTarget *eventTarget) : Instance(ev
 }
 
 void bindEventTarget(std::unique_ptr<JSContext> &context) {
-  auto *eventConstructor = new Event(context.get());
-  context->defineGlobalProperty("Event", eventConstructor->classObject);
+  auto *eventTargetConstructor = new EventTarget(context.get());
+  // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
+  JS_SetPrototype(context->ctx(), context->global(), eventTargetConstructor->prototype());
+  context->defineGlobalProperty("EventTarget", eventTargetConstructor->classObject);
 }
 
 void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *nativeEventType,

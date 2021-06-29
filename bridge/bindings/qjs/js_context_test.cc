@@ -48,6 +48,46 @@ TEST(Context, unrejectPromiseError) {
   delete bridge;
 }
 
+TEST(Context, window) {
+  bool errorHandlerExecuted = false;
+  static bool logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "true");
+  };
+
+  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg) {
+    errorHandlerExecuted = true;
+    KRAKEN_LOG(VERBOSE) << errmsg;
+  };
+  auto bridge = new kraken::JSBridge(0, errorHandler);
+  const char* code = "console.log(window == globalThis)";
+  bridge->evaluateScript(code, strlen(code), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, false);
+  EXPECT_EQ(logCalled, true);
+  delete bridge;
+}
+
+TEST(Context, windowInheritEventTarget) {
+  bool errorHandlerExecuted = false;
+  static bool logCalled = false;
+  kraken::JSBridge::consoleMessageHandler = [](void *ctx, const std::string &message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "ƒ () ƒ () ƒ () true");
+  };
+
+  auto errorHandler = [&errorHandlerExecuted](int32_t contextId, const char *errmsg) {
+    errorHandlerExecuted = true;
+    KRAKEN_LOG(VERBOSE) << errmsg;
+  };
+  auto bridge = new kraken::JSBridge(0, errorHandler);
+  const char* code = "console.log(window.addEventListener, addEventListener, globalThis.addEventListener, window.addEventListener === addEventListener)";
+  bridge->evaluateScript(code, strlen(code), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, false);
+  EXPECT_EQ(logCalled, true);
+  delete bridge;
+}
+
 TEST(jsValueToNativeString, utf8String) {
   auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "helloworld");

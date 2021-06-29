@@ -43,6 +43,7 @@ public:
 
   inline uint32_t contextId() const { return m_contextId; }
   inline JSContext *context() const { return m_context; }
+  inline JSValue prototype() const { return m_prototypeObject; };
 
 protected:
   JSValue m_prototypeObject{JS_NULL};

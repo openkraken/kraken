@@ -35,7 +35,12 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
   timeOrigin = std::chrono::system_clock::now();
   globalObject = JS_GetGlobalObject(m_ctx);
-
+  JSValue windowGetter = JS_NewCFunction(m_ctx, [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) -> JSValue {
+    return JS_GetGlobalObject(ctx);
+  }, "get", 0);
+  JSAtom windowKey = JS_NewAtom(m_ctx, "window");
+  JS_DefinePropertyGetSet(m_ctx, globalObject, windowKey, windowGetter, JS_UNDEFINED, JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
+  JS_FreeAtom(m_ctx, windowKey);
   JS_SetContextOpaque(m_ctx, this);
   JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, this);
 }
@@ -102,7 +107,7 @@ bool JSContext::handleException(JSValue *exception) {
 }
 
 JSValue JSContext::global() {
-  return JS_GetGlobalObject(m_ctx);
+  return globalObject;
 }
 
 QjsContext *JSContext::ctx() {

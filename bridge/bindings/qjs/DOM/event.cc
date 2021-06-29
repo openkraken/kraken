@@ -15,6 +15,9 @@ JSValue Event::constructor(QjsContext *ctx, JSValue this_val, int argc, JSValue 
   return HostClass::constructor(ctx, this_val, argc, argv);
 }
 
+OBJECT_INSTANCE_IMPL(Event);
+std::unordered_map<std::string, EventCreator> Event::m_eventCreatorMap{};
+
 PROP_GETTER(Event, Type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *eventInstance = static_cast<EventInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
   return JS_NewUnicodeString(eventInstance->context()->runtime(), eventInstance->context()->ctx(),
@@ -112,6 +115,7 @@ PROP_SETTER(Event, CancelBubble)(QjsContext *ctx, JSValue this_val, int argc, JS
   if (v) {
     eventInstance->cancelled(v);
   }
+  return JS_NULL;
 }
 
 EventInstance *Event::buildEventInstance(std::string &eventType, JSContext *context, void *nativeEvent,
