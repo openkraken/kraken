@@ -87,9 +87,9 @@ mixin EventHandlerMixin on EventTarget {
       rotationAngle: pointEvent.orientation,
       force: pointEvent.pressure,
     );
-    event.changedTouches.items.add(touch);
-    event.targetTouches.items.add(touch);
-    event.touches.items.add(touch);
+    event.changedTouches.append(touch);
+    event.targetTouches.append(touch);
+    event.touches.append(touch);
     return event;
   }
 
