@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ui';
 import 'dart:ffi';
-
+import 'dart:math' as math;
 import 'package:kraken/bridge.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -38,6 +38,10 @@ const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
   BORDER: '1px solid #767676',
 };
+
+// The default width ratio to multiple for calculating the default width of input
+// when width is not set.
+const int _FONT_SIZE_RATIO = 10;
 
 typedef ValueChanged<T> = void Function(T value);
 // The time it takes for the cursor to fade from fully opaque to fully
@@ -167,6 +171,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   bool autoCorrect = true;
   late EditableTextDelegate _textSelectionDelegate;
   TextSpan? _actualText;
+  RenderInputBox? _renderInputBox;
   RenderEditable? _renderEditable;
   TextInputConnection? _textInputConnection;
 
@@ -214,16 +219,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
 
-    // Default width of input equals to 10 times of font-size approximately if width is not set.
-    if (style[WIDTH].isEmpty) {
-      double fontSize = CSSText.getFontSize(style, viewportSize);
-      String defaultWidth = (fontSize * 10).toString() + 'px';
-      style.setProperty(WIDTH, defaultWidth , viewportSize);
-    }
-
-    // Line-height works as height when height is not set.
-    if (style[HEIGHT].isEmpty && style[LINE_HEIGHT].isNotEmpty) {
-      style.setProperty(HEIGHT, style[LINE_HEIGHT] , viewportSize);
+    // Set default width of input when width is not set in style.
+    if (renderBoxModel!.renderStyle.width == null) {
+      double fontSize = renderBoxModel!.renderStyle.fontSize;
+      renderBoxModel!.renderStyle.width = fontSize * _FONT_SIZE_RATIO;
     }
 
     addChild(createRenderBox());
@@ -261,6 +260,19 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void setStyle(String key, value) {
     super.setStyle(key, value);
 
+    if (_renderInputBox != null) {
+      RenderStyle renderStyle = renderBoxModel!.renderStyle;
+      if (key == HEIGHT || (key == LINE_HEIGHT && renderStyle.height == null)) {
+        _renderInputBox!.markNeedsLayout();
+
+      // It needs to judge width in style here cause
+      // width in renderStyle may be set in node attach.
+      } else if (key == FONT_SIZE && style[WIDTH].isEmpty) {
+        double fontSize = renderStyle.fontSize;
+        renderStyle.width = fontSize * _FONT_SIZE_RATIO;
+        _renderInputBox!.markNeedsLayout();
+      }
+    }
     // @TODO: Filter style properties that used by text span.
     _rebuildTextSpan();
   }
@@ -412,25 +424,34 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return _renderEditable!;
   }
 
-  RenderBox createRenderBox() {
-    assert(renderBoxModel is RenderIntrinsic);
-    RenderEditable renderEditable = createRenderEditable();
+  double _getTopOffset() {
     RenderIntrinsic renderIntrinsic = (renderBoxModel as RenderIntrinsic?)!;
     RenderStyle renderStyle = renderIntrinsic.renderStyle;
 
-    // Make render editable vertically center.
-    double dy = renderStyle.height == null
-        ? 0
-        : (renderStyle.height!
-            - renderEditable.preferredLineHeight
-            - renderIntrinsic.renderStyle.borderTop
-            - renderIntrinsic.renderStyle.borderBottom) / 2;
+    double intrinsicInputHeight = _renderEditable!.preferredLineHeight
+      + renderStyle.paddingTop + renderStyle.paddingBottom
+      + renderStyle.borderTop + renderStyle.borderBottom;
 
-    RenderInputBox renderInputBox = RenderInputBox(
-      offset: Offset(0, dy),
+    double dy;
+    if (renderStyle.height != null) {
+      dy = (renderStyle.height! - intrinsicInputHeight) / 2;
+    } else if (renderStyle.lineHeight != null && renderStyle.lineHeight! > intrinsicInputHeight) {
+      dy = (renderStyle.lineHeight! - intrinsicInputHeight) /2;
+    } else {
+      dy = 0;
+    }
+    // Make render editable vertically center.
+    return dy;
+  }
+
+  RenderInputBox createRenderBox() {
+    assert(renderBoxModel is RenderIntrinsic);
+    RenderEditable renderEditable = createRenderEditable();
+
+    _renderInputBox = RenderInputBox(
       child: renderEditable,
     );
-    return renderInputBox;
+    return _renderInputBox!;
   }
 
   @override
@@ -874,19 +895,27 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
 class RenderInputBox extends RenderProxyBox {
   RenderInputBox({
-    RenderBox? child,
-    Offset? offset
-  }) : assert(offset != null),
-        _offset = offset,
-        super(child);
+    required RenderEditable child,
+  }) : super(child);
 
-  Offset? _offset;
-  Offset? get offset => _offset;
-  set(Offset? value) {
-    if (value != null && value != _offset) {
-      _offset = value;
-      markNeedsLayout();
+  Offset? get _offset {
+    RenderIntrinsic renderIntrinsic = (parent as RenderIntrinsic?)!;
+    RenderStyle renderStyle = renderIntrinsic.renderStyle;
+
+    double intrinsicInputHeight = (child as RenderEditable).preferredLineHeight
+      + renderStyle.paddingTop + renderStyle.paddingBottom
+      + renderStyle.borderTop + renderStyle.borderBottom;
+
+    // Make render editable vertically center.
+    double dy;
+    if (renderStyle.height != null) {
+      dy = (renderStyle.height! - intrinsicInputHeight) / 2;
+    } else if (renderStyle.lineHeight != null && renderStyle.lineHeight! > intrinsicInputHeight) {
+      dy = (renderStyle.lineHeight! - intrinsicInputHeight) /2;
+    } else {
+      dy = 0;
     }
+    return Offset(0, dy);
   }
 
   @override
@@ -908,8 +937,20 @@ class RenderInputBox extends RenderProxyBox {
       Size childSize = child!.size;
       double width = constraints.maxWidth != double.infinity ?
         constraints.maxWidth : childSize.width;
-      double height = constraints.maxHeight != double.infinity ?
-      constraints.maxHeight : childSize.height;
+
+      RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
+      RenderStyle renderStyle = renderIntrinsic.renderStyle;
+
+      double height;
+      // Height priority: height > max(line-height, child height) > child height
+      if (constraints.maxHeight != double.infinity) {
+        height = constraints.maxHeight;
+      } else if (renderStyle.lineHeight != null) {
+        height = math.max(renderStyle.lineHeight!, childSize.height);
+      } else {
+        height = childSize.height;
+      }
+
       size = Size(width, height);
     } else {
       size = computeSizeForNoChild(constraints);
