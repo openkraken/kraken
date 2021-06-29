@@ -81,7 +81,7 @@ describe('Tags input', () => {
     await snapshot();
   });
 
-  it('line-height set and is bigger than text size', async (done) => {
+  it('line-height set and is bigger than text size', async () => {
     let input;
     input = createElement(
       'input',
@@ -120,7 +120,7 @@ describe('Tags input', () => {
     });
   });
 
-  it('font-size set and width not set', async (done) => {
+  it('font-size set and width not set', async () => {
     let input;
     input = createElement(
       'input',
