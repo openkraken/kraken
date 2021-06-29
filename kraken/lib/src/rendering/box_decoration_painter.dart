@@ -10,6 +10,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
+enum _BorderDirection {
+  top,
+  bottom,
+  left,
+  right
+}
+
 /// An object that paints a [BoxDecoration] into a canvas.
 class BoxDecorationPainter extends BoxPainter {
   BoxDecorationPainter(
@@ -183,28 +190,28 @@ class BoxDecorationPainter extends BoxPainter {
       paddingBoxRect,
       textDirection,
       boxShadow,
-      'top'
+      _BorderDirection.top
     );
     Path bottomRectPath = _getOuterPaddingBoxPathByDirection(
       paddingBoxPath,
       paddingBoxRect,
       textDirection,
       boxShadow,
-      'bottom'
+      _BorderDirection.bottom
     );
     Path leftRectPath = _getOuterPaddingBoxPathByDirection(
       paddingBoxPath,
       paddingBoxRect,
       textDirection,
       boxShadow,
-      'left'
+      _BorderDirection.left
     );
     Path rightRectPath = _getOuterPaddingBoxPathByDirection(
       paddingBoxPath,
       paddingBoxRect,
       textDirection,
       boxShadow,
-      'right'
+      _BorderDirection.right
     );
 
     // 3. Combine all the paths in step 1 and step 2 as the final shadow path.
@@ -230,18 +237,18 @@ class BoxDecorationPainter extends BoxPainter {
     Rect paddingBoxRect,
     TextDirection? textDirection,
     BoxShadow boxShadow,
-    String direction,
+    _BorderDirection direction,
     ) {
     Rect offsetRect;
     Size paddingBoxSize = paddingBoxRect.size;
 
-    if (direction == 'left') {
+    if (direction == _BorderDirection.left) {
       offsetRect = paddingBoxRect
         .shift(Offset(-paddingBoxSize.width + boxShadow.offset.dx + boxShadow.spreadRadius, boxShadow.offset.dy));
-    } else if (direction == 'right') {
+    } else if (direction == _BorderDirection.right) {
       offsetRect = paddingBoxRect
         .shift(Offset(paddingBoxSize.width + boxShadow.offset.dx - boxShadow.spreadRadius, boxShadow.offset.dy));
-    } else if (direction == 'top') {
+    } else if (direction == _BorderDirection.top) {
       offsetRect = paddingBoxRect
         .shift(Offset(boxShadow.offset.dx, -paddingBoxSize.height + boxShadow.offset.dy + boxShadow.spreadRadius));
     } else {
