@@ -18,14 +18,13 @@ public:
   KRAKEN_DISALLOW_COPY_AND_ASSIGN(HostClass);
 
   HostClass(JSContext *context, std::string name)
-    : m_context(context), m_name(std::move(name)), m_ctx(context->context()), m_contextId(context->getContextId()) {
+    : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
     JSClassDef def{};
     def.class_name = name.c_str();
     def.finalizer = proxyFinalize;
     def.call = proxyCall;
-    int success = JS_NewClass(context->runtime(), kHostClassClassId, &def);
-//    assert_m(success == 0, "Can not allocate new Javascript Class.");
-    classObject = JS_NewObjectClass(context->context(), kHostClassClassId);
+    JS_NewClass(context->runtime(), kHostClassClassId, &def);
+    classObject = JS_NewObjectClass(context->ctx(), kHostClassClassId);
     m_prototypeObject = JS_NewObject(m_ctx);
 
     JSAtom prototypeKey = JS_NewAtom(m_ctx, "prototype");
@@ -41,6 +40,9 @@ public:
     return JS_NewObject(ctx);
   };
   JSValue classObject;
+
+  inline uint32_t contextId() const { return m_contextId; }
+  inline JSContext *context() const { return m_context; }
 
 protected:
   JSValue m_prototypeObject{JS_NULL};
@@ -67,18 +69,22 @@ private:
 
 class Instance {
 public:
-  Instance(JSContext *context, HostClass *hostClass, std::string name)
-      : m_context(context), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(context->context()) {
+  Instance(HostClass *hostClass, std::string name)
+      : m_context(hostClass->context()), m_hostClass(hostClass), m_name(std::move(name)), m_ctx(m_context->ctx()) {
     JSClassDef def{};
     def.class_name = name.c_str();
     def.finalizer = proxyInstanceFinalize;
-    int success = JS_NewClass(context->runtime(), kHostClassInstanceClassId, &def);
-//    assert_m(success == 0, "Can not allocate new Javascript Class.");
+    JS_NewClass(m_context->runtime(), kHostClassInstanceClassId, &def);
     instanceObject = JS_NewObjectClass(m_ctx, kHostClassInstanceClassId);
     JS_SetOpaque(instanceObject, this);
   };
   JSValue instanceObject;
-private:
+  virtual ~Instance() = default;
+
+  inline HostClass* prototype() const { return m_hostClass; }
+  inline JSContext* context() const { return m_context; }
+
+protected:
   JSContext *m_context{nullptr};
   QjsContext *m_ctx{nullptr};
   HostClass *m_hostClass{nullptr};

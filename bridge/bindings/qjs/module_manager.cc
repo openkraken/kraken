@@ -45,12 +45,12 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
 
   if (JS_IsNull(obj->m_callback)) {
     JSValue exception =
-      JS_ThrowTypeError(_context.context(), "Failed to execute '__kraken_invoke_module__': callback is null.");
+      JS_ThrowTypeError(_context.ctx(), "Failed to execute '__kraken_invoke_module__': callback is null.");
     _context.handleException(&exception);
     return;
   }
 
-  QjsContext *ctx = obj->m_context.context();
+  QjsContext *ctx = obj->m_context.ctx();
   if (!JS_IsObject(obj->m_callback)) {
     return;
   }

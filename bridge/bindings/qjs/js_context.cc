@@ -16,19 +16,6 @@ std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionH
   return std::make_unique<JSContext>(contextId, handler, owner);
 }
 
-NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value) {
-  if (!JS_IsString(value)) {
-    return nullptr;
-  }
-
-  uint32_t length;
-  uint16_t *buffer = JS_ToUnicode(ctx, value, &length);
-  NativeString tmp{};
-  tmp.string = buffer;
-  tmp.length = length;
-  return tmp.clone();
-}
-
 void promiseRejectTracker(QjsContext *ctx, JSValueConst promise,
                           JSValueConst reason,
                           JS_BOOL is_handled, void *opaque) {
@@ -118,7 +105,7 @@ JSValue JSContext::global() {
   return JS_GetGlobalObject(m_ctx);
 }
 
-QjsContext *JSContext::context() {
+QjsContext *JSContext::ctx() {
   assert(!ctxInvalid_ && "context has been released");
   return m_ctx;
 }
@@ -149,6 +136,38 @@ void JSContext::defineGlobalProperty(const char* prop, JSValue value) {
                     JS_UNDEFINED, JS_UNDEFINED, JS_PROP_HAS_VALUE);
   m_globalProps.emplace_front(value);
   JS_FreeAtom(m_ctx, atom);
+}
+
+
+NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value) {
+  if (!JS_IsString(value)) {
+    return nullptr;
+  }
+
+  uint32_t length;
+  uint16_t *buffer = JS_ToUnicode(ctx, value, &length);
+  NativeString tmp{};
+  tmp.string = buffer;
+  tmp.length = length;
+  return tmp.clone();
+}
+
+void buildUICommandArgs(QjsContext *ctx, JSValue key, NativeString &args_01) {
+  if (!JS_IsString(key)) return;
+
+  uint32_t length;
+  uint16_t *buffer = JS_ToUnicode(ctx, key, &length);
+  args_01.string = buffer;
+  args_01.length = length;
+}
+
+NativeString *stringToNativeString(std::string &string) {
+  std::u16string utf16;
+  fromUTF8(string, utf16);
+  NativeString tmp{};
+  tmp.string = reinterpret_cast<const uint16_t *>(utf16.c_str());
+  tmp.length = utf16.size();
+  return tmp.clone();
 }
 
 } // namespace kraken::binding::qjs

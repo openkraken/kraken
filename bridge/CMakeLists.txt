@@ -210,6 +210,12 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/BOM/console.h
       bindings/qjs/BOM/screen.cc
       bindings/qjs/BOM/screen.h
+      bindings/qjs/DOM/event_target.cc
+      bindings/qjs/DOM/event_target.h
+      bindings/qjs/DOM/event.cc
+      bindings/qjs/DOM/event.h
+      bindings/qjs/DOM/custom_event.cc
+      bindings/qjs/DOM/custom_event.h
   )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2
@@ -219,7 +225,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
 
   ## ENABLE MEM LEAK CHECK in debug mode
   if (${CMAKE_BUILD_TYPE} STREQUAL "debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
-    target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1)
+    target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1 -DDEBUG)
   endif()
 
 endif()

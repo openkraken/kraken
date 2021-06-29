@@ -10,14 +10,9 @@
 #include <forward_list>
 #include <memory>
 #include <quickjs/quickjs.h>
+#include "js_context_macros.h"
 
 using QjsContext = JSContext;
-
-#define QJS_GLOBAL_BINDING_FUNCTION(context, function, name, argc)                                                     \
-  {                                                                                                                    \
-    JSValue f = JS_NewCFunction(context->context(), function, name, argc);                                             \
-    context->defineGlobalProperty(name, f);                                                                            \
-  }
 
 namespace kraken::binding::qjs {
 
@@ -34,7 +29,7 @@ public:
   bool evaluateJavaScript(const char *code, size_t codeLength, const char *sourceURL, int startLine);
   bool isValid();
   JSValue global();
-  QjsContext *context();
+  QjsContext *ctx();
   JSRuntime *runtime();
   int32_t getContextId();
   void *getOwner();
@@ -63,13 +58,21 @@ public:
   ObjectProperty() = delete;
   explicit ObjectProperty(JSContext *context, JSValueConst thisObject, const char *property,
                               JSCFunction getterFunction, JSCFunction setterFunction) {
-    JSValue ge = JS_NewCFunction(context->context(), getterFunction, "get", 0);
-    JSValue se = JS_NewCFunction(context->context(), setterFunction, "set", 1);
-    JSAtom key = JS_NewAtom(context->context(), property);
-    JS_DefinePropertyGetSet(context->context(), thisObject, key, ge, se,
+    JSValue ge = JS_NewCFunction(context->ctx(), getterFunction, "get", 0);
+    JSValue se = JS_NewCFunction(context->ctx(), setterFunction, "set", 1);
+    JSAtom key = JS_NewAtom(context->ctx(), property);
+    JS_DefinePropertyGetSet(context->ctx(), thisObject, key, ge, se,
                             JS_PROP_C_W_E);
-    JS_FreeAtom(context->context(), key);
+    JS_FreeAtom(context->ctx(), key);
   };
+  explicit ObjectProperty(JSContext *context, JSValueConst thisObject, const char *property,
+                          JSCFunction getterFunction) {
+    JSValue get = JS_NewCFunction(context->ctx(), getterFunction, "get", 0);
+    JSAtom key = JS_NewAtom(context->ctx(), property);
+    JS_DefineProperty(context->ctx(), thisObject, key, JS_UNDEFINED, get, JS_UNDEFINED,
+                            JS_PROP_HAS_CONFIGURABLE | JS_PROP_ENUMERABLE | JS_PROP_HAS_GET);
+    JS_FreeAtom(context->ctx(), key);
+  }
 };
 
 class ObjectFunction {
@@ -79,22 +82,41 @@ public:
   ObjectFunction() = delete;
   explicit ObjectFunction(JSContext *context, JSValueConst thisObject, const char *functionName,
                               JSCFunction function, int argc) {
-    JSValue f = JS_NewCFunction(context->context(), function, functionName, argc);
-    JSAtom key = JS_NewAtom(context->context(), functionName);
+    JSValue f = JS_NewCFunction(context->ctx(), function, functionName, argc);
+    JSAtom key = JS_NewAtom(context->ctx(), functionName);
 
 // We should avoid overwrite exist property functions.
 #ifdef DEBUG
-    assert_m(JS_HasProperty(context->context(), thisObject, key) == 0, (std::string("Found exist function property: ") + std::string(functionName)).c_str());
+    assert_m(JS_HasProperty(context->ctx(), thisObject, key) == 0, (std::string("Found exist function property: ") + std::string(functionName)).c_str());
 #endif
 
-    JS_DefinePropertyValue(context->context(), thisObject, key, f,
+    JS_DefinePropertyValue(context->ctx(), thisObject, key, f,
                            JS_PROP_C_W_E);
-    JS_FreeAtom(context->context(), key);
+    JS_FreeAtom(context->ctx(), key);
   };
+};
+
+class JSValueHolder {
+public:
+  JSValueHolder() = delete;
+  explicit JSValueHolder(QjsContext *ctx, JSValue value): m_value(value), m_ctx(ctx) {};
+  ~JSValueHolder() {
+    JS_FreeValue(m_ctx, m_value);
+  }
+  inline void setValue(JSValue value) {
+    m_value = value;
+  };
+  inline JSValue value() const { return m_value; }
+private:
+  QjsContext *m_ctx{nullptr};
+  JSValue m_value{JS_NULL};
 };
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value);
+void buildUICommandArgs(QjsContext *ctx, JSValue key, NativeString &args_01);
+NativeString *stringToNativeString(std::string &string);
+
 
 } // namespace kraken::binding::qjs
 

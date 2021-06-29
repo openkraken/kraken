@@ -50,8 +50,8 @@ TEST(Context, unrejectPromiseError) {
 
 TEST(jsValueToNativeString, utf8String) {
   auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
-  JSValue str = JS_NewString(bridge->getContext()->context(), "helloworld");
-  NativeString *nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->context(), str);
+  JSValue str = JS_NewString(bridge->getContext()->ctx(), "helloworld");
+  NativeString *nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   EXPECT_EQ(nativeString->length, 10);
   uint8_t expectedString[10] = {
       104, 101, 108, 108,
@@ -65,8 +65,8 @@ TEST(jsValueToNativeString, utf8String) {
 
 TEST(jsValueToNativeString, unicodeChinese) {
   auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
-  JSValue str = JS_NewString(bridge->getContext()->context(), "这是你的优乐美");
-  NativeString *nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->context(), str);
+  JSValue str = JS_NewString(bridge->getContext()->ctx(), "这是你的优乐美");
+  NativeString *nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"这是你的优乐美";
   EXPECT_EQ(nativeString->length, expectedString.size());
   for (int i = 0; i < nativeString->length; i ++) {
@@ -76,8 +76,8 @@ TEST(jsValueToNativeString, unicodeChinese) {
 
 TEST(jsValueToNativeString, emoji) {
   auto bridge = new kraken::JSBridge(0, [](int32_t contextId, const char* errmsg) {});
-  JSValue str = JS_NewString(bridge->getContext()->context(), "……🤪");
-  NativeString *nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->context(), str);
+  JSValue str = JS_NewString(bridge->getContext()->ctx(), "……🤪");
+  NativeString *nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"……🤪";
   EXPECT_EQ(nativeString->length, expectedString.length());
   for (int i = 0; i < nativeString->length; i ++) {

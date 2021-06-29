@@ -27,7 +27,7 @@ class SampleClass;
 
 class SampleClassInstance : public Instance {
 public:
-  explicit SampleClassInstance(JSContext *context, HostClass *sampleClass) : Instance(context, sampleClass, "SampleClass") {};
+  explicit SampleClassInstance(HostClass *sampleClass) : Instance(sampleClass, "SampleClass") {};
 private:
 };
 
@@ -36,7 +36,7 @@ public:
   explicit SampleClass(JSContext *context) : ParentClass(context) {}
   JSValue constructor(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) override {
     auto *sampleClass = static_cast<SampleClass *>(JS_GetOpaque(this_val, kHostClassClassId));
-    auto *instance = new SampleClassInstance(sampleClass->m_context, sampleClass);
+    auto *instance = new SampleClassInstance(sampleClass);
     return instance->instanceObject;
   }
 private:
@@ -84,8 +84,8 @@ TEST(HostClass, instanceOf) {
   // Test for C API
   context->defineGlobalProperty("SampleClass", sampleObject->classObject);
   JSValue args[] = {};
-  JSValue object = JS_CallConstructor(context->context(), sampleObject->classObject, 0, args);
-  bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->classObject);
+  JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
+  bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->classObject);
   EXPECT_EQ(isInstanceof, true);
 
   // Test with Javascript
@@ -133,8 +133,8 @@ TEST(HostClass, multipleInstance) {
     auto *sampleObject = new SampleClass(context.get());
     context->defineGlobalProperty("SampleClass1", sampleObject->classObject);
     JSValue args[] = {};
-    JSValue object = JS_CallConstructor(context->context(), sampleObject->classObject, 0, args);
-    bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->classObject);
+    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->classObject);
     EXPECT_EQ(isInstanceof, true);
   }
 
@@ -143,8 +143,8 @@ TEST(HostClass, multipleInstance) {
     auto *sampleObject = new SampleClass(context.get());
     context->defineGlobalProperty("SampleClass2", sampleObject->classObject);
     JSValue args[] = {};
-    JSValue object = JS_CallConstructor(context->context(), sampleObject->classObject, 0, args);
-    bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->classObject);
+    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->classObject);
     EXPECT_EQ(isInstanceof, true);
   }
 
@@ -152,8 +152,8 @@ TEST(HostClass, multipleInstance) {
     auto *sampleObject = new SampleClass(context.get());
     context->defineGlobalProperty("SampleClass3", sampleObject->classObject);
     JSValue args[] = {};
-    JSValue object = JS_CallConstructor(context->context(), sampleObject->classObject, 0, args);
-    bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->classObject);
+    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->classObject);
     EXPECT_EQ(isInstanceof, true);
   }
 
@@ -161,8 +161,8 @@ TEST(HostClass, multipleInstance) {
     auto *sampleObject = new SampleClass(context.get());
     context->defineGlobalProperty("SampleClass4", sampleObject->classObject);
     JSValue args[] = {};
-    JSValue object = JS_CallConstructor(context->context(), sampleObject->classObject, 0, args);
-    bool isInstanceof = JS_IsInstanceOf(context->context(), object, sampleObject->classObject);
+    JSValue object = JS_CallConstructor(context->ctx(), sampleObject->classObject, 0, args);
+    bool isInstanceof = JS_IsInstanceOf(context->ctx(), object, sampleObject->classObject);
     EXPECT_EQ(isInstanceof, true);
   }
 

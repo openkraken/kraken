@@ -6,7 +6,6 @@
 #ifndef KRAKENBRIDGE_FOUNDATION_H
 #define KRAKENBRIDGE_FOUNDATION_H
 
-#include "kraken_bridge_jsc_config.h"
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
@@ -14,6 +13,12 @@
 
 #include <sstream>
 #include <string>
+
+#define HTML_TARGET_ID -1
+#define WINDOW_TARGET_ID -2
+#define DOCUMENT_TARGET_ID -3
+
+#define assert_m(exp, msg) assert(((void)msg, exp))
 
 #define KRAKEN_EXPORT __attribute__((__visibility__("default")))
 

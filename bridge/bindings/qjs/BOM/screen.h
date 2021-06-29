@@ -28,8 +28,8 @@ private:
     static JSValue setter(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   };
 
-  HostObjectProperty m_width{m_context, m_jsObject, "width", WidthPropertyDescriptor::getter, WidthPropertyDescriptor::setter};
-  HostObjectProperty m_height{m_context, m_jsObject, "height", HeightPropertyDescriptor::getter, HeightPropertyDescriptor::setter};
+  ObjectProperty m_width{m_context, jsObject, "width", WidthPropertyDescriptor::getter, WidthPropertyDescriptor::setter};
+  ObjectProperty m_height{m_context, jsObject, "height", HeightPropertyDescriptor::getter, HeightPropertyDescriptor::setter};
 };
 
 void bindScreen(std::unique_ptr<JSContext> &context);

@@ -56,17 +56,17 @@ public:
   struct Context {
     Context(kraken::binding::qjs::JSContext &context, JSValue callback)
       : m_context(context), m_callback(callback) {
-      JS_DupValue(context.context(), callback);
+      JS_DupValue(context.ctx(), callback);
     };
     Context(kraken::binding::qjs::JSContext &context, JSValue callback, JSValue secondaryCallback)
       : m_context(context), m_callback(callback), m_secondaryCallback(secondaryCallback) {
-      JS_DupValue(context.context(), callback);
-      JS_DupValue(context.context(), secondaryCallback);
+      JS_DupValue(context.ctx(), callback);
+      JS_DupValue(context.ctx(), secondaryCallback);
     };
     ~Context() {
-      JS_FreeValue(m_context.context(), m_callback);
+      JS_FreeValue(m_context.ctx(), m_callback);
       if (!JS_IsNull(m_secondaryCallback)) {
-        JS_FreeValue(m_context.context(), m_secondaryCallback);
+        JS_FreeValue(m_context.ctx(), m_secondaryCallback);
       }
     }
     kraken::binding::qjs::JSContext &m_context;

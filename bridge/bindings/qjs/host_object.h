@@ -18,7 +18,7 @@ public:
 
   HostObject() = delete;
   HostObject(JSContext *context, std::string name)
-    : m_context(context), m_name(std::move(name)), m_ctx(context->context()), m_contextId(context->getContextId()) {
+    : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
     JSClassDef def{};
     def.class_name = name.c_str();
     def.finalizer = proxyFinalize;

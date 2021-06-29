@@ -15,6 +15,7 @@
 #include "bindings/qjs/BOM/console.h"
 #include "bindings/qjs/kraken.h"
 #include "bindings/qjs/module_manager.h"
+#include "bindings/qjs/DOM/event_target.h"
 
 //#include "bindings/jsc/KOM/timer.h"
 //#include "bindings/jsc/DOM/comment_node.h"
@@ -85,6 +86,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 //  bindTimer(m_context);
   bindKraken(m_context);
   bindModuleManager(m_context);
+  bindEventTarget(m_context);
 //  bindConsole(m_context);
 //  bindEvent(m_context);
 //  bindMouseEvent(m_context);
@@ -191,7 +193,7 @@ JSBridge::~JSBridge() {
   if (!m_context->isValid()) return;
 
   for (auto &callback : krakenModuleListenerList) {
-    JS_FreeValue(m_context->context(), callback);
+    JS_FreeValue(m_context->ctx(), callback);
   }
 
   krakenModuleListenerList.clear();
