@@ -138,18 +138,18 @@ class GestureManager {
         EventTarget node = target.getEventTarget!();
 
         Touch touch = Touch(
-          identifier: event.pointer,
+          identifier: point.pointer,
           target: node,
-          screenX: event.position.dx,
-          screenY: event.position.dy,
-          clientX: event.localPosition.dx,
-          clientY: event.localPosition.dy,
-          pageX: event.localPosition.dx,
-          pageY: event.localPosition.dy,
-          radiusX: event.radiusMajor,
-          radiusY: event.radiusMinor,
-          rotationAngle: event.orientation,
-          force: event.pressure,
+          screenX: point.position.dx,
+          screenY: point.position.dy,
+          clientX: point.localPosition.dx,
+          clientY: point.localPosition.dy,
+          pageX: point.localPosition.dx,
+          pageY: point.localPosition.dy,
+          radiusX: point.radiusMajor,
+          radiusY: point.radiusMinor,
+          rotationAngle: point.orientation,
+          force: point.pressure,
         );
 
         e.changedTouches.append(touch);
