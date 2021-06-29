@@ -40,4 +40,59 @@ describe('display sliver', () => {
     container.scrollBy(0, -150);
     await snapshot();
   });
+
+  it('should works with positioned element of no top and left', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'sliver',
+          width: '200px',
+          height: '200px',
+        },
+      }, [
+        createElement('div', {
+          style: {
+            positive: 'relative',
+            width: '200px',
+            height: '100px',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              positive: 'absolute',
+              width: '50px',
+              height: '50px',
+              backgroundColor: 'green',
+            }
+          }, [
+            createText('1')
+          ])
+        ]),
+        createElement('div', {
+          style: {
+            positive: 'relative',
+            width: '200px',
+            height: '100px',
+          }
+        }, [
+          createElement('div', {
+            style: {
+              positive: 'absolute',
+              width: '50px',
+              height: '50px',
+              backgroundColor: 'green',
+            }
+          }, [
+            createText('2')
+          ])
+        ])
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
 });
