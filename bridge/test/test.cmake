@@ -4,6 +4,8 @@ list(APPEND KRAKEN_TEST_SOURCE
   polyfill/dist/testframework.cc
 )
 
+set(gtest_disable_pthreads ON)
+
 add_subdirectory(./third_party/googletest)
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
@@ -29,6 +31,9 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   target_include_directories(kraken_unit_test PUBLIC ./third_party/googletest/googletest/include ${BRIDGE_INCLUDE})
   target_link_libraries(kraken_unit_test gtest gtest_main kraken_static quickjs)
 endif()
+
+target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1)
+target_compile_options(kraken PUBLIC -DDUMP_LEAKS=1)
 
 ### kraken_integration support library
 add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE})

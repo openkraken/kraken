@@ -24,6 +24,11 @@ list(APPEND PUBLIC_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
 )
 
+if (ENABLE_ASAN)
+  add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+  add_link_options(-fsanitize=address -fno-omit-frame-pointer)
+endif()
+
 list(APPEND BRIDGE_SOURCE
     kraken_bridge.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
@@ -214,6 +219,8 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/DOM/event_target.h
       bindings/qjs/DOM/event.cc
       bindings/qjs/DOM/event.h
+      bindings/qjs/BOM/blob.cc
+      bindings/qjs/BOM/blob.h
       bindings/qjs/DOM/custom_event.cc
       bindings/qjs/DOM/custom_event.h
   )
@@ -223,12 +230,8 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   add_compile_options(-fno-optimize-sibling-calls -fno-omit-frame-pointer)
   target_compile_options(quickjs PUBLIC -DCONFIG_VERSION=${\"QUICKJS_VERSION\"})
 
-  ## ENABLE MEM LEAK CHECK in debug mode
-  if (${CMAKE_BUILD_TYPE} STREQUAL "debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "relwithdebinfo")
-    target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1 -DDEBUG)
-  endif()
-
 endif()
+
 
 list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h

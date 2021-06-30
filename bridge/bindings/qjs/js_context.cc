@@ -31,6 +31,8 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   if (m_runtime == nullptr) {
     m_runtime = JS_NewRuntime();
   }
+  // JavaScript and C are shared the same system call stack.
+  JS_SetMaxStackSize(m_runtime, 1024 * 1024 /* 1MB stack  */);
   m_ctx = JS_NewContext(m_runtime);
 
   timeOrigin = std::chrono::system_clock::now();
@@ -55,6 +57,11 @@ JSContext::~JSContext() {
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
   JS_RunGC(m_runtime);
+
+#if DUMP_LEAKS
+  JS_FreeRuntime(m_runtime);
+  m_runtime = nullptr;
+#endif
   m_ctx = nullptr;
 }
 
@@ -127,22 +134,21 @@ void JSContext::reportError(JSValueConst &error) {
   JSValue stackValue = JS_GetPropertyStr(m_ctx, error, "stack");
   if (!JS_IsUndefined(stackValue)) {
     stack = JS_ToCString(m_ctx, stackValue);
-    JS_FreeCString(m_ctx, stack);
   }
-  JS_FreeCString(m_ctx, title);
-  JS_FreeValue(m_ctx, stackValue);
 
   _handler(contextId, (std::string(title) + "\n" + std::string(stack)).c_str());
+
+  JS_FreeValue(m_ctx, stackValue);
+  JS_FreeCString(m_ctx, title);
+  JS_FreeCString(m_ctx, stack);
 }
 
-void JSContext::defineGlobalProperty(const char* prop, JSValue value) {
+void JSContext::defineGlobalProperty(const char *prop, JSValue value) {
   JSAtom atom = JS_NewAtom(m_ctx, prop);
-  JS_DefineProperty(m_ctx, globalObject, atom, value,
-                    JS_UNDEFINED, JS_UNDEFINED, JS_PROP_HAS_VALUE);
+  JS_DefineProperty(m_ctx, globalObject, atom, value, JS_UNDEFINED, JS_UNDEFINED, JS_PROP_HAS_VALUE);
   m_globalProps.emplace_front(value);
   JS_FreeAtom(m_ctx, atom);
 }
-
 
 NativeString *jsValueToNativeString(QjsContext *ctx, JSValue &value) {
   if (!JS_IsString(value)) {

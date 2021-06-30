@@ -101,6 +101,7 @@ TEST(jsValueToNativeString, utf8String) {
   for (int i = 0; i < 10; i ++) {
     EXPECT_EQ(expectedString[i], *(nativeString->string + i));
   }
+  delete bridge;
 }
 
 TEST(jsValueToNativeString, unicodeChinese) {
@@ -112,6 +113,7 @@ TEST(jsValueToNativeString, unicodeChinese) {
   for (int i = 0; i < nativeString->length; i ++) {
     EXPECT_EQ(expectedString[i], *(nativeString->string + i));
   }
+  delete bridge;
 }
 
 TEST(jsValueToNativeString, emoji) {
@@ -123,4 +125,5 @@ TEST(jsValueToNativeString, emoji) {
   for (int i = 0; i < nativeString->length; i ++) {
     EXPECT_EQ(expectedString[i], *(nativeString->string + i));
   }
+  delete bridge;
 }

@@ -99,16 +99,18 @@ public:
 class JSValueHolder {
 public:
   JSValueHolder() = delete;
-  explicit JSValueHolder(QjsContext *ctx, JSValue value): m_value(value), m_ctx(ctx) {};
+  explicit JSValueHolder(JSContext *context, JSValue value): m_value(value), m_context(context) {};
   ~JSValueHolder() {
-    JS_FreeValue(m_ctx, m_value);
+    if (m_context->isValid()) {
+      JS_FreeValue(m_context->ctx(), m_value);
+    }
   }
   inline void setValue(JSValue value) {
     m_value = value;
   };
   inline JSValue value() const { return m_value; }
 private:
-  QjsContext *m_ctx{nullptr};
+  JSContext *m_context{nullptr};
   JSValue m_value{JS_NULL};
 };
 
