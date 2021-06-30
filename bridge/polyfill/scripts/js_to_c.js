@@ -43,19 +43,20 @@ void initKraken${outputName}(kraken::JSBridge *bridge);
 `;
 
 const getPolyFillJavaScriptSource = (source) => {
-  // const uint8Array = new Uint8Array(Buffer.from(source));
-  let utf8BufferView = strEncodeUTF8(source);
-  let utf16BufferView = strEncodeUTF16(source);
-  if (process.env.KRAKEN_JS_ENGINE == 'quickjs') {
-    return `
-const uint32_t bufferLength = ${utf8BufferView.length};
-static const uint8_t sourceBuffer[${utf8BufferView.length}] = { ${utf8BufferView.join(',')} };`
+  if (process.env.KRAKEN_JS_ENGINE === 'quickjs') {
+    return `static std::string jsCode = std::string(R"(${source})");`
   } else {
-    return `
-const uint32_t bufferLength = ${utf16BufferView.length};
-static const uint16_t sourceBuffer[${utf16BufferView.length}] = { ${utf16BufferView.join(',')} };`
+    return `static std::u16string jsCode = std::u16string(uR"(${source})");`
   }
 };
+
+const getPolyfillEvalCall = () => {
+  if (process.env.KRAKEN_JS_ENGINE === 'quickjs') {
+    return 'bridge->evaluateScript(jsCode.c_str(), jsCode.length(), "internal://", 0);';
+  } else {
+    return 'bridge->evaluateScript(reinterpret_cast<const uint16_t *>(jsCode.c_str()), jsCode.length(), "internal://", 0);'
+  }
+}
 
 const getPolyFillSource = (source, outputName) => `/*
  * Copyright (C) 2020 Alibaba Inc. All rights reserved.
@@ -67,12 +68,16 @@ const getPolyFillSource = (source, outputName) => `/*
 ${getPolyFillJavaScriptSource(source)}
 
 void initKraken${outputName}(kraken::JSBridge *bridge) {
-  bridge->evaluateScript(${process.env.KRAKEN_JS_ENGINE === 'quickjs' ? 'reinterpret_cast<const char *>(sourceBuffer)' : 'sourceBuffer'}, bufferLength, "internal://", 0);
+  ${getPolyfillEvalCall()}
 }
 `;
 
 function convertJSToCpp(code, outputName) {
-  code = code.replace(/\)\"/g, '))") + std::u16string(uR"("');
+  if (process.env.KRAKEN_JS_ENGINE === 'quickjs') {
+    code = code.replace(/\)\"/g, '))") + std::string(R"("');
+  } else {
+    code = code.replace(/\)\"/g, '))") + std::u16string(uR"("');
+  }
   return getPolyFillSource(code, outputName);
 }
 
