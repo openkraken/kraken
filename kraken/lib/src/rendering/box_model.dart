@@ -156,15 +156,7 @@ class RenderLayoutBox extends RenderBoxModel
     renderStyle: renderStyle,
     viewportSize: viewportSize,
     elementDelegate: elementDelegate
-  ) {
-    _renderStyle = renderStyle;
-  }
-
-  late RenderStyle _renderStyle;
-
-  RenderStyle get renderStyle {
-    return _renderStyle;
-  }
+  );
 
   @override
   void markNeedsLayout() {
@@ -496,6 +488,7 @@ class RenderBoxModel extends RenderBox
     renderStyle.renderBoxModel = this;
     _viewportSize = viewportSize;
     _elementDelegate = elementDelegate;
+    _renderStyle = renderStyle;
   }
 
   @override
@@ -507,6 +500,12 @@ class RenderBoxModel extends RenderBox
 
   Size? _viewportSize;
   Size get viewportSize => _viewportSize!;
+
+  late RenderStyle _renderStyle;
+
+  RenderStyle get renderStyle {
+    return _renderStyle;
+  }
 
   ElementDelegate? _elementDelegate;
   ElementDelegate get elementDelegate => _elementDelegate!;
