@@ -6,7 +6,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/scheduler.dart';
 
 enum AppearEventState {
   none,
@@ -15,9 +14,6 @@ enum AppearEventState {
 }
 
 mixin EventHandlerMixin on EventTarget {
-  static const int MAX_STEP_MS = 10;
-  final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
-
   AppearEventState appearEventState = AppearEventState.none;
 
   void addEventResponder(RenderPointerListenerMixin renderBox) {
