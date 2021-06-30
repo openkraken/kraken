@@ -45,32 +45,6 @@ mixin EventHandlerMixin on EventTarget {
     return this;
   }
 
-  TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
-    TouchEvent event = TouchEvent(type);
-    var pointerEventOriginal = pointEvent.original;
-    // Use original event, prevent to be relative coordinate
-    if (pointerEventOriginal != null) pointEvent = pointerEventOriginal;
-
-    Touch touch = Touch(
-      identifier: pointEvent.pointer,
-      target: this,
-      screenX: pointEvent.position.dx,
-      screenY: pointEvent.position.dy,
-      clientX: pointEvent.localPosition.dx,
-      clientY: pointEvent.localPosition.dy,
-      pageX: pointEvent.localPosition.dx,
-      pageY: pointEvent.localPosition.dy,
-      radiusX: pointEvent.radiusMajor,
-      radiusY: pointEvent.radiusMinor,
-      rotationAngle: pointEvent.orientation,
-      force: pointEvent.pressure,
-    );
-    event.changedTouches.append(touch);
-    event.targetTouches.append(touch);
-    event.touches.append(touch);
-    return event;
-  }
-
   void handleMouseEvent(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
     RenderBoxModel? root = elementManager.viewportElement.renderBoxModel;
     if (root == null || up == null) {
