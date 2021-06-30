@@ -48,6 +48,8 @@ class GestureManager {
 
   List<RenderBox> _hitTestList = [];
 
+  RenderPointerListenerMixin? _target;
+
   Map<int, PointerEvent> eventByPointer = Map();
 
   Map<int, RenderPointerListenerMixin> targetByPointer = Map();
@@ -180,6 +182,13 @@ class GestureManager {
       }
 
       if (event is PointerUpEvent || event is PointerCancelEvent) {
+        // Multi pointer operations in the web will organize click and other gesture triggers.
+        if (targetByPointer.length == 1 && targetByPointer[event.pointer] != null) {
+          _target = targetByPointer[event.pointer];
+        } else {
+          _target = null;
+        }
+
         points.remove(event.pointer);
         eventByPointer.remove(event.pointer);
         targetByPointer.remove(event.pointer);
@@ -188,116 +197,114 @@ class GestureManager {
   }
 
   void onClick(String eventType, { PointerDownEvent? down, PointerUpEvent? up }) {
-    if (targetByPointer[down?.pointer] != null) {
-      RenderPointerListenerMixin target = targetByPointer[down?.pointer] as RenderPointerListenerMixin;
-      if (target.onClick != null) {
-        target.onClick!(eventType, up: up);
+    if (_target != null && _target!.onClick != null) {
+      if (_target!.onClick != null) {
+        _target!.onClick!(eventType, up: up);
       }
     }
   }
 
   void onSwipe(Event event) {
-    // if (targetByPointer[event?.pointer] != null) {
-    //   RenderPointerListenerMixin target = targetByPointer[down?.pointer] as RenderPointerListenerMixin;
-    //   if (target!.onSwipe != null) {
-    //     target!.onSwipe!(event);
-    //   }
-    // }
+    if (_target != null && _target!.onSwipe != null) {
+      if (_target!.onSwipe != null) {
+        _target!.onSwipe!(event);
+      }
+    }
   }
 
   void onPanStart(DragStartDetails details) {
-    // if (_target != null && _target!.onPan != null) {
-    //   _target!.onPan!(
-    //       GestureEvent(
-    //           EVENT_PAN,
-    //           GestureEventInit(
-    //               state: EVENT_STATE_START,
-    //               deltaX: details.globalPosition.dx,
-    //               deltaY: details.globalPosition.dy
-    //           )
-    //       )
-    //   );
-    // }
+    if (_target != null && _target!.onPan != null) {
+      _target!.onPan!(
+        GestureEvent(
+          EVENT_PAN,
+          GestureEventInit(
+            state: EVENT_STATE_START,
+            deltaX: details.globalPosition.dx,
+            deltaY: details.globalPosition.dy
+          )
+        )
+      );
+    }
   }
 
   void onPanUpdate(DragUpdateDetails details) {
-    // if (_target != null && _target!.onPan != null) {
-    //   _target!.onPan!(
-    //       GestureEvent(
-    //           EVENT_PAN,
-    //           GestureEventInit(
-    //               state: EVENT_STATE_UPDATE,
-    //               deltaX: details.globalPosition.dx,
-    //               deltaY: details.globalPosition.dy
-    //           )
-    //       )
-    //   );
-    // }
+    if (_target != null && _target!.onPan != null) {
+      _target!.onPan!(
+          GestureEvent(
+              EVENT_PAN,
+              GestureEventInit(
+                  state: EVENT_STATE_UPDATE,
+                  deltaX: details.globalPosition.dx,
+                  deltaY: details.globalPosition.dy
+              )
+          )
+      );
+    }
   }
 
   void onPanEnd(DragEndDetails details) {
-    // if (_target != null && _target!.onPan != null) {
-    //   _target!.onPan!(
-    //       GestureEvent(
-    //           EVENT_PAN,
-    //           GestureEventInit(
-    //               state: EVENT_STATE_END,
-    //               velocityX: details.velocity.pixelsPerSecond.dx,
-    //               velocityY: details.velocity.pixelsPerSecond.dy
-    //           )
-    //       )
-    //   );
-    // }
+    if (_target != null && _target!.onPan != null) {
+      _target!.onPan!(
+        GestureEvent(
+          EVENT_PAN,
+          GestureEventInit(
+            state: EVENT_STATE_END,
+            velocityX: details.velocity.pixelsPerSecond.dx,
+            velocityY: details.velocity.pixelsPerSecond.dy
+          )
+        )
+      );
+    }
   }
 
   void onScaleStart(ScaleStartDetails details) {
-    // if (_target != null && _target!.onScale != null) {
-    //   _target!.onScale!(
-    //       GestureEvent(
-    //           EVENT_SCALE,
-    //           GestureEventInit( state: EVENT_STATE_START )
-    //       )
-    //   );
-    // }
+    if (_target != null && _target!.onScale != null) {
+      _target!.onScale!(
+        GestureEvent(
+          EVENT_SCALE,
+          GestureEventInit( state: EVENT_STATE_START )
+        )
+      );
+    }
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    // if (_target != null && _target!.onScale != null) {
-    //   _target!.onScale!(
-    //       GestureEvent(
-    //           EVENT_SCALE,
-    //           GestureEventInit(
-    //               state: EVENT_STATE_UPDATE,
-    //               rotation: details.rotation,
-    //               scale: details.scale
-    //           )
-    //       )
-    //   );
-    // }
+    if (_target != null && _target!.onScale != null) {
+      _target!.onScale!(
+        GestureEvent(
+          EVENT_SCALE,
+          GestureEventInit(
+            state: EVENT_STATE_UPDATE,
+            rotation: details.rotation,
+            scale: details.scale
+          )
+        )
+      );
+    }
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    // if (_target != null && _target!.onScale != null) {
-    //   _target!.onScale!(
-    //       GestureEvent(
-    //           EVENT_SCALE,
-    //           GestureEventInit( state: EVENT_STATE_END )
-    //       )
-    //   );
-    // }
+    if (_target != null && _target!.onScale != null) {
+      _target!.onScale!(
+        GestureEvent(
+          EVENT_SCALE,
+          GestureEventInit( state: EVENT_STATE_END )
+        )
+      );
+    }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    // if (_target != null && _target!.onLongPress != null) {
-    //   _target!.onLongPress!(
-    //       GestureEvent(
-    //           EVENT_LONG_PRESS,
-    //           GestureEventInit(
-    //               deltaX: details.globalPosition.dx,
-    //               deltaY: details.globalPosition.dy
-    //           )
-    //       )
-    //   );
-    // }
+    if (_target != null && _target!.onLongPress != null) {
+      _target!.onLongPress!(
+        GestureEvent(
+          EVENT_LONG_PRESS,
+          GestureEventInit(
+            deltaX: details.globalPosition.dx,
+            deltaY: details.globalPosition.dy
+          )
+        )
+      );
+    }
   }
 }
