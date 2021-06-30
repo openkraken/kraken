@@ -45,28 +45,6 @@ mixin EventHandlerMixin on EventTarget {
     return this;
   }
 
-  void handlePointDown(PointerDownEvent pointEvent) {
-    TouchEvent event = _getTouchEvent(EVENT_TOUCH_START, pointEvent);
-    dispatchEvent(event);
-  }
-
-  void handlePointMove(PointerMoveEvent pointEvent) {
-    _throttler.throttle(() {
-      TouchEvent event = _getTouchEvent(EVENT_TOUCH_MOVE, pointEvent);
-      dispatchEvent(event);
-    });
-  }
-
-  void handlePointUp(PointerUpEvent pointEvent) {
-    TouchEvent event = _getTouchEvent(EVENT_TOUCH_END, pointEvent);
-    dispatchEvent(event);
-  }
-
-  void handlePointCancel(PointerCancelEvent pointEvent) {
-    TouchEvent event = _getTouchEvent(EVENT_TOUCH_CANCEL, pointEvent);
-    dispatchEvent(event);
-  }
-
   TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
     TouchEvent event = TouchEvent(type);
     var pointerEventOriginal = pointEvent.original;
