@@ -68,6 +68,7 @@ mixin ElementBase on Node {
   }
 }
 
+/// Delegate element methods for renderBoxModel.
 class ElementDelegate {
   Function markRendererNeedsLayout;
   Function toggleRendererRepaintBoundary;
