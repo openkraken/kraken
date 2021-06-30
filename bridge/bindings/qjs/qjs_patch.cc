@@ -163,7 +163,7 @@ uint16_t *JS_ToUnicode(JSContext *ctx, JSValueConst value, uint32_t *length) {
   if (!string->is_wide_char) {
     uint8_t *p = string->u.str8;
     uint32_t len = *length = string->len;
-    auto *newBuf = (uint16_t*) malloc(sizeof(uint16_t) * len);
+    auto *newBuf = (uint16_t*) malloc(sizeof(uint16_t) * len * 2);
     for (size_t i = 0; i < len; i ++) {
       newBuf[i] = p[i];
       newBuf[i+1] = 0x00;
