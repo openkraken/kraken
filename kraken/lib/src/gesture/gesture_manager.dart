@@ -91,7 +91,7 @@ class GestureManager {
       }
     }
 
-    String touchType = '';
+    String touchType = EVENT_TOUCH_CANCEL;
 
     if (event is PointerDownEvent) {
       touchType = EVENT_TOUCH_START;
@@ -124,6 +124,8 @@ class GestureManager {
       touchType = EVENT_TOUCH_END;
       points.remove(event.pointer);
       eventByPointer.remove(event.pointer);
+    } else if (event is PointerCancelEvent) {
+      touchType = EVENT_TOUCH_CANCEL;
     }
 
     if (targetByPointer[event.pointer] != null) {
