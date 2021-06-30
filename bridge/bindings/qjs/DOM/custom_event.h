@@ -24,7 +24,7 @@ class CustomEvent : public Event {
 public:
   CustomEvent() = delete;
   explicit CustomEvent(JSContext *context) : Event(context) {};
-  JSValue constructor(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) override;
+  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
   static JSValue initCustomEvent(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
   OBJECT_INSTANCE(CustomEvent);
@@ -51,7 +51,7 @@ public:
   }
 
 private:
-  JSValueHolder m_detail{m_ctx, JS_NULL};
+  JSValueHolder m_detail{m_context, JS_NULL};
   NativeCustomEvent* nativeCustomEvent{nullptr};
 };
 

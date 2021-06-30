@@ -11,7 +11,7 @@ namespace kraken::binding::qjs {
 
 static std::atomic<int64_t> globalEventTargetId{0};
 
-JSValue EventTarget::constructor(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue EventTarget::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc == 1) {
     JSValue &jsOnlyEvents = argv[0];
 

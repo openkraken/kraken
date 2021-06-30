@@ -48,7 +48,7 @@ JSValue CustomEvent::initCustomEvent(QjsContext *ctx, JSValue this_val, int argc
   return JS_NULL;
 }
 
-JSValue CustomEvent::constructor(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+JSValue CustomEvent::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to construct 'CustomEvent': 1 argument required, but only 0 present.");
   }

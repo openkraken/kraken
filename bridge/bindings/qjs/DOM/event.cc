@@ -11,8 +11,8 @@
 
 namespace kraken::binding::qjs {
 
-JSValue Event::constructor(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return HostClass::constructor(ctx, this_val, argc, argv);
+JSValue Event::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+  return HostClass::constructor(ctx, func_obj, this_val, argc, argv);
 }
 
 OBJECT_INSTANCE_IMPL(Event);

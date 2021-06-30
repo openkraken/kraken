@@ -17,7 +17,7 @@ class NativeEventTarget;
 
 class EventTarget : public HostClass {
 public:
-  JSValue constructor(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) override;
+  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   EventTarget() = delete;
   explicit EventTarget(JSContext *context): HostClass(context, "EventTarget") {}
 

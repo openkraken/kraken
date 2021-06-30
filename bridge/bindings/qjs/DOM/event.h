@@ -86,7 +86,7 @@ using EventCreator = EventInstance *(*)(JSContext *context, void *nativeEvent);
 
 class Event : public HostClass {
 public:
-  JSValue constructor(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) override;
+  JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   Event() = delete;
   explicit Event(JSContext *context): HostClass(context, "Event") {}
 

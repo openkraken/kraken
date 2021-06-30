@@ -36,7 +36,7 @@ public:
   };
   virtual ~HostClass() = default;
 
-  virtual JSValue constructor(QjsContext *ctx, JSValue this_val, int argc, JSValueConst *argv) {
+  virtual JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst *argv) {
     return JS_NewObject(ctx);
   };
   JSValue classObject;
@@ -55,15 +55,21 @@ protected:
 private:
   static void proxyFinalize(JSRuntime *rt, JSValue val) {
     auto hostObject = static_cast<HostClass *>(JS_GetOpaque(val, kHostClassClassId));
-    JS_FreeValue(hostObject->m_ctx, hostObject->classObject);
-    JS_FreeValue(hostObject->m_ctx, hostObject->m_prototypeObject);
+    if (hostObject->context()->isValid()) {
+      JS_FreeValue(hostObject->m_ctx, hostObject->classObject);
+    }
     delete hostObject;
   };
   static JSValue proxyCall(QjsContext *ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst *argv,
                            int flags) {
-    auto *hostClass = static_cast<HostClass *>(JS_GetOpaque(this_val, kHostClassClassId));
-    JSValue instance = hostClass->constructor(ctx, this_val, argc, argv);
-    JS_SetPrototype(ctx, instance, hostClass->m_prototypeObject);
+    auto *hostClass = static_cast<HostClass *>(JS_GetOpaque(func_obj, kHostClassClassId));
+
+    JSAtom prototypeKey = JS_NewAtom(ctx, "prototype");
+    JSValue proto = JS_GetProperty(ctx, this_val, prototypeKey);
+    JSValue instance = hostClass->constructor(ctx, func_obj, this_val, argc, argv);
+    JS_SetPrototype(ctx, instance, proto);
+    JS_FreeAtom(ctx, prototypeKey);
+    JS_FreeValue(ctx, proto);
     return instance;
   }
 };
@@ -93,7 +99,9 @@ protected:
 
   static void proxyInstanceFinalize(JSRuntime *rt, JSValue val) {
     auto *instance = static_cast<Instance *>(JS_GetOpaque(val, kHostClassInstanceClassId));
-    JS_FreeValue(instance->m_ctx, instance->instanceObject);
+    if (instance->context()->isValid()) {
+      JS_FreeValue(instance->m_ctx, instance->instanceObject);
+    }
     delete instance;
   };
 };
