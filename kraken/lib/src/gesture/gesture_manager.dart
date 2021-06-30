@@ -6,6 +6,7 @@
 import 'package:kraken/rendering.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/scheduler.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
@@ -13,6 +14,9 @@ class GestureManager {
 
   static GestureManager? _instance;
   GestureManager._();
+
+  static const int MAX_STEP_MS = 10;
+  final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
 
   factory GestureManager.instance() {
     if (_instance == null) {
@@ -158,20 +162,14 @@ class GestureManager {
       }
 
       if (currentTarget.dispatchEvent != null) {
-        currentTarget.dispatchEvent!(e);
+        if (touchType == EVENT_TOUCH_MOVE) {
+          _throttler.throttle(() {
+            currentTarget.dispatchEvent!(e);
+          });
+        } else {
+          currentTarget.dispatchEvent!(e);
+        }
       }
-
-      //
-      // if (currentTarget.onPointerDown != null && event is PointerDownEvent)
-      //   currentTarget.onPointerDown!(event);
-      // if (currentTarget.onPointerMove != null && event is PointerMoveEvent)
-      //   currentTarget.onPointerMove!(event);
-      // if (currentTarget.onPointerUp != null && event is PointerUpEvent)
-      //   currentTarget.onPointerUp!(event);
-      // if (currentTarget.onPointerCancel != null && event is PointerCancelEvent)
-      //   currentTarget.onPointerCancel!(event);
-      // if (currentTarget.onPointerSignal != null && event is PointerSignalEvent)
-      //   currentTarget.onPointerSignal!(event);
     }
   }
 
