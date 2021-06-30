@@ -21,10 +21,6 @@ mixin EventHandlerMixin on EventTarget {
   AppearEventState appearEventState = AppearEventState.none;
 
   void addEventResponder(RenderPointerListenerMixin renderBox) {
-    renderBox.onPointerDown = handlePointDown;
-    renderBox.onPointerMove = handlePointMove;
-    renderBox.onPointerUp = handlePointUp;
-    renderBox.onPointerCancel = handlePointCancel;
     renderBox.onClick = handleMouseEvent;
     renderBox.onSwipe = dispatchEvent;
     renderBox.onPan = dispatchEvent;
@@ -36,10 +32,6 @@ mixin EventHandlerMixin on EventTarget {
   }
 
   void removeEventResponder(RenderPointerListenerMixin renderBox) {
-    renderBox.onPointerDown = null;
-    renderBox.onPointerMove = null;
-    renderBox.onPointerUp = null;
-    renderBox.onPointerCancel = null;
     renderBox.onClick = null;
     renderBox.onSwipe = null;
     renderBox.onPan = null;
