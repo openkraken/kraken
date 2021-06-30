@@ -8,7 +8,6 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 

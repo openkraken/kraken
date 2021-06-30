@@ -10,7 +10,6 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 

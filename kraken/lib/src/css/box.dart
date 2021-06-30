@@ -11,7 +11,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 
 // CSS Box Model: https://drafts.csswg.org/css-box-4/

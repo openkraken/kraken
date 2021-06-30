@@ -336,7 +336,6 @@ mixin CSSTextMixin on RenderStyleBase {
     TextStyle? textStyle;
 
     CSSStyleDeclaration parentStyle;
-    ElementManager elementManager;
     Size viewportSize;
     if (parentElement != null) {
       parentStyle = parentElement.style;

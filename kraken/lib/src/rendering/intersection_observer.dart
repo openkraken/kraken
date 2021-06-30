@@ -5,7 +5,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/rendering.dart';
 
 /// Returns a sequence containing the specified [Layer] and all of its
 /// ancestors.  The returned sequence is in [parent, child] order.
