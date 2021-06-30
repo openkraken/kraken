@@ -117,13 +117,13 @@ class GestureManager {
           }
         }
       }
+
+      clearTargetList();
     } else if (event is PointerMoveEvent) {
       touchType = EVENT_TOUCH_MOVE;
       eventByPointer[event.pointer] = event;
     } else if (event is PointerUpEvent) {
       touchType = EVENT_TOUCH_END;
-      points.remove(event.pointer);
-      eventByPointer.remove(event.pointer);
     } else if (event is PointerCancelEvent) {
       touchType = EVENT_TOUCH_CANCEL;
     }
@@ -158,8 +158,14 @@ class GestureManager {
           force: point.pressure,
         );
 
-        e.changedTouches.append(touch);
-        e.targetTouches.append(touch);
+        if (pointer == event.pointer) {
+          e.changedTouches.append(touch);
+        }
+
+        if (currentTarget == target) {
+          e.targetTouches.append(touch);
+        }
+
         e.touches.append(touch);
       }
 
@@ -171,6 +177,12 @@ class GestureManager {
         } else {
           currentTarget.dispatchEvent!(e);
         }
+      }
+
+      if (event is PointerUpEvent || event is PointerCancelEvent) {
+        points.remove(event.pointer);
+        eventByPointer.remove(event.pointer);
+        targetByPointer.remove(event.pointer);
       }
     }
   }
