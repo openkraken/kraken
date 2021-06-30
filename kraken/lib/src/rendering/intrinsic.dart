@@ -14,10 +14,13 @@ class RenderIntrinsic extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   RenderIntrinsic(
       RenderStyle renderStyle,
-      Size viewportSize
+      Size viewportSize,
+      ElementDelegate elementDelegate
   ) : super(
-            renderStyle: renderStyle,
-            viewportSize: viewportSize);
+      renderStyle: renderStyle,
+      viewportSize: viewportSize,
+      elementDelegate: elementDelegate
+  );
 
   BoxSizeType get widthSizeType {
     bool widthDefined =
@@ -213,7 +216,7 @@ class RenderIntrinsic extends RenderBoxModel
     RenderObject? childRenderObject = child;
     child = null;
     RenderSelfRepaintIntrinsic newChild =
-      RenderSelfRepaintIntrinsic(renderStyle, viewportSize);
+      RenderSelfRepaintIntrinsic(renderStyle, viewportSize, elementDelegate);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }
@@ -230,8 +233,9 @@ class RenderIntrinsic extends RenderBoxModel
 class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
   RenderSelfRepaintIntrinsic(
       RenderStyle renderStyle,
-      Size viewportSize)
-      : super(renderStyle, viewportSize);
+      Size viewportSize,
+      ElementDelegate elementDelegate,
+    ) : super(renderStyle, viewportSize, elementDelegate);
 
   @override
   bool get isRepaintBoundary => true;
@@ -240,7 +244,7 @@ class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
     RenderObject? childRenderObject = child;
     child = null;
     RenderIntrinsic newChild =
-        RenderIntrinsic(renderStyle, viewportSize);
+        RenderIntrinsic(renderStyle, viewportSize, elementDelegate);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }

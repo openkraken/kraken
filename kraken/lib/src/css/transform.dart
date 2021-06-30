@@ -1118,21 +1118,16 @@ mixin CSSTransformMixin on RenderStyleBase {
       return;
     }
 
-    ElementManager elementManager = renderBoxModel!.elementManager!;
-    int targetId = renderBoxModel!.targetId;
-    Element element = elementManager.getEventTargetByTargetId<Element>(targetId)!;
-    element.renderBoxModel!.renderStyle.transform = matrix4;
+    transform = matrix4;
+
+    ElementDelegate elementDelegate = renderBoxModel!.elementDelegate;
 
     if (shouldToggleRepaintBoundary) {
-      if (element.shouldConvertToRepaintBoundary) {
-        element.convertToRepaintBoundary();
-      } else {
-        element.convertToNonRepaintBoundary();
-      }
+      elementDelegate.toggleRendererRepaintBoundary();
     }
 
     if (shouldMarkNeedsLayout) {
-      element.renderBoxModel!.markNeedsLayout();
+      elementDelegate.markRendererNeedsLayout();
     }
   }
 

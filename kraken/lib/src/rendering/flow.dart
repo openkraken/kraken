@@ -35,14 +35,16 @@ class _RunMetrics {
 
 /// Impl flow layout algorithm.
 class RenderFlowLayout extends RenderLayoutBox {
-  RenderFlowLayout(
-      {List<RenderBox>? children,
-      required RenderStyle renderStyle,
-      required Size viewportSize,
-      })
-      : super(
-            renderStyle: renderStyle,
-            viewportSize: viewportSize) {
+  RenderFlowLayout({
+    List<RenderBox>? children,
+    required RenderStyle renderStyle,
+    required Size viewportSize,
+    required ElementDelegate elementDelegate
+  }) : super(
+    renderStyle: renderStyle,
+    viewportSize: viewportSize,
+    elementDelegate: elementDelegate
+  ) {
     addAll(children);
   }
 
@@ -1736,8 +1738,10 @@ class RenderFlowLayout extends RenderLayoutBox {
   RenderRecyclerLayout toRenderRecyclerLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderRecyclerLayout layout = RenderRecyclerLayout(
-        renderStyle: renderStyle,
-        viewportSize: viewportSize);
+      renderStyle: renderStyle,
+      viewportSize: viewportSize,
+      elementDelegate: elementDelegate,
+    );
     layout.addAll(children as List<RenderBox?>?);
     return copyWith(layout);
   }
@@ -1746,31 +1750,35 @@ class RenderFlowLayout extends RenderLayoutBox {
   RenderFlexLayout toFlexLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlexLayout flexLayout = RenderFlexLayout(
-        children: children as List<RenderBox>,
-        renderStyle: renderStyle,
-        viewportSize: viewportSize);
+      children: children as List<RenderBox>,
+      renderStyle: renderStyle,
+      viewportSize: viewportSize,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(flexLayout);
   }
 
   /// Convert [RenderFlowLayout] to [RenderSelfRepaintFlowLayout]
   RenderSelfRepaintFlowLayout toSelfRepaint() {
     List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderSelfRepaintFlowLayout selfRepaintFlowLayout =
-        RenderSelfRepaintFlowLayout(
-            children: children as List<RenderBox>?,
-            renderStyle: renderStyle,
-            viewportSize: viewportSize);
+    RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
+      children: children as List<RenderBox>?,
+      renderStyle: renderStyle,
+      viewportSize: viewportSize,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(selfRepaintFlowLayout);
   }
 
   /// Convert [RenderFlowLayout] to [RenderSelfRepaintFlexLayout]
   RenderSelfRepaintFlexLayout toSelfRepaintFlexLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderSelfRepaintFlexLayout selfRepaintFlexLayout =
-        RenderSelfRepaintFlexLayout(
-            children: children as List<RenderBox>,
-            renderStyle: renderStyle,
-            viewportSize: viewportSize);
+    RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
+      children: children as List<RenderBox>,
+      renderStyle: renderStyle,
+      viewportSize: viewportSize,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(selfRepaintFlexLayout);
   }
 }
@@ -1780,11 +1788,14 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   RenderSelfRepaintFlowLayout({
     List<RenderBox>? children,
     required RenderStyle renderStyle,
-    required Size viewportSize
+    required Size viewportSize,
+    required ElementDelegate elementDelegate
   }) : super(
-            children: children,
-            renderStyle: renderStyle,
-            viewportSize: viewportSize);
+    children: children,
+    renderStyle: renderStyle,
+    viewportSize: viewportSize,
+    elementDelegate: elementDelegate
+  );
 
   @override
   bool get isRepaintBoundary => true;
@@ -1792,11 +1803,12 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   /// Convert [RenderSelfRepaintFlowLayout] to [RenderSelfRepaintFlexLayout]
   RenderSelfRepaintFlexLayout toFlexLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
-    RenderSelfRepaintFlexLayout selfRepaintFlexLayout =
-        RenderSelfRepaintFlexLayout(
-            children: children as List<RenderBox>,
-            renderStyle: renderStyle,
-            viewportSize: viewportSize);
+    RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
+      children: children as List<RenderBox>,
+      renderStyle: renderStyle,
+      viewportSize: viewportSize,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(selfRepaintFlexLayout);
   }
 
@@ -1804,9 +1816,11 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   RenderFlowLayout toParentRepaint() {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
-        children: children as List<RenderBox>,
-        renderStyle: renderStyle,
-        viewportSize: viewportSize);
+      children: children as List<RenderBox>,
+      renderStyle: renderStyle,
+      viewportSize: viewportSize,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(renderFlowLayout);
   }
 
@@ -1814,9 +1828,11 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   RenderFlexLayout toParentRepaintFlexLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
-        children: children as List<RenderBox>,
-        renderStyle: renderStyle,
-        viewportSize: viewportSize);
+      children: children as List<RenderBox>,
+      renderStyle: renderStyle,
+      viewportSize: viewportSize,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(renderFlexLayout);
   }
 }
