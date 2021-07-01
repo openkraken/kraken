@@ -68,7 +68,8 @@ mixin ElementBase on Node {
   }
 }
 
-/// Delegate element methods for renderBoxModel.
+/// Delegate methods passed to renderBoxModel for actions involved with element
+/// (eg. convert renderBoxModel to repaint boundary then attach to element).
 class ElementDelegate {
   Function markRendererNeedsLayout;
   Function toggleRendererRepaintBoundary;
@@ -174,6 +175,37 @@ class Element extends Node
       _beforeRendererAttach,
       _afterRendererAttach,
     );
+  }
+
+  // Mark renderer as needs layout.
+  void _markRendererNeedsLayout() {
+    renderBoxModel!.markNeedsLayout();
+  }
+
+  // Toggle renderer between repaint boundary and non repaint boundary.
+  void _toggleRendererRepaintBoundary() {
+    if (shouldConvertToRepaintBoundary) {
+      convertToRepaintBoundary();
+    } else {
+      convertToNonRepaintBoundary();
+    }
+  }
+
+  // Detach renderer from element.
+  void _detachRenderer() {
+    detach();
+  }
+
+  // Actions before renderer attached.
+  void _beforeRendererAttach() {
+    willAttachRenderer();
+    style.applyTargetProperties();
+  }
+
+  // Actions after renderer attached.
+  void _afterRendererAttach() {
+    didAttachRenderer();
+    ensureChildAttached();
   }
 
   @override
@@ -295,33 +327,6 @@ class Element extends Node
     for (RenderBoxModel stickyChild in scrollContainer.stickyChildren) {
       CSSPositionedLayout.applyStickyChildOffset(scrollContainer, stickyChild);
     }
-  }
-
-
-  void _markRendererNeedsLayout() {
-    renderBoxModel!.markNeedsLayout();
-  }
-
-  void _toggleRendererRepaintBoundary() {
-    if (shouldConvertToRepaintBoundary) {
-      convertToRepaintBoundary();
-    } else {
-      convertToNonRepaintBoundary();
-    }
-  }
-
-  void _detachRenderer() {
-    detach();
-  }
-
-  void _beforeRendererAttach() {
-    willAttachRenderer();
-    style.applyTargetProperties();
-  }
-
-  void _afterRendererAttach() {
-    didAttachRenderer();
-    ensureChildAttached();
   }
 
   /// Convert renderBoxModel to non repaint boundary
