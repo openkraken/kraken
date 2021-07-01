@@ -168,11 +168,11 @@ class Element extends Node
 
   ElementDelegate get elementDelegate {
     return ElementDelegate(
-      markRendererNeedsLayout,
-      toggleRendererRepaintBoundary,
-      detachRenderer,
-      beforeRendererAttach,
-      afterRendererAttach,
+      _markRendererNeedsLayout,
+      _toggleRendererRepaintBoundary,
+      _detachRenderer,
+      _beforeRendererAttach,
+      _afterRendererAttach,
     );
   }
 
@@ -298,11 +298,11 @@ class Element extends Node
   }
 
 
-  void markRendererNeedsLayout() {
+  void _markRendererNeedsLayout() {
     renderBoxModel!.markNeedsLayout();
   }
 
-  void toggleRendererRepaintBoundary() {
+  void _toggleRendererRepaintBoundary() {
     if (shouldConvertToRepaintBoundary) {
       convertToRepaintBoundary();
     } else {
@@ -310,16 +310,16 @@ class Element extends Node
     }
   }
 
-  void detachRenderer() {
+  void _detachRenderer() {
     detach();
   }
 
-  void beforeRendererAttach() {
+  void _beforeRendererAttach() {
     willAttachRenderer();
     style.applyTargetProperties();
   }
 
-  void afterRendererAttach() {
+  void _afterRendererAttach() {
     didAttachRenderer();
     ensureChildAttached();
   }
