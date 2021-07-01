@@ -50,11 +50,11 @@ class GestureManager {
 
   RenderPointerListenerMixin? _target;
 
-  Map<int, PointerEvent> eventByPointer = Map();
+  Map<int, PointerEvent> _pointerToEvent = Map();
 
-  Map<int, RenderPointerListenerMixin> targetByPointer = Map();
+  Map<int, RenderPointerListenerMixin> _pointerToTarget = Map();
 
-  List<int> points = [];
+  List<int> _points = [];
 
   void addTargetToList(RenderBox target) {
     _hitTestList.add(target);
@@ -97,8 +97,8 @@ class GestureManager {
 
     if (event is PointerDownEvent) {
       touchType = EVENT_TOUCH_START;
-      eventByPointer[event.pointer] = event;
-      points.add(event.pointer);
+      _pointerToEvent[event.pointer] = event;
+      _points.add(event.pointer);
 
       // Add pointer to gestures then register the gesture recognizer to the arena.
       gestures.forEach((key, gesture) {
@@ -114,7 +114,7 @@ class GestureManager {
         for (int i = 0; i < _hitTestList.length; i++) {
           RenderBox renderBox = _hitTestList[i];
           if ((renderBox is RenderBoxModel && !renderBox.isScrollingContentBox) || renderBox is RenderViewportBox) {
-            targetByPointer[event.pointer] = renderBox as RenderPointerListenerMixin;
+            _pointerToTarget[event.pointer] = renderBox as RenderPointerListenerMixin;
             break;
           }
         }
@@ -123,25 +123,25 @@ class GestureManager {
       clearTargetList();
     } else if (event is PointerMoveEvent) {
       touchType = EVENT_TOUCH_MOVE;
-      eventByPointer[event.pointer] = event;
+      _pointerToEvent[event.pointer] = event;
     } else if (event is PointerUpEvent) {
       touchType = EVENT_TOUCH_END;
     } else if (event is PointerCancelEvent) {
       touchType = EVENT_TOUCH_CANCEL;
     }
 
-    if (targetByPointer[event.pointer] != null) {
-      RenderPointerListenerMixin currentTarget = targetByPointer[event.pointer] as RenderPointerListenerMixin;
+    if (_pointerToTarget[event.pointer] != null) {
+      RenderPointerListenerMixin currentTarget = _pointerToTarget[event.pointer] as RenderPointerListenerMixin;
 
       TouchEvent e = TouchEvent(touchType);
       var pointerEventOriginal = event.original;
       // Use original event, prevent to be relative coordinate
       if (pointerEventOriginal != null) event = pointerEventOriginal;
 
-      for (int i = 0; i < points.length; i++) {
-        int pointer = points[i];
-        PointerEvent point = eventByPointer[pointer] as PointerEvent;
-        RenderPointerListenerMixin target = targetByPointer[pointer] as RenderPointerListenerMixin;
+      for (int i = 0; i < _points.length; i++) {
+        int pointer = _points[i];
+        PointerEvent point = _pointerToEvent[pointer] as PointerEvent;
+        RenderPointerListenerMixin target = _pointerToTarget[pointer] as RenderPointerListenerMixin;
 
         EventTarget node = target.getEventTarget!();
 
@@ -183,15 +183,15 @@ class GestureManager {
 
       if (event is PointerUpEvent || event is PointerCancelEvent) {
         // Multi pointer operations in the web will organize click and other gesture triggers.
-        if (targetByPointer.length == 1 && targetByPointer[event.pointer] != null) {
-          _target = targetByPointer[event.pointer];
+        if (_pointerToTarget.length == 1 && _pointerToTarget[event.pointer] != null) {
+          _target = _pointerToTarget[event.pointer];
         } else {
           _target = null;
         }
 
-        points.remove(event.pointer);
-        eventByPointer.remove(event.pointer);
-        targetByPointer.remove(event.pointer);
+        _points.remove(event.pointer);
+        _pointerToEvent.remove(event.pointer);
+        _pointerToTarget.remove(event.pointer);
       }
     }
   }
