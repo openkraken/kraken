@@ -168,11 +168,6 @@ mixin CSSOverflowMixin on ElementBase {
   }
 
   void _createScrollingLayoutBox(Element element) {
-    int shadowElementTargetId = -100 - element.targetId; // Shadow element id start from -100
-    // Inner element target id is less than 0
-    if (element.targetId < 0) {
-      shadowElementTargetId = element.targetId - 50;
-    }
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(element);
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
     scrollingContentLayoutBox = Element.createRenderLayout(
