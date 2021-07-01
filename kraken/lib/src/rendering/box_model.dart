@@ -495,13 +495,10 @@ class RenderBoxModel extends RenderBox
   bool _debugShouldPaintOverlay = false;
 
   late RenderStyle _renderStyle;
+  RenderStyle get renderStyle => _renderStyle;
 
-  RenderStyle get renderStyle {
-    return _renderStyle;
-  }
-
-  ElementDelegate? _elementDelegate;
-  ElementDelegate get elementDelegate => _elementDelegate!;
+  late ElementDelegate _elementDelegate;
+  ElementDelegate get elementDelegate => _elementDelegate;
 
   bool get debugShouldPaintOverlay => _debugShouldPaintOverlay;
 
