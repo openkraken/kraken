@@ -73,7 +73,7 @@ Pointer<Utf8> _environment() {
 
 final Pointer<NativeFunction<NativeEnvironment>> _nativeEnvironment = Pointer.fromFunction(_environment);
 
-typedef Native_SimulatePointer = Void Function(Pointer<Pointer<MousePointer>>,  Int32 length);
+typedef Native_SimulatePointer = Void Function(Pointer<Pointer<MousePointer>>,  Int32 length, Int32 pointer);
 typedef Native_SimulateKeyPress = Void Function(Pointer<NativeString>);
 
 PointerChange _getPointerChange(double change) {
@@ -94,7 +94,7 @@ class MousePointer extends Struct {
   external double change;
 }
 
-void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int length) {
+void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int length, int pointer) {
   List<PointerData> data = [];
 
   for (int i = 0; i < length; i ++) {
@@ -111,9 +111,11 @@ void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int lengt
       // which handle extra mouse connection phase for [event.kind = PointerDeviceKind.mouse].
       // Prefer to use touch event.
       kind: PointerDeviceKind.touch,
-      change: _getPointerChange(change)
+      change: _getPointerChange(change),
+      pointerIdentifier: pointer
     ));
   }
+
   PointerDataPacket dataPacket = PointerDataPacket(data: data);
   window.onPointerDataPacket!(dataPacket);
 }

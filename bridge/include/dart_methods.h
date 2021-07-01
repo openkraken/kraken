@@ -62,7 +62,7 @@ struct MousePointer {
   double y;
   double change;
 };
-using SimulatePointer = void (*)(MousePointer **, int32_t length);
+using SimulatePointer = void (*)(MousePointer **, int32_t length, int32_t pointer);
 using SimulateKeyPress = void (*)(NativeString *nativeString);
 
 namespace kraken {

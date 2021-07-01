@@ -158,6 +158,13 @@ JSValueRef simulatePointer(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     return nullptr;
   }
 
+  const JSValueRef &secondArgsValueRef = arguments[1];
+  if (!JSValueIsNumber(ctx, secondArgsValueRef)) {
+    binding::jsc::throwJSError(ctx, "Failed to execute '__kraken_simulate_pointer__': second arguments should be an number.",
+                    exception);
+    return nullptr;
+  }
+
   JSObjectRef inputArrayObjectRef = JSValueToObject(ctx, firstArgsValueRef, exception);
   size_t length;
 
@@ -182,7 +189,9 @@ JSValueRef simulatePointer(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     mousePointerList[i] = mouse;
   }
 
-  getDartMethod()->simulatePointer(mousePointerList, length);
+  int32_t pointer = JSValueToNumber(ctx, secondArgsValueRef, exception);
+
+  getDartMethod()->simulatePointer(mousePointerList, length, pointer);
 
   delete[] mousePointerList;
 
