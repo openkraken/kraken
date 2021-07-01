@@ -68,14 +68,25 @@ mixin ElementBase on Node {
   }
 }
 
+/// Mark the renderer of element as needs layout.
+typedef void MarkRendererNeedsLayout();
+/// Toggle the renderer of element between repaint boundary and non repaint boundary.
+typedef void ToggleRendererRepaintBoundary();
+/// Detach the renderer from its owner element.
+typedef void DetachRenderer();
+/// Do the preparation work before the renderer is attached.
+typedef void BeforeRendererAttach();
+/// Do the clean work after the renderer has attached.
+typedef void AfterRendererAttach();
+
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
 class ElementDelegate {
-  Function markRendererNeedsLayout;
-  Function toggleRendererRepaintBoundary;
-  Function detachRenderer;
-  Function beforeRendererAttach;
-  Function afterRendererAttach;
+  MarkRendererNeedsLayout markRendererNeedsLayout;
+  ToggleRendererRepaintBoundary toggleRendererRepaintBoundary;
+  DetachRenderer detachRenderer;
+  BeforeRendererAttach beforeRendererAttach;
+  AfterRendererAttach afterRendererAttach;
 
   ElementDelegate(
     this.markRendererNeedsLayout,
@@ -175,12 +186,10 @@ class Element extends Node
     );
   }
 
-  // Mark renderer as needs layout.
   void _markRendererNeedsLayout() {
     renderBoxModel!.markNeedsLayout();
   }
 
-  // Toggle renderer between repaint boundary and non repaint boundary.
   void _toggleRendererRepaintBoundary() {
     if (shouldConvertToRepaintBoundary) {
       convertToRepaintBoundary();
@@ -189,18 +198,15 @@ class Element extends Node
     }
   }
 
-  // Detach renderer from element.
   void _detachRenderer() {
     detach();
   }
 
-  // Actions before renderer attached.
   void _beforeRendererAttach() {
     willAttachRenderer();
     style.applyTargetProperties();
   }
 
-  // Actions after renderer attached.
   void _afterRendererAttach() {
     didAttachRenderer();
     ensureChildAttached();
