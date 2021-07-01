@@ -123,8 +123,6 @@ class Element extends Node
   /// Style declaration from user input.
   late CSSStyleDeclaration style;
 
-  Element? scrollingElement;
-
   Size get viewportSize => elementManager.viewport.viewportSize;
 
   /// Whether should create repaintBoundary for this element when style changed
@@ -471,7 +469,6 @@ class Element extends Node
 
     RenderBoxModel? _renderBoxModel = renderBoxModel;
     Element? _parentElement = parentElement;
-    Element? _scrollingElement = scrollingElement;
 
     // Call dispose method of renderBoxModel when GC auto dispose element
     if (_renderBoxModel != null) {
@@ -484,11 +481,6 @@ class Element extends Node
 
     style.dispose();
     properties.clear();
-
-    if (_scrollingElement != null) {
-      _scrollingElement.dispose();
-      scrollingElement = null;
-    }
 
     // Remove native reference.
     _nativeMap.remove(nativeElementPtr.address);
