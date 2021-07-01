@@ -358,7 +358,6 @@ class Element extends Node
     }
     RenderBoxModel targetRenderBox = createRenderBoxModel(
       this,
-      viewportSize: viewportSize,
       prevRenderBoxModel: _renderBoxModel,
       repaintSelf: repaintSelf
     );
@@ -1416,7 +1415,6 @@ class Element extends Node
   static RenderBoxModel createRenderBoxModel(
     Element element,
     {
-      required Size viewportSize,
       RenderBoxModel? prevRenderBoxModel,
       bool repaintSelf = false
     }
