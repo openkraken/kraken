@@ -1,3 +1,9 @@
+## 0.8.0+2
+
+**Features**
+
++ input element now support inputmode property https://github.com/openkraken/kraken/pull/441
+
 ## 0.8.0+1
 
 **Bug Fixed**
