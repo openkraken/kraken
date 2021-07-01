@@ -214,7 +214,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   void updateBoxShadow(String property) {
 
     CSSBoxDecoration? prevBoxDecoration = decoration;
-    Size viewportSize = renderBoxModel!.viewportSize;
+    Size viewportSize = renderBoxModel!.renderStyle.viewportSize;
 
     if (prevBoxDecoration != null) {
       decoration = CSSBoxDecoration(

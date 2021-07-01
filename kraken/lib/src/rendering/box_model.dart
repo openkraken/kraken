@@ -150,11 +150,9 @@ class RenderLayoutBox extends RenderBoxModel
             ContainerBoxParentData<RenderBox>> {
   RenderLayoutBox({
     required RenderStyle renderStyle,
-    required Size viewportSize,
     required ElementDelegate elementDelegate
   }) : super(
     renderStyle: renderStyle,
-    viewportSize: viewportSize,
     elementDelegate: elementDelegate
   );
 
@@ -482,11 +480,9 @@ class RenderBoxModel extends RenderBox
         RenderObjectWithControllerMixin {
   RenderBoxModel({
     required RenderStyle renderStyle,
-    required Size viewportSize,
     required ElementDelegate elementDelegate
   })  : super() {
     renderStyle.renderBoxModel = this;
-    _viewportSize = viewportSize;
     _elementDelegate = elementDelegate;
     _renderStyle = renderStyle;
   }
@@ -497,9 +493,6 @@ class RenderBoxModel extends RenderBox
   RenderPositionHolder? renderPositionHolder;
 
   bool _debugShouldPaintOverlay = false;
-
-  Size? _viewportSize;
-  Size get viewportSize => _viewportSize!;
 
   late RenderStyle _renderStyle;
 

@@ -343,7 +343,7 @@ mixin CSSTextMixin on RenderStyleBase {
       parentRenderBoxModel = parentElement.renderBoxModel;
     } else {
       parentStyle = parentRenderBoxModel!.renderStyle.style!;
-      viewportSize = parentRenderBoxModel.viewportSize;
+      viewportSize = parentRenderBoxModel.renderStyle.viewportSize;
     }
 
     if (parentRenderBoxModel != null) {

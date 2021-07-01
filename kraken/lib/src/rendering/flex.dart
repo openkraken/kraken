@@ -155,11 +155,9 @@ class RenderFlexLayout extends RenderLayoutBox {
   RenderFlexLayout({
     List<RenderBox>? children,
     required RenderStyle renderStyle,
-    required Size viewportSize,
     required ElementDelegate elementDelegate
   }) : super(
     renderStyle: renderStyle,
-    viewportSize: viewportSize,
     elementDelegate: elementDelegate
   ) {
     addAll(children);
@@ -2631,7 +2629,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     List<RenderBox?> children = getDetachedChildrenAsList() as List<RenderBox?>;
     RenderRecyclerLayout renderRecyclerLayout = RenderRecyclerLayout(
       renderStyle: renderStyle,
-      viewportSize: viewportSize,
       elementDelegate: elementDelegate,
     );
     renderRecyclerLayout.addAll(children);
@@ -2644,7 +2641,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderFlowLayout flowLayout = RenderFlowLayout(
       children: children as List<RenderBox>,
       renderStyle: renderStyle,
-      viewportSize: viewportSize,
       elementDelegate: elementDelegate,
     );
     return copyWith(flowLayout);
@@ -2656,7 +2652,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
       children: children as List<RenderBox>,
       renderStyle: renderStyle,
-      viewportSize: viewportSize,
       elementDelegate: elementDelegate,
     );
     return copyWith(selfRepaintFlexLayout);
@@ -2668,7 +2663,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
       children: children as List<RenderBox>,
       renderStyle: renderStyle,
-      viewportSize: viewportSize,
       elementDelegate: elementDelegate,
     );
     return copyWith(selfRepaintFlowLayout);
@@ -2680,12 +2674,10 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
   RenderSelfRepaintFlexLayout({
     List<RenderBox>? children,
     required RenderStyle renderStyle,
-    required Size viewportSize,
     required ElementDelegate elementDelegate
   }) : super(
     children: children,
     renderStyle: renderStyle,
-    viewportSize: viewportSize,
     elementDelegate: elementDelegate
   );
 
@@ -2698,7 +2690,6 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
       children: children as List<RenderBox>?,
       renderStyle: renderStyle,
-      viewportSize: viewportSize,
       elementDelegate: elementDelegate,
     );
     return copyWith(selfRepaintFlowLayout);
@@ -2710,7 +2701,6 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
     RenderFlexLayout flexLayout = RenderFlexLayout(
       children: children as List<RenderBox>,
       renderStyle: renderStyle,
-      viewportSize: viewportSize,
       elementDelegate: elementDelegate,
     );
     return copyWith(flexLayout);
@@ -2722,7 +2712,6 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
     RenderFlowLayout flowLayout = RenderFlowLayout(
       children: children as List<RenderBox>?,
       renderStyle: renderStyle,
-      viewportSize: viewportSize,
       elementDelegate: elementDelegate,
     );
     return copyWith(flowLayout);

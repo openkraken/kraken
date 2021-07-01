@@ -144,7 +144,7 @@ class CSSBackground {
 
   static Gradient? getBackgroundGradient(CSSStyleDeclaration? style, RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
     Gradient? gradient;
-    Size viewportSize = renderBoxModel.viewportSize;
+    Size viewportSize = renderBoxModel.renderStyle.viewportSize;
 
     if (method.args.length > 1) {
       List<Color> colors = [];
@@ -363,7 +363,7 @@ class CSSBackground {
       strings = src.split(' ');
     }
 
-    Size viewportSize = renderBoxModel.viewportSize;
+    Size viewportSize = renderBoxModel.renderStyle.viewportSize;
 
     if (strings.length >= 1) {
       double? stop = defaultStop;

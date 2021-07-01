@@ -181,7 +181,6 @@ mixin CSSOverflowMixin on ElementBase {
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
     scrollingContentLayoutBox = Element.createRenderLayout(
       scrollingElement,
-      viewportSize: element.viewportSize,
       repaintSelf: true,
       style: repaintBoundaryStyle
     );
@@ -210,7 +209,6 @@ mixin CSSOverflowMixin on ElementBase {
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
     RenderLayoutBox outerLayoutBox = Element.createRenderLayout(
       element,
-      viewportSize: element.viewportSize,
       repaintSelf: true,
       prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
     );
@@ -245,7 +243,6 @@ mixin CSSOverflowMixin on ElementBase {
     RenderObject? previousSibling = _detachRenderObject(element, layoutBoxParent, renderBoxModel);
     RenderLayoutBox newLayoutBox = Element.createRenderLayout(
       element,
-      viewportSize: element.viewportSize,
       repaintSelf: false,
       prevRenderLayoutBox: renderBoxModel as RenderLayoutBox?
     );

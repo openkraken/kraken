@@ -223,14 +223,12 @@ class Element extends Node
       RenderIntrinsic renderIntrinsic = _renderIntrinsic = createRenderIntrinsic(
         this,
         repaintSelf: repaintSelf,
-        viewportSize: viewportSize,
       );
       renderStyle = renderIntrinsic.renderStyle;
     } else {
       RenderLayoutBox renderLayoutBox = _renderLayoutBox = createRenderLayout(
         this,
         repaintSelf: repaintSelf,
-        viewportSize: viewportSize,
       );
       renderStyle = renderLayoutBox.renderStyle;
     }
@@ -1436,14 +1434,12 @@ class Element extends Node
     if (renderBoxModel is RenderIntrinsic) {
       return createRenderIntrinsic(
         element,
-        viewportSize: viewportSize,
         prevRenderIntrinsic: prevRenderBoxModel as RenderIntrinsic?,
         repaintSelf: repaintSelf
       );
     } else {
       return createRenderLayout(
         element,
-        viewportSize: viewportSize,
         prevRenderLayoutBox: prevRenderBoxModel as RenderLayoutBox?,
         repaintSelf: repaintSelf
       );
@@ -1453,7 +1449,6 @@ class Element extends Node
   static RenderLayoutBox createRenderLayout(
     Element element,
     {
-      required Size viewportSize,
       CSSStyleDeclaration? style,
       RenderLayoutBox? prevRenderLayoutBox,
       bool repaintSelf = false
@@ -1463,7 +1458,7 @@ class Element extends Node
     CSSDisplay display = CSSDisplayMixin.getDisplay(
       CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]
     );
-    RenderStyle renderStyle = RenderStyle(style: style);
+    RenderStyle renderStyle = RenderStyle(style: style, viewportSize: element.viewportSize);
     ElementDelegate elementDelegate = element.elementDelegate;
 
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
@@ -1473,13 +1468,11 @@ class Element extends Node
         if (repaintSelf) {
           flexLayout = RenderSelfRepaintFlexLayout(
             renderStyle: renderStyle,
-            viewportSize: viewportSize,
             elementDelegate: elementDelegate,
           );
         } else {
           flexLayout = RenderFlexLayout(
             renderStyle: renderStyle,
-            viewportSize: viewportSize,
             elementDelegate: elementDelegate,
           );
         }
@@ -1540,13 +1533,11 @@ class Element extends Node
         if (repaintSelf) {
           flowLayout = RenderSelfRepaintFlowLayout(
             renderStyle: renderStyle,
-            viewportSize: viewportSize,
             elementDelegate: elementDelegate,
           );
         } else {
           flowLayout = RenderFlowLayout(
             renderStyle: renderStyle,
-            viewportSize: viewportSize,
             elementDelegate: elementDelegate,
           );
         }
@@ -1603,7 +1594,6 @@ class Element extends Node
       if (prevRenderLayoutBox == null) {
         renderRecyclerLayout = RenderRecyclerLayout(
           renderStyle: renderStyle,
-          viewportSize: viewportSize,
           elementDelegate: elementDelegate,
         );
       } else if (prevRenderLayoutBox is RenderFlowLayout) {
@@ -1625,26 +1615,23 @@ class Element extends Node
   static RenderIntrinsic createRenderIntrinsic(
     Element element,
     {
-      required Size viewportSize,
       RenderIntrinsic? prevRenderIntrinsic,
       bool repaintSelf = false
     }
   ) {
     RenderIntrinsic intrinsic;
-    RenderStyle renderStyle = RenderStyle(style: element.style);
+    RenderStyle renderStyle = RenderStyle(style: element.style, viewportSize: element.viewportSize);
     ElementDelegate elementDelegate = element.elementDelegate;
 
     if (prevRenderIntrinsic == null) {
       if (repaintSelf) {
         intrinsic = RenderSelfRepaintIntrinsic(
           renderStyle,
-          viewportSize,
           elementDelegate
         );
       } else {
         intrinsic = RenderIntrinsic(
           renderStyle,
-          viewportSize,
           elementDelegate
         );
       }

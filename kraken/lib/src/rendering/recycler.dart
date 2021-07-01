@@ -32,11 +32,9 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
   RenderRecyclerLayout({
     required RenderStyle renderStyle,
-    required Size viewportSize,
     required ElementDelegate elementDelegate
   }) : super(
     renderStyle: renderStyle,
-    viewportSize: viewportSize,
     elementDelegate: elementDelegate
   ) {
     _buildRenderViewport();
@@ -365,7 +363,6 @@ class RenderRecyclerLayout extends RenderLayoutBox
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
       children: children as List<RenderBox>?,
       renderStyle: renderStyle,
-      viewportSize: viewportSize,
       elementDelegate: elementDelegate,
     );
     return copyWith(renderFlexLayout);
@@ -375,7 +372,6 @@ class RenderRecyclerLayout extends RenderLayoutBox
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
       renderStyle: renderStyle,
-      viewportSize: viewportSize,
       elementDelegate: elementDelegate,
     );
     renderFlowLayout.addAll(children as List<RenderBox>?);

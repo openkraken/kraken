@@ -53,7 +53,6 @@ mixin CSSDisplayMixin on RenderStyleBase {
       RenderLayoutBox? prevRenderLayoutBox = renderBoxModel as RenderLayoutBox?;
       renderBoxModel = Element.createRenderLayout(
         element,
-        viewportSize: viewportSize,
         prevRenderLayoutBox: prevRenderLayoutBox,
         repaintSelf: element.repaintSelf
       );
