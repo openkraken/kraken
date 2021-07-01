@@ -380,8 +380,14 @@ class CSSStyleProperty {
 
   static List<List<String?>>? getShadowValues(String property) {
     List shadows = property.split(_commaRegExp);
+    // The shadow effects are applied front-to-back: the first shadow is on top and
+    // the others are layered behind.
+    // https://drafts.csswg.org/css-backgrounds-3/#shadow-layers
+    Iterable reversedShadows = shadows.reversed;
+    List reversedShadowList = reversedShadows.toList();
     List<List<String?>> values = List.empty(growable: true);
-    for (String shadow in shadows as Iterable<String>) {
+
+    for (String shadow in reversedShadowList as Iterable<String>) {
       if (shadow == NONE) {
         continue;
       }
