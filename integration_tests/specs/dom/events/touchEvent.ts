@@ -67,4 +67,188 @@ describe('TouchEvent', () => {
 
     simulateClick(120, 10);
   });
+
+  it('should work with touches', (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'blue';
+    div.style.width = '30px';
+    div.style.height = '30px';
+
+    const func = (e: TouchEvent) => {
+      expect(e.touches.length).toBe(2);
+      simulatePoinrUp(20, 20, 1);
+      div.removeEventListener('touchend', func);
+      done();
+    }
+
+    div.addEventListener('touchend', func);
+
+    document.body.appendChild(div);
+
+    simulatePointDown(20, 20, 1);
+    
+    simulateClick(10, 10);
+  });
+
+  it('should work with touches when touching different elements', (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'blue';
+    div.style.width = '30px';
+    div.style.height = '30px';
+
+    const div2 = document.createElement('div');
+    div2.style.backgroundColor = 'yellow';
+    div2.style.width = '10px';
+    div2.style.height = '10px';
+
+    document.body.appendChild(div);
+
+    div.appendChild(div2);
+
+    const func = (e: TouchEvent) => {
+      expect(e.touches.length).toBe(2);
+      simulatePoinrUp(20, 20, 1);
+      div.removeEventListener('touchend', func);
+      done();
+    }
+
+    div.addEventListener('touchend', func);
+
+    simulatePointDown(20, 20, 1);
+    
+    simulateClick(5, 5);
+  });
+
+  it('should work with targetTouches when touching different elements', (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'blue';
+    div.style.width = '30px';
+    div.style.height = '30px';
+
+    const div2 = document.createElement('div');
+    div2.style.backgroundColor = 'yellow';
+    div2.style.width = '10px';
+    div2.style.height = '10px';
+
+    document.body.appendChild(div);
+
+    div.appendChild(div2);
+
+    const func = (e: TouchEvent) => {
+      expect(e.targetTouches.length).toBe(1);
+      simulatePoinrUp(20, 20, 1);
+      div2.removeEventListener('touchend', func);
+      done();
+    }
+
+    div2.addEventListener('touchend', func);
+
+    simulatePointDown(20, 20, 1);
+    
+    simulateClick(5, 5);
+  });
+
+  it('should work with targetTouches', (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'blue';
+    div.style.width = '30px';
+    div.style.height = '30px';
+
+    const func = (e: TouchEvent) => {
+      expect(e.targetTouches.length).toBe(2);
+      simulatePoinrUp(20, 20, 1);
+      div.removeEventListener('touchend', func);
+      done();
+    }
+
+    div.addEventListener('touchend', func)
+
+    document.body.appendChild(div);
+
+    simulatePointDown(20, 20, 1);
+    
+    simulateClick(10, 10);
+  });
+
+  it('should work with targetTouches', (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'blue';
+    div.style.width = '30px';
+    div.style.height = '30px';
+
+    const func = (e: TouchEvent) => {
+      expect(e.targetTouches.length).toBe(2);
+      simulatePoinrUp(20, 20, 1);
+      div.removeEventListener('touchend', func);
+      done();
+    }
+
+    div.addEventListener('touchend', func)
+
+    document.body.appendChild(div);
+
+    simulatePointDown(20, 20, 1);
+    
+    simulateClick(10, 10);
+  });
+
+  it('touchend should work with changedTouches', (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'blue';
+    div.style.width = '30px';
+    div.style.height = '30px';
+
+    const func = (e: TouchEvent) => {
+      expect(e.changedTouches.length).toBe(1);
+      simulatePoinrUp(20, 20, 1);
+      div.removeEventListener('touchend', func);
+      done();
+    }
+
+    div.addEventListener('touchend', func)
+
+    document.body.appendChild(div);
+    
+    simulateClick(10, 10);
+  });
+
+  it('touchstart should work with changedTouches', (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'blue';
+    div.style.width = '30px';
+    div.style.height = '30px';
+
+    const func = (e: TouchEvent) => {
+      expect(e.changedTouches.length).toBe(1);
+      simulatePoinrUp(20, 20, 1);
+      div.removeEventListener('touchstart', func);
+      done();
+    }
+
+    div.addEventListener('touchstart', func)
+
+    document.body.appendChild(div);
+    
+    simulateClick(10, 10);
+  });
+
+  it('touchmove should work with changedTouches', (done) => {
+    const div = document.createElement('div');
+    div.style.backgroundColor = 'blue';
+    div.style.width = '30px';
+    div.style.height = '30px';
+
+    const func = (e: TouchEvent) => {
+      expect(e.changedTouches.length).toBe(1);
+      simulatePoinrUp(20, 20, 1);
+      div.removeEventListener('touchmove', func);
+      done();
+    }
+
+    div.addEventListener('touchmove', func)
+
+    document.body.appendChild(div);
+    
+    simulateSwipe(0, 0, 0, 100, 0.5);
+  });
 });
