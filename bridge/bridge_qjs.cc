@@ -12,10 +12,10 @@
 #include <memory>
 #include "bridge_qjs.h"
 
-#include "bindings/qjs/BOM/console.h"
+#include "bindings/qjs/bom/console.h"
 #include "bindings/qjs/kraken.h"
 #include "bindings/qjs/module_manager.h"
-#include "bindings/qjs/DOM/event_target.h"
+#include "bindings/qjs/dom/event_target.h"
 
 //#include "bindings/jsc/KOM/timer.h"
 //#include "bindings/jsc/DOM/comment_node.h"

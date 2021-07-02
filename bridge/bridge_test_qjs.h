@@ -17,17 +17,17 @@ public:
   explicit JSBridgeTest(JSBridge *bridge);
 
   ~JSBridgeTest() {
-//    if (executeTestCallback != nullptr) {
-//      JSValueUnprotect(context->context(), executeTestCallback);
-//    }
+    if (!JS_IsNull(executeTestCallback)) {
+      JS_FreeValue(context->ctx(), executeTestCallback);
+    }
   }
 
   /// evaluete JavaScript source code with build-in test frameworks, use in test only.
-//  bool evaluateTestScripts(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
-//  void invokeExecuteTest(ExecuteCallback executeCallback);
-//
-//  JSValue executeTestCallback;
-//
+  bool evaluateTestScripts(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
+  void invokeExecuteTest(ExecuteCallback executeCallback);
+
+  JSValue executeTestCallback{JS_NULL};
+
 private:
   /// the pointer of bridge, ownership belongs to JSBridge
   JSBridge *bridge_;
