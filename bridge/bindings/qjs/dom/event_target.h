@@ -8,7 +8,7 @@
 
 #include "bindings/qjs/host_class.h"
 #include "bindings/qjs/js_context.h"
-#include "bindings/qjs/DOM/event.h"
+#include "bindings/qjs/dom/event.h"
 
 namespace kraken::binding::qjs {
 
