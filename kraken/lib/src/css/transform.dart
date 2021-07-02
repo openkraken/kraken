@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
@@ -31,13 +30,9 @@ void _updateColor(Color oldColor, Color newColor, double progress, String proper
   switch (property) {
     case COLOR:
       renderStyle.color = color;
-      // Update style of children text nodes
-      _updateChildTextNodes(renderStyle);
       break;
     case TEXT_DECORATION_COLOR:
       renderStyle.textDecorationColor = color;
-      // Update style of children text nodes
-      _updateChildTextNodes(renderStyle);
       break;
     case BACKGROUND_COLOR:
       renderStyle.updateBackgroundColor(color);
@@ -93,18 +88,12 @@ void _updateLength(double oldLength, double newLength, double progress, String p
     case FLEX_BASIS:
     case FONT_SIZE:
       renderStyle.fontSize = length;
-      // Update style of children text nodes
-      _updateChildTextNodes(renderStyle);
       break;
     case LETTER_SPACING:
       renderStyle.letterSpacing = length;
-      // Update style of children text nodes
-      _updateChildTextNodes(renderStyle);
       break;
     case WORD_SPACING:
       renderStyle.wordSpacing = length;
-      // Update style of children text nodes
-      _updateChildTextNodes(renderStyle);
       break;
     case HEIGHT:
     case WIDTH:
@@ -126,8 +115,6 @@ void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress
   switch (property) {
     case FONT_WEIGHT:
       renderStyle.fontWeight = fontWeight;
-      // Update style of children text nodes
-      _updateChildTextNodes(renderStyle);
       break;
   }
 }
@@ -221,18 +208,6 @@ void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, Ren
     );
   }
   renderStyle.updateTransform(newMatrix4);
-}
-
-void _updateChildTextNodes(RenderStyle renderStyle) {
-  RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-  ElementManager elementManager = renderBoxModel.elementManager!;
-  int targetId = renderBoxModel.targetId;
-  Element element = elementManager.getEventTargetByTargetId<Element>(targetId)!;
-  for (Node? node in element.childNodes) {
-    if (node is TextNode) {
-      node.updateTextStyle();
-    }
-  }
 }
 
 const List<Function> _colorHandler = [_parseColor, _updateColor];
@@ -1142,21 +1117,16 @@ mixin CSSTransformMixin on RenderStyleBase {
       return;
     }
 
-    ElementManager elementManager = renderBoxModel!.elementManager!;
-    int targetId = renderBoxModel!.targetId;
-    Element element = elementManager.getEventTargetByTargetId<Element>(targetId)!;
-    element.renderBoxModel!.renderStyle.transform = matrix4;
+    transform = matrix4;
+
+    ElementDelegate elementDelegate = renderBoxModel!.elementDelegate;
 
     if (shouldToggleRepaintBoundary) {
-      if (element.shouldConvertToRepaintBoundary) {
-        element.convertToRepaintBoundary();
-      } else {
-        element.convertToNonRepaintBoundary();
-      }
+      elementDelegate.toggleRendererRepaintBoundary();
     }
 
     if (shouldMarkNeedsLayout) {
-      element.renderBoxModel!.markNeedsLayout();
+      elementDelegate.markRendererNeedsLayout();
     }
   }
 

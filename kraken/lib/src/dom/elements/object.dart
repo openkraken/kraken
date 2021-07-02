@@ -66,6 +66,30 @@ class ObjectElement extends Element implements ObjectElementHost {
     }
   }
 
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+    _objectElementClient.willAttachRenderer();
+  }
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+    _objectElementClient.didAttachRenderer();
+  }
+
+  @override
+  void willDetachRenderer() {
+    super.willDetachRenderer();
+    _objectElementClient.willDetachRenderer();
+  }
+
+  @override
+  void didDetachRenderer() {
+    super.didDetachRenderer();
+    _objectElementClient.didDetachRenderer();
+  }
+
   // @override
   // void setStyle(String key, value) {
   //   super.setStyle(key, value);
@@ -147,5 +171,21 @@ class _DefaultObjectElementClient implements ObjectElementClient {
   @override
   void dispose() {
     print('call DefaultObjectElementClient dispose');
+  }
+
+  @override
+  void didAttachRenderer() {
+  }
+
+  @override
+  void didDetachRenderer() {
+  }
+
+  @override
+  void willAttachRenderer() {
+  }
+
+  @override
+  void willDetachRenderer() {
   }
 }

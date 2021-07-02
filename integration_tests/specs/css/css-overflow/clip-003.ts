@@ -1,5 +1,5 @@
 /*auto generated*/
-describe('clip-003', () => {
+xdescribe('clip-003', () => {
   xit('ref', async () => {
     let inner;
     let inner_1;

@@ -31,13 +31,12 @@ class RenderRecyclerLayout extends RenderLayoutBox
   }
 
   RenderRecyclerLayout({
-    required int targetId,
-    ElementManager? elementManager,
     required RenderStyle renderStyle,
+    required ElementDelegate elementDelegate
   }) : super(
-            targetId: targetId,
-            renderStyle: renderStyle,
-            elementManager: elementManager) {
+    renderStyle: renderStyle,
+    elementDelegate: elementDelegate
+  ) {
     _buildRenderViewport();
     super.insert(renderViewport!);
   }
@@ -45,17 +44,16 @@ class RenderRecyclerLayout extends RenderLayoutBox
   @override
   bool get isRepaintBoundary => true;
 
-  Element? _element;
   RenderViewport? renderViewport;
   RenderSliverList? _renderSliverList;
 
-  // Children targetId list.
-  List<int> _children = List.empty(growable: true);
+  // Children renderBox list.
+  List<RenderBox> _children = List.empty(growable: true);
 
   @override
   void add(RenderBox? child) {
     if (child is RenderBoxModel) {
-      _children.add(child.targetId);
+      _children.add(child);
     }
   }
 
@@ -71,11 +69,11 @@ class RenderRecyclerLayout extends RenderLayoutBox
       if (after == null) {
         index = 0;
       } else if (after is RenderBoxModel) {
-        index = _children.indexOf(after.targetId);
+        index = _children.indexOf(after);
       }
 
       if (index != null) {
-        _children.insert(index, child.targetId);
+        _children.insert(index, child);
       }
     }
   }
@@ -89,7 +87,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
   @override
   void remove(RenderBox child) {
     if (child is RenderBoxModel) {
-      _children.remove(child.targetId);
+      _children.remove(child);
     }
 
     assert(_renderSliverList != null);
@@ -172,7 +170,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
     if (kProfileMode) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
-          .mark(PERF_SILVER_LAYOUT_START, uniqueId: targetId);
+          .mark(PERF_SILVER_LAYOUT_START, uniqueId: hashCode);
     }
 
     beforeLayout();
@@ -221,7 +219,7 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_SILVER_LAYOUT_END,
-          uniqueId: targetId,
+          uniqueId: hashCode,
           startTime:
               DateTime.now().microsecondsSinceEpoch - childLayoutDuration);
     }
@@ -277,19 +275,6 @@ class RenderRecyclerLayout extends RenderLayoutBox
 
   int? _currentIndex;
 
-  RenderBox? _createRenderBox(int index) {
-    if (childCount <= index) {
-      return null;
-    }
-
-    int targetId = _children[index];
-    Node node = elementManager!.getEventTargetByTargetId<Node>(targetId)!;
-
-    node.createRenderer();
-
-    return node.renderer as RenderBox?;
-  }
-
   @override
   void createChild(int index, {RenderBox? after}) {
     if (_didUnderflow) return;
@@ -299,36 +284,24 @@ class RenderRecyclerLayout extends RenderLayoutBox
     if (index < 0) return;
     if (childCount <= index) return;
 
-    RenderBox? child;
-    int targetId = _children[index];
-    Node node = elementManager!.getEventTargetByTargetId<Node>(targetId)!;
-    node.willAttachRenderer();
+    RenderBox child = _children[index];
 
-    if (node is Element) {
-      node.style.applyTargetProperties();
-    }
-    if (node is Node) {
-      child = node.renderer as RenderBox?;
-    } else {
-      if (!kReleaseMode)
-        throw FlutterError('Unsupported type ${node.runtimeType} $node');
+    if (child is RenderBoxModel) {
+      child.elementDelegate.beforeRendererAttach();
     }
 
-    assert(child != null, 'Child should not be null');
-    child!.parentData = SliverMultiBoxAdaptorParentData();
+    child.parentData = SliverMultiBoxAdaptorParentData();
     _renderSliverList!.insert(child, after: after);
 
-    node.didAttachRenderer();
-    node.ensureChildAttached();
+    if (child is RenderBoxModel) {
+      child.elementDelegate.afterRendererAttach();
+    }
   }
 
   @override
   void removeChild(RenderBox child) {
     if (child is RenderBoxModel) {
-      Node? node = elementManager!.getEventTargetByTargetId(child.targetId);
-      if (node != null) {
-        node.detach();
-      }
+      child.elementDelegate.detachRenderer();
     } else {
       child.detach();
     }
@@ -385,32 +358,22 @@ class RenderRecyclerLayout extends RenderLayoutBox
     return trailingScrollOffset + averageExtent * remainingCount;
   }
 
-  @override
-  List<RenderBox> getChildrenAsList() {
-    assert(_element != null);
-    final List<RenderBox> result = <RenderBox>[];
-    for (int index = 0; index < childCount; index++) {
-      result.add(_createRenderBox(index)!);
-    }
-    return result;
-  }
-
   RenderFlexLayout toFlexLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlexLayout renderFlexLayout = RenderFlexLayout(
-        children: children as List<RenderBox>?,
-        targetId: targetId,
-        renderStyle: renderStyle,
-        elementManager: elementManager);
+      children: children as List<RenderBox>?,
+      renderStyle: renderStyle,
+      elementDelegate: elementDelegate,
+    );
     return copyWith(renderFlexLayout);
   }
 
   RenderFlowLayout toFlowLayout() {
     List<RenderObject?> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
-        targetId: targetId,
-        renderStyle: renderStyle,
-        elementManager: elementManager);
+      renderStyle: renderStyle,
+      elementDelegate: elementDelegate,
+    );
     renderFlowLayout.addAll(children as List<RenderBox>?);
     return copyWith(renderFlowLayout);
   }

@@ -5,7 +5,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/rendering.dart';
 
 /// Returns a sequence containing the specified [Layer] and all of its
 /// ancestors.  The returned sequence is in [parent, child] order.
@@ -83,9 +82,8 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       intersectionObserverLayer = IntersectionObserverLayer(
           elementSize: size,
           paintOffset: offset,
-          onIntersectionChange: _onIntersectionChange!,
-          rootRenderObject:
-              (this as RenderBoxModel).elementManager!.getRootRenderBox());
+          onIntersectionChange: _onIntersectionChange!
+      );
     } else {
       intersectionObserverLayer!.elementSize = semanticBounds.size;
       intersectionObserverLayer!.paintOffset = offset;
@@ -99,8 +97,7 @@ class IntersectionObserverLayer extends ContainerLayer {
   IntersectionObserverLayer(
       {required Size elementSize,
       required Offset paintOffset,
-      required this.onIntersectionChange,
-      required this.rootRenderObject})
+      required this.onIntersectionChange})
       : // TODO: This is zero for box element. For sliver element, this offset points to the start of the element which may be outside the viewport.
         _elementOffset = Offset.zero,
         _layerOffset = Offset.zero,
@@ -134,8 +131,6 @@ class IntersectionObserverLayer extends ContainerLayer {
     if (value == _paintOffset) return;
     _paintOffset = value;
   }
-
-  RenderBox rootRenderObject;
 
   /// Last known layer offset supplied to [addToScene].  Never null.
   Offset _layerOffset;

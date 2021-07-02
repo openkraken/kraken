@@ -291,11 +291,9 @@ class CSSPositionedLayout {
     // Original offset of sticky child in relative status
     Offset childOriginalOffset = childPlaceHolderParentData.offset;
 
-    RenderBox rootRenderObject = child.elementManager!.getRootRenderBox();
     // Offset of sticky child to scroll container
     Offset childToScrollContainerOffset =
-      childRenderPositionHolder.localToGlobal(Offset.zero, ancestor: rootRenderObject) -
-        scrollContainer.localToGlobal(Offset.zero, ancestor: rootRenderObject);
+      childRenderPositionHolder.localToGlobal(Offset.zero, ancestor: scrollContainer);
 
     bool isVerticalFixed = false;
     bool isHorizontalFixed = false;

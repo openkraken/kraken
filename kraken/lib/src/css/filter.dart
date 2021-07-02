@@ -8,7 +8,6 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
@@ -160,10 +159,7 @@ mixin CSSFilterEffectsMixin {
       renderBoxModel.colorFilter = colorFilter;
     }
 
-    ElementManager elementManager = renderBoxModel.elementManager!;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
+    Size viewportSize = renderBoxModel.renderStyle.viewportSize;
     ImageFilter? imageFilter = _parseImageFilters(functions, viewportSize);
     if (imageFilter != null) {
       renderBoxModel.imageFilter = imageFilter;
