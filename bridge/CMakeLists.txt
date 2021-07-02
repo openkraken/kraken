@@ -193,7 +193,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-atom.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/quickjs-opcode.h
   )
-  add_library(quickjs STATIC ${QUICK_JS_SOURCE})
+  add_library(quickjs SHARED ${QUICK_JS_SOURCE})
 
   list(APPEND BRIDGE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
   list(APPEND BRIDGE_LINK_LIBS quickjs)
@@ -211,18 +211,20 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/module_manager.h
       bindings/qjs/kraken.cc
       bindings/qjs/kraken.h
-      bindings/qjs/BOM/console.cc
-      bindings/qjs/BOM/console.h
-      bindings/qjs/BOM/screen.cc
-      bindings/qjs/BOM/screen.h
-      bindings/qjs/DOM/event_target.cc
-      bindings/qjs/DOM/event_target.h
-      bindings/qjs/DOM/event.cc
-      bindings/qjs/DOM/event.h
-      bindings/qjs/BOM/blob.cc
-      bindings/qjs/BOM/blob.h
-      bindings/qjs/DOM/custom_event.cc
-      bindings/qjs/DOM/custom_event.h
+      bindings/qjs/bom/console.cc
+      bindings/qjs/bom/console.h
+      bindings/qjs/bom/screen.cc
+      bindings/qjs/bom/screen.h
+      bindings/qjs/bom/timer.cc
+      bindings/qjs/bom/timer.h
+      bindings/qjs/dom/event_target.cc
+      bindings/qjs/dom/event_target.h
+      bindings/qjs/dom/event.cc
+      bindings/qjs/dom/event.h
+      bindings/qjs/bom/blob.cc
+      bindings/qjs/bom/blob.h
+      bindings/qjs/dom/custom_event.cc
+      bindings/qjs/dom/custom_event.h
   )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2
@@ -297,9 +299,9 @@ endif ()
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
   set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_jsc)
-elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "qjs")
-  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_qjs)
-  set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_qjs)
+elseif ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_quickjs)
+  set_target_properties(kraken_static PROPERTIES OUTPUT_NAME kraken_quickjs)
 endif()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
@@ -308,6 +310,10 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
           LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
           )
   set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
+
+  if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+    set_target_properties(quickjs PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
+  endif()
 elseif (IS_ANDROID)
   # android do nothing
 endif()

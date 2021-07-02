@@ -26,13 +26,13 @@ void initTestFramework(int32_t contextId) {
 }
 
 int8_t evaluateTestScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine) {
-//  auto bridgeTest = bridgeTestPool[contextId];
-//  return bridgeTest->evaluateTestScripts(code->string, code->length, bundleFilename, startLine);
+  auto bridgeTest = bridgeTestPool[contextId];
+  return bridgeTest->evaluateTestScripts(code->string, code->length, bundleFilename, startLine);
 }
 
 void executeTest(int32_t contextId, ExecuteCallback executeCallback) {
-//  auto bridgeTest = bridgeTestPool[contextId];
-//  bridgeTest->invokeExecuteTest(executeCallback);
+  auto bridgeTest = bridgeTestPool[contextId];
+  bridgeTest->invokeExecuteTest(executeCallback);
 }
 
 void registerTestEnvDartMethods(uint64_t *methodBytes, int32_t length) {

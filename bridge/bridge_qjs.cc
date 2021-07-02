@@ -13,6 +13,8 @@
 #include "bridge_qjs.h"
 
 #include "bindings/qjs/bom/console.h"
+#include "bindings/qjs/bom/timer.h"
+#include "bindings/qjs/bom/blob.h"
 #include "bindings/qjs/kraken.h"
 #include "bindings/qjs/module_manager.h"
 #include "bindings/qjs/dom/event_target.h"
@@ -83,11 +85,11 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 //#endif
 
   bindConsole(m_context);
-//  bindTimer(m_context);
+  bindTimer(m_context);
   bindKraken(m_context);
   bindModuleManager(m_context);
   bindEventTarget(m_context);
-//  bindConsole(m_context);
+  bindBlob(m_context);
 //  bindEvent(m_context);
 //  bindMouseEvent(m_context);
 //  bindCustomEvent(m_context);

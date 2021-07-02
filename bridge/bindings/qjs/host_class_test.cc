@@ -139,7 +139,7 @@ TEST(HostClass, inherintanceInJavaScript) {
   context->defineGlobalProperty("SampleClass", sampleObject->classObject);
 
   const char* code = R"(
-class Demo extends SampleClass{
+class Demo extends SampleClass {
   constructor(name) {
     super();
     this.name = name;

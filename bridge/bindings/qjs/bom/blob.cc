@@ -8,7 +8,10 @@
 
 namespace kraken::binding::qjs {
 
-void bindBlob(std::unique_ptr<JSContext> &context) {}
+void bindBlob(std::unique_ptr<JSContext> &context) {
+  auto *constructor = Blob::instance(context.get());
+  context->defineGlobalProperty("Blob", constructor->classObject);
+}
 
 OBJECT_INSTANCE_IMPL(Blob);
 
@@ -75,14 +78,36 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
-  auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
-  JSValue arrayBuffer = JS_NewArrayBuffer(ctx, blob->bytes(), blob->size(), [](JSRuntime *rt, void *opaque, void *ptr) {}, nullptr, false);
-  JSValue arguments[] = {arrayBuffer};
-  JSValue returnValue = JS_Call(ctx, resolving_funcs[0], blob->context()->global(), 1, arguments);
+  struct PromiseContext {
+    JSValue resolveFunc;
+    JSValue rejectFunc;
+    JSValue promise;
+    BlobInstance *blobInstance;
+  };
 
-  if (JS_IsException(returnValue)) {
-    return returnValue;
-  }
+  auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+
+  auto *promiseContext = new PromiseContext{resolving_funcs[0], resolving_funcs[1], promise, blob};
+  auto callback = [](void *callbackContext, int32_t contextId, const char *errmsg) {
+    auto *promiseContext = static_cast<PromiseContext *>(callbackContext);
+    auto *blob = promiseContext->blobInstance;
+    QjsContext *ctx = blob->m_ctx;
+
+    JSValue arrayBuffer = JS_NewArrayBuffer(ctx, blob->bytes(), blob->size(), [](JSRuntime *rt, void *opaque, void *ptr) {}, nullptr, false);
+    JSValue arguments[] = {arrayBuffer};
+    JSValue returnValue = JS_Call(ctx, promiseContext->resolveFunc, blob->context()->global(), 1, arguments);
+
+    if (JS_IsException(returnValue)) {
+      blob->context()->handleException(&returnValue);
+      return;
+    }
+
+    JS_FreeValue(ctx, promiseContext->resolveFunc);
+    JS_FreeValue(ctx, promiseContext->rejectFunc);
+    JS_FreeValue(ctx, arrayBuffer);
+  };
+
+  getDartMethod()->setTimeout(promiseContext, blob->context()->getContextId(), callback, 0);
 
   return promise;
 }
@@ -134,19 +159,25 @@ void BlobBuilder::append(JSContext &context, BlobInstance *blob) {
 
 void BlobBuilder::append(JSContext &context, JSValue &value) {
   if (JS_IsString(value)) {
-    std::string str = JS_ToCString(context.ctx(), value);
+    const char* buffer = JS_ToCString(context.ctx(), value);
+    std::string str = std::string(buffer);
     std::vector<uint8_t> strArr(str.begin(), str.end());
     _data.reserve(_data.size() + strArr.size());
     _data.insert(_data.end(), strArr.begin(), strArr.end());
+    JS_FreeCString(context.ctx(), buffer);
   } else if (JS_IsArray(context.ctx(), value)) {
     JSAtom lengthKey = JS_NewAtom(context.ctx(), "length");
     JSValue lengthValue = JS_GetProperty(context.ctx(), value, lengthKey);
     uint32_t length;
     JS_ToUint32(context.ctx(), &length, lengthValue);
 
+    JS_FreeValue(context.ctx(), lengthValue);
+    JS_FreeAtom(context.ctx(), lengthKey);
+
     for (size_t i = 0; i < length; i++) {
       JSValue v = JS_GetPropertyUint32(context.ctx(), value, i);
       append(context, v);
+      JS_FreeValue(context.ctx(), v);
     }
   } else if (JS_IsObject(value)) {
     size_t length;
