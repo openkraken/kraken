@@ -11,7 +11,7 @@ abstract class HttpClientInterceptor {
    *   request: [HttpClientRequest] that containing the detail of the request.
    * @return newRequest: A [HttpClientRequest] containing the response information or null if the kraken should load the resource itself.
    */
-  Future<HttpClientRequest> beforeRequest(HttpClientRequest request);
+  Future<HttpClientRequest?> beforeRequest(HttpClientRequest request);
 
   /**
    * @params
@@ -19,7 +19,7 @@ abstract class HttpClientInterceptor {
    *   request: [HttpClientResponse] that containing the detail of the request.
    * @return newRequest: A [HttpClientResponse] containing the response information or null if the kraken should load the resource itself.
    */
-  Future<HttpClientResponse> afterResponse(HttpClientRequest request, HttpClientResponse response);
+  Future<HttpClientResponse?> afterResponse(HttpClientRequest request, HttpClientResponse response);
 
-  Future<HttpClientResponse> shouldInterceptRequest(HttpClientRequest request);
+  Future<HttpClientResponse?> shouldInterceptRequest(HttpClientRequest request);
 }
