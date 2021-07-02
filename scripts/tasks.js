@@ -11,7 +11,7 @@ const del = require('del');
 const os = require('os');
 
 program
-.option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'jsc')
+.option('-e, --js-engine <engine>', 'The JavaScript Engine kraken used', 'quickjs')
 .option('--built-with-debug-jsc', 'Built bridge binary with debuggable JSC.')
 .parse(process.argv);
 
@@ -212,10 +212,18 @@ task('build-darwin-kraken-lib', done => {
 
   const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken_${program.jsEngine}.dylib`);
 
-  execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
+  if (program.jsEngine === 'jsc') {
+    execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
+  }
   if (buildMode == 'Release') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
     execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit' });
+
+    if (program.jsEngine === 'quickjs') {
+      const quickjsBinary = path.join(paths.bridge, `build/macos/lib/x86_64/libquickjs.dylib`);
+      execSync(`dsymutil ${quickjsBinary}`, { stdio: 'inherit' });
+      execSync(`strip -S -X -x ${quickjsBinary}`, { stdio: 'inherit' });
+    }
   }
 
   done();
