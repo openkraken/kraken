@@ -78,6 +78,8 @@ typedef void DetachRenderer();
 typedef void BeforeRendererAttach();
 /// Do the clean work after the renderer has attached.
 typedef void AfterRendererAttach();
+/// Return the targetId of current element.
+typedef int GetTargetId();
 
 /// Delegate methods passed to renderBoxModel for actions involved with element
 /// (eg. convert renderBoxModel to repaint boundary then attach to element).
@@ -87,13 +89,15 @@ class ElementDelegate {
   DetachRenderer detachRenderer;
   BeforeRendererAttach beforeRendererAttach;
   AfterRendererAttach afterRendererAttach;
+  GetTargetId getTargetId;
 
   ElementDelegate(
     this.markRendererNeedsLayout,
     this.toggleRendererRepaintBoundary,
     this.detachRenderer,
     this.beforeRendererAttach,
-    this.afterRendererAttach
+    this.afterRendererAttach,
+    this.getTargetId
   );
 }
 
@@ -183,6 +187,7 @@ class Element extends Node
       _detachRenderer,
       _beforeRendererAttach,
       _afterRendererAttach,
+      _getTargetId,
     );
   }
 
@@ -210,6 +215,10 @@ class Element extends Node
   void _afterRendererAttach() {
     didAttachRenderer();
     ensureChildAttached();
+  }
+
+  int _getTargetId() {
+    return targetId;
   }
 
   @override
