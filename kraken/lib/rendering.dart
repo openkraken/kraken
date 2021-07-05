@@ -24,5 +24,4 @@ export 'src/rendering/opacity.dart';
 export 'src/rendering/transform.dart';
 export 'src/rendering/visibility.dart';
 export 'src/rendering/viewport.dart';
-export 'src/rendering/editable.dart';
 export 'src/rendering/paragraph.dart';

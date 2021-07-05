@@ -161,7 +161,7 @@ global.simulatePointer = function simulatePointer(list, pointer) {
   });
 }
 
-global.simulateKeyPress = __kraken_simulate_keypress__;
+global.simulateInputText = __kraken_simulate_inputtext__;
 
 function resetDocumentElement() {
   window.scrollTo(0, 0);

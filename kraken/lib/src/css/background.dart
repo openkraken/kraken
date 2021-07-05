@@ -10,7 +10,6 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -145,10 +144,7 @@ class CSSBackground {
 
   static Gradient? getBackgroundGradient(CSSStyleDeclaration? style, RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
     Gradient? gradient;
-    ElementManager elementManager = renderBoxModel.elementManager!;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
+    Size viewportSize = renderBoxModel.renderStyle.viewportSize;
 
     if (method.args.length > 1) {
       List<Color> colors = [];
@@ -367,10 +363,7 @@ class CSSBackground {
       strings = src.split(' ');
     }
 
-    ElementManager elementManager = renderBoxModel.elementManager!;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
+    Size viewportSize = renderBoxModel.renderStyle.viewportSize;
 
     if (strings.length >= 1) {
       double? stop = defaultStop;

@@ -11,7 +11,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 
 // CSS Box Model: https://drafts.csswg.org/css-box-4/
@@ -168,7 +167,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     return constraints;
   }
 
-  void updateBox(String property, String? original, String present) {
+  void updateBox(String property, String? original, String present, int contextId) {
     RenderStyle renderStyle = this as RenderStyle;
 
     if (property == BACKGROUND_IMAGE) {
@@ -192,7 +191,7 @@ mixin CSSBoxMixin on RenderStyleBase {
       } else if (property.startsWith(BACKGROUND)) {
         // Including BACKGROUND_REPEAT, BACKGROUND_IMAGE,
         //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.
-        updateBackgroundImage(property, present);
+        updateBackgroundImage(property, present, contextId);
       } else if (property.startsWith(BORDER)) {
         updateBorder(property);
       } else if (property == BOX_SHADOW) {
@@ -215,10 +214,7 @@ mixin CSSBoxMixin on RenderStyleBase {
   void updateBoxShadow(String property) {
 
     CSSBoxDecoration? prevBoxDecoration = decoration;
-    ElementManager elementManager = renderBoxModel!.elementManager!;
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
+    Size viewportSize = renderBoxModel!.renderStyle.viewportSize;
 
     if (prevBoxDecoration != null) {
       decoration = CSSBoxDecoration(
@@ -262,7 +258,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     }
   }
 
-  void updateBackgroundImage(String property, String present) {
+  void updateBackgroundImage(String property, String present, int contextId) {
     CSSBoxDecoration prevBoxDecoration = decoration!;
 
     DecorationImage? decorationImage;
@@ -271,7 +267,7 @@ mixin CSSBoxMixin on RenderStyleBase {
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style![BACKGROUND_IMAGE]);
     for (CSSFunctionalNotation method in methods) {
       if (method.name == 'url') {
-        decorationImage = CSSBackground.getDecorationImage(style, method, contextId: renderBoxModel!.elementManager!.contextId);
+        decorationImage = CSSBackground.getDecorationImage(style, method, contextId: contextId);
       } else {
         gradient = CSSBackground.getBackgroundGradient(style, renderBoxModel!, method);
       }

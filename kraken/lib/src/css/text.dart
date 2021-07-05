@@ -336,19 +336,15 @@ mixin CSSTextMixin on RenderStyleBase {
     TextStyle? textStyle;
 
     CSSStyleDeclaration parentStyle;
-    ElementManager elementManager;
+    Size viewportSize;
     if (parentElement != null) {
       parentStyle = parentElement.style;
-      elementManager = parentElement.elementManager;
+      viewportSize = parentElement.viewportSize;
       parentRenderBoxModel = parentElement.renderBoxModel;
     } else {
       parentStyle = parentRenderBoxModel!.renderStyle.style!;
-      elementManager = parentRenderBoxModel.elementManager!;
+      viewportSize = parentRenderBoxModel.renderStyle.viewportSize;
     }
-
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
 
     if (parentRenderBoxModel != null) {
       textStyle = getTextStyle(parentStyle, viewportSize, parentRenderStyle: parentRenderBoxModel.renderStyle);

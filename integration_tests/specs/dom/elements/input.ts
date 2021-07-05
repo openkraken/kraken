@@ -48,6 +48,115 @@ describe('Tags input', () => {
     await snapshot();
   });
 
+  it('height not set and line-height set', async () => {
+    let div;
+    div = createElement(
+      'input',
+      {
+        value: '1234567890',   
+        style: {
+            lineHeight: '50px',
+            fontSize: '30px', 
+        },
+      }
+    );
+    BODY.appendChild(div);
+  });
+
+  // @TODO: line-height should not take effect for input element itself.
+  xit('line-height set and is smaller than text size', async (done) => {
+    let input;
+    input = createElement(
+      'input',
+      {
+        value: '1234567890',   
+        style: {
+            lineHeight: '10px',
+            fontSize: '30px'
+        },
+      }
+    );
+    BODY.appendChild(input);
+
+    await snapshot();
+  });
+
+  it('line-height set and is bigger than text size', async () => {
+    let input;
+    input = createElement(
+      'input',
+      {
+        value: '1234567890',   
+        style: {
+            lineHeight: '100px',
+            fontSize: '30px'
+        },
+      }
+    );
+    BODY.appendChild(input);
+
+    await snapshot();
+  });
+   
+  it('line-height changes when height is not set', async (done) => {
+    let input;
+    input = createElement(
+      'input',
+      {
+        value: '1234567890',   
+        style: {
+          lineHeight: '50px', 
+        },
+      }
+    );
+    BODY.appendChild(input);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      input.style.lineHeight = '100px';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('font-size set and width not set', async () => {
+    let input;
+    input = createElement(
+      'input',
+      {
+        value: '1234567890',   
+        style: {
+          fontSize: '30px'
+        },
+      }
+    );
+    BODY.appendChild(input);
+
+    await snapshot();
+  });
+
+  it('font-size changes when width not set', async (done) => {
+    let input;
+    input = createElement(
+      'input',
+      {
+        value: '1234567890',   
+        style: {
+        },
+      }
+    );
+    BODY.appendChild(input);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      input.style.fontSize = '30px';
+      await snapshot();
+      done();
+    });
+  });
+
   it('with value first', async () => {
     const input = document.createElement('input');
     input.setAttribute('value', 'Hello World Hello World Hello World Hello World');
@@ -124,7 +233,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -139,7 +248,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -154,7 +263,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -169,7 +278,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -184,7 +293,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -199,7 +308,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -214,7 +323,7 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
     });
   });
 
@@ -229,7 +338,30 @@ describe('Tags input', () => {
     document.body.appendChild(input);
     input.focus();
     requestAnimationFrame(() => {
-      simulateKeyPress(VALUE);
+      simulateInputText(VALUE);
+    });
+  });
+
+  it('support maxlength', (done) => {
+    const input = <input maxlength="3" />;
+    document.body.appendChild(input);
+    input.focus();
+    requestAnimationFrame(() => {
+      simulateInputText('1');
+      requestAnimationFrame(() => {
+        expect(input.value).toEqual('1');
+
+        simulateInputText('123');
+        requestAnimationFrame(() => {
+          expect(input.value).toEqual('123');
+
+          simulateInputText('1234');
+          requestAnimationFrame(() => {
+            expect(input.value).toEqual('123');
+            done();
+          });
+        });
+      });
     });
   });
 });
