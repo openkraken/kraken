@@ -642,7 +642,7 @@ JSValueRef JSElement::scrollBy(JSContextRef ctx, JSObjectRef function, JSObjectR
   return nullptr;
 }
 
-ElementInstance *JSElement::buildElementInstance(JSContext *context, std::string &name) {
+ElementInstance *JSElement::buildElementInstance(JSContext *context, const std::string &name) {
   ElementInstance *elementInstance;
   if (elementCreatorMap.count(name) > 0) {
     elementInstance = elementCreatorMap[name](context);

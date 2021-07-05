@@ -807,7 +807,7 @@ public:
   static std::unordered_map<std::string, ElementCreator> elementCreatorMap;
   OBJECT_INSTANCE(JSElement)
 
-  static ElementInstance *buildElementInstance(JSContext *context, std::string &tagName);
+  static ElementInstance *buildElementInstance(JSContext *context, const std::string &tagName);
 
   JSValueRef prototypeGetProperty(std::string &name, JSValueRef *exception) override;
 
