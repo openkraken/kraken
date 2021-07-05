@@ -18,6 +18,8 @@ namespace kraken::binding::qjs {
 
 static JSClassID kGlobalCustomClassId{0};
 
+JSRuntime *getGlobalJSRuntime();
+
 class JSContext {
 public:
   JSContext() = delete;

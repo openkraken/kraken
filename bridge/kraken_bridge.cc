@@ -248,6 +248,22 @@ void registerPluginSource(NativeString *code, const char *pluginName) {
   };
 }
 
+#if KRAKEN_QUICK_JS_ENGINE
+void executeJSPendingJob() {
+#if KRAKEN_QUICK_JS_ENGINE
+  JSRuntime *runtime = kraken::binding::qjs::getGlobalJSRuntime();
+  int finished = 1;
+  while (finished != 0) {
+    QjsContext *ctx;
+    finished = JS_ExecutePendingJob(runtime, &ctx);
+    if (finished == -1) {
+      break;
+    }
+  }
+#endif
+}
+#endif
+
 NativeString *NativeString::clone() {
   NativeString *newNativeString = new NativeString();
   uint16_t *newString = new uint16_t[length];

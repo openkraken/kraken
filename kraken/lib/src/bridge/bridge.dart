@@ -36,6 +36,10 @@ int initBridge() {
     Future.microtask(() {
       // Port flutter's frame callback into bridge.
       SchedulerBinding.instance!.addPersistentFrameCallback((_) {
+        // JS pending jobs like Promise are microtask in eventloop.
+        // https://html.spec.whatwg.org/multipage/webappapis.html#microtask-queue
+        executeJSPendingJob();
+
         assert(contextId != -1);
         flushUICommand();
         flushUICommandCallback();

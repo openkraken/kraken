@@ -243,6 +243,15 @@ typedef DartClearUICommandItems = void Function(int contextId);
 final DartClearUICommandItems _clearUICommandItems =
     nativeDynamicLibrary.lookup<NativeFunction<NativeClearUICommandItems>>('clearUICommandItems').asFunction();
 
+typedef NativeExecutePendingJob = Void Function();
+typedef DartExecutePendingJob = void Function();
+final DartExecutePendingJob _executeJSPendingJob =
+nativeDynamicLibrary.lookup<NativeFunction<NativeExecutePendingJob>>('executeJSPendingJob').asFunction();
+
+void executeJSPendingJob() {
+  _executeJSPendingJob();
+}
+
 class UICommand {
   late final UICommandType type;
   late final int id;

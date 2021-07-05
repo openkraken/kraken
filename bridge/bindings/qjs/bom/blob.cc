@@ -74,16 +74,16 @@ PROP_SETTER(Blob, Size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
   return JS_NULL;
 }
 
+struct PromiseContext {
+  JSValue resolveFunc;
+  JSValue rejectFunc;
+  JSValue promise;
+  BlobInstance *blobInstance;
+};
+
 JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   JSValue resolving_funcs[2];
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
-
-  struct PromiseContext {
-    JSValue resolveFunc;
-    JSValue rejectFunc;
-    JSValue promise;
-    BlobInstance *blobInstance;
-  };
 
   auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
 
@@ -94,7 +94,9 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
     QjsContext *ctx = blob->m_ctx;
 
     JSValue arrayBuffer = JS_NewArrayBuffer(ctx, blob->bytes(), blob->size(), [](JSRuntime *rt, void *opaque, void *ptr) {}, nullptr, false);
-    JSValue arguments[] = {arrayBuffer};
+    JSValue arguments[] = {
+      arrayBuffer
+    };
     JSValue returnValue = JS_Call(ctx, promiseContext->resolveFunc, blob->context()->global(), 1, arguments);
 
     if (JS_IsException(returnValue)) {
@@ -148,7 +150,36 @@ JSValue Blob::slice(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) 
 }
 
 JSValue Blob::text(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-  return JSValue();
+  JSValue resolving_funcs[2];
+  JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
+
+  auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+
+  auto *promiseContext = new PromiseContext{resolving_funcs[0], resolving_funcs[1], promise, blob};
+  auto callback = [](void *callbackContext, int32_t contextId, const char *errmsg) {
+    auto *promiseContext = static_cast<PromiseContext *>(callbackContext);
+    auto *blob = promiseContext->blobInstance;
+    QjsContext *ctx = blob->m_ctx;
+
+    JSValue text = JS_NewStringLen(ctx, reinterpret_cast<const char *>(blob->bytes()), blob->size());
+    JSValue arguments[] = {
+        text
+    };
+    JSValue returnValue = JS_Call(ctx, promiseContext->resolveFunc, blob->context()->global(), 1, arguments);
+
+    if (JS_IsException(returnValue)) {
+      blob->context()->handleException(&returnValue);
+      return;
+    }
+
+    JS_FreeValue(ctx, promiseContext->resolveFunc);
+    JS_FreeValue(ctx, promiseContext->rejectFunc);
+    JS_FreeValue(ctx, text);
+  };
+
+  getDartMethod()->setTimeout(promiseContext, blob->context()->getContextId(), callback, 0);
+
+  return promise;
 }
 
 void BlobBuilder::append(JSContext &context, BlobInstance *blob) {
@@ -159,7 +190,7 @@ void BlobBuilder::append(JSContext &context, BlobInstance *blob) {
 
 void BlobBuilder::append(JSContext &context, JSValue &value) {
   if (JS_IsString(value)) {
-    const char* buffer = JS_ToCString(context.ctx(), value);
+    const char *buffer = JS_ToCString(context.ctx(), value);
     std::string str = std::string(buffer);
     std::vector<uint8_t> strArr(str.begin(), str.end());
     _data.reserve(_data.size() + strArr.size());
@@ -204,7 +235,7 @@ int32_t BlobInstance::size() {
   return _data.size();
 }
 
-uint8_t * BlobInstance::bytes() {
+uint8_t *BlobInstance::bytes() {
   return _data.data();
 }
 } // namespace kraken::binding::qjs
