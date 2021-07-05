@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <vector>
 #include <forward_list>
+#include "third_party/gumbo-parser/src/gumbo.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char *errmsg)>;
 
@@ -99,6 +100,8 @@ private:
   void *owner;
   std::atomic<bool> ctxInvalid_{false};
   JSGlobalContextRef ctx_;
+
+  void traverseHTML(GumboNode * node, ElementInstance* element);
 };
 
 class KRAKEN_EXPORT JSFunctionHolder {

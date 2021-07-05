@@ -56,9 +56,17 @@ JSContext::~JSContext() {
   JSGlobalContextRelease(ctx_);
 }
 
-//void JSContext::traverseHTML() {
-//
-//}
+void JSContext::traverseHTML(GumboNode * node, ElementInstance* element) {
+  const GumboVector* children = &node->v.element.children;
+  for (int i = 0; i < children->length; ++i) {
+    GumboNode* child =(GumboNode*) children->data[i];
+    if (child->type == GUMBO_NODE_ELEMENT) {
+      auto newElement = JSElement::buildElementInstance(this, gumbo_normalized_tagname(child->v.element.tag));
+      element->internalAppendChild(newElement);
+      traverseHTML(child, newElement);
+    }
+  }
+}
 
 bool JSContext::parseHTML(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
   JSStringRef sourceRef = JSStringCreateWithCharacters(code, codeLength);
@@ -81,11 +89,10 @@ bool JSContext::parseHTML(const uint16_t *code, size_t codeLength, const char *s
 
   for (int i = 0; i < root_children->length; ++i) {
     GumboNode* child =(GumboNode*) root_children->data[i];
-    if (child->type == GUMBO_NODE_ELEMENT) {
-      if (child->v.element.tag == GUMBO_TAG_BODY) {
-        auto newElement = JSElement::buildElementInstance(this, gumbo_normalized_tagname(child->v.element.tag));
-        documentElement->internalAppendChild(newElement);
-      }
+    if (child->v.element.tag == GUMBO_TAG_BODY) {
+      auto newElement = JSElement::buildElementInstance(this, gumbo_normalized_tagname(child->v.element.tag));
+      documentElement->internalAppendChild(newElement);
+      traverseHTML(child, newElement);
     }
   }
 
