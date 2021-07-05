@@ -32,7 +32,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
     m_runtime = JS_NewRuntime();
   }
   // JavaScript and C are shared the same system call stack.
-  JS_SetMaxStackSize(m_runtime, 1024 * 1024 /* 1MB stack  */);
+  JS_SetMaxStackSize(m_runtime, 10 * 1024 * 1024 /* 10MB stack */);
   m_ctx = JS_NewContext(m_runtime);
 
   timeOrigin = std::chrono::system_clock::now();
