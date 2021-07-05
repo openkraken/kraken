@@ -7,6 +7,7 @@
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/kraken.h"
 #include "bindings/jsc/KOM/performance.h"
+#include "bindings/jsc/DOM/text_node.h"
 #include "dart_methods.h"
 #include <memory>
 #include <mutex>
@@ -64,6 +65,10 @@ void JSContext::traverseHTML(GumboNode * node, ElementInstance* element) {
       auto newElement = JSElement::buildElementInstance(this, gumbo_normalized_tagname(child->v.element.tag));
       element->internalAppendChild(newElement);
       traverseHTML(child, newElement);
+    } else if (child->type == GUMBO_NODE_TEXT) {
+      auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(this),
+                                                                  JSStringCreateWithUTF8CString(child->v.text.text));
+      element->internalAppendChild(newTextNodeInstance);
     }
   }
 }
