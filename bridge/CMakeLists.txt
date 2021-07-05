@@ -49,6 +49,37 @@ list(APPEND BRIDGE_SOURCE
     foundation/bridge_callback.h
     dart_methods.cc
     polyfill/dist/polyfill.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/attribute.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/attribute.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/char_ref.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/char_ref.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/error.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/error.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/gumbo.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/insertion_mode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/parser.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/parser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_buffer.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_buffer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_enum.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_gperf.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_sizes.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag_strings.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tag.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/string_piece.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/token_type.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer_states.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/tokenizer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/utf8.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/utf8.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/util.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/util.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/vector.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gumbo-parser/src/vector.h
 )
 
 list(APPEND BRIDGE_INCLUDE

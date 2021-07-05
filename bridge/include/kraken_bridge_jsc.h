@@ -72,6 +72,7 @@ public:
   JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
   ~JSContext();
 
+  KRAKEN_EXPORT bool parseHTML(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
   KRAKEN_EXPORT bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
   KRAKEN_EXPORT bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
 
