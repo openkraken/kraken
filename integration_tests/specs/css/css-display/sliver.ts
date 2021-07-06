@@ -41,6 +41,16 @@ describe('display sliver', () => {
     await snapshot();
   });
 
+  fit('continuous scroll works', async () => {
+    const container = createSliverBasicCase();
+
+    container.scrollTo(0, 600);
+    await snapshot();
+
+    container.scrollTo(0, 200);
+    await snapshot();
+  });
+
   it('should works with positioned element of no top and left', async () => {
     let div;
     div = createElement(
