@@ -41,7 +41,7 @@ describe('display sliver', () => {
     await snapshot();
   });
 
-  fit('continuous scroll works', async () => {
+  it('continuous scroll works', async () => {
     const container = createSliverBasicCase();
 
     container.scrollTo(0, 600);
