@@ -47,7 +47,8 @@ class RenderRecyclerLayout extends RenderLayoutBox
   RenderViewport? renderViewport;
   RenderSliverList? _renderSliverList;
 
-  // Children renderBox list.
+  // Children renderBox list of element when element is created,
+  // not correspond to the real renderObject.
   List<RenderBox> _children = List.empty(growable: true);
 
   @override
@@ -284,16 +285,12 @@ class RenderRecyclerLayout extends RenderLayoutBox
     if (index < 0) return;
     if (childCount <= index) return;
 
-    RenderBox child = _children[index];
-
-    if (child is RenderBoxModel) {
-      child.elementDelegate.beforeRendererAttach();
-    }
-
-    child.parentData = SliverMultiBoxAdaptorParentData();
-    _renderSliverList!.insert(child, after: after);
-
-    if (child is RenderBoxModel) {
+    RenderBox refChild = _children[index];
+    RenderBoxModel child;
+    if (refChild is RenderBoxModel) {
+      child = refChild.elementDelegate.beforeRendererAttach() as RenderBoxModel;
+      child.parentData = SliverMultiBoxAdaptorParentData();
+      _renderSliverList!.insert(child, after: after);
       child.elementDelegate.afterRendererAttach();
     }
   }
