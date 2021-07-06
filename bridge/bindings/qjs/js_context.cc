@@ -181,4 +181,8 @@ NativeString *stringToNativeString(std::string &string) {
   return tmp.clone();
 }
 
+JSRuntime *getGlobalJSRuntime() {
+  return m_runtime;
+}
+
 } // namespace kraken::binding::qjs
