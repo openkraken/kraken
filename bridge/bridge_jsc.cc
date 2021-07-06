@@ -168,6 +168,7 @@ void JSBridge::evaluateScript(const NativeString *script, const char *url, int s
   binding::jsc::updateLocation(url);
 
   if (strstr(url, ".html") != NULL) {
+    // parse html.
     m_context->parseHTML(script->string, script->length, url, startLine);
   } else {
     // eval javascript.

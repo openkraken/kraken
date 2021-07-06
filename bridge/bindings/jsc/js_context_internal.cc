@@ -74,36 +74,41 @@ void JSContext::traverseHTML(GumboNode * node, ElementInstance* element) {
 }
 
 bool JSContext::parseHTML(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
-  JSStringRef sourceRef = JSStringCreateWithCharacters(code, codeLength);
+  ElementInstance* body;
+  auto document = DocumentInstance::instance(this);
+  for (int i = 0; i < document->documentElement->childNodes.size(); ++i) {
+    NodeInstance* node = document->documentElement->childNodes[i];
+    ElementInstance* element = reinterpret_cast<ElementInstance *>(node);
 
-  std::string html = JSStringToStdString(sourceRef);
 
-  KRAKEN_LOG(VERBOSE) << "parseHTML:\n";
-  KRAKEN_LOG(VERBOSE) << "html=";
-  KRAKEN_LOG(VERBOSE) << html.c_str();
-  KRAKEN_LOG(VERBOSE) << "\n";
-
-  int html_length = html.length();
-  GumboOutput* output = gumbo_parse_with_options(
-    &kGumboDefaultOptions, html.c_str(), html_length);
-
-  const GumboVector *root_children = &output->root->v.element.children;
-
-  auto document = JSDocument::instance(this);
-  auto documentElement = static_cast<ElementInstance *>(JSObjectGetPrivate(document->classObject));
-
-  for (int i = 0; i < root_children->length; ++i) {
-    GumboNode* child =(GumboNode*) root_children->data[i];
-    if (child->v.element.tag == GUMBO_TAG_BODY) {
-      auto newElement = JSElement::buildElementInstance(this, gumbo_normalized_tagname(child->v.element.tag));
-      documentElement->internalAppendChild(newElement);
-      traverseHTML(child, newElement);
+    if (element->tagName() == "BODY") {
+      body = element;
+      break;
     }
   }
 
-  JSStringRelease(sourceRef);
+  if (body != nullptr) {
+    JSStringRef sourceRef = JSStringCreateWithCharacters(code, codeLength);
 
-  KRAKEN_LOG(VERBOSE) << "parseHTML end\n";
+    std::string html = JSStringToStdString(sourceRef);
+
+    int html_length = html.length();
+    GumboOutput* output = gumbo_parse_with_options(
+      &kGumboDefaultOptions, html.c_str(), html_length);
+
+    const GumboVector *root_children = &output->root->v.element.children;
+
+    for (int i = 0; i < root_children->length; ++i) {
+      GumboNode* child =(GumboNode*) root_children->data[i];
+      if (child->v.element.tag == GUMBO_TAG_BODY) {
+        traverseHTML(child, body);
+      }
+    }
+
+    JSStringRelease(sourceRef);
+  } else {
+    KRAKEN_LOG(ERROR) << "BODY is null.";
+  }
 
   return true;
 }
