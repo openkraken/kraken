@@ -126,7 +126,7 @@ int32_t allocateNewContext(int32_t targetContextId) {
                                                 .c_str());
   auto context = new kraken::JSBridge(targetContextId, printError);
   contextPool[targetContextId] = context;
-  return poolIndex;
+  return targetContextId;
 }
 
 void *getJSContext(int32_t contextId) {
