@@ -20,32 +20,6 @@ const defaultHeaders = {
   "Accept": "*/*",
 };
 
-// These headers are not user setable.
-// The following are allowed but banned in the spec:
-// * user-agent
-const forbiddenRequestHeaders = [
-  "accept-charset",
-  "accept-encoding",
-  "access-control-request-headers",
-  "access-control-request-method",
-  "connection",
-  "content-length",
-  "content-transfer-encoding",
-  "cookie",
-  "cookie2",
-  "date",
-  "expect",
-  "host",
-  "keep-alive",
-  // "origin", // Allow to set origin to enable CORS in lib-mtop request
-  "referer",
-  "te",
-  "trailer",
-  "transfer-encoding",
-  "upgrade",
-  "via"
-];
-
 // These request methods are not allowed
 const forbiddenRequestMethods = [
   "TRACE",
@@ -148,10 +122,6 @@ export class XMLHttpRequest extends EventTarget {
   public setRequestHeader(header: string, value: string) {
     if (this.readyState !== this.OPENED) {
       throw new Error("INVALID_STATE_ERR: setRequestHeader can only be called when state is OPEN");
-    }
-    if (!this.isAllowedHttpHeader(header)) {
-      console.warn("Refused to set unsafe header \"" + header + "\"");
-      return;
     }
     if (this.sendFlag) {
       throw new Error("INVALID_STATE_ERR: send flag is true");
@@ -373,16 +343,6 @@ export class XMLHttpRequest extends EventTarget {
     this.readyState = this.UNSENT;
     // @ts-ignore
     this.dispatchEvent(new Event("abort"));
-  };
-
-  /**
-   * Check if the specified header is allowed.
-   *
-   * @param string header Header to validate
-   * @return boolean False if not allowed, otherwise true
-   */
-  private isAllowedHttpHeader(header: string) {
-    return header && forbiddenRequestHeaders.indexOf(header.toLowerCase()) === -1;
   };
 
   /**
