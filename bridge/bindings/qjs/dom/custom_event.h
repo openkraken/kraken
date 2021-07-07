@@ -30,7 +30,7 @@ public:
   OBJECT_INSTANCE(CustomEvent);
 
 private:
-  DEFINE_OBJECT_PROPERTY(1, detail);
+  DEFINE_HOST_CLASS_PROPERTY(1, detail);
 
   ObjectFunction m_initCustomEvent{m_context, m_prototypeObject, "initCustomEvent", initCustomEvent, 4};
 };

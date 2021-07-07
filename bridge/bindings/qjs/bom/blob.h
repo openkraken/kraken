@@ -30,7 +30,7 @@ public:
   static JSValue text(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
 
 private:
-  DEFINE_OBJECT_PROPERTY(2, type, size);
+  DEFINE_HOST_CLASS_PROPERTY(2, type, size);
   friend BlobInstance;
 
   ObjectFunction m_arrayBuffer{m_context, m_prototypeObject, "arrayBuffer", arrayBuffer, 0};

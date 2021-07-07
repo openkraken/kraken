@@ -96,7 +96,7 @@ public:
 private:
   static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
   OBJECT_INSTANCE(Event);
-  DEFINE_OBJECT_PROPERTY(10, Type, Bubbles, Cancelable, Timestamp, DefaultPrevented, Target, SrcElement, CurrentTarget, ReturnValue, CancelBubble)
+  DEFINE_HOST_CLASS_PROPERTY(10, Type, Bubbles, Cancelable, Timestamp, DefaultPrevented, Target, SrcElement, CurrentTarget, ReturnValue, CancelBubble)
 };
 
 struct NativeEvent {
