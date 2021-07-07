@@ -247,7 +247,7 @@ class KrakenViewController {
     return result;
   }
 
-  void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
+  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_TEXT_NODE_START, uniqueId: id);
     }
@@ -257,7 +257,7 @@ class KrakenViewController {
     }
   }
 
-  void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
+  void createComment(int id, Pointer<NativeEventTarget> nativePtr, String data) {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_CREATE_COMMENT_START, uniqueId: id);
     }
@@ -675,15 +675,15 @@ class KrakenController {
       await _bundle!.eval(_view.contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
-        Event event = Event(EVENT_DOM_CONTENT_LOADED);
-        EventTarget window = view.getEventTargetById(WINDOW_ID)!;
-        emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
+        // Event event = Event(EVENT_DOM_CONTENT_LOADED);
+        // EventTarget window = view.getEventTargetById(WINDOW_ID)!;
+        // emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
 
         // @HACK: window.load should trigger after all image had loaded.
         // Someone needs to fix this in the future.
         module.requestAnimationFrame((_) {
-          Event event = Event(EVENT_LOAD);
-          emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
+          // Event event = Event(EVENT_LOAD);
+          // emitUIEvent(_view.contextId, window.nativeEventTargetPtr, event);
         });
       });
 

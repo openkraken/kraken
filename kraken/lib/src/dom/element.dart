@@ -77,13 +77,6 @@ class Element extends Node
         CSSVisibilityMixin,
         CSSTransitionMixin,
         CSSFilterEffectsMixin {
-  static SplayTreeMap<int, Element> _nativeMap = SplayTreeMap();
-
-  static Element getElementOfNativePtr(Pointer<NativeElement> nativeElement) {
-    Element? element = _nativeMap[nativeElement.address];
-    if (element == null) throw FlutterError('Can not get element from nativeElement: $nativeElement');
-    return element;
-  }
 
   final Map<String, dynamic> properties = Map<String, dynamic>();
 
@@ -99,8 +92,6 @@ class Element extends Node
 
   /// Is element an intrinsic box.
   final bool _isIntrinsicBox;
-
-  final Pointer<NativeElement> nativeElementPtr;
 
   /// Style declaration from user input.
   late CSSStyleDeclaration style;
@@ -127,7 +118,7 @@ class Element extends Node
       isSetRepaintSelf || hasTransform || isPositionedFixed;
   }
 
-  Element(int targetId, this.nativeElementPtr, ElementManager elementManager,
+  Element(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager,
       {required this.tagName,
         this.defaultStyle = const <String, dynamic>{},
         // Whether element allows children.
@@ -138,14 +129,14 @@ class Element extends Node
         bool isHiddenElement = false})
       : _isIntrinsicBox = isIntrinsicBox,
         defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : INLINE,
-        super(NodeType.ELEMENT_NODE, targetId, nativeElementPtr.ref.nativeNode, elementManager, tagName) {
+        super(NodeType.ELEMENT_NODE, targetId, nativeEventTarget, elementManager, tagName) {
     style = CSSStyleDeclaration(this);
 
-    if (!isHiddenElement) {
-      _nativeMap[nativeElementPtr.address] = this;
-    }
+    // if (!isHiddenElement) {
+    //   _nativeMap[nativeElementPtr.address] = this;
+    // }
 
-    bindNativeMethods(nativeElementPtr);
+    // bindNativeMethods(nativeElementPtr);
     _setDefaultStyle();
   }
 
@@ -419,9 +410,6 @@ class Element extends Node
       _scrollingElement.dispose();
       scrollingElement = null;
     }
-
-    // Remove native reference.
-    _nativeMap.remove(nativeElementPtr.address);
   }
 
   // Used for force update layout.
@@ -1298,7 +1286,7 @@ class Element extends Node
   }
 
   void eventResponder(Event event) {
-    emitUIEvent(elementManager.controller.view.contextId, nativeElementPtr.ref.nativeNode.ref.nativeEventTarget, event);
+    emitUIEvent(elementManager.controller.view.contextId, nativeEventTargetPtr, event);
   }
 
   void handleMethodClick() {

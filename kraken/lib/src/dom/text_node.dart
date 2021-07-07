@@ -19,20 +19,8 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  final Pointer<NativeTextNode> _nativePtr;
-
-  static SplayTreeMap<int, TextNode> _nativeMap = SplayTreeMap();
-
-  static TextNode getTextNodeOfNativePtr(Pointer<NativeTextNode> nativeTextNode) {
-    TextNode? textNode = _nativeMap[nativeTextNode.address];
-    if (textNode == null) throw FlutterError('Can not get textNode from nativeTextNode: $nativeTextNode');
-    return textNode;
-  }
-
-  TextNode(int targetId, this._nativePtr, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, _nativePtr.ref.nativeNode, elementManager, '#text') {
-    _nativeMap[_nativePtr.address] = this;
-  }
+  TextNode(int targetId, Pointer<NativeEventTarget> nativeEventTarget, this._data, ElementManager elementManager)
+      : super(NodeType.TEXT_NODE, targetId, nativeEventTarget, elementManager, '#text');
 
   RenderTextBox? _renderTextBox;
 
@@ -208,7 +196,6 @@ class TextNode extends Node {
     }
 
     assert(_renderTextBox == null);
-    _nativeMap.remove(_nativePtr.address);
   }
 }
 

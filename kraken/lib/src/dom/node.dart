@@ -17,10 +17,8 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  final Pointer<NativeCommentNode> nativeCommentNodePtr;
-
-  Comment(int targetId, this.nativeCommentNodePtr, ElementManager elementManager, this.data)
-      : super(NodeType.COMMENT_NODE, targetId, nativeCommentNodePtr.ref.nativeNode, elementManager, '#comment');
+  Comment(int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.data)
+      : super(NodeType.COMMENT_NODE, targetId, nativeEventTarget, elementManager, '#comment');
 
   // The comment information.
   String data;
@@ -85,8 +83,6 @@ abstract class LifecycleCallbacks {
 }
 
 abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCallbacks {
-  final Pointer<NativeNode> nativeNodePtr;
-
   List<Node> childNodes = [];
   Node? parentNode;
   NodeType nodeType;
@@ -112,8 +108,8 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     return _children;
   }
 
-  Node(this.nodeType, int targetId, this.nativeNodePtr, ElementManager elementManager, this.nodeName)
-      : super(targetId, nativeNodePtr.ref.nativeEventTarget, elementManager);
+  Node(this.nodeType, int targetId, Pointer<NativeEventTarget> nativeEventTarget, ElementManager elementManager, this.nodeName)
+      : super(targetId, nativeEventTarget, elementManager);
 
   // If node is on the tree, the root parent is body.
   bool get isConnected {

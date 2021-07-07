@@ -50,9 +50,9 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     element_registry.defineElement(type, creator);
   }
 
-  static Map<int, Pointer<NativeElement>> htmlNativePtrMap = Map();
-  static Map<int, Pointer<NativeDocument>> documentNativePtrMap = Map();
-  static Map<int, Pointer<NativeWindow>> windowNativePtrMap = Map();
+  static Map<int, Pointer<NativeEventTarget>> htmlNativePtrMap = Map();
+  static Map<int, Pointer<NativeEventTarget>> documentNativePtrMap = Map();
+  static Map<int, Pointer<NativeEventTarget>> windowNativePtrMap = Map();
 
   static double FOCUS_VIEWINSET_BOTTOM_OVERALL = 32;
 
@@ -74,32 +74,32 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
   EventClient? eventClient;
 
   ElementManager({ required this.contextId, required this.viewport, required this.controller, this.showPerformanceOverlayOverride = false, this.eventClient }) {
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
-      PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
-    }
-
-    HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
-    setEventTarget(documentElement);
-
-    viewportElement = documentElement;
-    viewport.child = viewportElement.renderBoxModel;
+    // if (kProfileMode) {
+    //   PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_PROPERTY_INIT);
+    //   PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_START);
+    // }
+    //
+    // HTMLElement documentElement = HTMLElement(HTML_ID, htmlNativePtrMap[contextId]!, this);
+    // setEventTarget(documentElement);
+    //
+    // viewportElement = documentElement;
+    // viewport.child = viewportElement.renderBoxModel;
     _viewportRenderObject = viewport;
-
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_END);
-    }
-
-    _setupObserver();
-
-    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId]!, this, viewportElement);
+    //
+    // if (kProfileMode) {
+    //   PerformanceTiming.instance().mark(PERF_ROOT_ELEMENT_INIT_END);
+    // }
+    //
+    // _setupObserver();
+    //
+    Window window = Window(WINDOW_ID, windowNativePtrMap[contextId]!, this);
     setEventTarget(window);
-
-    document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
-    document.appendChild(documentElement);
-    setEventTarget(document);
-
-    element_registry.defineBuiltInElements();
+    //
+    // document = Document(DOCUMENT_ID, documentNativePtrMap[contextId]!, this, documentElement);
+    // document.appendChild(documentElement);
+    // setEventTarget(document);
+    //
+    // element_registry.defineBuiltInElements();
   }
 
   void _setupObserver() {
@@ -166,12 +166,12 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
     return element;
   }
 
-  void createTextNode(int id, Pointer<NativeTextNode> nativePtr, String data) {
+  void createTextNode(int id, Pointer<NativeEventTarget> nativePtr, String data) {
     TextNode textNode = TextNode(id, nativePtr, data, this);
     setEventTarget(textNode);
   }
 
-  void createComment(int id, Pointer<NativeCommentNode> nativePtr, String data) {
+  void createComment(int id, Pointer<NativeEventTarget> nativePtr, String data) {
     EventTarget comment = Comment(id, nativePtr, this, data);
     setEventTarget(comment);
   }
@@ -406,17 +406,17 @@ class ElementManager implements WidgetsBindingObserver, ElementsBindingObserver 
       viewport.bottomInset = bottomInset;
     } else {
       bool shouldScrollByToCenter = false;
-      InputElement? focusInputElement = InputElement.focusInputElement;
-      if (focusInputElement != null) {
-        RenderBox? renderer = focusInputElement.renderer as RenderBox?;
-        if (renderer != null && renderer.hasSize) {
-          Offset focusOffset = renderer.localToGlobal(Offset.zero);
-          // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
-          if (focusOffset.dy > viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
-            shouldScrollByToCenter = true;
-          }
-        }
-      }
+      // InputElement? focusInputElement = InputElement.focusInputElement;
+      // if (focusInputElement != null) {
+      //   RenderBox? renderer = focusInputElement.renderer as RenderBox?;
+      //   if (renderer != null && renderer.hasSize) {
+      //     Offset focusOffset = renderer.localToGlobal(Offset.zero);
+      //     // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
+      //     if (focusOffset.dy > viewportHeight - bottomInset - FOCUS_VIEWINSET_BOTTOM_OVERALL) {
+      //       shouldScrollByToCenter = true;
+      //     }
+      //   }
+      // }
       // Show keyboard
       viewport.bottomInset = bottomInset;
       if (shouldScrollByToCenter) {
