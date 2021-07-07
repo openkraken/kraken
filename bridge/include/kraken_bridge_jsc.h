@@ -73,7 +73,6 @@ public:
   JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
   ~JSContext();
 
-  KRAKEN_EXPORT bool parseHTML(const uint16_t *code, size_t codeLength);
   KRAKEN_EXPORT bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
   KRAKEN_EXPORT bool evaluateJavaScript(const char16_t *code, size_t length, const char *sourceURL, int startLine);
 
@@ -100,6 +99,17 @@ private:
   void *owner;
   std::atomic<bool> ctxInvalid_{false};
   JSGlobalContextRef ctx_;
+};
+
+class HTMLParser {
+public:
+  HTMLParser(std::unique_ptr<JSContext> &context, const JSExceptionHandler &handler, void *owner);
+  KRAKEN_EXPORT bool parseHTML(const uint16_t *code, size_t codeLength);
+
+private:
+  std::unique_ptr<JSContext> &m_context;
+  JSExceptionHandler _handler;
+  void *owner;
 
   void traverseHTML(GumboNode * node, ElementInstance* element);
 };

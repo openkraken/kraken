@@ -7,12 +7,11 @@
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/kraken.h"
 #include "bindings/jsc/KOM/performance.h"
-#include "bindings/jsc/DOM/text_node.h"
 #include "dart_methods.h"
 #include <memory>
 #include <mutex>
 #include <vector>
-#include "third_party/gumbo-parser/src/gumbo.h"
+
 
 namespace kraken::binding::jsc {
 
@@ -55,62 +54,6 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 JSContext::~JSContext() {
   ctxInvalid_ = true;
   JSGlobalContextRelease(ctx_);
-}
-
-void JSContext::traverseHTML(GumboNode * node, ElementInstance* element) {
-  const GumboVector* children = &node->v.element.children;
-  for (int i = 0; i < children->length; ++i) {
-    GumboNode* child =(GumboNode*) children->data[i];
-    if (child->type == GUMBO_NODE_ELEMENT) {
-      auto newElement = JSElement::buildElementInstance(this, gumbo_normalized_tagname(child->v.element.tag));
-      element->internalAppendChild(newElement);
-      traverseHTML(child, newElement);
-    } else if (child->type == GUMBO_NODE_TEXT) {
-      auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(this),
-                                                                  JSStringCreateWithUTF8CString(child->v.text.text));
-      element->internalAppendChild(newTextNodeInstance);
-    }
-  }
-}
-
-bool JSContext::parseHTML(const uint16_t *code, size_t codeLength) {
-  ElementInstance* body;
-  auto document = DocumentInstance::instance(this);
-  for (int i = 0; i < document->documentElement->childNodes.size(); ++i) {
-    NodeInstance* node = document->documentElement->childNodes[i];
-    ElementInstance* element = reinterpret_cast<ElementInstance *>(node);
-
-
-    if (element->tagName() == "BODY") {
-      body = element;
-      break;
-    }
-  }
-
-  if (body != nullptr) {
-    JSStringRef sourceRef = JSStringCreateWithCharacters(code, codeLength);
-
-    std::string html = JSStringToStdString(sourceRef);
-
-    int html_length = html.length();
-    GumboOutput* output = gumbo_parse_with_options(
-      &kGumboDefaultOptions, html.c_str(), html_length);
-
-    const GumboVector *root_children = &output->root->v.element.children;
-
-    for (int i = 0; i < root_children->length; ++i) {
-      GumboNode* child =(GumboNode*) root_children->data[i];
-      if (child->v.element.tag == GUMBO_TAG_BODY) {
-        traverseHTML(child, body);
-      }
-    }
-
-    JSStringRelease(sourceRef);
-  } else {
-    KRAKEN_LOG(ERROR) << "BODY is null.";
-  }
-
-  return true;
 }
 
 bool JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {

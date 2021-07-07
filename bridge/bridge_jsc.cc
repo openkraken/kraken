@@ -46,6 +46,7 @@
 #include "bindings/jsc/js_context_internal.h"
 #include "bindings/jsc/kraken.h"
 #include "bindings/jsc/ui_manager.h"
+#include "bindings/jsc/html_parser.h"
 
 namespace kraken {
 
@@ -71,6 +72,8 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   bridgeCallback = new foundation::BridgeCallback();
 
   m_context = binding::jsc::createJSContext(contextId, errorHandler, this);
+
+  m_html_parser = binding::jsc::createHTMLParser(m_context, errorHandler, this);
 
 #if ENABLE_PROFILE
   auto nativePerformance = binding::jsc::NativePerformance::instance(m_context->uniqueId);
@@ -168,7 +171,7 @@ void JSBridge::parseHTML(const NativeString *script, const char *url) {
   if (!m_context->isValid()) return;
   binding::jsc::updateLocation(url);
 
-  m_context->parseHTML(script->string, script->length);
+  m_html_parser->parseHTML(script->string, script->length);
 }
 
 // eval javascript.

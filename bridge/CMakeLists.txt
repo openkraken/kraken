@@ -118,6 +118,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   list(APPEND BRIDGE_SOURCE
     bindings/jsc/js_context_internal.h
     bindings/jsc/js_context_internal.cc
+    bindings/jsc/html_parser.h
+    bindings/jsc/html_parser.cc
     bindings/jsc/host_object_internal.cc
     bindings/jsc/host_object_internal.h
     bindings/jsc/host_class.cc
