@@ -138,13 +138,13 @@ mixin CSSFilterEffectsMixin {
   }
 
   // Get the image filter.
-  static ImageFilter? _parseImageFilters(List<CSSFunctionalNotation> functions, Size viewportSize) {
+  static ImageFilter? _parseImageFilters(List<CSSFunctionalNotation> functions, RenderStyle renderStyle) {
     if (functions.length > 0) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {
           case BLUR:
-            double amount = CSSLength.parseLength(f.args.first, viewportSize)!;
+            double amount = CSSLength.parseLength(f.args.first, renderStyle: renderStyle)!;
             return ImageFilter.blur(sigmaX: amount, sigmaY: amount);
         }
       }
@@ -159,8 +159,8 @@ mixin CSSFilterEffectsMixin {
       renderBoxModel.colorFilter = colorFilter;
     }
 
-    Size viewportSize = renderBoxModel.renderStyle.viewportSize;
-    ImageFilter? imageFilter = _parseImageFilters(functions, viewportSize);
+    RenderStyle renderStyle = renderBoxModel.renderStyle;
+    ImageFilter? imageFilter = _parseImageFilters(functions, renderStyle);
     if (imageFilter != null) {
       renderBoxModel.imageFilter = imageFilter;
     }

@@ -380,14 +380,14 @@ class ImageElement extends Element {
         value += 'px';
       }
 
-      _propertyWidth = CSSLength.toDisplayPortValue(value, viewportSize);
+      _propertyWidth = CSSLength.toDisplayPortValue(value, viewportSize: viewportSize, renderStyle: renderBoxModel?.renderStyle);
       _resize();
     } else if (key == HEIGHT) {
       if (value is String && _isNumberString(value)) {
         value += 'px';
       }
 
-      _propertyHeight = CSSLength.toDisplayPortValue(value, viewportSize);
+      _propertyHeight = CSSLength.toDisplayPortValue(value, viewportSize: viewportSize, renderStyle: renderBoxModel?.renderStyle);
       _resize();
     }
   }

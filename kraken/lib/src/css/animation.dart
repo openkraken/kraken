@@ -454,14 +454,22 @@ class KeyframeEffect extends AnimationEffect {
   // Similarly, a playback rate of -1 will cause the animation’s current time to decrease at the same rate as the time values from its timeline increase.
   double _playbackRate = 1;
 
-  KeyframeEffect(this.style, this.target, List<Keyframe> keyframes, EffectTiming? options, this.viewportSize) {
+  KeyframeEffect(
+    this.style,
+    this.target,
+    List<Keyframe> keyframes,
+    EffectTiming? options,
+    this.viewportSize,
+    this.renderStyle
+  ) {
     timing = options == null ? EffectTiming() : options;
 
     _propertySpecificKeyframeGroups = _makePropertySpecificKeyframeGroups(keyframes);
-    _interpolations = _makeInterpolations(_propertySpecificKeyframeGroups, viewportSize);
+    _interpolations = _makeInterpolations(_propertySpecificKeyframeGroups, viewportSize, renderStyle);
   }
 
   Size? viewportSize;
+  RenderStyle? renderStyle;
 
   static _defaultParse(value) {
     return value;
@@ -471,7 +479,7 @@ class KeyframeEffect extends AnimationEffect {
     return progress < 0.5 ? start : end;
   }
 
-  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, Size? viewportSize) {
+  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, Size? viewportSize, RenderStyle? renderStyle) {
     List<_Interpolation> interpolations = [];
 
     propertySpecificKeyframeGroups.forEach((String property, List<Keyframe> keyframes) {
@@ -509,8 +517,8 @@ class KeyframeEffect extends AnimationEffect {
           startOffset,
           endOffset,
           _parseEasing(keyframes[startIndex].easing),
-          parseProperty(left, viewportSize),
-          parseProperty(right, viewportSize),
+          parseProperty(left, viewportSize, renderStyle),
+          parseProperty(right, viewportSize, renderStyle),
           handlers[1]
         );
 

@@ -171,7 +171,7 @@ class CSSStyleDeclaration {
     return _propertyRunningTransition.containsKey(property);
   }
 
-  void _transition(String propertyName, begin, end, Size? viewportSize) {
+  void _transition(String propertyName, begin, end, Size? viewportSize, RenderStyle? renderStyle) {
     if (_hasRunningTransition(propertyName)) {
       Animation animation = _propertyRunningTransition[propertyName]!;
       animation.cancel();
@@ -203,7 +203,7 @@ class CSSStyleDeclaration {
       Keyframe(propertyName, begin, 0, LINEAR),
       Keyframe(propertyName, end, 1, LINEAR),
     ];
-    KeyframeEffect effect = KeyframeEffect(this, target, keyframes, options, viewportSize);
+    KeyframeEffect effect = KeyframeEffect(this, target, keyframes, options, viewportSize, renderStyle);
     Animation animation = Animation(effect);
     _propertyRunningTransition[propertyName] = animation;
 
@@ -459,7 +459,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [Size? viewportSize]) {
+  void setProperty(String propertyName, value, [Size? viewportSize, RenderStyle? renderStyle]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -543,7 +543,7 @@ class CSSStyleDeclaration {
         if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
       case TRANSFORM:
-        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize)) {
+        if (!CSSTransform.isValidTransformValue(normalizedValue, viewportSize, renderStyle)) {
           return;
         }
         break;
@@ -563,7 +563,7 @@ class CSSStyleDeclaration {
     }
 
     if (_shouldTransition(propertyName, prevValue, normalizedValue)) {
-      _transition(propertyName, prevValue, normalizedValue, viewportSize);
+      _transition(propertyName, prevValue, normalizedValue, viewportSize, renderStyle);
     } else {
       setRenderStyleProperty(propertyName, prevValue, normalizedValue);
     }
@@ -609,13 +609,6 @@ class CSSStyleDeclaration {
     _styleChangeListeners.clear();
     _transitions.clear();
     _propertyRunningTransition.clear();
-  }
-
-  double? getLengthByPropertyName(String propertyName, ElementManager elementManager) {
-    double viewportWidth = elementManager.viewportWidth;
-    double viewportHeight = elementManager.viewportHeight;
-    Size viewportSize = Size(viewportWidth, viewportHeight);
-    return CSSLength.toDisplayPortValue(getPropertyValue(propertyName), viewportSize);
   }
 
   static bool isNullOrEmptyValue(value) {

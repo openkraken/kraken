@@ -12,7 +12,7 @@ import 'package:kraken/dom.dart';
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 
-Color? _parseColor(String color, [Size? viewportSize]) {
+Color? _parseColor(String color, [Size? viewportSize, RenderStyle? renderStyle]) {
   return CSSColor.parseColor(color);
 }
 
@@ -47,8 +47,8 @@ void _updateColor(Color oldColor, Color newColor, double progress, String proper
   }
 }
 
-double? _parseLength(String _length, [Size? viewportSize]) {
-  return CSSLength.parseLength(_length, viewportSize);
+double? _parseLength(String _length, [Size? viewportSize, RenderStyle? renderStyle]) {
+  return CSSLength.parseLength(_length, viewportSize: viewportSize, renderStyle: renderStyle);
 }
 
 void _updateLength(double oldLength, double newLength, double progress, String property, RenderStyle renderStyle) {
@@ -106,7 +106,7 @@ void _updateLength(double oldLength, double newLength, double progress, String p
   }
 }
 
-FontWeight _parseFontWeight(String fontWeight, [Size? viewportSize]) {
+FontWeight _parseFontWeight(String fontWeight, [Size? viewportSize, RenderStyle? renderStyle]) {
   return CSSText.parseFontWeight(fontWeight);
 }
 
@@ -119,7 +119,7 @@ void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress
   }
 }
 
-double? _parseNumber(String number, [Size? viewportSize]) {
+double? _parseNumber(String number, [Size? viewportSize, RenderStyle? renderStyle]) {
   return CSSNumber.parseNumber(number);
 }
 
@@ -145,7 +145,7 @@ void _updateNumber(double oldValue, double newValue, double progress, String pro
   }
 }
 
-String _parseLineHeight(String lineHeight, [Size? viewportSize]) {
+String _parseLineHeight(String lineHeight, [Size? viewportSize, RenderStyle? renderStyle]) {
   return lineHeight;
 }
 
@@ -154,8 +154,8 @@ void _updateLineHeight(String oldValue, String newValue, double progress, String
   double? lineHeight;
 
   if (CSSLength.isLength(oldValue) && CSSLength.isLength(newValue)) {
-    double left = CSSLength.parseLength(oldValue, viewportSize)!;
-    double right = CSSLength.parseLength(newValue, viewportSize)!;
+    double left = CSSLength.parseLength(oldValue, viewportSize: viewportSize, renderStyle: renderStyle)!;
+    double right = CSSLength.parseLength(newValue, viewportSize: viewportSize, renderStyle: renderStyle)!;
     lineHeight = _getNumber(left, right, progress);
   } else if (CSSNumber.isNumber(oldValue) && CSSNumber.isNumber(newValue)) {
     double left = CSSNumber.parseNumber(oldValue)!;
@@ -170,8 +170,8 @@ void _updateLineHeight(String oldValue, String newValue, double progress, String
   }
 }
 
-Matrix4? _parseTransform(String value, [Size? viewportSize]) {
-  return CSSTransform.parseTransform(value, viewportSize);
+Matrix4? _parseTransform(String value, [Size? viewportSize, RenderStyle? renderStyle]) {
+  return CSSTransform.parseTransform(value, viewportSize, renderStyle);
 }
 
 double _lerpDouble(double begin, double to, double t) {
@@ -799,18 +799,18 @@ class CSSTransform {
     return [translate, scale, angle, m11, m12, m21, m22];
   }
 
-  static bool isValidTransformValue(String value, [Size? viewportSize]) {
-    return value == NONE || parseTransform(value, viewportSize) != null;
+  static bool isValidTransformValue(String value, [Size? viewportSize, RenderStyle? renderStyle]) {
+    return value == NONE || parseTransform(value, viewportSize, renderStyle) != null;
   }
 
   static Matrix4 initial = Matrix4.identity();
 
-  static Matrix4? parseTransform(String value, [Size? viewportSize]) {
+  static Matrix4? parseTransform(String value, [Size? viewportSize, RenderStyle? renderStyle]) {
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(value);
 
     Matrix4? matrix4;
     for (CSSFunctionalNotation method in methods) {
-      Matrix4? transform = _parseTransform(method, viewportSize);
+      Matrix4? transform = _parseTransform(method, viewportSize, renderStyle);
       if (transform != null) {
         if (matrix4 == null) {
           matrix4 = transform;
@@ -844,7 +844,7 @@ class CSSTransform {
   static const String SKEW_Y = 'skewy';
   static const String PERSPECTIVE = 'perspective';
 
-  static Matrix4? _parseTransform(CSSFunctionalNotation method, [Size? viewportSize]) {
+  static Matrix4? _parseTransform(CSSFunctionalNotation method, [Size? viewportSize, RenderStyle? renderStyle]) {
     switch (method.name) {
       case MATRIX:
         if (method.args.length == 6) {
@@ -869,11 +869,11 @@ class CSSTransform {
         if (method.args.length >= 1 && method.args.length <= 2) {
           double y;
           if (method.args.length == 2) {
-            y = CSSLength.toDisplayPortValue(method.args[1].trim(), viewportSize) ?? 0;
+            y = CSSLength.toDisplayPortValue(method.args[1].trim(), viewportSize: viewportSize, renderStyle: renderStyle) ?? 0;
           } else {
             y = 0;
           }
-          double x = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
+          double x = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize: viewportSize, renderStyle: renderStyle) ?? 0;
           return Matrix4.identity()..translate(x, y);
         }
         break;
@@ -885,31 +885,31 @@ class CSSTransform {
         if (method.args.length >= 1 && method.args.length <= 3) {
           double y = 0, z = 0;
           if (method.args.length == 2) {
-            y = CSSLength.toDisplayPortValue(method.args[1].trim(), viewportSize) ?? 0;
+            y = CSSLength.toDisplayPortValue(method.args[1].trim(), viewportSize: viewportSize, renderStyle: renderStyle) ?? 0;
           }
           if (method.args.length == 3) {
-            y = CSSLength.toDisplayPortValue(method.args[1].trim(), viewportSize) ?? 0;
-            z = CSSLength.toDisplayPortValue(method.args[2].trim(), viewportSize) ?? 0;
+            y = CSSLength.toDisplayPortValue(method.args[1].trim(), viewportSize: viewportSize, renderStyle: renderStyle) ?? 0;
+            z = CSSLength.toDisplayPortValue(method.args[2].trim(), viewportSize: viewportSize, renderStyle: renderStyle) ?? 0;
           }
-          double x = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
+          double x = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize: viewportSize, renderStyle: renderStyle) ?? 0;
           return Matrix4.identity()..translate(x, y, z);
         }
         break;
       case TRANSLATE_X:
         if (method.args.length == 1) {
-          double x = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
+          double x = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize: viewportSize, renderStyle: renderStyle) ?? 0;
           return Matrix4.identity()..translate(x);
         }
         break;
       case TRANSLATE_Y:
         if (method.args.length == 1) {
-          double y = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
+          double y = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize: viewportSize, renderStyle: renderStyle) ?? 0;
           return Matrix4.identity()..translate(0.0, y);
         }
         break;
       case TRANSLATE_Z:
         if (method.args.length == 1) {
-          double z = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
+          double z = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize: viewportSize, renderStyle: renderStyle) ?? 0;
           return Matrix4.identity()..translate(0.0, 0.0, z);
         }
         break;
@@ -1008,7 +1008,7 @@ class CSSTransform {
         //   0, 0, 1, perspective,
         //   0, 0, 0, 1]
         if (method.args.length == 1) {
-          double p = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize) ?? 0;
+          double p = CSSLength.toDisplayPortValue(method.args[0].trim(), viewportSize: viewportSize, renderStyle: renderStyle) ?? 0;
           p = (-1 / p);
           return Matrix4.identity()..storage[11] = p;
         }
@@ -1024,7 +1024,7 @@ class CSSOrigin {
 
   CSSOrigin(this.offset, this.alignment);
 
-  static CSSOrigin? parseOrigin(String origin, Size viewportSize) {
+  static CSSOrigin? parseOrigin(String origin, RenderStyle renderStyle) {
     if (origin.isNotEmpty) {
       List<String> originList = origin.trim().split(_spaceRegExp);
       String? x, y;
@@ -1051,7 +1051,7 @@ class CSSOrigin {
 
       // handle x
       if (CSSLength.isLength(x)) {
-        offsetX = CSSLength.toDisplayPortValue(x, viewportSize) ?? offsetX;
+        offsetX = CSSLength.toDisplayPortValue(x, renderStyle: renderStyle) ?? offsetX;
       } else if (CSSPercentage.isPercentage(x)) {
         alignX = CSSPercentage.parsePercentage(x!)! * 2 - 1;
       } else if (x == CSSPosition.LEFT) {
@@ -1064,7 +1064,7 @@ class CSSOrigin {
 
       // handle y
       if (CSSLength.isLength(y)) {
-        offsetY = CSSLength.toDisplayPortValue(y, viewportSize) ?? offsetY;
+        offsetY = CSSLength.toDisplayPortValue(y, renderStyle: renderStyle) ?? offsetY;
       } else if (CSSPercentage.isPercentage(y)) {
         alignY = CSSPercentage.parsePercentage(y!)! * 2 - 1;
       } else if (y == CSSPosition.TOP) {
@@ -1131,7 +1131,8 @@ mixin CSSTransformMixin on RenderStyleBase {
   }
 
   void updateTransformOrigin(String present, [CSSOrigin? newOrigin]) {
-    CSSOrigin? transformOriginValue = newOrigin ?? CSSOrigin.parseOrigin(present, viewportSize);
+    RenderStyle renderStyle = this as RenderStyle;
+    CSSOrigin? transformOriginValue = newOrigin ?? CSSOrigin.parseOrigin(present, renderStyle);
     if (transformOriginValue == null) return;
 
     Offset oldOffset = transformOffset;

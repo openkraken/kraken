@@ -8,6 +8,7 @@
 import 'dart:ui';
 
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 // https://drafts.csswg.org/css-values-3/#absolute-lengths
 const _1in = 96; // 1in = 2.54cm = 96px
@@ -17,7 +18,7 @@ const _1Q = _1cm / 40; // 1Q = 1/40th of 1cm
 const _1pc = _1in / 6; // 1pc = 1/6th of 1in
 const _1pt = _1in / 72; // 1pt = 1/72th of 1in
 
-final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|vmin|vmax|in|cm|mm|pc|pt$', caseSensitive: false);
+final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|vmin|vmax|rem|em|in|cm|mm|pc|pt$', caseSensitive: false);
 final _percentageRegExp = RegExp(r'^\d+\%$', caseSensitive: false);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
@@ -34,6 +35,8 @@ class CSSLength {
   static const String PC = 'pc';
   static const String PT = 'pt';
   static const String Q = 'q';
+  static const String EM = 'em';
+  static const String REM = 'rem';
 
   static double? toDouble(value) {
     if (value is double) {
@@ -71,23 +74,39 @@ class CSSLength {
     return double.tryParse(percentage.split('%')[0])! / 100;
   }
 
-  static double? parseLength(String unitedValue, Size? viewportSize) {
-    return toDisplayPortValue(unitedValue, viewportSize);
+  static double? parseLength(String unitedValue, { Size? viewportSize, RenderStyle? renderStyle }) {
+    return toDisplayPortValue(unitedValue, viewportSize: viewportSize, renderStyle: renderStyle);
   }
 
-  static double? toDisplayPortValue(String? unitedValue, Size? viewportSize) {
+  static double? toDisplayPortValue(String? unitedValue, { Size? viewportSize, RenderStyle? renderStyle }) {
     if (unitedValue == null || unitedValue.isEmpty) return null;
 
     unitedValue = unitedValue.trim();
     if (unitedValue == INITIAL) return null;
 
     double? displayPortValue;
-    double viewportWidth = viewportSize!.width;
-    double viewportHeight = viewportSize.height;
+    Size _viewportSize = renderStyle != null ? renderStyle.viewportSize : viewportSize!;
+    double viewportWidth = _viewportSize.width;
+    double viewportHeight = _viewportSize.height;
 
     // Only '0' is accepted with no unit.
     if (unitedValue == ZERO) {
       return 0;
+    } else if (unitedValue.endsWith(REM)) {
+      double? currentValue = double.tryParse(unitedValue.split(REM)[0]);
+      if (currentValue == null || renderStyle == null) return null;
+      RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
+      RenderBoxModel? documentRoot = renderBoxModel.getDocumentRoot();
+      if (documentRoot != null) {
+        double rootFontSize = documentRoot.renderStyle.fontSize;
+        return rootFontSize * currentValue;
+      }
+      return null;
+    } else if (unitedValue.endsWith(EM)) {
+      double? currentValue = double.tryParse(unitedValue.split(EM)[0]);
+      if (currentValue == null || renderStyle == null) return null;
+      double fontSize = renderStyle.fontSize;
+      return fontSize * currentValue;
     } else if (unitedValue.endsWith(RPX)) {
       double? currentValue = double.tryParse(unitedValue.split(RPX)[0]);
       if (currentValue == null) return null;

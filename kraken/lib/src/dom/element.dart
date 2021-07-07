@@ -209,10 +209,10 @@ class Element extends Node
 
   void _beforeRendererAttach() {
     willAttachRenderer();
-    style.applyTargetProperties();
   }
 
   void _afterRendererAttach() {
+    style.applyTargetProperties();
     didAttachRenderer();
     ensureChildAttached();
   }
@@ -538,54 +538,11 @@ class Element extends Node
     CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
     if (display != CSSDisplay.none) {
       willAttachRenderer();
+      parent.addChildRenderObject(this, after: after);
+      ensureChildAttached();
       style.applyTargetProperties();
 
-      CSSDisplay? parentDisplayValue = parent.renderBoxModel!.renderStyle.display;
-      // InlineFlex or Flex
-      bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex ||
-          parentDisplayValue == CSSDisplay.inlineFlex;
-
-      parent.addChildRenderObject(this, after: after);
-
-      ensureChildAttached();
-
-      /// Update flex siblings.
-      if (isParentFlexDisplayType) {
-        for (Element child in parent.children) {
-          RenderBoxModel? childRenderBoxModel = child.renderBoxModel;
-          if (parent.renderBoxModel is RenderFlexLayout && childRenderBoxModel != null) {
-            childRenderBoxModel.renderStyle.updateFlexItem();
-            childRenderBoxModel.markNeedsLayout();
-          }
-        }
-      }
-
-      RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-
-      /// Recalculate gradient after node attached when gradient length cannot be obtained from style
-      if (selfRenderBoxModel.shouldRecalGradient) {
-        String backgroundImage = style[BACKGROUND_IMAGE];
-        int contextId = elementManager.contextId;
-        selfRenderBoxModel.renderStyle.updateBox(BACKGROUND_IMAGE, backgroundImage, backgroundImage, contextId);
-        selfRenderBoxModel.shouldRecalGradient = false;
-      }
-
-      /// Calculate font-size which is percentage when node attached
-      /// where it can access the font-size of its parent element
-      if (selfRenderBoxModel.shouldLazyCalFontSize) {
-        _updatePercentageFontSize();
-        selfRenderBoxModel.shouldLazyCalFontSize = false;
-      }
-
-      /// Calculate line-height which is percentage when node attached
-      /// where it can access the font-size of its own element
-      if (selfRenderBoxModel.shouldLazyCalLineHeight) {
-        _updatePercentageLineHeight();
-        selfRenderBoxModel.shouldLazyCalLineHeight = false;
-      }
-
-      RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
-
+      RenderStyle renderStyle = renderBoxModel!.renderStyle;
       /// Set display and transformedDisplay when display is not set in style
       renderStyle.initDisplay(style, defaultDisplay);
       didAttachRenderer();
@@ -1002,9 +959,10 @@ class Element extends Node
       return;
     }
 
-    double? presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
+    RenderStyle renderStyle = renderBoxModel!.renderStyle;
+    double? presentValue = CSSLength.toDisplayPortValue(present, renderStyle: renderStyle);
     if (presentValue == null) return;
-    renderBoxModel!.renderStyle.updateOffset(property, presentValue);
+    renderStyle.updateOffset(property, presentValue);
   }
 
   void _styleTextAlignChangedListener(String property, String? original, String present) {
@@ -1042,8 +1000,9 @@ class Element extends Node
       return;
     }
 
-    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
-    selfRenderBoxModel.renderStyle.updatePadding(property, presentValue);
+    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
+    double presentValue = CSSLength.toDisplayPortValue(present, renderStyle: renderStyle) ?? 0;
+    renderStyle.updatePadding(property, presentValue);
   }
 
   void _styleSizeChangedListener(String property, String? original, String present) {
@@ -1057,8 +1016,9 @@ class Element extends Node
       return;
     }
 
-    double? presentValue = CSSLength.toDisplayPortValue(present, viewportSize);
-    selfRenderBoxModel.renderStyle.updateSizing(property, presentValue);
+    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
+    double? presentValue = CSSLength.toDisplayPortValue(present, renderStyle: renderStyle);
+    renderStyle.updateSizing(property, presentValue);
   }
 
   void _styleMarginChangedListener(String property, String? original, String present) {
@@ -1072,8 +1032,8 @@ class Element extends Node
       return;
     }
 
-    double presentValue = CSSLength.toDisplayPortValue(present, viewportSize) ?? 0;
     RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
+    double presentValue = CSSLength.toDisplayPortValue(present, renderStyle: renderStyle) ?? 0;
     renderStyle.updateMargin(property, presentValue);
     // Margin change in flex layout may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
@@ -1157,8 +1117,9 @@ class Element extends Node
       return;
     }
 
-    Matrix4? matrix4 = CSSTransform.parseTransform(present, viewportSize);
-    selfRenderBoxModel.renderStyle.updateTransform(matrix4);
+    RenderStyle renderStyle = selfRenderBoxModel.renderStyle;
+    Matrix4? matrix4 = CSSTransform.parseTransform(present, renderStyle.viewportSize, renderStyle);
+    renderStyle.updateTransform(matrix4);
   }
 
   void _styleTransformOriginChangedListener(String property, String? original, String present) {
@@ -1168,26 +1129,17 @@ class Element extends Node
 
   // Update text related style
   void _updateTextStyle(String property) {
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     /// Percentage font-size should be resolved when node attached
     /// cause it needs to know its parents style
     if (property == FONT_SIZE && CSSLength.isPercentage(style[FONT_SIZE])) {
-      if (selfRenderBoxModel.attached) {
-        _updatePercentageFontSize();
-      } else {
-        selfRenderBoxModel.shouldLazyCalFontSize = true;
-      }
+      _updatePercentageFontSize();
       return;
     }
 
     /// Percentage line-height should be resolved when node attached
     /// cause it needs to know other style in its own element
     if (property == LINE_HEIGHT && CSSLength.isPercentage(style[LINE_HEIGHT])) {
-      if (selfRenderBoxModel.attached) {
-        _updatePercentageLineHeight();
-      } else {
-        selfRenderBoxModel.shouldLazyCalLineHeight = true;
-      }
+      _updatePercentageLineHeight();
       return;
     }
     renderBoxModel!.renderStyle.updateTextStyle(property);
@@ -1220,14 +1172,14 @@ class Element extends Node
     // then trigger the animation phase.
     if (key == TRANSITION) {
       SchedulerBinding.instance!.addPostFrameCallback((timestamp) {
-        style.setProperty(key, value, viewportSize);
+        style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
       });
       return;
     } else {
       CSSDisplay originalDisplay = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
       // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
       // [StyleChangeListener] to be invoked in sync.
-      style.setProperty(key, value, viewportSize);
+      style.setProperty(key, value, viewportSize, renderBoxModel?.renderStyle);
 
       // When renderer and style listener is not created when original display is none,
       // thus it needs to create renderer when style changed.

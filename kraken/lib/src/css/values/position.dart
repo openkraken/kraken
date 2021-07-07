@@ -53,11 +53,11 @@ class CSSPosition {
   }
 
   /// Parse background-position-x/background-position-y from string to CSSBackgroundPosition type.
-  static CSSBackgroundPosition parsePosition(String input, Size viewportSize, bool isHorizontal) {
+  static CSSBackgroundPosition parsePosition(String input, RenderStyle renderStyle, bool isHorizontal) {
     if (CSSLength.isPercentage(input)) {
       return CSSBackgroundPosition(percentage: _gatValuePercentage(input));
     } else if (CSSLength.isLength(input)) {
-      return CSSBackgroundPosition(length: CSSLength.toDisplayPortValue(input, viewportSize));
+      return CSSBackgroundPosition(length: CSSLength.toDisplayPortValue(input, renderStyle: renderStyle));
     } else {
       if (isHorizontal) {
         switch (input) {

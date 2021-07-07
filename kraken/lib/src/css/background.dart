@@ -144,7 +144,6 @@ class CSSBackground {
 
   static Gradient? getBackgroundGradient(CSSStyleDeclaration? style, RenderBoxModel renderBoxModel, CSSFunctionalNotation method) {
     Gradient? gradient;
-    Size viewportSize = renderBoxModel.renderStyle.viewportSize;
 
     if (method.args.length > 1) {
       List<Color> colors = [];
@@ -176,7 +175,7 @@ class CSSBackground {
                     end = Alignment.centerLeft;
                   }
                   if (style![WIDTH].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH], viewportSize);
+                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH], renderStyle: renderBoxModel.renderStyle);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
                   }
@@ -195,7 +194,7 @@ class CSSBackground {
                     end = Alignment.topCenter;
                   }
                   if (style![HEIGHT].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize);
+                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT], renderStyle: renderBoxModel.renderStyle);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
                   }
@@ -215,7 +214,7 @@ class CSSBackground {
                   }
 
                   if (style![WIDTH].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH], viewportSize);
+                    gradientLength = CSSLength.toDisplayPortValue(style[WIDTH], renderStyle: renderBoxModel.renderStyle);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentWidth(renderBoxModel);
                   }
@@ -235,7 +234,7 @@ class CSSBackground {
                     end = Alignment.bottomCenter;
                   }
                   if (style![HEIGHT].isNotEmpty) {
-                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT], viewportSize);
+                    gradientLength = CSSLength.toDisplayPortValue(style[HEIGHT], renderStyle: renderBoxModel.renderStyle);
                   } else if (renderBoxModel.attached) {
                     gradientLength = RenderBoxModel.getLogicalContentHeight(renderBoxModel);
                   }
@@ -363,8 +362,6 @@ class CSSBackground {
       strings = src.split(' ');
     }
 
-    Size viewportSize = renderBoxModel.renderStyle.viewportSize;
-
     if (strings.length >= 1) {
       double? stop = defaultStop;
       if (strings.length >= 2) {
@@ -376,11 +373,7 @@ class CSSBackground {
               stop = CSSAngle.parseAngle(strings[i])! / (math.pi * 2);
             } else if (CSSLength.isLength(strings[i])) {
               if (gradientLength != null) {
-                stop = CSSLength.toDisplayPortValue(strings[i], viewportSize)! / gradientLength;
-              } else if (!renderBoxModel.attached) {
-                /// When node is not attached and has no width/height, gradient length
-                /// cannot be obtained, so wait for renderBoxModel attached to recalculate gradient length
-                renderBoxModel.shouldRecalGradient = true;
+                stop = CSSLength.toDisplayPortValue(strings[i], renderStyle: renderBoxModel.renderStyle)! / gradientLength;
               }
             }
             colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
