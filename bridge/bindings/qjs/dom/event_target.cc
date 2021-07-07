@@ -240,6 +240,18 @@ EventTargetInstance::EventTargetInstance(EventTarget *eventTarget) : Instance(ev
   globalEventTargetId++;
 }
 
+JSValue EventTargetInstance::callNativeMethods(NativeString *method, int32_t argc,
+                                                   NativeValue *argv) {
+  if (nativeEventTarget.callNativeMethods == nullptr) {
+    return JS_ThrowTypeError(m_ctx, "Failed to call native dart methods: callNativeMethods not initialized.");
+  }
+
+  NativeValue nativeValue{};
+  nativeEventTarget.callNativeMethods(&nativeEventTarget, &nativeValue, method, argc, argv);
+  JSValue returnValue = nativeValueToJSValue(m_context, nativeValue);
+  return returnValue;
+}
+
 void bindEventTarget(std::unique_ptr<JSContext> &context) {
   auto *eventTargetConstructor = new EventTarget(context.get());
   // Set globalThis and Window's prototype to EventTarget's prototype to support EventTarget methods in global.
@@ -259,4 +271,5 @@ void NativeEventTarget::dispatchEventImpl(NativeEventTarget *nativeEventTarget, 
   eventInstance->nativeEvent->target = eventTargetInstance;
   eventTargetInstance->dispatchEvent(eventInstance);
 }
+
 } // namespace kraken::binding::qjs

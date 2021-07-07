@@ -6,9 +6,10 @@
 #ifndef KRAKENBRIDGE_EVENT_TARGET_H
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
+#include "bindings/qjs/dom/event.h"
 #include "bindings/qjs/host_class.h"
 #include "bindings/qjs/js_context.h"
-#include "bindings/qjs/dom/event.h"
+#include "bindings/qjs/native_value.h"
 
 namespace kraken::binding::qjs {
 
@@ -19,7 +20,8 @@ class EventTarget : public HostClass {
 public:
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
   EventTarget() = delete;
-  explicit EventTarget(JSContext *context): HostClass(context, "EventTarget") {}
+  explicit EventTarget(JSContext *context) : HostClass(context, "EventTarget") {}
+  explicit EventTarget(JSContext *context, const char* name): HostClass(context, name) {};
 
 private:
   std::vector<std::string> m_jsOnlyEvents;
@@ -43,17 +45,20 @@ private:
 
 using NativeDispatchEvent = void (*)(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent,
                                      int32_t isCustomEvent);
+using CallNativeMethods = void (*)(NativeEventTarget *nativeEventTarget, NativeValue *returnValue, NativeString *method, int32_t argc,
+                                           NativeValue *argv);
 
 struct NativeEventTarget {
   NativeEventTarget() = delete;
-  NativeEventTarget(EventTargetInstance *_instance)
-      : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl){};
+  explicit NativeEventTarget(EventTargetInstance *_instance)
+    : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl){};
 
-  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *eventType,
-                                              void *nativeEvent, int32_t isCustomEvent);
+  static void dispatchEventImpl(NativeEventTarget *nativeEventTarget, NativeString *eventType, void *nativeEvent,
+                                int32_t isCustomEvent);
 
-  EventTargetInstance *instance;
-  NativeDispatchEvent dispatchEvent;
+  EventTargetInstance *instance{nullptr};
+  NativeDispatchEvent dispatchEvent{nullptr};
+  CallNativeMethods callNativeMethods{nullptr};
 };
 
 class EventTargetInstance : public Instance {
@@ -63,12 +68,16 @@ public:
 
   bool dispatchEvent(EventInstance *event);
 
+  JSValue callNativeMethods(NativeString *method, int32_t argc,
+                                NativeValue *argv);
+
+protected:
+  NativeEventTarget nativeEventTarget{this};
 private:
   bool internalDispatchEvent(EventInstance *eventInstance);
   int32_t eventTargetId;
   std::unordered_map<std::string, std::forward_list<JSValue>> _eventHandlers;
   std::unordered_map<std::string, JSValue> _propertyEventHandler;
-  NativeEventTarget nativeEventTarget{this};
   friend EventTarget;
 };
 

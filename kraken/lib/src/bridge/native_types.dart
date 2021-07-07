@@ -227,8 +227,37 @@ class NativeBoundingClientRect extends Struct {
   external double left;
 }
 
+class NativeValue extends Struct {
+  @Double()
+  external double float64;
+
+  @Int64()
+  external int u;
+
+  @Int32()
+  external int tag;
+}
+
+enum JSValueType {
+  TAG_STRING,
+  TAG_INT,
+  TAG_BOOL,
+  TAG_NULL,
+  TAG_FLOAT64,
+  TAG_JSON,
+}
+
 typedef NativeDispatchEvent = Void Function(
-    Pointer<NativeEventTarget> nativeEventTarget, Pointer<NativeString> eventType, Pointer<Void> nativeEvent, Int32 isCustomEvent);
+    Pointer<NativeEventTarget> nativeEventTarget,
+    Pointer<NativeString> eventType,
+    Pointer<Void> nativeEvent,
+    Int32 isCustomEvent);
+typedef NativeCallNativeMethods = Void Function(
+    Pointer<NativeEventTarget> nativeEventTarget,
+    Pointer<NativeValue> returnedValue,
+    Pointer<NativeString> method,
+    Int32 argc,
+    Pointer<NativeValue> argv);
 
 class NativeEventTarget extends Struct {
   external Pointer<Void> instance;

@@ -175,7 +175,7 @@ mixin CSSOverflowMixin on ElementBase {
     }
     // @HACK: create shadow element for scrollingLayoutBox
     // @TODO: remove this after rendering phase are working without element and targetId required
-    Element scrollingElement = Element(shadowElementTargetId, element.nativeElementPtr, element.elementManager,
+    Element scrollingElement = Element(shadowElementTargetId, element.nativeEventTargetPtr, element.elementManager,
         defaultStyle: element.defaultStyle, isIntrinsicBox: element.isInlineBox, tagName: element.tagName, isHiddenElement: true);
     CSSStyleDeclaration repaintBoundaryStyle = element.style.clone(scrollingElement);
     repaintBoundaryStyle.setProperty(OVERFLOW, VISIBLE);
