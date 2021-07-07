@@ -73,7 +73,7 @@ void JSContext::traverseHTML(GumboNode * node, ElementInstance* element) {
   }
 }
 
-bool JSContext::parseHTML(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
+bool JSContext::parseHTML(const uint16_t *code, size_t codeLength) {
   ElementInstance* body;
   auto document = DocumentInstance::instance(this);
   for (int i = 0; i < document->documentElement->childNodes.size(); ++i) {
