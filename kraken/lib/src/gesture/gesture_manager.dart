@@ -15,7 +15,7 @@ class GestureManager {
   static GestureManager? _instance;
   GestureManager._();
 
-  static const int MAX_STEP_MS = 10;
+  static const int MAX_STEP_MS = 16;
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
 
   factory GestureManager.instance() {
