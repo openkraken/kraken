@@ -538,9 +538,10 @@ class Element extends Node
     CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
     if (display != CSSDisplay.none) {
       willAttachRenderer();
+
       parent.addChildRenderObject(this, after: after);
-      ensureChildAttached();
       style.applyTargetProperties();
+      ensureChildAttached();
 
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
       /// Set display and transformedDisplay when display is not set in style
