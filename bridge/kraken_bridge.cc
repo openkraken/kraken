@@ -114,7 +114,7 @@ void disposeContext(int32_t contextId) {
 
 int32_t allocateNewContext(int32_t targetContextId) {
   if (targetContextId == -1) {
-    targetContextId = poolIndex++;
+    targetContextId = ++poolIndex;
   }
 
   if (targetContextId >= maxPoolSize) {
