@@ -198,13 +198,14 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   if (JS_IsNull(executeTestCallback)) {
     return;
   }
+  if (!JS_IsFunction(context->ctx(), executeTestCallback)) {
+    return;
+  }
 
-  auto *callbackContext = new ExecuteCallbackContext(context.get(), executeCallback);
-  JS_SetOpaque(executeTestCallback, callbackContext);
-
-  auto done = [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) -> JSValue {
+  auto done = [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic, JSValue *func_data) -> JSValue {
     JSValue &statusValue = argv[0];
-    auto *callbackContext = static_cast<ExecuteCallbackContext *>(JS_GetOpaque(this_val, 1));
+    JSValue proxyObject = func_data[0];
+    auto *callbackContext = static_cast<ExecuteCallbackContext *>(JS_GetOpaque(proxyObject, 1));
 
     if (!JS_IsString(statusValue)) {
       return JS_ThrowTypeError(ctx, "failed to execute 'done': parameter 1 (status) is not a string");
@@ -215,7 +216,13 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     status->free();
     return JS_NULL;
   };
-  JSValue callback = JS_NewCFunction(context->ctx(), done, "done", 0);
+  auto *callbackContext = new ExecuteCallbackContext(context.get(), executeCallback);
+  JSValue proxyObject = JS_NewObject(context->ctx());
+  JS_SetOpaque(proxyObject, callbackContext);
+  JSValue callbackData[] {
+    proxyObject
+  };
+  JSValue callback = JS_NewCFunctionData(context->ctx(), done, 0, 0, 1, callbackData);
 
   JSValue arguments[] = {callback};
   JS_Call(context->ctx(), executeTestCallback, executeTestCallback, 1, arguments);

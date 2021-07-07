@@ -20,7 +20,7 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   )
   list(APPEND KRAKEN_UNIT_TEST_SOURCE
     ./bindings/qjs/js_context_test.cc
-    ./bindings/qjs/BOM/console_test.cc
+    ./bindings/qjs/bom/console_test.cc
     ./bindings/qjs/qjs_patch_test.cc
     ./bindings/qjs/host_object_test.cc
     ./bindings/qjs/host_class_test.cc
@@ -30,22 +30,22 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   add_executable(kraken_unit_test ${KRAKEN_UNIT_TEST_SOURCE})
   target_include_directories(kraken_unit_test PUBLIC ./third_party/googletest/googletest/include ${BRIDGE_INCLUDE})
   target_link_libraries(kraken_unit_test gtest gtest_main kraken_static quickjs)
-endif()
 
-target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1)
-target_compile_options(kraken PUBLIC -DDUMP_LEAKS=1)
+  target_compile_options(quickjs PUBLIC -DDUMP_LEAKS=1)
+  target_compile_options(kraken PUBLIC -DDUMP_LEAKS=1)
+endif()
 
 ### kraken_integration support library
 add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE})
-target_link_libraries(kraken_test PRIVATE ${BRIDGE_LINK_LIBS} kraken)
+target_link_libraries(kraken_test PRIVATE ${BRIDGE_LINK_LIBS} kraken_static)
 target_include_directories(kraken_test PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   set_target_properties(kraken_test PROPERTIES OUTPUT_NAME kraken_test_jsc)
-elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "qjs")
-  set_target_properties(kraken_test PROPERTIES OUTPUT_NAME kraken_test_qjs)
+elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+  set_target_properties(kraken_test PROPERTIES OUTPUT_NAME kraken_test_quickjs)
 endif()
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken_test

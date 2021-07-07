@@ -145,7 +145,7 @@ void JSContext::reportError(JSValueConst &error) {
 
 void JSContext::defineGlobalProperty(const char *prop, JSValue value) {
   JSAtom atom = JS_NewAtom(m_ctx, prop);
-  JS_DefineProperty(m_ctx, globalObject, atom, value, JS_UNDEFINED, JS_UNDEFINED, JS_PROP_HAS_VALUE);
+  JS_DefinePropertyValue(m_ctx, globalObject, atom, value, JS_PROP_C_W_E);
   m_globalProps.emplace_front(value);
   JS_FreeAtom(m_ctx, atom);
 }

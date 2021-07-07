@@ -58,27 +58,27 @@ JSValue Blob::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, i
   return blob->instanceObject;
 }
 
-PROP_GETTER(Blob, Type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Blob, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *blobInstance = static_cast<BlobInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
   return JS_NewString(blobInstance->m_ctx, blobInstance->mimeType.empty() ? "" : blobInstance->mimeType.c_str());
 }
-PROP_SETTER(Blob, Type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Blob, type)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
-PROP_GETTER(Blob, Size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_GETTER(Blob, size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   auto *blobInstance = static_cast<BlobInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
   return JS_NewFloat64(blobInstance->m_ctx, blobInstance->_size);
 }
-PROP_SETTER(Blob, Size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+PROP_SETTER(Blob, size)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   return JS_NULL;
 }
 
 struct PromiseContext {
+  BlobInstance *blobInstance;
   JSValue resolveFunc;
   JSValue rejectFunc;
   JSValue promise;
-  BlobInstance *blobInstance;
 };
 
 JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
@@ -87,16 +87,17 @@ JSValue Blob::arrayBuffer(QjsContext *ctx, JSValue this_val, int argc, JSValue *
 
   auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
 
-  auto *promiseContext = new PromiseContext{resolving_funcs[0], resolving_funcs[1], promise, blob};
+  JS_DupValue(ctx, blob->instanceObject);
+
+  auto *promiseContext = new PromiseContext{blob, resolving_funcs[0], resolving_funcs[1], promise};
   auto callback = [](void *callbackContext, int32_t contextId, const char *errmsg) {
     auto *promiseContext = static_cast<PromiseContext *>(callbackContext);
     auto *blob = promiseContext->blobInstance;
     QjsContext *ctx = blob->m_ctx;
 
-    JSValue arrayBuffer = JS_NewArrayBuffer(ctx, blob->bytes(), blob->size(), [](JSRuntime *rt, void *opaque, void *ptr) {}, nullptr, false);
-    JSValue arguments[] = {
-      arrayBuffer
-    };
+    JSValue arrayBuffer = JS_NewArrayBuffer(
+      ctx, blob->bytes(), blob->size(), [](JSRuntime *rt, void *opaque, void *ptr) {}, nullptr, false);
+    JSValue arguments[] = {arrayBuffer};
     JSValue returnValue = JS_Call(ctx, promiseContext->resolveFunc, blob->context()->global(), 1, arguments);
 
     if (JS_IsException(returnValue)) {
@@ -154,17 +155,16 @@ JSValue Blob::text(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
   JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
 
   auto blob = static_cast<BlobInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  JS_DupValue(ctx, blob->instanceObject);
 
-  auto *promiseContext = new PromiseContext{resolving_funcs[0], resolving_funcs[1], promise, blob};
+  auto *promiseContext = new PromiseContext{blob, resolving_funcs[0], resolving_funcs[1], promise};
   auto callback = [](void *callbackContext, int32_t contextId, const char *errmsg) {
     auto *promiseContext = static_cast<PromiseContext *>(callbackContext);
     auto *blob = promiseContext->blobInstance;
     QjsContext *ctx = blob->m_ctx;
 
     JSValue text = JS_NewStringLen(ctx, reinterpret_cast<const char *>(blob->bytes()), blob->size());
-    JSValue arguments[] = {
-        text
-    };
+    JSValue arguments[] = {text};
     JSValue returnValue = JS_Call(ctx, promiseContext->resolveFunc, blob->context()->global(), 1, arguments);
 
     if (JS_IsException(returnValue)) {
@@ -211,18 +211,33 @@ void BlobBuilder::append(JSContext &context, JSValue &value) {
       JS_FreeValue(context.ctx(), v);
     }
   } else if (JS_IsObject(value)) {
-    size_t length;
-    uint8_t *buffer = JS_GetArrayBuffer(context.ctx(), &length, value);
-    for (size_t i = 0; i < length; i++) {
-      _data.emplace_back(buffer[i]);
-    }
-  } else {
-    auto blob = static_cast<BlobInstance *>(JS_GetOpaque(value, kHostClassInstanceClassId));
-    if (blob == nullptr) return;
-    if (std::string(blob->m_name) == "Blob") {
-      std::vector<uint8_t> blobData = blob->_data;
-      _data.reserve(_data.size() + blobData.size());
-      _data.insert(_data.end(), blobData.begin(), blobData.end());
+    if (JS_IsInstanceOf(context.ctx(), value, Blob::instance(&context)->classObject)) {
+      auto blob = static_cast<BlobInstance *>(JS_GetOpaque(value, kHostClassInstanceClassId));
+      if (blob == nullptr) return;
+      if (std::string(blob->m_name) == "Blob") {
+        std::vector<uint8_t> blobData = blob->_data;
+        _data.reserve(_data.size() + blobData.size());
+        _data.insert(_data.end(), blobData.begin(), blobData.end());
+      }
+    } else {
+      size_t length;
+      uint8_t *buffer = JS_GetArrayBuffer(context.ctx(), &length, value);
+
+      if (buffer == nullptr) {
+        size_t byte_offset;
+        size_t byte_length;
+        size_t byte_per_element;
+        JSValue arrayBufferObject = JS_GetTypedArrayBuffer(context.ctx(), value, &byte_offset, &byte_length, &byte_per_element);
+        if (JS_IsException(arrayBufferObject)) {
+          context.handleException(&arrayBufferObject);
+          return;
+        }
+        buffer = JS_GetArrayBuffer(context.ctx(), &length, arrayBufferObject);
+      }
+
+      for (size_t i = 0; i < length; i++) {
+        _data.emplace_back(buffer[i]);
+      }
     }
   }
 }

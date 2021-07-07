@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:kraken/module.dart';
 
@@ -33,12 +35,17 @@ int initBridge() {
   // We should schedule addPersistentFrameCallback() to the next frame because of initBridge()
   // will be called from persistent frame callbacks and cause infinity loops.
   if (_firstView) {
+    void f() {
+      // JS pending jobs like Promise are microtask in eventloop.
+      // https://html.spec.whatwg.org/multipage/webappapis.html#microtask-queue
+      executeJSPendingJob();
+      Timer.run(f);
+    }
+    Future.microtask(f);
+
     Future.microtask(() {
       // Port flutter's frame callback into bridge.
       SchedulerBinding.instance!.addPersistentFrameCallback((_) {
-        // JS pending jobs like Promise are microtask in eventloop.
-        // https://html.spec.whatwg.org/multipage/webappapis.html#microtask-queue
-        executeJSPendingJob();
 
         assert(contextId != -1);
         flushUICommand();
