@@ -203,6 +203,8 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bridge_qjs.h
       bindings/qjs/js_context.cc
       bindings/qjs/js_context.h
+      bindings/qjs/native_value.cc
+      bindings/qjs/native_value.h
       bindings/qjs/host_object.h
       bindings/qjs/host_class.h
       bindings/qjs/qjs_patch.cc
@@ -223,6 +225,10 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
       bindings/qjs/dom/event.h
       bindings/qjs/bom/blob.cc
       bindings/qjs/bom/blob.h
+      bindings/qjs/bom/location.h
+      bindings/qjs/bom/location.cc
+      bindings/qjs/bom/window.cc
+      bindings/qjs/bom/window.h
       bindings/qjs/dom/custom_event.cc
       bindings/qjs/dom/custom_event.h
   )
