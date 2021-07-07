@@ -70,7 +70,13 @@ abstract class KrakenBundle {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
-    evaluateScripts(contextId, content, url.toString(), lineOffset);
+    if (url.toString().contains('.html')) {
+      // parse html.
+      parseHTML(contextId, content, url.toString());
+    } else {
+      // eval JavaScript.
+      evaluateScripts(contextId, content, url.toString(), lineOffset);
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
