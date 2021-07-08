@@ -136,8 +136,11 @@ mixin CSSTextMixin on RenderStyleBase {
   set fontSize(double value) {
     if (_fontSize == value) return;
     _fontSize = value;
+    // Need update all em unit style of own element when font size changed.
+    style.applyEmProperties();
+
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateNestChildrenText(renderBoxModel!, FONT_SIZE);
+    _updateFontSize(renderBoxModel!, renderBoxModel!.isDocumentRootBox);
   }
 
   double? _lineHeight;
@@ -321,8 +324,43 @@ mixin CSSTextMixin on RenderStyleBase {
         // Only need to update child text when style property is not set.
         if (child.renderStyle.style[styleProperty].isEmpty) {
           _updateNestChildrenText(child, styleProperty);
+          // Need update all em unit style of child when its font size is inherited.
+          if (styleProperty == FONT_SIZE) {
+            child.renderStyle.style.applyEmProperties();
+          }
         }
       } else if (child is RenderTextBox) {
+        // Need to recreate text span cause text style can not be set alone.
+        RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
+        KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;
+        String? text = renderParagraph.text.text;
+        child.text = CSSTextMixin.createTextSpan(text, parentRenderBoxModel: parentRenderBoxModel);
+      }
+    });
+  }
+  
+  // Update font-size may affect following style:
+  // 1. Nested children text size due to style inheritance.
+  // 2. Em unit: style of own element with em unit and nested children with no font-size set due to style inheritance.
+  // 3. Rem unit: nested children with rem set.
+  void _updateFontSize(RenderBoxModel renderBoxModel, bool isDocumentRoot) {
+    renderBoxModel.visitChildren((RenderObject child) {
+      if (child is RenderBoxModel) {
+        // Only need to update child text when style property is not set.
+        if (isDocumentRoot || child.renderStyle.style[FONT_SIZE].isEmpty) {
+          _updateFontSize(child, isDocumentRoot);
+          // Need update all em unit style of child when its font size is inherited.
+          child.renderStyle.style.applyEmProperties();
+          
+          if (isDocumentRoot) {
+            child.renderStyle.style.applyRemProperties();
+          }
+        }
+        
+      // Only need to update text when its parent has no font-size set.
+      } else if (child is RenderTextBox &&
+        renderBoxModel.renderStyle.style[FONT_SIZE].isEmpty
+      ) {
         // Need to recreate text span cause text style can not be set alone.
         RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
         KrakenRenderParagraph renderParagraph = child.child as KrakenRenderParagraph;

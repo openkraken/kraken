@@ -601,6 +601,26 @@ class CSSStyleDeclaration {
       setRenderStyleProperty(key, null, normalizedValue);
     });
   }
+  
+  /// Set all style properties with em unit.
+  void applyEmProperties() {
+    _properties.forEach((key, value) {
+      if (value.endsWith(CSSLength.EM)) {
+        String normalizedValue = _normalizeValue(value);
+        setRenderStyleProperty(key, null, normalizedValue);
+      }
+    });
+  }
+  
+  /// Set all style properties with rem unit.
+  void applyRemProperties() {
+    _properties.forEach((key, value) {
+      if (value.endsWith(CSSLength.REM)) {
+        String normalizedValue = _normalizeValue(value);
+        setRenderStyleProperty(key, null, normalizedValue);
+      }
+    });
+  }
 
   void dispose() {
     target = null;
