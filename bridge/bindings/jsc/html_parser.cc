@@ -100,10 +100,10 @@ bool HTMLParser::parseHTML(const uint16_t *code, size_t codeLength) {
     std::string html = JSStringToStdString(sourceRef);
 
     int html_length = html.length();
-    GumboOutput* output = gumbo_parse_with_options(
+    GumboOutput* htmlTree = gumbo_parse_with_options(
       &kGumboDefaultOptions, html.c_str(), html_length);
 
-    const GumboVector *root_children = &output->root->v.element.children;
+    const GumboVector *root_children = &htmlTree->root->v.element.children;
 
     for (int i = 0; i < root_children->length; ++i) {
       GumboNode* child =(GumboNode*) root_children->data[i];
