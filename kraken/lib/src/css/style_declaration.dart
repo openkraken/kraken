@@ -605,7 +605,7 @@ class CSSStyleDeclaration {
   /// Set all style properties with em unit.
   void applyEmProperties() {
     _properties.forEach((key, value) {
-      if (value.endsWith(CSSLength.EM)) {
+      if (key != FONT_SIZE && value.endsWith(CSSLength.EM)) {
         String normalizedValue = _normalizeValue(value);
         setRenderStyleProperty(key, null, normalizedValue);
       }
@@ -615,7 +615,7 @@ class CSSStyleDeclaration {
   /// Set all style properties with rem unit.
   void applyRemProperties() {
     _properties.forEach((key, value) {
-      if (value.endsWith(CSSLength.REM)) {
+      if (key != FONT_SIZE && value.endsWith(CSSLength.REM)) {
         String normalizedValue = _normalizeValue(value);
         setRenderStyleProperty(key, null, normalizedValue);
       }

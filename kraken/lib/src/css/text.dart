@@ -140,7 +140,7 @@ mixin CSSTextMixin on RenderStyleBase {
     style.applyEmProperties();
 
     // Update all the children text with specified style property not set due to style inheritance.
-    _updateFontSize(renderBoxModel!, renderBoxModel!.isDocumentRootBox);
+    _updateFontSize(renderBoxModel!, renderBoxModel!, renderBoxModel!.isDocumentRootBox);
   }
 
   double? _lineHeight;
@@ -343,12 +343,12 @@ mixin CSSTextMixin on RenderStyleBase {
   // 1. Nested children text size due to style inheritance.
   // 2. Em unit: style of own element with em unit and nested children with no font-size set due to style inheritance.
   // 3. Rem unit: nested children with rem set.
-  void _updateFontSize(RenderBoxModel renderBoxModel, bool isDocumentRoot) {
+  void _updateFontSize(RenderBoxModel renderBoxModel, RenderBoxModel oriRenderBoxModel, bool isDocumentRoot) {
     renderBoxModel.visitChildren((RenderObject child) {
       if (child is RenderBoxModel) {
         // Only need to update child text when style property is not set.
         if (isDocumentRoot || child.renderStyle.style[FONT_SIZE].isEmpty) {
-          _updateFontSize(child, isDocumentRoot);
+          _updateFontSize(child, oriRenderBoxModel, isDocumentRoot);
           // Need update all em unit style of child when its font size is inherited.
           child.renderStyle.style.applyEmProperties();
           
@@ -359,7 +359,7 @@ mixin CSSTextMixin on RenderStyleBase {
         
       // Only need to update text when its parent has no font-size set.
       } else if (child is RenderTextBox &&
-        renderBoxModel.renderStyle.style[FONT_SIZE].isEmpty
+        (renderBoxModel == oriRenderBoxModel || renderBoxModel.renderStyle.style[FONT_SIZE].isEmpty)
       ) {
         // Need to recreate text span cause text style can not be set alone.
         RenderBoxModel parentRenderBoxModel = child.parent as RenderBoxModel;
