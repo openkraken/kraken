@@ -1,5 +1,5 @@
 describe("rem", () => {
-  it("should works with font size of html", async (done) => {
+  it("should works with font size of html", async () => {
     let div;
     let div2;
     let div3;
@@ -41,15 +41,9 @@ describe("rem", () => {
     );
 
     BODY.appendChild(div);
+    document.documentElement.style.fontSize = '2rem';
 
     await snapshot();
-
-    window.requestAnimationFrame(async () => {
-      document.documentElement.style.fontSize = '2rem';
-      await snapshot();
-      done();
-    })
-
   }); 
 
   it("should works with style other than font-size of html", async () => {
@@ -140,11 +134,12 @@ describe("rem", () => {
     );
 
     BODY.appendChild(div);
+    document.documentElement.style.fontSize = '20px';
 
     await snapshot();
 
     window.requestAnimationFrame(async () => {
-      document.documentElement.style.fontSize = '20px';
+      document.documentElement.style.fontSize = '16px';
       await snapshot();
       done();
     });
