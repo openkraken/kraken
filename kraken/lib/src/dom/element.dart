@@ -368,6 +368,14 @@ class Element extends Node
       ContainerParentDataMixin<RenderBox>? _parentData = _renderBoxModel.parentData as ContainerParentDataMixin<RenderBox>?;
       if (_parentData != null) {
         previousSibling = _parentData.previousSibling;
+        // Get the renderBox before the RenderPositionHolder to find the renderBox to insert after
+        // cause renderPositionHolder of sticky element lays before the renderBox.
+        if (previousSibling is RenderPositionHolder) {
+          ContainerParentDataMixin<RenderBox>? _parentData = previousSibling.parentData as ContainerParentDataMixin<RenderBox>?;
+          if (_parentData != null) {
+            previousSibling = _parentData.previousSibling;
+          }
+        }
         parentRenderObject.remove(_renderBoxModel);
       }
     }
@@ -392,10 +400,6 @@ class Element extends Node
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
     RenderBoxModel _renderBoxModel = renderBoxModel!;
     Element _parentElement = parentElement!;
-
-    if (_renderBoxModel.parent is RenderLayoutBox) {
-      _renderBoxModel.renderStyle.position = currentPosition;
-    }
 
     // Remove fixed children before convert to non repaint boundary renderObject
     if (currentPosition != CSSPositionType.fixed) {
@@ -525,7 +529,7 @@ class Element extends Node
           parentRenderLayoutBox.insert(child.renderBoxModel!, after: after);
 
           if (positionType == CSSPositionType.sticky) {
-            _addPositionHolder(parentRenderLayoutBox, child);
+            _addPositionHolder(parentRenderLayoutBox, child, positionType);
           }
         }
         break;
@@ -538,14 +542,11 @@ class Element extends Node
     CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
     if (display != CSSDisplay.none) {
       willAttachRenderer();
-
+      
       parent.addChildRenderObject(this, after: after);
+
       style.applyTargetProperties();
       ensureChildAttached();
-
-      RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      /// Set display and transformedDisplay when display is not set in style
-      renderStyle.initDisplay(style, defaultDisplay);
       didAttachRenderer();
     }
   }
@@ -683,14 +684,14 @@ class Element extends Node
     _setPositionedChildParentData(parentRenderLayoutBox, child);
     parentRenderLayoutBox.add(childRenderBoxModel);
 
-    _addPositionHolder(parentRenderLayoutBox, child);
+    _addPositionHolder(parentRenderLayoutBox, child, position);
   }
 
-  void _addPositionHolder(RenderLayoutBox parentRenderLayoutBox, Element child) {
+  void _addPositionHolder(RenderLayoutBox parentRenderLayoutBox, Element child, CSSPositionType position) {
     Size preferredSize = Size.zero;
     RenderBoxModel childRenderBoxModel = child.renderBoxModel!;
     RenderStyle childRenderStyle = childRenderBoxModel.renderStyle;
-    if (childRenderStyle.position == CSSPositionType.sticky) {
+    if (position == CSSPositionType.sticky) {
       preferredSize = Size(0, 0);
     } else if (childRenderStyle.display != CSSDisplay.inline) {
       preferredSize = Size(
@@ -702,7 +703,7 @@ class Element extends Node
     childRenderBoxModel.renderPositionHolder = childPositionHolder;
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
 
-    if (childRenderStyle.position == CSSPositionType.sticky) {
+    if (position == CSSPositionType.sticky) {
       // Placeholder of sticky renderBox need to inherit offset from original renderBox,
       // so it needs to layout before original renderBox
       RenderBox? preSibling = parentRenderLayoutBox.childBefore(childRenderBoxModel);
@@ -927,12 +928,12 @@ class Element extends Node
 
   void _stylePositionChangedListener(String property, String? original, String present) {
     /// Update position.
-    CSSPositionType prevPosition = CSSPositionMixin.parsePositionType(original);
+    CSSPositionType prevPosition = renderBoxModel!.renderStyle.position;
     CSSPositionType currentPosition = CSSPositionMixin.parsePositionType(present);
 
-    renderBoxModel!.renderStyle.updatePosition(property, present);
     // Position changed.
     if (prevPosition != currentPosition) {
+      renderBoxModel!.renderStyle.updatePosition(property, present);
       _updatePosition(prevPosition, currentPosition);
     }
   }
