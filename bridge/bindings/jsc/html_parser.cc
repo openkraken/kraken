@@ -54,8 +54,7 @@ void HTMLParser::traverseHTML(GumboNode * node, ElementInstance* element) {
             std::string::size_type position = s.find(":");
             if (position != s.npos) {
               std::string styleKey = s.substr(0, position);
-              const char *styleValue = s.substr(position + 1, s.length()).c_str();
-              styleDeclarationInstance->internalSetProperty(styleKey, JSValueMakeString(m_context->context() ,JSStringCreateWithUTF8CString(styleValue)), nullptr);
+              styleDeclarationInstance->internalSetProperty(styleKey, JSValueMakeString(m_context->context() ,JSStringCreateWithUTF8CString(s.substr(position + 1, s.length()).c_str())), nullptr);
             }
           }
 
