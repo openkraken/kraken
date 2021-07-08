@@ -144,7 +144,7 @@ describe('align-items', () => {
 
     await snapshot();
   });
-  fit('004', async () => {
+  it('004', async () => {
     let div1;
     let div2;
     let div3;
