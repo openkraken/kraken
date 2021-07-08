@@ -230,20 +230,17 @@ class Element extends Node
       return renderer!;
     }
 
-    RenderStyle? renderStyle;
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
-      RenderIntrinsic renderIntrinsic = _renderIntrinsic = createRenderIntrinsic(
+      _renderIntrinsic = createRenderIntrinsic(
         this,
         repaintSelf: repaintSelf,
       );
-      renderStyle = renderIntrinsic.renderStyle;
     } else {
-      RenderLayoutBox renderLayoutBox = _renderLayoutBox = createRenderLayout(
+      _renderLayoutBox = createRenderLayout(
         this,
         repaintSelf: repaintSelf,
       );
-      renderStyle = renderLayoutBox.renderStyle;
     }
 
     return renderer!;
