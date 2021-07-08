@@ -65,7 +65,7 @@ void printError(int32_t contextId, const char* errmsg) {
 namespace {
 
 void disposeAllBridge() {
-  for (int i = 0; i <= poolIndex; i++) {
+  for (int i = 0; i <= poolIndex && i < maxPoolSize; i++) {
     disposeContext(i);
   }
   poolIndex = 0;
