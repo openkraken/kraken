@@ -246,9 +246,6 @@ class Element extends Node
       renderStyle = renderLayoutBox.renderStyle;
     }
 
-    /// Set display and transformedDisplay when display is not set in style
-    renderStyle.initDisplay(style, defaultDisplay);
-
     return renderer!;
   }
 
@@ -261,6 +258,9 @@ class Element extends Node
   @override
   void didAttachRenderer() {
     RenderBoxModel _renderBoxModel = renderBoxModel!;
+
+    // Set display and transformedDisplay when display is not set in style.
+    _renderBoxModel.renderStyle.initDisplay(style, defaultDisplay);
 
     // Bind pointer responder.
     addEventResponder(_renderBoxModel);
@@ -541,13 +541,9 @@ class Element extends Node
   void attachTo(Element parent, {RenderBox? after}) {
     CSSDisplay display = CSSDisplayMixin.getDisplay(style[DISPLAY] ?? defaultDisplay);
     if (display != CSSDisplay.none) {
-      willAttachRenderer();
-      
+      _beforeRendererAttach();
       parent.addChildRenderObject(this, after: after);
-
-      style.applyTargetProperties();
-      ensureChildAttached();
-      didAttachRenderer();
+      _afterRendererAttach();
     }
   }
 
