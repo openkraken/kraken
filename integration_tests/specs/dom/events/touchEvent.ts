@@ -47,7 +47,7 @@ describe('TouchEvent', () => {
     div.style.width = '100px';
     div.style.height = '100px';
 
-    div.addEventListener('touchstart', ()=>touchNum++)
+    div.addEventListener('touchstart', () => touchNum++);
 
     document.body.appendChild(div)
 
@@ -57,26 +57,26 @@ describe('TouchEvent', () => {
     div2.style.height = '50px';
     div2.style.marginLeft = '100px';
 
-    div2.addEventListener('touchstart', ()=>touchNum++)
-    div.appendChild(div2)
+    div2.addEventListener('touchstart', () => touchNum++);
+    div.appendChild(div2);
 
-    document.body.addEventListener('touchstart', ()=>{
+    document.body.addEventListener('touchstart', () => {
       expect(touchNum).toBe(2);
       done();
-    })
+    });
 
     simulateClick(120, 10);
   });
 
-  it('should work with touches', (done) => {
+  it('should work with touches', async (done) => {
     const div = document.createElement('div');
     div.style.backgroundColor = 'blue';
     div.style.width = '30px';
     div.style.height = '30px';
 
-    const func = (e: TouchEvent) => {
+    const func = async (e: TouchEvent) => {
       expect(e.touches.length).toBe(2);
-      simulatePoinrUp(20, 20, 1);
+      await simulatePoinrUp(20, 20, 1);
       div.removeEventListener('touchend', func);
       done();
     }
@@ -85,12 +85,12 @@ describe('TouchEvent', () => {
 
     document.body.appendChild(div);
 
-    simulatePointDown(20, 20, 1);
+    await simulatePointDown(20, 20, 1);
     
-    simulateClick(10, 10);
+    await simulateClick(10, 10);
   });
 
-  it('should work with touches when touching different elements', (done) => {
+  it('should work with touches when touching different elements', async (done) => {
     const div = document.createElement('div');
     div.style.backgroundColor = 'blue';
     div.style.width = '30px';
@@ -105,21 +105,21 @@ describe('TouchEvent', () => {
 
     div.appendChild(div2);
 
-    const func = (e: TouchEvent) => {
+    const func = async (e: TouchEvent) => {
       expect(e.touches.length).toBe(2);
-      simulatePoinrUp(20, 20, 1);
+      await simulatePoinrUp(20, 20, 1);
       div.removeEventListener('touchend', func);
       done();
     }
 
     div.addEventListener('touchend', func);
 
-    simulatePointDown(20, 20, 1);
+    await simulatePointDown(20, 20, 1);
     
-    simulateClick(5, 5);
+    await simulateClick(5, 5);
   });
 
-  it('should work with targetTouches when touching different elements', (done) => {
+  it('should work with targetTouches when touching different elements', async (done) => {
     const div = document.createElement('div');
     div.style.backgroundColor = 'blue';
     div.style.width = '30px';
@@ -134,29 +134,29 @@ describe('TouchEvent', () => {
 
     div.appendChild(div2);
 
-    const func = (e: TouchEvent) => {
+    const func = async (e: TouchEvent) => {
       expect(e.targetTouches.length).toBe(1);
-      simulatePoinrUp(20, 20, 1);
+      await simulatePoinrUp(20, 20, 1);
       div2.removeEventListener('touchend', func);
       done();
     }
 
     div2.addEventListener('touchend', func);
 
-    simulatePointDown(20, 20, 1);
+    await simulatePointDown(20, 20, 1);
     
-    simulateClick(5, 5);
+    await simulateClick(5, 5);
   });
 
-  it('should work with targetTouches', (done) => {
+  it('should work with targetTouches', async (done) => {
     const div = document.createElement('div');
     div.style.backgroundColor = 'blue';
     div.style.width = '30px';
     div.style.height = '30px';
 
-    const func = (e: TouchEvent) => {
+    const func = async (e: TouchEvent) => {
       expect(e.targetTouches.length).toBe(2);
-      simulatePoinrUp(20, 20, 1);
+      await simulatePoinrUp(20, 20, 1);
       div.removeEventListener('touchend', func);
       done();
     }
@@ -165,20 +165,20 @@ describe('TouchEvent', () => {
 
     document.body.appendChild(div);
 
-    simulatePointDown(20, 20, 1);
+    await simulatePointDown(20, 20, 1);
     
-    simulateClick(10, 10);
+    await simulateClick(10, 10);
   });
 
-  it('should work with targetTouches', (done) => {
+  it('should work with targetTouches', async (done) => {
     const div = document.createElement('div');
     div.style.backgroundColor = 'blue';
     div.style.width = '30px';
     div.style.height = '30px';
 
-    const func = (e: TouchEvent) => {
+    const func = async (e: TouchEvent) => {
       expect(e.targetTouches.length).toBe(2);
-      simulatePoinrUp(20, 20, 1);
+      await simulatePoinrUp(20, 20, 1);
       div.removeEventListener('touchend', func);
       done();
     }
@@ -187,12 +187,12 @@ describe('TouchEvent', () => {
 
     document.body.appendChild(div);
 
-    simulatePointDown(20, 20, 1);
+    await simulatePointDown(20, 20, 1);
     
-    simulateClick(10, 10);
+    await simulateClick(10, 10);
   });
 
-  it('touchend should work with changedTouches', (done) => {
+  it('touchend should work with changedTouches', async (done) => {
     const div = document.createElement('div');
     div.style.backgroundColor = 'blue';
     div.style.width = '30px';
@@ -208,10 +208,10 @@ describe('TouchEvent', () => {
 
     document.body.appendChild(div);
     
-    simulateClick(10, 10);
+    await simulateClick(10, 10);
   });
 
-  it('touchstart should work with changedTouches', (done) => {
+  it('touchstart should work with changedTouches', async (done) => {
     const div = document.createElement('div');
     div.style.backgroundColor = 'blue';
     div.style.width = '30px';
@@ -227,10 +227,10 @@ describe('TouchEvent', () => {
 
     document.body.appendChild(div);
     
-    simulateClick(10, 10);
+    await simulateClick(10, 10);
   });
 
-  it('touchmove should work with changedTouches', (done) => {
+  it('touchmove should work with changedTouches', async (done) => {
     const div = document.createElement('div');
     div.style.backgroundColor = 'blue';
     div.style.width = '30px';
@@ -246,6 +246,6 @@ describe('TouchEvent', () => {
 
     document.body.appendChild(div);
     
-    simulateSwipe(0, 0, 0, 100, 0.5);
+    await simulateSwipe(0, 0, 0, 100, 0.5);
   });
 });
