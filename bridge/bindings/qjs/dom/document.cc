@@ -1,0 +1,115 @@
+/*
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
+#include "document.h"
+#include "element.h"
+#include "event.h"
+
+namespace kraken::binding::qjs {
+
+void bindDocument(std::unique_ptr<JSContext> &context) {
+  auto *documentConstructor = new Document(context.get());
+  JSValue documentInstance = JS_CallConstructor(context->ctx(), documentConstructor->classObject, 0, nullptr);
+  context->defineGlobalProperty("Document", documentConstructor->classObject);
+  context->defineGlobalProperty("document", documentInstance);
+}
+
+JSValue Document::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
+  return EventTarget::constructor(ctx, func_obj, this_val, argc, argv);
+}
+
+JSValue Document::createEvent(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  if (argc < 1) {
+    return JS_ThrowTypeError(ctx, "Failed to argumentCount: 1 argument required, but only 0 present.");
+  }
+
+  JSValue &eventTypeValue = argv[0];
+  if (!JS_IsString(eventTypeValue)) {
+    return JS_ThrowTypeError(ctx, "Failed to createEvent: type should be a string.");
+  }
+  const char* c_eventType = JS_ToCString(ctx, eventTypeValue);
+  JS_FreeCString(ctx, c_eventType);
+  std::string eventType = std::string(c_eventType);
+  if (eventType == "Event") {
+    NativeString *nativeEventType = jsValueToNativeString(ctx, eventTypeValue);
+    auto nativeEvent = new NativeEvent(nativeEventType);
+
+    auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+    auto e = Event::buildEventInstance(eventType, document->context(), nativeEvent, false);
+    return e->instanceObject;
+  } else {
+    return JS_NULL;
+  }
+}
+
+JSValue Document::createElement(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  if (argc < 1) {
+    return JS_ThrowTypeError(ctx, "Failed to createElement: 1 argument required, but only 0 present.");
+  }
+
+  JSValue &tagNameValue = argv[0];
+  if (!JS_IsString(tagNameValue)) {
+    return JS_ThrowTypeError(ctx, "Failed to createElement: tagName should be a string.");
+  }
+
+  auto document = static_cast<DocumentInstance *>(JS_GetOpaque(this_val, kHostClassInstanceClassId));
+  JSValue element = JS_CallConstructor(ctx, Element::instance(document->context())->classObject, argc, argv);
+  return element;
+}
+
+JSValue Document::createTextNode(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JSValue();
+}
+JSValue Document::createComment(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JSValue();
+}
+JSValue Document::getElementById(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JSValue();
+}
+JSValue Document::getElementsByTagName(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JSValue();
+}
+
+PROP_GETTER(Document, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NewString(ctx, "#document");
+}
+PROP_SETTER(Document, nodeName)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
+PROP_GETTER(Document, all)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  // TODO: support HTMLAllCollection
+  return JS_NULL;
+}
+PROP_SETTER(Document, all)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
+PROP_GETTER(Document, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+PROP_SETTER(Document, cookie)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {  return JS_NULL;}
+
+PROP_GETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+PROP_SETTER(Document, documentElement)(QjsContext *ctx, JSValue this_val, int argc, JSValue *argv) {
+  return JS_NULL;
+}
+
+DocumentInstance::DocumentInstance(Document *document): NodeInstance(document, NodeType::DOCUMENT_NODE, this) {
+//  JSStringRef tagName = JSStringCreateWithUTF8CString("HTML");
+//  documentElement = new ElementInstance(JSElement::instance(document->context), tagName, HTML_TARGET_ID);
+//  documentElement->m_document = this;
+//  documentElement->parentNode = this;
+//  JSStringHolder documentElementStringHolder = JSStringHolder(context, "documentElement");
+//  JSObjectSetProperty(ctx, object, documentElementStringHolder.getString(),
+//                      documentElement->object, kJSPropertyAttributeReadOnly, nullptr);
+//
+//  instanceMap[document->context] = this;
+//  getDartMethod()->initDocument(contextId, nativeDocument);
+}
+
+}

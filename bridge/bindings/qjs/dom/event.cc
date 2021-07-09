@@ -11,6 +11,11 @@
 
 namespace kraken::binding::qjs {
 
+void bindEvent(std::unique_ptr<JSContext> &context) {
+  auto *constructor = new Event(context.get());
+  context->defineGlobalProperty("Event", constructor->classObject);
+}
+
 JSValue Event::constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) {
   return HostClass::constructor(ctx, func_obj, this_val, argc, argv);
 }

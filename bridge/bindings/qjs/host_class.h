@@ -20,7 +20,7 @@ public:
   HostClass(JSContext *context, std::string name)
     : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
     JSClassDef def{};
-    def.class_name = name.c_str();
+    def.class_name = m_name.c_str();
     def.finalizer = proxyFinalize;
     def.call = proxyCall;
     JS_NewClass(context->runtime(), kHostClassClassId, &def);

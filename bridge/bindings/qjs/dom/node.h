@@ -24,6 +24,9 @@ class DocumentInstance;
 
 class Node : public EventTarget {
 public:
+  Node() = delete;
+  Node(JSContext *context, const std::string &className): EventTarget(context, className.c_str()) {}
+
   JSValue constructor(QjsContext *ctx, JSValue func_obj, JSValue this_val, int argc, JSValue *argv) override;
 
   static JSValue cloneNode(QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv);
@@ -50,7 +53,7 @@ private:
 class NodeInstance : public EventTargetInstance {
 public:
   NodeInstance() = delete;
-  explicit NodeInstance(Node *node, NodeType nodeType) : EventTargetInstance(node) {}
+  explicit NodeInstance(Node *node, NodeType nodeType, DocumentInstance *document) : EventTargetInstance(node), m_document(document) {}
   bool isConnected();
   DocumentInstance *ownerDocument();
   NodeInstance *firstChild();

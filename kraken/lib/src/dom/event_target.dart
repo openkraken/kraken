@@ -31,6 +31,8 @@ void callNativeMethods(Pointer<NativeEventTarget> nativeEventTarget, Pointer<Nat
         return null;
       case JSValueType.TAG_FLOAT64:
         return nativeValue.ref.float64;
+      case JSValueType.TAG_JSON:
+        return jsonDecode(nativeStringToString(Pointer.fromAddress(nativeValue.ref.u)));
     }
   });
 
@@ -60,7 +62,7 @@ void callNativeMethods(Pointer<NativeEventTarget> nativeEventTarget, Pointer<Nat
 
 Pointer<NativeFunction<NativeCallNativeMethods>> _nativeCallNativeMethods = Pointer.fromFunction(callNativeMethods);
 
-class EventTarget {
+abstract class EventTarget {
   static SplayTreeMap<int, EventTarget> _nativeMap = SplayTreeMap();
   static EventTarget getEventTargetOfNativePtr(Pointer<NativeEventTarget> nativePtr) {
     EventTarget? target = _nativeMap[nativePtr.address];
@@ -119,11 +121,7 @@ class EventTarget {
     return eventHandlers;
   }
 
-  dynamic handleJSCall(String method, List<dynamic> argv) {
-    return {
-      'name': 1
-    };
-  }
+  dynamic handleJSCall(String method, List<dynamic> argv);
 
   @mustCallSuper
   void dispose() {

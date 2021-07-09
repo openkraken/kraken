@@ -5,6 +5,7 @@
 
 #include "node.h"
 #include "kraken_bridge.h"
+#include "element.h"
 
 namespace kraken::binding::qjs {
 
@@ -27,17 +28,15 @@ JSValue Node::cloneNode(QjsContext *ctx, JSValue this_val, int argc, JSValue *ar
   bool deep = JS_ToBool(ctx, deepValue);
 
   if (selfInstance->nodeType == NodeType::ELEMENT_NODE) {
-//    auto element = static_cast<ElementInstance *>(selfInstance);
-//
-//    JSValueRef rootElementRef = copyNodeValue(ctx, static_cast<NodeInstance *>(element));
-//    JSObjectRef rootNodeObjectRef = JSValueToObject(ctx, rootElementRef, nullptr);
-//    auto rootNodeInstance = static_cast<NodeInstance *>(JSObjectGetPrivate(rootNodeObjectRef));
-//
-//    if (deepBooleanRef) {
-//      traverseCloneNode(ctx, static_cast<ElementInstance *>(element), static_cast<ElementInstance *>(rootNodeInstance));
-//    }
-//
-//    return rootNodeInstance->object;
+    auto element = static_cast<ElementInstance *>(selfInstance);
+
+    JSValue rootElement = copyNodeValue(ctx, static_cast<NodeInstance *>(element));
+    auto rootNodeInstance = static_cast<NodeInstance *>(JS_GetOpaque(rootElement, kHostClassInstanceClassId));
+
+    if (deep) {
+      traverseCloneNode(ctx, static_cast<ElementInstance *>(element), static_cast<ElementInstance *>(rootNodeInstance));
+    }
+    return rootNodeInstance->instanceObject;
   } else if (selfInstance->nodeType == NodeType::TEXT_NODE) {
 //    auto textNode = static_cast<JSTextNode::TextNodeInstance *>(selfInstance);
 //    JSValueRef newTextNodeRef = copyNodeValue(ctx, static_cast<NodeInstance *>(textNode));
@@ -176,15 +175,19 @@ void Node::traverseCloneNode(QjsContext *ctx, NodeInstance *element, NodeInstanc
   }
 }
 
-JSValue Node::copyNodeValue(QjsContext *ctx, NodeInstance *element) {
-//  if (node->nodeType == NodeType::ELEMENT_NODE) {
-//    ElementInstance *element = reinterpret_cast<ElementInstance *>(node);
-//
-//    /* createElement */
-//    std::string tagName = element->getRegisteredTagName();
-//    auto newElement = JSElement::buildElementInstance(element->document()->context, tagName);
-//
-//    /* copy attributes */
+JSValue Node::copyNodeValue(QjsContext *ctx, NodeInstance *node) {
+  if (node->nodeType == NodeType::ELEMENT_NODE) {
+    auto *element = reinterpret_cast<ElementInstance *>(node);
+
+    /* createElement */
+    std::string tagName = element->getRegisteredTagName();
+    JSValue arguments[] = {
+      JS_NewString(element->m_ctx, tagName.c_str())
+    };
+    JSValue newElementValue = JS_CallConstructor(element->context()->ctx(), Element::instance(element->context())->classObject, 1, arguments);
+    auto *newElement = static_cast<ElementInstance *>(JS_GetOpaque(newElementValue, kHostClassInstanceClassId));
+
+    /* copy attributes */
 //    JSStringHolder attributesStringHolder = JSStringHolder(element->document()->context, "attributes");
 //    JSValueRef attributeValueRef =
 //        JSObjectGetProperty(ctx, element->object, attributesStringHolder.getString(), nullptr);
@@ -199,26 +202,21 @@ JSValue Node::copyNodeValue(QjsContext *ctx, NodeInstance *element) {
 //
 //    /* copy style */
 //    newElement->setStyle(element->getStyle());
-//
-//    std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
-//
-//    NativeString args_01{};
-//    buildUICommandArgs(newNodeEventTargetId, args_01);
-//
-//    foundation::UICommandBuffer::instance(newElement->contextId)
-//        ->addCommand(element->eventTargetId, UICommand::cloneNode, args_01, nullptr);
-//
-//    return newElement->object;
-//  } else if (node->nodeType == TEXT_NODE) {
+
+    std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId);
+    NativeString *args_01 = stringToNativeString(newNodeEventTargetId);
+    foundation::UICommandBuffer::instance(newElement->context()->getContextId())
+        ->addCommand(element->eventTargetId, UICommand::cloneNode, *args_01, nullptr);
+
+    return newElement->instanceObject;
+  } else if (node->nodeType == TEXT_NODE) {
 //    JSTextNode::TextNodeInstance *textNode = reinterpret_cast<JSTextNode::TextNodeInstance *>(node);
 //
 //    std::string content = textNode->internalGetTextContent();
 //    auto newTextNodeInstance = new JSTextNode::TextNodeInstance(JSTextNode::instance(textNode->document()->context),
 //                                                                JSStringCreateWithUTF8CString(content.c_str()));
 //    return newTextNodeInstance->object;
-//  }
-//
-//  return nullptr;
+  }
   return JS_NULL;
 }
 
@@ -385,18 +383,11 @@ void NodeInstance::internalAppendChild(NodeInstance *node) {
   std::string nodeEventTargetId = std::to_string(node->eventTargetId);
   std::string position = std::string("beforeend");
 
-  std::u16string u16NodeEventTargetId;
-  std::u16string u16Position;
-
-  fromUTF8(nodeEventTargetId, u16NodeEventTargetId);
-  fromUTF8(position, u16Position);
-
-  NativeString args_01{};
-  NativeString args_02{};
-  buildUICommandArgs(m_ctx, u16NodeEventTargetId, u16Position, args_01, args_02);
+  NativeString *args_01 = stringToNativeString(nodeEventTargetId);
+  NativeString *args_02 = stringToNativeString(position);
 
   foundation::UICommandBuffer::instance(m_context->getContextId())
-      ->addCommand(eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
+      ->addCommand(eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 }
 void NodeInstance::internalRemove() {
   if (parentNode == nullptr) return;
@@ -444,18 +435,11 @@ JSValue NodeInstance::internalInsertBefore(NodeInstance *node, NodeInstance *ref
       std::string nodeEventTargetId = std::to_string(node->eventTargetId);
       std::string position = std::string("beforebegin");
 
-      std::u16string u16NodeEventTargetId;
-      std::u16string u16Position;
-
-      fromUTF8(nodeEventTargetId, u16NodeEventTargetId);
-      fromUTF8(position, u16Position);
-
-      NativeString args_01{};
-      NativeString args_02{};
-      buildUICommandArgs(m_ctx, u16NodeEventTargetId, u16Position, args_01, args_02);
+      NativeString *args_01 = stringToNativeString(nodeEventTargetId);
+      NativeString *args_02 = stringToNativeString(position);
 
       foundation::UICommandBuffer::instance(m_context->getContextId())
-          ->addCommand(referenceNode->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
+          ->addCommand(referenceNode->eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
     }
   }
 
@@ -487,19 +471,11 @@ JSValue NodeInstance::internalReplaceChild(NodeInstance *newChild, NodeInstance 
   std::string newChildEventTargetId = std::to_string(newChild->eventTargetId);
   std::string position = std::string("afterend");
 
-  std::u16string u16NodeEventTargetId;
-  std::u16string u16Position;
-
-  fromUTF8(newChildEventTargetId, u16NodeEventTargetId);
-  fromUTF8(position, u16Position);
-
-  NativeString args_01{};
-  NativeString args_02{};
-
-  buildUICommandArgs(m_ctx, u16NodeEventTargetId, u16Position, args_01, args_02);
+  NativeString *args_01 = stringToNativeString(newChildEventTargetId);
+  NativeString *args_02 = stringToNativeString(position);
 
   foundation::UICommandBuffer::instance(m_context->getContextId())
-      ->addCommand(oldChild->eventTargetId, UICommand::insertAdjacentNode, args_01, args_02, nullptr);
+      ->addCommand(oldChild->eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 
   foundation::UICommandBuffer::instance(m_context->getContextId())
       ->addCommand(oldChild->eventTargetId, UICommand::removeNode, nullptr);

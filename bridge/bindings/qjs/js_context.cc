@@ -16,9 +16,8 @@ std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionH
   return std::make_unique<JSContext>(contextId, handler, owner);
 }
 
-void promiseRejectTracker(QjsContext *ctx, JSValueConst promise,
-                          JSValueConst reason,
-                          JS_BOOL is_handled, void *opaque) {
+void promiseRejectTracker(QjsContext *ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled,
+                          void *opaque) {
   auto *context = static_cast<JSContext *>(opaque);
   context->reportError(reason);
 }
@@ -37,11 +36,15 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
   timeOrigin = std::chrono::system_clock::now();
   globalObject = JS_GetGlobalObject(m_ctx);
-  JSValue windowGetter = JS_NewCFunction(m_ctx, [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) -> JSValue {
-    return JS_GetGlobalObject(ctx);
-  }, "get", 0);
+  JSValue windowGetter = JS_NewCFunction(
+    m_ctx,
+    [](QjsContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) -> JSValue {
+      return JS_GetGlobalObject(ctx);
+    },
+    "get", 0);
   JSAtom windowKey = JS_NewAtom(m_ctx, "window");
-  JS_DefinePropertyGetSet(m_ctx, globalObject, windowKey, windowGetter, JS_UNDEFINED, JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
+  JS_DefinePropertyGetSet(m_ctx, globalObject, windowKey, windowGetter, JS_UNDEFINED,
+                          JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
   JS_FreeAtom(m_ctx, windowKey);
   JS_SetContextOpaque(m_ctx, this);
   JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, this);
@@ -54,6 +57,7 @@ JSContext::~JSContext() {
     JS_FreeValue(m_ctx, prop);
   }
 
+  JS_RunGC(m_runtime);
   JS_FreeValue(m_ctx, globalObject);
   JS_FreeContext(m_ctx);
   JS_RunGC(m_runtime);
@@ -145,8 +149,10 @@ void JSContext::reportError(JSValueConst &error) {
 
 void JSContext::defineGlobalProperty(const char *prop, JSValue value) {
   JSAtom atom = JS_NewAtom(m_ctx, prop);
-  JS_DefinePropertyValue(m_ctx, globalObject, atom, value, JS_PROP_C_W_E);
-  m_globalProps.emplace_front(value);
+  //  JS_DefineProperty(m_ctx, globalObject, atom, value, JS_UNDEFINED, JS_UNDEFINED, JS_PROP_HAS_VALUE);
+  //  JS_SetProperty(m_ctx, globalObject, atom, value);
+  JS_SetProperty(m_ctx, globalObject, atom, value);
+//  m_globalProps.emplace_front(value);
   JS_FreeAtom(m_ctx, atom);
 }
 

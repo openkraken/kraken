@@ -33,6 +33,7 @@ NativeValue Native_NewString(NativeString *string);
 NativeValue Native_NewFloat64(double value);
 NativeValue Native_NewBool(bool value);
 NativeValue Native_NewInt32(int32_t value);
+NativeValue Native_NewJSON(JSContext *context, JSValue &value);
 JSValue nativeValueToJSValue(JSContext *context, NativeValue &value);
 
 }

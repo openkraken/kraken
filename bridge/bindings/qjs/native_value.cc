@@ -41,6 +41,16 @@ NativeValue Native_NewInt32(int32_t value) {
   };
 }
 
+NativeValue Native_NewJSON(JSContext *context, JSValue &value) {
+  JSValue stringifiedValue = JS_JSONStringify(context->ctx(), value, JS_UNDEFINED, JS_UNDEFINED);
+  NativeString *string = jsValueToNativeString(context->ctx(), stringifiedValue);
+  return (NativeValue){
+      0,
+      .u = {.ptr = static_cast<void *>(string)},
+      NativeTag::TAG_JSON,
+  };
+}
+
 JSValue nativeValueToJSValue(JSContext *context, NativeValue &value) {
   switch (value.tag) {
   case NativeTag::TAG_STRING: {

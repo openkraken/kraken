@@ -25,6 +25,9 @@ class Comment extends Node {
 
   @override
   RenderObject? get renderer => null;
+
+  @override
+  dynamic handleJSCall(String method, List<dynamic> argv) {}
 }
 
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
@@ -156,6 +159,10 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
       childNodes[i].parentNode = null;
     }
     childNodes.clear();
+  }
+
+  @override
+  dynamic handleJSCall(String method, List<dynamic> argv) {
   }
 
   @override

@@ -123,4 +123,14 @@ class Window extends EventTarget {
   void dispose() {
     super.dispose();
   }
+
+  @override
+  dynamic handleJSCall(String method, List<dynamic> argv) {
+    switch(method) {
+      case 'scrollTo': {
+        break;
+      }
+      case 'scrollBy': {}
+    }
+  }
 }
