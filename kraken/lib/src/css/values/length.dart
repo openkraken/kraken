@@ -96,9 +96,9 @@ class CSSLength {
       double? currentValue = double.tryParse(unitedValue.split(REM)[0]);
       if (currentValue == null || renderStyle == null) return null;
       RenderBoxModel renderBoxModel = renderStyle.renderBoxModel!;
-      RenderBoxModel? documentRoot = renderBoxModel.getDocumentRoot();
-      if (documentRoot != null) {
-        double rootFontSize = documentRoot.renderStyle.fontSize;
+      RenderBoxModel? rootBoxModel = renderBoxModel.getRootBoxModel();
+      if (rootBoxModel != null) {
+        double rootFontSize = rootBoxModel.renderStyle.fontSize;
         return rootFontSize * currentValue;
       }
       return null;

@@ -1567,7 +1567,8 @@ class RenderBoxModel extends RenderBox
     return _parent != null ? _parent as RenderBoxModel : null;
   }
 
-  RenderBoxModel? getDocumentRoot() {
+  /// Get the root box model of document which corresponds to html element.
+  RenderBoxModel? getRootBoxModel() {
     RenderBoxModel _self = this;
     while (_self.parent != null && _self.parent is! RenderViewportBox) {
       _self = _self.parent as RenderBoxModel;
