@@ -200,7 +200,6 @@ describe('TouchEvent', () => {
 
     const func = (e: TouchEvent) => {
       expect(e.changedTouches.length).toBe(1);
-      simulatePoinrUp(20, 20, 1);
       div.removeEventListener('touchend', func);
       done();
     }
@@ -220,7 +219,6 @@ describe('TouchEvent', () => {
 
     const func = (e: TouchEvent) => {
       expect(e.changedTouches.length).toBe(1);
-      simulatePoinrUp(20, 20, 1);
       div.removeEventListener('touchstart', func);
       done();
     }
@@ -240,7 +238,6 @@ describe('TouchEvent', () => {
 
     const func = (e: TouchEvent) => {
       expect(e.changedTouches.length).toBe(1);
-      simulatePoinrUp(20, 20, 1);
       div.removeEventListener('touchmove', func);
       done();
     }
