@@ -75,7 +75,7 @@ typedef void ToggleRendererRepaintBoundary();
 /// Detach the renderer from its owner element.
 typedef void DetachRenderer();
 /// Do the preparation work before the renderer is attached.
-typedef void BeforeRendererAttach();
+typedef RenderObject BeforeRendererAttach();
 /// Do the clean work after the renderer has attached.
 typedef void AfterRendererAttach();
 /// Return the targetId of current element.
@@ -207,9 +207,10 @@ class Element extends Node
     detach();
   }
 
-  void _beforeRendererAttach() {
+  RenderObject _beforeRendererAttach() {
     willAttachRenderer();
     style.applyTargetProperties();
+    return renderer!;
   }
 
   void _afterRendererAttach() {
